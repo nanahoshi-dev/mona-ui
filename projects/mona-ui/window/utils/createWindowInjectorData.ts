@@ -18,6 +18,7 @@ export const createWindowInjectorData = (
         maxHeight: settings.maxHeight,
         maxWidth: settings.maxWidth,
         maximizable: settings.maximizable ?? true,
+        messages: settings.messages,
         minHeight: settings.minHeight ?? 50,
         minWidth: settings.minWidth ?? 50,
         minimizable: settings.minimizable ?? true,

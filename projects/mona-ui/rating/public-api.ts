@@ -10,6 +10,8 @@ export { RatingItemTemplateDirective } from "./directives/rating-item-template.d
 
 export { RatingSelectedItemTemplateDirective } from "./directives/rating-selected-item-template.directive";
 
+export * from "./i18n/rating.default-messages";
+
 export type { RatingItemTemplateContext } from "./models/RatingItemTemplateContext";
 
 export type { RatingIconName } from "./models/RatingIconName";

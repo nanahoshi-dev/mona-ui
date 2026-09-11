@@ -13,6 +13,7 @@ import {
     untracked
 } from "@angular/core";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
+import { injectComponentDirection } from "@nanahoshi/mona-ui/i18n";
 import { twMerge } from "tailwind-merge";
 import type { SidebarCollapsibleMode } from "../../models/SidebarCollapsibleMode";
 import type { SidebarSide } from "../../models/SidebarSide";
@@ -58,6 +59,7 @@ import { sidebarBorderAllowance, sidebarThemeVariants } from "../../styles/sideb
     providers: [SidebarService]
 })
 export class SidebarComponent {
+    readonly #direction = injectComponentDirection();
     readonly #focusTrap = inject(CdkTrapFocus);
     readonly #host = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #injector = inject(Injector);
@@ -65,11 +67,21 @@ export class SidebarComponent {
     readonly #sidebarService = inject(SidebarService);
     #restoreFocusTo: HTMLElement | null = null;
 
+    protected readonly physicalSide = computed<"left" | "right">(() => {
+        const isRtl = this.#direction() === "rtl";
+        const side = this.#sidebarService.side();
+        if (side === "start") {
+            return isRtl ? "right" : "left";
+        }
+        return isRtl ? "left" : "right";
+    });
+    protected readonly drawerPhysicalSide = this.physicalSide;
+
     protected readonly baseClass = computed(() => {
         const variantClass = sidebarThemeVariants({
             drawer: this.drawer(),
+            physicalSide: this.physicalSide(),
             open: this.#sidebarService.mobileOpen(),
-            side: this.#sidebarService.side(),
             variant: this.variant(),
             flush: this.offCanvasClosed()
         });

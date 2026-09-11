@@ -50,9 +50,9 @@ export const gridCellContainerThemeVariants = cva(
 );
 
 export const gridCellDirtyIndicatorThemeVariants = cva(`
-    absolute top-0 right-0 w-0 h-0
-    border-t-[8px] border-l-[8px]
-    border-t-destructive border-l-transparent
+    absolute top-0 end-0 w-0 h-0
+    border-t-[8px] border-s-[8px]
+    border-t-destructive border-s-transparent
     pointer-events-none
 `);
 
@@ -98,7 +98,7 @@ export const gridColumnDropHintThemeVariants = cva(`
 `);
 
 export const gridColumnResizerThemeVariants = cva(`
-    absolute top-0 bottom-0 w-3 bg-transparent cursor-col-resize z-10 -right-1.5
+    absolute top-0 bottom-0 w-3 bg-transparent cursor-col-resize z-10 -end-1.5
 `);
 
 export const gridDetailContentCellThemeVariants = cva(`border-b border-b-border-subtle`, {
@@ -112,7 +112,7 @@ export const gridDetailContentCellThemeVariants = cva(`border-b border-b-border-
 
 export const gridDetailIndentCellThemeVariants = cva(
     `
-        border-r border-r-border-subtle border-b border-b-border-subtle
+        border-e border-e-border-subtle border-b border-b-border-subtle
     `,
     {
         variants: {
@@ -160,7 +160,7 @@ export const gridFooterThemeVariants = cva(
     `
         flex flex-row grow-0 shrink-0 basis-auto
         overflow-hidden
-        bg-surface-muted border-r border-r-border-subtle border-t border-t-border-subtle
+        bg-surface-muted border-e border-e-border-subtle border-t border-t-border-subtle
     `
 );
 
@@ -170,14 +170,14 @@ export const gridFooterTableThemeVariants = cva(
     `
 );
 
-export const gridFooterTableRowThemeVariants = cva(`relative inline-flex [&>td:last-child]:border-r-0`);
+export const gridFooterTableRowThemeVariants = cva(`relative inline-flex [&>td:last-child]:border-e-0`);
 
 export const gridFooterTableCellThemeVariants = cva(
     `
         relative overflow-hidden
-        text-left align-middle px-2 py-2
+        text-start align-middle px-2 py-2
         bg-surface-muted
-        border-r border-r-border-subtle border-b border-b-border-subtle
+        border-e border-e-border-subtle border-b border-b-border-subtle
         font-medium
     `
 );
@@ -198,7 +198,7 @@ export const gridGroupRowThemeVariants = cva(
     `
         relative z-10
         w-full
-        bg-surface-muted border-r border-r-border-subtle
+        bg-surface-muted border-e border-e-border-subtle
     `
 );
 
@@ -206,7 +206,7 @@ export const gridHeaderThemeVariants = cva(
     `
         flex flex-row grow-0 shrink-0 basis-auto
         overflow-hidden
-        bg-surface-muted border-r border-r-border-subtle
+        bg-surface-muted border-e border-e-border-subtle
     `
 );
 
@@ -217,14 +217,14 @@ export const gridHeaderTableThemeVariants = cva(
 );
 
 export const gridHeaderTableRowThemeVariants = cva(
-    `relative inline-flex not-first:border-t not-first:border-t-border-subtle [&>th:last-child]:border-r-0`
+    `relative inline-flex not-first:border-t not-first:border-t-border-subtle [&>th:last-child]:border-e-0`
 );
 
 export const gridHeaderTableCellThemeVariants = cva(
     `
         relative select-none
-        text-left overflow-visible
-        outline-none border-r border-r-border-subtle
+        text-start overflow-visible
+        outline-none border-e border-e-border-subtle
         after:absolute after:inset-0 after:pointer-events-none
         focus:after:ring-1 focus:after:ring-inset focus:after:ring-focus-indicator/35
     `
@@ -313,7 +313,7 @@ export const gridListTableCellThemeVariants = cva(
             },
             lastInRow: {
                 true: "",
-                false: "border-r border-r-border-subtle"
+                false: "border-e border-e-border-subtle"
             },
             masterDetailContent: {
                 true: "",

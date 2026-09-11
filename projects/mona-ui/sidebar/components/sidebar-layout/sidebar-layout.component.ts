@@ -1,18 +1,46 @@
 import {
+    afterNextRender,
     ChangeDetectionStrategy,
     Component,
     computed,
     DestroyRef,
     effect,
+    ElementRef,
     inject,
     input,
     signal,
     untracked
 } from "@angular/core";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
-import { twMerge } from "tailwind-merge";
+import { injectComponentDirection } from "@nanahoshi/mona-ui/i18n";
+import { resolveSidebarLayoutBaseClass } from "../../internal/sidebar-layout-direction";
 import { SidebarLayoutService } from "../../services/sidebar-layout.service";
-import { sidebarBackdropThemeVariants, sidebarLayoutBaseThemeVariants } from "../../styles/sidebar.styles";
+import { sidebarBackdropThemeVariants } from "../../styles/sidebar.styles";
+
+function getComposedAncestors(startElement: Element): Element[] {
+    const chain: Element[] = [];
+    let current: Node | null = startElement;
+
+    while (current) {
+        if (current instanceof Element) {
+            chain.push(current);
+        }
+        if (current.parentElement) {
+            current = current.parentElement;
+        } else if (current.parentNode) {
+            const parent: Node = current.parentNode;
+            if ("host" in parent && (parent as ShadowRoot).host instanceof Element) {
+                current = (parent as ShadowRoot).host;
+            } else {
+                current = parent;
+            }
+        } else {
+            break;
+        }
+    }
+
+    return chain;
+}
 
 /**
  * @description
@@ -49,10 +77,21 @@ import { sidebarBackdropThemeVariants, sidebarLayoutBaseThemeVariants } from "..
     providers: [SidebarLayoutService]
 })
 export class SidebarLayoutComponent {
+    readonly #destroyRef = inject(DestroyRef);
+    readonly #direction = injectComponentDirection();
+    readonly #host = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #layoutService = inject(SidebarLayoutService);
     readonly #matches = signal(false);
+    readonly #browserCssDirection = signal<"ltr" | "rtl" | null>(null);
+
     protected readonly backdropClass = computed(() => sidebarBackdropThemeVariants({ open: this.mobileOpen() }));
-    protected readonly baseClass = computed(() => twMerge(sidebarLayoutBaseThemeVariants(), this.userClass()));
+    protected readonly baseClass = computed(() =>
+        resolveSidebarLayoutBaseClass({
+            semanticDirection: this.#direction(),
+            browserCssDirection: this.#browserCssDirection(),
+            userClass: this.userClass()
+        })
+    );
     protected readonly compact = this.#layoutService.compact;
 
     /** One backdrop serves every sidebar, because only one of their drawers is ever open. */
@@ -76,6 +115,7 @@ export class SidebarLayoutComponent {
 
     public constructor() {
         this.#watchBreakpoint();
+        this.#watchCssDirection();
     }
 
     protected onBackdropClick(): void {
@@ -129,5 +169,129 @@ export class SidebarLayoutComponent {
                 this.#matches.set(current.matches);
             });
         });
+    }
+
+    /**
+     * CSS direction compensation contract:
+     * Reads computed CSS `direction` to compensate flex-row orientation so that semantic
+     * start/end docking matches physical left/right edges.
+     * Reactive updates are supported for:
+     * 1. Host and composed ancestor `class`, `style`, and `dir` mutations (including through `ShadowRoot` boundaries);
+     * 2. Viewport-responsive media query threshold changes via window resize.
+     * Dynamic modification of arbitrary stylesheet rules or adoptedStyleSheets without attribute or resize triggers is out of scope.
+     */
+    #watchCssDirection(): void {
+        let updateAncestorObservers = (): void => {};
+
+        const updateCssDirection = (): void => {
+            if (typeof window === "undefined") {
+                this.#browserCssDirection.set(null);
+                return;
+            }
+
+            const el = this.#host.nativeElement;
+            if (!el) {
+                this.#browserCssDirection.set(null);
+                return;
+            }
+
+            try {
+                const computedDir = window.getComputedStyle(el).direction;
+                if (computedDir === "rtl" || computedDir === "ltr") {
+                    this.#browserCssDirection.set(computedDir);
+                } else {
+                    this.#browserCssDirection.set(null);
+                }
+            } catch {
+                this.#browserCssDirection.set(null);
+            }
+            updateAncestorObservers();
+        };
+
+        updateCssDirection();
+
+        effect(() => {
+            this.#direction();
+            updateCssDirection();
+        });
+
+        afterNextRender(() => {
+            updateCssDirection();
+        });
+
+        if (typeof MutationObserver !== "undefined") {
+            let observedElements = new Set<Element>();
+            const observer = new MutationObserver(() => {
+                updateCssDirection();
+            });
+
+            updateAncestorObservers = (): void => {
+                const el = this.#host.nativeElement;
+                if (!el) {
+                    return;
+                }
+                const currentAncestors = getComposedAncestors(el);
+                const nextSet = new Set(currentAncestors);
+
+                let changed = nextSet.size !== observedElements.size;
+                if (!changed) {
+                    for (const item of nextSet) {
+                        if (!observedElements.has(item)) {
+                            changed = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (changed) {
+                    observer.disconnect();
+                    observedElements = nextSet;
+                    for (const node of nextSet) {
+                        observer.observe(node, {
+                            attributes: true,
+                            attributeFilter: ["style", "class", "dir"]
+                        });
+                    }
+                }
+            };
+
+            updateAncestorObservers();
+
+            afterNextRender(() => {
+                updateAncestorObservers();
+                updateCssDirection();
+            });
+
+            this.#destroyRef.onDestroy(() => {
+                observer.disconnect();
+            });
+        }
+
+        if (typeof window !== "undefined") {
+            let resizeRafId: number | null = null;
+            const onResize = (): void => {
+                if (resizeRafId !== null) {
+                    return;
+                }
+                if (typeof window.requestAnimationFrame === "function") {
+                    resizeRafId = window.requestAnimationFrame(() => {
+                        resizeRafId = null;
+                        updateCssDirection();
+                    });
+                } else {
+                    updateCssDirection();
+                }
+            };
+
+            window.addEventListener("resize", onResize, { passive: true });
+
+            this.#destroyRef.onDestroy(() => {
+                if (resizeRafId !== null && typeof window.cancelAnimationFrame === "function") {
+                    window.cancelAnimationFrame(resizeRafId);
+                    resizeRafId = null;
+                }
+                window.removeEventListener("resize", onResize);
+            });
+        }
     }
 }

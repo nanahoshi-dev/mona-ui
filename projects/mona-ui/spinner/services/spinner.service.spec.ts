@@ -1,6 +1,6 @@
 import { ElementRef } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
-import { Observable, of, Subject, throwError } from "rxjs";
+import { Observable, Subject, throwError } from "rxjs";
 import { SpinnerService } from "./spinner.service";
 
 describe("SpinnerService", () => {

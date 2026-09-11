@@ -3,7 +3,7 @@
     [size]="'small'"
     [value]="selectedColor()"
     (valueChange)="onColorChange($event)"
-    title="Color">
+    [title]="messages().color">
     <ng-template monaColorPickerValueTemplate let-color>
         <div [class]="colorValueClass()">
             <i class="ri-font-family"></i>

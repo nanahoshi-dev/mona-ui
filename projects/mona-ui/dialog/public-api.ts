@@ -18,3 +18,4 @@ export * from "./models/DialogRef";
 export type { DialogResult } from "./models/DialogResult";
 export * from "./models/DialogSettings";
 export type { DialogVariantProps } from "./styles/dialog.styles";
+export { DIALOG_DEFAULT_MESSAGES } from "./i18n/dialog.default-messages";

@@ -11,14 +11,14 @@ import { v4 } from "uuid";
 })
 export class SplitterPaneComponent {
     /**
-     * @description Whether the pane is collapsible.
-     */
-    public readonly collapsible = input(false);
-
-    /**
      * @description Whether the pane is collapsed.
      */
     public readonly collapsed = model(false);
+
+    /**
+     * @description Whether the pane is collapsible.
+     */
+    public readonly collapsible = input(false);
 
     /**
      * @description The maximum size of the pane.

@@ -16,11 +16,13 @@ import {
     untracked,
     viewChild
 } from "@angular/core";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { twMerge } from "tailwind-merge";
 import { ChartAxisLabelTemplateDirective } from "../../directives/chart-axis-label-template.directive";
 import { ChartNoDataTemplateDirective } from "../../directives/chart-no-data-template.directive";
 import { ChartSubtitleTemplateDirective } from "../../directives/chart-subtitle-template.directive";
 import { ChartTitleTemplateDirective } from "../../directives/chart-title-template.directive";
+import { CHART_DEFAULT_MESSAGES } from "../../i18n/chart.default-messages";
 import { BrowserAnimationClock } from "../../internal/animation/chart-animation-clock";
 import { ChartAnimationController } from "../../internal/animation/chart-animation-controller";
 import {
@@ -300,6 +302,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     readonly #dataLabelMeasurements = new Map<string, ChartSize>();
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+    readonly #i18n = inject(MonaI18nService);
     readonly #hasInitializedDefaultSelection = signal(false);
     readonly #hasInitializedDefaultViewport = signal(false);
     readonly #internalSelectedMarkIds = signal<readonly string[]>([]);
@@ -392,6 +395,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #suppressNextCanvasClick: boolean = false;
     #synchronizationController: ChartSynchronizationController | null = null;
     #themeObserver: MutationObserver | null = null;
+    protected readonly messages = this.#i18n.componentMessages("chart", CHART_DEFAULT_MESSAGES);
     protected readonly activeAccessibilityText = signal<string>("");
     protected readonly animationDurationCss = computed(() => `${this.normalizedAnimationOptions().duration}ms`);
     protected readonly animationEasingCss = computed(() => easingToCss(this.normalizedAnimationOptions().easing));
@@ -531,7 +535,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     protected readonly effectiveAriaLabel = computed<string>(() => {
         const explicit = this.ariaLabel().trim();
         const builtIn = this.title().trim();
-        return explicit || builtIn || "Chart";
+        return explicit || builtIn || this.messages().chart;
     });
     protected readonly effectiveSelectedMarkIds = computed<readonly string[]>(() => {
         const reg = this.#selection();
@@ -1738,7 +1742,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             matchingHit.formattedFrom ?? (matchingHit.fromValue !== undefined ? String(matchingHit.fromValue) : "");
         const toStr = matchingHit.formattedTo ?? (matchingHit.toValue !== undefined ? String(matchingHit.toValue) : "");
         if (isRange && fromStr && toStr) {
-            return `${matchingHit.seriesName}: ${xStr}, ${fromStr} to ${toStr}`;
+            const title = `${matchingHit.seriesName}: ${xStr}`;
+            return this.messages().rangeDescription(title, fromStr, toStr);
         }
         return `${matchingHit.seriesName}: ${xStr}, ${yStr}`;
     }

@@ -2,6 +2,7 @@
  * Public API Surface of @nanahoshi/mona-ui/spinner
  */
 
+export { SPINNER_DEFAULT_MESSAGES } from "./i18n/spinner.default-messages";
 export { SpinnerComponent } from "./components/spinner/spinner.component";
 export { SpinnerService } from "./services/spinner.service";
 

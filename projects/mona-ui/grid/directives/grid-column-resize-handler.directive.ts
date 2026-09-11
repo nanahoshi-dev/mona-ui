@@ -1,5 +1,6 @@
 import { afterNextRender, DestroyRef, Directive, DOCUMENT, ElementRef, inject, input, output } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { injectComponentDirection } from "@nanahoshi/mona-ui/i18n";
 import { fromEvent } from "rxjs";
 import type { Column } from "../models/Column";
 import type { ColumnResizeEvent } from "../models/ColumnResizeEvent";
@@ -8,16 +9,18 @@ import { GridService } from "../services/grid.service";
 @Directive({
     selector: "[monaGridColumnResizeHandler]",
     host: {
-        "[attr.aria-label]": "'Resize column'",
+        "[attr.aria-label]": "messages().resizeColumn",
         "[attr.aria-orientation]": "'vertical'",
         "[attr.role]": "'separator'"
     }
 })
 export class GridColumnResizeHandlerDirective {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
+    readonly #direction = injectComponentDirection();
     readonly #document = inject(DOCUMENT);
     readonly #gridService = inject(GridService);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    protected readonly messages = this.#gridService.messages;
 
     public readonly column = input.required<Column>();
     public readonly resizeEnd = output<ColumnResizeEvent>();
@@ -69,8 +72,9 @@ export class GridColumnResizeHandlerDirective {
         let newWidth: number = -1;
 
         const onPointerMove = (event: PointerEvent) => {
-            const deltaX = event.clientX - initialX;
-            const appliedWidth = this.#applyDelta(initialWidth, deltaX);
+            const physicalDelta = event.clientX - initialX;
+            const logicalDelta = this.#direction() === "rtl" ? -physicalDelta : physicalDelta;
+            const appliedWidth = this.#applyDelta(initialWidth, logicalDelta);
             if (appliedWidth != null) {
                 newWidth = appliedWidth;
             }

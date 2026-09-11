@@ -81,7 +81,7 @@ export const segmentedOptionThemeVariants = cva(
 
 export const segmentedIndicatorThemeVariants = cva(
     `
-        pointer-events-none absolute top-0 left-0
+        pointer-events-none absolute top-0 start-0
         bg-primary shadow-sm ring-1 ring-selected-border
         data-[disabled='true']:opacity-50
         motion-reduce:transition-none

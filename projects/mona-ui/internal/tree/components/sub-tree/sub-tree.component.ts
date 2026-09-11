@@ -11,7 +11,9 @@ import { ChangeDetectionStrategy, Component, computed, DOCUMENT, inject, input, 
 import { FormsModule } from "@angular/forms";
 import { ImmutableSet } from "@mirei/ts-collections";
 import { CheckBoxComponent } from "@nanahoshi/mona-ui/check-box";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { asapScheduler, take } from "rxjs";
+import { TREE_DEFAULT_MESSAGES } from "../../i18n/tree.default-messages";
 import { NodeDragEndEvent } from "../../models/NodeDragEndEvent";
 import { InternalNodeDragEvent, NodeDragEvent } from "../../models/NodeDragEvent";
 import { NodeDragStartEvent } from "../../models/NodeDragStartEvent";
@@ -86,6 +88,7 @@ import { TreeNodeComponent } from "../tree-node/tree-node.component";
 })
 export class SubTreeComponent<T> {
     readonly #document = inject(DOCUMENT);
+    readonly #i18n = inject(MonaI18nService);
     readonly #zone = inject(NgZone);
     protected readonly listClass = computed(() => {
         return subTreeListThemeVariants();
@@ -93,6 +96,7 @@ export class SubTreeComponent<T> {
     protected readonly listItemClass = computed(() => {
         return subTreeListItemThemeVariants();
     });
+    protected readonly messages = this.#i18n.componentMessages("treeView", TREE_DEFAULT_MESSAGES);
     protected readonly nodeContainerClass = computed(() => {
         return treeNodeContainerThemeVariants();
     });
@@ -119,14 +123,6 @@ export class SubTreeComponent<T> {
         transform: value => ImmutableSet.create(value)
     });
     public readonly parent = input.required<TreeNode<T> | null>();
-
-    protected nodeAnimationDisabled(): boolean {
-        return (
-            !this.treeService.animationEnabled() ||
-            this.treeService.animationTemporarilyDisabled() ||
-            this.treeService.filterText().length !== 0
-        );
-    }
 
     public onExpandStateChange(node: TreeNode<T>): void {
         const expanded = this.treeService.isExpanded(node);
@@ -211,6 +207,14 @@ export class SubTreeComponent<T> {
                 asapScheduler.schedule(() => this.treeService.animationTemporarilyDisabled.set(false))
             );
         });
+    }
+
+    protected nodeAnimationDisabled(): boolean {
+        return (
+            !this.treeService.animationEnabled() ||
+            this.treeService.animationTemporarilyDisabled() ||
+            this.treeService.filterText().length !== 0
+        );
     }
 
     private focusNode(node: TreeNode<T>): void {

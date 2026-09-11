@@ -10,12 +10,13 @@ import { PagerNumericButtonsTemplateDirective } from "../../directives/pager-num
 import { PagerPageSizeTemplateDirective } from "../../directives/pager-page-size-template.directive";
 import type { PageChangeEvent } from "../../models/PageChangeEvent";
 import type { PageSizeChangeEvent } from "../../models/PageSizeChangeEvent";
+import { MONA_DEFAULT_LOCALE, MonaI18nService, type MonaLocale } from "@nanahoshi/mona-ui/i18n";
 import { pagerBaseThemeVariants, pagerInfoThemeVariants } from "../../styles/pager.styles";
 import { PagerComponent } from "./pager.component";
 
 class MockResizeObserver implements ResizeObserver {
-    public static instances: MockResizeObserver[] = [];
     public readonly callback: ResizeObserverCallback;
+    public static instances: MockResizeObserver[] = [];
 
     public constructor(callback: ResizeObserverCallback) {
         this.callback = callback;
@@ -688,7 +689,351 @@ describe("Pager visual contract", () => {
 
         expect(baseClasses).toContain("bg-(--mona-pager-background)");
         expect(baseClasses).toContain("border-border-subtle");
+        expect(baseClasses).toContain("[&_mona-numeric-text-box]:ms-4");
         expect(baseClasses).not.toContain("bg-primary");
         expect(infoClasses).toContain("text-muted-foreground");
+        expect(infoClasses).toContain("ps-2");
     });
 });
+
+describe("PagerComponent i18n and localization", () => {
+    let fixture: ComponentFixture<PagerComponent>;
+    let i18nService: MonaI18nService;
+
+    const testTurkishLocale: MonaLocale = {
+        direction: "ltr",
+        id: "tr-TR",
+        messages: {
+            pager: {
+                firstPageLabel: "İlk sayfa",
+                jumpBackwardLabel: pages => `${pages} sayfa geri git`,
+                jumpForwardLabel: pages => `${pages} sayfa ileri git`,
+                lastPageLabel: "Son sayfa",
+                nextPageLabel: "Sonraki sayfa",
+                ofText: "/",
+                pageLabel: page => `Sayfa ${page}`,
+                pageSizeLabel: pageSize => `${pageSize} / sayfa`,
+                pageText: "Sayfa",
+                previousPageLabel: "Önceki sayfa",
+                rangeStatus: (start, end, total) => `${start} - ${end} / ${total} öğe`
+            }
+        }
+    };
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            imports: [PagerComponent],
+            providers: []
+        });
+        fixture = TestBed.createComponent(PagerComponent);
+        i18nService = TestBed.inject(MonaI18nService);
+        i18nService.use(MONA_DEFAULT_LOCALE);
+        i18nService.setMessages({});
+    });
+
+    function setup(total: number, pageSize: number, skip: number = 0): void {
+        fixture.componentRef.setInput("total", total);
+        fixture.componentRef.setInput("pageSize", pageSize);
+        fixture.componentRef.setInput("skip", skip);
+        fixture.detectChanges();
+    }
+
+    function resizeHost(width: number): void {
+        const hostElement: HTMLElement = fixture.nativeElement;
+        const observer = MockResizeObserver.instances[MockResizeObserver.instances.length - 1];
+        expect(observer).toBeTruthy();
+
+        Object.defineProperty(hostElement, "clientWidth", { value: width, configurable: true });
+        observer.callback([], observer);
+        fixture.detectChanges();
+    }
+
+    function getInfoText(): string {
+        return fixture.nativeElement.textContent.replace(/\s+/g, " ").trim();
+    }
+
+    it("renders default English accessibility labels and text", async () => {
+        setup(100, 10, 0);
+        await fixture.whenStable();
+        resizeHost(900);
+
+        const buttons = Array.from(fixture.nativeElement.querySelectorAll("button")) as HTMLButtonElement[];
+        const labels = buttons.map(b => b.getAttribute("aria-label"));
+
+        expect(labels).toContain("First page");
+        expect(labels).toContain("Previous page");
+        expect(labels).toContain("Next page");
+        expect(labels).toContain("Last page");
+        expect(labels).toContain("Page 1");
+
+        expect(getInfoText()).toContain("1 - 10 of 100 items");
+    });
+
+    it("updates labels and text immediately on runtime locale switch", async () => {
+        setup(100, 10, 0);
+        await fixture.whenStable();
+        resizeHost(900);
+
+        i18nService.use(testTurkishLocale);
+        fixture.detectChanges();
+
+        const buttons = Array.from(fixture.nativeElement.querySelectorAll("button")) as HTMLButtonElement[];
+        const labels = buttons.map(b => b.getAttribute("aria-label"));
+
+        expect(labels).toContain("İlk sayfa");
+        expect(labels).toContain("Önceki sayfa");
+        expect(labels).toContain("Sonraki sayfa");
+        expect(labels).toContain("Son sayfa");
+        expect(labels).toContain("Sayfa 1");
+
+        expect(getInfoText()).toContain("1 - 10 / 100 öğe");
+    });
+
+    it("localizes jumper labels according to active locale", () => {
+        fixture.componentRef.setInput("total", 1000);
+        fixture.componentRef.setInput("pageSize", 5);
+        fixture.componentRef.setInput("skip", 500);
+        fixture.componentRef.setInput("visiblePages", 5);
+        fixture.detectChanges();
+
+        i18nService.use(testTurkishLocale);
+        fixture.detectChanges();
+
+        const buttons = Array.from(fixture.nativeElement.querySelectorAll("button")) as HTMLButtonElement[];
+        const labels = buttons.map(b => b.getAttribute("aria-label"));
+
+        expect(labels).toContain("5 sayfa geri git");
+        expect(labels).toContain("5 sayfa ileri git");
+    });
+
+    it("localizes input mode text ('Page' and 'of')", () => {
+        fixture.componentRef.setInput("type", "input");
+        fixture.componentRef.setInput("total", 100);
+        fixture.componentRef.setInput("pageSize", 10);
+        fixture.detectChanges();
+
+        i18nService.use(testTurkishLocale);
+        fixture.detectChanges();
+
+        const spans = Array.from(fixture.nativeElement.querySelectorAll("span")) as HTMLElement[];
+        const spanTexts = spans.map(s => s.textContent?.trim());
+
+        expect(spanTexts).toContain("Sayfa");
+        expect(spanTexts).toContain("/");
+    });
+
+    it("applies localized pageStatus to page input aria-label", () => {
+        fixture.componentRef.setInput("type", "input");
+        fixture.componentRef.setInput("total", 100);
+        fixture.componentRef.setInput("pageSize", 10);
+        fixture.detectChanges();
+
+        const inputEl = fixture.nativeElement.querySelector("mona-numeric-text-box input") as HTMLInputElement;
+        expect(inputEl.getAttribute("aria-label")).toBe("Page 1 of 10");
+
+        i18nService.patchMessages({
+            pager: {
+                pageStatus: (page, total) => `Sayfa ${page} / ${total}`
+            }
+        });
+        fixture.detectChanges();
+
+        expect(inputEl.getAttribute("aria-label")).toBe("Sayfa 1 / 10");
+    });
+
+    it("uses rangeStatus message when calculating pagerInfo", () => {
+        setup(100, 10, 20);
+
+        i18nService.patchMessages({
+            pager: {
+                rangeStatus: (start, end, total) => `${start} ila ${end} arası (${total} kayıt)`
+            }
+        });
+        fixture.detectChanges();
+
+        expect(getInfoText()).toContain("21 ila 30 arası (100 kayıt)");
+    });
+
+    describe("rangeStatus precedence matrix", () => {
+        it("renders fallback message when no locale or application override is provided", () => {
+            setup(100, 10, 20);
+            expect(getInfoText()).toContain("21 - 30 of 100 items");
+        });
+
+        it("renders locale rangeStatus when locale is set without application override", () => {
+            setup(100, 10, 20);
+            i18nService.use(testTurkishLocale);
+            fixture.detectChanges();
+
+            expect(getInfoText()).toContain("21 - 30 / 100 öğe");
+        });
+
+        it("renders application override rangeStatus over fallback when no locale is set", () => {
+            setup(100, 10, 20);
+            i18nService.setMessages({
+                pager: {
+                    rangeStatus: (start, end, total) => `Items ${start} to ${end} (Total: ${total})`
+                }
+            });
+            fixture.detectChanges();
+
+            expect(getInfoText()).toContain("Items 21 to 30 (Total: 100)");
+        });
+
+        it("renders application override rangeStatus over locale rangeStatus (application override outranks locale)", () => {
+            setup(100, 10, 20);
+            i18nService.use(testTurkishLocale);
+            i18nService.setMessages({
+                pager: {
+                    rangeStatus: (start, end, total) => `ÖZEL: ${start}..${end} (${total})`
+                }
+            });
+            fixture.detectChanges();
+
+            expect(getInfoText()).toContain("ÖZEL: 21..30 (100)");
+        });
+    });
+
+    it("respects application-level message overrides over locale and fallback", () => {
+        fixture.componentRef.setInput("total", 100);
+        fixture.componentRef.setInput("pageSize", 10);
+        fixture.detectChanges();
+
+        i18nService.use(testTurkishLocale);
+        i18nService.setMessages({
+            pager: {
+                nextPageLabel: "Sonraki Sayfaya Atla"
+            }
+        });
+        fixture.detectChanges();
+
+        const buttons = Array.from(fixture.nativeElement.querySelectorAll("button")) as HTMLButtonElement[];
+        const labels = buttons.map(b => b.getAttribute("aria-label"));
+
+        expect(labels).toContain("Sonraki Sayfaya Atla");
+        expect(labels).toContain("İlk sayfa");
+    });
+
+    it("applies logical styles and allows consumer class overrides to take precedence", () => {
+        fixture.componentRef.setInput("total", 100);
+        fixture.componentRef.setInput("pageSize", 10);
+        fixture.componentRef.setInput("class", "p-8 bg-red-500 border-dashed");
+        fixture.detectChanges();
+
+        const host = fixture.nativeElement as HTMLElement;
+        expect(host.className).toContain("p-8");
+        expect(host.className).toContain("bg-red-500");
+        expect(host.className).toContain("border-dashed");
+        expect(host.className).not.toContain("px-2");
+        expect(host.className).not.toContain("py-1");
+    });
+
+    describe("RTL and direction-aware keyboard navigation", () => {
+        function dispatchKey(element: Element, key: string): void {
+            element.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key }));
+            fixture.detectChanges();
+        }
+
+        function getActivePageNumber(): number {
+            const button = fixture.nativeElement.querySelector("button[aria-current='page']");
+            return Number(button?.textContent?.trim());
+        }
+
+        it("renders rtl:rotate-180 class on navigation chevron icons", () => {
+            setup(100, 10, 20);
+            const svgs = Array.from(fixture.nativeElement.querySelectorAll("button svg")) as SVGElement[];
+            const rotatedSvgs = svgs.filter(s => s.classList.contains("rtl:rotate-180"));
+
+            expect(rotatedSvgs.length).toBe(4);
+        });
+
+        it("navigates with ArrowLeft=prev and ArrowRight=next in LTR DOM", () => {
+            setup(100, 10, 20); // starts at page 3
+            expect(getActivePageNumber()).toBe(3);
+
+            const host = fixture.nativeElement as HTMLElement;
+            host.focus();
+
+            dispatchKey(host, "ArrowLeft");
+            expect(getActivePageNumber()).toBe(2);
+
+            dispatchKey(host, "ArrowRight");
+            expect(getActivePageNumber()).toBe(3);
+        });
+
+        it("navigates with ArrowLeft=next and ArrowRight=prev in RTL DOM", async () => {
+            setup(100, 10, 20); // starts at page 3
+            expect(getActivePageNumber()).toBe(3);
+
+            const host = fixture.nativeElement as HTMLElement;
+            host.setAttribute("dir", "rtl");
+            fixture.detectChanges();
+            await fixture.whenStable();
+            host.focus();
+
+            // In RTL: ArrowLeft moves visually forward -> page + 1
+            dispatchKey(host, "ArrowLeft");
+            expect(getActivePageNumber()).toBe(4);
+
+            // In RTL: ArrowRight moves visually backward -> page - 1
+            dispatchKey(host, "ArrowRight");
+            expect(getActivePageNumber()).toBe(3);
+        });
+
+        it("respects DOM direction over locale direction across mismatch combinations", async () => {
+            const host = fixture.nativeElement as HTMLElement;
+
+            // 1. RTL locale + LTR DOM -> ArrowLeft = prev, ArrowRight = next
+            i18nService.use({ id: "ar-SA", direction: "rtl", messages: {} });
+            host.setAttribute("dir", "ltr");
+            setup(100, 10, 20); // page 3
+            await fixture.whenStable();
+            host.focus();
+
+            dispatchKey(host, "ArrowLeft");
+            expect(getActivePageNumber()).toBe(2);
+            dispatchKey(host, "ArrowRight");
+            expect(getActivePageNumber()).toBe(3);
+
+            // 2. LTR locale + RTL DOM -> ArrowLeft = next, ArrowRight = prev
+            i18nService.use({ id: "en-US", direction: "ltr", messages: {} });
+            host.setAttribute("dir", "rtl");
+            setup(100, 10, 20); // page 3
+            await fixture.whenStable();
+            host.focus();
+
+            dispatchKey(host, "ArrowLeft");
+            expect(getActivePageNumber()).toBe(4);
+            dispatchKey(host, "ArrowRight");
+            expect(getActivePageNumber()).toBe(3);
+
+            // 3. RTL locale + RTL DOM -> ArrowLeft = next, ArrowRight = prev
+            i18nService.use({ id: "ar-SA", direction: "rtl", messages: {} });
+            host.setAttribute("dir", "rtl");
+            setup(100, 10, 20); // page 3
+            await fixture.whenStable();
+            host.focus();
+
+            dispatchKey(host, "ArrowLeft");
+            expect(getActivePageNumber()).toBe(4);
+            dispatchKey(host, "ArrowRight");
+            expect(getActivePageNumber()).toBe(3);
+        });
+
+        it("retains semantic PageUp=prev and PageDown=next regardless of direction", async () => {
+            setup(100, 10, 20); // page 3
+            const host = fixture.nativeElement as HTMLElement;
+            host.setAttribute("dir", "rtl");
+            fixture.detectChanges();
+            await fixture.whenStable();
+            host.focus();
+
+            dispatchKey(host, "PageUp");
+            expect(getActivePageNumber()).toBe(2);
+
+            dispatchKey(host, "PageDown");
+            expect(getActivePageNumber()).toBe(3);
+        });
+    });
+});
+

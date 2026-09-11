@@ -1,6 +1,7 @@
-import { DecimalPipe, NgTemplateOutlet } from "@angular/common";
+import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, contentChild, inject, input } from "@angular/core";
 import { getPercentage } from "@nanahoshi/mona-ui/common";
+import { formatNumber, injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { Action } from "@nanahoshi/mona-ui/internal";
 
 import { twMerge } from "tailwind-merge";
@@ -31,7 +32,7 @@ import {
             }
         }
     `,
-    imports: [DecimalPipe, NgTemplateOutlet],
+    imports: [NgTemplateOutlet],
     host: {
         "[class]": "baseClasses()",
         "[attr.aria-busy]": "indeterminate() || null",
@@ -51,6 +52,16 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
         const progress = this.progress();
         return typeof color === "string" ? color : color?.(progress);
     });
+    readonly #direction = injectComponentDirection();
+    readonly #i18n = inject(MonaI18nService);
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
+    protected readonly formattedProgress = computed(() => {
+        return formatNumber(this.progress(), this.#i18n.localeId(), {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2,
+            useGrouping: false
+        });
+    });
     protected readonly baseClasses = computed(() => {
         const rounded = this.rounded();
         const classes = progressBarBaseThemeVariants({ rounded });
@@ -66,7 +77,10 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
     protected readonly labelTemplate = contentChild(ProgressBarLabelTemplateDirective);
     protected readonly nextTrackClipPath = computed(() => {
         const progress = this.progress();
-        return `inset(-1px -1px -1px ${progress}%)`;
+        const isRtl = this.isRtl();
+        return isRtl
+            ? `inset(-1px ${progress}% -1px -1px)`
+            : `inset(-1px -1px -1px ${progress}%)`;
     });
     protected readonly prevTrackClipPath = computed(() => {
         const progress = this.progress();
@@ -74,8 +88,11 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
         if (indeterminate) {
             return `inset(-1px -1px -1px -1px)`;
         }
-        const right = progress < 100 ? 8 : 0;
-        return `inset(-1px ${right}px -1px 0px)`;
+        const offset = progress < 100 ? 8 : 0;
+        const isRtl = this.isRtl();
+        return isRtl
+            ? `inset(-1px 0px -1px ${offset}px)`
+            : `inset(-1px ${offset}px -1px 0px)`;
     });
     protected readonly progress = computed(() => getPercentage(this.value(), this.min(), this.max()));
     protected readonly trackClasses = computed(() => {
@@ -86,6 +103,13 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
             : twMerge(classes, "data-[next='true']:transition-none data-[prev='true']:transition-none");
     });
     protected readonly trackColor = this.#color;
+
+    /**
+     * @description Enables CSS transitions on fill and color changes.
+     * Set to `false` when updating `value` at high frequency (e.g., a real-time byte counter).
+     * @default true
+     */
+    public readonly animate = input(true);
 
     /**
      * @description Accessible label for the progress bar host element.
@@ -103,13 +127,6 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
      * @default ""
      */
     public readonly ariaValueText = input("", { alias: "aria-valuetext" });
-
-    /**
-     * @description Enables CSS transitions on fill and color changes.
-     * Set to `false` when updating `value` at high frequency (e.g., a real-time byte counter).
-     * @default true
-     */
-    public readonly animate = input(true);
 
     /**
      * @description Fill color of the progress track.

@@ -58,43 +58,33 @@ export const numericTextboxInputThemeVariants = cva(
     `,
     {
         variants: {
-            leftRounded: {
-                full: `
-                    rounded-tl-full rounded-bl-full
-                `,
-                large: `
-                    rounded-tl-lg rounded-bl-lg
-                `,
-                medium: `
-                    rounded-tl-md rounded-bl-md
-                `,
-                none: `
-                    rounded-tl-none rounded-bl-none
-                `,
-                small: `
-                    rounded-tl-sm rounded-bl-sm
-                `
+            startRounded: {
+                full: "rounded-s-full",
+                large: "rounded-s-lg",
+                medium: "rounded-s-md",
+                none: "rounded-s-none",
+                small: "rounded-s-sm"
             },
-            rightRounded: {
+            endRounded: {
                 full: `
-                    rounded-tr-full rounded-br-full
-                    data-[spinners='true']:rounded-tr-none data-[spinners='true']:rounded-br-none
+                    rounded-e-full
+                    data-[spinners='true']:rounded-e-none
                 `,
                 large: `
-                    rounded-tr-lg rounded-br-lg
-                    data-[spinners='true']:rounded-tr-none data-[spinners='true']:rounded-br-none
+                    rounded-e-lg
+                    data-[spinners='true']:rounded-e-none
                 `,
                 medium: `
-                    rounded-tr-md rounded-br-md
-                    data-[spinners='true']:rounded-tr-none data-[spinners='true']:rounded-br-none
+                    rounded-e-md
+                    data-[spinners='true']:rounded-e-none
                 `,
                 none: `
-                    rounded-tr-none rounded-br-none
-                    data-[spinners='true']:rounded-tr-none data-[spinners='true']:rounded-br-none
+                    rounded-e-none
+                    data-[spinners='true']:rounded-e-none
                 `,
                 small: `
-                    rounded-tr-sm rounded-br-sm
-                    data-[spinners='true']:rounded-tr-none data-[spinners='true']:rounded-br-none
+                    rounded-e-sm
+                    data-[spinners='true']:rounded-e-none
                 `
             }
         }
@@ -109,13 +99,11 @@ export const numericTextboxButtonThemeVariants = cva(
 
         [&>button]:flex [&>button]:flex-1 [&>button]:items-center
         [&>button]:rounded-none [&>button]:p-0
-        [&>button]:first:rounded-tl-none
-        [&>button]:first:rounded-bl-none
-        [&>button]:first:rounded-br-none
+        [&>button]:first:rounded-s-none
+        [&>button]:first:rounded-b-none
         [&>button]:first:h-1/2
-        [&>button]:last:rounded-tl-none
-        [&>button]:last:rounded-bl-none
-        [&>button]:last:rounded-tr-none
+        [&>button]:last:rounded-s-none
+        [&>button]:last:rounded-t-none
         [&>button]:last:h-1/2
     `,
     {

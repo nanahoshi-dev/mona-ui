@@ -6,6 +6,7 @@ import {
     computed,
     contentChildren,
     DestroyRef,
+    effect,
     ElementRef,
     inject,
     input,
@@ -14,6 +15,7 @@ import {
     Signal,
     signal,
     TemplateRef,
+    untracked,
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
@@ -36,8 +38,15 @@ import {
     timer
 } from "rxjs";
 import { twMerge } from "tailwind-merge";
+import {
+    formatNumber,
+    MonaI18nService,
+    validateLocalizedNumber,
+    validateLocalizedNumberEdit
+} from "@nanahoshi/mona-ui/i18n";
 import { TextBoxDirective } from "@nanahoshi/mona-ui/text-box";
 import { NumericTextBoxPrefixTemplateDirective } from "../../directives/numeric-text-box-prefix-template.directive";
+import { NUMERIC_TEXT_BOX_DEFAULT_MESSAGES } from "../../i18n/numeric-text-box.default-messages";
 import {
     numericTextboxButtonThemeVariants,
     numericTextboxInputThemeVariants,
@@ -64,6 +73,8 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
     readonly #destroyRef = inject(DestroyRef);
     readonly #focusMonitor = inject(FocusMonitor);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    readonly #i18n = inject(MonaI18nService);
+    #pendingPaste = false;
 
     protected readonly beforeInput$ = new Subject<InputEvent>();
     protected readonly classes = computed(() => {
@@ -73,13 +84,6 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
-    protected readonly inputClasses = computed(() => {
-        const hasPrefixTemplate = this.prefixTemplateList().length > 0;
-        const leftRounded = hasPrefixTemplate ? "none" : this.rounded();
-        const rightRounded = this.spinners() ? "none" : this.rounded();
-        const inputVariants = numericTextboxInputThemeVariants({ leftRounded, rightRounded });
-        return twMerge(inputVariants);
-    });
     protected readonly focused = signal(false);
     protected readonly formattedValue = computed(() => {
         if (this.focused() && !this.readonly()) {
@@ -87,11 +91,26 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
         }
         return this.formatValueForDisplay(this.value());
     });
+    protected readonly inputClasses = computed(() => {
+        const hasPrefixTemplate = this.prefixTemplateList().length > 0;
+        const startRounded = hasPrefixTemplate ? "none" : this.rounded();
+        const endRounded = this.spinners() ? "none" : this.rounded();
+        const inputVariants = numericTextboxInputThemeVariants({ endRounded, startRounded });
+        return twMerge(inputVariants);
+    });
     protected readonly invalidInput = computed(
         () => this.touched() && (this.invalid() || (this.required() && this.value() == null))
     );
     protected readonly keydown$ = new Subject<KeyboardEvent>();
+    protected readonly messages = this.#i18n.componentMessages(
+        "numericTextBox",
+        NUMERIC_TEXT_BOX_DEFAULT_MESSAGES
+    );
+    protected readonly prefixTemplateList = contentChildren(NumericTextBoxPrefixTemplateDirective, {
+        read: TemplateRef
+    });
     protected readonly rawInputValue = signal("");
+    protected readonly spin$ = new Subject<Sign>();
     protected readonly spinButtonClasses = computed(() => {
         const size = this.size();
         return numericTextboxButtonThemeVariants({ size });
@@ -100,11 +119,7 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
         const size = this.size();
         return size === "large" ? 20 : size === "medium" ? 16 : 14;
     });
-    protected readonly spin$ = new Subject<Sign>();
     protected readonly spinStop$ = new Subject<void>();
-    protected readonly prefixTemplateList = contentChildren(NumericTextBoxPrefixTemplateDirective, {
-        read: TemplateRef
-    });
     protected readonly valueChange$ = new Subject<string>();
     protected readonly valueTextBoxRef: Signal<ElementRef<HTMLInputElement>> = viewChild.required("valueTextBox");
     protected readonly wheel$ = new Subject<WheelEvent>();
@@ -115,10 +130,19 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
     public readonly ariaLabel = input<string | null>(null, { alias: "aria-label" });
 
     /**
-     * @description Number of decimals to show.
+     * @description Number of fractional decimal places to display and accept. Values are truncated to an integer
+     * and clamped to the range 0–20. Non-finite and negative values normalize to 0.
      * @default 0
      */
-    public readonly decimals = input(0);
+    public readonly decimals = input(0, {
+        transform: (value: number) => {
+            const num = Math.trunc(value);
+            if (!Number.isFinite(num) || num < 0) {
+                return 0;
+            }
+            return Math.min(20, num);
+        }
+    });
 
     /**
      * @description Sets whether the input is disabled.
@@ -146,6 +170,13 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
     public readonly inputFocusOut = output<FocusEvent>();
 
     /**
+     * @description Marks the numeric text box as invalid. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly invalid = input(false);
+
+    /**
      * @description Maximum value that can be entered.
      */
     public readonly maxValue = input<number | null>(null);
@@ -169,13 +200,6 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
      * @description Sets whether the input is required.
      */
     public readonly required = input(false);
-
-    /**
-     * @description Marks the numeric text box as invalid. When bound to a signal form field via `[formField]`,
-     * this is written by the `FormField` directive.
-     * @default false
-     */
-    public readonly invalid = input(false);
 
     /**
      * @description Sets the border radius of the input.
@@ -228,6 +252,14 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
     public readonly value = model<number | null>(null);
 
     public constructor() {
+        effect(() => {
+            this.#i18n.localeId();
+            untracked(() => {
+                if (this.focused() && !this.readonly()) {
+                    this.rawInputValue.set(this.formatEditValue(this.value()));
+                }
+            });
+        });
         afterNextRender({
             read: () => {
                 this.setSubscriptions();
@@ -240,7 +272,7 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
                         this.focused.set(isFocused);
                         if (isFocused && !this.readonly()) {
                             const currentValue = this.value();
-                            const rawValue = currentValue?.toString() ?? "";
+                            const rawValue = this.formatEditValue(currentValue);
                             this.rawInputValue.set(rawValue);
                         }
                     });
@@ -281,14 +313,23 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
     public decrease(): void {
         const value = this.value();
         if (value == null) {
-            this.applyRawValue("0");
+            const min = this.minValue();
+            const max = this.maxValue();
+            let initial = 0;
+            if (min != null && initial < min) {
+                initial = min;
+            }
+            if (max != null && initial > max) {
+                initial = max;
+            }
+            this.commitNumericValue(initial);
         } else {
             let result = NumericTextBoxComponent.calculate(value, this.step(), "-");
             const min = this.minValue();
             if (min != null && result < min) {
                 result = min;
             }
-            this.applyRawValue(result.toString());
+            this.commitNumericValue(result);
         }
         this.focus();
     }
@@ -303,19 +344,29 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
     public increase(): void {
         const value = this.value();
         if (value == null) {
-            this.applyRawValue("0");
+            const min = this.minValue();
+            const max = this.maxValue();
+            let initial = 0;
+            if (min != null && initial < min) {
+                initial = min;
+            }
+            if (max != null && initial > max) {
+                initial = max;
+            }
+            this.commitNumericValue(initial);
         } else {
             let result = NumericTextBoxComponent.calculate(value, this.step(), "+");
             const max = this.maxValue();
             if (max != null && result > max) {
                 result = max;
             }
-            this.applyRawValue(result.toString());
+            this.commitNumericValue(result);
         }
         this.focus();
     }
 
     public onBlur(event: FocusEvent): void {
+        this.#pendingPaste = false;
         const relatedTarget = event.relatedTarget as Node | null;
         if (relatedTarget && this.#hostElementRef.nativeElement.contains(relatedTarget)) {
             return;
@@ -328,6 +379,21 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
         this.inputBlur.emit(event);
     }
 
+    protected applyRawValue(text: string): void {
+        this.rawInputValue.set(text);
+        this.valueChange$.next(text);
+    }
+
+    private commitNumericValue(value: number | null): void {
+        this.value.set(value);
+        this.rawInputValue.set(
+            this.focused() && !this.readonly()
+                ? this.formatEditValue(value)
+                : this.formatValueForDisplay(value)
+        );
+        this.touch.emit();
+    }
+
     private correctValue(): boolean {
         const value = this.value();
         const min = this.minValue();
@@ -335,23 +401,37 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
 
         if (value == null) {
             if (this.nullable()) {
-                this.applyRawValue("");
+                if (this.rawInputValue() !== "") {
+                    this.rawInputValue.set("");
+                }
+                return false;
             } else if (min != null) {
-                this.applyRawValue(min.toString());
+                this.commitNumericValue(min);
+                return true;
             } else {
-                this.applyRawValue("0");
+                this.commitNumericValue(0);
+                return true;
             }
-            return true;
         }
         if (min != null && value < min) {
-            this.applyRawValue(min.toString());
+            this.commitNumericValue(min);
             return true;
         }
         if (max != null && value > max) {
-            this.applyRawValue(max.toString());
+            this.commitNumericValue(max);
             return true;
         }
         return false;
+    }
+
+    private formatEditValue(value: number | null): string {
+        if (value == null) {
+            return "";
+        }
+        return formatNumber(value, this.#i18n.localeId(), {
+            maximumFractionDigits: 20,
+            useGrouping: false
+        });
     }
 
     private formatValueForDisplay(value: number | null): string {
@@ -363,22 +443,97 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
             return formatter(value);
         }
         const decimals = this.decimals();
-        if (decimals > 0) {
-            return value.toFixed(decimals);
-        }
-        return value.toString();
+        return formatNumber(value, this.#i18n.localeId(), {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals,
+            useGrouping: false
+        });
     }
 
-    protected applyRawValue(text: string): void {
-        this.rawInputValue.set(text);
-        this.valueChange$.next(text);
+    protected onPaste(event: ClipboardEvent): void {
+        const pastedText = event.clipboardData?.getData("text/plain");
+        if (pastedText == null) {
+            this.#pendingPaste = false;
+            return;
+        }
+        const inputElement = this.valueTextBoxRef()?.nativeElement;
+        if (!inputElement) {
+            this.#pendingPaste = false;
+            return;
+        }
+        const { value, selectionStart, selectionEnd } = inputElement;
+        const start = selectionStart ?? value.length;
+        const end = selectionEnd ?? value.length;
+        const proposedValue = value.slice(0, start) + pastedText + value.slice(end);
+        const validation = validateLocalizedNumber(proposedValue, this.#i18n.localeId(), {
+            mode: "locale",
+            decimals: this.decimals()
+        });
+        if (!validation.valid || validation.value === null) {
+            event.preventDefault();
+            this.#pendingPaste = false;
+            return;
+        }
+        this.#pendingPaste = true;
+    }
+
+    private parseValue(value: string | null | undefined): number | null {
+        const raw = value == null ? "" : value;
+        this.rawInputValue.set(raw);
+
+        const isPaste = this.#pendingPaste;
+        this.#pendingPaste = false;
+
+        if (isPaste) {
+            const validation = validateLocalizedNumber(raw, this.#i18n.localeId(), {
+                mode: "locale",
+                decimals: this.decimals()
+            });
+
+            return validation.valid && validation.value !== null ? validation.value : this.value();
+        }
+
+        if (raw === "") {
+            return null;
+        }
+
+        if (raw.trim() !== raw) {
+            return this.value();
+        }
+
+        const edit = validateLocalizedNumberEdit(raw, this.#i18n.localeId(), {
+            decimals: this.decimals()
+        });
+
+        if (edit.valid) {
+            return edit.value === null ? this.value() : edit.value;
+        }
+
+        const localeValidation = validateLocalizedNumber(raw, this.#i18n.localeId(), {
+            mode: "locale",
+            decimals: this.decimals()
+        });
+        if (localeValidation.valid && localeValidation.value !== null) {
+            return localeValidation.value;
+        }
+
+        return this.value();
     }
 
     private setBeforeInputSubscription(): void {
         this.beforeInput$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe((event: InputEvent): void => {
             const inputElement = event.target as HTMLInputElement;
 
-            const insertedText = event.data;
+            const isPaste =
+                event.inputType === "insertFromPaste" || (this.#pendingPaste && event.inputType !== "insertText");
+            if (!isPaste) {
+                this.#pendingPaste = false;
+            }
+
+            const insertedText =
+                event.data ??
+                (event as unknown as { dataTransfer?: DataTransfer }).dataTransfer?.getData("text/plain");
+
             if (insertedText == null) {
                 return;
             }
@@ -389,31 +544,29 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
             }
 
             const proposedValue = value.slice(0, selectionStart) + insertedText + value.slice(selectionEnd);
-            if (proposedValue.lastIndexOf("-") > 0) {
-                event.preventDefault();
-                return;
-            }
+            const localeId = this.#i18n.localeId();
+            const decimals = this.decimals();
 
-            if ((proposedValue.match(/\./g) || []).length > 1) {
-                event.preventDefault();
-                return;
-            }
-
-            if (this.decimals() === 0 && proposedValue.includes(".")) {
-                event.preventDefault();
-                return;
-            }
-
-            if (proposedValue.includes(".")) {
-                const decimalPart = proposedValue.split(".")[1];
-                if (decimalPart && decimalPart.length > this.decimals()) {
+            if (isPaste) {
+                const validation = validateLocalizedNumber(proposedValue, localeId, {
+                    mode: "locale",
+                    decimals
+                });
+                if (!validation.valid || validation.value === null) {
                     event.preventDefault();
-                    return;
+                    this.#pendingPaste = false;
+                } else {
+                    this.#pendingPaste = true;
                 }
+                return;
             }
 
-            const numericRegex = new RegExp(`^-?\\d*\\.?\\d{0,${this.decimals()}}$`);
-            if (!numericRegex.test(proposedValue)) {
+            this.#pendingPaste = false;
+
+            const editValidation = validateLocalizedNumberEdit(proposedValue, localeId, {
+                decimals
+            });
+            if (!editValidation.valid) {
                 event.preventDefault();
             }
         });
@@ -501,20 +654,5 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
                     this.decrease();
                 }
             });
-    }
-
-    private parseValue(value: string | null | undefined): number | null {
-        const normalizedValue = value == null ? "" : value;
-        this.rawInputValue.set(normalizedValue);
-        if (normalizedValue === "" || normalizedValue === "-") {
-            return null;
-        }
-
-        const sanitizedValue = normalizedValue.replace(/,/g, "");
-        if (!NumericTextBoxComponent.isNumeric(sanitizedValue)) {
-            return this.value();
-        }
-
-        return parseFloat(sanitizedValue);
     }
 }

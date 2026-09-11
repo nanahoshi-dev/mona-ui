@@ -39,6 +39,12 @@ jobs:
       - name: Build Metadata
         run: npm run build:metadata
 
+      - name: Test audit tooling
+        run: npm run test:audit
+
+      - name: Audit i18n and RTL readiness
+        run: npm run audit:i18n-rtl:strict
+
       - name: Build Library
         run: npm run build:prod
 
@@ -58,3 +64,9 @@ jobs:
 
       - name: Check Theme Color Parity
         run: npm run test:theme-colors
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Test Browser Direction Geometry
+        run: npm run test:browser:geometry:no-build

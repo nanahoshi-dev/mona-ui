@@ -5,18 +5,18 @@
         [style.top.px]="hsvHandleTop()"
         [attr.tabindex]="disabled() ? -1 : 0"
         [attr.role]="'slider'"
-        [attr.aria-label]="'Color saturation and value'"
+        [attr.aria-label]="messages().saturationAndValue"
         [attr.aria-valuemin]="0"
         [attr.aria-valuemax]="100"
         [attr.aria-valuenow]="hsv().s"
-        [attr.aria-valuetext]="'Saturation ' + hsv().s + '%, Value ' + hsv().v + '%'"
+        [attr.aria-valuetext]="messages().saturationAndValueText(hsv().s ?? 0, hsv().v ?? 0)"
         [attr.aria-disabled]="disabled() || null"
         (keydown)="onHsvHandleKeyDown($event)"
         (blur)="onHsvHandleBlur()"
         #hsvPointer></div>
 </div>
 <div class="flex items-center gap-2">
-    <div class="flex flex-1 flex-col gap-1 mr-2">
+    <div class="flex flex-1 flex-col gap-1 me-2">
         <mona-slider
             [minValue]="0"
             [maxValue]="360"
@@ -55,7 +55,7 @@
             (click)="preview.onClick?.()"
             (keydown)="onPreviousColorKeyDown($event, preview.onClick)"></div>
     }
-    <button monaButton look="ghost" size="small" aria-label="Clear color" (click)="onClearClick()">
+    <button monaButton look="ghost" size="small" [attr.aria-label]="messages().clearColor" (click)="onClearClick()">
         <i class="ri-blur-off-line"></i>
     </button>
 </div>
@@ -90,7 +90,7 @@
                     look="ghost"
                     [rounded]="rounded()"
                     size="small"
-                    aria-label="Switch color mode"
+                    [attr.aria-label]="messages().switchColorMode"
                     (click)="onSwitchColorModeClick()">
                     <i class="ri-expand-up-down-line"></i>
                 </button>
@@ -111,13 +111,13 @@
                     [ngTemplateOutletContext]="{ $implicit: 'HEX', classes: 'w-auto px-2' }"></ng-container>
             </ng-template>
             <ng-template monaTextBoxSuffixTemplate>
-                <mona-dropdown-button look="ghost" aria-label="Copy color" class="h-full">
+                <mona-dropdown-button look="ghost" [attr.aria-label]="messages().copyColor" class="h-full">
                     <svg lucideCopy [size]="12"></svg>
                     <mona-dropdown-button-item
-                        label="Copy as HEX"
+                        [label]="messages().copyAsHex"
                         (menuClick)="onCopyColorSelect('hex')"></mona-dropdown-button-item>
                     <mona-dropdown-button-item
-                        label="Copy as RGB"
+                        [label]="messages().copyAsRgb"
                         (menuClick)="onCopyColorSelect('rgb')"></mona-dropdown-button-item>
                 </mona-dropdown-button>
             </ng-template>
@@ -125,8 +125,8 @@
     }
     @if (showButtons()) {
         <div class="flex items-center justify-end gap-2">
-            <button monaButton [rounded]="rounded()" look="primary" (click)="onApply()">Apply</button>
-            <button monaButton [rounded]="rounded()" (click)="onCancel()">Cancel</button>
+            <button monaButton [rounded]="rounded()" look="primary" (click)="onApply()">{{ messages().apply }}</button>
+            <button monaButton [rounded]="rounded()" (click)="onCancel()">{{ messages().cancel }}</button>
         </div>
     }
 </div>
@@ -134,7 +134,7 @@
 <ng-template #numericInputPrefixTemplate let-text let-classes="classes">
     <span
         [class]="classes"
-        class="inline-flex items-center justify-center select-none w-7.5 [background-color:var(--mona-input-addon-background,var(--color-secondary))] h-full text-foreground text-xs font-semibold border-r border-r-input-border"
+        class="inline-flex items-center justify-center select-none w-7.5 [background-color:var(--mona-input-addon-background,var(--color-secondary))] h-full text-foreground text-xs font-semibold border-e border-e-input-border"
         >{{ text }}</span
     >
 </ng-template>

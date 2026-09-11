@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
+import { MONA_DEFAULT_LOCALE, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { afterEach } from "vitest";
 
 import { TabListComponent } from "./tab-list.component";
 
@@ -30,6 +32,11 @@ describe("TabListComponent", () => {
         await fixture.whenRenderingDone();
     });
 
+    afterEach(() => {
+        TestBed.inject(MonaI18nService).use(MONA_DEFAULT_LOCALE);
+        TestBed.resetTestingModule();
+    });
+
     it("should create", () => {
         expect(component).toBeTruthy();
     });
@@ -54,6 +61,53 @@ describe("TabListComponent", () => {
         fixture.detectChanges();
         expect(preventDefaultSpy).toHaveBeenCalled();
         expect(emitSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 2 }));
+    });
+
+    it("should navigate to previous tab with ArrowRight in horizontal RTL", () => {
+        const i18n = TestBed.inject(MonaI18nService);
+        i18n.use({ direction: "rtl", id: "ar-EG", messages: {} });
+        fixture.nativeElement.setAttribute("dir", "rtl");
+        fixture.componentRef.setInput("selectedTabId", "tab1");
+        fixture.detectChanges();
+
+        const emitSpy = vi.spyOn(component.tabSelect, "emit");
+        const preventDefaultSpy = vi.fn();
+
+        fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowRight", preventDefault: preventDefaultSpy });
+        fixture.detectChanges();
+        expect(preventDefaultSpy).toHaveBeenCalled();
+        expect(emitSpy.mock.calls[0][0].index).toBe(2);
+    });
+
+    it("should navigate to next tab with ArrowLeft in horizontal RTL", () => {
+        const i18n = TestBed.inject(MonaI18nService);
+        i18n.use({ direction: "rtl", id: "ar-EG", messages: {} });
+        fixture.nativeElement.setAttribute("dir", "rtl");
+        fixture.componentRef.setInput("selectedTabId", "tab1");
+        fixture.detectChanges();
+
+        const emitSpy = vi.spyOn(component.tabSelect, "emit");
+        const preventDefaultSpy = vi.fn();
+
+        fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowLeft", preventDefault: preventDefaultSpy });
+        fixture.detectChanges();
+        expect(preventDefaultSpy).toHaveBeenCalled();
+        expect(emitSpy.mock.calls[0][0].index).toBe(1);
+    });
+
+    it("Case 2: should maintain normal LTR navigation when RTL locale is used with LTR DOM", () => {
+        const i18n = TestBed.inject(MonaI18nService);
+        i18n.use({ direction: "rtl", id: "ar-EG", messages: {} });
+        fixture.componentRef.setInput("selectedTabId", "tab1");
+        fixture.detectChanges();
+
+        const emitSpy = vi.spyOn(component.tabSelect, "emit");
+        const preventDefaultSpy = vi.fn();
+
+        fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowRight", preventDefault: preventDefaultSpy });
+        fixture.detectChanges();
+        expect(preventDefaultSpy).toHaveBeenCalled();
+        expect(emitSpy.mock.calls[0][0].index).toBe(1);
     });
 
     it("should navigate with Home", () => {
@@ -96,7 +150,9 @@ describe("TabListComponent", () => {
 
         // Mock document.getElementById
         const focusSpy = vi.fn();
-        const getElementByIdSpy = vi.spyOn(document, "getElementById").mockReturnValue({ focus: focusSpy } as any);
+        const getElementByIdSpy = vi
+            .spyOn(document, "getElementById")
+            .mockReturnValue({ focus: focusSpy } as unknown as HTMLElement);
 
         try {
             debugElement.triggerEventHandler("keydown", {
@@ -419,5 +475,30 @@ describe("TabListComponent", () => {
         fixture.detectChanges();
         await flushAsync();
         expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "auto", block: "nearest", inline: "nearest" });
+    });
+
+    describe("i18n", () => {
+        it("renders default close tab aria-label", () => {
+            const closeButton = fixture.debugElement.query(By.css("button[monaButton].ms-1"));
+            expect(closeButton.nativeElement.getAttribute("aria-label")).toBe("Close tab");
+        });
+
+        it("updates close tab aria-label dynamically when locale changes", () => {
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use({
+                direction: "ltr",
+                id: "es-ES",
+                messages: {
+                    tabs: {
+                        closeTab: "Cerrar pestaña",
+                        scrollNext: "Desplazar pestañas siguiente",
+                        scrollPrevious: "Desplazar pestañas anterior"
+                    }
+                }
+            });
+            fixture.detectChanges();
+            const closeButton = fixture.debugElement.query(By.css("button[monaButton].ms-1"));
+            expect(closeButton.nativeElement.getAttribute("aria-label")).toBe("Cerrar pestaña");
+        });
     });
 });

@@ -599,7 +599,7 @@
                 @if (noDataTemplate(); as template) {
                     <ng-container [ngTemplateOutlet]="template.templateRef" />
                 } @else {
-                    <span>No data available</span>
+                    <span>{{ messages().noData }}</span>
                 }
             </div>
         }

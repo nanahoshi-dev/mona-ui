@@ -18,6 +18,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { LucideX } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
+import { mergeMessages, type MonaSheetMessages, MonaI18nService, type SheetMessages } from "@nanahoshi/mona-ui/i18n";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import {
     PopupCloseEvent,
@@ -32,6 +33,7 @@ import {
 } from "@nanahoshi/mona-ui/popup";
 import { take } from "rxjs";
 import { twMerge } from "tailwind-merge";
+import { SHEET_DEFAULT_MESSAGES } from "../../i18n/sheet.default-messages";
 import { SheetSide } from "../../models/SheetSide";
 import {
     sheetBaseVariants,
@@ -54,7 +56,9 @@ import {
 export class SheetComponent implements SheetVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #document = inject(DOCUMENT);
+    readonly #i18n = inject(MonaI18nService);
     readonly #injector = inject(Injector);
+    readonly #localeMessages = this.#i18n.componentMessages("sheet", SHEET_DEFAULT_MESSAGES);
     readonly #popupService = inject(PopupService);
     #destroyed = false;
     #horizontal = false;
@@ -70,6 +74,9 @@ export class SheetComponent implements SheetVariantInput {
     protected readonly descriptionClass = computed(() => sheetDescriptionVariants());
     protected readonly descriptionId = createElementControlId();
     protected readonly headerClass = computed(() => sheetHeaderVariants());
+    protected readonly resolvedMessages = computed<MonaSheetMessages>(() => {
+        return mergeMessages(this.#localeMessages(), this.messages());
+    });
     protected readonly titleClass = computed(() => sheetTitleVariants());
     protected readonly titleId = createElementControlId();
 
@@ -80,6 +87,7 @@ export class SheetComponent implements SheetVariantInput {
     public readonly closable = input(true);
 
     /** @description Emitted before the sheet closes. Call preventDefault() to keep it open. */
+    // eslint-disable-next-line @angular-eslint/no-output-native
     public readonly close = output<PopupCloseEvent>();
 
     /** @description Whether clicking the backdrop requests that the sheet close. @default true */
@@ -96,6 +104,9 @@ export class SheetComponent implements SheetVariantInput {
 
     /** @description Explicit sheet height. Numbers are interpreted as pixels. */
     public readonly height = input<number | string>();
+
+    /** @description Internationalization message overrides for accessible labels. */
+    public readonly messages = input<Partial<SheetMessages>>();
 
     /** @description Edge of the viewport from which the sheet opens. @default "right" */
     public readonly side = input<SheetSide>("right");

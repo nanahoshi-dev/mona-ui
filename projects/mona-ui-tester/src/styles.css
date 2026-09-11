@@ -6,8 +6,8 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-@source "./projects/mona-ui/";
-@source "./projects/mona-ui-tester/";
+@source "../../mona-ui/**/*.{html,ts}";
+@source "../src/**/*.{html,ts}";
 
 @theme {
     /* Canvas and surfaces */

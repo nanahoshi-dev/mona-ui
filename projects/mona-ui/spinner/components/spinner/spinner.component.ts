@@ -1,9 +1,11 @@
-import { Component, computed, input } from "@angular/core";
+import { Component, computed, inject, input } from "@angular/core";
 import { LucideDynamicIcon, LucideLoader } from "@lucide/angular";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { twMerge } from "tailwind-merge";
 import type { SpinnerAppearance } from "../../models/SpinnerAppearance";
 import type { SpinnerSize } from "../../models/SpinnerSize";
+import { SPINNER_DEFAULT_MESSAGES } from "../../i18n/spinner.default-messages";
 import { spinnerThemeVariants, type SpinnerVariantInput } from "../../styles/spinner.styles";
 
 /**
@@ -18,17 +20,19 @@ import { spinnerThemeVariants, type SpinnerVariantInput } from "../../styles/spi
     imports: [LucideDynamicIcon],
     host: {
         "[attr.aria-hidden]": "decorative() ? 'true' : null",
-        "[attr.aria-label]": "decorative() ? null : (ariaLabel() || 'Loading')",
+        "[attr.aria-label]": "decorative() ? null : (ariaLabel() || messages().loading)",
         "[attr.role]": "decorative() ? null : 'status'",
         "[class]": "baseClass()"
     }
 })
 export class SpinnerComponent implements SpinnerVariantInput {
+    readonly #i18n = inject(MonaI18nService);
     protected readonly baseClass = computed(() => {
         const variantClass = spinnerThemeVariants({ size: this.size() });
         return twMerge(variantClass, this.userClass());
     });
     protected readonly loaderIcon = LucideLoader;
+    protected readonly messages = this.#i18n.componentMessages("spinner", SPINNER_DEFAULT_MESSAGES);
     protected readonly pixelSize = computed(() => {
         switch (this.size()) {
             case "small":
@@ -49,9 +53,11 @@ export class SpinnerComponent implements SpinnerVariantInput {
 
     /**
      * @description Accessible text announced by assistive technology when the spinner is not decorative.
-     * @default "Loading"
+     * When not set, falls back to the localized loading text.
+     * @default undefined
      */
-    public readonly ariaLabel = input<string>("Loading", { alias: "aria-label" });
+    public readonly ariaLabel = input<string | undefined>(undefined, { alias: "aria-label" });
+
 
     /**
      * @description When `true`, removes the `status` role and hides the spinner from assistive technology with `aria-hidden="true"`.

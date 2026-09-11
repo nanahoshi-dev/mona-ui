@@ -2414,7 +2414,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
-        "defaultValue": "\"Breadcrumb\""
+        "defaultValue": "\"\""
       },
       {
         "description": "Renders the entire breadcrumb with reduced visual emphasis and removes pointer interaction from all items.",
@@ -2466,8 +2466,7 @@
         "description": "Accessible name for the host element. Override when multiple button groups appear on the same page\nso screen reader users can distinguish them.",
         "kind": "input",
         "name": "ariaLabel",
-        "type": "string",
-        "defaultValue": "\"Button group\""
+        "type": "string | undefined"
       },
       {
         "description": "Renders all child buttons with reduced visual emphasis and removes pointer interaction.",
@@ -7633,6 +7632,13 @@
     "selector": "\"mona-color-palette\"",
     "inputs": [
       {
+        "description": "Accessible label for the color palette grid.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "The number of columns in the color palette grid.\nOnly applicable when using a custom palette.",
         "kind": "input",
         "name": "columns",
@@ -7668,18 +7674,18 @@
         "defaultValue": "false"
       },
       {
-        "description": "Border-radius preset applied to the color palette items.",
-        "kind": "input",
-        "name": "rounded",
-        "type": "ColorPaletteVariantProps[\"rounded\"]",
-        "defaultValue": "\"none\""
-      },
-      {
         "description": "Sets whether the color palette is required. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "required",
         "type": "boolean",
         "defaultValue": "false"
+      },
+      {
+        "description": "Border-radius preset applied to the color palette items.",
+        "kind": "input",
+        "name": "rounded",
+        "type": "ColorPaletteVariantProps[\"rounded\"]",
+        "defaultValue": "\"none\""
       },
       {
         "description": "The size of each tile in the color palette grid.",
@@ -7714,6 +7720,13 @@
     "name": "ColorPickerComponent",
     "selector": "\"mona-color-picker\"",
     "inputs": [
+      {
+        "description": "Accessible label for the color picker combobox.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
       {
         "description": "Whether to close the color picker when a color is selected.\r\nOnly applies when the view is set to \"palette\".",
         "kind": "input",
@@ -7764,6 +7777,13 @@
         "defaultValue": "false"
       },
       {
+        "description": "Sets whether the color picker is required. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "required",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
         "description": "Border-radius preset applied to the color picker.",
         "kind": "input",
         "name": "rounded",
@@ -7785,20 +7805,6 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "The view mode of the color picker.\r\nThis can be either \"palette\" or \"gradient\".",
-        "kind": "input",
-        "name": "view",
-        "type": "ColorPickerView",
-        "defaultValue": "\"gradient\""
-      },
-      {
-        "description": "Sets whether the color picker is required. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
-        "kind": "input",
-        "name": "required",
-        "type": "boolean",
-        "defaultValue": "false"
-      },
-      {
         "description": "Emitted when the color picker is interacted with on blur or color selection.\r\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
@@ -7817,6 +7823,13 @@
         "name": "value",
         "type": "string | null",
         "defaultValue": "null"
+      },
+      {
+        "description": "The view mode of the color picker.\r\nThis can be either \"palette\" or \"gradient\".",
+        "kind": "input",
+        "name": "view",
+        "type": "ColorPickerView",
+        "defaultValue": "\"gradient\""
       }
     ]
   },
@@ -8652,17 +8665,17 @@
         "type": "PopupCloseEvent"
       },
       {
-        "description": "Emits when the dialog is closed.",
-        "kind": "output",
-        "name": "closed",
-        "type": "void"
-      },
-      {
         "description": "Sets whether the dialog should close when the escape key is pressed.",
         "kind": "input",
         "name": "closeOnEscape",
         "type": "boolean",
         "defaultValue": "true"
+      },
+      {
+        "description": "Emits when the dialog is closed.",
+        "kind": "output",
+        "name": "closed",
+        "type": "void"
       },
       {
         "description": "Sets the description of the dialog.",
@@ -8699,6 +8712,12 @@
         "kind": "input",
         "name": "maxWidth",
         "type": "number"
+      },
+      {
+        "description": "Sets the custom messages for the dialog.",
+        "kind": "input",
+        "name": "messages",
+        "type": "Partial<DialogMessages>"
       },
       {
         "description": "Sets the minimum height of the dialog.",
@@ -10118,6 +10137,13 @@
         "defaultValue": "100%"
       },
       {
+        "description": "Collection of items to render.",
+        "kind": "input",
+        "name": "items",
+        "type": "Iterable<T>",
+        "defaultValue": "[]"
+      },
+      {
         "description": "Sets the classes of the inner UL element.",
         "kind": "input",
         "name": "listClass",
@@ -10144,13 +10170,6 @@
         "name": "listStyle",
         "type": "Partial<CSSStyleDeclaration>",
         "defaultValue": "{}"
-      },
-      {
-        "description": "Collection of items to render.",
-        "kind": "input",
-        "name": "items",
-        "type": "Iterable<T>",
-        "defaultValue": "[]"
       },
       {
         "description": "Sets the maximum height of the list.",
@@ -10398,17 +10417,17 @@
         "type": "MenuItemClickEvent"
       },
       {
-        "description": "Sets the size of the menubar.",
-        "kind": "input",
-        "name": "size",
-        "type": "MenubarVariantProps[\"size\"]",
-        "defaultValue": "\"medium\""
-      },
-      {
         "description": "Sets the rounded style of the menubar.",
         "kind": "input",
         "name": "rounded",
         "type": "MenubarVariantProps[\"rounded\"]",
+        "defaultValue": "\"medium\""
+      },
+      {
+        "description": "Sets the size of the menubar.",
+        "kind": "input",
+        "name": "size",
+        "type": "MenubarVariantProps[\"size\"]",
         "defaultValue": "\"medium\""
       },
       {
@@ -10641,7 +10660,7 @@
         "defaultValue": "null"
       },
       {
-        "description": "Number of decimals to show.",
+        "description": "Number of fractional decimal places to display and accept. Values are truncated to an integer\nand clamped to the range 0–20. Non-finite and negative values normalize to 0.",
         "kind": "input",
         "name": "decimals",
         "type": "number",
@@ -10680,6 +10699,13 @@
         "type": "FocusEvent"
       },
       {
+        "description": "Marks the numeric text box as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "invalid",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
         "description": "Maximum value that can be entered.",
         "kind": "input",
         "name": "maxValue",
@@ -10711,13 +10737,6 @@
         "description": "Sets whether the input is required.",
         "kind": "input",
         "name": "required",
-        "type": "boolean",
-        "defaultValue": "false"
-      },
-      {
-        "description": "Marks the numeric text box as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
-        "kind": "input",
-        "name": "invalid",
         "type": "boolean",
         "defaultValue": "false"
       },
@@ -10793,8 +10812,8 @@
         "description": "Accessible name for the inner `<input>` element.",
         "kind": "input",
         "name": "ariaLabel",
-        "type": "string",
-        "defaultValue": "\"Verification code\""
+        "type": "string | null",
+        "defaultValue": "null"
       },
       {
         "description": "Regular expression used to determine whether each individual OTP character is allowed.",
@@ -11637,6 +11656,13 @@
     "selector": "\"mona-progress-bar\"",
     "inputs": [
       {
+        "description": "Enables CSS transitions on fill and color changes.\nSet to `false` when updating `value` at high frequency (e.g., a real-time byte counter).",
+        "kind": "input",
+        "name": "animate",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
         "description": "Accessible label for the progress bar host element.\nUse to describe what is being measured (e.g., \"Upload progress\").\nWhen empty, assistive technology announces the role and numeric values only.",
         "kind": "input",
         "name": "ariaLabel",
@@ -11649,13 +11675,6 @@
         "name": "ariaValueText",
         "type": "string",
         "defaultValue": "\"\""
-      },
-      {
-        "description": "Enables CSS transitions on fill and color changes.\nSet to `false` when updating `value` at high frequency (e.g., a real-time byte counter).",
-        "kind": "input",
-        "name": "animate",
-        "type": "boolean",
-        "defaultValue": "true"
       },
       {
         "description": "Fill color of the progress track.\nPass a CSS color string, or a function that receives the current percentage (0–100) and returns a color string.\nWhen empty, falls back to the primary theme color.",
@@ -12237,6 +12256,12 @@
         "type": "number | string"
       },
       {
+        "description": "Internationalization message overrides for accessible labels.",
+        "kind": "input",
+        "name": "messages",
+        "type": "Partial<SheetMessages>"
+      },
+      {
         "description": "Edge of the viewport from which the sheet opens.",
         "kind": "input",
         "name": "side",
@@ -12436,14 +12461,14 @@
         "kind": "input",
         "name": "ariaLabelEnd",
         "type": "string | null",
-        "defaultValue": "\"Maximum value\""
+        "defaultValue": "null"
       },
       {
         "description": "Accessible name for the lower-value (primary) handle.",
         "kind": "input",
         "name": "ariaLabelStart",
         "type": "string | null",
-        "defaultValue": "\"Minimum value\""
+        "defaultValue": "null"
       },
       {
         "description": "Selected range as `[minimum, maximum]`.\r\nValues outside `[minValue, maxValue]` are clamped; the tuple is always sorted, so index 0 ≤ index 1.",
@@ -12609,7 +12634,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
-        "defaultValue": "\"Slider value\""
+        "defaultValue": "null"
       },
       {
         "description": "ID of an external element that provides the accessible name for the host element.",
@@ -12937,11 +12962,11 @@
         "defaultValue": "\"default\""
       },
       {
-        "description": "Accessible text announced by assistive technology when the spinner is not decorative.",
+        "description": "Accessible text announced by assistive technology when the spinner is not decorative.\nWhen not set, falls back to the localized loading text.",
         "kind": "input",
         "name": "ariaLabel",
-        "type": "string",
-        "defaultValue": "\"Loading\""
+        "type": "string | undefined",
+        "defaultValue": "undefined"
       },
       {
         "description": "When `true`, removes the `status` role and hides the spinner from assistive technology with `aria-hidden=\"true\"`.\nUseful when a parent element already manages loading semantics (such as `aria-busy=\"true\"` on a button).",
@@ -12984,18 +13009,18 @@
         "type": "void"
       },
       {
+        "description": "Label text displayed inside the cancellation button.\nWhen not set, falls back to the localized cancel text.",
+        "kind": "input",
+        "name": "cancelText",
+        "type": "string | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Whether the cancellation button is displayed in the overlay.",
         "kind": "input",
         "name": "cancellable",
         "type": "boolean",
         "defaultValue": "false"
-      },
-      {
-        "description": "Label text displayed inside the cancellation button.",
-        "kind": "input",
-        "name": "cancelText",
-        "type": "string",
-        "defaultValue": "\"Cancel\""
       },
       {
         "description": "Whether the overlay is fixed across the viewport or absolute within a target container.",
@@ -13066,11 +13091,11 @@
         "defaultValue": "\"default\""
       },
       {
-        "description": "Accessible name for the menu toggle button.\nOverride to provide a localized label for non-English applications.",
+        "description": "Accessible name for the menu toggle button.\nIf not provided, falls back to the localized default message.",
         "kind": "input",
         "name": "menuButtonAriaLabel",
         "type": "string",
-        "defaultValue": "\"Show menu options\""
+        "defaultValue": "\"\""
       },
       {
         "description": "Emitted when a menu item in the popup is clicked.",
@@ -13263,16 +13288,16 @@
     "selector": "\"mona-splitter-pane\"",
     "inputs": [
       {
-        "description": "Whether the pane is collapsible.",
-        "kind": "input",
-        "name": "collapsible",
+        "description": "Whether the pane is collapsed.",
+        "kind": "model",
+        "name": "collapsed",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Whether the pane is collapsed.",
-        "kind": "model",
-        "name": "collapsed",
+        "description": "Whether the pane is collapsible.",
+        "kind": "input",
+        "name": "collapsible",
         "type": "boolean",
         "defaultValue": "false"
       },
@@ -13310,6 +13335,13 @@
     "name": "SplitterResizerComponent",
     "selector": "\"mona-splitter-resizer\"",
     "inputs": [
+      {
+        "description": "Accessible label for the separator element.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
       {
         "description": "",
         "kind": "input",
@@ -13388,7 +13420,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
-        "defaultValue": "\"Progress\""
+        "defaultValue": "\"\""
       },
       {
         "description": "Sets the flow of the stepper.\nIf set to true, the user will only be able to navigate to the previous or the next step.",
@@ -13409,7 +13441,7 @@
         "kind": "input",
         "name": "progressAriaLabel",
         "type": "string",
-        "defaultValue": "\"Step progress\""
+        "defaultValue": "\"\""
       },
       {
         "description": "Sets the roundness of the stepper steps.",
@@ -13718,17 +13750,17 @@
         "type": "FocusEvent"
       },
       {
-        "description": "Emitted when the inner input gains focus.",
-        "kind": "output",
-        "name": "inputFocus",
-        "type": "FocusEvent"
-      },
-      {
         "description": "Additional CSS classes applied to the inner `<input>` element.",
         "kind": "input",
         "name": "inputClass",
         "type": "string | string[]",
         "defaultValue": "\"\""
+      },
+      {
+        "description": "Emitted when the inner input gains focus.",
+        "kind": "output",
+        "name": "inputFocus",
+        "type": "FocusEvent"
       },
       {
         "description": "Inline styles applied to the inner `<input>` element.\nAccepts a style string or a `CSSStyleDeclaration` partial.",
@@ -14017,11 +14049,11 @@
     "selector": "\"mona-time-selector\"",
     "inputs": [
       {
-        "description": "",
+        "description": "Accessible label for the time selector group.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
-        "defaultValue": "\"Time selector\""
+        "defaultValue": "\"\""
       },
       {
         "description": "",
@@ -14227,6 +14259,12 @@
         "defaultValue": "\"\""
       },
       {
+        "description": "Emitted when the tree-view loses focus.",
+        "kind": "output",
+        "name": "blur",
+        "type": "FocusEvent"
+      },
+      {
         "description": "Property name or accessor used to derive a node's children from a data item. Accepts a property name, a function returning the children, or a function returning an observable of the children.",
         "kind": "input",
         "name": "children",
@@ -14239,6 +14277,12 @@
         "name": "data",
         "type": "Iterable<T>",
         "defaultValue": "[]"
+      },
+      {
+        "description": "Emitted when the tree-view gains focus.",
+        "kind": "output",
+        "name": "focus",
+        "type": "FocusEvent"
       },
       {
         "description": "Predicate that determines whether a node has children. Required when the children selector returns an observable.",
@@ -14260,18 +14304,6 @@
         "name": "mode",
         "type": "DataStructure",
         "defaultValue": "\"hierarchical\""
-      },
-      {
-        "description": "Emitted when the tree-view loses focus.",
-        "kind": "output",
-        "name": "blur",
-        "type": "FocusEvent"
-      },
-      {
-        "description": "Emitted when the tree-view gains focus.",
-        "kind": "output",
-        "name": "focus",
-        "type": "FocusEvent"
       },
       {
         "description": "Emitted when a node is clicked.",
@@ -14307,16 +14339,10 @@
         "defaultValue": "true"
       },
       {
-        "description": "Emits when the window is about to be closed.",
+        "description": "",
         "kind": "output",
         "name": "close",
         "type": "PopupCloseEvent"
-      },
-      {
-        "description": "Emitted after the window has fully closed (post-animation). Preventing this event has no effect.",
-        "kind": "output",
-        "name": "closed",
-        "type": "void"
       },
       {
         "description": "Sets whether the window should close when the escape key is pressed.",
@@ -14324,6 +14350,12 @@
         "name": "closeOnEscape",
         "type": "boolean",
         "defaultValue": "true"
+      },
+      {
+        "description": "Emitted after the window has fully closed (post-animation). Preventing this event has no effect.",
+        "kind": "output",
+        "name": "closed",
+        "type": "void"
       },
       {
         "description": "Emits when the window dragging ends.",
@@ -14387,6 +14419,12 @@
         "name": "maximizable",
         "type": "boolean",
         "defaultValue": "true"
+      },
+      {
+        "description": "Internationalization message overrides for accessible labels.",
+        "kind": "input",
+        "name": "messages",
+        "type": "Partial<WindowMessages>"
       },
       {
         "description": "Sets the minimum height of the window.",

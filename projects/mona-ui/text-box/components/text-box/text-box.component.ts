@@ -16,11 +16,12 @@ import { FormsModule } from "@angular/forms";
 import { type FormValueControl } from "@angular/forms/signals";
 import { LucideX } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
-import { rxTimeout } from "@nanahoshi/mona-ui/internal";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { AttributeBinderDirective, AttributeConfig, rxTimeout } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
-import { AttributeBinderDirective, AttributeConfig } from "@nanahoshi/mona-ui/internal";
 import { TextBoxPrefixTemplateDirective } from "../../directives/text-box-prefix-template.directive";
 import { TextBoxSuffixTemplateDirective } from "../../directives/text-box-suffix-template.directive";
+import { TEXT_BOX_DEFAULT_MESSAGES } from "../../i18n/text-box.default-messages";
 import { InputType } from "../../models/InputType";
 import { textBoxThemeVariants, TextBoxVariantInput, TextBoxVariantProps } from "../../styles/textbox.styles";
 
@@ -38,6 +39,7 @@ import { textBoxThemeVariants, TextBoxVariantInput, TextBoxVariantProps } from "
 })
 export class TextBoxComponent implements TextBoxVariantInput, FormValueControl<string> {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #i18n = inject(MonaI18nService);
     protected readonly classes = computed(() => {
         const rounded = this.rounded();
         const size = this.size();
@@ -49,6 +51,7 @@ export class TextBoxComponent implements TextBoxVariantInput, FormValueControl<s
     protected readonly invalidInput = computed(
         () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
+    protected readonly messages = this.#i18n.componentMessages("textBox", TEXT_BOX_DEFAULT_MESSAGES);
     protected readonly prefixTemplateList = contentChildren(TextBoxPrefixTemplateDirective, { read: TemplateRef });
     protected readonly suffixTemplateList = contentChildren(TextBoxSuffixTemplateDirective, { read: TemplateRef });
 
@@ -76,15 +79,15 @@ export class TextBoxComponent implements TextBoxVariantInput, FormValueControl<s
     public readonly inputBlur = output<FocusEvent>();
 
     /**
-     * @description Emitted when the inner input gains focus.
-     */
-    public readonly inputFocus = output<FocusEvent>();
-
-    /**
      * @description Additional CSS classes applied to the inner `<input>` element.
      * @default ""
      */
     public readonly inputClass = input<string | string[]>("");
+
+    /**
+     * @description Emitted when the inner input gains focus.
+     */
+    public readonly inputFocus = output<FocusEvent>();
 
     /**
      * @description Inline styles applied to the inner `<input>` element.

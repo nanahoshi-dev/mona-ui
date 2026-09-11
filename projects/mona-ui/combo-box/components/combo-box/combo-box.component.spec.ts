@@ -8,6 +8,7 @@ import {
     required
 } from "@angular/forms/signals";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 
 import { ComboBoxComponent } from "./combo-box.component";
 
@@ -402,6 +403,32 @@ describe("ComboBoxComponent", () => {
         expect(getHost(fixture).getAttribute("tabindex")).toBe("-1");
         expect(getInput(fixture).getAttribute("role")).toBe("combobox");
         expect(getHost(fixture).querySelectorAll("[role='combobox']").length).toBe(1);
+    });
+
+    describe("i18n", () => {
+        it("renders default English clear label on indicator icon", async () => {
+            const fixture = await createObjectModeFixture();
+            const clearBtn = getClearButton(fixture);
+            expect(clearBtn.getAttribute("aria-label")).toBe("Clear");
+        });
+
+        it("updates clear label dynamically when locale changes", async () => {
+            const fixture = await createObjectModeFixture();
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use({
+                direction: "ltr",
+                id: "tr-TR",
+                messages: {
+                    comboBox: {
+                        clear: "Temizle"
+                    }
+                }
+            });
+            await waitForStable(fixture);
+
+            const clearBtn = getClearButton(fixture);
+            expect(clearBtn.getAttribute("aria-label")).toBe("Temizle");
+        });
     });
 });
 

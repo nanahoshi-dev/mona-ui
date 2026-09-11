@@ -1,6 +1,8 @@
 import { Component, computed, inject, input, output } from "@angular/core";
 import { LucideChevronDown, LucideChevronLeft, LucideChevronRight, LucideChevronUp } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { SPLITTER_DEFAULT_MESSAGES } from "../../i18n/splitter.default-messages";
 import { splitterResizerHandleThemeVariants, SplitterVariantProps } from "../../styles/splitter.styles";
 
 @Component({
@@ -12,10 +14,12 @@ import { splitterResizerHandleThemeVariants, SplitterVariantProps } from "../../
     }
 })
 export class SplitterResizerHandleComponent {
+    readonly #i18n = inject(MonaI18nService);
     protected readonly baseClass = computed(() => {
         const orientation = this.orientation();
         return splitterResizerHandleThemeVariants({ orientation });
     });
+    protected readonly messages = this.#i18n.componentMessages("splitter", SPLITTER_DEFAULT_MESSAGES);
 
     public readonly collapseNext = output<MouseEvent>();
     public readonly collapsePrevious = output<MouseEvent>();

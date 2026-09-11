@@ -257,6 +257,47 @@ describe("PopupService", () => {
         expect(withPositionsSpy).toHaveBeenCalledWith(customPositions);
     });
 
+    it("updates overlay direction and position when anchor direction changes dynamically while open", async () => {
+        const anchor = createAnchor();
+        anchor.setAttribute("dir", "ltr");
+
+        popupRef = service.create({
+            anchor,
+            animation: false,
+            content: PopupTestContentComponent
+        });
+
+        expect(popupRef.overlayRef.getDirection()).toBe("ltr");
+        const updatePositionSpy = vi.spyOn(popupRef.overlayRef, "updatePosition");
+
+        anchor.setAttribute("dir", "rtl");
+        await new Promise(resolve => setTimeout(resolve, 20));
+
+        expect(popupRef.overlayRef.getDirection()).toBe("rtl");
+        expect(updatePositionSpy).toHaveBeenCalled();
+    });
+
+    it("updates overlay direction when ancestor documentElement dir changes while open", async () => {
+        const anchor = createAnchor();
+
+        popupRef = service.create({
+            anchor,
+            animation: false,
+            content: PopupTestContentComponent
+        });
+
+        const initialDir = popupRef.overlayRef.getDirection();
+        expect(initialDir).toBe("ltr");
+
+        document.documentElement.setAttribute("dir", "rtl");
+        await new Promise(resolve => setTimeout(resolve, 20));
+
+        expect(popupRef.overlayRef.getDirection()).toBe("rtl");
+
+        document.documentElement.removeAttribute("dir");
+        await new Promise(resolve => setTimeout(resolve, 20));
+    });
+
     function createAnchor(): HTMLElement {
         const anchor = document.createElement("button");
         anchor.textContent = "Open popup";

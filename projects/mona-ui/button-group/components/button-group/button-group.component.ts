@@ -13,9 +13,11 @@ import {
 import { outputFromObservable, takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { ButtonDirective, ButtonService } from "@nanahoshi/mona-ui/button";
 import { SelectionMode } from "@nanahoshi/mona-ui/common";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 
 import { map, pairwise } from "rxjs";
 import { twMerge } from "tailwind-merge";
+import { BUTTON_GROUP_DEFAULT_MESSAGES } from "../../i18n/button-group.default-messages";
 import {
     buttonGroupThemeVariants,
     ButtonGroupVariantProps,
@@ -27,7 +29,7 @@ import {
     templateUrl: "./button-group.component.html",
     providers: [ButtonService],
     host: {
-        "[attr.aria-label]": "ariaLabel()",
+        "[attr.aria-label]": "effectiveAriaLabel()",
         "[class]": "baseClass()",
         role: "group"
     }
@@ -35,6 +37,7 @@ import {
 export class ButtonGroupComponent implements ButtonGroupVariantsInput {
     readonly #buttonService = inject(ButtonService, { self: true });
     readonly #destroyRef = inject(DestroyRef);
+    readonly #i18n = inject(MonaI18nService);
     protected readonly baseClass = computed(() => {
         const look = this.look();
         const rounded = this.rounded();
@@ -44,6 +47,8 @@ export class ButtonGroupComponent implements ButtonGroupVariantsInput {
         return twMerge(variantClasses, userClass);
     });
     protected readonly buttons = contentChildren(ButtonDirective);
+    protected readonly messages = this.#i18n.componentMessages("buttonGroup", BUTTON_GROUP_DEFAULT_MESSAGES);
+    protected readonly effectiveAriaLabel = computed(() => this.ariaLabel() ?? this.messages().buttonGroup);
 
     /**
      * @description When `false` and `selection` is `"single"`, at least one button must remain selected;
@@ -55,9 +60,8 @@ export class ButtonGroupComponent implements ButtonGroupVariantsInput {
     /**
      * @description Accessible name for the host element. Override when multiple button groups appear on the same page
      * so screen reader users can distinguish them.
-     * @default "Button group"
      */
-    public readonly ariaLabel = input("Button group", { alias: "aria-label" });
+    public readonly ariaLabel = input<string | undefined>(undefined, { alias: "aria-label" });
 
     /**
      * @description Emitted when any child button in the group is clicked.

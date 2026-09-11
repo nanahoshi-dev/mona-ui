@@ -1,6 +1,7 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { disabled, form, FormField, readonly } from "@angular/forms/signals";
+import { MONA_DEFAULT_LOCALE, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { TimeSelectorComponent } from "./time-selector.component";
 
 describe("TimeSelectorComponent", () => {
@@ -64,6 +65,102 @@ describe("TimeSelectorComponent", () => {
         expect(getHost().getAttribute("aria-readonly")).toBe("true");
     });
 
+    it("renders default english accessible labels and messages", () => {
+        const host = getHost();
+        expect(host.getAttribute("aria-label")).toBe("Time selector");
+
+        const headerDivs = host.querySelectorAll(".flex.text-xs > div");
+        expect(headerDivs[0]?.textContent?.trim()).toBe("Hr");
+        expect(headerDivs[1]?.textContent?.trim()).toBe("Min");
+
+        const nowBtn = host.querySelector("button[monaButton]") as HTMLButtonElement;
+        expect(nowBtn?.textContent?.trim()).toBe("Now");
+
+        expect(host.querySelector("ol[aria-label='Hours']")).not.toBeNull();
+        expect(host.querySelector("ol[aria-label='Minutes']")).not.toBeNull();
+
+        fixture.componentInstance.footer.set(true);
+        fixture.detectChanges();
+        const setBtn = host.querySelectorAll("button[monaButton]")[1] as HTMLButtonElement;
+        expect(setBtn?.textContent?.trim()).toBe("Set");
+    });
+
+    it("updates messages dynamically when locale changes", () => {
+        const i18n = TestBed.inject(MonaI18nService);
+        i18n.use({
+            ...MONA_DEFAULT_LOCALE,
+            messages: {
+                timeSelector: {
+                    am: "ÖÖ",
+                    amPm: "ÖÖ/ÖS",
+                    headerHours: "Sa",
+                    headerMinutes: "Dk",
+                    headerSeconds: "Sn",
+                    hours: "Saatler",
+                    minutes: "Dakikalar",
+                    now: "Şimdi",
+                    pm: "ÖS",
+                    seconds: "Saniyeler",
+                    set: "Ayarla",
+                    timeSelector: "Zaman seçici"
+                }
+            }
+        });
+        fixture.componentInstance.footer.set(true);
+        fixture.detectChanges();
+
+        const host = getHost();
+        expect(host.getAttribute("aria-label")).toBe("Zaman seçici");
+
+        const headerDivs = host.querySelectorAll(".flex.text-xs > div");
+        expect(headerDivs[0]?.textContent?.trim()).toBe("Sa");
+        expect(headerDivs[1]?.textContent?.trim()).toBe("Dk");
+
+        const buttons = host.querySelectorAll("button[monaButton]");
+        expect(buttons[0]?.textContent?.trim()).toBe("Şimdi");
+        expect(buttons[1]?.textContent?.trim()).toBe("Ayarla");
+
+        expect(host.querySelector("ol[aria-label='Saatler']")).not.toBeNull();
+        expect(host.querySelector("ol[aria-label='Dakikalar']")).not.toBeNull();
+
+        i18n.use(MONA_DEFAULT_LOCALE);
+    });
+
+    it("respects consumer ariaLabel input", () => {
+        fixture.componentInstance.ariaLabel.set("Meeting start time");
+        fixture.detectChanges();
+
+        expect(getHost().getAttribute("aria-label")).toBe("Meeting start time");
+    });
+
+    it("inverts horizontal arrow navigation in RTL mode", () => {
+        const i18n = TestBed.inject(MonaI18nService);
+        const host = getHost();
+        const hourList = host.querySelector("ol[aria-label='Hours']") as HTMLElement;
+
+        hourList.focus();
+        host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+        fixture.detectChanges();
+        const minuteList = host.querySelector("ol[aria-label='Minutes']") as HTMLElement;
+        expect(document.activeElement).toBe(minuteList);
+
+        i18n.use({
+            ...MONA_DEFAULT_LOCALE,
+            direction: "rtl"
+        });
+        fixture.detectChanges();
+
+        host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+        fixture.detectChanges();
+        expect(document.activeElement).toBe(hourList);
+
+        host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true }));
+        fixture.detectChanges();
+        expect(document.activeElement).toBe(minuteList);
+
+        i18n.use(MONA_DEFAULT_LOCALE);
+    });
+
     function getHost(): HTMLElement {
         const host = fixture.nativeElement.querySelector("mona-time-selector");
         if (!(host instanceof HTMLElement)) {
@@ -89,22 +186,29 @@ describe("TimeSelectorComponent", () => {
     }
 });
 
+interface TimeSelectorFormModel {
+    time: Date | null;
+}
+
 @Component({
     imports: [TimeSelectorComponent, FormField],
     template: `
-        <mona-time-selector [formField]="form.time" [focusOnMount]="false" [footer]="false"></mona-time-selector>
+        <mona-time-selector
+            [formField]="form.time"
+            [focusOnMount]="false"
+            [footer]="footer()"
+            [ariaLabel]="ariaLabel()"></mona-time-selector>
     `
 })
 class TimeSelectorHostComponent {
-    public readonly disabled = signal(false);
-    public readonly readonly = signal(false);
     readonly #model = signal<TimeSelectorFormModel>({ time: new Date(2026, 0, 2, 9, 30) });
+
+    public readonly ariaLabel = signal("");
+    public readonly disabled = signal(false);
+    public readonly footer = signal(false);
     public readonly form = form(this.#model, schema => {
         disabled(schema.time, { when: () => this.disabled() });
         readonly(schema.time, { when: () => this.readonly() });
     });
-}
-
-interface TimeSelectorFormModel {
-    time: Date | null;
+    public readonly readonly = signal(false);
 }

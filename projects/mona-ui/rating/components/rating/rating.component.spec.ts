@@ -4,6 +4,7 @@ import { disabled as fieldDisabled, form, FormField, min } from "@angular/forms/
 import { By } from "@angular/platform-browser";
 import axe from "axe-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { RatingHoveredItemTemplateDirective } from "../../directives/rating-hovered-item-template.directive";
 import { RatingItemTemplateDirective } from "../../directives/rating-item-template.directive";
 import { RatingSelectedItemTemplateDirective } from "../../directives/rating-selected-item-template.directive";
@@ -1390,6 +1391,103 @@ describe("RatingComponent", () => {
                 rules: { "color-contrast": { enabled: false } }
             });
             expect(results.violations).toEqual([]);
+        });
+    });
+
+    describe("i18n and RTL", () => {
+        it("renders default English aria-valuetext", async () => {
+            await TestBed.configureTestingModule({
+                imports: [HostComponent]
+            }).compileComponents();
+
+            const fixture = TestBed.createComponent(HostComponent);
+            await waitForStable(fixture);
+
+            const control = getControl(fixture);
+            expect(control.getAttribute("aria-valuetext")).toBe("Not rated");
+
+            fixture.componentInstance.value.set(3);
+            await waitForStable(fixture);
+            expect(control.getAttribute("aria-valuetext")).toBe("3 out of 5");
+        });
+
+        it("updates aria-valuetext dynamically when locale changes", async () => {
+            await TestBed.configureTestingModule({
+                imports: [HostComponent]
+            }).compileComponents();
+
+            const fixture = TestBed.createComponent(HostComponent);
+            const i18nService = TestBed.inject(MonaI18nService);
+            i18nService.use({
+                direction: "ltr",
+                id: "tr-TR",
+                messages: {
+                    rating: {
+                        notRated: "Değerlendirilmedi",
+                        valueText: (value, max) => `${max} üzerinden ${value}`
+                    }
+                }
+            });
+            await waitForStable(fixture);
+
+            const control = getControl(fixture);
+            expect(control.getAttribute("aria-valuetext")).toBe("Değerlendirilmedi");
+
+            fixture.componentInstance.value.set(4);
+            await waitForStable(fixture);
+            expect(control.getAttribute("aria-valuetext")).toBe("5 üzerinden 4");
+        });
+
+        it("inverts horizontal arrow key navigation when in RTL direction", async () => {
+            await TestBed.configureTestingModule({
+                imports: [HostComponent]
+            }).compileComponents();
+
+            const fixture = TestBed.createComponent(HostComponent);
+            const i18nService = TestBed.inject(MonaI18nService);
+            i18nService.use({
+                direction: "rtl",
+                id: "ar-EG",
+                messages: {
+                    rating: {
+                        notRated: "غير مقيم",
+                        valueText: (value, max) => `${value} من ${max}`
+                    }
+                }
+            });
+            fixture.componentInstance.value.set(2);
+            await waitForStable(fixture);
+
+            // Case 2: RTL locale + LTR DOM -> ArrowRight still increases value (normal LTR)
+            pressKey(fixture, "ArrowRight");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toBe(3);
+
+            pressKey(fixture, "ArrowLeft");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toBe(2);
+
+            // Case 4: RTL locale + RTL DOM -> inverts horizontal navigation
+            fixture.nativeElement.setAttribute("dir", "rtl");
+            await waitForStable(fixture);
+
+            // In RTL, ArrowRight decreases value, ArrowLeft increases value
+            pressKey(fixture, "ArrowRight");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toBe(1);
+
+            pressKey(fixture, "ArrowLeft");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toBe(2);
+
+            // Up and Down vertical keys remain unchanged
+            pressKey(fixture, "ArrowUp");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toBe(3);
+
+            pressKey(fixture, "ArrowDown");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toBe(2);
         });
     });
 });

@@ -4,7 +4,7 @@
     @if (text()) {
         <span class="max-w-xs truncate">{{ text() }}</span>
     } @else {
-        <span class="sr-only">Loading</span>
+        <span class="sr-only">{{ messages().loading }}</span>
     }
 
     @if (cancellable()) {
@@ -13,7 +13,7 @@
             (click)="onCancel()"
             class="mt-1 inline-flex items-center justify-center rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-foreground shadow-xs hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer transition-colors"
         >
-            {{ cancelText() }}
+            {{ effectiveCancelText() }}
         </button>
     }
 </div>

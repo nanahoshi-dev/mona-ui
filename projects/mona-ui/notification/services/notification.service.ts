@@ -16,7 +16,6 @@ import { NotificationData } from "../models/NotificationData";
 import { NotificationOptions } from "../models/NotificationOptions";
 import { NotificationPosition } from "../models/NotificationPosition";
 import { NotificationRef } from "../models/NotificationRef";
-import { getDefaultTitle } from "../utils/getDefaultTitle";
 
 @Injectable({
     providedIn: "root"
@@ -64,7 +63,7 @@ export class NotificationService {
             id: options.id ?? `Notification_${v4()}`,
             position,
             type,
-            title: options.title ?? getDefaultTitle(type),
+            title: options.title,
             closable: options.closable ?? (options.duration == null ? true : undefined)
         };
         const containerData: NotificationContainerData | undefined = this.notificationContainerMap.get(position);

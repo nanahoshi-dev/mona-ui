@@ -121,6 +121,12 @@ export class ListViewComponent<T = unknown> implements ListViewVariantInputs {
     public readonly height = input<string | number>("100%");
 
     /**
+     * @description Collection of items to render.
+     * @default []
+     */
+    public readonly items = input<Iterable<T>>([]);
+
+    /**
      * @description Sets the classes of the inner UL element.
      * @default ""
      */
@@ -143,12 +149,6 @@ export class ListViewComponent<T = unknown> implements ListViewVariantInputs {
      * @default {}
      */
     public readonly listStyle = input<Partial<CSSStyleDeclaration>>({});
-
-    /**
-     * @description Collection of items to render.
-     * @default []
-     */
-    public readonly items = input<Iterable<T>>([]);
 
     /**
      * @description Sets the maximum height of the list.

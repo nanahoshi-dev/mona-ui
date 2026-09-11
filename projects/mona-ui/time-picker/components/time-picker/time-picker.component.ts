@@ -29,6 +29,7 @@ import {
     dropdownPopupThemeVariants,
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { type AttributeConfig, createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { ListSizeInputType } from "@nanahoshi/mona-ui/internal/list";
 import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
@@ -37,6 +38,7 @@ import { TimeSelectorComponent } from "@nanahoshi/mona-ui/time-selector";
 import { DateTime } from "luxon";
 import { fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
+import { TIME_PICKER_DEFAULT_MESSAGES } from "../../i18n/time-picker.default-messages";
 import {
     timePickerBaseThemeVariants,
     TimePickerVariantInput,
@@ -71,6 +73,7 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
     readonly #destroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #i18n = inject(MonaI18nService);
     readonly #id = createElementControlId();
 
     protected readonly baseClass = computed(() => {
@@ -84,10 +87,11 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
     protected readonly currentDateString = linkedSignal(() => {
         const value = this.value();
         const format = this.format();
+        const locale = this.#i18n.localeId();
         if (!value) {
             return "";
         }
-        return DateTime.fromJSDate(value).toFormat(format);
+        return DateTime.fromJSDate(value).setLocale(locale).toFormat(format);
     });
     protected readonly expanded = computed(() => this.#dropdownService.popupRef() != null);
     protected readonly inputAttributes = computed<AttributeConfig>(() => {
@@ -108,6 +112,7 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
     protected readonly invalidState = computed(
         () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
+    protected readonly messages = this.#i18n.componentMessages("timePicker", TIME_PICKER_DEFAULT_MESSAGES);
     protected readonly navigatedDate = signal(new Date());
     protected readonly pickerPopupClass = computed(() => {
         const rounded = this.rounded();
@@ -122,6 +127,7 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
     /**
      * @description Emits when the popup is about to close. This event is preventable.
      */
+    // eslint-disable-next-line @angular-eslint/no-output-native
     public readonly close = output<PopupCloseEvent>();
 
     /**
@@ -291,6 +297,14 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
         });
     }
 
+    public focus(): void {
+        const input = this.#hostElementRef.nativeElement.querySelector("input");
+        if (input && !this.readonly()) {
+            input.focus();
+            input.setSelectionRange(input.value.length, input.value.length);
+        }
+    }
+
     protected onDateStringEdit(dateString: string): void {
         this.currentDateString.set(dateString);
     }
@@ -319,26 +333,20 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
 
     private dateStringEquals(date1: Date | null, date2: Date | null): boolean {
         if (date1 && date2) {
+            const locale = this.#i18n.localeId();
             return (
-                DateTime.fromJSDate(date1).toFormat(this.format()) ===
-                DateTime.fromJSDate(date2).toFormat(this.format())
+                DateTime.fromJSDate(date1).setLocale(locale).toFormat(this.format()) ===
+                DateTime.fromJSDate(date2).setLocale(locale).toFormat(this.format())
             );
         }
         return date1 === date2;
     }
 
-    public focus(): void {
-        const input = this.#hostElementRef.nativeElement.querySelector("input");
-        if (input && !this.readonly()) {
-            input.focus();
-            input.setSelectionRange(input.value.length, input.value.length);
-        }
-    }
-
     private generateValidDateTime(dateString: string): DateTime | null {
         const value = this.value();
-        const valueDate = value ? DateTime.fromJSDate(value) : DateTime.now();
-        let dateTime = DateTime.fromFormat(dateString, this.format());
+        const locale = this.#i18n.localeId();
+        const valueDate = value ? DateTime.fromJSDate(value).setLocale(locale) : DateTime.now().setLocale(locale);
+        let dateTime = DateTime.fromFormat(dateString, this.format(), { locale });
         if (dateTime.isValid) {
             return dateTime.set({ year: valueDate.year, month: valueDate.month, day: valueDate.day });
         }
@@ -346,7 +354,7 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
         const minDate = this.min();
         const date = minDate ?? maxDate;
         if (date) {
-            const newDate = DateTime.fromJSDate(date);
+            const newDate = DateTime.fromJSDate(date).setLocale(locale);
             dateTime = newDate.set({ year: valueDate.year, month: valueDate.month, day: valueDate.day });
             return dateTime;
         }
@@ -375,7 +383,7 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
     }
 
     private processTimeInput(inputText: string): void {
-        let dateTime = this.generateValidDateTime(inputText);
+        const dateTime = this.generateValidDateTime(inputText);
         if (!dateTime) {
             this.setCurrentDate(null);
             return;
@@ -404,7 +412,8 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
 
     private setDateValues(): void {
         const value = this.value();
-        this.navigatedDate.set(value ?? DateTime.now().toJSDate());
+        const locale = this.#i18n.localeId();
+        this.navigatedDate.set(value ?? DateTime.now().setLocale(locale).toJSDate());
         if (value) {
             this.updateCurrentDateString(value, this.format());
         }
@@ -431,7 +440,7 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
             this.currentDateString.set("");
             return;
         }
-        const dateString = DateTime.fromJSDate(date).toFormat(format);
+        const dateString = DateTime.fromJSDate(date).setLocale(this.#i18n.localeId()).toFormat(format);
         this.currentDateString.set(dateString);
     }
 }

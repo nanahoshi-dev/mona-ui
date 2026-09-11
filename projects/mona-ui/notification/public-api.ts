@@ -8,3 +8,5 @@ export * from "./models/NotificationOptions";
 export * from "./models/NotificationPosition";
 export * from "./models/NotificationRef";
 export * from "./models/NotificationType";
+
+export * from "./i18n/notification.default-messages";

@@ -1,6 +1,6 @@
 export interface ResizeEvent {
-    left: number;
     height: number;
+    left: number;
     top: number;
     width: number;
 }

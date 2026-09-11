@@ -17,10 +17,12 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { select } from "@mirei/ts-collections";
 import { fromEvent } from "rxjs";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { StepperIndicatorTemplateDirective } from "../../directives/stepper-indicator-template.directive";
 import { StepperIndicatorDirective } from "../../directives/stepper-indicator.directive";
 import { StepperLabelTemplateDirective } from "../../directives/stepper-label-template.directive";
 import { StepperStepTemplateDirective } from "../../directives/stepper-step-template.directive";
+import { STEPPER_DEFAULT_MESSAGES } from "../../i18n/stepper.default-messages";
 import type { StepItem, StepOptions } from "../../models/Step";
 import type { StepperTemplateContext } from "../../models/StepperTemplateContext";
 import {
@@ -39,14 +41,17 @@ import {
     imports: [NgTemplateOutlet, StepperIndicatorDirective],
     host: {
         role: "group",
-        "[attr.aria-label]": "ariaLabel()",
+        "[attr.aria-label]": "ariaLabel() || messages().stepper",
         "[class]": "baseClass()",
         "[style]": "hostStyles()"
     }
 })
 export class StepperComponent implements StepperVariantInput {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #direction = injectComponentDirection();
     readonly #hostElementRef = inject(ElementRef);
+    readonly #i18n = inject(MonaI18nService);
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     readonly #trackItemSize = computed(() => {
         const stepCount = this.viewSteps().length;
         return stepCount !== 0 ? 100 / stepCount : 0;
@@ -92,6 +97,7 @@ export class StepperComponent implements StepperVariantInput {
         const orientation = this.orientation();
         return stepperStepListItemThemeVariants({ orientation });
     });
+    protected readonly messages = this.#i18n.componentMessages("stepper", STEPPER_DEFAULT_MESSAGES);
     protected readonly progressMax = computed(() => Math.max(this.viewSteps().length - 1, 0));
     protected readonly stepTemplate = contentChild(StepperStepTemplateDirective, {
         read: TemplateRef
@@ -136,9 +142,9 @@ export class StepperComponent implements StepperVariantInput {
 
     /**
      * @description Sets the accessible label for the stepper group.
-     * @default "Progress"
+     * @default ""
      */
-    public readonly ariaLabel = input("Progress", { alias: "aria-label" });
+    public readonly ariaLabel = input<string>("", { alias: "aria-label" });
 
     /**
      * @description Sets the flow of the stepper.
@@ -154,9 +160,9 @@ export class StepperComponent implements StepperVariantInput {
 
     /**
      * @description Sets the accessible label for the progress bar element.
-     * @default "Step progress"
+     * @default ""
      */
-    public readonly progressAriaLabel = input("Step progress");
+    public readonly progressAriaLabel = input<string>("");
 
     /**
      * @description Sets the roundness of the stepper steps.
@@ -262,8 +268,13 @@ export class StepperComponent implements StepperVariantInput {
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(event => {
                 const orientation = this.orientation();
-                const previousKey = orientation === "vertical" ? "ArrowUp" : "ArrowLeft";
-                const nextKey = orientation === "vertical" ? "ArrowDown" : "ArrowRight";
+                const isRtl = this.isRtl();
+                let previousKey = orientation === "vertical" ? "ArrowUp" : "ArrowLeft";
+                let nextKey = orientation === "vertical" ? "ArrowDown" : "ArrowRight";
+                if (orientation === "horizontal" && isRtl) {
+                    previousKey = "ArrowRight";
+                    nextKey = "ArrowLeft";
+                }
                 if (event.key === previousKey) {
                     event.preventDefault();
                     this.moveHighlight(-1);

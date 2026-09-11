@@ -25,8 +25,8 @@ export const chartLegendBaseThemeVariants = cva("flex flex-wrap items-center gap
             // to non-empty (or vice versa), which would otherwise shift the
             // X axis vertically as the last/first series is toggled.
             bottom: "justify-center mt-3 min-h-5",
-            left: "flex-col justify-center mr-4",
-            right: "flex-col justify-center ml-4",
+            left: "flex-col justify-center me-4",
+            right: "flex-col justify-center ms-4",
             top: "justify-center mb-2 min-h-5"
         }
     }
@@ -60,8 +60,8 @@ export const chartHeaderBaseThemeVariants = cva("flex flex-col gap-1 mb-3 select
     variants: {
         align: {
             center: "items-center text-center",
-            left: "items-start text-left",
-            right: "items-end text-right"
+            left: "items-start text-start",
+            right: "items-end text-end"
         }
     }
 });

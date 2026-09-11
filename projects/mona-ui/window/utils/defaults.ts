@@ -1,4 +1,4 @@
-export const DefaultMaxWindowHeight = 800;
-export const DefaultMaxWindowWidth = 1200;
-export const DefaultMinWindowHeight = 50;
-export const DefaultMinWindowWidth = 50;
+export const DEFAULT_MAX_WINDOW_HEIGHT = 800;
+export const DEFAULT_MAX_WINDOW_WIDTH = 1200;
+export const DEFAULT_MIN_WINDOW_HEIGHT = 50;
+export const DEFAULT_MIN_WINDOW_WIDTH = 50;

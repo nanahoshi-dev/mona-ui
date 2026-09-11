@@ -2,6 +2,7 @@ import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { form, FormField, readonly as fieldReadonly, required } from "@angular/forms/signals";
 import { describe, expect, it } from "vitest";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 
 import type { PaletteType } from "@nanahoshi/mona-ui/common";
 import { flatColorScheme, materialColorScheme, websafeColorScheme } from "../../utils/colorSchemes";
@@ -12,13 +13,19 @@ const LARGE_TEST_PALETTE = Array.from({ length: 12 }, (_, i) => `#${i.toString(1
 
 @Component({
     template: `
-        <mona-color-palette [(value)]="value" [disabled]="disabled()" [palette]="palette" [readonly]="readonlyState()">
+        <mona-color-palette
+            [aria-label]="ariaLabel()"
+            [(value)]="value"
+            [disabled]="disabled()"
+            [palette]="palette"
+            [readonly]="readonlyState()">
         </mona-color-palette>
     `,
     imports: [ColorPaletteComponent]
 })
 class ValueBindingColorPaletteHostComponent {
     protected readonly palette = TEST_PALETTE;
+    public readonly ariaLabel = signal<string>("");
     public readonly disabled = signal(false);
     public readonly readonlyState = signal(false);
     public readonly value = signal<string | null>("#222222");
@@ -31,12 +38,12 @@ class ValueBindingColorPaletteHostComponent {
 class SignalFormColorPaletteHostComponent {
     readonly #formModel = signal<ColorPaletteFormModel>({ color: "#111111" });
     protected readonly palette = TEST_PALETTE;
-    public readonly readonlyState = signal(false);
-    public readonly requiredState = signal(false);
     public readonly form = form(this.#formModel, schema => {
         fieldReadonly(schema.color, { when: () => this.readonlyState() });
         required(schema.color, { when: () => this.requiredState() });
     });
+    public readonly readonlyState = signal(false);
+    public readonly requiredState = signal(false);
 }
 
 @Component({
@@ -342,6 +349,78 @@ describe("ColorPaletteComponent ARIA structure", () => {
         for (const tile of getTiles(fixture)) {
             expect(tile.parentElement?.getAttribute("role")).toBe("row");
         }
+    });
+});
+
+describe("ColorPaletteComponent i18n & RTL", () => {
+    it("renders default English aria-labels on host and tiles", async () => {
+        const fixture = await createValueBindingFixture();
+        expect(getPalette(fixture).getAttribute("aria-label")).toBe("Color palette");
+        expect(getTile(fixture, 0).getAttribute("aria-label")).toBe("Color #111111");
+    });
+
+    it("allows consumer aria-label to override host default", async () => {
+        const fixture = await createValueBindingFixture();
+        fixture.componentInstance.ariaLabel.set("Custom Palette");
+        await waitForStable(fixture);
+        expect(getPalette(fixture).getAttribute("aria-label")).toBe("Custom Palette");
+    });
+
+    it("updates aria-labels dynamically when locale changes", async () => {
+        const fixture = await createValueBindingFixture();
+        const i18n = TestBed.inject(MonaI18nService);
+        i18n.use({
+            direction: "ltr",
+            id: "tr-TR",
+            messages: {
+                colorPalette: {
+                    color: (c: string) => `Renk ${c}`,
+                    colorPalette: "Renk paleti"
+                }
+            }
+        });
+        await waitForStable(fixture);
+
+        expect(getPalette(fixture).getAttribute("aria-label")).toBe("Renk paleti");
+        expect(getTile(fixture, 0).getAttribute("aria-label")).toBe("Renk #111111");
+    });
+
+    it("inverts horizontal arrow navigation in RTL", async () => {
+        const fixture = await createValueBindingFixture();
+        const i18n = TestBed.inject(MonaI18nService);
+        i18n.use({
+            direction: "rtl",
+            id: "ar-EG",
+            messages: {}
+        });
+        await waitForStable(fixture);
+
+        // Case 2: RTL locale + LTR DOM -> maintains normal LTR navigation
+        let tile0 = getTile(fixture, 0);
+        dispatchKeyDown(tile0, "ArrowRight");
+        await waitForKeyboardNavigation(fixture);
+        expect(getTile(fixture, 1).getAttribute("tabindex")).toBe("0");
+
+        // Reset to tile 0
+        dispatchKeyDown(getTile(fixture, 1), "ArrowLeft");
+        await waitForKeyboardNavigation(fixture);
+        expect(getTile(fixture, 0).getAttribute("tabindex")).toBe("0");
+
+        // Case 4: RTL locale + RTL DOM -> inverts horizontal navigation
+        fixture.nativeElement.setAttribute("dir", "rtl");
+        await waitForStable(fixture);
+
+        tile0 = getTile(fixture, 0);
+        dispatchKeyDown(tile0, "ArrowLeft");
+        await waitForKeyboardNavigation(fixture);
+
+        expect(getTile(fixture, 1).getAttribute("tabindex")).toBe("0");
+
+        const tile1 = getTile(fixture, 1);
+        dispatchKeyDown(tile1, "ArrowRight");
+        await waitForKeyboardNavigation(fixture);
+
+        expect(getTile(fixture, 0).getAttribute("tabindex")).toBe("0");
     });
 });
 

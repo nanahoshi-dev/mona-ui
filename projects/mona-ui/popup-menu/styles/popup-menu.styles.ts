@@ -44,11 +44,11 @@ export const popupMenuGroupHeaderThemeVariants = cva(
     }
 );
 
-export const popupMenuIconContainerThemeVariants = cva(`absolute left-2 flex items-center justify-center`);
+export const popupMenuIconContainerThemeVariants = cva(`absolute start-2 flex items-center justify-center`);
 
 export const popupMenuItemThemeVariants = cva(
     `
-        relative flex cursor-pointer select-none items-center gap-2 py-1 pr-2 pl-8
+        relative flex cursor-pointer select-none items-center gap-2 py-1 pe-2 ps-8
         text-foreground outline-none
         hover:bg-[var(--mona-menu-item-hover-background,var(--color-hover))] hover:text-foreground
         focus-within:bg-[var(--mona-menu-item-hover-background,var(--color-hover))]

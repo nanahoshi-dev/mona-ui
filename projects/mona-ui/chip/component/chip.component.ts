@@ -16,9 +16,11 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { RouterLink } from "@angular/router";
 import { LucideCircleX } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { filter, fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ChipPrefixTemplateDirective } from "../directives/chip-prefix-template.directive";
+import { CHIP_DEFAULT_MESSAGES } from "../i18n/chip.default-messages";
 import { chipThemeVariants, ChipVariantInputs, ChipVariantProps } from "../styles/chip.styles";
 
 @Component({
@@ -37,6 +39,7 @@ import { chipThemeVariants, ChipVariantInputs, ChipVariantProps } from "../style
 export class ChipComponent implements ChipVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+    readonly #i18n = inject(MonaI18nService);
     readonly #routerLink = inject(RouterLink, { optional: true });
 
     protected readonly ariaChecked = computed(() => {
@@ -97,6 +100,7 @@ export class ChipComponent implements ChipVariantInputs {
         }
     });
     protected readonly isLink = computed(() => !!this.#routerLink);
+    protected readonly messages = this.#i18n.componentMessages("chip", CHIP_DEFAULT_MESSAGES);
     protected readonly prefixTemplate = contentChild(ChipPrefixTemplateDirective, { read: TemplateRef });
     protected readonly role = computed(() => {
         if (this.toggleable()) {

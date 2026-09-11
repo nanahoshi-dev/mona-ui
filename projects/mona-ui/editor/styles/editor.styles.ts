@@ -18,9 +18,9 @@ export const editorBaseThemeVariants = cva(
 
         [&_ol]:ps-8 [&_ul]:ps-8
 
-        [&_blockquote]:border-l-4
-        [&_blockquote]:border-l-solid
-        [&_blockquote]:border-l-border-control-hover
+        [&_blockquote]:border-s-4
+        [&_blockquote]:border-s-solid
+        [&_blockquote]:border-s-border-control-hover
         [&_blockquote]:px-4 [&_blockquote]:py-2
         [&_blockquote]:ms-4
         [&_blockquote]:bg-surface-muted
@@ -76,7 +76,7 @@ export const editorBaseThemeVariants = cva(
         [&_.column-resize-handle]:pointer-events-none
         [&_.column-resize-handle]:top-0
         [&_.column-resize-handle]:-bottom-0.5
-        [&_.column-resize-handle]:-right-0.5
+        [&_.column-resize-handle]:-end-0.5
 
         [&_.ProseMirror.resize-cursor]:cursor-ew-resize
 

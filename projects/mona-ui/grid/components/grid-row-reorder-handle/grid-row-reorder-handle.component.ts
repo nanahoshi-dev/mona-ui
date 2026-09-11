@@ -35,7 +35,7 @@ export class GridRowReorderHandleComponent {
         const label = this.#gridService.getRowReorderAriaLabel(this.row(), absoluteIndex);
         const reasonText = this.disabledReasonText();
         const suffix = reasonText == null ? "" : ` ${reasonText}`;
-        return `${label}. Use Alt plus Up Arrow or Alt plus Down Arrow to move.${suffix}`;
+        return `${label}. ${this.#gridService.messages().rowReorderKeyboardHint}${suffix}`;
     });
     protected readonly disabled = computed(() => !this.#gridService.canReorderRow(this.row()));
     protected readonly disabledReasonText = computed(() => {

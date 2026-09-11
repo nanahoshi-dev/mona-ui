@@ -40,10 +40,12 @@ import {
 } from "@nanahoshi/mona-ui/list-view";
 import { ImmutableList, ImmutableSet } from "@mirei/ts-collections";
 import { delay, filter, Observable, ReplaySubject, sample, scan, startWith, Subject, switchMap, tap } from "rxjs";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { ListBoxFooterTemplateDirective } from "../../directives/list-box-footer-template.directive";
 import { ListBoxHeaderTemplateDirective } from "../../directives/list-box-header-template.directive";
 import { ListBoxItemTemplateDirective } from "../../directives/list-box-item-template.directive";
 import { ListBoxNoDataTemplateDirective } from "../../directives/list-box-no-data-template.directive";
+import { LIST_BOX_DEFAULT_MESSAGES } from "../../i18n/list-box.default-messages";
 import { ListBoxActionEvent } from "../../models/ListBoxActionClickEvent";
 import { ListBoxClearEvent } from "../../models/ListBoxClearEvent";
 import { ListBoxMoveEvent } from "../../models/ListBoxMoveEvent";
@@ -92,6 +94,7 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
     readonly #dataStateChange$ = new Subject<void>();
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #i18n = inject(MonaI18nService);
     readonly #listService = inject<ListService<T>>(ListService);
     readonly #notifySelectionChange$ = new ReplaySubject<boolean>(1);
     /**
@@ -130,6 +133,7 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
         const width = this.width();
         return typeof width === "number" ? `${width}px` : width;
     });
+    protected readonly messages = this.#i18n.componentMessages("listBox", LIST_BOX_DEFAULT_MESSAGES);
     protected readonly noDataTemplate = contentChild(ListBoxNoDataTemplateDirective, { read: TemplateRef });
     protected readonly selectableOptions = computed<SelectableOptions>(() => {
         const enabled = true;
@@ -196,6 +200,12 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
      */
     public readonly selectBy = input<ListKeySelector<T, K>>("");
 
+    public readonly selectedItems = computed(() => {
+        const listItems = this.#listService.selectedListItems();
+        return listItems.select(item => item.data).toImmutableSet();
+    });
+    public readonly selectedItems$ = toObservable(this.selectedItems);
+
     /**
      * @description Keys of the currently selected items.
      * @default []
@@ -211,11 +221,6 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
      * @description Emitted with the selected and deselected items whenever the selection changes.
      */
     public readonly selectionChange = output<ListBoxSelectionEvent>();
-    public readonly selectedItems = computed(() => {
-        const listItems = this.#listService.selectedListItems();
-        return listItems.select(item => item.data).toImmutableSet();
-    });
-    public readonly selectedItems$ = toObservable(this.selectedItems);
 
     /**
      * @description Allows multiple items to be selected simultaneously when set to `"multiple"`.
@@ -433,16 +438,6 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
      * or `null` if neither side has one. Unlike {@link activeListBox}, this does not fall back to `this`,
      * since move actions need to know an actual selected index to operate on.
      */
-    private getSelectedListBox(): ListBoxComponent<T, K> | null {
-        if (this.selectedItems().any()) {
-            return this;
-        }
-        if (this.connectedList() != null) {
-            return this.connectedList()!.getSelectedListBox();
-        }
-        return null;
-    }
-
     private getDefaultToolbarOptions(): ToolbarOptions {
         return {
             actions: [
@@ -457,6 +452,16 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
             ],
             position: "right"
         };
+    }
+
+    private getSelectedListBox(): ListBoxComponent<T, K> | null {
+        if (this.selectedItems().any()) {
+            return this;
+        }
+        if (this.connectedList() != null) {
+            return this.connectedList()!.getSelectedListBox();
+        }
+        return null;
     }
 
     private scrollToSelectedItem(): void {

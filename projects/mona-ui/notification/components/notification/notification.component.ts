@@ -15,8 +15,10 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { LucideBadgeInfo, LucideCircleCheckBig, LucideOctagonAlert, LucideOctagonX, LucideX } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { ProgressBarComponent } from "@nanahoshi/mona-ui/progress-bar";
 import { asyncScheduler, interval, takeWhile } from "rxjs";
+import { NOTIFICATION_DEFAULT_MESSAGES } from "../../i18n/notification.default-messages";
 import { NotificationData } from "../../models/NotificationData";
 import {
     notificationActionThemeVariants,
@@ -52,8 +54,10 @@ import {
 export class NotificationComponent {
     readonly #destroyRef = inject(DestroyRef);
     readonly #document = inject(DOCUMENT);
+    readonly #i18n = inject(MonaI18nService);
     readonly #isUrgent = computed(() => this.type() === "error" || this.type() === "warning");
     readonly #paused = signal(false);
+    protected readonly messages = this.#i18n.componentMessages("notification", NOTIFICATION_DEFAULT_MESSAGES);
     protected readonly actionClass = computed(() => {
         return notificationActionThemeVariants();
     });
@@ -63,6 +67,9 @@ export class NotificationComponent {
     });
     protected readonly bodyClass = computed(() => {
         return notificationBodyThemeVariants();
+    });
+    protected readonly closeTitle = computed(() => {
+        return this.data().options.closeTitle ?? this.messages().close;
     });
     protected readonly contentClass = computed(() => {
         return notificationContentThemeVariants();
@@ -95,6 +102,7 @@ export class NotificationComponent {
         return notificationTextThemeVariants();
     });
     protected readonly type = computed(() => this.data().options.type ?? "info");
+    protected readonly title = computed(() => this.data().options.title ?? this.messages()[this.type()]);
     /**
      * @description The notification's internal state, created and managed by `NotificationService`. Not intended to be provided directly by consumers.
      */

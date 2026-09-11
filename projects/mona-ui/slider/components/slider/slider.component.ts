@@ -6,6 +6,7 @@ import { filter, fromEvent, switchMap, takeUntil, tap } from "rxjs";
 import { SliderTickDirective } from "../../directives/slider-tick.directive";
 import { LabelStylePipe } from "../../pipes/label-style.pipe";
 import { TickStylePipe } from "../../pipes/tick-style.pipe";
+import { SLIDER_DEFAULT_MESSAGES } from "../../i18n/slider.default-messages";
 import { SliderBaseComponent } from "../slider-base/slider-base.component";
 
 @Component({
@@ -21,12 +22,14 @@ import { SliderBaseComponent } from "../slider-base/slider-base.component";
     }
 })
 export class SliderComponent extends SliderBaseComponent implements FormValueControl<number> {
+    protected readonly computedAriaLabel = computed(() => this.ariaLabel() ?? this.messages().sliderValue);
     protected readonly handleFocused = signal(false);
     protected readonly handlePosition = computed(() => this.positionFromValue(this.normalizedValue()));
     protected readonly handleStyle = computed<Partial<CSSStyleDeclaration>>(() => ({
         ...this.handleTemplateStyles(),
         ...this.handleStyles()
     }));
+    protected readonly messages = this.i18n.componentMessages("slider", SLIDER_DEFAULT_MESSAGES);
     protected readonly normalizedValue = computed(() => this.snapValue(this.value()));
     protected readonly selectionLeft = computed(() => 0);
     protected readonly selectionRight = computed(() => this.handlePosition());
@@ -35,9 +38,9 @@ export class SliderComponent extends SliderBaseComponent implements FormValueCon
     /**
      * @description Accessible name for the host element. Describe what the component represents.
      * When empty, assistive technology announces the role without a label.
-     * @default "Slider value"
+     * @default null
      */
-    public readonly ariaLabel = input<string | null>("Slider value", { alias: "aria-label" });
+    public readonly ariaLabel = input<string | null>(null, { alias: "aria-label" });
 
     /**
      * @description ID of an external element that provides the accessible name for the host element.

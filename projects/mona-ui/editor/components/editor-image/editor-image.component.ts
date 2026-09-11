@@ -1,6 +1,8 @@
 import { Component, inject, signal } from "@angular/core";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { WindowComponent, WindowContentTemplateDirective } from "@nanahoshi/mona-ui/window";
+import { EDITOR_DEFAULT_MESSAGES } from "../../i18n/editor.default-messages";
 import { EditorImageInsertEvent } from "../../models/EditorImageInsertEvent";
 import { EditorService } from "../../services/editor.service";
 import { EditorImageInserterComponent } from "../editor-image-inserter/editor-image-inserter.component";
@@ -12,6 +14,8 @@ import { EditorImageInserterComponent } from "../editor-image-inserter/editor-im
 })
 export class EditorImageComponent {
     readonly #editorService: EditorService = inject(EditorService);
+    readonly #i18n = inject(MonaI18nService);
+    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
     protected readonly inserterVisible = signal(false);
 
     public onDisplayInserterClick(): void {

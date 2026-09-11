@@ -411,5 +411,12 @@ export const routes: Routes = [
                     import("./docs/components/window-doc/window-doc.component").then(m => m.WindowDocComponent)
             }
         ]
+    },
+    {
+        path: "browser-test/direction-geometry",
+        loadComponent: () =>
+            import("./browser-test/direction-geometry-fixture.component").then(
+                m => m.DirectionGeometryFixtureComponent
+            )
     }
 ];

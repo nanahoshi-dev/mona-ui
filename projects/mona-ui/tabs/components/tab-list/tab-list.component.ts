@@ -25,8 +25,10 @@ import {
 } from "@lucide/angular";
 import { firstOrDefault } from "@mirei/ts-collections";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { asapScheduler, EMPTY, interval, Subject, switchMap, tap, timer } from "rxjs";
 import { TabListItemDirective } from "../../directives/tab-list-item.directive";
+import { TABS_DEFAULT_MESSAGES } from "../../i18n/tabs.default-messages";
 import { getTabOrientation } from "../../models/TabOrientation";
 import { ScrollIntent, TabScrollDirection } from "../../models/ScrollIntent";
 import { TabCloseEvent } from "../../models/TabCloseEvent";
@@ -61,9 +63,12 @@ import {
 })
 export class TabListComponent implements TabListVariantInput {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #direction = injectComponentDirection();
+    readonly #i18n = inject(MonaI18nService);
     readonly #keydown$ = new Subject<KeyboardEvent>();
     readonly #scrollIntent$ = new Subject<ScrollIntent | null>();
     #resizeObserver: ResizeObserver | null = null;
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly baseClass = computed(() => {
         return tabListBaseThemeVariants({ position: this.position() });
     });
@@ -73,6 +78,7 @@ export class TabListComponent implements TabListVariantInput {
     protected readonly listWrapperClass = computed(() => {
         return tabListListWrapperThemeVariants();
     });
+    protected readonly messages = this.#i18n.componentMessages("tabs", TABS_DEFAULT_MESSAGES);
     protected readonly orientation = computed(() => {
         return getTabOrientation(this.position() ?? "top");
     });
@@ -176,6 +182,53 @@ export class TabListComponent implements TabListVariantInput {
         this.#scrollIntent$.next(null);
     }
 
+    private activateTab(tab: TabItem, event: Event): void {
+        const prevented = this.emitTabSelect(tab, event);
+        if (!prevented) {
+            this.selectTab(tab);
+            this.focusSelectedTab();
+        }
+    }
+
+    private emitTabClose(tabItem: TabItem, event: Event): boolean {
+        const selected = tabItem.id === this.selectedTabId();
+        const tabCloseEvent = new TabCloseEvent(tabItem.index, selected, event);
+        this.tabClose.emit(tabCloseEvent);
+        return tabCloseEvent.isDefaultPrevented();
+    }
+
+    private emitTabSelect(tab: TabItem, event: Event): boolean {
+        const selectEvent = new TabSelectEvent(tab.index, event);
+        this.tabSelect.emit(selectEvent);
+        return selectEvent.isDefaultPrevented();
+    }
+
+    private focusTab(tab: TabItem): void {
+        const tabListItems = this.tabListItems();
+        const tabListItem = tabListItems.find(t => t.nativeElement.getAttribute("data-tab-id") === tab.id);
+        tabListItem?.nativeElement.focus();
+    }
+
+    private getNavigationDirection(event: KeyboardEvent): TabScrollDirection | null {
+        if (this.orientation() === "vertical") {
+            if (event.key === "ArrowUp") {
+                return "previous";
+            }
+            if (event.key === "ArrowDown") {
+                return "next";
+            }
+            return null;
+        }
+        const isRtl = this.isRtl();
+        if (event.key === "ArrowLeft") {
+            return isRtl ? "next" : "previous";
+        }
+        if (event.key === "ArrowRight") {
+            return isRtl ? "previous" : "next";
+        }
+        return null;
+    }
+
     private handleKeyboardEvents(event: KeyboardEvent): void {
         const tabList = this.tabList();
         const tabs = Array.from(tabList);
@@ -226,52 +279,6 @@ export class TabListComponent implements TabListVariantInput {
         }
     }
 
-    private activateTab(tab: TabItem, event: Event): void {
-        const prevented = this.emitTabSelect(tab, event);
-        if (!prevented) {
-            this.selectTab(tab);
-            this.focusSelectedTab();
-        }
-    }
-
-    private emitTabClose(tabItem: TabItem, event: Event): boolean {
-        const selected = tabItem.id === this.selectedTabId();
-        const tabCloseEvent = new TabCloseEvent(tabItem.index, selected, event);
-        this.tabClose.emit(tabCloseEvent);
-        return tabCloseEvent.isDefaultPrevented();
-    }
-
-    private emitTabSelect(tab: TabItem, event: Event): boolean {
-        const selectEvent = new TabSelectEvent(tab.index, event);
-        this.tabSelect.emit(selectEvent);
-        return selectEvent.isDefaultPrevented();
-    }
-
-    private focusTab(tab: TabItem): void {
-        const tabListItems = this.tabListItems();
-        const tabListItem = tabListItems.find(t => t.nativeElement.getAttribute("data-tab-id") === tab.id);
-        tabListItem?.nativeElement.focus();
-    }
-
-    private getNavigationDirection(event: KeyboardEvent): TabScrollDirection | null {
-        if (this.orientation() === "vertical") {
-            if (event.key === "ArrowUp") {
-                return "previous";
-            }
-            if (event.key === "ArrowDown") {
-                return "next";
-            }
-            return null;
-        }
-        if (event.key === "ArrowLeft") {
-            return "previous";
-        }
-        if (event.key === "ArrowRight") {
-            return "next";
-        }
-        return null;
-    }
-
     private handleTabKey(tab: TabItem, event: KeyboardEvent): void {
         event.preventDefault();
         const panelId = tab.id + "-panel";
@@ -282,10 +289,13 @@ export class TabListComponent implements TabListVariantInput {
     }
 
     private performScroll(element: HTMLElement, direction: TabScrollDirection): void {
-        const offset = direction === "previous" ? -100 : 100;
+        let offset = direction === "previous" ? -100 : 100;
         if (this.orientation() === "vertical") {
             element.scrollBy({ top: offset, behavior: "smooth" });
             return;
+        }
+        if (this.isRtl()) {
+            offset = -offset;
         }
         element.scrollBy({ left: offset, behavior: "smooth" });
     }

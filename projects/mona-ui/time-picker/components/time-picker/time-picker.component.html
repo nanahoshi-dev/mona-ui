@@ -21,7 +21,7 @@
             [rounded]="'none'"
             (click)="onTimeInputButtonClick()"
             class="aspect-square h-full w-auto"
-            [attr.aria-label]="'Open time picker'"
+            [attr.aria-label]="messages().openTimePicker"
             [attr.aria-expanded]="expanded()"
             [attr.aria-controls]="popupId"
             [disabled]="disabled() || readonly()"
@@ -37,7 +37,7 @@
         [id]="popupId"
         aria-modal="true"
         role="dialog"
-        aria-label="Time picker"
+        [attr.aria-label]="messages().timePicker"
         cdkTrapFocus>
         <mona-time-selector
             [value]="value()"

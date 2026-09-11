@@ -50,6 +50,7 @@ export class GridCommandCellComponent {
         const context = this.gridService.editContext();
         return this.newRow() || (row != null && context?.mode === "row" && context.rowUid === row.uid);
     });
+    protected readonly messages = computed(() => this.gridService.messages());
     protected readonly rowErrorMessages = computed(() => {
         if (!this.isEditing()) {
             return [];
@@ -65,7 +66,7 @@ export class GridCommandCellComponent {
             .filter((message): message is string => !!message);
     });
     protected readonly rowErrorTooltip = computed(
-        () => this.rowErrorMessages().join("\n") || "This row has validation errors."
+        () => this.rowErrorMessages().join("\n") || this.messages().rowValidationError
     );
 
     public readonly column = input.required<Column>();
@@ -104,18 +105,18 @@ export class GridCommandCellComponent {
         }
         const dialogRef = this.#dialogService.show({
             actions: [
-                { look: "error", text: "Delete" },
-                { look: "default", text: "Cancel" }
+                { look: "error", text: this.messages().delete },
+                { look: "default", text: this.messages().cancel }
             ],
             closeOnEscape: true,
-            text: "Are you sure you want to delete this item?",
-            title: "Delete row?",
+            text: this.messages().deleteRowConfirmation,
+            title: this.messages().deleteRowTitle,
             type: "warning",
             modal: true,
             width: 360
         });
         dialogRef.result.pipe(take(1)).subscribe(result => {
-            if (!result.viaClose && result.action.text === "Delete") {
+            if (!result.viaClose && result.action.text === this.messages().delete) {
                 this.gridService.removeRow(row, event);
             }
             dialogRef.close();

@@ -1,6 +1,7 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { disabled, form, FormField, readonly } from "@angular/forms/signals";
+import { MONA_DEFAULT_LOCALE, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { TimePickerComponent } from "./time-picker.component";
 
 describe("TimePickerComponent", () => {
@@ -71,6 +72,42 @@ describe("TimePickerComponent", () => {
         ).toBe("true");
     });
 
+    it("renders default english accessible labels for toggle button and popup", () => {
+        const toggleBtn = fixture.nativeElement.querySelector("button[monaButton]") as HTMLButtonElement;
+        expect(toggleBtn.getAttribute("aria-label")).toBe("Open time picker");
+
+        toggleBtn.click();
+        fixture.detectChanges();
+
+        const popup = document.querySelector("div[role='dialog']") as HTMLElement;
+        expect(popup?.getAttribute("aria-label")).toBe("Time picker");
+    });
+
+    it("updates messages dynamically when locale changes", () => {
+        const i18n = TestBed.inject(MonaI18nService);
+        i18n.use({
+            ...MONA_DEFAULT_LOCALE,
+            messages: {
+                timePicker: {
+                    openTimePicker: "Saat seçiciyi aç",
+                    timePicker: "Saat seçici"
+                }
+            }
+        });
+        fixture.detectChanges();
+
+        const toggleBtn = fixture.nativeElement.querySelector("button[monaButton]") as HTMLButtonElement;
+        expect(toggleBtn.getAttribute("aria-label")).toBe("Saat seçiciyi aç");
+
+        toggleBtn.click();
+        fixture.detectChanges();
+
+        const popup = document.querySelector("div[role='dialog']") as HTMLElement;
+        expect(popup?.getAttribute("aria-label")).toBe("Saat seçici");
+
+        i18n.use(MONA_DEFAULT_LOCALE);
+    });
+
     function getInput(): HTMLInputElement {
         const input = fixture.nativeElement.querySelector("input");
         if (!(input instanceof HTMLInputElement)) {
@@ -80,20 +117,21 @@ describe("TimePickerComponent", () => {
     }
 });
 
+interface TimePickerFormModel {
+    value: Date | null;
+}
+
 @Component({
     imports: [TimePickerComponent, FormField],
     template: `<mona-time-picker [formField]="form.value" format="HH:mm"></mona-time-picker>`
 })
 class TimePickerHostComponent {
-    public readonly disabled = signal(false);
-    public readonly readonly = signal(false);
     readonly #model = signal<TimePickerFormModel>({ value: new Date(2026, 0, 2, 9, 30) });
+
+    public readonly disabled = signal(false);
     public readonly form = form(this.#model, schema => {
         disabled(schema.value, { when: () => this.disabled() });
         readonly(schema.value, { when: () => this.readonly() });
     });
-}
-
-interface TimePickerFormModel {
-    value: Date | null;
+    public readonly readonly = signal(false);
 }

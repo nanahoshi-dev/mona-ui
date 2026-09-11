@@ -34,4 +34,20 @@ describe("SwitchComponent", () => {
         ).toBe(true);
         expect(handleElement.classList.contains("border-border-subtle")).toBe(true);
     });
+
+    it("uses logical inset-inline-start positioning and transitions on the handle", () => {
+        const handleElement = fixture.nativeElement.querySelector("div") as HTMLDivElement;
+
+        expect(handleElement.classList.contains("transition-[inset-inline-start,background]")).toBe(true);
+        expect(handleElement.classList.contains("data-[active='false']:start-0.5")).toBe(true);
+        expect(handleElement.classList.contains("data-[active='true']:start-[calc(100%-22px)]")).toBe(true);
+    });
+
+    it("merges custom user class via tailwind-merge", () => {
+        fixture.componentRef.setInput("class", "custom-switch-class");
+        fixture.detectChanges();
+        const hostElement = fixture.nativeElement as HTMLElement;
+        expect(hostElement.classList.contains("custom-switch-class")).toBe(true);
+    });
 });
+

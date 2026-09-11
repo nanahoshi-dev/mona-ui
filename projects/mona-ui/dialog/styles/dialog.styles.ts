@@ -31,13 +31,13 @@ export const dialogContentContainerThemeVariants = cva(
 
 export const dialogBodyThemeVariants = cva(
     `
-        flex h-full w-full flex-col gap-0 pr-2 pb-2
+        flex h-full w-full flex-col gap-0 pe-2 pb-2
     `,
     {
         variants: {
             hasIcon: {
                 true: "",
-                false: "pl-5"
+                false: "ps-5"
             }
         }
     }
@@ -52,7 +52,7 @@ export const dialogHeaderThemeVariants = cva(
 
 export const dialogIconContainerThemeVariants = cva(
     `
-        flex items-start justify-center pt-8 pr-4 pl-6
+        flex items-start justify-center pt-8 pe-4 ps-6
     `
 );
 
@@ -60,7 +60,7 @@ export const dialogIconThemeVariants = cva(
     `
         relative h-fit w-fit rounded-full border p-1.5
         [&>span]:absolute [&>span]:flex [&>span]:rounded-full
-        [&>span]:-top-3 [&>span]:-right-3 [&>span]:-bottom-3 [&>span]:-left-3
+        [&>span]:-inset-3
         [&>span]:min-h-full [&>span]:min-w-full [&>span]:border
     `,
     {

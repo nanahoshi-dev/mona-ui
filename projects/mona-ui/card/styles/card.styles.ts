@@ -2,22 +2,23 @@ import { themeRaisedBackdropClasses, type VariantInputs } from "@nanahoshi/mona-
 import { cva, type VariantProps } from "class-variance-authority";
 
 const roundedTopVariants = {
-    small: "rounded-tl-sm rounded-tr-sm",
-    medium: "rounded-tl-md rounded-tr-md",
-    large: "rounded-tl-lg rounded-tr-lg",
-    xlarge: "rounded-tl-xl rounded-tr-xl",
-    xxlarge: "rounded-tl-2xl rounded-tr-2xl",
+    small: "rounded-t-sm",
+    medium: "rounded-t-md",
+    large: "rounded-t-lg",
+    xlarge: "rounded-t-xl",
+    xxlarge: "rounded-t-2xl",
     none: "rounded-none"
 };
 
 const roundedBottomVariants = {
-    small: "rounded-bl-sm rounded-br-sm",
-    medium: "rounded-bl-md rounded-br-md",
-    large: "rounded-bl-lg rounded-br-lg",
-    xlarge: "rounded-bl-xl rounded-br-xl",
-    xxlarge: "rounded-bl-2xl rounded-br-2xl",
+    small: "rounded-b-sm",
+    medium: "rounded-b-md",
+    large: "rounded-b-lg",
+    xlarge: "rounded-b-xl",
+    xxlarge: "rounded-b-2xl",
     none: "rounded-none"
 };
+
 
 const roundedAllVariants = {
     small: "rounded-sm",

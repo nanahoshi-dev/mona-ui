@@ -1,4 +1,6 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { FILTER_DEFAULT_MESSAGES } from "../i18n/filter.default-messages";
 import {
     type BooleanFilterDescriptor,
     type BooleanFilterOperators,
@@ -15,47 +17,65 @@ import type { FilterMenuDataItem } from "../models/FilterMenuDataItem";
 
 @Injectable()
 export class FilterService {
-    public readonly booleanFilterMenuItems: FilterMenuDataItem[] = [
-        { text: "Is true", value: "istrue" },
-        { text: "Is false", value: "isfalse" },
-        { text: "Is null", value: "isnull" },
-        { text: "Is not null", value: "isnotnull" }
-    ];
-    public readonly dateFilterMenuItems: FilterMenuDataItem[] = [
-        { text: "Is equal to", value: "eq" },
-        { text: "Is not equal to", value: "neq" },
-        { text: "Is after", value: "gt" },
-        { text: "Is after or equal to", value: "gte" },
-        { text: "Is before", value: "lt" },
-        { text: "Is before or equal to", value: "lte" },
-        { text: "Is null", value: "isnull" },
-        { text: "Is not null", value: "isnotnull" }
-    ];
+    readonly #i18n = inject(MonaI18nService);
+    readonly #messages = this.#i18n.componentMessages("filter", FILTER_DEFAULT_MESSAGES);
+
+    public get booleanFilterMenuItems(): FilterMenuDataItem[] {
+        const m = this.#messages();
+        return [
+            { text: m.isTrue, value: "istrue" },
+            { text: m.isFalse, value: "isfalse" },
+            { text: m.isNull, value: "isnull" },
+            { text: m.isNotNull, value: "isnotnull" }
+        ];
+    }
+
+    public get dateFilterMenuItems(): FilterMenuDataItem[] {
+        const m = this.#messages();
+        return [
+            { text: m.isEqualTo, value: "eq" },
+            { text: m.isNotEqualTo, value: "neq" },
+            { text: m.isAfter, value: "gt" },
+            { text: m.isAfterOrEqualTo, value: "gte" },
+            { text: m.isBefore, value: "lt" },
+            { text: m.isBeforeOrEqualTo, value: "lte" },
+            { text: m.isNull, value: "isnull" },
+            { text: m.isNotNull, value: "isnotnull" }
+        ];
+    }
+
     // TODO: Add null and empty filter operators
-    public readonly numericFilterMenuItems: FilterMenuDataItem[] = [
-        { text: "Is equal to", value: "eq" },
-        { text: "Is not equal to", value: "neq" },
-        { text: "Is greater than", value: "gt" },
-        { text: "Is greater than or equal to", value: "gte" },
-        { text: "Is less than", value: "lt" },
-        { text: "Is less than or equal to", value: "lte" },
-        { text: "Is null", value: "isnull" },
-        { text: "Is not null", value: "isnotnull" }
-    ];
-    public readonly stringFilterMenuItems: FilterMenuDataItem[] = [
-        { text: "Contains", value: "contains" },
-        { text: "Does not contain", value: "doesnotcontain" },
-        { text: "Ends with", value: "endswith" },
-        { text: "Starts with", value: "startswith" },
-        { text: "Is equal to", value: "eq" },
-        { text: "Is not equal to", value: "neq" },
-        { text: "Is empty", value: "isempty" },
-        { text: "Is not empty", value: "isnotempty" },
-        { text: "Is null", value: "isnull" },
-        { text: "Is not null", value: "isnotnull" },
-        { text: "Is null or empty", value: "isnullorempty" },
-        { text: "Is not null or empty", value: "isnotnullorempty" }
-    ];
+    public get numericFilterMenuItems(): FilterMenuDataItem[] {
+        const m = this.#messages();
+        return [
+            { text: m.isEqualTo, value: "eq" },
+            { text: m.isNotEqualTo, value: "neq" },
+            { text: m.isGreaterThan, value: "gt" },
+            { text: m.isGreaterThanOrEqualTo, value: "gte" },
+            { text: m.isLessThan, value: "lt" },
+            { text: m.isLessThanOrEqualTo, value: "lte" },
+            { text: m.isNull, value: "isnull" },
+            { text: m.isNotNull, value: "isnotnull" }
+        ];
+    }
+
+    public get stringFilterMenuItems(): FilterMenuDataItem[] {
+        const m = this.#messages();
+        return [
+            { text: m.contains, value: "contains" },
+            { text: m.doesNotContain, value: "doesnotcontain" },
+            { text: m.endsWith, value: "endswith" },
+            { text: m.startsWith, value: "startswith" },
+            { text: m.isEqualTo, value: "eq" },
+            { text: m.isNotEqualTo, value: "neq" },
+            { text: m.isEmpty, value: "isempty" },
+            { text: m.isNotEmpty, value: "isnotempty" },
+            { text: m.isNull, value: "isnull" },
+            { text: m.isNotNull, value: "isnotnull" },
+            { text: m.isNullOrEmpty, value: "isnullorempty" },
+            { text: m.isNotNullOrEmpty, value: "isnotnullorempty" }
+        ];
+    }
 
     public buildBooleanFilterDescriptor(
         args: FilterDescriptorBuildArgs<boolean | null, BooleanFilterOperators>

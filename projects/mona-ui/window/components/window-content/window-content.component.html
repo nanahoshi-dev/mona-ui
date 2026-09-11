@@ -6,7 +6,7 @@
         [draggable]="windowData.draggable"
         [windowRef]="windowData.windowReference"
         [attr.tabindex]="windowData.draggable ? 0 : null"
-        [attr.aria-label]="windowData.draggable ? 'Move window. Use arrow keys to move.' : null">
+        [attr.aria-label]="windowData.draggable ? messages().moveWindow : null">
         <div [id]="headerId" [class]="titleContainerClass()">
             @if (windowData.titleTemplate) {
                 <ng-container [ngTemplateOutlet]="windowData.titleTemplate"></ng-container>
@@ -21,7 +21,7 @@
                     [ngTemplateOutletContext]="{ $implicit: windowData.windowReference.windowRef }">
                 </ng-container>
             }
-            @let maximizeTitle = maximized() || minimized() ? "Restore" : "Maximize";
+            @let maximizeTitle = maximized() || minimized() ? messages().restore : messages().maximize;
             @if (windowData.minimizable && !minimized()) {
                 <button
                     monaButton
@@ -30,8 +30,8 @@
                     type="button"
                     [iconOnly]="true"
                     [rounded]="windowData.rounded"
-                    [title]="'Minimize'"
-                    aria-label="Minimize"
+                    [title]="messages().minimize"
+                    [attr.aria-label]="messages().minimize"
                     (dblclick)="$event.stopPropagation()"
                     (click)="onMinimizeClick()">
                     <svg lucideMinus [size]="16" aria-hidden="true"></svg>
@@ -60,8 +60,8 @@
                     type="button"
                     [iconOnly]="true"
                     [rounded]="windowData.rounded"
-                    title="Close"
-                    aria-label="Close window"
+                    [title]="messages().close"
+                    [attr.aria-label]="messages().closeWindow"
                     (dblclick)="$event.stopPropagation()"
                     (click)="onCloseClick($event)">
                     <svg lucideX [size]="16" aria-hidden="true"></svg>
@@ -96,7 +96,7 @@
             [windowRef]="windowData.windowReference"
             direction="north"
             tabindex="0"
-            aria-label="Resize window from the top. Use arrow keys to resize."
+            [attr.aria-label]="messages().resizeTop"
             [class]="'north' | monaResizePosition"></div>
         <div
             monaWindowResizeHandler
@@ -107,7 +107,7 @@
             [windowRef]="windowData.windowReference"
             direction="south"
             tabindex="0"
-            aria-label="Resize window from the bottom. Use arrow keys to resize."
+            [attr.aria-label]="messages().resizeBottom"
             [class]="'south' | monaResizePosition"></div>
         <div
             monaWindowResizeHandler
@@ -118,7 +118,7 @@
             [windowRef]="windowData.windowReference"
             direction="east"
             tabindex="0"
-            aria-label="Resize window from the right. Use arrow keys to resize."
+            [attr.aria-label]="messages().resizeRight"
             [class]="'east' | monaResizePosition"></div>
         <div
             monaWindowResizeHandler
@@ -129,7 +129,7 @@
             [windowRef]="windowData.windowReference"
             direction="west"
             tabindex="0"
-            aria-label="Resize window from the left. Use arrow keys to resize."
+            [attr.aria-label]="messages().resizeLeft"
             [class]="'west' | monaResizePosition"></div>
         <div
             monaWindowResizeHandler
@@ -140,7 +140,7 @@
             [windowRef]="windowData.windowReference"
             direction="northeast"
             tabindex="0"
-            aria-label="Resize window from the top-right corner. Use arrow keys to resize."
+            [attr.aria-label]="messages().resizeTopRight"
             [class]="'northeast' | monaResizePosition"></div>
         <div
             monaWindowResizeHandler
@@ -151,7 +151,7 @@
             [windowRef]="windowData.windowReference"
             direction="northwest"
             tabindex="0"
-            aria-label="Resize window from the top-left corner. Use arrow keys to resize."
+            [attr.aria-label]="messages().resizeTopLeft"
             [class]="'northwest' | monaResizePosition"></div>
         <div
             monaWindowResizeHandler
@@ -162,7 +162,7 @@
             [windowRef]="windowData.windowReference"
             direction="southeast"
             tabindex="0"
-            aria-label="Resize window from the bottom-right corner. Use arrow keys to resize."
+            [attr.aria-label]="messages().resizeBottomRight"
             [class]="'southeast' | monaResizePosition"></div>
         <div
             monaWindowResizeHandler
@@ -173,7 +173,7 @@
             [windowRef]="windowData.windowReference"
             direction="southwest"
             tabindex="0"
-            aria-label="Resize window from the bottom-left corner. Use arrow keys to resize."
+            [attr.aria-label]="messages().resizeBottomLeft"
             [class]="'southwest' | monaResizePosition"></div>
     }
 </div>

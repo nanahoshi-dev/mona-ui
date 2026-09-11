@@ -1,6 +1,7 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { disabled, form, FormField, readonly } from "@angular/forms/signals";
+import { MONA_DEFAULT_LOCALE, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { DateTimePickerComponent } from "./datetime-picker.component";
 
 describe("DateTimePickerComponent", () => {
@@ -69,6 +70,108 @@ describe("DateTimePickerComponent", () => {
         ).toBe("true");
     });
 
+    it("renders default english accessible labels and messages in popup", () => {
+        const toggleBtn = fixture.nativeElement.querySelector("button[monaButton]") as HTMLButtonElement;
+        expect(toggleBtn.getAttribute("aria-label")).toBe("Open date and time picker");
+
+        toggleBtn.click();
+        fixture.detectChanges();
+
+        const popup = document.querySelector("div[role='dialog']") as HTMLElement;
+        expect(popup?.getAttribute("aria-label")).toBe("Date and time picker");
+
+        const tabButtons = popup.querySelectorAll("button[role='tab']");
+        expect(tabButtons[0]?.textContent?.trim()).toBe("Date");
+        expect(tabButtons[1]?.textContent?.trim()).toBe("Time");
+
+        const calendarContainer = popup.querySelector("div[aria-label='Calendar']");
+        expect(calendarContainer).not.toBeNull();
+
+        const footerButtons = popup.querySelectorAll("div.border-t button");
+        expect(footerButtons[0]?.textContent?.trim()).toBe("Set");
+        expect(footerButtons[1]?.textContent?.trim()).toBe("Cancel");
+    });
+
+    it("updates messages dynamically when locale changes", () => {
+        const i18n = TestBed.inject(MonaI18nService);
+        i18n.use({
+            ...MONA_DEFAULT_LOCALE,
+            messages: {
+                dateTimePicker: {
+                    calendar: "Takvim",
+                    cancel: "İptal",
+                    date: "Tarih",
+                    dateTimePicker: "Tarih ve saat seçici",
+                    openDateTimePicker: "Tarih ve saat seçiciyi aç",
+                    set: "Ayarla",
+                    time: "Saat",
+                    timePicker: "Saat seçici"
+                }
+            }
+        });
+        fixture.detectChanges();
+
+        const toggleBtn = fixture.nativeElement.querySelector("button[monaButton]") as HTMLButtonElement;
+        expect(toggleBtn.getAttribute("aria-label")).toBe("Tarih ve saat seçiciyi aç");
+
+        toggleBtn.click();
+        fixture.detectChanges();
+
+        const popup = document.querySelector("div[role='dialog']") as HTMLElement;
+        expect(popup?.getAttribute("aria-label")).toBe("Tarih ve saat seçici");
+
+        const tabButtons = popup.querySelectorAll("button[role='tab']");
+        expect(tabButtons[0]?.textContent?.trim()).toBe("Tarih");
+        expect(tabButtons[1]?.textContent?.trim()).toBe("Saat");
+
+        const calendarContainer = popup.querySelector("div[aria-label='Takvim']");
+        expect(calendarContainer).not.toBeNull();
+
+        const footerButtons = popup.querySelectorAll("div.border-t button");
+        expect(footerButtons[0]?.textContent?.trim()).toBe("Ayarla");
+        expect(footerButtons[1]?.textContent?.trim()).toBe("İptal");
+
+        i18n.use(MONA_DEFAULT_LOCALE);
+    });
+
+    it("inverts alt+arrow keyboard tab switching in RTL mode", async () => {
+        const i18n = TestBed.inject(MonaI18nService);
+        const toggleBtn = fixture.nativeElement.querySelector("button[monaButton]") as HTMLButtonElement;
+        toggleBtn.click();
+        fixture.detectChanges();
+
+        const host = fixture.nativeElement.querySelector("mona-datetime-picker") as HTMLElement;
+
+        // In LTR: Alt+ArrowRight moves to time
+        host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", altKey: true, bubbles: true }));
+        fixture.detectChanges();
+        let popup = document.querySelector("div[role='dialog']") as HTMLElement;
+        expect(popup.querySelector("div[aria-label='Time picker']")).not.toBeNull();
+
+        // Switch to RTL locale and DOM
+        i18n.use({
+            ...MONA_DEFAULT_LOCALE,
+            direction: "rtl"
+        });
+        host.setAttribute("dir", "rtl");
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        // In RTL: Alt+ArrowRight moves to date
+        host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", altKey: true, bubbles: true }));
+        fixture.detectChanges();
+        popup = document.querySelector("div[role='dialog']") as HTMLElement;
+        expect(popup.querySelector("div[aria-label='Calendar']")).not.toBeNull();
+
+        // In RTL: Alt+ArrowLeft moves to time
+        host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", altKey: true, bubbles: true }));
+        fixture.detectChanges();
+        popup = document.querySelector("div[role='dialog']") as HTMLElement;
+        expect(popup.querySelector("div[aria-label='Time picker']")).not.toBeNull();
+
+        i18n.use(MONA_DEFAULT_LOCALE);
+    });
+
     function getInput(): HTMLInputElement {
         const input = fixture.nativeElement.querySelector("input");
         if (!(input instanceof HTMLInputElement)) {
@@ -78,20 +181,21 @@ describe("DateTimePickerComponent", () => {
     }
 });
 
+interface DateTimePickerFormModel {
+    value: Date | null;
+}
+
 @Component({
     imports: [DateTimePickerComponent, FormField],
     template: `<mona-datetime-picker [formField]="form.value" format="dd/MM/yyyy HH:mm"></mona-datetime-picker>`
 })
 class DateTimePickerHostComponent {
-    public readonly disabled = signal(false);
-    public readonly readonly = signal(false);
     readonly #model = signal<DateTimePickerFormModel>({ value: new Date(2026, 0, 2, 9, 30) });
+
+    public readonly disabled = signal(false);
     public readonly form = form(this.#model, schema => {
         disabled(schema.value, { when: () => this.disabled() });
         readonly(schema.value, { when: () => this.readonly() });
     });
-}
-
-interface DateTimePickerFormModel {
-    value: Date | null;
+    public readonly readonly = signal(false);
 }

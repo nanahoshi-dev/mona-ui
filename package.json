@@ -23,7 +23,12 @@
         "test:lib:density-stress": "ng run mona-ui:test-density-stress --watch=false",
         "test:lib:watch": "ng test mona-ui --coverage --watch",
         "test:app": "ng test mona-ui-tester --watch=false",
-        "test:theme-colors": "tsx projects/mona-ui-tester/scripts/check-theme-color-parity.ts"
+        "test:theme-colors": "tsx projects/mona-ui-tester/scripts/check-theme-color-parity.ts",
+        "test:audit": "vitest run projects/mona-ui-tester/scripts/audit-i18n-rtl.spec.ts",
+        "audit:i18n-rtl": "tsx projects/mona-ui-tester/scripts/audit-i18n-rtl.ts",
+        "audit:i18n-rtl:strict": "tsx projects/mona-ui-tester/scripts/audit-i18n-rtl.ts --strict",
+        "test:browser:geometry": "npm run build:tester && tsx scripts/test-direction-browser.ts --no-build",
+        "test:browser:geometry:no-build": "tsx scripts/test-direction-browser.ts --no-build"
     },
     "workspaces": [
         "projects/*"
@@ -140,6 +145,7 @@
         "@types/d3-shape": "^3.1.8",
         "@types/jasmine": "~6.0.0",
         "@types/luxon": "^3.7.1",
+        "@types/node": "^22.20.2",
         "@typescript-eslint/eslint-plugin": "^8.61.0",
         "@typescript-eslint/parser": "^8.61.0",
         "@vitest/coverage-v8": "^4.1.8",
@@ -150,6 +156,7 @@
         "jasmine-core": "~6.3.0",
         "jsdom": "^29.1.1",
         "ng-packagr": "^22.0.0",
+        "playwright": "^1.63.0",
         "prettier": "^3.8.4",
         "ts-morph": "^28.0.0",
         "tsx": "^4.22.4",

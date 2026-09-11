@@ -6,7 +6,6 @@ import { DialogSettings } from "./DialogSettings";
 
 export interface DialogRefParams<R = unknown> {
     close: (result?: R) => void;
-    update: (data: Partial<DialogSettings>) => void;
     get close$(): Observable<PopupCloseEvent<R>>;
     get closed$(): Observable<void>;
     get component(): ComponentRef<unknown> | null;
@@ -14,5 +13,6 @@ export interface DialogRefParams<R = unknown> {
     get height(): number;
     get popupRef(): PopupRef;
     get result(): Observable<DialogResult>;
+    update: (data: Partial<DialogSettings>) => void;
     get width(): number;
 }

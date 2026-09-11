@@ -14,11 +14,12 @@ export class TickStylePipe implements PipeTransform {
         const width = this.getWidth(tick, smallTickStep, largeTickStep, orientation);
 
         if (orientation === "horizontal") {
+            const isRtl = args.direction === "rtl";
             return {
                 position: "absolute",
-                left: `${position}%`,
+                ...(isRtl ? { right: `${position}%` } : { left: `${position}%` }),
                 top: "50%",
-                transform: "translateX(-50%) translateY(-50%) translateZ(0)",
+                transform: `${isRtl ? "translateX(50%)" : "translateX(-50%)"} translateY(-50%) translateZ(0)`,
                 width: "1px",
                 height: `${height}px`,
                 backfaceVisibility: "hidden",

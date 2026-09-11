@@ -15,3 +15,4 @@ export { SplitButtonMenuItemIconTemplateDirective } from "./directives/split-but
 export { SplitButtonMenuItemShortcutTemplateDirective } from "./directives/split-button-menu-item-shortcut-template.directive";
 export { SplitButtonMenuItemTextTemplateDirective } from "./directives/split-button-menu-item-text-template.directive";
 export { SplitButtonTextTemplateDirective } from "./directives/split-button-text-template.directive";
+export * from "./i18n/split-button.default-messages";

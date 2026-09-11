@@ -21,7 +21,7 @@
 
 @let textBoxValue = value();
 @if (clearButton() && textBoxValue && textBoxValue.length !== 0) {
-    <button monaButton look="link" size="small" class="me-2 p-0" aria-label="Clear" (click)="onClearClick()">
+    <button monaButton look="link" size="small" class="me-2 p-0" [attr.aria-label]="messages().clear" (click)="onClearClick()">
         <svg lucideX class="size-4 opacity-50 hover:opacity-90"></svg>
     </button>
 }

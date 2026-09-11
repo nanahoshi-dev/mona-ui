@@ -25,7 +25,7 @@
             [rounded]="'none'"
             [size]="size()"
             class="aspect-square h-full w-auto"
-            [attr.aria-label]="'Open calendar'"
+            [attr.aria-label]="messages().openCalendar"
             [attr.aria-expanded]="expanded()"
             [attr.aria-controls]="popupId"
             [disabled]="disabled() || readonly()"
@@ -42,7 +42,7 @@
         [id]="popupId"
         aria-modal="true"
         role="dialog"
-        aria-label="Date picker"
+        [attr.aria-label]="messages().datePicker"
         cdkTrapFocus>
         <mona-calendar
             [disabledDates]="disabledDates()"

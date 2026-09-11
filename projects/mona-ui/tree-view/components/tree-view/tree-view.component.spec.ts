@@ -1,31 +1,32 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { NodeItem } from "@nanahoshi/mona-ui/internal/tree";
+import { MonaI18nService, MonaTreeViewMessages } from "@nanahoshi/mona-ui/i18n";
+import { NodeItem, TreeService } from "@nanahoshi/mona-ui/internal/tree";
 
 import { TreeViewComponent } from "./tree-view.component";
 
 interface TestItem {
+    children?: TestItem[];
     id: string;
     text: string;
-    children?: TestItem[];
 }
 
 function buildData(): TestItem[] {
     return [
         {
-            id: "1",
-            text: "Node 1",
             children: [
                 { id: "1.1", text: "Node 1.1" },
                 { id: "1.2", text: "Node 1.2" }
-            ]
+            ],
+            id: "1",
+            text: "Node 1"
         },
         { id: "2", text: "Node 2" }
     ];
 }
 
 describe("TreeViewComponent", () => {
-    let component: TreeViewComponent<any>;
-    let fixture: ComponentFixture<TreeViewComponent<any>>;
+    let component: TreeViewComponent<TestItem>;
+    let fixture: ComponentFixture<TreeViewComponent<TestItem>>;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -33,7 +34,9 @@ describe("TreeViewComponent", () => {
             providers: []
         }).compileComponents();
 
-        fixture = TestBed.createComponent(TreeViewComponent);
+        fixture = TestBed.createComponent(TreeViewComponent) as unknown as ComponentFixture<
+            TreeViewComponent<TestItem>
+        >;
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
@@ -87,4 +90,56 @@ describe("TreeViewComponent", () => {
             ).not.toThrow();
         });
     });
+
+    describe("i18n & messages", () => {
+        it("provides default messages", () => {
+            const internals = component as unknown as TreeViewComponentInternals;
+            expect(internals.messages()).toEqual({
+                collapse: "Collapse",
+                expand: "Expand",
+                filter: "Filter",
+                filterTree: "Filter tree"
+            });
+        });
+
+        it("derives filterAriaLabel from ariaLabel and messages", () => {
+            const internals = component as unknown as TreeViewComponentInternals;
+            expect(internals.filterAriaLabel()).toBe("Filter tree");
+
+            fixture.componentRef.setInput("ariaLabel", "Files");
+            fixture.detectChanges();
+            expect(internals.filterAriaLabel()).toBe("Filter Files");
+        });
+
+        it("reacts to dynamic locale change", () => {
+            const i18n = TestBed.inject(MonaI18nService);
+            const internals = component as unknown as TreeViewComponentInternals;
+
+            i18n.use({
+                direction: "rtl",
+                id: "ar",
+                messages: {
+                    treeView: {
+                        collapse: "طي",
+                        expand: "توسيع",
+                        filter: "تصفية",
+                        filterTree: "تصفية الشجرة"
+                    }
+                }
+            });
+            fixture.detectChanges();
+
+            expect(internals.filterAriaLabel()).toBe("تصفية الشجرة");
+
+            fixture.componentRef.setInput("ariaLabel", "الملفات");
+            fixture.detectChanges();
+            expect(internals.filterAriaLabel()).toBe("تصفية الملفات");
+        });
+    });
 });
+
+interface TreeViewComponentInternals {
+    readonly filterAriaLabel: () => string;
+    readonly messages: () => MonaTreeViewMessages;
+    readonly treeService: TreeService<unknown>;
+}

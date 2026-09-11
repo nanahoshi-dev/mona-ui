@@ -18,10 +18,12 @@ import {
 } from "@angular/core";
 import { LucideDynamicIcon, LucideMaximize, LucideMinimize, LucideMinus, LucideX } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { mergeMessages, type MonaWindowMessages, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { createElementControlId, focusElement } from "@nanahoshi/mona-ui/internal";
 import { PopupCloseEvent, PopupCloseSource, PopupDataInjectionToken } from "@nanahoshi/mona-ui/popup";
 import { WindowDragHandlerDirective } from "../../directives/window-drag-handler.directive";
 import { WindowResizeHandlerDirective } from "../../directives/window-resize-handler.directive";
+import { WINDOW_DEFAULT_MESSAGES } from "../../i18n/window.default-messages";
 import { WindowInjectorData } from "../../models/WindowInjectorData";
 import { ResizePositionPipe } from "../../pipes/resize-position.pipe";
 import {
@@ -60,8 +62,9 @@ export class WindowContentComponent implements WindowContentVariantInput {
     readonly #appRef = inject(ApplicationRef);
     readonly #document = inject(DOCUMENT);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #i18n = inject(MonaI18nService);
     readonly #injector = inject(Injector);
-
+    readonly #localeMessages = this.#i18n.componentMessages("window", WINDOW_DEFAULT_MESSAGES);
     readonly #sizeBeforeMaximize = signal({ width: 0, height: 0, top: 0, left: 0 });
     readonly #sizeBeforeMinimize = signal(0);
     readonly #trapFocus = inject(CdkTrapFocus);
@@ -91,6 +94,9 @@ export class WindowContentComponent implements WindowContentVariantInput {
         return this.maximized() && !this.minimized() ? LucideMinimize : LucideMaximize;
     });
     protected readonly maximized = signal(false);
+    protected readonly messages = computed<MonaWindowMessages>(() => {
+        return mergeMessages(this.#localeMessages(), this.windowData.messages);
+    });
     protected readonly minimized = signal(false);
     protected readonly titleBarActionClass = computed(() => {
         return windowTitleBarActionThemeVariants();

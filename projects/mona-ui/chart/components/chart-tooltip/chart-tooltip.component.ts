@@ -12,8 +12,10 @@ import {
     signal,
     viewChild
 } from "@angular/core";
+import { formatNumber, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { twMerge } from "tailwind-merge";
 import { ChartTooltipTemplateDirective } from "../../directives/chart-tooltip-template.directive";
+import { CHART_DEFAULT_MESSAGES } from "../../i18n/chart.default-messages";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import { chartTooltipBaseThemeVariants } from "../../styles/chart.styles";
@@ -35,10 +37,12 @@ export interface ChartTooltipPlacement {
 export class ChartTooltipComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
+    readonly #i18n = inject(MonaI18nService);
     readonly #measuredHeight = signal<number>(60);
     readonly #measuredWidth = signal<number>(180);
     #tooltipResizeObserver: ResizeObserver | null = null;
 
+    protected readonly messages = this.#i18n.componentMessages("chart", CHART_DEFAULT_MESSAGES);
     protected readonly customTemplate = contentChild(ChartTooltipTemplateDirective);
     protected readonly placement = computed<ChartTooltipPlacement>(() => {
         const pos = this.tooltipPosition();
@@ -171,5 +175,23 @@ export class ChartTooltipComponent implements OnInit {
         });
 
         this.#destroyRef.onDestroy(unregister);
+    }
+
+    protected financialDirectionLabel(dir: "falling" | "rising" | "unchanged" | string | null | undefined): string {
+        if (dir === "rising") {
+            return this.messages().rising;
+        }
+        if (dir === "falling") {
+            return this.messages().falling;
+        }
+        return this.messages().unchanged;
+    }
+
+    protected formatPercent(value: number): string {
+        return formatNumber(value, this.#i18n.localeId(), {
+            style: "percent",
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1
+        });
     }
 }

@@ -4,10 +4,10 @@
         [selected]="linkSelected()"
         [toggleable]="false"
         (click)="onLinkDialogDisplay()"
-        title="Insert Link">
+        [title]="messages().insertLink">
         <i class="ri-link-m"></i>
     </button>
-    <button monaButton [disabled]="unlinkDisabled()" (click)="onUnlinkClick()" title="Remove Link">
+    <button monaButton [disabled]="unlinkDisabled()" (click)="onUnlinkClick()" [title]="messages().removeLink">
         <i class="ri-link-unlink-m"></i>
     </button>
 </mona-button-group>

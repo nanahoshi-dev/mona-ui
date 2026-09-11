@@ -4,7 +4,7 @@
         [selected]="alignLeftSelected()"
         [toggleable]="false"
         (click)="onAlignLeft()"
-        title="Align text left">
+        [title]="messages().alignLeft">
         <i class="ri-align-left"></i>
     </button>
     <button
@@ -12,7 +12,7 @@
         [selected]="alignCenterSelected()"
         [toggleable]="false"
         (click)="onAlignCenter()"
-        title="Center text">
+        [title]="messages().alignCenter">
         <i class="ri-align-center"></i>
     </button>
     <button
@@ -20,7 +20,7 @@
         [selected]="alignRightSelected()"
         [toggleable]="false"
         (click)="onAlignRight()"
-        title="Align text right">
+        [title]="messages().alignRight">
         <i class="ri-align-right"></i>
     </button>
     <button
@@ -28,7 +28,7 @@
         [selected]="alignJustifySelected()"
         [toggleable]="false"
         (click)="onAlignJustify()"
-        title="Justify">
+        [title]="messages().justify">
         <i class="ri-align-justify"></i>
     </button>
 </mona-button-group>

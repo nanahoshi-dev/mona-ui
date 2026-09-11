@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { Component, computed, inject, input, model, output } from "@angular/core";
+import { Component, computed, input, model, output } from "@angular/core";
 import { type FormCheckboxControl } from "@angular/forms/signals";
 import { twMerge } from "tailwind-merge";
 import {

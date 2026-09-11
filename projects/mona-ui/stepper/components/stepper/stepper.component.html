@@ -82,6 +82,6 @@
     [attr.aria-valuenow]="step()"
     [attr.aria-valuemin]="0"
     [attr.aria-valuemax]="progressMax()"
-    [attr.aria-label]="progressAriaLabel()">
+    [attr.aria-label]="progressAriaLabel() || messages().stepProgress">
     <div [class]="trackLineClass()" [style]="trackInnerStyles()"></div>
 </div>

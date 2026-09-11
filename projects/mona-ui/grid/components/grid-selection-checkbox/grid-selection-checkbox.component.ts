@@ -20,7 +20,7 @@ export class GridSelectionCheckboxComponent {
         if (labelFn) {
             return labelFn(this.row().data);
         }
-        return `Select row ${this.rowIndex() + 1}`;
+        return this.#gridService.messages().selectRow(this.rowIndex() + 1);
     });
     protected readonly checked = computed(() => this.#gridService.isRowSelected(this.row()));
     protected readonly hostClass = computed(() => gridSelectionCellThemeVariants());

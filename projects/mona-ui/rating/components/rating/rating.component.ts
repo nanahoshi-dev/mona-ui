@@ -4,6 +4,7 @@ import {
     computed,
     contentChild,
     ElementRef,
+    inject,
     input,
     model,
     output,
@@ -23,6 +24,8 @@ import {
 } from "@lucide/angular";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { range } from "@mirei/ts-collections";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { RATING_DEFAULT_MESSAGES } from "../../i18n/rating.default-messages";
 import { twMerge } from "tailwind-merge";
 import { RatingHoveredItemTemplateDirective } from "../../directives/rating-hovered-item-template.directive";
 import { RatingItemTemplateDirective } from "../../directives/rating-item-template.directive";
@@ -74,6 +77,9 @@ const ratingIcons = {
     imports: [NgTemplateOutlet, LucideDynamicIcon]
 })
 export class RatingComponent implements RatingVariantInput, FormValueControl<number> {
+    readonly #direction = injectComponentDirection();
+    readonly #i18n = inject(MonaI18nService);
+
     protected readonly activeState = computed<"hovered" | "selected">(() =>
         this.previewActive() ? "hovered" : "selected"
     );
@@ -95,7 +101,9 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
         if (custom) {
             return custom(this.normalizedValue(), this.itemsCount());
         }
-        return this.normalizedValue() === 0 ? "Not rated" : `${this.normalizedValue()} out of ${this.itemsCount()}`;
+        return this.normalizedValue() === 0
+            ? this.messages().notRated
+            : this.messages().valueText(this.normalizedValue(), this.itemsCount());
     });
     protected readonly effectiveTabIndex = computed(() => (this.disabled() ? -1 : this.tabindex()));
     protected readonly hoveredTemplate = contentChild(RatingHoveredItemTemplateDirective, {
@@ -106,6 +114,7 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
     protected readonly interactionDisabled = computed(() => this.disabled() || this.readonly());
     protected readonly interactionStep = computed(() => getRatingStep(this.precision()));
     protected readonly invalidState = computed(() => this.touched() && this.invalid());
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly itemClasses = computed(() => ratingItemThemeVariants({ size: this.size() }));
     protected readonly itemTemplate = contentChild(RatingItemTemplateDirective, { read: TemplateRef });
     protected readonly items = computed<readonly RatingItemDescriptor[]>(() =>
@@ -115,6 +124,7 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
     );
     protected readonly labelClasses = computed(() => ratingLabelThemeVariants({ size: this.size() }));
     protected readonly labelId = createElementControlId();
+    protected readonly messages = this.#i18n.componentMessages("rating", RATING_DEFAULT_MESSAGES);
     protected readonly normalizedValue = computed(() =>
         normalizeRatingValue(this.value(), this.itemsCount(), this.precision())
     );
@@ -384,11 +394,15 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
     }
 
     private getKeyAction(key: string): RatingKeyAction | null {
+        const isRtl = this.isRtl();
+        const decreaseKey = isRtl ? "ArrowRight" : "ArrowLeft";
+        const increaseKey = isRtl ? "ArrowLeft" : "ArrowRight";
+
         switch (key) {
-            case "ArrowRight":
+            case increaseKey:
             case "ArrowUp":
                 return "increase";
-            case "ArrowLeft":
+            case decreaseKey:
             case "ArrowDown":
                 return "decrease";
             case "Home":

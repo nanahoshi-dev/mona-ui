@@ -8,7 +8,7 @@ export const buttonGroupThemeVariants = cva(
         border border-input-border
         [&>button]:border-0
         [&>button]:shadow-none
-        [&>button:not(:last-child)]:border-r
+        [&>button:not(:last-child)]:border-e
         [&>button:not(:last-child)]:border-border-subtle
         [&>button]:rounded-none
         [&>button]:focus-visible:ring-2
@@ -19,7 +19,7 @@ export const buttonGroupThemeVariants = cva(
             look: {
                 default: "",
                 error: "border-transparent",
-                ghost: "border-transparent [&>button:not(:last-child)]:border-r-0",
+                ghost: "border-transparent [&>button:not(:last-child)]:border-e-0",
                 info: "border-transparent",
                 outline: "",
                 primary: "border-transparent",

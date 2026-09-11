@@ -1,8 +1,8 @@
 <mona-dropdown-list
     [data]="editorService.fontSizes()"
-    placeholder="Font Size"
+    [placeholder]="messages().fontSize"
     [value]="selectedFontSize()"
     (valueChange)="onFontSizeChange($event)"
     [size]="'small'"
     [class]="dropdownListClass()"
-    title="Select font size"></mona-dropdown-list>
+    [title]="messages().selectFontSize"></mona-dropdown-list>

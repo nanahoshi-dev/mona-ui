@@ -52,7 +52,9 @@ import {
     TextBoxSuffixTemplateDirective
 } from "@nanahoshi/mona-ui/text-box";
 import { type ColorMode, type ColorOutputFormat } from "@nanahoshi/mona-ui/common";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { distinctUntilChanged, fromEvent, Subject, switchMap, takeUntil } from "rxjs";
+import { COLOR_GRADIENT_DEFAULT_MESSAGES } from "../../i18n/color-gradient.default-messages";
 import { ColorInput } from "../../models/ColorInput";
 import {
     colorGradientBaseThemeVariants,
@@ -90,6 +92,7 @@ import {
 export class ColorGradientComponent implements ColorGradientVariantInputs, FormValueControl<string | null | undefined> {
     readonly #clipboard = inject(Clipboard);
     readonly #destroyRef = inject(DestroyRef);
+    readonly #i18n = inject(MonaI18nService);
     readonly #injector = inject(Injector);
     readonly #valueChange$ = new Subject<string | null>();
     readonly #viewReady = signal(false);
@@ -132,12 +135,12 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
         {
             type: "current",
             color: this.selectedColor(),
-            title: "Current color"
+            title: this.messages().currentColor
         },
         {
             type: "last",
             color: this.lastSelectedColor(),
-            title: "Previous color",
+            title: this.messages().previousColor,
             onClick: () => this.onResetColorClick()
         }
     ]);
@@ -175,6 +178,7 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
         () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
     protected readonly lastSelectedColor = signal("");
+    protected readonly messages = this.#i18n.componentMessages("colorGradient", COLOR_GRADIENT_DEFAULT_MESSAGES);
     protected readonly rgb = signal<RGB>({ r: 255, g: 255, b: 255 });
     protected readonly selectedColor = computed(() => {
         const rgb = this.rgb();

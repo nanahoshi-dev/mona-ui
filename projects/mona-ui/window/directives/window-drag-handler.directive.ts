@@ -2,10 +2,10 @@ import { afterNextRender, DestroyRef, Directive, DOCUMENT, ElementRef, inject, i
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { fromEvent } from "rxjs";
 import { WindowReference } from "../models/WindowReference";
-import { DefaultMaxWindowHeight, DefaultMaxWindowWidth } from "../utils/defaults";
+import { DEFAULT_MAX_WINDOW_HEIGHT, DEFAULT_MAX_WINDOW_WIDTH } from "../utils/defaults";
 
-const KeyboardMoveStep = 10;
-const KeyboardMoveStepFine = 1;
+const KEYBOARD_MOVE_STEP = 10;
+const KEYBOARD_MOVE_STEP_FINE = 1;
 
 @Directive({
     selector: "div[monaWindowDragHandler]",
@@ -34,10 +34,10 @@ export class WindowDragHandlerDirective {
         if (!this.draggable()) {
             return;
         }
-        const step = event.shiftKey ? KeyboardMoveStepFine : KeyboardMoveStep;
+        const step = event.shiftKey ? KEYBOARD_MOVE_STEP_FINE : KEYBOARD_MOVE_STEP;
         const element = this.windowRef().element;
-        const innerWidth = this.#document.defaultView?.innerWidth || DefaultMaxWindowWidth;
-        const innerHeight = this.#document.defaultView?.innerHeight || DefaultMaxWindowHeight;
+        const innerWidth = this.#document.defaultView?.innerWidth || DEFAULT_MAX_WINDOW_WIDTH;
+        const innerHeight = this.#document.defaultView?.innerHeight || DEFAULT_MAX_WINDOW_HEIGHT;
         const initialTop = element.getBoundingClientRect().top;
         const initialLeft = element.getBoundingClientRect().left;
         let top = initialTop;
@@ -78,8 +78,8 @@ export class WindowDragHandlerDirective {
         const initialY = event.clientY;
         const initialTop = element.getBoundingClientRect().top;
         const initialLeft = element.getBoundingClientRect().left;
-        const innerWidth = this.#document.defaultView?.innerWidth || DefaultMaxWindowWidth;
-        const innerHeight = this.#document.defaultView?.innerHeight || DefaultMaxWindowHeight;
+        const innerWidth = this.#document.defaultView?.innerWidth || DEFAULT_MAX_WINDOW_WIDTH;
+        const innerHeight = this.#document.defaultView?.innerHeight || DEFAULT_MAX_WINDOW_HEIGHT;
         let dragInitiated = false;
 
         const onPointerMove = (event: PointerEvent) => {

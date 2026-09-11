@@ -1,6 +1,7 @@
 import { OverlayContainer } from "@angular/cdk/overlay";
 import { ApplicationRef, Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { MONA_DEFAULT_LOCALE, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { PopupCloseEvent, PopupCloseSource, PopupService, type PopupSettings } from "@nanahoshi/mona-ui/popup";
 import axe from "axe-core";
 import { SheetSide } from "../../models/SheetSide";
@@ -354,5 +355,41 @@ describe("SheetComponent", () => {
         expect(closedCount).toBe(1);
         expect(document.activeElement).toBe(trigger);
         trigger.remove();
+    });
+
+    it("renders default English messages for close button", async () => {
+        await createSheet({ title: "Sheet" });
+        const closeBtn = getDialog().querySelector<HTMLButtonElement>("button[monaButton]");
+        expect(closeBtn?.getAttribute("aria-label")).toBe("Close sheet");
+    });
+
+    it("dynamically updates close button label on MonaI18nService.use", async () => {
+        const i18n = TestBed.inject(MonaI18nService);
+        await createSheet({ title: "Sheet" });
+        i18n.use({
+            ...MONA_DEFAULT_LOCALE,
+            messages: {
+                sheet: {
+                    closeSheet: "Kapat"
+                }
+            }
+        });
+        fixture?.detectChanges();
+        const closeBtn = getDialog().querySelector<HTMLButtonElement>("button[monaButton]");
+        expect(closeBtn?.getAttribute("aria-label")).toBe("Kapat");
+
+        i18n.use(MONA_DEFAULT_LOCALE);
+    });
+
+    it("respects consumer message overrides via messages input", async () => {
+        fixture = TestBed.createComponent(SheetComponent);
+        fixture.componentRef.setInput("title", "Sheet");
+        fixture.componentRef.setInput("messages", { closeSheet: "Fermer le panneau" });
+        fixture.detectChanges();
+        await fixture.whenStable();
+        TestBed.inject(ApplicationRef).tick();
+
+        const closeBtn = getDialog().querySelector<HTMLButtonElement>("button[monaButton]");
+        expect(closeBtn?.getAttribute("aria-label")).toBe("Fermer le panneau");
     });
 });

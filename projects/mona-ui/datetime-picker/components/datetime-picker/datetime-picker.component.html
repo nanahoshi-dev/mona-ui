@@ -25,7 +25,7 @@
             [size]="size()"
             [rounded]="'none'"
             class="aspect-square h-full w-auto"
-            [attr.aria-label]="'Open date and time picker'"
+            [attr.aria-label]="messages().openDateTimePicker"
             [attr.aria-expanded]="expanded()"
             [attr.aria-controls]="popupId"
             (click)="onDateInputButtonClick()"
@@ -43,6 +43,7 @@
         class="flex h-68 flex-col"
         aria-modal="true"
         role="dialog"
+        [attr.aria-label]="messages().dateTimePicker"
         cdkTrapFocus>
         <div [class]="headerClass()">
             <mona-button-group
@@ -54,16 +55,16 @@
                 [rounded]="rounded()"
                 role="tablist">
                 <button monaButton [selected]="activeView() === 'date'" (click)="activeView.set('date')" role="tab">
-                    Date
+                    {{ messages().date }}
                 </button>
                 <button monaButton [selected]="activeView() === 'time'" (click)="activeView.set('time')" role="tab">
-                    Time
+                    {{ messages().time }}
                 </button>
             </mona-button-group>
         </div>
         <div class="overflow-hidden">
             @if (activeView() === "date") {
-                <div class="flex h-full items-center justify-center" aria-label="Calendar">
+                <div class="flex h-full items-center justify-center" [attr.aria-label]="messages().calendar">
                     <mona-calendar
                         [disabledDates]="disabledDates()"
                         [minDate]="min()"
@@ -101,7 +102,7 @@
                 </div>
             }
             @if (activeView() === "time") {
-                <div class="flex h-full max-h-64 items-center justify-center" aria-label="Time picker">
+                <div class="flex h-full max-h-64 items-center justify-center" [attr.aria-label]="messages().timePicker">
                     <mona-time-selector
                         [value]="navigatedDate()"
                         (valueChange)="onTimeSelectorValueChange($event)"
@@ -128,7 +129,7 @@
                 [rounded]="rounded()"
                 [size]="size()"
                 (click)="onSetDateClick()">
-                Set
+                {{ messages().set }}
             </button>
             <button
                 monaButton
@@ -137,7 +138,7 @@
                 [rounded]="rounded()"
                 [size]="size()"
                 (click)="onCancelClick()">
-                Cancel
+                {{ messages().cancel }}
             </button>
         </div>
     </div>

@@ -21,6 +21,7 @@ import {
     select
 } from "@mirei/ts-collections";
 import { VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { PopupMenuItem } from "@nanahoshi/mona-ui/popup-menu";
 import {
     CompositeFilterDescriptor,
@@ -73,6 +74,7 @@ import { RowReorderEvent } from "../models/RowReorderEvent";
 import { SelectableOptions } from "../models/SelectableOptions";
 import { SortableOptions } from "../models/SortableOptions";
 import type { StructuralColumnDescriptor, StructuralColumnKind } from "../models/StructuralColumn";
+import { GRID_DEFAULT_MESSAGES } from "../i18n/grid.default-messages";
 
 // Flat projection of a Row used as the IterablePatchStore item type.
 // $rowId is injected to carry the row identity without modifying Row.data.
@@ -101,6 +103,7 @@ export class GridService {
     readonly #filterableOptions = signal<FilterableOptions>({ enabled: false, type: "menu" });
     readonly #groupColumnIds = signal<ImmutableList<string>>(ImmutableList.create());
     readonly #horizontalScrollLeft = signal(0);
+    readonly #i18n = inject(MonaI18nService);
     readonly #injector = inject(Injector);
     readonly #platformId = inject(PLATFORM_ID);
     readonly #reorderableOptions = signal<ReorderableOptions>({ enabled: false });
@@ -314,6 +317,7 @@ export class GridService {
         return this.normalizeRenderedWidth(this.leadingStructuralWidth() + columnListWidth);
     });
     public readonly masterDetailTemplate = signal<TemplateRef<unknown> | null>(null);
+    public readonly messages = this.#i18n.componentMessages("grid", GRID_DEFAULT_MESSAGES);
     public readonly newRowFactory = signal<() => Record<PropertyKey, unknown>>(() => ({}));
     public readonly paginationState = signal<PaginationState>({ page: 1, skip: 0, take: 10 });
     public readonly remove$ = new Subject<GridRemoveEvent>();
@@ -752,7 +756,7 @@ export class GridService {
     public getRowReorderAriaLabel(row: Row, absoluteIndex: number): string {
         const options = this.rowReorderableOptions();
         const label = options.rowAriaLabel?.(row.data, absoluteIndex);
-        return label ?? `Reorder row ${absoluteIndex + 1}`;
+        return label ?? this.messages().reorderRow(absoluteIndex + 1);
     }
 
     public handleMultipleSelection(event: MouseEvent, row: Row): void {

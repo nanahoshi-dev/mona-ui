@@ -59,8 +59,10 @@ import {
 } from "@nanahoshi/mona-ui/dropdowns";
 import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import { TextBoxDirective } from "@nanahoshi/mona-ui/text-box";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { debounceTime, filter, identity, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
+import { AUTO_COMPLETE_DEFAULT_MESSAGES } from "../i18n/auto-complete.default-messages";
 
 import {
     autoCompleteAffixContainerThemeVariants,
@@ -125,6 +127,7 @@ export class AutoCompleteComponent<TData = unknown>
     readonly #destroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    readonly #i18n = inject(MonaI18nService);
     readonly #listService = inject(ListService);
     readonly #popupRef = this.#dropdownService.popupRef;
 
@@ -182,6 +185,7 @@ export class AutoCompleteComponent<TData = unknown>
         const variantClass = dropdownPopupThemeVariants({ rounded, size });
         return twMerge(variantClass, userClass);
     });
+    protected readonly messages = this.#i18n.componentMessages("autoComplete", AUTO_COMPLETE_DEFAULT_MESSAGES);
     protected readonly noDataTemplate = contentChild(DropdownNoDataTemplateDirective, { read: TemplateRef });
     protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
     protected readonly prefixTemplate = contentChild(DropdownPrefixTemplateDirective, { read: TemplateRef });

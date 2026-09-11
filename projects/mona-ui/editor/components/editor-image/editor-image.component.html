@@ -1,4 +1,4 @@
-<button monaButton [size]="'small'" (click)="onDisplayInserterClick()" title="Insert image">
+<button monaButton [size]="'small'" (click)="onDisplayInserterClick()" [title]="messages().insertImage">
     <i class="ri-image-add-line"></i>
 </button>
 
@@ -6,7 +6,7 @@
     <mona-window
         [width]="400"
         [modal]="false"
-        [title]="'Insert Image'"
+        [title]="messages().insertImage"
         [minimizable]="false"
         [maximizable]="false"
         (close)="onInserterClose()">

@@ -1,39 +1,39 @@
 <mona-button-group selection="single" [size]="'small'">
-    <button monaButton title="Insert table" #insertTableButton>
+    <button monaButton [title]="messages().insertTable" #insertTableButton>
         <i class="ri-grid-line"></i>
     </button>
     <button
         monaButton
         [disabled]="addColumnBeforeDisabled()"
         (click)="onAddColumnBeforeClick()"
-        title="Add column before">
+        [title]="messages().addColumnBefore">
         <i class="ri-insert-column-left"></i>
     </button>
-    <button monaButton [disabled]="addColumnAfterDisabled()" (click)="onAddColumnAfterClick()" title="Add column after">
+    <button monaButton [disabled]="addColumnAfterDisabled()" (click)="onAddColumnAfterClick()" [title]="messages().addColumnAfter">
         <i class="ri-insert-column-right"></i>
     </button>
-    <button monaButton [disabled]="addRowBeforeDisabled()" (click)="onAddRowBeforeClick()" title="Add row before">
+    <button monaButton [disabled]="addRowBeforeDisabled()" (click)="onAddRowBeforeClick()" [title]="messages().addRowBefore">
         <i class="ri-insert-row-top"></i>
     </button>
-    <button monaButton [disabled]="addRowAfterDisabled()" (click)="onAddRowAfterClick()" title="Add row after">
+    <button monaButton [disabled]="addRowAfterDisabled()" (click)="onAddRowAfterClick()" [title]="messages().addRowAfter">
         <i class="ri-insert-row-bottom"></i>
     </button>
-    <button monaButton [disabled]="deleteColumnDisabled()" (click)="onDeleteColumnClick()" title="Delete column">
+    <button monaButton [disabled]="deleteColumnDisabled()" (click)="onDeleteColumnClick()" [title]="messages().deleteColumn">
         <i class="ri-delete-column"></i>
     </button>
-    <button monaButton [disabled]="deleteRowDisabled()" (click)="onDeleteRowClick()" title="Delete row">
+    <button monaButton [disabled]="deleteRowDisabled()" (click)="onDeleteRowClick()" [title]="messages().deleteRow">
         <i class="ri-delete-row"></i>
     </button>
-    <button monaButton [disabled]="mergeCellsDisabled()" (click)="onMergeCellsClick()" title="Merge selected cells">
+    <button monaButton [disabled]="mergeCellsDisabled()" (click)="onMergeCellsClick()" [title]="messages().mergeCells">
         <i class="ri-merge-cells-horizontal"></i>
     </button>
-    <button monaButton [disabled]="splitCellDisabled()" (click)="onSplitCellClick()" title="Split cell">
+    <button monaButton [disabled]="splitCellDisabled()" (click)="onSplitCellClick()" [title]="messages().splitCell">
         <i class="ri-split-cells-horizontal"></i>
     </button>
-    <button monaButton [disabled]="toggleHeaderRowDisabled()" (click)="onToggleHeaderRow()" title="Toggle header row">
+    <button monaButton [disabled]="toggleHeaderRowDisabled()" (click)="onToggleHeaderRow()" [title]="messages().toggleHeaderRow">
         <i class="ri-table-line"></i>
     </button>
-    <button monaButton [disabled]="deleteTableDisabled()" (click)="onDeleteTableClick()" title="Delete table">
+    <button monaButton [disabled]="deleteTableDisabled()" (click)="onDeleteTableClick()" [title]="messages().deleteTable">
         <i class="ri-close-large-line"></i>
     </button>
 </mona-button-group>

@@ -189,6 +189,7 @@ export class GridComponent<T> implements GridVariantInput {
     protected readonly gridHeaderElement = viewChild.required<ElementRef<HTMLDivElement>>("gridHeaderElement");
     protected readonly gridHeaderTableElement = viewChild.required<ElementRef<HTMLTableElement>>("headerTable");
     protected readonly gridService = inject(GridService);
+    protected readonly messages = this.gridService.messages;
     protected readonly gridWidthSet = signal(false);
     protected readonly groupColumnList = viewChild<CdkDropList>("groupColumnList");
     protected readonly groupPanelPlaceholderClass = computed(() => {

@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { Component, computed, contentChildren, inject, input } from "@angular/core";
+import { Component, computed, contentChildren, input } from "@angular/core";
 import { from } from "@mirei/ts-collections";
 import { SplitterPaneStyleDirective } from "../../directives/splitter-pane-style.directive";
 import { splitterBaseThemeVariants, SplitterVariantInput, SplitterVariantProps } from "../../styles/splitter.styles";

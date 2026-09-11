@@ -1,4 +1,5 @@
 import { computed, Directive, inject } from "@angular/core";
+import { injectComponentDirection } from "@nanahoshi/mona-ui/i18n";
 import { SidebarService } from "../services/sidebar.service";
 import { sidebarRailThemeVariants } from "../styles/sidebar.styles";
 
@@ -25,8 +26,21 @@ import { sidebarRailThemeVariants } from "../styles/sidebar.styles";
     }
 })
 export class SidebarRailDirective {
+    readonly #direction = injectComponentDirection();
     readonly #sidebarService = inject(SidebarService);
-    protected readonly baseClass = computed(() => sidebarRailThemeVariants({ side: this.#sidebarService.side() }));
+
+    protected readonly physicalSide = computed<"left" | "right">(() => {
+        const isRtl = this.#direction() === "rtl";
+        const side = this.#sidebarService.side();
+        if (side === "start") {
+            return isRtl ? "right" : "left";
+        }
+        return isRtl ? "left" : "right";
+    });
+
+    protected readonly baseClass = computed(() =>
+        sidebarRailThemeVariants({ physicalSide: this.physicalSide() })
+    );
     protected readonly expanded = this.#sidebarService.expanded;
     protected readonly sidebarId = this.#sidebarService.sidebarId;
 

@@ -81,7 +81,7 @@
                     @if (item.items.length > 0) {
                         @if (!item.checkable) {
                             <div [class]="linkContainerClasses()">
-                                <svg lucideChevronRight [size]="16"></svg>
+                                <svg lucideChevronRight [size]="16" class="rtl:rotate-180"></svg>
                             </div>
                         }
                     } @else if (shortcutTemplate) {

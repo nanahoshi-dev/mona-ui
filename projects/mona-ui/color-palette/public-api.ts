@@ -3,5 +3,6 @@
  */
 
 export * from "./components/color-palette/color-palette.component";
+export * from "./i18n/color-palette.default-messages";
 
 export type { ColorPaletteVariantProps } from "./styles/color-palette.styles";

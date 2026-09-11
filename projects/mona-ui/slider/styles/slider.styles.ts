@@ -54,13 +54,11 @@ export const sliderSelectionThemeVariants = cva(
         border-none
         transition duration-(--mona-motion-fast) ease-out
 
-        data-[orientation="horizontal"]:top-0
-        data-[orientation="horizontal"]:bottom-0
+        data-[orientation="horizontal"]:inset-y-0
         data-[orientation="horizontal"]:transition-[left,right]
         data-[orientation="horizontal"]:data-[dragging="true"]:transition-none
 
-        data-[orientation="vertical"]:left-0
-        data-[orientation="vertical"]:right-0
+        data-[orientation="vertical"]:inset-x-0
         data-[orientation="vertical"]:transition-[top,bottom]
         data-[orientation="vertical"]:data-[dragging="true"]:transition-none
     `
@@ -116,8 +114,8 @@ export const sliderHandleThemeVariants = cva(
         outline-none
         transition duration-(--mona-motion-fast) ease-out
 
-        data-[orientation="horizontal"]:translate-x-[-50%]
-        data-[orientation="horizontal"]:transition-[left]
+        data-[orientation="horizontal"]:translate-x-[-50%] rtl:data-[orientation="horizontal"]:translate-x-[50%]
+        data-[orientation="horizontal"]:transition-[left,right]
         data-[orientation="horizontal"]:data-[dragging="true"]:transition-none
 
         data-[orientation="vertical"]:translate-y-[50%]

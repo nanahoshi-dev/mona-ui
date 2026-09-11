@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { form, FormField } from "@angular/forms/signals";
 import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it } from "vitest";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 
 import { ColorGradientComponent } from "./color-gradient.component";
 
@@ -546,6 +547,77 @@ describe("ColorGradientComponent format output", () => {
 
         const emittedValue = component.value();
         expect(emittedValue).toMatch(/^rgba\(/);
+    });
+});
+
+describe("ColorGradientComponent i18n", () => {
+    let fixture: ComponentFixture<ColorGradientComponent>;
+
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [ColorGradientComponent]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(ColorGradientComponent);
+        fixture.componentRef.setInput("showButtons", true);
+        await waitForStable(fixture);
+    });
+
+    it("renders default English aria-labels and button text", () => {
+        const handle = getHsvHandle(fixture);
+        expect(handle.getAttribute("aria-label")).toBe("Color saturation and value");
+
+        const clearBtn = fixture.nativeElement.querySelector("button[aria-label='Clear color']");
+        expect(clearBtn).toBeTruthy();
+
+        const switchBtn = fixture.nativeElement.querySelector("button[aria-label='Switch color mode']");
+        expect(switchBtn).toBeTruthy();
+
+        const copyDropdown = fixture.nativeElement.querySelector("mona-dropdown-button[aria-label='Copy color']");
+        expect(copyDropdown).toBeTruthy();
+
+        const buttons = Array.from(
+            fixture.nativeElement.querySelectorAll("div.flex.items-center.justify-end.gap-2 button")
+        ) as HTMLButtonElement[];
+        expect(buttons[0].textContent?.trim()).toBe("Apply");
+        expect(buttons[1].textContent?.trim()).toBe("Cancel");
+    });
+
+    it("updates aria labels and button text dynamically when locale changes", async () => {
+        const i18n = TestBed.inject(MonaI18nService);
+        i18n.use({
+            direction: "ltr",
+            id: "tr-TR",
+            messages: {
+                colorGradient: {
+                    apply: "Uygula",
+                    cancel: "İptal",
+                    clearColor: "Rengi temizle",
+                    copyColor: "Rengi kopyala",
+                    saturationAndValue: "Renk doygunluğu ve parlaklığı",
+                    switchColorMode: "Renk modunu değiştir"
+                }
+            }
+        });
+        await waitForStable(fixture);
+
+        const handle = getHsvHandle(fixture);
+        expect(handle.getAttribute("aria-label")).toBe("Renk doygunluğu ve parlaklığı");
+
+        const clearBtn = fixture.nativeElement.querySelector("button[aria-label='Rengi temizle']");
+        expect(clearBtn).toBeTruthy();
+
+        const switchBtn = fixture.nativeElement.querySelector("button[aria-label='Renk modunu değiştir']");
+        expect(switchBtn).toBeTruthy();
+
+        const copyDropdown = fixture.nativeElement.querySelector("mona-dropdown-button[aria-label='Rengi kopyala']");
+        expect(copyDropdown).toBeTruthy();
+
+        const buttons = Array.from(
+            fixture.nativeElement.querySelectorAll("div.flex.items-center.justify-end.gap-2 button")
+        ) as HTMLButtonElement[];
+        expect(buttons[0].textContent?.trim()).toBe("Uygula");
+        expect(buttons[1].textContent?.trim()).toBe("İptal");
     });
 });
 

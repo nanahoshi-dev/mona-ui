@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { SpinnerComponent } from "../spinner/spinner.component";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { SpinnerOverlayComponent } from "./spinner-overlay.component";
 
 describe("SpinnerOverlayComponent", () => {
@@ -91,4 +91,33 @@ describe("SpinnerOverlayComponent", () => {
         button?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
         expect(cancelEmitted).toBe(true);
     });
+
+    it("dynamically updates screen-reader fallback and default cancel text on locale change", () => {
+        const i18n = TestBed.inject(MonaI18nService);
+        fixture.componentRef.setInput("cancellable", true);
+        fixture.detectChanges();
+
+        let srOnly = host.querySelector(".sr-only");
+        let button = host.querySelector("button");
+        expect(srOnly?.textContent?.trim()).toBe("Loading");
+        expect(button?.textContent?.trim()).toBe("Cancel");
+
+        i18n.use({
+            id: "tr-TR",
+            direction: "ltr",
+            messages: {
+                spinner: {
+                    cancel: "İptal",
+                    loading: "Yükleniyor"
+                }
+            }
+        });
+        fixture.detectChanges();
+
+        srOnly = host.querySelector(".sr-only");
+        button = host.querySelector("button");
+        expect(srOnly?.textContent?.trim()).toBe("Yükleniyor");
+        expect(button?.textContent?.trim()).toBe("İptal");
+    });
 });
+

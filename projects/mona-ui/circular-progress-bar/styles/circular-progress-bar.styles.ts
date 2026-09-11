@@ -6,9 +6,8 @@ export const circularProgressBarBaseThemeVariants = cva(
     `
         relative flex items-center justify-center select-none
         text-foreground
-        [&_svg]:absolute [&_svg]:top-1/2 [&_svg]:left-1/2
+        [&_svg]:absolute [&_svg]:inset-0
         [&_svg]:h-full [&_svg]:w-full
-        [&_svg]:-translate-x-1/2 [&_svg]:-translate-y-1/2
         [&_svg_circle]:origin-center
         [&_svg_circle]:-rotate-90
         [&_svg_circle]:transition-[stroke-dashoffset,stroke] duration-(--mona-motion-fast) ease-in

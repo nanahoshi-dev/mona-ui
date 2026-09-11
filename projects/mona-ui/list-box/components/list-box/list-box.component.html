@@ -49,8 +49,8 @@
                 [iconOnly]="true"
                 [rounded]="rounded()"
                 [size]="size()"
-                title="Move Up"
-                aria-label="Move Up"
+                [title]="messages().moveUp"
+                [attr.aria-label]="messages().moveUp"
                 [disabled]="!hasSelectedItems && !connectedListHasSelectedItems">
                 <svg lucideChevronUp [size]="16"></svg>
             </button>
@@ -62,8 +62,8 @@
                 [iconOnly]="true"
                 [rounded]="rounded()"
                 [size]="size()"
-                title="Move Down"
-                aria-label="Move Down"
+                [title]="messages().moveDown"
+                [attr.aria-label]="messages().moveDown"
                 [disabled]="!hasSelectedItems && !connectedListHasSelectedItems">
                 <svg lucideChevronDown [size]="16"></svg>
             </button>
@@ -75,10 +75,10 @@
                 [iconOnly]="true"
                 [rounded]="rounded()"
                 [size]="size()"
-                title="Transfer From"
-                aria-label="Transfer From"
+                [title]="messages().transferFrom"
+                [attr.aria-label]="messages().transferFrom"
                 [disabled]="!connectedListHasSelectedItems">
-                <svg lucideChevronLeft [size]="16"></svg>
+                <svg lucideChevronLeft [size]="16" class="rtl:rotate-180"></svg>
             </button>
         }
         @if (options.actions | monaContains: "transferTo") {
@@ -88,10 +88,10 @@
                 [iconOnly]="true"
                 [rounded]="rounded()"
                 [size]="size()"
-                title="Transfer To"
-                aria-label="Transfer To"
+                [title]="messages().transferTo"
+                [attr.aria-label]="messages().transferTo"
                 [disabled]="!hasSelectedItems">
-                <svg lucideChevronRight [size]="16"></svg>
+                <svg lucideChevronRight [size]="16" class="rtl:rotate-180"></svg>
             </button>
         }
         @if (options.actions | monaContains: "transferAllFrom") {
@@ -101,10 +101,10 @@
                 [iconOnly]="true"
                 [rounded]="rounded()"
                 [size]="size()"
-                title="Transfer All From"
-                aria-label="Transfer All From"
+                [title]="messages().transferAllFrom"
+                [attr.aria-label]="messages().transferAllFrom"
                 [disabled]="!connectedListBox || connectedListItems.length === 0">
-                <svg lucideChevronsLeft [size]="16"></svg>
+                <svg lucideChevronsLeft [size]="16" class="rtl:rotate-180"></svg>
             </button>
         }
         @if (options.actions | monaContains: "transferAllTo") {
@@ -114,10 +114,10 @@
                 [iconOnly]="true"
                 [rounded]="rounded()"
                 [size]="size()"
-                title="Transfer All To"
-                aria-label="Transfer All To"
+                [title]="messages().transferAllTo"
+                [attr.aria-label]="messages().transferAllTo"
                 [disabled]="listBoxItems().length === 0">
-                <svg lucideChevronsRight [size]="16"></svg>
+                <svg lucideChevronsRight [size]="16" class="rtl:rotate-180"></svg>
             </button>
         }
         @if (options.actions | monaContains: "clear") {
@@ -127,8 +127,8 @@
                 [iconOnly]="true"
                 [rounded]="rounded()"
                 [size]="size()"
-                title="Clear Selection"
-                aria-label="Clear Selection"
+                [title]="messages().clearSelection"
+                [attr.aria-label]="messages().clearSelection"
                 [disabled]="!hasSelectedItems && !connectedListHasSelectedItems">
                 <svg lucideX [size]="16"></svg>
             </button>
@@ -140,8 +140,8 @@
                 [iconOnly]="true"
                 [rounded]="rounded()"
                 [size]="size()"
-                title="Remove"
-                aria-label="Remove"
+                [title]="messages().remove"
+                [attr.aria-label]="messages().remove"
                 [disabled]="!hasSelectedItems && !connectedListHasSelectedItems">
                 <svg lucideTrash2 [size]="14"></svg>
             </button>

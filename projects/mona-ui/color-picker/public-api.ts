@@ -7,5 +7,6 @@ export * from "./directives/color-picker-value-template.directive";
 
 export * from "./models/ColorPickerValueTemplateContext";
 export * from "./models/ColorPickerView";
+export * from "./i18n/color-picker.default-messages";
 
 export type { ColorPickerVariantProps } from "./styles/color-picker.styles";

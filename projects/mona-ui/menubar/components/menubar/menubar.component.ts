@@ -19,6 +19,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { rotate, zip } from "@mirei/ts-collections";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import {
     PopupMenuComponent,
     PopupMenuGroupTemplateDirective,
@@ -63,8 +64,11 @@ import { MenuComponent } from "../menu/menu.component";
 })
 export class MenubarComponent implements MenubarVariantInput {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #direction = injectComponentDirection();
     readonly #document = inject(DOCUMENT);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    readonly #i18n = inject(MonaI18nService);
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly activeIndex = signal(0);
     protected readonly baseClasses = computed(() => {
         const rounded = this.rounded();
@@ -131,14 +135,14 @@ export class MenubarComponent implements MenubarVariantInput {
     public readonly menuItemClick = output<MenuItemClickEvent>();
 
     /**
-     * @description Sets the size of the menubar.
-     */
-    public readonly size = input<MenubarVariantProps["size"]>("medium");
-
-    /**
      * @description Sets the rounded style of the menubar.
      */
     public readonly rounded = input<MenubarVariantProps["rounded"]>("medium");
+
+    /**
+     * @description Sets the size of the menubar.
+     */
+    public readonly size = input<MenubarVariantProps["size"]>("medium");
 
     /**
      * @description Additional CSS classes to apply to the menubar, merged with the computed theme classes.
@@ -207,6 +211,10 @@ export class MenubarComponent implements MenubarVariantInput {
             return;
         }
 
+        const isRtl = this.isRtl();
+        const nextMenuKey = isRtl ? "ArrowLeft" : "ArrowRight";
+        const prevMenuKey = isRtl ? "ArrowRight" : "ArrowLeft";
+
         switch (event.key) {
             case "Enter":
             case " ":
@@ -215,11 +223,11 @@ export class MenubarComponent implements MenubarVariantInput {
                     popupMenu.openMenuViaKeyboard();
                 }
                 break;
-            case "ArrowRight":
+            case nextMenuKey:
                 event.preventDefault();
                 this.moveToNextMenu();
                 break;
-            case "ArrowLeft":
+            case prevMenuKey:
                 event.preventDefault();
                 this.moveToPreviousMenu();
                 break;
@@ -310,7 +318,7 @@ export class MenubarComponent implements MenubarVariantInput {
     }
 
     private findPreviousNonDisabledMenuIndex(): number {
-        let currentIndex = this.findCurrentMenuIndex();
+        const currentIndex = this.findCurrentMenuIndex();
         if (currentIndex == null || currentIndex < 0) {
             const menuList = this.menuList();
             const lastEnabledIndex = menuList
@@ -378,12 +386,15 @@ export class MenubarComponent implements MenubarVariantInput {
                 startWith(null),
                 pairwise(),
                 tap(([prev, next]) => {
-                    if (next && next.direction === "right" && (next.level === 0 || (next.level > 0 && !next.item))) {
+                    const isRtl = this.isRtl();
+                    const nextDir = isRtl ? "left" : "right";
+                    const prevDir = isRtl ? "right" : "left";
+                    if (next && next.direction === nextDir && (next.level === 0 || (next.level > 0 && !next.item))) {
                         const index = this.findNextNonDisabledMenuIndex();
                         if (index >= 0) {
                             this.updateCurrentMenuData(index);
                         }
-                    } else if (next && prev && next.direction === "left" && prev.level === 0 && next.level === 0) {
+                    } else if (next && prev && next.direction === prevDir && prev.level === 0 && next.level === 0) {
                         const index = this.findPreviousNonDisabledMenuIndex();
                         if (index >= 0) {
                             this.updateCurrentMenuData(index);

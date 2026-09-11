@@ -137,7 +137,7 @@ export class OtpInputWrapperComponent implements ComponentInputsAsSignal<OtpInpu
         return this.form.code().value().length === this.length();
     });
 
-    public readonly ariaLabel = input("Verification code");
+    public readonly ariaLabel = input<string | null>("Verification code");
     public readonly disabled = input(false);
     public readonly groupLength = input<number | number[] | null>(null);
     public readonly length = input(6);

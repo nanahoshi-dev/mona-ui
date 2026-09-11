@@ -26,7 +26,7 @@
                             [rounded]="rounded()"
                             [size]="size()"
                             [selected]="page() === 1"
-                            [attr.aria-label]="'Page 1'"
+                            [attr.aria-label]="messages().pageLabel(1)"
                             [attr.aria-current]="page() === 1 ? 'page' : null"
                             (click)="onPageClick(1)">
                             1
@@ -57,7 +57,7 @@
                             [rounded]="rounded()"
                             [size]="size()"
                             [selected]="page() === pageItem.page"
-                            [attr.aria-label]="'Page ' + pageItem.text"
+                            [attr.aria-label]="messages().pageLabel(pageItem.page)"
                             [attr.aria-current]="page() === pageItem.page ? 'page' : null"
                             (click)="onPageClick(pageItem.page)">
                             {{ pageItem.text }}
@@ -89,7 +89,7 @@
                             [rounded]="rounded()"
                             [size]="size()"
                             [selected]="page() === pageCount()"
-                            [attr.aria-label]="'Page ' + pageCount()"
+                            [attr.aria-label]="messages().pageLabel(pageCount())"
                             [attr.aria-current]="page() === pageCount() ? 'page' : null"
                             (click)="onPageClick(pageCount())">
                             {{ pageCount() }}
@@ -115,6 +115,7 @@
                         [maxValue]="pageCount()"
                         [rounded]="rounded()"
                         [size]="size()"
+                        [aria-label]="messages().pageStatus(page(), pageCount())"
                         [ngModel]="inputValue()"
                         (ngModelChange)="inputValue.set($event)"
                         (inputBlur)="onPageInputBlur()"></mona-numeric-text-box>
@@ -138,7 +139,7 @@
                             (ngModelChange)="onPageSizeValueChange($event)"
                             #pageSizeDropdownList>
                             <ng-template monaDropDownListValueTemplate let-item>
-                                <span>{{ item }} / page</span>
+                                 <span>{{ messages().pageSizeLabel(item) }}</span>
                             </ng-template>
                         </mona-dropdown-list>
                     }
@@ -167,7 +168,7 @@
                     <ng-container [ngTemplateOutlet]="previousPageButton"></ng-container>
                 }
                 <li class="flex items-center gap-2 mx-2">
-                    <span>Page</span>
+                    <span>{{ messages().pageText }}</span>
                     <mona-numeric-text-box
                         monaPagerFocusable
                         [spinners]="false"
@@ -175,10 +176,11 @@
                         [maxValue]="pageCount()"
                         [rounded]="rounded()"
                         [size]="size()"
+                        [aria-label]="messages().pageStatus(page(), pageCount())"
                         [ngModel]="inputValue()"
                         (ngModelChange)="inputValue.set($event)"
                         (inputBlur)="onPageInputBlur()"></mona-numeric-text-box>
-                    <span>of</span>
+                    <span>{{ messages().ofText }}</span>
                     <span>{{ pageCount() }}</span>
                 </li>
                 @if (previousNext()) {
@@ -249,10 +251,10 @@
                 look="ghost"
                 [rounded]="rounded()"
                 [size]="size()"
-                [attr.aria-label]="firstPageLabel"
+                [attr.aria-label]="messages().firstPageLabel"
                 (click)="onPageClick(1)"
                 [disabled]="page() === 1">
-                <svg lucideChevronsLeft [size]="iconSize()"></svg>
+                <svg lucideChevronsLeft class="rtl:rotate-180" [size]="iconSize()"></svg>
             </button>
         }
     </li>
@@ -278,9 +280,9 @@
                 [rounded]="rounded()"
                 [size]="size()"
                 [disabled]="page() <= 1"
-                [attr.aria-label]="previousPageLabel"
+                [attr.aria-label]="messages().previousPageLabel"
                 (click)="onPreviousPageClick()">
-                <svg lucideChevronLeft [size]="iconSize()"></svg>
+                <svg lucideChevronLeft class="rtl:rotate-180" [size]="iconSize()"></svg>
             </button>
         }
     </li>
@@ -306,9 +308,9 @@
                 [rounded]="rounded()"
                 [size]="size()"
                 [disabled]="page() < 1 || page() === pageCount()"
-                [attr.aria-label]="nextPageLabel"
+                [attr.aria-label]="messages().nextPageLabel"
                 (click)="onNextPageClick()">
-                <svg lucideChevronRight [size]="iconSize()"></svg>
+                <svg lucideChevronRight class="rtl:rotate-180" [size]="iconSize()"></svg>
             </button>
         }
     </li>
@@ -333,10 +335,10 @@
                 look="ghost"
                 [rounded]="rounded()"
                 [size]="size()"
-                [attr.aria-label]="lastPageLabel"
+                [attr.aria-label]="messages().lastPageLabel"
                 (click)="onPageClick(pageCount())"
                 [disabled]="page() === pageCount()">
-                <svg lucideChevronsRight [size]="iconSize()"></svg>
+                <svg lucideChevronsRight class="rtl:rotate-180" [size]="iconSize()"></svg>
             </button>
         }
     </li>

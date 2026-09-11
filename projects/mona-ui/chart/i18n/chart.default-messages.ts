@@ -1,0 +1,31 @@
+import type { MonaChartMessages } from "@nanahoshi/mona-ui/i18n";
+
+export const CHART_DEFAULT_MESSAGES: MonaChartMessages = {
+    change: "Change",
+    chart: "Chart",
+    chartLegend: "Chart legend",
+    close: "Close",
+    closeAbbreviation: "C",
+    colorScale: "Color scale",
+    conversion: "Conversion",
+    divergingRangeDescription: (title, min, mid, max) => `${title}, ${min} to ${mid} to ${max}`,
+    dropOff: "Drop-off",
+    falling: "Falling",
+    high: "High",
+    highAbbreviation: "H",
+    labelValueSeparator: ":",
+    low: "Low",
+    lowAbbreviation: "L",
+    noData: "No data available",
+    open: "Open",
+    openAbbreviation: "O",
+    overall: "Overall",
+    range: "Range",
+    rangeDescription: (title, min, max) => `${title}, ${min} to ${max}`,
+    rising: "Rising",
+    runningTotal: "Running Total",
+    size: "size",
+    unchanged: "Unchanged",
+    value: "Value",
+    visualIndicatorClamped: "Visual indicator clamped"
+};

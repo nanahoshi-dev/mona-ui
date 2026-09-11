@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { disabled as fieldDisabled, form, FormField } from "@angular/forms/signals";
 import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it } from "vitest";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { SliderHandleTemplateDirective } from "../../directives/slider-handle-template.directive";
 import type { SliderVariantProps } from "../../styles/slider.styles";
 import { RangeSliderComponent } from "./range-slider.component";
@@ -240,6 +241,242 @@ describe("RangeSliderComponent", () => {
             expect(handles.length).toBe(2);
             expect((handles[0].nativeElement as HTMLElement).textContent?.trim()).toBe("2");
             expect((handles[1].nativeElement as HTMLElement).textContent?.trim()).toBe("8");
+        });
+    });
+
+    describe("i18n and RTL", () => {
+        it("renders default English aria-labels on handles", async () => {
+            await TestBed.configureTestingModule({
+                imports: [ValueBindingRangeSliderHostComponent]
+            }).compileComponents();
+
+            const fixture = TestBed.createComponent(ValueBindingRangeSliderHostComponent);
+            await waitForStable(fixture);
+
+            expect(getPrimaryHandle(fixture).getAttribute("aria-label")).toBe("Minimum value");
+            expect(getSecondaryHandle(fixture).getAttribute("aria-label")).toBe("Maximum value");
+        });
+
+        it("updates aria-labels dynamically when locale changes", async () => {
+            await TestBed.configureTestingModule({
+                imports: [ValueBindingRangeSliderHostComponent]
+            }).compileComponents();
+
+            const fixture = TestBed.createComponent(ValueBindingRangeSliderHostComponent);
+            const i18nService = TestBed.inject(MonaI18nService);
+            i18nService.use({
+                direction: "ltr",
+                id: "tr-TR",
+                messages: {
+                    slider: {
+                        maximumValue: "Maksimum değer",
+                        minimumValue: "Minimum değer",
+                        sliderValue: "Sürgü değeri"
+                    }
+                }
+            });
+            await waitForStable(fixture);
+
+            expect(getPrimaryHandle(fixture).getAttribute("aria-label")).toBe("Minimum değer");
+            expect(getSecondaryHandle(fixture).getAttribute("aria-label")).toBe("Maksimum değer");
+        });
+
+        it("inverts horizontal arrow key navigation in RTL direction", async () => {
+            await TestBed.configureTestingModule({
+                imports: [ValueBindingRangeSliderHostComponent]
+            }).compileComponents();
+
+            const fixture = TestBed.createComponent(ValueBindingRangeSliderHostComponent);
+            const i18nService = TestBed.inject(MonaI18nService);
+            i18nService.use({
+                direction: "rtl",
+                id: "ar-EG",
+                messages: {
+                    slider: {
+                        maximumValue: "القيمة القصوى",
+                        minimumValue: "القيمة الدنيا",
+                        sliderValue: "قيمة شريط التمرير"
+                    }
+                }
+            });
+            await waitForStable(fixture);
+
+            // Case 2: RTL locale + LTR DOM -> ArrowRight still increases value (normal LTR)
+            dispatchKeydown(getSecondaryHandle(fixture), "ArrowRight");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([2, 9]);
+
+            dispatchKeydown(getSecondaryHandle(fixture), "ArrowLeft");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([2, 8]);
+
+            // Case 4: RTL locale + RTL DOM -> inverts horizontal navigation
+            fixture.nativeElement.setAttribute("dir", "rtl");
+            await waitForStable(fixture);
+
+            // In RTL, ArrowRight decreases value, ArrowLeft increases value
+            dispatchKeydown(getSecondaryHandle(fixture), "ArrowRight");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([2, 7]);
+
+            dispatchKeydown(getSecondaryHandle(fixture), "ArrowLeft");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([2, 8]);
+        });
+
+        it("maintains coherent LTR keyboard navigation and handle geometry under CSS-only direction override", async () => {
+            await TestBed.configureTestingModule({
+                imports: [ValueBindingRangeSliderHostComponent]
+            }).compileComponents();
+
+            const fixture = TestBed.createComponent(ValueBindingRangeSliderHostComponent);
+            fixture.nativeElement.setAttribute("dir", "ltr");
+            fixture.nativeElement.style.direction = "rtl";
+            await waitForStable(fixture);
+
+            const primaryHandle = getPrimaryHandle(fixture);
+            const secondaryHandle = getSecondaryHandle(fixture);
+
+            expect(primaryHandle.matches(":dir(ltr)")).toBe(true);
+            expect(primaryHandle.matches(":dir(rtl)")).toBe(false);
+            expect(secondaryHandle.matches(":dir(ltr)")).toBe(true);
+            expect(secondaryHandle.matches(":dir(rtl)")).toBe(false);
+
+            // Initial positions for value [2, 8] with min 0, max 10
+            const selection = fixture.nativeElement.querySelector("mona-range-slider [class*='bg-primary']") as HTMLElement;
+            expect(primaryHandle.style.left).toBe("20%");
+            expect(primaryHandle.style.right).toBe("");
+            expect(secondaryHandle.style.left).toBe("80%");
+            expect(secondaryHandle.style.right).toBe("");
+            expect(selection.style.left).toBe("20%");
+            expect(selection.style.right).toBe("20%");
+
+            // Secondary handle: ArrowRight increases in LTR
+            dispatchKeydown(secondaryHandle, "ArrowRight");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([2, 9]);
+            expect(secondaryHandle.style.left).toBe("90%");
+            expect(selection.style.left).toBe("20%");
+            expect(selection.style.right).toBe("10%");
+
+            dispatchKeydown(secondaryHandle, "ArrowLeft");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([2, 8]);
+            expect(secondaryHandle.style.left).toBe("80%");
+            expect(selection.style.left).toBe("20%");
+            expect(selection.style.right).toBe("20%");
+
+            // Primary handle: ArrowRight increases in LTR
+            dispatchKeydown(primaryHandle, "ArrowRight");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([3, 8]);
+            expect(primaryHandle.style.left).toBe("30%");
+            expect(selection.style.left).toBe("30%");
+            expect(selection.style.right).toBe("20%");
+
+            dispatchKeydown(primaryHandle, "ArrowLeft");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([2, 8]);
+            expect(primaryHandle.style.left).toBe("20%");
+            expect(selection.style.left).toBe("20%");
+            expect(selection.style.right).toBe("20%");
+        });
+
+        it("maintains coherent RTL keyboard navigation and handle geometry under CSS-only direction override", async () => {
+            await TestBed.configureTestingModule({
+                imports: [ValueBindingRangeSliderHostComponent]
+            }).compileComponents();
+
+            const fixture = TestBed.createComponent(ValueBindingRangeSliderHostComponent);
+            fixture.nativeElement.setAttribute("dir", "rtl");
+            fixture.nativeElement.style.direction = "ltr";
+            await waitForStable(fixture);
+
+            const primaryHandle = getPrimaryHandle(fixture);
+            const secondaryHandle = getSecondaryHandle(fixture);
+            const selection = fixture.nativeElement.querySelector("mona-range-slider [class*='bg-primary']") as HTMLElement;
+
+            expect(primaryHandle.matches(":dir(rtl)")).toBe(true);
+            expect(primaryHandle.matches(":dir(ltr)")).toBe(false);
+            expect(secondaryHandle.matches(":dir(rtl)")).toBe(true);
+            expect(secondaryHandle.matches(":dir(ltr)")).toBe(false);
+
+            // Initial positions for value [2, 8] with min 0, max 10
+            expect(primaryHandle.style.right).toBe("20%");
+            expect(primaryHandle.style.left).toBe("");
+            expect(secondaryHandle.style.right).toBe("80%");
+            expect(secondaryHandle.style.left).toBe("");
+            expect(selection.style.right).toBe("20%");
+            expect(selection.style.left).toBe("20%");
+
+            // Secondary handle: ArrowRight decreases in RTL
+            dispatchKeydown(secondaryHandle, "ArrowRight");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([2, 7]);
+            expect(secondaryHandle.style.right).toBe("70%");
+            expect(selection.style.right).toBe("20%");
+            expect(selection.style.left).toBe("30%");
+
+            dispatchKeydown(secondaryHandle, "ArrowLeft");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([2, 8]);
+            expect(secondaryHandle.style.right).toBe("80%");
+            expect(selection.style.right).toBe("20%");
+            expect(selection.style.left).toBe("20%");
+
+            // Primary handle: ArrowRight decreases in RTL
+            dispatchKeydown(primaryHandle, "ArrowRight");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([1, 8]);
+            expect(primaryHandle.style.right).toBe("10%");
+            expect(selection.style.right).toBe("10%");
+            expect(selection.style.left).toBe("20%");
+
+            dispatchKeydown(primaryHandle, "ArrowLeft");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.value()).toEqual([2, 8]);
+            expect(primaryHandle.style.right).toBe("20%");
+            expect(selection.style.right).toBe("20%");
+            expect(selection.style.left).toBe("20%");
+        });
+
+        it("aligns tick marks and labels with range handles in ordinary RTL", async () => {
+            @Component({
+                imports: [RangeSliderComponent],
+                template: `
+                    <mona-range-slider
+                        [showTicks]="true"
+                        [showLabels]="true"
+                        [minValue]="0"
+                        [maxValue]="10"
+                        [value]="[0, 10]" />
+                `
+            })
+            class RtlTicksRangeSliderHostComponent {}
+
+            await TestBed.configureTestingModule({
+                imports: [RtlTicksRangeSliderHostComponent]
+            }).compileComponents();
+
+            const fixture = TestBed.createComponent(RtlTicksRangeSliderHostComponent);
+            fixture.nativeElement.setAttribute("dir", "rtl");
+            await waitForStable(fixture);
+
+            const handles = fixture.nativeElement.querySelectorAll("[role='slider']") as NodeListOf<HTMLElement>;
+            const ticks = fixture.nativeElement.querySelectorAll("span[monaSliderTick]") as NodeListOf<HTMLElement>;
+
+            // Primary handle (0) is at right: 0%, secondary handle (10) is at right: 100%
+            expect(handles[0].style.right).toBe("0%");
+            expect(handles[1].style.right).toBe("100%");
+
+            // First tick (value 0) aligns with primary handle at right: 0%
+            expect(ticks[0].style.right).toBe("0%");
+            expect(ticks[0].style.left).toBe("");
+
+            // Last tick (value 10) aligns with secondary handle at right: 100%
+            const lastTick = ticks[ticks.length - 1];
+            expect(lastTick.style.right).toBe("100%");
+            expect(lastTick.style.left).toBe("");
         });
     });
 });

@@ -1,7 +1,10 @@
+import { range } from "@mirei/ts-collections";
 import { Component, computed, inject } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
 import { DropdownItemTemplateDirective } from "@nanahoshi/mona-ui/dropdowns";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { EDITOR_DEFAULT_MESSAGES } from "../../i18n/editor.default-messages";
 import { HeadingsDropdownListDataItem, HeadingType } from "../../models/HeadingsDropdownListDataItem";
 import { EditorService } from "../../services/editor.service";
 import { editorHeadingsDropdownListThemeVariants } from "../../styles/editor.styles";
@@ -13,26 +16,32 @@ import { editorHeadingsDropdownListThemeVariants } from "../../styles/editor.sty
 })
 export class EditorHeadingsComponent {
     readonly #editorService: EditorService = inject(EditorService);
+    readonly #i18n = inject(MonaI18nService);
+    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
     protected readonly HeadingType = HeadingType;
     protected readonly dropdownListClass = computed(() => {
         return editorHeadingsDropdownListThemeVariants();
     });
-    protected readonly headingsDropdownListData = [
-        { text: "Paragraph", value: HeadingType.Paragraph },
-        { text: "Heading 1", value: HeadingType.Heading1 },
-        { text: "Heading 2", value: HeadingType.Heading2 },
-        { text: "Heading 3", value: HeadingType.Heading3 },
-        { text: "Heading 4", value: HeadingType.Heading4 },
-        { text: "Heading 5", value: HeadingType.Heading5 },
-        { text: "Heading 6", value: HeadingType.Heading6 }
-    ];
+    protected readonly headingsDropdownListData = computed<HeadingsDropdownListDataItem[]>(() => {
+        const msgs = this.messages();
+        return [
+            { text: msgs.paragraph, value: HeadingType.Paragraph },
+            ...range(1, 6)
+                .select(level => ({
+                    text: msgs.heading(level),
+                    value: level as HeadingType
+                }))
+                .toArray()
+        ];
+    });
     protected readonly selectedHeadingsDropdownItem = computed(() => {
         const state = this.#editorService.state();
         const node = state.selection.$from.node();
+        const data = this.headingsDropdownListData();
         if (node && node.type.name === "heading") {
-            return this.headingsDropdownListData.find(item => item.value === node.attrs["level"]);
+            return data.find(item => item.value === node.attrs["level"]);
         }
-        return this.headingsDropdownListData.find(item => item.value === HeadingType.Paragraph);
+        return data.find(item => item.value === HeadingType.Paragraph);
     });
 
     public onFormatChange(headingItem: HeadingsDropdownListDataItem | null | undefined): void {

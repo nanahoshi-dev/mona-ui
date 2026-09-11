@@ -15,7 +15,7 @@ export const splitButtonThemeVariants = cva(
                 error: "",
                 ghost: "border-transparent",
                 info: "",
-                outline: "[&>button:not(:last-child)]:border-r [&>button:not(:last-child)]:border-input-border",
+                outline: "[&>button:not(:last-child)]:border-e [&>button:not(:last-child)]:border-input-border",
                 primary: "",
                 secondary: "",
                 success: "",
@@ -24,26 +24,26 @@ export const splitButtonThemeVariants = cva(
             rounded: {
                 full: `
                     rounded-full
-                    [&>button]:first:rounded-tl-full [&>button]:first:rounded-bl-full
-                    [&>button]:last:rounded-tr-full [&>button]:last:rounded-br-full
+                    [&>button]:first:rounded-s-full
+                    [&>button]:last:rounded-e-full
                 `,
                 large: `
                     rounded-lg
-                    [&>button]:first:rounded-tl-lg [&>button]:first:rounded-bl-lg
-                    [&>button]:last:rounded-tr-lg [&>button]:last:rounded-br-lg
+                    [&>button]:first:rounded-s-lg
+                    [&>button]:last:rounded-e-lg
                 `,
                 medium: `
                     rounded-md
-                    [&>button]:first:rounded-tl-md [&>button]:first:rounded-bl-md
-                    [&>button]:last:rounded-tr-md [&>button]:last:rounded-br-md
+                    [&>button]:first:rounded-s-md
+                    [&>button]:last:rounded-e-md
                 `,
                 none: `
                     rounded-none
                 `,
                 small: `
                     rounded-sm
-                    [&>button]:first:rounded-tl-sm [&>button]:first:rounded-bl-sm
-                    [&>button]:last:rounded-tr-sm [&>button]:last:rounded-br-sm
+                    [&>button]:first:rounded-s-sm
+                    [&>button]:last:rounded-e-sm
                 `
             },
             size: {

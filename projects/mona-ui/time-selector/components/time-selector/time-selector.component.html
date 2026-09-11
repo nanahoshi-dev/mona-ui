@@ -1,8 +1,8 @@
 <div [class]="headerClass()">
-    <div>Hr</div>
-    <div>Min</div>
+    <div>{{ messages().headerHours }}</div>
+    <div>{{ messages().headerMinutes }}</div>
     @if (showSeconds()) {
-        <div>Sec</div>
+        <div>{{ messages().headerSeconds }}</div>
     }
 </div>
 
@@ -16,7 +16,7 @@
         (click)="onNowClick($event)"
         (keydown.enter)="onNowClick($event)"
         (keydown.space)="onNowClick($event)">
-        Now
+        {{ messages().now }}
     </button>
 </div>
 
@@ -24,7 +24,7 @@
     <ol
         #hourList
         monaTimeSelectorList
-        aria-label="Hours"
+        [attr.aria-label]="messages().hours"
         [attr.aria-activedescendant]="`${hourListId}${navigatedDate().hour}`"
         [active]="focusedList() === 'hours'"
         [id]="hourListId"
@@ -38,14 +38,14 @@
                 [value]="h.value"
                 [id]="`${hourListId}${h.value}`"
                 (click)="onHourChange(h.value)">
-                {{ h.viewValue | number: "2.0" }}
+                {{ formatTwoDigit(h.viewValue) }}
             </li>
         }
     </ol>
     <ol
         #minuteList
         monaTimeSelectorList
-        aria-label="Minutes"
+        [attr.aria-label]="messages().minutes"
         [attr.aria-activedescendant]="`${minuteListId}${navigatedDate().minute}`"
         [active]="focusedList() === 'minutes'"
         [id]="minuteListId"
@@ -59,7 +59,7 @@
                 [value]="m.value"
                 [id]="`${minuteListId}${m.value}`"
                 (click)="onMinuteChange(m.value)">
-                {{ m.viewValue | number: "2.0" }}
+                {{ formatTwoDigit(m.viewValue) }}
             </li>
         }
     </ol>
@@ -67,7 +67,7 @@
         <ol
             #secondList
             monaTimeSelectorList
-            aria-label="Seconds"
+            [attr.aria-label]="messages().seconds"
             [attr.aria-activedescendant]="`${secondListId}${navigatedDate().second}`"
             [active]="focusedList() === 'seconds'"
             [id]="secondListId"
@@ -81,7 +81,7 @@
                     [value]="s.value"
                     [id]="`${secondListId}${s.value}`"
                     (click)="onSecondChange(s.value)">
-                    {{ s.value | number: "2.0" }}
+                    {{ formatTwoDigit(s.value) }}
                 </li>
             }
         </ol>
@@ -90,7 +90,7 @@
         <ol
             #meridiemList
             monaTimeSelectorList
-            aria-label="AM/PM"
+            [attr.aria-label]="messages().amPm"
             [attr.aria-activedescendant]="`${meridiemListId}${meridiem()}`"
             [active]="focusedList() === 'meridiem'"
             [id]="meridiemListId"
@@ -104,7 +104,7 @@
                     [value]="'AM'"
                     (click)="onMeridiemClick('AM')"
                     [id]="`${meridiemListId}AM`">
-                    AM
+                    {{ messages().am }}
                 </li>
             }
             @if (pmMeridiemVisible()) {
@@ -115,7 +115,7 @@
                     [value]="'PM'"
                     (click)="onMeridiemClick('PM')"
                     [id]="`${meridiemListId}PM`">
-                    PM
+                    {{ messages().pm }}
                 </li>
             }
         </ol>
@@ -124,6 +124,8 @@
 
 @if (footer()) {
     <div [class]="footerClass()">
-        <button monaButton look="primary" [rounded]="rounded()" [size]="size()" (click)="onSetTimeClick()">Set</button>
+        <button monaButton look="primary" [rounded]="rounded()" [size]="size()" (click)="onSetTimeClick()">
+            {{ messages().set }}
+        </button>
     </div>
 }

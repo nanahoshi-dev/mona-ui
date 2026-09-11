@@ -9,7 +9,7 @@
                 [attr.data-readonly]="readonly()"
                 [attr.tabindex]="disabled() ? -1 : i === activeColorIndex() ? 0 : -1"
                 [attr.role]="'gridcell'"
-                [attr.aria-label]="'Color ' + color"
+                [attr.aria-label]="messages().color(color)"
                 [attr.aria-disabled]="disabled()"
                 [attr.aria-readonly]="readonly()"
                 [attr.aria-selected]="color === value()"

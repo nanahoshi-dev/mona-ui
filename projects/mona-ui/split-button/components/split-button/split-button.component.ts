@@ -27,6 +27,7 @@ import {
     PopupMenuToken
 } from "@nanahoshi/mona-ui/popup-menu";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { SplitButtonMenuButtonTemplateDirective } from "../../directives/split-button-menu-button-template.directive";
@@ -35,6 +36,7 @@ import { SplitButtonMenuItemIconTemplateDirective } from "../../directives/split
 import { SplitButtonMenuItemShortcutTemplateDirective } from "../../directives/split-button-menu-item-shortcut-template.directive";
 import { SplitButtonMenuItemTextTemplateDirective } from "../../directives/split-button-menu-item-text-template.directive";
 import { SplitButtonTextTemplateDirective } from "../../directives/split-button-text-template.directive";
+import { SPLIT_BUTTON_DEFAULT_MESSAGES } from "../../i18n/split-button.default-messages";
 import {
     splitButtonThemeVariants,
     SplitButtonVariantInputs,
@@ -60,9 +62,8 @@ import {
 })
 export class SplitButtonComponent implements SplitButtonVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #i18n = inject(MonaI18nService);
     private readonly menuItemComponents = contentChildren(PopupMenuToken, { descendants: false });
-    protected readonly menuButtonRef = viewChild<ElementRef<HTMLButtonElement>>("menuButton");
-    protected readonly popupMenuRef = viewChild<PopupMenuComponent>("popupMenu");
     protected readonly classes = computed(() => {
         const look = this.look();
         const rounded = this.rounded();
@@ -75,6 +76,9 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
+    protected readonly effectiveMenuButtonAriaLabel = computed(() => {
+        return this.menuButtonAriaLabel() || this.messages().menuButtonAriaLabel;
+    });
     protected readonly groupTemplate = contentChild(SplitButtonMenuGroupTemplateDirective, {
         read: TemplateRef,
         descendants: false
@@ -84,6 +88,7 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
         descendants: false
     });
     protected readonly mainButtonTextTemplate = contentChild(SplitButtonTextTemplateDirective, { read: TemplateRef });
+    protected readonly menuButtonRef = viewChild<ElementRef<HTMLButtonElement>>("menuButton");
     protected readonly menuButtonTemplate = contentChild(SplitButtonMenuButtonTemplateDirective, { read: TemplateRef });
     protected readonly menuId = createElementControlId();
     protected readonly menuItems = computed(() => {
@@ -92,6 +97,8 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
             .flatMap(i => i);
     });
     protected readonly menuOpen = signal(false);
+    protected readonly messages = this.#i18n.componentMessages("splitButton", SPLIT_BUTTON_DEFAULT_MESSAGES);
+    protected readonly popupMenuRef = viewChild<PopupMenuComponent>("popupMenu");
     protected readonly popupMenuRounded = computed(() => {
         const rounded = this.rounded();
         return rounded === "full" ? "large" : rounded;
@@ -102,8 +109,11 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
     });
     protected readonly splitButtonAriaLabel = computed(() => {
         const ariaLabel = this.ariaLabel();
+        if (ariaLabel) {
+            return ariaLabel;
+        }
         const text = this.text();
-        return ariaLabel || `${text} splitbutton`;
+        return this.messages().splitButton(text);
     });
     protected readonly textTemplate = contentChild(SplitButtonMenuItemTextTemplateDirective, {
         read: TemplateRef,
@@ -144,10 +154,10 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
 
     /**
      * @description Accessible name for the menu toggle button.
-     * Override to provide a localized label for non-English applications.
-     * @default "Show menu options"
+     * If not provided, falls back to the localized default message.
+     * @default ""
      */
-    public readonly menuButtonAriaLabel = input("Show menu options");
+    public readonly menuButtonAriaLabel = input("");
 
     /**
      * @description Emitted when a menu item in the popup is clicked.

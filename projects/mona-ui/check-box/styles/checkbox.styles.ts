@@ -7,7 +7,7 @@ export const checkboxInputThemeVariants = cva(`sr-only appearance-none outline-n
 export const checkmarkThemeVariants = cva(
     `
         flex items-center justify-center
-        h-4.5 w-4.5 pl-0.25
+        h-4.5 w-4.5 ps-0.25
         cursor-pointer overflow-hidden
         ${themeControlSurfaceClasses}
         border border-input-border

@@ -35,7 +35,7 @@
                         [class]="nodeExpanderClass()"
                         [class.mona-disabled]="nodeComponent.disabled()"
                         [attr.aria-label]="
-                            (nodeComponent.expanded() ? 'Collapse' : 'Expand') + ' ' + nodeComponent.nodeText()
+                            (nodeComponent.expanded() ? messages().collapse : messages().expand) + ' ' + nodeComponent.nodeText()
                         "
                         (click)="onExpandStateChange(node)">
                         @if (node.loading()) {
@@ -43,7 +43,7 @@
                         } @else if (nodeComponent.expanded()) {
                             <i class="ri-arrow-down-s-fill"></i>
                         } @else {
-                            <i class="ri-arrow-right-s-fill"></i>
+                            <i class="ri-arrow-right-s-fill rtl:rotate-180"></i>
                         }
                     </button>
                 }

@@ -1,7 +1,12 @@
 @if (anyToolVisible()) {
     <mona-button-group selection="multiple" [size]="'small'">
         @if (boldVisible()) {
-            <button monaButton [selected]="boldSelected()" [toggleable]="false" (click)="onBoldToggle()" title="Bold">
+            <button
+                monaButton
+                [selected]="boldSelected()"
+                [toggleable]="false"
+                (click)="onBoldToggle()"
+                [title]="messages().bold">
                 <i class="ri-bold"></i>
             </button>
         }
@@ -11,7 +16,7 @@
                 [selected]="italicSelected()"
                 [toggleable]="false"
                 (click)="onItalicToggle()"
-                title="Italic">
+                [title]="messages().italic">
                 <i class="ri-italic"></i>
             </button>
         }
@@ -21,7 +26,7 @@
                 [selected]="underlineSelected()"
                 [toggleable]="false"
                 (click)="onUnderlineToggle()"
-                title="Underline">
+                [title]="messages().underline">
                 <i class="ri-underline"></i>
             </button>
         }
@@ -31,7 +36,7 @@
                 [selected]="strikeThroughSelected()"
                 [toggleable]="false"
                 (click)="onStrikeThroughToggle()"
-                title="Strikethrough">
+                [title]="messages().strikethrough">
                 <i class="ri-strikethrough"></i>
             </button>
         }
@@ -41,7 +46,7 @@
                 [selected]="subscriptSelected()"
                 [toggleable]="false"
                 (click)="onSubscriptToggle()"
-                title="Subscript">
+                [title]="messages().subscript">
                 <i class="ri-subscript"></i>
             </button>
         }
@@ -51,7 +56,7 @@
                 [selected]="superscriptSelected()"
                 [toggleable]="false"
                 (click)="onSuperscriptToggle()"
-                title="Superscript">
+                [title]="messages().superscript">
                 <i class="ri-superscript"></i>
             </button>
         }

@@ -117,5 +117,73 @@ describe("GridColumnResizeHandlerDirective", () => {
             const event = fixture.componentInstance.onResizeEnd.mock.calls[0][0] as ColumnResizeEvent;
             expect(event.newWidth).toBe(100);
         });
+
+        it("decreases column width when dragged to the left in LTR", () => {
+            element.dispatchEvent(new PointerEvent("pointerdown", { clientX: 0, pointerId: 1, bubbles: true }));
+            element.dispatchEvent(new PointerEvent("pointermove", { clientX: -20, pointerId: 1, bubbles: true }));
+            element.dispatchEvent(new PointerEvent("pointerup", { clientX: -20, pointerId: 1, bubbles: true }));
+
+            const event = fixture.componentInstance.onResizeEnd.mock.calls[0][0] as ColumnResizeEvent;
+            expect(event.oldWidth).toBe(100);
+            expect(event.newWidth).toBe(80);
+            expect(gridService.getColumnWidth(gridService.columns().firstOrDefault()!)).toBe(80);
+        });
+
+        it("increases column width when dragged to the left in RTL", async () => {
+            element.setAttribute("dir", "rtl");
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            element.dispatchEvent(new PointerEvent("pointerdown", { clientX: 0, pointerId: 1, bubbles: true }));
+            element.dispatchEvent(new PointerEvent("pointermove", { clientX: -30, pointerId: 1, bubbles: true }));
+            element.dispatchEvent(new PointerEvent("pointerup", { clientX: -30, pointerId: 1, bubbles: true }));
+
+            const event = fixture.componentInstance.onResizeEnd.mock.calls[0][0] as ColumnResizeEvent;
+            expect(event.oldWidth).toBe(100);
+            expect(event.newWidth).toBe(130);
+            expect(gridService.getColumnWidth(gridService.columns().firstOrDefault()!)).toBe(130);
+        });
+
+        it("decreases column width when dragged to the right in RTL", async () => {
+            element.setAttribute("dir", "rtl");
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            element.dispatchEvent(new PointerEvent("pointerdown", { clientX: 0, pointerId: 1, bubbles: true }));
+            element.dispatchEvent(new PointerEvent("pointermove", { clientX: 20, pointerId: 1, bubbles: true }));
+            element.dispatchEvent(new PointerEvent("pointerup", { clientX: 20, pointerId: 1, bubbles: true }));
+
+            const event = fixture.componentInstance.onResizeEnd.mock.calls[0][0] as ColumnResizeEvent;
+            expect(event.oldWidth).toBe(100);
+            expect(event.newWidth).toBe(80);
+            expect(gridService.getColumnWidth(gridService.columns().firstOrDefault()!)).toBe(80);
+        });
+
+        it("does not apply a resize past minWidth in RTL", async () => {
+            element.setAttribute("dir", "rtl");
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            element.dispatchEvent(new PointerEvent("pointerdown", { clientX: 0, pointerId: 1, bubbles: true }));
+            element.dispatchEvent(new PointerEvent("pointermove", { clientX: 100, pointerId: 1, bubbles: true }));
+            element.dispatchEvent(new PointerEvent("pointerup", { clientX: 100, pointerId: 1, bubbles: true }));
+
+            const event = fixture.componentInstance.onResizeEnd.mock.calls[0][0] as ColumnResizeEvent;
+            expect(event.newWidth).toBe(100);
+            expect(gridService.getColumnWidth(gridService.columns().firstOrDefault()!)).toBe(100);
+        });
+
+        it("does not apply a resize past maxWidth in RTL", async () => {
+            element.setAttribute("dir", "rtl");
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            element.dispatchEvent(new PointerEvent("pointerdown", { clientX: 0, pointerId: 1, bubbles: true }));
+            element.dispatchEvent(new PointerEvent("pointermove", { clientX: -500, pointerId: 1, bubbles: true }));
+            element.dispatchEvent(new PointerEvent("pointerup", { clientX: -500, pointerId: 1, bubbles: true }));
+
+            const event = fixture.componentInstance.onResizeEnd.mock.calls[0][0] as ColumnResizeEvent;
+            expect(event.newWidth).toBe(100);
+        });
     });
 });

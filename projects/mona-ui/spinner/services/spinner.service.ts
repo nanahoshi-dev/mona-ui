@@ -23,9 +23,10 @@ import type { SpinnerUpdate } from "../models/SpinnerUpdate";
 interface SpinnerRequestState {
     activatedAt: number;
     appearance: SpinnerAppearance;
-    cancellationHandled: boolean;
-    readonly cancellable: boolean;
     readonly cancelText: string;
+    readonly cancellable: boolean;
+    cancellationHandled: boolean;
+    readonly cancelledSubject: Subject<void>;
     delayTimer: ReturnType<typeof setTimeout> | null;
     readonly id: string;
     readonly isFullPage: boolean;
@@ -34,7 +35,6 @@ interface SpinnerRequestState {
     readonly registeredAt: number;
     size: SpinnerSize;
     status: "PENDING" | "VISIBLE" | "CLOSED";
-    readonly cancelledSubject: Subject<void>;
     readonly targets: HTMLElement[];
     text?: string;
 }

@@ -9,9 +9,9 @@ import { DialogResult } from "./DialogResult";
 import { DialogSettings } from "./DialogSettings";
 
 export class DialogReference<R = unknown> implements DialogRefParams<R> {
+    readonly #dialogRef: DialogRef<R>;
     public readonly data: WritableSignal<DialogInjectorData>;
     public readonly dialogResult$ = new Subject<DialogResult>();
-    readonly #dialogRef: DialogRef<R>;
     public constructor(
         private readonly options: DialogReferenceOptions,
         initialData: DialogInjectorData

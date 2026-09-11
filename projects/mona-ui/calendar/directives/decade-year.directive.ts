@@ -1,5 +1,7 @@
 import { computed, Directive, inject, input } from "@angular/core";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { DateTime } from "luxon";
+import { CALENDAR_DEFAULT_MESSAGES } from "../i18n/calendar.default-messages";
 import { calendarDecadeViewCellThemeVariants, CalendarVariantProps } from "../styles/calendar.styles";
 
 @Directive({
@@ -14,7 +16,9 @@ import { calendarDecadeViewCellThemeVariants, CalendarVariantProps } from "../st
     }
 })
 export class DecadeYearDirective {
-    protected readonly ariaLabel = computed(() => `Year ${this.year()}`);
+    readonly #i18n = inject(MonaI18nService);
+    protected readonly messages = this.#i18n.componentMessages("calendar", CALENDAR_DEFAULT_MESSAGES);
+    protected readonly ariaLabel = computed(() => this.messages().yearCellLabel(this.year()));
     protected readonly baseClass = computed(() => {
         const focused = this.focused();
         const rounded = this.rounded();

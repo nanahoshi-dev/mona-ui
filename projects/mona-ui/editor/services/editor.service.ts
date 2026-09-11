@@ -1,5 +1,6 @@
-import { Injectable, signal } from "@angular/core";
+import { inject, Injectable, signal } from "@angular/core";
 import { any, ImmutableSet, List } from "@mirei/ts-collections";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { Editor, Extension, Mark, Node } from "@tiptap/core";
 import { Color } from "@tiptap/extension-color";
 import { FontFamily } from "@tiptap/extension-font-family";
@@ -22,12 +23,15 @@ import { Subject } from "rxjs";
 import { ExtendedImage } from "../extensions/ExtendedImage";
 import { FontSize } from "../extensions/FontSize";
 import { Indent } from "../extensions/Indent";
+import { EDITOR_DEFAULT_MESSAGES } from "../i18n/editor.default-messages";
 import { EditorSettings } from "../models/EditorSettings";
 
 type ExtensionTypes = Extension | Mark | Node;
 
 @Injectable()
 export class EditorService {
+    readonly #i18n = inject(MonaI18nService);
+    public readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
     readonly #defaultSettings: EditorSettings = {
         alignment: true,
         blockquote: true,

@@ -8,6 +8,7 @@ import {
     required
 } from "@angular/forms/signals";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 
 import { AutoCompleteComponent } from "./auto-complete.component";
 
@@ -34,14 +35,14 @@ class SignalFormAutoCompleteHostComponent {
     readonly #formModel = signal<AutoCompleteFormModel>({ value: "Banana" });
     protected readonly data = FOOD_ITEMS;
     public readonly disabled = signal(false);
-    public readonly loading = signal(false);
-    public readonly readonlyState = signal(false);
-    public readonly requiredState = signal(false);
     public readonly form = form(this.#formModel, schema => {
         fieldDisabled(schema.value, { when: () => this.disabled() });
         fieldReadonly(schema.value, { when: () => this.readonlyState() });
         required(schema.value, { when: () => this.requiredState() });
     });
+    public readonly loading = signal(false);
+    public readonly readonlyState = signal(false);
+    public readonly requiredState = signal(false);
 }
 
 describe("AutoCompleteComponent", () => {
@@ -198,6 +199,32 @@ describe("AutoCompleteComponent", () => {
         expect(getHost(fixture).getAttribute("tabindex")).toBe("-1");
         expect(getInput(fixture).getAttribute("role")).toBe("combobox");
         expect(getHost(fixture).querySelectorAll("[role='combobox']").length).toBe(1);
+    });
+
+    describe("i18n", () => {
+        it("renders default English clear label on indicator icon", async () => {
+            const fixture = await createSignalFormFixture();
+            const clearBtn = getClearButton(fixture);
+            expect(clearBtn.getAttribute("aria-label")).toBe("Clear");
+        });
+
+        it("updates clear label dynamically when locale changes", async () => {
+            const fixture = await createSignalFormFixture();
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use({
+                direction: "ltr",
+                id: "tr-TR",
+                messages: {
+                    autoComplete: {
+                        clear: "Temizle"
+                    }
+                }
+            });
+            await waitForStable(fixture);
+
+            const clearBtn = getClearButton(fixture);
+            expect(clearBtn.getAttribute("aria-label")).toBe("Temizle");
+        });
     });
 });
 

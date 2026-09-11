@@ -4,6 +4,7 @@
         look="link"
         size="small"
         [class]="scrollButtonClass()"
+        [attr.aria-label]="messages().scrollPrevious"
         (click)="startScrolling(tabListElement, 'previous', 'single')"
         (pointerdown)="startContinuousScroll($event, tabListElement, 'previous')"
         (pointerup)="stopScrolling()"
@@ -13,7 +14,7 @@
         @if (orientation() === 'vertical') {
             <svg lucideChevronUp [size]="16"></svg>
         } @else {
-            <svg lucideChevronLeft [size]="16"></svg>
+            <svg lucideChevronLeft [size]="16" class="rtl:rotate-180"></svg>
         }
     </button>
 }
@@ -49,8 +50,9 @@
                         monaButton
                         look="link"
                         [disabled]="itemDisabled"
+                        [attr.aria-label]="messages().closeTab"
                         (click)="onTabClose(tab, $event)"
-                        class="px-0 h-fit ml-1 w-min"
+                        class="px-0 h-fit ms-1 w-min"
                         tabindex="-1">
                         <svg lucideX [size]="16"></svg>
                     </button>
@@ -65,6 +67,7 @@
         look="link"
         size="small"
         [class]="scrollButtonClass()"
+        [attr.aria-label]="messages().scrollNext"
         (click)="startScrolling(tabListElement, 'next', 'single')"
         (pointerdown)="startContinuousScroll($event, tabListElement, 'next')"
         (pointerup)="stopScrolling()"
@@ -74,7 +77,7 @@
         @if (orientation() === 'vertical') {
             <svg lucideChevronDown [size]="16"></svg>
         } @else {
-            <svg lucideChevronRight [size]="16"></svg>
+            <svg lucideChevronRight [size]="16" class="rtl:rotate-180"></svg>
         }
     </button>
 }

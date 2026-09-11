@@ -3,7 +3,7 @@
     [value]="selectedColor()"
     (valueChange)="onColorChange($event)"
     [size]="'small'"
-    title="Background color">
+    [title]="messages().backgroundColor">
     <ng-template monaColorPickerValueTemplate let-color>
         <div [class]="highlightValueClass()">
             <i class="ri-drop-fill"></i>

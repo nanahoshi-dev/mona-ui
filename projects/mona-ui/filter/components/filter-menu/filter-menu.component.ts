@@ -22,6 +22,8 @@ import { FilterMenuValue } from "../../models/FilterMenuValue";
 import { OperatorFilterPipe } from "../../pipes/operator-filter.pipe";
 import { ValuelessOperatorPipe } from "../../pipes/valueless-operator.pipe";
 import { FilterService } from "../../services/filter.service";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { FILTER_DEFAULT_MESSAGES } from "../../i18n/filter.default-messages";
 import {
     filterMenuActionsThemeVariants,
     filterMenuBaseThemeVariants,
@@ -51,6 +53,8 @@ import {
 export class FilterMenuComponent implements FilterMenuVariantInput {
     #booleanFilterValues: [boolean | null, boolean | null] = [null, null];
     readonly #filterService = inject(FilterService);
+    readonly #i18n = inject(MonaI18nService);
+    protected readonly messages = this.#i18n.componentMessages("filter", FILTER_DEFAULT_MESSAGES);
     protected readonly applyDisabled = computed(() => {
         if (!this.firstFilterValid()) {
             return true;
@@ -60,12 +64,12 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
     protected readonly baseClass = computed(() => {
         return filterMenuBaseThemeVariants();
     });
-    protected readonly booleanFilterMenuDataItems = this.#filterService.booleanFilterMenuItems;
-    protected readonly connectorDataItems: FilterMenuConnectorItem[] = [
-        { text: "AND", value: "and" },
-        { text: "OR", value: "or" }
-    ];
-    protected readonly dateFilterMenuDataItems = this.#filterService.dateFilterMenuItems;
+    protected readonly booleanFilterMenuDataItems = computed(() => this.#filterService.booleanFilterMenuItems);
+    protected readonly connectorDataItems = computed<FilterMenuConnectorItem[]>(() => [
+        { text: this.messages().and, value: "and" },
+        { text: this.messages().or, value: "or" }
+    ]);
+    protected readonly dateFilterMenuDataItems = computed(() => this.#filterService.dateFilterMenuItems);
     protected readonly dateFilterValues = signal<[Date | null, Date | null]>([null, null]);
     protected readonly effectiveDateOptions = computed(() => {
         const type = this.type();
@@ -121,7 +125,7 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
         }
     });
     protected readonly numberFilterValues = signal<[number | null, number | null]>([null, null]);
-    protected readonly numericFilterMenuDataItems = this.#filterService.numericFilterMenuItems;
+    protected readonly numericFilterMenuDataItems = computed(() => this.#filterService.numericFilterMenuItems);
     protected readonly secondFilterValid = computed(() => {
         const operator = this.selectedFilterMenuDataItemList()[1]?.value;
         const type = this.type();
@@ -160,7 +164,7 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
         undefined,
         undefined
     ]);
-    protected readonly stringFilterMenuDataItems = this.#filterService.stringFilterMenuItems;
+    protected readonly stringFilterMenuDataItems = computed(() => this.#filterService.stringFilterMenuItems);
     protected readonly stringFilterValues = signal<[string, string]>(["", ""]);
 
     public readonly apply = output<CompositeFilterDescriptor>();
@@ -183,6 +187,40 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
                     this.setFilterValues(value);
                 });
             }
+        });
+        effect(() => {
+            this.messages();
+            untracked(() => {
+                const current = this.selectedFilterMenuDataItemList();
+                let items: FilterMenuDataItem[] = [];
+                switch (this.type()) {
+                    case "string":
+                        items = this.stringFilterMenuDataItems();
+                        break;
+                    case "number":
+                        items = this.numericFilterMenuDataItems();
+                        break;
+                    case "date":
+                        items = this.dateFilterMenuDataItems();
+                        break;
+                    case "boolean":
+                        items = this.booleanFilterMenuDataItems();
+                        break;
+                }
+                const newFirst = current[0] ? items.find(i => i.value === current[0]!.value) : undefined;
+                const newSecond = current[1] ? items.find(i => i.value === current[1]!.value) : undefined;
+                if (newFirst !== current[0] || newSecond !== current[1]) {
+                    this.selectedFilterMenuDataItemList.set([newFirst, newSecond]);
+                }
+                const currentConnector = this.selectedConnectorItem();
+                if (currentConnector) {
+                    const newConnector =
+                        this.connectorDataItems().find(c => c.value === currentConnector.value) ?? null;
+                    if (newConnector && newConnector.text !== currentConnector.text) {
+                        this.selectedConnectorItem.set(newConnector);
+                    }
+                }
+            });
         });
     }
 
@@ -361,17 +399,17 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
 
         switch (this.type()) {
             case "string":
-                filterMenuDataItems = this.stringFilterMenuDataItems;
+                filterMenuDataItems = this.stringFilterMenuDataItems();
                 filterValues = [values.value1 ?? "", values.value2 ?? ""];
                 break;
             case "number":
-                filterMenuDataItems = this.numericFilterMenuDataItems;
+                filterMenuDataItems = this.numericFilterMenuDataItems();
                 filterValues = [values.value1 ?? null, values.value2 ?? null];
                 break;
             case "date":
             case "boolean":
                 filterMenuDataItems =
-                    this.type() !== "boolean" ? this.dateFilterMenuDataItems : this.booleanFilterMenuDataItems;
+                    this.type() !== "boolean" ? this.dateFilterMenuDataItems() : this.booleanFilterMenuDataItems();
                 filterValues = [values.value1 ?? null, values.value2 ?? null];
                 break;
             default:
@@ -404,7 +442,7 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
 
         const selectedConnectorItem =
             values.operator2 && values.logic
-                ? (this.connectorDataItems.find(c => c.value === values.logic) ?? null)
+                ? (this.connectorDataItems().find(c => c.value === values.logic) ?? null)
                 : null;
         this.selectedConnectorItem.set(selectedConnectorItem);
     }

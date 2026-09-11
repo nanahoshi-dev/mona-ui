@@ -8,6 +8,16 @@ export interface RatingItemTemplateContext {
     readonly $implicit: number;
 
     /**
+     * Visible fill amount between 0 and 1.
+     */
+    readonly fill: number;
+
+    /**
+     * Whether the visible state comes from pointer preview.
+     */
+    readonly hovered: boolean;
+
+    /**
      * Zero-based item index.
      */
     readonly index: number;
@@ -18,17 +28,7 @@ export interface RatingItemTemplateContext {
     readonly itemValue: number;
 
     /**
-     * Visible fill amount between 0 and 1.
-     */
-    readonly fill: number;
-
-    /**
      * Whether the visible state comes from the committed value.
      */
     readonly selected: boolean;
-
-    /**
-     * Whether the visible state comes from pointer preview.
-     */
-    readonly hovered: boolean;
 }
