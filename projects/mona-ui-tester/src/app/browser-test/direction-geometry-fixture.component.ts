@@ -1,6 +1,11 @@
 import { Component, signal } from "@angular/core";
 import { RangeSliderComponent, SliderComponent } from "@nanahoshi/mona-ui/slider";
-import { SidebarComponent, SidebarLayoutComponent } from "@nanahoshi/mona-ui/sidebar";
+import {
+    SidebarComponent,
+    SidebarInsetDirective,
+    SidebarLayoutComponent,
+    SidebarRailDirective
+} from "@nanahoshi/mona-ui/sidebar";
 import { ScrollViewComponent } from "@nanahoshi/mona-ui/scroll-view";
 
 export interface FixturePageItem {
@@ -15,6 +20,8 @@ export interface FixturePageItem {
         RangeSliderComponent,
         SidebarLayoutComponent,
         SidebarComponent,
+        SidebarInsetDirective,
+        SidebarRailDirective,
         ScrollViewComponent
     ],
     template: `
@@ -46,6 +53,13 @@ export interface FixturePageItem {
                             [style.width.px]="400"
                             (valueChange)="sliderValueLtr.set($event)"
                         />
+                        <div style="display: flex; gap: 4px; margin-top: 32px; position: relative; z-index: 10;">
+                            <button type="button" data-testid="set-slider-ltr-0" (click)="sliderValueLtr.set(0)">0</button>
+                            <button type="button" data-testid="set-slider-ltr-20" (click)="sliderValueLtr.set(20)">20</button>
+                            <button type="button" data-testid="set-slider-ltr-50" (click)="sliderValueLtr.set(50)">50</button>
+                            <button type="button" data-testid="set-slider-ltr-80" (click)="sliderValueLtr.set(80)">80</button>
+                            <button type="button" data-testid="set-slider-ltr-100" (click)="sliderValueLtr.set(100)">100</button>
+                        </div>
                     </div>
 
                     <!-- Range Slider -->
@@ -62,9 +76,14 @@ export interface FixturePageItem {
                             [style.width.px]="400"
                             (valueChange)="rangeValueLtr.set($event)"
                         />
+                        <div style="display: flex; gap: 4px; margin-top: 32px; position: relative; z-index: 10;">
+                            <button type="button" data-testid="set-range-ltr-0-100" (click)="rangeValueLtr.set([0, 100])">[0, 100]</button>
+                            <button type="button" data-testid="set-range-ltr-20-80" (click)="rangeValueLtr.set([20, 80])">[20, 80]</button>
+                            <button type="button" data-testid="set-range-ltr-40-60" (click)="rangeValueLtr.set([40, 60])">[40, 60]</button>
+                        </div>
                     </div>
 
-                    <!-- Sidebar -->
+                    <!-- Sidebar Drawer Layout -->
                     <div style="width: 400px; height: 220px; border: 1px dashed #94a3b8; position: relative; overflow: hidden;">
                         <h3 style="margin: 0 0 8px 0; font-size: 14px;">Sidebar Drawer Layout</h3>
                         <div style="display: flex; gap: 8px; margin-bottom: 8px;">
@@ -91,19 +110,53 @@ export interface FixturePageItem {
                         </mona-sidebar-layout>
                     </div>
 
+                    <!-- Sidebar Docked Layout -->
+                    <div style="width: 450px; height: 190px; border: 1px solid #94a3b8; position: relative;">
+                        <h3 style="margin: 0 0 8px 0; font-size: 14px;">Sidebar Docked Layout (breakpoint=0)</h3>
+                        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                            <button type="button" data-testid="toggle-docked-start-ltr" (click)="dockedStartOpenLtr.set(!dockedStartOpenLtr())">Toggle Start</button>
+                            <button type="button" data-testid="toggle-docked-end-ltr" (click)="dockedEndOpenLtr.set(!dockedEndOpenLtr())">Toggle End</button>
+                        </div>
+                        <mona-sidebar-layout [mobileBreakpoint]="0" style="width: 100%; height: 130px;" data-testid="docked-layout-ltr">
+                            <mona-sidebar
+                                data-testid="docked-sidebar-start-ltr"
+                                side="start"
+                                [(expanded)]="dockedStartOpenLtr"
+                                collapsible="icon"
+                                [width]="120"
+                                [iconWidth]="40"
+                                style="background: #e0f2fe;">
+                                <div style="padding: 8px;">Docked Start</div>
+                                <button monaSidebarRail data-testid="docked-rail-start-ltr" aria-label="Toggle rail"></button>
+                            </mona-sidebar>
+                            <main monaSidebarInset data-testid="docked-inset-ltr" style="background: #f8fafc; padding: 8px;">
+                                Docked Content Inset
+                            </main>
+                            <mona-sidebar
+                                data-testid="docked-sidebar-end-ltr"
+                                side="end"
+                                [(expanded)]="dockedEndOpenLtr"
+                                collapsible="offcanvas"
+                                [width]="120"
+                                style="background: #fef08a;">
+                                <div style="padding: 8px;">Docked End</div>
+                            </mona-sidebar>
+                        </mona-sidebar-layout>
+                    </div>
+
                     <!-- ScrollView -->
-                    <div style="width: 300px; height: 160px; border: 1px solid #cbd5e1; position: relative;">
-                        <h3 style="margin: 0 0 8px 0; font-size: 14px;">ScrollView</h3>
+                    <div style="width: 300px; height: 170px; border: 1px solid #cbd5e1; position: relative;">
+                        <h3 style="margin: 0 0 8px 0; font-size: 14px;">ScrollView (overflowing pager)</h3>
                         <mona-scroll-view
                             data-testid="scroll-view-ltr"
-                            [data]="pages"
+                            [data]="manyPages"
                             [width]="300"
-                            [height]="120"
+                            [height]="130"
                             [arrows]="true"
                             [infinite]="true"
                             [pageable]="true">
                             <ng-template let-item>
-                                <div style="width: 300px; height: 120px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; font-weight: bold;">
+                                <div style="width: 300px; height: 90px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; font-weight: bold;">
                                     {{ item.title }}
                                 </div>
                             </ng-template>
@@ -135,6 +188,13 @@ export interface FixturePageItem {
                             [style.width.px]="400"
                             (valueChange)="sliderValueRtl.set($event)"
                         />
+                        <div style="display: flex; gap: 4px; margin-top: 32px; position: relative; z-index: 10;">
+                            <button type="button" data-testid="set-slider-rtl-0" (click)="sliderValueRtl.set(0)">0</button>
+                            <button type="button" data-testid="set-slider-rtl-20" (click)="sliderValueRtl.set(20)">20</button>
+                            <button type="button" data-testid="set-slider-rtl-50" (click)="sliderValueRtl.set(50)">50</button>
+                            <button type="button" data-testid="set-slider-rtl-80" (click)="sliderValueRtl.set(80)">80</button>
+                            <button type="button" data-testid="set-slider-rtl-100" (click)="sliderValueRtl.set(100)">100</button>
+                        </div>
                     </div>
 
                     <!-- Range Slider -->
@@ -151,9 +211,14 @@ export interface FixturePageItem {
                             [style.width.px]="400"
                             (valueChange)="rangeValueRtl.set($event)"
                         />
+                        <div style="display: flex; gap: 4px; margin-top: 32px; position: relative; z-index: 10;">
+                            <button type="button" data-testid="set-range-rtl-0-100" (click)="rangeValueRtl.set([0, 100])">[0, 100]</button>
+                            <button type="button" data-testid="set-range-rtl-20-80" (click)="rangeValueRtl.set([20, 80])">[20, 80]</button>
+                            <button type="button" data-testid="set-range-rtl-40-60" (click)="rangeValueRtl.set([40, 60])">[40, 60]</button>
+                        </div>
                     </div>
 
-                    <!-- Sidebar -->
+                    <!-- Sidebar Drawer Layout -->
                     <div style="width: 400px; height: 220px; border: 1px dashed #94a3b8; position: relative; overflow: hidden;">
                         <h3 style="margin: 0 0 8px 0; font-size: 14px;">Sidebar Drawer Layout</h3>
                         <div style="display: flex; gap: 8px; margin-bottom: 8px;">
@@ -180,19 +245,53 @@ export interface FixturePageItem {
                         </mona-sidebar-layout>
                     </div>
 
+                    <!-- Sidebar Docked Layout -->
+                    <div style="width: 450px; height: 190px; border: 1px solid #94a3b8; position: relative;">
+                        <h3 style="margin: 0 0 8px 0; font-size: 14px;">Sidebar Docked Layout (breakpoint=0)</h3>
+                        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                            <button type="button" data-testid="toggle-docked-start-rtl" (click)="dockedStartOpenRtl.set(!dockedStartOpenRtl())">Toggle Start</button>
+                            <button type="button" data-testid="toggle-docked-end-rtl" (click)="dockedEndOpenRtl.set(!dockedEndOpenRtl())">Toggle End</button>
+                        </div>
+                        <mona-sidebar-layout [mobileBreakpoint]="0" style="width: 100%; height: 130px;" data-testid="docked-layout-rtl">
+                            <mona-sidebar
+                                data-testid="docked-sidebar-start-rtl"
+                                side="start"
+                                [(expanded)]="dockedStartOpenRtl"
+                                collapsible="icon"
+                                [width]="120"
+                                [iconWidth]="40"
+                                style="background: #e0f2fe;">
+                                <div style="padding: 8px;">Docked Start</div>
+                                <button monaSidebarRail data-testid="docked-rail-start-rtl" aria-label="Toggle rail"></button>
+                            </mona-sidebar>
+                            <main monaSidebarInset data-testid="docked-inset-rtl" style="background: #f8fafc; padding: 8px;">
+                                Docked Content Inset
+                            </main>
+                            <mona-sidebar
+                                data-testid="docked-sidebar-end-rtl"
+                                side="end"
+                                [(expanded)]="dockedEndOpenRtl"
+                                collapsible="offcanvas"
+                                [width]="120"
+                                style="background: #fef08a;">
+                                <div style="padding: 8px;">Docked End</div>
+                            </mona-sidebar>
+                        </mona-sidebar-layout>
+                    </div>
+
                     <!-- ScrollView -->
-                    <div style="width: 300px; height: 160px; border: 1px solid #cbd5e1; position: relative;">
-                        <h3 style="margin: 0 0 8px 0; font-size: 14px;">ScrollView</h3>
+                    <div style="width: 300px; height: 170px; border: 1px solid #cbd5e1; position: relative;">
+                        <h3 style="margin: 0 0 8px 0; font-size: 14px;">ScrollView (overflowing pager)</h3>
                         <mona-scroll-view
                             data-testid="scroll-view-rtl"
-                            [data]="pages"
+                            [data]="manyPages"
                             [width]="300"
-                            [height]="120"
+                            [height]="130"
                             [arrows]="true"
                             [infinite]="true"
                             [pageable]="true">
                             <ng-template let-item>
-                                <div style="width: 300px; height: 120px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; font-weight: bold;">
+                                <div style="width: 300px; height: 90px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; font-weight: bold;">
                                     {{ item.title }}
                                 </div>
                             </ng-template>
@@ -224,6 +323,13 @@ export interface FixturePageItem {
                             [style.width.px]="400"
                             (valueChange)="sliderValueSplitLtr.set($event)"
                         />
+                        <div style="display: flex; gap: 4px; margin-top: 32px; position: relative; z-index: 10;">
+                            <button type="button" data-testid="set-slider-split-ltr-0" (click)="sliderValueSplitLtr.set(0)">0</button>
+                            <button type="button" data-testid="set-slider-split-ltr-20" (click)="sliderValueSplitLtr.set(20)">20</button>
+                            <button type="button" data-testid="set-slider-split-ltr-50" (click)="sliderValueSplitLtr.set(50)">50</button>
+                            <button type="button" data-testid="set-slider-split-ltr-80" (click)="sliderValueSplitLtr.set(80)">80</button>
+                            <button type="button" data-testid="set-slider-split-ltr-100" (click)="sliderValueSplitLtr.set(100)">100</button>
+                        </div>
                     </div>
 
                     <!-- Range Slider -->
@@ -240,9 +346,14 @@ export interface FixturePageItem {
                             [style.width.px]="400"
                             (valueChange)="rangeValueSplitLtr.set($event)"
                         />
+                        <div style="display: flex; gap: 4px; margin-top: 32px; position: relative; z-index: 10;">
+                            <button type="button" data-testid="set-range-split-ltr-0-100" (click)="rangeValueSplitLtr.set([0, 100])">[0, 100]</button>
+                            <button type="button" data-testid="set-range-split-ltr-20-80" (click)="rangeValueSplitLtr.set([20, 80])">[20, 80]</button>
+                            <button type="button" data-testid="set-range-split-ltr-40-60" (click)="rangeValueSplitLtr.set([40, 60])">[40, 60]</button>
+                        </div>
                     </div>
 
-                    <!-- Sidebar -->
+                    <!-- Sidebar Drawer Layout -->
                     <div style="width: 400px; height: 220px; border: 1px dashed #94a3b8; position: relative; overflow: hidden;">
                         <h3 style="margin: 0 0 8px 0; font-size: 14px;">Sidebar Drawer Layout</h3>
                         <div style="display: flex; gap: 8px; margin-bottom: 8px;">
@@ -269,19 +380,53 @@ export interface FixturePageItem {
                         </mona-sidebar-layout>
                     </div>
 
+                    <!-- Sidebar Docked Layout -->
+                    <div style="width: 450px; height: 190px; border: 1px solid #94a3b8; position: relative;">
+                        <h3 style="margin: 0 0 8px 0; font-size: 14px;">Sidebar Docked Layout (breakpoint=0)</h3>
+                        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                            <button type="button" data-testid="toggle-docked-start-split-ltr" (click)="dockedStartOpenSplitLtr.set(!dockedStartOpenSplitLtr())">Toggle Start</button>
+                            <button type="button" data-testid="toggle-docked-end-split-ltr" (click)="dockedEndOpenSplitLtr.set(!dockedEndOpenSplitLtr())">Toggle End</button>
+                        </div>
+                        <mona-sidebar-layout [mobileBreakpoint]="0" style="width: 100%; height: 130px;" data-testid="docked-layout-split-ltr">
+                            <mona-sidebar
+                                data-testid="docked-sidebar-start-split-ltr"
+                                side="start"
+                                [(expanded)]="dockedStartOpenSplitLtr"
+                                collapsible="icon"
+                                [width]="120"
+                                [iconWidth]="40"
+                                style="background: #e0f2fe;">
+                                <div style="padding: 8px;">Docked Start</div>
+                                <button monaSidebarRail data-testid="docked-rail-start-split-ltr" aria-label="Toggle rail"></button>
+                            </mona-sidebar>
+                            <main monaSidebarInset data-testid="docked-inset-split-ltr" style="background: #f8fafc; padding: 8px;">
+                                Docked Content Inset
+                            </main>
+                            <mona-sidebar
+                                data-testid="docked-sidebar-end-split-ltr"
+                                side="end"
+                                [(expanded)]="dockedEndOpenSplitLtr"
+                                collapsible="offcanvas"
+                                [width]="120"
+                                style="background: #fef08a;">
+                                <div style="padding: 8px;">Docked End</div>
+                            </mona-sidebar>
+                        </mona-sidebar-layout>
+                    </div>
+
                     <!-- ScrollView -->
-                    <div style="width: 300px; height: 160px; border: 1px solid #cbd5e1; position: relative;">
-                        <h3 style="margin: 0 0 8px 0; font-size: 14px;">ScrollView</h3>
+                    <div style="width: 300px; height: 170px; border: 1px solid #cbd5e1; position: relative;">
+                        <h3 style="margin: 0 0 8px 0; font-size: 14px;">ScrollView (overflowing pager)</h3>
                         <mona-scroll-view
                             data-testid="scroll-view-split-ltr"
-                            [data]="pages"
+                            [data]="manyPages"
                             [width]="300"
-                            [height]="120"
+                            [height]="130"
                             [arrows]="true"
                             [infinite]="true"
                             [pageable]="true">
                             <ng-template let-item>
-                                <div style="width: 300px; height: 120px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; font-weight: bold;">
+                                <div style="width: 300px; height: 90px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; font-weight: bold;">
                                     {{ item.title }}
                                 </div>
                             </ng-template>
@@ -313,6 +458,13 @@ export interface FixturePageItem {
                             [style.width.px]="400"
                             (valueChange)="sliderValueSplitRtl.set($event)"
                         />
+                        <div style="display: flex; gap: 4px; margin-top: 32px; position: relative; z-index: 10;">
+                            <button type="button" data-testid="set-slider-split-rtl-0" (click)="sliderValueSplitRtl.set(0)">0</button>
+                            <button type="button" data-testid="set-slider-split-rtl-20" (click)="sliderValueSplitRtl.set(20)">20</button>
+                            <button type="button" data-testid="set-slider-split-rtl-50" (click)="sliderValueSplitRtl.set(50)">50</button>
+                            <button type="button" data-testid="set-slider-split-rtl-80" (click)="sliderValueSplitRtl.set(80)">80</button>
+                            <button type="button" data-testid="set-slider-split-rtl-100" (click)="sliderValueSplitRtl.set(100)">100</button>
+                        </div>
                     </div>
 
                     <!-- Range Slider -->
@@ -329,9 +481,14 @@ export interface FixturePageItem {
                             [style.width.px]="400"
                             (valueChange)="rangeValueSplitRtl.set($event)"
                         />
+                        <div style="display: flex; gap: 4px; margin-top: 32px; position: relative; z-index: 10;">
+                            <button type="button" data-testid="set-range-split-rtl-0-100" (click)="rangeValueSplitRtl.set([0, 100])">[0, 100]</button>
+                            <button type="button" data-testid="set-range-split-rtl-20-80" (click)="rangeValueSplitRtl.set([20, 80])">[20, 80]</button>
+                            <button type="button" data-testid="set-range-split-rtl-40-60" (click)="rangeValueSplitRtl.set([40, 60])">[40, 60]</button>
+                        </div>
                     </div>
 
-                    <!-- Sidebar -->
+                    <!-- Sidebar Drawer Layout -->
                     <div style="width: 400px; height: 220px; border: 1px dashed #94a3b8; position: relative; overflow: hidden;">
                         <h3 style="margin: 0 0 8px 0; font-size: 14px;">Sidebar Drawer Layout</h3>
                         <div style="display: flex; gap: 8px; margin-bottom: 8px;">
@@ -358,19 +515,53 @@ export interface FixturePageItem {
                         </mona-sidebar-layout>
                     </div>
 
+                    <!-- Sidebar Docked Layout -->
+                    <div style="width: 450px; height: 190px; border: 1px solid #94a3b8; position: relative;">
+                        <h3 style="margin: 0 0 8px 0; font-size: 14px;">Sidebar Docked Layout (breakpoint=0)</h3>
+                        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                            <button type="button" data-testid="toggle-docked-start-split-rtl" (click)="dockedStartOpenSplitRtl.set(!dockedStartOpenSplitRtl())">Toggle Start</button>
+                            <button type="button" data-testid="toggle-docked-end-split-rtl" (click)="dockedEndOpenSplitRtl.set(!dockedEndOpenSplitRtl())">Toggle End</button>
+                        </div>
+                        <mona-sidebar-layout [mobileBreakpoint]="0" style="width: 100%; height: 130px;" data-testid="docked-layout-split-rtl">
+                            <mona-sidebar
+                                data-testid="docked-sidebar-start-split-rtl"
+                                side="start"
+                                [(expanded)]="dockedStartOpenSplitRtl"
+                                collapsible="icon"
+                                [width]="120"
+                                [iconWidth]="40"
+                                style="background: #e0f2fe;">
+                                <div style="padding: 8px;">Docked Start</div>
+                                <button monaSidebarRail data-testid="docked-rail-start-split-rtl" aria-label="Toggle rail"></button>
+                            </mona-sidebar>
+                            <main monaSidebarInset data-testid="docked-inset-split-rtl" style="background: #f8fafc; padding: 8px;">
+                                Docked Content Inset
+                            </main>
+                            <mona-sidebar
+                                data-testid="docked-sidebar-end-split-rtl"
+                                side="end"
+                                [(expanded)]="dockedEndOpenSplitRtl"
+                                collapsible="offcanvas"
+                                [width]="120"
+                                style="background: #fef08a;">
+                                <div style="padding: 8px;">Docked End</div>
+                            </mona-sidebar>
+                        </mona-sidebar-layout>
+                    </div>
+
                     <!-- ScrollView -->
-                    <div style="width: 300px; height: 160px; border: 1px solid #cbd5e1; position: relative;">
-                        <h3 style="margin: 0 0 8px 0; font-size: 14px;">ScrollView</h3>
+                    <div style="width: 300px; height: 170px; border: 1px solid #cbd5e1; position: relative;">
+                        <h3 style="margin: 0 0 8px 0; font-size: 14px;">ScrollView (overflowing pager)</h3>
                         <mona-scroll-view
                             data-testid="scroll-view-split-rtl"
-                            [data]="pages"
+                            [data]="manyPages"
                             [width]="300"
-                            [height]="120"
+                            [height]="130"
                             [arrows]="true"
                             [infinite]="true"
                             [pageable]="true">
                             <ng-template let-item>
-                                <div style="width: 300px; height: 120px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; font-weight: bold;">
+                                <div style="width: 300px; height: 90px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; font-weight: bold;">
                                     {{ item.title }}
                                 </div>
                             </ng-template>
@@ -378,15 +569,50 @@ export interface FixturePageItem {
                     </div>
                 </div>
             </section>
+
+            <!-- 5. Dynamic dir mutation fixture -->
+            <section
+                id="fixture-dynamic-dir"
+                data-testid="fixture-dynamic-dir"
+                [attr.dir]="dynamicDir()"
+                style="border: 2px solid #8b5cf6; border-radius: 8px; padding: 16px; background: #fafafa;">
+                <h2 style="margin: 0 0 16px 0; font-size: 16px; color: #6d28d9;">5. Dynamic Dir Mutation</h2>
+                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                    <button type="button" data-testid="set-dynamic-ltr" (click)="dynamicDir.set('ltr')">Set LTR</button>
+                    <button type="button" data-testid="set-dynamic-rtl" (click)="dynamicDir.set('rtl')">Set RTL</button>
+                </div>
+                <div style="width: 450px; height: 180px; border: 1px solid #94a3b8; position: relative;">
+                    <mona-sidebar-layout [mobileBreakpoint]="0" style="width: 100%; height: 140px;" data-testid="docked-layout-dynamic">
+                        <mona-sidebar
+                            data-testid="docked-sidebar-start-dynamic"
+                            side="start"
+                            [expanded]="true"
+                            [width]="120"
+                            style="background: #e0f2fe;">
+                            <div style="padding: 8px;">Dynamic Start</div>
+                        </mona-sidebar>
+                        <main monaSidebarInset data-testid="docked-inset-dynamic" style="background: #f8fafc; padding: 8px;">
+                            Dynamic Inset
+                        </main>
+                        <mona-sidebar
+                            data-testid="docked-sidebar-end-dynamic"
+                            side="end"
+                            [expanded]="true"
+                            [width]="120"
+                            style="background: #fef08a;">
+                            <div style="padding: 8px;">Dynamic End</div>
+                        </mona-sidebar>
+                    </mona-sidebar-layout>
+                </div>
+            </section>
         </div>
     `
 })
 export class DirectionGeometryFixtureComponent {
-    public readonly pages: FixturePageItem[] = [
-        { id: 1, title: "Page 1" },
-        { id: 2, title: "Page 2" },
-        { id: 3, title: "Page 3" }
-    ];
+    public readonly manyPages: FixturePageItem[] = Array.from({ length: 40 }, (_, i) => ({
+        id: i + 1,
+        title: `Page ${i + 1}`
+    }));
 
     public readonly sidebarStartOpenLtr = signal(false);
     public readonly sidebarEndOpenLtr = signal(false);
@@ -400,6 +626,18 @@ export class DirectionGeometryFixtureComponent {
     public readonly sidebarStartOpenSplitRtl = signal(false);
     public readonly sidebarEndOpenSplitRtl = signal(false);
 
+    public readonly dockedStartOpenLtr = signal(true);
+    public readonly dockedEndOpenLtr = signal(true);
+
+    public readonly dockedStartOpenRtl = signal(true);
+    public readonly dockedEndOpenRtl = signal(true);
+
+    public readonly dockedStartOpenSplitLtr = signal(true);
+    public readonly dockedEndOpenSplitLtr = signal(true);
+
+    public readonly dockedStartOpenSplitRtl = signal(true);
+    public readonly dockedEndOpenSplitRtl = signal(true);
+
     public readonly sliderValueLtr = signal(20);
     public readonly sliderValueRtl = signal(20);
     public readonly sliderValueSplitLtr = signal(20);
@@ -409,4 +647,6 @@ export class DirectionGeometryFixtureComponent {
     public readonly rangeValueRtl = signal<[number, number]>([20, 80]);
     public readonly rangeValueSplitLtr = signal<[number, number]>([20, 80]);
     public readonly rangeValueSplitRtl = signal<[number, number]>([20, 80]);
+
+    public readonly dynamicDir = signal<"ltr" | "rtl">("ltr");
 }
