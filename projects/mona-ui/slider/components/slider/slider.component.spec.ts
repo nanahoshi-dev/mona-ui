@@ -338,22 +338,31 @@ describe("SliderComponent", () => {
             await waitForStable(fixture);
 
             const handle = getHandle(fixture);
+            const selection = fixture.nativeElement.querySelector("mona-slider [class*='bg-primary']") as HTMLElement;
+
             // Under semantic Option A, Tailwind rtl: is inactive and matches LTR behavior
             expect(handle.matches(":dir(rtl)")).toBe(false);
             expect(handle.matches(":dir(ltr)")).toBe(true);
-            expect(handle.style.insetInlineStart).toBe("50%");
+            expect(handle.style.left).toBe("50%");
+            expect(handle.style.right).toBe("");
+            expect(selection.style.left).toBe("0%");
+            expect(selection.style.right).toBe("50%");
             expect(handle.classList.contains("data-[orientation=\"horizontal\"]:translate-x-[-50%]")).toBe(true);
 
             // ArrowRight still increases value in LTR
             dispatchKeydown(handle, "ArrowRight");
             await waitForStable(fixture);
             expect(fixture.componentInstance.value()).toBe(6);
-            expect(handle.style.insetInlineStart).toBe("60%");
+            expect(handle.style.left).toBe("60%");
+            expect(selection.style.left).toBe("0%");
+            expect(selection.style.right).toBe("40%");
 
             dispatchKeydown(handle, "ArrowLeft");
             await waitForStable(fixture);
             expect(fixture.componentInstance.value()).toBe(5);
-            expect(handle.style.insetInlineStart).toBe("50%");
+            expect(handle.style.left).toBe("50%");
+            expect(selection.style.left).toBe("0%");
+            expect(selection.style.right).toBe("50%");
         });
 
         it("maintains coherent RTL keyboard navigation and handle geometry under CSS-only direction override", async () => {
@@ -367,22 +376,70 @@ describe("SliderComponent", () => {
             await waitForStable(fixture);
 
             const handle = getHandle(fixture);
+            const selection = fixture.nativeElement.querySelector("mona-slider [class*='bg-primary']") as HTMLElement;
+
             expect(handle.matches(":dir(rtl)")).toBe(true);
             expect(handle.matches(":dir(ltr)")).toBe(false);
-            expect(handle.style.insetInlineStart).toBe("50%");
+            expect(handle.style.right).toBe("50%");
+            expect(handle.style.left).toBe("");
+            expect(selection.style.right).toBe("0%");
+            expect(selection.style.left).toBe("50%");
             expect(handle.classList.contains("rtl:data-[orientation=\"horizontal\"]:translate-x-[50%]")).toBe(true);
 
             // ArrowRight decreases value in RTL
             dispatchKeydown(handle, "ArrowRight");
             await waitForStable(fixture);
             expect(fixture.componentInstance.value()).toBe(4);
-            expect(handle.style.insetInlineStart).toBe("40%");
+            expect(handle.style.right).toBe("40%");
+            expect(selection.style.right).toBe("0%");
+            expect(selection.style.left).toBe("60%");
 
             // ArrowLeft increases value in RTL
             dispatchKeydown(handle, "ArrowLeft");
             await waitForStable(fixture);
             expect(fixture.componentInstance.value()).toBe(5);
-            expect(handle.style.insetInlineStart).toBe("50%");
+            expect(handle.style.right).toBe("50%");
+            expect(selection.style.right).toBe("0%");
+            expect(selection.style.left).toBe("50%");
+        });
+
+        it("aligns tick marks and labels with min and max handle positions in ordinary RTL", async () => {
+            @Component({
+                imports: [SliderComponent],
+                template: `
+                    <mona-slider
+                        [showTicks]="true"
+                        [showLabels]="true"
+                        [minValue]="0"
+                        [maxValue]="10"
+                        [value]="0" />
+                `
+            })
+            class RtlTicksSliderHostComponent {}
+
+            await TestBed.configureTestingModule({
+                imports: [RtlTicksSliderHostComponent]
+            }).compileComponents();
+
+            const fixture = TestBed.createComponent(RtlTicksSliderHostComponent);
+            fixture.nativeElement.setAttribute("dir", "rtl");
+            await waitForStable(fixture);
+
+            const handle = fixture.nativeElement.querySelector("[role='slider']") as HTMLElement;
+            const ticks = fixture.nativeElement.querySelectorAll("span[monaSliderTick]") as NodeListOf<HTMLElement>;
+            const labels = fixture.nativeElement.querySelectorAll(".mona-slider span[data-orientation='horizontal']") as NodeListOf<HTMLElement>;
+
+            // Min value (0) handle is at right: 0%
+            expect(handle.style.right).toBe("0%");
+
+            // First tick (value 0) must be at right: 0%, not left
+            expect(ticks[0].style.right).toBe("0%");
+            expect(ticks[0].style.left).toBe("");
+
+            // Last tick (value 10) must be at right: 100%
+            const lastTick = ticks[ticks.length - 1];
+            expect(lastTick.style.right).toBe("100%");
+            expect(lastTick.style.left).toBe("");
         });
     });
 });

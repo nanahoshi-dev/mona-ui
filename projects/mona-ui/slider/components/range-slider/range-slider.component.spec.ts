@@ -343,30 +343,43 @@ describe("RangeSliderComponent", () => {
             expect(secondaryHandle.matches(":dir(rtl)")).toBe(false);
 
             // Initial positions for value [2, 8] with min 0, max 10
-            expect(primaryHandle.style.insetInlineStart).toBe("20%");
-            expect(secondaryHandle.style.insetInlineStart).toBe("80%");
+            const selection = fixture.nativeElement.querySelector("mona-range-slider [class*='bg-primary']") as HTMLElement;
+            expect(primaryHandle.style.left).toBe("20%");
+            expect(primaryHandle.style.right).toBe("");
+            expect(secondaryHandle.style.left).toBe("80%");
+            expect(secondaryHandle.style.right).toBe("");
+            expect(selection.style.left).toBe("20%");
+            expect(selection.style.right).toBe("20%");
 
             // Secondary handle: ArrowRight increases in LTR
             dispatchKeydown(secondaryHandle, "ArrowRight");
             await waitForStable(fixture);
             expect(fixture.componentInstance.value()).toEqual([2, 9]);
-            expect(secondaryHandle.style.insetInlineStart).toBe("90%");
+            expect(secondaryHandle.style.left).toBe("90%");
+            expect(selection.style.left).toBe("20%");
+            expect(selection.style.right).toBe("10%");
 
             dispatchKeydown(secondaryHandle, "ArrowLeft");
             await waitForStable(fixture);
             expect(fixture.componentInstance.value()).toEqual([2, 8]);
-            expect(secondaryHandle.style.insetInlineStart).toBe("80%");
+            expect(secondaryHandle.style.left).toBe("80%");
+            expect(selection.style.left).toBe("20%");
+            expect(selection.style.right).toBe("20%");
 
             // Primary handle: ArrowRight increases in LTR
             dispatchKeydown(primaryHandle, "ArrowRight");
             await waitForStable(fixture);
             expect(fixture.componentInstance.value()).toEqual([3, 8]);
-            expect(primaryHandle.style.insetInlineStart).toBe("30%");
+            expect(primaryHandle.style.left).toBe("30%");
+            expect(selection.style.left).toBe("30%");
+            expect(selection.style.right).toBe("20%");
 
             dispatchKeydown(primaryHandle, "ArrowLeft");
             await waitForStable(fixture);
             expect(fixture.componentInstance.value()).toEqual([2, 8]);
-            expect(primaryHandle.style.insetInlineStart).toBe("20%");
+            expect(primaryHandle.style.left).toBe("20%");
+            expect(selection.style.left).toBe("20%");
+            expect(selection.style.right).toBe("20%");
         });
 
         it("maintains coherent RTL keyboard navigation and handle geometry under CSS-only direction override", async () => {
@@ -381,6 +394,7 @@ describe("RangeSliderComponent", () => {
 
             const primaryHandle = getPrimaryHandle(fixture);
             const secondaryHandle = getSecondaryHandle(fixture);
+            const selection = fixture.nativeElement.querySelector("mona-range-slider [class*='bg-primary']") as HTMLElement;
 
             expect(primaryHandle.matches(":dir(rtl)")).toBe(true);
             expect(primaryHandle.matches(":dir(ltr)")).toBe(false);
@@ -388,30 +402,81 @@ describe("RangeSliderComponent", () => {
             expect(secondaryHandle.matches(":dir(ltr)")).toBe(false);
 
             // Initial positions for value [2, 8] with min 0, max 10
-            expect(primaryHandle.style.insetInlineStart).toBe("20%");
-            expect(secondaryHandle.style.insetInlineStart).toBe("80%");
+            expect(primaryHandle.style.right).toBe("20%");
+            expect(primaryHandle.style.left).toBe("");
+            expect(secondaryHandle.style.right).toBe("80%");
+            expect(secondaryHandle.style.left).toBe("");
+            expect(selection.style.right).toBe("20%");
+            expect(selection.style.left).toBe("20%");
 
             // Secondary handle: ArrowRight decreases in RTL
             dispatchKeydown(secondaryHandle, "ArrowRight");
             await waitForStable(fixture);
             expect(fixture.componentInstance.value()).toEqual([2, 7]);
-            expect(secondaryHandle.style.insetInlineStart).toBe("70%");
+            expect(secondaryHandle.style.right).toBe("70%");
+            expect(selection.style.right).toBe("20%");
+            expect(selection.style.left).toBe("30%");
 
             dispatchKeydown(secondaryHandle, "ArrowLeft");
             await waitForStable(fixture);
             expect(fixture.componentInstance.value()).toEqual([2, 8]);
-            expect(secondaryHandle.style.insetInlineStart).toBe("80%");
+            expect(secondaryHandle.style.right).toBe("80%");
+            expect(selection.style.right).toBe("20%");
+            expect(selection.style.left).toBe("20%");
 
             // Primary handle: ArrowRight decreases in RTL
             dispatchKeydown(primaryHandle, "ArrowRight");
             await waitForStable(fixture);
             expect(fixture.componentInstance.value()).toEqual([1, 8]);
-            expect(primaryHandle.style.insetInlineStart).toBe("10%");
+            expect(primaryHandle.style.right).toBe("10%");
+            expect(selection.style.right).toBe("10%");
+            expect(selection.style.left).toBe("20%");
 
             dispatchKeydown(primaryHandle, "ArrowLeft");
             await waitForStable(fixture);
             expect(fixture.componentInstance.value()).toEqual([2, 8]);
-            expect(primaryHandle.style.insetInlineStart).toBe("20%");
+            expect(primaryHandle.style.right).toBe("20%");
+            expect(selection.style.right).toBe("20%");
+            expect(selection.style.left).toBe("20%");
+        });
+
+        it("aligns tick marks and labels with range handles in ordinary RTL", async () => {
+            @Component({
+                imports: [RangeSliderComponent],
+                template: `
+                    <mona-range-slider
+                        [showTicks]="true"
+                        [showLabels]="true"
+                        [minValue]="0"
+                        [maxValue]="10"
+                        [value]="[0, 10]" />
+                `
+            })
+            class RtlTicksRangeSliderHostComponent {}
+
+            await TestBed.configureTestingModule({
+                imports: [RtlTicksRangeSliderHostComponent]
+            }).compileComponents();
+
+            const fixture = TestBed.createComponent(RtlTicksRangeSliderHostComponent);
+            fixture.nativeElement.setAttribute("dir", "rtl");
+            await waitForStable(fixture);
+
+            const handles = fixture.nativeElement.querySelectorAll("[role='slider']") as NodeListOf<HTMLElement>;
+            const ticks = fixture.nativeElement.querySelectorAll("span[monaSliderTick]") as NodeListOf<HTMLElement>;
+
+            // Primary handle (0) is at right: 0%, secondary handle (10) is at right: 100%
+            expect(handles[0].style.right).toBe("0%");
+            expect(handles[1].style.right).toBe("100%");
+
+            // First tick (value 0) aligns with primary handle at right: 0%
+            expect(ticks[0].style.right).toBe("0%");
+            expect(ticks[0].style.left).toBe("");
+
+            // Last tick (value 10) aligns with secondary handle at right: 100%
+            const lastTick = ticks[ticks.length - 1];
+            expect(lastTick.style.right).toBe("100%");
+            expect(lastTick.style.left).toBe("");
         });
     });
 });

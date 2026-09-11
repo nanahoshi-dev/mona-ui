@@ -13,13 +13,27 @@ export class LabelStylePipe implements PipeTransform {
 
         const valuePosition = valueToPosition(tick.value, min, max);
 
+        const isRtl = args.direction === "rtl";
+
         if (orientation === "horizontal") {
-            styles.left = `${valuePosition}%`;
+            if (isRtl) {
+                styles.right = `${valuePosition}%`;
+                styles.transform = "translateX(50%)";
+            } else {
+                styles.left = `${valuePosition}%`;
+                styles.transform = "translateX(-50%)";
+            }
             styles[labelPosition === "before" ? "bottom" : "top"] = "100%";
-            styles.transform = "translateX(-50%)";
         } else {
             styles.bottom = `${valuePosition}%`;
-            styles[labelPosition === "before" ? "right" : "left"] = "100%";
+            const side = isRtl
+                ? labelPosition === "before"
+                    ? "left"
+                    : "right"
+                : labelPosition === "before"
+                  ? "right"
+                  : "left";
+            styles[side] = "100%";
             styles.transform = "translateY(50%)";
         }
 

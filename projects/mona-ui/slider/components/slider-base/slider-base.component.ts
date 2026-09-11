@@ -10,6 +10,7 @@ import {
     NgZone,
     output,
     signal,
+    Signal,
     TemplateRef,
     viewChildren
 } from "@angular/core";
@@ -56,12 +57,13 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
     protected readonly i18n = inject(MonaI18nService);
     protected readonly isRtl = computed(() => this.direction() === "rtl");
     protected readonly labelStyleArgs = computed<LabelStyleArgs>(() => {
+        const direction = this.direction();
         const labelPosition = this.labelPosition();
         const max = this.maxValue();
         const min = this.minValue();
         const orientation = this.orientation();
         const tickCount = this.labelTicks().length;
-        return { labelPosition, max, min, orientation, tickCount };
+        return { direction, labelPosition, max, min, orientation, tickCount };
     });
     protected readonly labelTicks = computed(() => {
         const allTicks = this.ticks();
@@ -100,6 +102,20 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         }
         return typeof bg === "string" ? { background: bg } : bg;
     });
+    protected abstract readonly selectionLeft: Signal<number>;
+    protected abstract readonly selectionRight: Signal<number>;
+    protected readonly horizontalSelectionLeft = computed(() => {
+        if (this.orientation() !== "horizontal") {
+            return undefined;
+        }
+        return this.isRtl() ? 100 - this.selectionRight() : this.selectionLeft();
+    });
+    protected readonly horizontalSelectionRight = computed(() => {
+        if (this.orientation() !== "horizontal") {
+            return undefined;
+        }
+        return this.isRtl() ? this.selectionLeft() : 100 - this.selectionRight();
+    });
     protected readonly selectionClasses = computed(() => sliderSelectionThemeVariants());
     protected readonly sliderHandleClasses = computed(() => {
         const rounded = this.rounded();
@@ -127,12 +143,13 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
     protected readonly tickLabelListClasses = computed(() => sliderTickLabelListThemeVariants());
     protected readonly tickListClasses = computed(() => sliderTickListThemeVariants());
     protected readonly tickStyleArgs = computed<TickStyleArgs>(() => {
+        const direction = this.direction();
         const largeTickStep = this.largeTickStep();
         const max = this.maxValue();
         const min = this.minValue();
         const orientation = this.orientation();
         const smallTickStep = this.smallTickStep();
-        return { largeTickStep, max, min, orientation, smallTickStep };
+        return { direction, largeTickStep, max, min, orientation, smallTickStep };
     });
     protected readonly tickValueTemplate = contentChild(SliderTickValueTemplateDirective, { read: TemplateRef });
     protected readonly ticks = computed(() => {
