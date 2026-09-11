@@ -225,7 +225,7 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         return scrollViewArrowThemeVariants({ hidden, side });
     });
     protected readonly scrollBehavior = computed<ScrollBehavior>(() =>
-        this.#prefersReducedMotion() ? "auto" : "smooth"
+        this.#prefersReducedMotion() ? "instant" : "smooth"
     );
     protected readonly scrollViewHeight = computed(() => {
         const height = this.height();

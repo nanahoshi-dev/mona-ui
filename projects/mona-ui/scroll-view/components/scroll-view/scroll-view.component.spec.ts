@@ -1228,7 +1228,7 @@ describe("ScrollViewComponent", () => {
             }
         });
 
-        it("uses auto behavior when prefers-reduced-motion matches", () => {
+        it("uses instant behavior when prefers-reduced-motion matches", () => {
             const originalMatchMedia = window.matchMedia;
             try {
                 window.matchMedia = vi.fn().mockImplementation((query: string) => ({
@@ -1246,7 +1246,7 @@ describe("ScrollViewComponent", () => {
                 localFixture.detectChanges();
                 const localComp = localFixture.componentInstance;
 
-                expect(localComp["scrollBehavior"]()).toBe("auto");
+                expect(localComp["scrollBehavior"]()).toBe("instant");
 
                 const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
                 const mockButton = { scrollIntoView: vi.fn() } as unknown as HTMLButtonElement;
@@ -1255,11 +1255,11 @@ describe("ScrollViewComponent", () => {
                 try {
                     localComp["onPagerClick"](new MouseEvent("click", { detail: 1, button: 0 }), mockList, "right");
                     vi.advanceTimersByTime(60);
-                    expect(mockList.scrollBy).toHaveBeenCalledWith({ behavior: "auto", left: 100 });
+                    expect(mockList.scrollBy).toHaveBeenCalledWith({ behavior: "instant", left: 100 });
 
                     localComp["onPageClick"](1, mockButton);
                     expect(mockButton.scrollIntoView).toHaveBeenCalledWith({
-                        behavior: "auto",
+                        behavior: "instant",
                         block: "nearest",
                         inline: "center"
                     });
@@ -1302,7 +1302,7 @@ describe("ScrollViewComponent", () => {
                 changeListener!({ matches: true } as MediaQueryListEvent);
                 localFixture.detectChanges();
 
-                expect(localComp["scrollBehavior"]()).toBe("auto");
+                expect(localComp["scrollBehavior"]()).toBe("instant");
 
                 // Trigger runtime preference change back to no-preference
                 changeListener!({ matches: false } as MediaQueryListEvent);

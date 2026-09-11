@@ -1846,6 +1846,7 @@ async function runTests(): Promise<void> {
         await stdPagerList.evaluate(el => {
             (el as any).__scrollByCalls = [];
             (el as any).__scrollCalls = [];
+            el.style.scrollBehavior = "smooth";
         });
         await page.evaluate(() => { (window as any).__scrollIntoViewCalls = []; });
 
@@ -1853,8 +1854,8 @@ async function runTests(): Promise<void> {
         await page.waitForTimeout(150);
         const reduceScrollBy = await stdPagerList.evaluate(el => (el as any).__scrollByCalls || []);
         assert(
-            reduceScrollBy.length > 0 && reduceScrollBy[reduceScrollBy.length - 1].behavior === "auto",
-            `[Reduced Motion] Pager scrollBy requests behavior='auto' (got '${reduceScrollBy[reduceScrollBy.length - 1]?.behavior}')`
+            reduceScrollBy.length > 0 && reduceScrollBy[reduceScrollBy.length - 1].behavior === "instant",
+            `[Reduced Motion] Pager scroll requests behavior='instant' under conflicting CSS scroll-behavior: smooth (got '${reduceScrollBy[reduceScrollBy.length - 1]?.behavior}')`
         );
 
         const dot12 = stdScrollView.locator('li[data-page-index="12"] button');
@@ -1862,8 +1863,8 @@ async function runTests(): Promise<void> {
         await page.waitForTimeout(200);
         const reduceIntoView = await page.evaluate(() => (window as any).__scrollIntoViewCalls || []);
         assert(
-            reduceIntoView.length > 0 && reduceIntoView[reduceIntoView.length - 1].behavior === "auto",
-            `[Reduced Motion] scrollIntoView requests behavior='auto' (got '${reduceIntoView[reduceIntoView.length - 1]?.behavior}')`
+            reduceIntoView.length > 0 && reduceIntoView[reduceIntoView.length - 1].behavior === "instant",
+            `[Reduced Motion] scrollIntoView requests behavior='instant' (got '${reduceIntoView[reduceIntoView.length - 1]?.behavior}')`
         );
 
         // Test 3: Restore no-preference on custom fixture -> ~1200ms control
