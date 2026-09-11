@@ -26,7 +26,8 @@
         "test:theme-colors": "tsx projects/mona-ui-tester/scripts/check-theme-color-parity.ts",
         "test:audit": "vitest run projects/mona-ui-tester/scripts/audit-i18n-rtl.spec.ts",
         "audit:i18n-rtl": "tsx projects/mona-ui-tester/scripts/audit-i18n-rtl.ts",
-        "audit:i18n-rtl:strict": "tsx projects/mona-ui-tester/scripts/audit-i18n-rtl.ts --strict"
+        "audit:i18n-rtl:strict": "tsx projects/mona-ui-tester/scripts/audit-i18n-rtl.ts --strict",
+        "test:browser:geometry": "tsx scripts/test-direction-browser.ts"
     },
     "workspaces": [
         "projects/*"
@@ -154,6 +155,7 @@
         "jasmine-core": "~6.3.0",
         "jsdom": "^29.1.1",
         "ng-packagr": "^22.0.0",
+        "playwright": "^1.63.0",
         "prettier": "^3.8.4",
         "ts-morph": "^28.0.0",
         "tsx": "^4.22.4",
