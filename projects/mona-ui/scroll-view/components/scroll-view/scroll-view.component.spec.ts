@@ -1078,6 +1078,325 @@ describe("ScrollViewComponent", () => {
             }
         });
 
+        it("preserves pending trailing-click suppression across later owner short-click completion", () => {
+            vi.useFakeTimers();
+            try {
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollLeft: 0,
+                    scrollTo: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
+                const pointerADown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 10 });
+                const pointerAUp = new PointerEvent("pointerup", { pointerId: 10 });
+                const pointerAClick = new PointerEvent("click", { button: 0, detail: 1, pointerId: 10 });
+
+                const pointerBDown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 20 });
+                const pointerBUp = new PointerEvent("pointerup", { pointerId: 20 });
+                const pointerBClick = new PointerEvent("click", { button: 0, detail: 1, pointerId: 20 });
+
+                // Pointer A earns trailing-click suppression
+                component["onPagerPointerDown"](pointerADown, mockList, "right");
+                vi.advanceTimersByTime(120); // 2 ticks
+                expect(mockList.scrollTo).toHaveBeenCalledTimes(2);
+                document.dispatchEvent(pointerAUp);
+
+                // Pointer B starts and releases before 60ms (short click)
+                component["onPagerPointerDown"](pointerBDown, mockList, "right");
+                vi.advanceTimersByTime(30);
+                document.dispatchEvent(pointerBUp);
+
+                // Pointer A's click arrives -> still suppressed!
+                component["onPagerClick"](pointerAClick, mockList, "right");
+                expect(mockList.scrollTo).toHaveBeenCalledTimes(2);
+
+                // Pointer B's click arrives -> executes normally!
+                component["onPagerClick"](pointerBClick, mockList, "right");
+                expect(mockList.scrollTo).toHaveBeenCalledTimes(3);
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("preserves multiple pending pointer trailing-click suppressions concurrently", () => {
+            vi.useFakeTimers();
+            try {
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollLeft: 0,
+                    scrollTo: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
+                const pointerADown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 10 });
+                const pointerAUp = new PointerEvent("pointerup", { pointerId: 10 });
+                const pointerAClick = new PointerEvent("click", { button: 0, detail: 1, pointerId: 10 });
+
+                const pointerBDown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 20 });
+                const pointerBUp = new PointerEvent("pointerup", { pointerId: 20 });
+                const pointerBClick = new PointerEvent("click", { button: 0, detail: 1, pointerId: 20 });
+
+                // A earns suppression
+                component["onPagerPointerDown"](pointerADown, mockList, "right");
+                vi.advanceTimersByTime(120);
+                expect(mockList.scrollTo).toHaveBeenCalledTimes(2);
+                document.dispatchEvent(pointerAUp);
+
+                // B also earns suppression before A's click arrives
+                component["onPagerPointerDown"](pointerBDown, mockList, "right");
+                vi.advanceTimersByTime(120);
+                expect(mockList.scrollTo).toHaveBeenCalledTimes(4);
+                document.dispatchEvent(pointerBUp);
+
+                // Both clicks arrive and both are suppressed!
+                component["onPagerClick"](pointerAClick, mockList, "right");
+                expect(mockList.scrollTo).toHaveBeenCalledTimes(4);
+
+                component["onPagerClick"](pointerBClick, mockList, "right");
+                expect(mockList.scrollTo).toHaveBeenCalledTimes(4);
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("preserves pending trailing-click suppression when subsequent owner cancels", () => {
+            vi.useFakeTimers();
+            try {
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollLeft: 0,
+                    scrollTo: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
+                const pointerADown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 10 });
+                const pointerAUp = new PointerEvent("pointerup", { pointerId: 10 });
+                const pointerAClick = new PointerEvent("click", { button: 0, detail: 1, pointerId: 10 });
+
+                const pointerBDown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 20 });
+                const pointerBCancel = new PointerEvent("pointercancel", { pointerId: 20 });
+
+                // A earns suppression
+                component["onPagerPointerDown"](pointerADown, mockList, "right");
+                vi.advanceTimersByTime(120);
+                expect(mockList.scrollTo).toHaveBeenCalledTimes(2);
+                document.dispatchEvent(pointerAUp);
+
+                // B is accepted then canceled
+                component["onPagerPointerDown"](pointerBDown, mockList, "right");
+                document.dispatchEvent(pointerBCancel);
+
+                // A's click arrives: still suppressed
+                component["onPagerClick"](pointerAClick, mockList, "right");
+                expect(mockList.scrollTo).toHaveBeenCalledTimes(2);
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("removes document listeners when rejected pointer releases away without click", () => {
+            vi.useFakeTimers();
+            try {
+                const addSpy = vi.spyOn(document, "addEventListener");
+                const removeSpy = vi.spyOn(document, "removeEventListener");
+
+                const arrowBtn = document.createElement("button");
+                const outsideEl = document.createElement("div");
+                document.body.appendChild(arrowBtn);
+                document.body.appendChild(outsideEl);
+
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollLeft: 0,
+                    scrollTo: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
+
+                const pointerADown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 10 });
+                const pointerBDown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 20 });
+                Object.defineProperty(pointerBDown, "currentTarget", { value: arrowBtn });
+
+                const pointerBUpAway = new PointerEvent("pointerup", { pointerId: 20 });
+                Object.defineProperty(pointerBUpAway, "target", { value: outsideEl });
+
+                const pointerAUp = new PointerEvent("pointerup", { pointerId: 10 });
+
+                // A starts hold -> document listeners added
+                component["onPagerPointerDown"](pointerADown, mockList, "right");
+                expect(addSpy).toHaveBeenCalledWith("pointerup", expect.any(Function));
+                expect(addSpy).toHaveBeenCalledWith("pointercancel", expect.any(Function));
+
+                // B is rejected
+                component["onPagerPointerDown"](pointerBDown, mockList, "right");
+
+                // B releases outside arrow
+                document.dispatchEvent(pointerBUpAway);
+
+                // A is still down, so document listeners not removed yet
+                expect(removeSpy).not.toHaveBeenCalledWith("pointerup", expect.any(Function));
+
+                // A completes
+                document.dispatchEvent(pointerAUp);
+
+                // Now no pointer is physically down -> document listeners removed!
+                expect(removeSpy).toHaveBeenCalledWith("pointerup", expect.any(Function));
+                expect(removeSpy).toHaveBeenCalledWith("pointercancel", expect.any(Function));
+
+                arrowBtn.remove();
+                outsideEl.remove();
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("still suppresses click when rejected pointer releases on the same control", () => {
+            vi.useFakeTimers();
+            try {
+                const arrowBtn = document.createElement("button");
+                document.body.appendChild(arrowBtn);
+
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollLeft: 0,
+                    scrollTo: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
+                const pointerADown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 10 });
+                const pointerBDown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 20 });
+                Object.defineProperty(pointerBDown, "currentTarget", { value: arrowBtn });
+
+                const pointerBUp = new PointerEvent("pointerup", { pointerId: 20 });
+                Object.defineProperty(pointerBUp, "target", { value: arrowBtn });
+                const pointerBClick = new PointerEvent("click", { button: 0, detail: 1, pointerId: 20 });
+
+                // A starts hold
+                component["onPagerPointerDown"](pointerADown, mockList, "right");
+                vi.advanceTimersByTime(60);
+                expect(mockList.scrollTo).toHaveBeenCalledTimes(1);
+
+                // B is rejected
+                component["onPagerPointerDown"](pointerBDown, mockList, "right");
+
+                // B releases on same button
+                document.dispatchEvent(pointerBUp);
+
+                // B click arrives -> rejected, 0 steps
+                component["onPagerClick"](pointerBClick, mockList, "right");
+                expect(mockList.scrollTo).toHaveBeenCalledTimes(1);
+
+                arrowBtn.remove();
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("keeps multiple rejected pointers isolated across release-away and click rejection", () => {
+            vi.useFakeTimers();
+            try {
+                const arrowBtn = document.createElement("button");
+                const outsideEl = document.createElement("div");
+                document.body.appendChild(arrowBtn);
+                document.body.appendChild(outsideEl);
+
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollLeft: 0,
+                    scrollTo: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
+
+                const pointerADown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 10 });
+                const pointerBDown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 20 });
+                Object.defineProperty(pointerBDown, "currentTarget", { value: arrowBtn });
+
+                const pointerCDown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 30 });
+                Object.defineProperty(pointerCDown, "currentTarget", { value: arrowBtn });
+
+                const pointerBUpAway = new PointerEvent("pointerup", { pointerId: 20 });
+                Object.defineProperty(pointerBUpAway, "target", { value: outsideEl });
+
+                const pointerCUpOnControl = new PointerEvent("pointerup", { pointerId: 30 });
+                Object.defineProperty(pointerCUpOnControl, "target", { value: arrowBtn });
+
+                const pointerCClick = new PointerEvent("click", { button: 0, detail: 1, pointerId: 30 });
+                const pointerAUp = new PointerEvent("pointerup", { pointerId: 10 });
+
+                // A starts hold
+                component["onPagerPointerDown"](pointerADown, mockList, "right");
+
+                // B and C are rejected
+                component["onPagerPointerDown"](pointerBDown, mockList, "right");
+                component["onPagerPointerDown"](pointerCDown, mockList, "right");
+
+                // B releases away -> deleted from rejected map
+                document.dispatchEvent(pointerBUpAway);
+
+                // C releases on control -> transitions to awaiting-click
+                document.dispatchEvent(pointerCUpOnControl);
+
+                // A completes
+                document.dispatchEvent(pointerAUp);
+
+                // C click arrives -> suppressed (0 steps)
+                component["onPagerClick"](pointerCClick, mockList, "right");
+                expect(mockList.scrollTo).not.toHaveBeenCalled();
+
+                arrowBtn.remove();
+                outsideEl.remove();
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("does not accumulate stale pointer state after repeated release-away interactions", () => {
+            const arrowBtn = document.createElement("button");
+            const outsideEl = document.createElement("div");
+            document.body.appendChild(arrowBtn);
+            document.body.appendChild(outsideEl);
+
+            const removeSpy = vi.spyOn(document, "removeEventListener");
+
+            const mockList = {
+                clientWidth: 200,
+                scrollBy: vi.fn(),
+                scrollLeft: 0,
+                scrollTo: vi.fn(),
+                scrollWidth: 1000
+            } as unknown as HTMLUListElement;
+
+            const pointerADown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 10 });
+            component["onPagerPointerDown"](pointerADown, mockList, "right");
+
+            for (let i = 20; i < 25; i++) {
+                const rejectedDown = new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: i });
+                Object.defineProperty(rejectedDown, "currentTarget", { value: arrowBtn });
+                component["onPagerPointerDown"](rejectedDown, mockList, "right");
+
+                const rejectedUpAway = new PointerEvent("pointerup", { pointerId: i });
+                Object.defineProperty(rejectedUpAway, "target", { value: outsideEl });
+                document.dispatchEvent(rejectedUpAway);
+            }
+
+            // A completes
+            const pointerAUp = new PointerEvent("pointerup", { pointerId: 10 });
+            document.dispatchEvent(pointerAUp);
+
+            // Document listeners are removed because no rejected pointers remain down
+            expect(removeSpy).toHaveBeenCalledWith("pointerup", expect.any(Function));
+
+            // Verify a click with pointerId 20 is not treated as rejected (executes scroll)
+            const clickEvent = new PointerEvent("click", { button: 0, detail: 1, pointerId: 20 });
+            component["onPagerClick"](clickEvent, mockList, "right");
+            expect(mockList.scrollTo).toHaveBeenCalledTimes(1);
+
+            arrowBtn.remove();
+            outsideEl.remove();
+        });
+
         it("scrollend support path does not use wall-clock expiry and clears on scrollend", () => {
             vi.useFakeTimers();
             try {

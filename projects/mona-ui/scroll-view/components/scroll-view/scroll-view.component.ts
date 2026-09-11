@@ -51,6 +51,11 @@ import {
     ScrollViewVariantProps
 } from "../../styles/scroll-view.styles";
 
+interface RejectedPagerPointer {
+    readonly control?: HTMLElement | null;
+    phase: "down" | "awaiting-click";
+}
+
 interface PagerScrollContext {
     readonly direction: "ltr" | "rtl";
     readonly element: HTMLUListElement;
@@ -144,8 +149,9 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     readonly #pointerCancelHandler = (event: PointerEvent): void => this.#handlePointerEnd(event, false);
     readonly #pointerUpHandler = (event: PointerEvent): void => this.#handlePointerEnd(event, true);
     readonly #prefersReducedMotion = signal(false);
-    readonly #rejectedPagerPointerIds = new Set<number>();
+    readonly #rejectedPagerPointers = new Map<number, RejectedPagerPointer>();
     readonly #scroll$ = new Subject<void>();
+    readonly #suppressedPagerClickPointerIds = new Set<number>();
     readonly #viewIndex = computed(() => {
         const infinite = this.infinite();
         const index = this.index();
@@ -160,7 +166,6 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     #pagerScrollCompletionCleanup: (() => void) | null = null;
     #pagerScrollContext: PagerScrollContext | null = null;
     #resizeObserver: ResizeObserver | null = null;
-    #suppressedPagerClickPointerId: number | null = null;
 
     protected readonly animationDuration = computed(() => {
         const animate = this.animate();
@@ -387,18 +392,30 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
                     : null;
 
             if (pointerId !== null && pointerId !== -1) {
-                if (this.#rejectedPagerPointerIds.has(pointerId)) {
-                    this.#rejectedPagerPointerIds.delete(pointerId);
+                if (this.#rejectedPagerPointers.has(pointerId)) {
+                    this.#rejectedPagerPointers.delete(pointerId);
                     this.#cleanupDocumentPointerListenersIfNeeded();
                     return;
                 }
-                if (this.#suppressedPagerClickPointerId === pointerId) {
-                    this.#suppressedPagerClickPointerId = null;
+                if (this.#suppressedPagerClickPointerIds.delete(pointerId)) {
                     return;
                 }
-            } else if (this.#suppressedPagerClickPointerId !== null) {
-                this.#suppressedPagerClickPointerId = null;
-                return;
+            } else {
+                if (this.#rejectedPagerPointers.size === 1) {
+                    const firstKey = this.#rejectedPagerPointers.keys().next().value;
+                    if (firstKey !== undefined) {
+                        this.#rejectedPagerPointers.delete(firstKey);
+                        this.#cleanupDocumentPointerListenersIfNeeded();
+                        return;
+                    }
+                }
+                if (this.#suppressedPagerClickPointerIds.size === 1) {
+                    const firstId = this.#suppressedPagerClickPointerIds.values().next().value;
+                    if (firstId !== undefined) {
+                        this.#suppressedPagerClickPointerIds.delete(firstId);
+                        return;
+                    }
+                }
             }
         }
 
@@ -409,15 +426,17 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         if (!event.isPrimary || event.button !== 0) {
             return;
         }
+        const control = (event.currentTarget ?? event.target) as HTMLElement | null;
         if (this.#activePagerPointerId !== null) {
-            this.#rejectedPagerPointerIds.add(event.pointerId);
+            this.#rejectedPagerPointers.set(event.pointerId, {
+                control,
+                phase: "down"
+            });
             this.#ensureDocumentPointerListeners();
             return;
         }
-        this.#rejectedPagerPointerIds.delete(event.pointerId);
-        if (this.#suppressedPagerClickPointerId === event.pointerId) {
-            this.#suppressedPagerClickPointerId = null;
-        }
+        this.#rejectedPagerPointers.delete(event.pointerId);
+        this.#suppressedPagerClickPointerIds.delete(event.pointerId);
         this.#activePagerPointerId = event.pointerId;
         this.#continuousTicked = false;
 
@@ -484,7 +503,14 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     }
 
     #cleanupDocumentPointerListenersIfNeeded(): void {
-        if (this.#activePagerPointerId === null && this.#rejectedPagerPointerIds.size === 0) {
+        let hasDownRejected = false;
+        for (const p of this.#rejectedPagerPointers.values()) {
+            if (p.phase === "down") {
+                hasDownRejected = true;
+                break;
+            }
+        }
+        if (this.#activePagerPointerId === null && !hasDownRejected) {
             this.#document.removeEventListener("pointerup", this.#pointerUpHandler);
             this.#document.removeEventListener("pointercancel", this.#pointerCancelHandler);
         }
@@ -497,17 +523,32 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
 
     #handlePointerEnd(event: PointerEvent, isUp: boolean): void {
         if (event.pointerId !== this.#activePagerPointerId) {
-            if (!isUp && this.#rejectedPagerPointerIds.has(event.pointerId)) {
-                this.#rejectedPagerPointerIds.delete(event.pointerId);
+            const rejected = this.#rejectedPagerPointers.get(event.pointerId);
+            if (rejected) {
+                if (!isUp) {
+                    this.#rejectedPagerPointers.delete(event.pointerId);
+                } else {
+                    const targetNode = event.target as Node | null;
+                    const isWithinControl =
+                        rejected.control == null ||
+                        (targetNode != null && rejected.control.contains(targetNode)) ||
+                        (typeof event.composedPath === "function" && event.composedPath().includes(rejected.control));
+
+                    if (isWithinControl) {
+                        rejected.phase = "awaiting-click";
+                    } else {
+                        this.#rejectedPagerPointers.delete(event.pointerId);
+                    }
+                }
             }
             this.#cleanupDocumentPointerListenersIfNeeded();
             return;
         }
         this.#scroll$.next();
         if (isUp && this.#continuousTicked) {
-            this.#suppressedPagerClickPointerId = event.pointerId;
+            this.#suppressedPagerClickPointerIds.add(event.pointerId);
         } else {
-            this.#suppressedPagerClickPointerId = null;
+            this.#suppressedPagerClickPointerIds.delete(event.pointerId);
         }
         this.#continuousTicked = false;
         this.#activePagerPointerId = null;
@@ -567,8 +608,8 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         this.#scroll$.next();
         this.#continuousTicked = false;
         this.#activePagerPointerId = null;
-        this.#suppressedPagerClickPointerId = null;
-        this.#rejectedPagerPointerIds.clear();
+        this.#suppressedPagerClickPointerIds.clear();
+        this.#rejectedPagerPointers.clear();
     }
 
     private navigate(direction: ScrollDirection, infinite: boolean): void {
