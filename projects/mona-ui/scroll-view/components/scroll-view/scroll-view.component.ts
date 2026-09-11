@@ -174,7 +174,8 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     });
     protected readonly leftArrowClass = computed(() => {
         const hidden = !this.arrows() || !(this.infinite() || this.index() !== 0);
-        return scrollViewArrowThemeVariants({ hidden, start: true });
+        const side = this.isRtl() ? "right" : "left";
+        return scrollViewArrowThemeVariants({ hidden, side });
     });
     protected readonly listClass = computed(() => {
         return scrollViewListThemeVariants();
@@ -197,7 +198,8 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     protected readonly pagerListElementRef = viewChild<ElementRef<HTMLUListElement>>("pagerListElement");
     protected readonly rightArrowClass = computed(() => {
         const hidden = !this.arrows() || !(this.infinite() || this.index() !== this.itemCount() - 1);
-        return scrollViewArrowThemeVariants({ end: true, hidden });
+        const side = this.isRtl() ? "left" : "right";
+        return scrollViewArrowThemeVariants({ hidden, side });
     });
     protected readonly scrollViewHeight = computed(() => {
         const height = this.height();

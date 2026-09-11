@@ -63,7 +63,10 @@
 </button>
 
 @if (pageable()) {
-    <div [class]="pagerClass()" [style.backdrop-filter]="'blur(' + pagerBlur() + 'px)'">
+    <div
+        [class]="pagerClass()"
+        [style.direction]="isRtl() ? 'rtl' : 'ltr'"
+        [style.backdrop-filter]="'blur(' + pagerBlur() + 'px)'">
         @if (pagerArrowVisible()) {
             <button
                 type="button"

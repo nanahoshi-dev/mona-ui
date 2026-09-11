@@ -25,11 +25,17 @@ describe("ScrollViewComponent", () => {
         TestBed.resetTestingModule();
     });
 
+    async function waitForStable(fixture: ComponentFixture<unknown>): Promise<void> {
+        fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
+    }
+
     it("should create", () => {
         expect(component).toBeTruthy();
     });
 
-    it("uses a soft surface boundary and neutral carousel controls with logical start/end positioning", () => {
+    it("uses a soft surface boundary and neutral carousel controls with physical left/right positioning", () => {
         fixture.componentRef.setInput("arrows", true);
         fixture.componentRef.setInput("data", ["First", "Second"]);
         fixture.componentRef.setInput("infinite", true);
@@ -40,19 +46,20 @@ describe("ScrollViewComponent", () => {
         const prevArrow = host.querySelector("[data-navigate-prev]") as HTMLButtonElement;
         const nextArrow = host.querySelector("[data-navigate-next]") as HTMLButtonElement;
         const activePage = host.querySelector("[data-active-page='true']") as HTMLButtonElement;
-        const pager = activePage.closest(".inset-x-0");
+        const pager = activePage.closest(".inset-x-0") as HTMLElement;
 
         expect(host.classList.contains("bg-surface")).toBe(true);
         expect(host.classList.contains("border-border-subtle")).toBe(true);
         expect(host.classList.contains("border-2")).toBe(false);
 
-        // Logical positioning utilities
-        expect(prevArrow.classList.contains("start-0")).toBe(true);
-        expect(prevArrow.classList.contains("left-0")).toBe(false);
-        expect(nextArrow.classList.contains("end-0")).toBe(true);
-        expect(nextArrow.classList.contains("right-0")).toBe(false);
+        // Physical positioning utilities in LTR
+        expect(prevArrow.classList.contains("left-0")).toBe(true);
+        expect(prevArrow.classList.contains("right-0")).toBe(false);
+        expect(nextArrow.classList.contains("right-0")).toBe(true);
+        expect(nextArrow.classList.contains("left-0")).toBe(false);
         expect(pager?.classList.contains("inset-x-0")).toBe(true);
         expect(pager?.classList.contains("bottom-0")).toBe(true);
+        expect(pager?.style.direction).toBe("ltr");
 
         expect(prevArrow.classList.contains("bg-surface-overlay/65")).toBe(true);
         expect(prevArrow.classList.contains("hover:bg-hover/90")).toBe(true);
@@ -159,13 +166,13 @@ describe("ScrollViewComponent", () => {
         expect(component.index()).toBe(0);
     });
 
-    it("inverts horizontal keyboard navigation when DOM is RTL", () => {
+    it("inverts horizontal keyboard navigation when DOM is RTL", async () => {
         fixture.componentRef.setInput("data", ["Item 1", "Item 2", "Item 3"]);
         fixture.componentRef.setInput("index", 0);
 
         const host = fixture.nativeElement as HTMLElement;
         host.setAttribute("dir", "rtl");
-        fixture.detectChanges();
+        await waitForStable(fixture);
 
         // In RTL DOM, ArrowLeft navigates forward (next)
         host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft" }));
@@ -227,6 +234,12 @@ describe("ScrollViewComponent", () => {
         const nextArrow = host.querySelector("[data-navigate-next]") as HTMLButtonElement;
         const prevArrow = host.querySelector("[data-navigate-prev]") as HTMLButtonElement;
 
+        // In LTR, prevArrow is anchored at left-0 and nextArrow at right-0
+        expect(prevArrow.classList.contains("left-0")).toBe(true);
+        expect(prevArrow.classList.contains("right-0")).toBe(false);
+        expect(nextArrow.classList.contains("right-0")).toBe(true);
+        expect(nextArrow.classList.contains("left-0")).toBe(false);
+
         // Click Next arrow advances to index 1 with LTR slide-in-from-right animation
         nextArrow.click();
         fixture.detectChanges();
@@ -257,7 +270,7 @@ describe("ScrollViewComponent", () => {
         }
     });
 
-    it("maintains coherent RTL keyboard navigation, Prev/Next click scrolling, animation direction, and icon state under CSS-only direction override", () => {
+    it("maintains coherent RTL keyboard navigation, Prev/Next click scrolling, animation direction, and icon state under CSS-only direction override", async () => {
         fixture.componentRef.setInput("arrows", true);
         fixture.componentRef.setInput("data", ["Item 1", "Item 2", "Item 3"]);
         fixture.componentRef.setInput("index", 0);
@@ -265,7 +278,7 @@ describe("ScrollViewComponent", () => {
         const host = fixture.nativeElement as HTMLElement;
         host.setAttribute("dir", "rtl");
         host.style.direction = "ltr";
-        fixture.detectChanges();
+        await waitForStable(fixture);
 
         expect(host.matches(":dir(rtl)")).toBe(true);
         expect(host.matches(":dir(ltr)")).toBe(false);
@@ -294,6 +307,12 @@ describe("ScrollViewComponent", () => {
         // Prev / Next button clicks with animation direction verification
         const nextArrow = host.querySelector("[data-navigate-next]") as HTMLButtonElement;
         const prevArrow = host.querySelector("[data-navigate-prev]") as HTMLButtonElement;
+
+        // In RTL, prevArrow is anchored at physical right-0 and nextArrow at physical left-0
+        expect(prevArrow.classList.contains("right-0")).toBe(true);
+        expect(prevArrow.classList.contains("left-0")).toBe(false);
+        expect(nextArrow.classList.contains("left-0")).toBe(true);
+        expect(nextArrow.classList.contains("right-0")).toBe(false);
 
         // In RTL, clicking Next arrow advances index to 1 with RTL slide-in-from-left animation
         nextArrow.click();
@@ -325,14 +344,14 @@ describe("ScrollViewComponent", () => {
         }
     });
 
-    it("unifies keyboard navigation, transforms, and animation direction under semantic RTL", () => {
+    it("unifies keyboard navigation, transforms, and animation direction under semantic RTL", async () => {
         fixture.componentRef.setInput("arrows", true);
         fixture.componentRef.setInput("data", ["Item 1", "Item 2", "Item 3"]);
         fixture.componentRef.setInput("index", 0);
 
         const host = fixture.nativeElement as HTMLElement;
         host.setAttribute("dir", "rtl");
-        fixture.detectChanges();
+        await waitForStable(fixture);
 
         expect(host.matches(":dir(rtl)")).toBe(true);
 
@@ -343,6 +362,13 @@ describe("ScrollViewComponent", () => {
         expect(prevChevron.matches(":dir(rtl)")).toBe(true);
         expect(nextChevron.matches(":dir(rtl)")).toBe(true);
         expect(prevChevron.classList.contains("rtl:rotate-180")).toBe(true);
+
+        const prevArrow = host.querySelector("[data-navigate-prev]") as HTMLButtonElement;
+        const nextArrow = host.querySelector("[data-navigate-next]") as HTMLButtonElement;
+        expect(prevArrow.classList.contains("right-0")).toBe(true);
+        expect(prevArrow.classList.contains("left-0")).toBe(false);
+        expect(nextArrow.classList.contains("left-0")).toBe(true);
+        expect(nextArrow.classList.contains("right-0")).toBe(false);
 
         // ArrowLeft navigates next (RTL behavior)
         host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft" }));
