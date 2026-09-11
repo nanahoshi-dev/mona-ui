@@ -553,8 +553,188 @@ describe("ScrollViewComponent", () => {
 
                 // Keyboard activation arrives instead of a pointer click
                 component["onPagerClick"](keyboardClick, mockList, "right");
-                vi.advanceTimersByTime(60);
                 expect(mockList.scrollBy).toHaveBeenCalledTimes(3);
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("executes two rapid primary short clicks as two independent scroll steps", () => {
+            const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+            const down1 = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 1 });
+            const up1 = new PointerEvent("pointerup", { isPrimary: true, button: 0, pointerId: 1 });
+            const click1 = new MouseEvent("click", { detail: 1, button: 0 });
+
+            const down2 = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 1 });
+            const up2 = new PointerEvent("pointerup", { isPrimary: true, button: 0, pointerId: 1 });
+            const click2 = new MouseEvent("click", { detail: 1, button: 0 });
+
+            component["onPagerPointerDown"](down1, mockList, "right");
+            document.dispatchEvent(up1);
+            component["onPagerClick"](click1, mockList, "right");
+
+            component["onPagerPointerDown"](down2, mockList, "right");
+            document.dispatchEvent(up2);
+            component["onPagerClick"](click2, mockList, "right");
+
+            expect(mockList.scrollBy).toHaveBeenCalledTimes(2);
+        });
+
+        it("executes rapid alternating arrow clicks without losing steps and respects RTL inversion", () => {
+            const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+            const clickRight = new MouseEvent("click", { detail: 1, button: 0 });
+            const clickLeft = new MouseEvent("click", { detail: 1, button: 0 });
+
+            // In LTR: right = +100, left = -100
+            component["onPagerClick"](clickRight, mockList, "right");
+            component["onPagerClick"](clickLeft, mockList, "left");
+
+            expect(mockList.scrollBy).toHaveBeenNthCalledWith(1, { behavior: "smooth", left: 100 });
+            expect(mockList.scrollBy).toHaveBeenNthCalledWith(2, { behavior: "smooth", left: -100 });
+
+            // In RTL: right = -100, left = +100
+            vi.spyOn(component as any, "isRtl").mockReturnValue(true);
+            component["onPagerClick"](clickRight, mockList, "right");
+            component["onPagerClick"](clickLeft, mockList, "left");
+
+            expect(mockList.scrollBy).toHaveBeenNthCalledWith(3, { behavior: "smooth", left: -100 });
+            expect(mockList.scrollBy).toHaveBeenNthCalledWith(4, { behavior: "smooth", left: 100 });
+        });
+
+        it("executes rapid keyboard activations immediately and independently", () => {
+            const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+            const keyboardClick1 = new MouseEvent("click", { detail: 0, button: 0 });
+            const keyboardClick2 = new MouseEvent("click", { detail: 0, button: 0 });
+
+            component["onPagerClick"](keyboardClick1, mockList, "right");
+            component["onPagerClick"](keyboardClick2, mockList, "right");
+
+            expect(mockList.scrollBy).toHaveBeenCalledTimes(2);
+        });
+
+        it("preserves accepted short click when followed immediately by a continuous hold", () => {
+            vi.useFakeTimers();
+            try {
+                const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+                const click = new MouseEvent("click", { detail: 1, button: 0 });
+                const holdDown = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 5 });
+                const holdUp = new PointerEvent("pointerup", { pointerId: 5 });
+                const trailingClick = new MouseEvent("click", { detail: 1, button: 0 });
+
+                // Short click executes immediately
+                component["onPagerClick"](click, mockList, "right");
+                expect(mockList.scrollBy).toHaveBeenCalledTimes(1);
+
+                // Immediate hold start
+                component["onPagerPointerDown"](holdDown, mockList, "right");
+                vi.advanceTimersByTime(180); // 3 interval ticks
+                expect(mockList.scrollBy).toHaveBeenCalledTimes(4); // 1 click + 3 hold ticks
+
+                // Hold release
+                document.dispatchEvent(holdUp);
+                component["onPagerClick"](trailingClick, mockList, "right");
+                vi.advanceTimersByTime(100);
+
+                // Trailing click was suppressed, so still 4
+                expect(mockList.scrollBy).toHaveBeenCalledTimes(4);
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("rejects cross-pointer acquisition while an active hold exists", () => {
+            vi.useFakeTimers();
+            try {
+                const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+                const pointerADown = new PointerEvent("pointerdown", {
+                    isPrimary: true,
+                    button: 0,
+                    pointerId: 10,
+                    pointerType: "mouse"
+                });
+                const pointerBDown = new PointerEvent("pointerdown", {
+                    isPrimary: true,
+                    button: 0,
+                    pointerId: 20,
+                    pointerType: "touch"
+                });
+                const pointerBUp = new PointerEvent("pointerup", { pointerId: 20 });
+                const pointerAUp = new PointerEvent("pointerup", { pointerId: 10 });
+                const pointerAClick = new MouseEvent("click", { detail: 1, button: 0 });
+
+                // Pointer A starts hold
+                component["onPagerPointerDown"](pointerADown, mockList, "right");
+                vi.advanceTimersByTime(120); // 2 ticks
+                expect(mockList.scrollBy).toHaveBeenCalledTimes(2);
+
+                // Pointer B attempts to acquire hold while A is active -> rejected
+                component["onPagerPointerDown"](pointerBDown, mockList, "right");
+                vi.advanceTimersByTime(60); // 3rd tick belongs to A
+                expect(mockList.scrollBy).toHaveBeenCalledTimes(3);
+
+                // Pointer B release does not stop A
+                document.dispatchEvent(pointerBUp);
+                vi.advanceTimersByTime(60); // 4th tick belongs to A
+                expect(mockList.scrollBy).toHaveBeenCalledTimes(4);
+
+                // Pointer A release stops hold
+                document.dispatchEvent(pointerAUp);
+                vi.advanceTimersByTime(120);
+                expect(mockList.scrollBy).toHaveBeenCalledTimes(4);
+
+                // Trailing click from A is suppressed
+                component["onPagerClick"](pointerAClick, mockList, "right");
+                expect(mockList.scrollBy).toHaveBeenCalledTimes(4);
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("allows a new pointer to acquire hold after prior pointer completes", () => {
+            vi.useFakeTimers();
+            try {
+                const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+                const pointerADown = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 10 });
+                const pointerAUp = new PointerEvent("pointerup", { pointerId: 10 });
+                const pointerBDown = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 20 });
+                const pointerBUp = new PointerEvent("pointerup", { pointerId: 20 });
+
+                // Pointer A completes
+                component["onPagerPointerDown"](pointerADown, mockList, "right");
+                vi.advanceTimersByTime(60);
+                expect(mockList.scrollBy).toHaveBeenCalledTimes(1);
+                document.dispatchEvent(pointerAUp);
+
+                // Pointer B can acquire hold
+                component["onPagerPointerDown"](pointerBDown, mockList, "right");
+                vi.advanceTimersByTime(120);
+                expect(mockList.scrollBy).toHaveBeenCalledTimes(3);
+                document.dispatchEvent(pointerBUp);
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("allows a new pointer to acquire hold after prior pointer is canceled", () => {
+            vi.useFakeTimers();
+            try {
+                const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+                const pointerADown = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 10 });
+                const pointerACancel = new PointerEvent("pointercancel", { pointerId: 10 });
+                const pointerBDown = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 20 });
+                const pointerBUp = new PointerEvent("pointerup", { pointerId: 20 });
+
+                // Pointer A cancels
+                component["onPagerPointerDown"](pointerADown, mockList, "right");
+                vi.advanceTimersByTime(60);
+                expect(mockList.scrollBy).toHaveBeenCalledTimes(1);
+                document.dispatchEvent(pointerACancel);
+
+                // Pointer B can acquire hold
+                component["onPagerPointerDown"](pointerBDown, mockList, "right");
+                vi.advanceTimersByTime(120);
+                expect(mockList.scrollBy).toHaveBeenCalledTimes(3);
+                document.dispatchEvent(pointerBUp);
             } finally {
                 vi.useRealTimers();
             }

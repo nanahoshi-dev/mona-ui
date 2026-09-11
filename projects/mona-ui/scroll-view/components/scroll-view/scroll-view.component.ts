@@ -30,8 +30,7 @@ import {
     startWith,
     Subject,
     takeUntil,
-    tap,
-    timer
+    tap
 } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
@@ -374,24 +373,16 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
             return;
         }
         this.#suppressNextPointerClick = false;
-
-        const isRtl = this.isRtl();
-        timer(60)
-            .pipe(takeUntil(this.#scroll$), takeUntilDestroyed(this.#destroyRef))
-            .subscribe(() => {
-                let offset = direction === "left" ? -100 : 100;
-                if (isRtl) {
-                    offset = -offset;
-                }
-                element.scrollBy?.({ behavior: this.scrollBehavior(), left: offset });
-            });
+        this.#scrollPagerBy(element, direction);
     }
 
     protected onPagerPointerDown(event: PointerEvent, element: HTMLUListElement, direction: ScrollDirection): void {
         if (!event.isPrimary || event.button !== 0) {
             return;
         }
-        this.#stopContinuousScroll();
+        if (this.#activePagerPointerId !== null) {
+            return;
+        }
         this.#suppressNextPointerClick = false;
         this.#activePagerPointerId = event.pointerId;
         this.#continuousTicked = false;
@@ -399,17 +390,20 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         this.#document.addEventListener("pointerup", this.#pointerUpHandler);
         this.#document.addEventListener("pointercancel", this.#pointerCancelHandler);
 
-        const isRtl = this.isRtl();
         interval(60)
             .pipe(takeUntil(this.#scroll$), takeUntilDestroyed(this.#destroyRef))
             .subscribe(() => {
                 this.#continuousTicked = true;
-                let offset = direction === "left" ? -100 : 100;
-                if (isRtl) {
-                    offset = -offset;
-                }
-                element.scrollBy?.({ behavior: this.scrollBehavior(), left: offset });
+                this.#scrollPagerBy(element, direction);
             });
+    }
+
+    #scrollPagerBy(element: HTMLUListElement, direction: ScrollDirection): void {
+        let offset = direction === "left" ? -100 : 100;
+        if (this.isRtl()) {
+            offset = -offset;
+        }
+        element.scrollBy?.({ behavior: this.scrollBehavior(), left: offset });
     }
 
     #handlePointerEnd(event: PointerEvent, isUp: boolean): void {
