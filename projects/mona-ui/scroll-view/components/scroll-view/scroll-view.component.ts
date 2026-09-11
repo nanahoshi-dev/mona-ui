@@ -147,9 +147,12 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     });
     #activePagerPointerId: number | null = null;
     #continuousTicked = false;
+    #pagerScrollEndCleanup: (() => void) | null = null;
+    #pagerScrollTarget: number | null = null;
+    readonly #rejectedPagerPointerIds = new Set<number>();
     #resizeObserver: ResizeObserver | null = null;
     readonly #scroll$ = new Subject<void>();
-    #suppressNextPointerClick = false;
+    #suppressedPagerClickPointerId: number | null = null;
     readonly #pointerUpHandler = (event: PointerEvent): void => this.#handlePointerEnd(event, true);
     readonly #pointerCancelHandler = (event: PointerEvent): void => this.#handlePointerEnd(event, false);
 
@@ -344,6 +347,7 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         }
         this.#destroyRef.onDestroy(() => {
             this.#stopContinuousScroll();
+            this.#resetPagerScrollTarget();
             this.#scroll$.complete();
             this.#resizeObserver?.disconnect();
         });
@@ -359,20 +363,38 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     }
 
     protected onPageClick(index: number, element: HTMLButtonElement): void {
+        this.#resetPagerScrollTarget();
         this.index.set(index);
         element.scrollIntoView({ behavior: this.scrollBehavior(), block: "nearest", inline: "center" });
     }
 
-    protected onPagerClick(event: MouseEvent, element: HTMLUListElement, direction: ScrollDirection): void {
+    protected onPagerClick(event: MouseEvent | PointerEvent, element: HTMLUListElement, direction: ScrollDirection): void {
         if (event.button !== 0) {
             return;
         }
-        const isPointerClick = event.detail > 0;
-        if (isPointerClick && this.#suppressNextPointerClick) {
-            this.#suppressNextPointerClick = false;
-            return;
+
+        const isKeyboardActivation = event.detail === 0;
+        if (!isKeyboardActivation) {
+            const pointerId =
+                "pointerId" in event && typeof (event as PointerEvent).pointerId === "number"
+                    ? (event as PointerEvent).pointerId
+                    : null;
+
+            if (pointerId !== null && pointerId !== -1) {
+                if (this.#rejectedPagerPointerIds.has(pointerId)) {
+                    this.#rejectedPagerPointerIds.delete(pointerId);
+                    return;
+                }
+                if (this.#suppressedPagerClickPointerId === pointerId) {
+                    this.#suppressedPagerClickPointerId = null;
+                    return;
+                }
+            } else if (this.#suppressedPagerClickPointerId !== null) {
+                this.#suppressedPagerClickPointerId = null;
+                return;
+            }
         }
-        this.#suppressNextPointerClick = false;
+
         this.#scrollPagerBy(element, direction);
     }
 
@@ -381,9 +403,11 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
             return;
         }
         if (this.#activePagerPointerId !== null) {
+            this.#rejectedPagerPointerIds.add(event.pointerId);
             return;
         }
-        this.#suppressNextPointerClick = false;
+        this.#suppressedPagerClickPointerId = null;
+        this.#rejectedPagerPointerIds.clear();
         this.#activePagerPointerId = event.pointerId;
         this.#continuousTicked = false;
 
@@ -403,7 +427,66 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         if (this.isRtl()) {
             offset = -offset;
         }
-        element.scrollBy?.({ behavior: this.scrollBehavior(), left: offset });
+
+        const currentScrollLeft = element.scrollLeft ?? 0;
+        const base = this.#pagerScrollTarget ?? currentScrollLeft;
+        const target = base + offset;
+
+        const maxScroll = Math.max(0, (element.scrollWidth ?? 0) - (element.clientWidth ?? 0));
+        let clampedTarget = target;
+        if (maxScroll > 0) {
+            if (!this.isRtl()) {
+                clampedTarget = Math.max(0, Math.min(maxScroll, target));
+            } else {
+                clampedTarget = Math.max(-maxScroll, Math.min(0, target));
+            }
+        }
+        this.#pagerScrollTarget = clampedTarget;
+
+        if (typeof element.scrollTo === "function") {
+            element.scrollTo({ behavior: this.scrollBehavior(), left: clampedTarget });
+        } else if (typeof element.scrollBy === "function") {
+            element.scrollBy({ behavior: this.scrollBehavior(), left: offset });
+        }
+
+        this.#armPagerScrollTargetCleanup(element);
+    }
+
+    #armPagerScrollTargetCleanup(element: HTMLUListElement): void {
+        if (this.#pagerScrollEndCleanup) {
+            this.#pagerScrollEndCleanup();
+            this.#pagerScrollEndCleanup = null;
+        }
+
+        const onScrollEnd = (): void => {
+            this.#pagerScrollTarget = null;
+            if (this.#pagerScrollEndCleanup) {
+                this.#pagerScrollEndCleanup();
+                this.#pagerScrollEndCleanup = null;
+            }
+        };
+
+        element.addEventListener?.("scrollend", onScrollEnd, { once: true });
+
+        let timeoutId: number | null = null;
+        if (isPlatformBrowser(this.#platformId) && typeof window !== "undefined") {
+            timeoutId = window.setTimeout(onScrollEnd, 600);
+        }
+
+        this.#pagerScrollEndCleanup = () => {
+            element.removeEventListener?.("scrollend", onScrollEnd);
+            if (timeoutId !== null && typeof window !== "undefined") {
+                window.clearTimeout(timeoutId);
+            }
+        };
+    }
+
+    #resetPagerScrollTarget(): void {
+        if (this.#pagerScrollEndCleanup) {
+            this.#pagerScrollEndCleanup();
+            this.#pagerScrollEndCleanup = null;
+        }
+        this.#pagerScrollTarget = null;
     }
 
     #handlePointerEnd(event: PointerEvent, isUp: boolean): void {
@@ -414,9 +497,9 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         this.#document.removeEventListener("pointercancel", this.#pointerCancelHandler);
         this.#scroll$.next();
         if (isUp && this.#continuousTicked) {
-            this.#suppressNextPointerClick = true;
+            this.#suppressedPagerClickPointerId = event.pointerId;
         } else {
-            this.#suppressNextPointerClick = false;
+            this.#suppressedPagerClickPointerId = null;
         }
         this.#continuousTicked = false;
         this.#activePagerPointerId = null;
@@ -428,6 +511,8 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         this.#scroll$.next();
         this.#continuousTicked = false;
         this.#activePagerPointerId = null;
+        this.#suppressedPagerClickPointerId = null;
+        this.#rejectedPagerPointerIds.clear();
     }
 
     private navigate(direction: ScrollDirection, infinite: boolean): void {
@@ -466,6 +551,7 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     }
 
     private scrollActivePageIntoView(): void {
+        this.#resetPagerScrollTarget();
         asyncScheduler.schedule(() => {
             const element = this.#hostElementRef.nativeElement.querySelector("button[data-active-page='true']");
             if (element) {
