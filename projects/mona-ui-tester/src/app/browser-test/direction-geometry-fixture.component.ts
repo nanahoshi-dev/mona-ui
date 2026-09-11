@@ -732,6 +732,52 @@ export class ShadowSidebarFixtureComponent {
                 </div>
                 <app-shadow-sidebar-fixture #shadowFixture data-testid="shadow-fixture-host" />
             </section>
+
+            <!-- 9. ScrollView Animation / Reduced Motion Fixture -->
+            <section
+                id="fixture-scroll-view-reduced-motion"
+                data-testid="fixture-scroll-view-reduced-motion"
+                dir="ltr"
+                style="border: 2px solid #6366f1; border-radius: 8px; padding: 16px; background: #fafafa;">
+                <h2 style="margin: 0 0 16px 0; font-size: 16px; color: #4338ca;">9. ScrollView Animation and Reduced Motion</h2>
+                <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+                    <div style="width: 300px; height: 170px; border: 1px solid #cbd5e1; position: relative;">
+                        <h3 style="margin: 0 0 8px 0; font-size: 14px;">ScrollView Standard (animate=true)</h3>
+                        <mona-scroll-view
+                            data-testid="scroll-view-anim-standard"
+                            [data]="manyPages"
+                            [width]="300"
+                            [height]="130"
+                            [arrows]="true"
+                            [infinite]="true"
+                            [pageable]="true">
+                            <ng-template let-item>
+                                <div style="width: 300px; height: 90px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; font-weight: bold;">
+                                    {{ item.title }}
+                                </div>
+                            </ng-template>
+                        </mona-scroll-view>
+                    </div>
+                    <div style="width: 300px; height: 170px; border: 1px solid #cbd5e1; position: relative;">
+                        <h3 style="margin: 0 0 8px 0; font-size: 14px;">ScrollView Custom Duration (animate=1200)</h3>
+                        <mona-scroll-view
+                            data-testid="scroll-view-anim-custom"
+                            [data]="manyPages"
+                            [width]="300"
+                            [height]="130"
+                            [arrows]="true"
+                            [infinite]="true"
+                            [pageable]="true"
+                            [animate]="1200">
+                            <ng-template let-item>
+                                <div style="width: 300px; height: 90px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; font-weight: bold;">
+                                    {{ item.title }}
+                                </div>
+                            </ng-template>
+                        </mona-scroll-view>
+                    </div>
+                </div>
+            </section>
         </div>
     `
 })

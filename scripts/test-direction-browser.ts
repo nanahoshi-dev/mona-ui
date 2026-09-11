@@ -157,6 +157,56 @@ function assert(condition: boolean, message: string): void {
     }
 }
 
+async function getKeyframeTransforms(locator: Locator): Promise<{ startTransform: string; endTransform: string }> {
+    return await locator.evaluate(el => {
+        const anims = el.getAnimations();
+        for (const anim of anims) {
+            const effect = anim.effect;
+            if (effect instanceof KeyframeEffect) {
+                const keyframes = effect.getKeyframes();
+                if (keyframes.length >= 2) {
+                    const first = keyframes[0];
+                    const last = keyframes[keyframes.length - 1];
+                    return {
+                        startTransform: String(first.transform || ""),
+                        endTransform: String(last.transform || "")
+                    };
+                }
+            }
+        }
+        return { startTransform: "", endTransform: "" };
+    });
+}
+
+function parseTranslateXSign(transformStr: string): "positive" | "negative" | "zero" {
+    if (!transformStr || transformStr === "none") {
+        return "zero";
+    }
+    const translateMatch = transformStr.match(/(?:translate|translateX|translate3d)\(\s*(-?[\d.]+)(%|px)?/i);
+    if (translateMatch) {
+        const val = parseFloat(translateMatch[1]);
+        if (Math.abs(val) < 0.0001) {
+            return "zero";
+        }
+        return val > 0 ? "positive" : "negative";
+    }
+    const matrixMatch = transformStr.match(/matrix(?:3d)?\(\s*[^,]+,\s*[^,]+,\s*[^,]+,\s*[^,]+,\s*(-?[\d.]+)/i);
+    if (matrixMatch) {
+        const tx = parseFloat(matrixMatch[1]);
+        if (Math.abs(tx) < 0.0001) {
+            return "zero";
+        }
+        return tx > 0 ? "positive" : "negative";
+    }
+    if (/\b0(%|px)?\b/.test(transformStr)) {
+        return "zero";
+    }
+    if (transformStr.includes("-")) {
+        return "negative";
+    }
+    return "positive";
+}
+
 async function runTests(): Promise<void> {
     console.log("Starting static server for browser geometry tests...");
     const { server, port } = await startStaticServer();
@@ -173,11 +223,12 @@ async function runTests(): Promise<void> {
         console.log(`Navigating to ${url}...`);
         await page.goto(url, { waitUntil: "networkidle" });
 
-        // Wait for all four fixture sections to be present
+        // Wait for fixture sections to be present
         await page.waitForSelector("#fixture-ltr");
         await page.waitForSelector("#fixture-rtl");
         await page.waitForSelector("#fixture-split-ltr-css-rtl");
         await page.waitForSelector("#fixture-split-rtl-css-ltr");
+        await page.waitForSelector("#fixture-scroll-view-reduced-motion");
 
         console.log("\n==================================================");
         console.log("  Running Real Browser Direction Geometry Gate");
@@ -1028,13 +1079,30 @@ async function runTests(): Promise<void> {
                     assert(p0AfterPrev.x < p0AfterNext.x, `[${scenario.name}] RTL clicking pager prev scrolls back left`);
                 }
 
-                // Continuous mousedown scroll on pager Next arrow
+                // Instrument pagerList.scrollBy to record all scroll calls deterministically
+                await pagerList.evaluate(el => {
+                    const list = el as HTMLElement & { __scrollByCalls?: Array<{ left: number; behavior?: string }> };
+                    list.__scrollByCalls = [];
+                    const originalScrollBy = list.scrollBy.bind(list);
+                    list.scrollBy = function (options?: ScrollToOptions | number, y?: number) {
+                        if (typeof options === "object") {
+                            list.__scrollByCalls!.push({ left: options.left ?? 0, behavior: options.behavior });
+                            return originalScrollBy(options);
+                        } else {
+                            list.__scrollByCalls!.push({ left: options ?? 0 });
+                            return originalScrollBy(options, y);
+                        }
+                    };
+                });
+
+                // Genuine mouse hold gesture on pager Next arrow
                 const p0BeforeContinuous = (await p0.boundingBox())!.x;
-                await pagerNextArrow.dispatchEvent("mousedown");
-                await page.waitForTimeout(350);
+                await pagerNextArrow.hover();
+                await page.mouse.down();
+                await page.waitForTimeout(350); // holds down for ~5 interval ticks (60ms interval)
                 await page.mouse.up();
-                // Allow the final smooth scroll animation tick to settle
-                await page.waitForTimeout(350);
+                await page.waitForTimeout(50); // allow release event loop tick
+
                 const p0AfterContinuous = (await p0.boundingBox())!.x;
                 if (!isRtl) {
                     assert(p0AfterContinuous < p0BeforeContinuous, `[${scenario.name}] LTR continuous scroll moved content further left`);
@@ -1042,12 +1110,37 @@ async function runTests(): Promise<void> {
                     assert(p0AfterContinuous > p0BeforeContinuous, `[${scenario.name}] RTL continuous scroll moved content further right`);
                 }
 
-                // Verify continuous scroll stops completely (no new interval ticks after release)
-                await page.waitForTimeout(250);
-                const p0AfterRelease = (await p0.boundingBox())!.x;
+                const callsDuringHold = await pagerList.evaluate(el => ((el as any).__scrollByCalls || []).length);
                 assert(
-                    Math.abs(p0AfterRelease - p0AfterContinuous) <= 2,
-                    `[${scenario.name}] Continuous scroll stopped upon mouseup (diff: ${Math.abs(p0AfterRelease - p0AfterContinuous)}px)`
+                    callsDuringHold >= 2,
+                    `[${scenario.name}] Genuine mouse hold on pager arrow produced multiple scrollBy calls (got ${callsDuringHold})`
+                );
+
+                // Verify physical delta direction during continuous scroll
+                const holdCalls = await pagerList.evaluate(el => (el as any).__scrollByCalls || []);
+                const expectedDeltaSign = !isRtl ? 1 : -1;
+                for (const call of holdCalls) {
+                    assert(
+                        Math.sign(call.left) === expectedDeltaSign,
+                        `[${scenario.name}] Pager scrollBy delta (${call.left}) matches expected physical direction (${expectedDeltaSign > 0 ? "positive" : "negative"})`
+                    );
+                }
+
+                // Wait longer than the single-scroll timer (60ms) and hold reset timeout (150ms)
+                await page.waitForTimeout(250);
+                const callsAfterWait = await pagerList.evaluate(el => ((el as any).__scrollByCalls || []).length);
+                assert(
+                    callsAfterWait === callsDuringHold,
+                    `[${scenario.name}] Continuous scroll stopped upon mouseup: no trailing single scrollBy call after release (hold: ${callsDuringHold}, after wait: ${callsAfterWait})`
+                );
+
+                // Now test normal short click: must produce exactly one additional scrollBy call
+                await pagerNextArrow.click();
+                await page.waitForTimeout(200); // allow 60ms single timer to fire
+                const callsAfterClick = await pagerList.evaluate(el => ((el as any).__scrollByCalls || []).length);
+                assert(
+                    callsAfterClick === callsAfterWait + 1,
+                    `[${scenario.name}] Short click on pager arrow performed exactly one additional scrollBy call (expected ${callsAfterWait + 1}, got ${callsAfterClick})`
                 );
 
                 // Distant item centering
@@ -1105,6 +1198,29 @@ async function runTests(): Promise<void> {
                     `[${scenario.name}] In-flight Next leaving slide has animationName ending with '${nextLeaveAnimName}' (got '${nextLeaveAnim}')`
                 );
 
+                // Inspect Web Animations API keyframes to verify physical displacement direction
+                const nextEnterKf = await getKeyframeTransforms(nextEntering);
+                const nextLeaveKf = await getKeyframeTransforms(nextLeaving);
+                const expectedNextEnterStartSign = !isRtl ? "positive" : "negative";
+                const expectedNextLeaveEndSign = !isRtl ? "negative" : "positive";
+
+                assert(
+                    parseTranslateXSign(nextEnterKf.startTransform) === expectedNextEnterStartSign,
+                    `[${scenario.name}] Next entering slide keyframe start transform must be ${expectedNextEnterStartSign} (got '${nextEnterKf.startTransform}')`
+                );
+                assert(
+                    parseTranslateXSign(nextEnterKf.endTransform) === "zero",
+                    `[${scenario.name}] Next entering slide keyframe end transform must be zero (got '${nextEnterKf.endTransform}')`
+                );
+                assert(
+                    parseTranslateXSign(nextLeaveKf.startTransform) === "zero",
+                    `[${scenario.name}] Next leaving slide keyframe start transform must be zero (got '${nextLeaveKf.startTransform}')`
+                );
+                assert(
+                    parseTranslateXSign(nextLeaveKf.endTransform) === expectedNextLeaveEndSign,
+                    `[${scenario.name}] Next leaving slide keyframe end transform must be ${expectedNextLeaveEndSign} (got '${nextLeaveKf.endTransform}')`
+                );
+
                 // Await completion of the 500ms animation and subsequent DOM detachment
                 await nextLeaving.waitFor({ state: "detached", timeout: 2000 });
 
@@ -1143,6 +1259,29 @@ async function runTests(): Promise<void> {
                     `[${scenario.name}] In-flight Prev leaving slide has animationName ending with '${prevLeaveAnimName}' (got '${prevLeaveAnim}')`
                 );
 
+                // Inspect Web Animations API keyframes to verify physical displacement direction
+                const prevEnterKf = await getKeyframeTransforms(prevEntering);
+                const prevLeaveKf = await getKeyframeTransforms(prevLeaving);
+                const expectedPrevEnterStartSign = !isRtl ? "negative" : "positive";
+                const expectedPrevLeaveEndSign = !isRtl ? "positive" : "negative";
+
+                assert(
+                    parseTranslateXSign(prevEnterKf.startTransform) === expectedPrevEnterStartSign,
+                    `[${scenario.name}] Prev entering slide keyframe start transform must be ${expectedPrevEnterStartSign} (got '${prevEnterKf.startTransform}')`
+                );
+                assert(
+                    parseTranslateXSign(prevEnterKf.endTransform) === "zero",
+                    `[${scenario.name}] Prev entering slide keyframe end transform must be zero (got '${prevEnterKf.endTransform}')`
+                );
+                assert(
+                    parseTranslateXSign(prevLeaveKf.startTransform) === "zero",
+                    `[${scenario.name}] Prev leaving slide keyframe start transform must be zero (got '${prevLeaveKf.startTransform}')`
+                );
+                assert(
+                    parseTranslateXSign(prevLeaveKf.endTransform) === expectedPrevLeaveEndSign,
+                    `[${scenario.name}] Prev leaving slide keyframe end transform must be ${expectedPrevLeaveEndSign} (got '${prevLeaveKf.endTransform}')`
+                );
+
                 // Await completion of the 500ms animation and subsequent DOM detachment
                 await prevLeaving.waitFor({ state: "detached", timeout: 2000 });
 
@@ -1153,7 +1292,7 @@ async function runTests(): Promise<void> {
                     `[${scenario.name}] Clicking Prev returns to initial slide ('${backSlideText}' vs '${initialSlideText}')`
                 );
 
-                console.log(`    [PASS] ScrollView navigation arrows, overflowing pager, continuous scroll & slide transitions verified\n`);
+                console.log(`    [PASS] ScrollView navigation arrows, overflowing pager, continuous scroll, keyframe direction & slide transitions verified\n`);
             }
         }
 
@@ -1341,6 +1480,100 @@ async function runTests(): Promise<void> {
         assert(!backShadowClasses.includes("flex-row-reverse"), "After returning to shadow LTR: shadow layout returned to flex-row");
         assert(Math.abs(sStartBox.x - currentShadowLayoutBox.x) <= 4, "After returning to shadow LTR: start sidebar remains on physical LEFT");
         console.log("    [PASS] Dynamic CSS-only Shadow DOM ancestor direction verified\n");
+
+        // 11. ScrollView Animation Duration & prefers-reduced-motion Verification (#fixture-scroll-view-reduced-motion)
+        console.log("--> Testing ScrollView Animation Duration & prefers-reduced-motion (#fixture-scroll-view-reduced-motion)");
+        const reducedSection = page.locator("section#fixture-scroll-view-reduced-motion");
+        await reducedSection.scrollIntoViewIfNeeded();
+
+        const stdScrollView = reducedSection.locator('[data-testid="scroll-view-anim-standard"]');
+        const customScrollView = reducedSection.locator('[data-testid="scroll-view-anim-custom"]');
+        const stdNextBtn = stdScrollView.locator('button[data-navigate-next="true"]');
+        const customNextBtn = customScrollView.locator('button[data-navigate-next="true"]');
+
+        // Helper to capture animationstart events and their computed animationDuration
+        const captureAnimationDuration = async (
+            trigger: () => Promise<void>,
+            scrollViewLocator: Locator
+        ): Promise<{ animationName: string; animationDuration: string; durationMs: number }> => {
+            await scrollViewLocator.evaluate(host => {
+                (host as any).__lastAnimData = undefined;
+                host.addEventListener(
+                    "animationstart",
+                    e => {
+                        const target = e.target as HTMLElement;
+                        (host as any).__lastAnimData = {
+                            name: (e as AnimationEvent).animationName,
+                            duration: window.getComputedStyle(target).animationDuration
+                        };
+                    },
+                    { once: true, capture: true }
+                );
+            });
+
+            await trigger();
+            await page.waitForTimeout(100);
+
+            return await scrollViewLocator.evaluate(host => {
+                const data = (host as any).__lastAnimData;
+                if (!data) {
+                    return { animationName: "", animationDuration: "", durationMs: -1 };
+                }
+                const durStr = String(data.duration);
+                let ms = 0;
+                if (durStr.endsWith("ms")) {
+                    ms = parseFloat(durStr);
+                } else if (durStr.endsWith("s")) {
+                    ms = parseFloat(durStr) * 1000;
+                }
+                return { animationName: String(data.name), animationDuration: durStr, durationMs: ms };
+            });
+        };
+
+        // Test 1: no-preference + animate=true -> ~500ms
+        await page.emulateMedia({ reducedMotion: "no-preference" });
+        const stdControl = await captureAnimationDuration(async () => {
+            await stdNextBtn.click();
+        }, stdScrollView);
+        assert(
+            Math.abs(stdControl.durationMs - 500) <= 20,
+            `[Control: no-preference] Standard ScrollView computed animationDuration is ~500ms (got ${stdControl.animationDuration}, ${stdControl.durationMs}ms)`
+        );
+        await page.waitForTimeout(600); // allow slide animation to complete
+
+        // Test 2: reduce + animate=true -> ~1ms
+        await page.emulateMedia({ reducedMotion: "reduce" });
+        const stdReduced = await captureAnimationDuration(async () => {
+            await stdNextBtn.click();
+        }, stdScrollView);
+        assert(
+            stdReduced.durationMs <= 5,
+            `[Reduced Motion] Standard ScrollView (animate=true) computed animationDuration is overridden to ~1ms (got ${stdReduced.animationDuration}, ${stdReduced.durationMs}ms)`
+        );
+        await page.waitForTimeout(100);
+
+        // Test 3: reduce + animate=1200 -> still ~1ms
+        const customReduced = await captureAnimationDuration(async () => {
+            await customNextBtn.click();
+        }, customScrollView);
+        assert(
+            customReduced.durationMs <= 5,
+            `[Reduced Motion] Custom ScrollView (animate=1200) computed animationDuration is overridden to ~1ms (got ${customReduced.animationDuration}, ${customReduced.durationMs}ms)`
+        );
+        await page.waitForTimeout(100);
+
+        // Test 4: Restore no-preference on custom fixture -> ~1200ms control
+        await page.emulateMedia({ reducedMotion: "no-preference" });
+        const customControl = await captureAnimationDuration(async () => {
+            await customNextBtn.click();
+        }, customScrollView);
+        assert(
+            Math.abs(customControl.durationMs - 1200) <= 50,
+            `[Control: no-preference] Custom ScrollView (animate=1200) computed animationDuration is ~1200ms outside reduced motion (got ${customControl.animationDuration}, ${customControl.durationMs}ms)`
+        );
+        await page.waitForTimeout(1300);
+
+        console.log("    [PASS] ScrollView prefers-reduced-motion override and animationDuration contract verified\n");
 
         console.log("==================================================");
         console.log("  ALL BROWSER DIRECTION GEOMETRY TESTS PASSED!");
