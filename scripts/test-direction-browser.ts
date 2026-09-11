@@ -1129,7 +1129,7 @@ async function runTests(): Promise<void> {
                 const p0BeforeContinuous = (await p0.boundingBox())!.x;
                 await pagerNextArrow.hover();
                 await page.mouse.down();
-                await page.waitForTimeout(350); // holds down for ~5 interval ticks (60ms interval)
+                await page.waitForTimeout(180); // holds down for ~3 interval ticks (60ms interval)
                 await page.mouse.up();
                 await page.waitForTimeout(50); // allow release event loop tick
 
@@ -1465,15 +1465,38 @@ async function runTests(): Promise<void> {
 
         const p0InitialX = (await dynP0.boundingBox())!.x;
 
-        // Step 1: Click Next in LTR -> moves content left (displaces negatively in X)
-        await dynPagerNext.click();
-        await page.waitForTimeout(250);
-        const p0AfterLtrStep1 = (await dynP0.boundingBox())!.x;
-        assert(p0AfterLtrStep1 < p0InitialX, "Dynamic ScrollView LTR: clicking pager next displaces content leftward");
+        // Instrument dynamic pager list with scrollend tracking to verify scroll remains in-flight across direction switch
+        await page.evaluate(() => {
+            const list = document.querySelector('[data-testid="scroll-view-dynamic"] li[data-page-item="true"]')?.parentElement;
+            if (list) {
+                const win = window as unknown as { __dynScrollEndCount: number };
+                win.__dynScrollEndCount = 0;
+                list.addEventListener("scrollend", () => {
+                    win.__dynScrollEndCount++;
+                });
+            }
+        });
 
-        // Step 2: Immediately toggle direction to RTL while displaced
+        // Step 1: Rapidly issue multiple Next clicks in LTR to create a large in-flight scroll target (300px)
+        await dynPagerNext.click({ delay: 10 });
+        await dynPagerNext.click({ delay: 10 });
+        await dynPagerNext.click({ delay: 10 });
+
+        // Step 2: Immediately toggle direction to RTL while scroll is still in-flight
         await page.click('[data-testid="set-dynamic-rtl"]');
-        await page.waitForTimeout(300);
+
+        // Wait only until semantic direction is rendered as RTL
+        await page.waitForFunction(() => {
+            const el = document.querySelector('[data-testid="scroll-view-dynamic"] [style*="direction"]');
+            return el && getComputedStyle(el).direction === "rtl";
+        });
+
+        // Assert the old pager scroll has NOT already reported completion before direction mutation
+        const scrollEndCountLtr = await page.evaluate(() => (window as unknown as { __dynScrollEndCount: number }).__dynScrollEndCount);
+        assert(
+            scrollEndCountLtr === 0,
+            `Dynamic ScrollView LTR in-flight target was still actively scrolling when direction switched (scrollend count: ${scrollEndCountLtr})`
+        );
 
         // Verify RTL layout: Next arrow is on physical left, Prev arrow is on physical right
         nextBox = await dynPagerNext.boundingBox();
@@ -1482,31 +1505,52 @@ async function runTests(): Promise<void> {
         assert(prevBox.x > nextBox.x, "Dynamic ScrollView RTL: Prev arrow is right of Next arrow");
 
         // In RTL, click Next arrow:
-        // Must calculate from actual current position rather than a stale LTR target.
+        // Must calculate from actual current position rather than a stale in-flight LTR target.
         // In RTL, Next arrow displaces content rightward (increasing X for p0).
         const p0BeforeRtlStep = (await dynP0.boundingBox())!.x;
         await dynPagerNext.click();
-        await page.waitForTimeout(250);
+        await page.waitForTimeout(300);
         const p0AfterRtlStep = (await dynP0.boundingBox())!.x;
         assert(
             p0AfterRtlStep > p0BeforeRtlStep,
-            `Dynamic ScrollView RTL: clicking pager next displaces content rightward from current position (before: ${p0BeforeRtlStep}, after: ${p0AfterRtlStep})`
+            `Dynamic ScrollView RTL: clicking pager next displaces content rightward from actual RTL position (before: ${p0BeforeRtlStep}, after: ${p0AfterRtlStep})`
         );
 
-        // Step 3: Toggle direction back to LTR
+        // Step 3: Repeat with RTL -> LTR symmetry
+        await page.evaluate(() => {
+            (window as unknown as { __dynScrollEndCount: number }).__dynScrollEndCount = 0;
+        });
+
+        // Issue rapid clicks in RTL to establish an in-flight smooth scroll in RTL
+        await dynPagerNext.click({ delay: 10 });
+        await dynPagerNext.click({ delay: 10 });
+        await dynPagerNext.click({ delay: 10 });
+
+        // Immediately toggle direction back to LTR
         await page.click('[data-testid="set-dynamic-ltr"]');
-        await page.waitForTimeout(300);
+
+        // Wait only until semantic direction is rendered as LTR
+        await page.waitForFunction(() => {
+            const el = document.querySelector('[data-testid="scroll-view-dynamic"] [style*="direction"]');
+            return el && getComputedStyle(el).direction === "ltr";
+        });
+
+        const scrollEndCountRtl = await page.evaluate(() => (window as unknown as { __dynScrollEndCount: number }).__dynScrollEndCount);
+        assert(
+            scrollEndCountRtl === 0,
+            `Dynamic ScrollView RTL in-flight target was still actively scrolling when direction switched back to LTR (scrollend count: ${scrollEndCountRtl})`
+        );
 
         // In LTR, click Next arrow:
         // Must calculate from actual current position rather than stale RTL target.
         // In LTR, Next arrow displaces content leftward (decreasing X for p0).
         const p0BeforeLtrStep2 = (await dynP0.boundingBox())!.x;
         await dynPagerNext.click();
-        await page.waitForTimeout(250);
+        await page.waitForTimeout(300);
         const p0AfterLtrStep2 = (await dynP0.boundingBox())!.x;
         assert(
             p0AfterLtrStep2 < p0BeforeLtrStep2,
-            `Dynamic ScrollView LTR: clicking pager next displaces content leftward from current position (before: ${p0BeforeLtrStep2}, after: ${p0AfterLtrStep2})`
+            `Dynamic ScrollView LTR: clicking pager next displaces content leftward from actual LTR position (before: ${p0BeforeLtrStep2}, after: ${p0AfterLtrStep2})`
         );
 
         console.log("    [PASS] Dynamic ScrollView pager target resynchronization across direction mutations verified\n");
