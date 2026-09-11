@@ -5,6 +5,8 @@ import {
     type AuditViolation,
     collectLiteralStrings,
     isAllowlisted,
+    isPhysicalCssPropertyName,
+    isStyleName,
     isUserFacingText,
     MANUAL_REVIEW_PATTERNS,
     matchesFilePattern,
@@ -1374,6 +1376,209 @@ describe("audit-i18n-rtl", () => {
                 expect(isAllowlisted(violation, 'right: "left-0"')).toBe(true);
                 expect(isAllowlisted(violation, 'other: "right-0"')).toBe(false);
                 expect(isAllowlisted(violation, 'other: "left-0"')).toBe(false);
+            });
+
+            it("slider.component.html: allows disambiguated left and right handle bindings, rejects cross-matching and unrelated bindings", () => {
+                const violation: AuditViolation = {
+                    category: "rtl-physical-style",
+                    detail: "Physical style binding",
+                    file: "projects/mona-ui/slider/components/slider/slider.component.html",
+                    line: 61
+                };
+
+                const leftBinding = `[style.left.%]="orientation() === 'horizontal' && !isRtl() ? handlePosition() : undefined"`;
+                const rightBinding = `[style.right.%]="orientation() === 'horizontal' && isRtl() ? handlePosition() : undefined"`;
+                const unrelatedLeftBinding = `[style.marginLeft.px]="orientation() === 'horizontal' && !isRtl() ? handlePosition() : undefined"`;
+                const unrelatedRightBinding = `[style.marginRight.px]="orientation() === 'horizontal' && isRtl() ? handlePosition() : undefined"`;
+
+                // 1. intended left binding is allowed
+                expect(isAllowlisted(violation, leftBinding)).toBe(true);
+                // 2. intended right binding is allowed
+                expect(isAllowlisted(violation, rightBinding)).toBe(true);
+                // 3. an unrelated physical binding with the same condition is rejected
+                expect(isAllowlisted(violation, unrelatedLeftBinding)).toBe(false);
+                expect(isAllowlisted(violation, unrelatedRightBinding)).toBe(false);
+
+                // Check discrimination: right snippet doesn't match left line snippet
+                const rightAllowlistEntry = [
+                    {
+                        category: "rtl-physical-style" as const,
+                        filePattern: "projects/mona-ui/slider/components/slider/slider.component.html",
+                        lineSnippet: '[style.right.%]="orientation() === \'horizontal\' && isRtl() ? handlePosition() : undefined"',
+                        reason: "test"
+                    }
+                ];
+                expect(isAllowlisted(violation, leftBinding, rightAllowlistEntry)).toBe(false);
+
+                const leftAllowlistEntry = [
+                    {
+                        category: "rtl-physical-style" as const,
+                        filePattern: "projects/mona-ui/slider/components/slider/slider.component.html",
+                        lineSnippet: '[style.left.%]="orientation() === \'horizontal\' && !isRtl() ? handlePosition() : undefined"',
+                        reason: "test"
+                    }
+                ];
+                expect(isAllowlisted(violation, rightBinding, leftAllowlistEntry)).toBe(false);
+            });
+
+            it("range-slider.component.html: allows disambiguated primary handle left/right bindings, rejects cross-matching and unrelated", () => {
+                const violation: AuditViolation = {
+                    category: "rtl-physical-style",
+                    detail: "Physical style binding",
+                    file: "projects/mona-ui/slider/components/range-slider/range-slider.component.html",
+                    line: 61
+                };
+
+                const leftBinding = `[style.left.%]="orientation() === 'horizontal' && !isRtl() ? primaryHandlePosition() : undefined"`;
+                const rightBinding = `[style.right.%]="orientation() === 'horizontal' && isRtl() ? primaryHandlePosition() : undefined"`;
+                const unrelatedBinding = `[style.paddingLeft.px]="orientation() === 'horizontal' && !isRtl() ? primaryHandlePosition() : undefined"`;
+
+                expect(isAllowlisted(violation, leftBinding)).toBe(true);
+                expect(isAllowlisted(violation, rightBinding)).toBe(true);
+                expect(isAllowlisted(violation, unrelatedBinding)).toBe(false);
+
+                const rightOnlyEntry = [
+                    {
+                        category: "rtl-physical-style" as const,
+                        filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.html",
+                        lineSnippet: '[style.right.%]="orientation() === \'horizontal\' && isRtl() ? primaryHandlePosition() : undefined"',
+                        reason: "test"
+                    }
+                ];
+                expect(isAllowlisted(violation, leftBinding, rightOnlyEntry)).toBe(false);
+            });
+
+            it("range-slider.component.html: allows disambiguated secondary handle left/right bindings, rejects cross-matching and unrelated", () => {
+                const violation: AuditViolation = {
+                    category: "rtl-physical-style",
+                    detail: "Physical style binding",
+                    file: "projects/mona-ui/slider/components/range-slider/range-slider.component.html",
+                    line: 87
+                };
+
+                const leftBinding = `[style.left.%]="orientation() === 'horizontal' && !isRtl() ? secondaryHandlePosition() : undefined"`;
+                const rightBinding = `[style.right.%]="orientation() === 'horizontal' && isRtl() ? secondaryHandlePosition() : undefined"`;
+                const unrelatedBinding = `[style.paddingRight.px]="orientation() === 'horizontal' && isRtl() ? secondaryHandlePosition() : undefined"`;
+
+                expect(isAllowlisted(violation, leftBinding)).toBe(true);
+                expect(isAllowlisted(violation, rightBinding)).toBe(true);
+                expect(isAllowlisted(violation, unrelatedBinding)).toBe(false);
+
+                const leftOnlyEntry = [
+                    {
+                        category: "rtl-physical-style" as const,
+                        filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.html",
+                        lineSnippet: '[style.left.%]="orientation() === \'horizontal\' && !isRtl() ? secondaryHandlePosition() : undefined"',
+                        reason: "test"
+                    }
+                ];
+                expect(isAllowlisted(violation, rightBinding, leftOnlyEntry)).toBe(false);
+            });
+        });
+
+        describe("isPhysicalCssPropertyName canonical helper and AST detection", () => {
+            it("canonical helper identifies physical properties including borderLeftStyle, borderRightStyle, and hyphenated equivalents", () => {
+                // border*style
+                expect(isPhysicalCssPropertyName("borderLeftStyle")).toBe(true);
+                expect(isPhysicalCssPropertyName("borderRightStyle")).toBe(true);
+                expect(isPhysicalCssPropertyName("border-left-style")).toBe(true);
+                expect(isPhysicalCssPropertyName("border-right-style")).toBe(true);
+
+                // border*width, border*color
+                expect(isPhysicalCssPropertyName("borderLeftWidth")).toBe(true);
+                expect(isPhysicalCssPropertyName("borderRightColor")).toBe(true);
+                expect(isPhysicalCssPropertyName("border-left-width")).toBe(true);
+                expect(isPhysicalCssPropertyName("border-right-color")).toBe(true);
+
+                // margin, padding, left, right
+                expect(isPhysicalCssPropertyName("left")).toBe(true);
+                expect(isPhysicalCssPropertyName("right")).toBe(true);
+                expect(isPhysicalCssPropertyName("marginLeft")).toBe(true);
+                expect(isPhysicalCssPropertyName("marginRight")).toBe(true);
+                expect(isPhysicalCssPropertyName("padding-left")).toBe(true);
+                expect(isPhysicalCssPropertyName("padding-right")).toBe(true);
+
+                // radii
+                expect(isPhysicalCssPropertyName("borderTopLeftRadius")).toBe(true);
+                expect(isPhysicalCssPropertyName("border-bottom-right-radius")).toBe(true);
+
+                // logical properties are NOT physical
+                expect(isPhysicalCssPropertyName("borderInlineStartStyle")).toBe(false);
+                expect(isPhysicalCssPropertyName("borderInlineEndStyle")).toBe(false);
+                expect(isPhysicalCssPropertyName("border-inline-start-style")).toBe(false);
+                expect(isPhysicalCssPropertyName("borderInlineStart")).toBe(false);
+                expect(isPhysicalCssPropertyName("borderInlineEnd")).toBe(false);
+                expect(isPhysicalCssPropertyName("marginInlineStart")).toBe(false);
+                expect(isPhysicalCssPropertyName("padding-inline-end")).toBe(false);
+                expect(isPhysicalCssPropertyName("insetInlineStart")).toBe(false);
+            });
+
+            it("AST detects borderLeftStyle and borderRightStyle in style objects, assignments, and setProperty calls", () => {
+                const code = `
+                    const handleStyle = { borderLeftStyle: "solid" };
+                    const handleStyles = { borderRightStyle: "none" };
+                    styles.borderLeftStyle = "solid";
+                    styles["border-right-style"] = "none";
+                    element.style.setProperty("border-left-style", "solid");
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("test.ts", code, violations);
+
+                expect(violations).toHaveLength(5);
+                expect(violations.some(v => v.detail.includes('"borderLeftStyle"') && v.detail.includes("style object"))).toBe(true);
+                expect(violations.some(v => v.detail.includes('"borderRightStyle"') && v.detail.includes("style object"))).toBe(true);
+                expect(violations.some(v => v.detail.includes('"borderLeftStyle"') && v.detail.includes("assignment"))).toBe(true);
+                expect(violations.some(v => v.detail.includes('"border-right-style"') && v.detail.includes("assignment"))).toBe(true);
+                expect(violations.some(v => v.detail.includes('"border-left-style"') && v.detail.includes("setProperty"))).toBe(true);
+            });
+
+            it("AST ignores logical properties and non-style context assignments", () => {
+                const code = `
+                    const handleStyle = { borderInlineStartStyle: "solid" };
+                    configuration.borderLeftStyle = "metadata";
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("test.ts", code, violations);
+
+                expect(violations).toHaveLength(0);
+            });
+        });
+
+        describe("isStyleName and stylesheet heuristic narrowing", () => {
+            it("treats stylesheet, stylesheetOverrides, and componentStylesheet as style names", () => {
+                expect(isStyleName("stylesheet")).toBe(true);
+                expect(isStyleName("stylesheetOverrides")).toBe(true);
+                expect(isStyleName("componentStylesheet")).toBe(true);
+                expect(isStyleName("myStyleSheet")).toBe(true);
+            });
+
+            it("treats metadata, tokens, and guides as non-style names", () => {
+                expect(isStyleName("stylesheetMetadata")).toBe(false);
+                expect(isStyleName("styleId")).toBe(false);
+                expect(isStyleName("styleTokenName")).toBe(false);
+                expect(isStyleName("styleGuideText")).toBe(false);
+                expect(isStyleName("lifestyle")).toBe(false);
+            });
+
+            it("AST detects physical properties in stylesheet and stylesheetOverrides objects, but ignores stylesheetMetadata", () => {
+                const positiveCode = `
+                    const stylesheet = { left: "10px" };
+                    const stylesheetOverrides = { paddingRight: "8px" };
+                `;
+                const posViolations: AuditViolation[] = [];
+                scanTypeScriptAst("test.ts", positiveCode, posViolations);
+
+                expect(posViolations).toHaveLength(2);
+                expect(posViolations.some(v => v.detail.includes('"left"'))).toBe(true);
+                expect(posViolations.some(v => v.detail.includes('"paddingRight"'))).toBe(true);
+
+                const negativeCode = `
+                    const stylesheetMetadata = { left: "column-name" };
+                `;
+                const negViolations: AuditViolation[] = [];
+                scanTypeScriptAst("test.ts", negativeCode, negViolations);
+
+                expect(negViolations).toHaveLength(0);
             });
         });
     });

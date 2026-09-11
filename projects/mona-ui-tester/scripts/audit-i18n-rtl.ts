@@ -290,13 +290,13 @@ export const ALLOWLIST: AllowlistEntry[] = [
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/slider/components/slider/slider.component.html",
-        lineSnippet: "!isRtl() ? handlePosition() : undefined",
+        lineSnippet: '[style.left.%]="orientation() === \'horizontal\' && !isRtl() ? handlePosition() : undefined"',
         reason: "Slider horizontal handle physical left coordinate intentionally chosen from Mona semantic direction"
     },
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/slider/components/slider/slider.component.html",
-        lineSnippet: "isRtl() ? handlePosition() : undefined",
+        lineSnippet: '[style.right.%]="orientation() === \'horizontal\' && isRtl() ? handlePosition() : undefined"',
         reason: "Slider horizontal handle physical right coordinate intentionally chosen from Mona semantic direction"
     },
     {
@@ -314,25 +314,25 @@ export const ALLOWLIST: AllowlistEntry[] = [
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.html",
-        lineSnippet: "!isRtl() ? primaryHandlePosition() : undefined",
+        lineSnippet: '[style.left.%]="orientation() === \'horizontal\' && !isRtl() ? primaryHandlePosition() : undefined"',
         reason: "RangeSlider primary handle physical left coordinate intentionally chosen from Mona semantic direction"
     },
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.html",
-        lineSnippet: "isRtl() ? primaryHandlePosition() : undefined",
+        lineSnippet: '[style.right.%]="orientation() === \'horizontal\' && isRtl() ? primaryHandlePosition() : undefined"',
         reason: "RangeSlider primary handle physical right coordinate intentionally chosen from Mona semantic direction"
     },
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.html",
-        lineSnippet: "!isRtl() ? secondaryHandlePosition() : undefined",
+        lineSnippet: '[style.left.%]="orientation() === \'horizontal\' && !isRtl() ? secondaryHandlePosition() : undefined"',
         reason: "RangeSlider secondary handle physical left coordinate intentionally chosen from Mona semantic direction"
     },
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.html",
-        lineSnippet: "isRtl() ? secondaryHandlePosition() : undefined",
+        lineSnippet: '[style.right.%]="orientation() === \'horizontal\' && isRtl() ? secondaryHandlePosition() : undefined"',
         reason: "RangeSlider secondary handle physical right coordinate intentionally chosen from Mona semantic direction"
     },
     {
@@ -851,6 +851,116 @@ export function isUserFacingText(text: string): boolean {
     // Contains letters or marks across any script (Unicode-aware)
     return /[\p{L}\p{M}]/u.test(trimmed);
 }
+
+export const isPhysicalCssPropertyName = (name: string): boolean => {
+    if (!name) {
+        return false;
+    }
+    const clean = name.trim().replace(/^['"]|['"]$/g, "");
+    const lower = clean.toLowerCase();
+
+    // Guard against logical properties
+    if (
+        lower.startsWith("border-inline") ||
+        lower.startsWith("borderinline") ||
+        lower.startsWith("border-block") ||
+        lower.startsWith("borderblock") ||
+        lower.startsWith("margin-inline") ||
+        lower.startsWith("margininline") ||
+        lower.startsWith("padding-inline") ||
+        lower.startsWith("paddinginline") ||
+        lower.startsWith("inset-inline") ||
+        lower.startsWith("insetinline")
+    ) {
+        return false;
+    }
+
+    if (lower === "left" || lower === "right") {
+        return true;
+    }
+    if (lower === "margin-left" || lower === "margin-right" || lower === "marginleft" || lower === "marginright") {
+        return true;
+    }
+    if (lower === "padding-left" || lower === "padding-right" || lower === "paddingleft" || lower === "paddingright") {
+        return true;
+    }
+    if (
+        lower.startsWith("border-left") ||
+        lower.startsWith("border-right") ||
+        lower.startsWith("borderleft") ||
+        lower.startsWith("borderright")
+    ) {
+        return true;
+    }
+    if (/^border-(?:top|bottom)-(?:left|right)-radius$/.test(lower)) {
+        return true;
+    }
+    if (/^border(?:top|bottom)(?:left|right)radius$/i.test(clean)) {
+        return true;
+    }
+    return false;
+};
+
+export const isStyleName = (name: string | undefined): boolean => {
+    if (!name) {
+        return false;
+    }
+    const raw = name.includes(".") ? (name.split(".").pop() ?? name) : name;
+    const clean = raw.replace(/^#+/, "").replace(/^[_\s]+|[_\s]+$/g, "");
+    if (!clean) {
+        return false;
+    }
+
+    // Explicit negative exclusions: metadata, IDs, guides, tokens, or non-style words
+    if (
+        /^(?:lifestyle|stylesheet(?:Metadata|Token|Guide|Id|Name|Type|Key|Index|Doc|Rule|Prop|Class)|style(?:Id|Token|Guide|Name|Type|Key|Index|Doc|Rule|Prop|Class))/i.test(
+            clean
+        )
+    ) {
+        return false;
+    }
+
+    // 1. Exact "style" or "styles" (case-insensitive for standalone words like "Style" or "styles")
+    if (/^styles?$/i.test(clean)) {
+        return true;
+    }
+
+    // 2. Exact "styleObject" or "stylesObject"
+    if (/^styles?Object$/i.test(clean)) {
+        return true;
+    }
+
+    // 3. Exact "stylesheet" or "stylesheets" or begins with stylesheet (e.g. stylesheetOverrides)
+    if (/^stylesheets?/i.test(clean)) {
+        return true;
+    }
+
+    // 4. camelCase suffix ending in Style or Styles: [a-z0-9]Styles?$
+    // Examples: handleStyle, handleStyles, computedHandleStyle, labelStyles, makeStyle, createStyles
+    if (/[a-z0-9]Styles?$/.test(clean)) {
+        return true;
+    }
+
+    // 5. Suffix ending in StyleSheet or StyleSheets: [a-z0-9]StyleSheets?$
+    // Example: componentStylesheet, customStylesheet
+    if (/[a-z0-9]StyleSheets?$/i.test(clean)) {
+        return true;
+    }
+
+    // 6. snake_case suffix: _styles?$ or _stylesheets?$ (case-insensitive)
+    // Examples: handle_style, make_styles, handle_stylesheet
+    if (/[a-z0-9]_(?:styles?|stylesheets?)$/i.test(clean)) {
+        return true;
+    }
+
+    // 7. kebab-case suffix: -styles?$ or -stylesheets?$ (case-insensitive)
+    // Examples: handle-style, make-styles, handle-stylesheet
+    if (/[a-z0-9]-(?:styles?|stylesheets?)$/i.test(clean)) {
+        return true;
+    }
+
+    return false;
+};
 
 export const TECHNICAL_SEMANTIC_STRINGS = new Set([
     "",
@@ -1482,31 +1592,6 @@ export function scanTypeScriptAst(
         }
 
         // 6. TypeScript-authored physical style objects and assignments
-        const PHYSICAL_STYLE_PROPERTY_NAMES = new Set([
-            "left",
-            "right",
-            "marginLeft",
-            "marginRight",
-            "paddingLeft",
-            "paddingRight",
-            "borderLeft",
-            "borderRight",
-            "borderLeftWidth",
-            "borderRightWidth",
-            "borderLeftColor",
-            "borderRightColor",
-            "borderTopLeftRadius",
-            "borderTopRightRadius",
-            "borderBottomLeftRadius",
-            "borderBottomRightRadius",
-            "margin-left",
-            "margin-right",
-            "padding-left",
-            "padding-right",
-            "border-left",
-            "border-right"
-        ]);
-
         const CSS_SIBLING_PROPERTIES = new Set([
             "top",
             "bottom",
@@ -1538,56 +1623,6 @@ export function scanTypeScriptAst(
                 return false;
             }
             return /CSSStyleDeclaration|CSSProperties|StyleDeclaration/.test(typeText);
-        };
-
-        const isStyleName = (name: string | undefined): boolean => {
-            if (!name) {
-                return false;
-            }
-            const raw = name.includes(".") ? (name.split(".").pop() ?? name) : name;
-            const clean = raw.replace(/^#+/, "").replace(/^[_\s]+|[_\s]+$/g, "");
-            if (!clean) {
-                return false;
-            }
-
-            // Explicit negative exclusions: metadata, IDs, guides, tokens, sheets, or non-style words
-            if (
-                /^(?:lifestyle|stylesheet|style(?:Id|Token|Guide|Sheet|Name|Type|Key|Index|Doc|Rule|Prop|Class))/i.test(
-                    clean
-                )
-            ) {
-                return false;
-            }
-
-            // 1. Exact "style" or "styles" (case-insensitive for standalone words like "Style" or "styles")
-            if (/^styles?$/i.test(clean)) {
-                return true;
-            }
-
-            // 2. Exact "styleObject" or "stylesObject"
-            if (/^styles?Object$/i.test(clean)) {
-                return true;
-            }
-
-            // 3. camelCase suffix ending in Style or Styles: [a-z0-9]Styles?$
-            // Examples: handleStyle, handleStyles, computedHandleStyle, labelStyles, makeStyle, createStyles
-            if (/[a-z0-9]Styles?$/.test(clean)) {
-                return true;
-            }
-
-            // 4. snake_case suffix: _styles?$ (case-insensitive)
-            // Examples: handle_style, make_styles
-            if (/[a-z0-9]_styles?$/i.test(clean)) {
-                return true;
-            }
-
-            // 5. kebab-case suffix: -styles?$ (case-insensitive)
-            // Examples: handle-style, make-styles
-            if (/[a-z0-9]-styles?$/i.test(clean)) {
-                return true;
-            }
-
-            return false;
         };
 
         const hasCssUnit = (text: string): boolean => {
@@ -1711,7 +1746,7 @@ export function scanTypeScriptAst(
             for (const prop of obj.getProperties()) {
                 if (Node.isPropertyAssignment(prop) || Node.isShorthandPropertyAssignment(prop)) {
                     const rawName = prop.getName().replace(/['"]/g, "");
-                    if (PHYSICAL_STYLE_PROPERTY_NAMES.has(rawName)) {
+                    if (isPhysicalCssPropertyName(rawName)) {
                         violations.push({
                             category: "rtl-physical-style",
                             detail: `Physical style property "${rawName}" in style object`,
@@ -1751,7 +1786,7 @@ export function scanTypeScriptAst(
                 continue;
             }
 
-            const isPhysical = PHYSICAL_STYLE_PROPERTY_NAMES.has(propName) || propName === "side";
+            const isPhysical = isPhysicalCssPropertyName(propName) || propName === "side";
             if (!isPhysical) {
                 continue;
             }
@@ -1787,34 +1822,6 @@ export function scanTypeScriptAst(
                 });
             }
         }
-
-        const isPhysicalCssProperty = (prop: string): boolean => {
-            const p = prop.trim().toLowerCase();
-            if (p === "left" || p === "right") {
-                return true;
-            }
-            if (p === "margin-left" || p === "margin-right" || p === "marginleft" || p === "marginright") {
-                return true;
-            }
-            if (p === "padding-left" || p === "padding-right" || p === "paddingleft" || p === "paddingright") {
-                return true;
-            }
-            if (
-                p.startsWith("border-left") ||
-                p.startsWith("border-right") ||
-                p.startsWith("borderleft") ||
-                p.startsWith("borderright")
-            ) {
-                return true;
-            }
-            if (/^border-(?:top|bottom)-(?:left|right)-radius$/.test(p)) {
-                return true;
-            }
-            if (/^border(?:top|bottom)(?:left|right)radius$/i.test(p)) {
-                return true;
-            }
-            return false;
-        };
 
         for (const callExpr of sf.getDescendantsOfKind(SyntaxKind.CallExpression)) {
             const expr = callExpr.getExpression();
@@ -1857,7 +1864,7 @@ export function scanTypeScriptAst(
                 propName = firstArg.getLiteralText();
             }
 
-            if (propName && isPhysicalCssProperty(propName)) {
+            if (propName && isPhysicalCssPropertyName(propName)) {
                 violations.push({
                     category: "rtl-physical-style",
                     detail: `Physical style property "${propName}" in setProperty call: "${callExpr.getText().trim()}"`,
