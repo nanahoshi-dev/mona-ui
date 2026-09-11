@@ -1087,20 +1087,42 @@ async function runTests(): Promise<void> {
                     assert(p0AfterPrev.x < p0AfterNext.x, `[${scenario.name}] RTL clicking pager prev scrolls back left`);
                 }
 
-                // Instrument pagerList.scrollBy to record all scroll calls deterministically
+                // Instrument pagerList.scrollBy and scrollTo to record all scroll calls deterministically
                 await pagerList.evaluate(el => {
-                    const list = el as HTMLElement & { __scrollByCalls?: Array<{ left: number; behavior?: string }> };
-                    list.__scrollByCalls = [];
-                    const originalScrollBy = list.scrollBy.bind(list);
-                    list.scrollBy = function (options?: ScrollToOptions | number, y?: number) {
-                        if (typeof options === "object") {
-                            list.__scrollByCalls!.push({ left: options.left ?? 0, behavior: options.behavior });
-                            return originalScrollBy(options);
-                        } else {
-                            list.__scrollByCalls!.push({ left: options ?? 0 });
-                            return originalScrollBy(options, y);
-                        }
+                    const list = el as HTMLElement & {
+                        __scrollByCalls?: Array<{ left: number; behavior?: string; type?: string }>;
+                        __scrollCalls?: Array<{ left: number; behavior?: string; type?: string }>;
                     };
+                    list.__scrollByCalls = [];
+                    list.__scrollCalls = [];
+                    const originalScrollBy = list.scrollBy.bind(list);
+                    const originalScrollTo = list.scrollTo?.bind(list);
+
+                    list.scrollBy = function (options?: ScrollToOptions | number, y?: number) {
+                        const call =
+                            typeof options === "object"
+                                ? { left: options?.left ?? 0, behavior: options?.behavior, type: "scrollBy" }
+                                : { left: options ?? 0, type: "scrollBy" };
+                        list.__scrollByCalls!.push(call);
+                        list.__scrollCalls!.push(call);
+                        return typeof options === "object"
+                            ? originalScrollBy(options)
+                            : originalScrollBy(options as number, y as number);
+                    };
+
+                    if (originalScrollTo) {
+                        list.scrollTo = function (options?: ScrollToOptions | number, y?: number) {
+                            const call =
+                                typeof options === "object"
+                                    ? { left: options?.left ?? 0, behavior: options?.behavior, type: "scrollTo" }
+                                    : { left: options ?? 0, type: "scrollTo" };
+                            list.__scrollByCalls!.push(call);
+                            list.__scrollCalls!.push(call);
+                            return typeof options === "object"
+                                ? originalScrollTo(options)
+                                : originalScrollTo(options as number, y as number);
+                        };
+                    }
                 });
 
                 // Genuine mouse hold gesture on pager Next arrow
@@ -1168,24 +1190,67 @@ async function runTests(): Promise<void> {
                     `[${scenario.name}] Secondary right-click hold does not trigger pager scrolling (before: ${callsBeforeRight}, after: ${callsAfterRight})`
                 );
 
-                // Test rapid consecutive short clicks: must produce exactly two additional scrollBy calls
+                // Establish known pager scroll position at page 0 before rapid activation tests
+                const dot0 = scrollView.locator('li[data-page-index="0"] button');
+                await dot0.click();
+                await page.waitForTimeout(500); // allow active page centering to settle
+                await pagerList.evaluate(el => {
+                    (el as any).__scrollByCalls = [];
+                    (el as any).__scrollCalls = [];
+                });
+
+                // Test rapid consecutive short clicks: must produce exactly two scroll calls and cumulative physical displacement
                 const callsBeforeRapid = await pagerList.evaluate(el => ((el as any).__scrollByCalls || []).length);
+                const p0BeforeRapid = (await p0.boundingBox())!.x;
                 await pagerNextArrow.click();
                 await pagerNextArrow.click();
                 const callsAfterRapid = await pagerList.evaluate(el => ((el as any).__scrollByCalls || []).length);
                 assert(
                     callsAfterRapid === callsBeforeRapid + 2,
-                    `[${scenario.name}] Two rapid consecutive short clicks performed exactly two scrollBy calls (expected ${callsBeforeRapid + 2}, got ${callsAfterRapid})`
+                    `[${scenario.name}] Two rapid consecutive short clicks performed exactly two scroll calls (expected ${callsBeforeRapid + 2}, got ${callsAfterRapid})`
+                );
+                await page.waitForTimeout(500); // allow cumulative smooth scroll to settle
+                const p0AfterRapid = (await p0.boundingBox())!.x;
+                const displacementRapid = !isRtl ? p0BeforeRapid - p0AfterRapid : p0AfterRapid - p0BeforeRapid;
+                assert(
+                    displacementRapid >= 180 && displacementRapid <= 220,
+                    `[${scenario.name}] Two rapid consecutive short clicks produced cumulative physical displacement (expected ~200px, got ${displacementRapid.toFixed(1)}px)`
                 );
 
-                // Test rapid keyboard activations: two Enter presses perform exactly two steps
+                // Test rapid keyboard activations: two Enter presses perform exactly two steps and cumulative physical displacement
+                const p0BeforeKeyboard = (await p0.boundingBox())!.x;
                 await pagerNextArrow.focus();
                 await page.keyboard.press("Enter");
                 await page.keyboard.press("Enter");
                 const callsAfterKeyboard = await pagerList.evaluate(el => ((el as any).__scrollByCalls || []).length);
                 assert(
                     callsAfterKeyboard === callsAfterRapid + 2,
-                    `[${scenario.name}] Two rapid keyboard activations performed exactly two scrollBy calls (expected ${callsAfterRapid + 2}, got ${callsAfterKeyboard})`
+                    `[${scenario.name}] Two rapid keyboard activations performed exactly two scroll calls (expected ${callsAfterRapid + 2}, got ${callsAfterKeyboard})`
+                );
+                await page.waitForTimeout(500); // allow cumulative smooth scroll to settle
+                const p0AfterKeyboard = (await p0.boundingBox())!.x;
+                const displacementKeyboard = !isRtl ? p0BeforeKeyboard - p0AfterKeyboard : p0AfterKeyboard - p0BeforeKeyboard;
+                assert(
+                    displacementKeyboard >= 180 && displacementKeyboard <= 220,
+                    `[${scenario.name}] Two rapid keyboard activations produced cumulative physical displacement (expected ~200px, got ${displacementKeyboard.toFixed(1)}px)`
+                );
+
+                // Test rapid alternating Next then Previous clicks: must return to starting position
+                const p0BeforeAlternating = (await p0.boundingBox())!.x;
+                const callsBeforeAlternating = await pagerList.evaluate(el => ((el as any).__scrollByCalls || []).length);
+                await pagerNextArrow.click();
+                await pagerPrevArrow.click();
+                const callsAfterAlternating = await pagerList.evaluate(el => ((el as any).__scrollByCalls || []).length);
+                assert(
+                    callsAfterAlternating === callsBeforeAlternating + 2,
+                    `[${scenario.name}] Rapid alternating Next then Previous performed exactly two scroll calls (expected ${callsBeforeAlternating + 2}, got ${callsAfterAlternating})`
+                );
+                await page.waitForTimeout(500); // allow alternating smooth scroll to settle
+                const p0AfterAlternating = (await p0.boundingBox())!.x;
+                const netDeltaAlternating = Math.abs(p0AfterAlternating - p0BeforeAlternating);
+                assert(
+                    netDeltaAlternating <= 5,
+                    `[${scenario.name}] Rapid alternating Next then Previous returned to starting position (net delta: ${netDeltaAlternating.toFixed(1)}px)`
                 );
 
                 // Distant item centering
@@ -1538,21 +1603,43 @@ async function runTests(): Promise<void> {
         const customNextBtn = customScrollView.locator('button[data-navigate-next="true"]');
         const disabledNextBtn = disabledScrollView.locator('button[data-navigate-next="true"]');
 
-        // Instrument stdScrollView pager scrollBy and Element.prototype.scrollIntoView
+        // Instrument stdScrollView pager scrollBy and scrollTo, and Element.prototype.scrollIntoView
         const stdPagerList = stdScrollView.locator("ul").nth(1);
         await stdPagerList.evaluate(el => {
-            const list = el as HTMLElement & { __scrollByCalls?: Array<{ left: number; behavior?: string }> };
-            list.__scrollByCalls = [];
-            const originalScrollBy = list.scrollBy.bind(list);
-            list.scrollBy = function (options?: ScrollToOptions | number, y?: number) {
-                if (typeof options === "object") {
-                    list.__scrollByCalls!.push({ left: options.left ?? 0, behavior: options.behavior });
-                    return originalScrollBy(options);
-                } else {
-                    list.__scrollByCalls!.push({ left: options ?? 0 });
-                    return originalScrollBy(options, y);
-                }
+            const list = el as HTMLElement & {
+                __scrollByCalls?: Array<{ left: number; behavior?: string; type?: string }>;
+                __scrollCalls?: Array<{ left: number; behavior?: string; type?: string }>;
             };
+            list.__scrollByCalls = [];
+            list.__scrollCalls = [];
+            const originalScrollBy = list.scrollBy.bind(list);
+            const originalScrollTo = list.scrollTo?.bind(list);
+
+            list.scrollBy = function (options?: ScrollToOptions | number, y?: number) {
+                const call =
+                    typeof options === "object"
+                        ? { left: options?.left ?? 0, behavior: options?.behavior, type: "scrollBy" }
+                        : { left: options ?? 0, type: "scrollBy" };
+                list.__scrollByCalls!.push(call);
+                list.__scrollCalls!.push(call);
+                return typeof options === "object"
+                    ? originalScrollBy(options)
+                    : originalScrollBy(options as number, y as number);
+            };
+
+            if (originalScrollTo) {
+                list.scrollTo = function (options?: ScrollToOptions | number, y?: number) {
+                    const call =
+                        typeof options === "object"
+                            ? { left: options?.left ?? 0, behavior: options?.behavior, type: "scrollTo" }
+                            : { left: options ?? 0, type: "scrollTo" };
+                    list.__scrollByCalls!.push(call);
+                    list.__scrollCalls!.push(call);
+                    return typeof options === "object"
+                        ? originalScrollTo(options)
+                        : originalScrollTo(options as number, y as number);
+                };
+            }
         });
         await page.evaluate(() => {
             (window as any).__scrollIntoViewCalls = [];
@@ -1693,8 +1780,10 @@ async function runTests(): Promise<void> {
             `[Reduced Motion] Disabled ScrollView (animate=false) remains 0ms under reduced-motion (got ${disabledDurationReduce}ms)`
         );
 
-        // Test scrollBy and scrollIntoView behavior under reduced-motion
-        await stdPagerList.evaluate(el => { (el as any).__scrollByCalls = []; });
+        await stdPagerList.evaluate(el => {
+            (el as any).__scrollByCalls = [];
+            (el as any).__scrollCalls = [];
+        });
         await page.evaluate(() => { (window as any).__scrollIntoViewCalls = []; });
 
         await stdPagerNext.click();
