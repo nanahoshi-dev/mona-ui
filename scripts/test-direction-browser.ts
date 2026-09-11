@@ -1168,6 +1168,26 @@ async function runTests(): Promise<void> {
                     `[${scenario.name}] Secondary right-click hold does not trigger pager scrolling (before: ${callsBeforeRight}, after: ${callsAfterRight})`
                 );
 
+                // Test rapid consecutive short clicks: must produce exactly two additional scrollBy calls
+                const callsBeforeRapid = await pagerList.evaluate(el => ((el as any).__scrollByCalls || []).length);
+                await pagerNextArrow.click();
+                await pagerNextArrow.click();
+                const callsAfterRapid = await pagerList.evaluate(el => ((el as any).__scrollByCalls || []).length);
+                assert(
+                    callsAfterRapid === callsBeforeRapid + 2,
+                    `[${scenario.name}] Two rapid consecutive short clicks performed exactly two scrollBy calls (expected ${callsBeforeRapid + 2}, got ${callsAfterRapid})`
+                );
+
+                // Test rapid keyboard activations: two Enter presses perform exactly two steps
+                await pagerNextArrow.focus();
+                await page.keyboard.press("Enter");
+                await page.keyboard.press("Enter");
+                const callsAfterKeyboard = await pagerList.evaluate(el => ((el as any).__scrollByCalls || []).length);
+                assert(
+                    callsAfterKeyboard === callsAfterRapid + 2,
+                    `[${scenario.name}] Two rapid keyboard activations performed exactly two scrollBy calls (expected ${callsAfterRapid + 2}, got ${callsAfterKeyboard})`
+                );
+
                 // Distant item centering
                 const item15Btn = scrollView.locator('li[data-page-index="15"] button');
                 await item15Btn.click();
