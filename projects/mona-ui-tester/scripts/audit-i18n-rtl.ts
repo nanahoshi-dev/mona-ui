@@ -610,7 +610,7 @@ export const ALLOWLIST: AllowlistEntry[] = [
     {
         category: "rtl-manual-review",
         filePattern: "projects/mona-ui/scroll-view/components/scroll-view/scroll-view.component.ts",
-        lineSnippet: "scrollLeft",
+        lineSnippet: "const currentScrollLeft = element.scrollLeft",
         reason: "ScrollView pager calculates cumulative scroll target from element scrollLeft"
     },
     {
