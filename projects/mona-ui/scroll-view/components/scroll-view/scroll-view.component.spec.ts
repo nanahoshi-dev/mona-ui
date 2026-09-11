@@ -380,4 +380,57 @@ describe("ScrollViewComponent", () => {
         fixture.detectChanges();
         expect(component.index()).toBe(0);
     });
+
+    it("sets the --mona-scroll-view-animation-duration CSS variable based on animate input", () => {
+        fixture.componentRef.setInput("data", ["Item 1", "Item 2"]);
+        fixture.componentRef.setInput("animate", true);
+        fixture.detectChanges();
+
+        const host = fixture.nativeElement as HTMLElement;
+        const slide = host.querySelector("li[role='group']") as HTMLLIElement;
+        expect(slide.style.getPropertyValue("--mona-scroll-view-animation-duration")).toBe("500ms");
+
+        fixture.componentRef.setInput("animate", 1200);
+        fixture.detectChanges();
+        expect(slide.style.getPropertyValue("--mona-scroll-view-animation-duration")).toBe("1200ms");
+
+        fixture.componentRef.setInput("animate", false);
+        fixture.detectChanges();
+        expect(slide.style.getPropertyValue("--mona-scroll-view-animation-duration")).toBe("0ms");
+    });
+
+    it("arbitrates pager continuous hold vs click to prevent trailing single scroll", () => {
+        vi.useFakeTimers();
+        try {
+            const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+
+            // 1. Short click (<60ms): pointerdown -> pointerup (<60ms) -> click
+            component["onPagerScroll"](mockList, "right", "continuous");
+            vi.advanceTimersByTime(30);
+            component["onPagerScrollEnd"]();
+            component["onPagerScroll"](mockList, "right", "single");
+            vi.advanceTimersByTime(60);
+            expect(mockList.scrollBy).toHaveBeenCalledTimes(1);
+
+            (mockList.scrollBy as any).mockClear();
+
+            // 2. Long hold (>60ms): pointerdown -> hold 180ms -> pointerup -> click
+            component["onPagerScroll"](mockList, "right", "continuous");
+            vi.advanceTimersByTime(180);
+            expect(mockList.scrollBy).toHaveBeenCalledTimes(3);
+            component["onPagerScrollEnd"]();
+            component["onPagerScroll"](mockList, "right", "single");
+            vi.advanceTimersByTime(200);
+            expect(mockList.scrollBy).toHaveBeenCalledTimes(3);
+
+            (mockList.scrollBy as any).mockClear();
+
+            // 3. Keyboard click (no continuous pointerdown): click
+            component["onPagerScroll"](mockList, "right", "single");
+            vi.advanceTimersByTime(60);
+            expect(mockList.scrollBy).toHaveBeenCalledTimes(1);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
 });

@@ -8,7 +8,7 @@
                     [attr.aria-label]="messages().pageOf($index + 1, itemCount())"
                     [animate.enter]="enterAnimation()"
                     [animate.leave]="leaveAnimation()"
-                    [style.animation-duration.ms]="animationDuration()">
+                    [style.--mona-scroll-view-animation-duration]="animationDuration() + 'ms'">
                     @let width = contentElement.clientWidth;
                     @let height = contentElement.clientHeight;
                     <ng-container
@@ -73,7 +73,7 @@
                 [class]="pagerArrowClass()"
                 [attr.aria-label]="messages().scrollPagerPrevious"
                 (click)="onPagerScroll(pagerListElement, 'left', 'single')"
-                (mousedown)="onPagerScroll(pagerListElement, 'left', 'continuous')">
+                (pointerdown)="onPagerScroll(pagerListElement, 'left', 'continuous')">
                 <svg
                     aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
@@ -114,7 +114,7 @@
                 [class]="pagerArrowClass()"
                 [attr.aria-label]="messages().scrollPagerNext"
                 (click)="onPagerScroll(pagerListElement, 'right', 'single')"
-                (mousedown)="onPagerScroll(pagerListElement, 'right', 'continuous')">
+                (pointerdown)="onPagerScroll(pagerListElement, 'right', 'continuous')">
                 <svg
                     aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"

@@ -88,24 +88,32 @@ import {
                 transform: translateX(100%);
             }
         }
+        .slide-in-from-right,
+        .slide-out-to-left,
+        .slide-in-from-left,
+        .slide-out-to-right {
+            animation-duration: var(--mona-scroll-view-animation-duration, 500ms);
+            animation-timing-function: ease-out;
+            animation-fill-mode: both;
+        }
         .slide-in-from-right {
-            animation: slideInFromRight 0.5s ease-out both;
+            animation-name: slideInFromRight;
         }
         .slide-out-to-left {
-            animation: slideOutToLeft 0.5s ease-out both;
+            animation-name: slideOutToLeft;
         }
         .slide-in-from-left {
-            animation: slideInFromLeft 0.5s ease-out both;
+            animation-name: slideInFromLeft;
         }
         .slide-out-to-right {
-            animation: slideOutToRight 0.5s ease-out both;
+            animation-name: slideOutToRight;
         }
         @media (prefers-reduced-motion: reduce) {
             .slide-in-from-right,
             .slide-out-to-left,
             .slide-in-from-left,
             .slide-out-to-right {
-                animation-duration: 1ms;
+                animation-duration: 1ms !important;
             }
         }
     `,
@@ -137,7 +145,9 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     });
     #resizeObserver: ResizeObserver | null = null;
     #scroll$ = new Subject<void>();
-    #scrollMouseUpHandler = () => this.onPagerScrollEnd();
+    #scrollEndHandler = () => this.onPagerScrollEnd();
+    #continuousTicked = false;
+    #holdResetTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
     protected readonly animationDuration = computed(() => {
         const animate = this.animate();
@@ -317,7 +327,12 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         this.#destroyRef.onDestroy(() => {
             this.#scroll$.complete();
             this.#resizeObserver?.disconnect();
-            this.#document.removeEventListener("mouseup", this.#scrollMouseUpHandler);
+            this.#document.removeEventListener("pointerup", this.#scrollEndHandler);
+            this.#document.removeEventListener("pointercancel", this.#scrollEndHandler);
+            this.#document.removeEventListener("mouseup", this.#scrollEndHandler);
+            if (this.#holdResetTimeoutId !== null) {
+                clearTimeout(this.#holdResetTimeoutId);
+            }
         });
         afterNextRender(() => {
             this.setPagerListResizeObserver();
@@ -340,14 +355,30 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         direction: ScrollDirection,
         type: "single" | "continuous"
     ): void {
+        if (type === "single") {
+            if (this.#continuousTicked) {
+                this.#continuousTicked = false;
+                return;
+            }
+        }
         if (type === "continuous") {
-            this.#document.addEventListener("mouseup", this.#scrollMouseUpHandler, { once: true });
+            this.#continuousTicked = false;
+            if (this.#holdResetTimeoutId !== null) {
+                clearTimeout(this.#holdResetTimeoutId);
+                this.#holdResetTimeoutId = null;
+            }
+            this.#document.addEventListener("pointerup", this.#scrollEndHandler, { once: true });
+            this.#document.addEventListener("pointercancel", this.#scrollEndHandler, { once: true });
+            this.#document.addEventListener("mouseup", this.#scrollEndHandler, { once: true });
         }
         const isRtl = this.isRtl();
         const timeFunction = type === "single" ? timer : interval;
         timeFunction(60)
             .pipe(takeUntil(this.#scroll$), takeUntilDestroyed(this.#destroyRef))
             .subscribe(() => {
+                if (type === "continuous") {
+                    this.#continuousTicked = true;
+                }
                 let offset = direction === "left" ? -100 : 100;
                 if (isRtl) {
                     offset = -offset;
@@ -357,10 +388,19 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     }
 
     protected onPagerScrollEnd(): void {
-        this.#document.removeEventListener("mouseup", this.#scrollMouseUpHandler);
+        this.#document.removeEventListener("pointerup", this.#scrollEndHandler);
+        this.#document.removeEventListener("pointercancel", this.#scrollEndHandler);
+        this.#document.removeEventListener("mouseup", this.#scrollEndHandler);
         this.#scroll$.next();
         this.#scroll$.complete();
         this.#scroll$ = new Subject<void>();
+        if (this.#holdResetTimeoutId !== null) {
+            clearTimeout(this.#holdResetTimeoutId);
+        }
+        this.#holdResetTimeoutId = setTimeout(() => {
+            this.#continuousTicked = false;
+            this.#holdResetTimeoutId = null;
+        }, 150);
     }
 
     private navigate(direction: ScrollDirection, infinite: boolean): void {
