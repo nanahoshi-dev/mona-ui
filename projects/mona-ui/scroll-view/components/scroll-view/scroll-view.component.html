@@ -72,8 +72,8 @@
                 type="button"
                 [class]="pagerArrowClass()"
                 [attr.aria-label]="messages().scrollPagerPrevious"
-                (click)="onPagerScroll(pagerListElement, 'left', 'single')"
-                (pointerdown)="onPagerScroll(pagerListElement, 'left', 'continuous')">
+                (pointerdown)="onPagerPointerDown($event, pagerListElement, 'left')"
+                (click)="onPagerClick($event, pagerListElement, 'left')">
                 <svg
                     aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
@@ -113,8 +113,8 @@
                 type="button"
                 [class]="pagerArrowClass()"
                 [attr.aria-label]="messages().scrollPagerNext"
-                (click)="onPagerScroll(pagerListElement, 'right', 'single')"
-                (pointerdown)="onPagerScroll(pagerListElement, 'right', 'continuous')">
+                (pointerdown)="onPagerPointerDown($event, pagerListElement, 'right')"
+                (click)="onPagerClick($event, pagerListElement, 'right')">
                 <svg
                     aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"

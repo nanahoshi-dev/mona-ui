@@ -258,11 +258,11 @@ describe("ScrollViewComponent", () => {
         vi.useFakeTimers();
         try {
             const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
-            component["onPagerScroll"](mockList, "left", "single");
+            component["onPagerClick"](new MouseEvent("click", { detail: 1, button: 0 }), mockList, "left");
             vi.advanceTimersByTime(60);
             expect(mockList.scrollBy).toHaveBeenCalledWith({ behavior: "smooth", left: -100 });
 
-            component["onPagerScroll"](mockList, "right", "single");
+            component["onPagerClick"](new MouseEvent("click", { detail: 1, button: 0 }), mockList, "right");
             vi.advanceTimersByTime(60);
             expect(mockList.scrollBy).toHaveBeenCalledWith({ behavior: "smooth", left: 100 });
         } finally {
@@ -332,11 +332,11 @@ describe("ScrollViewComponent", () => {
         vi.useFakeTimers();
         try {
             const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
-            component["onPagerScroll"](mockList, "left", "single");
+            component["onPagerClick"](new MouseEvent("click", { detail: 1, button: 0 }), mockList, "left");
             vi.advanceTimersByTime(60);
             expect(mockList.scrollBy).toHaveBeenCalledWith({ behavior: "smooth", left: 100 });
 
-            component["onPagerScroll"](mockList, "right", "single");
+            component["onPagerClick"](new MouseEvent("click", { detail: 1, button: 0 }), mockList, "right");
             vi.advanceTimersByTime(60);
             expect(mockList.scrollBy).toHaveBeenCalledWith({ behavior: "smooth", left: -100 });
         } finally {
@@ -381,56 +381,294 @@ describe("ScrollViewComponent", () => {
         expect(component.index()).toBe(0);
     });
 
-    it("sets the --mona-scroll-view-animation-duration CSS variable based on animate input", () => {
-        fixture.componentRef.setInput("data", ["Item 1", "Item 2"]);
-        fixture.componentRef.setInput("animate", true);
-        fixture.detectChanges();
+    describe("animation duration and reduced motion", () => {
+        it("sets the --mona-scroll-view-animation-duration CSS variable based on animate input", () => {
+            fixture.componentRef.setInput("data", ["Item 1", "Item 2"]);
+            fixture.componentRef.setInput("animate", true);
+            fixture.detectChanges();
 
-        const host = fixture.nativeElement as HTMLElement;
-        const slide = host.querySelector("li[role='group']") as HTMLLIElement;
-        expect(slide.style.getPropertyValue("--mona-scroll-view-animation-duration")).toBe("500ms");
+            const host = fixture.nativeElement as HTMLElement;
+            const slide = host.querySelector("li[role='group']") as HTMLLIElement;
+            expect(slide.style.getPropertyValue("--mona-scroll-view-animation-duration")).toBe("500ms");
+            expect(component["animationDuration"]()).toBe(500);
 
-        fixture.componentRef.setInput("animate", 1200);
-        fixture.detectChanges();
-        expect(slide.style.getPropertyValue("--mona-scroll-view-animation-duration")).toBe("1200ms");
+            fixture.componentRef.setInput("animate", 1200);
+            fixture.detectChanges();
+            expect(slide.style.getPropertyValue("--mona-scroll-view-animation-duration")).toBe("1200ms");
+            expect(component["animationDuration"]()).toBe(1200);
 
-        fixture.componentRef.setInput("animate", false);
-        fixture.detectChanges();
-        expect(slide.style.getPropertyValue("--mona-scroll-view-animation-duration")).toBe("0ms");
+            fixture.componentRef.setInput("animate", false);
+            fixture.detectChanges();
+            expect(slide.style.getPropertyValue("--mona-scroll-view-animation-duration")).toBe("0ms");
+            expect(component["animationDuration"]()).toBe(0);
+        });
     });
 
-    it("arbitrates pager continuous hold vs click to prevent trailing single scroll", () => {
-        vi.useFakeTimers();
-        try {
+    describe("pager pointer hold arbitration", () => {
+        it("executes single scroll on primary pointer short click", () => {
+            vi.useFakeTimers();
+            try {
+                const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+                const downEvent = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 1 });
+                const upEvent = new PointerEvent("pointerup", { isPrimary: true, button: 0, pointerId: 1 });
+                const clickEvent = new MouseEvent("click", { detail: 1, button: 0 });
+
+                component["onPagerPointerDown"](downEvent, mockList, "right");
+                vi.advanceTimersByTime(30); // <60ms, before first repeat tick
+                document.dispatchEvent(upEvent);
+                component["onPagerClick"](clickEvent, mockList, "right");
+                vi.advanceTimersByTime(60);
+
+                expect(mockList.scrollBy).toHaveBeenCalledTimes(1);
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("executes repeated hold scrolling and suppresses trailing pointer click", () => {
+            vi.useFakeTimers();
+            try {
+                const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+                const downEvent = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 1 });
+                const upEvent = new PointerEvent("pointerup", { isPrimary: true, button: 0, pointerId: 1 });
+                const clickEvent = new MouseEvent("click", { detail: 1, button: 0 });
+
+                component["onPagerPointerDown"](downEvent, mockList, "right");
+                vi.advanceTimersByTime(180); // 3 interval ticks
+                expect(mockList.scrollBy).toHaveBeenCalledTimes(3);
+
+                document.dispatchEvent(upEvent);
+                component["onPagerClick"](clickEvent, mockList, "right");
+                vi.advanceTimersByTime(200); // verify no trailing single scroll
+
+                expect(mockList.scrollBy).toHaveBeenCalledTimes(3);
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("rejects non-primary mouse button on pointerdown and click", () => {
+            vi.useFakeTimers();
+            try {
+                const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+                const rightDown = new PointerEvent("pointerdown", { isPrimary: true, button: 2, pointerId: 1 });
+                const middleDown = new PointerEvent("pointerdown", { isPrimary: true, button: 1, pointerId: 1 });
+                const rightClick = new MouseEvent("click", { detail: 1, button: 2 });
+
+                component["onPagerPointerDown"](rightDown, mockList, "right");
+                vi.advanceTimersByTime(180);
+                expect(mockList.scrollBy).not.toHaveBeenCalled();
+
+                component["onPagerPointerDown"](middleDown, mockList, "right");
+                vi.advanceTimersByTime(180);
+                expect(mockList.scrollBy).not.toHaveBeenCalled();
+
+                component["onPagerClick"](rightClick, mockList, "right");
+                vi.advanceTimersByTime(100);
+                expect(mockList.scrollBy).not.toHaveBeenCalled();
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("rejects non-primary pointer", () => {
+            vi.useFakeTimers();
+            try {
+                const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+                const nonPrimaryDown = new PointerEvent("pointerdown", { isPrimary: false, button: 0, pointerId: 2 });
+
+                component["onPagerPointerDown"](nonPrimaryDown, mockList, "right");
+                vi.advanceTimersByTime(180);
+                expect(mockList.scrollBy).not.toHaveBeenCalled();
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("respects pointerId ownership during hold release", () => {
+            vi.useFakeTimers();
+            try {
+                const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+                const downEvent = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 10 });
+                const wrongUp = new PointerEvent("pointerup", { pointerId: 11 });
+                const matchingUp = new PointerEvent("pointerup", { pointerId: 10 });
+
+                component["onPagerPointerDown"](downEvent, mockList, "right");
+                vi.advanceTimersByTime(120); // 2 ticks
+                expect(mockList.scrollBy).toHaveBeenCalledTimes(2);
+
+                // Unrelated pointerup does not stop hold
+                document.dispatchEvent(wrongUp);
+                vi.advanceTimersByTime(60); // 3rd tick occurs
+                expect(mockList.scrollBy).toHaveBeenCalledTimes(3);
+
+                // Matching pointerup stops hold
+                document.dispatchEvent(matchingUp);
+                vi.advanceTimersByTime(120);
+                expect(mockList.scrollBy).toHaveBeenCalledTimes(3);
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("stops hold on pointercancel and preserves subsequent keyboard activation", () => {
+            vi.useFakeTimers();
+            try {
+                const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+                const downEvent = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 10 });
+                const cancelEvent = new PointerEvent("pointercancel", { pointerId: 10 });
+                const keyboardClick = new MouseEvent("click", { detail: 0, button: 0 });
+
+                component["onPagerPointerDown"](downEvent, mockList, "right");
+                vi.advanceTimersByTime(120);
+                expect(mockList.scrollBy).toHaveBeenCalledTimes(2);
+
+                document.dispatchEvent(cancelEvent);
+                vi.advanceTimersByTime(120);
+                expect(mockList.scrollBy).toHaveBeenCalledTimes(2);
+
+                // Keyboard click (detail=0) executes normally
+                component["onPagerClick"](keyboardClick, mockList, "right");
+                vi.advanceTimersByTime(60);
+                expect(mockList.scrollBy).toHaveBeenCalledTimes(3);
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("preserves keyboard activation even after pointer release without generated click", () => {
+            vi.useFakeTimers();
+            try {
+                const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+                const downEvent = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 10 });
+                const upEvent = new PointerEvent("pointerup", { pointerId: 10 });
+                const keyboardClick = new MouseEvent("click", { detail: 0, button: 0 });
+
+                component["onPagerPointerDown"](downEvent, mockList, "right");
+                vi.advanceTimersByTime(120);
+                expect(mockList.scrollBy).toHaveBeenCalledTimes(2);
+
+                document.dispatchEvent(upEvent);
+                vi.advanceTimersByTime(50);
+
+                // Keyboard activation arrives instead of a pointer click
+                component["onPagerClick"](keyboardClick, mockList, "right");
+                vi.advanceTimersByTime(60);
+                expect(mockList.scrollBy).toHaveBeenCalledTimes(3);
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+    });
+
+    describe("reduced-motion scrolling behavior", () => {
+        it("uses smooth behavior under default no-preference", () => {
             const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+            const mockButton = { scrollIntoView: vi.fn() } as unknown as HTMLButtonElement;
 
-            // 1. Short click (<60ms): pointerdown -> pointerup (<60ms) -> click
-            component["onPagerScroll"](mockList, "right", "continuous");
-            vi.advanceTimersByTime(30);
-            component["onPagerScrollEnd"]();
-            component["onPagerScroll"](mockList, "right", "single");
-            vi.advanceTimersByTime(60);
-            expect(mockList.scrollBy).toHaveBeenCalledTimes(1);
+            vi.useFakeTimers();
+            try {
+                component["onPagerClick"](new MouseEvent("click", { detail: 1, button: 0 }), mockList, "right");
+                vi.advanceTimersByTime(60);
+                expect(mockList.scrollBy).toHaveBeenCalledWith({ behavior: "smooth", left: 100 });
 
-            (mockList.scrollBy as any).mockClear();
+                component["onPageClick"](1, mockButton);
+                expect(mockButton.scrollIntoView).toHaveBeenCalledWith({
+                    behavior: "smooth",
+                    block: "nearest",
+                    inline: "center"
+                });
+            } finally {
+                vi.useRealTimers();
+            }
+        });
 
-            // 2. Long hold (>60ms): pointerdown -> hold 180ms -> pointerup -> click
-            component["onPagerScroll"](mockList, "right", "continuous");
-            vi.advanceTimersByTime(180);
-            expect(mockList.scrollBy).toHaveBeenCalledTimes(3);
-            component["onPagerScrollEnd"]();
-            component["onPagerScroll"](mockList, "right", "single");
-            vi.advanceTimersByTime(200);
-            expect(mockList.scrollBy).toHaveBeenCalledTimes(3);
+        it("uses auto behavior when prefers-reduced-motion matches", () => {
+            const originalMatchMedia = window.matchMedia;
+            try {
+                window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+                    matches: true,
+                    media: query,
+                    onchange: null,
+                    addEventListener: vi.fn(),
+                    removeEventListener: vi.fn(),
+                    dispatchEvent: vi.fn()
+                }));
 
-            (mockList.scrollBy as any).mockClear();
+                const localFixture = TestBed.createComponent(ScrollViewComponent);
+                localFixture.componentRef.setInput("width", 500);
+                localFixture.componentRef.setInput("height", 375);
+                localFixture.detectChanges();
+                const localComp = localFixture.componentInstance;
 
-            // 3. Keyboard click (no continuous pointerdown): click
-            component["onPagerScroll"](mockList, "right", "single");
-            vi.advanceTimersByTime(60);
-            expect(mockList.scrollBy).toHaveBeenCalledTimes(1);
-        } finally {
-            vi.useRealTimers();
-        }
+                expect(localComp["scrollBehavior"]()).toBe("auto");
+
+                const mockList = { scrollBy: vi.fn() } as unknown as HTMLUListElement;
+                const mockButton = { scrollIntoView: vi.fn() } as unknown as HTMLButtonElement;
+
+                vi.useFakeTimers();
+                try {
+                    localComp["onPagerClick"](new MouseEvent("click", { detail: 1, button: 0 }), mockList, "right");
+                    vi.advanceTimersByTime(60);
+                    expect(mockList.scrollBy).toHaveBeenCalledWith({ behavior: "auto", left: 100 });
+
+                    localComp["onPageClick"](1, mockButton);
+                    expect(mockButton.scrollIntoView).toHaveBeenCalledWith({
+                        behavior: "auto",
+                        block: "nearest",
+                        inline: "center"
+                    });
+                } finally {
+                    vi.useRealTimers();
+                    localFixture.destroy();
+                }
+            } finally {
+                window.matchMedia = originalMatchMedia;
+            }
+        });
+
+        it("reactively updates scrollBehavior when motion preference changes at runtime", () => {
+            let changeListener: ((e: MediaQueryListEvent) => void) | null = null;
+            const originalMatchMedia = window.matchMedia;
+            try {
+                window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+                    matches: false,
+                    media: query,
+                    onchange: null,
+                    addEventListener: vi.fn((event: string, listener: any) => {
+                        if (event === "change") {
+                            changeListener = listener;
+                        }
+                    }),
+                    removeEventListener: vi.fn(),
+                    dispatchEvent: vi.fn()
+                }));
+
+                const localFixture = TestBed.createComponent(ScrollViewComponent);
+                localFixture.componentRef.setInput("width", 500);
+                localFixture.componentRef.setInput("height", 375);
+                localFixture.detectChanges();
+                const localComp = localFixture.componentInstance;
+
+                expect(localComp["scrollBehavior"]()).toBe("smooth");
+
+                // Trigger runtime preference change to reduced motion
+                expect(changeListener).not.toBeNull();
+                changeListener!({ matches: true } as MediaQueryListEvent);
+                localFixture.detectChanges();
+
+                expect(localComp["scrollBehavior"]()).toBe("auto");
+
+                // Trigger runtime preference change back to no-preference
+                changeListener!({ matches: false } as MediaQueryListEvent);
+                localFixture.detectChanges();
+
+                expect(localComp["scrollBehavior"]()).toBe("smooth");
+
+                localFixture.destroy();
+            } finally {
+                window.matchMedia = originalMatchMedia;
+            }
+        });
     });
 });

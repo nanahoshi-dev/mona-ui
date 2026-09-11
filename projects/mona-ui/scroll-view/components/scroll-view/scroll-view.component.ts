@@ -1,4 +1,4 @@
-import { NgTemplateOutlet } from "@angular/common";
+import { isPlatformBrowser, NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
     Component,
@@ -10,6 +10,7 @@ import {
     inject,
     input,
     model,
+    PLATFORM_ID,
     signal,
     Signal,
     TemplateRef,
@@ -113,7 +114,7 @@ import {
             .slide-out-to-left,
             .slide-in-from-left,
             .slide-out-to-right {
-                animation-duration: 1ms !important;
+                animation-duration: min(var(--mona-scroll-view-animation-duration, 500ms), 1ms);
             }
         }
     `,
@@ -134,6 +135,8 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     readonly #document = inject(DOCUMENT);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
+    readonly #platformId = inject(PLATFORM_ID);
+    readonly #prefersReducedMotion = signal(false);
     readonly #viewIndex = computed(() => {
         const infinite = this.infinite();
         const index = this.index();
@@ -143,11 +146,13 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         }
         return infinite ? index % viewData.length : index;
     });
-    #resizeObserver: ResizeObserver | null = null;
-    #scroll$ = new Subject<void>();
-    #scrollEndHandler = () => this.onPagerScrollEnd();
+    #activePagerPointerId: number | null = null;
     #continuousTicked = false;
-    #holdResetTimeoutId: ReturnType<typeof setTimeout> | null = null;
+    #resizeObserver: ResizeObserver | null = null;
+    readonly #scroll$ = new Subject<void>();
+    #suppressNextPointerClick = false;
+    readonly #pointerUpHandler = (event: PointerEvent): void => this.#handlePointerEnd(event, true);
+    readonly #pointerCancelHandler = (event: PointerEvent): void => this.#handlePointerEnd(event, false);
 
     protected readonly animationDuration = computed(() => {
         const animate = this.animate();
@@ -211,6 +216,9 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         const side = this.isRtl() ? "left" : "right";
         return scrollViewArrowThemeVariants({ hidden, side });
     });
+    protected readonly scrollBehavior = computed<ScrollBehavior>(() =>
+        this.#prefersReducedMotion() ? "auto" : "smooth"
+    );
     protected readonly scrollViewHeight = computed(() => {
         const height = this.height();
         return toCssValue(height);
@@ -324,15 +332,21 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
                 initialValue: "right"
             }
         );
+        if (
+            isPlatformBrowser(this.#platformId) &&
+            typeof window !== "undefined" &&
+            typeof window.matchMedia === "function"
+        ) {
+            const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+            const onPreferenceChange = (event: MediaQueryListEvent): void => this.#prefersReducedMotion.set(event.matches);
+            this.#prefersReducedMotion.set(mediaQuery.matches);
+            mediaQuery.addEventListener("change", onPreferenceChange);
+            this.#destroyRef.onDestroy(() => mediaQuery.removeEventListener("change", onPreferenceChange));
+        }
         this.#destroyRef.onDestroy(() => {
+            this.#stopContinuousScroll();
             this.#scroll$.complete();
             this.#resizeObserver?.disconnect();
-            this.#document.removeEventListener("pointerup", this.#scrollEndHandler);
-            this.#document.removeEventListener("pointercancel", this.#scrollEndHandler);
-            this.#document.removeEventListener("mouseup", this.#scrollEndHandler);
-            if (this.#holdResetTimeoutId !== null) {
-                clearTimeout(this.#holdResetTimeoutId);
-            }
         });
         afterNextRender(() => {
             this.setPagerListResizeObserver();
@@ -347,60 +361,79 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
 
     protected onPageClick(index: number, element: HTMLButtonElement): void {
         this.index.set(index);
-        element.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+        element.scrollIntoView({ behavior: this.scrollBehavior(), block: "nearest", inline: "center" });
     }
 
-    protected onPagerScroll(
-        element: HTMLUListElement,
-        direction: ScrollDirection,
-        type: "single" | "continuous"
-    ): void {
-        if (type === "single") {
-            if (this.#continuousTicked) {
-                this.#continuousTicked = false;
-                return;
-            }
+    protected onPagerClick(event: MouseEvent, element: HTMLUListElement, direction: ScrollDirection): void {
+        if (event.button !== 0) {
+            return;
         }
-        if (type === "continuous") {
-            this.#continuousTicked = false;
-            if (this.#holdResetTimeoutId !== null) {
-                clearTimeout(this.#holdResetTimeoutId);
-                this.#holdResetTimeoutId = null;
-            }
-            this.#document.addEventListener("pointerup", this.#scrollEndHandler, { once: true });
-            this.#document.addEventListener("pointercancel", this.#scrollEndHandler, { once: true });
-            this.#document.addEventListener("mouseup", this.#scrollEndHandler, { once: true });
+        const isPointerClick = event.detail > 0;
+        if (isPointerClick && this.#suppressNextPointerClick) {
+            this.#suppressNextPointerClick = false;
+            return;
         }
+        this.#suppressNextPointerClick = false;
+
         const isRtl = this.isRtl();
-        const timeFunction = type === "single" ? timer : interval;
-        timeFunction(60)
+        timer(60)
             .pipe(takeUntil(this.#scroll$), takeUntilDestroyed(this.#destroyRef))
             .subscribe(() => {
-                if (type === "continuous") {
-                    this.#continuousTicked = true;
-                }
                 let offset = direction === "left" ? -100 : 100;
                 if (isRtl) {
                     offset = -offset;
                 }
-                element.scrollBy?.({ behavior: "smooth", left: offset });
+                element.scrollBy?.({ behavior: this.scrollBehavior(), left: offset });
             });
     }
 
-    protected onPagerScrollEnd(): void {
-        this.#document.removeEventListener("pointerup", this.#scrollEndHandler);
-        this.#document.removeEventListener("pointercancel", this.#scrollEndHandler);
-        this.#document.removeEventListener("mouseup", this.#scrollEndHandler);
-        this.#scroll$.next();
-        this.#scroll$.complete();
-        this.#scroll$ = new Subject<void>();
-        if (this.#holdResetTimeoutId !== null) {
-            clearTimeout(this.#holdResetTimeoutId);
+    protected onPagerPointerDown(event: PointerEvent, element: HTMLUListElement, direction: ScrollDirection): void {
+        if (!event.isPrimary || event.button !== 0) {
+            return;
         }
-        this.#holdResetTimeoutId = setTimeout(() => {
-            this.#continuousTicked = false;
-            this.#holdResetTimeoutId = null;
-        }, 150);
+        this.#stopContinuousScroll();
+        this.#suppressNextPointerClick = false;
+        this.#activePagerPointerId = event.pointerId;
+        this.#continuousTicked = false;
+
+        this.#document.addEventListener("pointerup", this.#pointerUpHandler);
+        this.#document.addEventListener("pointercancel", this.#pointerCancelHandler);
+
+        const isRtl = this.isRtl();
+        interval(60)
+            .pipe(takeUntil(this.#scroll$), takeUntilDestroyed(this.#destroyRef))
+            .subscribe(() => {
+                this.#continuousTicked = true;
+                let offset = direction === "left" ? -100 : 100;
+                if (isRtl) {
+                    offset = -offset;
+                }
+                element.scrollBy?.({ behavior: this.scrollBehavior(), left: offset });
+            });
+    }
+
+    #handlePointerEnd(event: PointerEvent, isUp: boolean): void {
+        if (event.pointerId !== this.#activePagerPointerId) {
+            return;
+        }
+        this.#document.removeEventListener("pointerup", this.#pointerUpHandler);
+        this.#document.removeEventListener("pointercancel", this.#pointerCancelHandler);
+        this.#scroll$.next();
+        if (isUp && this.#continuousTicked) {
+            this.#suppressNextPointerClick = true;
+        } else {
+            this.#suppressNextPointerClick = false;
+        }
+        this.#continuousTicked = false;
+        this.#activePagerPointerId = null;
+    }
+
+    #stopContinuousScroll(): void {
+        this.#document.removeEventListener("pointerup", this.#pointerUpHandler);
+        this.#document.removeEventListener("pointercancel", this.#pointerCancelHandler);
+        this.#scroll$.next();
+        this.#continuousTicked = false;
+        this.#activePagerPointerId = null;
     }
 
     private navigate(direction: ScrollDirection, infinite: boolean): void {
@@ -442,7 +475,7 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         asyncScheduler.schedule(() => {
             const element = this.#hostElementRef.nativeElement.querySelector("button[data-active-page='true']");
             if (element) {
-                element.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+                element.scrollIntoView({ behavior: this.scrollBehavior(), block: "nearest", inline: "center" });
             }
         });
     }
