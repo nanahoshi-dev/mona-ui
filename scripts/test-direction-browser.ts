@@ -286,7 +286,7 @@ async function runTests(): Promise<void> {
                     );
                 }
 
-                // Label-to-tick alignment for first and last
+                // Label-to-tick alignment for first, middle, and last
                 const firstTickCenter = firstTickBox.x + firstTickBox.width / 2;
                 const firstLabelCenter = firstLabelBox.x + firstLabelBox.width / 2;
                 assert(
@@ -294,8 +294,28 @@ async function runTests(): Promise<void> {
                     `[${scenario.name}] First label center aligns with first tick center`
                 );
 
-                // Pointer click mapping at ~20% and ~80% physical track positions
+                const midTickIdx = Math.floor(tickCount / 2);
+                const midLabelIdx = Math.floor(labelCount / 2);
+                const midTickBox = await ticks.nth(midTickIdx).boundingBox();
+                const midLabelBox = await labels.nth(midLabelIdx).boundingBox();
+                assert(midTickBox !== null && midLabelBox !== null, "Middle tick and label boxes available");
+                const midTickCenter = midTickBox.x + midTickBox.width / 2;
+                const midLabelCenter = midLabelBox.x + midLabelBox.width / 2;
+                assert(
+                    Math.abs(midLabelCenter - midTickCenter) <= 12,
+                    `[${scenario.name}] Middle label center aligns with middle tick center`
+                );
+
+                const lastTickCenter = lastTickBox.x + lastTickBox.width / 2;
+                const lastLabelCenter = lastLabelBox.x + lastLabelBox.width / 2;
+                assert(
+                    Math.abs(lastLabelCenter - lastTickCenter) <= 12,
+                    `[${scenario.name}] Last label center aligns with last tick center`
+                );
+
+                // Pointer click mapping at ~20%, ~50%, and ~80% physical track positions
                 const click20X = sliderBox.x + 0.2 * sliderBox.width;
+                const click50X = sliderBox.x + 0.5 * sliderBox.width;
                 const click80X = sliderBox.x + 0.8 * sliderBox.width;
                 const clickY = sliderBox.y + sliderBox.height / 2;
 
@@ -314,6 +334,14 @@ async function runTests(): Promise<void> {
                     );
                 }
 
+                await page.mouse.click(click50X, clickY);
+                await page.waitForTimeout(50);
+                const valAfter50Click = Number(await handle.getAttribute("aria-valuenow"));
+                assert(
+                    Math.abs(valAfter50Click - 50) <= 6,
+                    `[${scenario.name}] Click near 50% maps to ~50 (got ${valAfter50Click})`
+                );
+
                 await page.mouse.click(click80X, clickY);
                 await page.waitForTimeout(50);
                 const valAfter80Click = Number(await handle.getAttribute("aria-valuenow"));
@@ -329,31 +357,47 @@ async function runTests(): Promise<void> {
                     );
                 }
 
-                // Keyboard arrow navigation
+                // Keyboard arrow navigation and physical handle movement
                 await page.click(`[data-testid="set-slider-${scenario.suffix}-50"]`);
-                await page.waitForTimeout(50);
+                await page.waitForTimeout(250);
                 await handle.focus();
+
+                const hBoxBeforeKey = await handle.boundingBox();
+                assert(hBoxBeforeKey !== null, "Handle box before keyboard action");
+                const hCenterBefore = hBoxBeforeKey.x + hBoxBeforeKey.width / 2;
 
                 if (!isRtl) {
                     await page.keyboard.press("ArrowRight");
-                    await page.waitForTimeout(50);
+                    await page.waitForTimeout(250);
                     const vUp = Number(await handle.getAttribute("aria-valuenow"));
+                    const hBoxUp = (await handle.boundingBox())!;
+                    const hCenterUp = hBoxUp.x + hBoxUp.width / 2;
                     assert(vUp > 50, `[${scenario.name}] LTR ArrowRight increases value (got ${vUp})`);
+                    assert(hCenterUp > hCenterBefore, `[${scenario.name}] LTR ArrowRight physically moves handle to the right`);
 
                     await page.keyboard.press("ArrowLeft");
-                    await page.waitForTimeout(50);
+                    await page.waitForTimeout(250);
                     const vDown = Number(await handle.getAttribute("aria-valuenow"));
+                    const hBoxDown = (await handle.boundingBox())!;
+                    const hCenterDown = hBoxDown.x + hBoxDown.width / 2;
                     assert(vDown <= 50, `[${scenario.name}] LTR ArrowLeft decreases value (got ${vDown})`);
+                    assert(hCenterDown < hCenterUp, `[${scenario.name}] LTR ArrowLeft physically moves handle to the left`);
                 } else {
                     await page.keyboard.press("ArrowLeft");
-                    await page.waitForTimeout(50);
+                    await page.waitForTimeout(250);
                     const vUp = Number(await handle.getAttribute("aria-valuenow"));
+                    const hBoxUp = (await handle.boundingBox())!;
+                    const hCenterUp = hBoxUp.x + hBoxUp.width / 2;
                     assert(vUp > 50, `[${scenario.name}] RTL ArrowLeft increases value (got ${vUp})`);
+                    assert(hCenterUp < hCenterBefore, `[${scenario.name}] RTL ArrowLeft physically moves handle to the left`);
 
                     await page.keyboard.press("ArrowRight");
-                    await page.waitForTimeout(50);
+                    await page.waitForTimeout(250);
                     const vDown = Number(await handle.getAttribute("aria-valuenow"));
+                    const hBoxDown = (await handle.boundingBox())!;
+                    const hCenterDown = hBoxDown.x + hBoxDown.width / 2;
                     assert(vDown <= 50, `[${scenario.name}] RTL ArrowRight decreases value (got ${vDown})`);
+                    assert(hCenterDown > hCenterUp, `[${scenario.name}] RTL ArrowRight physically moves handle to the right`);
                 }
 
                 console.log(`    [PASS] Slider geometry, values (0-100), ticks/labels, pointer & keyboard verified`);
@@ -392,6 +436,23 @@ async function runTests(): Promise<void> {
                     const h0Center = h0Box.x + h0Box.width / 2;
                     const h1Center = h1Box.x + h1Box.width / 2;
 
+                    // Absolute handle positions relative to range box
+                    const expectedH0 = !isRtl
+                        ? rangeBox.x + (interval.min / 100) * rangeBox.width
+                        : rangeBox.x + (1 - interval.min / 100) * rangeBox.width;
+                    const expectedH1 = !isRtl
+                        ? rangeBox.x + (interval.max / 100) * rangeBox.width
+                        : rangeBox.x + (1 - interval.max / 100) * rangeBox.width;
+
+                    assert(
+                        Math.abs(h0Center - expectedH0) <= 15,
+                        `[${scenario.name}] Handle 0 physical center (${h0Center.toFixed(1)}) aligns with expected ${interval.min}% position (${expectedH0.toFixed(1)})`
+                    );
+                    assert(
+                        Math.abs(h1Center - expectedH1) <= 15,
+                        `[${scenario.name}] Handle 1 physical center (${h1Center.toFixed(1)}) aligns with expected ${interval.max}% position (${expectedH1.toFixed(1)})`
+                    );
+
                     if (!isRtl) {
                         assert(h0Center <= h1Center, `[${scenario.name}] LTR h0 is left of h1`);
                         assert(
@@ -423,6 +484,114 @@ async function runTests(): Promise<void> {
                     );
                 }
 
+                // Single-handle keyboard interaction on [40, 60]
+                await page.click(`[data-testid="set-range-${scenario.suffix}-40-60"]`);
+                await page.waitForTimeout(300);
+
+                await h0.focus();
+                const h0BoxBefore = (await h0.boundingBox())!;
+                const h1BoxBefore = (await h1.boundingBox())!;
+                const selBoxBefore = (await selection.boundingBox())!;
+                const h0CenterBefore = h0BoxBefore.x + h0BoxBefore.width / 2;
+                const h1CenterBefore = h1BoxBefore.x + h1BoxBefore.width / 2;
+
+                if (!isRtl) {
+                    await page.keyboard.press("ArrowRight");
+                    await page.waitForTimeout(250);
+                    const h0BoxAfter = (await h0.boundingBox())!;
+                    const h1BoxAfter = (await h1.boundingBox())!;
+                    const selBoxAfter = (await selection.boundingBox())!;
+                    const h0CenterAfter = h0BoxAfter.x + h0BoxAfter.width / 2;
+                    const h1CenterAfter = h1BoxAfter.x + h1BoxAfter.width / 2;
+
+                    assert(h0CenterAfter > h0CenterBefore, `[${scenario.name}] LTR h0 moves right on ArrowRight`);
+                    assert(Math.abs(h1CenterAfter - h1CenterBefore) <= 2, `[${scenario.name}] LTR h1 remains fixed when h0 moves`);
+                    assert(selBoxAfter.x > selBoxBefore.x, `[${scenario.name}] LTR selection band left edge moves right with h0`);
+                    assert(
+                        Math.abs(selBoxAfter.x + selBoxAfter.width - (selBoxBefore.x + selBoxBefore.width)) <= 2,
+                        `[${scenario.name}] LTR selection band right edge remains fixed when h0 moves`
+                    );
+
+                    await page.keyboard.press("ArrowLeft");
+                    await page.waitForTimeout(250);
+                } else {
+                    await page.keyboard.press("ArrowLeft");
+                    await page.waitForTimeout(250);
+                    const h0BoxAfter = (await h0.boundingBox())!;
+                    const h1BoxAfter = (await h1.boundingBox())!;
+                    const selBoxAfter = (await selection.boundingBox())!;
+                    const h0CenterAfter = h0BoxAfter.x + h0BoxAfter.width / 2;
+                    const h1CenterAfter = h1BoxAfter.x + h1BoxAfter.width / 2;
+
+                    assert(h0CenterAfter < h0CenterBefore, `[${scenario.name}] RTL h0 moves left on ArrowLeft`);
+                    assert(Math.abs(h1CenterAfter - h1CenterBefore) <= 2, `[${scenario.name}] RTL h1 remains fixed when h0 moves`);
+                    assert(
+                        selBoxAfter.x + selBoxAfter.width < selBoxBefore.x + selBoxBefore.width,
+                        `[${scenario.name}] RTL selection band right edge moves left with h0`
+                    );
+                    assert(
+                        Math.abs(selBoxAfter.x - selBoxBefore.x) <= 2,
+                        `[${scenario.name}] RTL selection band left edge remains fixed when h0 moves`
+                    );
+
+                    await page.keyboard.press("ArrowRight");
+                    await page.waitForTimeout(250);
+                }
+
+                // Focus h1 and move
+                await h1.focus();
+                const h1BoxBeforeH1 = (await h1.boundingBox())!;
+                const h0BoxBeforeH1 = (await h0.boundingBox())!;
+                const selBoxBeforeH1 = (await selection.boundingBox())!;
+                const h1CenterBeforeH1 = h1BoxBeforeH1.x + h1BoxBeforeH1.width / 2;
+                const h0CenterBeforeH1 = h0BoxBeforeH1.x + h0BoxBeforeH1.width / 2;
+
+                if (!isRtl) {
+                    await page.keyboard.press("ArrowLeft");
+                    await page.waitForTimeout(250);
+                    const h1BoxAfter = (await h1.boundingBox())!;
+                    const h0BoxAfter = (await h0.boundingBox())!;
+                    const selBoxAfter = (await selection.boundingBox())!;
+                    const h1CenterAfter = h1BoxAfter.x + h1BoxAfter.width / 2;
+                    const h0CenterAfter = h0BoxAfter.x + h0BoxAfter.width / 2;
+
+                    assert(h1CenterAfter < h1CenterBeforeH1, `[${scenario.name}] LTR h1 moves left on ArrowLeft`);
+                    assert(Math.abs(h0CenterAfter - h0CenterBeforeH1) <= 2, `[${scenario.name}] LTR h0 remains fixed when h1 moves`);
+                    assert(
+                        selBoxAfter.x + selBoxAfter.width < selBoxBeforeH1.x + selBoxBeforeH1.width,
+                        `[${scenario.name}] LTR selection right edge moves left with h1`
+                    );
+                    assert(
+                        Math.abs(selBoxAfter.x - selBoxBeforeH1.x) <= 2,
+                        `[${scenario.name}] LTR selection left edge remains fixed when h1 moves`
+                    );
+
+                    await page.keyboard.press("ArrowRight");
+                    await page.waitForTimeout(250);
+                } else {
+                    await page.keyboard.press("ArrowRight");
+                    await page.waitForTimeout(250);
+                    const h1BoxAfter = (await h1.boundingBox())!;
+                    const h0BoxAfter = (await h0.boundingBox())!;
+                    const selBoxAfter = (await selection.boundingBox())!;
+                    const h1CenterAfter = h1BoxAfter.x + h1BoxAfter.width / 2;
+                    const h0CenterAfter = h0BoxAfter.x + h0BoxAfter.width / 2;
+
+                    assert(h1CenterAfter > h1CenterBeforeH1, `[${scenario.name}] RTL h1 moves right on ArrowRight`);
+                    assert(Math.abs(h0CenterAfter - h0CenterBeforeH1) <= 2, `[${scenario.name}] RTL h0 remains fixed when h1 moves`);
+                    assert(
+                        selBoxAfter.x > selBoxBeforeH1.x,
+                        `[${scenario.name}] RTL selection left edge moves right with h1`
+                    );
+                    assert(
+                        Math.abs(selBoxAfter.x + selBoxAfter.width - (selBoxBeforeH1.x + selBoxBeforeH1.width)) <= 2,
+                        `[${scenario.name}] RTL selection right edge remains fixed when h1 moves`
+                    );
+
+                    await page.keyboard.press("ArrowLeft");
+                    await page.waitForTimeout(250);
+                }
+
                 // Ticks and labels
                 const rTicks = rangeSlider.locator("span[monaSliderTick]");
                 const rLabels = rangeSlider.locator("div[data-label-position] > span");
@@ -441,6 +610,33 @@ async function runTests(): Promise<void> {
                     assert(rFirstTick.x > rLastTick.x, `[${scenario.name}] RTL RangeSlider tick 0 is right of tick 100`);
                     assert(rFirstLabel.x > rLastLabel.x, `[${scenario.name}] RTL RangeSlider label 0 is right of label 100`);
                 }
+
+                // Label-to-tick alignment for first, middle, and last
+                const rTickCount = await rTicks.count();
+                const rLabelCount = await rLabels.count();
+                const rMidTick = await rTicks.nth(Math.floor(rTickCount / 2)).boundingBox();
+                const rMidLabel = await rLabels.nth(Math.floor(rLabelCount / 2)).boundingBox();
+                assert(rMidTick !== null && rMidLabel !== null, "RangeSlider mid tick/label boxes");
+
+                const rFirstTickCenter = rFirstTick.x + rFirstTick.width / 2;
+                const rFirstLabelCenter = rFirstLabel.x + rFirstLabel.width / 2;
+                const rMidTickCenter = rMidTick.x + rMidTick.width / 2;
+                const rMidLabelCenter = rMidLabel.x + rMidLabel.width / 2;
+                const rLastTickCenter = rLastTick.x + rLastTick.width / 2;
+                const rLastLabelCenter = rLastLabel.x + rLastLabel.width / 2;
+
+                assert(
+                    Math.abs(rFirstLabelCenter - rFirstTickCenter) <= 12,
+                    `[${scenario.name}] RangeSlider first label center aligns with first tick center`
+                );
+                assert(
+                    Math.abs(rMidLabelCenter - rMidTickCenter) <= 12,
+                    `[${scenario.name}] RangeSlider mid label center aligns with mid tick center`
+                );
+                assert(
+                    Math.abs(rLastLabelCenter - rLastTickCenter) <= 12,
+                    `[${scenario.name}] RangeSlider last label center aligns with last tick center`
+                );
 
                 console.log(`    [PASS] RangeSlider handles, selection band measurement & ticks/labels verified`);
             }
@@ -466,6 +662,21 @@ async function runTests(): Promise<void> {
                 // Start sidebar placement & interior border:
                 // LTR (and split LTR + CSS RTL): start is physically LEFT, interior border is border-r, rail on right-0
                 // RTL (and split RTL + CSS LTR): start is physically RIGHT, interior border is border-l, rail on left-0
+                const startBorders = await startSidebar.evaluate(el => {
+                    const cs = window.getComputedStyle(el);
+                    return {
+                        left: parseFloat(cs.borderLeftWidth) || 0,
+                        right: parseFloat(cs.borderRightWidth) || 0
+                    };
+                });
+                const endBorders = await endSidebar.evaluate(el => {
+                    const cs = window.getComputedStyle(el);
+                    return {
+                        left: parseFloat(cs.borderLeftWidth) || 0,
+                        right: parseFloat(cs.borderRightWidth) || 0
+                    };
+                });
+
                 if (!isRtl) {
                     assert(
                         Math.abs(startBox.x - layoutBox.x) <= 4,
@@ -479,11 +690,19 @@ async function runTests(): Promise<void> {
                         insetBox.x >= startBox.x + startBox.width - 2 && insetBox.x + insetBox.width <= endBox.x + 2,
                         `[${scenario.name}] Docked inset is positioned between start and end sidebars`
                     );
-                    // Interior borders
+                    // Interior border classes and rendered computed border widths
                     const startClasses = (await startSidebar.getAttribute("class")) || "";
                     const endClasses = (await endSidebar.getAttribute("class")) || "";
                     assert(startClasses.includes("border-r"), `[${scenario.name}] Start sidebar has interior border-r`);
                     assert(endClasses.includes("border-l"), `[${scenario.name}] End sidebar has interior border-l`);
+                    assert(
+                        startBorders.right >= 1 && startBorders.left === 0,
+                        `[${scenario.name}] Start sidebar rendered interior border is right (got R=${startBorders.right}, L=${startBorders.left})`
+                    );
+                    assert(
+                        endBorders.left >= 1 && endBorders.right === 0,
+                        `[${scenario.name}] End sidebar rendered interior border is left (got R=${endBorders.right}, L=${endBorders.left})`
+                    );
                     // Rail on inner edge
                     assert(
                         railBox.x + railBox.width >= startBox.x + startBox.width - 8,
@@ -502,11 +721,19 @@ async function runTests(): Promise<void> {
                         insetBox.x >= endBox.x + endBox.width - 2 && insetBox.x + insetBox.width <= startBox.x + 2,
                         `[${scenario.name}] Docked inset is positioned between end and start sidebars`
                     );
-                    // Interior borders
+                    // Interior border classes and rendered computed border widths
                     const startClasses = (await startSidebar.getAttribute("class")) || "";
                     const endClasses = (await endSidebar.getAttribute("class")) || "";
                     assert(startClasses.includes("border-l"), `[${scenario.name}] Start sidebar has interior border-l`);
                     assert(endClasses.includes("border-r"), `[${scenario.name}] End sidebar has interior border-r`);
+                    assert(
+                        startBorders.left >= 1 && startBorders.right === 0,
+                        `[${scenario.name}] Start sidebar rendered interior border is left (got R=${startBorders.left}, L=${startBorders.right})`
+                    );
+                    assert(
+                        endBorders.right >= 1 && endBorders.left === 0,
+                        `[${scenario.name}] End sidebar rendered interior border is right (got R=${endBorders.right}, L=${endBorders.left})`
+                    );
                     // Rail on inner edge
                     assert(
                         railBox.x <= startBox.x + 8,
@@ -674,10 +901,37 @@ async function runTests(): Promise<void> {
                     );
                 }
 
-                // Chevron icon rotation
+                // Chevron icon rotation / transform
                 const prevIcon = prevBtn.locator("svg");
                 const nextIcon = nextBtn.locator("svg");
                 assert((await prevIcon.count()) === 1 && (await nextIcon.count()) === 1, "Arrow icons exist");
+
+                const prevTransform = await prevIcon.evaluate(el => window.getComputedStyle(el).transform);
+                const nextTransform = await nextIcon.evaluate(el => window.getComputedStyle(el).transform);
+
+                const pagerPrevArrow = scrollView.locator('button[aria-label="Scroll pager previous"]');
+                const pagerNextArrow = scrollView.locator('button[aria-label="Scroll pager next"]');
+                assert(
+                    (await pagerPrevArrow.count()) === 1 && (await pagerNextArrow.count()) === 1,
+                    `[${scenario.name}] Pager navigation arrows are rendered when overflowing`
+                );
+
+                const pagerPrevSvg = pagerPrevArrow.locator("svg");
+                const pagerNextSvg = pagerNextArrow.locator("svg");
+                const pagerPrevTransform = await pagerPrevSvg.evaluate(el => window.getComputedStyle(el).transform);
+                const pagerNextTransform = await pagerNextSvg.evaluate(el => window.getComputedStyle(el).transform);
+
+                if (!isRtl) {
+                    assert(prevTransform === "none", `[${scenario.name}] LTR carousel prev chevron transform is 'none' (got '${prevTransform}')`);
+                    assert(nextTransform === "none", `[${scenario.name}] LTR carousel next chevron transform is 'none' (got '${nextTransform}')`);
+                    assert(pagerPrevTransform === "none", `[${scenario.name}] LTR pager prev chevron transform is 'none' (got '${pagerPrevTransform}')`);
+                    assert(pagerNextTransform === "none", `[${scenario.name}] LTR pager next chevron transform is 'none' (got '${pagerNextTransform}')`);
+                } else {
+                    assert(prevTransform.startsWith("matrix(-1"), `[${scenario.name}] RTL carousel prev chevron is rotated (got '${prevTransform}')`);
+                    assert(nextTransform.startsWith("matrix(-1"), `[${scenario.name}] RTL carousel next chevron is rotated (got '${nextTransform}')`);
+                    assert(pagerPrevTransform.startsWith("matrix(-1"), `[${scenario.name}] RTL pager prev chevron is rotated (got '${pagerPrevTransform}')`);
+                    assert(pagerNextTransform.startsWith("matrix(-1"), `[${scenario.name}] RTL pager next chevron is rotated (got '${pagerNextTransform}')`);
+                }
 
                 // Pager list and overflowing verification
                 const pagerList = scrollView.locator("ul").nth(1);
@@ -691,13 +945,39 @@ async function runTests(): Promise<void> {
                     `[${scenario.name}] Pager genuinely overflows: scrollWidth (${pagerMetrics.scrollWidth}) > clientWidth (${pagerMetrics.clientWidth})`
                 );
 
-                // Pager arrow controls rendered
-                const pagerPrevArrow = scrollView.locator('button[aria-label="Scroll pager previous"]');
-                const pagerNextArrow = scrollView.locator('button[aria-label="Scroll pager next"]');
-                assert(
-                    (await pagerPrevArrow.count()) === 1 && (await pagerNextArrow.count()) === 1,
-                    `[${scenario.name}] Pager navigation arrows are rendered when overflowing`
-                );
+                // Pager arrow physical sides relative to pager list
+                const pagerPrevBox = await pagerPrevArrow.boundingBox();
+                const pagerNextBox = await pagerNextArrow.boundingBox();
+                const pagerListBox = await pagerList.boundingBox();
+                assert(pagerPrevBox !== null && pagerNextBox !== null && pagerListBox !== null, "Pager arrow and list boxes available");
+
+                if (!isRtl) {
+                    assert(
+                        pagerPrevBox.x < pagerNextBox.x,
+                        `[${scenario.name}] LTR pager prev arrow is left of pager next arrow`
+                    );
+                    assert(
+                        pagerPrevBox.x <= pagerListBox.x + 2,
+                        `[${scenario.name}] LTR pager prev arrow is on left side of pager list`
+                    );
+                    assert(
+                        pagerNextBox.x + pagerNextBox.width >= pagerListBox.x + pagerListBox.width - 2,
+                        `[${scenario.name}] LTR pager next arrow is on right side of pager list`
+                    );
+                } else {
+                    assert(
+                        pagerPrevBox.x > pagerNextBox.x,
+                        `[${scenario.name}] RTL pager prev arrow is right of pager next arrow`
+                    );
+                    assert(
+                        pagerPrevBox.x + pagerPrevBox.width >= pagerListBox.x + pagerListBox.width - 2,
+                        `[${scenario.name}] RTL pager prev arrow is on right side of pager list`
+                    );
+                    assert(
+                        pagerNextBox.x <= pagerListBox.x + 2,
+                        `[${scenario.name}] RTL pager next arrow is on left side of pager list`
+                    );
+                }
 
                 // Pager items ordering
                 const p0 = scrollView.locator('li[data-page-index="0"]');
@@ -740,13 +1020,22 @@ async function runTests(): Promise<void> {
                 await pagerNextArrow.dispatchEvent("mousedown");
                 await page.waitForTimeout(350);
                 await page.mouse.up();
-                await page.waitForTimeout(100);
+                // Allow the final smooth scroll animation tick to settle
+                await page.waitForTimeout(350);
                 const p0AfterContinuous = (await p0.boundingBox())!.x;
                 if (!isRtl) {
                     assert(p0AfterContinuous < p0BeforeContinuous, `[${scenario.name}] LTR continuous scroll moved content further left`);
                 } else {
                     assert(p0AfterContinuous > p0BeforeContinuous, `[${scenario.name}] RTL continuous scroll moved content further right`);
                 }
+
+                // Verify continuous scroll stops completely (no new interval ticks after release)
+                await page.waitForTimeout(250);
+                const p0AfterRelease = (await p0.boundingBox())!.x;
+                assert(
+                    Math.abs(p0AfterRelease - p0AfterContinuous) <= 2,
+                    `[${scenario.name}] Continuous scroll stopped upon mouseup (diff: ${Math.abs(p0AfterRelease - p0AfterContinuous)}px)`
+                );
 
                 // Distant item centering
                 const item15Btn = scrollView.locator('li[data-page-index="15"] button');
@@ -763,8 +1052,39 @@ async function runTests(): Promise<void> {
                     activeBox.x >= containerBox.x - 2 && activeBox.x + activeBox.width <= containerBox.x + containerBox.width + 2,
                     `[${scenario.name}] Active page 15 is visibly within pager container viewport`
                 );
+                const activeCenter = activeBox.x + activeBox.width / 2;
+                const containerCenter = containerBox.x + containerBox.width / 2;
+                assert(
+                    Math.abs(activeCenter - containerCenter) <= 24,
+                    `[${scenario.name}] Active page 15 center (${activeCenter.toFixed(1)}) is centered within pager container (${containerCenter.toFixed(1)})`
+                );
 
-                console.log(`    [PASS] ScrollView navigation arrows, overflowing pager & continuous scroll verified\n`);
+                // Main carousel forward/backward slide navigation
+                await page.waitForTimeout(400); // ensure previous animations fully settled
+                const activeSlideInitial = scrollView.locator('li[role="group"]:not(.animate-leave)');
+                const initialSlideText = (await activeSlideInitial.first().textContent())?.trim();
+
+                // Click Next arrow
+                await nextBtn.click();
+                await page.waitForTimeout(700); // 500ms animation + 200ms DOM removal
+                const activeSlideNext = scrollView.locator('li[role="group"]:not(.animate-leave)');
+                const nextSlideText = (await activeSlideNext.first().textContent())?.trim();
+                assert(
+                    nextSlideText !== initialSlideText,
+                    `[${scenario.name}] Clicking Next advances slide (from '${initialSlideText}' to '${nextSlideText}')`
+                );
+
+                // Click Prev arrow
+                await prevBtn.click();
+                await page.waitForTimeout(700);
+                const activeSlideBack = scrollView.locator('li[role="group"]:not(.animate-leave)');
+                const backSlideText = (await activeSlideBack.first().textContent())?.trim();
+                assert(
+                    backSlideText === initialSlideText,
+                    `[${scenario.name}] Clicking Prev returns to initial slide ('${backSlideText}' vs '${initialSlideText}')`
+                );
+
+                console.log(`    [PASS] ScrollView navigation arrows, overflowing pager, continuous scroll & slide transitions verified\n`);
             }
         }
 
@@ -810,6 +1130,148 @@ async function runTests(): Promise<void> {
         assert(Math.abs(dEndBox.x + dEndBox.width - (dynCurrentLayoutBox.x + dynCurrentLayoutBox.width)) <= 4, "After returning to LTR: end sidebar returned to physical RIGHT");
 
         console.log("    [PASS] Dynamic dir mutation reactive layout updates verified\n");
+
+        // 8. Dynamic CSS-only Ancestor Class Toggle (#fixture-dynamic-css)
+        console.log("--> Testing Dynamic CSS-only Ancestor Class Toggle (#fixture-dynamic-css)");
+        const dynamicCssSection = page.locator("section#fixture-dynamic-css");
+        await dynamicCssSection.scrollIntoViewIfNeeded();
+
+        const cssLayout = dynamicCssSection.locator('[data-testid="docked-layout-dynamic-css"]');
+        const cssLayoutBox = await cssLayout.boundingBox();
+        assert(cssLayoutBox !== null, "CSS Dynamic layout box available");
+
+        const cssStart = dynamicCssSection.locator('[data-testid="docked-sidebar-start-dynamic-css"]');
+        const cssEnd = dynamicCssSection.locator('[data-testid="docked-sidebar-end-dynamic-css"]');
+
+        // Initial: LTR CSS, start on physical left
+        let cssStartBox = await cssStart.boundingBox();
+        let cssEndBox = await cssEnd.boundingBox();
+        assert(cssStartBox !== null && cssEndBox !== null, "CSS Dynamic start/end boxes");
+        assert(Math.abs(cssStartBox.x - cssLayoutBox.x) <= 4, "Initial dynamic CSS LTR: start sidebar on physical LEFT");
+        assert(Math.abs(cssEndBox.x + cssEndBox.width - (cssLayoutBox.x + cssLayoutBox.width)) <= 4, "Initial dynamic CSS LTR: end sidebar on physical RIGHT");
+        const initialCssClasses = (await cssLayout.getAttribute("class")) || "";
+        assert(!initialCssClasses.includes("flex-row-reverse"), "Initial dynamic CSS LTR: layout does not have flex-row-reverse");
+
+        // Toggle ancestor class to .direction-rtl
+        await page.click('[data-testid="set-css-rtl"]');
+        await page.waitForTimeout(300);
+
+        let cssCurrentLayoutBox = await cssLayout.boundingBox();
+        cssStartBox = await cssStart.boundingBox();
+        cssEndBox = await cssEnd.boundingBox();
+        assert(cssCurrentLayoutBox !== null && cssStartBox !== null && cssEndBox !== null, "Boxes after CSS RTL class toggle");
+        const rtlCssClasses = (await cssLayout.getAttribute("class")) || "";
+        assert(rtlCssClasses.includes("flex-row-reverse"), "After CSS RTL class toggle: layout compensated with flex-row-reverse");
+        // Start sidebar remains physically anchored on the LEFT edge because semantic direction is LTR
+        assert(Math.abs(cssStartBox.x - cssCurrentLayoutBox.x) <= 4, "After CSS RTL class toggle: start sidebar remains on physical LEFT");
+        assert(Math.abs(cssEndBox.x + cssEndBox.width - (cssCurrentLayoutBox.x + cssCurrentLayoutBox.width)) <= 4, "After CSS RTL class toggle: end sidebar remains on physical RIGHT");
+
+        // Toggle ancestor class back to LTR
+        await page.click('[data-testid="set-css-ltr"]');
+        await page.waitForTimeout(300);
+
+        cssCurrentLayoutBox = await cssLayout.boundingBox();
+        cssStartBox = await cssStart.boundingBox();
+        cssEndBox = await cssEnd.boundingBox();
+        assert(cssCurrentLayoutBox !== null && cssStartBox !== null && cssEndBox !== null, "Boxes after CSS LTR class return");
+        const backCssClasses = (await cssLayout.getAttribute("class")) || "";
+        assert(!backCssClasses.includes("flex-row-reverse"), "After returning to CSS LTR: layout returned to flex-row");
+        assert(Math.abs(cssStartBox.x - cssCurrentLayoutBox.x) <= 4, "After returning to CSS LTR: start sidebar remains on physical LEFT");
+        console.log("    [PASS] Dynamic CSS ancestor class toggle reactive compensation verified\n");
+
+        // 9. Dynamic Viewport Responsive Media Query Direction (#fixture-responsive-css)
+        console.log("--> Testing Dynamic Viewport Responsive CSS (#fixture-responsive-css)");
+        const responsiveSection = page.locator("section#fixture-responsive-css");
+        await responsiveSection.scrollIntoViewIfNeeded();
+
+        const respLayout = responsiveSection.locator('[data-testid="docked-layout-responsive"]');
+        const respLayoutBox = await respLayout.boundingBox();
+        assert(respLayoutBox !== null, "Responsive layout box available");
+
+        const respStart = responsiveSection.locator('[data-testid="docked-sidebar-start-responsive"]');
+        const respEnd = responsiveSection.locator('[data-testid="docked-sidebar-end-responsive"]');
+
+        // Initial wide viewport (1280px > 900px): LTR
+        let rStartBox = await respStart.boundingBox();
+        let rEndBox = await respEnd.boundingBox();
+        assert(rStartBox !== null && rEndBox !== null, "Responsive start/end boxes");
+        assert(Math.abs(rStartBox.x - respLayoutBox.x) <= 4, "Wide viewport: start sidebar on physical LEFT");
+        assert(Math.abs(rEndBox.x + rEndBox.width - (respLayoutBox.x + respLayoutBox.width)) <= 4, "Wide viewport: end sidebar on physical RIGHT");
+        const wideClasses = (await respLayout.getAttribute("class")) || "";
+        assert(!wideClasses.includes("flex-row-reverse"), "Wide viewport: layout does not have flex-row-reverse");
+
+        // Resize viewport to 800px (triggers @media (max-width: 900px) { direction: rtl })
+        await page.setViewportSize({ width: 800, height: 800 });
+        await page.waitForTimeout(300);
+
+        let currentRespLayoutBox = await respLayout.boundingBox();
+        rStartBox = await respStart.boundingBox();
+        rEndBox = await respEnd.boundingBox();
+        assert(currentRespLayoutBox !== null && rStartBox !== null && rEndBox !== null, "Boxes after narrow resize");
+        const narrowClasses = (await respLayout.getAttribute("class")) || "";
+        assert(narrowClasses.includes("flex-row-reverse"), "Narrow viewport (<900px): layout compensated with flex-row-reverse");
+        assert(Math.abs(rStartBox.x - currentRespLayoutBox.x) <= 4, "Narrow viewport: start sidebar remains on physical LEFT");
+        assert(Math.abs(rEndBox.x + rEndBox.width - (currentRespLayoutBox.x + currentRespLayoutBox.width)) <= 4, "Narrow viewport: end sidebar remains on physical RIGHT");
+
+        // Restore viewport to 1280px
+        await page.setViewportSize({ width: 1280, height: 800 });
+        await page.waitForTimeout(300);
+
+        currentRespLayoutBox = await respLayout.boundingBox();
+        rStartBox = await respStart.boundingBox();
+        rEndBox = await respEnd.boundingBox();
+        assert(currentRespLayoutBox !== null && rStartBox !== null && rEndBox !== null, "Boxes after wide restore");
+        const restoredClasses = (await respLayout.getAttribute("class")) || "";
+        assert(!restoredClasses.includes("flex-row-reverse"), "Restored wide viewport: layout returned to flex-row");
+        assert(Math.abs(rStartBox.x - currentRespLayoutBox.x) <= 4, "Restored wide viewport: start sidebar on physical LEFT");
+        console.log("    [PASS] Dynamic viewport responsive media query direction verified\n");
+
+        // 10. Dynamic CSS-only Shadow DOM Ancestor Direction (#fixture-shadow-dom)
+        console.log("--> Testing Dynamic CSS-Only Shadow DOM Ancestor Direction (#fixture-shadow-dom)");
+        const shadowSection = page.locator("section#fixture-shadow-dom");
+        await shadowSection.scrollIntoViewIfNeeded();
+
+        const shadowLayout = shadowSection.locator('[data-testid="docked-layout-shadow"]');
+        const shadowLayoutBox = await shadowLayout.boundingBox();
+        assert(shadowLayoutBox !== null, "Shadow layout box available");
+
+        const shadowStart = shadowSection.locator('[data-testid="docked-sidebar-start-shadow"]');
+        const shadowEnd = shadowSection.locator('[data-testid="docked-sidebar-end-shadow"]');
+
+        // Initial: Shadow LTR
+        let sStartBox = await shadowStart.boundingBox();
+        let sEndBox = await shadowEnd.boundingBox();
+        assert(sStartBox !== null && sEndBox !== null, "Shadow start/end boxes");
+        assert(Math.abs(sStartBox.x - shadowLayoutBox.x) <= 4, "Initial shadow LTR: start sidebar on physical LEFT");
+        assert(Math.abs(sEndBox.x + sEndBox.width - (shadowLayoutBox.x + shadowLayoutBox.width)) <= 4, "Initial shadow LTR: end sidebar on physical RIGHT");
+        const initialShadowClasses = (await shadowLayout.getAttribute("class")) || "";
+        assert(!initialShadowClasses.includes("flex-row-reverse"), "Initial shadow LTR: layout does not have flex-row-reverse");
+
+        // Mutate shadow ancestor direction to RTL
+        await page.click('[data-testid="set-shadow-rtl"]');
+        await page.waitForTimeout(300);
+
+        let currentShadowLayoutBox = await shadowLayout.boundingBox();
+        sStartBox = await shadowStart.boundingBox();
+        sEndBox = await shadowEnd.boundingBox();
+        assert(currentShadowLayoutBox !== null && sStartBox !== null && sEndBox !== null, "Boxes after shadow RTL mutation");
+        const rtlShadowClasses = (await shadowLayout.getAttribute("class")) || "";
+        assert(rtlShadowClasses.includes("flex-row-reverse"), "After shadow RTL mutation: shadow layout compensated with flex-row-reverse");
+        assert(Math.abs(sStartBox.x - currentShadowLayoutBox.x) <= 4, "After shadow RTL mutation: start sidebar inside ShadowRoot remains on physical LEFT");
+        assert(Math.abs(sEndBox.x + sEndBox.width - (currentShadowLayoutBox.x + currentShadowLayoutBox.width)) <= 4, "After shadow RTL mutation: end sidebar inside ShadowRoot remains on physical RIGHT");
+
+        // Mutate shadow ancestor direction back to LTR
+        await page.click('[data-testid="set-shadow-ltr"]');
+        await page.waitForTimeout(300);
+
+        currentShadowLayoutBox = await shadowLayout.boundingBox();
+        sStartBox = await shadowStart.boundingBox();
+        sEndBox = await shadowEnd.boundingBox();
+        assert(currentShadowLayoutBox !== null && sStartBox !== null && sEndBox !== null, "Boxes after shadow LTR return");
+        const backShadowClasses = (await shadowLayout.getAttribute("class")) || "";
+        assert(!backShadowClasses.includes("flex-row-reverse"), "After returning to shadow LTR: shadow layout returned to flex-row");
+        assert(Math.abs(sStartBox.x - currentShadowLayoutBox.x) <= 4, "After returning to shadow LTR: start sidebar remains on physical LEFT");
+        console.log("    [PASS] Dynamic CSS-only Shadow DOM ancestor direction verified\n");
 
         console.log("==================================================");
         console.log("  ALL BROWSER DIRECTION GEOMETRY TESTS PASSED!");

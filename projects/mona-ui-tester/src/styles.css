@@ -6,8 +6,13 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-@source "./projects/mona-ui/";
-@source "./projects/mona-ui-tester/";
+@source "../../mona-ui/**/*.{html,ts}";
+@source "../src/**/*.{html,ts}";
+
+:where([dir="rtl"], [dir="rtl"] *) .rtl\:rotate-180,
+:where([dir="rtl"], [dir="rtl"] *).rtl\:rotate-180 {
+    transform: rotate(180deg);
+}
 
 @theme {
     /* Canvas and surfaces */

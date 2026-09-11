@@ -1,4 +1,4 @@
-import { Component, signal } from "@angular/core";
+import { Component, signal, viewChild, ViewEncapsulation } from "@angular/core";
 import { RangeSliderComponent, SliderComponent } from "@nanahoshi/mona-ui/slider";
 import {
     SidebarComponent,
@@ -14,6 +14,40 @@ export interface FixturePageItem {
 }
 
 @Component({
+    selector: "app-shadow-sidebar-fixture",
+    imports: [SidebarLayoutComponent, SidebarComponent, SidebarInsetDirective],
+    encapsulation: ViewEncapsulation.ShadowDom,
+    template: `
+        <div [style.direction]="shadowDirection()" style="width: 450px; height: 180px; border: 1px solid #94a3b8; position: relative;">
+            <mona-sidebar-layout [mobileBreakpoint]="0" style="width: 100%; height: 140px;" data-testid="docked-layout-shadow">
+                <mona-sidebar
+                    data-testid="docked-sidebar-start-shadow"
+                    side="start"
+                    [expanded]="true"
+                    [width]="120"
+                    style="background: #e0f2fe;">
+                    <div style="padding: 8px;">Shadow Start</div>
+                </mona-sidebar>
+                <main monaSidebarInset data-testid="docked-inset-shadow" style="background: #f8fafc; padding: 8px;">
+                    Shadow Inset
+                </main>
+                <mona-sidebar
+                    data-testid="docked-sidebar-end-shadow"
+                    side="end"
+                    [expanded]="true"
+                    [width]="120"
+                    style="background: #fef08a;">
+                    <div style="padding: 8px;">Shadow End</div>
+                </mona-sidebar>
+            </mona-sidebar-layout>
+        </div>
+    `
+})
+export class ShadowSidebarFixtureComponent {
+    public readonly shadowDirection = signal<"ltr" | "rtl">("ltr");
+}
+
+@Component({
     selector: "app-direction-geometry-fixture",
     imports: [
         SliderComponent,
@@ -22,8 +56,19 @@ export interface FixturePageItem {
         SidebarComponent,
         SidebarInsetDirective,
         SidebarRailDirective,
-        ScrollViewComponent
+        ScrollViewComponent,
+        ShadowSidebarFixtureComponent
     ],
+    styles: `
+        .direction-rtl {
+            direction: rtl !important;
+        }
+        @media (max-width: 900px) {
+            .responsive-dir-container {
+                direction: rtl !important;
+            }
+        }
+    `,
     template: `
         <div style="padding: 24px; font-family: sans-serif; display: flex; flex-direction: column; gap: 48px;">
             <header>
@@ -605,6 +650,88 @@ export interface FixturePageItem {
                     </mona-sidebar-layout>
                 </div>
             </section>
+
+            <!-- 6. Dynamic CSS ancestor class toggle fixture -->
+            <section
+                id="fixture-dynamic-css"
+                data-testid="fixture-dynamic-css"
+                dir="ltr"
+                style="border: 2px solid #06b6d4; border-radius: 8px; padding: 16px; background: #fafafa;">
+                <h2 style="margin: 0 0 16px 0; font-size: 16px; color: #0891b2;">6. Dynamic CSS-Only Ancestor Class Toggle</h2>
+                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                    <button type="button" data-testid="set-css-ltr" (click)="dynamicCssClass.set('')">Set CSS LTR</button>
+                    <button type="button" data-testid="set-css-rtl" (click)="dynamicCssClass.set('direction-rtl')">Set CSS RTL</button>
+                </div>
+                <div [class]="dynamicCssClass()" style="width: 450px; height: 180px; border: 1px solid #94a3b8; position: relative;">
+                    <mona-sidebar-layout [mobileBreakpoint]="0" style="width: 100%; height: 140px;" data-testid="docked-layout-dynamic-css">
+                        <mona-sidebar
+                            data-testid="docked-sidebar-start-dynamic-css"
+                            side="start"
+                            [expanded]="true"
+                            [width]="120"
+                            style="background: #e0f2fe;">
+                            <div style="padding: 8px;">CSS Dynamic Start</div>
+                        </mona-sidebar>
+                        <main monaSidebarInset data-testid="docked-inset-dynamic-css" style="background: #f8fafc; padding: 8px;">
+                            CSS Dynamic Inset
+                        </main>
+                        <mona-sidebar
+                            data-testid="docked-sidebar-end-dynamic-css"
+                            side="end"
+                            [expanded]="true"
+                            [width]="120"
+                            style="background: #fef08a;">
+                            <div style="padding: 8px;">CSS Dynamic End</div>
+                        </mona-sidebar>
+                    </mona-sidebar-layout>
+                </div>
+            </section>
+
+            <!-- 7. Dynamic Viewport Responsive CSS Fixture -->
+            <section
+                id="fixture-responsive-css"
+                data-testid="fixture-responsive-css"
+                dir="ltr"
+                style="border: 2px solid #ec4899; border-radius: 8px; padding: 16px; background: #fafafa;">
+                <h2 style="margin: 0 0 16px 0; font-size: 16px; color: #be185d;">7. Dynamic Responsive Media Query Direction</h2>
+                <div class="responsive-dir-container" style="width: 450px; height: 180px; border: 1px solid #94a3b8; position: relative;">
+                    <mona-sidebar-layout [mobileBreakpoint]="0" style="width: 100%; height: 140px;" data-testid="docked-layout-responsive">
+                        <mona-sidebar
+                            data-testid="docked-sidebar-start-responsive"
+                            side="start"
+                            [expanded]="true"
+                            [width]="120"
+                            style="background: #e0f2fe;">
+                            <div style="padding: 8px;">Responsive Start</div>
+                        </mona-sidebar>
+                        <main monaSidebarInset data-testid="docked-inset-responsive" style="background: #f8fafc; padding: 8px;">
+                            Responsive Inset
+                        </main>
+                        <mona-sidebar
+                            data-testid="docked-sidebar-end-responsive"
+                            side="end"
+                            [expanded]="true"
+                            [width]="120"
+                            style="background: #fef08a;">
+                            <div style="padding: 8px;">Responsive End</div>
+                        </mona-sidebar>
+                    </mona-sidebar-layout>
+                </div>
+            </section>
+
+            <!-- 8. Dynamic CSS-only Shadow DOM Ancestor Direction -->
+            <section
+                id="fixture-shadow-dom"
+                data-testid="fixture-shadow-dom"
+                dir="ltr"
+                style="border: 2px solid #14b8a6; border-radius: 8px; padding: 16px; background: #fafafa;">
+                <h2 style="margin: 0 0 16px 0; font-size: 16px; color: #0f766e;">8. Dynamic CSS-Only Shadow DOM Ancestor Direction</h2>
+                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                    <button type="button" data-testid="set-shadow-ltr" (click)="shadowFixtureRef().shadowDirection.set('ltr')">Set Shadow LTR</button>
+                    <button type="button" data-testid="set-shadow-rtl" (click)="shadowFixtureRef().shadowDirection.set('rtl')">Set Shadow RTL</button>
+                </div>
+                <app-shadow-sidebar-fixture #shadowFixture data-testid="shadow-fixture-host" />
+            </section>
         </div>
     `
 })
@@ -649,4 +776,6 @@ export class DirectionGeometryFixtureComponent {
     public readonly rangeValueSplitRtl = signal<[number, number]>([20, 80]);
 
     public readonly dynamicDir = signal<"ltr" | "rtl">("ltr");
+    public readonly dynamicCssClass = signal("");
+    public readonly shadowFixtureRef = viewChild.required<ShadowSidebarFixtureComponent>("shadowFixture");
 }
