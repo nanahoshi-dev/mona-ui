@@ -1504,6 +1504,9 @@ async function runTests(): Promise<void> {
         assert(nextBox !== null && prevBox !== null, "Dynamic ScrollView pager arrow boxes after RTL toggle");
         assert(prevBox.x > nextBox.x, "Dynamic ScrollView RTL: Prev arrow is right of Next arrow");
 
+        // Wait for in-flight motion to settle before issuing the RTL step
+        await page.waitForTimeout(400);
+
         // In RTL, click Next arrow:
         // Must calculate from actual current position rather than a stale in-flight LTR target.
         // In RTL, Next arrow displaces content rightward (increasing X for p0).
