@@ -3,7 +3,7 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { extname, join, resolve } from "node:path";
-import { chromium, type Browser } from "playwright";
+import { chromium, type Browser, type Locator } from "playwright";
 
 const DIST_DIR = resolve(process.cwd(), "dist/mona-ui-tester/browser");
 const noBuild = process.argv.includes("--no-build");
@@ -906,9 +906,6 @@ async function runTests(): Promise<void> {
                 const nextIcon = nextBtn.locator("svg");
                 assert((await prevIcon.count()) === 1 && (await nextIcon.count()) === 1, "Arrow icons exist");
 
-                const prevTransform = await prevIcon.evaluate(el => window.getComputedStyle(el).transform);
-                const nextTransform = await nextIcon.evaluate(el => window.getComputedStyle(el).transform);
-
                 const pagerPrevArrow = scrollView.locator('button[aria-label="Scroll pager previous"]');
                 const pagerNextArrow = scrollView.locator('button[aria-label="Scroll pager next"]');
                 assert(
@@ -918,19 +915,35 @@ async function runTests(): Promise<void> {
 
                 const pagerPrevSvg = pagerPrevArrow.locator("svg");
                 const pagerNextSvg = pagerNextArrow.locator("svg");
-                const pagerPrevTransform = await pagerPrevSvg.evaluate(el => window.getComputedStyle(el).transform);
-                const pagerNextTransform = await pagerNextSvg.evaluate(el => window.getComputedStyle(el).transform);
+
+                // Chevron icon rotation / transform (evaluating authentic Tailwind rotate / transform utility)
+                // Regression note: The tester must not define the utility behavior being verified; the rendered transform must come from the same CSS pipeline consumers rely on.
+                const isSvgRotated180 = async (locator: Locator): Promise<{ rotated: boolean; desc: string }> => {
+                    return await locator.evaluate(el => {
+                        const style = window.getComputedStyle(el);
+                        const isRotated = style.rotate === "180deg" || style.transform.startsWith("matrix(-1");
+                        return {
+                            rotated: isRotated,
+                            desc: `rotate='${style.rotate}', transform='${style.transform}'`
+                        };
+                    });
+                };
+
+                const prevRotated = await isSvgRotated180(prevIcon);
+                const nextRotated = await isSvgRotated180(nextIcon);
+                const pagerPrevRotated = await isSvgRotated180(pagerPrevSvg);
+                const pagerNextRotated = await isSvgRotated180(pagerNextSvg);
 
                 if (!isRtl) {
-                    assert(prevTransform === "none", `[${scenario.name}] LTR carousel prev chevron transform is 'none' (got '${prevTransform}')`);
-                    assert(nextTransform === "none", `[${scenario.name}] LTR carousel next chevron transform is 'none' (got '${nextTransform}')`);
-                    assert(pagerPrevTransform === "none", `[${scenario.name}] LTR pager prev chevron transform is 'none' (got '${pagerPrevTransform}')`);
-                    assert(pagerNextTransform === "none", `[${scenario.name}] LTR pager next chevron transform is 'none' (got '${pagerNextTransform}')`);
+                    assert(!prevRotated.rotated, `[${scenario.name}] LTR carousel prev chevron must not be rotated 180deg (${prevRotated.desc})`);
+                    assert(!nextRotated.rotated, `[${scenario.name}] LTR carousel next chevron must not be rotated 180deg (${nextRotated.desc})`);
+                    assert(!pagerPrevRotated.rotated, `[${scenario.name}] LTR pager prev chevron must not be rotated 180deg (${pagerPrevRotated.desc})`);
+                    assert(!pagerNextRotated.rotated, `[${scenario.name}] LTR pager next chevron must not be rotated 180deg (${pagerNextRotated.desc})`);
                 } else {
-                    assert(prevTransform.startsWith("matrix(-1"), `[${scenario.name}] RTL carousel prev chevron is rotated (got '${prevTransform}')`);
-                    assert(nextTransform.startsWith("matrix(-1"), `[${scenario.name}] RTL carousel next chevron is rotated (got '${nextTransform}')`);
-                    assert(pagerPrevTransform.startsWith("matrix(-1"), `[${scenario.name}] RTL pager prev chevron is rotated (got '${pagerPrevTransform}')`);
-                    assert(pagerNextTransform.startsWith("matrix(-1"), `[${scenario.name}] RTL pager next chevron is rotated (got '${pagerNextTransform}')`);
+                    assert(prevRotated.rotated, `[${scenario.name}] RTL carousel prev chevron must be rotated 180deg (${prevRotated.desc})`);
+                    assert(nextRotated.rotated, `[${scenario.name}] RTL carousel next chevron must be rotated 180deg (${nextRotated.desc})`);
+                    assert(pagerPrevRotated.rotated, `[${scenario.name}] RTL pager prev chevron must be rotated 180deg (${pagerPrevRotated.desc})`);
+                    assert(pagerNextRotated.rotated, `[${scenario.name}] RTL pager next chevron must be rotated 180deg (${pagerNextRotated.desc})`);
                 }
 
                 // Pager list and overflowing verification
@@ -1059,25 +1072,81 @@ async function runTests(): Promise<void> {
                     `[${scenario.name}] Active page 15 center (${activeCenter.toFixed(1)}) is centered within pager container (${containerCenter.toFixed(1)})`
                 );
 
-                // Main carousel forward/backward slide navigation
+                // Main carousel forward/backward slide navigation with in-flight enter/leave animation verification
                 await page.waitForTimeout(400); // ensure previous animations fully settled
-                const activeSlideInitial = scrollView.locator('li[role="group"]:not(.animate-leave)');
+                const activeSlideInitial = scrollView.locator('li[role="group"]');
                 const initialSlideText = (await activeSlideInitial.first().textContent())?.trim();
 
-                // Click Next arrow
+                // Expected animation classes and @keyframes for logical Next:
+                // LTR: enter from right (slide-in-from-right / slideInFromRight), leave to left (slide-out-to-left / slideOutToLeft)
+                // RTL: enter from left (slide-in-from-left / slideInFromLeft), leave to right (slide-out-to-right / slideOutToRight)
+                const nextEnterClass = !isRtl ? "slide-in-from-right" : "slide-in-from-left";
+                const nextLeaveClass = !isRtl ? "slide-out-to-left" : "slide-out-to-right";
+                const nextEnterAnimName = !isRtl ? "slideInFromRight" : "slideInFromLeft";
+                const nextLeaveAnimName = !isRtl ? "slideOutToLeft" : "slideOutToRight";
+
                 await nextBtn.click();
-                await page.waitForTimeout(700); // 500ms animation + 200ms DOM removal
-                const activeSlideNext = scrollView.locator('li[role="group"]:not(.animate-leave)');
+
+                const nextEntering = scrollView.locator(`li[role="group"].${nextEnterClass}`);
+                const nextLeaving = scrollView.locator(`li[role="group"].${nextLeaveClass}`);
+
+                await nextEntering.waitFor({ state: "attached", timeout: 2000 });
+                await nextLeaving.waitFor({ state: "attached", timeout: 2000 });
+
+                const nextEnterAnim = await nextEntering.evaluate(el => window.getComputedStyle(el).animationName);
+                const nextLeaveAnim = await nextLeaving.evaluate(el => window.getComputedStyle(el).animationName);
+
+                assert(
+                    nextEnterAnim.endsWith(nextEnterAnimName),
+                    `[${scenario.name}] In-flight Next entering slide has animationName ending with '${nextEnterAnimName}' (got '${nextEnterAnim}')`
+                );
+                assert(
+                    nextLeaveAnim.endsWith(nextLeaveAnimName),
+                    `[${scenario.name}] In-flight Next leaving slide has animationName ending with '${nextLeaveAnimName}' (got '${nextLeaveAnim}')`
+                );
+
+                // Await completion of the 500ms animation and subsequent DOM detachment
+                await nextLeaving.waitFor({ state: "detached", timeout: 2000 });
+
+                const activeSlideNext = scrollView.locator('li[role="group"]');
                 const nextSlideText = (await activeSlideNext.first().textContent())?.trim();
                 assert(
                     nextSlideText !== initialSlideText,
                     `[${scenario.name}] Clicking Next advances slide (from '${initialSlideText}' to '${nextSlideText}')`
                 );
 
-                // Click Prev arrow
+                // Expected animation classes and @keyframes for logical Previous:
+                // LTR: enter from left (slide-in-from-left / slideInFromLeft), leave to right (slide-out-to-right / slideOutToRight)
+                // RTL: enter from right (slide-in-from-right / slideInFromRight), leave to left (slide-out-to-left / slideOutToLeft)
+                const prevEnterClass = !isRtl ? "slide-in-from-left" : "slide-in-from-right";
+                const prevLeaveClass = !isRtl ? "slide-out-to-right" : "slide-out-to-left";
+                const prevEnterAnimName = !isRtl ? "slideInFromLeft" : "slideInFromRight";
+                const prevLeaveAnimName = !isRtl ? "slideOutToRight" : "slideOutToLeft";
+
                 await prevBtn.click();
-                await page.waitForTimeout(700);
-                const activeSlideBack = scrollView.locator('li[role="group"]:not(.animate-leave)');
+
+                const prevEntering = scrollView.locator(`li[role="group"].${prevEnterClass}`);
+                const prevLeaving = scrollView.locator(`li[role="group"].${prevLeaveClass}`);
+
+                await prevEntering.waitFor({ state: "attached", timeout: 2000 });
+                await prevLeaving.waitFor({ state: "attached", timeout: 2000 });
+
+                const prevEnterAnim = await prevEntering.evaluate(el => window.getComputedStyle(el).animationName);
+                const prevLeaveAnim = await prevLeaving.evaluate(el => window.getComputedStyle(el).animationName);
+
+                assert(
+                    prevEnterAnim.endsWith(prevEnterAnimName),
+                    `[${scenario.name}] In-flight Prev entering slide has animationName ending with '${prevEnterAnimName}' (got '${prevEnterAnim}')`
+                );
+                assert(
+                    prevLeaveAnim.endsWith(prevLeaveAnimName),
+                    `[${scenario.name}] In-flight Prev leaving slide has animationName ending with '${prevLeaveAnimName}' (got '${prevLeaveAnim}')`
+                );
+
+                // Await completion of the 500ms animation and subsequent DOM detachment
+                await prevLeaving.waitFor({ state: "detached", timeout: 2000 });
+
+                const activeSlideBack = scrollView.locator('li[role="group"]');
                 const backSlideText = (await activeSlideBack.first().textContent())?.trim();
                 assert(
                     backSlideText === initialSlideText,

@@ -9,11 +9,6 @@
 @source "../../mona-ui/**/*.{html,ts}";
 @source "../src/**/*.{html,ts}";
 
-:where([dir="rtl"], [dir="rtl"] *) .rtl\:rotate-180,
-:where([dir="rtl"], [dir="rtl"] *).rtl\:rotate-180 {
-    transform: rotate(180deg);
-}
-
 @theme {
     /* Canvas and surfaces */
     --color-canvas: oklch(98.5% 0 0);
