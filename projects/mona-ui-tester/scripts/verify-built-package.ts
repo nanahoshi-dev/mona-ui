@@ -32,7 +32,10 @@ export function resolveTypeScriptCompilerPath(repoRoot: string = process.cwd()):
     return tscPath;
 }
 
-export function resolveExportTargets(pkgJsonPath: string): { runtimeRelPath: string; typesRelPath: string } {
+export function resolveExportTargets(
+    pkgJsonPath: string,
+    subpath: string = "./locales"
+): { runtimeRelPath: string; typesRelPath: string } {
     if (!existsSync(pkgJsonPath)) {
         throw new Error(`Built package.json not found at: ${pkgJsonPath}. Did you run "npm run build"?`);
     }
@@ -44,27 +47,27 @@ export function resolveExportTargets(pkgJsonPath: string): { runtimeRelPath: str
         throw new Error('Built package.json has no "exports" field');
     }
 
-    const localesExport = exports["./locales"];
-    if (!localesExport) {
-        throw new Error('Built package.json is missing exports["./locales"] entry point');
+    const targetExport = exports[subpath];
+    if (!targetExport) {
+        throw new Error(`Built package.json is missing exports["${subpath}"] entry point`);
     }
 
     let runtimeRelPath: string | null = null;
     let typesRelPath: string | null = null;
 
-    if (typeof localesExport === "string") {
-        runtimeRelPath = localesExport;
-    } else if (typeof localesExport === "object" && localesExport !== null) {
-        runtimeRelPath = localesExport.import ?? localesExport.default ?? null;
-        typesRelPath = localesExport.types ?? null;
+    if (typeof targetExport === "string") {
+        runtimeRelPath = targetExport;
+    } else if (typeof targetExport === "object" && targetExport !== null) {
+        runtimeRelPath = targetExport.import ?? targetExport.default ?? null;
+        typesRelPath = targetExport.types ?? null;
     }
 
     if (!runtimeRelPath) {
-        throw new Error('exports["./locales"] is missing an "import" or "default" runtime target');
+        throw new Error(`exports["${subpath}"] is missing an "import" or "default" runtime target`);
     }
 
     if (!typesRelPath) {
-        throw new Error('exports["./locales"] is missing a "types" declaration path');
+        throw new Error(`exports["${subpath}"] is missing a "types" declaration path`);
     }
 
     return { runtimeRelPath, typesRelPath };
@@ -79,10 +82,23 @@ export function runConsumerSmokeTest(options: ConsumerSmokeTestOptions): void {
         const pkgLink = join(nmAt, "mona-ui");
         symlinkSync(options.distDir, pkgLink, process.platform === "win32" ? "junction" : "dir");
 
+        const repoNmAngular = join(options.repoRoot ?? process.cwd(), "node_modules", "@angular");
+        if (existsSync(repoNmAngular)) {
+            const nmAngular = join(tempDir, "node_modules", "@angular");
+            symlinkSync(repoNmAngular, nmAngular, process.platform === "win32" ? "junction" : "dir");
+        }
+
         // 1. Runtime ESM consumer smoke test
         const smokeScriptPath = join(tempDir, "smoke.mjs");
         const smokeScript = `
+import "@angular/compiler";
 import * as locales from "@nanahoshi/mona-ui/locales";
+import {
+    getLocaleDateInputFormat,
+    getLocaleTimeInputFormat,
+    getLocaleDateTimeInputFormat,
+    getLocaleFirstDayOfWeek
+} from "@nanahoshi/mona-ui/i18n";
 
 const expectedLocales = ${JSON.stringify(options.expectedLocales)};
 for (const expected of expectedLocales) {
@@ -115,6 +131,36 @@ for (const expected of expectedLocales) {
         }
     }
 }
+
+if (typeof getLocaleDateInputFormat !== "function") {
+    console.error("Missing export getLocaleDateInputFormat in @nanahoshi/mona-ui/i18n");
+    process.exit(1);
+}
+if (typeof getLocaleTimeInputFormat !== "function") {
+    console.error("Missing export getLocaleTimeInputFormat in @nanahoshi/mona-ui/i18n");
+    process.exit(1);
+}
+if (typeof getLocaleDateTimeInputFormat !== "function") {
+    console.error("Missing export getLocaleDateTimeInputFormat in @nanahoshi/mona-ui/i18n");
+    process.exit(1);
+}
+if (typeof getLocaleFirstDayOfWeek !== "function") {
+    console.error("Missing export getLocaleFirstDayOfWeek in @nanahoshi/mona-ui/i18n");
+    process.exit(1);
+}
+
+const jaDateFormat = getLocaleDateInputFormat("ja-JP");
+if (!jaDateFormat || typeof jaDateFormat !== "string") {
+    console.error("Invalid getLocaleDateInputFormat output for ja-JP: " + jaDateFormat);
+    process.exit(1);
+}
+
+const jaFirstDay = getLocaleFirstDayOfWeek("ja-JP");
+if (jaFirstDay !== "sunday") {
+    console.error("Invalid getLocaleFirstDayOfWeek output for ja-JP: " + jaFirstDay);
+    process.exit(1);
+}
+
 console.log("Runtime package import verified successfully.");
 `;
         writeFileSync(smokeScriptPath, smokeScript);
@@ -125,7 +171,7 @@ console.log("Runtime package import verified successfully.");
                 stdio: ["ignore", "pipe", "pipe"],
                 encoding: "utf-8"
             });
-            console.log("✓ ESM consumer runtime import verified via package specifier '@nanahoshi/mona-ui/locales'");
+            console.log("✓ ESM consumer runtime import verified via package specifiers '@nanahoshi/mona-ui/locales' and '@nanahoshi/mona-ui/i18n'");
         } catch (err: any) {
             throw new Error(`Consumer runtime import test failed:\n${err.stderr || err.stdout || err.message}`);
         }
@@ -135,6 +181,13 @@ console.log("Runtime package import verified successfully.");
         const consumerTsPath = join(tempDir, "consumer.ts");
         const consumerTs = `
 import { ${symbols.join(", ")} } from "@nanahoshi/mona-ui/locales";
+import {
+    getLocaleDateInputFormat,
+    getLocaleTimeInputFormat,
+    getLocaleDateTimeInputFormat,
+    getLocaleFirstDayOfWeek,
+    type LocaleFirstDayOfWeek
+} from "@nanahoshi/mona-ui/i18n";
 
 ${symbols
     .map(
@@ -148,6 +201,15 @@ void msgs_${sym};
 `
     )
     .join("\n")}
+
+const testJaDate: string = getLocaleDateInputFormat("ja-JP");
+const testJaTime: string = getLocaleTimeInputFormat("ja-JP", { hourFormat: "12", showSeconds: false });
+const testJaDateTime: string = getLocaleDateTimeInputFormat("ja-JP", { hourFormat: "24" });
+const testJaFirstDay: LocaleFirstDayOfWeek = getLocaleFirstDayOfWeek("ja-JP");
+void testJaDate;
+void testJaTime;
+void testJaDateTime;
+void testJaFirstDay;
 `;
         writeFileSync(consumerTsPath, consumerTs);
 
@@ -194,7 +256,7 @@ export function verifyBuiltPackage(options: PackageVerificationOptions = {}): vo
     console.log("Verifying built package output at:", distDir);
 
     const pkgJsonPath = resolve(distDir, "package.json");
-    const { runtimeRelPath, typesRelPath } = resolveExportTargets(pkgJsonPath);
+    const { runtimeRelPath, typesRelPath } = resolveExportTargets(pkgJsonPath, "./locales");
     console.log('✓ Found exports["./locales"] in dist/mona-ui/package.json');
 
     const runtimePath = resolve(distDir, runtimeRelPath);
@@ -208,6 +270,21 @@ export function verifyBuiltPackage(options: PackageVerificationOptions = {}): vo
         throw new Error(`TypeScript declaration file not found at: ${typesPath}`);
     }
     console.log(`✓ TypeScript declaration file verified at ${typesRelPath}`);
+
+    const i18nTargets = resolveExportTargets(pkgJsonPath, "./i18n");
+    console.log('✓ Found exports["./i18n"] in dist/mona-ui/package.json');
+
+    const i18nRuntimePath = resolve(distDir, i18nTargets.runtimeRelPath);
+    if (!existsSync(i18nRuntimePath)) {
+        throw new Error(`Exported runtime file not found at: ${i18nRuntimePath}`);
+    }
+    console.log(`✓ i18n runtime target verified at ${i18nTargets.runtimeRelPath}`);
+
+    const i18nTypesPath = resolve(distDir, i18nTargets.typesRelPath);
+    if (!existsSync(i18nTypesPath)) {
+        throw new Error(`TypeScript declaration file not found at: ${i18nTypesPath}`);
+    }
+    console.log(`✓ i18n TypeScript declaration file verified at ${i18nTargets.typesRelPath}`);
 
     const discovery = discoverOfficialLocales(sourceLocalesDir);
     if (discovery.violations.length > 0) {

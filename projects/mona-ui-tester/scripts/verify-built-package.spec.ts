@@ -128,6 +128,32 @@ describe("verify-built-package", () => {
                 rmSync(tempDir, { recursive: true, force: true });
             }
         });
+
+        it("resolves valid export targets for custom subpath like ./i18n", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "pkg-verify-test-"));
+            try {
+                const pkgPath = join(tempDir, "package.json");
+                writeFileSync(
+                    pkgPath,
+                    JSON.stringify({
+                        name: "test-pkg",
+                        exports: {
+                            "./i18n": {
+                                types: "./types/i18n.d.ts",
+                                default: "./fesm2022/i18n.mjs"
+                            }
+                        }
+                    })
+                );
+                const targets = resolveExportTargets(pkgPath, "./i18n");
+                expect(targets).toEqual({
+                    runtimeRelPath: "./fesm2022/i18n.mjs",
+                    typesRelPath: "./types/i18n.d.ts"
+                });
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
     });
 
     describe("resolveTypeScriptCompilerPath", () => {
@@ -147,30 +173,68 @@ describe("verify-built-package", () => {
         });
     });
 
+    const DEFAULT_MOCK_I18N_MJS = `
+export function getLocaleDateInputFormat(locale) { return "yyyy/MM/dd"; }
+export function getLocaleTimeInputFormat(locale, options) { return "ahh:mm"; }
+export function getLocaleDateTimeInputFormat(locale, options) { return "yyyy/MM/dd HH:mm"; }
+export function getLocaleFirstDayOfWeek(locale) { return "sunday"; }
+`;
+
+    const DEFAULT_MOCK_I18N_DTS = `
+export type LocaleFirstDayOfWeek = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
+export declare function getLocaleDateInputFormat(locale?: string): string;
+export declare function getLocaleTimeInputFormat(locale?: string, options?: { hourFormat?: "12" | "24"; showSeconds?: boolean }): string;
+export declare function getLocaleDateTimeInputFormat(locale?: string, options?: { hourFormat?: "12" | "24"; showSeconds?: boolean }): string;
+export declare function getLocaleFirstDayOfWeek(locale?: string): LocaleFirstDayOfWeek;
+`;
+
+    function populateFakeDist(
+        dir: string,
+        options: {
+            localesMjs?: string;
+            localesDts?: string;
+            i18nMjs?: string;
+            i18nDts?: string;
+            exports?: Record<string, unknown>;
+        } = {}
+    ): void {
+        const pkgExports = options.exports ?? {
+            "./locales": {
+                types: "./locales.d.ts",
+                default: "./locales.mjs"
+            },
+            "./i18n": {
+                types: "./i18n.d.ts",
+                default: "./i18n.mjs"
+            }
+        };
+        writeFileSync(join(dir, "package.json"), JSON.stringify({ name: "@nanahoshi/mona-ui", exports: pkgExports }));
+        if (options.localesMjs !== undefined) {
+            writeFileSync(join(dir, "locales.mjs"), options.localesMjs);
+        }
+        if (options.localesDts !== undefined) {
+            writeFileSync(join(dir, "locales.d.ts"), options.localesDts);
+        }
+        if (options.i18nMjs !== undefined) {
+            writeFileSync(join(dir, "i18n.mjs"), options.i18nMjs);
+        } else if (pkgExports["./i18n"]) {
+            writeFileSync(join(dir, "i18n.mjs"), DEFAULT_MOCK_I18N_MJS);
+        }
+        if (options.i18nDts !== undefined) {
+            writeFileSync(join(dir, "i18n.d.ts"), options.i18nDts);
+        } else if (pkgExports["./i18n"]) {
+            writeFileSync(join(dir, "i18n.d.ts"), DEFAULT_MOCK_I18N_DTS);
+        }
+    }
+
     describe("runConsumerSmokeTest", () => {
         it("succeeds when synthetic package exports expected locale matching runtime and types", () => {
             const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
             try {
-                writeFileSync(
-                    join(fakeDist, "package.json"),
-                    JSON.stringify({
-                        name: "@nanahoshi/mona-ui",
-                        exports: {
-                            "./locales": {
-                                types: "./locales.d.ts",
-                                default: "./locales.mjs"
-                            }
-                        }
-                    })
-                );
-                writeFileSync(
-                    join(fakeDist, "locales.mjs"),
-                    'export const es_ES = { id: "es-ES", direction: "ltr", messages: { greeting: "hola" } };\n'
-                );
-                writeFileSync(
-                    join(fakeDist, "locales.d.ts"),
-                    'export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n'
-                );
+                populateFakeDist(fakeDist, {
+                    localesMjs: 'export const es_ES = { id: "es-ES", direction: "ltr", messages: { greeting: "hola" } };\n',
+                    localesDts: 'export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n'
+                });
 
                 expect(() =>
                     runConsumerSmokeTest({
@@ -186,23 +250,10 @@ describe("verify-built-package", () => {
         it("fails when runtime package is missing expected export", () => {
             const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
             try {
-                writeFileSync(
-                    join(fakeDist, "package.json"),
-                    JSON.stringify({
-                        name: "@nanahoshi/mona-ui",
-                        exports: {
-                            "./locales": {
-                                types: "./locales.d.ts",
-                                default: "./locales.mjs"
-                            }
-                        }
-                    })
-                );
-                writeFileSync(join(fakeDist, "locales.mjs"), "export const de_DE = { id: 'de-DE', direction: 'ltr', messages: {} };\n");
-                writeFileSync(
-                    join(fakeDist, "locales.d.ts"),
-                    "export declare const de_DE: { id: string; direction: string; messages: Record<string, unknown> };\n"
-                );
+                populateFakeDist(fakeDist, {
+                    localesMjs: "export const de_DE = { id: 'de-DE', direction: 'ltr', messages: {} };\n",
+                    localesDts: "export declare const de_DE: { id: string; direction: string; messages: Record<string, unknown> };\n"
+                });
 
                 expect(() =>
                     runConsumerSmokeTest({
@@ -218,26 +269,10 @@ describe("verify-built-package", () => {
         it("fails when runtime export has wrong id", () => {
             const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
             try {
-                writeFileSync(
-                    join(fakeDist, "package.json"),
-                    JSON.stringify({
-                        name: "@nanahoshi/mona-ui",
-                        exports: {
-                            "./locales": {
-                                types: "./locales.d.ts",
-                                default: "./locales.mjs"
-                            }
-                        }
-                    })
-                );
-                writeFileSync(
-                    join(fakeDist, "locales.mjs"),
-                    'export const es_ES = { id: "de-DE", direction: "ltr", messages: {} };\n'
-                );
-                writeFileSync(
-                    join(fakeDist, "locales.d.ts"),
-                    'export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n'
-                );
+                populateFakeDist(fakeDist, {
+                    localesMjs: 'export const es_ES = { id: "de-DE", direction: "ltr", messages: {} };\n',
+                    localesDts: 'export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n'
+                });
 
                 expect(() =>
                     runConsumerSmokeTest({
@@ -253,26 +288,10 @@ describe("verify-built-package", () => {
         it("fails when runtime export has invalid direction", () => {
             const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
             try {
-                writeFileSync(
-                    join(fakeDist, "package.json"),
-                    JSON.stringify({
-                        name: "@nanahoshi/mona-ui",
-                        exports: {
-                            "./locales": {
-                                types: "./locales.d.ts",
-                                default: "./locales.mjs"
-                            }
-                        }
-                    })
-                );
-                writeFileSync(
-                    join(fakeDist, "locales.mjs"),
-                    'export const es_ES = { id: "es-ES", direction: "horizontal", messages: {} };\n'
-                );
-                writeFileSync(
-                    join(fakeDist, "locales.d.ts"),
-                    'export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n'
-                );
+                populateFakeDist(fakeDist, {
+                    localesMjs: 'export const es_ES = { id: "es-ES", direction: "horizontal", messages: {} };\n',
+                    localesDts: 'export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n'
+                });
 
                 expect(() =>
                     runConsumerSmokeTest({
@@ -288,26 +307,10 @@ describe("verify-built-package", () => {
         it("fails when runtime export direction does not match expected direction", () => {
             const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
             try {
-                writeFileSync(
-                    join(fakeDist, "package.json"),
-                    JSON.stringify({
-                        name: "@nanahoshi/mona-ui",
-                        exports: {
-                            "./locales": {
-                                types: "./locales.d.ts",
-                                default: "./locales.mjs"
-                            }
-                        }
-                    })
-                );
-                writeFileSync(
-                    join(fakeDist, "locales.mjs"),
-                    'export const es_ES = { id: "es-ES", direction: "rtl", messages: {} };\n'
-                );
-                writeFileSync(
-                    join(fakeDist, "locales.d.ts"),
-                    'export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n'
-                );
+                populateFakeDist(fakeDist, {
+                    localesMjs: 'export const es_ES = { id: "es-ES", direction: "rtl", messages: {} };\n',
+                    localesDts: 'export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n'
+                });
 
                 expect(() =>
                     runConsumerSmokeTest({
@@ -323,23 +326,10 @@ describe("verify-built-package", () => {
         it("fails when runtime export does not conform to locale structure", () => {
             const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
             try {
-                writeFileSync(
-                    join(fakeDist, "package.json"),
-                    JSON.stringify({
-                        name: "@nanahoshi/mona-ui",
-                        exports: {
-                            "./locales": {
-                                types: "./locales.d.ts",
-                                default: "./locales.mjs"
-                            }
-                        }
-                    })
-                );
-                writeFileSync(join(fakeDist, "locales.mjs"), "export const es_ES = { id: 'es-ES', direction: 'ltr' };\n");
-                writeFileSync(
-                    join(fakeDist, "locales.d.ts"),
-                    "export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n"
-                );
+                populateFakeDist(fakeDist, {
+                    localesMjs: "export const es_ES = { id: 'es-ES', direction: 'ltr' };\n",
+                    localesDts: "export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n"
+                });
 
                 expect(() =>
                     runConsumerSmokeTest({
@@ -352,26 +342,59 @@ describe("verify-built-package", () => {
             }
         });
 
-        it("fails when TypeScript consumer compilation fails due to type mismatch", () => {
+        it("fails when runtime package is missing getLocaleDateInputFormat in @nanahoshi/mona-ui/i18n", () => {
             const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
             try {
-                writeFileSync(
-                    join(fakeDist, "package.json"),
-                    JSON.stringify({
-                        name: "@nanahoshi/mona-ui",
-                        exports: {
-                            "./locales": {
-                                types: "./locales.d.ts",
-                                default: "./locales.mjs"
-                            }
-                        }
+                populateFakeDist(fakeDist, {
+                    localesMjs: 'export const es_ES = { id: "es-ES", direction: "ltr", messages: {} };\n',
+                    localesDts: 'export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    i18nMjs: "export function getLocaleTimeInputFormat() {};\n"
+                });
+
+                expect(() =>
+                    runConsumerSmokeTest({
+                        distDir: fakeDist,
+                        expectedLocales: [{ symbol: "es_ES", id: "es-ES" }]
                     })
-                );
-                writeFileSync(
-                    join(fakeDist, "locales.mjs"),
-                    'export const es_ES = { id: "es-ES", direction: "ltr", messages: {} };\n'
-                );
-                writeFileSync(join(fakeDist, "locales.d.ts"), "export {};\n");
+                ).toThrow(/does not provide an export named 'getLocaleDateInputFormat'|Missing export getLocaleDateInputFormat/);
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when TypeScript consumer compilation fails due to type mismatch in locales", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                populateFakeDist(fakeDist, {
+                    localesMjs: 'export const es_ES = { id: "es-ES", direction: "ltr", messages: {} };\n',
+                    localesDts: "export {};\n"
+                });
+
+                expect(() =>
+                    runConsumerSmokeTest({
+                        distDir: fakeDist,
+                        expectedLocales: [{ symbol: "es_ES", id: "es-ES" }]
+                    })
+                ).toThrow("Consumer TypeScript compilation failed");
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when TypeScript consumer compilation fails due to type mismatch in i18n helpers", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                populateFakeDist(fakeDist, {
+                    localesMjs: 'export const es_ES = { id: "es-ES", direction: "ltr", messages: {} };\n',
+                    localesDts: 'export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    i18nDts: `
+export type LocaleFirstDayOfWeek = "monday" | "sunday";
+export declare function getLocaleDateInputFormat(locale?: string): number;
+export declare function getLocaleTimeInputFormat(locale?: string, options?: unknown): string;
+export declare function getLocaleDateTimeInputFormat(locale?: string, options?: unknown): string;
+export declare function getLocaleFirstDayOfWeek(locale?: string): LocaleFirstDayOfWeek;
+`
+                });
 
                 expect(() =>
                     runConsumerSmokeTest({
@@ -431,31 +454,72 @@ describe("verify-built-package", () => {
             }
         });
 
+        it("fails when i18n runtime target file does not exist on disk", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "pkg-verify-test-"));
+            try {
+                const pkgPath = join(tempDir, "package.json");
+                writeFileSync(join(tempDir, "locales.mjs"), "export {};");
+                writeFileSync(join(tempDir, "locales.d.ts"), "export {};");
+                writeFileSync(
+                    pkgPath,
+                    JSON.stringify({
+                        name: "test-pkg",
+                        exports: {
+                            "./locales": {
+                                types: "./locales.d.ts",
+                                default: "./locales.mjs"
+                            },
+                            "./i18n": {
+                                types: "./types/i18n.d.ts",
+                                default: "./missing-i18n.mjs"
+                            }
+                        }
+                    })
+                );
+                expect(() => verifyBuiltPackage({ distDir: tempDir })).toThrow("Exported runtime file not found");
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when i18n types declaration file does not exist on disk", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "pkg-verify-test-"));
+            try {
+                const pkgPath = join(tempDir, "package.json");
+                writeFileSync(join(tempDir, "locales.mjs"), "export {};");
+                writeFileSync(join(tempDir, "locales.d.ts"), "export {};");
+                writeFileSync(join(tempDir, "i18n.mjs"), "export {};");
+                writeFileSync(
+                    pkgPath,
+                    JSON.stringify({
+                        name: "test-pkg",
+                        exports: {
+                            "./locales": {
+                                types: "./locales.d.ts",
+                                default: "./locales.mjs"
+                            },
+                            "./i18n": {
+                                types: "./types/missing-i18n.d.ts",
+                                default: "./i18n.mjs"
+                            }
+                        }
+                    })
+                );
+                expect(() => verifyBuiltPackage({ distDir: tempDir })).toThrow("TypeScript declaration file not found");
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
         it("fails before runtime smoke when source locales include one valid plus one malformed locale", () => {
             const fakeDist = mkdtempSync(join(tmpdir(), "pkg-verify-dist-"));
             const fakeLocales = mkdtempSync(join(tmpdir(), "pkg-verify-locales-"));
             try {
                 // Setup valid built package output
-                writeFileSync(
-                    join(fakeDist, "package.json"),
-                    JSON.stringify({
-                        name: "@nanahoshi/mona-ui",
-                        exports: {
-                            "./locales": {
-                                types: "./locales.d.ts",
-                                default: "./locales.mjs"
-                            }
-                        }
-                    })
-                );
-                writeFileSync(
-                    join(fakeDist, "locales.mjs"),
-                    'export const MONA_ES_ES_LOCALE = { id: "es-ES", direction: "ltr", messages: {} };\n'
-                );
-                writeFileSync(
-                    join(fakeDist, "locales.d.ts"),
-                    'export declare const MONA_ES_ES_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n'
-                );
+                populateFakeDist(fakeDist, {
+                    localesMjs: 'export const MONA_ES_ES_LOCALE = { id: "es-ES", direction: "ltr", messages: {} };\n',
+                    localesDts: 'export declare const MONA_ES_ES_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n'
+                });
 
                 // Setup source locales: es-es (valid) and de-de (malformed - missing official locale export)
                 const esFolder = join(fakeLocales, "es-es");
