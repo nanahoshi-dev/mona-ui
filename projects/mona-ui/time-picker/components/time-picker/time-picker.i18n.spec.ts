@@ -61,4 +61,94 @@ describe("TimePickerComponent i18n", () => {
         expect(parsedDate?.getHours()).toBe(9);
         expect(parsedDate?.getMinutes()).toBe(15);
     });
+
+    it("derives default format based on locale, hourFormat, and showSeconds", async () => {
+        @Component({
+            template: `
+                <mona-time-picker
+                    [(value)]="value"
+                    [hourFormat]="hourFormat()"
+                    [showSeconds]="showSeconds()" />
+            `,
+            imports: [TimePickerComponent]
+        })
+        class DefaultTimeHostComponent {
+            public readonly hourFormat = signal<"12" | "24">("24");
+            public readonly showSeconds = signal(false);
+            public readonly value = signal<Date | null>(new Date(2026, 0, 1, 14, 30, 45));
+        }
+
+        TestBed.configureTestingModule({
+            imports: [DefaultTimeHostComponent]
+        });
+        const fixture = TestBed.createComponent(DefaultTimeHostComponent);
+        const i18n = TestBed.inject(MonaI18nService);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const input = fixture.nativeElement.querySelector("input") as HTMLInputElement;
+
+        // 1. 24h default without seconds
+        expect(input.value).toBe("14:30");
+
+        // 2. 24h with seconds
+        fixture.componentInstance.showSeconds.set(true);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(input.value).toBe("14:30:45");
+
+        // 3. Switch to ja-JP in 12h mode without seconds: 午後02:30
+        i18n.use({ id: "ja-JP", direction: "ltr", messages: {} });
+        fixture.componentInstance.hourFormat.set("12");
+        fixture.componentInstance.showSeconds.set(false);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(input.value).toBe("午後02:30");
+
+        // 4. ja-JP in 12h mode with seconds: 午後02:30:45
+        fixture.componentInstance.showSeconds.set(true);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(input.value).toBe("午後02:30:45");
+
+        // 5. Parse Japanese 12h input: 午前09:15:00
+        input.value = "午前09:15:00";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("blur", { bubbles: true }));
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const parsedDate = fixture.componentInstance.value();
+        expect(parsedDate?.getHours()).toBe(9);
+        expect(parsedDate?.getMinutes()).toBe(15);
+        expect(parsedDate?.getSeconds()).toBe(0);
+    });
+
+    it("preserves explicit format override even if hourFormat or showSeconds differ", async () => {
+        @Component({
+            template: `
+                <mona-time-picker
+                    [(value)]="value"
+                    [format]="'HH:mm'"
+                    [hourFormat]="'12'"
+                    [showSeconds]="true" />
+            `,
+            imports: [TimePickerComponent]
+        })
+        class OverrideHostComponent {
+            public readonly value = signal<Date | null>(new Date(2026, 0, 1, 14, 30, 45));
+        }
+
+        TestBed.configureTestingModule({
+            imports: [OverrideHostComponent]
+        });
+        const fixture = TestBed.createComponent(OverrideHostComponent);
+        const i18n = TestBed.inject(MonaI18nService);
+        i18n.use({ id: "ja-JP", direction: "ltr", messages: {} });
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const input = fixture.nativeElement.querySelector("input") as HTMLInputElement;
+        expect(input.value).toBe("14:30");
+    });
 });

@@ -29,7 +29,12 @@ import {
     dropdownPopupThemeVariants,
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import {
+    getLocaleTimeInputFormat,
+    gregorianDateTime,
+    MonaI18nService,
+    parseGregorianDate
+} from "@nanahoshi/mona-ui/i18n";
 import { type AttributeConfig, createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { ListSizeInputType } from "@nanahoshi/mona-ui/internal/list";
 import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
@@ -86,12 +91,21 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
     });
     protected readonly currentDateString = linkedSignal(() => {
         const value = this.value();
-        const format = this.format();
+        const format = this.effectiveFormat();
         const locale = this.#i18n.localeId();
         if (!value) {
             return "";
         }
-        return DateTime.fromJSDate(value).setLocale(locale).toFormat(format);
+        return gregorianDateTime(value, locale).toFormat(format);
+    });
+    protected readonly effectiveFormat = computed(() => {
+        return (
+            this.format() ??
+            getLocaleTimeInputFormat(this.#i18n.localeId(), {
+                hourFormat: this.hourFormat(),
+                showSeconds: this.showSeconds()
+            })
+        );
     });
     protected readonly expanded = computed(() => this.#dropdownService.popupRef() != null);
     protected readonly inputAttributes = computed<AttributeConfig>(() => {
@@ -141,9 +155,10 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
     public readonly disabled = input(false);
 
     /**
-     * @description Sets the format of the time picker.
+     * @description Sets the format of the time picker. If not specified, derives from the active locale, hourFormat, and showSeconds.
+     * @default null
      */
-    public readonly format = input("HH:mm");
+    public readonly format = input<string | null>(null);
 
     /**
      * @description Sets the hour format of the time picker.
@@ -335,8 +350,8 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
         if (date1 && date2) {
             const locale = this.#i18n.localeId();
             return (
-                DateTime.fromJSDate(date1).setLocale(locale).toFormat(this.format()) ===
-                DateTime.fromJSDate(date2).setLocale(locale).toFormat(this.format())
+                gregorianDateTime(date1, locale).toFormat(this.effectiveFormat()) ===
+                gregorianDateTime(date2, locale).toFormat(this.effectiveFormat())
             );
         }
         return date1 === date2;
@@ -345,8 +360,8 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
     private generateValidDateTime(dateString: string): DateTime | null {
         const value = this.value();
         const locale = this.#i18n.localeId();
-        const valueDate = value ? DateTime.fromJSDate(value).setLocale(locale) : DateTime.now().setLocale(locale);
-        let dateTime = DateTime.fromFormat(dateString, this.format(), { locale });
+        const valueDate = value ? gregorianDateTime(value, locale) : gregorianDateTime(new Date(), locale);
+        let dateTime = parseGregorianDate(dateString, this.effectiveFormat(), locale);
         if (dateTime.isValid) {
             return dateTime.set({ year: valueDate.year, month: valueDate.month, day: valueDate.day });
         }
@@ -354,7 +369,7 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
         const minDate = this.min();
         const date = minDate ?? maxDate;
         if (date) {
-            const newDate = DateTime.fromJSDate(date).setLocale(locale);
+            const newDate = gregorianDateTime(date, locale);
             dateTime = newDate.set({ year: valueDate.year, month: valueDate.month, day: valueDate.day });
             return dateTime;
         }
@@ -407,7 +422,7 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
     }
 
     private setCurrentDateString(date: Date | null): void {
-        this.updateCurrentDateString(date, this.format());
+        this.updateCurrentDateString(date, this.effectiveFormat());
     }
 
     private setDateValues(): void {
@@ -415,7 +430,7 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
         const locale = this.#i18n.localeId();
         this.navigatedDate.set(value ?? DateTime.now().setLocale(locale).toJSDate());
         if (value) {
-            this.updateCurrentDateString(value, this.format());
+            this.updateCurrentDateString(value, this.effectiveFormat());
         }
     }
 
@@ -440,7 +455,7 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
             this.currentDateString.set("");
             return;
         }
-        const dateString = DateTime.fromJSDate(date).setLocale(this.#i18n.localeId()).toFormat(format);
+        const dateString = gregorianDateTime(date, this.#i18n.localeId()).toFormat(format);
         this.currentDateString.set(dateString);
     }
 }
