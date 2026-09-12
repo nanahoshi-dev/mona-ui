@@ -27,6 +27,7 @@
         "test:audit": "vitest run projects/mona-ui-tester/scripts/audit-i18n-rtl.spec.ts projects/mona-ui-tester/scripts/audit-locales.spec.ts",
         "test:locales-audit": "vitest run projects/mona-ui-tester/scripts/audit-locales.spec.ts",
         "audit:locales": "tsx projects/mona-ui-tester/scripts/audit-locales.ts",
+        "verify:package": "tsx projects/mona-ui-tester/scripts/verify-built-package.ts",
         "audit:i18n-rtl": "tsx projects/mona-ui-tester/scripts/audit-i18n-rtl.ts",
         "audit:i18n-rtl:strict": "tsx projects/mona-ui-tester/scripts/audit-i18n-rtl.ts --strict",
         "test:browser:geometry": "npm run build:tester && tsx scripts/test-direction-browser.ts --no-build",
