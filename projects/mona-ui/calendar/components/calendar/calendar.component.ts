@@ -28,6 +28,7 @@ import { fromEvent, skip } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import {
     formatGregorianDateToLocaleString,
+    getLocaleFirstDayOfWeek,
     gregorianDateTime,
     gregorianDateTimeFromObject,
     injectComponentDirection,
@@ -88,7 +89,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         const day = this.navigatedDate();
         const firstDayOfMonth = gregorianDateTime(day, this.#i18n.localeId()).startOf("month");
         const lastDayOfMonth = gregorianDateTime(day, this.#i18n.localeId()).endOf("month");
-        const firstDayOfWeek = this.firstDay() === "monday" ? 1 : 0;
+        const firstDayOfWeek = this.effectiveFirstDay() === "monday" ? 1 : 0;
 
         let firstDayOfCalendar: DateTime;
         const monthStartWeekday = firstDayOfMonth.weekday;
@@ -324,7 +325,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         }
     });
     protected readonly weekdays = computed(() => {
-        const firstDayOfWeek = this.firstDay();
+        const firstDayOfWeek = this.effectiveFirstDay();
         const locale = this.#i18n.localeId();
         // 2024-01-07 was a Sunday
         const days = range(0, 7)
@@ -343,6 +344,10 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         return calendarYearViewGridThemeVariants();
     });
 
+    protected readonly effectiveFirstDay = computed<FirstDayOfWeek>(() => {
+        return this.firstDay() ?? getLocaleFirstDayOfWeek(this.#i18n.localeId());
+    });
+
     /**
      * @description Sets the disabled state of the calendar.
      */
@@ -355,10 +360,10 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     public readonly disabledDates = input<DateDisabledType>();
 
     /**
-     * @description Sets the first day of the week.
-     * @default "monday"
+     * @description Sets the first day of the week. If not specified, derives from the active locale.
+     * @default null
      */
-    public readonly firstDay = input<FirstDayOfWeek>("monday");
+    public readonly firstDay = input<FirstDayOfWeek | null>(null);
 
     /**
      * @description Marks the calendar as invalid. When bound to a signal form field via `[formField]`,
@@ -525,7 +530,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
 
     protected getWeekNumber(date: Date): number {
         let dt = gregorianDateTime(date, this.#i18n.localeId());
-        if (this.firstDay() === "sunday") {
+        if (this.effectiveFirstDay() === "sunday") {
             // In Sunday-first calendar, date is Sunday (day 0 of [Sun..Sat] row).
             // Thursday (day 4 of row) represents the majority of the row and defines its ISO 8601 week number.
             dt = dt.plus({ days: 4 });

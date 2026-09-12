@@ -484,4 +484,89 @@ describe("CalendarComponent i18n", () => {
         expect(weekNumbers[0]).toBe("1");
         expect(weekNumbers[1]).toBe("2");
     });
+
+    describe("locale-derived week start", () => {
+        @Component({
+            template: `<mona-calendar [firstDay]="firstDay()"></mona-calendar>`,
+            imports: [CalendarComponent]
+        })
+        class WeekStartTestHostComponent {
+            public readonly firstDay = signal<"monday" | "sunday" | null>(null);
+        }
+
+        it("defaults to Sunday-first for ja-JP and aligns weekday headers", async () => {
+            TestBed.configureTestingModule({
+                imports: [WeekStartTestHostComponent]
+            });
+            const fixture = TestBed.createComponent(WeekStartTestHostComponent);
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use({ id: "ja-JP", direction: "ltr", messages: {} });
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const headerRow = fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
+            const headers = Array.from(headerRow.querySelectorAll("div")).map(el => el.textContent?.trim());
+            expect(headers[0]).toBe("日");
+            expect(headers[1]).toBe("月");
+            expect(headers[6]).toBe("土");
+        });
+
+        it("defaults to Monday-first for de-DE", async () => {
+            TestBed.configureTestingModule({
+                imports: [WeekStartTestHostComponent]
+            });
+            const fixture = TestBed.createComponent(WeekStartTestHostComponent);
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use({ id: "de-DE", direction: "ltr", messages: {} });
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const headerRow = fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
+            const headers = Array.from(headerRow.querySelectorAll("div")).map(el => el.textContent?.trim());
+            expect(headers[0]).toBe("Mo");
+            expect(headers[6]).toBe("So");
+        });
+
+        it("preserves explicit firstDay override even when active locale differs", async () => {
+            TestBed.configureTestingModule({
+                imports: [WeekStartTestHostComponent]
+            });
+            const fixture = TestBed.createComponent(WeekStartTestHostComponent);
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use({ id: "ja-JP", direction: "ltr", messages: {} });
+            fixture.componentInstance.firstDay.set("monday");
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const headerRow = fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
+            const headers = Array.from(headerRow.querySelectorAll("div")).map(el => el.textContent?.trim());
+            expect(headers[0]).toBe("月");
+            expect(headers[6]).toBe("日");
+        });
+
+        it("reactively switches from Monday-first to Sunday-first on runtime locale change without override", async () => {
+            TestBed.configureTestingModule({
+                imports: [WeekStartTestHostComponent]
+            });
+            const fixture = TestBed.createComponent(WeekStartTestHostComponent);
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use({ id: "de-DE", direction: "ltr", messages: {} });
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const getFirstWeekday = () => {
+                const headerRow = fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
+                return headerRow.querySelectorAll("div")[0]?.textContent?.trim();
+            };
+
+            expect(getFirstWeekday()).toBe("Mo");
+
+            // Switch to Japanese
+            i18n.use({ id: "ja-JP", direction: "ltr", messages: {} });
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            expect(getFirstWeekday()).toBe("日");
+        });
+    });
 });
