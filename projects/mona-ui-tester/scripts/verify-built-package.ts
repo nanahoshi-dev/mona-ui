@@ -11,9 +11,15 @@ export interface PackageVerificationOptions {
     tscPath?: string;
 }
 
+export interface ExpectedLocaleExport {
+    readonly symbol: string;
+    readonly id: string;
+    readonly direction?: "ltr" | "rtl";
+}
+
 export interface ConsumerSmokeTestOptions {
     distDir: string;
-    expectedSymbols: readonly string[];
+    expectedLocales: readonly ExpectedLocaleExport[];
     tscPath?: string;
     repoRoot?: string;
 }
@@ -78,16 +84,35 @@ export function runConsumerSmokeTest(options: ConsumerSmokeTestOptions): void {
         const smokeScript = `
 import * as locales from "@nanahoshi/mona-ui/locales";
 
-const expected = ${JSON.stringify(options.expectedSymbols)};
-for (const sym of expected) {
-    if (!(sym in locales)) {
-        console.error("Missing export: " + sym);
+const expectedLocales = ${JSON.stringify(options.expectedLocales)};
+for (const expected of expectedLocales) {
+    if (!(expected.symbol in locales)) {
+        console.error("Missing export: " + expected.symbol);
         process.exit(1);
     }
-    const loc = locales[sym];
-    if (!loc || typeof loc !== "object" || !loc.id || !loc.messages) {
-        console.error("Invalid locale object structure for export: " + sym);
+    const loc = locales[expected.symbol];
+    if (!loc || typeof loc !== "object") {
+        console.error("Invalid locale object for export: " + expected.symbol);
         process.exit(1);
+    }
+    if (loc.id !== expected.id) {
+        console.error(\`Locale id mismatch for export \${expected.symbol}: expected "\${expected.id}", received "\${loc.id}"\`);
+        process.exit(1);
+    }
+    if (!loc.messages || typeof loc.messages !== "object") {
+        console.error("Invalid locale messages structure for export: " + expected.symbol);
+        process.exit(1);
+    }
+    if (expected.direction) {
+        if (loc.direction !== expected.direction) {
+            console.error(\`Locale direction mismatch for export \${expected.symbol}: expected "\${expected.direction}", received "\${loc.direction}"\`);
+            process.exit(1);
+        }
+    } else {
+        if (loc.direction !== "ltr" && loc.direction !== "rtl") {
+            console.error(\`Invalid locale direction for export \${expected.symbol}: received "\${loc.direction}", expected "ltr" or "rtl"\`);
+            process.exit(1);
+        }
     }
 }
 console.log("Runtime package import verified successfully.");
@@ -106,11 +131,12 @@ console.log("Runtime package import verified successfully.");
         }
 
         // 2. TypeScript consumer compilation test
+        const symbols = options.expectedLocales.map(l => l.symbol);
         const consumerTsPath = join(tempDir, "consumer.ts");
         const consumerTs = `
-import { ${options.expectedSymbols.join(", ")} } from "@nanahoshi/mona-ui/locales";
+import { ${symbols.join(", ")} } from "@nanahoshi/mona-ui/locales";
 
-${options.expectedSymbols
+${symbols
     .map(
         sym => `
 const localeId_${sym}: string = ${sym}.id;
@@ -190,16 +216,26 @@ export function verifyBuiltPackage(options: PackageVerificationOptions = {}): vo
         );
     }
 
-    const expectedSymbols = discovery.locales.map(l => l.localeExport).filter(Boolean);
-    if (expectedSymbols.length === 0) {
+    const expectedLocales: ExpectedLocaleExport[] = discovery.locales.map(l => {
+        if (!l.localeExport) {
+            throw new Error(`Internal invariant violation: locale "${l.folder}" has no official export symbol`);
+        }
+        return {
+            symbol: l.localeExport,
+            id: l.canonicalId,
+            direction: l.direction
+        };
+    });
+
+    if (expectedLocales.length === 0) {
         throw new Error(`No official locale symbols discovered in ${sourceLocalesDir}`);
     }
-    console.log(`✓ Discovered official locale symbols: ${expectedSymbols.join(", ")}`);
+    console.log(`✓ Discovered official locale symbols: ${expectedLocales.map(l => l.symbol).join(", ")}`);
     console.log(`✓ Resolved hermetic TypeScript compiler at: ${tscPath}`);
 
     runConsumerSmokeTest({
         distDir,
-        expectedSymbols,
+        expectedLocales,
         tscPath,
         repoRoot
     });

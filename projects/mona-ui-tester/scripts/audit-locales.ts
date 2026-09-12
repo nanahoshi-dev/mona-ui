@@ -30,6 +30,7 @@ export interface OfficialLocaleDescriptor {
     readonly localeFile: string;
     readonly messagesExport: string;
     readonly localeExport: string;
+    readonly direction?: "ltr" | "rtl";
 }
 
 export interface LocaleDiscoveryResult {
@@ -643,6 +644,7 @@ export function discoverOfficialLocales(
         }
 
         let localeExport = "";
+        let direction: "ltr" | "rtl" | undefined;
         try {
             const locSf = project.createSourceFile(
                 `disc-loc-${Date.now()}-${Math.random()}.ts`,
@@ -654,6 +656,22 @@ export function discoverOfficialLocales(
                 .filter(d => d.getVariableStatement()?.isExported() && /^MONA_[A-Z0-9_]+_LOCALE$/.test(d.getName()));
             if (exportedLocDecls.length === 1) {
                 localeExport = exportedLocDecls[0].getName();
+                const init = exportedLocDecls[0].getInitializer();
+                const obj =
+                    init?.asKind(SyntaxKind.SatisfiesExpression)?.getExpression()?.asKind(SyntaxKind.ObjectLiteralExpression) ??
+                    init?.asKind(SyntaxKind.ObjectLiteralExpression);
+                if (obj) {
+                    const dirProp = obj.getProperty("direction");
+                    if (dirProp && Node.isPropertyAssignment(dirProp)) {
+                        const dirInit = dirProp.getInitializer();
+                        if (dirInit && (Node.isStringLiteral(dirInit) || Node.isNoSubstitutionTemplateLiteral(dirInit))) {
+                            const val = dirInit.getLiteralText().trim();
+                            if (val === "ltr" || val === "rtl") {
+                                direction = val;
+                            }
+                        }
+                    }
+                }
             }
         } catch {
             // handled in file audit
@@ -666,7 +684,8 @@ export function discoverOfficialLocales(
             messagesFile,
             localeFile,
             messagesExport,
-            localeExport
+            localeExport,
+            direction
         });
     }
 

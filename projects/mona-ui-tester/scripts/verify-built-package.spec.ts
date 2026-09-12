@@ -175,7 +175,7 @@ describe("verify-built-package", () => {
                 expect(() =>
                     runConsumerSmokeTest({
                         distDir: fakeDist,
-                        expectedSymbols: ["es_ES"]
+                        expectedLocales: [{ symbol: "es_ES", id: "es-ES", direction: "ltr" }]
                     })
                 ).not.toThrow();
             } finally {
@@ -207,9 +207,114 @@ describe("verify-built-package", () => {
                 expect(() =>
                     runConsumerSmokeTest({
                         distDir: fakeDist,
-                        expectedSymbols: ["es_ES"]
+                        expectedLocales: [{ symbol: "es_ES", id: "es-ES" }]
                     })
                 ).toThrow("Missing export: es_ES");
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when runtime export has wrong id", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                writeFileSync(
+                    join(fakeDist, "package.json"),
+                    JSON.stringify({
+                        name: "@nanahoshi/mona-ui",
+                        exports: {
+                            "./locales": {
+                                types: "./locales.d.ts",
+                                default: "./locales.mjs"
+                            }
+                        }
+                    })
+                );
+                writeFileSync(
+                    join(fakeDist, "locales.mjs"),
+                    'export const es_ES = { id: "de-DE", direction: "ltr", messages: {} };\n'
+                );
+                writeFileSync(
+                    join(fakeDist, "locales.d.ts"),
+                    'export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n'
+                );
+
+                expect(() =>
+                    runConsumerSmokeTest({
+                        distDir: fakeDist,
+                        expectedLocales: [{ symbol: "es_ES", id: "es-ES" }]
+                    })
+                ).toThrow('Locale id mismatch for export es_ES: expected "es-ES", received "de-DE"');
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when runtime export has invalid direction", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                writeFileSync(
+                    join(fakeDist, "package.json"),
+                    JSON.stringify({
+                        name: "@nanahoshi/mona-ui",
+                        exports: {
+                            "./locales": {
+                                types: "./locales.d.ts",
+                                default: "./locales.mjs"
+                            }
+                        }
+                    })
+                );
+                writeFileSync(
+                    join(fakeDist, "locales.mjs"),
+                    'export const es_ES = { id: "es-ES", direction: "horizontal", messages: {} };\n'
+                );
+                writeFileSync(
+                    join(fakeDist, "locales.d.ts"),
+                    'export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n'
+                );
+
+                expect(() =>
+                    runConsumerSmokeTest({
+                        distDir: fakeDist,
+                        expectedLocales: [{ symbol: "es_ES", id: "es-ES" }]
+                    })
+                ).toThrow('Invalid locale direction for export es_ES: received "horizontal", expected "ltr" or "rtl"');
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when runtime export direction does not match expected direction", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                writeFileSync(
+                    join(fakeDist, "package.json"),
+                    JSON.stringify({
+                        name: "@nanahoshi/mona-ui",
+                        exports: {
+                            "./locales": {
+                                types: "./locales.d.ts",
+                                default: "./locales.mjs"
+                            }
+                        }
+                    })
+                );
+                writeFileSync(
+                    join(fakeDist, "locales.mjs"),
+                    'export const es_ES = { id: "es-ES", direction: "rtl", messages: {} };\n'
+                );
+                writeFileSync(
+                    join(fakeDist, "locales.d.ts"),
+                    'export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n'
+                );
+
+                expect(() =>
+                    runConsumerSmokeTest({
+                        distDir: fakeDist,
+                        expectedLocales: [{ symbol: "es_ES", id: "es-ES", direction: "ltr" }]
+                    })
+                ).toThrow('Locale direction mismatch for export es_ES: expected "ltr", received "rtl"');
             } finally {
                 rmSync(fakeDist, { recursive: true, force: true });
             }
@@ -230,7 +335,7 @@ describe("verify-built-package", () => {
                         }
                     })
                 );
-                writeFileSync(join(fakeDist, "locales.mjs"), "export const es_ES = { id: 'es-ES' };\n");
+                writeFileSync(join(fakeDist, "locales.mjs"), "export const es_ES = { id: 'es-ES', direction: 'ltr' };\n");
                 writeFileSync(
                     join(fakeDist, "locales.d.ts"),
                     "export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n"
@@ -239,9 +344,9 @@ describe("verify-built-package", () => {
                 expect(() =>
                     runConsumerSmokeTest({
                         distDir: fakeDist,
-                        expectedSymbols: ["es_ES"]
+                        expectedLocales: [{ symbol: "es_ES", id: "es-ES" }]
                     })
-                ).toThrow("Invalid locale object structure for export: es_ES");
+                ).toThrow("Invalid locale messages structure for export: es_ES");
             } finally {
                 rmSync(fakeDist, { recursive: true, force: true });
             }
@@ -271,7 +376,7 @@ describe("verify-built-package", () => {
                 expect(() =>
                     runConsumerSmokeTest({
                         distDir: fakeDist,
-                        expectedSymbols: ["es_ES"]
+                        expectedLocales: [{ symbol: "es_ES", id: "es-ES" }]
                     })
                 ).toThrow("Consumer TypeScript compilation failed");
             } finally {
