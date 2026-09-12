@@ -66,7 +66,23 @@ export const LOCALE_COPY_EXCEPTIONS: readonly LocaleCopyException[] = [
     { localeId: "es-ES", messagePath: "colorPalette.color", value: "Color" },
     { localeId: "de-DE", messagePath: "chart.highAbbreviation", value: "H" },
     { localeId: "de-DE", messagePath: "dialog.ok", value: "OK" },
-    { localeId: "de-DE", messagePath: "editor.format", value: "Format" }
+    { localeId: "de-DE", messagePath: "editor.format", value: "Format" },
+    { localeId: "fr-FR", messagePath: "chart.closeAbbreviation", value: "C" },
+    { localeId: "fr-FR", messagePath: "chart.conversion", value: "Conversion" },
+    { localeId: "fr-FR", messagePath: "chart.highAbbreviation", value: "H" },
+    { localeId: "fr-FR", messagePath: "chart.openAbbreviation", value: "O" },
+    { localeId: "fr-FR", messagePath: "colorGradient.saturationAndValueText", value: "Saturation" },
+    { localeId: "fr-FR", messagePath: "dateTimePicker.date", value: "Date" },
+    { localeId: "fr-FR", messagePath: "dialog.ok", value: "OK" },
+    { localeId: "fr-FR", messagePath: "editor.format", value: "Format" },
+    { localeId: "fr-FR", messagePath: "pager.jumpBackwardLabel", value: "pages" },
+    { localeId: "fr-FR", messagePath: "pager.jumpForwardLabel", value: "pages" },
+    { localeId: "fr-FR", messagePath: "pager.pageLabel", value: "Page" },
+    { localeId: "fr-FR", messagePath: "pager.pageStatus", value: "Page" },
+    { localeId: "fr-FR", messagePath: "pager.pageText", value: "Page" },
+    { localeId: "fr-FR", messagePath: "scrollView.page", value: "Page" },
+    { localeId: "fr-FR", messagePath: "scrollView.pageOf", value: "Page" },
+    { localeId: "fr-FR", messagePath: "timeSelector.minutes", value: "Minutes" }
 ];
 
 export function isAllowedLocaleCopyException(

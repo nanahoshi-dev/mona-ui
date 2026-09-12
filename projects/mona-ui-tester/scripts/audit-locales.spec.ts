@@ -68,6 +68,35 @@ describe("audit-locales", () => {
             expect(isAllowedLocaleCopyException("de-DE", "other.format", "Format")).toBe(false);
             expect(isAllowedLocaleCopyException("de-DE", "dialog.ok", "Cancel")).toBe(false);
         });
+
+        it("allows French-specific unchanged words on approved paths", () => {
+            expect(isAllowedLocaleCopyException("fr-FR", "chart.closeAbbreviation", "C")).toBe(true);
+            expect(isAllowedLocaleCopyException("fr-FR", "chart.conversion", "Conversion")).toBe(true);
+            expect(isAllowedLocaleCopyException("fr-FR", "chart.highAbbreviation", "H")).toBe(true);
+            expect(isAllowedLocaleCopyException("fr-FR", "chart.openAbbreviation", "O")).toBe(true);
+            expect(isAllowedLocaleCopyException("fr-FR", "colorGradient.saturationAndValueText", "Saturation")).toBe(true);
+            expect(isAllowedLocaleCopyException("fr-FR", "dateTimePicker.date", "Date")).toBe(true);
+            expect(isAllowedLocaleCopyException("fr-FR", "dialog.ok", "OK")).toBe(true);
+            expect(isAllowedLocaleCopyException("fr-FR", "editor.format", "Format")).toBe(true);
+            expect(isAllowedLocaleCopyException("fr-FR", "pager.jumpBackwardLabel", "pages")).toBe(true);
+            expect(isAllowedLocaleCopyException("fr-FR", "pager.jumpForwardLabel", "pages")).toBe(true);
+            expect(isAllowedLocaleCopyException("fr-FR", "pager.pageLabel", "Page")).toBe(true);
+            expect(isAllowedLocaleCopyException("fr-FR", "pager.pageStatus", "Page")).toBe(true);
+            expect(isAllowedLocaleCopyException("fr-FR", "pager.pageText", "Page")).toBe(true);
+            expect(isAllowedLocaleCopyException("fr-FR", "scrollView.page", "Page")).toBe(true);
+            expect(isAllowedLocaleCopyException("fr-FR", "scrollView.pageOf", "Page")).toBe(true);
+            expect(isAllowedLocaleCopyException("fr-FR", "timeSelector.minutes", "Minutes")).toBe(true);
+        });
+
+        it("disallows French-specific exceptions for other locales or unapproved paths", () => {
+            expect(isAllowedLocaleCopyException("de-DE", "timeSelector.minutes", "Minutes")).toBe(false);
+            expect(isAllowedLocaleCopyException("es-ES", "timeSelector.minutes", "Minutes")).toBe(false);
+            expect(isAllowedLocaleCopyException("fr-FR", "other.minutes", "Minutes")).toBe(false);
+            expect(isAllowedLocaleCopyException("fr-FR", "timeSelector.minutes", "Hours")).toBe(false);
+            expect(isAllowedLocaleCopyException("es-ES", "chart.openAbbreviation", "O")).toBe(false);
+            expect(isAllowedLocaleCopyException("de-DE", "chart.openAbbreviation", "O")).toBe(false);
+            expect(isAllowedLocaleCopyException(undefined, "chart.openAbbreviation", "O")).toBe(false);
+        });
     });
 
     describe("auditLocaleMessagesFile", () => {
@@ -1204,6 +1233,18 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
                         locale.canonicalId === "de-DE" &&
                         locale.localeExport === "MONA_DE_DE_LOCALE" &&
                         locale.messagesExport === "DE_DE_MESSAGES"
+                )
+            ).toBe(true);
+        });
+
+        it("discovers the official French locale", () => {
+            const discovery = discoverOfficialLocales();
+            expect(
+                discovery.locales.some(
+                    locale =>
+                        locale.canonicalId === "fr-FR" &&
+                        locale.localeExport === "MONA_FR_FR_LOCALE" &&
+                        locale.messagesExport === "FR_FR_MESSAGES"
                 )
             ).toBe(true);
         });
