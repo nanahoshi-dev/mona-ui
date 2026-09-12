@@ -352,15 +352,15 @@ export const ES_ES_MESSAGES = {
         timePicker: "Selector de hora"
     },
     timeSelector: {
-        am: "AM",
-        amPm: "AM/PM",
+        am: "a. m.",
+        amPm: "a. m./p. m.",
         headerHours: "h",
         headerMinutes: "min",
         headerSeconds: "s",
         hours: "Horas",
         minutes: "Minutos",
         now: "Ahora",
-        pm: "PM",
+        pm: "p. m.",
         seconds: "Segundos",
         set: "Establecer",
         timeSelector: "Selector de hora"

@@ -48,12 +48,12 @@ describe("audit-locales", () => {
             expect(isAllowedLocaleCopyException("es-ES", "notification.error", "Error")).toBe(true);
             expect(isAllowedLocaleCopyException("es-ES", "chart.closeAbbreviation", "C")).toBe(true);
             expect(isAllowedLocaleCopyException("es-ES", "colorPalette.color", "Color")).toBe(true);
-            expect(isAllowedLocaleCopyException("es-ES", "timeSelector.am", "AM")).toBe(true);
-            expect(isAllowedLocaleCopyException("es-ES", "timeSelector.pm", "PM")).toBe(true);
-            expect(isAllowedLocaleCopyException("es-ES", "timeSelector.amPm", "AM/PM")).toBe(true);
         });
 
-        it("disallows Spanish-specific exceptions for other locales or unapproved paths", () => {
+        it("disallows Spanish-specific exceptions for other locales, unapproved paths, or day periods", () => {
+            expect(isAllowedLocaleCopyException("es-ES", "timeSelector.am", "AM")).toBe(false);
+            expect(isAllowedLocaleCopyException("es-ES", "timeSelector.pm", "PM")).toBe(false);
+            expect(isAllowedLocaleCopyException("es-ES", "timeSelector.amPm", "AM/PM")).toBe(false);
             expect(isAllowedLocaleCopyException("de-DE", "editor.color", "Color")).toBe(false);
             expect(isAllowedLocaleCopyException("de-DE", "notification.error", "Error")).toBe(false);
             expect(isAllowedLocaleCopyException("es-ES", "other.error", "Error")).toBe(false);
@@ -1300,6 +1300,39 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
                         locale.messagesExport === "JA_JP_MESSAGES"
                 )
             ).toBe(true);
+        });
+    });
+
+    describe("semantic day-period locale verification", () => {
+        const getIntlDayPeriod = (locale: string, hour: number): string => {
+            const date = new Date(2026, 0, 1, hour, 0, 0);
+            const parts = new Intl.DateTimeFormat(locale, {
+                hour: "numeric",
+                minute: "numeric",
+                hour12: true
+            }).formatToParts(date);
+            const period = parts.find(p => p.type === "dayPeriod")?.value ?? "";
+            return period.replace(/[\u00A0\u202F]/g, " ");
+        };
+
+        it("derives localized day periods matching CLDR for supported locales", () => {
+            expect(getIntlDayPeriod("ja-JP", 9)).toBe("午前");
+            expect(getIntlDayPeriod("ja-JP", 21)).toBe("午後");
+
+            expect(getIntlDayPeriod("es-ES", 9)).toBe("a. m.");
+            expect(getIntlDayPeriod("es-ES", 21)).toBe("p. m.");
+
+            expect(getIntlDayPeriod("de-DE", 9)).toBe("AM");
+            expect(getIntlDayPeriod("de-DE", 21)).toBe("PM");
+
+            expect(getIntlDayPeriod("fr-FR", 9)).toBe("AM");
+            expect(getIntlDayPeriod("fr-FR", 21)).toBe("PM");
+        });
+
+        it("guarantees Spanish copy exceptions for day periods are rejected", () => {
+            expect(isAllowedLocaleCopyException("es-ES", "timeSelector.am", "AM")).toBe(false);
+            expect(isAllowedLocaleCopyException("es-ES", "timeSelector.pm", "PM")).toBe(false);
+            expect(isAllowedLocaleCopyException("es-ES", "timeSelector.amPm", "AM/PM")).toBe(false);
         });
     });
 });

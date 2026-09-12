@@ -6,6 +6,7 @@ import { ListBoxComponent } from "@nanahoshi/mona-ui/list-box";
 import { PagerComponent, PAGER_DEFAULT_MESSAGES } from "@nanahoshi/mona-ui/pager";
 import { ScrollViewComponent } from "@nanahoshi/mona-ui/scroll-view";
 import { SplitButtonComponent } from "@nanahoshi/mona-ui/split-button";
+import { TimeSelectorComponent } from "@nanahoshi/mona-ui/time-selector";
 import {
     formatNumber,
     getNumberSymbols,
@@ -14,6 +15,14 @@ import {
     provideMonaI18n
 } from "@nanahoshi/mona-ui/i18n";
 import { MONA_ES_ES_LOCALE } from "./es-es.locale";
+
+@Component({
+    template: `<mona-time-selector [(value)]="testTime" [hourFormat]="'12'" />`,
+    imports: [TimeSelectorComponent]
+})
+class TimeSelectorIntegrationHostComponent {
+    public readonly testTime = signal<Date | null>(new Date(2026, 8, 15, 9, 30));
+}
 
 @Component({
     template: `<mona-calendar [value]="testDate" />`,
@@ -196,10 +205,10 @@ describe("MONA_ES_ES_LOCALE Integration with MonaI18nService", () => {
     });
 
     it("ensures MONA_ES_ES_LOCALE is immutable and unmutated across service usage cycles", () => {
-        const deepFreeze = (obj: any): any => {
+        const deepFreeze = <T>(obj: T): T => {
             Object.freeze(obj);
-            for (const key of Object.getOwnPropertyNames(obj)) {
-                const val = obj[key];
+            for (const key of Object.getOwnPropertyNames(obj as object)) {
+                const val = (obj as Record<string, unknown>)[key];
                 if (val && (typeof val === "object" || typeof val === "function") && !Object.isFrozen(val)) {
                     deepFreeze(val);
                 }
@@ -392,5 +401,58 @@ describe("MONA_ES_ES_LOCALE Integration with MonaI18nService", () => {
         const hostEl = fixture.nativeElement as HTMLElement;
         expect(hostEl.querySelector("button[aria-label='Desplazar la paginación hacia atrás']")).not.toBeNull();
         expect(hostEl.querySelector("button[aria-label='Desplazar la paginación hacia delante']")).not.toBeNull();
+    });
+
+    it("renders TimeSelector component with localized Spanish 12-hour day periods and accessible labels", () => {
+        TestBed.configureTestingModule({
+            imports: [TimeSelectorIntegrationHostComponent],
+            providers: [
+                provideMonaI18n({
+                    locale: MONA_ES_ES_LOCALE
+                })
+            ]
+        });
+
+        const fixture = TestBed.createComponent(TimeSelectorIntegrationHostComponent);
+        fixture.detectChanges();
+
+        const hostEl = fixture.nativeElement as HTMLElement;
+
+        // 1. Meridiem list accessible label is Spanish: a. m./p. m.
+        const meridiemList = hostEl.querySelector("ol[aria-label='a. m./p. m.']") as HTMLOListElement;
+        expect(meridiemList).not.toBeNull();
+        expect(hostEl.querySelector("ol[aria-label='AM/PM']")).toBeNull();
+
+        // 2. Visible AM/PM options are localized to a. m. and p. m.
+        const listItems = Array.from(meridiemList.querySelectorAll("li"));
+        const amItem = listItems.find(li => li.textContent?.trim() === "a. m.");
+        const pmItem = listItems.find(li => li.textContent?.trim() === "p. m.");
+        expect(amItem).toBeDefined();
+        expect(pmItem).toBeDefined();
+        expect(listItems.some(li => li.textContent?.trim() === "AM")).toBe(false);
+        expect(listItems.some(li => li.textContent?.trim() === "PM")).toBe(false);
+
+        // 3. Info text displays Spanish day period matching the selector
+        expect(hostEl.textContent).toContain("9:30 a. m.");
+
+        // 4. Switching meridiem updates display time and internal model
+        pmItem?.click();
+        fixture.detectChanges();
+
+        expect(hostEl.textContent).toContain("9:30 p. m.");
+
+        const setButton = Array.from(hostEl.querySelectorAll("button")).find(b => b.textContent?.trim() === "Establecer");
+        setButton?.click();
+        fixture.detectChanges();
+        expect(fixture.componentInstance.testTime()?.getHours()).toBe(21);
+
+        amItem?.click();
+        fixture.detectChanges();
+
+        expect(hostEl.textContent).toContain("9:30 a. m.");
+
+        setButton?.click();
+        fixture.detectChanges();
+        expect(fixture.componentInstance.testTime()?.getHours()).toBe(9);
     });
 });
