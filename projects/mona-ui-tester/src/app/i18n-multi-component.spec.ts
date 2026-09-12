@@ -167,6 +167,13 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
         const esScroll = root.querySelector("mona-scroll-view");
         expect(esScroll?.querySelector("button[aria-label='Página anterior']")).not.toBeNull();
 
+        // Calendar translated UI controls and live region in Spanish
+        const esCalendar = root.querySelector("mona-calendar");
+        expect(esCalendar?.querySelector("button:first-child")?.textContent?.trim()).toBe("Hoy");
+        expect(esCalendar?.querySelector("button[aria-label='Mes anterior']")).not.toBeNull();
+        expect(esCalendar?.querySelector("button[aria-label='Mes siguiente']")).not.toBeNull();
+        expect(esCalendar?.querySelector("[aria-live='polite']")?.textContent?.toLowerCase()).toContain("calendario");
+
         // NumericTextBox formatting with Spanish comma separator
         expect(input.getAttribute("aria-valuetext")).toBe("1234,50");
 
@@ -238,8 +245,8 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
         expect(prevArrow?.getAttribute("aria-label")).toContain("[!! ");
     });
 
-    it("verifies RTL DOM subtree behavior is decoupled from Mona locale", () => {
-        // Active locale remains en-US (LTR)
+    it("verifies RTL DOM subtree behavior is decoupled from Mona locale", async () => {
+        // 1. English default (LTR) with RTL DOM subtree
         expect(i18n.localeId()).toBe("en-US");
         expect(i18n.direction()).toBe("ltr");
 
@@ -260,5 +267,24 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
         // English messages remain active in RTL DOM
         const pager = root.querySelector("mona-pager");
         expect(pager?.querySelector("button[aria-label='First page']")).not.toBeNull();
+
+        // 2. Activate Spanish locale (metadata: LTR) in the RTL DOM subtree
+        i18n.use(MONA_ES_ES_LOCALE);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        // Translation locale metadata is LTR, but semantic DOM direction remains RTL
+        expect(i18n.localeId()).toBe("es-ES");
+        expect(i18n.direction()).toBe("ltr");
+        expect(container.getAttribute("dir")).toBe("rtl");
+
+        // Direction-sensitive component layout still follows DOM RTL (chevrons mirrored)
+        expect(prevArrowIcon?.getAttribute("class")).toContain("rtl:rotate-180");
+
+        // Components render translated Spanish UI
+        expect(pager?.querySelector("button[aria-label='Primera página']")).not.toBeNull();
+        const calendar = root.querySelector("mona-calendar");
+        expect(calendar?.querySelector("button:first-child")?.textContent?.trim()).toBe("Hoy");
     });
 });
+
