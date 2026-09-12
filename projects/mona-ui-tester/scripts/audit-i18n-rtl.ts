@@ -1187,21 +1187,137 @@ export function collectLiteralFragments(node: Node | undefined): LiteralFragment
     return [];
 }
 
+const UNIVERSAL_TECHNICAL_MAP_VALUES = new Set([
+    "",
+    "ArrowLeft",
+    "ArrowRight",
+    "ArrowUp",
+    "ArrowDown",
+    "aria-label",
+    "aria-labelledby",
+    "aria-describedby",
+    "aria-roledescription",
+    "aria-label-start",
+    "aria-label-end",
+    "true",
+    "false",
+    "assertive",
+    "polite",
+    "off",
+    "mixed"
+]);
+
+const ROLE_TOKENS = new Set([
+    "button",
+    "menuitem",
+    "checkbox",
+    "radio",
+    "combobox",
+    "grid",
+    "tab",
+    "dialog",
+    "alert",
+    "none",
+    "presentation"
+]);
+
+const ORIENTATION_TOKENS = new Set([
+    "horizontal",
+    "vertical"
+]);
+
+const PLACEMENT_TOKENS = new Set([
+    "start",
+    "center",
+    "end",
+    "left",
+    "right",
+    "top",
+    "bottom",
+    "auto"
+]);
+
+const SORT_TOKENS = new Set([
+    "ascending",
+    "descending"
+]);
+
+const FILTER_OPERATOR_TOKENS = new Set([
+    "contains",
+    "doesnotcontain",
+    "startswith",
+    "endswith",
+    "eq",
+    "neq",
+    "gte",
+    "gt",
+    "lte",
+    "lt",
+    "isnull",
+    "isnotnull",
+    "isempty",
+    "isnotempty"
+]);
+
+const COLOR_CHANNEL_TOKENS = new Set([
+    "A",
+    "H",
+    "S",
+    "V",
+    "R",
+    "G",
+    "B"
+]);
+
 export function isTechnicalSemanticMapValue(
     mapName: string,
     propertyName: string,
     value: string
 ): boolean {
-    if (TECHNICAL_SEMANTIC_STRINGS.has(value)) {
+    if (UNIVERSAL_TECHNICAL_MAP_VALUES.has(value)) {
         return true;
     }
 
-    const stronglyUserFacing =
-        /(?:_LABELS|_ANNOUNCEMENTS)$/.test(mapName) ||
-        /^(?:LABELS|ANNOUNCEMENTS)_/.test(mapName);
+    if (
+        /^(?:role|ariaRole|roleName)$/i.test(propertyName) &&
+        ROLE_TOKENS.has(value)
+    ) {
+        return true;
+    }
 
-    if (stronglyUserFacing) {
-        return false;
+    if (
+        /^(?:orientation|axis)$/i.test(propertyName) &&
+        ORIENTATION_TOKENS.has(value)
+    ) {
+        return true;
+    }
+
+    if (
+        /^(?:placement|position|alignment|align)$/i.test(propertyName) &&
+        PLACEMENT_TOKENS.has(value)
+    ) {
+        return true;
+    }
+
+    if (
+        /^(?:sortDirection|sortOrder|sort|direction)$/i.test(propertyName) &&
+        SORT_TOKENS.has(value)
+    ) {
+        return true;
+    }
+
+    if (
+        /^(?:operator|filterOperator|op)$/i.test(propertyName) &&
+        FILTER_OPERATOR_TOKENS.has(value)
+    ) {
+        return true;
+    }
+
+    if (
+        /^(?:channel|colorChannel)$/i.test(propertyName) &&
+        COLOR_CHANNEL_TOKENS.has(value)
+    ) {
+        return true;
     }
 
     if (
@@ -1229,11 +1345,12 @@ export function isTechnicalSemanticMapValue(
 }
 
 export function isSemanticTextMapName(name: string): boolean {
-    const raw = name.replace(/^#/, "");
+    const clean = name.replace(/^#/, "").replace(/^_+/, "");
     return (
-        /(?:_TEXT|_LABELS|_ANNOUNCEMENTS)$/.test(raw) ||
-        /^(?:TEXT|LABELS|ANNOUNCEMENTS)_/.test(raw) ||
-        /^(?:TEXT|LABELS|ANNOUNCEMENTS)$/.test(raw.replace(/^_+/, ""))
+        /(?:_TEXT|_LABELS|_ANNOUNCEMENTS)$/.test(clean) ||
+        /^(?:TEXT|LABELS|ANNOUNCEMENTS)_/.test(clean) ||
+        /^(?:TEXT|LABELS|ANNOUNCEMENTS)$/.test(clean) ||
+        /.+(?:Text|Labels|Announcements)$/.test(clean)
     );
 }
 
@@ -1253,29 +1370,6 @@ function unwrapInitializer(node: Node | undefined): Node | undefined {
             if (exprText === "Object.freeze" || exprText === "freeze") {
                 const args = current.getArguments();
                 current = args.length > 0 ? args[0] : undefined;
-            } else if (
-                exprText === "computed" ||
-                exprText.endsWith(".computed") ||
-                exprText === "signal" ||
-                exprText.endsWith(".signal")
-            ) {
-                const args = current.getArguments();
-                if (args.length > 0) {
-                    const fn = args[0];
-                    if (Node.isArrowFunction(fn) || Node.isFunctionExpression(fn)) {
-                        const body = fn.getBody();
-                        if (Node.isBlock(body)) {
-                            const returns = getDirectReturnStatements(fn);
-                            current = returns.length > 0 ? returns[0].getExpression() : undefined;
-                        } else {
-                            current = body;
-                        }
-                    } else {
-                        current = fn;
-                    }
-                } else {
-                    break;
-                }
             } else {
                 break;
             }
@@ -1299,12 +1393,71 @@ function scanSemanticMapNode(
         return;
     }
 
+    if (Node.isCallExpression(unwrapped)) {
+        const exprText = unwrapped.getExpression().getText();
+        const callee = exprText.split(".").pop() ?? exprText;
+
+        if (callee === "computed") {
+            const args = unwrapped.getArguments();
+            if (args.length > 0) {
+                scanSemanticMapNode(mapName, propertyName, args[0], filePath, isAria, violations);
+            }
+            return;
+        }
+
+        if (callee === "signal") {
+            const args = unwrapped.getArguments();
+            if (args.length > 0) {
+                scanSemanticMapNode(mapName, propertyName, args[0], filePath, isAria, violations);
+            }
+            return;
+        }
+
+        if (callee === "linkedSignal") {
+            const args = unwrapped.getArguments();
+            if (args.length > 0) {
+                const arg = args[0];
+                if (Node.isObjectLiteralExpression(arg)) {
+                    const computation = arg.getProperty("computation");
+                    if (computation && Node.isPropertyAssignment(computation)) {
+                        scanSemanticMapNode(mapName, propertyName, computation.getInitializer(), filePath, isAria, violations);
+                    } else if (
+                        computation &&
+                        (Node.isMethodDeclaration(computation) || Node.isGetAccessorDeclaration(computation))
+                    ) {
+                        const body = computation.getBody();
+                        if (body) {
+                            for (const ret of getDirectReturnStatements(computation)) {
+                                scanSemanticMapNode(mapName, propertyName, ret.getExpression(), filePath, isAria, violations);
+                            }
+                        }
+                    }
+                } else {
+                    scanSemanticMapNode(mapName, propertyName, arg, filePath, isAria, violations);
+                }
+            }
+            return;
+        }
+    }
+
+    if (Node.isArrowFunction(unwrapped) || Node.isFunctionExpression(unwrapped)) {
+        const body = unwrapped.getBody();
+        if (Node.isBlock(body)) {
+            for (const ret of getDirectReturnStatements(unwrapped)) {
+                scanSemanticMapNode(mapName, propertyName, ret.getExpression(), filePath, isAria, violations);
+            }
+        } else {
+            scanSemanticMapNode(mapName, propertyName, body, filePath, isAria, violations);
+        }
+        return;
+    }
+
     if (Node.isObjectLiteralExpression(unwrapped)) {
         for (const prop of unwrapped.getProperties()) {
             if (Node.isPropertyAssignment(prop)) {
                 const propName = prop.getName().replace(/^['"]|['"]$/g, "");
                 scanSemanticMapNode(mapName, propName, prop.getInitializer(), filePath, isAria, violations);
-            } else if (Node.isMethodDeclaration(prop)) {
+            } else if (Node.isMethodDeclaration(prop) || Node.isGetAccessorDeclaration(prop)) {
                 const propName = prop.getName().replace(/^['"]|['"]$/g, "");
                 const returns = getDirectReturnStatements(prop);
                 for (const ret of returns) {
@@ -1325,6 +1478,10 @@ function scanSemanticMapNode(
     if (Node.isConditionalExpression(unwrapped)) {
         scanSemanticMapNode(mapName, propertyName, unwrapped.getWhenTrue(), filePath, isAria, violations);
         scanSemanticMapNode(mapName, propertyName, unwrapped.getWhenFalse(), filePath, isAria, violations);
+        return;
+    }
+
+    if (!propertyName) {
         return;
     }
 

@@ -63,10 +63,23 @@ describe("audit-i18n-rtl", () => {
             expect(isSemanticTextMapName("_LABELS")).toBe(true);
         });
 
+        it("identifies camelCase, PascalCase, and private semantic text map naming conventions", () => {
+            expect(isSemanticTextMapName("buttonLabels")).toBe(true);
+            expect(isSemanticTextMapName("ariaLabels")).toBe(true);
+            expect(isSemanticTextMapName("statusAnnouncements")).toBe(true);
+            expect(isSemanticTextMapName("disabledReasonText")).toBe(true);
+            expect(isSemanticTextMapName("#ariaLabels")).toBe(true);
+            expect(isSemanticTextMapName("_ariaLabels")).toBe(true);
+            expect(isSemanticTextMapName("ButtonLabels")).toBe(true);
+            expect(isSemanticTextMapName("StatusAnnouncements")).toBe(true);
+        });
+
         it("rejects non-semantic-map variable names", () => {
             expect(isSemanticTextMapName("item")).toBe(false);
             expect(isSemanticTextMapName("labels")).toBe(false);
             expect(isSemanticTextMapName("textValue")).toBe(false);
+            expect(isSemanticTextMapName("labelState")).toBe(false);
+            expect(isSemanticTextMapName("announcementEnabled")).toBe(false);
             expect(isSemanticTextMapName("customClass")).toBe(false);
         });
     });
@@ -83,6 +96,22 @@ describe("audit-i18n-rtl", () => {
             expect(isTechnicalSemanticMapValue("BUTTON_LABELS", "save", "save")).toBe(false);
             expect(isTechnicalSemanticMapValue("STATUS_ANNOUNCEMENTS", "loading", "loading")).toBe(false);
             expect(isTechnicalSemanticMapValue("ARIA_LABELS", "prev", "previous")).toBe(false);
+        });
+
+        it("fails closed when global technical tokens appear in user-facing property positions", () => {
+            expect(isTechnicalSemanticMapValue("BUTTON_LABELS", "caption", "button")).toBe(false);
+            expect(isTechnicalSemanticMapValue("ARIA_LABELS", "previous", "left")).toBe(false);
+            expect(isTechnicalSemanticMapValue("ARIA_LABELS", "next", "right")).toBe(false);
+            expect(isTechnicalSemanticMapValue("STATUS_ANNOUNCEMENTS", "state", "ascending")).toBe(false);
+            expect(isTechnicalSemanticMapValue("STATUS_ANNOUNCEMENTS", "state", "descending")).toBe(false);
+        });
+
+        it("allows technical tokens when property context matches technical semantics", () => {
+            expect(isTechnicalSemanticMapValue("BUTTON_LABELS", "role", "button")).toBe(true);
+            expect(isTechnicalSemanticMapValue("CONFIG_TEXT", "role", "button")).toBe(true);
+            expect(isTechnicalSemanticMapValue("CONFIG_TEXT", "orientation", "horizontal")).toBe(true);
+            expect(isTechnicalSemanticMapValue("CONFIG_TEXT", "placement", "left")).toBe(true);
+            expect(isTechnicalSemanticMapValue("CONFIG_TEXT", "sortDirection", "ascending")).toBe(true);
         });
 
         it("exempts explicit technical formats in configuration text maps", () => {
@@ -1358,7 +1387,7 @@ describe("audit-i18n-rtl", () => {
                 const stylesheetMetadata = { left: "0px", right: "0px" };
                 const styleId = { left: "id-1", right: "id-2" };
                 const styleTokenName = { left: "token-left", right: "token-right" };
-                const styleGuideText = { left: "Guide Left", right: "Guide Right" };
+                const styleGuideText = { left: messages().guideLeft, right: messages().guideRight };
             `;
             const violations: AuditViolation[] = [];
             scanTypeScriptAst("test.ts", code, violations);
@@ -1908,6 +1937,232 @@ describe("audit-i18n-rtl", () => {
                 const statusViolations: AuditViolation[] = [];
                 scanTypeScriptAst("example.ts", statusCode, statusViolations);
                 expect(statusViolations).toHaveLength(0);
+            });
+
+            it("detects ambiguous technical tokens used as user-facing text in semantic text maps", () => {
+                const ariaCode = `
+                    const ARIA_LABELS = {
+                        previous: "left",
+                        next: "right"
+                    };
+                `;
+                const ariaViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", ariaCode, ariaViolations);
+                expect(ariaViolations).toHaveLength(2);
+                expect(ariaViolations.every(v => v.category === "i18n-aria")).toBe(true);
+
+                const buttonCode = `
+                    const BUTTON_LABELS = {
+                        caption: "button"
+                    };
+                `;
+                const buttonViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", buttonCode, buttonViolations);
+                expect(buttonViolations).toHaveLength(1);
+                expect(buttonViolations[0].category).toBe("i18n-text");
+
+                const statusCode = `
+                    const STATUS_ANNOUNCEMENTS = {
+                        state: "ascending"
+                    };
+                `;
+                const statusViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", statusCode, statusViolations);
+                expect(statusViolations).toHaveLength(1);
+                expect(statusViolations[0].category).toBe("i18n-aria");
+            });
+
+            it("allows technical tokens when property context matches technical semantics in maps", () => {
+                const configCode = `
+                    const CONFIG_TEXT = {
+                        role: "button",
+                        orientation: "horizontal",
+                        encoding: "utf-8",
+                        serializationFormat: "json"
+                    };
+                `;
+                const configViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", configCode, configViolations);
+                expect(configViolations).toHaveLength(0);
+
+                const buttonCode = `
+                    const BUTTON_LABELS = {
+                        role: "button",
+                        close: messages().close
+                    };
+                `;
+                const buttonViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", buttonCode, buttonViolations);
+                expect(buttonViolations).toHaveLength(0);
+            });
+
+            it("detects user-facing text in camelCase and private semantic text maps", () => {
+                const ariaCode = `
+                    const ariaLabels = {
+                        close: "Close dialog"
+                    };
+                `;
+                const ariaViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", ariaCode, ariaViolations);
+                expect(ariaViolations).toHaveLength(1);
+                expect(ariaViolations[0].category).toBe("i18n-aria");
+
+                const privateCode = `
+                    class Demo {
+                        readonly #statusAnnouncements = {
+                            loading: "Loading"
+                        };
+                    }
+                `;
+                const privateViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.component.ts", privateCode, privateViolations);
+                expect(privateViolations).toHaveLength(1);
+                expect(privateViolations[0].category).toBe("i18n-aria");
+
+                const buttonCode = `
+                    const buttonLabels = {
+                        submit: "Submit form"
+                    };
+                `;
+                const buttonViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", buttonCode, buttonViolations);
+                expect(buttonViolations).toHaveLength(1);
+                expect(buttonViolations[0].category).toBe("i18n-text");
+
+                const disabledReasonCode = `
+                    const disabledReasonText = {
+                        invalid: "Value is invalid"
+                    };
+                `;
+                const disabledReasonViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", disabledReasonCode, disabledReasonViolations);
+                expect(disabledReasonViolations).toHaveLength(1);
+                expect(disabledReasonViolations[0].category).toBe("i18n-text");
+            });
+
+            it("passes when camelCase semantic maps use messages()", () => {
+                const ariaCode = `
+                    const ariaLabels = {
+                        close: messages().close
+                    };
+                `;
+                const ariaViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", ariaCode, ariaViolations);
+                expect(ariaViolations).toHaveLength(0);
+            });
+
+            it("detects user-facing text across all direct returns of computed() semantic maps regardless of branch order", () => {
+                // Localized first branch + hardcoded second branch
+                const localizedFirstCode = `
+                    const ARIA_LABELS = computed(() => {
+                        if (localized()) {
+                            return messages().ariaLabels;
+                        }
+
+                        return {
+                            previous: "Previous",
+                            next: "Next"
+                        };
+                    });
+                `;
+                const localizedFirstViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", localizedFirstCode, localizedFirstViolations);
+                expect(localizedFirstViolations).toHaveLength(2);
+                expect(localizedFirstViolations.every(v => v.category === "i18n-aria")).toBe(true);
+
+                // Hardcoded first branch + localized second branch
+                const localizedSecondCode = `
+                    const ARIA_LABELS = computed(() => {
+                        if (!localized()) {
+                            return {
+                                previous: "Previous"
+                            };
+                        }
+
+                        return messages().ariaLabels;
+                    });
+                `;
+                const localizedSecondViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", localizedSecondCode, localizedSecondViolations);
+                expect(localizedSecondViolations).toHaveLength(1);
+                expect(localizedSecondViolations[0].category).toBe("i18n-aria");
+            });
+
+            it("detects user-facing text inside signal() and linkedSignal() semantic maps", () => {
+                const signalCode = `
+                    const ARIA_LABELS = signal({
+                        previous: "Previous"
+                    });
+                `;
+                const signalViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", signalCode, signalViolations);
+                expect(signalViolations).toHaveLength(1);
+                expect(signalViolations[0].category).toBe("i18n-aria");
+
+                // linkedSignal callback overload
+                const linkedSignalCallbackCode = `
+                    const STATUS_ANNOUNCEMENTS = linkedSignal(() => ({
+                        loading: "Loading"
+                    }));
+                `;
+                const linkedSignalCallbackViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", linkedSignalCallbackCode, linkedSignalCallbackViolations);
+                expect(linkedSignalCallbackViolations).toHaveLength(1);
+                expect(linkedSignalCallbackViolations[0].category).toBe("i18n-aria");
+
+                // linkedSignal options overload
+                const linkedSignalOptionsCode = `
+                    const BUTTON_LABELS = linkedSignal({
+                        source: step,
+                        computation: () => ({
+                            save: "Save"
+                        })
+                    });
+                `;
+                const linkedSignalOptionsViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", linkedSignalOptionsCode, linkedSignalOptionsViolations);
+                expect(linkedSignalOptionsViolations).toHaveLength(1);
+                expect(linkedSignalOptionsViolations[0].category).toBe("i18n-text");
+            });
+
+            it("detects user-facing text returned from object getters in semantic maps", () => {
+                const getterCode = `
+                    const ARIA_LABELS = {
+                        get close() {
+                            return "Close dialog";
+                        }
+                    };
+                `;
+                const getterViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", getterCode, getterViolations);
+                expect(getterViolations).toHaveLength(1);
+                expect(getterViolations[0].category).toBe("i18n-aria");
+            });
+
+            it("documents intentional limitation: shorthand properties and spreads do not track arbitrary non-semantic identifiers", () => {
+                const shorthandCode = `
+                    const close = "Close dialog";
+                    const ARIA_LABELS = {
+                        close
+                    };
+                `;
+                const shorthandViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", shorthandCode, shorthandViolations);
+                // Documented limitation: shorthand property identifiers defined outside without semantic names are not tracked
+                expect(shorthandViolations).toHaveLength(0);
+
+                const spreadCode = `
+                    const COMMON = {
+                        close: "Close"
+                    };
+                    const ARIA_LABELS = {
+                        ...COMMON
+                    };
+                `;
+                const spreadViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", spreadCode, spreadViolations);
+                // Documented limitation: external spreads without semantic source map names are not tracked
+                expect(spreadViolations).toHaveLength(0);
             });
         });
     });
