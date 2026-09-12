@@ -89,6 +89,8 @@ describe("MONA_FR_FR_LOCALE", () => {
             expect(m.grid?.edit).toBe("Modifier");
             expect(m.grid?.filterPlaceholder).toBe("Filtrer...");
             expect(m.grid?.noData).toBe("Aucune donnée");
+            expect(m.grid?.moveAsNext).toBe("Déplacer à la position suivante");
+            expect(m.grid?.moveAsPrevious).toBe("Déplacer à la position précédente");
             expect(m.grid?.remove).toBe("Retirer");
             expect(m.grid?.save).toBe("Enregistrer");
             expect(m.grid?.selectAllRows).toBe("Sélectionner toutes les lignes");
