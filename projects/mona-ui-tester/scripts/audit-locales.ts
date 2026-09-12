@@ -710,7 +710,9 @@ export function discoverOfficialLocales(
             );
 
             interface ExportedSymbolInfo {
-                symbolName: string;
+                sourceName: string;
+                exportedName: string;
+                hasAlias: boolean;
                 moduleSpecifier: string;
                 line: number;
             }
@@ -719,10 +721,14 @@ export function discoverOfficialLocales(
             for (const exportDecl of pubSf.getExportDeclarations()) {
                 const moduleSpecifier = exportDecl.getModuleSpecifierValue() ?? "";
                 for (const named of exportDecl.getNamedExports()) {
+                    const sourceName = named.getName().trim();
                     const aliasNode = named.getAliasNode();
-                    const localOrExported = aliasNode ? aliasNode.getText().trim() : named.getName().trim();
+                    const exportedName = aliasNode ? aliasNode.getText().trim() : sourceName;
+                    const hasAlias = Boolean(aliasNode && aliasNode.getText().trim() !== sourceName);
                     exportsList.push({
-                        symbolName: localOrExported,
+                        sourceName,
+                        exportedName,
+                        hasAlias,
                         moduleSpecifier,
                         line: named.getStartLineNumber()
                     });
@@ -733,8 +739,32 @@ export function discoverOfficialLocales(
                 if (!loc.localeExport) {
                     continue;
                 }
-                const matchingExport = exportsList.find(e => e.symbolName === loc.localeExport);
-                if (!matchingExport) {
+
+                const aliasedToOfficial = exportsList.find(
+                    e => e.exportedName === loc.localeExport && (e.sourceName !== loc.localeExport || e.hasAlias)
+                );
+                if (aliasedToOfficial) {
+                    violations.push({
+                        category: "invalid-metadata",
+                        detail: `Official locale export "${loc.localeExport}" in public-api.ts must be directly re-exported without an alias (found "${aliasedToOfficial.sourceName} as ${aliasedToOfficial.exportedName}")`,
+                        file: publicApiPath,
+                        line: aliasedToOfficial.line
+                    });
+                }
+
+                const renamedOfficial = exportsList.find(
+                    e => e.sourceName === loc.localeExport && (e.exportedName !== loc.localeExport || e.hasAlias)
+                );
+                if (renamedOfficial) {
+                    violations.push({
+                        category: "invalid-metadata",
+                        detail: `Official locale export "${loc.localeExport}" in public-api.ts cannot be renamed as "${renamedOfficial.exportedName}"; it must be directly re-exported without an alias`,
+                        file: publicApiPath,
+                        line: renamedOfficial.line
+                    });
+                }
+
+                if (!exportsList.some(e => e.exportedName === loc.localeExport || e.sourceName === loc.localeExport)) {
                     violations.push({
                         category: "invalid-metadata",
                         detail: `Official locale export "${loc.localeExport}" is not exported in public-api.ts`,
@@ -744,17 +774,36 @@ export function discoverOfficialLocales(
                     continue;
                 }
 
-                if (!matchingExport.moduleSpecifier) {
+                const directExports = exportsList.filter(
+                    e => e.sourceName === loc.localeExport && e.exportedName === loc.localeExport && !e.hasAlias
+                );
+
+                if (directExports.length === 0) {
+                    // Already flagged by aliasedToOfficial or renamedOfficial
+                    continue;
+                }
+
+                if (directExports.length > 1) {
+                    violations.push({
+                        category: "invalid-metadata",
+                        detail: `Multiple direct exports for "${loc.localeExport}" found in public-api.ts`,
+                        file: publicApiPath,
+                        line: directExports[1].line
+                    });
+                }
+
+                const directExport = directExports[0];
+                if (!directExport.moduleSpecifier) {
                     violations.push({
                         category: "invalid-metadata",
                         detail: `Official locale export "${loc.localeExport}" in public-api.ts must be re-exported from its locale module file`,
                         file: publicApiPath,
-                        line: matchingExport.line
+                        line: directExport.line
                     });
                     continue;
                 }
 
-                const resolvedExportTarget = resolve(localesDir, matchingExport.moduleSpecifier)
+                const resolvedExportTarget = resolve(localesDir, directExport.moduleSpecifier)
                     .replace(/\.ts$/, "")
                     .replace(/\\/g, "/");
                 const expectedTarget = resolve(loc.localeFile).replace(/\.ts$/, "").replace(/\\/g, "/");
@@ -762,9 +811,9 @@ export function discoverOfficialLocales(
                 if (resolvedExportTarget !== expectedTarget) {
                     violations.push({
                         category: "invalid-metadata",
-                        detail: `Official locale export "${loc.localeExport}" in public-api.ts is exported from "${matchingExport.moduleSpecifier}", but expected module "./${loc.folder}/${basename(loc.localeFile).replace(/\.ts$/, "")}"`,
+                        detail: `Official locale export "${loc.localeExport}" in public-api.ts is exported from "${directExport.moduleSpecifier}", but expected module "./${loc.folder}/${basename(loc.localeFile).replace(/\.ts$/, "")}"`,
                         file: publicApiPath,
-                        line: matchingExport.line
+                        line: directExport.line
                     });
                 }
             }
