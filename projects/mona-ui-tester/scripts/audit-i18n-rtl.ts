@@ -1202,8 +1202,15 @@ export function scanTypeScriptAst(
 ): void {
     const sf = project.createSourceFile(`virtual-${Date.now()}-${Math.random()}.ts`, content, { overwrite: true });
 
+    const normalizedPath = filePath.replace(/\\/g, "/");
+    const isMessageCatalog =
+        normalizedPath.includes("/i18n/") ||
+        normalizedPath.endsWith(".default-messages.ts") ||
+        isOfficialLocaleMessageCatalog(normalizedPath);
+
     try {
-        // 1. Angular host metadata inspection
+        if (!isMessageCatalog) {
+            // 1. Angular host metadata inspection
         for (const classDecl of sf.getClasses()) {
             for (const decorator of classDecl.getDecorators()) {
                 const name = decorator.getName();
@@ -1551,6 +1558,101 @@ export function scanTypeScriptAst(
                     }
                 }
             }
+        }
+
+        // 4b. Hard-coded LiveAnnouncer announcement detection
+        const liveAnnouncerNames = new Set<string>();
+        for (const prop of sf.getDescendantsOfKind(SyntaxKind.PropertyDeclaration)) {
+            const typeText = prop.getTypeNode()?.getText() ?? "";
+            const initText = prop.getInitializer()?.getText() ?? "";
+            if (typeText.includes("LiveAnnouncer") || initText.includes("LiveAnnouncer")) {
+                liveAnnouncerNames.add(prop.getName());
+            }
+        }
+        for (const varDecl of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
+            const typeText = varDecl.getTypeNode()?.getText() ?? "";
+            const initText = varDecl.getInitializer()?.getText() ?? "";
+            if (typeText.includes("LiveAnnouncer") || initText.includes("LiveAnnouncer")) {
+                liveAnnouncerNames.add(varDecl.getName());
+            }
+        }
+        for (const param of sf.getDescendantsOfKind(SyntaxKind.Parameter)) {
+            const typeText = param.getTypeNode()?.getText() ?? "";
+            if (typeText.includes("LiveAnnouncer")) {
+                liveAnnouncerNames.add(param.getName());
+            }
+        }
+
+        for (const callExpr of sf.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+            const expr = callExpr.getExpression();
+            if (!Node.isPropertyAccessExpression(expr)) {
+                continue;
+            }
+            if (expr.getName() !== "announce") {
+                continue;
+            }
+            const receiver = expr.getExpression();
+            const receiverText = receiver.getText();
+            const isLiveAnnouncer =
+                (Node.isIdentifier(receiver) && liveAnnouncerNames.has(receiver.getText())) ||
+                (Node.isPropertyAccessExpression(receiver) &&
+                    (liveAnnouncerNames.has(receiver.getName()) || /(?:^|[.#_])liveannouncer$/i.test(receiverText))) ||
+                /(?:^|[.#_])liveannouncer$/i.test(receiverText);
+
+            if (isLiveAnnouncer) {
+                const args = callExpr.getArguments();
+                if (args.length > 0) {
+                    const fragments = collectLiteralFragments(args[0]);
+                    for (const frag of fragments) {
+                        const val = frag.text.trim();
+                        if (isUserFacingText(val) && !TECHNICAL_SEMANTIC_STRINGS.has(val)) {
+                            violations.push({
+                                category: "i18n-aria",
+                                detail: `Hard-coded accessibility live-announcement text in announce: "${val}"`,
+                                file: filePath,
+                                line: frag.node.getStartLineNumber()
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        // 4c. Semantic text maps with user-facing strings (e.g. *_TEXT, *_LABELS, *_ANNOUNCEMENTS)
+        for (const varDecl of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
+            const varName = varDecl.getName();
+            if (
+                /(?:_TEXT|_LABELS|_ANNOUNCEMENTS)$/.test(varName) ||
+                /^(?:TEXT|LABELS|ANNOUNCEMENTS)_/.test(varName)
+            ) {
+                const init = varDecl.getInitializer();
+                if (init && Node.isObjectLiteralExpression(init)) {
+                    for (const prop of init.getProperties()) {
+                        if (Node.isPropertyAssignment(prop)) {
+                            const propInit = prop.getInitializer();
+                            if (propInit) {
+                                const fragments = collectLiteralFragments(propInit);
+                                for (const frag of fragments) {
+                                    const val = frag.text.trim();
+                                    const isTechnical =
+                                        TECHNICAL_SEMANTIC_STRINGS.has(val) ||
+                                        (!/\s/.test(val) && !/[.!?]/.test(val) && /^[a-z0-9]+([-_/.][a-z0-9]+)*$/.test(val));
+                                    if (isUserFacingText(val) && !isTechnical) {
+                                        const isAria = /aria|announcement/i.test(varName);
+                                        violations.push({
+                                            category: isAria ? "i18n-aria" : "i18n-text",
+                                            detail: `Hard-coded semantic text-map property "${prop.getName()}" in "${varName}": "${val}"`,
+                                            file: filePath,
+                                            line: frag.node.getStartLineNumber()
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         }
 
         // 5. Indirect DOMRect access tracking

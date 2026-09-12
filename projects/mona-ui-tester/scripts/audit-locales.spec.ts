@@ -12,7 +12,8 @@ import {
     isAllowedLocaleCopyException,
     isAllowedTechnicalToken,
     loadCanonicalMessageNamespaces,
-    loadDefaultEnglishStrings
+    loadDefaultEnglishStrings,
+    type MessageFingerprint
 } from "./audit-locales";
 
 describe("audit-locales", () => {
@@ -237,7 +238,7 @@ describe("audit-locales", () => {
             ]);
             const code = `
                 import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
-                export const ES_ES_MESSAGES = {
+                export const TEST_MESSAGES = {
                     pager: {
                         pageLabel: (page: number) => \`Page \${page}\`
                     }
@@ -245,6 +246,30 @@ describe("audit-locales", () => {
             `;
             const violations = auditLocaleMessagesFile("test.messages.ts", code, englishDefaults);
             expect(violations.some(v => v.category === "copied-english" && v.detail.includes("pageLabel"))).toBe(true);
+        });
+
+        it("detects copied English fragment in rowReorderMoved function message", () => {
+            const englishDefaults = new Map<string, MessageFingerprint>([
+                [
+                    "grid.rowReorderMoved",
+                    {
+                        namespace: "grid",
+                        key: "rowReorderMoved",
+                        kind: "function",
+                        staticFragments: ["Moved row ", " to position "]
+                    }
+                ]
+            ]);
+            const code = `
+                import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+                export const TEST_MESSAGES = {
+                    grid: {
+                        rowReorderMoved: (from: number, to: number) => \`Moved row \${from} a posición \${to}.\`
+                    }
+                } satisfies MonaLocaleMessages;
+            `;
+            const violations = auditLocaleMessagesFile("test.messages.ts", code, englishDefaults);
+            expect(violations.some(v => v.category === "copied-english" && v.detail.includes("rowReorderMoved"))).toBe(true);
         });
 
         it("rejects file with 'any' type annotation on official messages catalog", () => {
@@ -1136,6 +1161,11 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
             const pageLabel = defaults.get("pager.pageLabel");
             expect(pageLabel?.kind).toBe("function");
             expect(pageLabel?.staticFragments.length).toBeGreaterThan(0);
+
+            const rowReorderMoved = defaults.get("grid.rowReorderMoved");
+            expect(rowReorderMoved?.kind).toBe("function");
+            expect(rowReorderMoved?.staticFragments).toContain("Moved row");
+            expect(rowReorderMoved?.staticFragments).toContain("to position");
         });
 
         it("runs auditAllLocales against the repository without violations", () => {

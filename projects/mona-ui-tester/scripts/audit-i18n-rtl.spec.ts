@@ -1583,6 +1583,153 @@ describe("audit-i18n-rtl", () => {
                 expect(negViolations).toHaveLength(0);
             });
         });
+
+        describe("LiveAnnouncer and semantic text maps", () => {
+            it("detects hardcoded string literals passed to LiveAnnouncer.announce", () => {
+                const code = `
+                    class Example {
+                        readonly #liveAnnouncer = inject(LiveAnnouncer);
+                        move(): void {
+                            this.#liveAnnouncer.announce("Operation complete.");
+                        }
+                    }
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.component.ts", code, violations);
+
+                expect(violations).toHaveLength(1);
+                expect(violations[0]).toMatchObject({
+                    category: "i18n-aria",
+                    detail: expect.stringContaining('Hard-coded accessibility live-announcement text in announce: "Operation complete."')
+                });
+            });
+
+            it("detects template literal fragments passed to LiveAnnouncer.announce", () => {
+                const code = `
+                    class Example {
+                        readonly #liveAnnouncer = inject(LiveAnnouncer);
+                        move(from: number, to: number): void {
+                            this.#liveAnnouncer.announce(\`Moved row \${from} to position \${to}.\`);
+                        }
+                    }
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.component.ts", code, violations);
+
+                expect(violations.length).toBeGreaterThan(0);
+                expect(violations.some(v => v.category === "i18n-aria" && v.detail.includes("Moved row"))).toBe(true);
+            });
+
+            it("ignores localized messages passed to LiveAnnouncer.announce", () => {
+                const code = `
+                    class Example {
+                        readonly #liveAnnouncer = inject(LiveAnnouncer);
+                        move(from: number, to: number): void {
+                            this.#liveAnnouncer.announce(this.messages().rowReorderMoved(from, to));
+                        }
+                    }
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.component.ts", code, violations);
+
+                expect(violations).toHaveLength(0);
+            });
+
+            it("detects user-facing text in semantic text maps ending in _TEXT, _LABELS, _ANNOUNCEMENTS", () => {
+                const code = `
+                    const DISABLED_REASON_TEXT = {
+                        disabled: "This control is disabled.",
+                        editing: "Finish editing to continue."
+                    };
+                    const ARIA_LABELS = {
+                        prev: "Go to previous step"
+                    };
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", code, violations);
+
+                expect(violations.length).toBeGreaterThanOrEqual(2);
+                expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("This control is disabled."))).toBe(true);
+                expect(violations.some(v => v.category === "i18n-aria" && v.detail.includes("Go to previous step"))).toBe(true);
+            });
+
+            it("ignores non-user-facing / technical objects with semantic suffixes", () => {
+                const code = `
+                    const CONFIG_TEXT = {
+                        mode: "utf-8",
+                        format: "json"
+                    };
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", code, violations);
+
+                expect(violations).toHaveLength(0);
+            });
+
+            it("does not report semantic text map violations in default-messages or locale catalogs", () => {
+                const code = `
+                    export const DEFAULT_MESSAGES_TEXT = {
+                        title: "Default English Title"
+                    };
+                `;
+                const violationsDefault: AuditViolation[] = [];
+                scanTypeScriptAst("projects/mona-ui/widget/i18n/widget.default-messages.ts", code, violationsDefault);
+                expect(violationsDefault).toHaveLength(0);
+
+                const violationsLocale: AuditViolation[] = [];
+                scanTypeScriptAst("projects/mona-ui/locales/de-de/de-de.messages.ts", code, violationsLocale);
+                expect(violationsLocale).toHaveLength(0);
+            });
+
+            it("catches both synthetic defects from the audit plan acceptance criteria", () => {
+                const code = `
+                    const REASON_TEXT = {
+                        disabled: "Control is disabled."
+                    };
+
+                    class Example {
+                        readonly #liveAnnouncer = inject(LiveAnnouncer);
+
+                        announce(): void {
+                            this.#liveAnnouncer.announce(
+                                "Operation complete."
+                            );
+                        }
+                    }
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.component.ts", code, violations);
+
+                expect(violations).toHaveLength(2);
+                expect(
+                    violations.some(
+                        v => v.category === "i18n-text" && v.detail.includes("Control is disabled.")
+                    )
+                ).toBe(true);
+                expect(
+                    violations.some(
+                        v => v.category === "i18n-aria" && v.detail.includes("Operation complete.")
+                    )
+                ).toBe(true);
+            });
+
+            it("passes when reasons and announcements are resolved from messages()", () => {
+                const code = `
+                    class Example {
+                        readonly #liveAnnouncer = inject(LiveAnnouncer);
+
+                        announce(): void {
+                            const reason = messages().disabledReason;
+                            this.#liveAnnouncer.announce(messages().operationComplete);
+                        }
+                    }
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.component.ts", code, violations);
+
+                expect(violations).toHaveLength(0);
+            });
+        });
     });
 
     describe("scanFile path filtering & locale handling", () => {
