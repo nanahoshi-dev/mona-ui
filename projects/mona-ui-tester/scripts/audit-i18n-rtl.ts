@@ -785,6 +785,48 @@ export const ALLOWLIST: AllowlistEntry[] = [
         filePattern: "projects/mona-ui/chart/internal/data/cartesian-stack-engine.ts",
         lineSnippet: "message:",
         reason: "Internal stack engine diagnostic warning messages"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.ts",
+        lineSnippet: 'label: "A"',
+        reason: "Alpha color channel symbol in ColorInput descriptor"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.ts",
+        lineSnippet: 'label: "H"',
+        reason: "Hue color channel symbol in ColorInput descriptor"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.ts",
+        lineSnippet: 'label: "S"',
+        reason: "Saturation color channel symbol in ColorInput descriptor"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.ts",
+        lineSnippet: 'label: "V"',
+        reason: "Value color channel symbol in ColorInput descriptor"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.ts",
+        lineSnippet: 'label: "R"',
+        reason: "Red color channel symbol in ColorInput descriptor"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.ts",
+        lineSnippet: 'label: "G"',
+        reason: "Green color channel symbol in ColorInput descriptor"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.ts",
+        lineSnippet: 'label: "B"',
+        reason: "Blue color channel symbol in ColorInput descriptor"
     }
 ];
 
@@ -1435,10 +1477,7 @@ export function isTechnicalLiteralForContext(
         }
 
         case "generic-semantic-object":
-            if (propertyName && /^(?:aria.*|title|placeholder|tooltip)$/i.test(propertyName)) {
-                return false;
-            }
-            return TECHNICAL_SEMANTIC_STRINGS.has(value);
+            return false;
 
         default:
             return false;

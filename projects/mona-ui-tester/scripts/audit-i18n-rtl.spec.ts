@@ -195,14 +195,12 @@ describe("audit-i18n-rtl", () => {
             expect(isTechnicalLiteralForContext("generic-semantic-object", "title", "button")).toBe(false);
             expect(isTechnicalLiteralForContext("generic-semantic-object", "placeholder", "search")).toBe(false);
             expect(isTechnicalLiteralForContext("generic-semantic-object", "tooltip", "button")).toBe(false);
-        });
-
-        it("allows technical tokens in generic object properties like text and label", () => {
-            expect(isTechnicalLiteralForContext("generic-semantic-object", "text", "contains")).toBe(true);
-            expect(isTechnicalLiteralForContext("generic-semantic-object", "text", "eq")).toBe(true);
-            expect(isTechnicalLiteralForContext("generic-semantic-object", "label", "horizontal")).toBe(true);
-            expect(isTechnicalLiteralForContext("generic-semantic-object", "label", "start")).toBe(true);
-            expect(isTechnicalLiteralForContext("generic-semantic-object", "text", "button")).toBe(true);
+            expect(isTechnicalLiteralForContext("generic-semantic-object", "message", "off")).toBe(false);
+            expect(isTechnicalLiteralForContext("generic-semantic-object", "description", "dialog")).toBe(false);
+            expect(isTechnicalLiteralForContext("generic-semantic-object", "emptyText", "none")).toBe(false);
+            expect(isTechnicalLiteralForContext("generic-semantic-object", "label", "left")).toBe(false);
+            expect(isTechnicalLiteralForContext("generic-semantic-object", "label", "horizontal")).toBe(false);
+            expect(isTechnicalLiteralForContext("generic-semantic-object", "text", "button")).toBe(false);
             expect(isTechnicalLiteralForContext("generic-semantic-object", "text", "Save changes")).toBe(false);
         });
 
@@ -419,13 +417,14 @@ describe("audit-i18n-rtl", () => {
             expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("Retry request"))).toBe(true);
         });
 
-        it("ignores technical tokens in object properties", () => {
+        it("ignores technical tokens in technical configuration objects without semantic text keys", () => {
             const code = `
-                export const operators = [
-                    { label: "horizontal", text: "contains" },
-                    { text: "eq", label: "start" },
-                    { text: "button" }
-                ];
+                export const config = {
+                    role: "button",
+                    orientation: "horizontal",
+                    placement: "left",
+                    sortDirection: "ascending"
+                };
             `;
             const violations: AuditViolation[] = [];
             scanTypeScriptAst("test.ts", code, violations);
@@ -914,6 +913,32 @@ describe("audit-i18n-rtl", () => {
             expect(isAllowlisted(exactViolation, snippet, allowlist)).toBe(true);
             expect(isAllowlisted(backupViolation, snippet, allowlist)).toBe(false);
             expect(isAllowlisted(nestedViolation, snippet, allowlist)).toBe(false);
+        });
+
+        it("allows documented ColorInput channel symbols in color-gradient.component.ts via default ALLOWLIST", () => {
+            const violationA: AuditViolation = {
+                category: "i18n-text",
+                detail: 'Hard-coded literal property "label": "A"',
+                file: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.ts",
+                line: 120
+            };
+            expect(isAllowlisted(violationA, 'label: "A",')).toBe(true);
+
+            const violationH: AuditViolation = {
+                category: "i18n-text",
+                detail: 'Hard-coded literal property "label": "H"',
+                file: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.ts",
+                line: 514
+            };
+            expect(isAllowlisted(violationH, 'label: "H",')).toBe(true);
+
+            const violationOtherFile: AuditViolation = {
+                category: "i18n-text",
+                detail: 'Hard-coded literal property "label": "A"',
+                file: "projects/mona-ui/other/other.component.ts",
+                line: 10
+            };
+            expect(isAllowlisted(violationOtherFile, 'label: "A",')).toBe(false);
         });
     });
 
@@ -2574,6 +2599,178 @@ describe("audit-i18n-rtl", () => {
                 const buttonViolations: AuditViolation[] = [];
                 scanTypeScriptAst("example.ts", buttonCode, buttonViolations);
                 expect(buttonViolations).toHaveLength(0);
+            });
+        });
+
+        describe("DE5-02: generic semantic object properties fail closed", () => {
+            it("detects 'off' in generic object property message as a text violation", () => {
+                const code = `
+                    const item = {
+                        message: "off"
+                    };
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", code, violations);
+
+                expect(violations).toHaveLength(1);
+                expect(violations[0]).toMatchObject({
+                    category: "i18n-text",
+                    detail: expect.stringContaining('Hard-coded literal property "message": "off"')
+                });
+            });
+
+            it("detects 'dialog' in generic object property description as a text violation", () => {
+                const code = `
+                    const item = {
+                        description: "dialog"
+                    };
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", code, violations);
+
+                expect(violations).toHaveLength(1);
+                expect(violations[0]).toMatchObject({
+                    category: "i18n-text",
+                    detail: expect.stringContaining('Hard-coded literal property "description": "dialog"')
+                });
+            });
+
+            it("detects 'none' in generic object property emptyText as a text violation", () => {
+                const code = `
+                    const item = {
+                        emptyText: "none"
+                    };
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", code, violations);
+
+                expect(violations).toHaveLength(1);
+                expect(violations[0]).toMatchObject({
+                    category: "i18n-text",
+                    detail: expect.stringContaining('Hard-coded literal property "emptyText": "none"')
+                });
+            });
+
+            it("detects 'left' in generic object property label as a text violation", () => {
+                const code = `
+                    const item = {
+                        label: "left"
+                    };
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", code, violations);
+
+                expect(violations).toHaveLength(1);
+                expect(violations[0]).toMatchObject({
+                    category: "i18n-text",
+                    detail: expect.stringContaining('Hard-coded literal property "label": "left"')
+                });
+            });
+
+            it("detects 'button' in generic object property text as a text violation", () => {
+                const code = `
+                    const item = {
+                        text: "button"
+                    };
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", code, violations);
+
+                expect(violations).toHaveLength(1);
+                expect(violations[0]).toMatchObject({
+                    category: "i18n-text",
+                    detail: expect.stringContaining('Hard-coded literal property "text": "button"')
+                });
+            });
+
+            it("allows localized messages in generic semantic objects", () => {
+                const code = `
+                    const item = {
+                        message: messages().message,
+                        description: messages().description,
+                        emptyText: messages().emptyText,
+                        label: messages().label,
+                        text: messages().text
+                    };
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", code, violations);
+
+                expect(violations).toHaveLength(0);
+            });
+
+            it("allows generic technical configuration objects", () => {
+                const code = `
+                    const config = {
+                        role: "button",
+                        orientation: "horizontal",
+                        placement: "left",
+                        sortDirection: "ascending"
+                    };
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", code, violations);
+
+                expect(violations).toHaveLength(0);
+            });
+
+            it("consistently reports user-facing literals across liveAnnouncer, semantic maps, and semantic objects", () => {
+                // Equivalence for "off"
+                const announceCode = `
+                    class Test {
+                        readonly #announcer = inject(LiveAnnouncer);
+                        act() { this.#announcer.announce("off"); }
+                    }
+                `;
+                const announceViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", announceCode, announceViolations);
+                expect(announceViolations).toHaveLength(1);
+
+                const mapCode = `
+                    const announcements = {
+                        status: "off"
+                    };
+                `;
+                const mapViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", mapCode, mapViolations);
+                expect(mapViolations).toHaveLength(1);
+
+                const objCode = `
+                    const x = {
+                        message: "off"
+                    };
+                `;
+                const objViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", objCode, objViolations);
+                expect(objViolations).toHaveLength(1);
+
+                // Equivalence for "left"
+                const ariaPropCode = `
+                    class Test {
+                        readonly ariaLabel = "left";
+                    }
+                `;
+                const ariaPropViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", ariaPropCode, ariaPropViolations);
+                expect(ariaPropViolations).toHaveLength(1);
+
+                const labelMapCode = `
+                    const labels = {
+                        previous: "left"
+                    };
+                `;
+                const labelMapViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", labelMapCode, labelMapViolations);
+                expect(labelMapViolations).toHaveLength(1);
+
+                const labelObjCode = `
+                    const x = {
+                        label: "left"
+                    };
+                `;
+                const labelObjViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", labelObjCode, labelObjViolations);
+                expect(labelObjViolations).toHaveLength(1);
             });
         });
     });
