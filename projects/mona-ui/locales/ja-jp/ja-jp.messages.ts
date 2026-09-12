@@ -26,7 +26,7 @@ export const JA_JP_MESSAGES = {
             `年表示に切り替える。現在は${currentMonthAndYear}`,
         today: "今日",
         yearCellLabel: (year: number) => `${year}年`,
-        yearViewLabel: (year: string) => `${year}年の年表示`
+        yearViewLabel: (year: string) => `年表示、${year}`
     },
     card: {
         actionsLabel: "カードのアクション"

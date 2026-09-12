@@ -320,6 +320,32 @@ describe("MONA_JA_JP_LOCALE Integration with MonaI18nService", () => {
         expect(liveRegion).not.toBeNull();
         expect(liveRegion.textContent).toContain("カレンダー");
         expect(liveRegion.textContent).toContain("9月");
+
+        // 4. Year view navigation and accessibility labels (no duplicate 年)
+        viewButton.click();
+        fixture.detectChanges();
+
+        expect(liveRegion.textContent).toContain("年表示");
+        expect(liveRegion.textContent).toContain("2026年");
+        expect(liveRegion.textContent).not.toContain("年年");
+
+        const yearViewButton = hostEl.querySelector('button[aria-label*="10年表示"]') as HTMLButtonElement;
+        expect(yearViewButton).not.toBeNull();
+        expect(yearViewButton.getAttribute("aria-label")).toContain("10年表示に切り替える。現在は2026年");
+        expect(yearViewButton.getAttribute("aria-label")).not.toContain("年年");
+
+        // 5. Decade view navigation and accessibility labels
+        yearViewButton.click();
+        fixture.detectChanges();
+
+        expect(liveRegion.textContent).toContain("10年表示");
+        expect(liveRegion.textContent).toContain("2020年");
+        expect(liveRegion.textContent).toContain("2029年");
+        expect(liveRegion.textContent).not.toContain("年年");
+
+        const decadeViewButton = hostEl.querySelector('button[aria-label*="2020年～2029年"]') as HTMLButtonElement;
+        expect(decadeViewButton).not.toBeNull();
+        expect(decadeViewButton.getAttribute("aria-label")).not.toContain("年年");
     });
 
     it("renders SplitButton component with Japanese accessible name", () => {

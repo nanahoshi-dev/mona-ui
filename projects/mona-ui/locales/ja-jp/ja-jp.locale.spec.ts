@@ -245,13 +245,13 @@ describe("MONA_JA_JP_LOCALE", () => {
             expect(m.calendar?.decadeRange?.(2020, 2029)).toBe("2020年～2029年");
             expect(m.calendar?.decadeViewLabel?.(2020, 2029)).toBe("2020年から2029年までの10年表示");
             expect(m.calendar?.yearCellLabel?.(2026)).toBe("2026年");
-            expect(m.calendar?.yearViewLabel?.("2026")).toBe("2026年の年表示");
-            expect(m.calendar?.goToToday?.("2026/09/15")).toBe("今日（2026/09/15）に移動");
+            expect(m.calendar?.yearViewLabel?.("2026年")).toBe("年表示、2026年");
+            expect(m.calendar?.goToToday?.("2026年9月15日")).toBe("今日（2026年9月15日）に移動");
             expect(m.calendar?.switchToYearView?.("2026年9月")).toBe(
                 "年表示に切り替える。現在は2026年9月"
             );
-            expect(m.calendar?.switchToDecadeView?.("2026")).toBe(
-                "10年表示に切り替える。現在は2026"
+            expect(m.calendar?.switchToDecadeView?.("2026年")).toBe(
+                "10年表示に切り替える。現在は2026年"
             );
         });
 
