@@ -14,7 +14,9 @@ export interface RowReorderableOptions {
     enabled?: boolean;
 
     /**
-     * Returns the accessible label for a row's reorder handle.
+     * Returns the accessible label fragment for a row's reorder handle.
+     * Locale-aware composition supplies sentence punctuation, keyboard instructions,
+     * and disabled reasons around this fragment.
      *
      * The default must be positional, such as:
      * "Reorder row 3"

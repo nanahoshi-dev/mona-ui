@@ -239,6 +239,8 @@ export const ES_ES_MESSAGES = {
         rowReorderDisabledSorted: "Quita la ordenación para reordenar las filas.",
         rowReorderDisabledVirtualScroll:
             "La reordenación de filas no está disponible mientras el desplazamiento virtual está activado.",
+        rowReorderHandleAriaLabel: (rowLabel: string, keyboardHint: string, disabledReason?: string) =>
+            `${rowLabel}. ${keyboardHint}${disabledReason ? ` ${disabledReason}` : ""}`,
         rowReorderKeyboardHint: "Usa Alt más Flecha arriba o Alt más Flecha abajo para mover.",
         rowReorderMoved: (fromRowNumber: number, toPosition: number) =>
             `Fila ${fromRowNumber} movida a la posición ${toPosition}.`,

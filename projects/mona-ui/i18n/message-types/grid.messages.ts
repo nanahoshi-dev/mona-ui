@@ -31,6 +31,7 @@ export interface MonaGridMessages {
     readonly rowReorderDisabledSingleRow: string;
     readonly rowReorderDisabledSorted: string;
     readonly rowReorderDisabledVirtualScroll: string;
+    rowReorderHandleAriaLabel(rowLabel: string, keyboardHint: string, disabledReason?: string): string;
     readonly rowReorderKeyboardHint: string;
     rowReorderMoved(fromRowNumber: number, toPosition: number): string;
     readonly rowValidationError: string;

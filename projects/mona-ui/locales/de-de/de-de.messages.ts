@@ -239,6 +239,8 @@ export const DE_DE_MESSAGES = {
         rowReorderDisabledSorted: "Sortierung aufheben, um Zeilen neu anzuordnen.",
         rowReorderDisabledVirtualScroll:
             "Bei aktiviertem virtuellem Scrollen können Zeilen nicht neu angeordnet werden.",
+        rowReorderHandleAriaLabel: (rowLabel: string, keyboardHint: string, disabledReason?: string) =>
+            `${rowLabel}. ${keyboardHint}${disabledReason ? ` ${disabledReason}` : ""}`,
         rowReorderKeyboardHint: "Alt + Pfeil nach oben oder Alt + Pfeil nach unten zum Verschieben verwenden.",
         rowReorderMoved: (fromRowNumber: number, toPosition: number) =>
             `Zeile ${fromRowNumber} an Position ${toPosition} verschoben.`,

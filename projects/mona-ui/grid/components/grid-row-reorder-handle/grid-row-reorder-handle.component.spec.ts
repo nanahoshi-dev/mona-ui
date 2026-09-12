@@ -491,7 +491,7 @@ describe("GridRowReorderHandleComponent", () => {
         it("renders Japanese accessible label and keyboard hint", () => {
             const button = getButton();
             expect(button.getAttribute("aria-label")).toBe(
-                "1行目を並べ替え. Alt + 上矢印または Alt + 下矢印で行を移動します。"
+                "1行目を並べ替え。Alt + 上矢印または Alt + 下矢印で行を移動します。"
             );
         });
 
@@ -502,7 +502,7 @@ describe("GridRowReorderHandleComponent", () => {
             const button = getButton();
             expect(button.getAttribute("title")).toBe("行の並べ替えは無効です。");
             expect(button.getAttribute("aria-label")).toBe(
-                "1行目を並べ替え. Alt + 上矢印または Alt + 下矢印で行を移動します。 行の並べ替えは無効です。"
+                "1行目を並べ替え。Alt + 上矢印または Alt + 下矢印で行を移動します。行の並べ替えは無効です。"
             );
         });
 
@@ -554,8 +554,8 @@ describe("GridRowReorderHandleComponent", () => {
             fixture.detectChanges();
 
             const button = getButton();
-            expect(button.getAttribute("title")).toBe("行を並べ替える前に並び替えを解除してください。");
-            expect(button.getAttribute("aria-label")).toContain("行を並べ替える前に並び替えを解除してください。");
+            expect(button.getAttribute("title")).toBe("行を並べ替える前にソートを解除してください。");
+            expect(button.getAttribute("aria-label")).toContain("行を並べ替える前にソートを解除してください。");
         });
 
         it("translates filtered reason to Japanese", () => {
@@ -672,7 +672,7 @@ describe("GridRowReorderHandleComponent", () => {
 
             i18nService.use(MONA_JA_JP_LOCALE);
             fixture.detectChanges();
-            expect(button.getAttribute("aria-label")).toContain("1行目を並べ替え.");
+            expect(button.getAttribute("aria-label")).toContain("1行目を並べ替え。");
             expect(button.getAttribute("aria-label")).toContain(
                 "Alt + 上矢印または Alt + 下矢印で行を移動します。"
             );

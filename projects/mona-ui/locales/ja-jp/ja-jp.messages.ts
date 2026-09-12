@@ -234,9 +234,11 @@ export const JA_JP_MESSAGES = {
         rowReorderDisabledFiltered: "行を並べ替える前にフィルターを解除してください。",
         rowReorderDisabledGrouped: "行を並べ替える前にグループ化を解除してください。",
         rowReorderDisabledSingleRow: "行を並べ替えるには2行以上必要です。",
-        rowReorderDisabledSorted: "行を並べ替える前に並び替えを解除してください。",
+        rowReorderDisabledSorted: "行を並べ替える前にソートを解除してください。",
         rowReorderDisabledVirtualScroll:
             "仮想スクロールが有効な場合、行の並べ替えは使用できません。",
+        rowReorderHandleAriaLabel: (rowLabel: string, keyboardHint: string, disabledReason?: string) =>
+            `${rowLabel}。${keyboardHint}${disabledReason ?? ""}`,
         rowReorderKeyboardHint:
             "Alt + 上矢印または Alt + 下矢印で行を移動します。",
         rowReorderMoved: (fromRowNumber: number, toPosition: number) =>

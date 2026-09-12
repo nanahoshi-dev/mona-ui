@@ -22,8 +22,8 @@ export class GridRowReorderHandleComponent {
         const absoluteIndex = this.pageIndex() + this.#gridService.paginationState().skip;
         const label = this.#gridService.getRowReorderAriaLabel(this.row(), absoluteIndex);
         const reasonText = this.disabledReasonText();
-        const suffix = reasonText == null ? "" : ` ${reasonText}`;
-        return `${label}. ${this.#gridService.messages().rowReorderKeyboardHint}${suffix}`;
+        const messages = this.#gridService.messages();
+        return messages.rowReorderHandleAriaLabel(label, messages.rowReorderKeyboardHint, reasonText ?? undefined);
     });
     protected readonly disabled = computed(() => !this.#gridService.canReorderRow(this.row()));
     protected readonly disabledReasonText = computed(() => {

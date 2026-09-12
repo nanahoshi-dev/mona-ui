@@ -238,7 +238,7 @@ describe("MONA_JA_JP_LOCALE", () => {
             expect(m.grid?.rowReorderDisabledFiltered).toBe("行を並べ替える前にフィルターを解除してください。");
             expect(m.grid?.rowReorderDisabledGrouped).toBe("行を並べ替える前にグループ化を解除してください。");
             expect(m.grid?.rowReorderDisabledSingleRow).toBe("行を並べ替えるには2行以上必要です。");
-            expect(m.grid?.rowReorderDisabledSorted).toBe("行を並べ替える前に並び替えを解除してください。");
+            expect(m.grid?.rowReorderDisabledSorted).toBe("行を並べ替える前にソートを解除してください。");
             expect(m.grid?.rowReorderDisabledVirtualScroll).toBe(
                 "仮想スクロールが有効な場合、行の並べ替えは使用できません。"
             );
@@ -308,6 +308,19 @@ describe("MONA_JA_JP_LOCALE", () => {
             expect(m.grid?.columnsSelected?.(3)).toBe("3列を選択中");
             expect(m.grid?.filterByColumn?.("名前")).toBe("名前でフィルター");
             expect(m.grid?.reorderRow?.(4)).toBe("4行目を並べ替え");
+            expect(
+                m.grid?.rowReorderHandleAriaLabel?.(
+                    "1行目を並べ替え",
+                    "Alt + 上矢印または Alt + 下矢印で行を移動します。"
+                )
+            ).toBe("1行目を並べ替え。Alt + 上矢印または Alt + 下矢印で行を移動します。");
+            expect(
+                m.grid?.rowReorderHandleAriaLabel?.(
+                    "1行目を並べ替え",
+                    "Alt + 上矢印または Alt + 下矢印で行を移動します。",
+                    "行の並べ替えは無効です。"
+                )
+            ).toBe("1行目を並べ替え。Alt + 上矢印または Alt + 下矢印で行を移動します。行の並べ替えは無効です。");
             expect(m.grid?.rowReorderMoved?.(3, 2)).toBe("3行目を2番目の位置に移動しました。");
             expect(m.grid?.selectRow?.(2)).toBe("2行目を選択");
         });

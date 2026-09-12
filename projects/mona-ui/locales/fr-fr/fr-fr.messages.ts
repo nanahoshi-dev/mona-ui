@@ -239,6 +239,8 @@ export const FR_FR_MESSAGES = {
         rowReorderDisabledSorted: "Supprimez le tri avant de réordonner les lignes.",
         rowReorderDisabledVirtualScroll:
             "La réorganisation des lignes n’est pas disponible lorsque le défilement virtuel est activé.",
+        rowReorderHandleAriaLabel: (rowLabel: string, keyboardHint: string, disabledReason?: string) =>
+            `${rowLabel}. ${keyboardHint}${disabledReason ? ` ${disabledReason}` : ""}`,
         rowReorderKeyboardHint:
             "Utilisez Alt + Flèche vers le haut ou Alt + Flèche vers le bas pour déplacer la ligne.",
         rowReorderMoved: (fromRowNumber: number, toPosition: number) =>
