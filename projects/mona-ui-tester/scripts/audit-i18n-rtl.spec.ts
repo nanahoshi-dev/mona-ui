@@ -7,7 +7,9 @@ import {
     isAllowlisted,
     isOfficialLocaleMessageCatalog,
     isPhysicalCssPropertyName,
+    isSemanticTextMapName,
     isStyleName,
+    isTechnicalSemanticMapValue,
     isUserFacingText,
     MANUAL_REVIEW_PATTERNS,
     matchesFilePattern,
@@ -45,6 +47,57 @@ describe("audit-i18n-rtl", () => {
             expect(isUserFacingText("&nbsp;")).toBe(false);
             expect(isUserFacingText("->")).toBe(false);
             expect(isUserFacingText("/")).toBe(false);
+        });
+    });
+
+    describe("isSemanticTextMapName", () => {
+        it("identifies semantic text map naming conventions", () => {
+            expect(isSemanticTextMapName("BUTTON_LABELS")).toBe(true);
+            expect(isSemanticTextMapName("STATUS_ANNOUNCEMENTS")).toBe(true);
+            expect(isSemanticTextMapName("DISABLED_REASON_TEXT")).toBe(true);
+            expect(isSemanticTextMapName("LABELS_MAP")).toBe(true);
+            expect(isSemanticTextMapName("ANNOUNCEMENTS_LIST")).toBe(true);
+            expect(isSemanticTextMapName("TEXT_OPTIONS")).toBe(true);
+            expect(isSemanticTextMapName("#ARIA_LABELS")).toBe(true);
+            expect(isSemanticTextMapName("_STATUS_ANNOUNCEMENTS")).toBe(true);
+            expect(isSemanticTextMapName("_LABELS")).toBe(true);
+        });
+
+        it("rejects non-semantic-map variable names", () => {
+            expect(isSemanticTextMapName("item")).toBe(false);
+            expect(isSemanticTextMapName("labels")).toBe(false);
+            expect(isSemanticTextMapName("textValue")).toBe(false);
+            expect(isSemanticTextMapName("customClass")).toBe(false);
+        });
+    });
+
+    describe("isTechnicalSemanticMapValue", () => {
+        it("recognizes global technical semantic strings", () => {
+            expect(isTechnicalSemanticMapValue("BUTTON_LABELS", "role", "button")).toBe(true);
+            expect(isTechnicalSemanticMapValue("CONFIG_TEXT", "orientation", "horizontal")).toBe(true);
+        });
+
+        it("treats lowercase UI labels as user-facing in strongly user-facing maps", () => {
+            expect(isTechnicalSemanticMapValue("BUTTON_LABELS", "close", "close")).toBe(false);
+            expect(isTechnicalSemanticMapValue("BUTTON_LABELS", "retry", "retry")).toBe(false);
+            expect(isTechnicalSemanticMapValue("BUTTON_LABELS", "save", "save")).toBe(false);
+            expect(isTechnicalSemanticMapValue("STATUS_ANNOUNCEMENTS", "loading", "loading")).toBe(false);
+            expect(isTechnicalSemanticMapValue("ARIA_LABELS", "prev", "previous")).toBe(false);
+        });
+
+        it("exempts explicit technical formats in configuration text maps", () => {
+            expect(isTechnicalSemanticMapValue("CONFIG_TEXT", "encoding", "utf-8")).toBe(true);
+            expect(isTechnicalSemanticMapValue("CONFIG_TEXT", "charset", "ascii")).toBe(true);
+            expect(isTechnicalSemanticMapValue("CONFIG_TEXT", "mode", "utf-8")).toBe(true);
+            expect(isTechnicalSemanticMapValue("CONFIG_TEXT", "format", "json")).toBe(true);
+            expect(isTechnicalSemanticMapValue("CONFIG_TEXT", "serializationFormat", "xml")).toBe(true);
+            expect(isTechnicalSemanticMapValue("CONFIG_TEXT", "mimeType", "application/json")).toBe(true);
+            expect(isTechnicalSemanticMapValue("CONFIG_TEXT", "contentType", "text/plain")).toBe(true);
+        });
+
+        it("fails closed for unrecognized strings in configuration text maps", () => {
+            expect(isTechnicalSemanticMapValue("CONFIG_TEXT", "title", "Configuration")).toBe(false);
+            expect(isTechnicalSemanticMapValue("CONFIG_TEXT", "action", "close")).toBe(false);
         });
     });
 
@@ -1653,11 +1706,118 @@ describe("audit-i18n-rtl", () => {
                 expect(violations.some(v => v.category === "i18n-aria" && v.detail.includes("Go to previous step"))).toBe(true);
             });
 
+            it("detects lowercase visible labels in _LABELS semantic text maps", () => {
+                const code = `
+                    const BUTTON_LABELS = {
+                        close: "close",
+                        retry: "retry",
+                        save: "save"
+                    };
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", code, violations);
+
+                expect(violations).toHaveLength(3);
+                expect(violations.every(v => v.category === "i18n-text")).toBe(true);
+            });
+
+            it("detects lowercase ARIA label in _LABELS semantic text maps", () => {
+                const code = `
+                    const ARIA_LABELS = {
+                        close: "close"
+                    };
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", code, violations);
+
+                expect(violations).toHaveLength(1);
+                expect(violations[0]).toMatchObject({
+                    category: "i18n-aria"
+                });
+            });
+
+            it("detects lowercase announcements in _ANNOUNCEMENTS semantic text maps", () => {
+                const code = `
+                    const STATUS_ANNOUNCEMENTS = {
+                        loading: "loading",
+                        success: "success"
+                    };
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", code, violations);
+
+                expect(violations).toHaveLength(2);
+                expect(violations.every(v => v.category === "i18n-aria")).toBe(true);
+            });
+
+            it("detects user-facing text in class-property semantic maps", () => {
+                const code = `
+                    class Example {
+                        private readonly ARIA_LABELS = {
+                            close: "Close dialog"
+                        };
+                    }
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.component.ts", code, violations);
+
+                expect(violations).toHaveLength(1);
+                expect(violations[0]).toMatchObject({
+                    category: "i18n-aria"
+                });
+            });
+
+            it("detects user-facing text in static class-property semantic maps", () => {
+                const code = `
+                    class Example {
+                        private static readonly STATUS_ANNOUNCEMENTS = {
+                            loading: "Loading"
+                        };
+                    }
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.component.ts", code, violations);
+
+                expect(violations).toHaveLength(1);
+                expect(violations[0]).toMatchObject({
+                    category: "i18n-aria"
+                });
+            });
+
+            it("detects user-facing text in nested semantic text maps", () => {
+                const code = `
+                    const ARIA_LABELS = {
+                        pager: {
+                            previous: "Previous",
+                            next: "Next"
+                        }
+                    };
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", code, violations);
+
+                expect(violations).toHaveLength(2);
+                expect(violations.every(v => v.category === "i18n-aria")).toBe(true);
+            });
+
             it("ignores non-user-facing / technical objects with semantic suffixes", () => {
                 const code = `
                     const CONFIG_TEXT = {
                         mode: "utf-8",
                         format: "json"
+                    };
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", code, violations);
+
+                expect(violations).toHaveLength(0);
+            });
+
+            it("ignores non-user-facing / technical objects with explicit technical properties", () => {
+                const code = `
+                    const CONFIG_TEXT = {
+                        encoding: "utf-8",
+                        serializationFormat: "json"
                     };
                 `;
                 const violations: AuditViolation[] = [];
@@ -1728,6 +1888,26 @@ describe("audit-i18n-rtl", () => {
                 scanTypeScriptAst("example.component.ts", code, violations);
 
                 expect(violations).toHaveLength(0);
+            });
+
+            it("passes when semantic text map values are resolved from messages()", () => {
+                const buttonCode = `
+                    const BUTTON_LABELS = {
+                        close: messages().close
+                    };
+                `;
+                const buttonViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", buttonCode, buttonViolations);
+                expect(buttonViolations).toHaveLength(0);
+
+                const statusCode = `
+                    const STATUS_ANNOUNCEMENTS = {
+                        loading: messages().loading
+                    };
+                `;
+                const statusViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", statusCode, statusViolations);
+                expect(statusViolations).toHaveLength(0);
             });
         });
     });

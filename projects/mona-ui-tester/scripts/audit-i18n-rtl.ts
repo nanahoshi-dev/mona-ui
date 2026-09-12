@@ -1187,6 +1187,171 @@ export function collectLiteralFragments(node: Node | undefined): LiteralFragment
     return [];
 }
 
+export function isTechnicalSemanticMapValue(
+    mapName: string,
+    propertyName: string,
+    value: string
+): boolean {
+    if (TECHNICAL_SEMANTIC_STRINGS.has(value)) {
+        return true;
+    }
+
+    const stronglyUserFacing =
+        /(?:_LABELS|_ANNOUNCEMENTS)$/.test(mapName) ||
+        /^(?:LABELS|ANNOUNCEMENTS)_/.test(mapName);
+
+    if (stronglyUserFacing) {
+        return false;
+    }
+
+    if (
+        /^(?:encoding|charset|mode)$/i.test(propertyName) &&
+        /^(?:utf-?8|utf-?16|ascii)$/i.test(value)
+    ) {
+        return true;
+    }
+
+    if (
+        /^(?:format|serializationFormat)$/i.test(propertyName) &&
+        /^(?:json|xml|yaml|yml)$/i.test(value)
+    ) {
+        return true;
+    }
+
+    if (
+        /^(?:mimeType|contentType)$/i.test(propertyName) &&
+        /^(?:application|text|image|audio|video)\/[a-z0-9.+-]+$/i.test(value)
+    ) {
+        return true;
+    }
+
+    return false;
+}
+
+export function isSemanticTextMapName(name: string): boolean {
+    const raw = name.replace(/^#/, "");
+    return (
+        /(?:_TEXT|_LABELS|_ANNOUNCEMENTS)$/.test(raw) ||
+        /^(?:TEXT|LABELS|ANNOUNCEMENTS)_/.test(raw) ||
+        /^(?:TEXT|LABELS|ANNOUNCEMENTS)$/.test(raw.replace(/^_+/, ""))
+    );
+}
+
+function unwrapInitializer(node: Node | undefined): Node | undefined {
+    let current = node;
+    while (current) {
+        if (
+            Node.isParenthesizedExpression(current) ||
+            Node.isAsExpression(current) ||
+            Node.isTypeAssertion(current) ||
+            Node.isNonNullExpression(current) ||
+            Node.isSatisfiesExpression(current)
+        ) {
+            current = current.getExpression();
+        } else if (Node.isCallExpression(current)) {
+            const exprText = current.getExpression().getText();
+            if (exprText === "Object.freeze" || exprText === "freeze") {
+                const args = current.getArguments();
+                current = args.length > 0 ? args[0] : undefined;
+            } else if (
+                exprText === "computed" ||
+                exprText.endsWith(".computed") ||
+                exprText === "signal" ||
+                exprText.endsWith(".signal")
+            ) {
+                const args = current.getArguments();
+                if (args.length > 0) {
+                    const fn = args[0];
+                    if (Node.isArrowFunction(fn) || Node.isFunctionExpression(fn)) {
+                        const body = fn.getBody();
+                        if (Node.isBlock(body)) {
+                            const returns = getDirectReturnStatements(fn);
+                            current = returns.length > 0 ? returns[0].getExpression() : undefined;
+                        } else {
+                            current = body;
+                        }
+                    } else {
+                        current = fn;
+                    }
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        } else {
+            break;
+        }
+    }
+    return current;
+}
+
+function scanSemanticMapNode(
+    mapName: string,
+    propertyName: string,
+    node: Node | undefined,
+    filePath: string,
+    isAria: boolean,
+    violations: AuditViolation[]
+): void {
+    const unwrapped = unwrapInitializer(node);
+    if (!unwrapped) {
+        return;
+    }
+
+    if (Node.isObjectLiteralExpression(unwrapped)) {
+        for (const prop of unwrapped.getProperties()) {
+            if (Node.isPropertyAssignment(prop)) {
+                const propName = prop.getName().replace(/^['"]|['"]$/g, "");
+                scanSemanticMapNode(mapName, propName, prop.getInitializer(), filePath, isAria, violations);
+            } else if (Node.isMethodDeclaration(prop)) {
+                const propName = prop.getName().replace(/^['"]|['"]$/g, "");
+                const returns = getDirectReturnStatements(prop);
+                for (const ret of returns) {
+                    scanSemanticMapNode(mapName, propName, ret.getExpression(), filePath, isAria, violations);
+                }
+            }
+        }
+        return;
+    }
+
+    if (Node.isArrayLiteralExpression(unwrapped)) {
+        for (const element of unwrapped.getElements()) {
+            scanSemanticMapNode(mapName, propertyName, element, filePath, isAria, violations);
+        }
+        return;
+    }
+
+    if (Node.isConditionalExpression(unwrapped)) {
+        scanSemanticMapNode(mapName, propertyName, unwrapped.getWhenTrue(), filePath, isAria, violations);
+        scanSemanticMapNode(mapName, propertyName, unwrapped.getWhenFalse(), filePath, isAria, violations);
+        return;
+    }
+
+    const fragments = collectLiteralFragments(unwrapped);
+    for (const frag of fragments) {
+        const val = frag.text.trim();
+        if (isUserFacingText(val) && !isTechnicalSemanticMapValue(mapName, propertyName, val)) {
+            violations.push({
+                category: isAria ? "i18n-aria" : "i18n-text",
+                detail: `Hard-coded semantic text-map property "${propertyName}" in "${mapName}": "${val}"`,
+                file: filePath,
+                line: frag.node.getStartLineNumber()
+            });
+        }
+    }
+}
+
+export function scanSemanticTextMap(
+    mapName: string,
+    initializer: Node | undefined,
+    filePath: string,
+    violations: AuditViolation[]
+): void {
+    const isAria = /aria|announcement/i.test(mapName);
+    scanSemanticMapNode(mapName, "", initializer, filePath, isAria, violations);
+}
+
 const sharedTsProject = new Project({
     useInMemoryFileSystem: true,
     compilerOptions: {
@@ -1621,36 +1786,14 @@ export function scanTypeScriptAst(
         // 4c. Semantic text maps with user-facing strings (e.g. *_TEXT, *_LABELS, *_ANNOUNCEMENTS)
         for (const varDecl of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
             const varName = varDecl.getName();
-            if (
-                /(?:_TEXT|_LABELS|_ANNOUNCEMENTS)$/.test(varName) ||
-                /^(?:TEXT|LABELS|ANNOUNCEMENTS)_/.test(varName)
-            ) {
-                const init = varDecl.getInitializer();
-                if (init && Node.isObjectLiteralExpression(init)) {
-                    for (const prop of init.getProperties()) {
-                        if (Node.isPropertyAssignment(prop)) {
-                            const propInit = prop.getInitializer();
-                            if (propInit) {
-                                const fragments = collectLiteralFragments(propInit);
-                                for (const frag of fragments) {
-                                    const val = frag.text.trim();
-                                    const isTechnical =
-                                        TECHNICAL_SEMANTIC_STRINGS.has(val) ||
-                                        (!/\s/.test(val) && !/[.!?]/.test(val) && /^[a-z0-9]+([-_/.][a-z0-9]+)*$/.test(val));
-                                    if (isUserFacingText(val) && !isTechnical) {
-                                        const isAria = /aria|announcement/i.test(varName);
-                                        violations.push({
-                                            category: isAria ? "i18n-aria" : "i18n-text",
-                                            detail: `Hard-coded semantic text-map property "${prop.getName()}" in "${varName}": "${val}"`,
-                                            file: filePath,
-                                            line: frag.node.getStartLineNumber()
-                                        });
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            if (isSemanticTextMapName(varName)) {
+                scanSemanticTextMap(varName, varDecl.getInitializer(), filePath, violations);
+            }
+        }
+        for (const prop of sf.getDescendantsOfKind(SyntaxKind.PropertyDeclaration)) {
+            const propName = prop.getName();
+            if (isSemanticTextMapName(propName)) {
+                scanSemanticTextMap(propName, prop.getInitializer(), filePath, violations);
             }
         }
         }
