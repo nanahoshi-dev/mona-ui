@@ -290,6 +290,10 @@ describe("MONA_JA_JP_LOCALE", () => {
             expect(m.colorGradient?.saturationAndValueText?.(50, 75)).toBe("彩度50%、明度75%");
         });
 
+        it("formats ColorPalette color function correctly", () => {
+            expect(m.colorPalette?.color?.("#FF00AA")).toBe("色: #FF00AA");
+        });
+
         it("formats Dropdowns functions with Japanese counters and no plural branches", () => {
             expect(m.dropdowns?.itemPosition?.("オプション 1", 1, 10)).toBe("オプション 1、10件中1件目");
             expect(m.dropdowns?.resultsAvailable?.(0)).toBe("0件の結果があります");
