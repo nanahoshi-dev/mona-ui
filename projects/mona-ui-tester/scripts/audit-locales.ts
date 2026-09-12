@@ -82,7 +82,8 @@ export const LOCALE_COPY_EXCEPTIONS: readonly LocaleCopyException[] = [
     { localeId: "fr-FR", messagePath: "pager.pageText", value: "Page" },
     { localeId: "fr-FR", messagePath: "scrollView.page", value: "Page" },
     { localeId: "fr-FR", messagePath: "scrollView.pageOf", value: "Page" },
-    { localeId: "fr-FR", messagePath: "timeSelector.minutes", value: "Minutes" }
+    { localeId: "fr-FR", messagePath: "timeSelector.minutes", value: "Minutes" },
+    { localeId: "ja-JP", messagePath: "dialog.ok", value: "OK" }
 ];
 
 export function isAllowedLocaleCopyException(

@@ -97,6 +97,16 @@ describe("audit-locales", () => {
             expect(isAllowedLocaleCopyException("de-DE", "chart.openAbbreviation", "O")).toBe(false);
             expect(isAllowedLocaleCopyException(undefined, "chart.openAbbreviation", "O")).toBe(false);
         });
+
+        it("allows Japanese-specific unchanged words on approved paths", () => {
+            expect(isAllowedLocaleCopyException("ja-JP", "dialog.ok", "OK")).toBe(true);
+        });
+
+        it("disallows Japanese-specific exceptions for other locales or unapproved paths", () => {
+            expect(isAllowedLocaleCopyException("es-ES", "dialog.ok", "OK")).toBe(false);
+            expect(isAllowedLocaleCopyException("ja-JP", "other.ok", "OK")).toBe(false);
+            expect(isAllowedLocaleCopyException("ja-JP", "dialog.ok", "Cancel")).toBe(false);
+        });
     });
 
     describe("auditLocaleMessagesFile", () => {
@@ -1245,6 +1255,18 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
                         locale.canonicalId === "fr-FR" &&
                         locale.localeExport === "MONA_FR_FR_LOCALE" &&
                         locale.messagesExport === "FR_FR_MESSAGES"
+                )
+            ).toBe(true);
+        });
+
+        it("discovers the official Japanese locale", () => {
+            const discovery = discoverOfficialLocales();
+            expect(
+                discovery.locales.some(
+                    locale =>
+                        locale.canonicalId === "ja-JP" &&
+                        locale.localeExport === "MONA_JA_JP_LOCALE" &&
+                        locale.messagesExport === "JA_JP_MESSAGES"
                 )
             ).toBe(true);
         });
