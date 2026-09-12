@@ -190,6 +190,31 @@ describe("MONA_DE_DE_LOCALE", () => {
             expect(m.stepper?.stepper).toBe("Schrittanzeige");
             expect(m.tabs?.closeTab).toBe("Registerkarte schließen");
         });
+
+        it("translates Filter date operators correctly", () => {
+            expect(m.filter?.isAfterOrEqualTo).toBe("Ist am oder nach");
+            expect(m.filter?.isBeforeOrEqualTo).toBe("Ist am oder vor");
+            expect(m.filter?.isAfter).toBe("Ist nach");
+            expect(m.filter?.isBefore).toBe("Ist vor");
+            expect(m.filter?.isEqualTo).toBe("Ist gleich");
+            expect(m.filter?.isNotEqualTo).toBe("Ist ungleich");
+        });
+
+        it("translates ColorGradient accessibility labels correctly", () => {
+            expect(m.colorGradient?.saturationAndValue).toBe("Sättigung und Helligkeit");
+        });
+
+        it("translates Grid row-reorder disabled reasons correctly", () => {
+            expect(m.grid?.rowReorderDisabled).toBe("Das Neuanordnen von Zeilen ist deaktiviert.");
+            expect(m.grid?.rowReorderDisabledEditing).toBe("Bearbeitung abschließen, um Zeilen neu anzuordnen.");
+            expect(m.grid?.rowReorderDisabledFiltered).toBe("Filter aufheben, um Zeilen neu anzuordnen.");
+            expect(m.grid?.rowReorderDisabledGrouped).toBe("Gruppierung aufheben, um Zeilen neu anzuordnen.");
+            expect(m.grid?.rowReorderDisabledSingleRow).toBe("Zum Neuanordnen sind mindestens zwei Zeilen erforderlich.");
+            expect(m.grid?.rowReorderDisabledSorted).toBe("Sortierung aufheben, um Zeilen neu anzuordnen.");
+            expect(m.grid?.rowReorderDisabledVirtualScroll).toBe(
+                "Bei aktiviertem virtuellem Scrollen können Zeilen nicht neu angeordnet werden."
+            );
+        });
     });
 
     describe("function-valued messages", () => {
@@ -201,7 +226,7 @@ describe("MONA_DE_DE_LOCALE", () => {
             expect(m.calendar?.decadeViewLabel?.(2020, 2029)).toBe("Jahrzehntansicht, 2020–2029");
             expect(m.calendar?.yearCellLabel?.(2026)).toBe("Jahr 2026");
             expect(m.calendar?.yearViewLabel?.("2026")).toBe("Jahresansicht, 2026");
-            expect(m.calendar?.goToToday?.("12.09.2026")).toBe("Zu heute wechseln, 12.09.2026");
+            expect(m.calendar?.goToToday?.("12.09.2026")).toBe("Zum heutigen Datum wechseln, 12.09.2026");
             expect(m.calendar?.switchToYearView?.("September 2026")).toBe(
                 "Zur Jahresansicht wechseln, aktuell September 2026"
             );
@@ -223,7 +248,7 @@ describe("MONA_DE_DE_LOCALE", () => {
         });
 
         it("formats ColorGradient saturationAndValueText function correctly", () => {
-            expect(m.colorGradient?.saturationAndValueText?.(50, 75)).toBe("Sättigung 50 %, Wert 75 %");
+            expect(m.colorGradient?.saturationAndValueText?.(50, 75)).toBe("Sättigung 50 %, Helligkeit 75 %");
         });
 
         it("formats Dropdowns functions with singular and plural correctly", () => {
@@ -242,6 +267,7 @@ describe("MONA_DE_DE_LOCALE", () => {
             expect(m.grid?.columnsSelected?.(3)).toBe("3 Spalten ausgewählt");
             expect(m.grid?.filterByColumn?.("Name")).toBe("Nach Name filtern");
             expect(m.grid?.reorderRow?.(4)).toBe("Zeile 4 neu anordnen");
+            expect(m.grid?.rowReorderMoved?.(3, 2)).toBe("Zeile 3 an Position 2 verschoben.");
             expect(m.grid?.selectRow?.(2)).toBe("Zeile 2 auswählen");
         });
 

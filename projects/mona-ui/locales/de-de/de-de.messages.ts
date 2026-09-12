@@ -14,7 +14,7 @@ export const DE_DE_MESSAGES = {
         calendarLabel: (formattedMonthAndYear: string) => `Kalender, ${formattedMonthAndYear}`,
         decadeRange: (start: number, end: number) => `${start} bis ${end}`,
         decadeViewLabel: (start: number, end: number) => `Jahrzehntansicht, ${start}–${end}`,
-        goToToday: (formattedDate: string) => `Zu heute wechseln, ${formattedDate}`,
+        goToToday: (formattedDate: string) => `Zum heutigen Datum wechseln, ${formattedDate}`,
         nextDecade: "Nächstes Jahrzehnt",
         nextMonth: "Nächster Monat",
         nextYear: "Nächstes Jahr",
@@ -78,9 +78,9 @@ export const DE_DE_MESSAGES = {
         copyColor: "Farbe kopieren",
         currentColor: "Aktuelle Farbe",
         previousColor: "Vorherige Farbe",
-        saturationAndValue: "Farbsättigung und -wert",
+        saturationAndValue: "Sättigung und Helligkeit",
         saturationAndValueText: (saturation: number, value: number) =>
-            `Sättigung ${saturation} %, Wert ${value} %`,
+            `Sättigung ${saturation} %, Helligkeit ${value} %`,
         switchColorMode: "Farbmodus wechseln"
     },
     colorPalette: {
@@ -184,9 +184,9 @@ export const DE_DE_MESSAGES = {
         doesNotContain: "Enthält nicht",
         endsWith: "Endet mit",
         isAfter: "Ist nach",
-        isAfterOrEqualTo: "Ist nach oder am",
+        isAfterOrEqualTo: "Ist am oder nach",
         isBefore: "Ist vor",
-        isBeforeOrEqualTo: "Ist vor oder am",
+        isBeforeOrEqualTo: "Ist am oder vor",
         isEmpty: "Ist leer",
         isEqualTo: "Ist gleich",
         isFalse: "Ist falsch",

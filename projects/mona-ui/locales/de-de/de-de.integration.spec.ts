@@ -2,6 +2,8 @@ import { Component, signal, viewChild } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
 import { CalendarComponent } from "@nanahoshi/mona-ui/calendar";
+import { ColorGradientComponent } from "@nanahoshi/mona-ui/color-gradient";
+import { FilterService } from "@nanahoshi/mona-ui/filter";
 import { ListBoxComponent } from "@nanahoshi/mona-ui/list-box";
 import { PagerComponent, PAGER_DEFAULT_MESSAGES } from "@nanahoshi/mona-ui/pager";
 import { ScrollViewComponent } from "@nanahoshi/mona-ui/scroll-view";
@@ -203,10 +205,10 @@ describe("MONA_DE_DE_LOCALE Integration with MonaI18nService", () => {
     });
 
     it("ensures MONA_DE_DE_LOCALE is immutable and unmutated across service usage cycles", () => {
-        const deepFreeze = (obj: any): any => {
+        const deepFreeze = <T>(obj: T): T => {
             Object.freeze(obj);
-            for (const key of Object.getOwnPropertyNames(obj)) {
-                const val = obj[key];
+            for (const key of Object.getOwnPropertyNames(obj as object)) {
+                const val = (obj as Record<string, unknown>)[key];
                 if (val && (typeof val === "object" || typeof val === "function") && !Object.isFrozen(val)) {
                     deepFreeze(val);
                 }
@@ -300,6 +302,7 @@ describe("MONA_DE_DE_LOCALE Integration with MonaI18nService", () => {
         // 1. Mona-owned UI button translations
         const todayButton = hostEl.querySelector("button:first-child") as HTMLButtonElement;
         expect(todayButton.textContent?.trim()).toBe("Heute");
+        expect(todayButton.getAttribute("aria-label")).toContain("Zum heutigen Datum wechseln");
 
         const prevButton = hostEl.querySelector('button[aria-label="Vorheriger Monat"]') as HTMLButtonElement;
         const nextButton = hostEl.querySelector('button[aria-label="Nächster Monat"]') as HTMLButtonElement;
@@ -399,5 +402,46 @@ describe("MONA_DE_DE_LOCALE Integration with MonaI18nService", () => {
         const hostEl = fixture.nativeElement as HTMLElement;
         expect(hostEl.querySelector("button[aria-label='Seitennavigation rückwärts scrollen']")).not.toBeNull();
         expect(hostEl.querySelector("button[aria-label='Seitennavigation vorwärts scrollen']")).not.toBeNull();
+    });
+
+    it("provides German date operator labels in FilterService", () => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideMonaI18n({
+                    locale: MONA_DE_DE_LOCALE
+                }),
+                FilterService
+            ]
+        });
+
+        const filterService = TestBed.inject(FilterService);
+        const dateItems = filterService.dateFilterMenuItems;
+
+        expect(dateItems.find(i => i.value === "eq")?.text).toBe("Ist gleich");
+        expect(dateItems.find(i => i.value === "neq")?.text).toBe("Ist ungleich");
+        expect(dateItems.find(i => i.value === "gt")?.text).toBe("Ist nach");
+        expect(dateItems.find(i => i.value === "gte")?.text).toBe("Ist am oder nach");
+        expect(dateItems.find(i => i.value === "lt")?.text).toBe("Ist vor");
+        expect(dateItems.find(i => i.value === "lte")?.text).toBe("Ist am oder vor");
+    });
+
+    it("renders ColorGradient component with German accessibility labels and value text", () => {
+        TestBed.configureTestingModule({
+            imports: [ColorGradientComponent],
+            providers: [
+                provideMonaI18n({
+                    locale: MONA_DE_DE_LOCALE
+                })
+            ]
+        });
+
+        const fixture = TestBed.createComponent(ColorGradientComponent);
+        fixture.detectChanges();
+
+        const slider = fixture.nativeElement.querySelector("[role='slider']") as HTMLElement;
+        expect(slider).not.toBeNull();
+        expect(slider.getAttribute("aria-label")).toBe("Sättigung und Helligkeit");
+        expect(slider.getAttribute("aria-valuetext")).toContain("Sättigung");
+        expect(slider.getAttribute("aria-valuetext")).toContain("Helligkeit");
     });
 });
