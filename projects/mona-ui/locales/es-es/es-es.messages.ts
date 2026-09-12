@@ -44,7 +44,7 @@ export const ES_ES_MESSAGES = {
             minimum: string,
             midpoint: string,
             maximum: string
-        ) => `${title}, de ${minimum} a ${midpoint} a ${maximum}`,
+        ) => `${title}, de ${minimum} a ${maximum}, con punto medio en ${midpoint}`,
         dropOff: "Abandono",
         falling: "En descenso",
         high: "Máximo",
@@ -67,7 +67,7 @@ export const ES_ES_MESSAGES = {
         visualIndicatorClamped: "Indicador visual acotado"
     },
     chip: {
-        removeLabel: (label?: string) => (label ? `Quitar, ${label}` : "Quitar elemento")
+        removeLabel: (label?: string) => (label ? `Quitar ${label}` : "Quitar elemento")
     },
     colorGradient: {
         apply: "Aplicar",
@@ -80,7 +80,7 @@ export const ES_ES_MESSAGES = {
         previousColor: "Color anterior",
         saturationAndValue: "Saturación y valor del color",
         saturationAndValueText: (saturation: number, value: number) =>
-            `Saturación ${saturation}%, Valor ${value}%`,
+            `Saturación ${saturation}%, valor ${value}%`,
         switchColorMode: "Cambiar modo de color"
     },
     colorPalette: {
@@ -213,7 +213,7 @@ export const ES_ES_MESSAGES = {
         columnsSelected: (count: number) =>
             count === 1 ? "1 columna seleccionada" : `${count} columnas seleccionadas`,
         delete: "Eliminar",
-        deleteRowConfirmation: "¿Seguro que deseas eliminar este elemento?",
+        deleteRowConfirmation: "¿Seguro que deseas eliminar esta fila?",
         deleteRowTitle: "¿Eliminar fila?",
         dragColumnHeaderToGroup: "Arrastra el encabezado de una columna aquí para agrupar",
         edit: "Editar",
@@ -246,10 +246,10 @@ export const ES_ES_MESSAGES = {
         moveDown: "Bajar",
         moveUp: "Subir",
         remove: "Quitar",
-        transferAllFrom: "Transferir todo desde",
-        transferAllTo: "Transferir todo hacia",
-        transferFrom: "Transferir desde",
-        transferTo: "Transferir hacia"
+        transferAllFrom: "Transferir todo desde la otra lista",
+        transferAllTo: "Transferir todo a la otra lista",
+        transferFrom: "Transferir desde la otra lista",
+        transferTo: "Transferir a la otra lista"
     },
     multiSelect: {
         clear: "Limpiar",
@@ -284,7 +284,7 @@ export const ES_ES_MESSAGES = {
         pageText: "Página",
         previousPageLabel: "Página anterior",
         rangeStatus: (start: number, end: number, total: number) =>
-            `${start} - ${end} de ${total} elementos`
+            `${start} - ${end} de ${total} ${total === 1 ? "elemento" : "elementos"}`
     },
     rating: {
         notRated: "Sin valoración",
@@ -296,8 +296,8 @@ export const ES_ES_MESSAGES = {
         page: (current: number) => `Página ${current}`,
         pageOf: (current: number, total: number) => `Página ${current} de ${total}`,
         previousPage: "Página anterior",
-        scrollPagerNext: "Desplazar al paginador siguiente",
-        scrollPagerPrevious: "Desplazar al paginador anterior",
+        scrollPagerNext: "Desplazar la paginación hacia delante",
+        scrollPagerPrevious: "Desplazar la paginación hacia atrás",
         slide: "diapositiva"
     },
     sheet: {
@@ -314,7 +314,7 @@ export const ES_ES_MESSAGES = {
     },
     splitButton: {
         menuButtonAriaLabel: "Mostrar opciones de menú",
-        splitButton: (text: string) => (text ? `${text} botón dividido` : "Botón dividido")
+        splitButton: (text: string) => (text ? `${text}, botón dividido` : "Botón dividido")
     },
     splitter: {
         collapseDown: "Contraer panel inferior",

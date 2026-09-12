@@ -83,7 +83,7 @@ describe("MONA_ES_ES_LOCALE", () => {
         it("translates Grid messages correctly", () => {
             expect(m.grid?.all).toBe("(Todos)");
             expect(m.grid?.delete).toBe("Eliminar");
-            expect(m.grid?.deleteRowConfirmation).toBe("¿Seguro que deseas eliminar este elemento?");
+            expect(m.grid?.deleteRowConfirmation).toBe("¿Seguro que deseas eliminar esta fila?");
             expect(m.grid?.deleteRowTitle).toBe("¿Eliminar fila?");
             expect(m.grid?.edit).toBe("Editar");
             expect(m.grid?.filterPlaceholder).toBe("Filtrar...");
@@ -91,6 +91,17 @@ describe("MONA_ES_ES_LOCALE", () => {
             expect(m.grid?.remove).toBe("Quitar");
             expect(m.grid?.save).toBe("Guardar");
             expect(m.grid?.selectAllRows).toBe("Seleccionar todas las filas");
+        });
+
+        it("translates ListBox messages correctly", () => {
+            expect(m.listBox?.clearSelection).toBe("Limpiar selección");
+            expect(m.listBox?.moveDown).toBe("Bajar");
+            expect(m.listBox?.moveUp).toBe("Subir");
+            expect(m.listBox?.remove).toBe("Quitar");
+            expect(m.listBox?.transferFrom).toBe("Transferir desde la otra lista");
+            expect(m.listBox?.transferTo).toBe("Transferir a la otra lista");
+            expect(m.listBox?.transferAllFrom).toBe("Transferir todo desde la otra lista");
+            expect(m.listBox?.transferAllTo).toBe("Transferir todo a la otra lista");
         });
 
         it("translates Editor messages correctly", () => {
@@ -154,6 +165,8 @@ describe("MONA_ES_ES_LOCALE", () => {
             expect(m.scrollView?.slide).toBe("diapositiva");
             expect(m.scrollView?.nextPage).toBe("Página siguiente");
             expect(m.scrollView?.previousPage).toBe("Página anterior");
+            expect(m.scrollView?.scrollPagerNext).toBe("Desplazar la paginación hacia delante");
+            expect(m.scrollView?.scrollPagerPrevious).toBe("Desplazar la paginación hacia atrás");
         });
 
         it("translates Spinner & Notification messages correctly", () => {
@@ -197,13 +210,17 @@ describe("MONA_ES_ES_LOCALE", () => {
         it("formats Chart functions correctly", () => {
             expect(m.chart?.rangeDescription?.("Ingresos", "0", "100")).toBe("Ingresos, de 0 a 100");
             expect(m.chart?.divergingRangeDescription?.("Rentabilidad", "-10", "0", "+10")).toBe(
-                "Rentabilidad, de -10 a 0 a +10"
+                "Rentabilidad, de -10 a +10, con punto medio en 0"
             );
         });
 
         it("formats Chip removeLabel function correctly", () => {
-            expect(m.chip?.removeLabel?.("Angular")).toBe("Quitar, Angular");
+            expect(m.chip?.removeLabel?.("Angular")).toBe("Quitar Angular");
             expect(m.chip?.removeLabel?.()).toBe("Quitar elemento");
+        });
+
+        it("formats ColorGradient saturationAndValueText function correctly", () => {
+            expect(m.colorGradient?.saturationAndValueText?.(50, 75)).toBe("Saturación 50%, valor 75%");
         });
 
         it("formats Dropdowns functions with singular and plural correctly", () => {
@@ -234,6 +251,7 @@ describe("MONA_ES_ES_LOCALE", () => {
             expect(m.pager?.pageLabel?.(3)).toBe("Página 3");
             expect(m.pager?.pageSizeLabel?.(10)).toBe("10 / página");
             expect(m.pager?.pageStatus?.(2, 5)).toBe("Página 2 de 5");
+            expect(m.pager?.rangeStatus?.(1, 1, 1)).toBe("1 - 1 de 1 elemento");
             expect(m.pager?.rangeStatus?.(1, 10, 50)).toBe("1 - 10 de 50 elementos");
             expect(m.pager?.jumpBackwardLabel?.(1)).toBe("Retroceder 1 página");
             expect(m.pager?.jumpBackwardLabel?.(3)).toBe("Retroceder 3 páginas");
@@ -251,7 +269,7 @@ describe("MONA_ES_ES_LOCALE", () => {
         });
 
         it("formats SplitButton function correctly", () => {
-            expect(m.splitButton?.splitButton?.("Guardar")).toBe("Guardar botón dividido");
+            expect(m.splitButton?.splitButton?.("Guardar")).toBe("Guardar, botón dividido");
             expect(m.splitButton?.splitButton?.("")).toBe("Botón dividido");
         });
     });
