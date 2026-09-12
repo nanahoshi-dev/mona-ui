@@ -25,7 +25,8 @@
                 textField="label"
                 size="small"
                 [value]="selectedLocale()"
-                [style.width.px]="140"
+                [style.min-width]="'10rem'"
+                [style.width]="'auto'"
                 (valueChange)="onLocaleChange($event)">
             </mona-dropdown-list>
             <mona-dropdown-list
