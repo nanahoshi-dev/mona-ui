@@ -1,1 +1,9 @@
-export type FirstDayOfWeek = "monday" | "sunday";
+export type FirstDayOfWeek =
+    | "monday"
+    | "tuesday"
+    | "wednesday"
+    | "thursday"
+    | "friday"
+    | "saturday"
+    | "sunday";
+

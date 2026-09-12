@@ -55,6 +55,16 @@ import {
 } from "../../styles/calendar.styles";
 import { compareDates } from "../../utils/compareDates";
 
+const FIRST_DAY_OF_WEEK_TO_ISO: Record<FirstDayOfWeek, number> = {
+    monday: 1,
+    tuesday: 2,
+    wednesday: 3,
+    thursday: 4,
+    friday: 5,
+    saturday: 6,
+    sunday: 7
+};
+
 @Component({
     selector: "mona-calendar",
     templateUrl: "./calendar.component.html",
@@ -89,27 +99,14 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         const day = this.navigatedDate();
         const firstDayOfMonth = gregorianDateTime(day, this.#i18n.localeId()).startOf("month");
         const lastDayOfMonth = gregorianDateTime(day, this.#i18n.localeId()).endOf("month");
-        const firstDayOfWeek = this.effectiveFirstDay() === "monday" ? 1 : 0;
+        const firstDayIso = FIRST_DAY_OF_WEEK_TO_ISO[this.effectiveFirstDay()];
 
-        let firstDayOfCalendar: DateTime;
-        const monthStartWeekday = firstDayOfMonth.weekday;
+        const daysToSubtract = (firstDayOfMonth.weekday - firstDayIso + 7) % 7;
+        const firstDayOfCalendar = firstDayOfMonth.minus({ days: daysToSubtract });
 
-        if (firstDayOfWeek === 0) {
-            const daysToSubtract = monthStartWeekday === 7 ? 0 : monthStartWeekday;
-            firstDayOfCalendar = firstDayOfMonth.minus({ days: daysToSubtract });
-        } else {
-            firstDayOfCalendar = firstDayOfMonth.startOf("week");
-        }
-
-        let lastDayOfCalendar: DateTime;
-        const monthEndWeekday = lastDayOfMonth.weekday;
-
-        if (firstDayOfWeek === 0) {
-            const daysToAdd = monthEndWeekday === 7 ? 6 : 6 - monthEndWeekday;
-            lastDayOfCalendar = lastDayOfMonth.plus({ days: daysToAdd });
-        } else {
-            lastDayOfCalendar = lastDayOfMonth.endOf("week");
-        }
+        const lastDayOfWeekIso = ((firstDayIso + 5) % 7) + 1;
+        const daysToAdd = (lastDayOfWeekIso - lastDayOfMonth.weekday + 7) % 7;
+        const lastDayOfCalendar = lastDayOfMonth.plus({ days: daysToAdd });
 
         const dictionary = new Dictionary<Date, number>();
         for (let i = firstDayOfCalendar; i <= lastDayOfCalendar; i = i.plus({ days: 1 })) {
@@ -325,19 +322,20 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         }
     });
     protected readonly weekdays = computed(() => {
-        const firstDayOfWeek = this.effectiveFirstDay();
+        const firstDayIso = FIRST_DAY_OF_WEEK_TO_ISO[this.effectiveFirstDay()];
         const locale = this.#i18n.localeId();
-        // 2024-01-07 was a Sunday
+        // 2024-01-01 was a Monday (ISO 1)
         const days = range(0, 7)
             .select(i => {
-                const dt = gregorianDateTimeFromObject({ year: 2024, month: 1, day: 7 + i }, locale);
+                const dt = gregorianDateTimeFromObject({ year: 2024, month: 1, day: 1 + i }, locale);
                 return {
                     short: dt.toFormat("ccc"),
                     full: dt.toFormat("cccc")
                 };
             })
             .toArray();
-        return firstDayOfWeek === "monday" ? [...days.slice(1), days[0]] : days;
+        const startIndex = firstDayIso - 1;
+        return [...days.slice(startIndex), ...days.slice(0, startIndex)];
     });
     protected readonly yearCellTemplate = contentChild(CalendarYearCellTemplateDirective);
     protected readonly yearGridClass = computed(() => {
@@ -529,13 +527,10 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     }
 
     protected getWeekNumber(date: Date): number {
-        let dt = gregorianDateTime(date, this.#i18n.localeId());
-        if (this.effectiveFirstDay() === "sunday") {
-            // In Sunday-first calendar, date is Sunday (day 0 of [Sun..Sat] row).
-            // Thursday (day 4 of row) represents the majority of the row and defines its ISO 8601 week number.
-            dt = dt.plus({ days: 4 });
-        }
-        return dt.weekNumber;
+        const dt = gregorianDateTime(date, this.#i18n.localeId());
+        const firstDayIso = FIRST_DAY_OF_WEEK_TO_ISO[this.effectiveFirstDay()];
+        const daysToThursday = (4 - firstDayIso + 7) % 7;
+        return dt.plus({ days: daysToThursday }).weekNumber;
     }
 
     protected onTodayButtonClick(): void {
@@ -975,11 +970,14 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         let newDate: Date;
 
         switch (view) {
-            case "month":
-                newDate = dateTime.endOf("month").toJSDate();
+            case "month": {
+                const firstDayIso = FIRST_DAY_OF_WEEK_TO_ISO[this.effectiveFirstDay()];
+                const lastDayOfWeekIso = ((firstDayIso + 5) % 7) + 1;
+                const daysToAdd = (lastDayOfWeekIso - dateTime.weekday + 7) % 7;
+                newDate = dateTime.plus({ days: daysToAdd }).toJSDate();
                 if (this.isDateDisabled(newDate)) {
-                    for (let i = newDate.getDate() - 1; i >= 1; i--) {
-                        const testDate = dateTime.set({ day: i }).toJSDate();
+                    for (let i = 1; i <= 6; i++) {
+                        const testDate = DateTime.fromJSDate(newDate).minus({ days: i }).toJSDate();
                         if (!this.isDateDisabled(testDate)) {
                             newDate = testDate;
                             break;
@@ -987,6 +985,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
                     }
                 }
                 break;
+            }
             case "year":
                 newDate = dateTime.set({ month: 12 }).toJSDate();
                 break;
@@ -1006,12 +1005,13 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         let newDate: Date;
 
         switch (view) {
-            case "month":
-                newDate = dateTime.startOf("month").toJSDate();
+            case "month": {
+                const firstDayIso = FIRST_DAY_OF_WEEK_TO_ISO[this.effectiveFirstDay()];
+                const daysToSubtract = (dateTime.weekday - firstDayIso + 7) % 7;
+                newDate = dateTime.minus({ days: daysToSubtract }).toJSDate();
                 if (this.isDateDisabled(newDate)) {
-                    const daysInMonth = dateTime.daysInMonth ?? 31;
-                    for (let i = 2; i <= daysInMonth; i++) {
-                        const testDate = dateTime.set({ day: i }).toJSDate();
+                    for (let i = 1; i <= 6; i++) {
+                        const testDate = DateTime.fromJSDate(newDate).plus({ days: i }).toJSDate();
                         if (!this.isDateDisabled(testDate)) {
                             newDate = testDate;
                             break;
@@ -1019,6 +1019,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
                     }
                 }
                 break;
+            }
             case "year":
                 newDate = dateTime.set({ month: 1 }).toJSDate();
                 break;

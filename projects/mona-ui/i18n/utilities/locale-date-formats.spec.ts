@@ -126,10 +126,10 @@ describe("locale-date-formats", () => {
                     }
                 }
                 (MockLocale.prototype as unknown as { getWeekInfo: unknown }).getWeekInfo = undefined;
-                Intl.Locale = MockLocale as unknown as typeof Intl.Locale;
+                Object.defineProperty(Intl, "Locale", { value: MockLocale, configurable: true, writable: true });
                 expect(getLocaleFirstDayOfWeek("en-AA")).toBe("sunday");
             } finally {
-                Intl.Locale = originalLocale;
+                Object.defineProperty(Intl, "Locale", { value: originalLocale, configurable: true, writable: true });
             }
         });
 
@@ -137,15 +137,15 @@ describe("locale-date-formats", () => {
             const originalLocale = Intl.Locale;
             try {
                 class MockLocale extends originalLocale {
-                    public override getWeekInfo(): { firstDay: number } {
+                    public getWeekInfo(): { firstDay: number } {
                         return { firstDay: 7 };
                     }
                 }
                 Object.defineProperty(MockLocale.prototype, "weekInfo", { value: undefined, configurable: true });
-                Intl.Locale = MockLocale as unknown as typeof Intl.Locale;
+                Object.defineProperty(Intl, "Locale", { value: MockLocale, configurable: true, writable: true });
                 expect(getLocaleFirstDayOfWeek("en-AB")).toBe("sunday");
             } finally {
-                Intl.Locale = originalLocale;
+                Object.defineProperty(Intl, "Locale", { value: originalLocale, configurable: true, writable: true });
             }
         });
     });
