@@ -44,8 +44,14 @@ jobs:
       - name: Audit i18n and RTL readiness
         run: npm run audit:i18n-rtl:strict
 
+      - name: Audit official locales
+        run: npm run audit:locales
+
       - name: Build
         run: npm run build:prod
+
+      - name: Verify built package exports
+        run: npm run verify:package
 
       - name: Release
         env:

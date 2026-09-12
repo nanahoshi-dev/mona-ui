@@ -1,10 +1,15 @@
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { execSync } from "node:child_process";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
+import { discoverOfficialLocales } from "./audit-locales";
 
-export function verifyBuiltPackage(distDir: string = resolve(process.cwd(), "dist/mona-ui")): void {
-    console.log("Verifying built package output at:", distDir);
+export interface PackageVerificationOptions {
+    distDir?: string;
+    sourceLocalesDir?: string;
+}
 
-    const pkgJsonPath = resolve(distDir, "package.json");
+export function resolveExportTargets(pkgJsonPath: string): { runtimeRelPath: string; typesRelPath: string } {
     if (!existsSync(pkgJsonPath)) {
         throw new Error(`Built package.json not found at: ${pkgJsonPath}. Did you run "npm run build"?`);
     }
@@ -12,48 +17,162 @@ export function verifyBuiltPackage(distDir: string = resolve(process.cwd(), "dis
     const pkgJson = JSON.parse(readFileSync(pkgJsonPath, "utf-8"));
     const exports = pkgJson.exports;
 
-    if (!exports) {
+    if (!exports || typeof exports !== "object") {
         throw new Error('Built package.json has no "exports" field');
     }
 
-    // Check for ./locales export
     const localesExport = exports["./locales"];
     if (!localesExport) {
         throw new Error('Built package.json is missing exports["./locales"] entry point');
     }
-    console.log('✓ Found exports["./locales"] in dist/mona-ui/package.json');
 
-    // Check emitted files
-    const localesDir = resolve(distDir, "locales");
-    if (!existsSync(localesDir)) {
-        throw new Error(`Built locales directory not found at: ${localesDir}`);
-    }
-    console.log("✓ Emitted locales directory exists");
+    let runtimeRelPath: string | null = null;
+    let typesRelPath: string | null = null;
 
-    // Check exported symbols
-    const fesmPath = resolve(distDir, "fesm2022/nanahoshi-mona-ui-locales.mjs");
-    if (!existsSync(fesmPath)) {
-        throw new Error(`FESM bundle for locales not found at: ${fesmPath}`);
+    if (typeof localesExport === "string") {
+        runtimeRelPath = localesExport;
+    } else if (typeof localesExport === "object" && localesExport !== null) {
+        runtimeRelPath = localesExport.import ?? localesExport.default ?? null;
+        typesRelPath = localesExport.types ?? null;
     }
 
-    const fesmContent = readFileSync(fesmPath, "utf-8");
-    if (!fesmContent.includes("MONA_ES_ES_LOCALE")) {
-        throw new Error("MONA_ES_ES_LOCALE is not exported from the built locales FESM bundle");
+    if (!runtimeRelPath) {
+        throw new Error('exports["./locales"] is missing an "import" or "default" runtime target');
     }
-    console.log("✓ MONA_ES_ES_LOCALE is exported from built locales bundle");
 
-    // Check type definition
-    const typesRelPath = typeof localesExport === "object" && localesExport !== null && "types" in localesExport
-        ? (localesExport as { types: string }).types
-        : null;
     if (!typesRelPath) {
         throw new Error('exports["./locales"] is missing a "types" declaration path');
     }
+
+    return { runtimeRelPath, typesRelPath };
+}
+
+export function verifyBuiltPackage(options: PackageVerificationOptions = {}): void {
+    const distDir = resolve(options.distDir ?? resolve(process.cwd(), "dist/mona-ui"));
+    const sourceLocalesDir = resolve(
+        options.sourceLocalesDir ?? resolve(process.cwd(), "projects/mona-ui/locales")
+    );
+
+    console.log("Verifying built package output at:", distDir);
+
+    const pkgJsonPath = resolve(distDir, "package.json");
+    const { runtimeRelPath, typesRelPath } = resolveExportTargets(pkgJsonPath);
+    console.log('✓ Found exports["./locales"] in dist/mona-ui/package.json');
+
+    const runtimePath = resolve(distDir, runtimeRelPath);
+    if (!existsSync(runtimePath)) {
+        throw new Error(`Exported runtime file not found at: ${runtimePath}`);
+    }
+    console.log(`✓ Runtime target verified at ${runtimeRelPath}`);
+
     const typesPath = resolve(distDir, typesRelPath);
     if (!existsSync(typesPath)) {
         throw new Error(`TypeScript declaration file not found at: ${typesPath}`);
     }
     console.log(`✓ TypeScript declaration file verified at ${typesRelPath}`);
+
+    const discovery = discoverOfficialLocales(sourceLocalesDir);
+    if (discovery.violations.length > 0) {
+        throw new Error(
+            `Cannot verify package: source locale audit failed with ${discovery.violations.length} violation(s)`
+        );
+    }
+
+    const expectedSymbols = discovery.locales.map(l => l.localeExport).filter(Boolean);
+    if (expectedSymbols.length === 0) {
+        throw new Error(`No official locale symbols discovered in ${sourceLocalesDir}`);
+    }
+    console.log(`✓ Discovered official locale symbols: ${expectedSymbols.join(", ")}`);
+
+    const tempDir = mkdtempSync(join(tmpdir(), "mona-consumer-smoke-"));
+    try {
+        const nmAt = join(tempDir, "node_modules", "@nanahoshi");
+        mkdirSync(nmAt, { recursive: true });
+        const pkgLink = join(nmAt, "mona-ui");
+        symlinkSync(distDir, pkgLink, process.platform === "win32" ? "junction" : "dir");
+
+        // 1. Runtime ESM consumer smoke test
+        const smokeScriptPath = join(tempDir, "smoke.mjs");
+        const smokeScript = `
+import * as locales from "@nanahoshi/mona-ui/locales";
+
+const expected = ${JSON.stringify(expectedSymbols)};
+for (const sym of expected) {
+    if (!(sym in locales)) {
+        console.error("Missing export: " + sym);
+        process.exit(1);
+    }
+    const loc = locales[sym];
+    if (!loc || typeof loc !== "object" || !loc.id || !loc.messages) {
+        console.error("Invalid locale object structure for export: " + sym);
+        process.exit(1);
+    }
+}
+console.log("Runtime package import verified successfully.");
+`;
+        writeFileSync(smokeScriptPath, smokeScript);
+
+        try {
+            execSync(`node "${smokeScriptPath}"`, {
+                cwd: tempDir,
+                stdio: ["ignore", "pipe", "pipe"],
+                encoding: "utf-8"
+            });
+            console.log("✓ ESM consumer runtime import verified via package specifier '@nanahoshi/mona-ui/locales'");
+        } catch (err: any) {
+            throw new Error(`Consumer runtime import test failed:\n${err.stderr || err.stdout || err.message}`);
+        }
+
+        // 2. TypeScript consumer compilation test
+        const consumerTsPath = join(tempDir, "consumer.ts");
+        const consumerTs = `
+import { ${expectedSymbols.join(", ")} } from "@nanahoshi/mona-ui/locales";
+
+${expectedSymbols
+    .map(
+        sym => `
+const localeId_${sym}: string = ${sym}.id;
+const dir_${sym}: string = ${sym}.direction;
+const msgs_${sym}: Record<string, unknown> = ${sym}.messages;
+void localeId_${sym};
+void dir_${sym};
+void msgs_${sym};
+`
+    )
+    .join("\n")}
+`;
+        writeFileSync(consumerTsPath, consumerTs);
+
+        const tsconfigPath = join(tempDir, "tsconfig.json");
+        const tsconfig = {
+            compilerOptions: {
+                target: "ES2022",
+                module: "NodeNext",
+                moduleResolution: "NodeNext",
+                noEmit: true,
+                skipLibCheck: true
+            },
+            include: ["consumer.ts"]
+        };
+        writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2));
+
+        try {
+            execSync("npx tsc --project .", {
+                cwd: tempDir,
+                stdio: ["ignore", "pipe", "pipe"],
+                encoding: "utf-8"
+            });
+            console.log("✓ TypeScript consumer compilation verified via NodeNext resolution");
+        } catch (err: any) {
+            throw new Error(`Consumer TypeScript compilation failed:\n${err.stderr || err.stdout || err.message}`);
+        }
+    } finally {
+        try {
+            rmSync(tempDir, { recursive: true, force: true });
+        } catch {
+            // best-effort cleanup
+        }
+    }
 
     console.log("\nPackage verification SUCCESS: All packaging criteria satisfied.");
 }
