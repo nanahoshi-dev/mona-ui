@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { describe, expect, it, beforeEach } from "vitest";
 import { CalendarComponent } from "@nanahoshi/mona-ui/calendar";
 import { generatePseudoLocale, MonaI18nService, type MonaLocale } from "@nanahoshi/mona-ui/i18n";
-import { MONA_DE_DE_LOCALE, MONA_ES_ES_LOCALE, MONA_FR_FR_LOCALE } from "@nanahoshi/mona-ui/locales";
+import { MONA_DE_DE_LOCALE, MONA_ES_ES_LOCALE, MONA_FR_FR_LOCALE, MONA_JA_JP_LOCALE } from "@nanahoshi/mona-ui/locales";
 import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
 import { PagerComponent } from "@nanahoshi/mona-ui/pager";
 import { ProgressBarComponent } from "@nanahoshi/mona-ui/progress-bar";
@@ -316,6 +316,68 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
 
         expect(i18n.localeId()).toBe("en-US");
         expect(frPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
+        expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
+    });
+
+    it("integrates official Japanese (ja-JP) locale reactively with runtime overrides and formatting", async () => {
+        const root = fixture.nativeElement as HTMLElement;
+        const input = root.querySelector("mona-numeric-text-box input") as HTMLInputElement;
+
+        // 1. Activate official Japanese (Japan) locale
+        i18n.use(MONA_JA_JP_LOCALE);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("ja-JP");
+        expect(i18n.direction()).toBe("ltr");
+
+        // Pager firstPageLabel in Japanese: "最初のページ"
+        const jaPager = root.querySelector("mona-pager");
+        expect(jaPager?.querySelector("button[aria-label='最初のページ']")).not.toBeNull();
+
+        // ScrollView previousPage in Japanese: "前のページ"
+        const jaScroll = root.querySelector("mona-scroll-view");
+        expect(jaScroll?.querySelector("button[aria-label='前のページ']")).not.toBeNull();
+
+        // Calendar translated UI controls and live region in Japanese
+        const jaCalendar = root.querySelector("mona-calendar");
+        expect(jaCalendar?.querySelector("button:first-child")?.textContent?.trim()).toBe("今日");
+        expect(jaCalendar?.querySelector("button[aria-label='前の月']")).not.toBeNull();
+        expect(jaCalendar?.querySelector("button[aria-label='次の月']")).not.toBeNull();
+        expect(jaCalendar?.querySelector("[aria-live='polite']")?.textContent).toContain("カレンダー");
+
+        // NumericTextBox formatting with Japanese dot separator
+        expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
+
+        // 2. Test application override precedence over Japanese locale
+        i18n.patchMessages({
+            pager: {
+                firstPageLabel: "先頭ページ"
+            }
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(jaPager?.querySelector("button[aria-label='先頭ページ']")).not.toBeNull();
+
+        // 3. Clear overrides: Japanese locale value returns
+        i18n.clearMessages();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(jaPager?.querySelector("button[aria-label='最初のページ']")).not.toBeNull();
+
+        // 4. Switch back to English default
+        i18n.use({
+            direction: "ltr",
+            id: "en-US",
+            messages: {}
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("en-US");
+        expect(jaPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
         expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
     });
 
