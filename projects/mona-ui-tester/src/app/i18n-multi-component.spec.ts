@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { describe, expect, it, beforeEach } from "vitest";
 import { CalendarComponent } from "@nanahoshi/mona-ui/calendar";
 import { generatePseudoLocale, MonaI18nService, type MonaLocale } from "@nanahoshi/mona-ui/i18n";
-import { MONA_ES_ES_LOCALE } from "@nanahoshi/mona-ui/locales";
+import { MONA_DE_DE_LOCALE, MONA_ES_ES_LOCALE } from "@nanahoshi/mona-ui/locales";
 import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
 import { PagerComponent } from "@nanahoshi/mona-ui/pager";
 import { ProgressBarComponent } from "@nanahoshi/mona-ui/progress-bar";
@@ -106,21 +106,7 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
         expect(input.getAttribute("aria-valuetext")).toBe("1234,50");
 
         // 2. Switch to German (de-DE)
-        const deLocale: MonaLocale = {
-            direction: "ltr",
-            id: "de-DE",
-            messages: {
-                pager: {
-                    firstPageLabel: "Erste Seite",
-                    nextPageLabel: "Nächste Seite"
-                },
-                scrollView: {
-                    nextPage: "Nächste Seite",
-                    previousPage: "Vorherige Seite"
-                }
-            }
-        };
-        i18n.use(deLocale);
+        i18n.use(MONA_DE_DE_LOCALE);
         await fixture.whenStable();
         fixture.detectChanges();
 
@@ -206,6 +192,68 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
 
         expect(i18n.localeId()).toBe("en-US");
         expect(esPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
+        expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
+    });
+
+    it("integrates official German (de-DE) locale reactively with runtime overrides and formatting", async () => {
+        const root = fixture.nativeElement as HTMLElement;
+        const input = root.querySelector("mona-numeric-text-box input") as HTMLInputElement;
+
+        // 1. Activate official German (Germany) locale
+        i18n.use(MONA_DE_DE_LOCALE);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("de-DE");
+        expect(i18n.direction()).toBe("ltr");
+
+        // Pager firstPageLabel in German: "Erste Seite"
+        const dePager = root.querySelector("mona-pager");
+        expect(dePager?.querySelector("button[aria-label='Erste Seite']")).not.toBeNull();
+
+        // ScrollView previousPage in German: "Vorherige Seite"
+        const deScroll = root.querySelector("mona-scroll-view");
+        expect(deScroll?.querySelector("button[aria-label='Vorherige Seite']")).not.toBeNull();
+
+        // Calendar translated UI controls and live region in German
+        const deCalendar = root.querySelector("mona-calendar");
+        expect(deCalendar?.querySelector("button:first-child")?.textContent?.trim()).toBe("Heute");
+        expect(deCalendar?.querySelector("button[aria-label='Vorheriger Monat']")).not.toBeNull();
+        expect(deCalendar?.querySelector("button[aria-label='Nächster Monat']")).not.toBeNull();
+        expect(deCalendar?.querySelector("[aria-live='polite']")?.textContent?.toLowerCase()).toContain("kalender");
+
+        // NumericTextBox formatting with German comma separator
+        expect(input.getAttribute("aria-valuetext")).toBe("1234,50");
+
+        // 2. Test application override precedence over German locale
+        i18n.patchMessages({
+            pager: {
+                firstPageLabel: "Startseite"
+            }
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(dePager?.querySelector("button[aria-label='Startseite']")).not.toBeNull();
+
+        // 3. Clear overrides: German locale value returns
+        i18n.clearMessages();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(dePager?.querySelector("button[aria-label='Erste Seite']")).not.toBeNull();
+
+        // 4. Switch back to English default
+        i18n.use({
+            direction: "ltr",
+            id: "en-US",
+            messages: {}
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("en-US");
+        expect(dePager?.querySelector("button[aria-label='First page']")).not.toBeNull();
         expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
     });
 

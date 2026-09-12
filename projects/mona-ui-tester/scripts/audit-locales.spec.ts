@@ -54,6 +54,19 @@ describe("audit-locales", () => {
             expect(isAllowedLocaleCopyException("es-ES", "other.error", "Error")).toBe(false);
             expect(isAllowedLocaleCopyException(undefined, "editor.color", "Color")).toBe(false);
         });
+
+        it("allows German-specific unchanged words on approved paths", () => {
+            expect(isAllowedLocaleCopyException("de-DE", "chart.highAbbreviation", "H")).toBe(true);
+            expect(isAllowedLocaleCopyException("de-DE", "dialog.ok", "OK")).toBe(true);
+            expect(isAllowedLocaleCopyException("de-DE", "editor.format", "Format")).toBe(true);
+        });
+
+        it("disallows German-specific exceptions for other locales or unapproved paths", () => {
+            expect(isAllowedLocaleCopyException("es-ES", "editor.format", "Format")).toBe(false);
+            expect(isAllowedLocaleCopyException("es-ES", "chart.highAbbreviation", "H")).toBe(false);
+            expect(isAllowedLocaleCopyException("de-DE", "other.format", "Format")).toBe(false);
+            expect(isAllowedLocaleCopyException("de-DE", "dialog.ok", "Cancel")).toBe(false);
+        });
     });
 
     describe("auditLocaleMessagesFile", () => {
@@ -1149,6 +1162,18 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
                         locale.canonicalId === "es-ES" &&
                         locale.localeExport === "MONA_ES_ES_LOCALE" &&
                         locale.messagesExport === "ES_ES_MESSAGES"
+                )
+            ).toBe(true);
+        });
+
+        it("discovers the official German locale", () => {
+            const discovery = discoverOfficialLocales();
+            expect(
+                discovery.locales.some(
+                    locale =>
+                        locale.canonicalId === "de-DE" &&
+                        locale.localeExport === "MONA_DE_DE_LOCALE" &&
+                        locale.messagesExport === "DE_DE_MESSAGES"
                 )
             ).toBe(true);
         });
