@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { describe, expect, it, beforeEach } from "vitest";
 import { CalendarComponent } from "@nanahoshi/mona-ui/calendar";
 import { generatePseudoLocale, MonaI18nService, type MonaLocale } from "@nanahoshi/mona-ui/i18n";
-import { MONA_DE_DE_LOCALE, MONA_ES_ES_LOCALE } from "@nanahoshi/mona-ui/locales";
+import { MONA_DE_DE_LOCALE, MONA_ES_ES_LOCALE, MONA_FR_FR_LOCALE } from "@nanahoshi/mona-ui/locales";
 import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
 import { PagerComponent } from "@nanahoshi/mona-ui/pager";
 import { ProgressBarComponent } from "@nanahoshi/mona-ui/progress-bar";
@@ -254,6 +254,68 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
 
         expect(i18n.localeId()).toBe("en-US");
         expect(dePager?.querySelector("button[aria-label='First page']")).not.toBeNull();
+        expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
+    });
+
+    it("integrates official French (fr-FR) locale reactively with runtime overrides and formatting", async () => {
+        const root = fixture.nativeElement as HTMLElement;
+        const input = root.querySelector("mona-numeric-text-box input") as HTMLInputElement;
+
+        // 1. Activate official French (France) locale
+        i18n.use(MONA_FR_FR_LOCALE);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("fr-FR");
+        expect(i18n.direction()).toBe("ltr");
+
+        // Pager firstPageLabel in French: "Première page"
+        const frPager = root.querySelector("mona-pager");
+        expect(frPager?.querySelector("button[aria-label='Première page']")).not.toBeNull();
+
+        // ScrollView previousPage in French: "Page précédente"
+        const frScroll = root.querySelector("mona-scroll-view");
+        expect(frScroll?.querySelector("button[aria-label='Page précédente']")).not.toBeNull();
+
+        // Calendar translated UI controls and live region in French
+        const frCalendar = root.querySelector("mona-calendar");
+        expect(frCalendar?.querySelector("button:first-child")?.textContent?.trim()).toBe("Aujourd’hui");
+        expect(frCalendar?.querySelector("button[aria-label='Mois précédent']")).not.toBeNull();
+        expect(frCalendar?.querySelector("button[aria-label='Mois suivant']")).not.toBeNull();
+        expect(frCalendar?.querySelector("[aria-live='polite']")?.textContent?.toLowerCase()).toContain("calendrier");
+
+        // NumericTextBox formatting with French comma separator
+        expect(input.getAttribute("aria-valuetext")).toBe("1234,50");
+
+        // 2. Test application override precedence over French locale
+        i18n.patchMessages({
+            pager: {
+                firstPageLabel: "Début de page"
+            }
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(frPager?.querySelector("button[aria-label='Début de page']")).not.toBeNull();
+
+        // 3. Clear overrides: French locale value returns
+        i18n.clearMessages();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(frPager?.querySelector("button[aria-label='Première page']")).not.toBeNull();
+
+        // 4. Switch back to English default
+        i18n.use({
+            direction: "ltr",
+            id: "en-US",
+            messages: {}
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("en-US");
+        expect(frPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
         expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
     });
 
