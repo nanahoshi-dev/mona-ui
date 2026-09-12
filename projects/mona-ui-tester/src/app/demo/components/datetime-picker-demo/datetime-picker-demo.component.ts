@@ -245,7 +245,7 @@ class DateTimePickerWrapperComponent implements ComponentInputsAsSignal<DateTime
     });
     protected readonly formValueText = computed(() => {
         const value = this.form.value().value();
-        const format = this.format();
+        const format = this.format() ?? "dd/MM/yyyy HH:mm";
         return value ? DateTime.fromJSDate(value).toFormat(format) : "";
     });
     protected readonly prefixIcon = computed(() => {
