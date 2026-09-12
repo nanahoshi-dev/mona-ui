@@ -174,6 +174,7 @@ describe("MONA_ES_ES_LOCALE Integration with MonaI18nService", () => {
 
         const symbols = getNumberSymbols(localeId);
         expect(symbols.decimal).toBe(",");
+        expect(symbols.group).toBe(".");
 
         const formatted = formatNumber(1234.5, localeId, {
             minimumFractionDigits: 2,
@@ -182,10 +183,65 @@ describe("MONA_ES_ES_LOCALE Integration with MonaI18nService", () => {
         expect(formatted).toContain(",");
         expect(formatted).toBe("1234,50");
 
+        const formattedGrouped = formatNumber(12345.67, localeId, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        expect(formattedGrouped).toBe("12.345,67");
+
         // Test date formatting using standard Intl with active locale ID
         const date = new Date(2026, 8, 15);
         const monthFormatter = new Intl.DateTimeFormat(localeId, { month: "long" });
         expect(monthFormatter.format(date).toLowerCase()).toBe("septiembre");
+    });
+
+    it("ensures MONA_ES_ES_LOCALE is immutable and unmutated across service usage cycles", () => {
+        const deepFreeze = (obj: any): any => {
+            Object.freeze(obj);
+            for (const key of Object.getOwnPropertyNames(obj)) {
+                const val = obj[key];
+                if (val && (typeof val === "object" || typeof val === "function") && !Object.isFrozen(val)) {
+                    deepFreeze(val);
+                }
+            }
+            return obj;
+        };
+
+        const pageLabelRef = MONA_ES_ES_LOCALE.messages.pager.pageLabel;
+        const snapshot = JSON.parse(JSON.stringify(MONA_ES_ES_LOCALE));
+
+        deepFreeze(MONA_ES_ES_LOCALE);
+
+        TestBed.configureTestingModule({
+            providers: [
+                provideMonaI18n({
+                    locale: MONA_ES_ES_LOCALE
+                })
+            ]
+        });
+
+        const service = TestBed.inject(MonaI18nService);
+        expect(service.localeId()).toBe("es-ES");
+        expect(service.direction()).toBe("ltr");
+
+        const pager = service.componentMessages("pager", PAGER_DEFAULT_MESSAGES);
+        expect(pager().firstPageLabel).toBe("Primera página");
+        expect(pager().pageLabel(2)).toBe("Página 2");
+
+        formatNumber(12345.67, service.localeId());
+
+        service.use(MONA_ES_ES_LOCALE);
+        service.patchMessages({
+            pager: {
+                nextPageLabel: "Temporal"
+            }
+        });
+        expect(pager().nextPageLabel).toBe("Temporal");
+        service.clearMessages();
+        expect(pager().nextPageLabel).toBe("Página siguiente");
+
+        expect(JSON.parse(JSON.stringify(MONA_ES_ES_LOCALE))).toEqual(snapshot);
+        expect(MONA_ES_ES_LOCALE.messages.pager.pageLabel).toBe(pageLabelRef);
     });
 
     it("preserves semantic direction decoupling when activating Spanish in an RTL document", () => {
