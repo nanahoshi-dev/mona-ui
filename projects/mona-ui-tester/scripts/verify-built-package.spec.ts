@@ -2,7 +2,12 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { resolveExportTargets, verifyBuiltPackage } from "./verify-built-package";
+import {
+    resolveExportTargets,
+    resolveTypeScriptCompilerPath,
+    runConsumerSmokeTest,
+    verifyBuiltPackage
+} from "./verify-built-package";
 
 describe("verify-built-package", () => {
     describe("resolveExportTargets", () => {
@@ -121,6 +126,156 @@ describe("verify-built-package", () => {
                 expect(targets.runtimeRelPath).toBe("./esm/locales.mjs");
             } finally {
                 rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+    });
+
+    describe("resolveTypeScriptCompilerPath", () => {
+        it("returns pinned tsc path when found in repoRoot", () => {
+            const tscPath = resolveTypeScriptCompilerPath(process.cwd());
+            expect(tscPath).toContain("typescript");
+            expect(tscPath).toContain("tsc");
+        });
+
+        it("throws when pinned tsc is not found in repoRoot", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "tsc-resolve-test-"));
+            try {
+                expect(() => resolveTypeScriptCompilerPath(tempDir)).toThrow("Pinned TypeScript compiler not found");
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+    });
+
+    describe("runConsumerSmokeTest", () => {
+        it("succeeds when synthetic package exports expected locale matching runtime and types", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                writeFileSync(
+                    join(fakeDist, "package.json"),
+                    JSON.stringify({
+                        name: "@nanahoshi/mona-ui",
+                        exports: {
+                            "./locales": {
+                                types: "./locales.d.ts",
+                                default: "./locales.mjs"
+                            }
+                        }
+                    })
+                );
+                writeFileSync(
+                    join(fakeDist, "locales.mjs"),
+                    'export const es_ES = { id: "es-ES", direction: "ltr", messages: { greeting: "hola" } };\n'
+                );
+                writeFileSync(
+                    join(fakeDist, "locales.d.ts"),
+                    'export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n'
+                );
+
+                expect(() =>
+                    runConsumerSmokeTest({
+                        distDir: fakeDist,
+                        expectedSymbols: ["es_ES"]
+                    })
+                ).not.toThrow();
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when runtime package is missing expected export", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                writeFileSync(
+                    join(fakeDist, "package.json"),
+                    JSON.stringify({
+                        name: "@nanahoshi/mona-ui",
+                        exports: {
+                            "./locales": {
+                                types: "./locales.d.ts",
+                                default: "./locales.mjs"
+                            }
+                        }
+                    })
+                );
+                writeFileSync(join(fakeDist, "locales.mjs"), "export const de_DE = { id: 'de-DE', direction: 'ltr', messages: {} };\n");
+                writeFileSync(
+                    join(fakeDist, "locales.d.ts"),
+                    "export declare const de_DE: { id: string; direction: string; messages: Record<string, unknown> };\n"
+                );
+
+                expect(() =>
+                    runConsumerSmokeTest({
+                        distDir: fakeDist,
+                        expectedSymbols: ["es_ES"]
+                    })
+                ).toThrow("Missing export: es_ES");
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when runtime export does not conform to locale structure", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                writeFileSync(
+                    join(fakeDist, "package.json"),
+                    JSON.stringify({
+                        name: "@nanahoshi/mona-ui",
+                        exports: {
+                            "./locales": {
+                                types: "./locales.d.ts",
+                                default: "./locales.mjs"
+                            }
+                        }
+                    })
+                );
+                writeFileSync(join(fakeDist, "locales.mjs"), "export const es_ES = { id: 'es-ES' };\n");
+                writeFileSync(
+                    join(fakeDist, "locales.d.ts"),
+                    "export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n"
+                );
+
+                expect(() =>
+                    runConsumerSmokeTest({
+                        distDir: fakeDist,
+                        expectedSymbols: ["es_ES"]
+                    })
+                ).toThrow("Invalid locale object structure for export: es_ES");
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when TypeScript consumer compilation fails due to type mismatch", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                writeFileSync(
+                    join(fakeDist, "package.json"),
+                    JSON.stringify({
+                        name: "@nanahoshi/mona-ui",
+                        exports: {
+                            "./locales": {
+                                types: "./locales.d.ts",
+                                default: "./locales.mjs"
+                            }
+                        }
+                    })
+                );
+                writeFileSync(
+                    join(fakeDist, "locales.mjs"),
+                    'export const es_ES = { id: "es-ES", direction: "ltr", messages: {} };\n'
+                );
+                writeFileSync(join(fakeDist, "locales.d.ts"), "export {};\n");
+
+                expect(() =>
+                    runConsumerSmokeTest({
+                        distDir: fakeDist,
+                        expectedSymbols: ["es_ES"]
+                    })
+                ).toThrow("Consumer TypeScript compilation failed");
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
             }
         });
     });
