@@ -139,6 +139,17 @@ describe("MONA_JA_JP_LOCALE", () => {
             expect(m.datePicker?.openCalendar).toBe("カレンダーを開く");
         });
 
+        it("translates TimeSelector & TimePicker messages correctly", () => {
+            expect(m.timeSelector?.am).toBe("午前");
+            expect(m.timeSelector?.pm).toBe("午後");
+            expect(m.timeSelector?.amPm).toBe("午前/午後");
+            expect(m.timeSelector?.timeSelector).toBe("時刻選択");
+            expect(m.timeSelector?.now).toBe("現在時刻");
+            expect(m.timeSelector?.set).toBe("設定");
+            expect(m.timePicker?.timePicker).toBe("時刻選択");
+            expect(m.timePicker?.openTimePicker).toBe("時刻選択を開く");
+        });
+
         it("translates NumericTextBox messages correctly", () => {
             expect(m.numericTextBox?.decrease).toBe("値を減らす");
             expect(m.numericTextBox?.increase).toBe("値を増やす");

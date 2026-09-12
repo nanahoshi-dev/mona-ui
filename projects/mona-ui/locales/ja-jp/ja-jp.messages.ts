@@ -347,15 +347,15 @@ export const JA_JP_MESSAGES = {
         timePicker: "時刻選択"
     },
     timeSelector: {
-        am: "AM",
-        amPm: "AM/PM",
+        am: "午前",
+        amPm: "午前/午後",
         headerHours: "時",
         headerMinutes: "分",
         headerSeconds: "秒",
         hours: "時",
         minutes: "分",
         now: "現在時刻",
-        pm: "PM",
+        pm: "午後",
         seconds: "秒",
         set: "設定",
         timeSelector: "時刻選択"

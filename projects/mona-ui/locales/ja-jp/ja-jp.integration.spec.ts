@@ -8,6 +8,7 @@ import { ListBoxComponent } from "@nanahoshi/mona-ui/list-box";
 import { PagerComponent, PAGER_DEFAULT_MESSAGES } from "@nanahoshi/mona-ui/pager";
 import { ScrollViewComponent } from "@nanahoshi/mona-ui/scroll-view";
 import { SplitButtonComponent } from "@nanahoshi/mona-ui/split-button";
+import { TimeSelectorComponent } from "@nanahoshi/mona-ui/time-selector";
 import {
     formatNumber,
     getNumberSymbols,
@@ -16,6 +17,14 @@ import {
     provideMonaI18n
 } from "@nanahoshi/mona-ui/i18n";
 import { MONA_JA_JP_LOCALE } from "./ja-jp.locale";
+
+@Component({
+    template: `<mona-time-selector [(value)]="testTime" [hourFormat]="'12'" />`,
+    imports: [TimeSelectorComponent]
+})
+class TimeSelectorIntegrationHostComponent {
+    public readonly testTime = signal<Date | null>(new Date(2026, 8, 15, 9, 30));
+}
 
 @Component({
     template: `<mona-calendar [value]="testDate" />`,
@@ -470,5 +479,58 @@ describe("MONA_JA_JP_LOCALE Integration with MonaI18nService", () => {
         expect(slider.getAttribute("aria-label")).toBe("彩度と明度");
         expect(slider.getAttribute("aria-valuetext")).toContain("彩度");
         expect(slider.getAttribute("aria-valuetext")).toContain("明度");
+    });
+
+    it("renders TimeSelector component with localized 12-hour day periods and accessible labels", () => {
+        TestBed.configureTestingModule({
+            imports: [TimeSelectorIntegrationHostComponent],
+            providers: [
+                provideMonaI18n({
+                    locale: MONA_JA_JP_LOCALE
+                })
+            ]
+        });
+
+        const fixture = TestBed.createComponent(TimeSelectorIntegrationHostComponent);
+        fixture.detectChanges();
+
+        const hostEl = fixture.nativeElement as HTMLElement;
+
+        // 1. Meridiem list accessible label is Japanese
+        const meridiemList = hostEl.querySelector("ol[aria-label='午前/午後']") as HTMLOListElement;
+        expect(meridiemList).not.toBeNull();
+        expect(hostEl.querySelector("ol[aria-label='AM/PM']")).toBeNull();
+
+        // 2. Visible AM/PM options are localized to 午前 and 午後
+        const listItems = Array.from(meridiemList.querySelectorAll("li"));
+        const amItem = listItems.find(li => li.textContent?.trim() === "午前");
+        const pmItem = listItems.find(li => li.textContent?.trim() === "午後");
+        expect(amItem).toBeDefined();
+        expect(pmItem).toBeDefined();
+        expect(listItems.some(li => li.textContent?.trim() === "AM")).toBe(false);
+        expect(listItems.some(li => li.textContent?.trim() === "PM")).toBe(false);
+
+        // 3. Info text displays Japanese day period matching the selector
+        expect(hostEl.textContent).toContain("午前9:30");
+
+        // 4. Switching meridiem updates display time and internal model
+        pmItem?.click();
+        fixture.detectChanges();
+
+        expect(hostEl.textContent).toContain("午後9:30");
+
+        const setButton = Array.from(hostEl.querySelectorAll("button")).find(b => b.textContent?.trim() === "設定");
+        setButton?.click();
+        fixture.detectChanges();
+        expect(fixture.componentInstance.testTime()?.getHours()).toBe(21);
+
+        amItem?.click();
+        fixture.detectChanges();
+
+        expect(hostEl.textContent).toContain("午前9:30");
+
+        setButton?.click();
+        fixture.detectChanges();
+        expect(fixture.componentInstance.testTime()?.getHours()).toBe(9);
     });
 });
