@@ -231,7 +231,17 @@ export const DE_DE_MESSAGES = {
         reorderRow: (rowNumber: number) => `Zeile ${rowNumber} neu anordnen`,
         resizeColumn: "Spaltengröße ändern",
         rowReorder: "Zeilenanordnung",
+        rowReorderDisabled: "Das Neuanordnen von Zeilen ist deaktiviert.",
+        rowReorderDisabledEditing: "Bearbeitung abschließen, um Zeilen neu anzuordnen.",
+        rowReorderDisabledFiltered: "Filter aufheben, um Zeilen neu anzuordnen.",
+        rowReorderDisabledGrouped: "Gruppierung aufheben, um Zeilen neu anzuordnen.",
+        rowReorderDisabledSingleRow: "Zum Neuanordnen sind mindestens zwei Zeilen erforderlich.",
+        rowReorderDisabledSorted: "Sortierung aufheben, um Zeilen neu anzuordnen.",
+        rowReorderDisabledVirtualScroll:
+            "Bei aktiviertem virtuellem Scrollen können Zeilen nicht neu angeordnet werden.",
         rowReorderKeyboardHint: "Alt + Pfeil nach oben oder Alt + Pfeil nach unten zum Verschieben verwenden.",
+        rowReorderMoved: (fromRowNumber: number, toPosition: number) =>
+            `Zeile ${fromRowNumber} an Position ${toPosition} verschoben.`,
         rowValidationError: "Diese Zeile enthält Validierungsfehler.",
         save: "Speichern",
         saveRow: "Zeile speichern",

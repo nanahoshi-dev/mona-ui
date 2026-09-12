@@ -1,26 +1,14 @@
 import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { CdkDragHandle } from "@angular/cdk/drag-drop";
-import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
+import { Component, computed, inject, input } from "@angular/core";
 import type { Row } from "../../models/Row";
-import type { RowReorderDisabledReason } from "../../services/grid.service";
 import { GridService } from "../../services/grid.service";
 import { gridRowReorderHandleThemeVariants } from "../../styles/grid.styles";
-
-const ROW_REORDER_DISABLED_REASON_TEXT: Record<Exclude<RowReorderDisabledReason, null>, string> = {
-    disabled: "Row reordering is disabled.",
-    editing: "Finish editing to reorder rows.",
-    filtered: "Clear filters to reorder rows.",
-    grouped: "Clear grouping to reorder rows.",
-    "single-row": "At least two rows are needed to reorder.",
-    sorted: "Clear sorting to reorder rows.",
-    "virtual-scroll": "Row reordering isn't available while virtual scrolling is enabled."
-};
 
 @Component({
     selector: "mona-grid-row-reorder-handle",
     templateUrl: "./grid-row-reorder-handle.component.html",
     imports: [CdkDragHandle],
-    changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         "(click)": "$event.stopPropagation()",
         "(contextmenu)": "$event.stopPropagation()",
@@ -40,7 +28,26 @@ export class GridRowReorderHandleComponent {
     protected readonly disabled = computed(() => !this.#gridService.canReorderRow(this.row()));
     protected readonly disabledReasonText = computed(() => {
         const reason = this.#gridService.rowReorderDisabledReason();
-        return reason == null ? null : ROW_REORDER_DISABLED_REASON_TEXT[reason];
+        const messages = this.#gridService.messages();
+
+        switch (reason) {
+            case null:
+                return null;
+            case "disabled":
+                return messages.rowReorderDisabled;
+            case "editing":
+                return messages.rowReorderDisabledEditing;
+            case "filtered":
+                return messages.rowReorderDisabledFiltered;
+            case "grouped":
+                return messages.rowReorderDisabledGrouped;
+            case "single-row":
+                return messages.rowReorderDisabledSingleRow;
+            case "sorted":
+                return messages.rowReorderDisabledSorted;
+            case "virtual-scroll":
+                return messages.rowReorderDisabledVirtualScroll;
+        }
     });
     protected readonly handleClass = computed(() => gridRowReorderHandleThemeVariants());
 
@@ -68,8 +75,10 @@ export class GridRowReorderHandleComponent {
         const moved = this.#gridService.requestRowReorder(this.row(), this.pageIndex(), targetIndex);
         if (moved) {
             const skip = this.#gridService.paginationState().skip;
+            const fromRowNumber = skip + this.pageIndex() + 1;
+            const toPosition = skip + targetIndex + 1;
             this.#liveAnnouncer.announce(
-                `Moved row ${skip + this.pageIndex() + 1} to position ${skip + targetIndex + 1}.`
+                this.#gridService.messages().rowReorderMoved(fromRowNumber, toPosition)
             );
         }
     }

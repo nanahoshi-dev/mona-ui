@@ -231,7 +231,17 @@ export const ES_ES_MESSAGES = {
         reorderRow: (rowNumber: number) => `Reordenar fila ${rowNumber}`,
         resizeColumn: "Cambiar tamaño de columna",
         rowReorder: "Reordenar fila",
+        rowReorderDisabled: "La reordenación de filas está desactivada.",
+        rowReorderDisabledEditing: "Termina la edición para reordenar las filas.",
+        rowReorderDisabledFiltered: "Limpia los filtros para reordenar las filas.",
+        rowReorderDisabledGrouped: "Quita la agrupación para reordenar las filas.",
+        rowReorderDisabledSingleRow: "Se necesitan al menos dos filas para reordenarlas.",
+        rowReorderDisabledSorted: "Quita la ordenación para reordenar las filas.",
+        rowReorderDisabledVirtualScroll:
+            "La reordenación de filas no está disponible mientras el desplazamiento virtual está activado.",
         rowReorderKeyboardHint: "Usa Alt más Flecha arriba o Alt más Flecha abajo para mover.",
+        rowReorderMoved: (fromRowNumber: number, toPosition: number) =>
+            `Fila ${fromRowNumber} movida a la posición ${toPosition}.`,
         rowValidationError: "Esta fila contiene errores de validación.",
         save: "Guardar",
         saveRow: "Guardar fila",
