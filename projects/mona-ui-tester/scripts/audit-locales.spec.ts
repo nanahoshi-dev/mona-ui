@@ -8,6 +8,7 @@ import {
     auditLocaleMetadataFile,
     canonicalizeLocaleId,
     discoverOfficialLocales,
+    isAllowedLocaleCopyException,
     isAllowedTechnicalToken,
     loadDefaultEnglishStrings
 } from "./audit-locales";
@@ -23,16 +24,33 @@ describe("audit-locales", () => {
             expect(isAllowedTechnicalToken("PM")).toBe(true);
             expect(isAllowedTechnicalToken("px")).toBe(true);
             expect(isAllowedTechnicalToken(":")).toBe(true);
-            expect(isAllowedTechnicalToken("Color")).toBe(true);
-            expect(isAllowedTechnicalToken("Error")).toBe(true);
         });
 
-        it("disallows general English words", () => {
+        it("disallows general English words and language-specific words", () => {
             expect(isAllowedTechnicalToken("First page")).toBe(false);
             expect(isAllowedTechnicalToken("Delete row")).toBe(false);
             expect(isAllowedTechnicalToken("Save")).toBe(false);
             expect(isAllowedTechnicalToken("Cancel")).toBe(false);
             expect(isAllowedTechnicalToken("Today")).toBe(false);
+            expect(isAllowedTechnicalToken("Color")).toBe(false);
+            expect(isAllowedTechnicalToken("Error")).toBe(false);
+            expect(isAllowedTechnicalToken("C")).toBe(false);
+        });
+    });
+
+    describe("isAllowedLocaleCopyException", () => {
+        it("allows Spanish-specific unchanged words on approved paths", () => {
+            expect(isAllowedLocaleCopyException("es-ES", "editor.color", "Color")).toBe(true);
+            expect(isAllowedLocaleCopyException("es-ES", "notification.error", "Error")).toBe(true);
+            expect(isAllowedLocaleCopyException("es-ES", "chart.closeAbbreviation", "C")).toBe(true);
+            expect(isAllowedLocaleCopyException("es-ES", "colorPalette.color", "Color")).toBe(true);
+        });
+
+        it("disallows Spanish-specific exceptions for other locales or unapproved paths", () => {
+            expect(isAllowedLocaleCopyException("de-DE", "editor.color", "Color")).toBe(false);
+            expect(isAllowedLocaleCopyException("de-DE", "notification.error", "Error")).toBe(false);
+            expect(isAllowedLocaleCopyException("es-ES", "other.error", "Error")).toBe(false);
+            expect(isAllowedLocaleCopyException(undefined, "editor.color", "Color")).toBe(false);
         });
     });
 
@@ -259,6 +277,126 @@ describe("audit-locales", () => {
             `;
             const violations = auditLocaleMessagesFile("test.messages.ts", code, englishDefaults);
             expect(violations).toHaveLength(0);
+        });
+
+        it("detects partially untranslated singular branch copied from English in function message", () => {
+            const englishDefaults = new Map<string, any>([
+                ["pager.resultsAvailable", {
+                    namespace: "pager",
+                    key: "resultsAvailable",
+                    kind: "function",
+                    staticFragments: ["1 result available", "results available"]
+                }]
+            ]);
+            const code = `
+                import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+                export const ES_ES_MESSAGES = {
+                    pager: {
+                        resultsAvailable: (count: number) =>
+                            count === 1 ? "1 result available" : \`\${count} resultados disponibles\`
+                    }
+                } satisfies MonaLocaleMessages;
+            `;
+            const violations = auditLocaleMessagesFile("test.messages.ts", code, englishDefaults, "es-ES");
+            expect(violations.some(v => v.category === "copied-english" && v.detail.includes("resultsAvailable"))).toBe(true);
+        });
+
+        it("detects partially untranslated plural branch copied from English in function message", () => {
+            const englishDefaults = new Map<string, any>([
+                ["pager.resultsAvailable", {
+                    namespace: "pager",
+                    key: "resultsAvailable",
+                    kind: "function",
+                    staticFragments: ["1 result available", "results available"]
+                }]
+            ]);
+            const code = `
+                import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+                export const ES_ES_MESSAGES = {
+                    pager: {
+                        resultsAvailable: (count: number) =>
+                            count === 1 ? "1 resultado disponible" : \`\${count} results available\`
+                    }
+                } satisfies MonaLocaleMessages;
+            `;
+            const violations = auditLocaleMessagesFile("test.messages.ts", code, englishDefaults, "es-ES");
+            expect(violations.some(v => v.category === "copied-english" && v.detail.includes("resultsAvailable"))).toBe(true);
+        });
+
+        it("allows Spanish-specific unchanged words with scoped exception but rejects for other locales", () => {
+            const englishDefaults = new Map<string, any>([
+                ["notification.error", {
+                    namespace: "notification",
+                    key: "error",
+                    kind: "static",
+                    staticFragments: ["Error"]
+                }],
+                ["editor.color", {
+                    namespace: "editor",
+                    key: "color",
+                    kind: "static",
+                    staticFragments: ["Color"]
+                }],
+                ["chart.closeAbbreviation", {
+                    namespace: "chart",
+                    key: "closeAbbreviation",
+                    kind: "static",
+                    staticFragments: ["C"]
+                }]
+            ]);
+            const esCode = `
+                import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+                export const ES_ES_MESSAGES = {
+                    notification: { error: "Error" },
+                    editor: { color: "Color" },
+                    chart: { closeAbbreviation: "C" }
+                } satisfies MonaLocaleMessages;
+            `;
+            const esViolations = auditLocaleMessagesFile("es-es.messages.ts", esCode, englishDefaults, "es-ES");
+            expect(esViolations.filter(v => v.category === "copied-english")).toHaveLength(0);
+
+            const deCode = `
+                import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+                export const DE_DE_MESSAGES = {
+                    notification: { error: "Error" },
+                    editor: { color: "Color" },
+                    chart: { closeAbbreviation: "C" }
+                } satisfies MonaLocaleMessages;
+            `;
+            const deViolations = auditLocaleMessagesFile("de-de.messages.ts", deCode, englishDefaults, "de-DE");
+            expect(deViolations.filter(v => v.category === "copied-english")).toHaveLength(3);
+        });
+
+        it("allows approved function-fragment exception for Spanish colorPalette.color", () => {
+            const englishDefaults = new Map<string, any>([
+                ["colorPalette.color", {
+                    namespace: "colorPalette",
+                    key: "color",
+                    kind: "function",
+                    staticFragments: ["Color "]
+                }]
+            ]);
+            const esCode = `
+                import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+                export const ES_ES_MESSAGES = {
+                    colorPalette: {
+                        color: (color: string) => \`Color \${color}\`
+                    }
+                } satisfies MonaLocaleMessages;
+            `;
+            const esViolations = auditLocaleMessagesFile("es-es.messages.ts", esCode, englishDefaults, "es-ES");
+            expect(esViolations.filter(v => v.category === "copied-english")).toHaveLength(0);
+
+            const deCode = `
+                import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+                export const DE_DE_MESSAGES = {
+                    colorPalette: {
+                        color: (color: string) => \`Color \${color}\`
+                    }
+                } satisfies MonaLocaleMessages;
+            `;
+            const deViolations = auditLocaleMessagesFile("de-de.messages.ts", deCode, englishDefaults, "de-DE");
+            expect(deViolations.some(v => v.category === "copied-english" && v.detail.includes("colorPalette.color"))).toBe(true);
         });
     });
 

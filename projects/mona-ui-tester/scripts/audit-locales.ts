@@ -49,11 +49,39 @@ export const TECHNICAL_ALLOWLIST = new Set([
     "px",
     ":",
     "-",
-    "+",
-    "C",
-    "Color",
-    "Error"
+    "+"
 ]);
+
+export interface LocaleCopyException {
+    readonly localeId: string;
+    readonly messagePath: string;
+    readonly value: string;
+}
+
+export const LOCALE_COPY_EXCEPTIONS: readonly LocaleCopyException[] = [
+    { localeId: "es-ES", messagePath: "chart.closeAbbreviation", value: "C" },
+    { localeId: "es-ES", messagePath: "editor.color", value: "Color" },
+    { localeId: "es-ES", messagePath: "notification.error", value: "Error" },
+    { localeId: "es-ES", messagePath: "colorPalette.color", value: "Color" }
+];
+
+export function isAllowedLocaleCopyException(
+    localeId: string | undefined,
+    messagePath: string,
+    value: string
+): boolean {
+    if (!localeId) {
+        return false;
+    }
+    const canonicalId = canonicalizeLocaleId(localeId) ?? localeId;
+    const normValue = value.trim().toLowerCase();
+    return LOCALE_COPY_EXCEPTIONS.some(
+        ex =>
+            (ex.localeId === localeId || ex.localeId === canonicalId) &&
+            ex.messagePath === messagePath &&
+            ex.value.trim().toLowerCase() === normValue
+    );
+}
 
 export const MONA_MESSAGE_NAMESPACES = [
     "autoComplete",
@@ -160,13 +188,50 @@ export function extractMeaningfulFragments(fnNode: Node): string[] {
     return fragments;
 }
 
-export function areFunctionFragmentsCopied(localeFragments: readonly string[], enFragments: readonly string[]): boolean {
-    const locClean = localeFragments.map(f => f.trim().toLowerCase()).filter(Boolean);
-    const enClean = enFragments.map(f => f.trim().toLowerCase()).filter(Boolean);
-    if (enClean.length === 0 || locClean.length === 0) {
-        return false;
+export function findCopiedFunctionFragments(
+    localeFragments: readonly string[],
+    enFragments: readonly string[],
+    localeId?: string,
+    messagePath?: string
+): string[] {
+    const copied: string[] = [];
+    for (const en of enFragments) {
+        const enClean = en.trim();
+        const enNorm = enClean.toLowerCase();
+        if (!enNorm || !/[a-zA-Z]/.test(enNorm)) {
+            continue;
+        }
+        if (isAllowedTechnicalToken(enClean)) {
+            continue;
+        }
+        if (messagePath && isAllowedLocaleCopyException(localeId, messagePath, enClean)) {
+            continue;
+        }
+        for (const loc of localeFragments) {
+            const locClean = loc.trim();
+            if (isAllowedTechnicalToken(locClean)) {
+                continue;
+            }
+            if (messagePath && isAllowedLocaleCopyException(localeId, messagePath, locClean)) {
+                continue;
+            }
+            if (locClean.toLowerCase() === enNorm) {
+                if (!copied.includes(locClean)) {
+                    copied.push(locClean);
+                }
+            }
+        }
     }
-    return enClean.every(enFrag => locClean.includes(enFrag));
+    return copied;
+}
+
+export function areFunctionFragmentsCopied(
+    localeFragments: readonly string[],
+    enFragments: readonly string[],
+    localeId?: string,
+    messagePath?: string
+): boolean {
+    return findCopiedFunctionFragments(localeFragments, enFragments, localeId, messagePath).length > 0;
 }
 
 function findDefaultMessageFiles(dir: string): string[] {
@@ -481,7 +546,8 @@ function checkCopiedEnglish(
     catalogObj: Node,
     englishDefaults: Map<string, any>,
     filePath: string,
-    violations: LocaleAuditViolation[]
+    violations: LocaleAuditViolation[],
+    localeId?: string
 ): void {
     if (!Node.isObjectLiteralExpression(catalogObj)) {
         return;
@@ -524,6 +590,9 @@ function checkCopiedEnglish(
                 if (isAllowedTechnicalToken(val)) {
                     continue;
                 }
+                if (isAllowedLocaleCopyException(localeId, fullPath, val)) {
+                    continue;
+                }
                 const enVal = (enFragments[0] ?? "").trim();
                 if (enKind === "static" && enVal && val === enVal) {
                     violations.push({
@@ -536,17 +605,21 @@ function checkCopiedEnglish(
             } else if (Node.isArrowFunction(msgInit) || Node.isFunctionExpression(msgInit)) {
                 if (enKind === "function") {
                     const locFragments = extractMeaningfulFragments(msgInit);
-                    if (
-                        locFragments.length > 0 &&
-                        enFragments.length > 0 &&
-                        areFunctionFragmentsCopied(locFragments, enFragments)
-                    ) {
-                        violations.push({
-                            category: "copied-english",
-                            detail: `Accidental copied English function message for "${fullPath}"`,
-                            file: filePath,
-                            line: msgProp.getStartLineNumber()
-                        });
+                    if (locFragments.length > 0 && enFragments.length > 0) {
+                        const copiedFragments = findCopiedFunctionFragments(
+                            locFragments,
+                            enFragments,
+                            localeId,
+                            fullPath
+                        );
+                        if (copiedFragments.length > 0) {
+                            violations.push({
+                                category: "copied-english",
+                                detail: `Accidental copied English function fragment in "${fullPath}": "${copiedFragments.join('", "')}"`,
+                                file: filePath,
+                                line: msgProp.getStartLineNumber()
+                            });
+                        }
                     }
                 }
             }
@@ -558,8 +631,22 @@ export function auditLocaleMessagesFile(
     filePath: string,
     content?: string,
     englishDefaults?: Map<string, any>,
-    project: Project = new Project({ useInMemoryFileSystem: true })
+    localeIdOrProject?: string | Project,
+    maybeProject?: Project
 ): LocaleAuditViolation[] {
+    let localeId: string | undefined;
+    let project: Project;
+    if (localeIdOrProject instanceof Project) {
+        project = localeIdOrProject;
+        localeId = undefined;
+    } else {
+        localeId = localeIdOrProject;
+        project = maybeProject ?? new Project({ useInMemoryFileSystem: true });
+    }
+    const folderName = basename(dirname(resolve(filePath)));
+    const canonicalFromFolder = canonicalizeLocaleId(folderName.replace(/_/g, "-"));
+    const effectiveLocaleId = localeId ?? canonicalFromFolder ?? undefined;
+
     const violations: LocaleAuditViolation[] = [];
     const sourceContent = content ?? readFileSync(filePath, "utf-8");
     const sf = project.createSourceFile(`test-messages-${Date.now()}-${Math.random()}.ts`, sourceContent, {
@@ -698,7 +785,7 @@ export function auditLocaleMessagesFile(
                 });
             } else {
                 if (englishDefaults && englishDefaults.size > 0) {
-                    checkCopiedEnglish(innerExpr, englishDefaults, filePath, violations);
+                    checkCopiedEnglish(innerExpr, englishDefaults, filePath, violations, effectiveLocaleId);
                 }
             }
         } else {
@@ -1028,7 +1115,14 @@ export function auditAllLocales(
     }
 
     for (const descriptor of discovery.locales) {
-        violations.push(...auditLocaleMessagesFile(descriptor.messagesFile, undefined, englishDefaults));
+        violations.push(
+            ...auditLocaleMessagesFile(
+                descriptor.messagesFile,
+                undefined,
+                englishDefaults,
+                descriptor.canonicalId
+            )
+        );
         violations.push(
             ...auditLocaleMetadataFile(
                 descriptor.localeFile,
