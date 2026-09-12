@@ -12,6 +12,10 @@ const timeFormatCache = new Map<string, string>();
 const dateTimeFormatCache = new Map<string, string>();
 const firstDayCache = new Map<string, LocaleFirstDayOfWeek>();
 
+function normalizeEditableLiteral(value: string): string {
+    return value.replace(/[\u00A0\u202F]/g, " ");
+}
+
 /**
  * Derives a localized numeric date format (e.g. "yyyy/MM/dd" or "dd/MM/yyyy") for the given locale.
  */
@@ -36,7 +40,7 @@ export function getLocaleDateInputFormat(localeId: string): string {
                 } else if (part.type === "day") {
                     derived += "dd";
                 } else if (part.type === "literal") {
-                    derived += part.value;
+                    derived += normalizeEditableLiteral(part.value);
                 }
             }
             format = derived || "dd/MM/yyyy";
@@ -82,7 +86,7 @@ export function getLocaleTimeInputFormat(localeId: string, options?: LocaleTimeF
                 } else if (part.type === "dayPeriod") {
                     derived += "a";
                 } else if (part.type === "literal") {
-                    derived += part.value;
+                    derived += normalizeEditableLiteral(part.value);
                 }
             }
             format =
@@ -139,7 +143,7 @@ export function getLocaleDateTimeInputFormat(localeId: string, options?: LocaleT
                 } else if (part.type === "dayPeriod") {
                     derived += "a";
                 } else if (part.type === "literal") {
-                    derived += part.value;
+                    derived += normalizeEditableLiteral(part.value);
                 }
             }
             format = derived || `${getLocaleDateInputFormat(localeId)} ${getLocaleTimeInputFormat(localeId, options)}`;

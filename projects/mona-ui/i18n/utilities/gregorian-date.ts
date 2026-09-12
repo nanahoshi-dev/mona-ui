@@ -73,18 +73,23 @@ export function parseGregorianDate(
     const locale = normalizeGregorianLocale(localeId);
     let dt = DateTime.fromFormat(text, format, { locale, outputCalendar: "gregory" });
     if (!dt.isValid) {
-        const normalizedText = normalizeLocalizedDigits(text, locale);
-        let latnLocale = locale;
-        try {
-            if (typeof Intl !== "undefined" && typeof Intl.Locale === "function") {
-                latnLocale = new Intl.Locale(locale, { numberingSystem: "latn" }).toString();
-            }
-        } catch {
-            // fallback
-        }
-        dt = DateTime.fromFormat(normalizedText, format, { locale: latnLocale, outputCalendar: "gregory" });
+        const normalizedSpacesText = text.replace(/[\u00A0\u202F]/g, " ");
+        const normalizedSpacesFormat = format.replace(/[\u00A0\u202F]/g, " ");
+        dt = DateTime.fromFormat(normalizedSpacesText, normalizedSpacesFormat, { locale, outputCalendar: "gregory" });
         if (!dt.isValid) {
-            dt = DateTime.fromFormat(normalizedText, format, { locale, outputCalendar: "gregory" });
+            const normalizedText = normalizeLocalizedDigits(normalizedSpacesText, locale);
+            let latnLocale = locale;
+            try {
+                if (typeof Intl !== "undefined" && typeof Intl.Locale === "function") {
+                    latnLocale = new Intl.Locale(locale, { numberingSystem: "latn" }).toString();
+                }
+            } catch {
+                // fallback
+            }
+            dt = DateTime.fromFormat(normalizedText, normalizedSpacesFormat, { locale: latnLocale, outputCalendar: "gregory" });
+            if (!dt.isValid) {
+                dt = DateTime.fromFormat(normalizedText, normalizedSpacesFormat, { locale, outputCalendar: "gregory" });
+            }
         }
     }
     return dt;
