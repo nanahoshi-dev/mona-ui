@@ -367,6 +367,12 @@ describe("GridRowReorderHandleComponent", () => {
             i18nService.use(MONA_DEFAULT_LOCALE);
             fixture.detectChanges();
             expect(button.getAttribute("aria-label")).toContain("Reorder row 1.");
+
+            button.dispatchEvent(
+                new KeyboardEvent("keydown", { key: "ArrowDown", altKey: true, bubbles: true, cancelable: true })
+            );
+            expect(liveAnnouncerMock.announce).toHaveBeenLastCalledWith("Moved row 1 to position 2.");
+            expect(liveAnnouncerMock.announce).toHaveBeenCalledTimes(2);
         });
     });
 });
