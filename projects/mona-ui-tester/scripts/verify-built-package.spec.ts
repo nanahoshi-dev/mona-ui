@@ -430,5 +430,71 @@ describe("verify-built-package", () => {
                 rmSync(tempDir, { recursive: true, force: true });
             }
         });
+
+        it("fails before runtime smoke when source locales include one valid plus one malformed locale", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "pkg-verify-dist-"));
+            const fakeLocales = mkdtempSync(join(tmpdir(), "pkg-verify-locales-"));
+            try {
+                // Setup valid built package output
+                writeFileSync(
+                    join(fakeDist, "package.json"),
+                    JSON.stringify({
+                        name: "@nanahoshi/mona-ui",
+                        exports: {
+                            "./locales": {
+                                types: "./locales.d.ts",
+                                default: "./locales.mjs"
+                            }
+                        }
+                    })
+                );
+                writeFileSync(
+                    join(fakeDist, "locales.mjs"),
+                    'export const MONA_ES_ES_LOCALE = { id: "es-ES", direction: "ltr", messages: {} };\n'
+                );
+                writeFileSync(
+                    join(fakeDist, "locales.d.ts"),
+                    'export declare const MONA_ES_ES_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n'
+                );
+
+                // Setup source locales: es-es (valid) and de-de (malformed - missing official locale export)
+                const esFolder = join(fakeLocales, "es-es");
+                const deFolder = join(fakeLocales, "de-de");
+                mkdirSync(esFolder, { recursive: true });
+                mkdirSync(deFolder, { recursive: true });
+
+                writeFileSync(
+                    join(fakeLocales, "public-api.ts"),
+                    'export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n'
+                );
+                writeFileSync(
+                    join(esFolder, "es-es.messages.ts"),
+                    'import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";\nexport const ES_ES_MESSAGES = {} satisfies MonaLocaleMessages;\n'
+                );
+                writeFileSync(
+                    join(esFolder, "es-es.locale.ts"),
+                    'import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";\nimport { ES_ES_MESSAGES } from "./es-es.messages";\nexport const MONA_ES_ES_LOCALE = { direction: "ltr", id: "es-ES", messages: ES_ES_MESSAGES } satisfies MonaLocale;\n'
+                );
+
+                writeFileSync(
+                    join(deFolder, "de-de.messages.ts"),
+                    'import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";\nexport const DE_DE_MESSAGES = {} satisfies MonaLocaleMessages;\n'
+                );
+                writeFileSync(
+                    join(deFolder, "de-de.locale.ts"),
+                    'export const NOT_AN_OFFICIAL_LOCALE = { foo: "bar" };\n'
+                );
+
+                expect(() =>
+                    verifyBuiltPackage({
+                        distDir: fakeDist,
+                        sourceLocalesDir: fakeLocales
+                    })
+                ).toThrow("Cannot verify package: source locale audit failed with");
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
+                rmSync(fakeLocales, { recursive: true, force: true });
+            }
+        });
     });
 });

@@ -638,9 +638,28 @@ export function discoverOfficialLocales(
                 .filter(d => d.getVariableStatement()?.isExported() && /^[A-Z0-9_]+_MESSAGES$/.test(d.getName()));
             if (exportedMsgDecls.length === 1) {
                 messagesExport = exportedMsgDecls[0].getName();
+            } else if (exportedMsgDecls.length === 0) {
+                violations.push({
+                    category: "invalid-metadata",
+                    detail: `Missing official exported messages catalog in "${messagesFile}". Expected a variable declaration matching /^[A-Z0-9_]+_MESSAGES$/`,
+                    file: messagesFile,
+                    line: 1
+                });
+            } else {
+                violations.push({
+                    category: "invalid-metadata",
+                    detail: `Expected exactly one exported official messages catalog in "${messagesFile}", found ${exportedMsgDecls.length} ([${exportedMsgDecls.map(d => d.getName()).join(", ")}])`,
+                    file: messagesFile,
+                    line: 1
+                });
             }
-        } catch {
-            // handled in file audit
+        } catch (err: any) {
+            violations.push({
+                category: "invalid-metadata",
+                detail: `Failed to parse locale messages file "${messagesFile}": ${err.message}`,
+                file: messagesFile,
+                line: 1
+            });
         }
 
         let localeExport = "";
@@ -672,21 +691,42 @@ export function discoverOfficialLocales(
                         }
                     }
                 }
+            } else if (exportedLocDecls.length === 0) {
+                violations.push({
+                    category: "invalid-metadata",
+                    detail: `Missing official exported locale constant in "${localeFile}". Expected a variable declaration matching /^MONA_[A-Z0-9_]+_LOCALE$/`,
+                    file: localeFile,
+                    line: 1
+                });
+            } else {
+                violations.push({
+                    category: "invalid-metadata",
+                    detail: `Expected exactly one exported official locale constant in "${localeFile}", found ${exportedLocDecls.length} ([${exportedLocDecls.map(d => d.getName()).join(", ")}])`,
+                    file: localeFile,
+                    line: 1
+                });
             }
-        } catch {
-            // handled in file audit
+        } catch (err: any) {
+            violations.push({
+                category: "invalid-metadata",
+                detail: `Failed to parse locale metadata file "${localeFile}": ${err.message}`,
+                file: localeFile,
+                line: 1
+            });
         }
 
-        locales.push({
-            folder,
-            folderPath,
-            canonicalId: canonicalTag,
-            messagesFile,
-            localeFile,
-            messagesExport,
-            localeExport,
-            direction
-        });
+        if (messagesExport && localeExport) {
+            locales.push({
+                folder,
+                folderPath,
+                canonicalId: canonicalTag,
+                messagesFile,
+                localeFile,
+                messagesExport,
+                localeExport,
+                direction
+            });
+        }
     }
 
     // Global validations across discovered locales

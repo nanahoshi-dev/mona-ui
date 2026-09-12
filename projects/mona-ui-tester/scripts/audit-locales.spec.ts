@@ -906,6 +906,114 @@ describe("audit-locales", () => {
                 rmSync(tempDir, { recursive: true, force: true });
             }
         });
+
+        it("rejects locale folder with zero official locale constants during discovery", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "mona-disc-no-loc-"));
+            try {
+                const esFolder = join(tempDir, "es-es");
+                mkdirSync(esFolder, { recursive: true });
+                writeFileSync(join(tempDir, "public-api.ts"), `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`);
+                writeFileSync(
+                    join(esFolder, "es-es.messages.ts"),
+                    `import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";\nexport const ES_ES_MESSAGES = {} satisfies MonaLocaleMessages;\n`
+                );
+                writeFileSync(
+                    join(esFolder, "es-es.locale.ts"),
+                    `export const someOtherVariable = 123;\n`
+                );
+
+                const discovery = discoverOfficialLocales(tempDir);
+                expect(
+                    discovery.violations.some(
+                        v => v.category === "invalid-metadata" && v.detail.includes("Missing official exported locale constant")
+                    )
+                ).toBe(true);
+                expect(discovery.locales).toHaveLength(0);
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("rejects locale folder with multiple official locale constants during discovery", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "mona-disc-multi-loc-"));
+            try {
+                const esFolder = join(tempDir, "es-es");
+                mkdirSync(esFolder, { recursive: true });
+                writeFileSync(join(tempDir, "public-api.ts"), `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`);
+                writeFileSync(
+                    join(esFolder, "es-es.messages.ts"),
+                    `import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";\nexport const ES_ES_MESSAGES = {} satisfies MonaLocaleMessages;\n`
+                );
+                writeFileSync(
+                    join(esFolder, "es-es.locale.ts"),
+                    `export const MONA_ES_ES_LOCALE = {} as any;\nexport const MONA_ES_ES_ALT_LOCALE = {} as any;\n`
+                );
+
+                const discovery = discoverOfficialLocales(tempDir);
+                expect(
+                    discovery.violations.some(
+                        v => v.category === "invalid-metadata" && v.detail.includes("Expected exactly one exported official locale constant")
+                    )
+                ).toBe(true);
+                expect(discovery.locales).toHaveLength(0);
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("rejects messages file with zero official message exports during discovery", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "mona-disc-no-msg-"));
+            try {
+                const esFolder = join(tempDir, "es-es");
+                mkdirSync(esFolder, { recursive: true });
+                writeFileSync(join(tempDir, "public-api.ts"), `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`);
+                writeFileSync(
+                    join(esFolder, "es-es.messages.ts"),
+                    `export const someOtherMessages = {};\n`
+                );
+                writeFileSync(
+                    join(esFolder, "es-es.locale.ts"),
+                    `import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";\nexport const MONA_ES_ES_LOCALE = { direction: "ltr", id: "es-ES", messages: {} } satisfies MonaLocale;\n`
+                );
+
+                const discovery = discoverOfficialLocales(tempDir);
+                expect(
+                    discovery.violations.some(
+                        v => v.category === "invalid-metadata" && v.detail.includes("Missing official exported messages catalog")
+                    )
+                ).toBe(true);
+                expect(discovery.locales).toHaveLength(0);
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("rejects messages file with multiple official message exports during discovery", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "mona-disc-multi-msg-"));
+            try {
+                const esFolder = join(tempDir, "es-es");
+                mkdirSync(esFolder, { recursive: true });
+                writeFileSync(join(tempDir, "public-api.ts"), `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`);
+                writeFileSync(
+                    join(esFolder, "es-es.messages.ts"),
+                    `export const ES_ES_MESSAGES = {} as any;\nexport const ES_ES_ALT_MESSAGES = {} as any;\n`
+                );
+                writeFileSync(
+                    join(esFolder, "es-es.locale.ts"),
+                    `import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";\nexport const MONA_ES_ES_LOCALE = { direction: "ltr", id: "es-ES", messages: {} } satisfies MonaLocale;\n`
+                );
+
+                const discovery = discoverOfficialLocales(tempDir);
+                expect(
+                    discovery.violations.some(
+                        v => v.category === "invalid-metadata" && v.detail.includes("Expected exactly one exported official messages catalog")
+                    )
+                ).toBe(true);
+                expect(discovery.locales).toHaveLength(0);
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
     });
 
     describe("loadDefaultEnglishStrings and Schema Parity", () => {
