@@ -2,7 +2,7 @@ import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { ImmutableDictionary, KeyValuePair } from "@mirei/ts-collections";
 import { MONA_DEFAULT_LOCALE, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { MONA_DE_DE_LOCALE } from "@nanahoshi/mona-ui/locales";
+import { MONA_DE_DE_LOCALE, MONA_FR_FR_LOCALE } from "@nanahoshi/mona-ui/locales";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Column } from "../../models/Column";
 import type { ColumnFilterState } from "../../models/ColumnFilterState";
@@ -350,6 +350,138 @@ describe("GridRowReorderHandleComponent", () => {
         });
     });
 
+    describe("French (fr-FR) locale", () => {
+        beforeEach(() => {
+            i18nService.use(MONA_FR_FR_LOCALE);
+            fixture.detectChanges();
+        });
+
+        it("renders French accessible label and keyboard hint", () => {
+            const button = getButton();
+            expect(button.getAttribute("aria-label")).toBe(
+                "Réordonner la ligne 1. Utilisez Alt + Flèche vers le haut ou Alt + Flèche vers le bas pour déplacer la ligne."
+            );
+        });
+
+        it("translates disabled reason suffix to French", () => {
+            gridService.setRowReorderableOptions({ enabled: false });
+            fixture.detectChanges();
+
+            const button = getButton();
+            expect(button.getAttribute("title")).toBe("La réorganisation des lignes est désactivée.");
+            expect(button.getAttribute("aria-label")).toBe(
+                "Réordonner la ligne 1. Utilisez Alt + Flèche vers le haut ou Alt + Flèche vers le bas pour déplacer la ligne. La réorganisation des lignes est désactivée."
+            );
+        });
+
+        it("translates editing reason to French", () => {
+            const column = createColumn("id");
+            gridService.columns.set(gridService.columns().add(column));
+            gridService.setEditableOptions({ enabled: true, mode: "cell" });
+            const row = gridService.rows().firstOrDefault()!;
+            gridService.startCellEdit(`${row.uid}_id`, row, column);
+            fixture.detectChanges();
+
+            const button = getButton();
+            expect(button.getAttribute("title")).toBe("Terminez la modification avant de réordonner les lignes.");
+            expect(button.getAttribute("aria-label")).toContain("Terminez la modification avant de réordonner les lignes.");
+        });
+
+        it("translates single-row reason to French", () => {
+            gridService.setRows([{ id: 1 }]);
+            fixture.componentRef.setInput("row", gridService.rows().firstOrDefault()!);
+            fixture.detectChanges();
+
+            const button = getButton();
+            expect(button.getAttribute("title")).toBe("Au moins deux lignes sont nécessaires pour les réordonner.");
+            expect(button.getAttribute("aria-label")).toContain(
+                "Au moins deux lignes sont nécessaires pour les réordonner."
+            );
+        });
+
+        it("translates virtual-scroll reason to French", () => {
+            gridService.setVirtualScrollOptions({ enabled: true });
+            fixture.detectChanges();
+
+            const button = getButton();
+            expect(button.getAttribute("title")).toBe(
+                "La réorganisation des lignes n’est pas disponible lorsque le défilement virtuel est activé."
+            );
+            expect(button.getAttribute("aria-label")).toContain(
+                "La réorganisation des lignes n’est pas disponible lorsque le défilement virtuel est activé."
+            );
+        });
+
+        it("translates sorted reason to French", () => {
+            const sortState: ColumnSortState = { sort: { field: "id", dir: "asc" } };
+            gridService.appliedSorts.set(
+                ImmutableDictionary.create<string, ColumnSortState>([
+                    new KeyValuePair("id", sortState)
+                ])
+            );
+            fixture.detectChanges();
+
+            const button = getButton();
+            expect(button.getAttribute("title")).toBe("Supprimez le tri avant de réordonner les lignes.");
+            expect(button.getAttribute("aria-label")).toContain("Supprimez le tri avant de réordonner les lignes.");
+        });
+
+        it("translates filtered reason to French", () => {
+            const filterState: ColumnFilterState = {
+                filter: {
+                    filters: [{ field: "id", operator: "neq", value: 999 }],
+                    logic: "and"
+                }
+            };
+            gridService.appliedFilters.set(
+                ImmutableDictionary.create<string, ColumnFilterState>([
+                    new KeyValuePair("id", filterState)
+                ])
+            );
+            fixture.detectChanges();
+
+            const button = getButton();
+            expect(button.getAttribute("title")).toBe("Supprimez les filtres avant de réordonner les lignes.");
+            expect(button.getAttribute("aria-label")).toContain("Supprimez les filtres avant de réordonner les lignes.");
+        });
+
+        it("translates grouped reason to French", () => {
+            const column = createColumn("id");
+            gridService.columns.set(gridService.columns().add(column));
+            gridService.addGroupColumn(column);
+            fixture.detectChanges();
+
+            const button = getButton();
+            expect(button.getAttribute("title")).toBe("Supprimez le regroupement avant de réordonner les lignes.");
+            expect(button.getAttribute("aria-label")).toContain("Supprimez le regroupement avant de réordonner les lignes.");
+        });
+
+        it("announces moved row position with French text on Alt+ArrowDown", () => {
+            const button = getButton();
+            button.dispatchEvent(
+                new KeyboardEvent("keydown", { key: "ArrowDown", altKey: true, bubbles: true, cancelable: true })
+            );
+
+            expect(liveAnnouncerMock.announce).toHaveBeenCalledTimes(1);
+            expect(liveAnnouncerMock.announce).toHaveBeenCalledWith("Ligne 1 déplacée à la position 2.");
+        });
+
+        it("announces moved row position with French text on Alt+ArrowUp", () => {
+            const thirdRow = gridService.rows().get(2);
+            fixture.componentRef.setInput("row", thirdRow);
+            fixture.componentRef.setInput("pageIndex", 2);
+            fixture.detectChanges();
+
+            const button = getButton();
+            button.dispatchEvent(
+                new KeyboardEvent("keydown", { key: "ArrowUp", altKey: true, bubbles: true, cancelable: true })
+            );
+
+            expect(liveAnnouncerMock.announce).toHaveBeenCalledTimes(1);
+            expect(liveAnnouncerMock.announce).toHaveBeenCalledWith("Ligne 3 déplacée à la position 2.");
+        });
+    });
+
     describe("Runtime locale switching", () => {
         it("dynamically updates aria-label and live announcement between English and German", () => {
             const button = getButton();
@@ -363,6 +495,33 @@ describe("GridRowReorderHandleComponent", () => {
                 new KeyboardEvent("keydown", { key: "ArrowDown", altKey: true, bubbles: true, cancelable: true })
             );
             expect(liveAnnouncerMock.announce).toHaveBeenCalledWith("Zeile 1 an Position 2 verschoben.");
+
+            i18nService.use(MONA_DEFAULT_LOCALE);
+            fixture.detectChanges();
+            expect(button.getAttribute("aria-label")).toContain("Reorder row 1.");
+
+            button.dispatchEvent(
+                new KeyboardEvent("keydown", { key: "ArrowDown", altKey: true, bubbles: true, cancelable: true })
+            );
+            expect(liveAnnouncerMock.announce).toHaveBeenLastCalledWith("Moved row 1 to position 2.");
+            expect(liveAnnouncerMock.announce).toHaveBeenCalledTimes(2);
+        });
+
+        it("dynamically updates aria-label and live announcement between English and French", () => {
+            const button = getButton();
+            expect(button.getAttribute("aria-label")).toContain("Reorder row 1.");
+
+            i18nService.use(MONA_FR_FR_LOCALE);
+            fixture.detectChanges();
+            expect(button.getAttribute("aria-label")).toContain("Réordonner la ligne 1.");
+            expect(button.getAttribute("aria-label")).toContain(
+                "Utilisez Alt + Flèche vers le haut ou Alt + Flèche vers le bas pour déplacer la ligne."
+            );
+
+            button.dispatchEvent(
+                new KeyboardEvent("keydown", { key: "ArrowDown", altKey: true, bubbles: true, cancelable: true })
+            );
+            expect(liveAnnouncerMock.announce).toHaveBeenCalledWith("Ligne 1 déplacée à la position 2.");
 
             i18nService.use(MONA_DEFAULT_LOCALE);
             fixture.detectChanges();
