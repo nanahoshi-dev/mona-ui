@@ -402,33 +402,37 @@ describe("audit-locales", () => {
             const tempDir = mkdtempSync(join(tmpdir(), "mona-locale-dup-"));
             try {
                 const esFolder1 = join(tempDir, "es-es");
-                const esFolder2 = join(tempDir, "es");
+                const esFolder2 = join(tempDir, "es_ES");
                 mkdirSync(esFolder1, { recursive: true });
                 mkdirSync(esFolder2, { recursive: true });
-                writeFileSync(join(tempDir, "public-api.ts"), `
-                    export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";
-                    export { MONA_ES_LOCALE } from "./es/es.locale";
-                `);
-                writeFileSync(join(esFolder1, "es-es.messages.ts"), `
-                    import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
-                    export const ES_ES_MESSAGES = {} satisfies MonaLocaleMessages;
-                `);
-                writeFileSync(join(esFolder1, "es-es.locale.ts"), `
-                    import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";
-                    import { ES_ES_MESSAGES } from "./es-es.messages";
-                    export const MONA_ES_ES_LOCALE = { direction: "ltr", id: "es-ES", messages: ES_ES_MESSAGES } satisfies MonaLocale;
-                `);
-                writeFileSync(join(esFolder2, "es.messages.ts"), `
-                    import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
-                    export const ES_MESSAGES = {} satisfies MonaLocaleMessages;
-                `);
-                writeFileSync(join(esFolder2, "es.locale.ts"), `
-                    import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";
-                    import { ES_MESSAGES } from "./es.messages";
-                    export const MONA_ES_LOCALE = { direction: "ltr", id: "es-ES", messages: ES_MESSAGES } satisfies MonaLocale;
-                `);
+                writeFileSync(
+                    join(tempDir, "public-api.ts"),
+                    `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\nexport { MONA_ES_ES_ALT_LOCALE } from "./es_ES/es_ES.locale";\n`
+                );
+                writeFileSync(
+                    join(esFolder1, "es-es.messages.ts"),
+                    `import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";\nexport const ES_ES_MESSAGES = {} satisfies MonaLocaleMessages;\n`
+                );
+                writeFileSync(
+                    join(esFolder1, "es-es.locale.ts"),
+                    `import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";\nimport { ES_ES_MESSAGES } from "./es-es.messages";\nexport const MONA_ES_ES_LOCALE = { direction: "ltr", id: "es-ES", messages: ES_ES_MESSAGES } satisfies MonaLocale;\n`
+                );
+                writeFileSync(
+                    join(esFolder2, "es_ES.messages.ts"),
+                    `import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";\nexport const ES_ES_ALT_MESSAGES = {} satisfies MonaLocaleMessages;\n`
+                );
+                writeFileSync(
+                    join(esFolder2, "es_ES.locale.ts"),
+                    `import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";\nimport { ES_ES_ALT_MESSAGES } from "./es_ES.messages";\nexport const MONA_ES_ES_ALT_LOCALE = { direction: "ltr", id: "es-ES", messages: ES_ES_ALT_MESSAGES } satisfies MonaLocale;\n`
+                );
                 const violations = auditAllLocales(tempDir);
-                expect(violations.some(v => v.detail.includes("Duplicate locale ID") || v.detail.includes("es-ES"))).toBe(true);
+                expect(
+                    violations.some(
+                        v =>
+                            v.category === "invalid-metadata" &&
+                            v.detail.includes('Duplicate locale ID "es-ES"')
+                    )
+                ).toBe(true);
             } finally {
                 rmSync(tempDir, { recursive: true, force: true });
             }
@@ -485,6 +489,46 @@ describe("audit-locales", () => {
                 rmSync(tempDir, { recursive: true, force: true });
             }
         });
+        it("discovers multiple official locales in a synthetic repository without violations", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "mona-locales-multi-"));
+            try {
+                const esFolder = join(tempDir, "es-es");
+                const deFolder = join(tempDir, "de-de");
+                mkdirSync(esFolder, { recursive: true });
+                mkdirSync(deFolder, { recursive: true });
+                writeFileSync(
+                    join(tempDir, "public-api.ts"),
+                    `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\nexport { MONA_DE_DE_LOCALE } from "./de-de/de-de.locale";\n`
+                );
+                writeFileSync(
+                    join(esFolder, "es-es.messages.ts"),
+                    `import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";\nexport const ES_ES_MESSAGES = {} satisfies MonaLocaleMessages;\n`
+                );
+                writeFileSync(
+                    join(esFolder, "es-es.locale.ts"),
+                    `import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";\nimport { ES_ES_MESSAGES } from "./es-es.messages";\nexport const MONA_ES_ES_LOCALE = { direction: "ltr", id: "es-ES", messages: ES_ES_MESSAGES } satisfies MonaLocale;\n`
+                );
+                writeFileSync(
+                    join(deFolder, "de-de.messages.ts"),
+                    `import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";\nexport const DE_DE_MESSAGES = {} satisfies MonaLocaleMessages;\n`
+                );
+                writeFileSync(
+                    join(deFolder, "de-de.locale.ts"),
+                    `import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";\nimport { DE_DE_MESSAGES } from "./de-de.messages";\nexport const MONA_DE_DE_LOCALE = { direction: "ltr", id: "de-DE", messages: DE_DE_MESSAGES } satisfies MonaLocale;\n`
+                );
+
+                const discovery = discoverOfficialLocales(tempDir);
+                expect(discovery.violations).toHaveLength(0);
+                expect(discovery.locales).toHaveLength(2);
+                for (const locale of discovery.locales) {
+                    expect(locale.localeExport).toMatch(/^MONA_[A-Z0-9_]+_LOCALE$/);
+                    expect(locale.messagesExport).toMatch(/^[A-Z0-9_]+_MESSAGES$/);
+                    expect(locale.canonicalId.length).toBeGreaterThan(0);
+                }
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
     });
 
     describe("Real Repository Locale Integration", () => {
@@ -507,13 +551,27 @@ describe("audit-locales", () => {
             expect(violations).toHaveLength(0);
         });
 
-        it("confirms all official locales are present in public-api.ts", () => {
+        it("discovers all official locales without structural violations", () => {
             const discovery = discoverOfficialLocales();
             expect(discovery.locales.length).toBeGreaterThan(0);
             expect(discovery.violations).toHaveLength(0);
-            for (const loc of discovery.locales) {
-                expect(loc.localeExport).toBe("MONA_ES_ES_LOCALE");
+            for (const locale of discovery.locales) {
+                expect(locale.localeExport).toMatch(/^MONA_[A-Z0-9_]+_LOCALE$/);
+                expect(locale.messagesExport).toMatch(/^[A-Z0-9_]+_MESSAGES$/);
+                expect(locale.canonicalId.length).toBeGreaterThan(0);
             }
+        });
+
+        it("discovers the official Spanish locale", () => {
+            const discovery = discoverOfficialLocales();
+            expect(
+                discovery.locales.some(
+                    locale =>
+                        locale.canonicalId === "es-ES" &&
+                        locale.localeExport === "MONA_ES_ES_LOCALE" &&
+                        locale.messagesExport === "ES_ES_MESSAGES"
+                )
+            ).toBe(true);
         });
     });
 });
