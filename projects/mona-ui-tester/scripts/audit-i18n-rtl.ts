@@ -7,7 +7,6 @@ import {
     LiteralPrimitive,
     parseTemplate,
     RecursiveAstVisitor,
-    TmplAstBoundAttribute,
     TmplAstBoundText,
     TmplAstDeferredBlock,
     TmplAstElement,
@@ -16,8 +15,7 @@ import {
     type TmplAstNode,
     TmplAstSwitchBlock,
     TmplAstTemplate,
-    TmplAstText,
-    TmplAstTextAttribute
+    TmplAstText
 } from "@angular/compiler";
 import { Node, Project, type ReturnStatement, SyntaxKind } from "ts-morph";
 
@@ -49,7 +47,7 @@ const PHYSICAL_TAILWIND_PATTERNS = [
         label: "Physical padding utility (pl-*/pr-* -> ps-*/pe-*)"
     },
     {
-        regex: /(?<![a-zA-Z0-9_-])(?:[a-z0-9-]+:)*-?(?:left|right)-(?=[0-9a-zA-Z_\[])[0-9a-z_[\].-]+/g,
+        regex: /(?<![a-zA-Z0-9_-])(?:[a-z0-9-]+:)*-?(?:left|right)-(?=[0-9a-zA-Z_[])[0-9a-z_[\].-]+/g,
         label: "Physical position utility (left-*/right-* -> start-*/end-*)"
     },
     {
@@ -847,7 +845,7 @@ export function isUserFacingText(text: string): boolean {
         return false;
     }
     // Pure symbols/punctuation/math/HTML entities
-    if (/^[&;:,\-–—/\\|•*+×#%°<>=_~()\[\]{}!?@^$'"`]+$/.test(trimmed)) {
+    if (/^[&;:,\-–—/\\|•*+×#%°<>=_~()[\]{}!?@^$'"`]+$/.test(trimmed)) {
         return false;
     }
     // HTML entities
@@ -1344,8 +1342,101 @@ export function isTechnicalSemanticMapValue(
     return false;
 }
 
+export type SemanticLiteralContext =
+    | "host-aria-text"
+    | "host-visible-text"
+    | "aria-property"
+    | "semantic-property"
+    | "semantic-helper"
+    | "live-announcement"
+    | "generic-semantic-object";
+
+const TECHNICAL_ARIA_STATE_PROPERTIES = new Set([
+    "ariadisabled",
+    "arialive",
+    "ariachecked",
+    "ariaexpanded",
+    "ariaselected",
+    "ariahidden",
+    "ariapressed",
+    "ariacurrent",
+    "ariahaspopup",
+    "ariamodal",
+    "ariaatomic",
+    "ariabusy",
+    "ariarequired",
+    "ariareadonly",
+    "ariaorientation",
+    "ariasort",
+    "ariainvalid",
+    "ariarole",
+    "role"
+]);
+
+const TECHNICAL_ARIA_STATE_VALUES = new Set([
+    "true",
+    "false",
+    "assertive",
+    "polite",
+    "off",
+    "mixed",
+    "none",
+    "horizontal",
+    "vertical",
+    "ascending",
+    "descending",
+    "page",
+    "step",
+    "location",
+    "date",
+    "time",
+    "all",
+    "grammar",
+    "spelling"
+]);
+
+export function isTechnicalLiteralForContext(
+    context: SemanticLiteralContext,
+    propertyName: string | undefined,
+    value: string
+): boolean {
+    switch (context) {
+        case "host-aria-text":
+        case "host-visible-text":
+        case "live-announcement":
+        case "aria-property":
+            return false;
+
+        case "semantic-helper":
+        case "semantic-property": {
+            if (propertyName) {
+                const cleanProp = propertyName.replace(/^#/, "").replace(/^_+/, "").toLowerCase();
+                if (
+                    TECHNICAL_ARIA_STATE_PROPERTIES.has(cleanProp) &&
+                    TECHNICAL_ARIA_STATE_VALUES.has(value.toLowerCase())
+                ) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        case "generic-semantic-object":
+            if (propertyName && /^(?:aria.*|title|placeholder|tooltip)$/i.test(propertyName)) {
+                return false;
+            }
+            return TECHNICAL_SEMANTIC_STRINGS.has(value);
+
+        default:
+            return false;
+    }
+}
+
 export function isSemanticTextMapName(name: string): boolean {
     const clean = name.replace(/^#/, "").replace(/^_+/, "");
+    if (/^(?:labels|announcements)$/i.test(clean)) {
+        return true;
+    }
     return (
         /(?:_TEXT|_LABELS|_ANNOUNCEMENTS)$/.test(clean) ||
         /^(?:TEXT|LABELS|ANNOUNCEMENTS)_/.test(clean) ||
@@ -1592,7 +1683,11 @@ export function scanTypeScriptAst(
                                                                 for (const strVal of literals) {
                                                                     if (
                                                                         isUserFacingText(strVal) &&
-                                                                        !TECHNICAL_SEMANTIC_STRINGS.has(strVal)
+                                                                        !isTechnicalLiteralForContext(
+                                                                            isAria ? "host-aria-text" : "host-visible-text",
+                                                                            cleanPropName,
+                                                                            strVal
+                                                                        )
                                                                     ) {
                                                                         violations.push({
                                                                             category: isAria
@@ -1617,7 +1712,11 @@ export function scanTypeScriptAst(
                                                 } else {
                                                     if (
                                                         isUserFacingText(rawVal) &&
-                                                        !TECHNICAL_SEMANTIC_STRINGS.has(rawVal)
+                                                        !isTechnicalLiteralForContext(
+                                                            isAria ? "host-aria-text" : "host-visible-text",
+                                                            cleanPropName,
+                                                            rawVal
+                                                        )
                                                     ) {
                                                         violations.push({
                                                             category: isAria ? "i18n-aria" : "i18n-text",
@@ -1696,7 +1795,7 @@ export function scanTypeScriptAst(
                             const fragments = collectLiteralFragments(init);
                             for (const frag of fragments) {
                                 const val = frag.text.trim();
-                                if (isUserFacingText(val) && !TECHNICAL_SEMANTIC_STRINGS.has(val)) {
+                                if (isUserFacingText(val) && !isTechnicalLiteralForContext("generic-semantic-object", propName, val)) {
                                     const isAria = propName.toLowerCase().startsWith("aria");
                                     violations.push({
                                         category: isAria ? "i18n-aria" : "i18n-text",
@@ -1724,7 +1823,7 @@ export function scanTypeScriptAst(
                     const fragments = collectLiteralFragments(init);
                     for (const frag of fragments) {
                         const val = frag.text.trim();
-                        if (isUserFacingText(val) && !TECHNICAL_SEMANTIC_STRINGS.has(val)) {
+                        if (isUserFacingText(val) && !isTechnicalLiteralForContext("aria-property", propName, val)) {
                             violations.push({
                                 category: "i18n-aria",
                                 detail: `Hard-coded text in accessibility property "${propName}": "${val}"`,
@@ -1769,7 +1868,7 @@ export function scanTypeScriptAst(
                     const fragments = collectLiteralFragments(init);
                     for (const frag of fragments) {
                         const val = frag.text.trim();
-                        if (isUserFacingText(val) && !TECHNICAL_SEMANTIC_STRINGS.has(val)) {
+                        if (isUserFacingText(val) && !isTechnicalLiteralForContext("semantic-property", propName, val)) {
                             const isAria = isAriaSemanticName(propName);
                             violations.push({
                                 category: isAria ? "i18n-aria" : "i18n-text",
@@ -1868,7 +1967,7 @@ export function scanTypeScriptAst(
                     const fragments = collectLiteralFragments(expr);
                     for (const frag of fragments) {
                         const val = frag.text.trim();
-                        if (isUserFacingText(val) && !TECHNICAL_SEMANTIC_STRINGS.has(val)) {
+                        if (isUserFacingText(val) && !isTechnicalLiteralForContext("semantic-helper", fnName, val)) {
                             const isAria = isAriaSemanticName(fnName);
                             violations.push({
                                 category: isAria ? "i18n-aria" : "i18n-text",
@@ -1927,7 +2026,7 @@ export function scanTypeScriptAst(
                     const fragments = collectLiteralFragments(args[0]);
                     for (const frag of fragments) {
                         const val = frag.text.trim();
-                        if (isUserFacingText(val) && !TECHNICAL_SEMANTIC_STRINGS.has(val)) {
+                        if (isUserFacingText(val) && !isTechnicalLiteralForContext("live-announcement", undefined, val)) {
                             violations.push({
                                 category: "i18n-aria",
                                 detail: `Hard-coded accessibility live-announcement text in announce: "${val}"`,
@@ -2000,32 +2099,6 @@ export function scanTypeScriptAst(
         }
 
         // 6. TypeScript-authored physical style objects and assignments
-        const CSS_SIBLING_PROPERTIES = new Set([
-            "top",
-            "bottom",
-            "width",
-            "height",
-            "transform",
-            "position",
-            "zIndex",
-            "display",
-            "backgroundColor",
-            "background",
-            "color",
-            "transformOrigin",
-            "opacity",
-            "overflow",
-            "visibility",
-            "willChange",
-            "backfaceVisibility",
-            "flex",
-            "flexGrow",
-            "flexShrink",
-            "flexBasis",
-            "cursor",
-            "pointerEvents"
-        ]);
-
         const isCssStyleType = (typeText: string | undefined): boolean => {
             if (!typeText) {
                 return false;
