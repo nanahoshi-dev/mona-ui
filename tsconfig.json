@@ -58,6 +58,7 @@
             "@nanahoshi/mona-ui/list": ["./projects/mona-ui/list/public-api.ts"],
             "@nanahoshi/mona-ui/list-box": ["./projects/mona-ui/list-box/public-api.ts"],
             "@nanahoshi/mona-ui/list-view": ["./projects/mona-ui/list-view/public-api.ts"],
+            "@nanahoshi/mona-ui/locales": ["./projects/mona-ui/locales/public-api.ts"],
             "@nanahoshi/mona-ui/menubar": ["./projects/mona-ui/menubar/public-api.ts"],
             "@nanahoshi/mona-ui/multi-select": ["./projects/mona-ui/multi-select/public-api.ts"],
             "@nanahoshi/mona-ui/notification": ["./projects/mona-ui/notification/public-api.ts"],

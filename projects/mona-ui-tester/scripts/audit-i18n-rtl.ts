@@ -2051,6 +2051,7 @@ export function scanFile(filePath: string, violations: AuditViolation[]): void {
     if (
         normalizedPath.endsWith(".spec.ts") ||
         normalizedPath.includes("/i18n/") ||
+        normalizedPath.includes("/locales/") ||
         normalizedPath.includes("/tests/") ||
         normalizedPath.includes("/testing/") ||
         normalizedPath.includes("/scripts/") ||

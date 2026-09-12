@@ -10,6 +10,7 @@ import {
     isUserFacingText,
     MANUAL_REVIEW_PATTERNS,
     matchesFilePattern,
+    scanFile,
     scanFileContent,
     scanTemplateNodes,
     scanTypeScriptAst
@@ -1580,6 +1581,20 @@ describe("audit-i18n-rtl", () => {
 
                 expect(negViolations).toHaveLength(0);
             });
+        });
+    });
+
+    describe("scanFile path filtering", () => {
+        it("skips files in /locales/ directory", () => {
+            const violations: AuditViolation[] = [];
+            scanFile("projects/mona-ui/locales/es-es/es-es.messages.ts", violations);
+            expect(violations).toHaveLength(0);
+        });
+
+        it("skips files in /i18n/ directory", () => {
+            const violations: AuditViolation[] = [];
+            scanFile("projects/mona-ui/i18n/models/mona-locale.ts", violations);
+            expect(violations).toHaveLength(0);
         });
     });
 });
