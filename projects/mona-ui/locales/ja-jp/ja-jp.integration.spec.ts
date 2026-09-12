@@ -1,13 +1,16 @@
 import { Component, signal, viewChild } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
-import { CalendarComponent } from "@nanahoshi/mona-ui/calendar";
+import { CalendarComponent, type FirstDayOfWeek } from "@nanahoshi/mona-ui/calendar";
 import { ColorGradientComponent } from "@nanahoshi/mona-ui/color-gradient";
+import { DatePickerComponent } from "@nanahoshi/mona-ui/date-picker";
+import { DateTimePickerComponent } from "@nanahoshi/mona-ui/datetime-picker";
 import { FilterService } from "@nanahoshi/mona-ui/filter";
 import { ListBoxComponent } from "@nanahoshi/mona-ui/list-box";
 import { PagerComponent, PAGER_DEFAULT_MESSAGES } from "@nanahoshi/mona-ui/pager";
 import { ScrollViewComponent } from "@nanahoshi/mona-ui/scroll-view";
 import { SplitButtonComponent } from "@nanahoshi/mona-ui/split-button";
+import { TimePickerComponent } from "@nanahoshi/mona-ui/time-picker";
 import { TimeSelectorComponent } from "@nanahoshi/mona-ui/time-selector";
 import {
     formatNumber,
@@ -17,6 +20,57 @@ import {
     provideMonaI18n
 } from "@nanahoshi/mona-ui/i18n";
 import { MONA_JA_JP_LOCALE } from "./ja-jp.locale";
+
+@Component({
+    template: `
+        <mona-date-picker
+            [(value)]="value"
+            [format]="format()"
+            [firstDay]="firstDay()" />
+    `,
+    imports: [DatePickerComponent]
+})
+class DatePickerIntegrationHostComponent {
+    public readonly firstDay = signal<FirstDayOfWeek | null>(null);
+    public readonly format = signal<string | null>(null);
+    public readonly value = signal<Date | null>(new Date(2026, 8, 15));
+}
+
+@Component({
+    template: `
+        <mona-time-picker
+            [(value)]="value"
+            [format]="format()"
+            [hourFormat]="hourFormat()"
+            [showSeconds]="showSeconds()" />
+    `,
+    imports: [TimePickerComponent]
+})
+class TimePickerIntegrationHostComponent {
+    public readonly format = signal<string | null>(null);
+    public readonly hourFormat = signal<"12" | "24">("24");
+    public readonly showSeconds = signal(false);
+    public readonly value = signal<Date | null>(new Date(2026, 8, 15, 21, 30, 45));
+}
+
+@Component({
+    template: `
+        <mona-datetime-picker
+            [(value)]="value"
+            [format]="format()"
+            [firstDay]="firstDay()"
+            [hourFormat]="hourFormat()"
+            [showSeconds]="showSeconds()" />
+    `,
+    imports: [DateTimePickerComponent]
+})
+class DateTimePickerIntegrationHostComponent {
+    public readonly firstDay = signal<FirstDayOfWeek | null>(null);
+    public readonly format = signal<string | null>(null);
+    public readonly hourFormat = signal<"12" | "24">("24");
+    public readonly showSeconds = signal(false);
+    public readonly value = signal<Date | null>(new Date(2026, 8, 15, 21, 30, 45));
+}
 
 @Component({
     template: `<mona-time-selector [(value)]="testTime" [hourFormat]="'12'" />`,
@@ -532,5 +586,225 @@ describe("MONA_JA_JP_LOCALE Integration with MonaI18nService", () => {
         setButton?.click();
         fixture.detectChanges();
         expect(fixture.componentInstance.testTime()?.getHours()).toBe(9);
+    });
+
+    it("renders DatePicker component with Japanese defaults, parsing, Sunday-first calendar, and overrides", async () => {
+        TestBed.configureTestingModule({
+            imports: [DatePickerIntegrationHostComponent],
+            providers: [
+                provideMonaI18n({
+                    locale: MONA_JA_JP_LOCALE
+                })
+            ]
+        });
+
+        const fixture = TestBed.createComponent(DatePickerIntegrationHostComponent);
+        const service = TestBed.inject(MonaI18nService);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const hostEl = fixture.nativeElement as HTMLElement;
+        const input = hostEl.querySelector("input") as HTMLInputElement;
+
+        // 1. Japanese default numeric date format: 2026/09/15
+        expect(input.value).toBe("2026/09/15");
+
+        // 2. Japanese date input parsing: 2026/11/20
+        input.value = "2026/11/20";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("blur", { bubbles: true }));
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const parsedDate = fixture.componentInstance.value();
+        expect(parsedDate?.getFullYear()).toBe(2026);
+        expect(parsedDate?.getMonth()).toBe(10);
+        expect(parsedDate?.getDate()).toBe(20);
+
+        // 3. Sunday-first calendar popup in Japanese
+        const toggleBtn = hostEl.querySelector("button[monaButton]") as HTMLButtonElement;
+        toggleBtn.click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const getFirstWeekday = () => {
+            const headerRow = document.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
+            return headerRow?.querySelectorAll("div")[0]?.textContent?.trim();
+        };
+        expect(getFirstWeekday()).toBe("日");
+
+        // 4. Explicit firstDay override
+        fixture.componentInstance.firstDay.set("monday");
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(getFirstWeekday()).toBe("月");
+
+        // 5. Explicit format override
+        fixture.componentInstance.format.set("dd.MM.yyyy");
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(input.value).toBe("20.11.2026");
+
+        // 6. Runtime locale switching when format is null
+        fixture.componentInstance.format.set(null);
+        fixture.componentInstance.firstDay.set(null);
+        service.use(MONA_DEFAULT_LOCALE);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(input.value).toBe("11/20/2026");
+
+        service.use(MONA_JA_JP_LOCALE);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(input.value).toBe("2026/11/20");
+    });
+
+    it("renders TimePicker component with Japanese defaults, 午前/午後, seconds, and overrides", async () => {
+        TestBed.configureTestingModule({
+            imports: [TimePickerIntegrationHostComponent],
+            providers: [
+                provideMonaI18n({
+                    locale: MONA_JA_JP_LOCALE
+                })
+            ]
+        });
+
+        const fixture = TestBed.createComponent(TimePickerIntegrationHostComponent);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const hostEl = fixture.nativeElement as HTMLElement;
+        const input = hostEl.querySelector("input") as HTMLInputElement;
+
+        // 1. 24h default without seconds: 21:30
+        expect(input.value).toBe("21:30");
+
+        // 2. 12h mode without seconds: 午後09:30
+        fixture.componentInstance.hourFormat.set("12");
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(input.value).toBe("午後09:30");
+
+        // 3. Open popup and verify meridiem list & localized options
+        const toggleBtn = hostEl.querySelector("button[monaButton]") as HTMLButtonElement;
+        toggleBtn.click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const meridiemList = document.querySelector("ol[aria-label='午前/午後']") as HTMLOListElement;
+        expect(meridiemList).not.toBeNull();
+        const amItem = Array.from(meridiemList.querySelectorAll("li")).find(li => li.textContent?.trim() === "午前");
+        expect(amItem).toBeDefined();
+
+        amItem?.click();
+        fixture.detectChanges();
+
+        const setButton = Array.from(document.querySelectorAll<HTMLButtonElement>("button")).find(b => b.textContent?.trim() === "設定");
+        setButton?.click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(input.value).toBe("午前09:30");
+        expect(fixture.componentInstance.value()?.getHours()).toBe(9);
+
+        // 4. 12h mode with seconds
+        fixture.componentInstance.showSeconds.set(true);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(input.value).toBe("午前09:30:45");
+
+        // 5. Explicit format override
+        fixture.componentInstance.format.set("hh:mm:ss");
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(input.value).toBe("09:30:45");
+    });
+
+    it("renders DateTimePicker component with Japanese datetime defaults, day period, popup consistency, and overrides", async () => {
+        TestBed.configureTestingModule({
+            imports: [DateTimePickerIntegrationHostComponent],
+            providers: [
+                provideMonaI18n({
+                    locale: MONA_JA_JP_LOCALE
+                })
+            ]
+        });
+
+        const fixture = TestBed.createComponent(DateTimePickerIntegrationHostComponent);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const hostEl = fixture.nativeElement as HTMLElement;
+        const input = hostEl.querySelector("input") as HTMLInputElement;
+
+        // 1. 24h default without seconds: 2026/09/15 21:30
+        expect(input.value).toBe("2026/09/15 21:30");
+
+        // 2. 12h mode without seconds: 2026/09/15 午後09:30
+        fixture.componentInstance.hourFormat.set("12");
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(input.value).toBe("2026/09/15 午後09:30");
+
+        // 3. 12h mode with seconds: 2026/09/15 午後09:30:45
+        fixture.componentInstance.showSeconds.set(true);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(input.value).toBe("2026/09/15 午後09:30:45");
+
+        // 4. Japanese datetime input parsing: 2026/12/25 午前08:15:00
+        input.value = "2026/12/25 午前08:15:00";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("blur", { bubbles: true }));
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const parsedDate = fixture.componentInstance.value();
+        expect(parsedDate?.getFullYear()).toBe(2026);
+        expect(parsedDate?.getMonth()).toBe(11);
+        expect(parsedDate?.getDate()).toBe(25);
+        expect(parsedDate?.getHours()).toBe(8);
+        expect(parsedDate?.getMinutes()).toBe(15);
+        expect(parsedDate?.getSeconds()).toBe(0);
+
+        // 5. Open popup and verify Japanese labels and consistency
+        const toggleBtn = hostEl.querySelector("button[monaButton]") as HTMLButtonElement;
+        toggleBtn.click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const popup = document.querySelector("div[role='dialog']") as HTMLElement;
+        expect(popup?.getAttribute("aria-label")).toBe("日時選択");
+
+        const tabButtons = Array.from(popup.querySelectorAll<HTMLButtonElement>("button[role='tab']"));
+        expect(tabButtons[0]?.textContent?.trim()).toBe("日付");
+        expect(tabButtons[1]?.textContent?.trim()).toBe("時刻");
+
+        // In date view, Sunday is first: 日
+        const headerRow = popup.querySelector("div[style*='grid-template-columns']") as HTMLElement;
+        expect(headerRow?.querySelectorAll("div")[0]?.textContent?.trim()).toBe("日");
+
+        // Switch to time view
+        tabButtons[1]?.click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const meridiemList = popup.querySelector("ol[aria-label='午前/午後']") as HTMLOListElement;
+        expect(meridiemList).not.toBeNull();
+
+        const footerButtons = popup.querySelectorAll("div.border-t button");
+        expect(footerButtons[0]?.textContent?.trim()).toBe("設定");
+        expect(footerButtons[1]?.textContent?.trim()).toBe("キャンセル");
+
+        // Close popup
+        (footerButtons[1] as HTMLButtonElement).click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        // 6. Explicit format override
+        fixture.componentInstance.format.set("yyyy-MM-dd HH:mm");
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(input.value).toBe("2026-12-25 08:15");
     });
 });
