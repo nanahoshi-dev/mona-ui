@@ -2530,11 +2530,11 @@
         "type": "DateDisabledType"
       },
       {
-        "description": "Sets the first day of the week.",
+        "description": "Sets the first day of the week. If not specified, derives from the active locale.",
         "kind": "input",
         "name": "firstDay",
-        "type": "FirstDayOfWeek",
-        "defaultValue": "\"monday\""
+        "type": "FirstDayOfWeek | null",
+        "defaultValue": "null"
       },
       {
         "description": "Marks the calendar as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
@@ -8262,18 +8262,18 @@
         "type": "DateDisabledType"
       },
       {
-        "description": "Sets the first day of the week.",
+        "description": "Sets the first day of the week. If not specified, derives from the active locale.",
         "kind": "input",
         "name": "firstDay",
-        "type": "FirstDayOfWeek",
-        "defaultValue": "\"monday\""
+        "type": "FirstDayOfWeek | null",
+        "defaultValue": "null"
       },
       {
-        "description": "Sets the date format of the date picker.",
+        "description": "Sets the date format of the date picker. If not specified, derives from the active locale.",
         "kind": "input",
         "name": "format",
-        "type": "string",
-        "defaultValue": "\"dd/MM/yyyy\""
+        "type": "string | null",
+        "defaultValue": "null"
       },
       {
         "description": "Marks the date picker as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
@@ -8442,18 +8442,18 @@
         "type": "DateDisabledType"
       },
       {
-        "description": "Sets the first day of the week.",
+        "description": "Sets the first day of the week. If not specified, derives from the active locale.",
         "kind": "input",
         "name": "firstDay",
-        "type": "FirstDayOfWeek",
-        "defaultValue": "\"monday\""
+        "type": "FirstDayOfWeek | null",
+        "defaultValue": "null"
       },
       {
-        "description": "Sets the date format of the date time picker.",
+        "description": "Sets the date format of the date time picker. If not specified, derives from the active locale, hourFormat, and showSeconds.",
         "kind": "input",
         "name": "format",
-        "type": "string",
-        "defaultValue": "\"dd/MM/yyyy HH:mm\""
+        "type": "string | null",
+        "defaultValue": "null"
       },
       {
         "description": "Sets the hour format of the time picker.",
@@ -13871,11 +13871,11 @@
         "defaultValue": "false"
       },
       {
-        "description": "Sets the format of the time picker.",
+        "description": "Sets the format of the time picker. If not specified, derives from the active locale, hourFormat, and showSeconds.",
         "kind": "input",
         "name": "format",
-        "type": "string",
-        "defaultValue": "\"HH:mm\""
+        "type": "string | null",
+        "defaultValue": "null"
       },
       {
         "description": "Sets the hour format of the time picker.",
