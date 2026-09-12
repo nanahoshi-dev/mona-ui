@@ -1,7 +1,13 @@
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+    auditAllLocales,
     auditLocaleMessagesFile,
     auditLocaleMetadataFile,
+    canonicalizeLocaleId,
+    discoverOfficialLocales,
     isAllowedTechnicalToken,
     loadDefaultEnglishStrings
 } from "./audit-locales";
@@ -128,7 +134,7 @@ describe("audit-locales", () => {
             expect(violations).toHaveLength(1);
             expect(violations[0]).toMatchObject({
                 category: "copied-english",
-                detail: expect.stringContaining('Accidental copied English default string for "firstPageLabel": "First page"')
+                detail: expect.stringContaining('firstPageLabel": "First page"')
             });
         });
 
@@ -145,6 +151,109 @@ describe("audit-locales", () => {
                     },
                     colorGradient: {
                         hex: "HEX"
+                    }
+                } satisfies MonaLocaleMessages;
+            `;
+            const violations = auditLocaleMessagesFile("test.messages.ts", code, englishDefaults);
+            expect(violations).toHaveLength(0);
+        });
+
+        it("rejects file where satisfies MonaLocaleMessages is only on an unrelated decoy", () => {
+            const code = `
+                import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+                declare const decoyCatalog: MonaLocaleMessages;
+                const dummy = decoyCatalog satisfies MonaLocaleMessages;
+                export const ES_ES_MESSAGES = {
+                    pager: {
+                        firstPageLabel: "Primera página"
+                    }
+                };
+            `;
+            const violations = auditLocaleMessagesFile("test.messages.ts", code);
+            expect(violations.some(v => v.category === "completeness-bypass" && v.detail.includes("satisfies MonaLocaleMessages"))).toBe(true);
+        });
+
+        it("detects copied English across namespaces without leaf name collision overwriting", () => {
+            const englishDefaults = new Map<string, any>([
+                ["autoComplete.clear", { namespace: "autoComplete", key: "clear", kind: "static", staticFragments: ["Clear"] }],
+                ["comboBox.clear", { namespace: "comboBox", key: "clear", kind: "static", staticFragments: ["Clear combo"] }]
+            ]);
+            const code = `
+                import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+                export const ES_ES_MESSAGES = {
+                    autoComplete: {
+                        clear: "Clear"
+                    },
+                    comboBox: {
+                        clear: "Limpiar"
+                    }
+                } satisfies MonaLocaleMessages;
+            `;
+            const violations = auditLocaleMessagesFile("test.messages.ts", code, englishDefaults);
+            expect(violations.some(v => v.category === "copied-english" && v.detail.includes("autoComplete.clear"))).toBe(true);
+        });
+
+        it("detects copied English in function-valued template messages", () => {
+            const englishDefaults = new Map<string, any>([
+                ["pager.pageLabel", {
+                    namespace: "pager",
+                    key: "pageLabel",
+                    kind: "function",
+                    staticFragments: ["Page "]
+                }]
+            ]);
+            const code = `
+                import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+                export const ES_ES_MESSAGES = {
+                    pager: {
+                        pageLabel: (page: number) => \`Page \${page}\`
+                    }
+                } satisfies MonaLocaleMessages;
+            `;
+            const violations = auditLocaleMessagesFile("test.messages.ts", code, englishDefaults);
+            expect(violations.some(v => v.category === "copied-english" && v.detail.includes("pageLabel"))).toBe(true);
+        });
+
+        it("rejects file with 'any' type annotation on official messages catalog", () => {
+            const code = `
+                import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+                export const TEST_MESSAGES: any = {
+                    pager: {
+                        firstPageLabel: "Primera página"
+                    }
+                } satisfies MonaLocaleMessages;
+            `;
+            const violations = auditLocaleMessagesFile("test.messages.ts", code);
+            expect(violations.some(v => v.category === "forbidden-syntax" && v.detail.includes(": any"))).toBe(true);
+        });
+
+        it("rejects file with 'as never' type-erasure bypass", () => {
+            const code = `
+                import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+                export const TEST_MESSAGES = ({
+                    pager: {
+                        firstPageLabel: "Primera página"
+                    }
+                } as never) satisfies MonaLocaleMessages;
+            `;
+            const violations = auditLocaleMessagesFile("test.messages.ts", code);
+            expect(violations.some(v => v.category === "forbidden-syntax" && v.detail.includes("never"))).toBe(true);
+        });
+
+        it("accepts legitimately translated function-valued messages", () => {
+            const englishDefaults = new Map<string, any>([
+                ["pager.pageLabel", {
+                    namespace: "pager",
+                    key: "pageLabel",
+                    kind: "function",
+                    staticFragments: ["Page "]
+                }]
+            ]);
+            const code = `
+                import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+                export const TEST_MESSAGES = {
+                    pager: {
+                        pageLabel: (page: number) => \`Página \${page}\`
                     }
                 } satisfies MonaLocaleMessages;
             `;
@@ -197,6 +306,214 @@ describe("audit-locales", () => {
             `;
             const violations = auditLocaleMetadataFile("test.locale.ts", code);
             expect(violations.some(v => v.category === "invalid-metadata" && v.detail.includes("BCP 47"))).toBe(true);
+        });
+
+        it("rejects file where valid metadata is on an unexported decoy and exported locale is partial or missing satisfies", () => {
+            const code = `
+                import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";
+                import { ES_ES_MESSAGES } from "./es-es.messages";
+
+                const decoyLocale = {
+                    direction: "ltr",
+                    id: "es-ES",
+                    messages: ES_ES_MESSAGES
+                };
+
+                export const MONA_ES_ES_LOCALE = {
+                    id: "es-ES"
+                };
+            `;
+            const violations = auditLocaleMetadataFile("test.locale.ts", code);
+            expect(violations.length).toBeGreaterThan(0);
+        });
+
+        it("rejects locale metadata referencing wrong sibling messages constant", () => {
+            const code = `
+                import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";
+                import { OTHER_MESSAGES } from "./other.messages";
+
+                export const MONA_ES_ES_LOCALE = {
+                    direction: "ltr",
+                    id: "es-ES",
+                    messages: OTHER_MESSAGES
+                } satisfies MonaLocale;
+            `;
+            const violations = auditLocaleMetadataFile("test.locale.ts", code, "es-ES", "ES_ES_MESSAGES");
+            expect(violations.some(v => v.category === "invalid-metadata" && v.detail.includes("ES_ES_MESSAGES"))).toBe(true);
+        });
+
+        it("rejects multiple official locale exports in a single metadata file", () => {
+            const code = `
+                import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";
+                import { ES_ES_MESSAGES } from "./es-es.messages";
+
+                export const MONA_ES_ES_LOCALE = {
+                    direction: "ltr",
+                    id: "es-ES",
+                    messages: ES_ES_MESSAGES
+                } satisfies MonaLocale;
+
+                export const MONA_SECOND_LOCALE = {
+                    direction: "ltr",
+                    id: "es-ES",
+                    messages: ES_ES_MESSAGES
+                } satisfies MonaLocale;
+            `;
+            const violations = auditLocaleMetadataFile("test.locale.ts", code);
+            expect(violations.some(v => v.category === "invalid-metadata" && v.detail.includes("exactly one"))).toBe(true);
+        });
+    });
+
+    describe("canonicalizeLocaleId", () => {
+        it("handles valid canonical and extended BCP-47 tags and rejects malformed tags", () => {
+            expect(canonicalizeLocaleId("es-ES")).toBe("es-ES");
+            expect(canonicalizeLocaleId("de-DE")).toBe("de-DE");
+            expect(canonicalizeLocaleId("zh-Hant-TW")).toBe("zh-Hant-TW");
+            expect(canonicalizeLocaleId("en-US-u-ca-gregory")).toBe("en-US-u-ca-gregory");
+            expect(canonicalizeLocaleId("definitely_not_a_locale")).toBeNull();
+        });
+    });
+
+    describe("auditAllLocales", () => {
+        it("fails closed when locale directory does not exist", () => {
+            const violations = auditAllLocales("/non/existent/locale/path");
+            expect(violations.length).toBeGreaterThan(0);
+            expect(violations.some(v => v.detail.includes("does not exist"))).toBe(true);
+        });
+
+        it("rejects locale folder missing *.locale.ts or *.messages.ts", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "mona-locale-missing-"));
+            try {
+                const esFolder = join(tempDir, "es-es");
+                mkdirSync(esFolder, { recursive: true });
+                writeFileSync(join(tempDir, "public-api.ts"), `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`);
+                writeFileSync(join(esFolder, "es-es.messages.ts"), `
+                    import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+                    export const ES_ES_MESSAGES = {} satisfies MonaLocaleMessages;
+                `);
+                const violations = auditAllLocales(tempDir);
+                expect(violations.some(v => v.detail.includes("Missing *.locale.ts"))).toBe(true);
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("rejects duplicate locale IDs across folders", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "mona-locale-dup-"));
+            try {
+                const esFolder1 = join(tempDir, "es-es");
+                const esFolder2 = join(tempDir, "es");
+                mkdirSync(esFolder1, { recursive: true });
+                mkdirSync(esFolder2, { recursive: true });
+                writeFileSync(join(tempDir, "public-api.ts"), `
+                    export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";
+                    export { MONA_ES_LOCALE } from "./es/es.locale";
+                `);
+                writeFileSync(join(esFolder1, "es-es.messages.ts"), `
+                    import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+                    export const ES_ES_MESSAGES = {} satisfies MonaLocaleMessages;
+                `);
+                writeFileSync(join(esFolder1, "es-es.locale.ts"), `
+                    import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";
+                    import { ES_ES_MESSAGES } from "./es-es.messages";
+                    export const MONA_ES_ES_LOCALE = { direction: "ltr", id: "es-ES", messages: ES_ES_MESSAGES } satisfies MonaLocale;
+                `);
+                writeFileSync(join(esFolder2, "es.messages.ts"), `
+                    import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+                    export const ES_MESSAGES = {} satisfies MonaLocaleMessages;
+                `);
+                writeFileSync(join(esFolder2, "es.locale.ts"), `
+                    import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";
+                    import { ES_MESSAGES } from "./es.messages";
+                    export const MONA_ES_LOCALE = { direction: "ltr", id: "es-ES", messages: ES_MESSAGES } satisfies MonaLocale;
+                `);
+                const violations = auditAllLocales(tempDir);
+                expect(violations.some(v => v.detail.includes("Duplicate locale ID") || v.detail.includes("es-ES"))).toBe(true);
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("rejects folder name and locale ID mismatch", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "mona-locale-test-"));
+            try {
+                const deFolder = join(tempDir, "de-de");
+                mkdirSync(deFolder, { recursive: true });
+                writeFileSync(join(tempDir, "public-api.ts"), `export { MONA_ES_ES_LOCALE } from "./de-de/de-de.locale";\n`);
+                writeFileSync(join(deFolder, "de-de.messages.ts"), `
+                    import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+                    export const DE_DE_MESSAGES = {} satisfies MonaLocaleMessages;
+                `);
+                writeFileSync(join(deFolder, "de-de.locale.ts"), `
+                    import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";
+                    import { DE_DE_MESSAGES } from "./de-de.messages";
+                    export const MONA_ES_ES_LOCALE = {
+                        direction: "ltr",
+                        id: "es-ES",
+                        messages: DE_DE_MESSAGES
+                    } satisfies MonaLocale;
+                `);
+                const violations = auditAllLocales(tempDir);
+                expect(violations.some(v => v.detail.includes("mismatch") || v.detail.includes("does not match") || v.detail.includes("canonical"))).toBe(true);
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("rejects official locale missing from public-api.ts", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "mona-locale-test-"));
+            try {
+                const esFolder = join(tempDir, "es-es");
+                mkdirSync(esFolder, { recursive: true });
+                writeFileSync(join(tempDir, "public-api.ts"), `// empty\n`);
+                writeFileSync(join(esFolder, "es-es.messages.ts"), `
+                    import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+                    export const ES_ES_MESSAGES = {} satisfies MonaLocaleMessages;
+                `);
+                writeFileSync(join(esFolder, "es-es.locale.ts"), `
+                    import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";
+                    import { ES_ES_MESSAGES } from "./es-es.messages";
+                    export const MONA_ES_ES_LOCALE = {
+                        direction: "ltr",
+                        id: "es-ES",
+                        messages: ES_ES_MESSAGES
+                    } satisfies MonaLocale;
+                `);
+                const violations = auditAllLocales(tempDir);
+                expect(violations.some(v => v.detail.includes("public-api.ts") || v.detail.includes("not exported"))).toBe(true);
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+    });
+
+    describe("Real Repository Locale Integration", () => {
+        it("discovers non-empty, representative English defaults matching canonical namespaces", () => {
+            const defaults = loadDefaultEnglishStrings();
+            expect(defaults.size).toBeGreaterThan(50);
+            expect(defaults.has("pager.firstPageLabel")).toBe(true);
+            expect(defaults.has("grid.deleteRowConfirmation")).toBe(true);
+            expect(defaults.has("calendar.today")).toBe(true);
+            expect(defaults.has("splitButton.splitButton")).toBe(true);
+
+            // Verify function messages are fingerprinted with kind === 'function'
+            const pageLabel = defaults.get("pager.pageLabel");
+            expect(pageLabel?.kind).toBe("function");
+            expect(pageLabel?.staticFragments.length).toBeGreaterThan(0);
+        });
+
+        it("runs auditAllLocales against the repository without violations", () => {
+            const violations = auditAllLocales();
+            expect(violations).toHaveLength(0);
+        });
+
+        it("confirms all official locales are present in public-api.ts", () => {
+            const discovery = discoverOfficialLocales();
+            expect(discovery.locales.length).toBeGreaterThan(0);
+            expect(discovery.violations).toHaveLength(0);
+            for (const loc of discovery.locales) {
+                expect(loc.localeExport).toBe("MONA_ES_ES_LOCALE");
+            }
         });
     });
 });
