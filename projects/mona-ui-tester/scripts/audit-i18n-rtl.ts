@@ -1185,26 +1185,6 @@ export function collectLiteralFragments(node: Node | undefined): LiteralFragment
     return [];
 }
 
-const UNIVERSAL_TECHNICAL_MAP_VALUES = new Set([
-    "",
-    "ArrowLeft",
-    "ArrowRight",
-    "ArrowUp",
-    "ArrowDown",
-    "aria-label",
-    "aria-labelledby",
-    "aria-describedby",
-    "aria-roledescription",
-    "aria-label-start",
-    "aria-label-end",
-    "true",
-    "false",
-    "assertive",
-    "polite",
-    "off",
-    "mixed"
-]);
-
 const ROLE_TOKENS = new Set([
     "button",
     "menuitem",
@@ -1267,12 +1247,89 @@ const COLOR_CHANNEL_TOKENS = new Set([
     "B"
 ]);
 
+const TECHNICAL_ARIA_STATE_PROPERTIES = new Set([
+    "ariadisabled",
+    "arialive",
+    "ariachecked",
+    "ariaexpanded",
+    "ariaselected",
+    "ariahidden",
+    "ariapressed",
+    "ariacurrent",
+    "ariahaspopup",
+    "ariamodal",
+    "ariaatomic",
+    "ariabusy",
+    "ariarequired",
+    "ariareadonly",
+    "ariaorientation",
+    "ariasort",
+    "ariainvalid",
+    "ariarole",
+    "role"
+]);
+
+const TECHNICAL_ARIA_STATE_VALUES = new Set([
+    "true",
+    "false",
+    "assertive",
+    "polite",
+    "off",
+    "mixed",
+    "none",
+    "horizontal",
+    "vertical",
+    "ascending",
+    "descending",
+    "page",
+    "step",
+    "location",
+    "date",
+    "time",
+    "all",
+    "grammar",
+    "spelling"
+]);
+
+export type SemanticMapKind =
+    | "announcements-map"
+    | "aria-labels-map"
+    | "labels-map"
+    | "configuration-text-map"
+    | "generic-text-map";
+
+export function classifySemanticMapName(name: string): SemanticMapKind {
+    const clean = name.replace(/^#/, "").replace(/^_+/, "");
+    if (/announcement/i.test(clean)) {
+        return "announcements-map";
+    }
+    if (/aria.*label/i.test(clean)) {
+        return "aria-labels-map";
+    }
+    if (/label/i.test(clean)) {
+        return "labels-map";
+    }
+    if (/config/i.test(clean)) {
+        return "configuration-text-map";
+    }
+    return "generic-text-map";
+}
+
 export function isTechnicalSemanticMapValue(
     mapName: string,
     propertyName: string,
     value: string
 ): boolean {
-    if (UNIVERSAL_TECHNICAL_MAP_VALUES.has(value)) {
+    if (!value || !value.trim()) {
+        return true;
+    }
+
+    const cleanProp = propertyName.replace(/^#/, "").replace(/^_+/, "").replace(/-/g, "").toLowerCase();
+
+    if (
+        TECHNICAL_ARIA_STATE_PROPERTIES.has(cleanProp) &&
+        TECHNICAL_ARIA_STATE_VALUES.has(value.toLowerCase())
+    ) {
         return true;
     }
 
@@ -1350,50 +1407,6 @@ export type SemanticLiteralContext =
     | "semantic-helper"
     | "live-announcement"
     | "generic-semantic-object";
-
-const TECHNICAL_ARIA_STATE_PROPERTIES = new Set([
-    "ariadisabled",
-    "arialive",
-    "ariachecked",
-    "ariaexpanded",
-    "ariaselected",
-    "ariahidden",
-    "ariapressed",
-    "ariacurrent",
-    "ariahaspopup",
-    "ariamodal",
-    "ariaatomic",
-    "ariabusy",
-    "ariarequired",
-    "ariareadonly",
-    "ariaorientation",
-    "ariasort",
-    "ariainvalid",
-    "ariarole",
-    "role"
-]);
-
-const TECHNICAL_ARIA_STATE_VALUES = new Set([
-    "true",
-    "false",
-    "assertive",
-    "polite",
-    "off",
-    "mixed",
-    "none",
-    "horizontal",
-    "vertical",
-    "ascending",
-    "descending",
-    "page",
-    "step",
-    "location",
-    "date",
-    "time",
-    "all",
-    "grammar",
-    "spelling"
-]);
 
 export function isTechnicalLiteralForContext(
     context: SemanticLiteralContext,

@@ -3,6 +3,7 @@ import { parseTemplate } from "@angular/compiler";
 import {
     type AllowlistEntry,
     type AuditViolation,
+    classifySemanticMapName,
     collectLiteralStrings,
     isAllowlisted,
     isOfficialLocaleMessageCatalog,
@@ -91,7 +92,35 @@ describe("audit-i18n-rtl", () => {
             expect(isSemanticTextMapName("announcementEnabled")).toBe(false);
             expect(isSemanticTextMapName("customClass")).toBe(false);
             // Documented: exact lowercase "text" is excluded to avoid false positives on arbitrary data
-            expect(isSemanticTextMapName("text")).toBe(false);
+        });
+    });
+
+    describe("classifySemanticMapName", () => {
+        it("classifies announcement maps correctly", () => {
+            expect(classifySemanticMapName("announcements")).toBe("announcements-map");
+            expect(classifySemanticMapName("STATUS_ANNOUNCEMENTS")).toBe("announcements-map");
+            expect(classifySemanticMapName("#announcements")).toBe("announcements-map");
+            expect(classifySemanticMapName("_announcements")).toBe("announcements-map");
+            expect(classifySemanticMapName("statusAnnouncements")).toBe("announcements-map");
+        });
+
+        it("classifies aria-label maps correctly", () => {
+            expect(classifySemanticMapName("ARIA_LABELS")).toBe("aria-labels-map");
+            expect(classifySemanticMapName("ariaLabels")).toBe("aria-labels-map");
+            expect(classifySemanticMapName("#ariaLabels")).toBe("aria-labels-map");
+        });
+
+        it("classifies visible label maps correctly", () => {
+            expect(classifySemanticMapName("labels")).toBe("labels-map");
+            expect(classifySemanticMapName("BUTTON_LABELS")).toBe("labels-map");
+            expect(classifySemanticMapName("buttonLabels")).toBe("labels-map");
+            expect(classifySemanticMapName("#labels")).toBe("labels-map");
+        });
+
+        it("classifies config and generic text maps correctly", () => {
+            expect(classifySemanticMapName("CONFIG_TEXT")).toBe("configuration-text-map");
+            expect(classifySemanticMapName("DISABLED_REASON_TEXT")).toBe("generic-text-map");
+            expect(classifySemanticMapName("TEXT_OPTIONS")).toBe("generic-text-map");
         });
     });
 
@@ -115,6 +144,11 @@ describe("audit-i18n-rtl", () => {
             expect(isTechnicalSemanticMapValue("ARIA_LABELS", "next", "right")).toBe(false);
             expect(isTechnicalSemanticMapValue("STATUS_ANNOUNCEMENTS", "state", "ascending")).toBe(false);
             expect(isTechnicalSemanticMapValue("STATUS_ANNOUNCEMENTS", "state", "descending")).toBe(false);
+            expect(isTechnicalSemanticMapValue("announcements", "status", "off")).toBe(false);
+            expect(isTechnicalSemanticMapValue("STATUS_ANNOUNCEMENTS", "checked", "mixed")).toBe(false);
+            expect(isTechnicalSemanticMapValue("labels", "enabled", "true")).toBe(false);
+            expect(isTechnicalSemanticMapValue("labels", "disabled", "false")).toBe(false);
+            expect(isTechnicalSemanticMapValue("ARIA_LABELS", "key", "ArrowLeft")).toBe(false);
         });
 
         it("allows technical tokens when property context matches technical semantics", () => {
@@ -2451,6 +2485,95 @@ describe("audit-i18n-rtl", () => {
                 scanTypeScriptAst("example.component.ts", code, violations);
 
                 expect(violations).toHaveLength(0);
+            });
+        });
+
+        describe("DE5-01: contextual technical tokens in semantic maps without universal exemptions", () => {
+            it("detects 'off' in announcements map as an accessibility violation", () => {
+                const code = `
+                    const announcements = {
+                        status: "off"
+                    };
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", code, violations);
+
+                expect(violations).toHaveLength(1);
+                expect(violations[0]).toMatchObject({
+                    category: "i18n-aria",
+                    detail: expect.stringContaining('semantic text-map property "status" in "announcements": "off"')
+                });
+            });
+
+            it("detects 'mixed' in STATUS_ANNOUNCEMENTS map as an accessibility violation", () => {
+                const code = `
+                    const STATUS_ANNOUNCEMENTS = {
+                        checked: "mixed"
+                    };
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", code, violations);
+
+                expect(violations).toHaveLength(1);
+                expect(violations[0]).toMatchObject({
+                    category: "i18n-aria",
+                    detail: expect.stringContaining('semantic text-map property "checked" in "STATUS_ANNOUNCEMENTS": "mixed"')
+                });
+            });
+
+            it("detects 'true' and 'false' in labels map as text violations unless in explicit technical metadata property", () => {
+                const code = `
+                    const labels = {
+                        enabled: "true",
+                        disabled: "false"
+                    };
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", code, violations);
+
+                expect(violations).toHaveLength(2);
+                expect(violations.every(v => v.category === "i18n-text")).toBe(true);
+                expect(violations[0].detail).toContain('semantic text-map property "enabled" in "labels": "true"');
+                expect(violations[1].detail).toContain('semantic text-map property "disabled" in "labels": "false"');
+            });
+
+            it("detects keyboard tokens in ARIA_LABELS map as accessibility violations", () => {
+                const code = `
+                    const ARIA_LABELS = {
+                        key: "ArrowLeft"
+                    };
+                `;
+                const violations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", code, violations);
+
+                expect(violations).toHaveLength(1);
+                expect(violations[0]).toMatchObject({
+                    category: "i18n-aria",
+                    detail: expect.stringContaining('semantic text-map property "key" in "ARIA_LABELS": "ArrowLeft"')
+                });
+            });
+
+            it("allows technical metadata properties inside CONFIG_TEXT and BUTTON_LABELS", () => {
+                const configCode = `
+                    const CONFIG_TEXT = {
+                        ariaLive: "polite",
+                        role: "button",
+                        orientation: "horizontal"
+                    };
+                `;
+                const configViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", configCode, configViolations);
+                expect(configViolations).toHaveLength(0);
+
+                const buttonCode = `
+                    const BUTTON_LABELS = {
+                        role: "button",
+                        close: messages().close
+                    };
+                `;
+                const buttonViolations: AuditViolation[] = [];
+                scanTypeScriptAst("example.ts", buttonCode, buttonViolations);
+                expect(buttonViolations).toHaveLength(0);
             });
         });
     });
