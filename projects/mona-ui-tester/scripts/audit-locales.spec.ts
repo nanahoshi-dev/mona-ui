@@ -711,6 +711,77 @@ describe("audit-locales", () => {
                 rmSync(tempDir, { recursive: true, force: true });
             }
         });
+
+        it("rejects when locale symbol is only present in a comment in public-api.ts", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "mona-locale-comment-"));
+            try {
+                const esFolder = join(tempDir, "es-es");
+                mkdirSync(esFolder, { recursive: true });
+                writeFileSync(join(tempDir, "public-api.ts"), `// MONA_ES_ES_LOCALE\n`);
+                writeFileSync(
+                    join(esFolder, "es-es.messages.ts"),
+                    `import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";\nexport const ES_ES_MESSAGES = {} satisfies MonaLocaleMessages;\n`
+                );
+                writeFileSync(
+                    join(esFolder, "es-es.locale.ts"),
+                    `import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";\nimport { ES_ES_MESSAGES } from "./es-es.messages";\nexport const MONA_ES_ES_LOCALE = { direction: "ltr", id: "es-ES", messages: ES_ES_MESSAGES } satisfies MonaLocale;\n`
+                );
+                const violations = auditAllLocales(tempDir);
+                expect(violations.some(v => v.detail.includes("is not exported in public-api.ts"))).toBe(true);
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("rejects when locale symbol is only imported in public-api.ts without export", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "mona-locale-import-"));
+            try {
+                const esFolder = join(tempDir, "es-es");
+                mkdirSync(esFolder, { recursive: true });
+                writeFileSync(join(tempDir, "public-api.ts"), `import { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`);
+                writeFileSync(
+                    join(esFolder, "es-es.messages.ts"),
+                    `import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";\nexport const ES_ES_MESSAGES = {} satisfies MonaLocaleMessages;\n`
+                );
+                writeFileSync(
+                    join(esFolder, "es-es.locale.ts"),
+                    `import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";\nimport { ES_ES_MESSAGES } from "./es-es.messages";\nexport const MONA_ES_ES_LOCALE = { direction: "ltr", id: "es-ES", messages: ES_ES_MESSAGES } satisfies MonaLocale;\n`
+                );
+                const violations = auditAllLocales(tempDir);
+                expect(violations.some(v => v.detail.includes("is not exported in public-api.ts"))).toBe(true);
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("rejects when locale symbol in public-api.ts is exported from the wrong module", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "mona-locale-wrong-mod-"));
+            try {
+                const esFolder = join(tempDir, "es-es");
+                mkdirSync(esFolder, { recursive: true });
+                writeFileSync(
+                    join(tempDir, "public-api.ts"),
+                    `export { MONA_ES_ES_LOCALE } from "./de-de/de-de.locale";\n`
+                );
+                writeFileSync(
+                    join(esFolder, "es-es.messages.ts"),
+                    `import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";\nexport const ES_ES_MESSAGES = {} satisfies MonaLocaleMessages;\n`
+                );
+                writeFileSync(
+                    join(esFolder, "es-es.locale.ts"),
+                    `import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";\nimport { ES_ES_MESSAGES } from "./es-es.messages";\nexport const MONA_ES_ES_LOCALE = { direction: "ltr", id: "es-ES", messages: ES_ES_MESSAGES } satisfies MonaLocale;\n`
+                );
+                const violations = auditAllLocales(tempDir);
+                expect(
+                    violations.some(
+                        v => v.category === "invalid-metadata" && v.detail.includes("expected module")
+                    )
+                ).toBe(true);
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
         it("discovers multiple official locales in a synthetic repository without violations", () => {
             const tempDir = mkdtempSync(join(tmpdir(), "mona-locales-multi-"));
             try {

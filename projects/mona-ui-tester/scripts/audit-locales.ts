@@ -702,18 +702,79 @@ export function discoverOfficialLocales(
     }
 
     if (publicApiContent) {
-        for (const loc of locales) {
-            if (loc.localeExport) {
-                const regex = new RegExp(`\\b${loc.localeExport}\\b`);
-                if (!regex.test(publicApiContent)) {
+        try {
+            const pubSf = project.createSourceFile(
+                `disc-pub-${Date.now()}-${Math.random()}.ts`,
+                publicApiContent,
+                { overwrite: true }
+            );
+
+            interface ExportedSymbolInfo {
+                symbolName: string;
+                moduleSpecifier: string;
+                line: number;
+            }
+            const exportsList: ExportedSymbolInfo[] = [];
+
+            for (const exportDecl of pubSf.getExportDeclarations()) {
+                const moduleSpecifier = exportDecl.getModuleSpecifierValue() ?? "";
+                for (const named of exportDecl.getNamedExports()) {
+                    const aliasNode = named.getAliasNode();
+                    const localOrExported = aliasNode ? aliasNode.getText().trim() : named.getName().trim();
+                    exportsList.push({
+                        symbolName: localOrExported,
+                        moduleSpecifier,
+                        line: named.getStartLineNumber()
+                    });
+                }
+            }
+
+            for (const loc of locales) {
+                if (!loc.localeExport) {
+                    continue;
+                }
+                const matchingExport = exportsList.find(e => e.symbolName === loc.localeExport);
+                if (!matchingExport) {
                     violations.push({
                         category: "invalid-metadata",
                         detail: `Official locale export "${loc.localeExport}" is not exported in public-api.ts`,
                         file: publicApiPath,
                         line: 1
                     });
+                    continue;
+                }
+
+                if (!matchingExport.moduleSpecifier) {
+                    violations.push({
+                        category: "invalid-metadata",
+                        detail: `Official locale export "${loc.localeExport}" in public-api.ts must be re-exported from its locale module file`,
+                        file: publicApiPath,
+                        line: matchingExport.line
+                    });
+                    continue;
+                }
+
+                const resolvedExportTarget = resolve(localesDir, matchingExport.moduleSpecifier)
+                    .replace(/\.ts$/, "")
+                    .replace(/\\/g, "/");
+                const expectedTarget = resolve(loc.localeFile).replace(/\.ts$/, "").replace(/\\/g, "/");
+
+                if (resolvedExportTarget !== expectedTarget) {
+                    violations.push({
+                        category: "invalid-metadata",
+                        detail: `Official locale export "${loc.localeExport}" in public-api.ts is exported from "${matchingExport.moduleSpecifier}", but expected module "./${loc.folder}/${basename(loc.localeFile).replace(/\.ts$/, "")}"`,
+                        file: publicApiPath,
+                        line: matchingExport.line
+                    });
                 }
             }
+        } catch (err: any) {
+            violations.push({
+                category: "invalid-metadata",
+                detail: `Failed to parse public-api.ts: ${err.message}`,
+                file: publicApiPath,
+                line: 1
+            });
         }
     }
 
