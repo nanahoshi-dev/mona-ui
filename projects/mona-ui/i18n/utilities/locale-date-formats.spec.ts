@@ -1,5 +1,6 @@
 import { DateTime } from "luxon";
 import { describe, expect, it } from "vitest";
+import { parseGregorianDate } from "./gregorian-date";
 import {
     getLocaleDateInputFormat,
     getLocaleDateTimeInputFormat,
@@ -160,4 +161,88 @@ describe("locale-date-formats", () => {
             expect(parsed.minute).toBe(30);
         });
     });
+
+    describe("whitespace normalization and portability", () => {
+        it("ensures generated editable formats do not contain typographic whitespace (U+00A0, U+202F)", () => {
+            const locales = ["en-US", "de-DE", "fr-FR", "es-ES", "ja-JP"];
+            for (const loc of locales) {
+                const time12 = getLocaleTimeInputFormat(loc, { hourFormat: "12" });
+                expect(time12).not.toMatch(/[\u00A0\u202F]/);
+
+                const time12Seconds = getLocaleTimeInputFormat(loc, { hourFormat: "12", showSeconds: true });
+                expect(time12Seconds).not.toMatch(/[\u00A0\u202F]/);
+
+                const time24 = getLocaleTimeInputFormat(loc, { hourFormat: "24" });
+                expect(time24).not.toMatch(/[\u00A0\u202F]/);
+
+                const dateTime12 = getLocaleDateTimeInputFormat(loc, { hourFormat: "12" });
+                expect(dateTime12).not.toMatch(/[\u00A0\u202F]/);
+
+                const date = getLocaleDateInputFormat(loc);
+                expect(date).not.toMatch(/[\u00A0\u202F]/);
+            }
+        });
+
+        it("preserves Japanese day period in prefix position", () => {
+            const format12 = getLocaleTimeInputFormat("ja-JP", { hourFormat: "12" });
+            expect(format12.startsWith("a")).toBe(true);
+            expect(format12).toBe("ahh:mm");
+
+            const dtFormat12 = getLocaleDateTimeInputFormat("ja-JP", { hourFormat: "12" });
+            expect(dtFormat12).toBe("yyyy/MM/dd ahh:mm");
+        });
+
+        it("preserves English day period in suffix position with ordinary ASCII space", () => {
+            const format12 = getLocaleTimeInputFormat("en-US", { hourFormat: "12" });
+            expect(format12).toBe("hh:mm a");
+            expect(format12.includes("\u202F")).toBe(false);
+            expect(format12.includes(" ")).toBe(true);
+
+            const dtFormat12 = getLocaleDateTimeInputFormat("en-US", { hourFormat: "12" });
+            expect(dtFormat12).toBe("MM/dd/yyyy, hh:mm a");
+        });
+
+        it("parses typed input with ordinary ASCII space using auto-generated formats", () => {
+            const usFormat = getLocaleTimeInputFormat("en-US", { hourFormat: "12" });
+            const parsedUs = DateTime.fromFormat("09:30 PM", usFormat, { locale: "en-US" });
+            expect(parsedUs.isValid).toBe(true);
+            expect(parsedUs.hour).toBe(21);
+            expect(parsedUs.minute).toBe(30);
+
+            const jaFormat = getLocaleTimeInputFormat("ja-JP", { hourFormat: "12" });
+            const parsedJa = DateTime.fromFormat("午後09:30", jaFormat, { locale: "ja-JP" });
+            expect(parsedJa.isValid).toBe(true);
+            expect(parsedJa.hour).toBe(21);
+            expect(parsedJa.minute).toBe(30);
+        });
+
+        it("tolerates space character differences between typed input and parse format in parseGregorianDate", () => {
+            // Normal space in input, narrow NBSP in format
+            const dt1 = parseGregorianDate("09:30 PM", "hh:mm\u202fa", "en-US");
+            expect(dt1.isValid).toBe(true);
+            expect(dt1.hour).toBe(21);
+            expect(dt1.minute).toBe(30);
+
+            // Narrow NBSP in input, normal space in format
+            const dt2 = parseGregorianDate("09:30\u202fPM", "hh:mm a", "en-US");
+            expect(dt2.isValid).toBe(true);
+            expect(dt2.hour).toBe(21);
+            expect(dt2.minute).toBe(30);
+
+            // NBSP in input, normal space in format
+            const dt3 = parseGregorianDate("09:30\u00a0PM", "hh:mm a", "en-US");
+            expect(dt3.isValid).toBe(true);
+            expect(dt3.hour).toBe(21);
+            expect(dt3.minute).toBe(30);
+
+            // Date and time with space normalization
+            const dt4 = parseGregorianDate("09/15/2026, 09:30 PM", "MM/dd/yyyy, hh:mm a", "en-US");
+            expect(dt4.isValid).toBe(true);
+            expect(dt4.year).toBe(2026);
+            expect(dt4.month).toBe(9);
+            expect(dt4.day).toBe(15);
+        });
+    });
 });
+
+
