@@ -112,6 +112,26 @@ describe("locale-date-formats", () => {
             expect(getLocaleFirstDayOfWeek("fr-FR")).toBe("monday");
         });
 
+        it("returns saturday for Egyptian Arabic (ar-EG)", () => {
+            expect(getLocaleFirstDayOfWeek("ar-EG")).toBe("saturday");
+        });
+
+        it("falls back to saturday for Saturday-first regions in CLDR fallback when weekInfo is unavailable", () => {
+            const originalLocale = Intl.Locale;
+            try {
+                class MockLocale extends originalLocale {
+                    public get weekInfo(): undefined {
+                        return undefined;
+                    }
+                }
+                (MockLocale.prototype as unknown as { getWeekInfo: unknown }).getWeekInfo = undefined;
+                Object.defineProperty(Intl, "Locale", { value: MockLocale, configurable: true, writable: true });
+                expect(getLocaleFirstDayOfWeek("ar-EG")).toBe("saturday");
+            } finally {
+                Object.defineProperty(Intl, "Locale", { value: originalLocale, configurable: true, writable: true });
+            }
+        });
+
         it("falls back to monday safely for unknown locales", () => {
             expect(getLocaleFirstDayOfWeek("")).toBe("monday");
             expect(getLocaleFirstDayOfWeek("xyz-unknown")).toBe("monday");

@@ -2,6 +2,7 @@ import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { MonaI18nService, type MonaLocale } from "@nanahoshi/mona-ui/i18n";
 import { describe, expect, it } from "vitest";
+import type { FirstDayOfWeek } from "../../models/FirstDayOfWeek";
 import { CalendarComponent } from "./calendar.component";
 
 @Component({
@@ -487,11 +488,12 @@ describe("CalendarComponent i18n", () => {
 
     describe("locale-derived week start", () => {
         @Component({
-            template: `<mona-calendar [firstDay]="firstDay()"></mona-calendar>`,
+            template: `<mona-calendar [firstDay]="firstDay()" [value]="value()"></mona-calendar>`,
             imports: [CalendarComponent]
         })
         class WeekStartTestHostComponent {
-            public readonly firstDay = signal<"monday" | "sunday" | null>(null);
+            public readonly firstDay = signal<FirstDayOfWeek | null>(null);
+            public readonly value = signal<Date | null>(null);
         }
 
         it("defaults to Sunday-first for ja-JP and aligns weekday headers", async () => {
@@ -525,6 +527,93 @@ describe("CalendarComponent i18n", () => {
             const headers = Array.from(headerRow.querySelectorAll("div")).map(el => el.textContent?.trim());
             expect(headers[0]).toBe("Mo");
             expect(headers[6]).toBe("So");
+        });
+
+        it("defaults to Saturday-first for ar-EG and aligns weekday headers and month grid", async () => {
+            TestBed.configureTestingModule({
+                imports: [WeekStartTestHostComponent]
+            });
+            const fixture = TestBed.createComponent(WeekStartTestHostComponent);
+            const i18n = TestBed.inject(MonaI18nService);
+            // ar-EG is a verified Saturday-first locale (firstDay: 6 in Intl.Locale.weekInfo and CLDR)
+            i18n.use({ id: "ar-EG", direction: "rtl", messages: {} });
+            fixture.componentInstance.value.set(new Date(2026, 8, 15)); // September 15, 2026
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const headerRow = fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
+            const headers = Array.from(headerRow.querySelectorAll("div")).map(el => el.textContent?.trim());
+            expect(headers[0]).toBe("السبت");
+            expect(headers[1]).toBe("الأحد");
+            expect(headers[6]).toBe("الجمعة");
+
+            // Month grid alignment for September 2026:
+            // Sep 1, 2026 is Tuesday. With Saturday start, row 1 contains:
+            // Aug 29 (Sat), Aug 30 (Sun), Aug 31 (Mon), Sep 1 (Tue) ...
+            // Sep 30, 2026 is Wednesday. Row 5 ends on Friday Oct 2.
+            const gridDays = Array.from(fixture.nativeElement.querySelectorAll("[monaMonthDay]"))
+                .map(el => (el as HTMLElement).textContent?.trim());
+            expect(gridDays[0]).toBe("29");
+            expect(gridDays[gridDays.length - 1]).toBe("2");
+        });
+
+        it("navigates to start and end of week row via Home and End keys for monday, sunday, and saturday-first calendars", async () => {
+            TestBed.configureTestingModule({
+                imports: [WeekStartTestHostComponent]
+            });
+            const fixture = TestBed.createComponent(WeekStartTestHostComponent);
+            const i18n = TestBed.inject(MonaI18nService);
+            const calendarEl = fixture.nativeElement.querySelector("mona-calendar") as HTMLElement;
+            const getFocusedDay = () => calendarEl.querySelector("[monaMonthDay][tabindex='0']")?.textContent?.trim();
+
+            // 1. Monday-first calendar: focus on Wednesday Sep 16, 2026
+            // Week row is Mon Sep 14 to Sun Sep 20
+            fixture.componentInstance.firstDay.set("monday");
+            fixture.componentInstance.value.set(new Date(2026, 8, 16));
+            fixture.detectChanges();
+            await fixture.whenStable();
+            expect(getFocusedDay()).toBe("16");
+
+            calendarEl.dispatchEvent(new KeyboardEvent("keydown", { key: "Home", bubbles: true, cancelable: true }));
+            fixture.detectChanges();
+            expect(getFocusedDay()).toBe("14");
+
+            calendarEl.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true, cancelable: true }));
+            fixture.detectChanges();
+            expect(getFocusedDay()).toBe("20");
+
+            // 2. Sunday-first calendar: focus on Wednesday Sep 16, 2026
+            // Week row is Sun Sep 13 to Sat Sep 19
+            fixture.componentInstance.firstDay.set("sunday");
+            fixture.componentInstance.value.set(new Date(2026, 8, 16));
+            fixture.detectChanges();
+            await fixture.whenStable();
+            expect(getFocusedDay()).toBe("16");
+
+            calendarEl.dispatchEvent(new KeyboardEvent("keydown", { key: "Home", bubbles: true, cancelable: true }));
+            fixture.detectChanges();
+            expect(getFocusedDay()).toBe("13");
+
+            calendarEl.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true, cancelable: true }));
+            fixture.detectChanges();
+            expect(getFocusedDay()).toBe("19");
+
+            // 3. Saturday-first calendar via ar-EG locale auto-derivation: focus on Wednesday Sep 16, 2026
+            // Week row is Sat Sep 12 to Fri Sep 18
+            i18n.use({ id: "ar-EG", direction: "rtl", messages: {} });
+            fixture.componentInstance.firstDay.set(null); // Auto-derive from locale
+            fixture.componentInstance.value.set(new Date(2026, 8, 16));
+            fixture.detectChanges();
+            await fixture.whenStable();
+            expect(getFocusedDay()).toBe("16");
+
+            calendarEl.dispatchEvent(new KeyboardEvent("keydown", { key: "Home", bubbles: true, cancelable: true }));
+            fixture.detectChanges();
+            expect(getFocusedDay()).toBe("12");
+
+            calendarEl.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true, cancelable: true }));
+            fixture.detectChanges();
+            expect(getFocusedDay()).toBe("18");
         });
 
         it("preserves explicit firstDay override even when active locale differs", async () => {
