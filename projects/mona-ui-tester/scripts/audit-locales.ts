@@ -254,25 +254,163 @@ function findDefaultMessageFiles(dir: string): string[] {
     return results;
 }
 
+export interface EnglishDefaultDiscoveryResult {
+    readonly fingerprints: Map<string, DefaultMessageFingerprint>;
+    readonly violations: readonly LocaleAuditViolation[];
+    readonly namespaces: Set<string>;
+    readonly size: number;
+    has(key: string): boolean;
+    get(key: string): DefaultMessageFingerprint | undefined;
+    [Symbol.iterator](): IterableIterator<[string, DefaultMessageFingerprint]>;
+}
+
+export function loadCanonicalMessageNamespaces(
+    schemaPath: string = resolve(process.cwd(), "projects/mona-ui/i18n/models/mona-locale-messages.ts"),
+    project: Project = new Project({ useInMemoryFileSystem: true })
+): { namespaces: Set<string>; violations: LocaleAuditViolation[] } {
+    const violations: LocaleAuditViolation[] = [];
+    const namespaces = new Set<string>();
+
+    if (!existsSync(schemaPath)) {
+        violations.push({
+            category: "invalid-metadata",
+            detail: `Canonical message schema file does not exist: ${schemaPath}`,
+            file: schemaPath,
+            line: 1
+        });
+        return { namespaces, violations };
+    }
+
+    try {
+        const content = readFileSync(schemaPath, "utf-8");
+        const sf = project.createSourceFile(`schema-${Date.now()}-${Math.random()}.ts`, content, { overwrite: true });
+        const iface = sf.getInterface("MonaLocaleMessages");
+        if (!iface) {
+            violations.push({
+                category: "invalid-metadata",
+                detail: `Could not find interface "MonaLocaleMessages" in ${schemaPath}`,
+                file: schemaPath,
+                line: 1
+            });
+            return { namespaces, violations };
+        }
+
+        for (const prop of iface.getProperties()) {
+            namespaces.add(prop.getName().trim());
+        }
+    } catch (err: any) {
+        violations.push({
+            category: "invalid-metadata",
+            detail: `Failed to parse canonical message schema in ${schemaPath}: ${err.message}`,
+            file: schemaPath,
+            line: 1
+        });
+    }
+
+    return { namespaces, violations };
+}
+
+export function checkSchemaDrift(
+    canonicalNamespaces: Set<string>,
+    schemaPath: string
+): LocaleAuditViolation[] {
+    const violations: LocaleAuditViolation[] = [];
+    const hardcodedSet = new Set<string>(MONA_MESSAGE_NAMESPACES);
+
+    const missingInHardcoded = Array.from(canonicalNamespaces).filter(ns => !hardcodedSet.has(ns));
+    const extraInHardcoded = Array.from(hardcodedSet).filter(ns => !canonicalNamespaces.has(ns));
+
+    if (missingInHardcoded.length > 0 || extraInHardcoded.length > 0) {
+        violations.push({
+            category: "invalid-metadata",
+            detail: `Audit namespace registry MONA_MESSAGE_NAMESPACES has drifted from canonical MonaLocaleMessages interface: missing [${missingInHardcoded.join(", ")}], extra [${extraInHardcoded.join(", ")}]`,
+            file: schemaPath,
+            line: 1
+        });
+    }
+
+    return violations;
+}
+
 export function loadDefaultEnglishStrings(
     baseDir: string = resolve(process.cwd(), "projects/mona-ui"),
     project: Project = new Project({ useInMemoryFileSystem: true })
-): Map<string, DefaultMessageFingerprint> {
+): EnglishDefaultDiscoveryResult {
+    const violations: LocaleAuditViolation[] = [];
+    const fingerprints = new Map<string, DefaultMessageFingerprint>();
+    const namespaces = new Set<string>();
+
+    const makeResult = (): EnglishDefaultDiscoveryResult => ({
+        fingerprints,
+        violations,
+        namespaces,
+        get size() {
+            return fingerprints.size;
+        },
+        has(key: string) {
+            return fingerprints.has(key);
+        },
+        get(key: string) {
+            return fingerprints.get(key);
+        },
+        [Symbol.iterator]() {
+            return fingerprints[Symbol.iterator]();
+        }
+    });
+
+    if (!existsSync(baseDir)) {
+        violations.push({
+            category: "invalid-metadata",
+            detail: `English default message root does not exist: ${baseDir}`,
+            file: baseDir,
+            line: 1
+        });
+        return makeResult();
+    }
+
+    const schemaPath = resolve(baseDir, "i18n/models/mona-locale-messages.ts");
+    let canonicalNamespaces: Set<string>;
+    let hasCanonicalSchema = false;
+    if (existsSync(schemaPath)) {
+        hasCanonicalSchema = true;
+        const schemaResult = loadCanonicalMessageNamespaces(schemaPath, project);
+        violations.push(...schemaResult.violations);
+        canonicalNamespaces = schemaResult.namespaces;
+        violations.push(...checkSchemaDrift(canonicalNamespaces, schemaPath));
+    } else {
+        canonicalNamespaces = new Set<string>(MONA_MESSAGE_NAMESPACES);
+    }
+
     const defaultFiles = findDefaultMessageFiles(baseDir);
-    const defaults = new Map<string, DefaultMessageFingerprint>();
+    if (defaultFiles.length === 0) {
+        violations.push({
+            category: "completeness-bypass",
+            detail: `Zero default English message catalogs discovered in ${baseDir}`,
+            file: baseDir,
+            line: 1
+        });
+        return makeResult();
+    }
 
     for (const file of defaultFiles) {
         const content = readFileSync(file, "utf-8");
         const sf = project.createSourceFile(`default-${Date.now()}-${Math.random()}.ts`, content, { overwrite: true });
 
         // Determine namespace
-        let detectedNamespace: MonaMessageNamespace | null = null;
+        let detectedNamespace: string | null = null;
         for (const decl of sf.getVariableDeclarations()) {
-            const typeText = decl.getTypeNode()?.getText() ?? decl.getInitializer()?.asKind(SyntaxKind.SatisfiesExpression)?.getTypeNode().getText();
+            const typeText =
+                decl.getTypeNode()?.getText() ??
+                decl.getInitializer()?.asKind(SyntaxKind.SatisfiesExpression)?.getTypeNode().getText();
             if (typeText) {
-                detectedNamespace = typeNameToNamespace(typeText);
-                if (detectedNamespace) {
-                    break;
+                const match = /^Mona([A-Z][a-zA-Z0-9]*)Messages$/.exec(typeText.trim());
+                if (match) {
+                    const pascal = match[1];
+                    const camel = pascal[0].toLowerCase() + pascal.slice(1);
+                    if (canonicalNamespaces.has(camel) || MONA_MESSAGE_NAMESPACES.includes(camel as MonaMessageNamespace)) {
+                        detectedNamespace = camel;
+                        break;
+                    }
                 }
             }
         }
@@ -286,16 +424,27 @@ export function loadDefaultEnglishStrings(
                 detectedNamespace = "treeView";
             } else {
                 const camel = base.replace(/-([a-z0-9])/g, (_, ch) => ch.toUpperCase());
-                if (MONA_MESSAGE_NAMESPACES.includes(camel as MonaMessageNamespace)) {
-                    detectedNamespace = camel as MonaMessageNamespace;
+                if (canonicalNamespaces.has(camel) || MONA_MESSAGE_NAMESPACES.includes(camel as MonaMessageNamespace)) {
+                    detectedNamespace = camel;
                 }
             }
         }
 
-        if (!detectedNamespace) {
+        if (
+            !detectedNamespace ||
+            (!canonicalNamespaces.has(detectedNamespace) &&
+                !MONA_MESSAGE_NAMESPACES.includes(detectedNamespace as MonaMessageNamespace))
+        ) {
+            violations.push({
+                category: "invalid-metadata",
+                detail: `Default message file "${file}" has unknown or unmapped namespace "${detectedNamespace ?? "unrecognized"}"`,
+                file,
+                line: 1
+            });
             continue;
         }
 
+        let fileHasProperties = false;
         for (const obj of sf.getDescendantsOfKind(SyntaxKind.ObjectLiteralExpression)) {
             for (const prop of obj.getProperties()) {
                 if (Node.isPropertyAssignment(prop)) {
@@ -306,8 +455,19 @@ export function loadDefaultEnglishStrings(
                         continue;
                     }
 
+                    if (fingerprints.has(fullPath)) {
+                        violations.push({
+                            category: "invalid-metadata",
+                            detail: `Duplicate English default message fingerprint for "${fullPath}" found in "${file}"`,
+                            file,
+                            line: prop.getStartLineNumber()
+                        });
+                        continue;
+                    }
+
                     if (Node.isStringLiteral(init) || Node.isNoSubstitutionTemplateLiteral(init)) {
-                        defaults.set(fullPath, {
+                        fileHasProperties = true;
+                        fingerprints.set(fullPath, {
                             namespace: detectedNamespace,
                             key,
                             kind: "static",
@@ -315,7 +475,8 @@ export function loadDefaultEnglishStrings(
                         });
                     } else if (Node.isArrowFunction(init) || Node.isFunctionExpression(init)) {
                         const fragments = extractMeaningfulFragments(init);
-                        defaults.set(fullPath, {
+                        fileHasProperties = true;
+                        fingerprints.set(fullPath, {
                             namespace: detectedNamespace,
                             key,
                             kind: "function",
@@ -325,9 +486,26 @@ export function loadDefaultEnglishStrings(
                 }
             }
         }
+
+        if (fileHasProperties) {
+            namespaces.add(detectedNamespace);
+        }
     }
 
-    return defaults;
+    if (hasCanonicalSchema && canonicalNamespaces.size > 0) {
+        for (const canonicalNs of canonicalNamespaces) {
+            if (!namespaces.has(canonicalNs)) {
+                violations.push({
+                    category: "invalid-metadata",
+                    detail: `Canonical message namespace "${canonicalNs}" has no discovered English default message fingerprints in ${baseDir}`,
+                    file: baseDir,
+                    line: 1
+                });
+            }
+        }
+    }
+
+    return makeResult();
 }
 
 export function discoverOfficialLocales(
@@ -544,7 +722,7 @@ export function discoverOfficialLocales(
 
 function checkCopiedEnglish(
     catalogObj: Node,
-    englishDefaults: Map<string, any>,
+    englishDefaults: Map<string, any> | EnglishDefaultDiscoveryResult,
     filePath: string,
     violations: LocaleAuditViolation[],
     localeId?: string
@@ -552,6 +730,11 @@ function checkCopiedEnglish(
     if (!Node.isObjectLiteralExpression(catalogObj)) {
         return;
     }
+
+    const defaultsMap =
+        "fingerprints" in englishDefaults && englishDefaults.fingerprints instanceof Map
+            ? englishDefaults.fingerprints
+            : (englishDefaults as Map<string, any>);
 
     for (const nsProp of catalogObj.getProperties()) {
         if (!Node.isPropertyAssignment(nsProp)) {
@@ -574,7 +757,7 @@ function checkCopiedEnglish(
                 continue;
             }
 
-            const enDefault = englishDefaults.get(fullPath) ?? englishDefaults.get(messageKey);
+            const enDefault = defaultsMap.get(fullPath) ?? defaultsMap.get(messageKey);
             if (!enDefault) {
                 continue;
             }
@@ -630,7 +813,7 @@ function checkCopiedEnglish(
 export function auditLocaleMessagesFile(
     filePath: string,
     content?: string,
-    englishDefaults?: Map<string, any>,
+    englishDefaults?: Map<string, any> | EnglishDefaultDiscoveryResult,
     localeIdOrProject?: string | Project,
     maybeProject?: Project
 ): LocaleAuditViolation[] {
@@ -1105,14 +1288,7 @@ export function auditAllLocales(
     }
 
     const englishDefaults = loadDefaultEnglishStrings(baseDir);
-    if (existsSync(baseDir) && englishDefaults.size === 0) {
-        violations.push({
-            category: "completeness-bypass",
-            detail: `Zero default English message catalogs discovered in ${baseDir}`,
-            file: baseDir,
-            line: 1
-        });
-    }
+    violations.push(...englishDefaults.violations);
 
     for (const descriptor of discovery.locales) {
         violations.push(

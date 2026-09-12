@@ -7,9 +7,11 @@ import {
     auditLocaleMessagesFile,
     auditLocaleMetadataFile,
     canonicalizeLocaleId,
+    checkSchemaDrift,
     discoverOfficialLocales,
     isAllowedLocaleCopyException,
     isAllowedTechnicalToken,
+    loadCanonicalMessageNamespaces,
     loadDefaultEnglishStrings
 } from "./audit-locales";
 
@@ -751,7 +753,101 @@ describe("audit-locales", () => {
         });
     });
 
+    describe("loadDefaultEnglishStrings and Schema Parity", () => {
+        it("fails closed when English defaults base directory does not exist", () => {
+            const result = loadDefaultEnglishStrings("/non/existent/base/dir");
+            expect(result.violations.some(v => v.detail.includes("English default message root does not exist"))).toBe(true);
+        });
+
+        it("fails when English base directory contains zero default message catalogs", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "mona-no-defaults-"));
+            try {
+                const result = loadDefaultEnglishStrings(tempDir);
+                expect(result.violations.some(v => v.detail.includes("Zero default English message catalogs"))).toBe(true);
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when a default-message file has an unknown or unmapped namespace", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "mona-unknown-ns-"));
+            try {
+                const unknownDir = join(tempDir, "unknown-widget");
+                mkdirSync(unknownDir, { recursive: true });
+                writeFileSync(
+                    join(unknownDir, "unknown-widget.default-messages.ts"),
+                    `export const UNKNOWN_MESSAGES = { foo: "bar" };\n`
+                );
+                const result = loadDefaultEnglishStrings(tempDir);
+                expect(result.violations.some(v => v.detail.includes("unknown or unmapped namespace"))).toBe(true);
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when duplicate fingerprints exist for the same namespace.key path", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "mona-dup-fp-"));
+            try {
+                const dir1 = join(tempDir, "pager-a");
+                const dir2 = join(tempDir, "pager-b");
+                mkdirSync(dir1, { recursive: true });
+                mkdirSync(dir2, { recursive: true });
+                writeFileSync(
+                    join(dir1, "pager.default-messages.ts"),
+                    `import type { MonaPagerMessages } from "@nanahoshi/mona-ui/i18n";
+export const PAGER_A_DEFAULT_MESSAGES: MonaPagerMessages = {
+    firstPageLabel: "First page"
+} as any;\n`
+                );
+                writeFileSync(
+                    join(dir2, "pager.default-messages.ts"),
+                    `import type { MonaPagerMessages } from "@nanahoshi/mona-ui/i18n";
+export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
+    firstPageLabel: "First page duplicate"
+} as any;\n`
+                );
+                const result = loadDefaultEnglishStrings(tempDir);
+                expect(
+                    result.violations.some(
+                        v => v.detail.includes("Duplicate English default message fingerprint") && v.detail.includes("pager.firstPageLabel")
+                    )
+                ).toBe(true);
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("detects drift when canonical schema has namespaces missing from MONA_MESSAGE_NAMESPACES", () => {
+            const canonicalNamespaces = new Set(["autoComplete", "newWidgetNamespace"]);
+            const violations = checkSchemaDrift(canonicalNamespaces, "test-schema.ts");
+            expect(violations.some(v => v.detail.includes("drifted") && v.detail.includes("newWidgetNamespace"))).toBe(true);
+        });
+
+        it("detects drift when MONA_MESSAGE_NAMESPACES has extra namespaces missing from canonical schema", () => {
+            const canonicalNamespaces = new Set(["autoComplete"]);
+            const violations = checkSchemaDrift(canonicalNamespaces, "test-schema.ts");
+            expect(violations.some(v => v.detail.includes("drifted") && v.detail.includes("extra"))).toBe(true);
+        });
+    });
+
     describe("Real Repository Locale Integration", () => {
+        it("verifies exact parity between MonaLocaleMessages interface and MONA_MESSAGE_NAMESPACES", () => {
+            const canonical = loadCanonicalMessageNamespaces();
+            expect(canonical.violations).toHaveLength(0);
+            expect(canonical.namespaces.size).toBe(40);
+            const drift = checkSchemaDrift(canonical.namespaces, "canonical-schema");
+            expect(drift).toHaveLength(0);
+        });
+
+        it("discovers all 40 canonical namespaces in the real repository English defaults", () => {
+            const defaults = loadDefaultEnglishStrings();
+            expect(defaults.violations).toHaveLength(0);
+            const canonical = loadCanonicalMessageNamespaces();
+            for (const ns of canonical.namespaces) {
+                expect(defaults.namespaces.has(ns)).toBe(true);
+            }
+        });
+
         it("discovers non-empty, representative English defaults matching canonical namespaces", () => {
             const defaults = loadDefaultEnglishStrings();
             expect(defaults.size).toBeGreaterThan(50);
