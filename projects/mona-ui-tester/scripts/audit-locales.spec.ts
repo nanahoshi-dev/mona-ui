@@ -23,8 +23,6 @@ describe("audit-locales", () => {
             expect(isAllowedTechnicalToken("RGB")).toBe(true);
             expect(isAllowedTechnicalToken("URL")).toBe(true);
             expect(isAllowedTechnicalToken("HTML")).toBe(true);
-            expect(isAllowedTechnicalToken("AM")).toBe(true);
-            expect(isAllowedTechnicalToken("PM")).toBe(true);
             expect(isAllowedTechnicalToken("px")).toBe(true);
             expect(isAllowedTechnicalToken(":")).toBe(true);
         });
@@ -38,6 +36,9 @@ describe("audit-locales", () => {
             expect(isAllowedTechnicalToken("Color")).toBe(false);
             expect(isAllowedTechnicalToken("Error")).toBe(false);
             expect(isAllowedTechnicalToken("C")).toBe(false);
+            expect(isAllowedTechnicalToken("AM")).toBe(false);
+            expect(isAllowedTechnicalToken("PM")).toBe(false);
+            expect(isAllowedTechnicalToken("AM/PM")).toBe(false);
         });
     });
 
@@ -47,6 +48,9 @@ describe("audit-locales", () => {
             expect(isAllowedLocaleCopyException("es-ES", "notification.error", "Error")).toBe(true);
             expect(isAllowedLocaleCopyException("es-ES", "chart.closeAbbreviation", "C")).toBe(true);
             expect(isAllowedLocaleCopyException("es-ES", "colorPalette.color", "Color")).toBe(true);
+            expect(isAllowedLocaleCopyException("es-ES", "timeSelector.am", "AM")).toBe(true);
+            expect(isAllowedLocaleCopyException("es-ES", "timeSelector.pm", "PM")).toBe(true);
+            expect(isAllowedLocaleCopyException("es-ES", "timeSelector.amPm", "AM/PM")).toBe(true);
         });
 
         it("disallows Spanish-specific exceptions for other locales or unapproved paths", () => {
@@ -60,6 +64,9 @@ describe("audit-locales", () => {
             expect(isAllowedLocaleCopyException("de-DE", "chart.highAbbreviation", "H")).toBe(true);
             expect(isAllowedLocaleCopyException("de-DE", "dialog.ok", "OK")).toBe(true);
             expect(isAllowedLocaleCopyException("de-DE", "editor.format", "Format")).toBe(true);
+            expect(isAllowedLocaleCopyException("de-DE", "timeSelector.am", "AM")).toBe(true);
+            expect(isAllowedLocaleCopyException("de-DE", "timeSelector.pm", "PM")).toBe(true);
+            expect(isAllowedLocaleCopyException("de-DE", "timeSelector.amPm", "AM/PM")).toBe(true);
         });
 
         it("disallows German-specific exceptions for other locales or unapproved paths", () => {
@@ -85,6 +92,9 @@ describe("audit-locales", () => {
             expect(isAllowedLocaleCopyException("fr-FR", "pager.pageText", "Page")).toBe(true);
             expect(isAllowedLocaleCopyException("fr-FR", "scrollView.page", "Page")).toBe(true);
             expect(isAllowedLocaleCopyException("fr-FR", "scrollView.pageOf", "Page")).toBe(true);
+            expect(isAllowedLocaleCopyException("fr-FR", "timeSelector.am", "AM")).toBe(true);
+            expect(isAllowedLocaleCopyException("fr-FR", "timeSelector.pm", "PM")).toBe(true);
+            expect(isAllowedLocaleCopyException("fr-FR", "timeSelector.amPm", "AM/PM")).toBe(true);
             expect(isAllowedLocaleCopyException("fr-FR", "timeSelector.minutes", "Minutes")).toBe(true);
         });
 
@@ -102,10 +112,13 @@ describe("audit-locales", () => {
             expect(isAllowedLocaleCopyException("ja-JP", "dialog.ok", "OK")).toBe(true);
         });
 
-        it("disallows Japanese-specific exceptions for other locales or unapproved paths", () => {
+        it("disallows Japanese-specific exceptions for other locales, unapproved paths, or day periods", () => {
             expect(isAllowedLocaleCopyException("es-ES", "dialog.ok", "OK")).toBe(false);
             expect(isAllowedLocaleCopyException("ja-JP", "other.ok", "OK")).toBe(false);
             expect(isAllowedLocaleCopyException("ja-JP", "dialog.ok", "Cancel")).toBe(false);
+            expect(isAllowedLocaleCopyException("ja-JP", "timeSelector.am", "AM")).toBe(false);
+            expect(isAllowedLocaleCopyException("ja-JP", "timeSelector.pm", "PM")).toBe(false);
+            expect(isAllowedLocaleCopyException("ja-JP", "timeSelector.amPm", "AM/PM")).toBe(false);
         });
     });
 
@@ -211,24 +224,42 @@ describe("audit-locales", () => {
             });
         });
 
-        it("does not report false positives for technical tokens like HEX or AM", () => {
+        it("does not report false positives for technical tokens like HEX or RGB", () => {
             const englishDefaults = new Map<string, string>([
-                ["am", "AM"],
+                ["rgb", "RGB"],
                 ["hex", "HEX"]
             ]);
             const code = `
                 import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
                 export const TEST_MESSAGES = {
-                    timeSelector: {
-                        am: "AM"
-                    },
                     colorGradient: {
+                        rgb: "RGB",
                         hex: "HEX"
                     }
                 } satisfies MonaLocaleMessages;
             `;
             const violations = auditLocaleMessagesFile("test.messages.ts", code, englishDefaults);
             expect(violations).toHaveLength(0);
+        });
+
+        it("flags copied English day period tokens like AM as violations", () => {
+            const englishDefaults = new Map<string, string>([
+                ["am", "AM"]
+            ]);
+            const code = `
+                import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+                export const TEST_MESSAGES = {
+                    timeSelector: {
+                        am: "AM"
+                    }
+                } satisfies MonaLocaleMessages;
+            `;
+            const violations = auditLocaleMessagesFile("test.messages.ts", code, englishDefaults);
+            expect(violations).toHaveLength(1);
+            expect(violations[0]).toMatchObject({
+                category: "copied-english",
+                detail: expect.stringContaining('am": "AM"')
+            });
         });
 
         it("rejects file where satisfies MonaLocaleMessages is only on an unrelated decoy", () => {
