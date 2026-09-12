@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { describe, expect, it, beforeEach } from "vitest";
 import { CalendarComponent } from "@nanahoshi/mona-ui/calendar";
 import { generatePseudoLocale, MonaI18nService, type MonaLocale } from "@nanahoshi/mona-ui/i18n";
+import { MONA_ES_ES_LOCALE } from "@nanahoshi/mona-ui/locales";
 import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
 import { PagerComponent } from "@nanahoshi/mona-ui/pager";
 import { ProgressBarComponent } from "@nanahoshi/mona-ui/progress-bar";
@@ -143,6 +144,61 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
         expect(enPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
         const enScroll = root.querySelector("mona-scroll-view");
         expect(enScroll?.querySelector("button[aria-label='Previous page']")).not.toBeNull();
+        expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
+    });
+
+    it("integrates official Spanish (es-ES) locale reactively with runtime overrides and formatting", async () => {
+        const root = fixture.nativeElement as HTMLElement;
+        const input = root.querySelector("mona-numeric-text-box input") as HTMLInputElement;
+
+        // 1. Activate official Spanish (Spain) locale
+        i18n.use(MONA_ES_ES_LOCALE);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("es-ES");
+        expect(i18n.direction()).toBe("ltr");
+
+        // Pager firstPageLabel in Spanish: "Primera página"
+        const esPager = root.querySelector("mona-pager");
+        expect(esPager?.querySelector("button[aria-label='Primera página']")).not.toBeNull();
+
+        // ScrollView previousPage in Spanish: "Página anterior"
+        const esScroll = root.querySelector("mona-scroll-view");
+        expect(esScroll?.querySelector("button[aria-label='Página anterior']")).not.toBeNull();
+
+        // NumericTextBox formatting with Spanish comma separator
+        expect(input.getAttribute("aria-valuetext")).toBe("1234,50");
+
+        // 2. Test application override precedence over Spanish locale
+        i18n.patchMessages({
+            pager: {
+                firstPageLabel: "Inicio de página"
+            }
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(esPager?.querySelector("button[aria-label='Inicio de página']")).not.toBeNull();
+
+        // 3. Clear overrides: Spanish locale value returns
+        i18n.clearMessages();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(esPager?.querySelector("button[aria-label='Primera página']")).not.toBeNull();
+
+        // 4. Switch back to English default
+        i18n.use({
+            direction: "ltr",
+            id: "en-US",
+            messages: {}
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("en-US");
+        expect(esPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
         expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
     });
 
