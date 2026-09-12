@@ -362,6 +362,88 @@ describe("audit-locales", () => {
             const violations = auditLocaleMetadataFile("test.locale.ts", code);
             expect(violations.some(v => v.category === "invalid-metadata" && v.detail.includes("exactly one"))).toBe(true);
         });
+
+        it("rejects wrong locale aliased under the expected messages identifier", () => {
+            const code = `
+                import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";
+                import { DE_DE_MESSAGES as ES_ES_MESSAGES } from "../de-de/de-de.messages";
+
+                export const MONA_ES_ES_LOCALE = {
+                    direction: "ltr",
+                    id: "es-ES",
+                    messages: ES_ES_MESSAGES
+                } satisfies MonaLocale;
+            `;
+            const violations = auditLocaleMetadataFile("test.locale.ts", code, "es-ES", "ES_ES_MESSAGES");
+            expect(
+                violations.some(
+                    v => v.category === "invalid-metadata" && v.detail.includes("alias")
+                )
+            ).toBe(true);
+        });
+
+        it("rejects correct symbol imported from wrong or non-sibling module", () => {
+            const code = `
+                import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";
+                import { ES_ES_MESSAGES } from "../legacy/es-es.messages";
+
+                export const MONA_ES_ES_LOCALE = {
+                    direction: "ltr",
+                    id: "es-ES",
+                    messages: ES_ES_MESSAGES
+                } satisfies MonaLocale;
+            `;
+            const violations = auditLocaleMetadataFile("test.locale.ts", code, "es-ES", "ES_ES_MESSAGES");
+            expect(
+                violations.some(
+                    v => v.category === "invalid-metadata" && v.detail.includes("direct sibling")
+                )
+            ).toBe(true);
+        });
+
+        it("rejects messages identifier defined via local shadow variable instead of imported sibling", () => {
+            const code = `
+                import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";
+                const ES_ES_MESSAGES = {} as any;
+
+                export const MONA_ES_ES_LOCALE = {
+                    direction: "ltr",
+                    id: "es-ES",
+                    messages: ES_ES_MESSAGES
+                } satisfies MonaLocale;
+            `;
+            const violations = auditLocaleMetadataFile("test.locale.ts", code, "es-ES", "ES_ES_MESSAGES");
+            expect(
+                violations.some(
+                    v => v.category === "invalid-metadata" && v.detail.includes("shadowed")
+                )
+            ).toBe(true);
+        });
+
+        it("rejects messages import that does not resolve to expected sibling messages file", () => {
+            const code = `
+                import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";
+                import { ES_ES_MESSAGES } from "./de-de.messages";
+
+                export const MONA_ES_ES_LOCALE = {
+                    direction: "ltr",
+                    id: "es-ES",
+                    messages: ES_ES_MESSAGES
+                } satisfies MonaLocale;
+            `;
+            const violations = auditLocaleMetadataFile(
+                "/repo/locales/es-es/es-es.locale.ts",
+                code,
+                "es-ES",
+                "ES_ES_MESSAGES",
+                "/repo/locales/es-es/es-es.messages.ts"
+            );
+            expect(
+                violations.some(
+                    v => v.category === "invalid-metadata" && v.detail.includes("does not resolve to expected")
+                )
+            ).toBe(true);
+        });
     });
 
     describe("canonicalizeLocaleId", () => {

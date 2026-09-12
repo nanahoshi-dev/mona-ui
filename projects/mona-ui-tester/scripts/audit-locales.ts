@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { basename, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { Node, Project, SyntaxKind } from "ts-morph";
 
 export type LocaleAuditCategory =
@@ -719,8 +719,18 @@ export function auditLocaleMetadataFile(
     content?: string,
     expectedLocaleId?: string,
     expectedMessagesExport?: string,
-    project: Project = new Project({ useInMemoryFileSystem: true })
+    expectedMessagesFileOrProject?: string | Project,
+    maybeProject?: Project
 ): LocaleAuditViolation[] {
+    let expectedMessagesFile: string | undefined;
+    let project: Project;
+    if (expectedMessagesFileOrProject instanceof Project) {
+        project = expectedMessagesFileOrProject;
+        expectedMessagesFile = undefined;
+    } else {
+        expectedMessagesFile = expectedMessagesFileOrProject;
+        project = maybeProject ?? new Project({ useInMemoryFileSystem: true });
+    }
     const violations: LocaleAuditViolation[] = [];
     const sourceContent = content ?? readFileSync(filePath, "utf-8");
     const sf = project.createSourceFile(`test-locale-${Date.now()}-${Math.random()}.ts`, sourceContent, {
@@ -877,13 +887,119 @@ export function auditLocaleMetadataFile(
                 file: filePath,
                 line: msgProp.getStartLineNumber()
             });
-        } else if (expectedMessagesExport && msgInit.getText().trim() !== expectedMessagesExport) {
+        } else if (!Node.isIdentifier(msgInit)) {
             violations.push({
                 category: "invalid-metadata",
-                detail: `Locale "messages" must reference sibling catalog "${expectedMessagesExport}", found "${msgInit.getText().trim()}"`,
+                detail: `Locale "messages" property must reference an imported sibling messages catalog identifier, found "${msgInit.getText().trim()}"`,
                 file: filePath,
                 line: msgProp.getStartLineNumber()
             });
+        } else {
+            const msgIdentifier = msgInit.getText().trim();
+            if (expectedMessagesExport && msgIdentifier !== expectedMessagesExport) {
+                violations.push({
+                    category: "invalid-metadata",
+                    detail: `Locale "messages" must reference sibling catalog "${expectedMessagesExport}", found "${msgIdentifier}"`,
+                    file: filePath,
+                    line: msgProp.getStartLineNumber()
+                });
+            }
+
+            // Reject local variable shadowing (e.g. const ES_ES_MESSAGES = ...)
+            const localShadows = sf.getVariableDeclarations().filter(
+                d => d.getName() === msgIdentifier && d !== decl
+            );
+            if (localShadows.length > 0) {
+                violations.push({
+                    category: "invalid-metadata",
+                    detail: `Locale "messages" references locally shadowed variable "${msgIdentifier}" instead of imported sibling catalog`,
+                    file: filePath,
+                    line: localShadows[0].getStartLineNumber()
+                });
+            }
+
+            // Find matching named import
+            let matchingNamedImport: {
+                importDecl: ReturnType<typeof sf.getImportDeclarations>[number];
+                namedImport: ReturnType<ReturnType<typeof sf.getImportDeclarations>[number]["getNamedImports"]>[number];
+            } | null = null;
+
+            for (const importDecl of sf.getImportDeclarations()) {
+                for (const named of importDecl.getNamedImports()) {
+                    const aliasNode = named.getAliasNode();
+                    const localName = aliasNode ? aliasNode.getText().trim() : named.getName().trim();
+                    if (localName === msgIdentifier) {
+                        matchingNamedImport = { importDecl, namedImport: named };
+                        break;
+                    }
+                }
+                if (matchingNamedImport) {
+                    break;
+                }
+            }
+
+            if (!matchingNamedImport) {
+                violations.push({
+                    category: "invalid-metadata",
+                    detail: `Locale "messages" identifier "${msgIdentifier}" is not imported from sibling messages catalog`,
+                    file: filePath,
+                    line: msgProp.getStartLineNumber()
+                });
+            } else {
+                const importedSymbol = matchingNamedImport.namedImport.getName().trim();
+                if (importedSymbol !== msgIdentifier) {
+                    violations.push({
+                        category: "invalid-metadata",
+                        detail: `Locale "messages" imports alias "${matchingNamedImport.namedImport.getText().trim()}" instead of direct export "${msgIdentifier}"`,
+                        file: filePath,
+                        line: matchingNamedImport.namedImport.getStartLineNumber()
+                    });
+                }
+                if (expectedMessagesExport && importedSymbol !== expectedMessagesExport) {
+                    violations.push({
+                        category: "invalid-metadata",
+                        detail: `Locale "messages" must import sibling export "${expectedMessagesExport}", found "${importedSymbol}"`,
+                        file: filePath,
+                        line: matchingNamedImport.namedImport.getStartLineNumber()
+                    });
+                }
+
+                const moduleSpecifier = matchingNamedImport.importDecl.getModuleSpecifierValue().trim();
+                const isRelativeSibling =
+                    moduleSpecifier.startsWith("./") &&
+                    !moduleSpecifier.slice(2).includes("/") &&
+                    !moduleSpecifier.slice(2).includes("\\");
+
+                if (!isRelativeSibling) {
+                    violations.push({
+                        category: "invalid-metadata",
+                        detail: `Locale messages import "${moduleSpecifier}" must be a direct sibling relative import starting with "./"`,
+                        file: filePath,
+                        line: matchingNamedImport.importDecl.getStartLineNumber()
+                    });
+                } else if (!moduleSpecifier.endsWith(".messages") && !moduleSpecifier.endsWith(".messages.ts")) {
+                    violations.push({
+                        category: "invalid-metadata",
+                        detail: `Locale messages import "${moduleSpecifier}" must refer to a sibling "*.messages" module`,
+                        file: filePath,
+                        line: matchingNamedImport.importDecl.getStartLineNumber()
+                    });
+                }
+
+                if (expectedMessagesFile) {
+                    const dir = dirname(resolve(filePath));
+                    const resolvedImport = resolve(dir, moduleSpecifier).replace(/\.ts$/, "").replace(/\\/g, "/");
+                    const resolvedExpected = resolve(expectedMessagesFile).replace(/\.ts$/, "").replace(/\\/g, "/");
+                    if (resolvedImport !== resolvedExpected) {
+                        violations.push({
+                            category: "invalid-metadata",
+                            detail: `Locale messages import "${moduleSpecifier}" does not resolve to expected sibling messages file "${expectedMessagesFile}"`,
+                            file: filePath,
+                            line: matchingNamedImport.importDecl.getStartLineNumber()
+                        });
+                    }
+                }
+            }
         }
     }
 
@@ -918,7 +1034,8 @@ export function auditAllLocales(
                 descriptor.localeFile,
                 undefined,
                 descriptor.canonicalId,
-                descriptor.messagesExport
+                descriptor.messagesExport,
+                descriptor.messagesFile
             )
         );
     }
