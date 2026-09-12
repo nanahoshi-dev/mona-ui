@@ -5,6 +5,7 @@ import {
     type AuditViolation,
     collectLiteralStrings,
     isAllowlisted,
+    isOfficialLocaleMessageCatalog,
     isPhysicalCssPropertyName,
     isStyleName,
     isUserFacingText,
@@ -1584,11 +1585,31 @@ describe("audit-i18n-rtl", () => {
         });
     });
 
-    describe("scanFile path filtering", () => {
-        it("skips files in /locales/ directory", () => {
+    describe("scanFile path filtering & locale handling", () => {
+        it("identifies official locale message catalog files correctly", () => {
+            expect(isOfficialLocaleMessageCatalog("projects/mona-ui/locales/es-es/es-es.messages.ts")).toBe(true);
+            expect(isOfficialLocaleMessageCatalog("projects/mona-ui/locales/es-es/es-es.locale.ts")).toBe(false);
+            expect(isOfficialLocaleMessageCatalog("projects/mona-ui/button/button.component.ts")).toBe(false);
+        });
+
+        it("does not trigger hard-coded text violations for translated literals in official message catalogs", () => {
             const violations: AuditViolation[] = [];
             scanFile("projects/mona-ui/locales/es-es/es-es.messages.ts", violations);
             expect(violations).toHaveLength(0);
+        });
+
+        it("detects physical styles deliberately placed in locale files", () => {
+            const violations: AuditViolation[] = [];
+            const codeWithPhysicalStyle = `
+                export const TEST_MESSAGES = {
+                    pager: {
+                        firstPageLabel: "Primera página"
+                    }
+                };
+                const style = { "margin-left": "16px" };
+            `;
+            scanFileContent("projects/mona-ui/locales/es-es/es-es.messages.ts", codeWithPhysicalStyle, violations);
+            expect(violations.some(v => v.category === "rtl-physical-style")).toBe(true);
         });
 
         it("skips files in /i18n/ directory", () => {

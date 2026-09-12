@@ -2045,13 +2045,17 @@ export function scanTemplateNodes(nodes: TmplAstNode[], filePath: string, violat
     }
 }
 
+export function isOfficialLocaleMessageCatalog(filePath: string): boolean {
+    const normalized = filePath.replace(/\\/g, "/");
+    return /\/locales\/[^/]+\/[^/]+\.messages\.ts$/.test(normalized);
+}
+
 export function scanFile(filePath: string, violations: AuditViolation[]): void {
     const normalizedPath = filePath.replace(/\\/g, "/");
     // Skip spec files, i18n package itself, tester app, scripts, tests directories, and generated files
     if (
         normalizedPath.endsWith(".spec.ts") ||
         normalizedPath.includes("/i18n/") ||
-        normalizedPath.includes("/locales/") ||
         normalizedPath.includes("/tests/") ||
         normalizedPath.includes("/testing/") ||
         normalizedPath.includes("/scripts/") ||
@@ -2173,7 +2177,7 @@ export function scanFileContent(filePath: string, content: string, violations: A
         }
 
         // Scan TS host ARIA bindings regex
-        if (normalizedPath.endsWith(".ts")) {
+        if (normalizedPath.endsWith(".ts") && !isOfficialLocaleMessageCatalog(normalizedPath)) {
             for (const pattern of HARD_CODED_ARIA_PATTERNS) {
                 pattern.regex.lastIndex = 0;
                 let match: RegExpExecArray | null;
@@ -2199,7 +2203,11 @@ export function scanFileContent(filePath: string, content: string, violations: A
     if (normalizedPath.endsWith(".ts")) {
         const tsViolations: AuditViolation[] = [];
         scanTypeScriptAst(normalizedPath, content, tsViolations);
+        const isCatalog = isOfficialLocaleMessageCatalog(normalizedPath);
         for (const tv of tsViolations) {
+            if (isCatalog && (tv.category === "i18n-text" || tv.category === "i18n-aria")) {
+                continue;
+            }
             const lineContent = lines[tv.line - 1] ?? "";
             if (!isAllowlisted(tv, lineContent)) {
                 violations.push(tv);
