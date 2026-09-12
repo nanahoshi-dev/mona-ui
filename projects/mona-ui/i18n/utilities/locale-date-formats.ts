@@ -155,6 +155,15 @@ export function getLocaleDateTimeInputFormat(localeId: string, options?: LocaleT
     return format;
 }
 
+interface LocaleWeekInfoCompat {
+    readonly weekInfo?: {
+        readonly firstDay?: number;
+    };
+    getWeekInfo?: () => {
+        readonly firstDay?: number;
+    };
+}
+
 /**
  * Resolves the first day of the week ("monday" or "sunday") for the given locale using Intl.Locale.getWeekInfo() or CLDR fallbacks.
  */
@@ -164,12 +173,10 @@ export function getLocaleFirstDayOfWeek(localeId: string): LocaleFirstDayOfWeek 
     if (!firstDay) {
         try {
             if (typeof Intl !== "undefined" && typeof Intl.Locale === "function") {
-                const loc = new Intl.Locale(locale);
-                if (typeof (loc as unknown as { getWeekInfo?: () => { firstDay?: number } }).getWeekInfo === "function") {
-                    const weekInfo = (loc as unknown as { getWeekInfo: () => { firstDay?: number } }).getWeekInfo();
-                    if (weekInfo && typeof weekInfo.firstDay === "number") {
-                        firstDay = weekInfo.firstDay === 7 ? "sunday" : "monday";
-                    }
+                const loc = new Intl.Locale(locale) as unknown as LocaleWeekInfoCompat;
+                const weekInfo = loc.weekInfo ?? loc.getWeekInfo?.();
+                if (weekInfo && typeof weekInfo.firstDay === "number") {
+                    firstDay = weekInfo.firstDay === 7 ? "sunday" : "monday";
                 }
             }
         } catch {

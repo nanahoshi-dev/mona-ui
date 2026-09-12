@@ -116,6 +116,38 @@ describe("locale-date-formats", () => {
             expect(getLocaleFirstDayOfWeek("")).toBe("monday");
             expect(getLocaleFirstDayOfWeek("xyz-unknown")).toBe("monday");
         });
+
+        it("reads weekInfo accessor when available without getWeekInfo method", () => {
+            const originalLocale = Intl.Locale;
+            try {
+                class MockLocale extends originalLocale {
+                    public get weekInfo(): { firstDay: number } {
+                        return { firstDay: 7 };
+                    }
+                }
+                (MockLocale.prototype as unknown as { getWeekInfo: unknown }).getWeekInfo = undefined;
+                Intl.Locale = MockLocale as unknown as typeof Intl.Locale;
+                expect(getLocaleFirstDayOfWeek("en-AA")).toBe("sunday");
+            } finally {
+                Intl.Locale = originalLocale;
+            }
+        });
+
+        it("reads getWeekInfo method when weekInfo accessor is undefined", () => {
+            const originalLocale = Intl.Locale;
+            try {
+                class MockLocale extends originalLocale {
+                    public override getWeekInfo(): { firstDay: number } {
+                        return { firstDay: 7 };
+                    }
+                }
+                Object.defineProperty(MockLocale.prototype, "weekInfo", { value: undefined, configurable: true });
+                Intl.Locale = MockLocale as unknown as typeof Intl.Locale;
+                expect(getLocaleFirstDayOfWeek("en-AB")).toBe("sunday");
+            } finally {
+                Intl.Locale = originalLocale;
+            }
+        });
     });
 
     describe("roundtrip formatting and parsing", () => {
