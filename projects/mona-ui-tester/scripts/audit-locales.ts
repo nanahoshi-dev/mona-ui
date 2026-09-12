@@ -63,7 +63,10 @@ export const LOCALE_COPY_EXCEPTIONS: readonly LocaleCopyException[] = [
     { localeId: "es-ES", messagePath: "chart.closeAbbreviation", value: "C" },
     { localeId: "es-ES", messagePath: "editor.color", value: "Color" },
     { localeId: "es-ES", messagePath: "notification.error", value: "Error" },
-    { localeId: "es-ES", messagePath: "colorPalette.color", value: "Color" }
+    { localeId: "es-ES", messagePath: "colorPalette.color", value: "Color" },
+    { localeId: "de-DE", messagePath: "chart.highAbbreviation", value: "H" },
+    { localeId: "de-DE", messagePath: "dialog.ok", value: "OK" },
+    { localeId: "de-DE", messagePath: "editor.format", value: "Format" }
 ];
 
 export function isAllowedLocaleCopyException(
