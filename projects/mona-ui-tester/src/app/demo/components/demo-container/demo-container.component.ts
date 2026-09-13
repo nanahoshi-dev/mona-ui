@@ -7,7 +7,13 @@ import { ColorPickerComponent } from "@nanahoshi/mona-ui/color-picker";
 import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
 import { DropdownGroupableDirective } from "@nanahoshi/mona-ui/dropdowns";
 import { MONA_DEFAULT_LOCALE, MonaI18nService, type MonaLocale } from "@nanahoshi/mona-ui/i18n";
-import { MONA_ES_ES_LOCALE } from "@nanahoshi/mona-ui/locales";
+import {
+    MONA_DE_DE_LOCALE,
+    MONA_ES_ES_LOCALE,
+    MONA_FR_FR_LOCALE,
+    MONA_JA_JP_LOCALE,
+    MONA_PT_BR_LOCALE
+} from "@nanahoshi/mona-ui/locales";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { THEME_OPTIONS, type ThemeOption } from "../../../theme-options";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
@@ -110,7 +116,11 @@ export class DemoContainerComponent<TComponent> {
     });
     protected readonly localeOptions: readonly LocaleOption[] = [
         { label: "English", locale: MONA_DEFAULT_LOCALE },
-        { label: "Español (España)", locale: MONA_ES_ES_LOCALE }
+        { label: "Deutsch", locale: MONA_DE_DE_LOCALE },
+        { label: "Español (España)", locale: MONA_ES_ES_LOCALE },
+        { label: "Français", locale: MONA_FR_FR_LOCALE },
+        { label: "Português (Brasil)", locale: MONA_PT_BR_LOCALE },
+        { label: "日本語", locale: MONA_JA_JP_LOCALE }
     ];
     protected readonly selectedLocale = computed(() => {
         const id = this.#i18n.localeId();

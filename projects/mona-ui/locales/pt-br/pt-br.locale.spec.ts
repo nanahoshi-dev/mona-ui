@@ -6,6 +6,9 @@ describe("MONA_PT_BR_LOCALE", () => {
     describe("metadata", () => {
         it("declares pt-BR locale id", () => {
             expect(MONA_PT_BR_LOCALE.id).toBe("pt-BR");
+            expect(MONA_PT_BR_LOCALE.id).not.toBe("pt");
+            expect(MONA_PT_BR_LOCALE.id).not.toBe("pt_BR");
+            expect(MONA_PT_BR_LOCALE.id).not.toBe("pt-br");
         });
 
         it("canonicalizes to pt-BR via Intl.getCanonicalLocales", () => {
@@ -67,6 +70,8 @@ describe("MONA_PT_BR_LOCALE", () => {
         ] as const;
 
         it("defines all 40 canonical message namespaces", () => {
+            expect(Object.keys(MONA_PT_BR_LOCALE.messages)).toHaveLength(40);
+            expect(Object.keys(MONA_PT_BR_LOCALE.messages).sort()).toEqual([...expectedNamespaces].sort());
             for (const ns of expectedNamespaces) {
                 expect(MONA_PT_BR_LOCALE.messages[ns], `Namespace ${ns} must be defined`).toBeDefined();
             }
@@ -93,10 +98,12 @@ describe("MONA_PT_BR_LOCALE", () => {
             expect(m.grid?.deleteRowTitle).toBe("Excluir linha?");
             expect(m.grid?.edit).toBe("Editar");
             expect(m.grid?.filterPlaceholder).toBe("Filtrar...");
+            expect(m.grid?.moveRow).toBe("Mover linha");
             expect(m.grid?.noData).toBe("Nenhum dado disponível");
             expect(m.grid?.moveAsNext).toBe("Mover como próximo");
             expect(m.grid?.moveAsPrevious).toBe("Mover como anterior");
             expect(m.grid?.remove).toBe("Remover");
+            expect(m.grid?.rowReorder).toBe("Reordenar linhas");
             expect(m.grid?.save).toBe("Salvar");
             expect(m.grid?.selectAllRows).toBe("Selecionar todas as linhas");
         });
@@ -318,11 +325,12 @@ describe("MONA_PT_BR_LOCALE", () => {
             expect(m.colorPalette?.color?.("#FF00AA")).toBe("Cor: #FF00AA");
         });
 
-        it("formats Dropdowns functions with singular and plural agreement", () => {
+        it("formats Dropdowns functions with singular and plural agreement across 0, 1, 2, 10 counts", () => {
             expect(m.dropdowns?.itemPosition?.("Opção 1", 1, 10)).toBe("Opção 1, 1 de 10");
             expect(m.dropdowns?.resultsAvailable?.(0)).toBe("0 resultados disponíveis");
             expect(m.dropdowns?.resultsAvailable?.(1)).toBe("1 resultado disponível");
-            expect(m.dropdowns?.resultsAvailable?.(5)).toBe("5 resultados disponíveis");
+            expect(m.dropdowns?.resultsAvailable?.(2)).toBe("2 resultados disponíveis");
+            expect(m.dropdowns?.resultsAvailable?.(10)).toBe("10 resultados disponíveis");
         });
 
         it("formats Editor heading function correctly", () => {
@@ -330,10 +338,11 @@ describe("MONA_PT_BR_LOCALE", () => {
             expect(m.editor?.heading?.(3)).toBe("Título 3");
         });
 
-        it("formats Grid functions correctly with singular and plural agreement", () => {
+        it("formats Grid functions correctly with singular and plural agreement across 0, 1, 2, 10 counts", () => {
             expect(m.grid?.columnsSelected?.(0)).toBe("0 colunas selecionadas");
             expect(m.grid?.columnsSelected?.(1)).toBe("1 coluna selecionada");
-            expect(m.grid?.columnsSelected?.(3)).toBe("3 colunas selecionadas");
+            expect(m.grid?.columnsSelected?.(2)).toBe("2 colunas selecionadas");
+            expect(m.grid?.columnsSelected?.(10)).toBe("10 colunas selecionadas");
             expect(m.grid?.filterByColumn?.("Nome")).toBe("Filtrar por Nome");
             expect(m.grid?.reorderRow?.(4)).toBe("Reordenar linha 4");
             expect(
@@ -355,24 +364,33 @@ describe("MONA_PT_BR_LOCALE", () => {
             expect(m.grid?.selectRow?.(2)).toBe("Selecionar linha 2");
         });
 
-        it("formats MultiSelect itemsCount function with singular and plural agreement", () => {
+        it("formats MultiSelect itemsCount function with singular and plural agreement across 0, 1, 2, 10 counts", () => {
             expect(m.multiSelect?.itemsCount?.(0)).toBe("+ 0 itens");
             expect(m.multiSelect?.itemsCount?.(1)).toBe("+ 1 item");
-            expect(m.multiSelect?.itemsCount?.(4)).toBe("+ 4 itens");
+            expect(m.multiSelect?.itemsCount?.(2)).toBe("+ 2 itens");
+            expect(m.multiSelect?.itemsCount?.(10)).toBe("+ 10 itens");
         });
 
-        it("formats Pager functions correctly with discrete count inflections", () => {
+        it("formats Pager functions correctly with discrete count inflections across 0, 1, 2, 10 counts", () => {
             expect(m.pager?.pageLabel?.(3)).toBe("Página 3");
             expect(m.pager?.pageSizeLabel?.(10)).toBe("10 / página");
-            expect(m.pager?.pageStatus?.(2, 5)).toBe("Página 2 de 5");
+            expect(m.pager?.pageStatus?.(1, 1)).toBe("Página 1 de 1");
+            expect(m.pager?.pageStatus?.(1, 2)).toBe("Página 1 de 2");
+            expect(m.pager?.pageStatus?.(2, 10)).toBe("Página 2 de 10");
+            expect(m.pager?.jumpBackwardLabel?.(0)).toBe("Retroceder 0 páginas");
             expect(m.pager?.jumpBackwardLabel?.(1)).toBe("Retroceder 1 página");
-            expect(m.pager?.jumpBackwardLabel?.(3)).toBe("Retroceder 3 páginas");
+            expect(m.pager?.jumpBackwardLabel?.(2)).toBe("Retroceder 2 páginas");
+            expect(m.pager?.jumpBackwardLabel?.(10)).toBe("Retroceder 10 páginas");
+            expect(m.pager?.jumpForwardLabel?.(0)).toBe("Avançar 0 páginas");
             expect(m.pager?.jumpForwardLabel?.(1)).toBe("Avançar 1 página");
-            expect(m.pager?.jumpForwardLabel?.(5)).toBe("Avançar 5 páginas");
+            expect(m.pager?.jumpForwardLabel?.(2)).toBe("Avançar 2 páginas");
+            expect(m.pager?.jumpForwardLabel?.(10)).toBe("Avançar 10 páginas");
         });
 
         it("formats Pager rangeStatus with correct singular and plural noun inflections", () => {
+            expect(m.pager?.rangeStatus?.(0, 0, 0)).toBe("0 - 0 de 0 itens");
             expect(m.pager?.rangeStatus?.(1, 1, 1)).toBe("1 - 1 de 1 item");
+            expect(m.pager?.rangeStatus?.(1, 2, 2)).toBe("1 - 2 de 2 itens");
             expect(m.pager?.rangeStatus?.(1, 10, 50)).toBe("1 - 10 de 50 itens");
             expect(m.pager?.rangeStatus?.(1, 20, 100)).toBe("1 - 20 de 100 itens");
         });

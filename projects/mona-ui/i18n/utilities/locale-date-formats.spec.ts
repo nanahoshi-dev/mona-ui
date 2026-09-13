@@ -589,11 +589,51 @@ describe("locale-date-formats", () => {
             expect(parsed.hour).toBe(21);
             expect(parsed.minute).toBe(30);
         });
+
+        it("formats and parses Brazilian Portuguese date correctly", () => {
+            const format = getLocaleDateInputFormat("pt-BR");
+            const dt = DateTime.fromJSDate(testDate).setLocale("pt-BR");
+            const str = dt.toFormat(format);
+            expect(str).toBe("15/09/2026");
+
+            const parsed = DateTime.fromFormat(str, format, { locale: "pt-BR" });
+            expect(parsed.isValid).toBe(true);
+            expect(parsed.year).toBe(2026);
+            expect(parsed.month).toBe(9);
+            expect(parsed.day).toBe(15);
+        });
+
+        it("formats and parses Brazilian Portuguese 24-hour time correctly", () => {
+            const format = getLocaleTimeInputFormat("pt-BR", { hourFormat: "24", showSeconds: false });
+            const dt = DateTime.fromJSDate(testDate).setLocale("pt-BR");
+            const str = dt.toFormat(format);
+            expect(str).toBe("21:30");
+
+            const parsed = DateTime.fromFormat(str, format, { locale: "pt-BR" });
+            expect(parsed.isValid).toBe(true);
+            expect(parsed.hour).toBe(21);
+            expect(parsed.minute).toBe(30);
+        });
+
+        it("formats and parses Brazilian Portuguese 24-hour datetime correctly", () => {
+            const format = getLocaleDateTimeInputFormat("pt-BR", { hourFormat: "24", showSeconds: false });
+            const dt = DateTime.fromJSDate(testDate).setLocale("pt-BR");
+            const str = dt.toFormat(format);
+            expect(str).toBe("15/09/2026, 21:30");
+
+            const parsed = DateTime.fromFormat(str, format, { locale: "pt-BR" });
+            expect(parsed.isValid).toBe(true);
+            expect(parsed.year).toBe(2026);
+            expect(parsed.month).toBe(9);
+            expect(parsed.day).toBe(15);
+            expect(parsed.hour).toBe(21);
+            expect(parsed.minute).toBe(30);
+        });
     });
 
     describe("whitespace normalization and portability", () => {
         it("ensures generated editable formats do not contain typographic whitespace (U+00A0, U+202F)", () => {
-            const locales = ["en-US", "de-DE", "fr-FR", "es-ES", "ja-JP"];
+            const locales = ["en-US", "de-DE", "fr-FR", "es-ES", "ja-JP", "pt-BR"];
             for (const loc of locales) {
                 const time12 = getLocaleTimeInputFormat(loc, { hourFormat: "12" });
                 expect(time12).not.toMatch(/[\u00A0\u202F]/);

@@ -6,6 +6,12 @@ import { ColorGradientComponent } from "@nanahoshi/mona-ui/color-gradient";
 import { DatePickerComponent } from "@nanahoshi/mona-ui/date-picker";
 import { DateTimePickerComponent } from "@nanahoshi/mona-ui/datetime-picker";
 import { FilterService } from "@nanahoshi/mona-ui/filter";
+import {
+    GridColumnComponent,
+    GridComponent,
+    GridRowReorderableDirective,
+    GRID_DEFAULT_MESSAGES
+} from "@nanahoshi/mona-ui/grid";
 import { ListBoxComponent } from "@nanahoshi/mona-ui/list-box";
 import { PagerComponent, PAGER_DEFAULT_MESSAGES } from "@nanahoshi/mona-ui/pager";
 import { ScrollViewComponent } from "@nanahoshi/mona-ui/scroll-view";
@@ -138,6 +144,26 @@ class PagerIntegrationHostComponent {
 class ScrollViewIntegrationHostComponent {
     public readonly items = ["Item 1", "Item 2"];
     public readonly scrollView = viewChild.required(ScrollViewComponent);
+}
+
+@Component({
+    template: `
+        <mona-grid
+            [data]="rows"
+            [rowKey]="'id'"
+            [resizeMethod]="120"
+            [responsivePager]="false"
+            monaGridRowReorderable>
+            <mona-grid-column field="name" title="Nome" [width]="120" />
+        </mona-grid>
+    `,
+    imports: [GridComponent, GridColumnComponent, GridRowReorderableDirective]
+})
+class GridIntegrationHostComponent {
+    public readonly rows = [
+        { id: 1, name: "Item 1" },
+        { id: 2, name: "Item 2" }
+    ];
 }
 
 describe("MONA_PT_BR_LOCALE Integration with MonaI18nService", () => {
@@ -801,5 +827,71 @@ describe("MONA_PT_BR_LOCALE Integration with MonaI18nService", () => {
         fixture.detectChanges();
         await fixture.whenStable();
         expect(input.value).toBe("2026-12-25 08:15");
+    });
+
+    it("renders Grid component with Brazilian Portuguese row-reorder accessibility labels", async () => {
+        await TestBed.configureTestingModule({
+            imports: [GridIntegrationHostComponent],
+            providers: [
+                provideMonaI18n({
+                    locale: MONA_PT_BR_LOCALE
+                })
+            ]
+        }).compileComponents();
+
+        const fixture = TestBed.createComponent(GridIntegrationHostComponent);
+        for (let cycle = 0; cycle < 3; cycle++) {
+            fixture.detectChanges();
+            await fixture.whenStable();
+        }
+        await fixture.whenRenderingDone();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const hostEl = fixture.nativeElement as HTMLElement;
+        const reorderHeader = hostEl.querySelector("th[aria-label='Reordenar linhas']");
+        expect(reorderHeader).not.toBeNull();
+
+        const reorderButton = hostEl.querySelector("button[aria-label*='Reordenar linha 1']");
+        expect(reorderButton).not.toBeNull();
+        expect(reorderButton?.getAttribute("aria-label")).toContain(
+            "Use Alt mais Seta para cima ou Alt mais Seta para baixo para mover."
+        );
+    });
+
+    it("provides Brazilian Portuguese messages for Grid row reordering accessibility and live announcements", () => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideMonaI18n({
+                    locale: MONA_PT_BR_LOCALE
+                })
+            ]
+        });
+
+        const service = TestBed.inject(MonaI18nService);
+        const gridMessages = service.componentMessages("grid", GRID_DEFAULT_MESSAGES);
+
+        expect(gridMessages().rowReorder).toBe("Reordenar linhas");
+        expect(gridMessages().moveRow).toBe("Mover linha");
+        expect(gridMessages().reorderRow(3)).toBe("Reordenar linha 3");
+        expect(gridMessages().rowReorderDisabled).toBe("A reordenação de linhas está desabilitada.");
+        expect(gridMessages().rowReorderDisabledEditing).toBe("Conclua a edição antes de reordenar as linhas.");
+        expect(gridMessages().rowReorderDisabledFiltered).toBe("Remova os filtros antes de reordenar as linhas.");
+        expect(gridMessages().rowReorderDisabledGrouped).toBe("Remova o agrupamento antes de reordenar as linhas.");
+        expect(gridMessages().rowReorderDisabledSingleRow).toBe("São necessárias pelo menos duas linhas para reordenar.");
+        expect(gridMessages().rowReorderDisabledSorted).toBe("Remova a ordenação antes de reordenar as linhas.");
+        expect(gridMessages().rowReorderDisabledVirtualScroll).toBe(
+            "A reordenação de linhas não está disponível com a rolagem virtual ativada."
+        );
+        expect(gridMessages().rowReorderMoved(3, 1)).toBe("Linha 3 movida para a posição 1.");
+        expect(
+            gridMessages().rowReorderHandleAriaLabel(
+                "Reordenar linha 1",
+                gridMessages().rowReorderKeyboardHint,
+                gridMessages().rowReorderDisabledSingleRow
+            )
+        ).toBe(
+            "Reordenar linha 1. Use Alt mais Seta para cima ou Alt mais Seta para baixo para mover. São necessárias pelo menos duas linhas para reordenar."
+        );
     });
 });

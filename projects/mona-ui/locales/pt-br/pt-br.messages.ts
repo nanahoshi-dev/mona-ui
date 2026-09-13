@@ -231,7 +231,7 @@ export const PT_BR_MESSAGES = {
         removeRow: "Remover linha",
         reorderRow: (rowNumber: number) => `Reordenar linha ${rowNumber}`,
         resizeColumn: "Redimensionar coluna",
-        rowReorder: "Reordenar linha",
+        rowReorder: "Reordenar linhas",
         rowReorderDisabled: "A reordenação de linhas está desabilitada.",
         rowReorderDisabledEditing: "Conclua a edição antes de reordenar as linhas.",
         rowReorderDisabledFiltered: "Remova os filtros antes de reordenar as linhas.",

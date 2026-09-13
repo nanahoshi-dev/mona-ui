@@ -1326,7 +1326,8 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
                     locale =>
                         locale.canonicalId === "pt-BR" &&
                         locale.localeExport === "MONA_PT_BR_LOCALE" &&
-                        locale.messagesExport === "PT_BR_MESSAGES"
+                        locale.messagesExport === "PT_BR_MESSAGES" &&
+                        locale.direction === "ltr"
                 )
             ).toBe(true);
         });
