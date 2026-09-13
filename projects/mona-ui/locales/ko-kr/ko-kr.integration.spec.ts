@@ -712,7 +712,18 @@ describe("MONA_KO_KR_LOCALE Integration with MonaI18nService", () => {
         // 1. Korean default numeric date format: yyyy. MM. dd. -> 2026. 09. 15.
         expect(input.value).toBe("2026. 09. 15.");
 
-        // 2. Korean date input parsing: 2026. 12. 25.
+        // 2. Korean date input parsing: supports both trailing dot omission (user habit) and canonical format
+        input.value = "2026. 11. 30";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("blur", { bubbles: true }));
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const parsedDateWithoutDot = fixture.componentInstance.value();
+        expect(parsedDateWithoutDot?.getFullYear()).toBe(2026);
+        expect(parsedDateWithoutDot?.getMonth()).toBe(10);
+        expect(parsedDateWithoutDot?.getDate()).toBe(30);
+
         input.value = "2026. 12. 25.";
         input.dispatchEvent(new Event("input", { bubbles: true }));
         input.dispatchEvent(new Event("blur", { bubbles: true }));
@@ -869,7 +880,21 @@ describe("MONA_KO_KR_LOCALE Integration with MonaI18nService", () => {
         await fixture.whenStable();
         expect(input.value).toBe("2026. 09. 15. 오후 09:30:45");
 
-        // 4. Korean datetime input parsing
+        // 4. Korean datetime input parsing: supports both dot omission before time and canonical format
+        input.value = "2026. 11. 30 오전 08:15:00";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("blur", { bubbles: true }));
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const parsedDateWithoutDot = fixture.componentInstance.value();
+        expect(parsedDateWithoutDot?.getFullYear()).toBe(2026);
+        expect(parsedDateWithoutDot?.getMonth()).toBe(10);
+        expect(parsedDateWithoutDot?.getDate()).toBe(30);
+        expect(parsedDateWithoutDot?.getHours()).toBe(8);
+        expect(parsedDateWithoutDot?.getMinutes()).toBe(15);
+        expect(parsedDateWithoutDot?.getSeconds()).toBe(0);
+
         input.value = "2026. 12. 25. 오전 08:15:00";
         input.dispatchEvent(new Event("input", { bubbles: true }));
         input.dispatchEvent(new Event("blur", { bubbles: true }));

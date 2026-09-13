@@ -5,11 +5,11 @@ import { join, resolve } from "node:path";
 import { discoverOfficialLocales } from "./audit-locales";
 
 export interface PackageVerificationOptions {
-    distDir?: string;
-    sourceLocalesDir?: string;
-    repoRoot?: string;
-    tscPath?: string;
     canonicalLicensePath?: string;
+    distDir?: string;
+    repoRoot?: string;
+    sourceLocalesDir?: string;
+    tscPath?: string;
 }
 
 export function verifyThirdPartyNotices(
@@ -38,16 +38,16 @@ export function verifyThirdPartyNotices(
 }
 
 export interface ExpectedLocaleExport {
-    readonly symbol: string;
-    readonly id: string;
     readonly direction?: "ltr" | "rtl";
+    readonly id: string;
+    readonly symbol: string;
 }
 
 export interface ConsumerSmokeTestOptions {
     distDir: string;
     expectedLocales: readonly ExpectedLocaleExport[];
-    tscPath?: string;
     repoRoot?: string;
+    tscPath?: string;
 }
 
 export function resolveTypeScriptCompilerPath(repoRoot: string = process.cwd()): string {
@@ -250,8 +250,9 @@ console.log("Runtime package import verified successfully.");
                 encoding: "utf-8"
             });
             console.log("✓ ESM consumer runtime import verified via package specifiers '@nanahoshi/mona-ui/locales' and '@nanahoshi/mona-ui/i18n'");
-        } catch (err: any) {
-            throw new Error(`Consumer runtime import test failed:\n${err.stderr || err.stdout || err.message}`);
+        } catch (err: unknown) {
+            const execErr = err as { stderr?: string; stdout?: string; message?: string };
+            throw new Error(`Consumer runtime import test failed:\n${execErr.stderr || execErr.stdout || execErr.message}`);
         }
 
         // 2. TypeScript consumer compilation test
@@ -341,8 +342,9 @@ getLocaleFirstDayOfWeek();
                 encoding: "utf-8"
             });
             console.log("✓ TypeScript consumer compilation verified via NodeNext resolution");
-        } catch (err: any) {
-            throw new Error(`Consumer TypeScript compilation failed:\n${err.stderr || err.stdout || err.message}`);
+        } catch (err: unknown) {
+            const execErr = err as { stderr?: string; stdout?: string; message?: string };
+            throw new Error(`Consumer TypeScript compilation failed:\n${execErr.stderr || execErr.stdout || execErr.message}`);
         }
     } finally {
         try {

@@ -823,6 +823,60 @@ describe("locale-date-formats", () => {
             expect(dt4.month).toBe(9);
             expect(dt4.day).toBe(15);
         });
+
+        it("tolerates trailing literal dot and dot spacing differences in parseGregorianDate", () => {
+            // Korean date with trailing dot omitted by user
+            const dtKoWithoutDot = parseGregorianDate("2026. 09. 15", "yyyy. MM. dd.", "ko-KR");
+            expect(dtKoWithoutDot.isValid).toBe(true);
+            expect(dtKoWithoutDot.year).toBe(2026);
+            expect(dtKoWithoutDot.month).toBe(9);
+            expect(dtKoWithoutDot.day).toBe(15);
+
+            // Korean date with trailing dot included
+            const dtKoWithDot = parseGregorianDate("2026. 09. 15.", "yyyy. MM. dd.", "ko-KR");
+            expect(dtKoWithDot.isValid).toBe(true);
+            expect(dtKoWithDot.year).toBe(2026);
+            expect(dtKoWithDot.month).toBe(9);
+            expect(dtKoWithDot.day).toBe(15);
+
+            // Korean date without spaces after dots
+            const dtKoNoSpaceNoDot = parseGregorianDate("2026.09.15", "yyyy. MM. dd.", "ko-KR");
+            expect(dtKoNoSpaceNoDot.isValid).toBe(true);
+            expect(dtKoNoSpaceNoDot.year).toBe(2026);
+            expect(dtKoNoSpaceNoDot.month).toBe(9);
+            expect(dtKoNoSpaceNoDot.day).toBe(15);
+
+            const dtKoNoSpaceWithDot = parseGregorianDate("2026.09.15.", "yyyy. MM. dd.", "ko-KR");
+            expect(dtKoNoSpaceWithDot.isValid).toBe(true);
+            expect(dtKoNoSpaceWithDot.year).toBe(2026);
+            expect(dtKoNoSpaceWithDot.month).toBe(9);
+            expect(dtKoNoSpaceWithDot.day).toBe(15);
+
+            // Korean 24h datetime without dot before time
+            const dtKoDateTime24 = parseGregorianDate("2026. 09. 15 21:30", "yyyy. MM. dd. HH:mm", "ko-KR");
+            expect(dtKoDateTime24.isValid).toBe(true);
+            expect(dtKoDateTime24.year).toBe(2026);
+            expect(dtKoDateTime24.month).toBe(9);
+            expect(dtKoDateTime24.day).toBe(15);
+            expect(dtKoDateTime24.hour).toBe(21);
+            expect(dtKoDateTime24.minute).toBe(30);
+
+            // Korean 12h datetime without dot before time
+            const dtKoDateTime12 = parseGregorianDate("2026. 09. 15 오후 09:30", "yyyy. MM. dd. a hh:mm", "ko-KR");
+            expect(dtKoDateTime12.isValid).toBe(true);
+            expect(dtKoDateTime12.year).toBe(2026);
+            expect(dtKoDateTime12.month).toBe(9);
+            expect(dtKoDateTime12.day).toBe(15);
+            expect(dtKoDateTime12.hour).toBe(21);
+            expect(dtKoDateTime12.minute).toBe(30);
+
+            // Extraneous trailing dot on format that does not have one
+            const dtUsWithTrailingDot = parseGregorianDate("09/15/2026.", "MM/dd/yyyy", "en-US");
+            expect(dtUsWithTrailingDot.isValid).toBe(true);
+            expect(dtUsWithTrailingDot.year).toBe(2026);
+            expect(dtUsWithTrailingDot.month).toBe(9);
+            expect(dtUsWithTrailingDot.day).toBe(15);
+        });
     });
 });
 

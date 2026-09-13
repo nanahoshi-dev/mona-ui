@@ -78,7 +78,7 @@ export function parseGregorianDate(
         const normalizedSpacesFormat = format.replace(/[\u00A0\u2009\u202F]/g, " ");
         dt = DateTime.fromFormat(normalizedSpacesText, normalizedSpacesFormat, { locale, outputCalendar: "gregory" });
         if (!dt.isValid) {
-            const normalizedText = normalizeLocalizedDigits(normalizedSpacesText, locale);
+            let normalizedText = normalizeLocalizedDigits(normalizedSpacesText, locale);
             let latnLocale = locale;
             try {
                 if (typeof Intl !== "undefined" && typeof Intl.Locale === "function") {
@@ -90,6 +90,78 @@ export function parseGregorianDate(
             dt = DateTime.fromFormat(normalizedText, normalizedSpacesFormat, { locale: latnLocale, outputCalendar: "gregory" });
             if (!dt.isValid) {
                 dt = DateTime.fromFormat(normalizedText, normalizedSpacesFormat, { locale, outputCalendar: "gregory" });
+            }
+
+            if (!dt.isValid) {
+                const effectiveLocale = latnLocale !== locale ? latnLocale : locale;
+
+                if (normalizedSpacesFormat.includes(". ") && !normalizedText.includes(". ")) {
+                    const textWithDotSpaces = normalizedText.replace(/\.(?!\s|$)/g, ". ");
+                    dt = DateTime.fromFormat(textWithDotSpaces, normalizedSpacesFormat, {
+                        locale: effectiveLocale,
+                        outputCalendar: "gregory"
+                    });
+                    if (!dt.isValid && effectiveLocale !== locale) {
+                        dt = DateTime.fromFormat(textWithDotSpaces, normalizedSpacesFormat, {
+                            locale,
+                            outputCalendar: "gregory"
+                        });
+                    }
+                    if (dt.isValid) {
+                        return dt;
+                    }
+                    normalizedText = textWithDotSpaces;
+                }
+
+                if (
+                    normalizedSpacesFormat.includes("dd. ") &&
+                    /(\b\d{4}\.\s*\d{1,2}\.\s*\d{1,2})\s+/.test(normalizedText)
+                ) {
+                    const withDotBeforeTime = normalizedText.replace(
+                        /(\b\d{4}\.\s*\d{1,2}\.\s*\d{1,2})\s+/,
+                        (_match, datePart) => `${datePart}. `
+                    );
+                    dt = DateTime.fromFormat(withDotBeforeTime, normalizedSpacesFormat, {
+                        locale: effectiveLocale,
+                        outputCalendar: "gregory"
+                    });
+                    if (!dt.isValid && effectiveLocale !== locale) {
+                        dt = DateTime.fromFormat(withDotBeforeTime, normalizedSpacesFormat, {
+                            locale,
+                            outputCalendar: "gregory"
+                        });
+                    }
+                    if (dt.isValid) {
+                        return dt;
+                    }
+                }
+
+                const trimmedFormat = normalizedSpacesFormat.trimEnd();
+                const trimmedText = normalizedText.trimEnd();
+                if (trimmedFormat.endsWith(".") && !trimmedText.endsWith(".")) {
+                    dt = DateTime.fromFormat(trimmedText + ".", trimmedFormat, {
+                        locale: effectiveLocale,
+                        outputCalendar: "gregory"
+                    });
+                    if (!dt.isValid && effectiveLocale !== locale) {
+                        dt = DateTime.fromFormat(trimmedText + ".", trimmedFormat, {
+                            locale,
+                            outputCalendar: "gregory"
+                        });
+                    }
+                } else if (!trimmedFormat.endsWith(".") && trimmedText.endsWith(".")) {
+                    const strippedText = trimmedText.replace(/\.+$/, "");
+                    dt = DateTime.fromFormat(strippedText, trimmedFormat, {
+                        locale: effectiveLocale,
+                        outputCalendar: "gregory"
+                    });
+                    if (!dt.isValid && effectiveLocale !== locale) {
+                        dt = DateTime.fromFormat(strippedText, trimmedFormat, {
+                            locale,
+                            outputCalendar: "gregory"
+                        });
+                    }
+                }
             }
         }
     }

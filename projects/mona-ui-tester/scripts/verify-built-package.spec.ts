@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -267,6 +268,56 @@ ${CANONICAL_CLDR_LICENSE.trim()}
                         expectedLocales: [{ symbol: "es_ES", id: "es-ES", direction: "ltr" }]
                     })
                 ).not.toThrow();
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
+            }
+        });
+
+        it("succeeds when synthetic package exports ko-KR with matching formatting and Sunday first-day", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                populateFakeDist(fakeDist, {
+                    i18nMjs: `
+export function getLocaleDateInputFormat(locale) { return "yyyy. MM. dd."; }
+export function getLocaleTimeInputFormat(locale, options) { return "a hh:mm"; }
+export function getLocaleDateTimeInputFormat(locale, options) { return "yyyy. MM. dd. a hh:mm"; }
+export function getLocaleFirstDayOfWeek(locale) { return "sunday"; }
+`,
+                    localesDts: 'export declare const ko_KR: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesMjs: 'export const ko_KR = { id: "ko-KR", direction: "ltr", messages: {} };\n'
+                });
+
+                expect(() =>
+                    runConsumerSmokeTest({
+                        distDir: fakeDist,
+                        expectedLocales: [{ direction: "ltr", id: "ko-KR", symbol: "ko_KR" }]
+                    })
+                ).not.toThrow();
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when ko-KR is expected but getLocaleDateInputFormat returns invalid format", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                populateFakeDist(fakeDist, {
+                    i18nMjs: `
+export function getLocaleDateInputFormat(locale) { return locale === "ko-KR" ? "yyyy/MM/dd" : "yyyy. MM. dd."; }
+export function getLocaleTimeInputFormat() { return "a hh:mm"; }
+export function getLocaleDateTimeInputFormat() { return "yyyy. MM. dd. a hh:mm"; }
+export function getLocaleFirstDayOfWeek() { return "sunday"; }
+`,
+                    localesDts: 'export declare const ko_KR: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesMjs: 'export const ko_KR = { id: "ko-KR", direction: "ltr", messages: {} };\n'
+                });
+
+                expect(() =>
+                    runConsumerSmokeTest({
+                        distDir: fakeDist,
+                        expectedLocales: [{ direction: "ltr", id: "ko-KR", symbol: "ko_KR" }]
+                    })
+                ).toThrow("Invalid getLocaleDateInputFormat output for ko-KR: yyyy/MM/dd");
             } finally {
                 rmSync(fakeDist, { recursive: true, force: true });
             }
