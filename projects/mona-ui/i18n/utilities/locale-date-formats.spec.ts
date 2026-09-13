@@ -29,6 +29,11 @@ describe("locale-date-formats", () => {
             expect(getLocaleDateInputFormat("zh-TW")).toBe("yyyy/MM/dd");
         });
 
+        it("returns Korean year. month. day. format for ko-KR", () => {
+            const format = getLocaleDateInputFormat("ko-KR");
+            expect(format).toBe("yyyy. MM. dd.");
+        });
+
         it("returns US month/day/year format for en-US", () => {
             const format = getLocaleDateInputFormat("en-US");
             expect(format).toBe("MM/dd/yyyy");
@@ -83,6 +88,16 @@ describe("locale-date-formats", () => {
             expect(getLocaleTimeInputFormat("zh-TW", { hourFormat: "12", showSeconds: true })).toBe("ahh:mm:ss");
         });
 
+        it("returns Korean 12-hour a hh:mm with day period in prefix position for ko-KR", () => {
+            const format = getLocaleTimeInputFormat("ko-KR", { hourFormat: "12", showSeconds: false });
+            expect(format).toBe("a hh:mm");
+        });
+
+        it("returns Korean 12-hour a hh:mm:ss with day period in prefix position when showSeconds is true", () => {
+            const format = getLocaleTimeInputFormat("ko-KR", { hourFormat: "12", showSeconds: true });
+            expect(format).toBe("a hh:mm:ss");
+        });
+
         it("returns English 12-hour hh:mm a with day period in suffix position", () => {
             const format = getLocaleTimeInputFormat("en-US", { hourFormat: "12", showSeconds: false });
             expect(format).toBe("hh:mm a");
@@ -113,6 +128,21 @@ describe("locale-date-formats", () => {
         it("derives combined Chinese date and time format in 12h with day period in native position", () => {
             expect(getLocaleDateTimeInputFormat("zh-CN", { hourFormat: "12", showSeconds: false })).toBe("yyyy/MM/dd ahh:mm");
             expect(getLocaleDateTimeInputFormat("zh-TW", { hourFormat: "12", showSeconds: false })).toBe("yyyy/MM/dd ahh:mm");
+        });
+
+        it("derives combined Korean date and time format in 24h and 12h for ko-KR", () => {
+            expect(getLocaleDateTimeInputFormat("ko-KR", { hourFormat: "24", showSeconds: false })).toBe(
+                "yyyy. MM. dd. HH:mm"
+            );
+            expect(getLocaleDateTimeInputFormat("ko-KR", { hourFormat: "24", showSeconds: true })).toBe(
+                "yyyy. MM. dd. HH:mm:ss"
+            );
+            expect(getLocaleDateTimeInputFormat("ko-KR", { hourFormat: "12", showSeconds: false })).toBe(
+                "yyyy. MM. dd. a hh:mm"
+            );
+            expect(getLocaleDateTimeInputFormat("ko-KR", { hourFormat: "12", showSeconds: true })).toBe(
+                "yyyy. MM. dd. a hh:mm:ss"
+            );
         });
 
         it("derives combined US date and time format in 12h", () => {
@@ -156,6 +186,10 @@ describe("locale-date-formats", () => {
 
             it("returns sunday for Japanese (ja-JP)", () => {
                 expect(getLocaleFirstDayOfWeek("ja-JP")).toBe("sunday");
+            });
+
+            it("returns sunday for Korean (ko-KR)", () => {
+                expect(getLocaleFirstDayOfWeek("ko-KR")).toBe("sunday");
             });
 
             it("returns sunday for US English (en-US)", () => {
@@ -252,8 +286,9 @@ describe("locale-date-formats", () => {
                     expect(resolveFallbackFirstDayOfWeek("en-AU")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("zh-CN")).toBe("monday");
 
-                    // TW, PT, BR, and YE are Sunday-first in CLDR
+                    // TW, PT, BR, KR, and YE are Sunday-first in CLDR
                     expect(resolveFallbackFirstDayOfWeek("zh-TW")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("ko-KR")).toBe("sunday");
                     expect(resolveFallbackFirstDayOfWeek("is-IS")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("ar-YE")).toBe("sunday");
 
