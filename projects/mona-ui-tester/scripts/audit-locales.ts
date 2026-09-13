@@ -86,7 +86,12 @@ export const LOCALE_COPY_EXCEPTIONS: readonly LocaleCopyException[] = [
     { localeId: "fr-FR", messagePath: "timeSelector.amPm", value: "AM/PM" },
     { localeId: "fr-FR", messagePath: "timeSelector.minutes", value: "Minutes" },
     { localeId: "fr-FR", messagePath: "timeSelector.pm", value: "PM" },
-    { localeId: "ja-JP", messagePath: "dialog.ok", value: "OK" }
+    { localeId: "ja-JP", messagePath: "dialog.ok", value: "OK" },
+    { localeId: "pt-BR", messagePath: "dialog.ok", value: "OK" },
+    { localeId: "pt-BR", messagePath: "scrollView.slide", value: "slide" },
+    { localeId: "pt-BR", messagePath: "timeSelector.am", value: "AM" },
+    { localeId: "pt-BR", messagePath: "timeSelector.amPm", value: "AM/PM" },
+    { localeId: "pt-BR", messagePath: "timeSelector.pm", value: "PM" }
 ];
 
 export function isAllowedLocaleCopyException(
