@@ -39,8 +39,8 @@ export default [
             sourceType: "script",
 
             parserOptions: {
-                project: ["tsconfig.json", "e2e/tsconfig.json"],
-                createDefaultProgram: true
+                project: ["./tsconfig.json"],
+                tsconfigRootDir: __dirname
             }
         },
 
