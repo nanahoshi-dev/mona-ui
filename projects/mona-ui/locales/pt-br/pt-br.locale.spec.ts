@@ -313,8 +313,8 @@ describe("MONA_PT_BR_LOCALE", () => {
         });
 
         it("formats Chip removeLabel function correctly for both labelled and unlabelled cases", () => {
-            expect(m.chip?.removeLabel?.("Angular")).toBe("Remover, Angular");
-            expect(m.chip?.removeLabel?.()).toBe("Remover, item");
+            expect(m.chip?.removeLabel?.("Angular")).toBe("Remover Angular");
+            expect(m.chip?.removeLabel?.()).toBe("Remover item");
         });
 
         it("formats ColorGradient saturationAndValueText function correctly using valor", () => {

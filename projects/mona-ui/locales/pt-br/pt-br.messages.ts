@@ -68,7 +68,7 @@ export const PT_BR_MESSAGES = {
         visualIndicatorClamped: "Indicador visual limitado"
     },
     chip: {
-        removeLabel: (label?: string) => (label ? `Remover, ${label}` : "Remover, item")
+        removeLabel: (label?: string) => (label ? `Remover ${label}` : "Remover item")
     },
     colorGradient: {
         apply: "Aplicar",
