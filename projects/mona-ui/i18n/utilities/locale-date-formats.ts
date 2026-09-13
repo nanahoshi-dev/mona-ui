@@ -1,13 +1,7 @@
 import { normalizeGregorianLocale } from "./gregorian-date";
+import { type LocaleFirstDayOfWeek, resolveLocaleFirstDayOfWeek } from "./locale-week-data";
 
-export type LocaleFirstDayOfWeek =
-    | "monday"
-    | "tuesday"
-    | "wednesday"
-    | "thursday"
-    | "friday"
-    | "saturday"
-    | "sunday";
+export type { LocaleFirstDayOfWeek };
 
 
 export interface LocaleTimeFormatOptions {
@@ -163,97 +157,16 @@ export function getLocaleDateTimeInputFormat(localeId: string, options?: LocaleT
     return format;
 }
 
-interface LocaleWeekInfoCompat {
-    readonly weekInfo?: {
-        readonly firstDay?: number;
-    };
-    getWeekInfo?: () => {
-        readonly firstDay?: number;
-    };
-}
-
-const ISO_DAY_MAP: Record<number, LocaleFirstDayOfWeek> = {
-    1: "monday",
-    2: "tuesday",
-    3: "wednesday",
-    4: "thursday",
-    5: "friday",
-    6: "saturday",
-    7: "sunday"
-};
-
-const SATURDAY_FIRST_REGIONS = new Set([
-    "AE", "AF", "BH", "DJ", "DZ", "EG", "IQ", "IR", "JO", "KW", "LY", "OM", "QA", "SD", "SY", "YE"
-]);
-
-const SUNDAY_FIRST_REGIONS = new Set([
-    "AG", "AS", "AU", "BD", "BR", "BS", "BT", "BW", "BZ", "CA", "CN", "CO", "DM", "DO", "ET",
-    "GT", "GU", "HK", "HN", "ID", "IL", "IN", "JM", "JP", "KE", "KH", "KR", "LA", "MH", "MM",
-    "MO", "MT", "MX", "MZ", "NI", "NP", "PA", "PE", "PH", "PK", "PR", "PT", "PY", "SA", "SG",
-    "SV", "TH", "TT", "TW", "UM", "US", "VE", "VI", "WS", "ZA", "ZW"
-]);
-
-function resolveFallbackFirstDayOfWeek(locale: string): LocaleFirstDayOfWeek {
-    let region: string | null = null;
-    try {
-        if (typeof Intl !== "undefined" && typeof Intl.Locale === "function") {
-            const loc = new Intl.Locale(locale);
-            if (loc.region) {
-                region = loc.region.toUpperCase();
-            }
-        }
-    } catch {
-        // fallback
-    }
-    if (!region) {
-        const match = locale.match(/[-_]([a-zA-Z]{2}|\d{3})(?:[-_]|$)/);
-        if (match) {
-            region = match[1].toUpperCase();
-        }
-    }
-    if (region) {
-        if (SATURDAY_FIRST_REGIONS.has(region)) {
-            return "saturday";
-        }
-        if (SUNDAY_FIRST_REGIONS.has(region)) {
-            return "sunday";
-        }
-        return "monday";
-    }
-    const lang = locale.split(/[-_]/)[0]?.toLowerCase();
-    if (lang === "ja") {
-        return "sunday";
-    }
-    if (lang === "fa" || lang === "ar") {
-        return "saturday";
-    }
-    return "monday";
-}
-
 /**
  * Resolves the first day of the week for the given locale using Intl.Locale.weekInfo,
  * Intl.Locale.getWeekInfo(), or CLDR fallbacks.
  */
 export function getLocaleFirstDayOfWeek(localeId: string): LocaleFirstDayOfWeek {
-    const locale = normalizeGregorianLocale(localeId);
-    let firstDay = firstDayCache.get(locale);
+    const cacheKey = (localeId ?? "").trim();
+    let firstDay = firstDayCache.get(cacheKey);
     if (!firstDay) {
-        try {
-            if (typeof Intl !== "undefined" && typeof Intl.Locale === "function") {
-                const loc = new Intl.Locale(locale) as unknown as LocaleWeekInfoCompat;
-                const weekInfo = loc.weekInfo ?? loc.getWeekInfo?.();
-                if (weekInfo && typeof weekInfo.firstDay === "number") {
-                    const dayNum = weekInfo.firstDay === 0 ? 7 : weekInfo.firstDay;
-                    firstDay = ISO_DAY_MAP[dayNum];
-                }
-            }
-        } catch {
-            // fallback
-        }
-        if (!firstDay) {
-            firstDay = resolveFallbackFirstDayOfWeek(locale);
-        }
-        firstDayCache.set(locale, firstDay);
+        firstDay = resolveLocaleFirstDayOfWeek(localeId);
+        firstDayCache.set(cacheKey, firstDay);
     }
     return firstDay;
 }

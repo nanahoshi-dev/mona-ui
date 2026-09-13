@@ -7,6 +7,12 @@ import {
     getLocaleFirstDayOfWeek,
     getLocaleTimeInputFormat
 } from "./locale-date-formats";
+import {
+    resolveExplicitFirstDayOverride,
+    resolveFallbackFirstDayOfWeek,
+    resolveLikelyRegion,
+    resolveLocaleFirstDayOfWeek
+} from "./locale-week-data";
 
 describe("locale-date-formats", () => {
     describe("getLocaleDateInputFormat", () => {
@@ -92,81 +98,175 @@ describe("locale-date-formats", () => {
     });
 
     describe("getLocaleFirstDayOfWeek", () => {
-        it("returns sunday for Japanese (ja-JP)", () => {
-            expect(getLocaleFirstDayOfWeek("ja-JP")).toBe("sunday");
-        });
+        describe("native week-info path", () => {
+            it("returns sunday for Japanese (ja-JP)", () => {
+                expect(getLocaleFirstDayOfWeek("ja-JP")).toBe("sunday");
+            });
 
-        it("returns sunday for US English (en-US)", () => {
-            expect(getLocaleFirstDayOfWeek("en-US")).toBe("sunday");
-        });
+            it("returns sunday for US English (en-US)", () => {
+                expect(getLocaleFirstDayOfWeek("en-US")).toBe("sunday");
+            });
 
-        it("returns monday for German (de-DE)", () => {
-            expect(getLocaleFirstDayOfWeek("de-DE")).toBe("monday");
-        });
+            it("returns monday for German (de-DE)", () => {
+                expect(getLocaleFirstDayOfWeek("de-DE")).toBe("monday");
+            });
 
-        it("returns monday for Spanish (es-ES)", () => {
-            expect(getLocaleFirstDayOfWeek("es-ES")).toBe("monday");
-        });
+            it("returns monday for Spanish (es-ES)", () => {
+                expect(getLocaleFirstDayOfWeek("es-ES")).toBe("monday");
+            });
 
-        it("returns monday for French (fr-FR)", () => {
-            expect(getLocaleFirstDayOfWeek("fr-FR")).toBe("monday");
-        });
+            it("returns monday for French (fr-FR)", () => {
+                expect(getLocaleFirstDayOfWeek("fr-FR")).toBe("monday");
+            });
 
-        it("returns saturday for Egyptian Arabic (ar-EG)", () => {
-            expect(getLocaleFirstDayOfWeek("ar-EG")).toBe("saturday");
-        });
-
-        it("falls back to saturday for Saturday-first regions in CLDR fallback when weekInfo is unavailable", () => {
-            const originalLocale = Intl.Locale;
-            try {
-                class MockLocale extends originalLocale {
-                    public get weekInfo(): undefined {
-                        return undefined;
-                    }
-                }
-                (MockLocale.prototype as unknown as { getWeekInfo: unknown }).getWeekInfo = undefined;
-                Object.defineProperty(Intl, "Locale", { value: MockLocale, configurable: true, writable: true });
+            it("returns saturday for Egyptian Arabic (ar-EG)", () => {
                 expect(getLocaleFirstDayOfWeek("ar-EG")).toBe("saturday");
-            } finally {
-                Object.defineProperty(Intl, "Locale", { value: originalLocale, configurable: true, writable: true });
-            }
-        });
+            });
 
-        it("falls back to monday safely for unknown locales", () => {
-            expect(getLocaleFirstDayOfWeek("")).toBe("monday");
-            expect(getLocaleFirstDayOfWeek("xyz-unknown")).toBe("monday");
-        });
+            it("returns friday for Maldives (dv-MV)", () => {
+                expect(getLocaleFirstDayOfWeek("dv-MV")).toBe("friday");
+            });
 
-        it("reads weekInfo accessor when available without getWeekInfo method", () => {
-            const originalLocale = Intl.Locale;
-            try {
-                class MockLocale extends originalLocale {
-                    public get weekInfo(): { firstDay: number } {
-                        return { firstDay: 7 };
+            it("falls back to monday safely for unknown locales", () => {
+                expect(getLocaleFirstDayOfWeek("")).toBe("monday");
+                expect(getLocaleFirstDayOfWeek("xyz-unknown")).toBe("monday");
+            });
+
+            it("reads weekInfo accessor when available without getWeekInfo method", () => {
+                const originalLocale = Intl.Locale;
+                try {
+                    class MockLocale extends originalLocale {
+                        public get weekInfo(): { firstDay: number } {
+                            return { firstDay: 7 };
+                        }
                     }
+                    (MockLocale.prototype as unknown as { getWeekInfo: unknown }).getWeekInfo = undefined;
+                    Object.defineProperty(Intl, "Locale", { value: MockLocale, configurable: true, writable: true });
+                    expect(getLocaleFirstDayOfWeek("en-AA")).toBe("sunday");
+                } finally {
+                    Object.defineProperty(Intl, "Locale", { value: originalLocale, configurable: true, writable: true });
                 }
-                (MockLocale.prototype as unknown as { getWeekInfo: unknown }).getWeekInfo = undefined;
-                Object.defineProperty(Intl, "Locale", { value: MockLocale, configurable: true, writable: true });
-                expect(getLocaleFirstDayOfWeek("en-AA")).toBe("sunday");
-            } finally {
-                Object.defineProperty(Intl, "Locale", { value: originalLocale, configurable: true, writable: true });
-            }
+            });
+
+            it("reads getWeekInfo method when weekInfo accessor is undefined", () => {
+                const originalLocale = Intl.Locale;
+                try {
+                    class MockLocale extends originalLocale {
+                        public getWeekInfo(): { firstDay: number } {
+                            return { firstDay: 7 };
+                        }
+                    }
+                    Object.defineProperty(MockLocale.prototype, "weekInfo", { value: undefined, configurable: true });
+                    Object.defineProperty(Intl, "Locale", { value: MockLocale, configurable: true, writable: true });
+                    expect(getLocaleFirstDayOfWeek("en-AB")).toBe("sunday");
+                } finally {
+                    Object.defineProperty(Intl, "Locale", { value: originalLocale, configurable: true, writable: true });
+                }
+            });
         });
 
-        it("reads getWeekInfo method when weekInfo accessor is undefined", () => {
-            const originalLocale = Intl.Locale;
-            try {
-                class MockLocale extends originalLocale {
-                    public getWeekInfo(): { firstDay: number } {
-                        return { firstDay: 7 };
+        describe("forced fallback resolution (weekInfo and getWeekInfo unavailable)", () => {
+            function withWeekInfoDisabled(fn: () => void): void {
+                const originalLocale = Intl.Locale;
+                try {
+                    class MockDisabledLocale extends originalLocale {
+                        public get weekInfo(): undefined {
+                            return undefined;
+                        }
                     }
+                    (MockDisabledLocale.prototype as unknown as { getWeekInfo: unknown }).getWeekInfo = undefined;
+                    Object.defineProperty(Intl, "Locale", { value: MockDisabledLocale, configurable: true, writable: true });
+                    fn();
+                } finally {
+                    Object.defineProperty(Intl, "Locale", { value: originalLocale, configurable: true, writable: true });
                 }
-                Object.defineProperty(MockLocale.prototype, "weekInfo", { value: undefined, configurable: true });
-                Object.defineProperty(Intl, "Locale", { value: MockLocale, configurable: true, writable: true });
-                expect(getLocaleFirstDayOfWeek("en-AB")).toBe("sunday");
-            } finally {
-                Object.defineProperty(Intl, "Locale", { value: originalLocale, configurable: true, writable: true });
             }
+
+            it("matches pinned CLDR firstDay expectations across verified regions", () => {
+                withWeekInfoDisabled(() => {
+                    // AE, AU, CN are Monday-first in CLDR 46+
+                    expect(resolveFallbackFirstDayOfWeek("ar-AE")).toBe("monday");
+                    expect(resolveFallbackFirstDayOfWeek("en-AU")).toBe("monday");
+                    expect(resolveFallbackFirstDayOfWeek("zh-CN")).toBe("monday");
+
+                    // IS and YE are Sunday-first in CLDR
+                    expect(resolveFallbackFirstDayOfWeek("is-IS")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("ar-YE")).toBe("sunday");
+
+                    // MV is Friday-first in CLDR
+                    expect(resolveFallbackFirstDayOfWeek("dv-MV")).toBe("friday");
+
+                    // Saturday-first regions in CLDR
+                    expect(resolveFallbackFirstDayOfWeek("ar-EG")).toBe("saturday");
+                    expect(resolveFallbackFirstDayOfWeek("fa-IR")).toBe("saturday");
+                });
+            });
+
+            it("resolves language-only tags through likely subtags without misreading -u-ca-gregory as region CA", () => {
+                withWeekInfoDisabled(() => {
+                    expect(resolveFallbackFirstDayOfWeek("de")).toBe("monday");
+                    expect(resolveFallbackFirstDayOfWeek("ja")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("ko")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("ar")).toBe("saturday");
+                    expect(resolveFallbackFirstDayOfWeek("fa")).toBe("saturday");
+
+                    // Critical regression test: de with -u-ca-gregory extension must not be interpreted as Canada (CA)
+                    expect(resolveFallbackFirstDayOfWeek("de-u-ca-gregory")).toBe("monday");
+                    expect(resolveLikelyRegion("de-u-ca-gregory")).toBe("DE");
+                });
+            });
+
+            it("respects explicit Unicode u-fw-* overrides when week-info API is unavailable", () => {
+                withWeekInfoDisabled(() => {
+                    expect(resolveFallbackFirstDayOfWeek("en-US-u-fw-mon")).toBe("monday");
+                    expect(resolveFallbackFirstDayOfWeek("de-DE-u-fw-sun")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("ja-JP-u-fw-mon")).toBe("monday");
+                    expect(resolveFallbackFirstDayOfWeek("ar-EG-u-fw-fri")).toBe("friday");
+                    expect(resolveFallbackFirstDayOfWeek("en-US-u-ca-gregory-fw-mon")).toBe("monday");
+
+                    // Unknown or invalid fw values fall through safely to regional lookup
+                    expect(resolveFallbackFirstDayOfWeek("en-US-u-fw-invalid")).toBe("sunday");
+                });
+            });
+
+            it("ensures public getLocaleFirstDayOfWeek executes fallback when mock is active on an uncached locale", () => {
+                withWeekInfoDisabled(() => {
+                    // Test with unique locales that were not queried previously in normal-path tests
+                    expect(getLocaleFirstDayOfWeek("en-MV")).toBe("friday");
+                    expect(getLocaleFirstDayOfWeek("is-IS")).toBe("sunday");
+                });
+            });
+
+            it("proves forced-fallback resolution is isolated from prior normal-path cache entries", () => {
+                // 1. Query normal path for en-US
+                expect(getLocaleFirstDayOfWeek("en-US")).toBe("sunday");
+
+                // 2. Pure resolver under disabled weekInfo resolves independent targets correctly
+                withWeekInfoDisabled(() => {
+                    expect(resolveLocaleFirstDayOfWeek("dv-MV")).toBe("friday");
+                    expect(resolveLocaleFirstDayOfWeek("ar-YE")).toBe("sunday");
+                    expect(resolveLocaleFirstDayOfWeek("ar-AE")).toBe("monday");
+                });
+            });
+
+            it("correctly parses base region when Intl.Locale is completely absent", () => {
+                const originalIntl = globalThis.Intl;
+                try {
+                    // Simulate primitive environment without Intl.Locale
+                    const mockedIntl = { ...originalIntl };
+                    delete (mockedIntl as Record<string, unknown>).Locale;
+                    Object.defineProperty(globalThis, "Intl", { value: mockedIntl, configurable: true, writable: true });
+
+                    expect(resolveLikelyRegion("en-US")).toBe("US");
+                    expect(resolveLikelyRegion("de-u-ca-gregory")).toBeNull();
+                    expect(resolveFallbackFirstDayOfWeek("de-u-ca-gregory")).toBe("monday");
+                    expect(resolveFallbackFirstDayOfWeek("ja")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("ar-EG")).toBe("saturday");
+                    expect(resolveFallbackFirstDayOfWeek("dv-MV")).toBe("friday");
+                } finally {
+                    Object.defineProperty(globalThis, "Intl", { value: originalIntl, configurable: true, writable: true });
+                }
+            });
         });
     });
 
