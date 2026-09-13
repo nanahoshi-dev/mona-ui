@@ -1,4 +1,11 @@
-import { resolveLikelyFirstDayOfWeek } from "./locale-week-likely-data";
+import {
+    CLDR_LIKELY_SUBTAGS_VERSION,
+    CLDR_WEEK_DATA_VERSION,
+    FRIDAY_FIRST_REGIONS,
+    resolveLikelyFirstDayOfWeek,
+    SATURDAY_FIRST_REGIONS,
+    SUNDAY_FIRST_REGIONS
+} from "./locale-week-likely-data";
 
 export type LocaleFirstDayOfWeek =
     | "monday"
@@ -9,45 +16,14 @@ export type LocaleFirstDayOfWeek =
     | "saturday"
     | "sunday";
 
-/**
- * Pinned Unicode CLDR release: 46 / Unicode 16.0
- * Source: common/supplemental/supplementalData.xml -> weekData/firstDay
- * Default territory ("001") is Monday.
- * Update from the pinned CLDR dataset rather than editing ad hoc.
- */
-export const CLDR_WEEK_DATA_VERSION = "46";
-
-// Territories where firstDay is Friday (CLDR weekData/firstDay day="fri")
-export const FRIDAY_FIRST_REGIONS: ReadonlySet<string> = new Set([
-    "MV"
-]);
-
-// Territories where firstDay is Saturday (CLDR weekData/firstDay day="sat")
-export const SATURDAY_FIRST_REGIONS: ReadonlySet<string> = new Set([
-    "AF",
-    "BH",
-    "DJ",
-    "DZ",
-    "EG",
-    "IQ",
-    "IR",
-    "JO",
-    "KW",
-    "LY",
-    "OM",
-    "QA",
-    "SD",
-    "SY"
-]);
-
-// Territories where firstDay is Sunday (CLDR weekData/firstDay day="sun")
-export const SUNDAY_FIRST_REGIONS: ReadonlySet<string> = new Set([
-    "AG", "AS", "BD", "BR", "BS", "BT", "BW", "BZ", "CA", "CO", "DM", "DO", "ET",
-    "GT", "GU", "HK", "HN", "ID", "IL", "IN", "IS", "JM", "JP", "KE", "KH", "KR",
-    "LA", "MH", "MM", "MO", "MT", "MX", "MZ", "NI", "NP", "PA", "PE", "PH", "PK",
-    "PR", "PT", "PY", "SA", "SG", "SV", "TH", "TT", "TW", "UM", "US", "VE", "VI",
-    "WS", "YE", "ZA", "ZW"
-]);
+export {
+    CLDR_LIKELY_SUBTAGS_VERSION,
+    CLDR_WEEK_DATA_VERSION,
+    FRIDAY_FIRST_REGIONS,
+    SATURDAY_FIRST_REGIONS,
+    SUNDAY_FIRST_REGIONS,
+    resolveLikelyFirstDayOfWeek
+};
 
 const FW_TO_FIRST_DAY: Record<string, LocaleFirstDayOfWeek> = {
     mon: "monday",
@@ -231,8 +207,6 @@ export function resolveFallbackFirstDayOfWeek(localeId: string): LocaleFirstDayO
     }
     return "monday";
 }
-
-export { resolveLikelyFirstDayOfWeek };
 
 /**
  * Pure, uncached resolver for locale first day of week.

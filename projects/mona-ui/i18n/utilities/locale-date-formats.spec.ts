@@ -8,6 +8,8 @@ import {
     getLocaleTimeInputFormat
 } from "./locale-date-formats";
 import {
+    CLDR_LIKELY_SUBTAGS_VERSION,
+    CLDR_WEEK_DATA_VERSION,
     resolveExplicitFirstDayOverride,
     resolveFallbackFirstDayOfWeek,
     resolveLikelyFirstDayOfWeek,
@@ -444,6 +446,11 @@ describe("locale-date-formats", () => {
                     expect(resolveFallbackFirstDayOfWeek(item.locale)).toBe(item.expected);
                 }
             });
+
+            it("verifies CLDR version synchronization", () => {
+                expect(CLDR_LIKELY_SUBTAGS_VERSION).toBe(CLDR_WEEK_DATA_VERSION);
+                expect(CLDR_WEEK_DATA_VERSION).toBe("46");
+            });
         });
     });
 
@@ -505,6 +512,16 @@ describe("locale-date-formats", () => {
             expect(resolveLikelyFirstDayOfWeek("zh")).toBeNull();
             expect(resolveLikelyFirstDayOfWeek("zh-Hans")).toBeNull();
             expect(resolveLikelyFirstDayOfWeek("xyz-unknown")).toBeNull();
+        });
+
+        it("resolves undefined language (und) and und-Script tags according to CLDR 46 likely subtags", () => {
+            expect(resolveLikelyFirstDayOfWeek("und")).toBe("sunday");
+            expect(resolveLikelyFirstDayOfWeek("und-Latn")).toBe("sunday");
+            expect(resolveLikelyFirstDayOfWeek("und-Hant")).toBe("sunday");
+            expect(resolveLikelyFirstDayOfWeek("und-Hebr")).toBe("sunday");
+            expect(resolveLikelyFirstDayOfWeek("und-Arab")).toBe("saturday");
+            expect(resolveLikelyFirstDayOfWeek("und-Cyrl")).toBe("monday");
+            expect(resolveLikelyFirstDayOfWeek("und-Diak")).toBe("friday");
         });
     });
 

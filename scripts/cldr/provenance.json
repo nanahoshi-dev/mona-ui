@@ -1,0 +1,15 @@
+{
+  "cldrVersion": "46",
+  "cldrJsonTag": "46.0.0",
+  "unicodeVersion": "16.0",
+  "files": {
+    "likelySubtags.json": {
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/refs/tags/46.0.0/cldr-json/cldr-core/supplemental/likelySubtags.json",
+      "sha256": "bd98c1a08b6795bfc52f56014d5f522ab8d42ef92dfc3febd8e7bbb3ab84b48f"
+    },
+    "weekData.json": {
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/refs/tags/46.0.0/cldr-json/cldr-core/supplemental/weekData.json",
+      "sha256": "7667d479f415418288ed1ab0390bb440892626f4549612d875becc4334708c77"
+    }
+  }
+}
