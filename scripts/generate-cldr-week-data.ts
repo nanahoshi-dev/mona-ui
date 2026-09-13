@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -9,25 +10,205 @@ export const CLDR_VERSION = "46";
 export const UNICODE_VERSION = "16.0";
 export const CLDR_JSON_TAG = "46.0.0";
 
-const LIKELY_SUBTAGS_URL = `https://raw.githubusercontent.com/unicode-org/cldr-json/refs/tags/${CLDR_JSON_TAG}/cldr-json/cldr-core/supplemental/likelySubtags.json`;
-const WEEK_DATA_URL = `https://raw.githubusercontent.com/unicode-org/cldr-json/refs/tags/${CLDR_JSON_TAG}/cldr-json/cldr-core/supplemental/weekData.json`;
+export const LIKELY_SUBTAGS_URL = `https://raw.githubusercontent.com/unicode-org/cldr-json/refs/tags/${CLDR_JSON_TAG}/cldr-json/cldr-core/supplemental/likelySubtags.json`;
+export const WEEK_DATA_URL = `https://raw.githubusercontent.com/unicode-org/cldr-json/refs/tags/${CLDR_JSON_TAG}/cldr-json/cldr-core/supplemental/weekData.json`;
 
 export interface CldrSources {
     readonly likelySubtags: Record<string, string>;
     readonly weekDataFirstDay: Record<string, string>;
 }
 
-export async function loadCldrSources(forceFetch = false): Promise<CldrSources> {
-    const cldrDir = path.resolve(__dirname, "cldr");
+export interface CldrProvenanceFile {
+    readonly url: string;
+    readonly sha256: string;
+}
+
+export interface CldrProvenance {
+    readonly cldrVersion: string;
+    readonly cldrJsonTag: string;
+    readonly unicodeVersion: string;
+    readonly files: {
+        readonly "likelySubtags.json": CldrProvenanceFile;
+        readonly "weekData.json": CldrProvenanceFile;
+        readonly [filename: string]: CldrProvenanceFile;
+    };
+}
+
+export interface CldrVersionedDocument {
+    readonly supplemental?: {
+        readonly version?: {
+            readonly _cldrVersion?: string;
+            readonly _unicodeVersion?: string;
+        };
+        readonly likelySubtags?: Record<string, string>;
+        readonly weekData?: {
+            readonly firstDay?: Record<string, string>;
+        };
+    };
+}
+
+export function computeSha256(content: Buffer | string): string {
+    return crypto.createHash("sha256").update(content).digest("hex");
+}
+
+export function normalizeUnicodeVersion(version: string): string {
+    const parts = version.trim().split(".");
+    if (parts.length >= 2) {
+        return `${parts[0]}.${parts[1]}`;
+    }
+    return version.trim();
+}
+
+export function validateCldrProvenance(
+    provenance: CldrProvenance,
+    fileContents: Record<string, Buffer | string>,
+    options?: {
+        expectedCldrVersion?: string;
+        expectedCldrJsonTag?: string;
+        expectedUnicodeVersion?: string;
+    }
+): void {
+    const expectedCldrVersion = options?.expectedCldrVersion ?? CLDR_VERSION;
+    const expectedCldrJsonTag = options?.expectedCldrJsonTag ?? CLDR_JSON_TAG;
+    const expectedUnicodeVersion = options?.expectedUnicodeVersion ?? UNICODE_VERSION;
+
+    if (!provenance || typeof provenance !== "object") {
+        throw new Error("Invalid provenance data: expected an object");
+    }
+
+    if (provenance.cldrVersion !== expectedCldrVersion) {
+        throw new Error(
+            `CLDR provenance version mismatch: expected CLDR ${expectedCldrVersion}, but provenance declares CLDR ${provenance.cldrVersion}.`
+        );
+    }
+
+    if (provenance.cldrJsonTag !== expectedCldrJsonTag) {
+        throw new Error(
+            `CLDR provenance tag mismatch: expected tag ${expectedCldrJsonTag}, but provenance declares tag ${provenance.cldrJsonTag}.`
+        );
+    }
+
+    if (normalizeUnicodeVersion(provenance.unicodeVersion) !== normalizeUnicodeVersion(expectedUnicodeVersion)) {
+        throw new Error(
+            `CLDR provenance Unicode version mismatch: expected Unicode ${expectedUnicodeVersion}, but provenance declares Unicode ${provenance.unicodeVersion}.`
+        );
+    }
+
+    if (!provenance.files || typeof provenance.files !== "object") {
+        throw new Error("Invalid provenance data: missing 'files' dictionary");
+    }
+
+    for (const [filename, content] of Object.entries(fileContents)) {
+        const fileMeta = provenance.files[filename];
+        if (!fileMeta) {
+            throw new Error(`CLDR provenance entry missing for file: ${filename}`);
+        }
+        const actualHash = computeSha256(content);
+        if (actualHash !== fileMeta.sha256) {
+            throw new Error(
+                `CLDR source integrity check failed:\n` +
+                `${filename} SHA-256 does not match provenance.json.\n` +
+                `Expected: ${fileMeta.sha256}\n` +
+                `Actual:   ${actualHash}\n` +
+                `Run the documented CLDR source-update workflow.`
+            );
+        }
+    }
+}
+
+export function validateCldrSourceVersions(
+    fileJsonMap: Record<string, unknown>,
+    options?: {
+        expectedCldrVersion?: string;
+        expectedUnicodeVersion?: string;
+    }
+): void {
+    const expectedCldrVersion = options?.expectedCldrVersion ?? CLDR_VERSION;
+    const expectedUnicodeVersion = options?.expectedUnicodeVersion ?? UNICODE_VERSION;
+
+    let previousBaseline: string | null = null;
+
+    for (const [filename, rawJson] of Object.entries(fileJsonMap)) {
+        const doc = rawJson as CldrVersionedDocument | undefined;
+        const versionObj = doc?.supplemental?.version;
+        if (!versionObj || typeof versionObj !== "object") {
+            throw new Error(`CLDR source version metadata missing in ${filename} (expected supplemental.version)`);
+        }
+
+        const sourceCldr = versionObj._cldrVersion;
+        if (!sourceCldr || typeof sourceCldr !== "string") {
+            throw new Error(`CLDR source _cldrVersion missing in ${filename}`);
+        }
+
+        if (sourceCldr !== expectedCldrVersion) {
+            throw new Error(
+                `CLDR source version mismatch in ${filename}: expected CLDR ${expectedCldrVersion}, but ${filename} declares CLDR ${sourceCldr}.`
+            );
+        }
+
+        const sourceUnicode = versionObj._unicodeVersion;
+        if (!sourceUnicode || typeof sourceUnicode !== "string") {
+            throw new Error(`CLDR source _unicodeVersion missing in ${filename}`);
+        }
+
+        if (normalizeUnicodeVersion(sourceUnicode) !== normalizeUnicodeVersion(expectedUnicodeVersion)) {
+            throw new Error(
+                `CLDR source Unicode version mismatch in ${filename}: expected Unicode ${expectedUnicodeVersion}, but ${filename} declares Unicode ${sourceUnicode}.`
+            );
+        }
+
+        if (previousBaseline !== null && previousBaseline !== sourceCldr) {
+            throw new Error(
+                `CLDR source baseline mismatch: inconsistent CLDR versions between source files (${previousBaseline} vs ${sourceCldr}).`
+            );
+        }
+        previousBaseline = sourceCldr;
+    }
+}
+
+export async function loadCldrSources(
+    optionsOrForceFetch: boolean | { readonly forceFetch?: boolean; readonly cldrDir?: string } = false
+): Promise<CldrSources> {
+    const forceFetch =
+        typeof optionsOrForceFetch === "boolean"
+            ? optionsOrForceFetch
+            : (optionsOrForceFetch?.forceFetch ?? false);
+    const cldrDir =
+        typeof optionsOrForceFetch === "object" && optionsOrForceFetch.cldrDir
+            ? optionsOrForceFetch.cldrDir
+            : path.resolve(__dirname, "cldr");
+
     const likelyFile = path.join(cldrDir, "likelySubtags.json");
     const weekFile = path.join(cldrDir, "weekData.json");
+    const provFile = path.join(cldrDir, "provenance.json");
 
     if (!forceFetch && fs.existsSync(likelyFile) && fs.existsSync(weekFile)) {
-        const likelyJson = JSON.parse(fs.readFileSync(likelyFile, "utf8"));
-        const weekJson = JSON.parse(fs.readFileSync(weekFile, "utf8"));
+        if (!fs.existsSync(provFile)) {
+            throw new Error(`CLDR provenance file not found at: ${provFile}`);
+        }
+
+        const provRaw = fs.readFileSync(provFile, "utf8");
+        const provenance: CldrProvenance = JSON.parse(provRaw);
+
+        const likelyRaw = fs.readFileSync(likelyFile);
+        const weekRaw = fs.readFileSync(weekFile);
+
+        validateCldrProvenance(provenance, {
+            "likelySubtags.json": likelyRaw,
+            "weekData.json": weekRaw
+        });
+
+        const likelyJson = JSON.parse(likelyRaw.toString("utf8")) as CldrVersionedDocument;
+        const weekJson = JSON.parse(weekRaw.toString("utf8")) as CldrVersionedDocument;
+
+        validateCldrSourceVersions({
+            "likelySubtags.json": likelyJson,
+            "weekData.json": weekJson
+        });
+
         return {
-            likelySubtags: likelyJson.supplemental.likelySubtags,
-            weekDataFirstDay: weekJson.supplemental.weekData.firstDay
+            likelySubtags: likelyJson.supplemental?.likelySubtags ?? {},
+            weekDataFirstDay: weekJson.supplemental?.weekData?.firstDay ?? {}
         };
     }
 
@@ -44,12 +225,17 @@ export async function loadCldrSources(forceFetch = false): Promise<CldrSources> 
         throw new Error(`Failed to fetch weekData: ${weekRes.status} ${weekRes.statusText}`);
     }
 
-    const likelyJson = (await likelyRes.json()) as { supplemental: { likelySubtags: Record<string, string> } };
-    const weekJson = (await weekRes.json()) as { supplemental: { weekData: { firstDay: Record<string, string> } } };
+    const likelyJson = (await likelyRes.json()) as CldrVersionedDocument;
+    const weekJson = (await weekRes.json()) as CldrVersionedDocument;
+
+    validateCldrSourceVersions({
+        "likelySubtags.json": likelyJson,
+        "weekData.json": weekJson
+    });
 
     return {
-        likelySubtags: likelyJson.supplemental.likelySubtags,
-        weekDataFirstDay: weekJson.supplemental.weekData.firstDay
+        likelySubtags: likelyJson.supplemental?.likelySubtags ?? {},
+        weekDataFirstDay: weekJson.supplemental?.weekData?.firstDay ?? {}
     };
 }
 
@@ -249,9 +435,85 @@ function normalizeNewlines(str: string): string {
     return str.replace(/\r\n/g, "\n").trim();
 }
 
+export async function updateCldrSources(options?: { readonly cldrDir?: string; readonly targetFile?: string }): Promise<void> {
+    const cldrDir = options?.cldrDir ?? path.resolve(__dirname, "cldr");
+    const likelyFile = path.join(cldrDir, "likelySubtags.json");
+    const weekFile = path.join(cldrDir, "weekData.json");
+    const provFile = path.join(cldrDir, "provenance.json");
+    const targetFile =
+        options?.targetFile ??
+        path.resolve(__dirname, "../projects/mona-ui/i18n/utilities/locale-week-likely-data.ts");
+
+    console.log(`Updating CLDR sources to CLDR ${CLDR_VERSION} (tag: ${CLDR_JSON_TAG}, Unicode: ${UNICODE_VERSION})...`);
+    const [likelyRes, weekRes] = await Promise.all([
+        fetch(LIKELY_SUBTAGS_URL),
+        fetch(WEEK_DATA_URL)
+    ]);
+
+    if (!likelyRes.ok) {
+        throw new Error(`Failed to fetch likelySubtags: ${likelyRes.status} ${likelyRes.statusText}`);
+    }
+    if (!weekRes.ok) {
+        throw new Error(`Failed to fetch weekData: ${weekRes.status} ${weekRes.statusText}`);
+    }
+
+    const likelyBuffer = Buffer.from(await likelyRes.arrayBuffer());
+    const weekBuffer = Buffer.from(await weekRes.arrayBuffer());
+
+    const likelyJson = JSON.parse(likelyBuffer.toString("utf8")) as CldrVersionedDocument;
+    const weekJson = JSON.parse(weekBuffer.toString("utf8")) as CldrVersionedDocument;
+
+    validateCldrSourceVersions({
+        "likelySubtags.json": likelyJson,
+        "weekData.json": weekJson
+    });
+
+    const likelySha256 = computeSha256(likelyBuffer);
+    const weekSha256 = computeSha256(weekBuffer);
+
+    const provenance: CldrProvenance = {
+        cldrVersion: CLDR_VERSION,
+        cldrJsonTag: CLDR_JSON_TAG,
+        unicodeVersion: UNICODE_VERSION,
+        files: {
+            "likelySubtags.json": {
+                url: LIKELY_SUBTAGS_URL,
+                sha256: likelySha256
+            },
+            "weekData.json": {
+                url: WEEK_DATA_URL,
+                sha256: weekSha256
+            }
+        }
+    };
+
+    fs.mkdirSync(cldrDir, { recursive: true });
+    fs.writeFileSync(likelyFile, likelyBuffer);
+    fs.writeFileSync(weekFile, weekBuffer);
+    fs.writeFileSync(provFile, JSON.stringify(provenance, null, 2) + "\n", "utf8");
+
+    const sources: CldrSources = {
+        likelySubtags: likelyJson.supplemental?.likelySubtags ?? {},
+        weekDataFirstDay: weekJson.supplemental?.weekData?.firstDay ?? {}
+    };
+
+    const generatedContent = generateWeekDataModuleContent(sources);
+    fs.writeFileSync(targetFile, generatedContent, "utf8");
+
+    console.log(`Updated CLDR sources in ${cldrDir}`);
+    console.log(`Updated provenance in ${provFile}`);
+    console.log(`Regenerated ${targetFile} (${(Buffer.byteLength(generatedContent) / 1024).toFixed(1)} KB)`);
+}
+
 async function main(): Promise<void> {
     const isCheckMode = process.argv.includes("--check");
+    const isUpdateSourcesMode = process.argv.includes("--update-sources");
     const forceFetch = process.argv.includes("--fetch");
+
+    if (isUpdateSourcesMode) {
+        await updateCldrSources();
+        return;
+    }
 
     const sources = await loadCldrSources(forceFetch);
     const generatedContent = generateWeekDataModuleContent(sources);
@@ -273,6 +535,7 @@ async function main(): Promise<void> {
         }
 
         console.log(`CLDR week data version: ${CLDR_VERSION}`);
+        console.log("CLDR source provenance & hashes: OK");
         console.log("Territory first-day data: OK");
         console.log("Likely first-day data: OK");
         console.log("Generated files are up to date.");

@@ -27,6 +27,7 @@
         "test:audit": "vitest run projects/mona-ui-tester/scripts/audit-i18n-rtl.spec.ts projects/mona-ui-tester/scripts/audit-locales.spec.ts projects/mona-ui-tester/scripts/verify-built-package.spec.ts scripts/generate-cldr-week-data.spec.ts",
         "test:locales-audit": "vitest run projects/mona-ui-tester/scripts/audit-locales.spec.ts",
         "generate:cldr-week-data": "tsx scripts/generate-cldr-week-data.ts",
+        "update:cldr-week-sources": "tsx scripts/generate-cldr-week-data.ts --update-sources",
         "check:cldr-week-data": "tsx scripts/generate-cldr-week-data.ts --check",
         "audit:locales": "tsx projects/mona-ui-tester/scripts/audit-locales.ts",
         "verify:package": "tsx projects/mona-ui-tester/scripts/verify-built-package.ts",
