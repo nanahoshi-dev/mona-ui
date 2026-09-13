@@ -279,6 +279,74 @@ describe("locale-date-formats", () => {
                     Object.defineProperty(globalThis, "Intl", { value: originalIntl, configurable: true, writable: true });
                 }
             });
+
+            it("canonicalizes numeric M49 region codes when Intl.Locale is unavailable but getCanonicalLocales is available", () => {
+                const originalIntl = globalThis.Intl;
+                try {
+                    const mockedIntl = Object.create(originalIntl);
+                    Object.defineProperty(mockedIntl, "Locale", { value: undefined, configurable: true });
+                    Object.defineProperty(globalThis, "Intl", { value: mockedIntl, configurable: true, writable: true });
+
+                    expect(resolveLikelyRegion("en-840")).toBe("US");
+                    expect(resolveLikelyRegion("dv-462")).toBe("MV");
+                    expect(resolveLikelyRegion("ar-818")).toBe("EG");
+                    expect(resolveLikelyRegion("ja-392")).toBe("JP");
+
+                    expect(resolveFallbackFirstDayOfWeek("en-840")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("dv-462")).toBe("friday");
+                    expect(resolveFallbackFirstDayOfWeek("ar-818")).toBe("saturday");
+                    expect(resolveFallbackFirstDayOfWeek("ja-392")).toBe("sunday");
+                } finally {
+                    Object.defineProperty(globalThis, "Intl", { value: originalIntl, configurable: true, writable: true });
+                }
+            });
+
+            it("does not mistake private-use-only tags (e.g. x-US) for region-bearing tags", () => {
+                expect(resolveLikelyRegion("x-US")).toBeNull();
+                expect(resolveFallbackFirstDayOfWeek("x-US")).toBe("monday");
+                expect(resolveLocaleFirstDayOfWeek("x-US")).toBe("monday");
+
+                const originalIntl = globalThis.Intl;
+                try {
+                    const mockedIntl = Object.create(originalIntl);
+                    Object.defineProperty(mockedIntl, "Locale", { value: undefined, configurable: true });
+                    Object.defineProperty(globalThis, "Intl", { value: mockedIntl, configurable: true, writable: true });
+
+                    expect(resolveLikelyRegion("x-US")).toBeNull();
+                    expect(resolveFallbackFirstDayOfWeek("x-US")).toBe("monday");
+                    expect(resolveLocaleFirstDayOfWeek("x-US")).toBe("monday");
+                } finally {
+                    Object.defineProperty(globalThis, "Intl", { value: originalIntl, configurable: true, writable: true });
+                }
+            });
+
+            it("handles primitive environment where both Intl.Locale and Intl.getCanonicalLocales are unavailable", () => {
+                const originalIntl = globalThis.Intl;
+                try {
+                    const mockedIntl = Object.create(originalIntl);
+                    Object.defineProperty(mockedIntl, "Locale", { value: undefined, configurable: true });
+                    Object.defineProperty(mockedIntl, "getCanonicalLocales", { value: undefined, configurable: true });
+                    Object.defineProperty(globalThis, "Intl", { value: mockedIntl, configurable: true, writable: true });
+
+                    // Standard alpha-2 regions are parsed directly
+                    expect(resolveLikelyRegion("en-US")).toBe("US");
+                    expect(resolveLikelyRegion("ar-EG")).toBe("EG");
+                    expect(resolveLikelyRegion("dv-MV")).toBe("MV");
+                    expect(resolveFallbackFirstDayOfWeek("en-US")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("ar-EG")).toBe("saturday");
+                    expect(resolveFallbackFirstDayOfWeek("dv-MV")).toBe("friday");
+
+                    // Numeric regions cannot be mapped without canonicalization and safely fall back
+                    expect(resolveLikelyRegion("en-840")).toBeNull();
+                    expect(resolveFallbackFirstDayOfWeek("en-840")).toBe("monday");
+
+                    // Private use is guarded
+                    expect(resolveLikelyRegion("x-US")).toBeNull();
+                    expect(resolveFallbackFirstDayOfWeek("x-US")).toBe("monday");
+                } finally {
+                    Object.defineProperty(globalThis, "Intl", { value: originalIntl, configurable: true, writable: true });
+                }
+            });
         });
     });
 

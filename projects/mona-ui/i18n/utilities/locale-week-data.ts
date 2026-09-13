@@ -84,7 +84,7 @@ export function resolveExplicitFirstDayOverride(localeId: string): LocaleFirstDa
     if (!localeId) {
         return null;
     }
-    const normalized = localeId.replace(/_/g, "-");
+    const normalized = localeId.trim().replace(/_/g, "-");
     const subtags = normalized.split("-");
     let inUExtension = false;
 
@@ -105,19 +105,24 @@ export function resolveExplicitFirstDayOverride(localeId: string): LocaleFirstDa
 }
 
 /**
- * Resolves the 2-letter or 3-digit region code from a locale tag.
- * Uses Intl.Locale.region, then Intl.Locale.maximize().region.
- * If Intl.Locale is unavailable or fails, manually parses the base language tag
- * while safely stripping Unicode (-u-) and private-use (-x-) extensions to prevent
- * mistaking extension keys (like '-ca-') for region subtags.
+ * Resolves the 2-letter ISO region code from a locale tag.
+ * 1. Uses Intl.Locale.region, then Intl.Locale.maximize().region.
+ * 2. If Intl.Locale is unavailable or fails, canonicalizes via Intl.getCanonicalLocales() to map numeric M49 region codes to alpha-2.
+ * 3. Falls back to manual base language tag parsing (safely stripping extension singletons like -u- or -x-) for 2-letter alpha territory subtags.
+ * Private-use tags (e.g. 'x-US') without a standard language tag are ignored.
  */
 export function resolveLikelyRegion(localeId: string): string | null {
     if (!localeId) {
         return null;
     }
+    const normalized = localeId.trim().replace(/_/g, "-");
+    if (!normalized || /^[xX](?:-|$)/.test(normalized)) {
+        return null;
+    }
+
     try {
         if (typeof Intl !== "undefined" && typeof Intl.Locale === "function") {
-            const loc = new Intl.Locale(localeId);
+            const loc = new Intl.Locale(normalized);
             if (loc.region) {
                 return loc.region.toUpperCase();
             }
@@ -129,16 +134,30 @@ export function resolveLikelyRegion(localeId: string): string | null {
             }
         }
     } catch {
-        // Fallback safely to manual base tag parser
+        // Fallback safely to canonicalization / manual base tag parser
+    }
+
+    let tagToParse = normalized;
+    try {
+        if (typeof Intl !== "undefined" && typeof Intl.getCanonicalLocales === "function") {
+            const canonical = Intl.getCanonicalLocales(normalized)[0];
+            if (canonical) {
+                tagToParse = canonical;
+            }
+        }
+    } catch {
+        // Continue with normalized tag
     }
 
     // Manual BCP-47 fallback: strip singleton extensions (-u-, -x-, -t-, etc.) and everything following
-    const normalized = localeId.replace(/_/g, "-");
-    const basePart = normalized.split(/-[a-zA-Z0-9]-/)[0];
+    const basePart = tagToParse.split(/-[a-zA-Z0-9]-/)[0];
     const subtags = basePart.split("-");
+    if (!subtags[0] || subtags[0].length <= 1) {
+        return null;
+    }
     for (let i = 1; i < subtags.length; i++) {
         const subtag = subtags[i];
-        if (/^[a-zA-Z]{2}$|^\d{3}$/.test(subtag)) {
+        if (/^[a-zA-Z]{2}$/.test(subtag)) {
             return subtag.toUpperCase();
         }
     }
@@ -150,12 +169,17 @@ export function resolveLikelyRegion(localeId: string): string | null {
  * Pure fallback resolver when Intl.Locale.weekInfo / getWeekInfo() is unavailable.
  */
 export function resolveFallbackFirstDayOfWeek(localeId: string): LocaleFirstDayOfWeek {
-    const explicitOverride = resolveExplicitFirstDayOverride(localeId);
+    const normalized = (localeId ?? "").trim();
+    if (!normalized) {
+        return "monday";
+    }
+
+    const explicitOverride = resolveExplicitFirstDayOverride(normalized);
     if (explicitOverride) {
         return explicitOverride;
     }
 
-    const region = resolveLikelyRegion(localeId);
+    const region = resolveLikelyRegion(normalized);
     if (region) {
         if (FRIDAY_FIRST_REGIONS.has(region)) {
             return "friday";
@@ -170,8 +194,16 @@ export function resolveFallbackFirstDayOfWeek(localeId: string): LocaleFirstDayO
     }
 
     // Language-only fallback for primitive environments where maximize() was unavailable
-    const normalized = localeId.replace(/_/g, "-");
-    const baseLang = normalized.split(/-[a-zA-Z0-9]-/)[0].split("-")[0]?.toLowerCase();
+    const tag = normalized.replace(/_/g, "-");
+    if (/^[xX](?:-|$)/.test(tag)) {
+        return "monday";
+    }
+    const basePart = tag.split(/-[a-zA-Z0-9]-/)[0];
+    const subtags = basePart.split("-");
+    if (!subtags[0] || subtags[0].length <= 1) {
+        return "monday";
+    }
+    const baseLang = subtags[0].toLowerCase();
     if (baseLang === "ja" || baseLang === "ko") {
         return "sunday";
     }
@@ -187,12 +219,13 @@ export function resolveFallbackFirstDayOfWeek(localeId: string): LocaleFirstDayO
  * 2. Falls back to deterministic CLDR fallback
  */
 export function resolveLocaleFirstDayOfWeek(localeId: string): LocaleFirstDayOfWeek {
-    if (!localeId) {
+    const normalized = (localeId ?? "").trim();
+    if (!normalized) {
         return "monday";
     }
     try {
         if (typeof Intl !== "undefined" && typeof Intl.Locale === "function") {
-            const loc = new Intl.Locale(localeId) as unknown as LocaleWeekInfoCompat;
+            const loc = new Intl.Locale(normalized) as unknown as LocaleWeekInfoCompat;
             const weekInfo = loc.weekInfo ?? loc.getWeekInfo?.();
             if (weekInfo && typeof weekInfo.firstDay === "number") {
                 const dayNum = weekInfo.firstDay === 0 ? 7 : weekInfo.firstDay;
@@ -205,5 +238,5 @@ export function resolveLocaleFirstDayOfWeek(localeId: string): LocaleFirstDayOfW
     } catch {
         // fallback
     }
-    return resolveFallbackFirstDayOfWeek(localeId);
+    return resolveFallbackFirstDayOfWeek(normalized);
 }
