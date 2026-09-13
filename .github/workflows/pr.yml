@@ -48,6 +48,9 @@ jobs:
       - name: Audit official locales
         run: npm run audit:locales
 
+      - name: Check generated CLDR week data
+        run: npm run check:cldr-week-data
+
       - name: Build Library
         run: npm run build:prod
 
