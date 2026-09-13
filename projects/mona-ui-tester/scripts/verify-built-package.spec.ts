@@ -406,6 +406,32 @@ export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayO
                 rmSync(fakeDist, { recursive: true, force: true });
             }
         });
+
+        it("fails when TypeScript consumer compilation detects unneeded ts-expect-error if locale is optional in i18n helpers", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                populateFakeDist(fakeDist, {
+                    localesMjs: 'export const es_ES = { id: "es-ES", direction: "ltr", messages: {} };\n',
+                    localesDts: 'export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    i18nDts: `
+export type LocaleFirstDayOfWeek = "monday" | "sunday";
+export declare function getLocaleDateInputFormat(locale: string): string;
+export declare function getLocaleTimeInputFormat(locale?: string, options?: unknown): string;
+export declare function getLocaleDateTimeInputFormat(locale: string, options?: unknown): string;
+export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayOfWeek;
+`
+                });
+
+                expect(() =>
+                    runConsumerSmokeTest({
+                        distDir: fakeDist,
+                        expectedLocales: [{ symbol: "es_ES", id: "es-ES" }]
+                    })
+                ).toThrow("Consumer TypeScript compilation failed");
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
+            }
+        });
     });
 
     describe("verifyBuiltPackage missing file checks", () => {
