@@ -66,11 +66,16 @@ export function validateCldrProvenance(
         expectedCldrVersion?: string;
         expectedCldrJsonTag?: string;
         expectedUnicodeVersion?: string;
+        expectedUrls?: Record<string, string>;
     }
 ): void {
     const expectedCldrVersion = options?.expectedCldrVersion ?? CLDR_VERSION;
     const expectedCldrJsonTag = options?.expectedCldrJsonTag ?? CLDR_JSON_TAG;
     const expectedUnicodeVersion = options?.expectedUnicodeVersion ?? UNICODE_VERSION;
+    const expectedUrls: Record<string, string> = options?.expectedUrls ?? {
+        "likelySubtags.json": LIKELY_SUBTAGS_URL,
+        "weekData.json": WEEK_DATA_URL
+    };
 
     if (!provenance || typeof provenance !== "object") {
         throw new Error("Invalid provenance data: expected an object");
@@ -103,6 +108,14 @@ export function validateCldrProvenance(
         if (!fileMeta) {
             throw new Error(`CLDR provenance entry missing for file: ${filename}`);
         }
+        const expectedUrl = expectedUrls[filename];
+        if (expectedUrl && fileMeta.url !== expectedUrl) {
+            throw new Error(
+                `CLDR provenance source URL mismatch for ${filename}:\n` +
+                `Expected: ${expectedUrl}\n` +
+                `Actual:   ${fileMeta.url}`
+            );
+        }
         const actualHash = computeSha256(content);
         if (actualHash !== fileMeta.sha256) {
             throw new Error(
@@ -125,8 +138,6 @@ export function validateCldrSourceVersions(
 ): void {
     const expectedCldrVersion = options?.expectedCldrVersion ?? CLDR_VERSION;
     const expectedUnicodeVersion = options?.expectedUnicodeVersion ?? UNICODE_VERSION;
-
-    let previousBaseline: string | null = null;
 
     for (const [filename, rawJson] of Object.entries(fileJsonMap)) {
         const doc = rawJson as CldrVersionedDocument | undefined;
@@ -156,13 +167,6 @@ export function validateCldrSourceVersions(
                 `CLDR source Unicode version mismatch in ${filename}: expected Unicode ${expectedUnicodeVersion}, but ${filename} declares Unicode ${sourceUnicode}.`
             );
         }
-
-        if (previousBaseline !== null && previousBaseline !== sourceCldr) {
-            throw new Error(
-                `CLDR source baseline mismatch: inconsistent CLDR versions between source files (${previousBaseline} vs ${sourceCldr}).`
-            );
-        }
-        previousBaseline = sourceCldr;
     }
 }
 
@@ -182,9 +186,27 @@ export async function loadCldrSources(
     const weekFile = path.join(cldrDir, "weekData.json");
     const provFile = path.join(cldrDir, "provenance.json");
 
-    if (!forceFetch && fs.existsSync(likelyFile) && fs.existsSync(weekFile)) {
+    if (!forceFetch) {
+        if (!fs.existsSync(likelyFile)) {
+            throw new Error(
+                `Pinned CLDR source file is missing:\n${likelyFile}\n\n` +
+                `Normal generation/check mode is hermetic and will not fetch missing inputs.\n` +
+                `Run "npm run update:cldr-week-sources" to restore or update the pinned source set.`
+            );
+        }
+        if (!fs.existsSync(weekFile)) {
+            throw new Error(
+                `Pinned CLDR source file is missing:\n${weekFile}\n\n` +
+                `Normal generation/check mode is hermetic and will not fetch missing inputs.\n` +
+                `Run "npm run update:cldr-week-sources" to restore or update the pinned source set.`
+            );
+        }
         if (!fs.existsSync(provFile)) {
-            throw new Error(`CLDR provenance file not found at: ${provFile}`);
+            throw new Error(
+                `Pinned CLDR provenance file is missing:\n${provFile}\n\n` +
+                `Normal generation/check mode is hermetic and will not fetch missing inputs.\n` +
+                `Run "npm run update:cldr-week-sources" to restore or update the pinned source set.`
+            );
         }
 
         const provRaw = fs.readFileSync(provFile, "utf8");
