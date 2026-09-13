@@ -154,7 +154,6 @@
     --color-scrollbar-track-focus: var(--color-accent);
     --color-scrollbar-corner: var(--color-canvas);
 
-    --color-page-background: oklch(98.5% 0 0);
     --color-demo-background: oklch(100% 0 0);
 }
 
@@ -225,7 +224,7 @@ body {
         Helvetica,
         Arial,
         sans-serif !important;
-    background-color: var(--color-page-background);
+    background-color: var(--color-canvas);
     color: var(--color-foreground);
 }
 
