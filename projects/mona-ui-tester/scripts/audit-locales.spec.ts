@@ -1331,6 +1331,32 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
                 )
             ).toBe(true);
         });
+
+        it("discovers the official Simplified Chinese locale", () => {
+            const discovery = discoverOfficialLocales();
+            expect(
+                discovery.locales.some(
+                    locale =>
+                        locale.canonicalId === "zh-CN" &&
+                        locale.localeExport === "MONA_ZH_CN_LOCALE" &&
+                        locale.messagesExport === "ZH_CN_MESSAGES" &&
+                        locale.direction === "ltr"
+                )
+            ).toBe(true);
+        });
+
+        it("discovers the official Traditional Chinese locale", () => {
+            const discovery = discoverOfficialLocales();
+            expect(
+                discovery.locales.some(
+                    locale =>
+                        locale.canonicalId === "zh-TW" &&
+                        locale.localeExport === "MONA_ZH_TW_LOCALE" &&
+                        locale.messagesExport === "ZH_TW_MESSAGES" &&
+                        locale.direction === "ltr"
+                )
+            ).toBe(true);
+        });
     });
 
     describe("semantic day-period locale verification", () => {
@@ -1348,6 +1374,12 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
         it("derives localized day periods matching CLDR for supported locales", () => {
             expect(getIntlDayPeriod("ja-JP", 9)).toBe("午前");
             expect(getIntlDayPeriod("ja-JP", 21)).toBe("午後");
+
+            expect(getIntlDayPeriod("zh-CN", 9)).toBe("上午");
+            expect(getIntlDayPeriod("zh-CN", 21)).toBe("下午");
+
+            expect(getIntlDayPeriod("zh-TW", 9)).toBe("上午");
+            expect(getIntlDayPeriod("zh-TW", 21)).toBe("下午");
 
             expect(getIntlDayPeriod("es-ES", 9)).toBe("a. m.");
             expect(getIntlDayPeriod("es-ES", 21)).toBe("p. m.");
@@ -1367,5 +1399,15 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
             expect(isAllowedLocaleCopyException("es-ES", "timeSelector.pm", "PM")).toBe(false);
             expect(isAllowedLocaleCopyException("es-ES", "timeSelector.amPm", "AM/PM")).toBe(false);
         });
+
+        it("guarantees Chinese copy exceptions for day periods are rejected", () => {
+            expect(isAllowedLocaleCopyException("zh-CN", "timeSelector.am", "AM")).toBe(false);
+            expect(isAllowedLocaleCopyException("zh-CN", "timeSelector.pm", "PM")).toBe(false);
+            expect(isAllowedLocaleCopyException("zh-CN", "timeSelector.amPm", "AM/PM")).toBe(false);
+            expect(isAllowedLocaleCopyException("zh-TW", "timeSelector.am", "AM")).toBe(false);
+            expect(isAllowedLocaleCopyException("zh-TW", "timeSelector.pm", "PM")).toBe(false);
+            expect(isAllowedLocaleCopyException("zh-TW", "timeSelector.amPm", "AM/PM")).toBe(false);
+        });
     });
 });
+

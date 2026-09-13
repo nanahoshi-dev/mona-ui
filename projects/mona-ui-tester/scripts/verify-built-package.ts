@@ -187,6 +187,34 @@ if (jaFirstDay !== "sunday") {
     process.exit(1);
 }
 
+const hasZhCn = expectedLocales.some(l => l.id === "zh-CN");
+if (hasZhCn) {
+    const zhCnDateFormat = getLocaleDateInputFormat("zh-CN");
+    if (zhCnDateFormat !== "yyyy/MM/dd") {
+        console.error("Invalid getLocaleDateInputFormat output for zh-CN: " + zhCnDateFormat);
+        process.exit(1);
+    }
+    const zhCnFirstDay = getLocaleFirstDayOfWeek("zh-CN");
+    if (zhCnFirstDay !== "monday") {
+        console.error("Invalid getLocaleFirstDayOfWeek output for zh-CN: " + zhCnFirstDay);
+        process.exit(1);
+    }
+}
+
+const hasZhTw = expectedLocales.some(l => l.id === "zh-TW");
+if (hasZhTw) {
+    const zhTwDateFormat = getLocaleDateInputFormat("zh-TW");
+    if (zhTwDateFormat !== "yyyy/MM/dd") {
+        console.error("Invalid getLocaleDateInputFormat output for zh-TW: " + zhTwDateFormat);
+        process.exit(1);
+    }
+    const zhTwFirstDay = getLocaleFirstDayOfWeek("zh-TW");
+    if (zhTwFirstDay !== "sunday") {
+        console.error("Invalid getLocaleFirstDayOfWeek output for zh-TW: " + zhTwFirstDay);
+        process.exit(1);
+    }
+}
+
 console.log("Runtime package import verified successfully.");
 `;
         writeFileSync(smokeScriptPath, smokeScript);
@@ -236,6 +264,15 @@ void testJaDate;
 void testJaTime;
 void testJaDateTime;
 void testJaFirstDay;
+
+const testZhCnDate: string = getLocaleDateInputFormat("zh-CN");
+const testZhCnFirstDay: LocaleFirstDayOfWeek = getLocaleFirstDayOfWeek("zh-CN");
+const testZhTwDate: string = getLocaleDateInputFormat("zh-TW");
+const testZhTwFirstDay: LocaleFirstDayOfWeek = getLocaleFirstDayOfWeek("zh-TW");
+void testZhCnDate;
+void testZhCnFirstDay;
+void testZhTwDate;
+void testZhTwFirstDay;
 
 // @ts-expect-error Locale argument is required
 getLocaleDateInputFormat();
