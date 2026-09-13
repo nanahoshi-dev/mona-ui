@@ -3,14 +3,20 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { describe, expect, it, beforeEach } from "vitest";
 import { CalendarComponent } from "@nanahoshi/mona-ui/calendar";
 import { generatePseudoLocale, MonaI18nService, type MonaLocale } from "@nanahoshi/mona-ui/i18n";
-import { MONA_DE_DE_LOCALE, MONA_ES_ES_LOCALE, MONA_FR_FR_LOCALE, MONA_JA_JP_LOCALE } from "@nanahoshi/mona-ui/locales";
+import {
+    MONA_DE_DE_LOCALE,
+    MONA_ES_ES_LOCALE,
+    MONA_FR_FR_LOCALE,
+    MONA_JA_JP_LOCALE,
+    MONA_PT_BR_LOCALE
+} from "@nanahoshi/mona-ui/locales";
 import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
 import { PagerComponent } from "@nanahoshi/mona-ui/pager";
 import { ProgressBarComponent } from "@nanahoshi/mona-ui/progress-bar";
 import { ScrollViewComponent } from "@nanahoshi/mona-ui/scroll-view";
 
 @Component({
-    selector: "mona-test-multi-i18n",
+    selector: "app-test-multi-i18n",
     template: `
         <div [attr.dir]="direction()">
             <mona-pager [total]="100" [pageSize]="10" />
@@ -378,6 +384,71 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
 
         expect(i18n.localeId()).toBe("en-US");
         expect(jaPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
+        expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
+    });
+
+    it("integrates official Brazilian Portuguese (pt-BR) locale reactively with runtime overrides and formatting", async () => {
+        const root = fixture.nativeElement as HTMLElement;
+        const input = root.querySelector("mona-numeric-text-box input") as HTMLInputElement;
+
+        // 1. Activate official Brazilian Portuguese locale
+        i18n.use(MONA_PT_BR_LOCALE);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("pt-BR");
+        expect(i18n.direction()).toBe("ltr");
+
+        // Pager firstPageLabel in Portuguese: "Primeira página"
+        const ptPager = root.querySelector("mona-pager");
+        expect(ptPager?.querySelector("button[aria-label='Primeira página']")).not.toBeNull();
+
+        // ScrollView previousPage in Portuguese: "Página anterior"
+        const ptScroll = root.querySelector("mona-scroll-view");
+        expect(ptScroll?.querySelector("button[aria-label='Página anterior']")).not.toBeNull();
+
+        // Calendar translated UI controls, Sunday-first header, and live region in Portuguese
+        const ptCalendar = root.querySelector("mona-calendar");
+        expect(ptCalendar?.querySelector("button:first-child")?.textContent?.trim()).toBe("Hoje");
+        expect(ptCalendar?.querySelector("button[aria-label='Mês anterior']")).not.toBeNull();
+        expect(ptCalendar?.querySelector("button[aria-label='Próximo mês']")).not.toBeNull();
+        expect(ptCalendar?.querySelector("[aria-live='polite']")?.textContent?.toLowerCase()).toContain("calendário");
+
+        const headerRow = ptCalendar?.querySelector("div[style*='grid-template-columns']") as HTMLElement;
+        expect(headerRow?.querySelectorAll("div")[0]?.textContent?.trim()).toBe("dom.");
+
+        // NumericTextBox formatting with Brazilian comma separator
+        expect(input.getAttribute("aria-valuetext")).toBe("1234,50");
+
+        // 2. Test application override precedence over Portuguese locale
+        i18n.patchMessages({
+            pager: {
+                firstPageLabel: "Início da página"
+            }
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(ptPager?.querySelector("button[aria-label='Início da página']")).not.toBeNull();
+
+        // 3. Clear overrides: Portuguese locale value returns
+        i18n.clearMessages();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(ptPager?.querySelector("button[aria-label='Primeira página']")).not.toBeNull();
+
+        // 4. Switch back to English default
+        i18n.use({
+            direction: "ltr",
+            id: "en-US",
+            messages: {}
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("en-US");
+        expect(ptPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
         expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
     });
 

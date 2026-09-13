@@ -34,7 +34,8 @@ describe("locale-date-formats", () => {
             expect(format).toBe("dd.MM.yyyy");
         });
 
-        it("returns day/month/year format for es-ES and fr-FR", () => {
+        it("returns day/month/year format for pt-BR, es-ES, and fr-FR", () => {
+            expect(getLocaleDateInputFormat("pt-BR")).toBe("dd/MM/yyyy");
             expect(getLocaleDateInputFormat("es-ES")).toBe("dd/MM/yyyy");
             expect(getLocaleDateInputFormat("fr-FR")).toBe("dd/MM/yyyy");
         });
@@ -98,6 +99,16 @@ describe("locale-date-formats", () => {
             const format = getLocaleDateTimeInputFormat("de-DE", { hourFormat: "24", showSeconds: false });
             expect(format).toBe("dd.MM.yyyy, HH:mm");
         });
+
+        it("derives combined Brazilian Portuguese date and time format in 24h with comma separator", () => {
+            const format = getLocaleDateTimeInputFormat("pt-BR", { hourFormat: "24", showSeconds: false });
+            expect(format).toBe("dd/MM/yyyy, HH:mm");
+        });
+
+        it("derives combined Brazilian Portuguese date and time format in 12h with comma separator and day period", () => {
+            const format = getLocaleDateTimeInputFormat("pt-BR", { hourFormat: "12", showSeconds: false });
+            expect(format).toBe("dd/MM/yyyy, hh:mm a");
+        });
     });
 
     describe("getLocaleFirstDayOfWeek", () => {
@@ -114,6 +125,10 @@ describe("locale-date-formats", () => {
         });
 
         describe("native week-info path", () => {
+            it("returns sunday for Brazilian Portuguese (pt-BR)", () => {
+                expect(getLocaleFirstDayOfWeek("pt-BR")).toBe("sunday");
+            });
+
             it("returns sunday for Japanese (ja-JP)", () => {
                 expect(getLocaleFirstDayOfWeek("ja-JP")).toBe("sunday");
             });
@@ -208,6 +223,10 @@ describe("locale-date-formats", () => {
                     expect(resolveFallbackFirstDayOfWeek("is-IS")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("ar-YE")).toBe("sunday");
 
+                    // PT and BR are Sunday-first in CLDR
+                    expect(resolveFallbackFirstDayOfWeek("pt-PT")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("pt-BR")).toBe("sunday");
+
                     // MV is Friday-first in CLDR
                     expect(resolveFallbackFirstDayOfWeek("dv-MV")).toBe("friday");
 
@@ -222,6 +241,7 @@ describe("locale-date-formats", () => {
                     expect(resolveFallbackFirstDayOfWeek("de")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("ja")).toBe("sunday");
                     expect(resolveFallbackFirstDayOfWeek("ko")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("pt")).toBe("sunday");
                     expect(resolveFallbackFirstDayOfWeek("ar")).toBe("saturday");
                     expect(resolveFallbackFirstDayOfWeek("fa")).toBe("saturday");
 
@@ -236,6 +256,7 @@ describe("locale-date-formats", () => {
                     expect(resolveFallbackFirstDayOfWeek("en-US-u-fw-mon")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("de-DE-u-fw-sun")).toBe("sunday");
                     expect(resolveFallbackFirstDayOfWeek("ja-JP-u-fw-mon")).toBe("monday");
+                    expect(resolveFallbackFirstDayOfWeek("pt-BR-u-fw-mon")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("ar-EG-u-fw-fri")).toBe("friday");
                     expect(resolveFallbackFirstDayOfWeek("en-US-u-ca-gregory-fw-mon")).toBe("monday");
 
@@ -248,6 +269,7 @@ describe("locale-date-formats", () => {
                 withWeekInfoDisabled(() => {
                     expect(resolveFallbackFirstDayOfWeek("en-GB-x-u-fw-sun")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("en-US-x-u-fw-mon")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("pt-BR-x-u-fw-mon")).toBe("sunday");
                     expect(resolveFallbackFirstDayOfWeek("x-u-fw-sun")).toBe("monday");
 
                     // Legitimate overrides before private use still take precedence

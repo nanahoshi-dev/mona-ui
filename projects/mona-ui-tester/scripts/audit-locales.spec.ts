@@ -120,6 +120,23 @@ describe("audit-locales", () => {
             expect(isAllowedLocaleCopyException("ja-JP", "timeSelector.pm", "PM")).toBe(false);
             expect(isAllowedLocaleCopyException("ja-JP", "timeSelector.amPm", "AM/PM")).toBe(false);
         });
+
+        it("allows Brazilian Portuguese-specific unchanged words on approved paths", () => {
+            expect(isAllowedLocaleCopyException("pt-BR", "dialog.ok", "OK")).toBe(true);
+            expect(isAllowedLocaleCopyException("pt-BR", "scrollView.slide", "slide")).toBe(true);
+            expect(isAllowedLocaleCopyException("pt-BR", "timeSelector.am", "AM")).toBe(true);
+            expect(isAllowedLocaleCopyException("pt-BR", "timeSelector.pm", "PM")).toBe(true);
+            expect(isAllowedLocaleCopyException("pt-BR", "timeSelector.amPm", "AM/PM")).toBe(true);
+        });
+
+        it("disallows Brazilian Portuguese-specific exceptions for other locales or unapproved paths", () => {
+            expect(isAllowedLocaleCopyException("es-ES", "dialog.ok", "OK")).toBe(false);
+            expect(isAllowedLocaleCopyException("ja-JP", "scrollView.slide", "slide")).toBe(false);
+            expect(isAllowedLocaleCopyException("pt-BR", "other.ok", "OK")).toBe(false);
+            expect(isAllowedLocaleCopyException("pt-BR", "dialog.ok", "Cancel")).toBe(false);
+            expect(isAllowedLocaleCopyException("pt-BR", "scrollView.slide", "carousel")).toBe(false);
+            expect(isAllowedLocaleCopyException("pt-BR", "timeSelector.minutes", "Minutes")).toBe(false);
+        });
     });
 
     describe("auditLocaleMessagesFile", () => {
@@ -1301,6 +1318,18 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
                 )
             ).toBe(true);
         });
+
+        it("discovers the official Brazilian Portuguese locale", () => {
+            const discovery = discoverOfficialLocales();
+            expect(
+                discovery.locales.some(
+                    locale =>
+                        locale.canonicalId === "pt-BR" &&
+                        locale.localeExport === "MONA_PT_BR_LOCALE" &&
+                        locale.messagesExport === "PT_BR_MESSAGES"
+                )
+            ).toBe(true);
+        });
     });
 
     describe("semantic day-period locale verification", () => {
@@ -1327,6 +1356,9 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
 
             expect(getIntlDayPeriod("fr-FR", 9)).toBe("AM");
             expect(getIntlDayPeriod("fr-FR", 21)).toBe("PM");
+
+            expect(getIntlDayPeriod("pt-BR", 9)).toBe("AM");
+            expect(getIntlDayPeriod("pt-BR", 21)).toBe("PM");
         });
 
         it("guarantees Spanish copy exceptions for day periods are rejected", () => {
