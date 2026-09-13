@@ -744,7 +744,7 @@ describe("locale-date-formats", () => {
 
     describe("whitespace normalization and portability", () => {
         it("ensures generated editable formats do not contain typographic whitespace (U+00A0, U+202F, U+2009)", () => {
-            const locales = ["en-US", "de-DE", "fr-FR", "es-ES", "ja-JP", "pt-BR", "zh-CN", "zh-TW"];
+            const locales = ["en-US", "de-DE", "fr-FR", "es-ES", "ja-JP", "ko-KR", "pt-BR", "zh-CN", "zh-TW"];
             for (const loc of locales) {
                 const time12 = getLocaleTimeInputFormat(loc, { hourFormat: "12" });
                 expect(time12).not.toMatch(/[\u00A0\u2009\u202F]/);
