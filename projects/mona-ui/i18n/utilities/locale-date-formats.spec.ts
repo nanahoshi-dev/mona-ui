@@ -241,6 +241,18 @@ describe("locale-date-formats", () => {
                 });
             });
 
+            it("does not allow -x- private-use payload to override regional week start in fallback mode", () => {
+                withWeekInfoDisabled(() => {
+                    expect(resolveFallbackFirstDayOfWeek("en-GB-x-u-fw-sun")).toBe("monday");
+                    expect(resolveFallbackFirstDayOfWeek("en-US-x-u-fw-mon")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("x-u-fw-sun")).toBe("monday");
+
+                    // Legitimate overrides before private use still take precedence
+                    expect(resolveFallbackFirstDayOfWeek("en-GB-u-fw-sun-x-test")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("en-US-u-fw-mon-x-test")).toBe("monday");
+                });
+            });
+
             it("ensures public getLocaleFirstDayOfWeek executes fallback when mock is active on an uncached locale", () => {
                 withWeekInfoDisabled(() => {
                     // Test with unique locales that were not queried previously in normal-path tests
@@ -347,6 +359,32 @@ describe("locale-date-formats", () => {
                     Object.defineProperty(globalThis, "Intl", { value: originalIntl, configurable: true, writable: true });
                 }
             });
+        });
+    });
+
+    describe("resolveExplicitFirstDayOverride", () => {
+        it("parses explicit Unicode fw override", () => {
+            expect(resolveExplicitFirstDayOverride("en-GB-u-fw-sun")).toBe("sunday");
+            expect(resolveExplicitFirstDayOverride("en-US-u-fw-mon")).toBe("monday");
+        });
+
+        it("preserves legitimate Unicode override before private use", () => {
+            expect(resolveExplicitFirstDayOverride("en-GB-u-fw-sun-x-anything")).toBe("sunday");
+            expect(resolveExplicitFirstDayOverride("en-GB-u-fw-sun-x-test")).toBe("sunday");
+            expect(resolveExplicitFirstDayOverride("en-US-u-fw-mon-x-test")).toBe("monday");
+        });
+
+        it("treats -x- private use as terminal and ignores opaque payload", () => {
+            expect(resolveExplicitFirstDayOverride("en-GB-x-u-fw-sun")).toBeNull();
+            expect(resolveExplicitFirstDayOverride("en-US-x-u-fw-mon")).toBeNull();
+            expect(resolveExplicitFirstDayOverride("x-u-fw-sun")).toBeNull();
+        });
+
+        it("returns null for empty, invalid, or missing fw tags", () => {
+            expect(resolveExplicitFirstDayOverride("")).toBeNull();
+            expect(resolveExplicitFirstDayOverride("en-US")).toBeNull();
+            expect(resolveExplicitFirstDayOverride("en-US-u-ca-gregory")).toBeNull();
+            expect(resolveExplicitFirstDayOverride("en-US-u-fw-invalid")).toBeNull();
         });
     });
 

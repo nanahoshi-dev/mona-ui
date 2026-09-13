@@ -91,6 +91,9 @@ export function resolveExplicitFirstDayOverride(localeId: string): LocaleFirstDa
     for (let i = 0; i < subtags.length; i++) {
         const subtag = subtags[i].toLowerCase();
         if (subtag.length === 1) {
+            if (subtag === "x") {
+                break;
+            }
             inUExtension = subtag === "u";
             continue;
         }
