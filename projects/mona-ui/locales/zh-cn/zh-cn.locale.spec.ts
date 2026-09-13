@@ -242,10 +242,12 @@ describe("MONA_ZH_CN_LOCALE", () => {
         it("evaluates calendar function messages without duplicate year suffixes", () => {
             expect(m.calendar.calendarLabel("2026年9月")).toBe("2026年9月日历");
             expect(m.calendar.yearViewLabel("2026年")).toBe("年视图，2026年");
-            expect(m.calendar.decadeViewLabel(2020, 2029)).toBe("2020年至2029年年代视图");
+            expect(m.calendar.decadeViewLabel(2020, 2029)).toBe("十年视图，2020年至2029年");
+            expect(m.calendar.decadeViewLabel(2020, 2029)).not.toContain("年代视图");
             expect(m.calendar.goToToday("2026年9月15日")).toBe("转到今天（2026年9月15日）");
             expect(m.calendar.switchToYearView("2026年9月")).toBe("切换到年视图，当前为2026年9月");
-            expect(m.calendar.switchToDecadeView("2026年")).toBe("切换到年代视图，当前为2026年");
+            expect(m.calendar.switchToDecadeView("2026年")).toBe("切换到十年视图，当前为2026年");
+            expect(m.calendar.switchToDecadeView("2026年")).not.toContain("年代视图");
             expect(m.calendar.decadeRange(2020, 2029)).toBe("2020年至2029年");
             expect(m.calendar.yearCellLabel(2026)).toBe("2026年");
         });

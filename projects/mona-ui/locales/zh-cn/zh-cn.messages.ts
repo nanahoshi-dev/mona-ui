@@ -13,7 +13,7 @@ export const ZH_CN_MESSAGES = {
     calendar: {
         calendarLabel: (formattedMonthAndYear: string) => `${formattedMonthAndYear}日历`,
         decadeRange: (start: number, end: number) => `${start}年至${end}年`,
-        decadeViewLabel: (start: number, end: number) => `${start}年至${end}年年代视图`,
+        decadeViewLabel: (start: number, end: number) => `十年视图，${start}年至${end}年`,
         goToToday: (formattedDate: string) => `转到今天（${formattedDate}）`,
         nextDecade: "下一个十年",
         nextMonth: "下个月",
@@ -21,7 +21,7 @@ export const ZH_CN_MESSAGES = {
         previousDecade: "上一个十年",
         previousMonth: "上个月",
         previousYear: "上一年",
-        switchToDecadeView: (currentYear: string) => `切换到年代视图，当前为${currentYear}`,
+        switchToDecadeView: (currentYear: string) => `切换到十年视图，当前为${currentYear}`,
         switchToYearView: (currentMonthAndYear: string) =>
             `切换到年视图，当前为${currentMonthAndYear}`,
         today: "今天",

@@ -426,15 +426,15 @@ describe("MONA_ZH_CN_LOCALE Integration with MonaI18nService", () => {
 
         expect(liveRegion.textContent).toContain("年视图，2026年");
 
-        const yearViewButton = hostEl.querySelector('button[aria-label*="切换到年代视图"]') as HTMLButtonElement;
+        const yearViewButton = hostEl.querySelector('button[aria-label*="切换到十年视图"]') as HTMLButtonElement;
         expect(yearViewButton).not.toBeNull();
-        expect(yearViewButton.getAttribute("aria-label")).toContain("切换到年代视图，当前为2026年");
+        expect(yearViewButton.getAttribute("aria-label")).toContain("切换到十年视图，当前为2026年");
 
         // 6. Decade view navigation and accessibility labels
         yearViewButton.click();
         fixture.detectChanges();
 
-        expect(liveRegion.textContent).toContain("2020年至2029年年代视图");
+        expect(liveRegion.textContent).toContain("十年视图，2020年至2029年");
 
         const decadeViewButton = hostEl.querySelector('button[aria-label*="2020年至2029年"]') as HTMLButtonElement;
         expect(decadeViewButton).not.toBeNull();
