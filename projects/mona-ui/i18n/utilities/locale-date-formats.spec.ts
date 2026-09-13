@@ -10,6 +10,7 @@ import {
 import {
     resolveExplicitFirstDayOverride,
     resolveFallbackFirstDayOfWeek,
+    resolveLikelyFirstDayOfWeek,
     resolveLikelyRegion,
     resolveLocaleFirstDayOfWeek
 } from "./locale-week-data";
@@ -273,7 +274,7 @@ describe("locale-date-formats", () => {
                 });
             });
 
-            it("correctly parses base region when Intl.Locale is completely absent", () => {
+            it("correctly resolves likely first day when Intl.Locale is absent but getCanonicalLocales is available", () => {
                 const originalIntl = globalThis.Intl;
                 try {
                     // Simulate primitive environment without Intl.Locale
@@ -284,9 +285,38 @@ describe("locale-date-formats", () => {
                     expect(resolveLikelyRegion("en-US")).toBe("US");
                     expect(resolveLikelyRegion("de-u-ca-gregory")).toBeNull();
                     expect(resolveFallbackFirstDayOfWeek("de-u-ca-gregory")).toBe("monday");
-                    expect(resolveFallbackFirstDayOfWeek("ja")).toBe("sunday");
+
+                    // Explicit regions continue to work
+                    expect(resolveFallbackFirstDayOfWeek("en-US")).toBe("sunday");
                     expect(resolveFallbackFirstDayOfWeek("ar-EG")).toBe("saturday");
                     expect(resolveFallbackFirstDayOfWeek("dv-MV")).toBe("friday");
+
+                    // Language-only tags resolve via CLDR 46 likely subtags
+                    expect(resolveFallbackFirstDayOfWeek("en")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("pt")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("he")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("hi")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("ja")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("ko")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("ar")).toBe("saturday");
+                    expect(resolveFallbackFirstDayOfWeek("fa")).toBe("saturday");
+                    expect(resolveFallbackFirstDayOfWeek("dv")).toBe("friday");
+                    expect(resolveFallbackFirstDayOfWeek("id")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("th")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("ur")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("bn")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("fil")).toBe("sunday");
+
+                    // Language-script tags resolve correctly
+                    expect(resolveFallbackFirstDayOfWeek("zh-Hant")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("zh-Hans")).toBe("monday");
+                    expect(resolveFallbackFirstDayOfWeek("zh")).toBe("monday");
+                    expect(resolveFallbackFirstDayOfWeek("en-Shaw")).toBe("monday");
+
+                    // Monday default languages remain Monday
+                    expect(resolveFallbackFirstDayOfWeek("de")).toBe("monday");
+                    expect(resolveFallbackFirstDayOfWeek("es")).toBe("monday");
+                    expect(resolveFallbackFirstDayOfWeek("fr")).toBe("monday");
                 } finally {
                     Object.defineProperty(globalThis, "Intl", { value: originalIntl, configurable: true, writable: true });
                 }
@@ -352,6 +382,20 @@ describe("locale-date-formats", () => {
                     expect(resolveLikelyRegion("en-840")).toBeNull();
                     expect(resolveFallbackFirstDayOfWeek("en-840")).toBe("monday");
 
+                    // Language-only and language-script fallback operates deterministically in fully primitive mode
+                    expect(resolveFallbackFirstDayOfWeek("en")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("pt")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("he")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("hi")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("ja")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("ko")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("ar")).toBe("saturday");
+                    expect(resolveFallbackFirstDayOfWeek("fa")).toBe("saturday");
+                    expect(resolveFallbackFirstDayOfWeek("dv")).toBe("friday");
+                    expect(resolveFallbackFirstDayOfWeek("zh-Hant")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("zh-Hans")).toBe("monday");
+                    expect(resolveFallbackFirstDayOfWeek("de")).toBe("monday");
+
                     // Private use is guarded
                     expect(resolveLikelyRegion("x-US")).toBeNull();
                     expect(resolveFallbackFirstDayOfWeek("x-US")).toBe("monday");
@@ -385,6 +429,41 @@ describe("locale-date-formats", () => {
             expect(resolveExplicitFirstDayOverride("en-US")).toBeNull();
             expect(resolveExplicitFirstDayOverride("en-US-u-ca-gregory")).toBeNull();
             expect(resolveExplicitFirstDayOverride("en-US-u-fw-invalid")).toBeNull();
+        });
+    });
+
+    describe("resolveLikelyFirstDayOfWeek", () => {
+        it("resolves CLDR 46 likely week start for base languages", () => {
+            expect(resolveLikelyFirstDayOfWeek("en")).toBe("sunday");
+            expect(resolveLikelyFirstDayOfWeek("pt")).toBe("sunday");
+            expect(resolveLikelyFirstDayOfWeek("he")).toBe("sunday");
+            expect(resolveLikelyFirstDayOfWeek("hi")).toBe("sunday");
+            expect(resolveLikelyFirstDayOfWeek("ja")).toBe("sunday");
+            expect(resolveLikelyFirstDayOfWeek("ko")).toBe("sunday");
+            expect(resolveLikelyFirstDayOfWeek("ar")).toBe("saturday");
+            expect(resolveLikelyFirstDayOfWeek("fa")).toBe("saturday");
+            expect(resolveLikelyFirstDayOfWeek("dv")).toBe("friday");
+            expect(resolveLikelyFirstDayOfWeek("id")).toBe("sunday");
+            expect(resolveLikelyFirstDayOfWeek("th")).toBe("sunday");
+            expect(resolveLikelyFirstDayOfWeek("ur")).toBe("sunday");
+            expect(resolveLikelyFirstDayOfWeek("bn")).toBe("sunday");
+            expect(resolveLikelyFirstDayOfWeek("fil")).toBe("sunday");
+        });
+
+        it("resolves script-sensitive tags according to CLDR likely subtags", () => {
+            expect(resolveLikelyFirstDayOfWeek("zh-Hant")).toBe("sunday");
+            expect(resolveLikelyFirstDayOfWeek("en-Shaw")).toBe("monday");
+            expect(resolveLikelyFirstDayOfWeek("pal-Phlp")).toBe("monday");
+            expect(resolveLikelyFirstDayOfWeek("yue-Hans")).toBe("monday");
+        });
+
+        it("returns null for Monday default languages and unknown tags", () => {
+            expect(resolveLikelyFirstDayOfWeek("de")).toBeNull();
+            expect(resolveLikelyFirstDayOfWeek("fr")).toBeNull();
+            expect(resolveLikelyFirstDayOfWeek("es")).toBeNull();
+            expect(resolveLikelyFirstDayOfWeek("zh")).toBeNull();
+            expect(resolveLikelyFirstDayOfWeek("zh-Hans")).toBeNull();
+            expect(resolveLikelyFirstDayOfWeek("xyz-unknown")).toBeNull();
         });
     });
 
