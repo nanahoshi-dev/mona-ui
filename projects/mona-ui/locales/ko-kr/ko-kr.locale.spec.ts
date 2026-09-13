@@ -236,6 +236,12 @@ describe("MONA_KO_KR_LOCALE", () => {
             expect(m.filter.isBeforeOrEqualTo).toBe("이전 또는 같음");
             expect(m.filter.isEqualTo).toBe("같음");
             expect(m.filter.isNotEqualTo).toBe("같지 않음");
+            expect(m.filter.isNull).toBe("null");
+            expect(m.filter.isNotNull).toBe("null 아님");
+            expect(m.filter.isEmpty).toBe("비어 있음");
+            expect(m.filter.isNotEmpty).toBe("비어 있지 않음");
+            expect(m.filter.isNullOrEmpty).toBe("null 또는 비어 있음");
+            expect(m.filter.isNotNullOrEmpty).toBe("null이 아니고 비어 있지 않음");
             expect(m.colorGradient.apply).toBe("적용");
             expect(m.colorGradient.cancel).toBe("취소");
             expect(m.chip.removeLabel("라벨")).toBe("라벨 삭제");

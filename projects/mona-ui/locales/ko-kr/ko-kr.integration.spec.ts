@@ -621,6 +621,23 @@ describe("MONA_KO_KR_LOCALE Integration with MonaI18nService", () => {
         expect(dateItems.find(i => i.value === "lte")?.text).toBe("이전 또는 같음");
     });
 
+    it("provides Korean string operator labels in FilterService", () => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideMonaI18n({
+                    locale: MONA_KO_KR_LOCALE
+                }),
+                FilterService
+            ]
+        });
+
+        const filterService = TestBed.inject(FilterService);
+        const items = filterService.stringFilterMenuItems;
+
+        expect(items.find(i => i.value === "isnullorempty")?.text).toBe("null 또는 비어 있음");
+        expect(items.find(i => i.value === "isnotnullorempty")?.text).toBe("null이 아니고 비어 있지 않음");
+    });
+
     it("renders ColorGradient component with Korean accessibility labels and value text", () => {
         TestBed.configureTestingModule({
             imports: [ColorGradientComponent],

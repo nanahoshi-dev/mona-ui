@@ -196,7 +196,7 @@ export const KO_KR_MESSAGES = {
         isNotEmpty: "비어 있지 않음",
         isNotEqualTo: "같지 않음",
         isNotNull: "null 아님",
-        isNotNullOrEmpty: "null 또는 비어 있지 않음",
+        isNotNullOrEmpty: "null이 아니고 비어 있지 않음",
         isNull: "null",
         isNullOrEmpty: "null 또는 비어 있음",
         isTrue: "참",
