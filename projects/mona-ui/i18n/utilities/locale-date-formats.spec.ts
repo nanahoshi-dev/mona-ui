@@ -869,13 +869,11 @@ describe("locale-date-formats", () => {
             expect(dtKoDateTime12.day).toBe(15);
             expect(dtKoDateTime12.hour).toBe(21);
             expect(dtKoDateTime12.minute).toBe(30);
+        });
 
-            // Extraneous trailing dot on format that does not have one
-            const dtUsWithTrailingDot = parseGregorianDate("09/15/2026.", "MM/dd/yyyy", "en-US");
-            expect(dtUsWithTrailingDot.isValid).toBe(true);
-            expect(dtUsWithTrailingDot.year).toBe(2026);
-            expect(dtUsWithTrailingDot.month).toBe(9);
-            expect(dtUsWithTrailingDot.day).toBe(15);
+        it("does not strip punctuation absent from the requested format", () => {
+            const parsed = parseGregorianDate("09/15/2026.", "MM/dd/yyyy", "en-US");
+            expect(parsed.isValid).toBe(false);
         });
     });
 });

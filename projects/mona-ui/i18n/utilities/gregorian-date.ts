@@ -149,18 +149,6 @@ export function parseGregorianDate(
                             outputCalendar: "gregory"
                         });
                     }
-                } else if (!trimmedFormat.endsWith(".") && trimmedText.endsWith(".")) {
-                    const strippedText = trimmedText.replace(/\.+$/, "");
-                    dt = DateTime.fromFormat(strippedText, trimmedFormat, {
-                        locale: effectiveLocale,
-                        outputCalendar: "gregory"
-                    });
-                    if (!dt.isValid && effectiveLocale !== locale) {
-                        dt = DateTime.fromFormat(strippedText, trimmedFormat, {
-                            locale,
-                            outputCalendar: "gregory"
-                        });
-                    }
                 }
             }
         }
