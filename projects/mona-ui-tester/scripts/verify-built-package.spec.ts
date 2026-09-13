@@ -1,12 +1,13 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
     resolveExportTargets,
     resolveTypeScriptCompilerPath,
     runConsumerSmokeTest,
-    verifyBuiltPackage
+    verifyBuiltPackage,
+    verifyThirdPartyNotices
 } from "./verify-built-package";
 
 describe("verify-built-package", () => {
@@ -188,6 +189,22 @@ export declare function getLocaleDateTimeInputFormat(locale: string, options?: {
 export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayOfWeek;
 `;
 
+    const CANONICAL_CLDR_LICENSE = readFileSync(
+        resolve(process.cwd(), "scripts/cldr/LICENSE"),
+        "utf-8"
+    );
+
+    const DEFAULT_THIRD_PARTY_NOTICES = `# Third-Party Notices
+
+## Unicode CLDR (Common Locale Data Repository)
+
+### Unicode License v3
+
+\`\`\`
+${CANONICAL_CLDR_LICENSE.trim()}
+\`\`\`
+`;
+
     function populateFakeDist(
         dir: string,
         options: {
@@ -231,10 +248,7 @@ export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayO
                 writeFileSync(join(dir, "THIRD_PARTY_NOTICES.md"), options.thirdPartyNotices);
             }
         } else {
-            writeFileSync(
-                join(dir, "THIRD_PARTY_NOTICES.md"),
-                "# Third-Party Notices\n\n## Unicode CLDR\n\nUnicode License v3\n"
-            );
+            writeFileSync(join(dir, "THIRD_PARTY_NOTICES.md"), DEFAULT_THIRD_PARTY_NOTICES);
         }
     }
 
@@ -627,6 +641,143 @@ export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayO
                 expect(() => verifyBuiltPackage({ distDir: tempDir })).toThrow("missing required Unicode CLDR notice");
             } finally {
                 rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when THIRD_PARTY_NOTICES.md has keyword-only placeholder without exact license body", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "pkg-verify-test-"));
+            try {
+                populateFakeDist(tempDir, {
+                    localesMjs: "export {};",
+                    localesDts: "export {};",
+                    i18nMjs: "export {};",
+                    i18nDts: "export {};",
+                    thirdPartyNotices: "# Third-Party Notices\n\n## Unicode CLDR\n\nUnicode License v3 placeholder only.\n"
+                });
+                expect(() => verifyBuiltPackage({ distDir: tempDir })).toThrow("does not contain the exact canonical Unicode CLDR license");
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when license has changed copyright wording", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "pkg-verify-test-"));
+            try {
+                const altered = CANONICAL_CLDR_LICENSE.replace("Copyright © 2015-2024 Unicode, Inc.", "Copyright © 1991-2024 Unicode, Inc. All rights reserved.");
+                populateFakeDist(tempDir, {
+                    localesMjs: "export {};",
+                    localesDts: "export {};",
+                    i18nMjs: "export {};",
+                    i18nDts: "export {};",
+                    thirdPartyNotices: `# Third-Party Notices\n\n## Unicode CLDR\n\nUnicode License v3\n\n\`\`\`\n${altered}\n\`\`\`\n`
+                });
+                expect(() => verifyBuiltPackage({ distDir: tempDir })).toThrow("does not contain the exact canonical Unicode CLDR license");
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when license is missing upstream NOTICE TO USER section", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "pkg-verify-test-"));
+            try {
+                const altered = CANONICAL_CLDR_LICENSE.replace(/NOTICE TO USER:[\s\S]*?USE THE DATA FILES OR SOFTWARE\./, "");
+                populateFakeDist(tempDir, {
+                    localesMjs: "export {};",
+                    localesDts: "export {};",
+                    i18nMjs: "export {};",
+                    i18nDts: "export {};",
+                    thirdPartyNotices: `# Third-Party Notices\n\n## Unicode CLDR\n\nUnicode License v3\n\n\`\`\`\n${altered}\n\`\`\`\n`
+                });
+                expect(() => verifyBuiltPackage({ distDir: tempDir })).toThrow("does not contain the exact canonical Unicode CLDR license");
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when license is missing SPDX line", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "pkg-verify-test-"));
+            try {
+                const altered = CANONICAL_CLDR_LICENSE.replace("SPDX-License-Identifier: Unicode-3.0", "");
+                populateFakeDist(tempDir, {
+                    localesMjs: "export {};",
+                    localesDts: "export {};",
+                    i18nMjs: "export {};",
+                    i18nDts: "export {};",
+                    thirdPartyNotices: `# Third-Party Notices\n\n## Unicode CLDR\n\nUnicode License v3\n\n\`\`\`\n${altered}\n\`\`\`\n`
+                });
+                expect(() => verifyBuiltPackage({ distDir: tempDir })).toThrow("does not contain the exact canonical Unicode CLDR license");
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when license body is truncated", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "pkg-verify-test-"));
+            try {
+                const truncated = CANONICAL_CLDR_LICENSE.slice(0, Math.floor(CANONICAL_CLDR_LICENSE.length / 2));
+                populateFakeDist(tempDir, {
+                    localesMjs: "export {};",
+                    localesDts: "export {};",
+                    i18nMjs: "export {};",
+                    i18nDts: "export {};",
+                    thirdPartyNotices: `# Third-Party Notices\n\n## Unicode CLDR\n\nUnicode License v3\n\n\`\`\`\n${truncated}\n\`\`\`\n`
+                });
+                expect(() => verifyBuiltPackage({ distDir: tempDir })).toThrow("does not contain the exact canonical Unicode CLDR license");
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("passes when exact canonical license body is embedded in THIRD_PARTY_NOTICES.md", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "pkg-verify-test-"));
+            try {
+                const noticeFile = join(tempDir, "THIRD_PARTY_NOTICES.md");
+                writeFileSync(noticeFile, DEFAULT_THIRD_PARTY_NOTICES);
+                expect(() => verifyThirdPartyNotices(noticeFile)).not.toThrow();
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("verifies root THIRD_PARTY_NOTICES.md and projects/mona-ui/THIRD_PARTY_NOTICES.md are identical", () => {
+            const rootNotice = readFileSync(resolve(process.cwd(), "THIRD_PARTY_NOTICES.md"), "utf-8").replace(/\r\n/g, "\n");
+            const libNotice = readFileSync(resolve(process.cwd(), "projects/mona-ui/THIRD_PARTY_NOTICES.md"), "utf-8").replace(/\r\n/g, "\n");
+            expect(rootNotice).toBe(libNotice);
+        });
+
+        it("fails when root and projects/mona-ui third-party notices differ", () => {
+            const fakeRepo = mkdtempSync(join(tmpdir(), "fake-repo-"));
+            const fakeDist = join(fakeRepo, "dist/mona-ui");
+            const fakeLocales = join(fakeRepo, "projects/mona-ui/locales");
+            mkdirSync(fakeDist, { recursive: true });
+            mkdirSync(fakeLocales, { recursive: true });
+            mkdirSync(join(fakeRepo, "scripts/cldr"), { recursive: true });
+
+            try {
+                writeFileSync(join(fakeRepo, "scripts/cldr/LICENSE"), CANONICAL_CLDR_LICENSE);
+                writeFileSync(join(fakeRepo, "THIRD_PARTY_NOTICES.md"), DEFAULT_THIRD_PARTY_NOTICES);
+                writeFileSync(join(fakeRepo, "projects/mona-ui/THIRD_PARTY_NOTICES.md"), DEFAULT_THIRD_PARTY_NOTICES + "\n// modified\n");
+                populateFakeDist(fakeDist, {
+                    localesMjs: 'export const MONA_ES_ES_LOCALE = { id: "es-ES", direction: "ltr", messages: {} };\n',
+                    localesDts: 'export declare const MONA_ES_ES_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n'
+                });
+
+                const esFolder = join(fakeLocales, "es-es");
+                mkdirSync(esFolder, { recursive: true });
+                writeFileSync(join(fakeLocales, "public-api.ts"), 'export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n');
+                writeFileSync(join(esFolder, "es-es.messages.ts"), 'export const ES_ES_MESSAGES = {};\n');
+                writeFileSync(join(esFolder, "es-es.locale.ts"), 'export const MONA_ES_ES_LOCALE = { direction: "ltr", id: "es-ES", messages: {} };\n');
+
+                expect(() =>
+                    verifyBuiltPackage({
+                        distDir: fakeDist,
+                        sourceLocalesDir: fakeLocales,
+                        repoRoot: fakeRepo,
+                        tscPath: resolveTypeScriptCompilerPath(process.cwd())
+                    })
+                ).toThrow("Repository notice mismatch");
+            } finally {
+                rmSync(fakeRepo, { recursive: true, force: true });
             }
         });
     });

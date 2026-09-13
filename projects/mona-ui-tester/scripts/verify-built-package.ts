@@ -9,6 +9,32 @@ export interface PackageVerificationOptions {
     sourceLocalesDir?: string;
     repoRoot?: string;
     tscPath?: string;
+    canonicalLicensePath?: string;
+}
+
+export function verifyThirdPartyNotices(
+    noticePath: string,
+    canonicalLicensePath?: string
+): void {
+    if (!existsSync(noticePath)) {
+        throw new Error(`Third-party notices file not found at: ${noticePath}`);
+    }
+    const noticeContent = readFileSync(noticePath, "utf-8").replace(/\r\n/g, "\n");
+    if (!noticeContent.includes("Unicode License") || !noticeContent.includes("CLDR")) {
+        throw new Error(`Third-party notices file at ${noticePath} is missing required Unicode CLDR notice`);
+    }
+
+    const licensePath = canonicalLicensePath ?? resolve(process.cwd(), "scripts/cldr/LICENSE");
+    if (!existsSync(licensePath)) {
+        throw new Error(`Canonical CLDR license file not found at: ${licensePath}`);
+    }
+
+    const canonicalLicense = readFileSync(licensePath, "utf-8").replace(/\r\n/g, "\n").replace(/\n$/, "");
+    if (!noticeContent.includes(canonicalLicense)) {
+        throw new Error(
+            `Third-party notices file at ${noticePath} does not contain the exact canonical Unicode CLDR license from ${licensePath}`
+        );
+    }
 }
 
 export interface ExpectedLocaleExport {
@@ -299,14 +325,21 @@ export function verifyBuiltPackage(options: PackageVerificationOptions = {}): vo
     console.log(`✓ i18n TypeScript declaration file verified at ${i18nTargets.typesRelPath}`);
 
     const noticePath = resolve(distDir, "THIRD_PARTY_NOTICES.md");
-    if (!existsSync(noticePath)) {
-        throw new Error(`Third-party notices file not found at: ${noticePath}`);
-    }
-    const noticeContent = readFileSync(noticePath, "utf-8");
-    if (!noticeContent.includes("Unicode License") || !noticeContent.includes("CLDR")) {
-        throw new Error(`Third-party notices file at ${noticePath} is missing required Unicode CLDR notice`);
-    }
+    const canonicalLicensePath = options.canonicalLicensePath ?? resolve(repoRoot, "scripts/cldr/LICENSE");
+    verifyThirdPartyNotices(noticePath, canonicalLicensePath);
     console.log("✓ Third-party notices verified at THIRD_PARTY_NOTICES.md");
+
+    const rootNoticePath = resolve(repoRoot, "THIRD_PARTY_NOTICES.md");
+    const libNoticePath = resolve(repoRoot, "projects/mona-ui/THIRD_PARTY_NOTICES.md");
+    if (existsSync(rootNoticePath) && existsSync(libNoticePath)) {
+        const rootContent = readFileSync(rootNoticePath, "utf-8").replace(/\r\n/g, "\n");
+        const libContent = readFileSync(libNoticePath, "utf-8").replace(/\r\n/g, "\n");
+        if (rootContent !== libContent) {
+            throw new Error(
+                `Repository notice mismatch: ${rootNoticePath} and ${libNoticePath} differ`
+            );
+        }
+    }
 
     const discovery = discoverOfficialLocales(sourceLocalesDir);
     if (discovery.violations.length > 0) {
