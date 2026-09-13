@@ -162,11 +162,11 @@ export function getLocaleDateTimeInputFormat(localeId: string, options?: LocaleT
  * Intl.Locale.getWeekInfo(), or CLDR fallbacks.
  */
 export function getLocaleFirstDayOfWeek(localeId: string): LocaleFirstDayOfWeek {
-    const cacheKey = (localeId ?? "").trim();
-    let firstDay = firstDayCache.get(cacheKey);
+    const normalizedLocaleId = (localeId ?? "").trim();
+    let firstDay = firstDayCache.get(normalizedLocaleId);
     if (!firstDay) {
-        firstDay = resolveLocaleFirstDayOfWeek(localeId);
-        firstDayCache.set(cacheKey, firstDay);
+        firstDay = resolveLocaleFirstDayOfWeek(normalizedLocaleId);
+        firstDayCache.set(normalizedLocaleId, firstDay);
     }
     return firstDay;
 }

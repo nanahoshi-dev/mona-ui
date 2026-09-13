@@ -712,5 +712,33 @@ describe("CalendarComponent i18n", () => {
 
             expect(getFirstWeekday()).toBe("日");
         });
+
+        it("prevents cache poisoning when activating whitespace-bearing locale before official ja-JP", async () => {
+            TestBed.configureTestingModule({
+                imports: [WeekStartTestHostComponent]
+            });
+            const fixture = TestBed.createComponent(WeekStartTestHostComponent);
+            const i18n = TestBed.inject(MonaI18nService);
+
+            const getFirstWeekday = () => {
+                const headerRow = fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
+                return headerRow.querySelectorAll("div")[0]?.textContent?.trim();
+            };
+
+            // 1. Activate custom locale with whitespace in id
+            i18n.use({ id: " ja-JP ", direction: "ltr", messages: {} });
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            expect(getFirstWeekday()).toBe("日");
+
+            // 2. Switch to official Japanese locale
+            i18n.use({ id: "ja-JP", direction: "ltr", messages: {} });
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            // First weekday must remain Sunday ("日")
+            expect(getFirstWeekday()).toBe("日");
+        });
     });
 });

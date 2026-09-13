@@ -98,6 +98,18 @@ describe("locale-date-formats", () => {
     });
 
     describe("getLocaleFirstDayOfWeek", () => {
+        describe("cache normalization and anti-poisoning", () => {
+            it("does not allow whitespace-bearing locale to poison cache for canonical ja-JP", () => {
+                expect(getLocaleFirstDayOfWeek(" ja-JP ")).toBe("sunday");
+                expect(getLocaleFirstDayOfWeek("ja-JP")).toBe("sunday");
+            });
+
+            it("does not allow whitespace-bearing locale with override to poison cache for canonical tag", () => {
+                expect(getLocaleFirstDayOfWeek(" en-US-u-fw-mon ")).toBe("monday");
+                expect(getLocaleFirstDayOfWeek("en-US-u-fw-mon")).toBe("monday");
+            });
+        });
+
         describe("native week-info path", () => {
             it("returns sunday for Japanese (ja-JP)", () => {
                 expect(getLocaleFirstDayOfWeek("ja-JP")).toBe("sunday");

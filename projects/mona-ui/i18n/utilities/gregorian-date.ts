@@ -6,18 +6,19 @@ import { normalizeLocalizedDigits } from "./locale-formatters";
  * and doesn't contain a conflicting -u-ca-* extension.
  */
 export function normalizeGregorianLocale(localeId: string): string {
-    if (!localeId) {
-        return localeId;
+    const trimmed = (localeId ?? "").trim();
+    if (!trimmed) {
+        return trimmed;
     }
     try {
         if (typeof Intl !== "undefined" && typeof Intl.Locale === "function") {
-            const loc = new Intl.Locale(localeId, { calendar: "gregory" });
+            const loc = new Intl.Locale(trimmed, { calendar: "gregory" });
             return loc.toString();
         }
     } catch {
         // Fallback safely if localeId is malformed
     }
-    return localeId;
+    return trimmed;
 }
 
 /**
