@@ -169,12 +169,14 @@ class GridIntegrationHostComponent {
 
 @Component({
     template: `
-        <mona-chip [removable]="true" [label]="label()" />
+        <mona-chip [removable]="true" [label]="label()" [removeLabel]="removeLabel()" />
+        <mona-chip [removable]="true">Conteúdo projetado</mona-chip>
     `,
     imports: [ChipComponent]
 })
 class ChipIntegrationHostComponent {
     public readonly label = signal("");
+    public readonly removeLabel = signal<string | undefined>(undefined);
 }
 
 describe("MONA_PT_BR_LOCALE Integration with MonaI18nService", () => {
@@ -917,6 +919,7 @@ describe("MONA_PT_BR_LOCALE Integration with MonaI18nService", () => {
         }).compileComponents();
 
         const fixture = TestBed.createComponent(ChipIntegrationHostComponent);
+        const service = TestBed.inject(MonaI18nService);
 
         // 1. Labeled removable Chip
         fixture.componentInstance.label.set("Angular");
@@ -924,17 +927,49 @@ describe("MONA_PT_BR_LOCALE Integration with MonaI18nService", () => {
         await fixture.whenStable();
 
         const hostEl = fixture.nativeElement as HTMLElement;
-        const removeButton = hostEl.querySelector<HTMLButtonElement>("button[data-chip-remove]");
-        expect(removeButton).not.toBeNull();
-        expect(removeButton?.getAttribute("aria-label")).toBe("Remover Angular");
-        expect(removeButton?.getAttribute("aria-label")).not.toBe("Remover, Angular");
+        const removeButtons = hostEl.querySelectorAll<HTMLButtonElement>("button[data-chip-remove]");
+        expect(removeButtons.length).toBe(2);
+        const [labeledButton, projectedButton] = Array.from(removeButtons);
 
-        // 2. Unlabeled fallback
+        expect(labeledButton.getAttribute("aria-label")).toBe("Remover Angular");
+        expect(labeledButton.getAttribute("aria-label")).not.toBe("Remover, Angular");
+
+        // 2. Custom removeLabel input override
+        fixture.componentInstance.removeLabel.set("Descartar tag");
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(labeledButton.getAttribute("aria-label")).toBe("Descartar tag");
+
+        // Reset custom override
+        fixture.componentInstance.removeLabel.set(undefined);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(labeledButton.getAttribute("aria-label")).toBe("Remover Angular");
+
+        // 3. Projected content fallback (unlabelled via public template projection)
+        expect(projectedButton.getAttribute("aria-label")).toBe("Remover item");
+        expect(projectedButton.getAttribute("aria-label")).not.toBe("Remover, item");
+
+        // 4. Empty string label fallback
         fixture.componentInstance.label.set("");
         fixture.detectChanges();
         await fixture.whenStable();
 
-        expect(removeButton?.getAttribute("aria-label")).toBe("Remover item");
-        expect(removeButton?.getAttribute("aria-label")).not.toBe("Remover, item");
+        expect(labeledButton.getAttribute("aria-label")).toBe("Remover item");
+        expect(labeledButton.getAttribute("aria-label")).not.toBe("Remover, item");
+
+        // 5. Reactive runtime locale switching
+        service.use(MONA_DEFAULT_LOCALE);
+        fixture.componentInstance.label.set("Angular");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(labeledButton.getAttribute("aria-label")).toBe("Remove, Angular");
+
+        service.use(MONA_PT_BR_LOCALE);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(labeledButton.getAttribute("aria-label")).toBe("Remover Angular");
     });
 });
