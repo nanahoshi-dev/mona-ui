@@ -24,6 +24,11 @@ describe("locale-date-formats", () => {
             expect(format).toBe("yyyy/MM/dd");
         });
 
+        it("returns Chinese year/month/day format for zh-CN and zh-TW", () => {
+            expect(getLocaleDateInputFormat("zh-CN")).toBe("yyyy/MM/dd");
+            expect(getLocaleDateInputFormat("zh-TW")).toBe("yyyy/MM/dd");
+        });
+
         it("returns US month/day/year format for en-US", () => {
             const format = getLocaleDateInputFormat("en-US");
             expect(format).toBe("MM/dd/yyyy");
@@ -68,6 +73,16 @@ describe("locale-date-formats", () => {
             expect(format).toBe("ahh:mm:ss");
         });
 
+        it("returns Chinese 12-hour ahh:mm with day period in prefix position for zh-CN and zh-TW", () => {
+            expect(getLocaleTimeInputFormat("zh-CN", { hourFormat: "12", showSeconds: false })).toBe("ahh:mm");
+            expect(getLocaleTimeInputFormat("zh-TW", { hourFormat: "12", showSeconds: false })).toBe("ahh:mm");
+        });
+
+        it("returns Chinese 12-hour ahh:mm:ss with day period in prefix position when showSeconds is true", () => {
+            expect(getLocaleTimeInputFormat("zh-CN", { hourFormat: "12", showSeconds: true })).toBe("ahh:mm:ss");
+            expect(getLocaleTimeInputFormat("zh-TW", { hourFormat: "12", showSeconds: true })).toBe("ahh:mm:ss");
+        });
+
         it("returns English 12-hour hh:mm a with day period in suffix position", () => {
             const format = getLocaleTimeInputFormat("en-US", { hourFormat: "12", showSeconds: false });
             expect(format).toBe("hh:mm a");
@@ -88,6 +103,16 @@ describe("locale-date-formats", () => {
         it("derives combined Japanese date and time format in 12h with day period in native position", () => {
             const format = getLocaleDateTimeInputFormat("ja-JP", { hourFormat: "12", showSeconds: false });
             expect(format).toBe("yyyy/MM/dd ahh:mm");
+        });
+
+        it("derives combined Chinese date and time format in 24h for zh-CN and zh-TW", () => {
+            expect(getLocaleDateTimeInputFormat("zh-CN", { hourFormat: "24", showSeconds: false })).toBe("yyyy/MM/dd HH:mm");
+            expect(getLocaleDateTimeInputFormat("zh-TW", { hourFormat: "24", showSeconds: false })).toBe("yyyy/MM/dd HH:mm");
+        });
+
+        it("derives combined Chinese date and time format in 12h with day period in native position", () => {
+            expect(getLocaleDateTimeInputFormat("zh-CN", { hourFormat: "12", showSeconds: false })).toBe("yyyy/MM/dd ahh:mm");
+            expect(getLocaleDateTimeInputFormat("zh-TW", { hourFormat: "12", showSeconds: false })).toBe("yyyy/MM/dd ahh:mm");
         });
 
         it("derives combined US date and time format in 12h", () => {
@@ -147,6 +172,14 @@ describe("locale-date-formats", () => {
 
             it("returns monday for French (fr-FR)", () => {
                 expect(getLocaleFirstDayOfWeek("fr-FR")).toBe("monday");
+            });
+
+            it("returns monday for Simplified Chinese (zh-CN)", () => {
+                expect(getLocaleFirstDayOfWeek("zh-CN")).toBe("monday");
+            });
+
+            it("returns sunday for Traditional Chinese (zh-TW)", () => {
+                expect(getLocaleFirstDayOfWeek("zh-TW")).toBe("sunday");
             });
 
             it("returns saturday for Egyptian Arabic (ar-EG)", () => {
@@ -219,7 +252,8 @@ describe("locale-date-formats", () => {
                     expect(resolveFallbackFirstDayOfWeek("en-AU")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("zh-CN")).toBe("monday");
 
-                    // YE is Sunday-first; IS is Monday-first in CLDR 46
+                    // TW, PT, BR, and YE are Sunday-first in CLDR
+                    expect(resolveFallbackFirstDayOfWeek("zh-TW")).toBe("sunday");
                     expect(resolveFallbackFirstDayOfWeek("is-IS")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("ar-YE")).toBe("sunday");
 
@@ -629,28 +663,71 @@ describe("locale-date-formats", () => {
             expect(parsed.hour).toBe(21);
             expect(parsed.minute).toBe(30);
         });
+
+        it("formats and parses Simplified Chinese date, 12h time, and datetime correctly", () => {
+            const dateFormat = getLocaleDateInputFormat("zh-CN");
+            const dtCN = DateTime.fromJSDate(testDate).setLocale("zh-CN");
+            expect(dtCN.toFormat(dateFormat)).toBe("2026/09/15");
+
+            const timeFormat = getLocaleTimeInputFormat("zh-CN", { hourFormat: "12", showSeconds: false });
+            expect(dtCN.toFormat(timeFormat)).toBe("下午09:30");
+
+            const dtFormat = getLocaleDateTimeInputFormat("zh-CN", { hourFormat: "12", showSeconds: false });
+            const str = dtCN.toFormat(dtFormat);
+            expect(str).toBe("2026/09/15 下午09:30");
+
+            const parsed = DateTime.fromFormat(str, dtFormat, { locale: "zh-CN" });
+            expect(parsed.isValid).toBe(true);
+            expect(parsed.year).toBe(2026);
+            expect(parsed.month).toBe(9);
+            expect(parsed.day).toBe(15);
+            expect(parsed.hour).toBe(21);
+            expect(parsed.minute).toBe(30);
+        });
+
+        it("formats and parses Traditional Chinese date, 12h time, and datetime correctly", () => {
+            const dateFormat = getLocaleDateInputFormat("zh-TW");
+            const dtTW = DateTime.fromJSDate(testDate).setLocale("zh-TW");
+            expect(dtTW.toFormat(dateFormat)).toBe("2026/09/15");
+
+            const timeFormat = getLocaleTimeInputFormat("zh-TW", { hourFormat: "12", showSeconds: false });
+            expect(dtTW.toFormat(timeFormat)).toBe("下午09:30");
+
+            const dtFormat = getLocaleDateTimeInputFormat("zh-TW", { hourFormat: "12", showSeconds: false });
+            const str = dtTW.toFormat(dtFormat);
+            expect(str).toBe("2026/09/15 下午09:30");
+
+            const parsed = DateTime.fromFormat(str, dtFormat, { locale: "zh-TW" });
+            expect(parsed.isValid).toBe(true);
+            expect(parsed.year).toBe(2026);
+            expect(parsed.month).toBe(9);
+            expect(parsed.day).toBe(15);
+            expect(parsed.hour).toBe(21);
+            expect(parsed.minute).toBe(30);
+        });
     });
 
     describe("whitespace normalization and portability", () => {
-        it("ensures generated editable formats do not contain typographic whitespace (U+00A0, U+202F)", () => {
-            const locales = ["en-US", "de-DE", "fr-FR", "es-ES", "ja-JP", "pt-BR"];
+        it("ensures generated editable formats do not contain typographic whitespace (U+00A0, U+202F, U+2009)", () => {
+            const locales = ["en-US", "de-DE", "fr-FR", "es-ES", "ja-JP", "pt-BR", "zh-CN", "zh-TW"];
             for (const loc of locales) {
                 const time12 = getLocaleTimeInputFormat(loc, { hourFormat: "12" });
-                expect(time12).not.toMatch(/[\u00A0\u202F]/);
+                expect(time12).not.toMatch(/[\u00A0\u2009\u202F]/);
 
                 const time12Seconds = getLocaleTimeInputFormat(loc, { hourFormat: "12", showSeconds: true });
-                expect(time12Seconds).not.toMatch(/[\u00A0\u202F]/);
+                expect(time12Seconds).not.toMatch(/[\u00A0\u2009\u202F]/);
 
                 const time24 = getLocaleTimeInputFormat(loc, { hourFormat: "24" });
-                expect(time24).not.toMatch(/[\u00A0\u202F]/);
+                expect(time24).not.toMatch(/[\u00A0\u2009\u202F]/);
 
                 const dateTime12 = getLocaleDateTimeInputFormat(loc, { hourFormat: "12" });
-                expect(dateTime12).not.toMatch(/[\u00A0\u202F]/);
+                expect(dateTime12).not.toMatch(/[\u00A0\u2009\u202F]/);
 
                 const date = getLocaleDateInputFormat(loc);
-                expect(date).not.toMatch(/[\u00A0\u202F]/);
+                expect(date).not.toMatch(/[\u00A0\u2009\u202F]/);
             }
         });
+
 
         it("preserves Japanese day period in prefix position", () => {
             const format12 = getLocaleTimeInputFormat("ja-JP", { hourFormat: "12" });

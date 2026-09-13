@@ -74,8 +74,8 @@ export function parseGregorianDate(
     const locale = normalizeGregorianLocale(localeId);
     let dt = DateTime.fromFormat(text, format, { locale, outputCalendar: "gregory" });
     if (!dt.isValid) {
-        const normalizedSpacesText = text.replace(/[\u00A0\u202F]/g, " ");
-        const normalizedSpacesFormat = format.replace(/[\u00A0\u202F]/g, " ");
+        const normalizedSpacesText = text.replace(/[\u00A0\u2009\u202F]/g, " ");
+        const normalizedSpacesFormat = format.replace(/[\u00A0\u2009\u202F]/g, " ");
         dt = DateTime.fromFormat(normalizedSpacesText, normalizedSpacesFormat, { locale, outputCalendar: "gregory" });
         if (!dt.isValid) {
             const normalizedText = normalizeLocalizedDigits(normalizedSpacesText, locale);
