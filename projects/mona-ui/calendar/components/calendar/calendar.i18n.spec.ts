@@ -446,7 +446,7 @@ describe("CalendarComponent i18n", () => {
         })
         class WeekNumberHostComponent {
             public readonly value = signal<Date>(new Date(2026, 0, 15)); // January 2026 (Jan 1 is Thursday)
-            public readonly firstDay = signal<"sunday" | "monday">("sunday");
+            public readonly firstDay = signal<FirstDayOfWeek>("sunday");
         }
 
         TestBed.configureTestingModule({
@@ -478,6 +478,17 @@ describe("CalendarComponent i18n", () => {
         // Row 1 (Mon Dec 29 - Sun Jan 4) -> Week 1
         // Row 2 (Mon Jan 5 - Sun Jan 11) -> Week 2
         fixture.componentInstance.firstDay.set("monday");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        weekNumbers = getWeekNumberTexts();
+        expect(weekNumbers[0]).toBe("1");
+        expect(weekNumbers[1]).toBe("2");
+
+        // 3. Friday-first: Jan 1, 2026 is Thursday.
+        // Row 1 (Fri Dec 26 - Thu Jan 1) contains Thu Jan 1 -> Week 1
+        // Row 2 (Fri Jan 2 - Thu Jan 8) contains Thu Jan 8 -> Week 2
+        fixture.componentInstance.firstDay.set("friday");
         fixture.detectChanges();
         await fixture.whenStable();
 
@@ -557,7 +568,34 @@ describe("CalendarComponent i18n", () => {
             expect(gridDays[gridDays.length - 1]).toBe("2");
         });
 
-        it("navigates to start and end of week row via Home and End keys for monday, sunday, and saturday-first calendars", async () => {
+        it("defaults to Friday-first for dv-MV and aligns weekday headers and month grid", async () => {
+            TestBed.configureTestingModule({
+                imports: [WeekStartTestHostComponent]
+            });
+            const fixture = TestBed.createComponent(WeekStartTestHostComponent);
+            const i18n = TestBed.inject(MonaI18nService);
+            // dv-MV is a verified Friday-first locale (firstDay: 5 in Intl.Locale.weekInfo and CLDR)
+            i18n.use({ id: "dv-MV", direction: "rtl", messages: {} });
+            fixture.componentInstance.value.set(new Date(2026, 8, 15)); // September 15, 2026
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const headerRow = fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
+            const headers = Array.from(headerRow.querySelectorAll("div")).map(el => el.textContent?.trim());
+            expect(headers[0]).toBe("Fri");
+            expect(headers[6]).toBe("Thu");
+
+            // Month grid alignment for September 2026:
+            // Sep 1, 2026 is Tuesday. With Friday start, row 1 contains:
+            // Aug 28 (Fri), Aug 29 (Sat), Aug 30 (Sun), Aug 31 (Mon), Sep 1 (Tue) ...
+            // Sep 30, 2026 is Wednesday. Row 5 ends on Thursday Oct 1.
+            const gridDays = Array.from(fixture.nativeElement.querySelectorAll("[monaMonthDay]"))
+                .map(el => (el as HTMLElement).textContent?.trim());
+            expect(gridDays[0]).toBe("28");
+            expect(gridDays[gridDays.length - 1]).toBe("1");
+        });
+
+        it("navigates to start and end of week row via Home and End keys for monday, sunday, saturday, and friday-first calendars", async () => {
             TestBed.configureTestingModule({
                 imports: [WeekStartTestHostComponent]
             });
@@ -614,6 +652,23 @@ describe("CalendarComponent i18n", () => {
             calendarEl.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true, cancelable: true }));
             fixture.detectChanges();
             expect(getFocusedDay()).toBe("18");
+
+            // 4. Friday-first calendar via dv-MV locale auto-derivation: focus on Wednesday Sep 16, 2026
+            // Week row is Fri Sep 11 to Thu Sep 17
+            i18n.use({ id: "dv-MV", direction: "rtl", messages: {} });
+            fixture.componentInstance.firstDay.set(null); // Auto-derive from locale
+            fixture.componentInstance.value.set(new Date(2026, 8, 16));
+            fixture.detectChanges();
+            await fixture.whenStable();
+            expect(getFocusedDay()).toBe("16");
+
+            calendarEl.dispatchEvent(new KeyboardEvent("keydown", { key: "Home", bubbles: true, cancelable: true }));
+            fixture.detectChanges();
+            expect(getFocusedDay()).toBe("11");
+
+            calendarEl.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true, cancelable: true }));
+            fixture.detectChanges();
+            expect(getFocusedDay()).toBe("17");
         });
 
         it("preserves explicit firstDay override even when active locale differs", async () => {

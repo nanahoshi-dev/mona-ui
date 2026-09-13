@@ -254,7 +254,7 @@ describe("locale-date-formats", () => {
                 try {
                     // Simulate primitive environment without Intl.Locale
                     const mockedIntl = { ...originalIntl };
-                    delete (mockedIntl as Record<string, unknown>).Locale;
+                    Reflect.deleteProperty(mockedIntl, "Locale");
                     Object.defineProperty(globalThis, "Intl", { value: mockedIntl, configurable: true, writable: true });
 
                     expect(resolveLikelyRegion("en-US")).toBe("US");
