@@ -2,6 +2,7 @@ import { Component, signal, viewChild } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
 import { CalendarComponent, type FirstDayOfWeek } from "@nanahoshi/mona-ui/calendar";
+import { ChipComponent } from "@nanahoshi/mona-ui/chip";
 import { ColorGradientComponent } from "@nanahoshi/mona-ui/color-gradient";
 import { DatePickerComponent } from "@nanahoshi/mona-ui/date-picker";
 import { DateTimePickerComponent } from "@nanahoshi/mona-ui/datetime-picker";
@@ -164,6 +165,16 @@ class GridIntegrationHostComponent {
         { id: 1, name: "Item 1" },
         { id: 2, name: "Item 2" }
     ];
+}
+
+@Component({
+    template: `
+        <mona-chip [removable]="true" [label]="label()" />
+    `,
+    imports: [ChipComponent]
+})
+class ChipIntegrationHostComponent {
+    public readonly label = signal("");
 }
 
 describe("MONA_PT_BR_LOCALE Integration with MonaI18nService", () => {
@@ -893,5 +904,37 @@ describe("MONA_PT_BR_LOCALE Integration with MonaI18nService", () => {
         ).toBe(
             "Reordenar linha 1. Use Alt mais Seta para cima ou Alt mais Seta para baixo para mover. São necessárias pelo menos duas linhas para reordenar."
         );
+    });
+
+    it("renders Chip component with Brazilian Portuguese remove accessibility label", async () => {
+        await TestBed.configureTestingModule({
+            imports: [ChipIntegrationHostComponent],
+            providers: [
+                provideMonaI18n({
+                    locale: MONA_PT_BR_LOCALE
+                })
+            ]
+        }).compileComponents();
+
+        const fixture = TestBed.createComponent(ChipIntegrationHostComponent);
+
+        // 1. Labeled removable Chip
+        fixture.componentInstance.label.set("Angular");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const hostEl = fixture.nativeElement as HTMLElement;
+        const removeButton = hostEl.querySelector<HTMLButtonElement>("button[data-chip-remove]");
+        expect(removeButton).not.toBeNull();
+        expect(removeButton?.getAttribute("aria-label")).toBe("Remover Angular");
+        expect(removeButton?.getAttribute("aria-label")).not.toBe("Remover, Angular");
+
+        // 2. Unlabeled fallback
+        fixture.componentInstance.label.set("");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(removeButton?.getAttribute("aria-label")).toBe("Remover item");
+        expect(removeButton?.getAttribute("aria-label")).not.toBe("Remover, item");
     });
 });
