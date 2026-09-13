@@ -64,6 +64,35 @@
             <div class="text-sm text-muted-foreground mt-1">v6.0</div>
         </div>
     </a>
+
+    <!-- ts-collections Card -->
+    <a
+        href="https://phrolovia.github.io/ts-collections/"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="ts-collections v17.5 documentation (opens in a new tab)"
+        class="group flex flex-col justify-between p-5 rounded-xl border border-border hover:border-border-control hover:shadow-sm bg-card transition-all duration-200 cursor-pointer">
+        <div class="flex justify-between items-start w-full">
+            <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-600">
+                <svg
+                    class="w-6 h-6"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+                    <path d="M12 6v6l4 2" />
+                </svg>
+            </div>
+            <ng-container *ngTemplateOutlet="arrowIconTemplate"></ng-container>
+        </div>
+        <div class="mt-6">
+            <div class="font-bold text-foreground text-base">ts-collections</div>
+            <div class="text-sm text-muted-foreground mt-1">v17.5</div>
+        </div>
+    </a>
 </div>
 
 <ng-template #arrowIconTemplate>

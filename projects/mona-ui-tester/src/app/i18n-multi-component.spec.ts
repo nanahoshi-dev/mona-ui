@@ -8,7 +8,9 @@ import {
     MONA_ES_ES_LOCALE,
     MONA_FR_FR_LOCALE,
     MONA_JA_JP_LOCALE,
-    MONA_PT_BR_LOCALE
+    MONA_PT_BR_LOCALE,
+    MONA_ZH_CN_LOCALE,
+    MONA_ZH_TW_LOCALE
 } from "@nanahoshi/mona-ui/locales";
 import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
 import { PagerComponent } from "@nanahoshi/mona-ui/pager";
@@ -450,6 +452,175 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
         expect(i18n.localeId()).toBe("en-US");
         expect(ptPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
         expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
+    });
+
+    it("integrates official Simplified Chinese (zh-CN) locale reactively with runtime overrides and formatting", async () => {
+        const root = fixture.nativeElement as HTMLElement;
+        const input = root.querySelector("mona-numeric-text-box input") as HTMLInputElement;
+
+        // 1. Activate official Simplified Chinese locale
+        i18n.use(MONA_ZH_CN_LOCALE);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("zh-CN");
+        expect(i18n.direction()).toBe("ltr");
+
+        // Pager firstPageLabel in zh-CN: "第一页"
+        const cnPager = root.querySelector("mona-pager");
+        expect(cnPager?.querySelector("button[aria-label='第一页']")).not.toBeNull();
+
+        // ScrollView previousPage in zh-CN: "上一页"
+        const cnScroll = root.querySelector("mona-scroll-view");
+        expect(cnScroll?.querySelector("button[aria-label='上一页']")).not.toBeNull();
+
+        // Calendar translated UI controls, Monday-first header, and live region in zh-CN
+        const cnCalendar = root.querySelector("mona-calendar");
+        expect(cnCalendar?.querySelector("button:first-child")?.textContent?.trim()).toBe("今天");
+        expect(cnCalendar?.querySelector("button[aria-label='上个月']")).not.toBeNull();
+        expect(cnCalendar?.querySelector("button[aria-label='下个月']")).not.toBeNull();
+        expect(cnCalendar?.querySelector("[aria-live='polite']")?.textContent).toContain("日历");
+
+        const headerRow = cnCalendar?.querySelector("div[style*='grid-template-columns']") as HTMLElement;
+        expect(headerRow?.querySelectorAll("div")[0]?.textContent?.trim()).toBe("周一");
+
+        // NumericTextBox formatting with dot decimal separator
+        expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
+
+        // 2. Test application override precedence over Simplified Chinese locale
+        i18n.patchMessages({
+            pager: {
+                firstPageLabel: "首页"
+            }
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(cnPager?.querySelector("button[aria-label='首页']")).not.toBeNull();
+
+        // 3. Clear overrides: Simplified Chinese locale value returns
+        i18n.clearMessages();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(cnPager?.querySelector("button[aria-label='第一页']")).not.toBeNull();
+
+        // 4. Switch back to English default
+        i18n.use({
+            direction: "ltr",
+            id: "en-US",
+            messages: {}
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("en-US");
+        expect(cnPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
+        expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
+    });
+
+    it("integrates official Traditional Chinese (zh-TW) locale reactively with runtime overrides and formatting", async () => {
+        const root = fixture.nativeElement as HTMLElement;
+        const input = root.querySelector("mona-numeric-text-box input") as HTMLInputElement;
+
+        // 1. Activate official Traditional Chinese locale
+        i18n.use(MONA_ZH_TW_LOCALE);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("zh-TW");
+        expect(i18n.direction()).toBe("ltr");
+
+        // Pager firstPageLabel in zh-TW: "第一頁"
+        const twPager = root.querySelector("mona-pager");
+        expect(twPager?.querySelector("button[aria-label='第一頁']")).not.toBeNull();
+
+        // ScrollView previousPage in zh-TW: "上一頁"
+        const twScroll = root.querySelector("mona-scroll-view");
+        expect(twScroll?.querySelector("button[aria-label='上一頁']")).not.toBeNull();
+
+        // Calendar translated UI controls, Sunday-first header, and live region in zh-TW
+        const twCalendar = root.querySelector("mona-calendar");
+        expect(twCalendar?.querySelector("button:first-child")?.textContent?.trim()).toBe("今天");
+        expect(twCalendar?.querySelector("button[aria-label='上個月']")).not.toBeNull();
+        expect(twCalendar?.querySelector("button[aria-label='下個月']")).not.toBeNull();
+        expect(twCalendar?.querySelector("[aria-live='polite']")?.textContent).toContain("行事曆");
+
+        const headerRow = twCalendar?.querySelector("div[style*='grid-template-columns']") as HTMLElement;
+        expect(headerRow?.querySelectorAll("div")[0]?.textContent?.trim()).toBe("週日");
+
+        // NumericTextBox formatting with dot decimal separator
+        expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
+
+        // 2. Test application override precedence over Traditional Chinese locale
+        i18n.patchMessages({
+            pager: {
+                firstPageLabel: "首頁"
+            }
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(twPager?.querySelector("button[aria-label='首頁']")).not.toBeNull();
+
+        // 3. Clear overrides: Traditional Chinese locale value returns
+        i18n.clearMessages();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(twPager?.querySelector("button[aria-label='第一頁']")).not.toBeNull();
+
+        // 4. Switch back to English default
+        i18n.use({
+            direction: "ltr",
+            id: "en-US",
+            messages: {}
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("en-US");
+        expect(twPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
+        expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
+    });
+
+    it("switches directly between Simplified Chinese (zh-CN) and Traditional Chinese (zh-TW)", async () => {
+        const root = fixture.nativeElement as HTMLElement;
+
+        // 1. Activate zh-CN
+        i18n.use(MONA_ZH_CN_LOCALE);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("zh-CN");
+        const pager = root.querySelector("mona-pager");
+        expect(pager?.querySelector("button[aria-label='第一页']")).not.toBeNull();
+        const calendar = root.querySelector("mona-calendar");
+        expect(calendar?.querySelector("[aria-live='polite']")?.textContent).toContain("日历");
+        let headerRow = calendar?.querySelector("div[style*='grid-template-columns']") as HTMLElement;
+        expect(headerRow?.querySelectorAll("div")[0]?.textContent?.trim()).toBe("周一");
+
+        // 2. Switch directly to zh-TW
+        i18n.use(MONA_ZH_TW_LOCALE);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("zh-TW");
+        expect(pager?.querySelector("button[aria-label='第一頁']")).not.toBeNull();
+        expect(calendar?.querySelector("[aria-live='polite']")?.textContent).toContain("行事曆");
+        headerRow = calendar?.querySelector("div[style*='grid-template-columns']") as HTMLElement;
+        expect(headerRow?.querySelectorAll("div")[0]?.textContent?.trim()).toBe("週日");
+
+        // 3. Switch directly back to zh-CN
+        i18n.use(MONA_ZH_CN_LOCALE);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("zh-CN");
+        expect(pager?.querySelector("button[aria-label='第一页']")).not.toBeNull();
+        expect(calendar?.querySelector("[aria-live='polite']")?.textContent).toContain("日历");
+        headerRow = calendar?.querySelector("div[style*='grid-template-columns']") as HTMLElement;
+        expect(headerRow?.querySelectorAll("div")[0]?.textContent?.trim()).toBe("周一");
     });
 
     it("applies pseudo-localization (en-XA) across multiple components reactively", () => {
