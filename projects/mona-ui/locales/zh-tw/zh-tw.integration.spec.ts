@@ -19,6 +19,7 @@ import { ScrollViewComponent } from "@nanahoshi/mona-ui/scroll-view";
 import { SplitButtonComponent } from "@nanahoshi/mona-ui/split-button";
 import { TimePickerComponent } from "@nanahoshi/mona-ui/time-picker";
 import { TimeSelectorComponent } from "@nanahoshi/mona-ui/time-selector";
+import { TreeViewComponent, TreeViewFilterableDirective } from "@nanahoshi/mona-ui/tree-view";
 import {
     formatNumber,
     getNumberSymbols,
@@ -178,6 +179,30 @@ class GridIntegrationHostComponent {
 class ChipIntegrationHostComponent {
     public readonly label = signal("");
     public readonly removeLabel = signal<string | undefined>(undefined);
+}
+
+interface TreeItem {
+    id: number;
+    text: string;
+}
+
+@Component({
+    template: `
+        <mona-tree-view
+            [data]="data"
+            textField="text"
+            [ariaLabel]="ariaLabel()"
+            monaTreeViewFilterable
+        />
+    `,
+    imports: [TreeViewComponent, TreeViewFilterableDirective]
+})
+class TreeViewIntegrationHostComponent {
+    public readonly data: TreeItem[] = [
+        { id: 1, text: "專案 1" },
+        { id: 2, text: "專案 2" }
+    ];
+    public readonly ariaLabel = signal<string>("");
 }
 
 describe("MONA_ZH_TW_LOCALE Integration with MonaI18nService", () => {
@@ -859,7 +884,7 @@ describe("MONA_ZH_TW_LOCALE Integration with MonaI18nService", () => {
         const reorderHeader = hostEl.querySelector("th[aria-label='資料列重新排序']");
         expect(reorderHeader).not.toBeNull();
 
-        const reorderButton = hostEl.querySelector("button[aria-label*='重新排列第 1 列']");
+        const reorderButton = hostEl.querySelector("button[aria-label*='重新排列第 1 個資料列']");
         expect(reorderButton).not.toBeNull();
         expect(reorderButton?.getAttribute("aria-label")).toContain(
             "使用 Alt + 向上鍵或 Alt + 向下鍵移動。"
@@ -880,25 +905,25 @@ describe("MONA_ZH_TW_LOCALE Integration with MonaI18nService", () => {
 
         expect(gridMessages().rowReorder).toBe("資料列重新排序");
         expect(gridMessages().moveRow).toBe("移動資料列");
-        expect(gridMessages().reorderRow(3)).toBe("重新排列第 3 列");
+        expect(gridMessages().reorderRow(3)).toBe("重新排列第 3 個資料列");
         expect(gridMessages().rowReorderDisabled).toBe("資料列重新排序已停用。");
         expect(gridMessages().rowReorderDisabledEditing).toBe("請完成編輯後再重新排列資料列。");
         expect(gridMessages().rowReorderDisabledFiltered).toBe("請清除篩選後再重新排列資料列。");
         expect(gridMessages().rowReorderDisabledGrouped).toBe("請清除群組後再重新排列資料列。");
-        expect(gridMessages().rowReorderDisabledSingleRow).toBe("至少需要兩列才能重新排序。");
+        expect(gridMessages().rowReorderDisabledSingleRow).toBe("至少需要兩個資料列才能重新排序。");
         expect(gridMessages().rowReorderDisabledSorted).toBe("請清除排序後再重新排列資料列。");
         expect(gridMessages().rowReorderDisabledVirtualScroll).toBe(
             "啟用虛擬捲動時無法重新排列資料列。"
         );
-        expect(gridMessages().rowReorderMoved(3, 1)).toBe("已將第 3 列移至位置 1。");
+        expect(gridMessages().rowReorderMoved(3, 1)).toBe("已將第 3 個資料列移至位置 1。");
         expect(
             gridMessages().rowReorderHandleAriaLabel(
-                "重新排列第 1 列",
+                "重新排列第 1 個資料列",
                 gridMessages().rowReorderKeyboardHint,
                 gridMessages().rowReorderDisabledSingleRow
             )
         ).toBe(
-            "重新排列第 1 列。使用 Alt + 向上鍵或 Alt + 向下鍵移動。 至少需要兩列才能重新排序。"
+            "重新排列第 1 個資料列。使用 Alt + 向上鍵或 Alt + 向下鍵移動。 至少需要兩個資料列才能重新排序。"
         );
     });
 
@@ -962,6 +987,33 @@ describe("MONA_ZH_TW_LOCALE Integration with MonaI18nService", () => {
         await fixture.whenStable();
 
         expect(labeledButton.getAttribute("aria-label")).toBe("移除Angular");
+    });
+
+    it("renders TreeView component with Taiwan filter accessibility labels", async () => {
+        await TestBed.configureTestingModule({
+            imports: [TreeViewIntegrationHostComponent],
+            providers: [
+                provideMonaI18n({
+                    locale: MONA_ZH_TW_LOCALE
+                })
+            ]
+        }).compileComponents();
+
+        const fixture = TestBed.createComponent(TreeViewIntegrationHostComponent);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const hostEl = fixture.nativeElement as HTMLElement;
+        const searchRegion = hostEl.querySelector("div[role='search']");
+        expect(searchRegion).not.toBeNull();
+        expect(searchRegion?.getAttribute("aria-label")).toBe("篩選樹狀檢視");
+
+        // Explicit tree label composition
+        fixture.componentInstance.ariaLabel.set("專案");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(searchRegion?.getAttribute("aria-label")).toBe("篩選 專案");
     });
 
     it("reactively switches directly between zh-TW and zh-CN (Phase 9 direct cross-locale switching)", () => {

@@ -118,10 +118,13 @@ describe("MONA_ZH_TW_LOCALE", () => {
             expect(m.grid.rowReorderDisabled).toBe("資料列重新排序已停用。");
             expect(m.grid.rowReorderKeyboardHint).toBe("使用 Alt + 向上鍵或 Alt + 向下鍵移動。");
             expect(m.grid.columnsSelected(3)).toBe("已選取 3 欄");
-            expect(m.grid.filterByColumn("名稱")).toBe("依 名稱 篩選");
-            expect(m.grid.reorderRow(2)).toBe("重新排列第 2 列");
-            expect(m.grid.selectRow(5)).toBe("選取第 5 列");
-            expect(m.grid.rowReorderMoved(2, 4)).toBe("已將第 2 列移至位置 4。");
+            expect(m.grid.reorderRow(2)).toBe("重新排列第 2 個資料列");
+            expect(m.grid.selectRow(5)).toBe("選取第 5 個資料列");
+            expect(m.grid.rowReorderMoved(2, 4)).toBe("已將第 2 個資料列移至位置 4。");
+            expect(m.grid.rowReorderDisabledSingleRow).toBe("至少需要兩個資料列才能重新排序。");
+            expect(m.grid.reorderRow(2)).not.toMatch(/第 2 列$/);
+            expect(m.grid.selectRow(5)).not.toMatch(/第 5 列$/);
+            expect(m.grid.rowReorderDisabledSingleRow).not.toContain("兩列");
         });
 
         it("translates ListBox messages with descriptive accessible transfer labels", () => {
@@ -201,7 +204,8 @@ describe("MONA_ZH_TW_LOCALE", () => {
             expect(m.treeView.expand).toBe("展開");
             expect(m.treeView.collapse).toBe("摺疊");
             expect(m.treeView.filter).toBe("篩選");
-            expect(m.treeView.filterTree).toBe("篩選樹狀圖");
+            expect(m.treeView.filterTree).toBe("篩選樹狀檢視");
+            expect(m.treeView.filterTree).not.toContain("樹狀圖");
             expect(m.scrollView.carousel).toBe("輪播");
             expect(m.scrollView.slide).toBe("投影片");
             expect(m.scrollView.nextPage).toBe("下一頁");
@@ -269,13 +273,13 @@ describe("MONA_ZH_TW_LOCALE", () => {
         });
 
         it("evaluates Grid row reorder accessibility announcements", () => {
-            const handleLabel = m.grid.rowReorderHandleAriaLabel("第 1 列", "使用 Alt + 向上鍵移動。");
-            expect(handleLabel).toBe("第 1 列。使用 Alt + 向上鍵移動。");
+            const handleLabel = m.grid.rowReorderHandleAriaLabel("第 1 個資料列", "使用 Alt + 向上鍵移動。");
+            expect(handleLabel).toBe("第 1 個資料列。使用 Alt + 向上鍵移動。");
 
-            const disabledHandle = m.grid.rowReorderHandleAriaLabel("第 1 列", "使用方向鍵移動。", "資料列重新排序已停用。");
-            expect(disabledHandle).toBe("第 1 列。使用方向鍵移動。 資料列重新排序已停用。");
+            const disabledHandle = m.grid.rowReorderHandleAriaLabel("第 1 個資料列", "使用方向鍵移動。", "資料列重新排序已停用。");
+            expect(disabledHandle).toBe("第 1 個資料列。使用方向鍵移動。 資料列重新排序已停用。");
 
-            expect(m.grid.rowReorderMoved(3, 1)).toBe("已將第 3 列移至位置 1。");
+            expect(m.grid.rowReorderMoved(3, 1)).toBe("已將第 3 個資料列移至位置 1。");
         });
 
         it("evaluates ColorGradient accessibility label", () => {

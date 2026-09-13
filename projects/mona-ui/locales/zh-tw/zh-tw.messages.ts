@@ -226,26 +226,26 @@ export const ZH_TW_MESSAGES = {
         noData: "沒有資料",
         remove: "移除",
         removeRow: "移除資料列",
-        reorderRow: (rowNumber: number) => `重新排列第 ${rowNumber} 列`,
+        reorderRow: (rowNumber: number) => `重新排列第 ${rowNumber} 個資料列`,
         resizeColumn: "調整欄寬",
         rowReorder: "資料列重新排序",
         rowReorderDisabled: "資料列重新排序已停用。",
         rowReorderDisabledEditing: "請完成編輯後再重新排列資料列。",
         rowReorderDisabledFiltered: "請清除篩選後再重新排列資料列。",
         rowReorderDisabledGrouped: "請清除群組後再重新排列資料列。",
-        rowReorderDisabledSingleRow: "至少需要兩列才能重新排序。",
+        rowReorderDisabledSingleRow: "至少需要兩個資料列才能重新排序。",
         rowReorderDisabledSorted: "請清除排序後再重新排列資料列。",
         rowReorderDisabledVirtualScroll: "啟用虛擬捲動時無法重新排列資料列。",
         rowReorderHandleAriaLabel: (rowLabel: string, keyboardHint: string, disabledReason?: string) =>
             `${rowLabel}。${keyboardHint}${disabledReason ? ` ${disabledReason}` : ""}`,
         rowReorderKeyboardHint: "使用 Alt + 向上鍵或 Alt + 向下鍵移動。",
         rowReorderMoved: (fromRowNumber: number, toPosition: number) =>
-            `已將第 ${fromRowNumber} 列移至位置 ${toPosition}。`,
+            `已將第 ${fromRowNumber} 個資料列移至位置 ${toPosition}。`,
         rowValidationError: "此資料列存在驗證錯誤。",
         save: "儲存",
         saveRow: "儲存資料列",
         selectAllRows: "選取所有資料列",
-        selectRow: (rowNumber: number) => `選取第 ${rowNumber} 列`
+        selectRow: (rowNumber: number) => `選取第 ${rowNumber} 個資料列`
     },
     list: {
         noData: "沒有資料"
@@ -364,7 +364,7 @@ export const ZH_TW_MESSAGES = {
         collapse: "摺疊",
         expand: "展開",
         filter: "篩選",
-        filterTree: "篩選樹狀圖"
+        filterTree: "篩選樹狀檢視"
     },
     window: {
         close: "關閉",
