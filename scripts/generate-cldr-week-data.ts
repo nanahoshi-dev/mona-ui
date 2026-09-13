@@ -86,11 +86,6 @@ export function generateWeekDataModuleContent(sources: CldrSources): string {
         }
     }
 
-    // Iceland (IS) is Sunday-first in ICU 78 / Mona pinned contract
-    if (!sundayRegions.includes("IS")) {
-        sundayRegions.push("IS");
-    }
-
     fridayRegions.sort();
     saturdayRegions.sort();
     sundayRegions.sort();

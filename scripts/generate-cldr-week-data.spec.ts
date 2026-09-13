@@ -67,12 +67,11 @@ describe("generate-cldr-week-data", () => {
         // Sunday
         expect(SUNDAY_FIRST_REGIONS.has("US")).toBe(true);
         expect(SUNDAY_FIRST_REGIONS.has("JP")).toBe(true);
-        expect(SUNDAY_FIRST_REGIONS.has("IS")).toBe(true);
         expect(SUNDAY_FIRST_REGIONS.has("YE")).toBe(true);
         expect(SUNDAY_FIRST_REGIONS.has("CA")).toBe(true);
 
         // Monday default controls (not in Friday, Saturday, or Sunday sets)
-        for (const territory of ["DE", "FR", "ES", "AE", "AU", "CN", "GB"]) {
+        for (const territory of ["DE", "FR", "ES", "AE", "AU", "CN", "GB", "IS"]) {
             expect(FRIDAY_FIRST_REGIONS.has(territory)).toBe(false);
             expect(SATURDAY_FIRST_REGIONS.has(territory)).toBe(false);
             expect(SUNDAY_FIRST_REGIONS.has(territory)).toBe(false);
@@ -88,6 +87,7 @@ describe("generate-cldr-week-data", () => {
         expect(resolveLikelyFirstDayOfWeek("dv")).toBe("friday");
         expect(resolveLikelyFirstDayOfWeek("de")).toBeNull();
         expect(resolveLikelyFirstDayOfWeek("fr")).toBeNull();
+        expect(resolveLikelyFirstDayOfWeek("is")).toBeNull();
     });
 
     it("resolves script-sensitive language tags", () => {

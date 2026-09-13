@@ -204,8 +204,8 @@ describe("locale-date-formats", () => {
                     expect(resolveFallbackFirstDayOfWeek("en-AU")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("zh-CN")).toBe("monday");
 
-                    // IS and YE are Sunday-first in CLDR
-                    expect(resolveFallbackFirstDayOfWeek("is-IS")).toBe("sunday");
+                    // YE is Sunday-first; IS is Monday-first in CLDR 46
+                    expect(resolveFallbackFirstDayOfWeek("is-IS")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("ar-YE")).toBe("sunday");
 
                     // MV is Friday-first in CLDR
@@ -260,7 +260,7 @@ describe("locale-date-formats", () => {
                 withWeekInfoDisabled(() => {
                     // Test with unique locales that were not queried previously in normal-path tests
                     expect(getLocaleFirstDayOfWeek("en-MV")).toBe("friday");
-                    expect(getLocaleFirstDayOfWeek("is-IS")).toBe("sunday");
+                    expect(getLocaleFirstDayOfWeek("is-IS")).toBe("monday");
                 });
             });
 
