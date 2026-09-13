@@ -6,9 +6,14 @@ import {
     CLDR_JSON_TAG,
     CLDR_VERSION,
     UNICODE_VERSION,
+    type CldrProvenance,
+    computeSha256,
     extractRegion,
     generateWeekDataModuleContent,
-    loadCldrSources
+    loadCldrSources,
+    normalizeUnicodeVersion,
+    validateCldrProvenance,
+    validateCldrSourceVersions
 } from "./generate-cldr-week-data";
 import {
     CLDR_LIKELY_SUBTAGS_VERSION,
@@ -35,14 +40,31 @@ describe("generate-cldr-week-data", () => {
         expect(CLDR_LIKELY_SUBTAGS_VERSION).toBe(CLDR_VERSION);
     });
 
-    it("verifies provenance metadata matches pinned files and hashes", () => {
-        const provFile = path.resolve(__dirname, "cldr/provenance.json");
+    it("verifies provenance metadata matches pinned files and computes valid sha256 hashes", () => {
+        const cldrDir = path.resolve(__dirname, "cldr");
+        const provFile = path.join(cldrDir, "provenance.json");
+        const weekFile = path.join(cldrDir, "weekData.json");
+        const likelyFile = path.join(cldrDir, "likelySubtags.json");
+
         expect(fs.existsSync(provFile)).toBe(true);
-        const prov = JSON.parse(fs.readFileSync(provFile, "utf8"));
+        const prov: CldrProvenance = JSON.parse(fs.readFileSync(provFile, "utf8"));
         expect(prov.cldrVersion).toBe(CLDR_VERSION);
         expect(prov.cldrJsonTag).toBe(CLDR_JSON_TAG);
-        expect(prov.files["likelySubtags.json"]).toBeDefined();
-        expect(prov.files["weekData.json"]).toBeDefined();
+        expect(prov.unicodeVersion).toBe(UNICODE_VERSION);
+
+        const weekRaw = fs.readFileSync(weekFile);
+        const likelyRaw = fs.readFileSync(likelyFile);
+
+        expect(computeSha256(weekRaw)).toBe(prov.files["weekData.json"].sha256);
+        expect(computeSha256(likelyRaw)).toBe(prov.files["likelySubtags.json"].sha256);
+
+        // Verifies the integrated validation function passes cleanly for the repo's vendored sources
+        expect(() => {
+            validateCldrProvenance(prov, {
+                "weekData.json": weekRaw,
+                "likelySubtags.json": likelyRaw
+            });
+        }).not.toThrow();
     });
 
     it("extracts territory regions accurately from maximized tags", () => {
@@ -121,5 +143,218 @@ describe("generate-cldr-week-data", () => {
         const existing = fs.readFileSync(targetFile, "utf8");
         const normalize = (s: string) => s.replace(/\r\n/g, "\n").trim();
         expect(normalize(content)).toBe(normalize(existing));
+    });
+});
+
+describe("source integrity and tampering detection", () => {
+    const validWeekBuffer = Buffer.from('{"supplemental":{"version":{"_unicodeVersion":"16.0.0","_cldrVersion":"46"},"weekData":{"firstDay":{"001":"mon"}}}}');
+    const validLikelyBuffer = Buffer.from('{"supplemental":{"version":{"_unicodeVersion":"16.0.0","_cldrVersion":"46"},"likelySubtags":{"en":"en-Latn-US"}}}');
+
+    const validProvenance: CldrProvenance = {
+        cldrVersion: "46",
+        cldrJsonTag: "46.0.0",
+        unicodeVersion: "16.0",
+        files: {
+            "weekData.json": {
+                url: "https://example.com/weekData.json",
+                sha256: computeSha256(validWeekBuffer)
+            },
+            "likelySubtags.json": {
+                url: "https://example.com/likelySubtags.json",
+                sha256: computeSha256(validLikelyBuffer)
+            }
+        }
+    };
+
+    it("accepts authentic source fixtures with exact matching hashes", () => {
+        expect(() => {
+            validateCldrProvenance(validProvenance, {
+                "weekData.json": validWeekBuffer,
+                "likelySubtags.json": validLikelyBuffer
+            });
+        }).not.toThrow();
+    });
+
+    it("fails when weekData.json is modified by a single byte", () => {
+        const tamperedWeek = Buffer.from(validWeekBuffer);
+        tamperedWeek[tamperedWeek.length - 1] = tamperedWeek[tamperedWeek.length - 1] === 32 ? 33 : 32;
+
+        expect(() => {
+            validateCldrProvenance(validProvenance, {
+                "weekData.json": tamperedWeek,
+                "likelySubtags.json": validLikelyBuffer
+            });
+        }).toThrow(/CLDR source integrity check failed:[\s\S]*weekData\.json SHA-256 does not match/);
+    });
+
+    it("fails when likelySubtags.json is modified by a single byte", () => {
+        const tamperedLikely = Buffer.from(validLikelyBuffer);
+        tamperedLikely[tamperedLikely.length - 1] = tamperedLikely[tamperedLikely.length - 1] === 32 ? 33 : 32;
+
+        expect(() => {
+            validateCldrProvenance(validProvenance, {
+                "weekData.json": validWeekBuffer,
+                "likelySubtags.json": tamperedLikely
+            });
+        }).toThrow(/CLDR source integrity check failed:[\s\S]*likelySubtags\.json SHA-256 does not match/);
+    });
+
+    it("fails when provenance hash is tampered or mismatched", () => {
+        const tamperedProv: CldrProvenance = {
+            ...validProvenance,
+            files: {
+                ...validProvenance.files,
+                "weekData.json": {
+                    ...validProvenance.files["weekData.json"],
+                    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+                }
+            }
+        };
+
+        expect(() => {
+            validateCldrProvenance(tamperedProv, {
+                "weekData.json": validWeekBuffer,
+                "likelySubtags.json": validLikelyBuffer
+            });
+        }).toThrow(/CLDR source integrity check failed:[\s\S]*weekData\.json SHA-256 does not match/);
+    });
+
+    it("fails when provenance cldrVersion does not match expected version", () => {
+        const badProv: CldrProvenance = {
+            ...validProvenance,
+            cldrVersion: "48"
+        };
+
+        expect(() => {
+            validateCldrProvenance(badProv, {
+                "weekData.json": validWeekBuffer,
+                "likelySubtags.json": validLikelyBuffer
+            });
+        }).toThrow(/CLDR provenance version mismatch: expected CLDR 46, but provenance declares CLDR 48/);
+    });
+
+    it("fails when provenance cldrJsonTag does not match expected tag", () => {
+        const badProv: CldrProvenance = {
+            ...validProvenance,
+            cldrJsonTag: "48.0.0"
+        };
+
+        expect(() => {
+            validateCldrProvenance(badProv, {
+                "weekData.json": validWeekBuffer,
+                "likelySubtags.json": validLikelyBuffer
+            });
+        }).toThrow(/CLDR provenance tag mismatch: expected tag 46\.0\.0, but provenance declares tag 48\.0\.0/);
+    });
+
+    it("fails when provenance unicodeVersion does not match expected version", () => {
+        const badProv: CldrProvenance = {
+            ...validProvenance,
+            unicodeVersion: "17.0"
+        };
+
+        expect(() => {
+            validateCldrProvenance(badProv, {
+                "weekData.json": validWeekBuffer,
+                "likelySubtags.json": validLikelyBuffer
+            });
+        }).toThrow(/CLDR provenance Unicode version mismatch: expected Unicode 16\.0, but provenance declares Unicode 17\.0/);
+    });
+
+    it("fails when a required file is missing from provenance", () => {
+        const missingFileProv: CldrProvenance = {
+            ...validProvenance,
+            files: {
+                "weekData.json": validProvenance.files["weekData.json"]
+            } as unknown as CldrProvenance["files"]
+        };
+
+        expect(() => {
+            validateCldrProvenance(missingFileProv, {
+                "weekData.json": validWeekBuffer,
+                "likelySubtags.json": validLikelyBuffer
+            });
+        }).toThrow(/CLDR provenance entry missing for file: likelySubtags\.json/);
+    });
+
+    it("validates that valid source version metadata passes", () => {
+        const weekJson = JSON.parse(validWeekBuffer.toString("utf8"));
+        const likelyJson = JSON.parse(validLikelyBuffer.toString("utf8"));
+
+        expect(() => {
+            validateCldrSourceVersions({
+                "weekData.json": weekJson,
+                "likelySubtags.json": likelyJson
+            });
+        }).not.toThrow();
+    });
+
+    it("fails when fixture _cldrVersion does not match expected generator constant", () => {
+        const badWeekJson = {
+            supplemental: {
+                version: {
+                    _unicodeVersion: "16.0.0",
+                    _cldrVersion: "48"
+                }
+            }
+        };
+
+        expect(() => {
+            validateCldrSourceVersions({
+                "weekData.json": badWeekJson
+            });
+        }).toThrow(/CLDR source version mismatch in weekData\.json: expected CLDR 46, but weekData\.json declares CLDR 48/);
+    });
+
+    it("fails when fixture _unicodeVersion does not match expected generator constant", () => {
+        const badWeekJson = {
+            supplemental: {
+                version: {
+                    _unicodeVersion: "15.0.0",
+                    _cldrVersion: "46"
+                }
+            }
+        };
+
+        expect(() => {
+            validateCldrSourceVersions({
+                "weekData.json": badWeekJson
+            });
+        }).toThrow(/CLDR source Unicode version mismatch in weekData\.json: expected Unicode 16\.0, but weekData\.json declares Unicode 15\.0\.0/);
+    });
+
+    it("fails when source files have inconsistent CLDR baselines", () => {
+        const weekJson = {
+            supplemental: {
+                version: {
+                    _unicodeVersion: "16.0.0",
+                    _cldrVersion: "46"
+                }
+            }
+        };
+        const likelyJson = {
+            supplemental: {
+                version: {
+                    _unicodeVersion: "16.0.0",
+                    _cldrVersion: "47"
+                }
+            }
+        };
+
+        expect(() => {
+            validateCldrSourceVersions(
+                {
+                    "weekData.json": weekJson,
+                    "likelySubtags.json": likelyJson
+                },
+                { expectedCldrVersion: undefined } // skip constant check to trigger baseline comparison
+            );
+        }).toThrow(/CLDR source version mismatch in likelySubtags\.json/);
+    });
+
+    it("normalizes Unicode versions with minor release digits correctly", () => {
+        expect(normalizeUnicodeVersion("16.0.0")).toBe("16.0");
+        expect(normalizeUnicodeVersion("16.0")).toBe("16.0");
+        expect(normalizeUnicodeVersion("15.1.2")).toBe("15.1");
     });
 });
