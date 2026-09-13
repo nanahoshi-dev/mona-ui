@@ -316,7 +316,17 @@ describe("locale-date-formats", () => {
                     // Monday default languages remain Monday
                     expect(resolveFallbackFirstDayOfWeek("de")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("es")).toBe("monday");
-                    expect(resolveFallbackFirstDayOfWeek("fr")).toBe("monday");
+                    // Undefined language fallback
+                    expect(resolveFallbackFirstDayOfWeek("und")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("und-Hant")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("und-Hebr")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("und-Arab")).toBe("saturday");
+                    expect(resolveFallbackFirstDayOfWeek("und-Latn")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("und-Cyrl")).toBe("monday");
+                    expect(resolveFallbackFirstDayOfWeek("und-US")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("und-TW")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("und-EG")).toBe("saturday");
+                    expect(resolveFallbackFirstDayOfWeek("und-MV")).toBe("friday");
                 } finally {
                     Object.defineProperty(globalThis, "Intl", { value: originalIntl, configurable: true, writable: true });
                 }
@@ -396,11 +406,42 @@ describe("locale-date-formats", () => {
                     expect(resolveFallbackFirstDayOfWeek("zh-Hans")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("de")).toBe("monday");
 
+                    // Undefined language fallback in fully primitive mode
+                    expect(resolveFallbackFirstDayOfWeek("und")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("und-Hant")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("und-Hebr")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("und-Arab")).toBe("saturday");
+                    expect(resolveFallbackFirstDayOfWeek("und-Latn")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("und-Cyrl")).toBe("monday");
+                    expect(resolveFallbackFirstDayOfWeek("und-US")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("und-TW")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("und-EG")).toBe("saturday");
+                    expect(resolveFallbackFirstDayOfWeek("und-MV")).toBe("friday");
+
                     // Private use is guarded
                     expect(resolveLikelyRegion("x-US")).toBeNull();
                     expect(resolveFallbackFirstDayOfWeek("x-US")).toBe("monday");
                 } finally {
                     Object.defineProperty(globalThis, "Intl", { value: originalIntl, configurable: true, writable: true });
+                }
+            });
+
+            it("verifies native Intl.Locale likely region aligns with pinned fallback for curated locales", () => {
+                const curated = [
+                    { locale: "und", expected: "sunday" },
+                    { locale: "und-Hant", expected: "sunday" },
+                    { locale: "und-Hebr", expected: "sunday" },
+                    { locale: "und-Arab", expected: "saturday" },
+                    { locale: "und-Latn", expected: "sunday" },
+                    { locale: "und-Cyrl", expected: "monday" },
+                    { locale: "en", expected: "sunday" },
+                    { locale: "ja", expected: "sunday" },
+                    { locale: "ar", expected: "saturday" },
+                    { locale: "zh-Hant", expected: "sunday" },
+                    { locale: "en-Shaw", expected: "monday" }
+                ];
+                for (const item of curated) {
+                    expect(resolveFallbackFirstDayOfWeek(item.locale)).toBe(item.expected);
                 }
             });
         });
