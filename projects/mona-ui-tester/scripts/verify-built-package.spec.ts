@@ -196,6 +196,7 @@ export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayO
             i18nMjs?: string;
             i18nDts?: string;
             exports?: Record<string, unknown>;
+            thirdPartyNotices?: string | null;
         } = {}
     ): void {
         const pkgExports = options.exports ?? {
@@ -224,6 +225,16 @@ export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayO
             writeFileSync(join(dir, "i18n.d.ts"), options.i18nDts);
         } else if (pkgExports["./i18n"]) {
             writeFileSync(join(dir, "i18n.d.ts"), DEFAULT_MOCK_I18N_DTS);
+        }
+        if (options.thirdPartyNotices !== undefined) {
+            if (options.thirdPartyNotices !== null) {
+                writeFileSync(join(dir, "THIRD_PARTY_NOTICES.md"), options.thirdPartyNotices);
+            }
+        } else {
+            writeFileSync(
+                join(dir, "THIRD_PARTY_NOTICES.md"),
+                "# Third-Party Notices\n\n## Unicode CLDR\n\nUnicode License v3\n"
+            );
         }
     }
 
@@ -584,6 +595,38 @@ export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayO
             } finally {
                 rmSync(fakeDist, { recursive: true, force: true });
                 rmSync(fakeLocales, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when THIRD_PARTY_NOTICES.md is missing from dist", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "pkg-verify-test-"));
+            try {
+                populateFakeDist(tempDir, {
+                    localesMjs: "export {};",
+                    localesDts: "export {};",
+                    i18nMjs: "export {};",
+                    i18nDts: "export {};",
+                    thirdPartyNotices: null
+                });
+                expect(() => verifyBuiltPackage({ distDir: tempDir })).toThrow("Third-party notices file not found");
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when THIRD_PARTY_NOTICES.md is missing required Unicode CLDR notice", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "pkg-verify-test-"));
+            try {
+                populateFakeDist(tempDir, {
+                    localesMjs: "export {};",
+                    localesDts: "export {};",
+                    i18nMjs: "export {};",
+                    i18nDts: "export {};",
+                    thirdPartyNotices: "# Third-Party Notices\n\nSome unrelated library notice.\n"
+                });
+                expect(() => verifyBuiltPackage({ distDir: tempDir })).toThrow("missing required Unicode CLDR notice");
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
             }
         });
     });

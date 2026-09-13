@@ -298,6 +298,16 @@ export function verifyBuiltPackage(options: PackageVerificationOptions = {}): vo
     }
     console.log(`✓ i18n TypeScript declaration file verified at ${i18nTargets.typesRelPath}`);
 
+    const noticePath = resolve(distDir, "THIRD_PARTY_NOTICES.md");
+    if (!existsSync(noticePath)) {
+        throw new Error(`Third-party notices file not found at: ${noticePath}`);
+    }
+    const noticeContent = readFileSync(noticePath, "utf-8");
+    if (!noticeContent.includes("Unicode License") || !noticeContent.includes("CLDR")) {
+        throw new Error(`Third-party notices file at ${noticePath} is missing required Unicode CLDR notice`);
+    }
+    console.log("✓ Third-party notices verified at THIRD_PARTY_NOTICES.md");
+
     const discovery = discoverOfficialLocales(sourceLocalesDir);
     if (discovery.violations.length > 0) {
         throw new Error(

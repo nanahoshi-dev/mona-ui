@@ -25,6 +25,7 @@
             "input": "src/styles",
             "glob": "**/*.scss",
             "output": "styles"
-        }
+        },
+        "THIRD_PARTY_NOTICES.md"
     ]
 }
