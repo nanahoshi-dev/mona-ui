@@ -182,10 +182,10 @@ export function getLocaleFirstDayOfWeek(locale) { return "sunday"; }
 
     const DEFAULT_MOCK_I18N_DTS = `
 export type LocaleFirstDayOfWeek = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
-export declare function getLocaleDateInputFormat(locale?: string): string;
-export declare function getLocaleTimeInputFormat(locale?: string, options?: { hourFormat?: "12" | "24"; showSeconds?: boolean }): string;
-export declare function getLocaleDateTimeInputFormat(locale?: string, options?: { hourFormat?: "12" | "24"; showSeconds?: boolean }): string;
-export declare function getLocaleFirstDayOfWeek(locale?: string): LocaleFirstDayOfWeek;
+export declare function getLocaleDateInputFormat(locale: string): string;
+export declare function getLocaleTimeInputFormat(locale: string, options?: { hourFormat?: "12" | "24"; showSeconds?: boolean }): string;
+export declare function getLocaleDateTimeInputFormat(locale: string, options?: { hourFormat?: "12" | "24"; showSeconds?: boolean }): string;
+export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayOfWeek;
 `;
 
     function populateFakeDist(
@@ -389,10 +389,10 @@ export declare function getLocaleFirstDayOfWeek(locale?: string): LocaleFirstDay
                     localesDts: 'export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n',
                     i18nDts: `
 export type LocaleFirstDayOfWeek = "monday" | "sunday";
-export declare function getLocaleDateInputFormat(locale?: string): number;
-export declare function getLocaleTimeInputFormat(locale?: string, options?: unknown): string;
-export declare function getLocaleDateTimeInputFormat(locale?: string, options?: unknown): string;
-export declare function getLocaleFirstDayOfWeek(locale?: string): LocaleFirstDayOfWeek;
+export declare function getLocaleDateInputFormat(locale: string): number;
+export declare function getLocaleTimeInputFormat(locale: string, options?: unknown): string;
+export declare function getLocaleDateTimeInputFormat(locale: string, options?: unknown): string;
+export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayOfWeek;
 `
                 });
 

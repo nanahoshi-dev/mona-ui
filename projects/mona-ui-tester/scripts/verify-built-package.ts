@@ -210,6 +210,12 @@ void testJaDate;
 void testJaTime;
 void testJaDateTime;
 void testJaFirstDay;
+
+// @ts-expect-error Locale argument is required
+getLocaleDateInputFormat();
+
+// @ts-expect-error Locale argument is required
+getLocaleFirstDayOfWeek();
 `;
         writeFileSync(consumerTsPath, consumerTs);
 
