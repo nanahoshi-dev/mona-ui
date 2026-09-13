@@ -215,6 +215,30 @@ if (hasZhTw) {
     }
 }
 
+const hasKoKr = expectedLocales.some(l => l.id === "ko-KR");
+if (hasKoKr) {
+    const koDateFormat = getLocaleDateInputFormat("ko-KR");
+    if (koDateFormat !== "yyyy. MM. dd.") {
+        console.error("Invalid getLocaleDateInputFormat output for ko-KR: " + koDateFormat);
+        process.exit(1);
+    }
+    const koTime12 = getLocaleTimeInputFormat("ko-KR", { hourFormat: "12", showSeconds: false });
+    if (koTime12 !== "a hh:mm") {
+        console.error("Invalid getLocaleTimeInputFormat output for ko-KR: " + koTime12);
+        process.exit(1);
+    }
+    const koDateTime12 = getLocaleDateTimeInputFormat("ko-KR", { hourFormat: "12", showSeconds: false });
+    if (koDateTime12 !== "yyyy. MM. dd. a hh:mm") {
+        console.error("Invalid getLocaleDateTimeInputFormat output for ko-KR: " + koDateTime12);
+        process.exit(1);
+    }
+    const koFirstDay = getLocaleFirstDayOfWeek("ko-KR");
+    if (koFirstDay !== "sunday") {
+        console.error("Invalid getLocaleFirstDayOfWeek output for ko-KR: " + koFirstDay);
+        process.exit(1);
+    }
+}
+
 console.log("Runtime package import verified successfully.");
 `;
         writeFileSync(smokeScriptPath, smokeScript);
@@ -273,6 +297,15 @@ void testZhCnDate;
 void testZhCnFirstDay;
 void testZhTwDate;
 void testZhTwFirstDay;
+
+const testKoDate: string = getLocaleDateInputFormat("ko-KR");
+const testKoTime: string = getLocaleTimeInputFormat("ko-KR", { hourFormat: "12" });
+const testKoDateTime: string = getLocaleDateTimeInputFormat("ko-KR", { hourFormat: "24" });
+const testKoFirstDay: LocaleFirstDayOfWeek = getLocaleFirstDayOfWeek("ko-KR");
+void testKoDate;
+void testKoTime;
+void testKoDateTime;
+void testKoFirstDay;
 
 // @ts-expect-error Locale argument is required
 getLocaleDateInputFormat();

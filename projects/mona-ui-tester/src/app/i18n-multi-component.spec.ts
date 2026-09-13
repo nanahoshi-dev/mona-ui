@@ -8,6 +8,7 @@ import {
     MONA_ES_ES_LOCALE,
     MONA_FR_FR_LOCALE,
     MONA_JA_JP_LOCALE,
+    MONA_KO_KR_LOCALE,
     MONA_PT_BR_LOCALE,
     MONA_ZH_CN_LOCALE,
     MONA_ZH_TW_LOCALE
@@ -581,6 +582,71 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
 
         expect(i18n.localeId()).toBe("en-US");
         expect(twPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
+        expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
+    });
+
+    it("integrates official Korean (ko-KR) locale reactively with runtime overrides and formatting", async () => {
+        const root = fixture.nativeElement as HTMLElement;
+        const input = root.querySelector("mona-numeric-text-box input") as HTMLInputElement;
+
+        // 1. Activate official Korean locale
+        i18n.use(MONA_KO_KR_LOCALE);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("ko-KR");
+        expect(i18n.direction()).toBe("ltr");
+
+        // Pager firstPageLabel in ko-KR: "첫 페이지"
+        const koPager = root.querySelector("mona-pager");
+        expect(koPager?.querySelector("button[aria-label='첫 페이지']")).not.toBeNull();
+
+        // ScrollView previousPage in ko-KR: "이전 페이지"
+        const koScroll = root.querySelector("mona-scroll-view");
+        expect(koScroll?.querySelector("button[aria-label='이전 페이지']")).not.toBeNull();
+
+        // Calendar translated UI controls, Sunday-first header, and live region in ko-KR
+        const koCalendar = root.querySelector("mona-calendar");
+        expect(koCalendar?.querySelector("button:first-child")?.textContent?.trim()).toBe("오늘");
+        expect(koCalendar?.querySelector("button[aria-label='이전 달']")).not.toBeNull();
+        expect(koCalendar?.querySelector("button[aria-label='다음 달']")).not.toBeNull();
+        expect(koCalendar?.querySelector("[aria-live='polite']")?.textContent).toContain("달력");
+
+        const headerRow = koCalendar?.querySelector("div[style*='grid-template-columns']") as HTMLElement;
+        expect(headerRow?.querySelectorAll("div")[0]?.textContent?.trim()).toBe("일");
+
+        // NumericTextBox formatting with dot decimal separator
+        expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
+
+        // 2. Test application override precedence over Korean locale
+        i18n.patchMessages({
+            pager: {
+                firstPageLabel: "맨 앞 페이지"
+            }
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(koPager?.querySelector("button[aria-label='맨 앞 페이지']")).not.toBeNull();
+
+        // 3. Clear overrides: Korean locale value returns
+        i18n.clearMessages();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(koPager?.querySelector("button[aria-label='첫 페이지']")).not.toBeNull();
+
+        // 4. Switch back to English default
+        i18n.use({
+            direction: "ltr",
+            id: "en-US",
+            messages: {}
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("en-US");
+        expect(koPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
         expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
     });
 
