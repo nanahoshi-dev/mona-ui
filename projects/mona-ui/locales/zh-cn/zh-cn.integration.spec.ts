@@ -19,6 +19,7 @@ import { ScrollViewComponent } from "@nanahoshi/mona-ui/scroll-view";
 import { SplitButtonComponent } from "@nanahoshi/mona-ui/split-button";
 import { TimePickerComponent } from "@nanahoshi/mona-ui/time-picker";
 import { TimeSelectorComponent } from "@nanahoshi/mona-ui/time-selector";
+import { TreeViewComponent, TreeViewFilterableDirective } from "@nanahoshi/mona-ui/tree-view";
 import {
     formatNumber,
     getNumberSymbols,
@@ -178,6 +179,30 @@ class GridIntegrationHostComponent {
 class ChipIntegrationHostComponent {
     public readonly label = signal("");
     public readonly removeLabel = signal<string | undefined>(undefined);
+}
+
+interface TreeItem {
+    id: number;
+    text: string;
+}
+
+@Component({
+    template: `
+        <mona-tree-view
+            [data]="data"
+            textField="text"
+            [ariaLabel]="ariaLabel()"
+            monaTreeViewFilterable
+        />
+    `,
+    imports: [TreeViewComponent, TreeViewFilterableDirective]
+})
+class TreeViewIntegrationHostComponent {
+    public readonly ariaLabel = signal<string>("");
+    public readonly data: TreeItem[] = [
+        { id: 1, text: "项目 1" },
+        { id: 2, text: "项目 2" }
+    ];
 }
 
 describe("MONA_ZH_CN_LOCALE Integration with MonaI18nService", () => {
@@ -962,6 +987,60 @@ describe("MONA_ZH_CN_LOCALE Integration with MonaI18nService", () => {
         await fixture.whenStable();
 
         expect(labeledButton.getAttribute("aria-label")).toBe("删除Angular");
+    });
+
+    it("renders TreeView component with Chinese filter accessibility labels", async () => {
+        await TestBed.configureTestingModule({
+            imports: [TreeViewIntegrationHostComponent],
+            providers: [
+                provideMonaI18n({
+                    locale: MONA_ZH_CN_LOCALE
+                })
+            ]
+        }).compileComponents();
+
+        const fixture = TestBed.createComponent(TreeViewIntegrationHostComponent);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const hostEl = fixture.nativeElement as HTMLElement;
+        const searchRegion = hostEl.querySelector("div[role='search']");
+        expect(searchRegion).not.toBeNull();
+        expect(searchRegion?.getAttribute("aria-label")).toBe("筛选树");
+
+        // Explicit tree label composition
+        fixture.componentInstance.ariaLabel.set("项目");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(searchRegion?.getAttribute("aria-label")).toBe("筛选 项目");
+
+        // Compound and alphanumeric label composition
+        fixture.componentInstance.ariaLabel.set("项目 2026");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(searchRegion?.getAttribute("aria-label")).toBe("筛选 项目 2026");
+
+        // Reactive runtime switching
+        const service = TestBed.inject(MonaI18nService);
+        service.use(MONA_DEFAULT_LOCALE);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(searchRegion?.getAttribute("aria-label")).toBe("Filter 项目 2026");
+
+        fixture.componentInstance.ariaLabel.set("");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(searchRegion?.getAttribute("aria-label")).toBe("Filter tree");
+
+        service.use(MONA_ZH_CN_LOCALE);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(searchRegion?.getAttribute("aria-label")).toBe("筛选树");
     });
 
     it("reactively switches directly between zh-CN and zh-TW (Phase 9 direct cross-locale switching)", () => {

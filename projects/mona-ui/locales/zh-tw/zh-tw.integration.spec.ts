@@ -198,11 +198,11 @@ interface TreeItem {
     imports: [TreeViewComponent, TreeViewFilterableDirective]
 })
 class TreeViewIntegrationHostComponent {
+    public readonly ariaLabel = signal<string>("");
     public readonly data: TreeItem[] = [
         { id: 1, text: "專案 1" },
         { id: 2, text: "專案 2" }
     ];
-    public readonly ariaLabel = signal<string>("");
 }
 
 describe("MONA_ZH_TW_LOCALE Integration with MonaI18nService", () => {
@@ -1014,6 +1014,33 @@ describe("MONA_ZH_TW_LOCALE Integration with MonaI18nService", () => {
         await fixture.whenStable();
 
         expect(searchRegion?.getAttribute("aria-label")).toBe("篩選 專案");
+
+        // Compound and alphanumeric label composition
+        fixture.componentInstance.ariaLabel.set("專案 2026");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(searchRegion?.getAttribute("aria-label")).toBe("篩選 專案 2026");
+
+        // Reactive runtime switching
+        const service = TestBed.inject(MonaI18nService);
+        service.use(MONA_DEFAULT_LOCALE);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(searchRegion?.getAttribute("aria-label")).toBe("Filter 專案 2026");
+
+        fixture.componentInstance.ariaLabel.set("");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(searchRegion?.getAttribute("aria-label")).toBe("Filter tree");
+
+        service.use(MONA_ZH_TW_LOCALE);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(searchRegion?.getAttribute("aria-label")).toBe("篩選樹狀檢視");
     });
 
     it("reactively switches directly between zh-TW and zh-CN (Phase 9 direct cross-locale switching)", () => {
