@@ -1,3 +1,5 @@
+import { resolveLikelyFirstDayOfWeek } from "./locale-week-likely-data";
+
 export type LocaleFirstDayOfWeek =
     | "monday"
     | "tuesday"
@@ -196,7 +198,7 @@ export function resolveFallbackFirstDayOfWeek(localeId: string): LocaleFirstDayO
         return "monday";
     }
 
-    // Language-only fallback for primitive environments where maximize() was unavailable
+    // Base tag fallback for primitive environments where maximize() was unavailable
     const tag = normalized.replace(/_/g, "-");
     if (/^[xX](?:-|$)/.test(tag)) {
         return "monday";
@@ -206,15 +208,31 @@ export function resolveFallbackFirstDayOfWeek(localeId: string): LocaleFirstDayO
     if (!subtags[0] || subtags[0].length <= 1) {
         return "monday";
     }
-    const baseLang = subtags[0].toLowerCase();
-    if (baseLang === "ja" || baseLang === "ko") {
-        return "sunday";
+
+    // If an explicit region subtag was present (alpha-2 or 3-digit numeric) but could not be mapped,
+    // do not fall back to language-only likely subtags; use deterministic default (Monday).
+    const hasRegion = subtags.slice(1).some(s => /^[a-zA-Z]{2}$|^\d{3}$/.test(s));
+    if (hasRegion) {
+        return "monday";
     }
-    if (baseLang === "fa" || baseLang === "ar") {
-        return "saturday";
+
+    const baseLang = subtags[0].toLowerCase();
+    if (subtags.length > 1 && /^[a-zA-Z]{4}$/.test(subtags[1])) {
+        const script = subtags[1].charAt(0).toUpperCase() + subtags[1].slice(1).toLowerCase();
+        const langScript = `${baseLang}-${script}`;
+        const scriptFirstDay = resolveLikelyFirstDayOfWeek(langScript);
+        if (scriptFirstDay) {
+            return scriptFirstDay;
+        }
+    }
+    const langFirstDay = resolveLikelyFirstDayOfWeek(baseLang);
+    if (langFirstDay) {
+        return langFirstDay;
     }
     return "monday";
 }
+
+export { resolveLikelyFirstDayOfWeek };
 
 /**
  * Pure, uncached resolver for locale first day of week.
