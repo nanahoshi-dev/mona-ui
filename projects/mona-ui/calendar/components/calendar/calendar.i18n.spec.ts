@@ -568,14 +568,14 @@ describe("CalendarComponent i18n", () => {
             expect(gridDays[gridDays.length - 1]).toBe("2");
         });
 
-        it("defaults to Friday-first for dv-MV and aligns weekday headers and month grid", async () => {
+        it("defaults to Friday-first for en-MV and aligns weekday headers and month grid", async () => {
             TestBed.configureTestingModule({
                 imports: [WeekStartTestHostComponent]
             });
             const fixture = TestBed.createComponent(WeekStartTestHostComponent);
             const i18n = TestBed.inject(MonaI18nService);
-            // dv-MV is a verified Friday-first locale (firstDay: 5 in Intl.Locale.weekInfo and CLDR)
-            i18n.use({ id: "dv-MV", direction: "rtl", messages: {} });
+            // en-MV is a verified Friday-first territory locale with stable English weekday names (firstDay: 5 in Intl.Locale.weekInfo and CLDR)
+            i18n.use({ id: "en-MV", direction: "ltr", messages: {} });
             fixture.componentInstance.value.set(new Date(2026, 8, 15)); // September 15, 2026
             fixture.detectChanges();
             await fixture.whenStable();
@@ -653,9 +653,9 @@ describe("CalendarComponent i18n", () => {
             fixture.detectChanges();
             expect(getFocusedDay()).toBe("18");
 
-            // 4. Friday-first calendar via dv-MV locale auto-derivation: focus on Wednesday Sep 16, 2026
+            // 4. Friday-first calendar via en-MV locale auto-derivation: focus on Wednesday Sep 16, 2026
             // Week row is Fri Sep 11 to Thu Sep 17
-            i18n.use({ id: "dv-MV", direction: "rtl", messages: {} });
+            i18n.use({ id: "en-MV", direction: "ltr", messages: {} });
             fixture.componentInstance.firstDay.set(null); // Auto-derive from locale
             fixture.componentInstance.value.set(new Date(2026, 8, 16));
             fixture.detectChanges();
