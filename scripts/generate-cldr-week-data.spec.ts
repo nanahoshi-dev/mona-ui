@@ -1,17 +1,21 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
     CLDR_JSON_TAG,
     CLDR_VERSION,
+    LIKELY_SUBTAGS_URL,
     UNICODE_VERSION,
+    WEEK_DATA_URL,
     type CldrProvenance,
     computeSha256,
     extractRegion,
     generateWeekDataModuleContent,
     loadCldrSources,
     normalizeUnicodeVersion,
+    updateCldrSources,
     validateCldrProvenance,
     validateCldrSourceVersions
 } from "./generate-cldr-week-data";
@@ -146,25 +150,26 @@ describe("generate-cldr-week-data", () => {
     });
 });
 
-describe("source integrity and tampering detection", () => {
-    const validWeekBuffer = Buffer.from('{"supplemental":{"version":{"_unicodeVersion":"16.0.0","_cldrVersion":"46"},"weekData":{"firstDay":{"001":"mon"}}}}');
-    const validLikelyBuffer = Buffer.from('{"supplemental":{"version":{"_unicodeVersion":"16.0.0","_cldrVersion":"46"},"likelySubtags":{"en":"en-Latn-US"}}}');
+const validWeekBuffer = Buffer.from('{"supplemental":{"version":{"_unicodeVersion":"16.0.0","_cldrVersion":"46"},"weekData":{"firstDay":{"001":"mon"}}}}');
+const validLikelyBuffer = Buffer.from('{"supplemental":{"version":{"_unicodeVersion":"16.0.0","_cldrVersion":"46"},"likelySubtags":{"en":"en-Latn-US"}}}');
 
-    const validProvenance: CldrProvenance = {
-        cldrVersion: "46",
-        cldrJsonTag: "46.0.0",
-        unicodeVersion: "16.0",
-        files: {
-            "weekData.json": {
-                url: "https://example.com/weekData.json",
-                sha256: computeSha256(validWeekBuffer)
-            },
-            "likelySubtags.json": {
-                url: "https://example.com/likelySubtags.json",
-                sha256: computeSha256(validLikelyBuffer)
-            }
+const validProvenance: CldrProvenance = {
+    cldrVersion: "46",
+    cldrJsonTag: "46.0.0",
+    unicodeVersion: "16.0",
+    files: {
+        "weekData.json": {
+            url: WEEK_DATA_URL,
+            sha256: computeSha256(validWeekBuffer)
+        },
+        "likelySubtags.json": {
+            url: LIKELY_SUBTAGS_URL,
+            sha256: computeSha256(validLikelyBuffer)
         }
-    };
+    }
+};
+
+describe("source integrity and tampering detection", () => {
 
     it("accepts authentic source fixtures with exact matching hashes", () => {
         expect(() => {
@@ -261,6 +266,46 @@ describe("source integrity and tampering detection", () => {
         }).toThrow(/CLDR provenance Unicode version mismatch: expected Unicode 16\.0, but provenance declares Unicode 17\.0/);
     });
 
+    it("fails when provenance likelySubtags.json URL does not match expected URL", () => {
+        const badUrlProv: CldrProvenance = {
+            ...validProvenance,
+            files: {
+                ...validProvenance.files,
+                "likelySubtags.json": {
+                    ...validProvenance.files["likelySubtags.json"],
+                    url: "https://example.com/wrong/likelySubtags.json"
+                }
+            }
+        };
+
+        expect(() => {
+            validateCldrProvenance(badUrlProv, {
+                "weekData.json": validWeekBuffer,
+                "likelySubtags.json": validLikelyBuffer
+            });
+        }).toThrow(/CLDR provenance source URL mismatch for likelySubtags\.json/);
+    });
+
+    it("fails when provenance weekData.json URL does not match expected URL", () => {
+        const badUrlProv: CldrProvenance = {
+            ...validProvenance,
+            files: {
+                ...validProvenance.files,
+                "weekData.json": {
+                    ...validProvenance.files["weekData.json"],
+                    url: "https://example.com/wrong/weekData.json"
+                }
+            }
+        };
+
+        expect(() => {
+            validateCldrProvenance(badUrlProv, {
+                "weekData.json": validWeekBuffer,
+                "likelySubtags.json": validLikelyBuffer
+            });
+        }).toThrow(/CLDR provenance source URL mismatch for weekData\.json/);
+    });
+
     it("fails when a required file is missing from provenance", () => {
         const missingFileProv: CldrProvenance = {
             ...validProvenance,
@@ -323,7 +368,7 @@ describe("source integrity and tampering detection", () => {
         }).toThrow(/CLDR source Unicode version mismatch in weekData\.json: expected Unicode 16\.0, but weekData\.json declares Unicode 15\.0\.0/);
     });
 
-    it("fails when source files have inconsistent CLDR baselines", () => {
+    it("rejects any source whose embedded CLDR version differs from the pinned baseline", () => {
         const weekJson = {
             supplemental: {
                 version: {
@@ -342,19 +387,177 @@ describe("source integrity and tampering detection", () => {
         };
 
         expect(() => {
-            validateCldrSourceVersions(
-                {
-                    "weekData.json": weekJson,
-                    "likelySubtags.json": likelyJson
-                },
-                { expectedCldrVersion: undefined } // skip constant check to trigger baseline comparison
-            );
-        }).toThrow(/CLDR source version mismatch in likelySubtags\.json/);
+            validateCldrSourceVersions({
+                "weekData.json": weekJson,
+                "likelySubtags.json": likelyJson
+            });
+        }).toThrow(/CLDR source version mismatch in likelySubtags\.json: expected CLDR 46, but likelySubtags\.json declares CLDR 47/);
     });
 
     it("normalizes Unicode versions with minor release digits correctly", () => {
         expect(normalizeUnicodeVersion("16.0.0")).toBe("16.0");
         expect(normalizeUnicodeVersion("16.0")).toBe("16.0");
         expect(normalizeUnicodeVersion("15.1.2")).toBe("15.1");
+    });
+});
+
+describe("hermetic local-mode and network control", () => {
+    let fetchSpy: ReturnType<typeof vi.spyOn>;
+
+    beforeEach(() => {
+        fetchSpy = vi.spyOn(globalThis, "fetch");
+    });
+
+    afterEach(() => {
+        fetchSpy.mockRestore();
+    });
+
+    it("passes and does not call fetch when all local files are valid", async () => {
+        const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cldr-hermetic-"));
+        try {
+            fs.writeFileSync(path.join(tempDir, "weekData.json"), validWeekBuffer);
+            fs.writeFileSync(path.join(tempDir, "likelySubtags.json"), validLikelyBuffer);
+            fs.writeFileSync(path.join(tempDir, "provenance.json"), JSON.stringify(validProvenance));
+
+            const sources = await loadCldrSources({ cldrDir: tempDir });
+            expect(sources).toBeDefined();
+            expect(fetchSpy).not.toHaveBeenCalled();
+        } finally {
+            fs.rmSync(tempDir, { recursive: true, force: true });
+        }
+    });
+
+    it("fails and does not call fetch when likelySubtags.json is missing in normal mode", async () => {
+        const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cldr-hermetic-"));
+        try {
+            fs.writeFileSync(path.join(tempDir, "weekData.json"), validWeekBuffer);
+            fs.writeFileSync(path.join(tempDir, "provenance.json"), JSON.stringify(validProvenance));
+
+            await expect(loadCldrSources({ cldrDir: tempDir })).rejects.toThrow(
+                /Pinned CLDR source file is missing:[\s\S]*likelySubtags\.json/
+            );
+            expect(fetchSpy).not.toHaveBeenCalled();
+        } finally {
+            fs.rmSync(tempDir, { recursive: true, force: true });
+        }
+    });
+
+    it("fails and does not call fetch when weekData.json is missing in normal mode", async () => {
+        const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cldr-hermetic-"));
+        try {
+            fs.writeFileSync(path.join(tempDir, "likelySubtags.json"), validLikelyBuffer);
+            fs.writeFileSync(path.join(tempDir, "provenance.json"), JSON.stringify(validProvenance));
+
+            await expect(loadCldrSources({ cldrDir: tempDir })).rejects.toThrow(
+                /Pinned CLDR source file is missing:[\s\S]*weekData\.json/
+            );
+            expect(fetchSpy).not.toHaveBeenCalled();
+        } finally {
+            fs.rmSync(tempDir, { recursive: true, force: true });
+        }
+    });
+
+    it("fails and does not call fetch when provenance.json is missing in normal mode", async () => {
+        const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cldr-hermetic-"));
+        try {
+            fs.writeFileSync(path.join(tempDir, "likelySubtags.json"), validLikelyBuffer);
+            fs.writeFileSync(path.join(tempDir, "weekData.json"), validWeekBuffer);
+
+            await expect(loadCldrSources({ cldrDir: tempDir })).rejects.toThrow(
+                /Pinned CLDR provenance file is missing:[\s\S]*provenance\.json/
+            );
+            expect(fetchSpy).not.toHaveBeenCalled();
+        } finally {
+            fs.rmSync(tempDir, { recursive: true, force: true });
+        }
+    });
+
+    it("fails and does not call fetch when local hash mismatches in normal mode", async () => {
+        const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cldr-hermetic-"));
+        try {
+            const tamperedWeek = Buffer.from(validWeekBuffer);
+            tamperedWeek[tamperedWeek.length - 1] = tamperedWeek[tamperedWeek.length - 1] === 32 ? 33 : 32;
+            fs.writeFileSync(path.join(tempDir, "likelySubtags.json"), validLikelyBuffer);
+            fs.writeFileSync(path.join(tempDir, "weekData.json"), tamperedWeek);
+            fs.writeFileSync(path.join(tempDir, "provenance.json"), JSON.stringify(validProvenance));
+
+            await expect(loadCldrSources({ cldrDir: tempDir })).rejects.toThrow(
+                /CLDR source integrity check failed/
+            );
+            expect(fetchSpy).not.toHaveBeenCalled();
+        } finally {
+            fs.rmSync(tempDir, { recursive: true, force: true });
+        }
+    });
+
+    it("fails and does not call fetch when embedded source version mismatches in normal mode", async () => {
+        const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cldr-hermetic-"));
+        try {
+            const badVersionWeek = Buffer.from('{"supplemental":{"version":{"_unicodeVersion":"16.0.0","_cldrVersion":"45"},"weekData":{"firstDay":{"001":"mon"}}}}');
+            const prov: CldrProvenance = {
+                ...validProvenance,
+                files: {
+                    ...validProvenance.files,
+                    "weekData.json": {
+                        url: WEEK_DATA_URL,
+                        sha256: computeSha256(badVersionWeek)
+                    }
+                }
+            };
+            fs.writeFileSync(path.join(tempDir, "likelySubtags.json"), validLikelyBuffer);
+            fs.writeFileSync(path.join(tempDir, "weekData.json"), badVersionWeek);
+            fs.writeFileSync(path.join(tempDir, "provenance.json"), JSON.stringify(prov));
+
+            await expect(loadCldrSources({ cldrDir: tempDir })).rejects.toThrow(
+                /CLDR source version mismatch/
+            );
+            expect(fetchSpy).not.toHaveBeenCalled();
+        } finally {
+            fs.rmSync(tempDir, { recursive: true, force: true });
+        }
+    });
+
+    it("permits network access when forceFetch is explicitly enabled", async () => {
+        fetchSpy.mockImplementation(async (url: any) => {
+            const strUrl = String(url);
+            if (strUrl.includes("likelySubtags")) {
+                return new Response(validLikelyBuffer.toString("utf8"), { status: 200 });
+            }
+            if (strUrl.includes("weekData")) {
+                return new Response(validWeekBuffer.toString("utf8"), { status: 200 });
+            }
+            return new Response("Not found", { status: 404 });
+        });
+
+        const sources = await loadCldrSources({ forceFetch: true });
+        expect(sources).toBeDefined();
+        expect(fetchSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it("permits network access during explicit updateCldrSources workflow", async () => {
+        const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cldr-update-"));
+        const targetFile = path.join(tempDir, "generated.ts");
+
+        fetchSpy.mockImplementation(async (url: any) => {
+            const strUrl = String(url);
+            if (strUrl.includes("likelySubtags")) {
+                return new Response(validLikelyBuffer.toString("utf8"), { status: 200 });
+            }
+            if (strUrl.includes("weekData")) {
+                return new Response(validWeekBuffer.toString("utf8"), { status: 200 });
+            }
+            return new Response("Not found", { status: 404 });
+        });
+
+        try {
+            await updateCldrSources({ cldrDir: tempDir, targetFile });
+            expect(fetchSpy).toHaveBeenCalledTimes(2);
+            expect(fs.existsSync(path.join(tempDir, "likelySubtags.json"))).toBe(true);
+            expect(fs.existsSync(path.join(tempDir, "weekData.json"))).toBe(true);
+            expect(fs.existsSync(path.join(tempDir, "provenance.json"))).toBe(true);
+            expect(fs.existsSync(targetFile)).toBe(true);
+        } finally {
+            fs.rmSync(tempDir, { recursive: true, force: true });
+        }
     });
 });
