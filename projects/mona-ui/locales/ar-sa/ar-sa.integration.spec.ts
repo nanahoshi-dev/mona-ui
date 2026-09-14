@@ -927,6 +927,7 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
 
         expect(prevBtn).not.toBeNull();
         expect(nextBtn).not.toBeNull();
+        expect(root.querySelector("mona-scroll-view")?.getAttribute("aria-roledescription")).toBe("دوّار");
     });
 
     it("renders Grid component with Arabic row reordering accessibility labels", async () => {

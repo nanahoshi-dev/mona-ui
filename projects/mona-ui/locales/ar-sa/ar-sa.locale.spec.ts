@@ -231,7 +231,7 @@ describe("MONA_AR_SA_LOCALE", () => {
             expect(m.treeView.collapse).toBe("طي");
             expect(m.treeView.filter).toBe("تصفية:");
             expect(m.treeView.filterTree).toBe("تصفية طريقة عرض الشجرة");
-            expect(m.scrollView.carousel).toBe("عرض دائري");
+            expect(m.scrollView.carousel).toBe("دوّار");
             expect(m.scrollView.slide).toBe("شريحة");
             expect(m.scrollView.nextPage).toBe("الصفحة التالية");
             expect(m.scrollView.previousPage).toBe("الصفحة السابقة");

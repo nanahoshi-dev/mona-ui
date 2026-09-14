@@ -327,7 +327,7 @@ export const AR_SA_MESSAGES = {
         valueText: (value: number, max: number) => `${formatInteger(value)} من ${formatInteger(max)}`
     },
     scrollView: {
-        carousel: "عرض دائري",
+        carousel: "دوّار",
         nextPage: "الصفحة التالية",
         page: (current: number) => `الصفحة ${formatInteger(current)}`,
         pageOf: (current: number, total: number) =>
