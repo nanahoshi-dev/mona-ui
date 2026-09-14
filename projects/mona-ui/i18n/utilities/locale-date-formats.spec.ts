@@ -50,6 +50,12 @@ describe("locale-date-formats", () => {
             expect(getLocaleDateInputFormat("fr-FR")).toBe("dd/MM/yyyy");
         });
 
+        it("returns day/month/year format without hidden bidi controls for ar-SA", () => {
+            const format = getLocaleDateInputFormat("ar-SA");
+            expect(format).toBe("dd/MM/yyyy");
+            expect(format).not.toMatch(/[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/);
+        });
+
         it("falls back gracefully for invalid or empty locale", () => {
             expect(getLocaleDateInputFormat("")).toBe("dd/MM/yyyy");
             expect(getLocaleDateInputFormat("invalid-locale-!!!")).toBe("dd/MM/yyyy");
@@ -106,6 +112,16 @@ describe("locale-date-formats", () => {
         it("returns English 12-hour hh:mm:ss a when showSeconds is true", () => {
             const format = getLocaleTimeInputFormat("en-US", { hourFormat: "12", showSeconds: true });
             expect(format).toBe("hh:mm:ss a");
+        });
+
+        it("returns Saudi Arabic 24-hour HH:mm and HH:mm:ss for ar-SA", () => {
+            expect(getLocaleTimeInputFormat("ar-SA", { hourFormat: "24", showSeconds: false })).toBe("HH:mm");
+            expect(getLocaleTimeInputFormat("ar-SA", { hourFormat: "24", showSeconds: true })).toBe("HH:mm:ss");
+        });
+
+        it("returns Saudi Arabic 12-hour hh:mm a and hh:mm:ss a with day period in suffix position for ar-SA", () => {
+            expect(getLocaleTimeInputFormat("ar-SA", { hourFormat: "12", showSeconds: false })).toBe("hh:mm a");
+            expect(getLocaleTimeInputFormat("ar-SA", { hourFormat: "12", showSeconds: true })).toBe("hh:mm:ss a");
         });
     });
 
@@ -164,6 +180,21 @@ describe("locale-date-formats", () => {
             const format = getLocaleDateTimeInputFormat("pt-BR", { hourFormat: "12", showSeconds: false });
             expect(format).toBe("dd/MM/yyyy, hh:mm a");
         });
+
+        it("derives combined Saudi Arabic date and time format with Arabic comma for ar-SA", () => {
+            expect(getLocaleDateTimeInputFormat("ar-SA", { hourFormat: "24", showSeconds: false })).toBe(
+                "dd/MM/yyyy، HH:mm"
+            );
+            expect(getLocaleDateTimeInputFormat("ar-SA", { hourFormat: "24", showSeconds: true })).toBe(
+                "dd/MM/yyyy، HH:mm:ss"
+            );
+            expect(getLocaleDateTimeInputFormat("ar-SA", { hourFormat: "12", showSeconds: false })).toBe(
+                "dd/MM/yyyy، hh:mm a"
+            );
+            expect(getLocaleDateTimeInputFormat("ar-SA", { hourFormat: "12", showSeconds: true })).toBe(
+                "dd/MM/yyyy، hh:mm:ss a"
+            );
+        });
     });
 
     describe("getLocaleFirstDayOfWeek", () => {
@@ -218,6 +249,10 @@ describe("locale-date-formats", () => {
 
             it("returns saturday for Egyptian Arabic (ar-EG)", () => {
                 expect(getLocaleFirstDayOfWeek("ar-EG")).toBe("saturday");
+            });
+
+            it("returns sunday for Saudi Arabic (ar-SA)", () => {
+                expect(getLocaleFirstDayOfWeek("ar-SA")).toBe("sunday");
             });
 
             it("returns friday for Maldives (dv-MV)", () => {
@@ -291,6 +326,7 @@ describe("locale-date-formats", () => {
                     expect(resolveFallbackFirstDayOfWeek("ko-KR")).toBe("sunday");
                     expect(resolveFallbackFirstDayOfWeek("is-IS")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("ar-YE")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("ar-SA")).toBe("sunday");
 
                     // PT and BR are Sunday-first in CLDR
                     expect(resolveFallbackFirstDayOfWeek("pt-PT")).toBe("sunday");
@@ -744,7 +780,7 @@ describe("locale-date-formats", () => {
 
     describe("whitespace normalization and portability", () => {
         it("ensures generated editable formats do not contain typographic whitespace (U+00A0, U+202F, U+2009)", () => {
-            const locales = ["en-US", "de-DE", "fr-FR", "es-ES", "ja-JP", "ko-KR", "pt-BR", "zh-CN", "zh-TW"];
+            const locales = ["en-US", "de-DE", "fr-FR", "es-ES", "ja-JP", "ko-KR", "pt-BR", "zh-CN", "zh-TW", "ar-SA"];
             for (const loc of locales) {
                 const time12 = getLocaleTimeInputFormat(loc, { hourFormat: "12" });
                 expect(time12).not.toMatch(/[\u00A0\u2009\u202F]/);
@@ -761,6 +797,32 @@ describe("locale-date-formats", () => {
                 const date = getLocaleDateInputFormat(loc);
                 expect(date).not.toMatch(/[\u00A0\u2009\u202F]/);
             }
+        });
+
+        it("ensures generated editable formats do not contain bidi-control characters (U+061C, U+200E, U+200F, U+202A-U+202E, U+2066-U+2069)", () => {
+            const locales = ["en-US", "de-DE", "fr-FR", "es-ES", "ja-JP", "ko-KR", "pt-BR", "zh-CN", "zh-TW", "ar-SA"];
+            const bidiRegex = /[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/;
+            for (const loc of locales) {
+                expect(getLocaleDateInputFormat(loc)).not.toMatch(bidiRegex);
+                expect(getLocaleTimeInputFormat(loc, { hourFormat: "24" })).not.toMatch(bidiRegex);
+                expect(getLocaleTimeInputFormat(loc, { hourFormat: "24", showSeconds: true })).not.toMatch(bidiRegex);
+                expect(getLocaleTimeInputFormat(loc, { hourFormat: "12" })).not.toMatch(bidiRegex);
+                expect(getLocaleTimeInputFormat(loc, { hourFormat: "12", showSeconds: true })).not.toMatch(bidiRegex);
+                expect(getLocaleDateTimeInputFormat(loc, { hourFormat: "24" })).not.toMatch(bidiRegex);
+                expect(getLocaleDateTimeInputFormat(loc, { hourFormat: "24", showSeconds: true })).not.toMatch(bidiRegex);
+                expect(getLocaleDateTimeInputFormat(loc, { hourFormat: "12" })).not.toMatch(bidiRegex);
+                expect(getLocaleDateTimeInputFormat(loc, { hourFormat: "12", showSeconds: true })).not.toMatch(bidiRegex);
+            }
+        });
+
+        it("preserves Arabic comma in ar-SA datetime format without normalizing to ASCII comma", () => {
+            const dtFormat24 = getLocaleDateTimeInputFormat("ar-SA", { hourFormat: "24" });
+            expect(dtFormat24).toContain("،");
+            expect(dtFormat24).not.toContain(",");
+
+            const dtFormat12 = getLocaleDateTimeInputFormat("ar-SA", { hourFormat: "12" });
+            expect(dtFormat12).toContain("،");
+            expect(dtFormat12).not.toContain(",");
         });
 
 

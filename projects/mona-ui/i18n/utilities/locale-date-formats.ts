@@ -1,4 +1,4 @@
-import { normalizeGregorianLocale } from "./gregorian-date";
+import { normalizeGregorianLocale, sanitizeDateText } from "./gregorian-date";
 import { type LocaleFirstDayOfWeek, resolveLocaleFirstDayOfWeek } from "./locale-week-data";
 
 export type { LocaleFirstDayOfWeek };
@@ -15,7 +15,7 @@ const dateTimeFormatCache = new Map<string, string>();
 const firstDayCache = new Map<string, LocaleFirstDayOfWeek>();
 
 function normalizeEditableLiteral(value: string): string {
-    return value.replace(/[\u00A0\u2009\u202F]/g, " ");
+    return sanitizeDateText(value);
 }
 
 /**
