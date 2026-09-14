@@ -1,3 +1,4 @@
+export { MONA_AR_SA_LOCALE } from "./ar-sa/ar-sa.locale";
 export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";
 export { MONA_DE_DE_LOCALE } from "./de-de/de-de.locale";
 export { MONA_FR_FR_LOCALE } from "./fr-fr/fr-fr.locale";
