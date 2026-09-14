@@ -3,6 +3,7 @@ import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
 import { CalendarComponent, type FirstDayOfWeek } from "@nanahoshi/mona-ui/calendar";
 import { ChipComponent } from "@nanahoshi/mona-ui/chip";
+import { ColorGradientComponent } from "@nanahoshi/mona-ui/color-gradient";
 import { DatePickerComponent } from "@nanahoshi/mona-ui/date-picker";
 import { DateTimePickerComponent } from "@nanahoshi/mona-ui/datetime-picker";
 import { FilterService } from "@nanahoshi/mona-ui/filter";
@@ -206,6 +207,14 @@ class TreeViewIntegrationHostComponent {
         { id: 1, text: "المشروع 1" },
         { id: 2, text: "المشروع 2" }
     ];
+}
+
+@Component({
+    template: `<mona-color-gradient [value]="value()" />`,
+    imports: [ColorGradientComponent]
+})
+class ColorGradientIntegrationHostComponent {
+    public readonly value = signal<string | null | undefined>("#801a1a");
 }
 
 describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
@@ -1088,8 +1097,9 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
         expect(booleanOperators.find(o => o.value === "isfalse")?.text).toBe("خطأ");
     });
 
-    it("integrates with ColorGradient for Arabic accessible labels and percentages", () => {
+    it("integrates with ColorGradient for Arabic accessible labels and percentages", async () => {
         TestBed.configureTestingModule({
+            imports: [ColorGradientIntegrationHostComponent],
             providers: [
                 provideMonaI18n({
                     locale: MONA_AR_SA_LOCALE
@@ -1097,14 +1107,33 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
             ]
         });
 
-        const service = TestBed.inject(MonaI18nService);
-        const m = service.componentMessages("colorGradient", AR_SA_MESSAGES.colorGradient);
+        const fixture = TestBed.createComponent(ColorGradientIntegrationHostComponent);
+        const i18n = TestBed.inject(MonaI18nService);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
 
-        expect(m().saturationAndValue).toBe("التشبع والقيمة");
-        expect(m().saturationAndValueText(80, 50)).toBe("التشبع ٨٠٪، القيمة ٥٠٪");
-        expect(m().clearColor).toBe("مسح اللون");
-        expect(m().copyAsHex).toBe("نسخ بصيغة HEX");
-        expect(m().copyAsRgb).toBe("نسخ بصيغة RGB");
+        const root = fixture.nativeElement as HTMLElement;
+        const slider = root.querySelector("[role='slider']") as HTMLElement;
+        expect(slider).not.toBeNull();
+        expect(slider.getAttribute("aria-label")).toBe("التشبع والقيمة");
+        expect(slider.getAttribute("aria-valuetext")).toBe("التشبع ٨٠٪، القيمة ٥٠٪");
+
+        // Switch to en-US and verify reactive binding updates
+        i18n.use(MONA_DEFAULT_LOCALE);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(slider.getAttribute("aria-label")).toBe("Color saturation and value");
+        expect(slider.getAttribute("aria-valuetext")).toBe("Saturation 80%, Value 50%");
+
+        // Switch back to ar-SA
+        i18n.use(MONA_AR_SA_LOCALE);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(slider.getAttribute("aria-label")).toBe("التشبع والقيمة");
+        expect(slider.getAttribute("aria-valuetext")).toBe("التشبع ٨٠٪، القيمة ٥٠٪");
     });
 
     it("demonstrates complete decoupling between locale metadata and DOM layout direction", async () => {
