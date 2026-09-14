@@ -328,9 +328,15 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         const days = range(0, 7)
             .select(i => {
                 const dt = gregorianDateTimeFromObject({ year: 2024, month: 1, day: 1 + i }, locale);
+                const short = dt.toFormat("ccc");
+                const full = dt.toFormat("cccc");
+                const narrow = dt.toFormat("ccccc");
+                const display = short.length > 4 || (short === full && short.length > 3) ? narrow : short;
                 return {
-                    short: dt.toFormat("ccc"),
-                    full: dt.toFormat("cccc")
+                    display,
+                    short,
+                    narrow,
+                    full
                 };
             })
             .toArray();

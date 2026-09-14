@@ -71,8 +71,8 @@
         @if (weekNumber()) {
             <div></div>
         }
-        @for (day of weekdays(); track day.short) {
-            <div>{{ day.short }}</div>
+        @for (day of weekdays(); track day.full) {
+            <div [attr.aria-label]="day.full">{{ day.display }}</div>
         }
     </div>
     <div

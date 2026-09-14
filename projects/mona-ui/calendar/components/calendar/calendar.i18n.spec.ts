@@ -540,7 +540,7 @@ describe("CalendarComponent i18n", () => {
             expect(headers[6]).toBe("So");
         });
 
-        it("defaults to Saturday-first for ar-EG and aligns weekday headers and month grid", async () => {
+        it("defaults to Saturday-first for ar-EG and aligns weekday headers and month grid with compact labels", async () => {
             TestBed.configureTestingModule({
                 imports: [WeekStartTestHostComponent]
             });
@@ -553,10 +553,14 @@ describe("CalendarComponent i18n", () => {
             await fixture.whenStable();
 
             const headerRow = fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
-            const headers = Array.from(headerRow.querySelectorAll("div")).map(el => el.textContent?.trim());
-            expect(headers[0]).toBe("السبت");
-            expect(headers[1]).toBe("الأحد");
-            expect(headers[6]).toBe("الجمعة");
+            const headerDivs = Array.from(headerRow.querySelectorAll("div"));
+            const headers = headerDivs.map(el => el.textContent?.trim());
+            expect(headers[0]).toBe("س");
+            expect(headers[1]).toBe("ح");
+            expect(headers[6]).toBe("ج");
+            expect(headerDivs[0].getAttribute("aria-label")).toBe("السبت");
+            expect(headerDivs[1].getAttribute("aria-label")).toBe("الأحد");
+            expect(headerDivs[6].getAttribute("aria-label")).toBe("الجمعة");
 
             // Month grid alignment for September 2026:
             // Sep 1, 2026 is Tuesday. With Saturday start, row 1 contains:
@@ -566,6 +570,56 @@ describe("CalendarComponent i18n", () => {
                 .map(el => (el as HTMLElement).textContent?.trim());
             expect(gridDays[0]).toBe("29");
             expect(gridDays[gridDays.length - 1]).toBe("2");
+        });
+
+        it("defaults to Sunday-first for ar-SA and displays compact narrow weekday headers with full accessible labels", async () => {
+            TestBed.configureTestingModule({
+                imports: [WeekStartTestHostComponent]
+            });
+            const fixture = TestBed.createComponent(WeekStartTestHostComponent);
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use({ id: "ar-SA", direction: "rtl", messages: {} });
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const headerRow = fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
+            const headerDivs = Array.from(headerRow.querySelectorAll("div"));
+            const headers = headerDivs.map(el => el.textContent?.trim());
+            const accessibleLabels = headerDivs.map(el => el.getAttribute("aria-label"));
+
+            expect(headers).toEqual(["ح", "ن", "ث", "ر", "خ", "ج", "س"]);
+            expect(accessibleLabels).toEqual(["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"]);
+        });
+
+        it("retains compact weekday headers across all official locales without overflow", async () => {
+            TestBed.configureTestingModule({
+                imports: [WeekStartTestHostComponent]
+            });
+            const fixture = TestBed.createComponent(WeekStartTestHostComponent);
+            const i18n = TestBed.inject(MonaI18nService);
+
+            const testCases = [
+                { id: "en-US", expected: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] },
+                { id: "de-DE", expected: ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"] },
+                { id: "es-ES", expected: ["lun", "mar", "mié", "jue", "vie", "sáb", "dom"] },
+                { id: "fr-FR", expected: ["lun.", "mar.", "mer.", "jeu.", "ven.", "sam.", "dim."] },
+                { id: "ja-JP", expected: ["日", "月", "火", "水", "木", "金", "土"] },
+                { id: "ko-KR", expected: ["일", "월", "화", "수", "목", "금", "토"] },
+                { id: "pt-BR", expected: ["dom.", "seg.", "ter.", "qua.", "qui.", "sex.", "sáb."] },
+                { id: "zh-CN", expected: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"] },
+                { id: "zh-TW", expected: ["週日", "週一", "週二", "週三", "週四", "週五", "週六"] },
+                { id: "ar-SA", expected: ["ح", "ن", "ث", "ر", "خ", "ج", "س"] }
+            ];
+
+            for (const { id, expected } of testCases) {
+                i18n.use({ id, direction: id === "ar-SA" ? "rtl" : "ltr", messages: {} });
+                fixture.detectChanges();
+                await fixture.whenStable();
+
+                const headerRow = fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
+                const headers = Array.from(headerRow.querySelectorAll("div")).map(el => el.textContent?.trim());
+                expect(headers).toEqual(expected);
+            }
         });
 
         it("defaults to Friday-first for en-MV and aligns weekday headers and month grid", async () => {
