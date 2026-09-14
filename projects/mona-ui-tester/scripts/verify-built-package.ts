@@ -292,6 +292,40 @@ if (hasItIt) {
     }
 }
 
+const hasTrTr = expectedLocales.some(l => l.id === "tr-TR");
+if (hasTrTr) {
+    const trDateFormat = getLocaleDateInputFormat("tr-TR");
+    if (trDateFormat !== "dd.MM.yyyy") {
+        console.error("Invalid getLocaleDateInputFormat output for tr-TR: " + trDateFormat);
+        process.exit(1);
+    }
+    const trTime24 = getLocaleTimeInputFormat("tr-TR", { hourFormat: "24", showSeconds: false });
+    if (trTime24 !== "HH:mm") {
+        console.error("Invalid getLocaleTimeInputFormat output for tr-TR: " + trTime24);
+        process.exit(1);
+    }
+    const trTime12 = getLocaleTimeInputFormat("tr-TR", { hourFormat: "12", showSeconds: false });
+    if (trTime12 !== "a hh:mm") {
+        console.error("Invalid getLocaleTimeInputFormat output for tr-TR: " + trTime12);
+        process.exit(1);
+    }
+    const trDateTime24 = getLocaleDateTimeInputFormat("tr-TR", { hourFormat: "24", showSeconds: false });
+    if (trDateTime24 !== "dd.MM.yyyy HH:mm") {
+        console.error("Invalid getLocaleDateTimeInputFormat output for tr-TR: " + trDateTime24);
+        process.exit(1);
+    }
+    const trDateTime12 = getLocaleDateTimeInputFormat("tr-TR", { hourFormat: "12", showSeconds: false });
+    if (trDateTime12 !== "dd.MM.yyyy a hh:mm") {
+        console.error("Invalid getLocaleDateTimeInputFormat output for tr-TR: " + trDateTime12);
+        process.exit(1);
+    }
+    const trFirstDay = getLocaleFirstDayOfWeek("tr-TR");
+    if (trFirstDay !== "monday") {
+        console.error("Invalid getLocaleFirstDayOfWeek output for tr-TR: " + trFirstDay);
+        process.exit(1);
+    }
+}
+
 console.log("Runtime package import verified successfully.");
 `;
         writeFileSync(smokeScriptPath, smokeScript);

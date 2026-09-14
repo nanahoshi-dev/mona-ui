@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -151,6 +152,13 @@ describe("audit-locales", () => {
             expect(isAllowedLocaleCopyException("it-IT", "other.ok", "OK")).toBe(false);
             expect(isAllowedLocaleCopyException("es-ES", "dialog.ok", "OK")).toBe(false);
             expect(isAllowedLocaleCopyException("it-IT", "chart.openAbbreviation", "O")).toBe(false);
+        });
+
+        it("disallows copy exceptions for Turkish (tr-TR)", () => {
+            expect(isAllowedLocaleCopyException("tr-TR", "dialog.ok", "OK")).toBe(false);
+            expect(isAllowedLocaleCopyException("tr-TR", "timeSelector.am", "AM")).toBe(false);
+            expect(isAllowedLocaleCopyException("tr-TR", "timeSelector.pm", "PM")).toBe(false);
+            expect(isAllowedLocaleCopyException("tr-TR", "timeSelector.amPm", "AM/PM")).toBe(false);
         });
     });
 
@@ -1466,6 +1474,9 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
 
             expect(getIntlDayPeriod("pt-BR", 9)).toBe("AM");
             expect(getIntlDayPeriod("pt-BR", 21)).toBe("PM");
+
+            expect(getIntlDayPeriod("tr-TR", 9)).toBe("ÖÖ");
+            expect(getIntlDayPeriod("tr-TR", 21)).toBe("ÖS");
         });
 
         it("guarantees Spanish copy exceptions for day periods are rejected", () => {
@@ -1481,6 +1492,13 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
             expect(isAllowedLocaleCopyException("zh-TW", "timeSelector.am", "AM")).toBe(false);
             expect(isAllowedLocaleCopyException("zh-TW", "timeSelector.pm", "PM")).toBe(false);
             expect(isAllowedLocaleCopyException("zh-TW", "timeSelector.amPm", "AM/PM")).toBe(false);
+        });
+
+        it("guarantees Turkish copy exceptions for day periods and dialog are rejected", () => {
+            expect(isAllowedLocaleCopyException("tr-TR", "timeSelector.am", "AM")).toBe(false);
+            expect(isAllowedLocaleCopyException("tr-TR", "timeSelector.pm", "PM")).toBe(false);
+            expect(isAllowedLocaleCopyException("tr-TR", "timeSelector.amPm", "AM/PM")).toBe(false);
+            expect(isAllowedLocaleCopyException("tr-TR", "dialog.ok", "OK")).toBe(false);
         });
     });
 });

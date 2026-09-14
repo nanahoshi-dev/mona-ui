@@ -423,6 +423,56 @@ export function getLocaleFirstDayOfWeek(locale) { return "sunday"; }
             }
         });
 
+        it("succeeds when synthetic package exports tr-TR with matching formatting and Monday first-day", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                populateFakeDist(fakeDist, {
+                    i18nMjs: `
+export function getLocaleDateInputFormat(locale) { return "dd.MM.yyyy"; }
+export function getLocaleTimeInputFormat(locale, options) { return options?.hourFormat === "12" ? "a hh:mm" : "HH:mm"; }
+export function getLocaleDateTimeInputFormat(locale, options) { return options?.hourFormat === "12" ? "dd.MM.yyyy a hh:mm" : "dd.MM.yyyy HH:mm"; }
+export function getLocaleFirstDayOfWeek(locale) { return locale === "tr-TR" ? "monday" : "sunday"; }
+`,
+                    localesDts: 'export declare const MONA_TR_TR_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesMjs: 'export const MONA_TR_TR_LOCALE = { id: "tr-TR", direction: "ltr", messages: {} };\n'
+                });
+
+                expect(() =>
+                    runConsumerSmokeTest({
+                        distDir: fakeDist,
+                        expectedLocales: [{ direction: "ltr", id: "tr-TR", symbol: "MONA_TR_TR_LOCALE" }]
+                    })
+                ).not.toThrow();
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when tr-TR is expected but getLocaleDateInputFormat returns invalid date format", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                populateFakeDist(fakeDist, {
+                    i18nMjs: `
+export function getLocaleDateInputFormat(locale) { return "dd/MM/yyyy"; }
+export function getLocaleTimeInputFormat(locale, options) { return options?.hourFormat === "12" ? "a hh:mm" : "HH:mm"; }
+export function getLocaleDateTimeInputFormat(locale, options) { return options?.hourFormat === "12" ? "dd.MM.yyyy a hh:mm" : "dd.MM.yyyy HH:mm"; }
+export function getLocaleFirstDayOfWeek(locale) { return locale === "tr-TR" ? "monday" : "sunday"; }
+`,
+                    localesDts: 'export declare const MONA_TR_TR_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesMjs: 'export const MONA_TR_TR_LOCALE = { id: "tr-TR", direction: "ltr", messages: {} };\n'
+                });
+
+                expect(() =>
+                    runConsumerSmokeTest({
+                        distDir: fakeDist,
+                        expectedLocales: [{ direction: "ltr", id: "tr-TR", symbol: "MONA_TR_TR_LOCALE" }]
+                    })
+                ).toThrow("Invalid getLocaleDateInputFormat output for tr-TR: dd/MM/yyyy");
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
+            }
+        });
+
         it("fails when runtime package is missing expected export", () => {
             const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
             try {

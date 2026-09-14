@@ -47,10 +47,17 @@ describe("locale-formatters", () => {
             expect(symbols.digits.get("\u06F0")).toBe("0");
             expect(symbols.digits.get("\u06F9")).toBe("9");
         });
+
+        it("returns correct symbols for tr-TR", () => {
+            const symbols = getNumberSymbols("tr-TR");
+            expect(symbols.decimal).toBe(",");
+            expect(symbols.group).toBe(".");
+            expect(symbols.minus).toBe("-");
+        });
     });
 
     describe("getNumberGroupingPattern", () => {
-        it("returns Western 3-3 grouping for en-US, de-DE, and it-IT", () => {
+        it("returns Western 3-3 grouping for en-US, de-DE, it-IT, and tr-TR", () => {
             const enPattern = getNumberGroupingPattern("en-US");
             expect(enPattern.primaryGroupSize).toBe(3);
             expect(enPattern.secondaryGroupSize).toBe(3);
@@ -65,6 +72,11 @@ describe("locale-formatters", () => {
             expect(itPattern.primaryGroupSize).toBe(3);
             expect(itPattern.secondaryGroupSize).toBe(3);
             expect(itPattern.groupSeparator).toBe(".");
+
+            const trPattern = getNumberGroupingPattern("tr-TR");
+            expect(trPattern.primaryGroupSize).toBe(3);
+            expect(trPattern.secondaryGroupSize).toBe(3);
+            expect(trPattern.groupSeparator).toBe(".");
         });
 
         it("returns Indian 3-2 grouping for hi-IN, en-IN, bn-BD, and mr-IN", () => {
@@ -145,6 +157,15 @@ describe("locale-formatters", () => {
             expect(parseLocalizedNumber("12.5", "it-IT", { mode: "edit" })).toBe(12.5);
         });
 
+        it("parses comma-decimal numbers in tr-TR", () => {
+            expect(parseLocalizedNumber("1234,5", "tr-TR")).toBe(1234.5);
+            expect(parseLocalizedNumber("1.234,5", "tr-TR")).toBe(1234.5);
+            expect(parseLocalizedNumber("1.234.567,89", "tr-TR")).toBe(1234567.89);
+            expect(parseLocalizedNumber("-1.234,5", "tr-TR")).toBe(-1234.5);
+            expect(parseLocalizedNumber("1.000", "tr-TR")).toBe(1000);
+            expect(parseLocalizedNumber("12.5", "tr-TR", { mode: "edit" })).toBe(12.5);
+        });
+
         it("supports explicit locale vs edit parse modes for comma-decimal locales", () => {
             // de-DE strict locale mode (paste)
             expect(parseLocalizedNumber("1.234", "de-DE", { mode: "locale" })).toBe(1234);
@@ -217,6 +238,7 @@ describe("locale-formatters", () => {
             // Western 4-digit grouping preserved where canonical
             expect(parseLocalizedNumber("1,000", "en-US", { mode: "locale" })).toBe(1000);
             expect(parseLocalizedNumber("1.000", "de-DE", { mode: "locale" })).toBe(1000);
+            expect(parseLocalizedNumber("1.000", "tr-TR", { mode: "locale" })).toBe(1000);
         });
 
         it("rejects tabs, newlines, and non-standard whitespace in strict mode", () => {
@@ -287,7 +309,8 @@ describe("locale-formatters", () => {
                 "bn-BD",
                 "mr-IN",
                 "ar-SA",
-                "fa-IR"
+                "fa-IR",
+                "tr-TR"
             ];
             const testValues = [12, 1234, 12345, 1234567, 12345678.9, -12345678.9];
 
@@ -544,6 +567,20 @@ describe("locale-formatters", () => {
                 maximumFractionDigits: 2
             });
             expect(formatted).toBe("1.234.567,89");
+        });
+
+        it("formats Turkish grouping and decimal separators correctly", () => {
+            const formatted = formatNumber(1234567.89, "tr-TR", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+            expect(formatted).toBe("1.234.567,89");
+
+            const formattedThousand = formatNumber(1000, "tr-TR", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+            expect(formattedThousand).toBe("1.000");
         });
     });
 });

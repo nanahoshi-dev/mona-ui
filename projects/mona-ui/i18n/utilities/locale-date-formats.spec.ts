@@ -51,6 +51,11 @@ describe("locale-date-formats", () => {
             expect(getLocaleDateInputFormat("it-IT")).toBe("dd/MM/yyyy");
         });
 
+        it("returns Turkish day.month.year format for tr-TR", () => {
+            const format = getLocaleDateInputFormat("tr-TR");
+            expect(format).toBe("dd.MM.yyyy");
+        });
+
         it("returns day/month/year format without hidden bidi controls for ar-SA", () => {
             const format = getLocaleDateInputFormat("ar-SA");
             expect(format).toBe("dd/MM/yyyy");
@@ -123,6 +128,16 @@ describe("locale-date-formats", () => {
         it("returns Saudi Arabic 12-hour hh:mm a and hh:mm:ss a with day period in suffix position for ar-SA", () => {
             expect(getLocaleTimeInputFormat("ar-SA", { hourFormat: "12", showSeconds: false })).toBe("hh:mm a");
             expect(getLocaleTimeInputFormat("ar-SA", { hourFormat: "12", showSeconds: true })).toBe("hh:mm:ss a");
+        });
+
+        it("returns Turkish 24-hour HH:mm and HH:mm:ss for tr-TR", () => {
+            expect(getLocaleTimeInputFormat("tr-TR", { hourFormat: "24", showSeconds: false })).toBe("HH:mm");
+            expect(getLocaleTimeInputFormat("tr-TR", { hourFormat: "24", showSeconds: true })).toBe("HH:mm:ss");
+        });
+
+        it("returns Turkish 12-hour a hh:mm and a hh:mm:ss with day period in prefix position for tr-TR", () => {
+            expect(getLocaleTimeInputFormat("tr-TR", { hourFormat: "12", showSeconds: false })).toBe("a hh:mm");
+            expect(getLocaleTimeInputFormat("tr-TR", { hourFormat: "12", showSeconds: true })).toBe("a hh:mm:ss");
         });
     });
 
@@ -206,6 +221,20 @@ describe("locale-date-formats", () => {
                 "dd/MM/yyyy، hh:mm:ss a"
             );
         });
+
+        it("derives combined Turkish date and time format in 24h with space separator", () => {
+            const format = getLocaleDateTimeInputFormat("tr-TR", { hourFormat: "24", showSeconds: false });
+            expect(format).toBe("dd.MM.yyyy HH:mm");
+            const formatSec = getLocaleDateTimeInputFormat("tr-TR", { hourFormat: "24", showSeconds: true });
+            expect(formatSec).toBe("dd.MM.yyyy HH:mm:ss");
+        });
+
+        it("derives combined Turkish date and time format in 12h with space separator and day period in prefix position", () => {
+            const format = getLocaleDateTimeInputFormat("tr-TR", { hourFormat: "12", showSeconds: false });
+            expect(format).toBe("dd.MM.yyyy a hh:mm");
+            const formatSec = getLocaleDateTimeInputFormat("tr-TR", { hourFormat: "12", showSeconds: true });
+            expect(formatSec).toBe("dd.MM.yyyy a hh:mm:ss");
+        });
     });
 
     describe("getLocaleFirstDayOfWeek", () => {
@@ -252,6 +281,10 @@ describe("locale-date-formats", () => {
 
             it("returns monday for Italian (it-IT)", () => {
                 expect(getLocaleFirstDayOfWeek("it-IT")).toBe("monday");
+            });
+
+            it("returns monday for Turkish (tr-TR)", () => {
+                expect(getLocaleFirstDayOfWeek("tr-TR")).toBe("monday");
             });
 
             it("returns monday for Simplified Chinese (zh-CN)", () => {
@@ -336,6 +369,7 @@ describe("locale-date-formats", () => {
                     expect(resolveFallbackFirstDayOfWeek("en-AU")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("zh-CN")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("it-IT")).toBe("monday");
+                    expect(resolveFallbackFirstDayOfWeek("tr-TR")).toBe("monday");
 
                     // TW, PT, BR, KR, and YE are Sunday-first in CLDR
                     expect(resolveFallbackFirstDayOfWeek("zh-TW")).toBe("sunday");
@@ -768,6 +802,33 @@ describe("locale-date-formats", () => {
             expect(parsed.minute).toBe(30);
         });
 
+        it("formats and parses Turkish 24-hour and 12-hour datetime correctly", () => {
+            const format24 = getLocaleDateTimeInputFormat("tr-TR", { hourFormat: "24", showSeconds: false });
+            const dt24 = DateTime.fromJSDate(testDate).setLocale("tr-TR");
+            const str24 = dt24.toFormat(format24);
+            expect(str24).toBe("15.09.2026 21:30");
+
+            const parsed24 = DateTime.fromFormat(str24, format24, { locale: "tr-TR" });
+            expect(parsed24.isValid).toBe(true);
+            expect(parsed24.year).toBe(2026);
+            expect(parsed24.month).toBe(9);
+            expect(parsed24.day).toBe(15);
+            expect(parsed24.hour).toBe(21);
+            expect(parsed24.minute).toBe(30);
+
+            const format12 = getLocaleDateTimeInputFormat("tr-TR", { hourFormat: "12", showSeconds: false });
+            const str12 = dt24.toFormat(format12);
+            expect(str12).toBe("15.09.2026 ÖS 09:30");
+
+            const parsed12 = DateTime.fromFormat(str12, format12, { locale: "tr-TR" });
+            expect(parsed12.isValid).toBe(true);
+            expect(parsed12.year).toBe(2026);
+            expect(parsed12.month).toBe(9);
+            expect(parsed12.day).toBe(15);
+            expect(parsed12.hour).toBe(21);
+            expect(parsed12.minute).toBe(30);
+        });
+
         it("formats and parses Simplified Chinese date, 12h time, and datetime correctly", () => {
             const dateFormat = getLocaleDateInputFormat("zh-CN");
             const dtCN = DateTime.fromJSDate(testDate).setLocale("zh-CN");
@@ -813,7 +874,7 @@ describe("locale-date-formats", () => {
 
     describe("whitespace normalization and portability", () => {
         it("ensures generated editable formats do not contain typographic whitespace (U+00A0, U+202F, U+2009)", () => {
-            const locales = ["en-US", "de-DE", "fr-FR", "es-ES", "ja-JP", "ko-KR", "pt-BR", "it-IT", "zh-CN", "zh-TW", "ar-SA"];
+            const locales = ["en-US", "de-DE", "fr-FR", "es-ES", "ja-JP", "ko-KR", "pt-BR", "it-IT", "zh-CN", "zh-TW", "ar-SA", "tr-TR"];
             for (const loc of locales) {
                 const time12 = getLocaleTimeInputFormat(loc, { hourFormat: "12" });
                 expect(time12).not.toMatch(/[\u00A0\u2009\u202F]/);
@@ -833,7 +894,7 @@ describe("locale-date-formats", () => {
         });
 
         it("ensures generated editable formats do not contain bidi-control characters (U+061C, U+200E, U+200F, U+202A-U+202E, U+2066-U+2069)", () => {
-            const locales = ["en-US", "de-DE", "fr-FR", "es-ES", "ja-JP", "ko-KR", "pt-BR", "it-IT", "zh-CN", "zh-TW", "ar-SA"];
+            const locales = ["en-US", "de-DE", "fr-FR", "es-ES", "ja-JP", "ko-KR", "pt-BR", "it-IT", "zh-CN", "zh-TW", "ar-SA", "tr-TR"];
             const bidiRegex = /[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/;
             for (const loc of locales) {
                 expect(getLocaleDateInputFormat(loc)).not.toMatch(bidiRegex);
