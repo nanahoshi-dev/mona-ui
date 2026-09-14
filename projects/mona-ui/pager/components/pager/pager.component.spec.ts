@@ -11,6 +11,7 @@ import { PagerPageSizeTemplateDirective } from "../../directives/pager-page-size
 import type { PageChangeEvent } from "../../models/PageChangeEvent";
 import type { PageSizeChangeEvent } from "../../models/PageSizeChangeEvent";
 import { MONA_DEFAULT_LOCALE, MonaI18nService, type MonaLocale, normalizeLocalizedDigits } from "@nanahoshi/mona-ui/i18n";
+import { MONA_AR_SA_LOCALE } from "@nanahoshi/mona-ui/locales";
 import { pagerBaseThemeVariants, pagerInfoThemeVariants } from "../../styles/pager.styles";
 import { PagerComponent } from "./pager.component";
 
@@ -738,6 +739,7 @@ describe("PagerComponent i18n and localization", () => {
 
     afterEach(() => {
         globalThis.ResizeObserver = originalResizeObserver;
+        document.querySelectorAll(".cdk-overlay-container").forEach(container => container.replaceChildren());
     });
 
     function setup(total: number, pageSize: number, skip: number = 0): void {
@@ -1118,6 +1120,41 @@ describe("PagerComponent i18n and localization", () => {
             const valueSpan = dropdown.querySelector("span");
             expect(valueSpan?.textContent?.trim()).toBe("١");
         });
+
+        it("renders Arabic-Indic digits in page-size dropdown options under ar-SA and switches reactively", async () => {
+            i18nService.use(MONA_AR_SA_LOCALE);
+            setup(100, 10, 0);
+            await fixture.whenStable();
+            resizeHost(900);
+            await fixture.whenStable();
+            fixture.detectChanges();
+
+            const dropdown = fixture.nativeElement.querySelector("mona-dropdown-list") as HTMLElement;
+            expect(dropdown).toBeTruthy();
+            const valueSpan = dropdown.querySelector("span");
+            expect(valueSpan?.textContent?.trim()).toBe("عدد العناصر في الصفحة: ١٠");
+
+            dropdown.click();
+            fixture.detectChanges();
+            await fixture.whenStable();
+            await new Promise(resolve => setTimeout(resolve, 0));
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const options = Array.from(document.body.querySelectorAll("li[role='option']")).map(el => el.textContent?.trim());
+            expect(options).toEqual(["٥", "١٠", "٢٠", "٥٠", "١٠٠"]);
+
+            // Switch to en-US reactively
+            i18nService.use(MONA_DEFAULT_LOCALE);
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            expect(valueSpan?.textContent?.trim()).toBe("10 / page");
+            const enOptions = Array.from(document.body.querySelectorAll("li[role='option']")).map(el => el.textContent?.trim());
+            expect(enOptions).toEqual(["5", "10", "20", "50", "100"]);
+        });
     });
 });
+
+
 
