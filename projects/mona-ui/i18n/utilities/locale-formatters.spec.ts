@@ -4,7 +4,6 @@ import {
     getNumberGroupingPattern,
     getNumberSymbols,
     normalizeLocalizedDigits,
-    normalizeLocalizedInput,
     normalizeLocalizedMinus,
     parseLocalizedNumber,
     validateLocalizedNumber,
@@ -29,6 +28,13 @@ describe("locale-formatters", () => {
             expect(symbols.minus).toBe("-");
         });
 
+        it("returns correct symbols for it-IT", () => {
+            const symbols = getNumberSymbols("it-IT");
+            expect(symbols.decimal).toBe(",");
+            expect(symbols.group).toBe(".");
+            expect(symbols.minus).toBe("-");
+        });
+
         it("returns localized symbols and digits for ar-SA", () => {
             const symbols = getNumberSymbols("ar-SA");
             expect(symbols.decimal).toBe("\u066B");
@@ -44,7 +50,7 @@ describe("locale-formatters", () => {
     });
 
     describe("getNumberGroupingPattern", () => {
-        it("returns Western 3-3 grouping for en-US and de-DE", () => {
+        it("returns Western 3-3 grouping for en-US, de-DE, and it-IT", () => {
             const enPattern = getNumberGroupingPattern("en-US");
             expect(enPattern.primaryGroupSize).toBe(3);
             expect(enPattern.secondaryGroupSize).toBe(3);
@@ -54,6 +60,11 @@ describe("locale-formatters", () => {
             expect(dePattern.primaryGroupSize).toBe(3);
             expect(dePattern.secondaryGroupSize).toBe(3);
             expect(dePattern.groupSeparator).toBe(".");
+
+            const itPattern = getNumberGroupingPattern("it-IT");
+            expect(itPattern.primaryGroupSize).toBe(3);
+            expect(itPattern.secondaryGroupSize).toBe(3);
+            expect(itPattern.groupSeparator).toBe(".");
         });
 
         it("returns Indian 3-2 grouping for hi-IN, en-IN, bn-BD, and mr-IN", () => {
@@ -126,6 +137,14 @@ describe("locale-formatters", () => {
             expect(parseLocalizedNumber("-1.234,5", "de-DE")).toBe(-1234.5);
         });
 
+        it("parses comma-decimal numbers in it-IT", () => {
+            expect(parseLocalizedNumber("1234,5", "it-IT")).toBe(1234.5);
+            expect(parseLocalizedNumber("12.345,5", "it-IT")).toBe(12345.5);
+            expect(parseLocalizedNumber("1.234.567,89", "it-IT")).toBe(1234567.89);
+            expect(parseLocalizedNumber("-12.345,5", "it-IT")).toBe(-12345.5);
+            expect(parseLocalizedNumber("12.5", "it-IT", { mode: "edit" })).toBe(12.5);
+        });
+
         it("supports explicit locale vs edit parse modes for comma-decimal locales", () => {
             // de-DE strict locale mode (paste)
             expect(parseLocalizedNumber("1.234", "de-DE", { mode: "locale" })).toBe(1234);
@@ -189,6 +208,11 @@ describe("locale-formatters", () => {
             expect(parseLocalizedNumber("10 000", "lv-LV", { mode: "locale" })).toBe(10000);
             expect(parseLocalizedNumber("1 000", "pt-PT", { mode: "locale" })).toBeNull();
             expect(parseLocalizedNumber("10 000", "pt-PT", { mode: "locale" })).toBe(10000);
+
+            // it-IT: 4-digit numbers are un-grouped, grouping begins at 10000
+            expect(parseLocalizedNumber("1.000", "it-IT", { mode: "locale" })).toBeNull();
+            expect(parseLocalizedNumber("1000", "it-IT", { mode: "locale" })).toBe(1000);
+            expect(parseLocalizedNumber("10.000", "it-IT", { mode: "locale" })).toBe(10000);
 
             // Western 4-digit grouping preserved where canonical
             expect(parseLocalizedNumber("1,000", "en-US", { mode: "locale" })).toBe(1000);
@@ -512,6 +536,14 @@ describe("locale-formatters", () => {
                 useGrouping: false
             });
             expect(formatted).toBe("1.23");
+        });
+
+        it("formats Italian grouping and decimal separators correctly", () => {
+            const formatted = formatNumber(1234567.89, "it-IT", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+            expect(formatted).toBe("1.234.567,89");
         });
     });
 });

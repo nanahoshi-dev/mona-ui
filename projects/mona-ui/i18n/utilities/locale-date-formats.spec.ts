@@ -44,10 +44,11 @@ describe("locale-date-formats", () => {
             expect(format).toBe("dd.MM.yyyy");
         });
 
-        it("returns day/month/year format for pt-BR, es-ES, and fr-FR", () => {
+        it("returns day/month/year format for pt-BR, es-ES, fr-FR, and it-IT", () => {
             expect(getLocaleDateInputFormat("pt-BR")).toBe("dd/MM/yyyy");
             expect(getLocaleDateInputFormat("es-ES")).toBe("dd/MM/yyyy");
             expect(getLocaleDateInputFormat("fr-FR")).toBe("dd/MM/yyyy");
+            expect(getLocaleDateInputFormat("it-IT")).toBe("dd/MM/yyyy");
         });
 
         it("returns day/month/year format without hidden bidi controls for ar-SA", () => {
@@ -181,6 +182,16 @@ describe("locale-date-formats", () => {
             expect(format).toBe("dd/MM/yyyy, hh:mm a");
         });
 
+        it("derives combined Italian date and time format in 24h with comma separator", () => {
+            const format = getLocaleDateTimeInputFormat("it-IT", { hourFormat: "24", showSeconds: false });
+            expect(format).toBe("dd/MM/yyyy, HH:mm");
+        });
+
+        it("derives combined Italian date and time format in 12h with comma separator and day period", () => {
+            const format = getLocaleDateTimeInputFormat("it-IT", { hourFormat: "12", showSeconds: false });
+            expect(format).toBe("dd/MM/yyyy, hh:mm a");
+        });
+
         it("derives combined Saudi Arabic date and time format with Arabic comma for ar-SA", () => {
             expect(getLocaleDateTimeInputFormat("ar-SA", { hourFormat: "24", showSeconds: false })).toBe(
                 "dd/MM/yyyy، HH:mm"
@@ -237,6 +248,10 @@ describe("locale-date-formats", () => {
 
             it("returns monday for French (fr-FR)", () => {
                 expect(getLocaleFirstDayOfWeek("fr-FR")).toBe("monday");
+            });
+
+            it("returns monday for Italian (it-IT)", () => {
+                expect(getLocaleFirstDayOfWeek("it-IT")).toBe("monday");
             });
 
             it("returns monday for Simplified Chinese (zh-CN)", () => {
@@ -320,6 +335,7 @@ describe("locale-date-formats", () => {
                     expect(resolveFallbackFirstDayOfWeek("ar-AE")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("en-AU")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("zh-CN")).toBe("monday");
+                    expect(resolveFallbackFirstDayOfWeek("it-IT")).toBe("monday");
 
                     // TW, PT, BR, KR, and YE are Sunday-first in CLDR
                     expect(resolveFallbackFirstDayOfWeek("zh-TW")).toBe("sunday");
@@ -344,6 +360,7 @@ describe("locale-date-formats", () => {
             it("resolves language-only tags through likely subtags without misreading -u-ca-gregory as region CA", () => {
                 withWeekInfoDisabled(() => {
                     expect(resolveFallbackFirstDayOfWeek("de")).toBe("monday");
+                    expect(resolveFallbackFirstDayOfWeek("it")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("ja")).toBe("sunday");
                     expect(resolveFallbackFirstDayOfWeek("ko")).toBe("sunday");
                     expect(resolveFallbackFirstDayOfWeek("pt")).toBe("sunday");
@@ -360,6 +377,7 @@ describe("locale-date-formats", () => {
                 withWeekInfoDisabled(() => {
                     expect(resolveFallbackFirstDayOfWeek("en-US-u-fw-mon")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("de-DE-u-fw-sun")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("it-IT-u-fw-sun")).toBe("sunday");
                     expect(resolveFallbackFirstDayOfWeek("ja-JP-u-fw-mon")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("pt-BR-u-fw-mon")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("ar-EG-u-fw-fri")).toBe("friday");
@@ -735,6 +753,21 @@ describe("locale-date-formats", () => {
             expect(parsed.minute).toBe(30);
         });
 
+        it("formats and parses Italian 24-hour datetime correctly", () => {
+            const format = getLocaleDateTimeInputFormat("it-IT", { hourFormat: "24", showSeconds: false });
+            const dt = DateTime.fromJSDate(testDate).setLocale("it-IT");
+            const str = dt.toFormat(format);
+            expect(str).toBe("15/09/2026, 21:30");
+
+            const parsed = DateTime.fromFormat(str, format, { locale: "it-IT" });
+            expect(parsed.isValid).toBe(true);
+            expect(parsed.year).toBe(2026);
+            expect(parsed.month).toBe(9);
+            expect(parsed.day).toBe(15);
+            expect(parsed.hour).toBe(21);
+            expect(parsed.minute).toBe(30);
+        });
+
         it("formats and parses Simplified Chinese date, 12h time, and datetime correctly", () => {
             const dateFormat = getLocaleDateInputFormat("zh-CN");
             const dtCN = DateTime.fromJSDate(testDate).setLocale("zh-CN");
@@ -780,7 +813,7 @@ describe("locale-date-formats", () => {
 
     describe("whitespace normalization and portability", () => {
         it("ensures generated editable formats do not contain typographic whitespace (U+00A0, U+202F, U+2009)", () => {
-            const locales = ["en-US", "de-DE", "fr-FR", "es-ES", "ja-JP", "ko-KR", "pt-BR", "zh-CN", "zh-TW", "ar-SA"];
+            const locales = ["en-US", "de-DE", "fr-FR", "es-ES", "ja-JP", "ko-KR", "pt-BR", "it-IT", "zh-CN", "zh-TW", "ar-SA"];
             for (const loc of locales) {
                 const time12 = getLocaleTimeInputFormat(loc, { hourFormat: "12" });
                 expect(time12).not.toMatch(/[\u00A0\u2009\u202F]/);
@@ -800,7 +833,7 @@ describe("locale-date-formats", () => {
         });
 
         it("ensures generated editable formats do not contain bidi-control characters (U+061C, U+200E, U+200F, U+202A-U+202E, U+2066-U+2069)", () => {
-            const locales = ["en-US", "de-DE", "fr-FR", "es-ES", "ja-JP", "ko-KR", "pt-BR", "zh-CN", "zh-TW", "ar-SA"];
+            const locales = ["en-US", "de-DE", "fr-FR", "es-ES", "ja-JP", "ko-KR", "pt-BR", "it-IT", "zh-CN", "zh-TW", "ar-SA"];
             const bidiRegex = /[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/;
             for (const loc of locales) {
                 expect(getLocaleDateInputFormat(loc)).not.toMatch(bidiRegex);

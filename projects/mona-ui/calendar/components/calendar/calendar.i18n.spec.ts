@@ -632,6 +632,7 @@ describe("CalendarComponent i18n", () => {
                 { id: "ja-JP", expected: ["日", "月", "火", "水", "木", "金", "土"] },
                 { id: "ko-KR", expected: ["일", "월", "화", "수", "목", "금", "토"] },
                 { id: "pt-BR", expected: ["dom.", "seg.", "ter.", "qua.", "qui.", "sex.", "sáb."] },
+                { id: "it-IT", expected: ["lun", "mar", "mer", "gio", "ven", "sab", "dom"] },
                 { id: "zh-CN", expected: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"] },
                 { id: "zh-TW", expected: ["週日", "週一", "週二", "週三", "週四", "週五", "週六"] },
                 { id: "ar-SA", expected: ["ح", "ن", "ث", "ر", "خ", "ج", "س"] }
