@@ -2,7 +2,7 @@ import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { describe, expect, it, beforeEach } from "vitest";
 import { CalendarComponent } from "@nanahoshi/mona-ui/calendar";
-import { generatePseudoLocale, MonaI18nService, MONA_DEFAULT_LOCALE, type MonaLocale } from "@nanahoshi/mona-ui/i18n";
+import { generatePseudoLocale, MonaI18nService, MONA_DEFAULT_LOCALE } from "@nanahoshi/mona-ui/i18n";
 import {
     MONA_AR_SA_LOCALE,
     MONA_DE_DE_LOCALE,
