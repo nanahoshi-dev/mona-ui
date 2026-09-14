@@ -28,7 +28,7 @@ describe("DemoContainerComponent", () => {
         expect(component).toBeTruthy();
     });
 
-    it("includes all official locales including Italian (it-IT) in localeOptions", () => {
+    it("includes all official locales including Italian (it-IT) and Turkish (tr-TR) in localeOptions", () => {
         const options = (
             component as unknown as { localeOptions: readonly { label: string; locale: { id: string } }[] }
         ).localeOptions;
@@ -36,6 +36,12 @@ describe("DemoContainerComponent", () => {
             expect.objectContaining({
                 label: "Italiano (Italia)",
                 locale: expect.objectContaining({ id: "it-IT" })
+            })
+        );
+        expect(options).toContainEqual(
+            expect.objectContaining({
+                label: "Türkçe (Türkiye)",
+                locale: expect.objectContaining({ id: "tr-TR" })
             })
         );
         const ids = options.map(option => option.locale.id);

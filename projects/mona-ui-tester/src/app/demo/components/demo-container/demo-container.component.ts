@@ -16,6 +16,7 @@ import {
     MONA_JA_JP_LOCALE,
     MONA_KO_KR_LOCALE,
     MONA_PT_BR_LOCALE,
+    MONA_TR_TR_LOCALE,
     MONA_ZH_CN_LOCALE,
     MONA_ZH_TW_LOCALE
 } from "@nanahoshi/mona-ui/locales";
@@ -127,6 +128,7 @@ export class DemoContainerComponent<TComponent> {
         { label: "Français", locale: MONA_FR_FR_LOCALE },
         { label: "Italiano (Italia)", locale: MONA_IT_IT_LOCALE },
         { label: "Português (Brasil)", locale: MONA_PT_BR_LOCALE },
+        { label: "Türkçe (Türkiye)", locale: MONA_TR_TR_LOCALE },
         { label: "日本語", locale: MONA_JA_JP_LOCALE },
         { label: "한국어 (대한민국)", locale: MONA_KO_KR_LOCALE },
         { label: "简体中文", locale: MONA_ZH_CN_LOCALE },
