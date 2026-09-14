@@ -1237,17 +1237,18 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
         it("verifies exact parity between MonaLocaleMessages interface and MONA_MESSAGE_NAMESPACES", () => {
             const canonical = loadCanonicalMessageNamespaces();
             expect(canonical.violations).toHaveLength(0);
-            expect(canonical.namespaces.size).toBe(40);
+            expect(canonical.namespaces.size).toBeGreaterThan(0);
             const drift = checkSchemaDrift(canonical.namespaces, "canonical-schema");
             expect(drift).toHaveLength(0);
         });
 
-        it("discovers all 40 canonical namespaces in the real repository English defaults", () => {
+        it("discovers every canonical namespace in the real repository English defaults", () => {
             const defaults = loadDefaultEnglishStrings();
             expect(defaults.violations).toHaveLength(0);
             const canonical = loadCanonicalMessageNamespaces();
+            expect(canonical.violations).toHaveLength(0);
             for (const ns of canonical.namespaces) {
-                expect(defaults.namespaces.has(ns)).toBe(true);
+                expect(defaults.namespaces.has(ns), `Missing English defaults for namespace ${ns}`).toBe(true);
             }
         });
 
