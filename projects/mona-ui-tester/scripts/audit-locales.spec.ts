@@ -1231,6 +1231,48 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
             const violations = checkSchemaDrift(canonicalNamespaces, "test-schema.ts");
             expect(violations.some(v => v.detail.includes("drifted") && v.detail.includes("extra"))).toBe(true);
         });
+
+        it("fails closed when canonical message schema file does not exist", () => {
+            const result = loadCanonicalMessageNamespaces("/non/existent/canonical-schema.ts");
+            expect(result.violations.some(v => v.detail.includes("Canonical message schema file does not exist"))).toBe(true);
+            expect(result.namespaces.size).toBe(0);
+        });
+
+        it("fails when canonical schema does not contain MonaLocaleMessages interface", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "mona-no-iface-"));
+            try {
+                const fakeSchema = join(tempDir, "fake-schema.ts");
+                writeFileSync(fakeSchema, 'export interface OtherInterface { foo: string; }\n');
+                const result = loadCanonicalMessageNamespaces(fakeSchema);
+                expect(result.violations.some(v => v.detail.includes('Could not find interface "MonaLocaleMessages"'))).toBe(true);
+                expect(result.namespaces.size).toBe(0);
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("dynamically discovers all namespaces from MonaLocaleMessages without fixed-count assumptions", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "mona-dyn-schema-"));
+            try {
+                const fakeSchema = join(tempDir, "fake-schema.ts");
+                writeFileSync(
+                    fakeSchema,
+                    `export interface MonaLocaleMessages {
+                        customNamespaceOne: string;
+                        customNamespaceTwo: string;
+                        customNamespaceThree: string;
+                    }\n`
+                );
+                const result = loadCanonicalMessageNamespaces(fakeSchema);
+                expect(result.violations).toHaveLength(0);
+                expect(result.namespaces.size).toBe(3);
+                expect(result.namespaces.has("customNamespaceOne")).toBe(true);
+                expect(result.namespaces.has("customNamespaceTwo")).toBe(true);
+                expect(result.namespaces.has("customNamespaceThree")).toBe(true);
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
     });
 
     describe("Real Repository Locale Integration", () => {
