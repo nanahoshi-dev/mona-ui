@@ -100,8 +100,8 @@ describe("MONA_IT_IT_LOCALE", () => {
             expect(m.grid?.filterPlaceholder).toBe("Filtra...");
             expect(m.grid?.moveRow).toBe("Sposta riga");
             expect(m.grid?.noData).toBe("Nessun dato disponibile");
-            expect(m.grid?.moveAsNext).toBe("Sposta come successivo");
-            expect(m.grid?.moveAsPrevious).toBe("Sposta come precedente");
+            expect(m.grid?.moveAsNext).toBe("Sposta dopo");
+            expect(m.grid?.moveAsPrevious).toBe("Sposta prima");
             expect(m.grid?.remove).toBe("Rimuovi");
             expect(m.grid?.rowReorder).toBe("Riordina righe");
             expect(m.grid?.save).toBe("Salva");
@@ -285,15 +285,15 @@ describe("MONA_IT_IT_LOCALE", () => {
         it("formats Calendar functions correctly with natural Italian date composition", () => {
             expect(m.calendar?.calendarLabel?.("settembre 2026")).toBe("Calendario, settembre 2026");
             expect(m.calendar?.decadeRange?.(2020, 2029)).toBe("2020 - 2029");
-            expect(m.calendar?.decadeViewLabel?.(2020, 2029)).toBe("Vista decennio, 2020 - 2029");
+            expect(m.calendar?.decadeViewLabel?.(2020, 2029)).toBe("Vista del decennio, 2020 - 2029");
             expect(m.calendar?.yearCellLabel?.(2026)).toBe("Anno 2026");
-            expect(m.calendar?.yearViewLabel?.("2026")).toBe("Vista anno, 2026");
+            expect(m.calendar?.yearViewLabel?.("2026")).toBe("Vista dell'anno, 2026");
             expect(m.calendar?.goToToday?.("15/09/2026")).toBe("Vai a oggi, 15/09/2026");
             expect(m.calendar?.switchToYearView?.("settembre 2026")).toBe(
-                "Passa alla vista anno, attualmente settembre 2026"
+                "Passa alla vista dell'anno, attualmente settembre 2026"
             );
             expect(m.calendar?.switchToDecadeView?.("2026")).toBe(
-                "Passa alla vista decennio, attualmente 2026"
+                "Passa alla vista del decennio, attualmente 2026"
             );
         });
 

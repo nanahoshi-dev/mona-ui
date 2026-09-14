@@ -411,7 +411,9 @@ describe("MONA_IT_IT_LOCALE Integration with MonaI18nService", () => {
         expect(nextButton).not.toBeNull();
 
         // 2. Locale-formatted Italian month/year header (e.g. settembre 2026)
-        const viewButton = hostEl.querySelector('button[aria-label*="Passa alla vista anno"]') as HTMLButtonElement;
+        const viewButton = hostEl.querySelector(
+            'button[aria-label*="Passa alla vista dell\'anno"]'
+        ) as HTMLButtonElement;
         expect(viewButton).not.toBeNull();
         expect(viewButton.textContent?.toLowerCase()).toContain("settembre");
         expect(viewButton.textContent).toContain("2026");
@@ -430,17 +432,17 @@ describe("MONA_IT_IT_LOCALE Integration with MonaI18nService", () => {
         viewButton.click();
         fixture.detectChanges();
 
-        expect(liveRegion.textContent).toContain("Vista anno, 2026");
+        expect(liveRegion.textContent).toContain("Vista dell'anno, 2026");
 
-        const yearViewButton = hostEl.querySelector('button[aria-label*="Passa alla vista decennio"]') as HTMLButtonElement;
+        const yearViewButton = hostEl.querySelector('button[aria-label*="Passa alla vista del decennio"]') as HTMLButtonElement;
         expect(yearViewButton).not.toBeNull();
-        expect(yearViewButton.getAttribute("aria-label")).toContain("Passa alla vista decennio, attualmente 2026");
+        expect(yearViewButton.getAttribute("aria-label")).toContain("Passa alla vista del decennio, attualmente 2026");
 
         // 6. Decade view navigation and accessibility labels
         yearViewButton.click();
         fixture.detectChanges();
 
-        expect(liveRegion.textContent).toContain("Vista decennio, 2020 - 2029");
+        expect(liveRegion.textContent).toContain("Vista del decennio, 2020 - 2029");
 
         const decadeViewButton = hostEl.querySelector('button[aria-label*="2020 - 2029"]') as HTMLButtonElement;
         expect(decadeViewButton).not.toBeNull();
@@ -883,7 +885,8 @@ describe("MONA_IT_IT_LOCALE Integration with MonaI18nService", () => {
 
         const service = TestBed.inject(MonaI18nService);
         const gridMessages = service.componentMessages("grid", GRID_DEFAULT_MESSAGES);
-
+        expect(gridMessages().moveAsPrevious).toBe("Sposta prima");
+        expect(gridMessages().moveAsNext).toBe("Sposta dopo");
         expect(gridMessages().rowReorder).toBe("Riordina righe");
         expect(gridMessages().moveRow).toBe("Sposta riga");
         expect(gridMessages().reorderRow(3)).toBe("Riordina riga 3");

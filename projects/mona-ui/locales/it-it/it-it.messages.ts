@@ -13,7 +13,7 @@ export const IT_IT_MESSAGES = {
     calendar: {
         calendarLabel: (formattedMonthAndYear: string) => `Calendario, ${formattedMonthAndYear}`,
         decadeRange: (start: number, end: number) => `${start} - ${end}`,
-        decadeViewLabel: (start: number, end: number) => `Vista decennio, ${start} - ${end}`,
+        decadeViewLabel: (start: number, end: number) => `Vista del decennio, ${start} - ${end}`,
         goToToday: (formattedDate: string) => `Vai a oggi, ${formattedDate}`,
         nextDecade: "Decennio successivo",
         nextMonth: "Mese successivo",
@@ -22,12 +22,12 @@ export const IT_IT_MESSAGES = {
         previousMonth: "Mese precedente",
         previousYear: "Anno precedente",
         switchToDecadeView: (currentYear: string) =>
-            `Passa alla vista decennio, attualmente ${currentYear}`,
+            `Passa alla vista del decennio, attualmente ${currentYear}`,
         switchToYearView: (currentMonthAndYear: string) =>
-            `Passa alla vista anno, attualmente ${currentMonthAndYear}`,
+            `Passa alla vista dell'anno, attualmente ${currentMonthAndYear}`,
         today: "Oggi",
         yearCellLabel: (year: number) => `Anno ${year}`,
-        yearViewLabel: (year: string) => `Vista anno, ${year}`
+        yearViewLabel: (year: string) => `Vista dell'anno, ${year}`
     },
     card: {
         actionsLabel: "Azioni della scheda"
@@ -223,8 +223,8 @@ export const IT_IT_MESSAGES = {
         filterByColumn: (column: string) => `Filtra per ${column}`,
         filterPlaceholder: "Filtra...",
         modified: "Modificato",
-        moveAsNext: "Sposta come successivo",
-        moveAsPrevious: "Sposta come precedente",
+        moveAsNext: "Sposta dopo",
+        moveAsPrevious: "Sposta prima",
         moveRow: "Sposta riga",
         noData: "Nessun dato disponibile",
         remove: "Rimuovi",
