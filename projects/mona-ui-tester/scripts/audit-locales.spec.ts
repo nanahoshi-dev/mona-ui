@@ -1372,6 +1372,19 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
                 )
             ).toBe(true);
         });
+
+        it("discovers the official Italian locale", () => {
+            const discovery = discoverOfficialLocales();
+            expect(
+                discovery.locales.some(
+                    locale =>
+                        locale.canonicalId === "it-IT" &&
+                        locale.localeExport === "MONA_IT_IT_LOCALE" &&
+                        locale.messagesExport === "IT_IT_MESSAGES" &&
+                        locale.direction === "ltr"
+                )
+            ).toBe(true);
+        });
     });
 
     describe("semantic day-period locale verification", () => {
@@ -1404,6 +1417,9 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
 
             expect(getIntlDayPeriod("fr-FR", 9)).toBe("AM");
             expect(getIntlDayPeriod("fr-FR", 21)).toBe("PM");
+
+            expect(getIntlDayPeriod("it-IT", 9)).toBe("AM");
+            expect(getIntlDayPeriod("it-IT", 21)).toBe("PM");
 
             expect(getIntlDayPeriod("pt-BR", 9)).toBe("AM");
             expect(getIntlDayPeriod("pt-BR", 21)).toBe("PM");

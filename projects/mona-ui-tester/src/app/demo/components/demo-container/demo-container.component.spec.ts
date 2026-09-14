@@ -27,4 +27,12 @@ describe("DemoContainerComponent", () => {
     it("should create", () => {
         expect(component).toBeTruthy();
     });
+
+    it("includes all official locales including Italian (it-IT) in localeOptions", () => {
+        const options = (
+            component as unknown as { localeOptions: readonly { label: string; locale: { id: string } }[] }
+        ).localeOptions;
+        expect(options.some(o => o.locale.id === "it-IT" && o.label === "Italiano (Italia)")).toBe(true);
+        expect(options).toHaveLength(11);
+    });
 });

@@ -2563,6 +2563,13 @@
         "defaultValue": "false"
       },
       {
+        "description": "Sets whether the calendar is required. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "required",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
         "description": "Sets the border radius of the calendar.",
         "kind": "input",
         "name": "rounded",
@@ -2581,13 +2588,6 @@
         "kind": "output",
         "name": "touch",
         "type": "void"
-      },
-      {
-        "description": "Sets whether the calendar is required. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
-        "kind": "input",
-        "name": "required",
-        "type": "boolean",
-        "defaultValue": "false"
       },
       {
         "description": "Sets the touched state of the calendar. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
