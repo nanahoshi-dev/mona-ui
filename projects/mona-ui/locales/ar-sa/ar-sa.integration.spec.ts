@@ -710,6 +710,9 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
         const liveRegion = root.querySelector("[aria-live='polite']") as HTMLElement;
         expect(liveRegion.textContent).toContain("تقويم سبتمبر ٢٠٢٦");
 
+        const focusedDay = root.querySelector("[monaMonthDay][tabindex='0']") as HTMLElement;
+        expect(focusedDay?.textContent?.trim()).toBe("١٥");
+
         // Sunday-first weekday headers: ح ن ث ر خ ج س
         const headerRow = root.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
         const headerDivs = Array.from(headerRow.querySelectorAll(":scope > div"));
@@ -742,6 +745,11 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
         expect(liveRegion.textContent).toContain("عرض العقد، من ٢٠٢٠ إلى ٢٠٢٩");
         expect(root.querySelector("button[aria-label='العقد السابق']")).not.toBeNull();
         expect(root.querySelector("button[aria-label='العقد التالي']")).not.toBeNull();
+        expect(root.querySelector("button span[id$='-heading']")?.textContent?.trim()).toBe("٢٠٢٠ - ٢٠٢٩");
+
+        const decadeCells = Array.from(root.querySelectorAll("[monaDecadeYear] span")).map(el => el.textContent?.trim());
+        expect(decadeCells).toContain("٢٠٢٠");
+        expect(decadeCells).toContain("٢٠٢٩");
     });
 
     it("respects explicit firstDay override precedence in Calendar", async () => {
@@ -861,6 +869,8 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
         });
 
         const fixture = TestBed.createComponent(PagerIntegrationHostComponent);
+        const i18n = TestBed.inject(MonaI18nService);
+        fixture.componentInstance.total.set(100);
         fixture.detectChanges();
         await fixture.whenStable();
 
@@ -874,6 +884,18 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
         expect(prevBtn).not.toBeNull();
         expect(nextBtn).not.toBeNull();
         expect(lastBtn).not.toBeNull();
+
+        const pageButtons = Array.from(root.querySelectorAll("ol > li > button")).map(b => b.textContent?.trim());
+        expect(pageButtons).toContain("١");
+        expect(pageButtons).toContain("١٠");
+
+        i18n.use(MONA_DEFAULT_LOCALE);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const enPageButtons = Array.from(root.querySelectorAll("ol > li > button")).map(b => b.textContent?.trim());
+        expect(enPageButtons).toContain("1");
+        expect(enPageButtons).toContain("10");
     });
 
     it("integrates with ScrollView for Arabic navigation and pager controls", async () => {

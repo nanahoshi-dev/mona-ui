@@ -1,8 +1,9 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { MonaI18nService, type MonaLocale } from "@nanahoshi/mona-ui/i18n";
+import { MONA_DEFAULT_LOCALE, MonaI18nService, type MonaLocale } from "@nanahoshi/mona-ui/i18n";
 import axe from "axe-core";
 import { describe, expect, it } from "vitest";
+import { CalendarMonthCellTemplateDirective } from "../../directives/calendar-month-cell-template.directive";
 import type { FirstDayOfWeek } from "../../models/FirstDayOfWeek";
 import { CalendarComponent } from "./calendar.component";
 
@@ -231,7 +232,7 @@ describe("CalendarComponent i18n", () => {
 
         calendarEl.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true, cancelable: true }));
         fixture.detectChanges();
-        expect(getFocusedDay()).toBe("14");
+        expect(getFocusedDay()).toBe("١٤");
 
         // LTR locale + RTL DOM -> ArrowLeft = next (+1 day)
         i18n.use({ id: "en-US", direction: "ltr", messages: {} });
@@ -571,8 +572,8 @@ describe("CalendarComponent i18n", () => {
             // Sep 30, 2026 is Wednesday. Row 5 ends on Friday Oct 2.
             const gridDays = Array.from(fixture.nativeElement.querySelectorAll("[monaMonthDay]"))
                 .map(el => (el as HTMLElement).textContent?.trim());
-            expect(gridDays[0]).toBe("29");
-            expect(gridDays[gridDays.length - 1]).toBe("2");
+            expect(gridDays[0]).toBe("٢٩");
+            expect(gridDays[gridDays.length - 1]).toBe("٢");
         });
 
         it("defaults to Sunday-first for ar-SA and displays compact narrow weekday headers with full accessible labels", async () => {
@@ -722,15 +723,15 @@ describe("CalendarComponent i18n", () => {
             fixture.componentInstance.value.set(new Date(2026, 8, 16));
             fixture.detectChanges();
             await fixture.whenStable();
-            expect(getFocusedDay()).toBe("16");
+            expect(getFocusedDay()).toBe("١٦");
 
             calendarEl.dispatchEvent(new KeyboardEvent("keydown", { key: "Home", bubbles: true, cancelable: true }));
             fixture.detectChanges();
-            expect(getFocusedDay()).toBe("12");
+            expect(getFocusedDay()).toBe("١٢");
 
             calendarEl.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true, cancelable: true }));
             fixture.detectChanges();
-            expect(getFocusedDay()).toBe("18");
+            expect(getFocusedDay()).toBe("١٨");
 
             // 4. Friday-first calendar via en-MV locale auto-derivation: focus on Wednesday Sep 16, 2026
             // Week row is Fri Sep 11 to Thu Sep 17
@@ -818,6 +819,111 @@ describe("CalendarComponent i18n", () => {
 
             // First weekday must remain Sunday ("日")
             expect(getFirstWeekday()).toBe("日");
+        });
+    });
+
+    describe("Numeral localization", () => {
+        @Component({
+            template: `
+                <mona-calendar [value]="value()" [weekNumber]="weekNumber()">
+                    @if (useCustomTemplate()) {
+                        <ng-template monaCalendarMonthCellTemplate let-day let-date="date">
+                            <span class="custom-cell">{{ day }}-{{ typeofDay(day) }}</span>
+                        </ng-template>
+                    }
+                </mona-calendar>
+            `,
+            imports: [CalendarComponent, CalendarMonthCellTemplateDirective]
+        })
+        class NumeralTestHostComponent {
+            public readonly value = signal<Date | null>(new Date(2026, 8, 15));
+            public readonly weekNumber = signal(false);
+            public readonly useCustomTemplate = signal(false);
+            public typeofDay(val: unknown): string {
+                return typeof val;
+            }
+        }
+
+        it("renders Arabic-Indic numerals in month day cells, decade heading, and decade cells under ar-SA", async () => {
+            TestBed.configureTestingModule({
+                imports: [NumeralTestHostComponent]
+            });
+            const fixture = TestBed.createComponent(NumeralTestHostComponent);
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use({ id: "ar-SA", direction: "rtl", messages: {} });
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const calendarEl = fixture.nativeElement.querySelector("mona-calendar") as HTMLElement;
+            const focusedDay = calendarEl.querySelector("[monaMonthDay][tabindex='0']");
+            expect(focusedDay?.textContent?.trim()).toBe("١٥");
+
+            // Switch to decade view: click switch to year, then switch to decade
+            const viewSwitchBtn = calendarEl.querySelectorAll("button")[1] as HTMLButtonElement;
+            viewSwitchBtn.click();
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const decadeSwitchBtn = calendarEl.querySelectorAll("button")[1] as HTMLButtonElement;
+            decadeSwitchBtn.click();
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            // Decade heading: ٢٠٢٠ - ٢٠٢٩
+            const heading = calendarEl.querySelector("button span.text-primary");
+            expect(heading?.textContent?.trim()).toBe("٢٠٢٠ - ٢٠٢٩");
+
+            // Decade cells: ٢٠٢٠ ... ٢٠٢٩
+            const decadeCells = Array.from(calendarEl.querySelectorAll("div[monaDecadeYear]")).map(el => el.textContent?.trim());
+            expect(decadeCells).toContain("٢٠٢٠");
+            expect(decadeCells).toContain("٢٠٢٩");
+
+            // Switch reactively back to en-US
+            i18n.use(MONA_DEFAULT_LOCALE);
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            expect(heading?.textContent?.trim()).toBe("2020 - 2029");
+            const enDecadeCells = Array.from(calendarEl.querySelectorAll("div[monaDecadeYear]")).map(el => el.textContent?.trim());
+            expect(enDecadeCells).toContain("2020");
+            expect(enDecadeCells).toContain("2029");
+        });
+
+        it("renders Arabic-Indic numerals for week numbers when enabled", async () => {
+            TestBed.configureTestingModule({
+                imports: [NumeralTestHostComponent]
+            });
+            const fixture = TestBed.createComponent(NumeralTestHostComponent);
+            fixture.componentInstance.weekNumber.set(true);
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use({ id: "ar-SA", direction: "rtl", messages: {} });
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const calendarEl = fixture.nativeElement.querySelector("mona-calendar") as HTMLElement;
+            const monthGrid = calendarEl.querySelectorAll("div[style*='grid-template-columns']")[1] as HTMLElement;
+            const weekDivs = Array.from(monthGrid.children).filter(el => !el.hasAttribute("monamonthday"));
+            expect(weekDivs.length).toBeGreaterThan(0);
+            const weekTexts = weekDivs.map(el => el.textContent?.trim());
+            expect(weekTexts.some(t => /[٠-٩]/.test(t))).toBe(true);
+            expect(weekTexts.some(t => /[0-9]/.test(t))).toBe(false);
+        });
+
+        it("preserves numeric type in custom template context even under ar-SA", async () => {
+            TestBed.configureTestingModule({
+                imports: [NumeralTestHostComponent]
+            });
+            const fixture = TestBed.createComponent(NumeralTestHostComponent);
+            fixture.componentInstance.useCustomTemplate.set(true);
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use({ id: "ar-SA", direction: "rtl", messages: {} });
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const calendarEl = fixture.nativeElement.querySelector("mona-calendar") as HTMLElement;
+            const customCells = calendarEl.querySelectorAll(".custom-cell");
+            expect(customCells.length).toBeGreaterThan(0);
+            expect(customCells[0].textContent).toContain("number");
         });
     });
 });

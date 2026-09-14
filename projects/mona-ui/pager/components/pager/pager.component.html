@@ -29,7 +29,7 @@
                             [attr.aria-label]="messages().pageLabel(1)"
                             [attr.aria-current]="page() === 1 ? 'page' : null"
                             (click)="onPageClick(1)">
-                            1
+                            {{ formatPageNumber(1) }}
                         </button>
                     </li>
                 }
@@ -92,7 +92,7 @@
                             [attr.aria-label]="messages().pageLabel(pageCount())"
                             [attr.aria-current]="page() === pageCount() ? 'page' : null"
                             (click)="onPageClick(pageCount())">
-                            {{ pageCount() }}
+                            {{ formatPageNumber(pageCount()) }}
                         </button>
                     </li>
                 }
@@ -141,6 +141,9 @@
                             <ng-template monaDropDownListValueTemplate let-item>
                                  <span>{{ messages().pageSizeLabel(item) }}</span>
                             </ng-template>
+                            <ng-template monaDropDownItemTemplate let-item>
+                                 <span>{{ formatPageNumber(item) }}</span>
+                            </ng-template>
                         </mona-dropdown-list>
                     }
                 </li>
@@ -181,7 +184,7 @@
                         (ngModelChange)="inputValue.set($event)"
                         (inputBlur)="onPageInputBlur()"></mona-numeric-text-box>
                     <span>{{ messages().ofText }}</span>
-                    <span>{{ pageCount() }}</span>
+                    <span>{{ formatPageNumber(pageCount()) }}</span>
                 </li>
                 @if (previousNext()) {
                     <ng-container [ngTemplateOutlet]="nextPageButton"></ng-container>
@@ -220,7 +223,14 @@
                     [size]="size()"
                     monaDropDownVirtualScroll
                     (ngModelChange)="onPageClick($event)"
-                    style="width: 75px"></mona-dropdown-list>
+                    style="width: 75px">
+                    <ng-template monaDropDownListValueTemplate let-item>
+                        <span>{{ formatPageNumber(item) }}</span>
+                    </ng-template>
+                    <ng-template monaDropDownItemTemplate let-item>
+                        <span>{{ formatPageNumber(item) }}</span>
+                    </ng-template>
+                </mona-dropdown-list>
             </li>
         }
         @if (previousNext()) {

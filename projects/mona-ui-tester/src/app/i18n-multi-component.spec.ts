@@ -666,6 +666,7 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
         // Pager firstPageLabel in Arabic: "الصفحة الأولى"
         const arPager = root.querySelector("mona-pager");
         expect(arPager?.querySelector("button[aria-label='الصفحة الأولى']")).not.toBeNull();
+        expect(arPager?.querySelector("button[aria-current='page']")?.textContent?.trim()).toBe("١");
 
         // ScrollView previousPage in Arabic: "الصفحة السابقة"
         const arScroll = root.querySelector("mona-scroll-view");

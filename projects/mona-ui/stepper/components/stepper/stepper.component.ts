@@ -17,7 +17,7 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { select } from "@mirei/ts-collections";
 import { fromEvent } from "rxjs";
-import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { formatNumber, injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { StepperIndicatorTemplateDirective } from "../../directives/stepper-indicator-template.directive";
 import { StepperIndicatorDirective } from "../../directives/stepper-indicator.directive";
 import { StepperLabelTemplateDirective } from "../../directives/stepper-label-template.directive";
@@ -52,6 +52,16 @@ export class StepperComponent implements StepperVariantInput {
     readonly #hostElementRef = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
     protected readonly isRtl = computed(() => this.#direction() === "rtl");
+
+    protected formatStepNumber(value: number): string {
+        if (value == null) {
+            return "";
+        }
+        return formatNumber(value, this.#i18n.localeId(), {
+            maximumFractionDigits: 0,
+            useGrouping: false
+        });
+    }
     readonly #trackItemSize = computed(() => {
         const stepCount = this.viewSteps().length;
         return stepCount !== 0 ? 100 / stepCount : 0;

@@ -28,6 +28,7 @@ import { fromEvent, skip } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import {
     formatGregorianDateToLocaleString,
+    formatNumber,
     getLocaleFirstDayOfWeek,
     gregorianDateTime,
     gregorianDateTimeFromObject,
@@ -530,6 +531,16 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
                 break;
         }
         this.navigatedDate.set(direction === "prev" ? date.minus(unit).toJSDate() : date.plus(unit).toJSDate());
+    }
+
+    protected formatInteger(value: number): string {
+        if (value == null) {
+            return "";
+        }
+        return formatNumber(value, this.#i18n.localeId(), {
+            maximumFractionDigits: 0,
+            useGrouping: false
+        });
     }
 
     protected getWeekNumber(date: Date): number {
