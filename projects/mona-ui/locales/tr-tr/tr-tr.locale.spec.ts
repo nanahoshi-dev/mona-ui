@@ -209,6 +209,14 @@ describe("MONA_TR_TR_LOCALE", () => {
             expect(m.filter?.endsWith).toBe("İle biter");
         });
 
+        it("translates Breadcrumb messages correctly with Turkish accessibility terminology", () => {
+            expect(m.breadcrumb?.breadcrumb).toBe("İçerik haritası");
+        });
+
+        it("translates SplitButton menu toggle message correctly", () => {
+            expect(m.splitButton?.menuButtonAriaLabel).toBe("Menü seçeneklerini göster");
+        });
+
         it("translates ColorGradient accessibility labels correctly", () => {
             expect(m.colorGradient?.saturationAndValue).toBe("Renk doygunluğu ve değeri");
         });
@@ -378,8 +386,8 @@ describe("MONA_TR_TR_LOCALE", () => {
         });
 
         it("formats SplitButton function correctly for both text and empty states", () => {
-            expect(m.splitButton?.splitButton?.("Kaydet")).toBe("Kaydet, menülü düğme");
-            expect(m.splitButton?.splitButton?.("")).toBe("Menülü düğme");
+            expect(m.splitButton?.splitButton?.("Kaydet")).toBe("Kaydet, bölünmüş düğme");
+            expect(m.splitButton?.splitButton?.("")).toBe("Bölünmüş düğme");
         });
     });
 });

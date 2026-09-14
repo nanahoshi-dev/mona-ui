@@ -1,6 +1,7 @@
 import { Component, signal, viewChild } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
+import { BreadcrumbComponent, BreadcrumbItemComponent } from "@nanahoshi/mona-ui/breadcrumb";
 import { CalendarComponent, type FirstDayOfWeek } from "@nanahoshi/mona-ui/calendar";
 import { ChipComponent } from "@nanahoshi/mona-ui/chip";
 import { ColorGradientComponent } from "@nanahoshi/mona-ui/color-gradient";
@@ -96,10 +97,26 @@ class CalendarIntegrationHostComponent {
 }
 
 @Component({
-    template: `<mona-split-button [text]="'Kaydet'" />`,
+    template: `
+        <mona-breadcrumb [aria-label]="ariaLabel()">
+            <mona-breadcrumb-item>Ana Sayfa</mona-breadcrumb-item>
+            <mona-breadcrumb-item>Kategori</mona-breadcrumb-item>
+        </mona-breadcrumb>
+    `,
+    imports: [BreadcrumbComponent, BreadcrumbItemComponent]
+})
+class BreadcrumbIntegrationHostComponent {
+    public readonly ariaLabel = signal("");
+}
+
+@Component({
+    template: `<mona-split-button [text]="text()" [aria-label]="ariaLabel()" />`,
     imports: [SplitButtonComponent]
 })
-class SplitButtonIntegrationHostComponent {}
+class SplitButtonIntegrationHostComponent {
+    public readonly ariaLabel = signal("");
+    public readonly text = signal("Kaydet");
+}
 
 interface Item {
     id: number;
@@ -455,7 +472,38 @@ describe("MONA_TR_TR_LOCALE Integration with MonaI18nService", () => {
         expect(decadeViewButton).not.toBeNull();
     });
 
-    it("renders SplitButton component with Turkish accessible name", () => {
+    it("renders Breadcrumb component with Turkish navigation landmark and supports explicit aria-label override", () => {
+        TestBed.configureTestingModule({
+            imports: [BreadcrumbIntegrationHostComponent],
+            providers: [
+                provideMonaI18n({
+                    locale: MONA_TR_TR_LOCALE
+                })
+            ]
+        });
+
+        const fixture = TestBed.createComponent(BreadcrumbIntegrationHostComponent);
+        fixture.detectChanges();
+
+        const hostEl = fixture.nativeElement as HTMLElement;
+        const breadcrumb = hostEl.querySelector("mona-breadcrumb");
+
+        expect(breadcrumb).not.toBeNull();
+        expect(breadcrumb?.getAttribute("role")).toBe("navigation");
+        expect(breadcrumb?.getAttribute("aria-label")).toBe("İçerik haritası");
+
+        // Explicit application aria-label override takes precedence
+        fixture.componentInstance.ariaLabel.set("Özel içerik haritası");
+        fixture.detectChanges();
+        expect(breadcrumb?.getAttribute("aria-label")).toBe("Özel içerik haritası");
+
+        // Clearing override restores localized Turkish default
+        fixture.componentInstance.ariaLabel.set("");
+        fixture.detectChanges();
+        expect(breadcrumb?.getAttribute("aria-label")).toBe("İçerik haritası");
+    });
+
+    it("renders SplitButton component with Turkish accessible name and distinct menu toggle semantics", () => {
         TestBed.configureTestingModule({
             imports: [SplitButtonIntegrationHostComponent],
             providers: [
@@ -469,8 +517,35 @@ describe("MONA_TR_TR_LOCALE Integration with MonaI18nService", () => {
         fixture.detectChanges();
 
         const hostEl = fixture.nativeElement as HTMLElement;
-        const mainBtn = hostEl.querySelector("button[aria-label='Kaydet, menülü düğme']");
+        const mainBtn = hostEl.querySelector("button[aria-label='Kaydet, bölünmüş düğme']");
         expect(mainBtn).not.toBeNull();
+
+        const menuBtn = hostEl.querySelector("button[aria-label='Menü seçeneklerini göster']");
+        expect(menuBtn).not.toBeNull();
+
+        // Dynamic text update
+        fixture.componentInstance.text.set("Paylaş");
+        fixture.detectChanges();
+        const updatedMainBtn = hostEl.querySelector("button[aria-label='Paylaş, bölünmüş düğme']");
+        expect(updatedMainBtn).not.toBeNull();
+
+        // Explicit application aria-label override takes precedence
+        fixture.componentInstance.ariaLabel.set("Özel bölünmüş eylem");
+        fixture.detectChanges();
+        const overrideMainBtn = hostEl.querySelector("button[aria-label='Özel bölünmüş eylem']");
+        expect(overrideMainBtn).not.toBeNull();
+
+        // Clearing override restores localized Turkish default with updated text
+        fixture.componentInstance.ariaLabel.set("");
+        fixture.detectChanges();
+        expect(hostEl.querySelector("button[aria-label='Paylaş, bölünmüş düğme']")).not.toBeNull();
+
+        // Empty text fallback
+        fixture.componentInstance.text.set("");
+        fixture.detectChanges();
+
+        const emptyMainBtn = hostEl.querySelector("button[aria-label='Bölünmüş düğme']");
+        expect(emptyMainBtn).not.toBeNull();
     });
 
     it("renders connected ListBox components with self-contained Turkish transfer accessible names", () => {
