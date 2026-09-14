@@ -2250,6 +2250,87 @@ async function runTests(): Promise<void> {
         await touchContext.close();
         console.log("    [PASS] Real-Browser Touch Pager Hold & Capture-Safe Release-Away verified\n");
 
+        // 13. Arabic Calendar Weekday Header Real-Browser Geometry Verification (LTR and RTL)
+        console.log("--> Testing Arabic Calendar Weekday Header Real-Browser Geometry (dir=ltr and dir=rtl)");
+        const calPage = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+        await calPage.goto(url, { waitUntil: "networkidle" });
+        await calPage.waitForSelector("#fixture-arabic-calendar");
+
+        for (const dir of ["ltr", "rtl"] as const) {
+            const calendar = calPage.locator(`[data-testid="calendar-arabic-${dir}"]`);
+            await calendar.scrollIntoViewIfNeeded();
+            await calendar.waitFor({ state: "visible" });
+
+            // Find the 7 weekday header cells
+            const headerRow = calendar.locator("div[style*='grid-template-columns'][style*='repeat']").first();
+            const cells = headerRow.locator(":scope > div");
+            const cellCount = await cells.count();
+            assert(cellCount === 7, `Expected 7 weekday cells in Arabic Calendar (${dir}), got ${cellCount}`);
+
+            const labelBoxes: { left: number; right: number; top: number; bottom: number; width: number; height: number; text: string }[] = [];
+
+            for (let i = 0; i < cellCount; i++) {
+                const cell = cells.nth(i);
+                const cellBox = await cell.boundingBox();
+                assert(cellBox !== null, `Weekday cell ${i} (${dir}) must have a bounding box`);
+
+                const visibleSpan = cell.locator("span[aria-hidden='true']");
+                const spanBox = await visibleSpan.boundingBox();
+                assert(spanBox !== null, `Visible label ${i} (${dir}) must have a bounding box`);
+
+                const text = (await visibleSpan.textContent())?.trim() ?? "";
+                assert(text.length > 0, `Visible label ${i} (${dir}) must have non-empty text`);
+
+                // Assert label remains inside cell within 1px subpixel tolerance
+                const tolerance = 1.0;
+                assert(
+                    spanBox.x >= cellBox.x - tolerance,
+                    `Visible label '${text}' left (${spanBox.x}) must be >= cell left (${cellBox.x}) in ${dir}`
+                );
+                assert(
+                    spanBox.x + spanBox.width <= cellBox.x + cellBox.width + tolerance,
+                    `Visible label '${text}' right (${spanBox.x + spanBox.width}) must be <= cell right (${cellBox.x + cellBox.width}) in ${dir}`
+                );
+                assert(
+                    spanBox.y >= cellBox.y - tolerance,
+                    `Visible label '${text}' top (${spanBox.y}) must be >= cell top (${cellBox.y}) in ${dir}`
+                );
+                assert(
+                    spanBox.y + spanBox.height <= cellBox.y + cellBox.height + tolerance,
+                    `Visible label '${text}' bottom (${spanBox.y + spanBox.height}) must be <= cell bottom (${cellBox.y + cellBox.height}) in ${dir}`
+                );
+
+                // Assert single line: scrollHeight <= clientHeight + 1
+                const isSingleLine = await visibleSpan.evaluate(el => el.scrollHeight <= el.clientHeight + 1);
+                assert(isSingleLine, `Visible label '${text}' in ${dir} must render on a single line`);
+
+                labelBoxes.push({
+                    left: spanBox.x,
+                    right: spanBox.x + spanBox.width,
+                    top: spanBox.y,
+                    bottom: spanBox.y + spanBox.height,
+                    width: spanBox.width,
+                    height: spanBox.height,
+                    text
+                });
+            }
+
+            // Assert neighboring labels do not overlap horizontally
+            // Sort boxes horizontally by their left coordinate to check visual adjacency regardless of DOM order
+            const sortedBoxes = [...labelBoxes].sort((a, b) => a.left - b.left);
+            for (let i = 0; i < sortedBoxes.length - 1; i++) {
+                const current = sortedBoxes[i];
+                const next = sortedBoxes[i + 1];
+                const overlap = current.right - next.left;
+                assert(
+                    overlap <= 0.5,
+                    `Adjacent weekday labels '${current.text}' and '${next.text}' in ${dir} must not overlap (overlap: ${overlap}px)`
+                );
+            }
+        }
+        await calPage.close();
+        console.log("    [PASS] Arabic Calendar Weekday Header Real-Browser Geometry verified (LTR & RTL)\n");
+
         console.log("==================================================");
         console.log("  ALL BROWSER DIRECTION GEOMETRY TESTS PASSED!");
         console.log("==================================================\n");
