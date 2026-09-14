@@ -8,6 +8,7 @@ import {
     MONA_DE_DE_LOCALE,
     MONA_ES_ES_LOCALE,
     MONA_FR_FR_LOCALE,
+    MONA_IT_IT_LOCALE,
     MONA_JA_JP_LOCALE,
     MONA_KO_KR_LOCALE,
     MONA_PT_BR_LOCALE,
@@ -453,6 +454,72 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
 
         expect(i18n.localeId()).toBe("en-US");
         expect(ptPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
+        expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
+    });
+
+    it("integrates official Italian (it-IT) locale reactively with runtime overrides and formatting", async () => {
+        const root = fixture.nativeElement as HTMLElement;
+        const input = root.querySelector("mona-numeric-text-box input") as HTMLInputElement;
+
+        // 1. Activate official Italian (Italy) locale
+        i18n.use(MONA_IT_IT_LOCALE);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("it-IT");
+        expect(i18n.direction()).toBe("ltr");
+
+        // Pager firstPageLabel in Italian: "Prima pagina"
+        const itPager = root.querySelector("mona-pager");
+        expect(itPager?.querySelector("button[aria-label='Prima pagina']")).not.toBeNull();
+
+        // ScrollView previousPage in Italian: "Pagina precedente"
+        const itScroll = root.querySelector("mona-scroll-view");
+        expect(itScroll?.querySelector("button[aria-label='Pagina precedente']")).not.toBeNull();
+
+        // Calendar translated UI controls and live region in Italian
+        const itCalendar = root.querySelector("mona-calendar");
+        expect(itCalendar?.querySelector("button:first-child")?.textContent?.trim()).toBe("Oggi");
+        expect(itCalendar?.querySelector("button[aria-label='Mese precedente']")).not.toBeNull();
+        expect(itCalendar?.querySelector("button[aria-label='Mese successivo']")).not.toBeNull();
+        expect(itCalendar?.querySelector("[aria-live='polite']")?.textContent?.toLowerCase()).toContain("calendario");
+
+        // Calendar Monday-first header (lun)
+        const headerRow = itCalendar?.querySelector("div[style*='grid-template-columns']") as HTMLElement;
+        expect(headerRow?.querySelector("span[aria-hidden='true']")?.textContent?.trim()).toBe("lun");
+
+        // NumericTextBox formatting with Italian comma separator
+        expect(input.getAttribute("aria-valuetext")).toBe("1234,50");
+
+        // 2. Test application override precedence over Italian locale
+        i18n.patchMessages({
+            pager: {
+                firstPageLabel: "Inizio"
+            }
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(itPager?.querySelector("button[aria-label='Inizio']")).not.toBeNull();
+
+        // 3. Clear overrides: Italian locale value returns
+        i18n.clearMessages();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(itPager?.querySelector("button[aria-label='Prima pagina']")).not.toBeNull();
+
+        // 4. Switch back to English default
+        i18n.use({
+            direction: "ltr",
+            id: "en-US",
+            messages: {}
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("en-US");
+        expect(itPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
         expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
     });
 

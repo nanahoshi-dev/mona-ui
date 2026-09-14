@@ -373,6 +373,31 @@ export function getLocaleFirstDayOfWeek(locale) { return "sunday"; }
             }
         });
 
+        it("succeeds when synthetic package exports it-IT with matching formatting and Monday first-day", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                populateFakeDist(fakeDist, {
+                    i18nMjs: `
+export function getLocaleDateInputFormat(locale) { return "dd/MM/yyyy"; }
+export function getLocaleTimeInputFormat(locale, options) { return "HH:mm"; }
+export function getLocaleDateTimeInputFormat(locale, options) { return "dd/MM/yyyy, HH:mm"; }
+export function getLocaleFirstDayOfWeek(locale) { return locale === "it-IT" ? "monday" : "sunday"; }
+`,
+                    localesDts: 'export declare const it_IT: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesMjs: 'export const it_IT = { id: "it-IT", direction: "ltr", messages: {} };\n'
+                });
+
+                expect(() =>
+                    runConsumerSmokeTest({
+                        distDir: fakeDist,
+                        expectedLocales: [{ direction: "ltr", id: "it-IT", symbol: "it_IT" }]
+                    })
+                ).not.toThrow();
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
+            }
+        });
+
         it("fails when runtime package is missing expected export", () => {
             const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
             try {
