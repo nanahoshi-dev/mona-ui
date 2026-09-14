@@ -634,6 +634,10 @@ describe("MONA_KO_KR_LOCALE Integration with MonaI18nService", () => {
         const filterService = TestBed.inject(FilterService);
         const items = filterService.stringFilterMenuItems;
 
+        expect(items.find(i => i.value === "isnull")?.text).toBe("null");
+        expect(items.find(i => i.value === "isnotnull")?.text).toBe("null 아님");
+        expect(items.find(i => i.value === "isempty")?.text).toBe("비어 있음");
+        expect(items.find(i => i.value === "isnotempty")?.text).toBe("비어 있지 않음");
         expect(items.find(i => i.value === "isnullorempty")?.text).toBe("null 또는 비어 있음");
         expect(items.find(i => i.value === "isnotnullorempty")?.text).toBe("null이 아니고 비어 있지 않음");
     });
