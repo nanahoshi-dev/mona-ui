@@ -115,10 +115,10 @@ export function parseGregorianDate(
 
                 if (
                     normalizedSpacesFormat.includes("dd. ") &&
-                    /(\b\d{4}\.\s*\d{1,2}\.\s*\d{1,2})\s+/.test(normalizedText)
+                    /(\b\d{4}\.\s*\d{1,2}\.\s*\d{1,2})\.?\s+/.test(normalizedText)
                 ) {
                     const withDotBeforeTime = normalizedText.replace(
-                        /(\b\d{4}\.\s*\d{1,2}\.\s*\d{1,2})\s+/,
+                        /(\b\d{4}\.\s*\d{1,2}\.\s*\d{1,2})\.?\s+/,
                         (_match, datePart) => `${datePart}. `
                     );
                     dt = DateTime.fromFormat(withDotBeforeTime, normalizedSpacesFormat, {
@@ -137,14 +137,15 @@ export function parseGregorianDate(
                 }
 
                 const trimmedFormat = normalizedSpacesFormat.trimEnd();
-                const trimmedText = normalizedText.trimEnd();
-                if (trimmedFormat.endsWith(".") && !trimmedText.endsWith(".")) {
-                    dt = DateTime.fromFormat(trimmedText + ".", trimmedFormat, {
+                const trimmedText = normalizedText.trim();
+                if (trimmedFormat.endsWith(".")) {
+                    const textWithDot = trimmedText.endsWith(".") ? trimmedText : trimmedText + ".";
+                    dt = DateTime.fromFormat(textWithDot, trimmedFormat, {
                         locale: effectiveLocale,
                         outputCalendar: "gregory"
                     });
                     if (!dt.isValid && effectiveLocale !== locale) {
-                        dt = DateTime.fromFormat(trimmedText + ".", trimmedFormat, {
+                        dt = DateTime.fromFormat(textWithDot, trimmedFormat, {
                             locale,
                             outputCalendar: "gregory"
                         });

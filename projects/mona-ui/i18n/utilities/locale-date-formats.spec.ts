@@ -867,13 +867,47 @@ describe("locale-date-formats", () => {
             expect(dtKoDateTime12.year).toBe(2026);
             expect(dtKoDateTime12.month).toBe(9);
             expect(dtKoDateTime12.day).toBe(15);
-            expect(dtKoDateTime12.hour).toBe(21);
-            expect(dtKoDateTime12.minute).toBe(30);
+            // Korean date with trailing space or leading space
+            const dtKoTrailingSpaceWithDot = parseGregorianDate("2026. 09. 15. ", "yyyy. MM. dd.", "ko-KR");
+            expect(dtKoTrailingSpaceWithDot.isValid).toBe(true);
+            expect(dtKoTrailingSpaceWithDot.year).toBe(2026);
+            expect(dtKoTrailingSpaceWithDot.month).toBe(9);
+            expect(dtKoTrailingSpaceWithDot.day).toBe(15);
+
+            const dtKoLeadingSpaceWithDot = parseGregorianDate(" 2026. 09. 15.", "yyyy. MM. dd.", "ko-KR");
+            expect(dtKoLeadingSpaceWithDot.isValid).toBe(true);
+            expect(dtKoLeadingSpaceWithDot.year).toBe(2026);
+            expect(dtKoLeadingSpaceWithDot.month).toBe(9);
+            expect(dtKoLeadingSpaceWithDot.day).toBe(15);
+
+            // Korean 24h datetime with dot and multiple spaces before time
+            const dtKoDateTime24MultiSpace = parseGregorianDate("2026. 09. 15.  21:30", "yyyy. MM. dd. HH:mm", "ko-KR");
+            expect(dtKoDateTime24MultiSpace.isValid).toBe(true);
+            expect(dtKoDateTime24MultiSpace.year).toBe(2026);
+            expect(dtKoDateTime24MultiSpace.month).toBe(9);
+            expect(dtKoDateTime24MultiSpace.day).toBe(15);
+            expect(dtKoDateTime24MultiSpace.hour).toBe(21);
+            expect(dtKoDateTime24MultiSpace.minute).toBe(30);
+
+            // Korean 12h datetime with dot and multiple spaces before time
+            const dtKoDateTime12MultiSpace = parseGregorianDate("2026. 09. 15.  오후 09:30", "yyyy. MM. dd. a hh:mm", "ko-KR");
+            expect(dtKoDateTime12MultiSpace.isValid).toBe(true);
+            expect(dtKoDateTime12MultiSpace.year).toBe(2026);
+            expect(dtKoDateTime12MultiSpace.month).toBe(9);
+            expect(dtKoDateTime12MultiSpace.day).toBe(15);
+            expect(dtKoDateTime12MultiSpace.hour).toBe(21);
+            expect(dtKoDateTime12MultiSpace.minute).toBe(30);
         });
 
         it("does not strip punctuation absent from the requested format", () => {
             const parsed = parseGregorianDate("09/15/2026.", "MM/dd/yyyy", "en-US");
             expect(parsed.isValid).toBe(false);
+        });
+
+        it("strictly rejects malformed delimiters when the format is dotted", () => {
+            expect(parseGregorianDate("2026, 09, 15", "yyyy. MM. dd.", "ko-KR").isValid).toBe(false);
+            expect(parseGregorianDate("2026/09/15", "yyyy. MM. dd.", "ko-KR").isValid).toBe(false);
+            expect(parseGregorianDate("2026-09-15", "yyyy. MM. dd.", "ko-KR").isValid).toBe(false);
         });
     });
 });
