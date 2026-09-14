@@ -2,7 +2,7 @@ import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { describe, expect, it, beforeEach } from "vitest";
 import { CalendarComponent } from "@nanahoshi/mona-ui/calendar";
-import { generatePseudoLocale, MonaI18nService, type MonaLocale } from "@nanahoshi/mona-ui/i18n";
+import { generatePseudoLocale, MonaI18nService, MONA_DEFAULT_LOCALE, type MonaLocale } from "@nanahoshi/mona-ui/i18n";
 import {
     MONA_AR_SA_LOCALE,
     MONA_DE_DE_LOCALE,
@@ -12,6 +12,7 @@ import {
     MONA_JA_JP_LOCALE,
     MONA_KO_KR_LOCALE,
     MONA_PT_BR_LOCALE,
+    MONA_TR_TR_LOCALE,
     MONA_ZH_CN_LOCALE,
     MONA_ZH_TW_LOCALE
 } from "@nanahoshi/mona-ui/locales";
@@ -91,21 +92,7 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
         const input = root.querySelector("mona-numeric-text-box input") as HTMLInputElement;
 
         // 1. Switch to Turkish (tr-TR)
-        const trLocale: MonaLocale = {
-            direction: "ltr",
-            id: "tr-TR",
-            messages: {
-                pager: {
-                    firstPageLabel: "İlk sayfa",
-                    nextPageLabel: "Sonraki sayfa"
-                },
-                scrollView: {
-                    nextPage: "Sonraki sayfa",
-                    previousPage: "Önceki sayfa"
-                }
-            }
-        };
-        i18n.use(trLocale);
+        i18n.use(MONA_TR_TR_LOCALE);
         await fixture.whenStable();
         fixture.detectChanges();
 
@@ -129,11 +116,7 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
         expect(input.getAttribute("aria-valuetext")).toBe("1234,50");
 
         // 3. Switch back to English (en-US)
-        i18n.use({
-            direction: "ltr",
-            id: "en-US",
-            messages: {}
-        });
+        i18n.use(MONA_DEFAULT_LOCALE);
         await fixture.whenStable();
         fixture.detectChanges();
 
@@ -141,6 +124,68 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
         expect(enPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
         const enScroll = root.querySelector("mona-scroll-view");
         expect(enScroll?.querySelector("button[aria-label='Previous page']")).not.toBeNull();
+        expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
+    });
+
+    it("integrates official Turkish (tr-TR) locale reactively with runtime overrides and formatting", async () => {
+        const root = fixture.nativeElement as HTMLElement;
+        const input = root.querySelector("mona-numeric-text-box input") as HTMLInputElement;
+
+        // 1. Activate official Turkish (Türkiye) locale
+        i18n.use(MONA_TR_TR_LOCALE);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("tr-TR");
+        expect(i18n.direction()).toBe("ltr");
+
+        // Pager firstPageLabel in Turkish: "İlk sayfa"
+        const trPager = root.querySelector("mona-pager");
+        expect(trPager?.querySelector("button[aria-label='İlk sayfa']")).not.toBeNull();
+
+        // ScrollView previousPage in Turkish: "Önceki sayfa"
+        const trScroll = root.querySelector("mona-scroll-view");
+        expect(trScroll?.querySelector("button[aria-label='Önceki sayfa']")).not.toBeNull();
+
+        // Calendar translated UI controls and live region in Turkish
+        const trCalendar = root.querySelector("mona-calendar");
+        expect(trCalendar?.querySelector("button:first-child")?.textContent?.trim()).toBe("Bugün");
+        expect(trCalendar?.querySelector("button[aria-label='Önceki ay']")).not.toBeNull();
+        expect(trCalendar?.querySelector("button[aria-label='Sonraki ay']")).not.toBeNull();
+        expect(trCalendar?.querySelector("[aria-live='polite']")?.textContent).toContain("Takvim");
+
+        // Calendar Monday-first header (Pzt)
+        const headerRow = trCalendar?.querySelector("div[style*='grid-template-columns']") as HTMLElement;
+        expect(headerRow?.querySelector("span[aria-hidden='true']")?.textContent?.trim()).toBe("Pzt");
+
+        // NumericTextBox formatting with Turkish comma separator
+        expect(input.getAttribute("aria-valuetext")).toBe("1234,50");
+
+        // 2. Test application override precedence over Turkish locale
+        i18n.patchMessages({
+            pager: {
+                firstPageLabel: "Başlangıç"
+            }
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(trPager?.querySelector("button[aria-label='Başlangıç']")).not.toBeNull();
+
+        // 3. Clear overrides: Turkish locale value returns
+        i18n.clearMessages();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(trPager?.querySelector("button[aria-label='İlk sayfa']")).not.toBeNull();
+
+        // 4. Switch back to English default
+        i18n.use(MONA_DEFAULT_LOCALE);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("en-US");
+        expect(trPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
         expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
     });
 

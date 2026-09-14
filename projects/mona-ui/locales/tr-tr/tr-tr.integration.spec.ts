@@ -306,6 +306,10 @@ describe("MONA_TR_TR_LOCALE Integration with MonaI18nService", () => {
         const date = new Date(2026, 8, 15);
         const monthFormatter = new Intl.DateTimeFormat(localeId, { month: "long" });
         expect(monthFormatter.format(date)).toBe("Eylül");
+
+        // Verify Turkish casing invariants in runtime environment
+        expect("Iİ".toLocaleLowerCase(localeId)).toBe("ıi");
+        expect("ıi".toLocaleUpperCase(localeId)).toBe("Iİ");
     });
 
     it("ensures MONA_TR_TR_LOCALE is immutable and unmutated across service usage cycles", () => {
