@@ -3,7 +3,6 @@ import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
 import { CalendarComponent, type FirstDayOfWeek } from "@nanahoshi/mona-ui/calendar";
 import { ChipComponent } from "@nanahoshi/mona-ui/chip";
-import { ColorGradientComponent } from "@nanahoshi/mona-ui/color-gradient";
 import { DatePickerComponent } from "@nanahoshi/mona-ui/date-picker";
 import { DateTimePickerComponent } from "@nanahoshi/mona-ui/datetime-picker";
 import { FilterService } from "@nanahoshi/mona-ui/filter";
@@ -23,9 +22,6 @@ import { TreeViewComponent, TreeViewFilterableDirective } from "@nanahoshi/mona-
 import {
     formatNumber,
     getLocaleDateInputFormat,
-    getLocaleDateTimeInputFormat,
-    getLocaleFirstDayOfWeek,
-    getLocaleTimeInputFormat,
     getNumberSymbols,
     MONA_DEFAULT_LOCALE,
     MonaI18nService,

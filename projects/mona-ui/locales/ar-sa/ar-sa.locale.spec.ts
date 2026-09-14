@@ -337,25 +337,24 @@ describe("MONA_AR_SA_LOCALE", () => {
         const m = MONA_AR_SA_LOCALE.messages;
 
         it("covers all 6 plural categories and boundary transitions in Pager jump labels", () => {
-            const expectations: Record<number, { backward: string; forward: string }> = {
-                0: { backward: "للخلف: ٠ صفحات", forward: "للأمام: ٠ صفحات" },
-                1: { backward: "للخلف: صفحة واحدة", forward: "للأمام: صفحة واحدة" },
-                2: { backward: "للخلف: صفحتان", forward: "للأمام: صفحتان" },
-                3: { backward: "للخلف: ٣ صفحات", forward: "للأمام: ٣ صفحات" },
-                5: { backward: "للخلف: ٥ صفحات", forward: "للأمام: ٥ صفحات" },
-                10: { backward: "للخلف: ١٠ صفحات", forward: "للأمام: ١٠ صفحات" },
-                11: { backward: "للخلف: ١١ صفحة", forward: "للأمام: ١١ صفحة" },
-                12: { backward: "للخلف: ١٢ صفحة", forward: "للأمام: ١٢ صفحة" },
-                99: { backward: "للخلف: ٩٩ صفحة", forward: "للأمام: ٩٩ صفحة" },
-                100: { backward: "للخلف: ١٠٠ صفحة", forward: "للأمام: ١٠٠ صفحة" },
-                101: { backward: "للخلف: ١٠١ صفحة", forward: "للأمام: ١٠١ صفحة" },
-                102: { backward: "للخلف: ١٠٢ صفحة", forward: "للأمام: ١٠٢ صفحة" },
-                103: { backward: "للخلف: ١٠٣ صفحات", forward: "للأمام: ١٠٣ صفحات" },
-                111: { backward: "للخلف: ١١١ صفحة", forward: "للأمام: ١١١ صفحة" }
-            };
+            const expectations: ReadonlyArray<readonly [number, { backward: string; forward: string }]> = [
+                [0, { backward: "للخلف: ٠ صفحات", forward: "للأمام: ٠ صفحات" }],
+                [1, { backward: "للخلف: صفحة واحدة", forward: "للأمام: صفحة واحدة" }],
+                [2, { backward: "للخلف: صفحتان", forward: "للأمام: صفحتان" }],
+                [3, { backward: "للخلف: ٣ صفحات", forward: "للأمام: ٣ صفحات" }],
+                [5, { backward: "للخلف: ٥ صفحات", forward: "للأمام: ٥ صفحات" }],
+                [10, { backward: "للخلف: ١٠ صفحات", forward: "للأمام: ١٠ صفحات" }],
+                [11, { backward: "للخلف: ١١ صفحة", forward: "للأمام: ١١ صفحة" }],
+                [12, { backward: "للخلف: ١٢ صفحة", forward: "للأمام: ١٢ صفحة" }],
+                [99, { backward: "للخلف: ٩٩ صفحة", forward: "للأمام: ٩٩ صفحة" }],
+                [100, { backward: "للخلف: ١٠٠ صفحة", forward: "للأمام: ١٠٠ صفحة" }],
+                [101, { backward: "للخلف: ١٠١ صفحة", forward: "للأمام: ١٠١ صفحة" }],
+                [102, { backward: "للخلف: ١٠٢ صفحة", forward: "للأمام: ١٠٢ صفحة" }],
+                [103, { backward: "للخلف: ١٠٣ صفحات", forward: "للأمام: ١٠٣ صفحات" }],
+                [111, { backward: "للخلف: ١١١ صفحة", forward: "للأمام: ١١١ صفحة" }]
+            ];
 
-            for (const [countStr, expected] of Object.entries(expectations)) {
-                const count = Number(countStr);
+            for (const [count, expected] of expectations) {
                 expect(m.pager.jumpBackwardLabel(count), `count ${count} backward`).toBe(expected.backward);
                 expect(m.pager.jumpForwardLabel(count), `count ${count} forward`).toBe(expected.forward);
             }
