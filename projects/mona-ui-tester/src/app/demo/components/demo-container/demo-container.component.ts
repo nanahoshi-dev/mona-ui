@@ -8,6 +8,7 @@ import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
 import { DropdownGroupableDirective } from "@nanahoshi/mona-ui/dropdowns";
 import { MONA_DEFAULT_LOCALE, MonaI18nService, type MonaLocale } from "@nanahoshi/mona-ui/i18n";
 import {
+    MONA_AR_SA_LOCALE,
     MONA_DE_DE_LOCALE,
     MONA_ES_ES_LOCALE,
     MONA_FR_FR_LOCALE,
@@ -119,6 +120,7 @@ export class DemoContainerComponent<TComponent> {
     });
     protected readonly localeOptions: readonly LocaleOption[] = [
         { label: "English", locale: MONA_DEFAULT_LOCALE },
+        { label: "العربية (السعودية)", locale: MONA_AR_SA_LOCALE },
         { label: "Deutsch", locale: MONA_DE_DE_LOCALE },
         { label: "Español (España)", locale: MONA_ES_ES_LOCALE },
         { label: "Français", locale: MONA_FR_FR_LOCALE },

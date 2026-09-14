@@ -4,6 +4,7 @@ import { describe, expect, it, beforeEach } from "vitest";
 import { CalendarComponent } from "@nanahoshi/mona-ui/calendar";
 import { generatePseudoLocale, MonaI18nService, type MonaLocale } from "@nanahoshi/mona-ui/i18n";
 import {
+    MONA_AR_SA_LOCALE,
     MONA_DE_DE_LOCALE,
     MONA_ES_ES_LOCALE,
     MONA_FR_FR_LOCALE,
@@ -647,6 +648,84 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
 
         expect(i18n.localeId()).toBe("en-US");
         expect(koPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
+        expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
+    });
+
+    it("integrates official Arabic (ar-SA) locale reactively with runtime overrides, Arabic-Indic numbers, and direction decoupling", async () => {
+        const root = fixture.nativeElement as HTMLElement;
+        const input = root.querySelector("mona-numeric-text-box input") as HTMLInputElement;
+
+        // 1. Activate official Arabic (Saudi Arabia) locale
+        i18n.use(MONA_AR_SA_LOCALE);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("ar-SA");
+        expect(i18n.direction()).toBe("rtl");
+
+        // Pager firstPageLabel in Arabic: "الصفحة الأولى"
+        const arPager = root.querySelector("mona-pager");
+        expect(arPager?.querySelector("button[aria-label='الصفحة الأولى']")).not.toBeNull();
+
+        // ScrollView previousPage in Arabic: "الصفحة السابقة"
+        const arScroll = root.querySelector("mona-scroll-view");
+        expect(arScroll?.querySelector("button[aria-label='الصفحة السابقة']")).not.toBeNull();
+
+        // Calendar translated UI controls, Sunday-first narrow fallback, and live region in Arabic
+        const arCalendar = root.querySelector("mona-calendar");
+        expect(arCalendar?.querySelector("button:first-child")?.textContent?.trim()).toBe("اليوم");
+        expect(arCalendar?.querySelector("button[aria-label='الشهر السابق']")).not.toBeNull();
+        expect(arCalendar?.querySelector("button[aria-label='الشهر التالي']")).not.toBeNull();
+        expect(arCalendar?.querySelector("[aria-live='polite']")?.textContent).toContain("تقويم");
+
+        const headerRow = arCalendar?.querySelector("div[style*='grid-template-columns']") as HTMLElement;
+        const firstDayHeader = headerRow?.querySelectorAll("div")[0];
+        expect(firstDayHeader?.textContent?.trim()).toBe("ح");
+        expect(firstDayHeader?.getAttribute("aria-label")).toBe("الأحد");
+
+        // NumericTextBox formatting with Arabic-Indic numerals and Arabic decimal separator
+        expect(input.getAttribute("aria-valuetext")).toBe("١٢٣٤٫٥٠");
+
+        // 2. Test application override precedence over Arabic locale
+        i18n.patchMessages({
+            pager: {
+                firstPageLabel: "البداية"
+            }
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(arPager?.querySelector("button[aria-label='البداية']")).not.toBeNull();
+
+        // 3. Clear overrides: Arabic locale value returns
+        i18n.clearMessages();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(arPager?.querySelector("button[aria-label='الصفحة الأولى']")).not.toBeNull();
+
+        // 4. Direction decoupling check: host direction toggle doesn't affect locale direction, and vice versa
+        expect(host.direction()).toBe("ltr");
+        host.direction.set("rtl");
+        fixture.detectChanges();
+        expect(i18n.direction()).toBe("rtl");
+
+        host.direction.set("ltr");
+        fixture.detectChanges();
+        expect(i18n.direction()).toBe("rtl");
+
+        // 5. Switch back to English default
+        i18n.use({
+            direction: "ltr",
+            id: "en-US",
+            messages: {}
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("en-US");
+        expect(i18n.direction()).toBe("ltr");
+        expect(arPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
         expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
     });
 
