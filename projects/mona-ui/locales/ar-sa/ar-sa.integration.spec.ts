@@ -376,9 +376,11 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
         await fixture.whenStable();
 
         const headerRow = document.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
-        const firstWeekday = headerRow?.querySelectorAll("div")[0];
-        expect(firstWeekday?.textContent?.trim()).toBe("ح");
-        expect(firstWeekday?.getAttribute("aria-label")).toBe("الأحد");
+        const firstWeekday = headerRow?.querySelectorAll(":scope > div")[0];
+        expect(firstWeekday?.querySelector("span[aria-hidden='true']")?.textContent?.trim()).toBe("ح");
+        expect(firstWeekday?.querySelector("span[aria-hidden='true']")?.getAttribute("aria-hidden")).toBe("true");
+        expect(firstWeekday?.querySelector("span.sr-only")?.textContent?.trim()).toBe("الأحد");
+        expect(firstWeekday?.getAttribute("aria-label")).toBeNull();
 
         // Close popup by toggling
         toggleBtn.click();
@@ -579,7 +581,7 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
 
         // In date view, Sunday is first: ح
         const headerRow = popup.querySelector("div[style*='grid-template-columns']") as HTMLElement;
-        expect(headerRow?.querySelectorAll("div")[0]?.textContent?.trim()).toBe("ح");
+        expect(headerRow?.querySelector("span[aria-hidden='true']")?.textContent?.trim()).toBe("ح");
 
         // Switch to time view tab
         tabButtons[1]?.click();
@@ -710,13 +712,14 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
 
         // Sunday-first weekday headers: ح ن ث ر خ ج س
         const headerRow = root.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
-        const headerDivs = Array.from(headerRow.querySelectorAll("div"));
-        const headers = headerDivs.map(el => el.textContent?.trim());
-        expect(headers).toEqual(["ح", "ن", "ث", "ر", "خ", "ج", "س"]);
+        const headerDivs = Array.from(headerRow.querySelectorAll(":scope > div"));
+        const visibleHeaders = headerDivs.map(el => el.querySelector("span[aria-hidden='true']"));
+        const accessibleLabels = headerDivs.map(el => el.querySelector("span.sr-only"));
 
-        // Accessible names remain full Arabic day names
-        const accessibleLabels = headerDivs.map(el => el.getAttribute("aria-label"));
-        expect(accessibleLabels).toEqual(["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"]);
+        expect(visibleHeaders.map(el => el?.textContent?.trim())).toEqual(["ح", "ن", "ث", "ر", "خ", "ج", "س"]);
+        visibleHeaders.forEach(el => expect(el?.getAttribute("aria-hidden")).toBe("true"));
+        expect(accessibleLabels.map(el => el?.textContent?.trim())).toEqual(["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"]);
+        headerDivs.forEach(el => expect(el.getAttribute("aria-label")).toBeNull());
 
         // 1. Click to switch to Year View
         viewButton.click();
@@ -758,7 +761,7 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
 
         const getFirstHeader = () => {
             const row = fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
-            return row.querySelectorAll("div")[0]?.textContent?.trim();
+            return row.querySelector("span[aria-hidden='true']")?.textContent?.trim();
         };
 
         // 1. ar-SA default -> Sunday (ح)

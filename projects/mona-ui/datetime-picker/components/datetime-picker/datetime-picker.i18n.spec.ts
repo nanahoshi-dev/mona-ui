@@ -138,7 +138,7 @@ describe("DateTimePickerComponent i18n", () => {
 
         const getFirstWeekday = () => {
             const headerRow = document.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
-            return headerRow?.querySelectorAll("div")[0]?.textContent?.trim();
+            return headerRow?.querySelector("span[aria-hidden='true']")?.textContent?.trim();
         };
 
         // Sunday is first in ja-JP

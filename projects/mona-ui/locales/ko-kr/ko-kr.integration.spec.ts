@@ -446,7 +446,7 @@ describe("MONA_KO_KR_LOCALE Integration with MonaI18nService", () => {
 
         // 4. Verify Sunday is the first day of the week in ko-KR Calendar view (일)
         const headerRow = hostEl.querySelector("div[style*='grid-template-columns']") as HTMLElement;
-        expect(headerRow?.querySelectorAll("div")[0]?.textContent?.trim()).toBe("일");
+        expect(headerRow?.querySelector("span[aria-hidden='true']")?.textContent?.trim()).toBe("일");
 
         // 5. Year view navigation and accessibility labels
         viewButton.click();
@@ -485,7 +485,7 @@ describe("MONA_KO_KR_LOCALE Integration with MonaI18nService", () => {
         const hostEl = fixture.nativeElement as HTMLElement;
         const getFirstDayLabel = () => {
             const headerRow = hostEl.querySelector("div[style*='grid-template-columns']") as HTMLElement;
-            return headerRow?.querySelectorAll("div")[0]?.textContent?.trim();
+            return headerRow?.querySelector("span[aria-hidden='true']")?.textContent?.trim();
         };
 
         // 1. ko-KR default first day is Sunday (일)
@@ -764,7 +764,7 @@ describe("MONA_KO_KR_LOCALE Integration with MonaI18nService", () => {
 
         const getFirstWeekday = () => {
             const headerRow = document.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
-            return headerRow?.querySelectorAll("div")[0]?.textContent?.trim();
+            return headerRow?.querySelector("span[aria-hidden='true']")?.textContent?.trim();
         };
         expect(getFirstWeekday()).toBe("일");
 
@@ -945,7 +945,7 @@ describe("MONA_KO_KR_LOCALE Integration with MonaI18nService", () => {
 
         // In date view, Sunday is first: 일
         const headerRow = popup.querySelector("div[style*='grid-template-columns']") as HTMLElement;
-        expect(headerRow?.querySelectorAll("div")[0]?.textContent?.trim()).toBe("일");
+        expect(headerRow?.querySelector("span[aria-hidden='true']")?.textContent?.trim()).toBe("일");
 
         // Switch to time view
         tabButtons[1]?.click();

@@ -72,7 +72,10 @@
             <div></div>
         }
         @for (day of weekdays(); track day.full) {
-            <div [attr.aria-label]="day.full">{{ day.display }}</div>
+            <div>
+                <span aria-hidden="true">{{ day.display }}</span>
+                <span class="sr-only">{{ day.full }}</span>
+            </div>
         }
     </div>
     <div

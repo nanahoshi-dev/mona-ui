@@ -1,6 +1,7 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { MonaI18nService, type MonaLocale } from "@nanahoshi/mona-ui/i18n";
+import axe from "axe-core";
 import { describe, expect, it } from "vitest";
 import type { FirstDayOfWeek } from "../../models/FirstDayOfWeek";
 import { CalendarComponent } from "./calendar.component";
@@ -79,7 +80,7 @@ describe("CalendarComponent i18n", () => {
 
         const getWeekdayHeaders = () => {
             const headerRow = hostEl.querySelectorAll("div[style*='grid-template-columns']")[0];
-            return Array.from(headerRow.querySelectorAll("div"))
+            return Array.from(headerRow.querySelectorAll("span[aria-hidden='true']"))
                 .map(el => el.textContent?.trim())
                 .filter(Boolean);
         };
@@ -518,7 +519,7 @@ describe("CalendarComponent i18n", () => {
             await fixture.whenStable();
 
             const headerRow = fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
-            const headers = Array.from(headerRow.querySelectorAll("div")).map(el => el.textContent?.trim());
+            const headers = Array.from(headerRow.querySelectorAll("span[aria-hidden='true']")).map(el => el.textContent?.trim());
             expect(headers[0]).toBe("日");
             expect(headers[1]).toBe("月");
             expect(headers[6]).toBe("土");
@@ -535,7 +536,7 @@ describe("CalendarComponent i18n", () => {
             await fixture.whenStable();
 
             const headerRow = fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
-            const headers = Array.from(headerRow.querySelectorAll("div")).map(el => el.textContent?.trim());
+            const headers = Array.from(headerRow.querySelectorAll("span[aria-hidden='true']")).map(el => el.textContent?.trim());
             expect(headers[0]).toBe("Mo");
             expect(headers[6]).toBe("So");
         });
@@ -553,14 +554,16 @@ describe("CalendarComponent i18n", () => {
             await fixture.whenStable();
 
             const headerRow = fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
-            const headerDivs = Array.from(headerRow.querySelectorAll("div"));
-            const headers = headerDivs.map(el => el.textContent?.trim());
-            expect(headers[0]).toBe("س");
-            expect(headers[1]).toBe("ح");
-            expect(headers[6]).toBe("ج");
-            expect(headerDivs[0].getAttribute("aria-label")).toBe("السبت");
-            expect(headerDivs[1].getAttribute("aria-label")).toBe("الأحد");
-            expect(headerDivs[6].getAttribute("aria-label")).toBe("الجمعة");
+            const headerDivs = Array.from(headerRow.querySelectorAll(":scope > div"));
+            const visibleHeaders = headerDivs.map(el => el.querySelector("span[aria-hidden='true']")?.textContent?.trim());
+            const accessibleHeaders = headerDivs.map(el => el.querySelector("span.sr-only")?.textContent?.trim());
+            expect(visibleHeaders[0]).toBe("س");
+            expect(visibleHeaders[1]).toBe("ح");
+            expect(visibleHeaders[6]).toBe("ج");
+            expect(accessibleHeaders[0]).toBe("السبت");
+            expect(accessibleHeaders[1]).toBe("الأحد");
+            expect(accessibleHeaders[6]).toBe("الجمعة");
+            headerDivs.forEach(el => expect(el.getAttribute("aria-label")).toBeNull());
 
             // Month grid alignment for September 2026:
             // Sep 1, 2026 is Tuesday. With Saturday start, row 1 contains:
@@ -583,12 +586,34 @@ describe("CalendarComponent i18n", () => {
             await fixture.whenStable();
 
             const headerRow = fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
-            const headerDivs = Array.from(headerRow.querySelectorAll("div"));
-            const headers = headerDivs.map(el => el.textContent?.trim());
-            const accessibleLabels = headerDivs.map(el => el.getAttribute("aria-label"));
+            const headerDivs = Array.from(headerRow.querySelectorAll(":scope > div"));
+            const visibleSpans = headerDivs.map(el => el.querySelector("span[aria-hidden='true']"));
+            const srOnlySpans = headerDivs.map(el => el.querySelector("span.sr-only"));
 
-            expect(headers).toEqual(["ح", "ن", "ث", "ر", "خ", "ج", "س"]);
-            expect(accessibleLabels).toEqual(["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"]);
+            expect(visibleSpans.map(s => s?.textContent?.trim())).toEqual(["ح", "ن", "ث", "ر", "خ", "ج", "س"]);
+            visibleSpans.forEach(s => expect(s?.getAttribute("aria-hidden")).toBe("true"));
+            expect(srOnlySpans.map(s => s?.textContent?.trim())).toEqual(["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"]);
+            headerDivs.forEach(el => expect(el.getAttribute("aria-label")).toBeNull());
+        });
+
+        it("ensures weekday header elements have no aria-prohibited-attr violations", async () => {
+            TestBed.configureTestingModule({
+                imports: [WeekStartTestHostComponent]
+            });
+            const fixture = TestBed.createComponent(WeekStartTestHostComponent);
+            const i18n = TestBed.inject(MonaI18nService);
+            i18n.use({ id: "ar-SA", direction: "rtl", messages: {} });
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const headerRow = fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
+            const results = await axe.run(headerRow, {
+                runOnly: {
+                    type: "rule",
+                    values: ["aria-prohibited-attr"]
+                }
+            });
+            expect(results.violations).toEqual([]);
         });
 
         it("retains compact weekday headers across all official locales without overflow", async () => {
@@ -617,7 +642,7 @@ describe("CalendarComponent i18n", () => {
                 await fixture.whenStable();
 
                 const headerRow = fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
-                const headers = Array.from(headerRow.querySelectorAll("div")).map(el => el.textContent?.trim());
+                const headers = Array.from(headerRow.querySelectorAll("span[aria-hidden='true']")).map(el => el.textContent?.trim());
                 expect(headers).toEqual(expected);
             }
         });
@@ -635,7 +660,7 @@ describe("CalendarComponent i18n", () => {
             await fixture.whenStable();
 
             const headerRow = fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
-            const headers = Array.from(headerRow.querySelectorAll("div")).map(el => el.textContent?.trim());
+            const headers = Array.from(headerRow.querySelectorAll("span[aria-hidden='true']")).map(el => el.textContent?.trim());
             expect(headers[0]).toBe("Fri");
             expect(headers[6]).toBe("Thu");
 
@@ -737,7 +762,7 @@ describe("CalendarComponent i18n", () => {
             await fixture.whenStable();
 
             const headerRow = fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
-            const headers = Array.from(headerRow.querySelectorAll("div")).map(el => el.textContent?.trim());
+            const headers = Array.from(headerRow.querySelectorAll("span[aria-hidden='true']")).map(el => el.textContent?.trim());
             expect(headers[0]).toBe("月");
             expect(headers[6]).toBe("日");
         });
@@ -754,7 +779,7 @@ describe("CalendarComponent i18n", () => {
 
             const getFirstWeekday = () => {
                 const headerRow = fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
-                return headerRow.querySelectorAll("div")[0]?.textContent?.trim();
+                return headerRow.querySelector("span[aria-hidden='true']")?.textContent?.trim();
             };
 
             expect(getFirstWeekday()).toBe("Mo");
@@ -776,7 +801,7 @@ describe("CalendarComponent i18n", () => {
 
             const getFirstWeekday = () => {
                 const headerRow = fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
-                return headerRow.querySelectorAll("div")[0]?.textContent?.trim();
+                return headerRow.querySelector("span[aria-hidden='true']")?.textContent?.trim();
             };
 
             // 1. Activate custom locale with whitespace in id

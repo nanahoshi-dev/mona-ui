@@ -419,7 +419,7 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
         expect(ptCalendar?.querySelector("[aria-live='polite']")?.textContent?.toLowerCase()).toContain("calendário");
 
         const headerRow = ptCalendar?.querySelector("div[style*='grid-template-columns']") as HTMLElement;
-        expect(headerRow?.querySelectorAll("div")[0]?.textContent?.trim()).toBe("dom.");
+        expect(headerRow?.querySelector("span[aria-hidden='true']")?.textContent?.trim()).toBe("dom.");
 
         // NumericTextBox formatting with Brazilian comma separator
         expect(input.getAttribute("aria-valuetext")).toBe("1234,50");
@@ -484,7 +484,7 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
         expect(cnCalendar?.querySelector("[aria-live='polite']")?.textContent).toContain("日历");
 
         const headerRow = cnCalendar?.querySelector("div[style*='grid-template-columns']") as HTMLElement;
-        expect(headerRow?.querySelectorAll("div")[0]?.textContent?.trim()).toBe("周一");
+        expect(headerRow?.querySelector("span[aria-hidden='true']")?.textContent?.trim()).toBe("周一");
 
         // NumericTextBox formatting with dot decimal separator
         expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
@@ -549,7 +549,7 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
         expect(twCalendar?.querySelector("[aria-live='polite']")?.textContent).toContain("行事曆");
 
         const headerRow = twCalendar?.querySelector("div[style*='grid-template-columns']") as HTMLElement;
-        expect(headerRow?.querySelectorAll("div")[0]?.textContent?.trim()).toBe("週日");
+        expect(headerRow?.querySelector("span[aria-hidden='true']")?.textContent?.trim()).toBe("週日");
 
         // NumericTextBox formatting with dot decimal separator
         expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
@@ -614,7 +614,7 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
         expect(koCalendar?.querySelector("[aria-live='polite']")?.textContent).toContain("달력");
 
         const headerRow = koCalendar?.querySelector("div[style*='grid-template-columns']") as HTMLElement;
-        expect(headerRow?.querySelectorAll("div")[0]?.textContent?.trim()).toBe("일");
+        expect(headerRow?.querySelector("span[aria-hidden='true']")?.textContent?.trim()).toBe("일");
 
         // NumericTextBox formatting with dot decimal separator
         expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
@@ -679,9 +679,11 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
         expect(arCalendar?.querySelector("[aria-live='polite']")?.textContent).toContain("تقويم");
 
         const headerRow = arCalendar?.querySelector("div[style*='grid-template-columns']") as HTMLElement;
-        const firstDayHeader = headerRow?.querySelectorAll("div")[0];
-        expect(firstDayHeader?.textContent?.trim()).toBe("ح");
-        expect(firstDayHeader?.getAttribute("aria-label")).toBe("الأحد");
+        const firstDayHeader = headerRow?.querySelectorAll(":scope > div")[0];
+        expect(firstDayHeader?.querySelector("span[aria-hidden='true']")?.textContent?.trim()).toBe("ح");
+        expect(firstDayHeader?.querySelector("span[aria-hidden='true']")?.getAttribute("aria-hidden")).toBe("true");
+        expect(firstDayHeader?.querySelector("span.sr-only")?.textContent?.trim()).toBe("الأحد");
+        expect(firstDayHeader?.getAttribute("aria-label")).toBeNull();
 
         // NumericTextBox formatting with Arabic-Indic numerals and Arabic decimal separator
         expect(input.getAttribute("aria-valuetext")).toBe("١٢٣٤٫٥٠");
@@ -743,7 +745,7 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
         const calendar = root.querySelector("mona-calendar");
         expect(calendar?.querySelector("[aria-live='polite']")?.textContent).toContain("日历");
         let headerRow = calendar?.querySelector("div[style*='grid-template-columns']") as HTMLElement;
-        expect(headerRow?.querySelectorAll("div")[0]?.textContent?.trim()).toBe("周一");
+        expect(headerRow?.querySelector("span[aria-hidden='true']")?.textContent?.trim()).toBe("周一");
 
         // 2. Switch directly to zh-TW
         i18n.use(MONA_ZH_TW_LOCALE);
@@ -754,7 +756,7 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
         expect(pager?.querySelector("button[aria-label='第一頁']")).not.toBeNull();
         expect(calendar?.querySelector("[aria-live='polite']")?.textContent).toContain("行事曆");
         headerRow = calendar?.querySelector("div[style*='grid-template-columns']") as HTMLElement;
-        expect(headerRow?.querySelectorAll("div")[0]?.textContent?.trim()).toBe("週日");
+        expect(headerRow?.querySelector("span[aria-hidden='true']")?.textContent?.trim()).toBe("週日");
 
         // 3. Switch directly back to zh-CN
         i18n.use(MONA_ZH_CN_LOCALE);
@@ -765,7 +767,7 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
         expect(pager?.querySelector("button[aria-label='第一页']")).not.toBeNull();
         expect(calendar?.querySelector("[aria-live='polite']")?.textContent).toContain("日历");
         headerRow = calendar?.querySelector("div[style*='grid-template-columns']") as HTMLElement;
-        expect(headerRow?.querySelectorAll("div")[0]?.textContent?.trim()).toBe("周一");
+        expect(headerRow?.querySelector("span[aria-hidden='true']")?.textContent?.trim()).toBe("周一");
     });
 
     it("applies pseudo-localization (en-XA) across multiple components reactively", () => {
