@@ -8,4 +8,4 @@ export { MONA_KO_KR_LOCALE } from "./ko-kr/ko-kr.locale";
 export { MONA_PT_BR_LOCALE } from "./pt-br/pt-br.locale";
 export { MONA_ZH_CN_LOCALE } from "./zh-cn/zh-cn.locale";
 export { MONA_ZH_TW_LOCALE } from "./zh-tw/zh-tw.locale";
-
+export { MONA_TR_TR_LOCALE } from "./tr-tr/tr-tr.locale";
