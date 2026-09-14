@@ -323,6 +323,56 @@ export function getLocaleFirstDayOfWeek() { return "sunday"; }
             }
         });
 
+        it("succeeds when synthetic package exports ar-SA with matching formatting, Sunday first-day, and bidi-clean strings", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                populateFakeDist(fakeDist, {
+                    i18nMjs: `
+export function getLocaleDateInputFormat(locale) { return "dd/MM/yyyy"; }
+export function getLocaleTimeInputFormat(locale, options) { return "hh:mm a"; }
+export function getLocaleDateTimeInputFormat(locale, options) { return "dd/MM/yyyy، hh:mm a"; }
+export function getLocaleFirstDayOfWeek(locale) { return "sunday"; }
+`,
+                    localesDts: 'export declare const ar_SA: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesMjs: 'export const ar_SA = { id: "ar-SA", direction: "rtl", messages: {} };\n'
+                });
+
+                expect(() =>
+                    runConsumerSmokeTest({
+                        distDir: fakeDist,
+                        expectedLocales: [{ direction: "rtl", id: "ar-SA", symbol: "ar_SA" }]
+                    })
+                ).not.toThrow();
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when ar-SA is expected but getLocaleDateInputFormat leaks bidi control characters", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                populateFakeDist(fakeDist, {
+                    i18nMjs: `
+export function getLocaleDateInputFormat(locale) { return "dd/\\u200FMM/\\u200Fyyyy"; }
+export function getLocaleTimeInputFormat(locale, options) { return "hh:mm a"; }
+export function getLocaleDateTimeInputFormat(locale, options) { return "dd/MM/yyyy، hh:mm a"; }
+export function getLocaleFirstDayOfWeek(locale) { return "sunday"; }
+`,
+                    localesDts: 'export declare const ar_SA: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesMjs: 'export const ar_SA = { id: "ar-SA", direction: "rtl", messages: {} };\n'
+                });
+
+                expect(() =>
+                    runConsumerSmokeTest({
+                        distDir: fakeDist,
+                        expectedLocales: [{ direction: "rtl", id: "ar-SA", symbol: "ar_SA" }]
+                    })
+                ).toThrow("Bidi control leak detected in ar-SA format derivation");
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
+            }
+        });
+
         it("fails when runtime package is missing expected export", () => {
             const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
             try {

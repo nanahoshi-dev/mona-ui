@@ -239,6 +239,35 @@ if (hasKoKr) {
     }
 }
 
+const hasArSa = expectedLocales.some(l => l.id === "ar-SA");
+if (hasArSa) {
+    const arSaDateFormat = getLocaleDateInputFormat("ar-SA");
+    const arSaTime12 = getLocaleTimeInputFormat("ar-SA", { hourFormat: "12", showSeconds: false });
+    const arSaDateTime12 = getLocaleDateTimeInputFormat("ar-SA", { hourFormat: "12", showSeconds: false });
+    const bidiRegex = /[\\u061C\\u200E\\u200F\\u202A-\\u202E\\u2066-\\u2069]/;
+    if (bidiRegex.test(arSaDateFormat) || bidiRegex.test(arSaTime12) || bidiRegex.test(arSaDateTime12)) {
+        console.error("Bidi control leak detected in ar-SA format derivation");
+        process.exit(1);
+    }
+    if (arSaDateFormat !== "dd/MM/yyyy") {
+        console.error("Invalid getLocaleDateInputFormat output for ar-SA: " + arSaDateFormat);
+        process.exit(1);
+    }
+    if (arSaTime12 !== "hh:mm a") {
+        console.error("Invalid getLocaleTimeInputFormat output for ar-SA: " + arSaTime12);
+        process.exit(1);
+    }
+    if (arSaDateTime12 !== "dd/MM/yyyy، hh:mm a") {
+        console.error("Invalid getLocaleDateTimeInputFormat output for ar-SA: " + arSaDateTime12);
+        process.exit(1);
+    }
+    const arSaFirstDay = getLocaleFirstDayOfWeek("ar-SA");
+    if (arSaFirstDay !== "sunday") {
+        console.error("Invalid getLocaleFirstDayOfWeek output for ar-SA: " + arSaFirstDay);
+        process.exit(1);
+    }
+}
+
 console.log("Runtime package import verified successfully.");
 `;
         writeFileSync(smokeScriptPath, smokeScript);
