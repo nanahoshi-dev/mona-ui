@@ -183,10 +183,10 @@ export const TR_TR_MESSAGES = {
         contains: "İçerir",
         doesNotContain: "İçermez",
         endsWith: "İle biter",
-        isAfter: "Sonrasındadır",
-        isAfterOrEqualTo: "Sonrasında veya eşittir",
-        isBefore: "Öncesindedir",
-        isBeforeOrEqualTo: "Öncesinde veya eşittir",
+        isAfter: "Daha sonra",
+        isAfterOrEqualTo: "Eşit veya daha sonra",
+        isBefore: "Daha önce",
+        isBeforeOrEqualTo: "Eşit veya daha önce",
         isEmpty: "Boştur",
         isEqualTo: "Eşittir",
         isFalse: "Yanlıştır",
@@ -299,7 +299,7 @@ export const TR_TR_MESSAGES = {
         valueText: (value: number, max: number) => `${max} üzerinden ${value}`
     },
     scrollView: {
-        carousel: "karusel",
+        carousel: "atlıkarınca",
         nextPage: "Sonraki sayfa",
         page: (current: number) => `${current}. sayfa`,
         pageOf: (current: number, total: number) => `Sayfa ${current} / ${total}`,

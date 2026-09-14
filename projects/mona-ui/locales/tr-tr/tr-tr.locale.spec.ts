@@ -162,7 +162,7 @@ describe("MONA_TR_TR_LOCALE", () => {
         });
 
         it("translates ScrollView messages correctly", () => {
-            expect(m.scrollView?.carousel).toBe("karusel");
+            expect(m.scrollView?.carousel).toBe("atlıkarınca");
             expect(m.scrollView?.slide).toBe("slayt");
             expect(m.scrollView?.nextPage).toBe("Sonraki sayfa");
             expect(m.scrollView?.previousPage).toBe("Önceki sayfa");
@@ -193,10 +193,10 @@ describe("MONA_TR_TR_LOCALE", () => {
         });
 
         it("translates Filter date, boolean, and null operators correctly", () => {
-            expect(m.filter?.isAfterOrEqualTo).toBe("Sonrasında veya eşittir");
-            expect(m.filter?.isBeforeOrEqualTo).toBe("Öncesinde veya eşittir");
-            expect(m.filter?.isAfter).toBe("Sonrasındadır");
-            expect(m.filter?.isBefore).toBe("Öncesindedir");
+            expect(m.filter?.isAfter).toBe("Daha sonra");
+            expect(m.filter?.isAfterOrEqualTo).toBe("Eşit veya daha sonra");
+            expect(m.filter?.isBefore).toBe("Daha önce");
+            expect(m.filter?.isBeforeOrEqualTo).toBe("Eşit veya daha önce");
             expect(m.filter?.isEqualTo).toBe("Eşittir");
             expect(m.filter?.isNotEqualTo).toBe("Eşit değildir");
             expect(m.filter?.isNull).toBe("Null'dır");

@@ -549,10 +549,10 @@ describe("MONA_TR_TR_LOCALE Integration with MonaI18nService", () => {
 
         expect(dateItems.find(i => i.value === "eq")?.text).toBe("Eşittir");
         expect(dateItems.find(i => i.value === "neq")?.text).toBe("Eşit değildir");
-        expect(dateItems.find(i => i.value === "gt")?.text).toBe("Sonrasındadır");
-        expect(dateItems.find(i => i.value === "gte")?.text).toBe("Sonrasında veya eşittir");
-        expect(dateItems.find(i => i.value === "lt")?.text).toBe("Öncesindedir");
-        expect(dateItems.find(i => i.value === "lte")?.text).toBe("Öncesinde veya eşittir");
+        expect(dateItems.find(i => i.value === "gt")?.text).toBe("Daha sonra");
+        expect(dateItems.find(i => i.value === "gte")?.text).toBe("Eşit veya daha sonra");
+        expect(dateItems.find(i => i.value === "lt")?.text).toBe("Daha önce");
+        expect(dateItems.find(i => i.value === "lte")?.text).toBe("Eşit veya daha önce");
     });
 
     it("renders ColorGradient component with Turkish accessibility labels and value text", () => {
