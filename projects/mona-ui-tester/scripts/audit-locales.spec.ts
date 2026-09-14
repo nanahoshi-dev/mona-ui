@@ -137,6 +137,21 @@ describe("audit-locales", () => {
             expect(isAllowedLocaleCopyException("pt-BR", "scrollView.slide", "carousel")).toBe(false);
             expect(isAllowedLocaleCopyException("pt-BR", "timeSelector.minutes", "Minutes")).toBe(false);
         });
+
+        it("allows Italian-specific unchanged words on approved paths", () => {
+            expect(isAllowedLocaleCopyException("it-IT", "chart.closeAbbreviation", "C")).toBe(true);
+            expect(isAllowedLocaleCopyException("it-IT", "dialog.ok", "OK")).toBe(true);
+            expect(isAllowedLocaleCopyException("it-IT", "timeSelector.am", "AM")).toBe(true);
+            expect(isAllowedLocaleCopyException("it-IT", "timeSelector.pm", "PM")).toBe(true);
+            expect(isAllowedLocaleCopyException("it-IT", "timeSelector.amPm", "AM/PM")).toBe(true);
+        });
+
+        it("disallows Italian-specific exceptions for other locales or unapproved paths", () => {
+            expect(isAllowedLocaleCopyException("it-IT", "dialog.ok", "Cancel")).toBe(false);
+            expect(isAllowedLocaleCopyException("it-IT", "other.ok", "OK")).toBe(false);
+            expect(isAllowedLocaleCopyException("es-ES", "dialog.ok", "OK")).toBe(false);
+            expect(isAllowedLocaleCopyException("it-IT", "chart.openAbbreviation", "O")).toBe(false);
+        });
     });
 
     describe("auditLocaleMessagesFile", () => {
