@@ -28,7 +28,7 @@ describe("DemoContainerComponent", () => {
         expect(component).toBeTruthy();
     });
 
-    it("includes all official locales including Italian (it-IT) and Turkish (tr-TR) in localeOptions", () => {
+    it("includes official locale options with unique ids and labels", () => {
         const options = (
             component as unknown as { localeOptions: readonly { label: string; locale: { id: string } }[] }
         ).localeOptions;

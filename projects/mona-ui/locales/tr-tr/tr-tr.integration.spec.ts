@@ -305,7 +305,7 @@ describe("MONA_TR_TR_LOCALE Integration with MonaI18nService", () => {
         // Test date formatting using standard Intl with active locale ID
         const date = new Date(2026, 8, 15);
         const monthFormatter = new Intl.DateTimeFormat(localeId, { month: "long" });
-        expect(monthFormatter.format(date).toLowerCase()).toBe("eylül");
+        expect(monthFormatter.format(date)).toBe("Eylül");
     });
 
     it("ensures MONA_TR_TR_LOCALE is immutable and unmutated across service usage cycles", () => {
@@ -418,14 +418,14 @@ describe("MONA_TR_TR_LOCALE Integration with MonaI18nService", () => {
             'button[aria-label*="Yıl görünümüne geç"]'
         ) as HTMLButtonElement;
         expect(viewButton).not.toBeNull();
-        expect(viewButton.textContent?.toLowerCase()).toContain("eylül");
+        expect(viewButton.textContent).toContain("Eylül");
         expect(viewButton.textContent).toContain("2026");
 
         // 3. Calendar container accessible label in Turkish
         const liveRegion = hostEl.querySelector('[aria-live="polite"]') as HTMLElement;
         expect(liveRegion).not.toBeNull();
         expect(liveRegion.textContent).toContain("Takvim, ");
-        expect(liveRegion.textContent?.toLowerCase()).toContain("eylül");
+        expect(liveRegion.textContent).toContain("Eylül");
 
         // 4. Verify Monday is the first day of the week in Calendar view (Pzt)
         const headerRow = hostEl.querySelector("div[style*='grid-template-columns']") as HTMLElement;
@@ -510,7 +510,7 @@ describe("MONA_TR_TR_LOCALE Integration with MonaI18nService", () => {
         expect(hostEl.textContent).toContain("1 - 10 / 50 öğe");
     });
 
-    it("renders ScrollView component with Turkish pager overflow buttons", () => {
+    it("renders ScrollView component with Turkish role descriptions and pager overflow buttons", () => {
         TestBed.configureTestingModule({
             imports: [ScrollViewIntegrationHostComponent],
             providers: [
@@ -523,13 +523,19 @@ describe("MONA_TR_TR_LOCALE Integration with MonaI18nService", () => {
         const fixture = TestBed.createComponent(ScrollViewIntegrationHostComponent);
         fixture.detectChanges();
 
+        const hostEl = fixture.nativeElement as HTMLElement;
+        const scrollView = hostEl.querySelector("mona-scroll-view");
+        expect(scrollView?.getAttribute("aria-roledescription")).toBe("atlıkarınca");
+
+        const slide = hostEl.querySelector("li[role='group']");
+        expect(slide?.getAttribute("aria-roledescription")).toBe("slayt");
+
         const comp = fixture.componentInstance.scrollView() as unknown as {
             pagerArrowVisible: { set: (v: boolean) => void };
         };
         comp.pagerArrowVisible.set(true);
         fixture.detectChanges();
 
-        const hostEl = fixture.nativeElement as HTMLElement;
         expect(hostEl.querySelector("button[aria-label='Sayfalama seçeneklerini geri kaydır']")).not.toBeNull();
         expect(hostEl.querySelector("button[aria-label='Sayfalama seçeneklerini ileri kaydır']")).not.toBeNull();
     });

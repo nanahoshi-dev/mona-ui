@@ -1436,6 +1436,19 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
                 )
             ).toBe(true);
         });
+
+        it("discovers the official Turkish locale", () => {
+            const discovery = discoverOfficialLocales();
+            expect(
+                discovery.locales.some(
+                    locale =>
+                        locale.canonicalId === "tr-TR" &&
+                        locale.localeExport === "MONA_TR_TR_LOCALE" &&
+                        locale.messagesExport === "TR_TR_MESSAGES" &&
+                        locale.direction === "ltr"
+                )
+            ).toBe(true);
+        });
     });
 
     describe("semantic day-period locale verification", () => {
