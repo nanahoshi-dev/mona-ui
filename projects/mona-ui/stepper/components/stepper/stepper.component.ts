@@ -51,17 +51,6 @@ export class StepperComponent implements StepperVariantInput {
     readonly #direction = injectComponentDirection();
     readonly #hostElementRef = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
-    protected readonly isRtl = computed(() => this.#direction() === "rtl");
-
-    protected formatStepNumber(value: number): string {
-        if (value == null) {
-            return "";
-        }
-        return formatNumber(value, this.#i18n.localeId(), {
-            maximumFractionDigits: 0,
-            useGrouping: false
-        });
-    }
     readonly #trackItemSize = computed(() => {
         const stepCount = this.viewSteps().length;
         return stepCount !== 0 ? 100 / stepCount : 0;
@@ -96,6 +85,7 @@ export class StepperComponent implements StepperVariantInput {
     protected readonly indicatorTemplate = contentChild(StepperIndicatorTemplateDirective, {
         read: TemplateRef
     }) as Signal<TemplateRef<StepperTemplateContext> | undefined>;
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly labelTemplate = contentChild(StepperLabelTemplateDirective, { read: TemplateRef }) as Signal<
         TemplateRef<StepperTemplateContext> | undefined
     >;
@@ -201,6 +191,16 @@ export class StepperComponent implements StepperVariantInput {
         });
         afterNextRender({
             read: () => this.setKeyboardEvents()
+        });
+    }
+
+    protected formatStepNumber(value: number): string {
+        if (value == null) {
+            return "";
+        }
+        return formatNumber(value, this.#i18n.localeId(), {
+            maximumFractionDigits: 0,
+            useGrouping: false
         });
     }
 

@@ -375,8 +375,8 @@ describe("CalendarComponent i18n", () => {
             imports: [CalendarComponent]
         })
         class BoundaryHostComponent {
-            public readonly value = signal<Date>(new Date(2026, 4, 15)); // May 2026 (ends Sunday May 31)
             public readonly firstDay = signal<"sunday" | "monday">("sunday");
+            public readonly value = signal<Date>(new Date(2026, 4, 15)); // May 2026 (ends Sunday May 31)
         }
 
         TestBed.configureTestingModule({
@@ -447,8 +447,8 @@ describe("CalendarComponent i18n", () => {
             imports: [CalendarComponent]
         })
         class WeekNumberHostComponent {
-            public readonly value = signal<Date>(new Date(2026, 0, 15)); // January 2026 (Jan 1 is Thursday)
             public readonly firstDay = signal<FirstDayOfWeek>("sunday");
+            public readonly value = signal<Date>(new Date(2026, 0, 15)); // January 2026 (Jan 1 is Thursday)
         }
 
         TestBed.configureTestingModule({
@@ -836,9 +836,9 @@ describe("CalendarComponent i18n", () => {
             imports: [CalendarComponent, CalendarMonthCellTemplateDirective]
         })
         class NumeralTestHostComponent {
+            public readonly useCustomTemplate = signal(false);
             public readonly value = signal<Date | null>(new Date(2026, 8, 15));
             public readonly weekNumber = signal(false);
-            public readonly useCustomTemplate = signal(false);
             public typeofDay(val: unknown): string {
                 return typeof val;
             }

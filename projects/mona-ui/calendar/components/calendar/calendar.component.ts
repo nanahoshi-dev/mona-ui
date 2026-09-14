@@ -95,7 +95,6 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     readonly #direction = injectComponentDirection();
     readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #i18n = inject(MonaI18nService);
-    protected readonly messages = this.#i18n.componentMessages("calendar", CALENDAR_DEFAULT_MESSAGES);
     readonly #monthDict = computed(() => {
         const day = this.navigatedDate();
         const firstDayOfMonth = gregorianDateTime(day, this.#i18n.localeId()).startOf("month");
@@ -184,13 +183,30 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
             .select(e => e.toArray())
             .toArray();
     });
+    protected readonly effectiveFirstDay = computed<FirstDayOfWeek>(() => {
+        return this.firstDay() ?? getLocaleFirstDayOfWeek(this.#i18n.localeId());
+    });
     protected readonly gridId = createElementControlId();
     protected readonly headerClass = computed(() => {
         return calendarHeaderThemeVariants({});
     });
+    protected readonly headerMonthYear = computed(() => {
+        const locale = this.#i18n.localeId();
+        return formatGregorianDateToLocaleString(this.navigatedDate(), locale, {
+            year: "numeric",
+            month: "long"
+        });
+    });
+    protected readonly headerYear = computed(() => {
+        const locale = this.#i18n.localeId();
+        return formatGregorianDateToLocaleString(this.navigatedDate(), locale, {
+            year: "numeric"
+        });
+    });
     protected readonly invalidState = computed(
         () => this.touched() && (this.invalid() || (this.required() && this.isEmptyValue()))
     );
+    protected readonly messages = this.#i18n.componentMessages("calendar", CALENDAR_DEFAULT_MESSAGES);
     protected readonly monthBounds = computed(() => {
         const navigatedDate = this.navigatedDate();
         const firstDayOfMonth = gregorianDateTime(navigatedDate, this.#i18n.localeId()).startOf("month");
@@ -216,19 +232,6 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     protected readonly monthGridHeaderClass = computed(() => {
         return calendarMonthViewGridHeaderThemeVariants();
     });
-    protected readonly headerMonthYear = computed(() => {
-        const locale = this.#i18n.localeId();
-        return formatGregorianDateToLocaleString(this.navigatedDate(), locale, {
-            year: "numeric",
-            month: "long"
-        });
-    });
-    protected readonly headerYear = computed(() => {
-        const locale = this.#i18n.localeId();
-        return formatGregorianDateToLocaleString(this.navigatedDate(), locale, {
-            year: "numeric"
-        });
-    });
     protected readonly months = computed(() => {
         const locale = this.#i18n.localeId();
         const names = range(1, 12)
@@ -252,6 +255,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
                 return messages.nextDecade;
         }
     });
+    protected readonly pendingRangeStart = signal<Date | null>(null);
     protected readonly prevButtonLabel = computed(() => {
         const view = this.calendarView();
         const messages = this.messages();
@@ -264,7 +268,6 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
                 return messages.previousDecade;
         }
     });
-    protected readonly pendingRangeStart = signal<Date | null>(null);
     protected readonly rangePreviewDate = signal<Date | null>(null);
     protected readonly rangePreviewDates = computed(() => {
         if (this.selection() !== "range") {
@@ -349,10 +352,6 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         return calendarYearViewGridThemeVariants();
     });
 
-    protected readonly effectiveFirstDay = computed<FirstDayOfWeek>(() => {
-        return this.firstDay() ?? getLocaleFirstDayOfWeek(this.#i18n.localeId());
-    });
-
     /**
      * @description Sets the disabled state of the calendar.
      */
@@ -394,6 +393,13 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     public readonly readonly = input(false);
 
     /**
+     * @description Sets whether the calendar is required. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly required = input(false);
+
+    /**
      * @description Sets the border radius of the calendar.
      * @default "medium"
      */
@@ -410,13 +416,6 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
      * The `FormField` directive listens to this to mark the field as touched.
      */
     public readonly touch = output<void>();
-
-    /**
-     * @description Sets whether the calendar is required. When bound to a signal form field via `[formField]`,
-     * this is written by the `FormField` directive.
-     * @default false
-     */
-    public readonly required = input(false);
 
     /**
      * @description Sets the touched state of the calendar. When bound to a signal form field via `[formField]`,
@@ -477,6 +476,23 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
             .subscribe(() => this.focusActiveCell());
     }
 
+    protected formatInteger(value: number): string {
+        if (value == null) {
+            return "";
+        }
+        return formatNumber(value, this.#i18n.localeId(), {
+            maximumFractionDigits: 0,
+            useGrouping: false
+        });
+    }
+
+    protected getWeekNumber(date: Date): number {
+        const dt = gregorianDateTime(date, this.#i18n.localeId());
+        const firstDayIso = FIRST_DAY_OF_WEEK_TO_ISO[this.effectiveFirstDay()];
+        const daysToThursday = (4 - firstDayIso + 7) % 7;
+        return dt.plus({ days: daysToThursday }).weekNumber;
+    }
+
     protected onDayClick(date: Date, event: MouseEvent): void {
         event.preventDefault();
         if (this.disabled() || this.readonly()) {
@@ -533,23 +549,6 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         this.navigatedDate.set(direction === "prev" ? date.minus(unit).toJSDate() : date.plus(unit).toJSDate());
     }
 
-    protected formatInteger(value: number): string {
-        if (value == null) {
-            return "";
-        }
-        return formatNumber(value, this.#i18n.localeId(), {
-            maximumFractionDigits: 0,
-            useGrouping: false
-        });
-    }
-
-    protected getWeekNumber(date: Date): number {
-        const dt = gregorianDateTime(date, this.#i18n.localeId());
-        const firstDayIso = FIRST_DAY_OF_WEEK_TO_ISO[this.effectiveFirstDay()];
-        const daysToThursday = (4 - firstDayIso + 7) % 7;
-        return dt.plus({ days: daysToThursday }).weekNumber;
-    }
-
     protected onTodayButtonClick(): void {
         if (this.disabled() || this.readonly()) {
             return;
@@ -576,6 +575,16 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         this.calendarView.set("year");
     }
 
+    private clearPendingRange(): void {
+        this.pendingRangeStart.set(null);
+        this.rangePreviewDate.set(null);
+    }
+
+    private commitUserSelection(): void {
+        this.value.set(this.#outputValue());
+        this.touch.emit();
+    }
+
     private extendSelection(offset: number): void {
         const currentDate = this.navigatedDate();
         const newDate = DateTime.fromJSDate(currentDate).plus({ days: offset }).toJSDate();
@@ -589,16 +598,6 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
             this.setCurrentDate([...currentSelection, newDate]);
         }
         this.navigatedDate.set(newDate);
-    }
-
-    private clearPendingRange(): void {
-        this.pendingRangeStart.set(null);
-        this.rangePreviewDate.set(null);
-    }
-
-    private commitUserSelection(): void {
-        this.value.set(this.#outputValue());
-        this.touch.emit();
     }
 
     private focusActiveCell(): void {
@@ -858,6 +857,22 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         }
     }
 
+    private horizontalCellDelta(key: "ArrowLeft" | "ArrowRight"): -1 | 1 {
+        const isRtl = this.#direction() === "rtl";
+        if (key === "ArrowLeft") {
+            return isRtl ? 1 : -1;
+        }
+        return isRtl ? -1 : 1;
+    }
+
+    private horizontalPeriodDirection(key: "ArrowLeft" | "ArrowRight"): "prev" | "next" {
+        const isRtl = this.#direction() === "rtl";
+        if (key === "ArrowLeft") {
+            return isRtl ? "next" : "prev";
+        }
+        return isRtl ? "prev" : "next";
+    }
+
     private isDateDisabled(date: Date): boolean {
         const disabledDates = this.disabledDates();
         const max = this.maxDate();
@@ -876,22 +891,6 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     private isEmptyValue(): boolean {
         const value = this.value();
         return value == null || (Array.isArray(value) && value.length === 0);
-    }
-
-    private horizontalCellDelta(key: "ArrowLeft" | "ArrowRight"): -1 | 1 {
-        const isRtl = this.#direction() === "rtl";
-        if (key === "ArrowLeft") {
-            return isRtl ? 1 : -1;
-        }
-        return isRtl ? -1 : 1;
-    }
-
-    private horizontalPeriodDirection(key: "ArrowLeft" | "ArrowRight"): "prev" | "next" {
-        const isRtl = this.#direction() === "rtl";
-        if (key === "ArrowLeft") {
-            return isRtl ? "next" : "prev";
-        }
-        return isRtl ? "prev" : "next";
     }
 
     private navigateByDaysOrCells(offset: number, view: CalendarView): void {
@@ -1006,10 +1005,11 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
             case "year":
                 newDate = dateTime.set({ month: 12 }).toJSDate();
                 break;
-            case "decade":
+            case "decade": {
                 const yearEnd = this.decadeEnd();
                 newDate = dateTime.set({ year: yearEnd }).toJSDate();
                 break;
+            }
         }
 
         this.rangePreviewDate.set(null);
@@ -1040,10 +1040,11 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
             case "year":
                 newDate = dateTime.set({ month: 1 }).toJSDate();
                 break;
-            case "decade":
+            case "decade": {
                 const yearStart = this.decadeStart();
                 newDate = dateTime.set({ year: yearStart }).toJSDate();
                 break;
+            }
         }
 
         this.rangePreviewDate.set(null);

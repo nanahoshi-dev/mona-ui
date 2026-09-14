@@ -356,6 +356,16 @@ export class PagerComponent implements PagerVariantInputs {
         inject(DestroyRef).onDestroy(() => this.#widthObserver?.disconnect());
     }
 
+    protected formatPageNumber(value: number): string {
+        if (value == null) {
+            return "";
+        }
+        return formatNumber(value, this.#i18n.localeId(), {
+            maximumFractionDigits: 0,
+            useGrouping: false
+        });
+    }
+
     protected onJumpNextClick(): void {
         const page = Math.min(this.page() + this.visiblePages(), this.pageCount());
         this.setPage(page);
@@ -563,16 +573,6 @@ export class PagerComponent implements PagerVariantInputs {
         }
         element.setAttribute("tabindex", "-1");
         this.#managedFocusTargets.add(element);
-    }
-
-    protected formatPageNumber(value: number): string {
-        if (value == null) {
-            return "";
-        }
-        return formatNumber(value, this.#i18n.localeId(), {
-            maximumFractionDigits: 0,
-            useGrouping: false
-        });
     }
 
     private preparePages(currentPage: number, visiblePages: number, maxPages: number): Page[] {
