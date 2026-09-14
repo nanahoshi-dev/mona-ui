@@ -5,7 +5,7 @@ export const TR_TR_MESSAGES = {
         clear: "Temizle"
     },
     breadcrumb: {
-        breadcrumb: "İçerik yolu"
+        breadcrumb: "İçerik haritası"
     },
     buttonGroup: {
         buttonGroup: "Düğme grubu"
@@ -322,7 +322,7 @@ export const TR_TR_MESSAGES = {
     },
     splitButton: {
         menuButtonAriaLabel: "Menü seçeneklerini göster",
-        splitButton: (text: string) => (text ? `${text}, menülü düğme` : "Menülü düğme")
+        splitButton: (text: string) => (text ? `${text}, bölünmüş düğme` : "Bölünmüş düğme")
     },
     splitter: {
         collapseDown: "Alt paneli daralt",
