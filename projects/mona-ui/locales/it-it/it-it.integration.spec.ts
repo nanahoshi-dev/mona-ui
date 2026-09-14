@@ -567,7 +567,7 @@ describe("MONA_IT_IT_LOCALE Integration with MonaI18nService", () => {
 
         const slider = fixture.nativeElement.querySelector("[role='slider']") as HTMLElement;
         expect(slider).not.toBeNull();
-        expect(slider.getAttribute("aria-label")).toBe("Saturação e valor da cor".replace("Saturação e valor da cor", "Saturazione e valore del colore"));
+        expect(slider.getAttribute("aria-label")).toBe("Saturazione e valore del colore");
         expect(slider.getAttribute("aria-valuetext")).toContain("Saturazione");
         expect(slider.getAttribute("aria-valuetext")).toContain("valore");
     });
@@ -810,7 +810,7 @@ describe("MONA_IT_IT_LOCALE Integration with MonaI18nService", () => {
         await fixture.whenStable();
 
         const popup = document.querySelector("div[role='dialog']") as HTMLElement;
-        expect(popup?.getAttribute("aria-label")).toBe("Seletor de data e hora".replace("Seletor de data e hora", "Selettore data e ora"));
+        expect(popup?.getAttribute("aria-label")).toBe("Selettore data e ora");
 
         const tabButtons = Array.from(popup.querySelectorAll<HTMLButtonElement>("button[role='tab']"));
         expect(tabButtons[0]?.textContent?.trim()).toBe("Data");
