@@ -181,5 +181,47 @@ describe("gregorian-date utilities", () => {
             expect(dt.hour).toBe(21);
             expect(dt.minute).toBe(30);
         });
+
+        it("parses mixed-digit Arabic day and Latin year without error", () => {
+            const dt = parseGregorianDate("١٥/09/2026", "dd/MM/yyyy", "ar-SA");
+            expect(dt.isValid).toBe(true);
+            expect(dt.year).toBe(2026);
+            expect(dt.month).toBe(9);
+            expect(dt.day).toBe(15);
+        });
+
+        it("parses Eastern Arabic-Indic digits (۰-۹) normalized correctly", () => {
+            const dt = parseGregorianDate("۱۵/۰۹/۲۰۲۶", "dd/MM/yyyy", "ar-SA");
+            expect(dt.isValid).toBe(true);
+            expect(dt.year).toBe(2026);
+            expect(dt.month).toBe(9);
+            expect(dt.day).toBe(15);
+        });
+
+        it("parses Saudi Arabic 12-hour datetime with seconds in both Arabic-Indic and Latin digits", () => {
+            const dtArab = parseGregorianDate("٢٥/١٢/٢٠٢٦، ٠٨:١٥:٠٠ ص", "dd/MM/yyyy، hh:mm:ss a", "ar-SA");
+            expect(dtArab.isValid).toBe(true);
+            expect(dtArab.year).toBe(2026);
+            expect(dtArab.month).toBe(12);
+            expect(dtArab.day).toBe(25);
+            expect(dtArab.hour).toBe(8);
+            expect(dtArab.minute).toBe(15);
+            expect(dtArab.second).toBe(0);
+
+            const dtLatn = parseGregorianDate("25/12/2026، 08:15:00 ص", "dd/MM/yyyy، hh:mm:ss a", "ar-SA");
+            expect(dtLatn.isValid).toBe(true);
+            expect(dtLatn.year).toBe(2026);
+            expect(dtLatn.month).toBe(12);
+            expect(dtLatn.day).toBe(25);
+            expect(dtLatn.hour).toBe(8);
+            expect(dtLatn.minute).toBe(15);
+            expect(dtLatn.second).toBe(0);
+        });
+
+        it("strictly rejects ASCII comma when Arabic comma is expected in datetime format", () => {
+            const dt = parseGregorianDate("25/12/2026, 08:15:00 ص", "dd/MM/yyyy، hh:mm:ss a", "ar-SA");
+            expect(dt.isValid).toBe(false);
+        });
     });
 });
+

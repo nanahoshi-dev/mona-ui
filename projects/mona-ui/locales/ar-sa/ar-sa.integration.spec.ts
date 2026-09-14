@@ -374,20 +374,71 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
         const toggleBtn = root.querySelector("button") as HTMLButtonElement;
         expect(toggleBtn.getAttribute("aria-label")).toBe("فتح التقويم");
 
+        // Open calendar popup
+        toggleBtn.click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const headerRow = document.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
+        const firstWeekday = headerRow?.querySelectorAll("div")[0];
+        expect(firstWeekday?.textContent?.trim()).toBe("ح");
+        expect(firstWeekday?.getAttribute("aria-label")).toBe("الأحد");
+
+        // Close popup by toggling
+        toggleBtn.click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        // Parse Arabic-Indic date input: ٢٥/١٢/٢٠٢٦
+        input.value = "٢٥/١٢/٢٠٢٦";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("blur", { bubbles: true }));
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        let parsed = fixture.componentInstance.value();
+        expect(parsed?.getFullYear()).toBe(2026);
+        expect(parsed?.getMonth()).toBe(11);
+        expect(parsed?.getDate()).toBe(25);
+
+        // Parse ASCII date input: 25/12/2026
+        input.value = "25/12/2026";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("blur", { bubbles: true }));
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        parsed = fixture.componentInstance.value();
+        expect(parsed?.getFullYear()).toBe(2026);
+        expect(parsed?.getMonth()).toBe(11);
+        expect(parsed?.getDate()).toBe(25);
+
+        // Parse date input with native-Intl-style bidi controls
+        input.value = "٢٥\u200F/١٢\u200F/٢٠٢٦";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("blur", { bubbles: true }));
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        parsed = fixture.componentInstance.value();
+        expect(parsed?.getFullYear()).toBe(2026);
+        expect(parsed?.getMonth()).toBe(11);
+        expect(parsed?.getDate()).toBe(25);
+
         // Format override precedence
         fixture.componentInstance.format.set("yyyy-MM-dd");
         fixture.detectChanges();
         await fixture.whenStable();
-        expect(input.value).toBe("٢٠٢٦-٠٩-١٥");
+        expect(input.value).toBe("٢٠٢٦-١٢-٢٥");
 
         // Clear format override: restores locale-derived format
         fixture.componentInstance.format.set(null);
         fixture.detectChanges();
         await fixture.whenStable();
-        expect(input.value).toBe("١٥/٠٩/٢٠٢٦");
+        expect(input.value).toBe("٢٥/١٢/٢٠٢٦");
     });
 
-    it("integrates with TimePicker for 24h, 12h, and seconds formats", async () => {
+    it("integrates with TimePicker for 24h, 12h, and seconds formats with parsing and popup interaction", async () => {
         TestBed.configureTestingModule({
             imports: [TimePickerIntegrationHostComponent],
             providers: [
@@ -425,12 +476,63 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
         await fixture.whenStable();
         expect(input.value).toBe("٠٩:٣٠ م");
 
-        // Open time picker button label
+        // Open time picker button label & popup
         const toggleBtn = root.querySelector("button") as HTMLButtonElement;
         expect(toggleBtn.getAttribute("aria-label")).toBe("فتح منتقي الوقت");
+
+        toggleBtn.click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const meridiemList = document.querySelector("ol[aria-label='ص/م']") as HTMLOListElement;
+        expect(meridiemList).not.toBeNull();
+        const amItem = Array.from(meridiemList.querySelectorAll("li")).find(li => li.textContent?.trim() === "ص");
+        expect(amItem).toBeDefined();
+
+        amItem?.click();
+        fixture.detectChanges();
+
+        const setButton = Array.from(document.querySelectorAll<HTMLButtonElement>("button")).find(
+            b => b.textContent?.trim() === "تعيين"
+        );
+        expect(setButton).toBeDefined();
+        setButton?.click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(input.value).toBe("٠٩:٣٠ ص");
+        expect(fixture.componentInstance.value()?.getHours()).toBe(9);
+
+        // Test parsing 12h with seconds in Arabic-Indic digits
+        fixture.componentInstance.showSeconds.set(true);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        input.value = "٠٨:١٥:٠٠ ص";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("blur", { bubbles: true }));
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        let parsedTime = fixture.componentInstance.value();
+        expect(parsedTime?.getHours()).toBe(8);
+        expect(parsedTime?.getMinutes()).toBe(15);
+        expect(parsedTime?.getSeconds()).toBe(0);
+
+        // Test parsing 12h with seconds in ASCII digits
+        input.value = "08:15:00 ص";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("blur", { bubbles: true }));
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        parsedTime = fixture.componentInstance.value();
+        expect(parsedTime?.getHours()).toBe(8);
+        expect(parsedTime?.getMinutes()).toBe(15);
+        expect(parsedTime?.getSeconds()).toBe(0);
     });
 
-    it("integrates with DateTimePicker for 24h, 12h, and tab navigation", async () => {
+    it("integrates with DateTimePicker for 24h, 12h, popup tabs, and parsing", async () => {
         TestBed.configureTestingModule({
             imports: [DateTimePickerIntegrationHostComponent],
             providers: [
@@ -464,9 +566,71 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
         await fixture.whenStable();
         expect(input.value).toBe("١٥/٠٩/٢٠٢٦، ٠٩:٣٠:٤٥ م");
 
-        // Open datetime picker button label
+        // Open datetime picker popup
         const toggleBtn = root.querySelector("button") as HTMLButtonElement;
         expect(toggleBtn.getAttribute("aria-label")).toBe("فتح منتقي التاريخ والوقت");
+
+        toggleBtn.click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const popup = document.querySelector("div[role='dialog']") as HTMLElement;
+        expect(popup?.getAttribute("aria-label")).toBe("منتقي التاريخ والوقت");
+
+        const tabButtons = Array.from(popup.querySelectorAll<HTMLButtonElement>("button[role='tab']"));
+        expect(tabButtons[0]?.textContent?.trim()).toBe("التاريخ");
+        expect(tabButtons[1]?.textContent?.trim()).toBe("الوقت");
+
+        // In date view, Sunday is first: ح
+        const headerRow = popup.querySelector("div[style*='grid-template-columns']") as HTMLElement;
+        expect(headerRow?.querySelectorAll("div")[0]?.textContent?.trim()).toBe("ح");
+
+        // Switch to time view tab
+        tabButtons[1]?.click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const meridiemList = popup.querySelector("ol[aria-label='ص/م']") as HTMLOListElement;
+        expect(meridiemList).not.toBeNull();
+
+        const footerButtons = popup.querySelectorAll("div.border-t button");
+        expect(footerButtons[0]?.textContent?.trim()).toBe("تعيين");
+        expect(footerButtons[1]?.textContent?.trim()).toBe("إلغاء");
+
+        // Close popup
+        (footerButtons[1] as HTMLButtonElement).click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        // Test datetime parsing in Arabic-Indic digits
+        input.value = "٢٥/١٢/٢٠٢٦، ٠٨:١٥:٠٠ ص";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("blur", { bubbles: true }));
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        let parsedDateTime = fixture.componentInstance.value();
+        expect(parsedDateTime?.getFullYear()).toBe(2026);
+        expect(parsedDateTime?.getMonth()).toBe(11);
+        expect(parsedDateTime?.getDate()).toBe(25);
+        expect(parsedDateTime?.getHours()).toBe(8);
+        expect(parsedDateTime?.getMinutes()).toBe(15);
+        expect(parsedDateTime?.getSeconds()).toBe(0);
+
+        // Test datetime parsing in ASCII digits
+        input.value = "25/12/2026، 08:15:00 ص";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("blur", { bubbles: true }));
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        parsedDateTime = fixture.componentInstance.value();
+        expect(parsedDateTime?.getFullYear()).toBe(2026);
+        expect(parsedDateTime?.getMonth()).toBe(11);
+        expect(parsedDateTime?.getDate()).toBe(25);
+        expect(parsedDateTime?.getHours()).toBe(8);
+        expect(parsedDateTime?.getMinutes()).toBe(15);
+        expect(parsedDateTime?.getSeconds()).toBe(0);
     });
 
     it("integrates with TimeSelector for AM/PM toggling with Arabic labels", async () => {
@@ -495,6 +659,22 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
         expect(pmItem).toBeDefined();
         expect(listItems.some(li => li.textContent?.trim() === "AM")).toBe(false);
         expect(listItems.some(li => li.textContent?.trim() === "PM")).toBe(false);
+
+        // AM -> PM -> AM toggling with model updates
+        const setButton = Array.from(hostEl.querySelectorAll("button")).find(b => b.textContent?.trim() === "تعيين");
+        expect(setButton).toBeDefined();
+
+        pmItem?.click();
+        fixture.detectChanges();
+        setButton?.click();
+        fixture.detectChanges();
+        expect(fixture.componentInstance.testTime()?.getHours()).toBe(21);
+
+        amItem?.click();
+        fixture.detectChanges();
+        setButton?.click();
+        fixture.detectChanges();
+        expect(fixture.componentInstance.testTime()?.getHours()).toBe(9);
     });
 
     it("integrates with Calendar for Sunday-first headers, month/year, and views", async () => {
@@ -516,6 +696,7 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
         // Header buttons
         const todayBtn = root.querySelector("button:first-child") as HTMLButtonElement;
         expect(todayBtn.textContent?.trim()).toBe("اليوم");
+        expect(todayBtn.getAttribute("aria-label")).toContain("الانتقال إلى اليوم (");
 
         const prevBtn = root.querySelector("button[aria-label='الشهر السابق']") as HTMLButtonElement;
         const nextBtn = root.querySelector("button[aria-label='الشهر التالي']") as HTMLButtonElement;
@@ -523,8 +704,13 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
         expect(nextBtn).not.toBeNull();
 
         // Month heading: سبتمبر ٢٠٢٦
-        const heading = root.querySelector("[id$='-heading']")?.textContent?.trim();
-        expect(heading).toBe("سبتمبر ٢٠٢٦");
+        const viewButton = root.querySelector("button[aria-label*='التبديل إلى عرض السنة']") as HTMLButtonElement;
+        expect(viewButton).not.toBeNull();
+        expect(viewButton.textContent).toContain("سبتمبر ٢٠٢٦");
+
+        // Live region
+        const liveRegion = root.querySelector("[aria-live='polite']") as HTMLElement;
+        expect(liveRegion.textContent).toContain("تقويم سبتمبر ٢٠٢٦");
 
         // Sunday-first weekday headers: ح ن ث ر خ ج س
         const headerRow = root.querySelectorAll("div[style*='grid-template-columns']")[0] as HTMLElement;
@@ -535,6 +721,28 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
         // Accessible names remain full Arabic day names
         const accessibleLabels = headerDivs.map(el => el.getAttribute("aria-label"));
         expect(accessibleLabels).toEqual(["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"]);
+
+        // 1. Click to switch to Year View
+        viewButton.click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(liveRegion.textContent).toContain("عرض السنة، ٢٠٢٦");
+        expect(root.querySelector("button[aria-label='السنة السابقة']")).not.toBeNull();
+        expect(root.querySelector("button[aria-label='السنة التالية']")).not.toBeNull();
+
+        const yearViewButton = root.querySelector("button[aria-label*='التبديل إلى عرض العقد']") as HTMLButtonElement;
+        expect(yearViewButton).not.toBeNull();
+        expect(yearViewButton.getAttribute("aria-label")).toContain("التبديل إلى عرض العقد. السنة الحالية ٢٠٢٦");
+
+        // 2. Click to switch to Decade View
+        yearViewButton.click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(liveRegion.textContent).toContain("عرض العقد، من ٢٠٢٠ إلى ٢٠٢٩");
+        expect(root.querySelector("button[aria-label='العقد السابق']")).not.toBeNull();
+        expect(root.querySelector("button[aria-label='العقد التالي']")).not.toBeNull();
     });
 
     it("respects explicit firstDay override precedence in Calendar", async () => {
@@ -689,6 +897,36 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
 
         expect(prevBtn).not.toBeNull();
         expect(nextBtn).not.toBeNull();
+    });
+
+    it("renders Grid component with Arabic row reordering accessibility labels", async () => {
+        await TestBed.configureTestingModule({
+            imports: [GridIntegrationHostComponent],
+            providers: [
+                provideMonaI18n({
+                    locale: MONA_AR_SA_LOCALE
+                })
+            ]
+        }).compileComponents();
+
+        const fixture = TestBed.createComponent(GridIntegrationHostComponent);
+        for (let cycle = 0; cycle < 3; cycle++) {
+            fixture.detectChanges();
+            await fixture.whenStable();
+        }
+        await fixture.whenRenderingDone();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const hostEl = fixture.nativeElement as HTMLElement;
+        const reorderHeader = hostEl.querySelector("th[aria-label='إعادة ترتيب الصفوف']");
+        expect(reorderHeader).not.toBeNull();
+
+        const reorderButton = hostEl.querySelector("button[aria-label*='إعادة ترتيب الصف ١']");
+        expect(reorderButton).not.toBeNull();
+        expect(reorderButton?.getAttribute("aria-label")).toContain(
+            "استخدم Alt + سهم لأعلى أو Alt + سهم لأسفل للتحريك."
+        );
     });
 
     it("provides Arabic messages for Grid row reordering accessibility and live announcements", () => {
