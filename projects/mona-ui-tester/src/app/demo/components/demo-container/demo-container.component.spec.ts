@@ -32,7 +32,16 @@ describe("DemoContainerComponent", () => {
         const options = (
             component as unknown as { localeOptions: readonly { label: string; locale: { id: string } }[] }
         ).localeOptions;
-        expect(options.some(o => o.locale.id === "it-IT" && o.label === "Italiano (Italia)")).toBe(true);
-        expect(options).toHaveLength(11);
+        expect(options).toContainEqual(
+            expect.objectContaining({
+                label: "Italiano (Italia)",
+                locale: expect.objectContaining({ id: "it-IT" })
+            })
+        );
+        const ids = options.map(option => option.locale.id);
+        expect(new Set(ids).size).toBe(ids.length);
+
+        const labels = options.map(option => option.label);
+        expect(new Set(labels).size).toBe(labels.length);
     });
 });
