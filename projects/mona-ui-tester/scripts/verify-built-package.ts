@@ -360,6 +360,40 @@ if (hasIdId) {
     }
 }
 
+const hasRuRu = expectedLocales.some(l => l.id === "ru-RU");
+if (hasRuRu) {
+    const ruDateFormat = getLocaleDateInputFormat("ru-RU");
+    if (ruDateFormat !== "dd.MM.yyyy") {
+        console.error("Invalid getLocaleDateInputFormat output for ru-RU: " + ruDateFormat);
+        process.exit(1);
+    }
+    const ruTime24 = getLocaleTimeInputFormat("ru-RU", { hourFormat: "24", showSeconds: false });
+    if (ruTime24 !== "HH:mm") {
+        console.error("Invalid getLocaleTimeInputFormat (24h) output for ru-RU: " + ruTime24);
+        process.exit(1);
+    }
+    const ruTime12 = getLocaleTimeInputFormat("ru-RU", { hourFormat: "12", showSeconds: false });
+    if (ruTime12 !== "hh:mm a") {
+        console.error("Invalid getLocaleTimeInputFormat (12h) output for ru-RU: " + ruTime12);
+        process.exit(1);
+    }
+    const ruDateTime24 = getLocaleDateTimeInputFormat("ru-RU", { hourFormat: "24", showSeconds: false });
+    if (ruDateTime24 !== "dd.MM.yyyy, HH:mm") {
+        console.error("Invalid getLocaleDateTimeInputFormat (24h) output for ru-RU: " + ruDateTime24);
+        process.exit(1);
+    }
+    const ruDateTime12 = getLocaleDateTimeInputFormat("ru-RU", { hourFormat: "12", showSeconds: false });
+    if (ruDateTime12 !== "dd.MM.yyyy, hh:mm a") {
+        console.error("Invalid getLocaleDateTimeInputFormat (12h) output for ru-RU: " + ruDateTime12);
+        process.exit(1);
+    }
+    const ruFirstDay = getLocaleFirstDayOfWeek("ru-RU");
+    if (ruFirstDay !== "monday") {
+        console.error("Invalid getLocaleFirstDayOfWeek output for ru-RU: " + ruFirstDay);
+        process.exit(1);
+    }
+}
+
 console.log("Runtime package import verified successfully.");
 `;
         writeFileSync(smokeScriptPath, smokeScript);
@@ -446,6 +480,15 @@ void testIdDate;
 void testIdTime;
 void testIdDateTime;
 void testIdFirstDay;
+
+const testRuDate: string = getLocaleDateInputFormat("ru-RU");
+const testRuTime: string = getLocaleTimeInputFormat("ru-RU", { hourFormat: "24" });
+const testRuDateTime: string = getLocaleDateTimeInputFormat("ru-RU", { hourFormat: "24" });
+const testRuFirstDay: LocaleFirstDayOfWeek = getLocaleFirstDayOfWeek("ru-RU");
+void testRuDate;
+void testRuTime;
+void testRuDateTime;
+void testRuFirstDay;
 
 // @ts-expect-error Locale argument is required
 getLocaleDateInputFormat();
