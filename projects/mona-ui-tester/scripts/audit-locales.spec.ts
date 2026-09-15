@@ -154,19 +154,30 @@ describe("audit-locales", () => {
             expect(isAllowedLocaleCopyException("it-IT", "chart.openAbbreviation", "O")).toBe(false);
         });
 
-        it("allows Indonesian-specific unchanged words on approved paths", () => {
+        it("allows only the established Indonesian copied-English exceptions", () => {
             expect(isAllowedLocaleCopyException("id-ID", "dialog.ok", "OK")).toBe(true);
             expect(isAllowedLocaleCopyException("id-ID", "multiSelect.itemsCount", "item")).toBe(true);
             expect(isAllowedLocaleCopyException("id-ID", "scrollView.slide", "slide")).toBe(true);
             expect(isAllowedLocaleCopyException("id-ID", "timeSelector.am", "AM")).toBe(true);
-            expect(isAllowedLocaleCopyException("id-ID", "timeSelector.pm", "PM")).toBe(true);
             expect(isAllowedLocaleCopyException("id-ID", "timeSelector.amPm", "AM/PM")).toBe(true);
+            expect(isAllowedLocaleCopyException("id-ID", "timeSelector.pm", "PM")).toBe(true);
+
+            // Wrong paths / unrelated English must remain rejected.
+            expect(isAllowedLocaleCopyException("id-ID", "dialog.cancel", "Cancel")).toBe(false);
+            expect(isAllowedLocaleCopyException("id-ID", "editor.bold", "Bold")).toBe(false);
+            expect(isAllowedLocaleCopyException("id-ID", "pager.rangeStatus", "item")).toBe(false);
+            expect(isAllowedLocaleCopyException("id-ID", "scrollView.carousel", "carousel")).toBe(false);
+
+            // Wrong values for otherwise valid paths must remain rejected.
+            expect(isAllowedLocaleCopyException("id-ID", "multiSelect.itemsCount", "items")).toBe(false);
         });
 
         it("disallows Indonesian-specific exceptions for other locales or unapproved paths", () => {
             expect(isAllowedLocaleCopyException("es-ES", "dialog.ok", "OK")).toBe(false);
+            expect(isAllowedLocaleCopyException("es-ES", "multiSelect.itemsCount", "item")).toBe(false);
             expect(isAllowedLocaleCopyException("id-ID", "other.ok", "OK")).toBe(false);
             expect(isAllowedLocaleCopyException("id-ID", "dialog.ok", "Cancel")).toBe(false);
+            expect(isAllowedLocaleCopyException(undefined, "dialog.ok", "OK")).toBe(false);
         });
 
         it("disallows copy exceptions for Turkish (tr-TR)", () => {
