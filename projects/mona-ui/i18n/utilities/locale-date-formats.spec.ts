@@ -398,16 +398,14 @@ describe("locale-date-formats", () => {
                     expect(resolveFallbackFirstDayOfWeek("zh-CN")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("it-IT")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("tr-TR")).toBe("monday");
+                    expect(resolveFallbackFirstDayOfWeek("is-IS")).toBe("monday");
 
-                    // TW, PT, BR, KR, and YE are Sunday-first in CLDR
+                    // Verified Sunday-first regions in the current CLDR dataset.
                     expect(resolveFallbackFirstDayOfWeek("zh-TW")).toBe("sunday");
                     expect(resolveFallbackFirstDayOfWeek("ko-KR")).toBe("sunday");
-                    expect(resolveFallbackFirstDayOfWeek("is-IS")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("ar-YE")).toBe("sunday");
                     expect(resolveFallbackFirstDayOfWeek("ar-SA")).toBe("sunday");
                     expect(resolveFallbackFirstDayOfWeek("id-ID")).toBe("sunday");
-
-                    // PT and BR are Sunday-first in CLDR
                     expect(resolveFallbackFirstDayOfWeek("pt-PT")).toBe("sunday");
                     expect(resolveFallbackFirstDayOfWeek("pt-BR")).toBe("sunday");
 

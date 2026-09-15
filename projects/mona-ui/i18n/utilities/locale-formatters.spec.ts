@@ -205,6 +205,12 @@ describe("locale-formatters", () => {
             expect(parseLocalizedNumber("12,5", "tr-TR", { mode: "locale" })).toBe(12.5);
             expect(parseLocalizedNumber("12.5", "tr-TR", { mode: "locale" })).toBeNull();
             expect(parseLocalizedNumber("12.5", "tr-TR", { mode: "edit" })).toBe(12.5);
+
+            // id-ID equivalent matrix
+            expect(parseLocalizedNumber("1.000", "id-ID", { mode: "locale" })).toBe(1000);
+            expect(parseLocalizedNumber("12,5", "id-ID", { mode: "locale" })).toBe(12.5);
+            expect(parseLocalizedNumber("12.5", "id-ID", { mode: "locale" })).toBeNull();
+            expect(parseLocalizedNumber("12.5", "id-ID", { mode: "edit" })).toBe(12.5);
         });
 
         it("supports symmetric locale vs edit parse modes for dot-decimal locales (en-US)", () => {
@@ -260,6 +266,7 @@ describe("locale-formatters", () => {
             expect(parseLocalizedNumber("1,000", "en-US", { mode: "locale" })).toBe(1000);
             expect(parseLocalizedNumber("1.000", "de-DE", { mode: "locale" })).toBe(1000);
             expect(parseLocalizedNumber("1.000", "tr-TR", { mode: "locale" })).toBe(1000);
+            expect(parseLocalizedNumber("1.000", "id-ID", { mode: "locale" })).toBe(1000);
         });
 
         it("rejects tabs, newlines, and non-standard whitespace in strict mode", () => {
