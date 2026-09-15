@@ -365,9 +365,11 @@ describe("MONA_RU_RU_LOCALE", () => {
             expect(m.multiSelect.itemsCount(25)).toBe("+ 25 элементов");
             expect(m.multiSelect.itemsCount(101)).toBe("+ 101 элемент");
             expect(m.multiSelect.itemsCount(111)).toBe("+ 111 элементов");
+            expect(m.multiSelect.itemsCount(1.5)).toBe("+ 1.5 элемента");
         });
 
         it("inflects Pager jumpForwardLabel correctly across one, few, and many counts", () => {
+            expect(m.pager.jumpForwardLabel(0)).toBe("Вперёд на 0 страниц");
             expect(m.pager.jumpForwardLabel(1)).toBe("Вперёд на 1 страницу");
             expect(m.pager.jumpForwardLabel(2)).toBe("Вперёд на 2 страницы");
             expect(m.pager.jumpForwardLabel(4)).toBe("Вперёд на 4 страницы");
@@ -378,9 +380,11 @@ describe("MONA_RU_RU_LOCALE", () => {
             expect(m.pager.jumpForwardLabel(25)).toBe("Вперёд на 25 страниц");
             expect(m.pager.jumpForwardLabel(101)).toBe("Вперёд на 101 страницу");
             expect(m.pager.jumpForwardLabel(111)).toBe("Вперёд на 111 страниц");
+            expect(m.pager.jumpForwardLabel(1.5)).toBe("Вперёд на 1.5 страницы");
         });
 
         it("inflects Pager jumpBackwardLabel correctly across one, few, and many counts", () => {
+            expect(m.pager.jumpBackwardLabel(0)).toBe("Назад на 0 страниц");
             expect(m.pager.jumpBackwardLabel(1)).toBe("Назад на 1 страницу");
             expect(m.pager.jumpBackwardLabel(2)).toBe("Назад на 2 страницы");
             expect(m.pager.jumpBackwardLabel(4)).toBe("Назад на 4 страницы");
@@ -391,6 +395,7 @@ describe("MONA_RU_RU_LOCALE", () => {
             expect(m.pager.jumpBackwardLabel(25)).toBe("Назад на 25 страниц");
             expect(m.pager.jumpBackwardLabel(101)).toBe("Назад на 101 страницу");
             expect(m.pager.jumpBackwardLabel(111)).toBe("Назад на 111 страниц");
+            expect(m.pager.jumpBackwardLabel(1.5)).toBe("Назад на 1.5 страницы");
         });
     });
 });

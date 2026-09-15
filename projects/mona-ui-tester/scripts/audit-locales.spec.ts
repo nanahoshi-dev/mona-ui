@@ -202,6 +202,11 @@ describe("audit-locales", () => {
         it("disallows Russian-specific exceptions for other locales or undefined locale", () => {
             expect(isAllowedLocaleCopyException("es-ES", "timeSelector.am", "AM")).toBe(false);
             expect(isAllowedLocaleCopyException(undefined, "timeSelector.am", "AM")).toBe(false);
+            expect(isAllowedLocaleCopyException("ru", "timeSelector.am", "AM")).toBe(false);
+            expect(isAllowedLocaleCopyException("ru_RU", "timeSelector.am", "AM")).toBe(false);
+            expect(isAllowedLocaleCopyException("ru-BY", "timeSelector.am", "AM")).toBe(false);
+            expect(isAllowedLocaleCopyException("ru-KZ", "timeSelector.am", "AM")).toBe(false);
+            expect(isAllowedLocaleCopyException("uk-UA", "timeSelector.am", "AM")).toBe(false);
         });
     });
 

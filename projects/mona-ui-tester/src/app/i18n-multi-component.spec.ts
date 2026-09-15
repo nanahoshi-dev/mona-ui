@@ -999,11 +999,7 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
         expect(ruPager?.querySelector("button[aria-label='Первая страница']")).not.toBeNull();
 
         // 4. Switch back to English default
-        i18n.use({
-            direction: "ltr",
-            id: "en-US",
-            messages: {}
-        });
+        i18n.use(MONA_DEFAULT_LOCALE);
         await fixture.whenStable();
         fixture.detectChanges();
 

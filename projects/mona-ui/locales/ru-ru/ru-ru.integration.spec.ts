@@ -1,6 +1,6 @@
 import { Component, signal, viewChild } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { BreadcrumbComponent, BreadcrumbItemComponent } from "@nanahoshi/mona-ui/breadcrumb";
 import { CalendarComponent, type FirstDayOfWeek } from "@nanahoshi/mona-ui/calendar";
 import { ChipComponent } from "@nanahoshi/mona-ui/chip";
@@ -15,6 +15,7 @@ import {
     GRID_DEFAULT_MESSAGES
 } from "@nanahoshi/mona-ui/grid";
 import { ListBoxComponent } from "@nanahoshi/mona-ui/list-box";
+import { MultiSelectComponent, MultiSelectSummaryTagDirective } from "@nanahoshi/mona-ui/multi-select";
 import { PagerComponent, PAGER_DEFAULT_MESSAGES } from "@nanahoshi/mona-ui/pager";
 import { ScrollViewComponent } from "@nanahoshi/mona-ui/scroll-view";
 import { SplitButtonComponent } from "@nanahoshi/mona-ui/split-button";
@@ -196,7 +197,39 @@ class ChipIntegrationHostComponent {
     public readonly removeLabel = signal<string | undefined>(undefined);
 }
 
+@Component({
+    template: `
+        <mona-multi-select
+            [data]="data"
+            textField="text"
+            valueField="value"
+            [valuePrimitive]="true"
+            [monaMultiSelectSummaryTag]="1"
+            [(value)]="selectedValues" />
+    `,
+    imports: [MultiSelectComponent, MultiSelectSummaryTagDirective]
+})
+class MultiSelectIntegrationHostComponent {
+    public readonly data = [
+        { text: "Item 1", value: 1 },
+        { text: "Item 2", value: 2 },
+        { text: "Item 3", value: 3 },
+        { text: "Item 4", value: 4 },
+        { text: "Item 5", value: 5 },
+        { text: "Item 6", value: 6 }
+    ];
+    public readonly selectedValues = signal<number[]>([1, 2]);
+}
+
+function clearOverlays(): void {
+    document.querySelectorAll(".cdk-overlay-container").forEach(container => container.replaceChildren());
+}
+
 describe("MONA_RU_RU_LOCALE Integration with MonaI18nService", () => {
+    afterEach(() => {
+        clearOverlays();
+    });
+
     it("configures ru-RU locale at startup via provideMonaI18n", () => {
         TestBed.configureTestingModule({
             providers: [
@@ -807,6 +840,11 @@ describe("MONA_RU_RU_LOCALE Integration with MonaI18nService", () => {
         await fixture.whenStable();
         expect(getFirstWeekday()).toBe("вс");
 
+        // Close calendar popup
+        toggleBtn.click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
         // 5. Explicit format override
         fixture.componentInstance.format.set("yyyy-MM-dd");
         fixture.detectChanges();
@@ -1108,5 +1146,50 @@ describe("MONA_RU_RU_LOCALE Integration with MonaI18nService", () => {
         await fixture.whenStable();
 
         expect(labeledButton.getAttribute("aria-label")).toBe("Удалить Angular");
+    });
+
+    it("renders MultiSelect component with Russian summary tag itemsCount inflections and reactive switching", async () => {
+        TestBed.configureTestingModule({
+            imports: [MultiSelectIntegrationHostComponent],
+            providers: [
+                provideMonaI18n({
+                    locale: MONA_RU_RU_LOCALE
+                })
+            ]
+        });
+
+        const fixture = TestBed.createComponent(MultiSelectIntegrationHostComponent);
+        const service = TestBed.inject(MonaI18nService);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const hostEl = fixture.nativeElement as HTMLElement;
+
+        // 1. 2 selected, 1 tag shown -> remaining 1 -> "+ 1 элемент"
+        expect(hostEl.textContent).toContain("+ 1 элемент");
+
+        // 2. 3 selected, 1 tag shown -> remaining 2 -> "+ 2 элемента"
+        fixture.componentInstance.selectedValues.set([1, 2, 3]);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(hostEl.textContent).toContain("+ 2 элемента");
+
+        // 3. 6 selected, 1 tag shown -> remaining 5 -> "+ 5 элементов"
+        fixture.componentInstance.selectedValues.set([1, 2, 3, 4, 5, 6]);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(hostEl.textContent).toContain("+ 5 элементов");
+
+        // 4. Reactive runtime locale switching to default English
+        service.use(MONA_DEFAULT_LOCALE);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(hostEl.textContent).toContain("+ 5 items");
+
+        // 5. Reactive switch back to Russian
+        service.use(MONA_RU_RU_LOCALE);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(hostEl.textContent).toContain("+ 5 элементов");
     });
 });

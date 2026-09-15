@@ -648,6 +648,31 @@ export function getLocaleFirstDayOfWeek(locale) { return locale === "ru-RU" ? "m
             }
         });
 
+        it("fails when ru-RU is expected but getLocaleDateTimeInputFormat (24h) returns invalid datetime format", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                populateFakeDist(fakeDist, {
+                    i18nMjs: `
+export function getLocaleDateInputFormat(locale) { return "dd.MM.yyyy"; }
+export function getLocaleTimeInputFormat(locale, options) { return options?.hourFormat === "12" ? "hh:mm a" : "HH:mm"; }
+export function getLocaleDateTimeInputFormat(locale, options) { return options?.hourFormat === "12" ? "dd.MM.yyyy, hh:mm a" : "dd.MM.yyyy HH:mm"; }
+export function getLocaleFirstDayOfWeek(locale) { return locale === "ru-RU" ? "monday" : "sunday"; }
+`,
+                    localesDts: 'export declare const MONA_RU_RU_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesMjs: 'export const MONA_RU_RU_LOCALE = { id: "ru-RU", direction: "ltr", messages: {} };\n'
+                });
+
+                expect(() =>
+                    runConsumerSmokeTest({
+                        distDir: fakeDist,
+                        expectedLocales: [{ direction: "ltr", id: "ru-RU", symbol: "MONA_RU_RU_LOCALE" }]
+                    })
+                ).toThrow("Invalid getLocaleDateTimeInputFormat (24h) output for ru-RU: dd.MM.yyyy HH:mm");
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
+            }
+        });
+
         it("fails when runtime package is missing expected export", () => {
             const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
             try {
