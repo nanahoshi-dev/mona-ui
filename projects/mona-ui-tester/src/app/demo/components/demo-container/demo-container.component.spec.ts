@@ -44,6 +44,12 @@ describe("DemoContainerComponent", () => {
                 locale: expect.objectContaining({ id: "tr-TR" })
             })
         );
+        expect(options).toContainEqual(
+            expect.objectContaining({
+                label: "Indonesia",
+                locale: expect.objectContaining({ id: "id-ID" })
+            })
+        );
         const ids = options.map(option => option.locale.id);
         expect(new Set(ids).size).toBe(ids.length);
 
