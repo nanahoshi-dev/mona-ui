@@ -13,6 +13,7 @@ import {
     MONA_KO_KR_LOCALE,
     MONA_PT_BR_LOCALE,
     MONA_TR_TR_LOCALE,
+    MONA_ID_ID_LOCALE,
     MONA_ZH_CN_LOCALE,
     MONA_ZH_TW_LOCALE
 } from "@nanahoshi/mona-ui/locales";
@@ -186,6 +187,68 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
 
         expect(i18n.localeId()).toBe("en-US");
         expect(trPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
+        expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
+    });
+
+    it("integrates official Indonesian (id-ID) locale reactively with runtime overrides and formatting", async () => {
+        const root = fixture.nativeElement as HTMLElement;
+        const input = root.querySelector("mona-numeric-text-box input") as HTMLInputElement;
+
+        // 1. Activate official Indonesian (Indonesia) locale
+        i18n.use(MONA_ID_ID_LOCALE);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("id-ID");
+        expect(i18n.direction()).toBe("ltr");
+
+        // Pager firstPageLabel in Indonesian: "Halaman pertama"
+        const idPager = root.querySelector("mona-pager");
+        expect(idPager?.querySelector("button[aria-label='Halaman pertama']")).not.toBeNull();
+
+        // ScrollView previousPage in Indonesian: "Halaman sebelumnya"
+        const idScroll = root.querySelector("mona-scroll-view");
+        expect(idScroll?.querySelector("button[aria-label='Halaman sebelumnya']")).not.toBeNull();
+
+        // Calendar translated UI controls and live region in Indonesian
+        const idCalendar = root.querySelector("mona-calendar");
+        expect(idCalendar?.querySelector("button:first-child")?.textContent?.trim()).toBe("Hari ini");
+        expect(idCalendar?.querySelector("button[aria-label='Bulan sebelumnya']")).not.toBeNull();
+        expect(idCalendar?.querySelector("button[aria-label='Bulan berikutnya']")).not.toBeNull();
+        expect(idCalendar?.querySelector("[aria-live='polite']")?.textContent).toContain("Kalender");
+
+        // Calendar Sunday-first header (Min)
+        const headerRow = idCalendar?.querySelector("div[style*='grid-template-columns']") as HTMLElement;
+        expect(headerRow?.querySelector("span[aria-hidden='true']")?.textContent?.trim()).toBe("Min");
+
+        // NumericTextBox formatting with Indonesian comma separator
+        expect(input.getAttribute("aria-valuetext")).toBe("1234,50");
+
+        // 2. Test application override precedence over Indonesian locale
+        i18n.patchMessages({
+            pager: {
+                firstPageLabel: "Awal"
+            }
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(idPager?.querySelector("button[aria-label='Awal']")).not.toBeNull();
+
+        // 3. Clear overrides: Indonesian locale value returns
+        i18n.clearMessages();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(idPager?.querySelector("button[aria-label='Halaman pertama']")).not.toBeNull();
+
+        // 4. Switch back to English default
+        i18n.use(MONA_DEFAULT_LOCALE);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("en-US");
+        expect(idPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
         expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
     });
 
