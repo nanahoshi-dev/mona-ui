@@ -62,6 +62,10 @@ describe("locale-date-formats", () => {
             expect(format).not.toMatch(/[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/);
         });
 
+        it("returns Indonesian day/month/year format for id-ID", () => {
+            expect(getLocaleDateInputFormat("id-ID")).toBe("dd/MM/yyyy");
+        });
+
         it("falls back gracefully for invalid or empty locale", () => {
             expect(getLocaleDateInputFormat("")).toBe("dd/MM/yyyy");
             expect(getLocaleDateInputFormat("invalid-locale-!!!")).toBe("dd/MM/yyyy");
@@ -138,6 +142,16 @@ describe("locale-date-formats", () => {
         it("returns Turkish 12-hour a hh:mm and a hh:mm:ss with day period in prefix position for tr-TR", () => {
             expect(getLocaleTimeInputFormat("tr-TR", { hourFormat: "12", showSeconds: false })).toBe("a hh:mm");
             expect(getLocaleTimeInputFormat("tr-TR", { hourFormat: "12", showSeconds: true })).toBe("a hh:mm:ss");
+        });
+
+        it("returns Indonesian 24-hour HH.mm and HH.mm.ss for id-ID", () => {
+            expect(getLocaleTimeInputFormat("id-ID", { hourFormat: "24", showSeconds: false })).toBe("HH.mm");
+            expect(getLocaleTimeInputFormat("id-ID", { hourFormat: "24", showSeconds: true })).toBe("HH.mm.ss");
+        });
+
+        it("returns Indonesian 12-hour hh.mm a and hh.mm.ss a with day period in suffix position for id-ID", () => {
+            expect(getLocaleTimeInputFormat("id-ID", { hourFormat: "12", showSeconds: false })).toBe("hh.mm a");
+            expect(getLocaleTimeInputFormat("id-ID", { hourFormat: "12", showSeconds: true })).toBe("hh.mm.ss a");
         });
     });
 
@@ -235,6 +249,16 @@ describe("locale-date-formats", () => {
             const formatSec = getLocaleDateTimeInputFormat("tr-TR", { hourFormat: "12", showSeconds: true });
             expect(formatSec).toBe("dd.MM.yyyy a hh:mm:ss");
         });
+
+        it("derives combined Indonesian date and time format in 24h", () => {
+            expect(getLocaleDateTimeInputFormat("id-ID", { hourFormat: "24", showSeconds: false })).toBe("dd/MM/yyyy, HH.mm");
+            expect(getLocaleDateTimeInputFormat("id-ID", { hourFormat: "24", showSeconds: true })).toBe("dd/MM/yyyy, HH.mm.ss");
+        });
+
+        it("derives combined Indonesian date and time format in 12h", () => {
+            expect(getLocaleDateTimeInputFormat("id-ID", { hourFormat: "12", showSeconds: false })).toBe("dd/MM/yyyy, hh.mm a");
+            expect(getLocaleDateTimeInputFormat("id-ID", { hourFormat: "12", showSeconds: true })).toBe("dd/MM/yyyy, hh.mm.ss a");
+        });
     });
 
     describe("getLocaleFirstDayOfWeek", () => {
@@ -257,6 +281,10 @@ describe("locale-date-formats", () => {
 
             it("returns sunday for Japanese (ja-JP)", () => {
                 expect(getLocaleFirstDayOfWeek("ja-JP")).toBe("sunday");
+            });
+
+            it("returns sunday for Indonesian (id-ID)", () => {
+                expect(getLocaleFirstDayOfWeek("id-ID")).toBe("sunday");
             });
 
             it("returns sunday for Korean (ko-KR)", () => {
@@ -377,6 +405,7 @@ describe("locale-date-formats", () => {
                     expect(resolveFallbackFirstDayOfWeek("is-IS")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("ar-YE")).toBe("sunday");
                     expect(resolveFallbackFirstDayOfWeek("ar-SA")).toBe("sunday");
+                    expect(resolveFallbackFirstDayOfWeek("id-ID")).toBe("sunday");
 
                     // PT and BR are Sunday-first in CLDR
                     expect(resolveFallbackFirstDayOfWeek("pt-PT")).toBe("sunday");

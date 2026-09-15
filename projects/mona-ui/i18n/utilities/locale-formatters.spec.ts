@@ -54,10 +54,17 @@ describe("locale-formatters", () => {
             expect(symbols.group).toBe(".");
             expect(symbols.minus).toBe("-");
         });
+
+        it("returns correct symbols for id-ID", () => {
+            const symbols = getNumberSymbols("id-ID");
+            expect(symbols.decimal).toBe(",");
+            expect(symbols.group).toBe(".");
+            expect(symbols.minus).toBe("-");
+        });
     });
 
     describe("getNumberGroupingPattern", () => {
-        it("returns Western 3-3 grouping for en-US, de-DE, it-IT, and tr-TR", () => {
+        it("returns Western 3-3 grouping for en-US, de-DE, it-IT, tr-TR, and id-ID", () => {
             const enPattern = getNumberGroupingPattern("en-US");
             expect(enPattern.primaryGroupSize).toBe(3);
             expect(enPattern.secondaryGroupSize).toBe(3);
@@ -77,6 +84,11 @@ describe("locale-formatters", () => {
             expect(trPattern.primaryGroupSize).toBe(3);
             expect(trPattern.secondaryGroupSize).toBe(3);
             expect(trPattern.groupSeparator).toBe(".");
+
+            const idPattern = getNumberGroupingPattern("id-ID");
+            expect(idPattern.primaryGroupSize).toBe(3);
+            expect(idPattern.secondaryGroupSize).toBe(3);
+            expect(idPattern.groupSeparator).toBe(".");
         });
 
         it("returns Indian 3-2 grouping for hi-IN, en-IN, bn-BD, and mr-IN", () => {
@@ -164,6 +176,15 @@ describe("locale-formatters", () => {
             expect(parseLocalizedNumber("-1.234,5", "tr-TR")).toBe(-1234.5);
             expect(parseLocalizedNumber("1.000", "tr-TR")).toBe(1000);
             expect(parseLocalizedNumber("12.5", "tr-TR", { mode: "edit" })).toBe(12.5);
+        });
+
+        it("parses comma-decimal numbers in id-ID", () => {
+            expect(parseLocalizedNumber("1234,5", "id-ID")).toBe(1234.5);
+            expect(parseLocalizedNumber("1.234,5", "id-ID")).toBe(1234.5);
+            expect(parseLocalizedNumber("1.234.567,89", "id-ID")).toBe(1234567.89);
+            expect(parseLocalizedNumber("-1.234,5", "id-ID")).toBe(-1234.5);
+            expect(parseLocalizedNumber("1.000", "id-ID")).toBe(1000);
+            expect(parseLocalizedNumber("12.5", "id-ID", { mode: "edit" })).toBe(12.5);
         });
 
         it("supports explicit locale vs edit parse modes for comma-decimal locales", () => {
@@ -310,7 +331,8 @@ describe("locale-formatters", () => {
                 "mr-IN",
                 "ar-SA",
                 "fa-IR",
-                "tr-TR"
+                "tr-TR",
+                "id-ID"
             ];
             const testValues = [12, 1234, 12345, 1234567, 12345678.9, -12345678.9];
 

@@ -326,6 +326,30 @@ if (hasTrTr) {
     }
 }
 
+const hasIdId = expectedLocales.some(l => l.id === "id-ID");
+if (hasIdId) {
+    const idDateFormat = getLocaleDateInputFormat("id-ID");
+    if (idDateFormat !== "dd/MM/yyyy") {
+        console.error("Invalid getLocaleDateInputFormat output for id-ID: " + idDateFormat);
+        process.exit(1);
+    }
+    const idTime24 = getLocaleTimeInputFormat("id-ID", { hourFormat: "24", showSeconds: false });
+    if (idTime24 !== "HH.mm") {
+        console.error("Invalid getLocaleTimeInputFormat output for id-ID: " + idTime24);
+        process.exit(1);
+    }
+    const idDateTime24 = getLocaleDateTimeInputFormat("id-ID", { hourFormat: "24", showSeconds: false });
+    if (idDateTime24 !== "dd/MM/yyyy, HH.mm") {
+        console.error("Invalid getLocaleDateTimeInputFormat output for id-ID: " + idDateTime24);
+        process.exit(1);
+    }
+    const idFirstDay = getLocaleFirstDayOfWeek("id-ID");
+    if (idFirstDay !== "sunday") {
+        console.error("Invalid getLocaleFirstDayOfWeek output for id-ID: " + idFirstDay);
+        process.exit(1);
+    }
+}
+
 console.log("Runtime package import verified successfully.");
 `;
         writeFileSync(smokeScriptPath, smokeScript);
@@ -403,6 +427,15 @@ void testItDate;
 void testItTime;
 void testItDateTime;
 void testItFirstDay;
+
+const testIdDate: string = getLocaleDateInputFormat("id-ID");
+const testIdTime: string = getLocaleTimeInputFormat("id-ID", { hourFormat: "24" });
+const testIdDateTime: string = getLocaleDateTimeInputFormat("id-ID", { hourFormat: "24" });
+const testIdFirstDay: LocaleFirstDayOfWeek = getLocaleFirstDayOfWeek("id-ID");
+void testIdDate;
+void testIdTime;
+void testIdDateTime;
+void testIdFirstDay;
 
 // @ts-expect-error Locale argument is required
 getLocaleDateInputFormat();

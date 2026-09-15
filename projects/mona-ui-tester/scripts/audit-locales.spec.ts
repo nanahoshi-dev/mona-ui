@@ -154,6 +154,19 @@ describe("audit-locales", () => {
             expect(isAllowedLocaleCopyException("it-IT", "chart.openAbbreviation", "O")).toBe(false);
         });
 
+        it("allows Indonesian-specific unchanged words on approved paths", () => {
+            expect(isAllowedLocaleCopyException("id-ID", "dialog.ok", "OK")).toBe(true);
+            expect(isAllowedLocaleCopyException("id-ID", "timeSelector.am", "AM")).toBe(true);
+            expect(isAllowedLocaleCopyException("id-ID", "timeSelector.pm", "PM")).toBe(true);
+            expect(isAllowedLocaleCopyException("id-ID", "timeSelector.amPm", "AM/PM")).toBe(true);
+        });
+
+        it("disallows Indonesian-specific exceptions for other locales or unapproved paths", () => {
+            expect(isAllowedLocaleCopyException("es-ES", "dialog.ok", "OK")).toBe(false);
+            expect(isAllowedLocaleCopyException("id-ID", "other.ok", "OK")).toBe(false);
+            expect(isAllowedLocaleCopyException("id-ID", "dialog.ok", "Cancel")).toBe(false);
+        });
+
         it("disallows copy exceptions for Turkish (tr-TR)", () => {
             expect(isAllowedLocaleCopyException("tr-TR", "dialog.ok", "OK")).toBe(false);
             expect(isAllowedLocaleCopyException("tr-TR", "timeSelector.am", "AM")).toBe(false);
