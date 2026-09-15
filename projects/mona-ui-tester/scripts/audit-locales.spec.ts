@@ -186,6 +186,23 @@ describe("audit-locales", () => {
             expect(isAllowedLocaleCopyException("tr-TR", "timeSelector.pm", "PM")).toBe(false);
             expect(isAllowedLocaleCopyException("tr-TR", "timeSelector.amPm", "AM/PM")).toBe(false);
         });
+
+        it("allows only the established Russian copied-English exceptions", () => {
+            expect(isAllowedLocaleCopyException("ru-RU", "timeSelector.am", "AM")).toBe(true);
+            expect(isAllowedLocaleCopyException("ru-RU", "timeSelector.pm", "PM")).toBe(true);
+            expect(isAllowedLocaleCopyException("ru-RU", "timeSelector.amPm", "AM/PM")).toBe(true);
+
+            expect(isAllowedLocaleCopyException("ru-RU", "dialog.ok", "OK")).toBe(false);
+            expect(isAllowedLocaleCopyException("ru-RU", "scrollView.slide", "slide")).toBe(false);
+            expect(isAllowedLocaleCopyException("ru-RU", "multiSelect.itemsCount", "item")).toBe(false);
+            expect(isAllowedLocaleCopyException("ru-RU", "editor.bold", "Bold")).toBe(false);
+            expect(isAllowedLocaleCopyException("ru-RU", "timeSelector.am", "Wrong")).toBe(false);
+        });
+
+        it("disallows Russian-specific exceptions for other locales or undefined locale", () => {
+            expect(isAllowedLocaleCopyException("es-ES", "timeSelector.am", "AM")).toBe(false);
+            expect(isAllowedLocaleCopyException(undefined, "timeSelector.am", "AM")).toBe(false);
+        });
     });
 
     describe("auditLocaleMessagesFile", () => {
@@ -1488,6 +1505,19 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
                 )
             ).toBe(true);
         });
+
+        it("discovers the official Russian locale", () => {
+            const discovery = discoverOfficialLocales();
+            expect(
+                discovery.locales.some(
+                    locale =>
+                        locale.canonicalId === "ru-RU" &&
+                        locale.localeExport === "MONA_RU_RU_LOCALE" &&
+                        locale.messagesExport === "RU_RU_MESSAGES" &&
+                        locale.direction === "ltr"
+                )
+            ).toBe(true);
+        });
     });
 
     describe("semantic day-period locale verification", () => {
@@ -1532,6 +1562,9 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
 
             expect(getIntlDayPeriod("id-ID", 9)).toBe("AM");
             expect(getIntlDayPeriod("id-ID", 21)).toBe("PM");
+
+            expect(getIntlDayPeriod("ru-RU", 9)).toBe("AM");
+            expect(getIntlDayPeriod("ru-RU", 21)).toBe("PM");
         });
 
         it("guarantees Spanish copy exceptions for day periods are rejected", () => {
