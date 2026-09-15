@@ -127,7 +127,7 @@ export class DemoContainerComponent<TComponent> {
         { label: "Deutsch", locale: MONA_DE_DE_LOCALE },
         { label: "Español (España)", locale: MONA_ES_ES_LOCALE },
         { label: "Français", locale: MONA_FR_FR_LOCALE },
-        { label: "Indonesia", locale: MONA_ID_ID_LOCALE },
+        { label: "Bahasa Indonesia (Indonesia)", locale: MONA_ID_ID_LOCALE },
         { label: "Italiano (Italia)", locale: MONA_IT_IT_LOCALE },
         { label: "Português (Brasil)", locale: MONA_PT_BR_LOCALE },
         { label: "Türkçe (Türkiye)", locale: MONA_TR_TR_LOCALE },

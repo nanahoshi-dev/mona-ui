@@ -46,7 +46,7 @@ describe("DemoContainerComponent", () => {
         );
         expect(options).toContainEqual(
             expect.objectContaining({
-                label: "Indonesia",
+                label: "Bahasa Indonesia (Indonesia)",
                 locale: expect.objectContaining({ id: "id-ID" })
             })
         );
