@@ -473,6 +473,81 @@ export function getLocaleFirstDayOfWeek(locale) { return locale === "tr-TR" ? "m
             }
         });
 
+        it("succeeds when synthetic package exports id-ID with matching formatting and Sunday first-day", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                populateFakeDist(fakeDist, {
+                    i18nMjs: `
+export function getLocaleDateInputFormat(locale) { return "dd/MM/yyyy"; }
+export function getLocaleTimeInputFormat(locale, options) { return options?.hourFormat === "12" ? "hh.mm a" : "HH.mm"; }
+export function getLocaleDateTimeInputFormat(locale, options) { return options?.hourFormat === "12" ? "dd/MM/yyyy, hh.mm a" : "dd/MM/yyyy, HH.mm"; }
+export function getLocaleFirstDayOfWeek(locale) { return "sunday"; }
+`,
+                    localesDts: 'export declare const MONA_ID_ID_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesMjs: 'export const MONA_ID_ID_LOCALE = { id: "id-ID", direction: "ltr", messages: {} };\n'
+                });
+
+                expect(() =>
+                    runConsumerSmokeTest({
+                        distDir: fakeDist,
+                        expectedLocales: [{ direction: "ltr", id: "id-ID", symbol: "MONA_ID_ID_LOCALE" }]
+                    })
+                ).not.toThrow();
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when id-ID is expected but getLocaleDateInputFormat returns invalid date format", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                populateFakeDist(fakeDist, {
+                    i18nMjs: `
+export function getLocaleDateInputFormat(locale) { return "yyyy-MM-dd"; }
+export function getLocaleTimeInputFormat(locale, options) { return options?.hourFormat === "12" ? "hh.mm a" : "HH.mm"; }
+export function getLocaleDateTimeInputFormat(locale, options) { return options?.hourFormat === "12" ? "dd/MM/yyyy, hh.mm a" : "dd/MM/yyyy, HH.mm"; }
+export function getLocaleFirstDayOfWeek(locale) { return "sunday"; }
+`,
+                    localesDts: 'export declare const MONA_ID_ID_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesMjs: 'export const MONA_ID_ID_LOCALE = { id: "id-ID", direction: "ltr", messages: {} };\n'
+                });
+
+                expect(() =>
+                    runConsumerSmokeTest({
+                        distDir: fakeDist,
+                        expectedLocales: [{ direction: "ltr", id: "id-ID", symbol: "MONA_ID_ID_LOCALE" }]
+                    })
+                ).toThrow("Invalid getLocaleDateInputFormat output for id-ID: yyyy-MM-dd");
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when id-ID is expected but getLocaleFirstDayOfWeek returns invalid first-day", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                populateFakeDist(fakeDist, {
+                    i18nMjs: `
+export function getLocaleDateInputFormat(locale) { return "dd/MM/yyyy"; }
+export function getLocaleTimeInputFormat(locale, options) { return options?.hourFormat === "12" ? "hh.mm a" : "HH.mm"; }
+export function getLocaleDateTimeInputFormat(locale, options) { return options?.hourFormat === "12" ? "dd/MM/yyyy, hh.mm a" : "dd/MM/yyyy, HH.mm"; }
+export function getLocaleFirstDayOfWeek(locale) { return locale === "id-ID" ? "monday" : "sunday"; }
+`,
+                    localesDts: 'export declare const MONA_ID_ID_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesMjs: 'export const MONA_ID_ID_LOCALE = { id: "id-ID", direction: "ltr", messages: {} };\n'
+                });
+
+                expect(() =>
+                    runConsumerSmokeTest({
+                        distDir: fakeDist,
+                        expectedLocales: [{ direction: "ltr", id: "id-ID", symbol: "MONA_ID_ID_LOCALE" }]
+                    })
+                ).toThrow("Invalid getLocaleFirstDayOfWeek output for id-ID: monday");
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
+            }
+        });
+
         it("fails when runtime package is missing expected export", () => {
             const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
             try {

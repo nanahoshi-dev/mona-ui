@@ -338,9 +338,19 @@ if (hasIdId) {
         console.error("Invalid getLocaleTimeInputFormat output for id-ID: " + idTime24);
         process.exit(1);
     }
+    const idTime12 = getLocaleTimeInputFormat("id-ID", { hourFormat: "12", showSeconds: false });
+    if (idTime12 !== "hh.mm a") {
+        console.error("Invalid getLocaleTimeInputFormat (12h) output for id-ID: " + idTime12);
+        process.exit(1);
+    }
     const idDateTime24 = getLocaleDateTimeInputFormat("id-ID", { hourFormat: "24", showSeconds: false });
     if (idDateTime24 !== "dd/MM/yyyy, HH.mm") {
         console.error("Invalid getLocaleDateTimeInputFormat output for id-ID: " + idDateTime24);
+        process.exit(1);
+    }
+    const idDateTime12 = getLocaleDateTimeInputFormat("id-ID", { hourFormat: "12", showSeconds: false });
+    if (idDateTime12 !== "dd/MM/yyyy, hh.mm a") {
+        console.error("Invalid getLocaleDateTimeInputFormat (12h) output for id-ID: " + idDateTime12);
         process.exit(1);
     }
     const idFirstDay = getLocaleFirstDayOfWeek("id-ID");
