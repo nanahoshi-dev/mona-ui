@@ -156,6 +156,8 @@ describe("audit-locales", () => {
 
         it("allows Indonesian-specific unchanged words on approved paths", () => {
             expect(isAllowedLocaleCopyException("id-ID", "dialog.ok", "OK")).toBe(true);
+            expect(isAllowedLocaleCopyException("id-ID", "multiSelect.itemsCount", "item")).toBe(true);
+            expect(isAllowedLocaleCopyException("id-ID", "scrollView.slide", "slide")).toBe(true);
             expect(isAllowedLocaleCopyException("id-ID", "timeSelector.am", "AM")).toBe(true);
             expect(isAllowedLocaleCopyException("id-ID", "timeSelector.pm", "PM")).toBe(true);
             expect(isAllowedLocaleCopyException("id-ID", "timeSelector.amPm", "AM/PM")).toBe(true);
