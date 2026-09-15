@@ -10,3 +10,4 @@ export { MONA_ZH_CN_LOCALE } from "./zh-cn/zh-cn.locale";
 export { MONA_ZH_TW_LOCALE } from "./zh-tw/zh-tw.locale";
 export { MONA_TR_TR_LOCALE } from "./tr-tr/tr-tr.locale";
 export { MONA_ID_ID_LOCALE } from "./id-id/id-id.locale";
+export { MONA_RU_RU_LOCALE } from "./ru-ru/ru-ru.locale";
