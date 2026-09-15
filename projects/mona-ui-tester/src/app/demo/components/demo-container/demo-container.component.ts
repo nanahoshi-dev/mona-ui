@@ -17,6 +17,7 @@ import {
     MONA_JA_JP_LOCALE,
     MONA_KO_KR_LOCALE,
     MONA_PT_BR_LOCALE,
+    MONA_RU_RU_LOCALE,
     MONA_TR_TR_LOCALE,
     MONA_ZH_CN_LOCALE,
     MONA_ZH_TW_LOCALE
@@ -130,6 +131,7 @@ export class DemoContainerComponent<TComponent> {
         { label: "Bahasa Indonesia (Indonesia)", locale: MONA_ID_ID_LOCALE },
         { label: "Italiano (Italia)", locale: MONA_IT_IT_LOCALE },
         { label: "Português (Brasil)", locale: MONA_PT_BR_LOCALE },
+        { label: "Русский (Россия)", locale: MONA_RU_RU_LOCALE },
         { label: "Türkçe (Türkiye)", locale: MONA_TR_TR_LOCALE },
         { label: "日本語", locale: MONA_JA_JP_LOCALE },
         { label: "한국어 (대한민국)", locale: MONA_KO_KR_LOCALE },

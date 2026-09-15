@@ -12,6 +12,7 @@ import {
     MONA_JA_JP_LOCALE,
     MONA_KO_KR_LOCALE,
     MONA_PT_BR_LOCALE,
+    MONA_RU_RU_LOCALE,
     MONA_TR_TR_LOCALE,
     MONA_ID_ID_LOCALE,
     MONA_ZH_CN_LOCALE,
@@ -944,6 +945,71 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
         expect(calendar?.querySelector("[aria-live='polite']")?.textContent).toContain("日历");
         headerRow = calendar?.querySelector("div[style*='grid-template-columns']") as HTMLElement;
         expect(headerRow?.querySelector("span[aria-hidden='true']")?.textContent?.trim()).toBe("周一");
+    });
+
+    it("integrates official Russian (ru-RU) locale reactively with runtime overrides and formatting", async () => {
+        const root = fixture.nativeElement as HTMLElement;
+        const input = root.querySelector("mona-numeric-text-box input") as HTMLInputElement;
+
+        // 1. Activate official Russian (ru-RU) locale
+        i18n.use(MONA_RU_RU_LOCALE);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("ru-RU");
+        expect(i18n.direction()).toBe("ltr");
+
+        // Pager firstPageLabel in Russian: "Первая страница"
+        const ruPager = root.querySelector("mona-pager");
+        expect(ruPager?.querySelector("button[aria-label='Первая страница']")).not.toBeNull();
+
+        // ScrollView previousPage in Russian: "Предыдущая страница"
+        const ruScroll = root.querySelector("mona-scroll-view");
+        expect(ruScroll?.querySelector("button[aria-label='Предыдущая страница']")).not.toBeNull();
+
+        // Calendar translated UI controls, Monday-first header (пн), and live region in Russian
+        const ruCalendar = root.querySelector("mona-calendar");
+        expect(ruCalendar?.querySelector("button:first-child")?.textContent?.trim()).toBe("Сегодня");
+        expect(ruCalendar?.querySelector("button[aria-label='Предыдущий месяц']")).not.toBeNull();
+        expect(ruCalendar?.querySelector("button[aria-label='Следующий месяц']")).not.toBeNull();
+        expect(ruCalendar?.querySelector("[aria-live='polite']")?.textContent?.toLowerCase()).toContain("календарь");
+
+        const headerRow = ruCalendar?.querySelector("div[style*='grid-template-columns']") as HTMLElement;
+        expect(headerRow?.querySelector("span[aria-hidden='true']")?.textContent?.trim()).toBe("пн");
+
+        // NumericTextBox formatting with Russian comma separator (1234,50)
+        expect(input.getAttribute("aria-valuetext")).toBe("1234,50");
+
+        // 2. Test application override precedence over Russian locale
+        i18n.patchMessages({
+            pager: {
+                firstPageLabel: "В начало"
+            }
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(ruPager?.querySelector("button[aria-label='В начало']")).not.toBeNull();
+
+        // 3. Clear overrides: Russian locale value returns
+        i18n.clearMessages();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(ruPager?.querySelector("button[aria-label='Первая страница']")).not.toBeNull();
+
+        // 4. Switch back to English default
+        i18n.use({
+            direction: "ltr",
+            id: "en-US",
+            messages: {}
+        });
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("en-US");
+        expect(ruPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
+        expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
     });
 
     it("applies pseudo-localization (en-XA) across multiple components reactively", () => {
