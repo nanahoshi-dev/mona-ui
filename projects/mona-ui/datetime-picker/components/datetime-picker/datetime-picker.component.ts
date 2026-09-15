@@ -47,6 +47,7 @@ import {
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
 import {
+    getLocaleDateTimeInputFormat,
     gregorianDateTime,
     injectComponentDirection,
     MonaI18nService,
@@ -121,7 +122,6 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
     readonly #i18n = inject(MonaI18nService);
     readonly #id = createElementControlId();
     readonly #timeSelectorService = inject(TimeSelectorService);
-    protected readonly isRtl = computed(() => this.#direction() === "rtl");
 
     protected readonly activeView = signal<ActiveView>("date");
     protected readonly baseClass = computed(() => {
@@ -134,7 +134,7 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
     });
     protected readonly currentDateString = linkedSignal(() => {
         const value = this.value();
-        const format = this.format();
+        const format = this.effectiveFormat();
         const locale = this.#i18n.localeId();
         if (!value) {
             return "";
@@ -142,6 +142,15 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
         return gregorianDateTime(value, locale).toFormat(format);
     });
     protected readonly decadeCellTemplate = contentChild(CalendarDecadeCellTemplateDirective);
+    protected readonly effectiveFormat = computed(() => {
+        return (
+            this.format() ??
+            getLocaleDateTimeInputFormat(this.#i18n.localeId(), {
+                hourFormat: this.hourFormat(),
+                showSeconds: this.showSeconds()
+            })
+        );
+    });
     protected readonly expanded = computed(() => this.#dropdownService.popupRef() !== null);
     protected readonly footerClass = computed(() => {
         return dateTimePickerFooterThemeVariants();
@@ -167,6 +176,7 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
     protected readonly invalidState = computed(
         () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly messages = this.#i18n.componentMessages("dateTimePicker", DATETIME_PICKER_DEFAULT_MESSAGES);
     protected readonly monthCellTemplate = contentChild(CalendarMonthCellTemplateDirective);
     protected readonly navigatedDate = linkedSignal(() => this.value() ?? new Date());
@@ -231,14 +241,16 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
     public readonly disabledDates = input<DateDisabledType>();
 
     /**
-     * @description Sets the first day of the week.
+     * @description Sets the first day of the week. If not specified, derives from the active locale.
+     * @default null
      */
-    public readonly firstDay = input<FirstDayOfWeek>("monday");
+    public readonly firstDay = input<FirstDayOfWeek | null>(null);
 
     /**
-     * @description Sets the date format of the date time picker.
+     * @description Sets the date format of the date time picker. If not specified, derives from the active locale, hourFormat, and showSeconds.
+     * @default null
      */
-    public readonly format = input("dd/MM/yyyy HH:mm");
+    public readonly format = input<string | null>(null);
 
     /**
      * @description Sets the hour format of the time picker.
@@ -430,7 +442,7 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
         }
 
         const locale = this.#i18n.localeId();
-        const dateTime = parseGregorianDate(this.currentDateString(), this.format(), locale);
+        const dateTime = parseGregorianDate(this.currentDateString(), this.effectiveFormat(), locale);
         if (this.dateStringEquals(this.value(), dateTime.toJSDate())) {
             this.touch.emit();
             return;
@@ -493,8 +505,8 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
         if (date1 && date2) {
             const locale = this.#i18n.localeId();
             return (
-                gregorianDateTime(date1, locale).toFormat(this.format()) ===
-                gregorianDateTime(date2, locale).toFormat(this.format())
+                gregorianDateTime(date1, locale).toFormat(this.effectiveFormat()) ===
+                gregorianDateTime(date2, locale).toFormat(this.effectiveFormat())
             );
         }
         return date1 === date2;
@@ -571,7 +583,7 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
 
     private setCurrentDate(date: Date | null): void {
         this.value.set(date);
-        this.updateCurrentDateString(date, this.format());
+        this.updateCurrentDateString(date, this.effectiveFormat());
         this.touch.emit();
     }
 

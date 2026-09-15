@@ -6,6 +6,22 @@ import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ColorPickerComponent } from "@nanahoshi/mona-ui/color-picker";
 import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
 import { DropdownGroupableDirective } from "@nanahoshi/mona-ui/dropdowns";
+import { MONA_DEFAULT_LOCALE, MonaI18nService, type MonaLocale } from "@nanahoshi/mona-ui/i18n";
+import {
+    MONA_AR_SA_LOCALE,
+    MONA_DE_DE_LOCALE,
+    MONA_ES_ES_LOCALE,
+    MONA_FR_FR_LOCALE,
+    MONA_ID_ID_LOCALE,
+    MONA_IT_IT_LOCALE,
+    MONA_JA_JP_LOCALE,
+    MONA_KO_KR_LOCALE,
+    MONA_PT_BR_LOCALE,
+    MONA_RU_RU_LOCALE,
+    MONA_TR_TR_LOCALE,
+    MONA_ZH_CN_LOCALE,
+    MONA_ZH_TW_LOCALE
+} from "@nanahoshi/mona-ui/locales";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { THEME_OPTIONS, type ThemeOption } from "../../../theme-options";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
@@ -17,6 +33,11 @@ import {
 import { ComponentConfig, createComponentInputConfigArray, extractConfigValues } from "../../utils/componentConfig";
 import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
 import { ConfigComponent } from "../config/config.component";
+
+interface LocaleOption {
+    readonly label: string;
+    readonly locale: MonaLocale;
+}
 
 @Component({
     selector: "app-demo-container",
@@ -73,6 +94,7 @@ import { ConfigComponent } from "../config/config.component";
 export class DemoContainerComponent<TComponent> {
     readonly #directionality = inject(Directionality);
     readonly #document = inject(DOCUMENT);
+    readonly #i18n = inject(MonaI18nService);
     readonly #metadataInputNames = computed(() => new Set((this.metadata().inputs ?? []).map(i => i.name)));
     readonly #themeService = inject(ThemeService);
     protected readonly background = computed(() => {
@@ -100,6 +122,26 @@ export class DemoContainerComponent<TComponent> {
         source: signal({}),
         computation: () => extractConfigValues(this.config())
     });
+    protected readonly localeOptions: readonly LocaleOption[] = [
+        { label: "English", locale: MONA_DEFAULT_LOCALE },
+        { label: "العربية (السعودية)", locale: MONA_AR_SA_LOCALE },
+        { label: "Deutsch", locale: MONA_DE_DE_LOCALE },
+        { label: "Español (España)", locale: MONA_ES_ES_LOCALE },
+        { label: "Français", locale: MONA_FR_FR_LOCALE },
+        { label: "Bahasa Indonesia (Indonesia)", locale: MONA_ID_ID_LOCALE },
+        { label: "Italiano (Italia)", locale: MONA_IT_IT_LOCALE },
+        { label: "Português (Brasil)", locale: MONA_PT_BR_LOCALE },
+        { label: "Русский (Россия)", locale: MONA_RU_RU_LOCALE },
+        { label: "Türkçe (Türkiye)", locale: MONA_TR_TR_LOCALE },
+        { label: "日本語", locale: MONA_JA_JP_LOCALE },
+        { label: "한국어 (대한민국)", locale: MONA_KO_KR_LOCALE },
+        { label: "简体中文", locale: MONA_ZH_CN_LOCALE },
+        { label: "繁體中文", locale: MONA_ZH_TW_LOCALE }
+    ];
+    protected readonly selectedLocale = computed(() => {
+        const id = this.#i18n.localeId();
+        return this.localeOptions.find(o => o.locale.id === id) ?? this.localeOptions[0];
+    });
     protected readonly selectedTheme = computed(() => {
         return this.themeDropdownData.find(
             theme =>
@@ -119,6 +161,13 @@ export class DemoContainerComponent<TComponent> {
         this.direction.set(direction);
         this.#document.documentElement.setAttribute("dir", direction);
         this.#directionality.change.emit(direction);
+    }
+
+    protected onLocaleChange(item: LocaleOption | null | undefined): void {
+        if (!item) {
+            return;
+        }
+        this.#i18n.use(item.locale);
     }
 
     protected onThemeChange(item: ThemeOption | null | undefined): void {

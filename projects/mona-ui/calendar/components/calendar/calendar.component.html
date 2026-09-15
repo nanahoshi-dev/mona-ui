@@ -36,7 +36,7 @@
         @case ("decade") {
             <button monaButton look="ghost" [rounded]="rounded()" [attr.aria-label]="viewSwitchButtonLabel()">
                 <span class="text-primary font-semibold" [id]="gridId + '-heading'"
-                    >{{ decadeStart() }} - {{ decadeEnd() }}</span
+                    >{{ formatInteger(decadeStart()) }} - {{ formatInteger(decadeEnd()) }}</span
                 >
             </button>
         }
@@ -71,8 +71,11 @@
         @if (weekNumber()) {
             <div></div>
         }
-        @for (day of weekdays(); track day.short) {
-            <div>{{ day.short }}</div>
+        @for (day of weekdays(); track day.full) {
+            <div>
+                <span aria-hidden="true">{{ day.display }}</span>
+                <span class="sr-only">{{ day.full }}</span>
+            </div>
         }
     </div>
     <div
@@ -85,7 +88,7 @@
                 @let firstEntry = row | monaTakeFirst;
                 @if (firstEntry) {
                     @let week = getWeekNumber(firstEntry.key);
-                    <div>{{ week }}</div>
+                    <div>{{ formatInteger(week) }}</div>
                 }
             }
             @for (entry of row; track entry.key) {
@@ -108,7 +111,7 @@
                             [ngTemplateOutlet]="monthCellTemplate()?.templateRef"
                             [ngTemplateOutletContext]="{ $implicit: entry.value, date: entry.key }"></ng-container>
                     } @else {
-                        <span>{{ entry.value }}</span>
+                        <span>{{ formatInteger(entry.value) }}</span>
                     }
                 </div>
             }
@@ -155,7 +158,7 @@
                             [ngTemplateOutletContext]="{ $implicit: year }">
                         </ng-container>
                     } @else {
-                        <span>{{ year }}</span>
+                        <span>{{ formatInteger(year) }}</span>
                     }
                 </div>
             }

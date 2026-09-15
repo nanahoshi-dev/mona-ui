@@ -21,6 +21,15 @@
                 (valueChange)="customColor.set($event)"
                 size="small"></mona-color-picker>
             <mona-dropdown-list
+                [data]="localeOptions"
+                textField="label"
+                size="small"
+                [value]="selectedLocale()"
+                [style.min-width]="'10rem'"
+                [style.width]="'auto'"
+                (valueChange)="onLocaleChange($event)">
+            </mona-dropdown-list>
+            <mona-dropdown-list
                 [data]="themeDropdownData"
                 textField="text"
                 valueField="value"

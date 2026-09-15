@@ -45,8 +45,17 @@ jobs:
       - name: Audit i18n and RTL readiness
         run: npm run audit:i18n-rtl:strict
 
+      - name: Audit official locales
+        run: npm run audit:locales
+
+      - name: Check generated CLDR week data
+        run: npm run check:cldr-week-data
+
       - name: Build Library
         run: npm run build:prod
+
+      - name: Verify built package exports
+        run: npm run verify:package
 
       - name: Test Library
         run: npm run test:lib

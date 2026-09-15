@@ -133,10 +133,15 @@ export function getNumberSymbols(localeId: string): NumberSymbols {
 }
 
 export function getNumberFormatter(locale: string, options?: Intl.NumberFormatOptions): Intl.NumberFormat {
-    const key = `${locale}:${serializeOptions(options)}`;
+    const cleanLocale = (locale ?? "").trim() || "en-US";
+    const key = `${cleanLocale}:${serializeOptions(options)}`;
     let formatter = numberFormatterCache.get(key);
     if (!formatter) {
-        formatter = new Intl.NumberFormat(locale, options);
+        try {
+            formatter = new Intl.NumberFormat(cleanLocale, options);
+        } catch {
+            formatter = new Intl.NumberFormat("en-US", options);
+        }
         numberFormatterCache.set(key, formatter);
     }
     return formatter;

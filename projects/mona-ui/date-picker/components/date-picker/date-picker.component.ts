@@ -43,7 +43,7 @@ import {
     DropdownPopupInputToken,
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
-import { gregorianDateTime, MonaI18nService, parseGregorianDate } from "@nanahoshi/mona-ui/i18n";
+import { getLocaleDateInputFormat, gregorianDateTime, MonaI18nService, parseGregorianDate } from "@nanahoshi/mona-ui/i18n";
 import { type AttributeConfig, createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { ListSizeInputType } from "@nanahoshi/mona-ui/internal/list";
 import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
@@ -116,7 +116,7 @@ export class DatePickerComponent
     });
     protected readonly currentDateString = linkedSignal(() => {
         const value = this.value();
-        const format = this.format();
+        const format = this.effectiveFormat();
         const locale = this.#i18n.localeId();
         if (!value) {
             return "";
@@ -124,6 +124,9 @@ export class DatePickerComponent
         return gregorianDateTime(value, locale).toFormat(format);
     });
     protected readonly decadeCellTemplate = contentChild(CalendarDecadeCellTemplateDirective);
+    protected readonly effectiveFormat = computed(() => {
+        return this.format() ?? getLocaleDateInputFormat(this.#i18n.localeId());
+    });
     protected readonly expanded = computed(() => this.#dropdownService.popupRef() !== null);
     protected readonly inputAttributes = computed<AttributeConfig>(() => {
         const controls = this.popupId;
@@ -181,14 +184,16 @@ export class DatePickerComponent
     public readonly disabledDates = input<DateDisabledType>();
 
     /**
-     * @description Sets the first day of the week.
+     * @description Sets the first day of the week. If not specified, derives from the active locale.
+     * @default null
      */
-    public readonly firstDay = input<FirstDayOfWeek>("monday");
+    public readonly firstDay = input<FirstDayOfWeek | null>(null);
 
     /**
-     * @description Sets the date format of the date picker.
+     * @description Sets the date format of the date picker. If not specified, derives from the active locale.
+     * @default null
      */
-    public readonly format = input("dd/MM/yyyy");
+    public readonly format = input<string | null>(null);
 
     /**
      * @description Marks the date picker as invalid. When bound to a signal form field via `[formField]`,
@@ -343,7 +348,7 @@ export class DatePickerComponent
         }
 
         const locale = this.#i18n.localeId();
-        const dateTime = parseGregorianDate(this.currentDateString(), this.format(), locale);
+        const dateTime = parseGregorianDate(this.currentDateString(), this.effectiveFormat(), locale);
         if (this.dateStringEquals(this.value(), dateTime.toJSDate())) {
             this.touch.emit();
             return;
@@ -394,8 +399,8 @@ export class DatePickerComponent
         if (date1 && date2) {
             const locale = this.#i18n.localeId();
             return (
-                gregorianDateTime(date1, locale).toFormat(this.format()) ===
-                gregorianDateTime(date2, locale).toFormat(this.format())
+                gregorianDateTime(date1, locale).toFormat(this.effectiveFormat()) ===
+                gregorianDateTime(date2, locale).toFormat(this.effectiveFormat())
             );
         }
         return date1 === date2;

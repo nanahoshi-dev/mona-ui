@@ -1,15 +1,44 @@
 # Introduction
 
-Welcome to Mona UI! This library is a collection of UI components designed to be clean, modular, and accessible.
+Welcome to **Mona UI**! A modern, high-performance, and accessible UI component library built for Angular and styled with Tailwind CSS.
 
 ## What is Mona UI?
 
-**Mona UI** is a lightweight, responsive UI framework built for Angular using signals and modern CSS layouts. It is fully styled with the latest version of Tailwind CSS.
+**Mona UI** is a lightweight, responsive UI component library built from the ground up for modern Angular. It provides pixel-perfect, production-ready components designed to accelerate web development without sacrificing architectural flexibility, performance, or accessibility.
 
-Skip months of design and development with pixel-perfect, production-ready components. Mona UI is built with Angular signals, TypeScript, and styled with Tailwind CSS.
+Unlike traditional component libraries that carry legacy patterns or bulky runtimes, Mona UI embraces Angular's modern reactivity model—leveraging Signals, Standalone Components, and fine-grained reactivity by default.
 
-It's the perfect starting point for any project—everything you need to design and build modern, beautiful interfaces and websites.
+## Key Features
 
-## Tech stack
+- **Signal-First Reactivity**: Built natively with Angular Signals (`input()`, `output()`, `model()`, and `computed()`) for fine-grained reactivity, predictable data flow, and optimal performance.
+- **55+ Modular Components**: Comprehensive suite covering form controls, rich data presentation (Data Grid, Charts, TreeView), overlays (Dialog, Window, Popover, Sheet), navigation, and editors.
+- **Accessible by Default**: Designed to adhere to WAI-ARIA authoring practices, featuring complete keyboard navigation, dynamic ARIA attributes, and zero axe violations.
+- **Tailwind CSS & Semantic Tokens**: Styled with Tailwind CSS v4 and structured around semantic design tokens for effortless light, dark, and brand theming.
+- **Comprehensive i18n & RTL**: Zero-configuration English defaults with typed runtime locale switching and native right-to-left (RTL) layout support using CSS Logical Properties.
+- **Strictly Typed**: Authored in strict TypeScript, providing comprehensive type inference and autocomplete for a seamless developer experience.
 
-We've kept our tech stack minimal, so you can focus on building. Mona UI is powered by:
+## Quick Example
+
+Mona UI components integrate naturally into modern Angular standalone components:
+
+```typescript
+import { Component, signal } from "@angular/core";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+
+@Component({
+    selector: "app-example",
+    imports: [ButtonDirective],
+    template: `
+        <button monaButton look="primary" (click)="count.update(c => c + 1)">
+            Clicked {{ count() }} times
+        </button>
+    `
+})
+export class ExampleComponent {
+    protected readonly count = signal(0);
+}
+```
+
+## Tech Stack
+
+We keep our core dependencies lean and modern, built on the latest web and Angular standards:

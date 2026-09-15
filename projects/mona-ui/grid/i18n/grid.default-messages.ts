@@ -26,7 +26,18 @@ export const GRID_DEFAULT_MESSAGES = {
     reorderRow: (rowNumber: number) => `Reorder row ${rowNumber}`,
     resizeColumn: "Resize column",
     rowReorder: "Row reorder",
+    rowReorderDisabled: "Row reordering is disabled.",
+    rowReorderDisabledEditing: "Finish editing to reorder rows.",
+    rowReorderDisabledFiltered: "Clear filters to reorder rows.",
+    rowReorderDisabledGrouped: "Clear grouping to reorder rows.",
+    rowReorderDisabledSingleRow: "At least two rows are needed to reorder.",
+    rowReorderDisabledSorted: "Clear sorting to reorder rows.",
+    rowReorderDisabledVirtualScroll: "Row reordering isn't available while virtual scrolling is enabled.",
+    rowReorderHandleAriaLabel: (rowLabel: string, keyboardHint: string, disabledReason?: string) =>
+        `${rowLabel}. ${keyboardHint}${disabledReason ? ` ${disabledReason}` : ""}`,
     rowReorderKeyboardHint: "Use Alt plus Up Arrow or Alt plus Down Arrow to move.",
+    rowReorderMoved: (fromRowNumber: number, toPosition: number) =>
+        `Moved row ${fromRowNumber} to position ${toPosition}.`,
     rowValidationError: "This row has validation errors.",
     save: "Save",
     saveRow: "Save row",

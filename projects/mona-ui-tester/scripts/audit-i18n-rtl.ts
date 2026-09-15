@@ -7,7 +7,6 @@ import {
     LiteralPrimitive,
     parseTemplate,
     RecursiveAstVisitor,
-    TmplAstBoundAttribute,
     TmplAstBoundText,
     TmplAstDeferredBlock,
     TmplAstElement,
@@ -16,8 +15,7 @@ import {
     type TmplAstNode,
     TmplAstSwitchBlock,
     TmplAstTemplate,
-    TmplAstText,
-    TmplAstTextAttribute
+    TmplAstText
 } from "@angular/compiler";
 import { Node, Project, type ReturnStatement, SyntaxKind } from "ts-morph";
 
@@ -49,7 +47,7 @@ const PHYSICAL_TAILWIND_PATTERNS = [
         label: "Physical padding utility (pl-*/pr-* -> ps-*/pe-*)"
     },
     {
-        regex: /(?<![a-zA-Z0-9_-])(?:[a-z0-9-]+:)*-?(?:left|right)-(?=[0-9a-zA-Z_\[])[0-9a-z_[\].-]+/g,
+        regex: /(?<![a-zA-Z0-9_-])(?:[a-z0-9-]+:)*-?(?:left|right)-(?=[0-9a-zA-Z_[])[0-9a-z_[\].-]+/g,
         label: "Physical position utility (left-*/right-* -> start-*/end-*)"
     },
     {
@@ -787,6 +785,48 @@ export const ALLOWLIST: AllowlistEntry[] = [
         filePattern: "projects/mona-ui/chart/internal/data/cartesian-stack-engine.ts",
         lineSnippet: "message:",
         reason: "Internal stack engine diagnostic warning messages"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.ts",
+        lineSnippet: 'label: "A"',
+        reason: "Alpha color channel symbol in ColorInput descriptor"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.ts",
+        lineSnippet: 'label: "H"',
+        reason: "Hue color channel symbol in ColorInput descriptor"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.ts",
+        lineSnippet: 'label: "S"',
+        reason: "Saturation color channel symbol in ColorInput descriptor"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.ts",
+        lineSnippet: 'label: "V"',
+        reason: "Value color channel symbol in ColorInput descriptor"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.ts",
+        lineSnippet: 'label: "R"',
+        reason: "Red color channel symbol in ColorInput descriptor"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.ts",
+        lineSnippet: 'label: "G"',
+        reason: "Green color channel symbol in ColorInput descriptor"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.ts",
+        lineSnippet: 'label: "B"',
+        reason: "Blue color channel symbol in ColorInput descriptor"
     }
 ];
 
@@ -847,7 +887,7 @@ export function isUserFacingText(text: string): boolean {
         return false;
     }
     // Pure symbols/punctuation/math/HTML entities
-    if (/^[&;:,\-–—/\\|•*+×#%°<>=_~()\[\]{}!?@^$'"`]+$/.test(trimmed)) {
+    if (/^[&;:,\-–—/\\|•*+×#%°<>=_~()[\]{}!?@^$'"`]+$/.test(trimmed)) {
         return false;
     }
     // HTML entities
@@ -1187,6 +1227,431 @@ export function collectLiteralFragments(node: Node | undefined): LiteralFragment
     return [];
 }
 
+const ROLE_TOKENS = new Set([
+    "button",
+    "menuitem",
+    "checkbox",
+    "radio",
+    "combobox",
+    "grid",
+    "tab",
+    "dialog",
+    "alert",
+    "none",
+    "presentation"
+]);
+
+const ORIENTATION_TOKENS = new Set([
+    "horizontal",
+    "vertical"
+]);
+
+const PLACEMENT_TOKENS = new Set([
+    "start",
+    "center",
+    "end",
+    "left",
+    "right",
+    "top",
+    "bottom",
+    "auto"
+]);
+
+const SORT_TOKENS = new Set([
+    "ascending",
+    "descending"
+]);
+
+const FILTER_OPERATOR_TOKENS = new Set([
+    "contains",
+    "doesnotcontain",
+    "startswith",
+    "endswith",
+    "eq",
+    "neq",
+    "gte",
+    "gt",
+    "lte",
+    "lt",
+    "isnull",
+    "isnotnull",
+    "isempty",
+    "isnotempty"
+]);
+
+const COLOR_CHANNEL_TOKENS = new Set([
+    "A",
+    "H",
+    "S",
+    "V",
+    "R",
+    "G",
+    "B"
+]);
+
+const TECHNICAL_ARIA_STATE_PROPERTIES = new Set([
+    "ariadisabled",
+    "arialive",
+    "ariachecked",
+    "ariaexpanded",
+    "ariaselected",
+    "ariahidden",
+    "ariapressed",
+    "ariacurrent",
+    "ariahaspopup",
+    "ariamodal",
+    "ariaatomic",
+    "ariabusy",
+    "ariarequired",
+    "ariareadonly",
+    "ariaorientation",
+    "ariasort",
+    "ariainvalid",
+    "ariarole",
+    "role"
+]);
+
+const TECHNICAL_ARIA_STATE_VALUES = new Set([
+    "true",
+    "false",
+    "assertive",
+    "polite",
+    "off",
+    "mixed",
+    "none",
+    "horizontal",
+    "vertical",
+    "ascending",
+    "descending",
+    "page",
+    "step",
+    "location",
+    "date",
+    "time",
+    "all",
+    "grammar",
+    "spelling"
+]);
+
+export type SemanticMapKind =
+    | "announcements-map"
+    | "aria-labels-map"
+    | "labels-map"
+    | "configuration-text-map"
+    | "generic-text-map";
+
+export function classifySemanticMapName(name: string): SemanticMapKind {
+    const clean = name.replace(/^#/, "").replace(/^_+/, "");
+    if (/announcement/i.test(clean)) {
+        return "announcements-map";
+    }
+    if (/aria.*label/i.test(clean)) {
+        return "aria-labels-map";
+    }
+    if (/label/i.test(clean)) {
+        return "labels-map";
+    }
+    if (/config/i.test(clean)) {
+        return "configuration-text-map";
+    }
+    return "generic-text-map";
+}
+
+export function isTechnicalSemanticMapValue(
+    mapName: string,
+    propertyName: string,
+    value: string
+): boolean {
+    if (!value || !value.trim()) {
+        return true;
+    }
+
+    const cleanProp = propertyName.replace(/^#/, "").replace(/^_+/, "").replace(/-/g, "").toLowerCase();
+
+    if (
+        TECHNICAL_ARIA_STATE_PROPERTIES.has(cleanProp) &&
+        TECHNICAL_ARIA_STATE_VALUES.has(value.toLowerCase())
+    ) {
+        return true;
+    }
+
+    if (
+        /^(?:role|ariaRole|roleName)$/i.test(propertyName) &&
+        ROLE_TOKENS.has(value)
+    ) {
+        return true;
+    }
+
+    if (
+        /^(?:orientation|axis)$/i.test(propertyName) &&
+        ORIENTATION_TOKENS.has(value)
+    ) {
+        return true;
+    }
+
+    if (
+        /^(?:placement|position|alignment|align)$/i.test(propertyName) &&
+        PLACEMENT_TOKENS.has(value)
+    ) {
+        return true;
+    }
+
+    if (
+        /^(?:sortDirection|sortOrder|sort|direction)$/i.test(propertyName) &&
+        SORT_TOKENS.has(value)
+    ) {
+        return true;
+    }
+
+    if (
+        /^(?:operator|filterOperator|op)$/i.test(propertyName) &&
+        FILTER_OPERATOR_TOKENS.has(value)
+    ) {
+        return true;
+    }
+
+    if (
+        /^(?:channel|colorChannel)$/i.test(propertyName) &&
+        COLOR_CHANNEL_TOKENS.has(value)
+    ) {
+        return true;
+    }
+
+    if (
+        /^(?:encoding|charset|mode)$/i.test(propertyName) &&
+        /^(?:utf-?8|utf-?16|ascii)$/i.test(value)
+    ) {
+        return true;
+    }
+
+    if (
+        /^(?:format|serializationFormat)$/i.test(propertyName) &&
+        /^(?:json|xml|yaml|yml)$/i.test(value)
+    ) {
+        return true;
+    }
+
+    if (
+        /^(?:mimeType|contentType)$/i.test(propertyName) &&
+        /^(?:application|text|image|audio|video)\/[a-z0-9.+-]+$/i.test(value)
+    ) {
+        return true;
+    }
+
+    return false;
+}
+
+export type SemanticLiteralContext =
+    | "host-aria-text"
+    | "host-visible-text"
+    | "aria-property"
+    | "semantic-property"
+    | "semantic-helper"
+    | "live-announcement"
+    | "generic-semantic-object";
+
+export function isTechnicalLiteralForContext(
+    context: SemanticLiteralContext,
+    propertyName: string | undefined,
+    value: string
+): boolean {
+    switch (context) {
+        case "host-aria-text":
+        case "host-visible-text":
+        case "live-announcement":
+        case "aria-property":
+            return false;
+
+        case "semantic-helper":
+        case "semantic-property": {
+            if (propertyName) {
+                const cleanProp = propertyName.replace(/^#/, "").replace(/^_+/, "").toLowerCase();
+                if (
+                    TECHNICAL_ARIA_STATE_PROPERTIES.has(cleanProp) &&
+                    TECHNICAL_ARIA_STATE_VALUES.has(value.toLowerCase())
+                ) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        case "generic-semantic-object":
+            return false;
+
+        default:
+            return false;
+    }
+}
+
+export function isSemanticTextMapName(name: string): boolean {
+    const clean = name.replace(/^#/, "").replace(/^_+/, "");
+    if (/^(?:labels|announcements)$/i.test(clean)) {
+        return true;
+    }
+    return (
+        /(?:_TEXT|_LABELS|_ANNOUNCEMENTS)$/.test(clean) ||
+        /^(?:TEXT|LABELS|ANNOUNCEMENTS)_/.test(clean) ||
+        /^(?:TEXT|LABELS|ANNOUNCEMENTS)$/.test(clean) ||
+        /.+(?:Text|Labels|Announcements)$/.test(clean)
+    );
+}
+
+function unwrapInitializer(node: Node | undefined): Node | undefined {
+    let current = node;
+    while (current) {
+        if (
+            Node.isParenthesizedExpression(current) ||
+            Node.isAsExpression(current) ||
+            Node.isTypeAssertion(current) ||
+            Node.isNonNullExpression(current) ||
+            Node.isSatisfiesExpression(current)
+        ) {
+            current = current.getExpression();
+        } else if (Node.isCallExpression(current)) {
+            const exprText = current.getExpression().getText();
+            if (exprText === "Object.freeze" || exprText === "freeze") {
+                const args = current.getArguments();
+                current = args.length > 0 ? args[0] : undefined;
+            } else {
+                break;
+            }
+        } else {
+            break;
+        }
+    }
+    return current;
+}
+
+function scanSemanticMapNode(
+    mapName: string,
+    propertyName: string,
+    node: Node | undefined,
+    filePath: string,
+    isAria: boolean,
+    violations: AuditViolation[]
+): void {
+    const unwrapped = unwrapInitializer(node);
+    if (!unwrapped) {
+        return;
+    }
+
+    if (Node.isCallExpression(unwrapped)) {
+        const exprText = unwrapped.getExpression().getText();
+        const callee = exprText.split(".").pop() ?? exprText;
+
+        if (callee === "computed") {
+            const args = unwrapped.getArguments();
+            if (args.length > 0) {
+                scanSemanticMapNode(mapName, propertyName, args[0], filePath, isAria, violations);
+            }
+            return;
+        }
+
+        if (callee === "signal") {
+            const args = unwrapped.getArguments();
+            if (args.length > 0) {
+                scanSemanticMapNode(mapName, propertyName, args[0], filePath, isAria, violations);
+            }
+            return;
+        }
+
+        if (callee === "linkedSignal") {
+            const args = unwrapped.getArguments();
+            if (args.length > 0) {
+                const arg = args[0];
+                if (Node.isObjectLiteralExpression(arg)) {
+                    const computation = arg.getProperty("computation");
+                    if (computation && Node.isPropertyAssignment(computation)) {
+                        scanSemanticMapNode(mapName, propertyName, computation.getInitializer(), filePath, isAria, violations);
+                    } else if (
+                        computation &&
+                        (Node.isMethodDeclaration(computation) || Node.isGetAccessorDeclaration(computation))
+                    ) {
+                        const body = computation.getBody();
+                        if (body) {
+                            for (const ret of getDirectReturnStatements(computation)) {
+                                scanSemanticMapNode(mapName, propertyName, ret.getExpression(), filePath, isAria, violations);
+                            }
+                        }
+                    }
+                } else {
+                    scanSemanticMapNode(mapName, propertyName, arg, filePath, isAria, violations);
+                }
+            }
+            return;
+        }
+    }
+
+    if (Node.isArrowFunction(unwrapped) || Node.isFunctionExpression(unwrapped)) {
+        const body = unwrapped.getBody();
+        if (Node.isBlock(body)) {
+            for (const ret of getDirectReturnStatements(unwrapped)) {
+                scanSemanticMapNode(mapName, propertyName, ret.getExpression(), filePath, isAria, violations);
+            }
+        } else {
+            scanSemanticMapNode(mapName, propertyName, body, filePath, isAria, violations);
+        }
+        return;
+    }
+
+    if (Node.isObjectLiteralExpression(unwrapped)) {
+        for (const prop of unwrapped.getProperties()) {
+            if (Node.isPropertyAssignment(prop)) {
+                const propName = prop.getName().replace(/^['"]|['"]$/g, "");
+                scanSemanticMapNode(mapName, propName, prop.getInitializer(), filePath, isAria, violations);
+            } else if (Node.isMethodDeclaration(prop) || Node.isGetAccessorDeclaration(prop)) {
+                const propName = prop.getName().replace(/^['"]|['"]$/g, "");
+                const returns = getDirectReturnStatements(prop);
+                for (const ret of returns) {
+                    scanSemanticMapNode(mapName, propName, ret.getExpression(), filePath, isAria, violations);
+                }
+            }
+        }
+        return;
+    }
+
+    if (Node.isArrayLiteralExpression(unwrapped)) {
+        for (const element of unwrapped.getElements()) {
+            scanSemanticMapNode(mapName, propertyName, element, filePath, isAria, violations);
+        }
+        return;
+    }
+
+    if (Node.isConditionalExpression(unwrapped)) {
+        scanSemanticMapNode(mapName, propertyName, unwrapped.getWhenTrue(), filePath, isAria, violations);
+        scanSemanticMapNode(mapName, propertyName, unwrapped.getWhenFalse(), filePath, isAria, violations);
+        return;
+    }
+
+    if (!propertyName) {
+        return;
+    }
+
+    const fragments = collectLiteralFragments(unwrapped);
+    for (const frag of fragments) {
+        const val = frag.text.trim();
+        if (isUserFacingText(val) && !isTechnicalSemanticMapValue(mapName, propertyName, val)) {
+            violations.push({
+                category: isAria ? "i18n-aria" : "i18n-text",
+                detail: `Hard-coded semantic text-map property "${propertyName}" in "${mapName}": "${val}"`,
+                file: filePath,
+                line: frag.node.getStartLineNumber()
+            });
+        }
+    }
+}
+
+export function scanSemanticTextMap(
+    mapName: string,
+    initializer: Node | undefined,
+    filePath: string,
+    violations: AuditViolation[]
+): void {
+    const isAria = /aria|announcement/i.test(mapName);
+    scanSemanticMapNode(mapName, "", initializer, filePath, isAria, violations);
+}
+
 const sharedTsProject = new Project({
     useInMemoryFileSystem: true,
     compilerOptions: {
@@ -1202,8 +1667,15 @@ export function scanTypeScriptAst(
 ): void {
     const sf = project.createSourceFile(`virtual-${Date.now()}-${Math.random()}.ts`, content, { overwrite: true });
 
+    const normalizedPath = filePath.replace(/\\/g, "/");
+    const isMessageCatalog =
+        normalizedPath.includes("/i18n/") ||
+        normalizedPath.endsWith(".default-messages.ts") ||
+        isOfficialLocaleMessageCatalog(normalizedPath);
+
     try {
-        // 1. Angular host metadata inspection
+        if (!isMessageCatalog) {
+            // 1. Angular host metadata inspection
         for (const classDecl of sf.getClasses()) {
             for (const decorator of classDecl.getDecorators()) {
                 const name = decorator.getName();
@@ -1263,7 +1735,11 @@ export function scanTypeScriptAst(
                                                                 for (const strVal of literals) {
                                                                     if (
                                                                         isUserFacingText(strVal) &&
-                                                                        !TECHNICAL_SEMANTIC_STRINGS.has(strVal)
+                                                                        !isTechnicalLiteralForContext(
+                                                                            isAria ? "host-aria-text" : "host-visible-text",
+                                                                            cleanPropName,
+                                                                            strVal
+                                                                        )
                                                                     ) {
                                                                         violations.push({
                                                                             category: isAria
@@ -1288,7 +1764,11 @@ export function scanTypeScriptAst(
                                                 } else {
                                                     if (
                                                         isUserFacingText(rawVal) &&
-                                                        !TECHNICAL_SEMANTIC_STRINGS.has(rawVal)
+                                                        !isTechnicalLiteralForContext(
+                                                            isAria ? "host-aria-text" : "host-visible-text",
+                                                            cleanPropName,
+                                                            rawVal
+                                                        )
                                                     ) {
                                                         violations.push({
                                                             category: isAria ? "i18n-aria" : "i18n-text",
@@ -1367,7 +1847,7 @@ export function scanTypeScriptAst(
                             const fragments = collectLiteralFragments(init);
                             for (const frag of fragments) {
                                 const val = frag.text.trim();
-                                if (isUserFacingText(val) && !TECHNICAL_SEMANTIC_STRINGS.has(val)) {
+                                if (isUserFacingText(val) && !isTechnicalLiteralForContext("generic-semantic-object", propName, val)) {
                                     const isAria = propName.toLowerCase().startsWith("aria");
                                     violations.push({
                                         category: isAria ? "i18n-aria" : "i18n-text",
@@ -1395,7 +1875,7 @@ export function scanTypeScriptAst(
                     const fragments = collectLiteralFragments(init);
                     for (const frag of fragments) {
                         const val = frag.text.trim();
-                        if (isUserFacingText(val) && !TECHNICAL_SEMANTIC_STRINGS.has(val)) {
+                        if (isUserFacingText(val) && !isTechnicalLiteralForContext("aria-property", propName, val)) {
                             violations.push({
                                 category: "i18n-aria",
                                 detail: `Hard-coded text in accessibility property "${propName}": "${val}"`,
@@ -1440,7 +1920,7 @@ export function scanTypeScriptAst(
                     const fragments = collectLiteralFragments(init);
                     for (const frag of fragments) {
                         const val = frag.text.trim();
-                        if (isUserFacingText(val) && !TECHNICAL_SEMANTIC_STRINGS.has(val)) {
+                        if (isUserFacingText(val) && !isTechnicalLiteralForContext("semantic-property", propName, val)) {
                             const isAria = isAriaSemanticName(propName);
                             violations.push({
                                 category: isAria ? "i18n-aria" : "i18n-text",
@@ -1539,7 +2019,7 @@ export function scanTypeScriptAst(
                     const fragments = collectLiteralFragments(expr);
                     for (const frag of fragments) {
                         const val = frag.text.trim();
-                        if (isUserFacingText(val) && !TECHNICAL_SEMANTIC_STRINGS.has(val)) {
+                        if (isUserFacingText(val) && !isTechnicalLiteralForContext("semantic-helper", fnName, val)) {
                             const isAria = isAriaSemanticName(fnName);
                             violations.push({
                                 category: isAria ? "i18n-aria" : "i18n-text",
@@ -1551,6 +2031,79 @@ export function scanTypeScriptAst(
                     }
                 }
             }
+        }
+
+        // 4b. Hard-coded LiveAnnouncer announcement detection
+        const liveAnnouncerNames = new Set<string>();
+        for (const prop of sf.getDescendantsOfKind(SyntaxKind.PropertyDeclaration)) {
+            const typeText = prop.getTypeNode()?.getText() ?? "";
+            const initText = prop.getInitializer()?.getText() ?? "";
+            if (typeText.includes("LiveAnnouncer") || initText.includes("LiveAnnouncer")) {
+                liveAnnouncerNames.add(prop.getName());
+            }
+        }
+        for (const varDecl of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
+            const typeText = varDecl.getTypeNode()?.getText() ?? "";
+            const initText = varDecl.getInitializer()?.getText() ?? "";
+            if (typeText.includes("LiveAnnouncer") || initText.includes("LiveAnnouncer")) {
+                liveAnnouncerNames.add(varDecl.getName());
+            }
+        }
+        for (const param of sf.getDescendantsOfKind(SyntaxKind.Parameter)) {
+            const typeText = param.getTypeNode()?.getText() ?? "";
+            if (typeText.includes("LiveAnnouncer")) {
+                liveAnnouncerNames.add(param.getName());
+            }
+        }
+
+        for (const callExpr of sf.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+            const expr = callExpr.getExpression();
+            if (!Node.isPropertyAccessExpression(expr)) {
+                continue;
+            }
+            if (expr.getName() !== "announce") {
+                continue;
+            }
+            const receiver = expr.getExpression();
+            const receiverText = receiver.getText();
+            const isLiveAnnouncer =
+                (Node.isIdentifier(receiver) && liveAnnouncerNames.has(receiver.getText())) ||
+                (Node.isPropertyAccessExpression(receiver) &&
+                    (liveAnnouncerNames.has(receiver.getName()) || /(?:^|[.#_])liveannouncer$/i.test(receiverText))) ||
+                /(?:^|[.#_])liveannouncer$/i.test(receiverText);
+
+            if (isLiveAnnouncer) {
+                const args = callExpr.getArguments();
+                if (args.length > 0) {
+                    const fragments = collectLiteralFragments(args[0]);
+                    for (const frag of fragments) {
+                        const val = frag.text.trim();
+                        if (isUserFacingText(val) && !isTechnicalLiteralForContext("live-announcement", undefined, val)) {
+                            violations.push({
+                                category: "i18n-aria",
+                                detail: `Hard-coded accessibility live-announcement text in announce: "${val}"`,
+                                file: filePath,
+                                line: frag.node.getStartLineNumber()
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        // 4c. Semantic text maps with user-facing strings (e.g. *_TEXT, *_LABELS, *_ANNOUNCEMENTS)
+        for (const varDecl of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
+            const varName = varDecl.getName();
+            if (isSemanticTextMapName(varName)) {
+                scanSemanticTextMap(varName, varDecl.getInitializer(), filePath, violations);
+            }
+        }
+        for (const prop of sf.getDescendantsOfKind(SyntaxKind.PropertyDeclaration)) {
+            const propName = prop.getName();
+            if (isSemanticTextMapName(propName)) {
+                scanSemanticTextMap(propName, prop.getInitializer(), filePath, violations);
+            }
+        }
         }
 
         // 5. Indirect DOMRect access tracking
@@ -1598,32 +2151,6 @@ export function scanTypeScriptAst(
         }
 
         // 6. TypeScript-authored physical style objects and assignments
-        const CSS_SIBLING_PROPERTIES = new Set([
-            "top",
-            "bottom",
-            "width",
-            "height",
-            "transform",
-            "position",
-            "zIndex",
-            "display",
-            "backgroundColor",
-            "background",
-            "color",
-            "transformOrigin",
-            "opacity",
-            "overflow",
-            "visibility",
-            "willChange",
-            "backfaceVisibility",
-            "flex",
-            "flexGrow",
-            "flexShrink",
-            "flexBasis",
-            "cursor",
-            "pointerEvents"
-        ]);
-
         const isCssStyleType = (typeText: string | undefined): boolean => {
             if (!typeText) {
                 return false;
@@ -2045,6 +2572,11 @@ export function scanTemplateNodes(nodes: TmplAstNode[], filePath: string, violat
     }
 }
 
+export function isOfficialLocaleMessageCatalog(filePath: string): boolean {
+    const normalized = filePath.replace(/\\/g, "/");
+    return /\/locales\/[^/]+\/[^/]+\.messages\.ts$/.test(normalized);
+}
+
 export function scanFile(filePath: string, violations: AuditViolation[]): void {
     const normalizedPath = filePath.replace(/\\/g, "/");
     // Skip spec files, i18n package itself, tester app, scripts, tests directories, and generated files
@@ -2172,7 +2704,7 @@ export function scanFileContent(filePath: string, content: string, violations: A
         }
 
         // Scan TS host ARIA bindings regex
-        if (normalizedPath.endsWith(".ts")) {
+        if (normalizedPath.endsWith(".ts") && !isOfficialLocaleMessageCatalog(normalizedPath)) {
             for (const pattern of HARD_CODED_ARIA_PATTERNS) {
                 pattern.regex.lastIndex = 0;
                 let match: RegExpExecArray | null;
@@ -2198,7 +2730,11 @@ export function scanFileContent(filePath: string, content: string, violations: A
     if (normalizedPath.endsWith(".ts")) {
         const tsViolations: AuditViolation[] = [];
         scanTypeScriptAst(normalizedPath, content, tsViolations);
+        const isCatalog = isOfficialLocaleMessageCatalog(normalizedPath);
         for (const tv of tsViolations) {
+            if (isCatalog && (tv.category === "i18n-text" || tv.category === "i18n-aria")) {
+                continue;
+            }
             const lineContent = lines[tv.line - 1] ?? "";
             if (!isAllowlisted(tv, lineContent)) {
                 violations.push(tv);

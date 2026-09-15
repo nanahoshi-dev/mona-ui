@@ -30,9 +30,9 @@ import { range } from "@mirei/ts-collections";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { SlicePipe } from "@nanahoshi/mona-ui/common";
 import { DropdownListComponent, DropdownListValueTemplateDirective } from "@nanahoshi/mona-ui/dropdown-list";
-import { DropdownVirtualScrollDirective } from "@nanahoshi/mona-ui/dropdowns";
+import { DropdownItemTemplateDirective, DropdownVirtualScrollDirective } from "@nanahoshi/mona-ui/dropdowns";
 import { NavigationKeys } from "@nanahoshi/mona-ui/internal";
-import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { formatNumber, injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
 import { twMerge } from "tailwind-merge";
 import { PAGER_DEFAULT_MESSAGES } from "../../i18n/pager.default-messages";
@@ -72,6 +72,7 @@ const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [ta
         DropdownVirtualScrollDirective,
         NgTemplateOutlet,
         DropdownListValueTemplateDirective,
+        DropdownItemTemplateDirective,
         LucideEllipsis,
         LucideChevronsLeft,
         LucideChevronLeft,
@@ -355,6 +356,16 @@ export class PagerComponent implements PagerVariantInputs {
         inject(DestroyRef).onDestroy(() => this.#widthObserver?.disconnect());
     }
 
+    protected formatPageNumber(value: number): string {
+        if (value == null) {
+            return "";
+        }
+        return formatNumber(value, this.#i18n.localeId(), {
+            maximumFractionDigits: 0,
+            useGrouping: false
+        });
+    }
+
     protected onJumpNextClick(): void {
         const page = Math.min(this.page() + this.visiblePages(), this.pageCount());
         this.setPage(page);
@@ -571,25 +582,25 @@ export class PagerComponent implements PagerVariantInputs {
         const pages: Page[] = [];
         if (maxPages <= 5) {
             for (index = 1; index <= maxPages; index++) {
-                pages.push({ page: index, text: index.toString() });
+                pages.push({ page: index, text: this.formatPageNumber(index) });
             }
         } else if (currentPage < visiblePages) {
-            pages.push({ page: first, text: first.toString() });
+            pages.push({ page: first, text: this.formatPageNumber(first) });
             for (index = 2; index < (maxPages < visiblePages ? maxPages : visiblePages) + 1; index++) {
-                pages.push({ page: index, text: index.toString() });
+                pages.push({ page: index, text: this.formatPageNumber(index) });
             }
-            pages.push({ page: maxPages, text: maxPages.toString() });
+            pages.push({ page: maxPages, text: this.formatPageNumber(maxPages) });
         } else if (currentPage >= visiblePages && currentPage <= maxPages - visiblePages) {
-            pages.push({ page: first, text: first.toString() });
+            pages.push({ page: first, text: this.formatPageNumber(first) });
             for (index = currentPage - half; index < currentPage + visiblePages - half; index++) {
-                pages.push({ page: index, text: index.toString() });
+                pages.push({ page: index, text: this.formatPageNumber(index) });
             }
-            pages.push({ page: maxPages, text: maxPages.toString() });
+            pages.push({ page: maxPages, text: this.formatPageNumber(maxPages) });
         } else if (currentPage >= maxPages - visiblePages) {
-            pages.push({ page: first, text: first.toString() });
+            pages.push({ page: first, text: this.formatPageNumber(first) });
             index = maxPages - visiblePages < currentPage ? maxPages - visiblePages : currentPage;
             for (; index <= maxPages; index++) {
-                pages.push({ page: index, text: index.toString() });
+                pages.push({ page: index, text: this.formatPageNumber(index) });
             }
         }
         return pages;

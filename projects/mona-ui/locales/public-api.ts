@@ -1,0 +1,13 @@
+export { MONA_AR_SA_LOCALE } from "./ar-sa/ar-sa.locale";
+export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";
+export { MONA_DE_DE_LOCALE } from "./de-de/de-de.locale";
+export { MONA_FR_FR_LOCALE } from "./fr-fr/fr-fr.locale";
+export { MONA_IT_IT_LOCALE } from "./it-it/it-it.locale";
+export { MONA_JA_JP_LOCALE } from "./ja-jp/ja-jp.locale";
+export { MONA_KO_KR_LOCALE } from "./ko-kr/ko-kr.locale";
+export { MONA_PT_BR_LOCALE } from "./pt-br/pt-br.locale";
+export { MONA_ZH_CN_LOCALE } from "./zh-cn/zh-cn.locale";
+export { MONA_ZH_TW_LOCALE } from "./zh-tw/zh-tw.locale";
+export { MONA_TR_TR_LOCALE } from "./tr-tr/tr-tr.locale";
+export { MONA_ID_ID_LOCALE } from "./id-id/id-id.locale";
+export { MONA_RU_RU_LOCALE } from "./ru-ru/ru-ru.locale";

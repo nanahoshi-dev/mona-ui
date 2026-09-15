@@ -10,7 +10,8 @@ import { PagerNumericButtonsTemplateDirective } from "../../directives/pager-num
 import { PagerPageSizeTemplateDirective } from "../../directives/pager-page-size-template.directive";
 import type { PageChangeEvent } from "../../models/PageChangeEvent";
 import type { PageSizeChangeEvent } from "../../models/PageSizeChangeEvent";
-import { MONA_DEFAULT_LOCALE, MonaI18nService, type MonaLocale } from "@nanahoshi/mona-ui/i18n";
+import { MONA_DEFAULT_LOCALE, MonaI18nService, type MonaLocale, normalizeLocalizedDigits } from "@nanahoshi/mona-ui/i18n";
+import { MONA_AR_SA_LOCALE } from "@nanahoshi/mona-ui/locales";
 import { pagerBaseThemeVariants, pagerInfoThemeVariants } from "../../styles/pager.styles";
 import { PagerComponent } from "./pager.component";
 
@@ -699,6 +700,7 @@ describe("Pager visual contract", () => {
 describe("PagerComponent i18n and localization", () => {
     let fixture: ComponentFixture<PagerComponent>;
     let i18nService: MonaI18nService;
+    let originalResizeObserver: typeof ResizeObserver;
 
     const testTurkishLocale: MonaLocale = {
         direction: "ltr",
@@ -721,6 +723,10 @@ describe("PagerComponent i18n and localization", () => {
     };
 
     beforeEach(() => {
+        originalResizeObserver = globalThis.ResizeObserver;
+        MockResizeObserver.instances = [];
+        globalThis.ResizeObserver = MockResizeObserver;
+
         TestBed.configureTestingModule({
             imports: [PagerComponent],
             providers: []
@@ -729,6 +735,11 @@ describe("PagerComponent i18n and localization", () => {
         i18nService = TestBed.inject(MonaI18nService);
         i18nService.use(MONA_DEFAULT_LOCALE);
         i18nService.setMessages({});
+    });
+
+    afterEach(() => {
+        globalThis.ResizeObserver = originalResizeObserver;
+        document.querySelectorAll(".cdk-overlay-container").forEach(container => container.replaceChildren());
     });
 
     function setup(total: number, pageSize: number, skip: number = 0): void {
@@ -936,7 +947,8 @@ describe("PagerComponent i18n and localization", () => {
 
         function getActivePageNumber(): number {
             const button = fixture.nativeElement.querySelector("button[aria-current='page']");
-            return Number(button?.textContent?.trim());
+            const text = button?.textContent?.trim() ?? "";
+            return Number(normalizeLocalizedDigits(text));
         }
 
         it("renders rtl:rotate-180 class on navigation chevron icons", () => {
@@ -1035,5 +1047,114 @@ describe("PagerComponent i18n and localization", () => {
             expect(getActivePageNumber()).toBe(3);
         });
     });
+
+    describe("Numeral localization", () => {
+        function getActivePageNumber(): number {
+            const button = fixture.nativeElement.querySelector("button[aria-current='page']");
+            const text = button?.textContent?.trim() ?? "";
+            return Number(normalizeLocalizedDigits(text));
+        }
+
+        it("renders Arabic-Indic digits on numeric page buttons under ar-SA while keeping models numeric", async () => {
+            setup(100, 10, 0); // 10 pages
+            await fixture.whenStable();
+            resizeHost(900);
+
+            i18nService.use({ id: "ar-SA", direction: "rtl", messages: {} });
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const buttons = Array.from(fixture.nativeElement.querySelectorAll("ol > li > button")) as HTMLButtonElement[];
+            const pageButtonTexts = buttons.map(b => b.textContent?.trim());
+            expect(pageButtonTexts).toContain("١");
+            expect(pageButtonTexts).toContain("١٠");
+
+            // Click page 2 button:
+            let emittedEvent: PageChangeEvent | undefined;
+            fixture.componentInstance.pageChange.subscribe(e => (emittedEvent = e));
+
+            const page2Btn = buttons.find(b => b.textContent?.trim() === "٢");
+            expect(page2Btn).toBeTruthy();
+            page2Btn?.click();
+            fixture.detectChanges();
+
+            expect(emittedEvent?.page).toBe(2);
+            expect(emittedEvent?.skip).toBe(10);
+            expect(getActivePageNumber()).toBe(2);
+
+            // Switch to en-US reactively
+            i18nService.use(MONA_DEFAULT_LOCALE);
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const enButtons = Array.from(fixture.nativeElement.querySelectorAll("ol > li > button")) as HTMLButtonElement[];
+            const enTexts = enButtons.map(b => b.textContent?.trim());
+            expect(enTexts).toContain("1");
+            expect(enTexts).toContain("10");
+        });
+
+        it("renders Arabic-Indic digits for total pages in input mode", async () => {
+            fixture.componentRef.setInput("type", "input");
+            setup(100, 10, 0);
+            await fixture.whenStable();
+
+            i18nService.use({ id: "ar-SA", direction: "rtl", messages: {} });
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const spans = Array.from(fixture.nativeElement.querySelectorAll("li span")) as HTMLElement[];
+            const texts = spans.map(s => s.textContent?.trim());
+            expect(texts).toContain("١٠");
+        });
+
+        it("renders Arabic-Indic digits in page-list dropdown when narrow", async () => {
+            i18nService.use({ id: "ar-SA", direction: "rtl", messages: {} });
+            setup(50, 10, 0);
+            await fixture.whenStable();
+            resizeHost(300);
+            await fixture.whenStable();
+            fixture.detectChanges();
+
+            const dropdown = fixture.nativeElement.querySelector("mona-dropdown-list") as HTMLElement;
+            expect(dropdown).toBeTruthy();
+            const valueSpan = dropdown.querySelector("span");
+            expect(valueSpan?.textContent?.trim()).toBe("١");
+        });
+
+        it("renders Arabic-Indic digits in page-size dropdown options under ar-SA and switches reactively", async () => {
+            i18nService.use(MONA_AR_SA_LOCALE);
+            setup(100, 10, 0);
+            await fixture.whenStable();
+            resizeHost(900);
+            await fixture.whenStable();
+            fixture.detectChanges();
+
+            const dropdown = fixture.nativeElement.querySelector("mona-dropdown-list") as HTMLElement;
+            expect(dropdown).toBeTruthy();
+            const valueSpan = dropdown.querySelector("span");
+            expect(valueSpan?.textContent?.trim()).toBe("عدد العناصر في الصفحة: ١٠");
+
+            dropdown.click();
+            fixture.detectChanges();
+            await fixture.whenStable();
+            await new Promise(resolve => setTimeout(resolve, 0));
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const options = Array.from(document.body.querySelectorAll("li[role='option']")).map(el => el.textContent?.trim());
+            expect(options).toEqual(["٥", "١٠", "٢٠", "٥٠", "١٠٠"]);
+
+            // Switch to en-US reactively
+            i18nService.use(MONA_DEFAULT_LOCALE);
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            expect(valueSpan?.textContent?.trim()).toBe("10 / page");
+            const enOptions = Array.from(document.body.querySelectorAll("li[role='option']")).map(el => el.textContent?.trim());
+            expect(enOptions).toEqual(["5", "10", "20", "50", "100"]);
+        });
+    });
 });
+
+
 

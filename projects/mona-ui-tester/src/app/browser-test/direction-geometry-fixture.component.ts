@@ -7,6 +7,9 @@ import {
     SidebarRailDirective
 } from "@nanahoshi/mona-ui/sidebar";
 import { ScrollViewComponent } from "@nanahoshi/mona-ui/scroll-view";
+import { CalendarComponent } from "@nanahoshi/mona-ui/calendar";
+import { MONA_I18N_CONFIG, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { MONA_AR_SA_LOCALE } from "@nanahoshi/mona-ui/locales";
 
 export interface FixturePageItem {
     id: number;
@@ -48,6 +51,37 @@ export class ShadowSidebarFixtureComponent {
 }
 
 @Component({
+    selector: "app-arabic-calendar-fixture",
+    imports: [CalendarComponent],
+    providers: [
+        MonaI18nService,
+        {
+            provide: MONA_I18N_CONFIG,
+            useValue: { locale: MONA_AR_SA_LOCALE }
+        }
+    ],
+    template: `
+        <div style="display: flex; gap: 32px; flex-wrap: wrap;">
+            <div dir="ltr" style="width: 280px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                <h4 style="margin: 0 0 8px 0; font-size: 14px;">Arabic Calendar (dir=ltr)</h4>
+                <mona-calendar
+                    data-testid="calendar-arabic-ltr"
+                    [value]="testDate" />
+            </div>
+            <div dir="rtl" style="width: 280px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                <h4 style="margin: 0 0 8px 0; font-size: 14px;">Arabic Calendar (dir=rtl)</h4>
+                <mona-calendar
+                    data-testid="calendar-arabic-rtl"
+                    [value]="testDate" />
+            </div>
+        </div>
+    `
+})
+export class ArabicCalendarFixtureComponent {
+    public readonly testDate = new Date(2026, 8, 15);
+}
+
+@Component({
     selector: "app-direction-geometry-fixture",
     imports: [
         SliderComponent,
@@ -57,7 +91,8 @@ export class ShadowSidebarFixtureComponent {
         SidebarInsetDirective,
         SidebarRailDirective,
         ScrollViewComponent,
-        ShadowSidebarFixtureComponent
+        ShadowSidebarFixtureComponent,
+        ArabicCalendarFixtureComponent
     ],
     styles: `
         .direction-rtl {
@@ -826,6 +861,16 @@ export class ShadowSidebarFixtureComponent {
                         </mona-scroll-view>
                     </div>
                 </div>
+            </section>
+
+            <!-- 10. Arabic Calendar Geometry (Weekday Headers LTR & RTL) -->
+            <section
+                id="fixture-arabic-calendar"
+                data-testid="fixture-arabic-calendar"
+                dir="ltr"
+                style="border: 2px solid #f59e0b; border-radius: 8px; padding: 16px; background: #fafafa;">
+                <h2 style="margin: 0 0 16px 0; font-size: 16px; color: #b45309;">10. Arabic Calendar Geometry (Weekday Headers LTR & RTL)</h2>
+                <app-arabic-calendar-fixture data-testid="arabic-calendar-fixture" />
             </section>
         </div>
     `

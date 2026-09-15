@@ -118,4 +118,82 @@ describe("DatePickerComponent i18n", () => {
         expect(date?.getMonth()).toBe(8);
         expect(date?.getDate()).toBe(10);
     });
+
+    it("derives locale-native default date format (e.g. ja-JP yyyy/MM/dd) and updates reactively without explicit format", async () => {
+        @Component({
+            template: `<mona-date-picker [(value)]="value" />`,
+            imports: [DatePickerComponent]
+        })
+        class DefaultFormatTestHostComponent {
+            public readonly value = signal<Date | null>(new Date(2026, 8, 15));
+        }
+
+        TestBed.configureTestingModule({
+            imports: [DefaultFormatTestHostComponent]
+        });
+        const fixture = TestBed.createComponent(DefaultFormatTestHostComponent);
+        const i18n = TestBed.inject(MonaI18nService);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const input = fixture.nativeElement.querySelector("input") as HTMLInputElement;
+
+        // 1. Default en-US: MM/dd/yyyy
+        expect(input.value).toBe("09/15/2026");
+
+        // 2. Switch to ja-JP: yyyy/MM/dd
+        i18n.use({ id: "ja-JP", direction: "ltr", messages: {} });
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(input.value).toBe("2026/09/15");
+
+        // 3. Parse user input in Japanese format: 2026/10/20
+        input.value = "2026/10/20";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("blur", { bubbles: true }));
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const parsedDate = fixture.componentInstance.value();
+        expect(parsedDate?.getFullYear()).toBe(2026);
+        expect(parsedDate?.getMonth()).toBe(9); // 0-indexed month 9 is October
+        expect(parsedDate?.getDate()).toBe(20);
+
+        // 4. Switch to de-DE: dd.MM.yyyy
+        i18n.use({ id: "de-DE", direction: "ltr", messages: {} });
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(input.value).toBe("20.10.2026");
+    });
+
+    it("preserves explicit format regardless of locale switches", async () => {
+        @Component({
+            template: `<mona-date-picker [(value)]="value" [format]="'yyyy-MM-dd'" />`,
+            imports: [DatePickerComponent]
+        })
+        class ExplicitFormatTestHostComponent {
+            public readonly value = signal<Date | null>(new Date(2026, 8, 15));
+        }
+
+        TestBed.configureTestingModule({
+            imports: [ExplicitFormatTestHostComponent]
+        });
+        const fixture = TestBed.createComponent(ExplicitFormatTestHostComponent);
+        const i18n = TestBed.inject(MonaI18nService);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const input = fixture.nativeElement.querySelector("input") as HTMLInputElement;
+        expect(input.value).toBe("2026-09-15");
+
+        i18n.use({ id: "ja-JP", direction: "ltr", messages: {} });
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(input.value).toBe("2026-09-15");
+
+        i18n.use({ id: "de-DE", direction: "ltr", messages: {} });
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(input.value).toBe("2026-09-15");
+    });
 });

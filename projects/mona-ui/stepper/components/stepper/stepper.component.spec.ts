@@ -1181,5 +1181,35 @@ describe("StepperComponent", () => {
                 expect(classes).toContain("top-0");
             });
         });
+
+        describe("Numeral localization", () => {
+            it("renders Arabic-Indic digits for default step indicators under ar-SA and switches reactively", async () => {
+                const fixture = TestBed.createComponent(TestStepperHostComponent);
+                const i18n = TestBed.inject(MonaI18nService);
+                i18n.use({ id: "ar-SA", direction: "rtl", messages: {} });
+                await waitForStable(fixture);
+
+                const indicators = getIndicators(fixture);
+                expect(indicators.map(el => el.textContent?.trim())).toEqual(["١", "٢", "٣"]);
+
+                // Switch to en-US reactively
+                i18n.use(MONA_DEFAULT_LOCALE);
+                await waitForStable(fixture);
+
+                const enIndicators = getIndicators(fixture);
+                expect(enIndicators.map(el => el.textContent?.trim())).toEqual(["1", "2", "3"]);
+            });
+
+            it("preserves numeric indices in custom indicator templates under ar-SA", async () => {
+                const fixture = TestBed.createComponent(TestIndicatorTemplateHostComponent);
+                const i18n = TestBed.inject(MonaI18nService);
+                i18n.use({ id: "ar-SA", direction: "rtl", messages: {} });
+                await waitForStable(fixture);
+
+                const items = fixture.debugElement.queryAll(By.css(".custom-indicator"));
+                expect(items[0].nativeElement.textContent?.trim()).toBe("custom-0");
+                expect(items[1].nativeElement.textContent?.trim()).toBe("custom-1");
+            });
+        });
     });
 });

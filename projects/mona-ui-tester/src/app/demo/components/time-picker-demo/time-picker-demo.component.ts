@@ -126,7 +126,7 @@ class TimePickerWrapperComponent implements ComponentInputsAsSignal<TimePickerCo
     });
     protected readonly formValueText = computed(() => {
         const value = this.form.value().value();
-        const format = this.format();
+        const format = this.format() ?? "HH:mm";
         const hourMode = this.hourFormat();
         if (!value) {
             return "";

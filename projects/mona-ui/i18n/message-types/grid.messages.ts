@@ -24,7 +24,16 @@ export interface MonaGridMessages {
     reorderRow(rowNumber: number): string;
     readonly resizeColumn: string;
     readonly rowReorder: string;
+    readonly rowReorderDisabled: string;
+    readonly rowReorderDisabledEditing: string;
+    readonly rowReorderDisabledFiltered: string;
+    readonly rowReorderDisabledGrouped: string;
+    readonly rowReorderDisabledSingleRow: string;
+    readonly rowReorderDisabledSorted: string;
+    readonly rowReorderDisabledVirtualScroll: string;
+    rowReorderHandleAriaLabel(rowLabel: string, keyboardHint: string, disabledReason?: string): string;
     readonly rowReorderKeyboardHint: string;
+    rowReorderMoved(fromRowNumber: number, toPosition: number): string;
     readonly rowValidationError: string;
     readonly save: string;
     readonly saveRow: string;
