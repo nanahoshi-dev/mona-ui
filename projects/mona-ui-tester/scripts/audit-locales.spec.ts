@@ -1464,6 +1464,19 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
                 )
             ).toBe(true);
         });
+
+        it("discovers the official Indonesian locale", () => {
+            const discovery = discoverOfficialLocales();
+            expect(
+                discovery.locales.some(
+                    locale =>
+                        locale.canonicalId === "id-ID" &&
+                        locale.localeExport === "MONA_ID_ID_LOCALE" &&
+                        locale.messagesExport === "ID_ID_MESSAGES" &&
+                        locale.direction === "ltr"
+                )
+            ).toBe(true);
+        });
     });
 
     describe("semantic day-period locale verification", () => {
@@ -1505,6 +1518,9 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
 
             expect(getIntlDayPeriod("tr-TR", 9)).toBe("ÖÖ");
             expect(getIntlDayPeriod("tr-TR", 21)).toBe("ÖS");
+
+            expect(getIntlDayPeriod("id-ID", 9)).toBe("AM");
+            expect(getIntlDayPeriod("id-ID", 21)).toBe("PM");
         });
 
         it("guarantees Spanish copy exceptions for day periods are rejected", () => {
