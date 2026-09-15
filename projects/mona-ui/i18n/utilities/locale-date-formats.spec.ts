@@ -66,6 +66,10 @@ describe("locale-date-formats", () => {
             expect(getLocaleDateInputFormat("id-ID")).toBe("dd/MM/yyyy");
         });
 
+        it("returns Russian day.month.year format for ru-RU", () => {
+            expect(getLocaleDateInputFormat("ru-RU")).toBe("dd.MM.yyyy");
+        });
+
         it("falls back gracefully for invalid or empty locale", () => {
             expect(getLocaleDateInputFormat("")).toBe("dd/MM/yyyy");
             expect(getLocaleDateInputFormat("invalid-locale-!!!")).toBe("dd/MM/yyyy");
@@ -152,6 +156,16 @@ describe("locale-date-formats", () => {
         it("returns Indonesian 12-hour hh.mm a and hh.mm.ss a with day period in suffix position for id-ID", () => {
             expect(getLocaleTimeInputFormat("id-ID", { hourFormat: "12", showSeconds: false })).toBe("hh.mm a");
             expect(getLocaleTimeInputFormat("id-ID", { hourFormat: "12", showSeconds: true })).toBe("hh.mm.ss a");
+        });
+
+        it("returns Russian 24-hour HH:mm and HH:mm:ss for ru-RU", () => {
+            expect(getLocaleTimeInputFormat("ru-RU", { hourFormat: "24", showSeconds: false })).toBe("HH:mm");
+            expect(getLocaleTimeInputFormat("ru-RU", { hourFormat: "24", showSeconds: true })).toBe("HH:mm:ss");
+        });
+
+        it("returns Russian 12-hour hh:mm a and hh:mm:ss a with day period in suffix position for ru-RU", () => {
+            expect(getLocaleTimeInputFormat("ru-RU", { hourFormat: "12", showSeconds: false })).toBe("hh:mm a");
+            expect(getLocaleTimeInputFormat("ru-RU", { hourFormat: "12", showSeconds: true })).toBe("hh:mm:ss a");
         });
     });
 
@@ -259,6 +273,24 @@ describe("locale-date-formats", () => {
             expect(getLocaleDateTimeInputFormat("id-ID", { hourFormat: "12", showSeconds: false })).toBe("dd/MM/yyyy, hh.mm a");
             expect(getLocaleDateTimeInputFormat("id-ID", { hourFormat: "12", showSeconds: true })).toBe("dd/MM/yyyy, hh.mm.ss a");
         });
+
+        it("derives combined Russian date and time format in 24h", () => {
+            expect(getLocaleDateTimeInputFormat("ru-RU", { hourFormat: "24", showSeconds: false })).toBe(
+                "dd.MM.yyyy, HH:mm"
+            );
+            expect(getLocaleDateTimeInputFormat("ru-RU", { hourFormat: "24", showSeconds: true })).toBe(
+                "dd.MM.yyyy, HH:mm:ss"
+            );
+        });
+
+        it("derives combined Russian date and time format in 12h", () => {
+            expect(getLocaleDateTimeInputFormat("ru-RU", { hourFormat: "12", showSeconds: false })).toBe(
+                "dd.MM.yyyy, hh:mm a"
+            );
+            expect(getLocaleDateTimeInputFormat("ru-RU", { hourFormat: "12", showSeconds: true })).toBe(
+                "dd.MM.yyyy, hh:mm:ss a"
+            );
+        });
     });
 
     describe("getLocaleFirstDayOfWeek", () => {
@@ -317,6 +349,10 @@ describe("locale-date-formats", () => {
 
             it("returns monday for Simplified Chinese (zh-CN)", () => {
                 expect(getLocaleFirstDayOfWeek("zh-CN")).toBe("monday");
+            });
+
+            it("returns monday for Russian (ru-RU)", () => {
+                expect(getLocaleFirstDayOfWeek("ru-RU")).toBe("monday");
             });
 
             it("returns sunday for Traditional Chinese (zh-TW)", () => {
@@ -399,6 +435,7 @@ describe("locale-date-formats", () => {
                     expect(resolveFallbackFirstDayOfWeek("it-IT")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("tr-TR")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("is-IS")).toBe("monday");
+                    expect(resolveFallbackFirstDayOfWeek("ru-RU")).toBe("monday");
 
                     // Verified Sunday-first regions in the current CLDR dataset.
                     expect(resolveFallbackFirstDayOfWeek("zh-TW")).toBe("sunday");
@@ -422,6 +459,7 @@ describe("locale-date-formats", () => {
                 withWeekInfoDisabled(() => {
                     expect(resolveFallbackFirstDayOfWeek("de")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("it")).toBe("monday");
+                    expect(resolveFallbackFirstDayOfWeek("ru")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("ja")).toBe("sunday");
                     expect(resolveFallbackFirstDayOfWeek("ko")).toBe("sunday");
                     expect(resolveFallbackFirstDayOfWeek("pt")).toBe("sunday");
