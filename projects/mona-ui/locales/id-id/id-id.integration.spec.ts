@@ -237,11 +237,7 @@ describe("MONA_ID_ID_LOCALE Integration with MonaI18nService", () => {
         expect(pagerMessages().firstPageLabel).toBe("Halaman pertama");
 
         // Switch back to English default
-        service.use({
-            direction: "ltr",
-            id: "en-US",
-            messages: {}
-        });
+        service.use(MONA_DEFAULT_LOCALE);
         expect(service.localeId()).toBe("en-US");
         expect(pagerMessages().firstPageLabel).toBe("First page");
     });
