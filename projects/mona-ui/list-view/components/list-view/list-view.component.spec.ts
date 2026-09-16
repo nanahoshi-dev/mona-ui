@@ -268,6 +268,11 @@ describe("ListViewComponent keyboard navigation", () => {
         listHost.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
         fixture.detectChanges();
 
+        expect(listService.highlightedItem()?.data).toEqual({ name: "one" });
+
+        listHost.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+        fixture.detectChanges();
+
         expect(listService.highlightedItem()?.data).toEqual({ name: "two" });
     });
 });
