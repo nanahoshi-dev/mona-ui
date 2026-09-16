@@ -117,6 +117,7 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
         },
         virtualization: dropdownVirtualizationFeatureConfig("multi select")
     });
+    protected readonly MultiSelectWrapperComponent = MultiSelectWrapperComponent;
     protected readonly config = computed<ComponentConfig<MultiSelectComponent>>(() => ({
         inputs: deriveInputConfig<MultiSelectComponent>(this.metadata(), {
             data: {
@@ -181,7 +182,6 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("MultiSelectComponent");
-    protected readonly MultiSelectWrapperComponent = MultiSelectWrapperComponent;
 }
 
 @Component({
@@ -288,14 +288,14 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
     `
 })
 class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelectComponent> {
-    readonly #formModel = signal<MultiSelectFormModel>({ value: [dropdownFoodData[1]] });
+    readonly #formModel = signal<MultiSelectFormModel>({ value: [] /*[dropdownFoodData[1]]*/ });
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly filtering = computed(() => buildFilterableOptions(this.features()));
     protected readonly form = form(this.#formModel, schema => {
         disabled(schema.value, { when: () => this.disabled() });
         readonly(schema.value, { when: () => this.readonly() });
         required(schema.value, { when: () => this.required() });
     });
-    protected readonly filtering = computed(() => buildFilterableOptions(this.features()));
     protected readonly formValueText = computed(() => {
         const value = this.form.value().value();
         if (!value) {

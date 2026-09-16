@@ -3,7 +3,7 @@ import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import { ListService } from "@nanahoshi/mona-ui/internal/list";
 import { filter, fromEvent, switchMap, take } from "rxjs";
-import { DropdownPopupInputToken } from "../models/DropdownPopupInput";
+import { DROPDOWN_POPUP_INPUT_TOKEN } from "../models/DropdownPopupInput";
 import { DropdownListService } from "../services/dropdown-list.service";
 import { DropdownService } from "../services/dropdown.service";
 import { DropdownPopupHandlerDirective } from "./dropdown-popup-handler.directive";
@@ -16,7 +16,7 @@ export class DropdownListPopupHandlerDirective {
     readonly #destroyRef = inject(DestroyRef);
     readonly #dropdownListService = inject(DropdownListService, { optional: true });
     readonly #dropdownService = inject(DropdownService);
-    readonly #host = inject(DropdownPopupInputToken);
+    readonly #host = inject(DROPDOWN_POPUP_INPUT_TOKEN);
     readonly #hostElementRef = inject(ElementRef);
     readonly #listService = inject(ListService);
     readonly #popupClosed$ = toObservable(this.#dropdownService.popupRef).pipe(

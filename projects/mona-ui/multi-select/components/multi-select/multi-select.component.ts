@@ -35,7 +35,7 @@ import {
     DropdownLiveRegionDirective,
     DropdownNoDataTemplateDirective,
     DropdownPopupInput,
-    DropdownPopupInputToken,
+    DROPDOWN_POPUP_INPUT_TOKEN,
     dropdownPopupThemeVariants,
     DropdownPopupVariantInput,
     DropdownPrefixTemplateDirective,
@@ -83,7 +83,7 @@ import {
             multi: false
         },
         {
-            provide: DropdownPopupInputToken,
+            provide: DROPDOWN_POPUP_INPUT_TOKEN,
             useExisting: forwardRef(() => MultiSelectComponent),
             multi: false
         }
@@ -161,13 +161,13 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
         read: TemplateRef
     });
     protected readonly headerTemplate = contentChild(DropdownHeaderTemplateDirective, { read: TemplateRef });
-    protected readonly invalidState = computed(
-        () => this.touched() && (this.invalid() || (this.required() && none(this.value())))
-    );
     protected readonly indicatorClass = computed(() => {
         const size = this.size();
         return multiSelectIndicatorContainerThemeVariants({ size });
     });
+    protected readonly invalidState = computed(
+        () => this.touched() && (this.invalid() || (this.required() && none(this.value())))
+    );
     protected readonly itemContainerClass = computed(() => {
         const rounded = this.rounded();
         return multiSelectItemContainerThemeVariants({ rounded });
@@ -183,11 +183,8 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
     });
     protected readonly messages = this.#i18n.componentMessages("multiSelect", MULTI_SELECT_DEFAULT_MESSAGES);
     protected readonly noDataTemplate = contentChild(DropdownNoDataTemplateDirective, { read: TemplateRef });
-    protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
+    protected readonly popupTemplate = viewChild.required<TemplateRef<unknown>>("popupTemplate");
     protected readonly prefixTemplate = contentChild(DropdownPrefixTemplateDirective, { read: TemplateRef });
-    protected readonly summaryTagTemplate = this.#multiSelectService.summaryTagTemplate.asReadonly();
-    protected readonly tagCount = this.#multiSelectService.tagCount.asReadonly();
-    protected readonly tagTemplate = contentChild(MultiSelectTagTemplateDirective, { read: TemplateRef });
     protected readonly selectedDataItems = computed(() => {
         return this.selectedListItems()
             .select(i => i.data)
@@ -196,6 +193,9 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
     protected readonly selectedListItems = computed(() => {
         return this.#listService.selectedListItems();
     });
+    protected readonly summaryTagTemplate = this.#multiSelectService.summaryTagTemplate.asReadonly();
+    protected readonly tagCount = this.#multiSelectService.tagCount.asReadonly();
+    protected readonly tagTemplate = contentChild(MultiSelectTagTemplateDirective, { read: TemplateRef });
     protected readonly valueTextMap = computed(() => {
         const tagCount = this.visibleTagCount();
         return this.selectedListItems()
@@ -261,16 +261,16 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
     public readonly disabled = model(false);
 
     /**
-     * @description A predicate function or the name of the field that determines whether an item is disabled.
-     */
-    public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
-
-    /**
      * @description Marks the multi select as invalid. When bound to a signal form field via `[formField]`,
      * this is written by the `FormField` directive.
      * @default false
      */
     public readonly invalid = input(false);
+
+    /**
+     * @description A predicate function or the name of the field that determines whether an item is disabled.
+     */
+    public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
 
     /**
      * @description Sets the loading state of the multi select component.
@@ -364,6 +364,15 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
     public readonly userClass = input<string>("", { alias: "class" });
 
     /**
+     * @description Two-way bindable current selected values. Implements `FormValueControl<Iterable<TValue>>`,
+     * enabling signal forms `[formField]` binding.
+     * Object mode contains selected data items; primitive mode (see {@link valuePrimitive}) contains values
+     * resolved through {@link valueField}. An empty selection is represented by an empty iterable/array.
+     * @default []
+     */
+    public readonly value = model<Iterable<TValue>>([]);
+
+    /**
      * @description Sets the value field of the multi select component.
      * It is used for stable item identity, matching externally supplied values, and primitive
      * value projection when {@link valuePrimitive} is enabled.
@@ -385,15 +394,6 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
      */
     public readonly valuePrimitive = input(false);
 
-    /**
-     * @description Two-way bindable current selected values. Implements `FormValueControl<Iterable<TValue>>`,
-     * enabling signal forms `[formField]` binding.
-     * Object mode contains selected data items; primitive mode (see {@link valuePrimitive}) contains values
-     * resolved through {@link valueField}. An empty selection is represented by an empty iterable/array.
-     * @default []
-     */
-    public readonly value = model<Iterable<TValue>>([]);
-
     public constructor() {
         afterNextRender({
             read: () => {
@@ -409,7 +409,7 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
         effect(() => {
             const valueField = this.valueField();
             const value = this.value();
-            const valuePrimitive = this.valuePrimitive();
+            this.valuePrimitive();
             untracked(() => {
                 this.#listService.setValueField(valueField ?? "");
                 this.synchronizeSelection(value);
@@ -425,7 +425,11 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
         this.#hostElementRef.nativeElement.focus();
     }
 
-    protected onBlur(): void {
+    protected onBlur(event?: FocusEvent): void {
+        const popupElement = this.#dropdownService.popupRef()?.overlayRef.overlayElement;
+        if (popupElement && event?.relatedTarget instanceof Node && popupElement.contains(event.relatedTarget)) {
+            return;
+        }
         this.touch.emit();
     }
 
@@ -436,14 +440,11 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
         }
     }
 
-    protected onSelectedItemRemove(event: Event, listItem: ListItem<TData>): void {
-        event.stopImmediatePropagation();
-        if (this.readonly() || this.disabled()) {
-            return;
+    protected onPopupPointerDown(event: PointerEvent): void {
+        const target = event.target as HTMLElement | null;
+        if (target?.tagName !== "INPUT") {
+            event.preventDefault();
         }
-        this.#listService.deselectItems([listItem]);
-        this.updateValue(this.getSelectedControlValues());
-        this.focus();
     }
 
     protected onSelectedItemGroupRemove(event: Event): void {
@@ -456,6 +457,16 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
             .takeLast(selectedItemCount - this.visibleTagCount())
             .toArray();
         this.#listService.deselectItems(removedItems);
+        this.updateValue(this.getSelectedControlValues());
+        this.focus();
+    }
+
+    protected onSelectedItemRemove(event: Event, listItem: ListItem<TData>): void {
+        event.stopImmediatePropagation();
+        if (this.readonly() || this.disabled()) {
+            return;
+        }
+        this.#listService.deselectItems([listItem]);
         this.updateValue(this.getSelectedControlValues());
         this.focus();
     }
@@ -474,9 +485,7 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
     private getSelectedControlValues(): TValue[] {
         return this.selectedListItems()
             .select(item => {
-                const value = this.valuePrimitive()
-                    ? this.#listService.getDataItemValue(item.data)
-                    : item.data;
+                const value = this.valuePrimitive() ? this.#listService.getDataItemValue(item.data) : item.data;
 
                 return value as TValue;
             })

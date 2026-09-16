@@ -25,7 +25,7 @@ import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import { HourFormat } from "@nanahoshi/mona-ui/date-input";
 import {
     DropdownPopupHandlerDirective,
-    DropdownPopupInputToken,
+    DROPDOWN_POPUP_INPUT_TOKEN,
     dropdownPopupThemeVariants,
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
@@ -56,7 +56,7 @@ import {
     providers: [
         DropdownService,
         {
-            provide: DropdownPopupInputToken,
+            provide: DROPDOWN_POPUP_INPUT_TOKEN,
             useExisting: forwardRef(() => TimePickerComponent),
             multi: false
         }

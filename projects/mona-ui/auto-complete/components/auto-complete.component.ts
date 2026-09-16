@@ -50,7 +50,7 @@ import {
     DropdownLiveRegionDirective,
     DropdownNoDataTemplateDirective,
     DropdownPopupInput,
-    DropdownPopupInputToken,
+    DROPDOWN_POPUP_INPUT_TOKEN,
     dropdownPopupThemeVariants,
     DropdownPopupVariantInput,
     DropdownPrefixTemplateDirective,
@@ -85,7 +85,7 @@ import {
             multi: false
         },
         {
-            provide: DropdownPopupInputToken,
+            provide: DROPDOWN_POPUP_INPUT_TOKEN,
             useExisting: forwardRef(() => AutoCompleteComponent),
             multi: false
         }
@@ -172,11 +172,11 @@ export class AutoCompleteComponent<TData = unknown>
         const rounded = this.rounded();
         return autoCompleteTextInputThemeVariants({ rounded });
     });
-    protected readonly itemTemplate = contentChild(DropdownItemTemplateDirective, { read: TemplateRef });
     protected readonly invalidState = computed(
         () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
     protected readonly isEmpty = computed(() => !this.#listService.viewItems().any());
+    protected readonly itemTemplate = contentChild(DropdownItemTemplateDirective, { read: TemplateRef });
     protected readonly listId = createElementControlId();
     protected readonly listPopupClass = computed(() => {
         const rounded = this.rounded();
@@ -187,7 +187,7 @@ export class AutoCompleteComponent<TData = unknown>
     });
     protected readonly messages = this.#i18n.componentMessages("autoComplete", AUTO_COMPLETE_DEFAULT_MESSAGES);
     protected readonly noDataTemplate = contentChild(DropdownNoDataTemplateDirective, { read: TemplateRef });
-    protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
+    protected readonly popupTemplate = viewChild.required<TemplateRef<unknown>>("popupTemplate");
     protected readonly prefixTemplate = contentChild(DropdownPrefixTemplateDirective, { read: TemplateRef });
     protected readonly selectableOptions: SelectableOptions = {
         enabled: true,
@@ -239,10 +239,10 @@ export class AutoCompleteComponent<TData = unknown>
     public readonly disabled = model(false);
 
     /**
-     * @description Predicate or field name used to determine whether an individual item is disabled.
-     * @default undefined
+     * @description Defines whether the first matching item should be highlighted while typing.
+     * @default true
      */
-    public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
+    public readonly highlightFirst = input(true);
 
     /**
      * @description Marks the autocomplete as invalid. When bound to a signal form field via `[formField]`,
@@ -252,10 +252,10 @@ export class AutoCompleteComponent<TData = unknown>
     public readonly invalid = input(false);
 
     /**
-     * @description Defines whether the first matching item should be highlighted while typing.
-     * @default true
+     * @description Predicate or field name used to determine whether an individual item is disabled.
+     * @default undefined
      */
-    public readonly highlightFirst = input(true);
+    public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
 
     /**
      * @description Displays a loading indicator and prevents interaction while an operation is in progress.
@@ -354,18 +354,18 @@ export class AutoCompleteComponent<TData = unknown>
     public readonly userClass = input<string>("", { alias: "class" });
 
     /**
-     * @description Property name or accessor used to derive the value from a data item.
-     * If null, the item itself is used as the value.
-     * @default null
-     */
-    public readonly valueField = input<DropdownFieldSelectorType<TData, unknown>>(null);
-
-    /**
      * @description Two-way bindable current autocomplete value. Implements `FormValueControl<string | null>`,
      * enabling signal forms `[formField]` binding.
      * @default null
      */
     public readonly value = model<string | null>(null);
+
+    /**
+     * @description Property name or accessor used to derive the value from a data item.
+     * If null, the item itself is used as the value.
+     * @default null
+     */
+    public readonly valueField = input<DropdownFieldSelectorType<TData, unknown>>(null);
 
     public constructor() {
         afterNextRender({
@@ -380,7 +380,19 @@ export class AutoCompleteComponent<TData = unknown>
         });
     }
 
-    protected onInputBlur(): void {
+    public focus(): void {
+        const input = this.#hostElementRef.nativeElement.querySelector("input");
+        if (input) {
+            input.focus();
+            input.setSelectionRange(input.value.length, input.value.length);
+        }
+    }
+
+    protected onInputBlur(event: FocusEvent): void {
+        const popupElement = this.#dropdownService.popupRef()?.overlayRef.overlayElement;
+        if (popupElement && event?.relatedTarget instanceof Node && popupElement.contains(event.relatedTarget)) {
+            return;
+        }
         this.touch.emit();
         if (this.value() !== this.autoCompleteValue() && !this.#popupRef()) {
             this.updateValue(this.autoCompleteValue());
@@ -393,6 +405,13 @@ export class AutoCompleteComponent<TData = unknown>
         this.autoCompleteValue.set(itemText);
         this.closePopup();
         rxTimeout(this.#destroyRef, () => this.focus());
+    }
+
+    protected onPopupPointerDown(event: PointerEvent): void {
+        const target = event.target as HTMLElement | null;
+        if (target?.tagName !== "INPUT") {
+            event.preventDefault();
+        }
     }
 
     protected onValueClear(event: MouseEvent | KeyboardEvent): void {
@@ -415,14 +434,6 @@ export class AutoCompleteComponent<TData = unknown>
 
     private closePopup(): void {
         this.#popupRef()?.close();
-    }
-
-    public focus(): void {
-        const input = this.#hostElementRef.nativeElement.querySelector("input");
-        if (input) {
-            input.focus();
-            input.setSelectionRange(input.value.length, input.value.length);
-        }
     }
 
     private initialize(): void {
@@ -539,6 +550,12 @@ export class AutoCompleteComponent<TData = unknown>
             });
     }
 
+    private setPopupCloseSubscriptions(): void {
+        this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
+            this.autoCompleteValue$.next(null);
+        });
+    }
+
     private setSpaceKeySubscription(): void {
         this.#dropdownService.beforeKeydown$
             .pipe(
@@ -547,12 +564,6 @@ export class AutoCompleteComponent<TData = unknown>
                 tap(e => e.preventDefault())
             )
             .subscribe();
-    }
-
-    private setPopupCloseSubscriptions(): void {
-        this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
-            this.autoCompleteValue$.next(null);
-        });
     }
 
     private setSubscriptions(): void {

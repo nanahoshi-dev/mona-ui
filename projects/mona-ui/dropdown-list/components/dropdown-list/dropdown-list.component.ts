@@ -35,7 +35,7 @@ import {
     DropdownLiveRegionDirective,
     DropdownNoDataTemplateDirective,
     DropdownPopupInput,
-    DropdownPopupInputToken,
+    DROPDOWN_POPUP_INPUT_TOKEN,
     dropdownPopupThemeVariants,
     DropdownPrefixTemplateDirective,
     DropdownService
@@ -82,7 +82,7 @@ import {
             multi: false
         },
         {
-            provide: DropdownPopupInputToken,
+            provide: DROPDOWN_POPUP_INPUT_TOKEN,
             useExisting: forwardRef(() => DropdownListComponent),
             multi: false
         }
@@ -116,7 +116,7 @@ import {
         "[attr.role]": "'combobox'",
         "[attr.tabindex]": "disabled() ? null : 0",
         "[class]": "baseClass()",
-        "(blur)": "onBlur()"
+        "(blur)": "onBlur($event)"
     }
 })
 export class DropdownListComponent<TData = unknown, TValue = TData>
@@ -165,11 +165,11 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
         read: TemplateRef
     });
     protected readonly headerTemplate = contentChild(DropdownHeaderTemplateDirective, { read: TemplateRef });
-    protected readonly itemTemplate = contentChild(DropdownItemTemplateDirective, { read: TemplateRef });
     protected readonly invalidState = computed(
         () => this.touched() && (this.invalid() || (this.required() && this.value() == null))
     );
     protected readonly isEmpty = computed(() => !this.#listService.viewItems().any());
+    protected readonly itemTemplate = contentChild(DropdownItemTemplateDirective, { read: TemplateRef });
     protected readonly listId = createElementControlId();
     protected readonly listPopupClass = computed(() => {
         const rounded = this.rounded();
@@ -180,7 +180,7 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
     });
     protected readonly messages = this.#i18n.componentMessages("dropdownList", DROPDOWN_LIST_DEFAULT_MESSAGES);
     protected readonly noDataTemplate = contentChild(DropdownNoDataTemplateDirective, { read: TemplateRef });
-    protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
+    protected readonly popupTemplate = viewChild.required<TemplateRef<unknown>>("popupTemplate");
     protected readonly prefixTemplate = contentChild(DropdownPrefixTemplateDirective, { read: TemplateRef });
     protected readonly selectableOptions: SelectableOptions = {
         enabled: true,
@@ -242,16 +242,16 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
     public readonly disabled = model(false);
 
     /**
-     * @description Predicate or field name used to determine whether an individual item is disabled.
-     * @default undefined
-     */
-    public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
-
-    /**
      * @description Marks the field as invalid. Set automatically by the `FormField` directive when bound via `[formField]`.
      * @default false
      */
     public readonly invalid = input(false);
+
+    /**
+     * @description Predicate or field name used to determine whether an individual item is disabled.
+     * @default undefined
+     */
+    public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
 
     /**
      * @description Displays a loading indicator and prevents interaction while an operation is in progress.
@@ -349,6 +349,14 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
     public readonly userClass = input<string>("", { alias: "class" });
 
     /**
+     * @description Currently selected value, two-way bindable and compatible with Signal Forms via `[formField]`.
+     * Object mode returns the selected data item; primitive mode (see {@link valuePrimitive}) returns the value
+     * resolved through {@link valueField}. `null` represents no selection.
+     * @default null
+     */
+    public readonly value = model<TValue | null>(null);
+
+    /**
      * @description Property name or accessor used to derive the value from a data item.
      * It is used for stable item identity, matching externally supplied values, and primitive
      * value projection when {@link valuePrimitive} is enabled.
@@ -368,14 +376,6 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
      * @default false
      */
     public readonly valuePrimitive = input(false);
-
-    /**
-     * @description Currently selected value, two-way bindable and compatible with Signal Forms via `[formField]`.
-     * Object mode returns the selected data item; primitive mode (see {@link valuePrimitive}) returns the value
-     * resolved through {@link valueField}. `null` represents no selection.
-     * @default null
-     */
-    public readonly value = model<TValue | null>(null);
 
     public constructor() {
         effect(() => {
@@ -409,11 +409,19 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
         });
     }
 
+    public focus(): void {
+        this.#hostElementRef.nativeElement?.focus();
+    }
+
     public setValue(value: TValue): void {
         this.updateValue(value);
     }
 
-    protected onBlur(): void {
+    protected onBlur(event?: FocusEvent): void {
+        const popupElement = this.#dropdownService.popupRef()?.overlayRef.overlayElement;
+        if (popupElement && event?.relatedTarget instanceof Node && popupElement.contains(event.relatedTarget)) {
+            return;
+        }
         this.touch.emit();
     }
 
@@ -429,6 +437,13 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
         this.updateValue(this.getControlValue(event.item.data), true);
         if (event.source.via === "mouse" || event.source.key === "Enter" || event.source.key === "NumpadEnter") {
             this.closePopup();
+        }
+    }
+
+    protected onPopupPointerDown(event: PointerEvent): void {
+        const target = event.target as HTMLElement | null;
+        if (target?.tagName !== "INPUT") {
+            event.preventDefault();
         }
     }
 
@@ -464,10 +479,6 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
             this.scrollToSelectedItem();
             this.#navigatedItem.set(nextItem.data);
         }
-    }
-
-    public focus(): void {
-        this.#hostElementRef.nativeElement?.focus();
     }
 
     private getControlValue(dataItem: TData): TValue {

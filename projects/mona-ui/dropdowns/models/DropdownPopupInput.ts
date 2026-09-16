@@ -9,9 +9,10 @@ export interface DropdownPopupInput {
     readonly disabled: InputSignal<boolean>;
     readonly open: OutputEmitterRef<PreventableEvent>;
     readonly opened: OutputEmitterRef<void>;
-    readonly readonly: InputSignal<boolean>;
     readonly popupHeight: InputSignal<ListSizeInputType>;
     readonly popupWidth: InputSignal<ListSizeInputType>;
+    readonly readonly: InputSignal<boolean>;
+    readonly touch: OutputEmitterRef<void>;
 }
 
-export const DropdownPopupInputToken = new InjectionToken<DropdownPopupInput>("DROPDOWN_POPUP_INPUT");
+export const DROPDOWN_POPUP_INPUT_TOKEN = new InjectionToken<DropdownPopupInput>("DROPDOWN_POPUP_INPUT");
