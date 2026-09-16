@@ -69,7 +69,7 @@ export class SheetDemoComponent extends AbstractDemoComponent<SheetComponent> {
                 [height]="resolvedHeight()"
                 [class]="userClass()"
                 (closed)="visible.set(false)">
-                <form class="flex flex-col gap-4" (submit)="$event.preventDefault()">
+                <form class="flex flex-col gap-4 px-4" (submit)="$event.preventDefault()">
                     @for (field of fields; track field) {
                         <mona-label class="w-full">
                             {{ field }}
@@ -108,9 +108,7 @@ class SheetWrapperComponent implements ComponentInputsAsSignal<SheetComponent> {
     public readonly closable = input<ReturnType<SheetComponent["closable"]>>(true);
     public readonly closeOnBackdropClick = input<ReturnType<SheetComponent["closeOnBackdropClick"]>>(true);
     public readonly closeOnEscape = input<ReturnType<SheetComponent["closeOnEscape"]>>(true);
-    public readonly description = input<string | undefined>(
-        "This long form demonstrates independent sheet scrolling."
-    );
+    public readonly description = input<string | undefined>("This long form demonstrates independent sheet scrolling.");
     public readonly height = input<ReturnType<SheetComponent["height"]>>("");
     public readonly side = input<ReturnType<SheetComponent["side"]>>("right");
     public readonly title = input<string | undefined>("Mobile settings");
