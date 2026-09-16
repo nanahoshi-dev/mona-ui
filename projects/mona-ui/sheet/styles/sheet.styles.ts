@@ -38,7 +38,7 @@ export const sheetDescriptionVariants = cva(`mt-1.5 text-sm text-muted-foregroun
 
 export const sheetContentVariants = cva(
     `
-        min-w-0 min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-4
+        min-w-0 min-h-0 flex-1 overflow-y-auto overscroll-contain
         [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]
     `
 );
