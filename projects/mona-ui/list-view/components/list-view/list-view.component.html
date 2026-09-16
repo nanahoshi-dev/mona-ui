@@ -2,6 +2,7 @@
     [ariaLabel]="ariaLabel()"
     [data]="viewItems()"
     [height]="listHeight()"
+    [focusOnMount]="false"
     [width]="listWidth()"
     [maxHeight]="listMaxHeight()"
     [maxWidth]="listMaxWidth()"
@@ -43,21 +44,19 @@
 @let pageableOptions = listService.pageableOptions();
 @if (pageableOptions.enabled && !listService.virtualScrollOptions().enabled && viewItems().length > 0) {
     @let pageState = listService.pageState();
-    <div class="mona-list-view-pager">
-        <mona-pager
-            [firstLast]="pageableOptions.firstLast"
-            [pageSizeValues]="pageableOptions.pageSizeValues"
-            [visiblePages]="pageableOptions.visiblePages"
-            [total]="itemCount()"
-            [skip]="pageState.skip"
-            [responsive]="false"
-            [rounded]="rounded()"
-            [pageSize]="pageState.take"
-            [previousNext]="pageableOptions.previousNext"
-            [showInfo]="pageableOptions.showInfo"
-            [size]="size()"
-            (pageChange)="onPageChange($event)"
-            (pageSizeChange)="onPageSizeChange($event)"
-            class="border-b-0 border-x-0 rounded-t-none"></mona-pager>
-    </div>
+    <mona-pager
+        [firstLast]="pageableOptions.firstLast"
+        [pageSizeValues]="pageableOptions.pageSizeValues"
+        [visiblePages]="pageableOptions.visiblePages"
+        [total]="itemCount()"
+        [skip]="pageState.skip"
+        [responsive]="false"
+        [rounded]="rounded()"
+        [pageSize]="pageState.take"
+        [previousNext]="pageableOptions.previousNext"
+        [showInfo]="pageableOptions.showInfo"
+        [size]="size()"
+        (pageChange)="onPageChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)"
+        class="border-b-0 border-x-0 rounded-t-none"></mona-pager>
 }
