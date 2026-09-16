@@ -43,7 +43,7 @@ import {
 import {
     DropdownPopupHandlerDirective,
     DropdownPopupInput,
-    DropdownPopupInputToken,
+    DROPDOWN_POPUP_INPUT_TOKEN,
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
 import {
@@ -82,7 +82,7 @@ import {
         DropdownService,
         TimeSelectorService,
         {
-            provide: DropdownPopupInputToken,
+            provide: DROPDOWN_POPUP_INPUT_TOKEN,
             useExisting: forwardRef(() => DateTimePickerComponent),
             multi: false
         }

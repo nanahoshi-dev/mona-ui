@@ -2,7 +2,7 @@ import { ElementRef, OutputEmitterRef, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { DropdownService } from "../services/dropdown.service";
 import { ListService } from "@nanahoshi/mona-ui/internal/list";
-import { DropdownPopupInputToken } from "../models/DropdownPopupInput";
+import { DROPDOWN_POPUP_INPUT_TOKEN } from "../models/DropdownPopupInput";
 import { DropdownListPopupHandlerDirective } from "./dropdown-list-popup-handler.directive";
 
 describe("DropdownListPopupHandlerDirective", () => {
@@ -13,7 +13,7 @@ describe("DropdownListPopupHandlerDirective", () => {
                 ListService,
                 { provide: ElementRef, useValue: new ElementRef(document.createElement("div")) },
                 {
-                    provide: DropdownPopupInputToken,
+                    provide: DROPDOWN_POPUP_INPUT_TOKEN,
                     useValue: {
                         close: { emit: () => {} } as unknown as OutputEmitterRef<any>,
                         closed: { emit: () => {} } as unknown as OutputEmitterRef<void>,

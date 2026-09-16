@@ -40,10 +40,15 @@ import {
 import {
     DropdownPopupHandlerDirective,
     DropdownPopupInput,
-    DropdownPopupInputToken,
+    DROPDOWN_POPUP_INPUT_TOKEN,
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
-import { getLocaleDateInputFormat, gregorianDateTime, MonaI18nService, parseGregorianDate } from "@nanahoshi/mona-ui/i18n";
+import {
+    getLocaleDateInputFormat,
+    gregorianDateTime,
+    MonaI18nService,
+    parseGregorianDate
+} from "@nanahoshi/mona-ui/i18n";
 import { type AttributeConfig, createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { ListSizeInputType } from "@nanahoshi/mona-ui/internal/list";
 import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
@@ -69,7 +74,7 @@ import {
         DropdownService,
         CalendarService,
         {
-            provide: DropdownPopupInputToken,
+            provide: DROPDOWN_POPUP_INPUT_TOKEN,
             useExisting: forwardRef(() => DatePickerComponent),
             multi: false
         }

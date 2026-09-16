@@ -65,7 +65,7 @@
 <span monaDropdownLiveRegion></span>
 
 <ng-template #popupTemplate>
-    <div [class]="listPopupClass()">
+    <div [class]="listPopupClass()" (pointerdown)="onPopupPointerDown($event)">
         <mona-list [listId]="listId" [focusOnMount]="false" [size]="size()" (itemSelect)="onItemSelect()">
             @if (footerTemplate()) {
                 <ng-template monaListFooterTemplate>

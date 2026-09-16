@@ -15,8 +15,9 @@ export class DropdownService {
     public readonly popupCloseStart$ = new Subject<PopupCloseEvent>();
     public readonly popupOpenComplete$ = new Subject<void>();
     public readonly popupRef = signal<PopupRef | null>(null);
-    public readonly popupTemplate = signal<TemplateRef<any> | null>(null);
+    public readonly popupTemplate = signal<TemplateRef<unknown> | null>(null);
     public readonly restoreFocus = signal<boolean | "auto">("auto");
+    public readonly touch$ = new Subject<void>();
     public readonly triggerPopupOpen$ = new Subject<Partial<PopupSettings>>();
     public readonly triggerPopupToggle$ = new Subject<Partial<PopupSettings>>();
 

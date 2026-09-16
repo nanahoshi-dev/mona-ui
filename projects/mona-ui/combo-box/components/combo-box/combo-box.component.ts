@@ -19,7 +19,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormsModule } from "@angular/forms";
-import type { FormValueControl } from "@angular/forms/signals";
+import { type FormValueControl } from "@angular/forms/signals";
 import { FilterChangeEvent, PreventableEvent } from "@nanahoshi/mona-ui/common";
 import {
     DropdownDataHandlerDirective,
@@ -36,7 +36,7 @@ import {
     DropdownLiveRegionDirective,
     DropdownNoDataTemplateDirective,
     DropdownPopupInput,
-    DropdownPopupInputToken,
+    DROPDOWN_POPUP_INPUT_TOKEN,
     dropdownPopupThemeVariants,
     DropdownPopupVariantInput,
     DropdownPrefixTemplateDirective,
@@ -85,7 +85,7 @@ import {
             multi: false
         },
         {
-            provide: DropdownPopupInputToken,
+            provide: DROPDOWN_POPUP_INPUT_TOKEN,
             useExisting: forwardRef(() => ComboBoxComponent),
             multi: false
         }
@@ -151,8 +151,8 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
-    protected readonly comboBoxValue$ = new Subject<string | null>();
     protected readonly comboBoxValue = signal("");
+    protected readonly comboBoxValue$ = new Subject<string | null>();
     protected readonly effectiveAriaLabel = computed(
         () => this.ariaLabel() || (this.ariaLabelledBy() ? "" : this.placeholder())
     );
@@ -179,7 +179,7 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
     });
     protected readonly messages = this.#i18n.componentMessages("comboBox", COMBO_BOX_DEFAULT_MESSAGES);
     protected readonly noDataTemplate = contentChild(DropdownNoDataTemplateDirective, { read: TemplateRef });
-    protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
+    protected readonly popupTemplate = viewChild.required<TemplateRef<unknown>>("popupTemplate");
     protected readonly prefixTemplate = contentChild(DropdownPrefixTemplateDirective, { read: TemplateRef });
     protected readonly selectableOptions: SelectableOptions = {
         enabled: true,
@@ -245,17 +245,17 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
     public readonly disabled = model(false);
 
     /**
-     * @description A predicate function or the name of the field that determines whether an item is disabled.
-     * @default undefined
-     */
-    public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
-
-    /**
      * @description Marks the combo box as invalid. When bound to a signal form field via `[formField]`,
      * this is written by the `FormField` directive.
      * @default false
      */
     public readonly invalid = input(false);
+
+    /**
+     * @description A predicate function or the name of the field that determines whether an item is disabled.
+     * @default undefined
+     */
+    public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
 
     /**
      * @description Displays a loading indicator and prevents interaction while an operation is in progress.
@@ -354,6 +354,15 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
     public readonly userClass = input<string>("", { alias: "class" });
 
     /**
+     * @description Two-way bindable current selected value. Implements `FormValueControl<TValue | null>`,
+     * enabling signal forms `[formField]` binding.
+     * Object mode returns the selected data item; primitive mode (see {@link valuePrimitive}) returns the value
+     * resolved through {@link valueField}. `null` represents no selection.
+     * @default null
+     */
+    public readonly value = model<TValue | null>(null);
+
+    /**
      * @description Emitted with the entered text when the user presses Enter on unmatched input.
      * Only emitted when {@link allowCustomValue} is true.
      */
@@ -380,15 +389,6 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
      */
     public readonly valuePrimitive = input(false);
 
-    /**
-     * @description Two-way bindable current selected value. Implements `FormValueControl<TValue | null>`,
-     * enabling signal forms `[formField]` binding.
-     * Object mode returns the selected data item; primitive mode (see {@link valuePrimitive}) returns the value
-     * resolved through {@link valueField}. `null` represents no selection.
-     * @default null
-     */
-    public readonly value = model<TValue | null>(null);
-
     public constructor() {
         effect(() => {
             const popupTemplate = this.popupTemplate();
@@ -398,8 +398,8 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
         effect(() => {
             const value = this.value();
             const valueField = this.valueField();
-            const valuePrimitive = this.valuePrimitive();
-            const selectedListItem = this.selectedListItem();
+            this.valuePrimitive();
+            this.selectedListItem();
             untracked(() => {
                 this.#listService.setValueField(valueField ?? "");
                 this.synchronizeSelection(value);
@@ -420,7 +420,21 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
             .subscribe(() => this.focus());
     }
 
-    protected onInputBlur(): void {
+    public focus(): void {
+        rxTimeout(this.#destroyRef, () => {
+            const input = this.#hostElementRef.nativeElement.querySelector("input");
+            if (input && !this.readonly()) {
+                input.focus();
+                input.setSelectionRange(input.value.length, input.value.length);
+            }
+        });
+    }
+
+    protected onInputBlur(event: FocusEvent): void {
+        const popupElement = this.#dropdownService.popupRef()?.overlayRef.overlayElement;
+        if (popupElement && event?.relatedTarget instanceof Node && popupElement.contains(event.relatedTarget)) {
+            return;
+        }
         this.touch.emit();
     }
 
@@ -435,6 +449,13 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
         }
         this.updateValue(this.getControlValue(event.item.data), true);
         this.closePopup();
+    }
+
+    protected onPopupPointerDown(event: PointerEvent): void {
+        const target = event.target as HTMLElement | null;
+        if (target?.tagName !== "INPUT") {
+            event.preventDefault();
+        }
     }
 
     protected onValueClear(event: Event): void {
@@ -461,14 +482,53 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
         this.#popupRef()?.close();
     }
 
-    public focus(): void {
-        rxTimeout(this.#destroyRef, () => {
-            const input = this.#hostElementRef.nativeElement.querySelector("input");
-            if (input && !this.readonly()) {
-                input.focus();
-                input.setSelectionRange(input.value.length, input.value.length);
+    private getControlValue(dataItem: TData): TValue {
+        const value = this.valuePrimitive() ? this.#listService.getDataItemValue(dataItem) : dataItem;
+        return value as TValue;
+    }
+
+    private handleEnterKey(): void {
+        const comboBoxText = this.comboBoxValue();
+        const highlightedItem = this.#listService.highlightedItem();
+
+        if (this.#userNavigatedViaArrows() && highlightedItem) {
+            this.selectItem(highlightedItem);
+            return;
+        }
+
+        if (!this.allowCustomValue()) {
+            if (highlightedItem) {
+                const highlightedText = this.#listService.getItemText(highlightedItem);
+                if (highlightedText.toLowerCase() === comboBoxText.toLowerCase()) {
+                    this.selectItem(highlightedItem);
+                } else {
+                    const matchingItem = this.#listService.getMatchingFilteredItem(comboBoxText);
+                    if (matchingItem) {
+                        this.selectItem(matchingItem);
+                    } else {
+                        this.clear();
+                    }
+                }
+            } else {
+                const matchingItem = this.#listService.getMatchingFilteredItem(comboBoxText);
+                if (matchingItem) {
+                    this.selectItem(matchingItem);
+                } else {
+                    this.clear();
+                }
             }
-        });
+        } else {
+            if (highlightedItem) {
+                const highlightedText = this.#listService.getItemText(highlightedItem);
+                if (highlightedText.toLowerCase() === comboBoxText.toLowerCase()) {
+                    this.selectItem(highlightedItem);
+                } else if (comboBoxText) {
+                    this.valueAdd.emit(comboBoxText);
+                }
+            } else if (comboBoxText) {
+                this.valueAdd.emit(comboBoxText);
+            }
+        }
     }
 
     private initialize(): void {
@@ -482,6 +542,11 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
         const event = new FilterChangeEvent(filter);
         this.#listService.filterChange$.next(event);
         return event;
+    }
+
+    private selectItem(item: ListItem<TData>): void {
+        this.#listService.selectItem(item);
+        this.updateValue(this.getControlValue(item.data));
     }
 
     private setArrowNavigationSubscription(): void {
@@ -536,55 +601,6 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
                     }
                 }
             });
-    }
-
-    private handleEnterKey(): void {
-        const comboBoxText = this.comboBoxValue();
-        const highlightedItem = this.#listService.highlightedItem();
-
-        if (this.#userNavigatedViaArrows() && highlightedItem) {
-            this.selectItem(highlightedItem);
-            return;
-        }
-
-        if (!this.allowCustomValue()) {
-            if (highlightedItem) {
-                const highlightedText = this.#listService.getItemText(highlightedItem);
-                if (highlightedText.toLowerCase() === comboBoxText.toLowerCase()) {
-                    this.selectItem(highlightedItem);
-                } else {
-                    const matchingItem = this.#listService.getMatchingFilteredItem(comboBoxText);
-                    if (matchingItem) {
-                        this.selectItem(matchingItem);
-                    } else {
-                        this.clear();
-                    }
-                }
-            } else {
-                const matchingItem = this.#listService.getMatchingFilteredItem(comboBoxText);
-                if (matchingItem) {
-                    this.selectItem(matchingItem);
-                } else {
-                    this.clear();
-                }
-            }
-        } else {
-            if (highlightedItem) {
-                const highlightedText = this.#listService.getItemText(highlightedItem);
-                if (highlightedText.toLowerCase() === comboBoxText.toLowerCase()) {
-                    this.selectItem(highlightedItem);
-                } else if (comboBoxText) {
-                    this.valueAdd.emit(comboBoxText);
-                }
-            } else if (comboBoxText) {
-                this.valueAdd.emit(comboBoxText);
-            }
-        }
-    }
-
-    private selectItem(item: ListItem<TData>): void {
-        this.#listService.selectItem(item);
-        this.updateValue(this.getControlValue(item.data));
     }
 
     private setEscapeKeySubscription(): void {
@@ -659,22 +675,6 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
         this.setSpaceKeySubscription();
     }
 
-    private updateValue(value: TValue | null, notify: boolean = true) {
-        const oldValue = this.value();
-        if (oldValue !== value) {
-            this.value.set(value);
-        }
-        this.comboBoxValue.set(this.valueText());
-        if (notify && oldValue !== value) {
-            this.touch.emit();
-        }
-    }
-
-    private getControlValue(dataItem: TData): TValue {
-        const value = this.valuePrimitive() ? this.#listService.getDataItemValue(dataItem) : dataItem;
-        return value as TValue;
-    }
-
     private synchronizeSelection(value: TValue | null): void {
         if (value == null) {
             this.#listService.clearSelections();
@@ -684,6 +684,17 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
             this.#listService.setSelectedKeys([value]);
         } else {
             this.#listService.setSelectedDataItems([value as unknown as TData]);
+        }
+    }
+
+    private updateValue(value: TValue | null, notify: boolean = true) {
+        const oldValue = this.value();
+        if (oldValue !== value) {
+            this.value.set(value);
+        }
+        this.comboBoxValue.set(this.valueText());
+        if (notify && oldValue !== value) {
+            this.touch.emit();
         }
     }
 }

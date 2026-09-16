@@ -3,7 +3,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import { dropdownPopupAnimation, PopupRef, PopupService, PopupSettings } from "@nanahoshi/mona-ui/popup";
 import { take, takeUntil } from "rxjs";
-import { DropdownPopupInputToken } from "../models/DropdownPopupInput";
+import { DROPDOWN_POPUP_INPUT_TOKEN } from "../models/DropdownPopupInput";
 import { DropdownService } from "../services/dropdown.service";
 
 @Directive({
@@ -13,7 +13,7 @@ export class DropdownPopupHandlerDirective {
     readonly #destroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
-    readonly #host = inject(DropdownPopupInputToken);
+    readonly #host = inject(DROPDOWN_POPUP_INPUT_TOKEN);
     readonly #popupService = inject(PopupService);
 
     public constructor() {

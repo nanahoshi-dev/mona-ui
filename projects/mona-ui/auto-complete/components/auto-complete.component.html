@@ -26,7 +26,7 @@
     [attr.aria-label]="effectiveAriaLabel() || undefined"
     [attr.aria-labelledby]="ariaLabelledBy() || undefined"
     (ngModelChange)="autoCompleteValue$.next($event)"
-    (blur)="onInputBlur()" />
+    (blur)="onInputBlur($event)" />
 
 @if (showClearButton() && autoCompleteValue() && !loading()) {
     <mona-indicator-icon
@@ -49,7 +49,7 @@
 <span monaDropdownLiveRegion></span>
 
 <ng-template #popupTemplate>
-    <div [class]="listPopupClass()">
+    <div [class]="listPopupClass()" (pointerdown)="onPopupPointerDown($event)">
         <mona-list (itemSelect)="onItemSelect($event)" [focusOnMount]="false" [size]="size()" [listId]="listId">
             @if (footerTemplate()) {
                 <ng-template monaListFooterTemplate>

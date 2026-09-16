@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { DropdownPopupInputToken } from "../models/DropdownPopupInput";
+import { DROPDOWN_POPUP_INPUT_TOKEN } from "../models/DropdownPopupInput";
 import { DropdownService } from "../services/dropdown.service";
 import { DropdownPopupHandlerDirective } from "./dropdown-popup-handler.directive";
 
@@ -20,7 +20,7 @@ describe("DropdownPopupHandlerDirective", () => {
             providers: [
                 DropdownService,
                 {
-                    provide: DropdownPopupInputToken,
+                    provide: DROPDOWN_POPUP_INPUT_TOKEN,
                     useValue: () => {}
                 }
             ]
