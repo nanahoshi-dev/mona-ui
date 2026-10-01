@@ -1,0 +1,106 @@
+<div class="space-y-6 my-6">
+    <h3 class="text-lg font-medium">Rows that fit their content</h3>
+    <p>Ordinary rows grow for avatars and custom editors. Virtual rows use one configured height.</p>
+    @for (direction of directions; track direction) {
+        <section [id]="'natural-' + direction" [dir]="direction">
+            <h4 class="font-medium mb-2">{{ direction === "ltr" ? "Left to right" : "Right to left" }}</h4>
+            <mona-grid
+                class="h-80 w-full"
+                [data]="rows()"
+                rowKey="id"
+                [pageSize]="10"
+                [responsivePager]="false"
+                [resizeMethod]="'auto'"
+                monaGridRowReorderable
+                (rowReorder)="onReorder($event)"
+                [monaGridSelectable]="{ enabled: true, mode: 'multiple', showCheckboxes: true }"
+                selectBy="id"
+                [monaGridEditable]="{ enabled: true, mode: 'cell' }"
+                [newRowFactory]="newUser">
+                <ng-template monaGridToolbarTemplate>
+                    <button monaButton monaGridAddCommand>Add user</button>
+                </ng-template>
+                <mona-grid-column field="id" title="ID" [locked]="true" [width]="70" />
+                <mona-grid-column field="name" title="User" [width]="300" [editable]="true">
+                    <ng-template monaGridCellTemplate let-user>
+                        @if (user.id === 1) {
+                            <span>{{ user.name }}</span>
+                        } @else {
+                            <div class="flex items-center gap-3" data-tall-user>
+                                <mona-avatar
+                                    label="JD"
+                                    labelColor="white"
+                                    backgroundColor="#44607e"
+                                    [width]="48"
+                                    [height]="48"
+                                    borderRadius="50%" />
+                                <div>
+                                    <div>{{ user.name }}</div>
+                                    <div class="text-xs text-foreground">{{ user.role }}</div>
+                                </div>
+                            </div>
+                        }
+                    </ng-template>
+                    <ng-template monaGridEditTemplate let-editor>
+                        <div class="py-3 w-full" data-tall-editor>
+                            <label class="block text-xs"
+                                >User name
+                                <input
+                                    class="border border-border-control w-full p-2"
+                                    [value]="editor.value"
+                                    (input)="onNameInput($event, editor.setValue)"
+                                    (keydown.enter)="editor.commit()" />
+                            </label>
+                        </div>
+                    </ng-template>
+                </mona-grid-column>
+                <mona-grid-column field="role" title="Role" [width]="140" [locked]="true" lockedPosition="right">
+                    <ng-template monaGridCellTemplate let-user
+                        ><mona-chip>{{ user.role }}</mona-chip></ng-template
+                    >
+                </mona-grid-column>
+                <mona-grid-command-column [width]="80" />
+                <ng-template monaGridDetailTemplate let-user
+                    ><div class="p-4">Details for {{ user.name }}</div></ng-template
+                >
+            </mona-grid>
+        </section>
+    }
+    <section id="virtual-explicit">
+        <h4 class="font-medium mb-2">Virtual rows: 48px</h4>
+        <mona-grid
+            class="h-64 w-full"
+            [data]="virtualRows"
+            [monaGridVirtualScroll]="{ height: 48 }"
+            [resizeMethod]="'auto'">
+            <mona-grid-column field="name" title="User" [width]="300">
+                <ng-template monaGridCellTemplate let-user>
+                    <div class="h-24" data-oversized-template>
+                        {{ user.name }}
+                        <div>Oversized content stays within the virtual row.</div>
+                    </div>
+                </ng-template>
+            </mona-grid-column>
+        </mona-grid>
+    </section>
+    <section id="virtual-default">
+        <h4 class="font-medium mb-2">Virtual rows: default 36px</h4>
+        <mona-grid class="h-64 w-full" [data]="virtualRows" monaGridVirtualScroll [resizeMethod]="'auto'">
+            <mona-grid-column field="name" title="User" [width]="300" />
+        </mona-grid>
+    </section>
+    <section id="virtual-grouped">
+        <h4 class="font-medium mb-2">Grouped virtual rows: 48px</h4>
+        <mona-grid
+            class="h-64 w-full"
+            [data]="virtualRows"
+            [monaGridVirtualScroll]="{ height: 48 }"
+            [resizeMethod]="'auto'"
+            [monaGridGroupable]="{ enabled: true, showFooter: true }"
+            [group]="[{ field: 'team' }]">
+            <mona-grid-column field="name" title="User" [width]="300" />
+            <mona-grid-column field="id" title="Count" [width]="100" [aggregate]="'count'" />
+            <mona-grid-column field="team" title="Team" [width]="100" />
+        </mona-grid>
+    </section>
+</div>

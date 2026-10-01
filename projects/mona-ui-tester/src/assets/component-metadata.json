@@ -1131,7 +1131,7 @@
       {
         "description": "",
         "kind": "output",
-        "name": "toggle",
+        "name": "toggleExpand",
         "type": "void"
       }
     ]
@@ -1243,6 +1243,39 @@
         "kind": "output",
         "name": "selectedKeysChange",
         "type": "unknown[]"
+      }
+    ]
+  },
+  "GridServerBindingDirective": {
+    "name": "GridServerBindingDirective",
+    "selector": "\"mona-grid[monaGridServerBinding]\"",
+    "inputs": [
+      {
+        "description": "Emitted once per user paging, sorting, or filtering action with the requested server state.",
+        "kind": "output",
+        "name": "dataStateChange",
+        "type": "GridDataState"
+      },
+      {
+        "description": "Shows a loading overlay while the application requests server data.",
+        "kind": "input",
+        "name": "loading",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Zero-based offset of the supplied server page. External changes do not request data.",
+        "kind": "input",
+        "name": "skip",
+        "type": "number",
+        "defaultValue": "0"
+      },
+      {
+        "description": "Total matching server records before paging. Must be a non-negative integer.",
+        "kind": "input",
+        "name": "total",
+        "type": "number",
+        "required": true
       }
     ]
   },
@@ -9438,13 +9471,6 @@
         "defaultValue": "\"fitView\""
       },
       {
-        "description": "Field name or selector used to derive a stable identity for each row.\nThe resolved value must be unique within the grid data.",
-        "kind": "input",
-        "name": "rowKey",
-        "type": "GridKeySelector<unknown> | null",
-        "defaultValue": "null"
-      },
-      {
         "description": "Whether the pager is responsive.\nIf set to `true`, the pager will be displayed as a dropdown when the grid width gets smaller.",
         "kind": "input",
         "name": "responsivePager",
@@ -9457,6 +9483,13 @@
         "name": "rounded",
         "type": "GridVariantProps[\"rounded\"]",
         "defaultValue": "\"medium\""
+      },
+      {
+        "description": "Field name or selector used to derive a stable identity for each row.\nThe resolved value must be unique within the grid data.",
+        "kind": "input",
+        "name": "rowKey",
+        "type": "GridKeySelector<unknown> | null",
+        "defaultValue": "null"
       },
       {
         "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
@@ -9729,7 +9762,7 @@
       {
         "description": "",
         "kind": "output",
-        "name": "cancel",
+        "name": "cancelEdit",
         "type": "void"
       },
       {

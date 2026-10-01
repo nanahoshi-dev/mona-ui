@@ -355,7 +355,7 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
                     description: `Height of each row in pixels.`,
                     name: "Row Height",
                     type: "number",
-                    numericValue: 32
+                    numericValue: 36
                 },
                 infiniteScroll: {
                     code: ``,
@@ -851,7 +851,7 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
     protected readonly virtualization = computed(() => {
         const features = this.features();
         const subFeatures = features["virtualization"].subFeatures || {};
-        const height = subFeatures["rowHeight"].numericValue ?? 31;
+        const height = subFeatures["rowHeight"].numericValue ?? 36;
         const enabled = features["virtualization"].active ?? false;
         const virtualization: VirtualScrollOptions = { enabled, height };
         return virtualization;
