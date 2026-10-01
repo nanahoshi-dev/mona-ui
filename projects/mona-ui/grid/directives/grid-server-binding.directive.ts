@@ -5,20 +5,20 @@ import { GridService } from "../services/grid.service";
 
 @Directive({ selector: "mona-grid[monaGridServerBinding]" })
 export class GridServerBindingDirective {
-    readonly #gridService = inject(GridService);
     readonly #destroyRef = inject(DestroyRef);
+    readonly #gridService = inject(GridService);
 
-    /** @description Total matching server records before paging. Must be a non-negative integer. */
-    public readonly total = input.required<number>();
-
-    /** @description Zero-based offset of the supplied server page. External changes do not request data. */
-    public readonly skip = input(0);
+    /** @description Emitted once per user paging, sorting, or filtering action with the requested server state. */
+    public readonly dataStateChange = output<GridDataState>();
 
     /** @description Shows a loading overlay while the application requests server data. */
     public readonly loading = input(false);
 
-    /** @description Emitted once per user paging, sorting, or filtering action with the requested server state. */
-    public readonly dataStateChange = output<GridDataState>();
+    /** @description Zero-based offset of the supplied server page. External changes do not request data. */
+    public readonly skip = input(0);
+
+    /** @description Total matching server records before paging. Must be a non-negative integer. */
+    public readonly total = input.required<number>();
 
     public constructor() {
         this.#gridService.setServerBindingEnabled(true);

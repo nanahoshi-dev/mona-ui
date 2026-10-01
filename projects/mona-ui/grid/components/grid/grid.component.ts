@@ -415,7 +415,9 @@ export class GridComponent<T> implements GridVariantInput {
             this.gridService.appliedFilters.update(dict => dict.remove(column.field));
             this.gridService.setColumnFiltered(column.id, false);
         }
-        this.adjustPageAfterFilter();
+        if (!this.gridService.serverBindingEnabled()) {
+            this.adjustPageAfterFilter();
+        }
         const allFilters = this.gridService
             .appliedFilters()
             .values()
@@ -423,6 +425,7 @@ export class GridComponent<T> implements GridVariantInput {
             .where(f => f != null)
             .toArray();
         this.gridService.filterChange$.next(allFilters);
+        this.gridService.requestDataStateChange({ resetPage: true });
     }
 
     protected onColumnMouseEnter(column: Column): void {
@@ -479,7 +482,11 @@ export class GridComponent<T> implements GridVariantInput {
     }
 
     protected onPageChange(event: PageChangeEvent): void {
+        const previous = this.gridService.paginationState();
         this.gridService.setPageState({ page: event.page, skip: event.skip, take: event.take });
+        if (previous.skip !== event.skip || previous.take !== event.take) {
+            this.gridService.requestDataStateChange();
+        }
 
         if (isPlatformBrowser(this.#platformId)) {
             const scrollableElement = this.#hostElementRef.nativeElement.querySelector(
@@ -492,7 +499,11 @@ export class GridComponent<T> implements GridVariantInput {
     }
 
     protected onPageSizeChange(data: PageSizeChangeEvent): void {
-        this.gridService.setPageState({ take: data.newPageSize });
+        const previous = this.gridService.paginationState();
+        this.gridService.setPageState({ skip: 0, take: data.newPageSize });
+        if (previous.skip !== 0 || previous.take !== data.newPageSize) {
+            this.gridService.requestDataStateChange();
+        }
     }
 
     protected onToolbarKeydown(event: KeyboardEvent): void {

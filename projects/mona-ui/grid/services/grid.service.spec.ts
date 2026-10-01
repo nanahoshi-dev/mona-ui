@@ -130,6 +130,38 @@ describe("GridService", () => {
         expect(() => service.setPageState({ take: 0 })).toThrow("pageSize must be");
     });
 
+    it("coalesces synchronous requests and resets to the first page", async () => {
+        service.setServerBindingEnabled(true);
+        service.setServerSkip(40);
+        const events = vi.fn();
+        service.dataStateChange$.subscribe(events);
+        service.requestDataStateChange();
+        service.setPageState({ take: 20 });
+        service.requestDataStateChange({ resetPage: true });
+        await Promise.resolve();
+        expect(events).toHaveBeenCalledTimes(1);
+        expect(events).toHaveBeenCalledWith({ skip: 0, take: 20, sort: [], filter: [] });
+        service.setServerBindingEnabled(false);
+        service.requestDataStateChange();
+        await Promise.resolve();
+        expect(events).toHaveBeenCalledTimes(1);
+    });
+
+    it("snapshots ordered sort and nested filter descriptors independently of internal state", () => {
+        service.setColumnDefinitions([createColumn({ field: "name" }), createColumn({ field: "id" })]);
+        service.loadSorts([
+            { field: "id", dir: "desc" },
+            { field: "name", dir: "asc" }
+        ]);
+        service.loadFilters([{ logic: "and", filters: [{ field: "id", operator: "in", value: [1, 2] }] }]);
+        const first = service.getDataState();
+        expect(first.sort.map(sort => sort.field)).toEqual(["id", "name"]);
+        first.sort[0].dir = "asc";
+        first.filter[0].filters.length = 0;
+        expect(service.getDataState().sort[0].dir).toBe("desc");
+        expect(service.getDataState().filter[0].filters).toHaveLength(1);
+    });
+
     describe("row identity", () => {
         it("uses deterministic row uids when a row key is provided", () => {
             service.setRows([{ id: 1, name: "Jane" }], "id");
