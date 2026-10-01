@@ -1,9 +1,11 @@
 import { Component, DestroyRef, inject, OnInit, signal } from "@angular/core";
 import { JsonPipe } from "@angular/common";
 import { range } from "@mirei/ts-collections";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import {
     GridColumnComponent,
     GridComponent,
+    GridExportDirective,
     GridFilterableDirective,
     GridServerBindingDirective,
     GridSortableDirective,
@@ -34,6 +36,8 @@ async function requestPage(state: GridDataState) {
     selector: "app-grid-server-binding-demo",
     imports: [
         JsonPipe,
+        ButtonDirective,
+        GridExportDirective,
         GridComponent,
         GridColumnComponent,
         GridServerBindingDirective,
@@ -51,6 +55,8 @@ async function requestPage(state: GridDataState) {
             [responsivePager]="false"
             [resizeMethod]="'auto'"
             monaGridServerBinding
+            monaGridExport
+            #export="monaGridExport"
             [total]="result().total"
             [skip]="state().skip"
             [loading]="loading()"
@@ -62,6 +68,7 @@ async function requestPage(state: GridDataState) {
             <mona-grid-column field="id" title="ID" type="number" [width]="100" />
             <mona-grid-column field="name" title="User" [width]="300" />
         </mona-grid>
+        <button monaButton (click)="export.exportCsv('server-page.csv')">Export loaded page</button>
         <p data-request-count>Requests: {{ requests() }}</p>
         <pre class="text-xs overflow-auto" data-request-state>{{ state() | json }}</pre>
     </section>`

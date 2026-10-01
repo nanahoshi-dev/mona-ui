@@ -91,6 +91,56 @@ describe("GridService", () => {
         expect(service).toBeTruthy();
     });
 
+    it("limits server select-all to loaded records while retaining stable keys from other pages", () => {
+        service.setServerBindingEnabled(true);
+        service.setServerTotal(137);
+        service.setPageState({ skip: 40, take: 10 });
+        service.selectBy.set("id");
+        service.setSelectableOptions({ enabled: true, mode: "multiple", selectAllScope: "view" });
+        service.setRows([{ id: 41 }, { id: 42 }], "id");
+        service.setBulkSelection(true);
+        expect([...service.selectedKeys()]).toEqual([41, 42]);
+        service.setRows([{ id: 51 }, { id: 52 }], "id");
+        service.setServerSkip(50);
+        service.setBulkSelection(true);
+        expect([...service.selectedKeys()]).toEqual([41, 42, 51, 52]);
+        service.setBulkSelection(false);
+        expect([...service.selectedKeys()]).toEqual([41, 42]);
+    });
+
+    it("calculates server aggregates from loaded rows rather than the remote total", () => {
+        service.setColumnDefinitions([
+            createColumn({ field: "amount", aggregate: "sum", dataType: "number" }),
+            createColumn({ field: "team" })
+        ]);
+        service.setServerBindingEnabled(true);
+        service.setServerTotal(137);
+        service.setPageState({ skip: 40, take: 10 });
+        service.setRows([
+            { amount: 10, team: "A" },
+            { amount: 25, team: "B" }
+        ]);
+        service.loadGroupColumns([{ field: "team" }]);
+        service.loadFilters([{ logic: "and", filters: [{ field: "amount", operator: "gt", value: 20 }] }]);
+        expect(service.aggregateMap().get("amount")?.sum).toBe(35);
+        expect(service.aggregateRows()).toEqual([
+            { amount: 10, team: "A" },
+            { amount: 25, team: "B" }
+        ]);
+        expect(
+            service
+                .groupAggregateMap()
+                .select(entry => ({
+                    count: entry.value.count,
+                    sum: entry.value.aggregates.get("amount")?.sum
+                }))
+                .toArray()
+        ).toEqual([
+            { count: 1, sum: 10 },
+            { count: 1, sum: 25 }
+        ]);
+    });
+
     it("displays the supplied server page without local sorting, filtering, or double paging", () => {
         service.setColumnDefinitions([createColumn({ field: "id" })]);
         service.setRows(createRowData(10, i => ({ id: 10 - i })));
