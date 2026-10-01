@@ -39,6 +39,8 @@ export * from "./directives/grid-resizable.directive";
 export * from "./directives/grid-row-reorderable.directive";
 export * from "./directives/grid-selectable.directive";
 export * from "./directives/grid-sortable.directive";
+export * from "./directives/grid-server-binding.directive";
+export type { GridDataState } from "./models/GridDataState";
 export * from "./directives/grid-state-persistence.directive";
 export * from "./directives/grid-toolbar-template.directive";
 export * from "./directives/grid-export.directive";

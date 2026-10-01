@@ -45,6 +45,7 @@ import type { FilterableOptions } from "../models/FilterableOptions";
 import { GridAddEvent } from "../models/GridAddEvent";
 import type { GridAggregateBucket, GridGroupAggregate } from "../models/GridAggregate";
 import { GridCancelEvent } from "../models/GridCancelEvent";
+import type { GridDataState } from "../models/GridDataState";
 import type { GridEditContext } from "../models/GridEditContext";
 import { GridEditEvent } from "../models/GridEditEvent";
 import type { GridEditFormContext } from "../models/GridEditFormContext";
@@ -112,6 +113,13 @@ export class GridService {
     readonly #scrollbarGutterMeasurementSource = signal<"body" | "fallback">("fallback");
     readonly #scrollbarGutterWidth = signal(0);
     readonly #rowUidByData = new WeakMap<Record<PropertyKey, unknown>, string>();
+    readonly #serverBindingEnabled = signal(false);
+    readonly #serverTotal = signal(0);
+    readonly #serverLoading = signal(false);
+    public readonly serverBindingEnabled = this.#serverBindingEnabled.asReadonly();
+    public readonly serverTotal = this.#serverTotal.asReadonly();
+    public readonly serverLoading = this.#serverLoading.asReadonly();
+    public readonly dataStateChange$ = new Subject<GridDataState>();
     readonly #rowUidByKeyObject = new WeakMap<object, string>();
     readonly #textMeasureCache = new Map<string, number>();
     public readonly addRowData = computed(() => {
@@ -1162,6 +1170,30 @@ export class GridService {
         this.paginationState.update(v => ({ ...v, ...state }));
     }
 
+    public setServerBindingEnabled(enabled: boolean): void {
+        this.#serverBindingEnabled.set(enabled);
+    }
+
+    public setServerTotal(total: number): void {
+        this.validateServerInteger(total, "total");
+        this.#serverTotal.set(total);
+    }
+
+    public setServerSkip(skip: number): void {
+        this.validateServerInteger(skip, "skip");
+        this.setPageState({ skip, page: Math.floor(skip / this.paginationState().take) + 1 });
+    }
+
+    public setServerLoading(loading: boolean): void {
+        this.#serverLoading.set(loading);
+    }
+
+    private validateServerInteger(value: number, name: string): void {
+        if (!Number.isSafeInteger(value) || value < 0) {
+            throw new Error(`monaGridServerBinding: ${name} must be a finite non-negative integer.`);
+        }
+    }
+
     public setReorderableOptions(options: Partial<ReorderableOptions>): void {
         this.#reorderableOptions.update(v => ({ ...v, ...options }));
     }
@@ -1909,11 +1941,4 @@ export class GridService {
 }
 
 export type RowReorderDisabledReason =
-    | "disabled"
-    | "editing"
-    | "filtered"
-    | "grouped"
-    | "single-row"
-    | "sorted"
-    | "virtual-scroll"
-    | null;
+    "disabled" | "editing" | "filtered" | "grouped" | "single-row" | "sorted" | "virtual-scroll" | null;
