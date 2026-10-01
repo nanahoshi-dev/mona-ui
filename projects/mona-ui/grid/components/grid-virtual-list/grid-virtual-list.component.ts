@@ -179,6 +179,10 @@ export class GridVirtualListComponent {
         this.gridService.setRowExpanded(row, !this.gridService.isRowExpanded(row));
     }
 
+    protected onViewportFocus(): void {
+        this.#gridNavigationService.focusActiveCellOrFirstHeader();
+    }
+
     private setElementScrollLeft(element: HTMLElement | null, scrollLeft: number): void {
         if (element != null && element.scrollLeft !== scrollLeft) {
             element.scrollLeft = scrollLeft;

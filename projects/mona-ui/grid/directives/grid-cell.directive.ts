@@ -6,7 +6,8 @@ import { gridListTableCellThemeVariants, type GridListTableCellVariantInput } fr
 @Directive({
     selector: "td[monaGridCell]",
     host: {
-        "[class]": "baseClass()"
+        "[class]": "baseClass()",
+        role: "gridcell"
     }
 })
 export class GridCellDirective implements GridListTableCellVariantInput {

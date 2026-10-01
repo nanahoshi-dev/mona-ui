@@ -5,14 +5,12 @@
     <mona-grid-command-cell [column]="column()" [row]="row()"></mona-grid-command-cell>
 } @else {
     <div
-        role="gridcell"
         [class]="cellContainerClass()"
         cdkMonitorSubtreeFocus
         [attr.data-uid]="cellUid()"
         [attr.data-ruid]="row().uid"
         [attr.data-field]="dataKey"
         [attr.data-col-index]="column().index"
-        [attr.aria-readonly]="!(gridService.editableOptions().enabled && column().editable)"
         (dblclick)="onCellDoubleClick($event)">
         @if (isEditing() && gridService.editSession(); as session) {
             <mona-grid-editor
@@ -21,7 +19,7 @@
                 [session]="session"
                 [tabNavigationEnabled]="editContextIsCellMode()"
                 (commit)="onEditCommit()"
-                (cancel)="onEditCancel()"
+                (cancelEdit)="onEditCancel()"
                 (tabNavigate)="onEditTabNavigate($event)"></mona-grid-editor>
         } @else if (column().cellTemplate) {
             <ng-container

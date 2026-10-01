@@ -70,218 +70,148 @@
         }
     </div>
 }
-<div [class]="headerClass()" [style.margin-right.px]="headerMarginRight()" #gridHeaderElement>
-    <div>
-        <table #headerTable [class]="headerTableClass()" [style.width.px]="gridService.tableWidth()">
-            <colgroup>
-                @for (_ of gridService.groupColumns(); track $index) {
-                    <col [style.width.px]="gridService.groupColumnWidth" />
-                }
-                @if (gridService.rowReorderColumnVisible()) {
-                    <col [style.width.px]="gridService.rowReorderColumnWidth" />
-                }
-                @if (gridService.masterDetailTemplate()) {
-                    <col [style.width.px]="gridService.detailColumnWidth" />
-                }
-                @if (gridService.selectionColumnVisible()) {
-                    <col [style.width.px]="gridService.selectionColumnWidth" />
-                }
-                @for (col of gridService.visibleColumns(); track $index) {
-                    <col [style.width.px]="col.calculatedWidth" />
-                }
-            </colgroup>
-            <thead role="rowgroup" [style.visibility]="!gridWidthSet() ? 'hidden' : undefined">
-                <tr
-                    cdkDropList
-                    [cdkDropListConnectedTo]="groupable() ? [groupColumnList()!] : []"
-                    (cdkDropListDropped)="onColumnDrop()"
-                    [class]="headerTableRowClass()">
+<div class="flex flex-col flex-1 min-h-0" [attr.role]="groupable() ? 'treegrid' : 'grid'">
+    <div [class]="headerClass()" [style.margin-right.px]="headerMarginRight()" #gridHeaderElement>
+        <div>
+            <table
+                role="presentation"
+                #headerTable
+                [class]="headerTableClass()"
+                [style.width.px]="gridService.tableWidth()">
+                <colgroup>
                     @for (_ of gridService.groupColumns(); track $index) {
-                        <th
-                            monaGridLockedCell
-                            [lockedCellHeader]="true"
-                            [lockedStructuralOffset]="$index * gridService.groupColumnWidth"
-                            scope="col"
-                            class="border-e border-border"
-                            [attr.colspan]="1"
-                            [style.width.px]="gridService.groupColumnWidth"></th>
+                        <col [style.width.px]="gridService.groupColumnWidth" />
                     }
                     @if (gridService.rowReorderColumnVisible()) {
-                        <th
-                            monaGridLockedCell
-                            [lockedCellHeader]="true"
-                            [structuralColumn]="'reorder'"
-                            monaGridLogicalCell
-                            [cellKind]="'command'"
-                            [columnId]="'$rowReorder'"
-                            [rowIndex]="-1"
-                            [colIndex]="0"
-                            [section]="'header'"
-                            [firstInRow]="gridService.groupColumns().length === 0"
-                            [lastInRow]="
-                                !gridService.masterDetailTemplate() &&
-                                !gridService.selectionColumnVisible() &&
-                                gridService.visibleColumns().length === 0
-                            "
-                            scope="col"
-                            [attr.aria-label]="gridService.messages().rowReorder"
-                            class="border-e border-border"
-                            [attr.colspan]="1"
-                            [style.width.px]="gridService.rowReorderColumnWidth"></th>
+                        <col [style.width.px]="gridService.rowReorderColumnWidth" />
                     }
                     @if (gridService.masterDetailTemplate()) {
-                        <th
-                            monaGridLockedCell
-                            [lockedCellHeader]="true"
-                            [structuralColumn]="'detail'"
-                            scope="col"
-                            class="border-e border-border"
-                            [attr.colspan]="1"
-                            [style.width.px]="gridService.detailColumnWidth"></th>
+                        <col [style.width.px]="gridService.detailColumnWidth" />
                     }
                     @if (gridService.selectionColumnVisible()) {
-                        <th
-                            monaGridLockedCell
-                            [lockedCellHeader]="true"
-                            [structuralColumn]="'selection'"
-                            monaGridLogicalCell
-                            [cellKind]="'command'"
-                            [columnId]="'$selection'"
-                            [rowIndex]="-1"
-                            [colIndex]="
-                                (gridService.rowReorderColumnVisible() ? 1 : 0) +
-                                (gridService.masterDetailTemplate() ? 1 : 0)
-                            "
-                            [section]="'header'"
-                            [firstInRow]="
-                                !gridService.rowReorderColumnVisible() &&
-                                !gridService.masterDetailTemplate() &&
-                                gridService.groupColumns().length === 0
-                            "
-                            [lastInRow]="gridService.visibleColumns().length === 0"
-                            scope="col"
-                            class="border-e border-border"
-                            [attr.colspan]="1"
-                            [style.width.px]="gridService.selectionColumnWidth">
-                            @if (
-                                gridService.selectableOptions().mode === "multiple" &&
-                                gridService.selectableOptions().showSelectAll !== false
-                            ) {
-                                <mona-grid-select-all-checkbox />
-                            }
-                        </th>
+                        <col [style.width.px]="gridService.selectionColumnWidth" />
                     }
-                    @for (column of gridService.visibleColumns(); track $index) {
-                        @let colIndex = $index + gridService.leadingLogicalColumnCount();
-                        <th
-                            scope="col"
-                            role="columnheader"
-                            cdkDrag
-                            monaGridLockedCell
-                            [column]="column"
-                            [lockedCellHeader]="true"
-                            monaGridLogicalCell
-                            [cellKind]="'header'"
-                            [columnId]="column.id"
-                            [rowIndex]="-1"
-                            [colIndex]="colIndex"
-                            [section]="'header'"
-                            [firstInRow]="colIndex === gridService.leadingLogicalColumnCount()"
-                            [lastInRow]="
-                                colIndex ===
-                                gridService.leadingLogicalColumnCount() + gridService.visibleColumns().length - 1
-                            "
-                            (toggle)="onColumnSort(column)"
-                            [cdkDragData]="column"
-                            [cdkDragDisabled]="isColumnDragDisabled(column)"
-                            [class]="headerTableCellClass()"
-                            (mouseenter)="onColumnMouseEnter(column)"
-                            (cdkDragEntered)="onColumnDragEnter($event)"
-                            (cdkDragStarted)="onColumnDragStart($event)"
-                            [style.min-width.px]="column.minWidth"
-                            [style.width.px]="column.calculatedWidth"
-                            [attr.colspan]="1"
-                            [attr.aria-sort]="
-                                gridService.sortableOptions().enabled
-                                    ? (column.columnSortDirection | columnAriaSort)
-                                    : null
-                            ">
-                            <div [class]="headerTableColumnWrapClass()">
-                                @if (column.headerTemplate) {
-                                    <ng-container
-                                        [ngTemplateOutlet]="column.headerTemplate"
-                                        [ngTemplateOutletContext]="{ $implicit: column, column }"></ng-container>
-                                } @else if (column.titleTemplate) {
-                                    <ng-container [ngTemplateOutlet]="column.titleTemplate"></ng-container>
-                                } @else {
-                                    <span
-                                        [class]="headerTableColumnTitleClass()"
-                                        (click)="onColumnSort(column)"
-                                        [title]="column.title"
-                                        >{{ column.title }}</span
-                                    >
-                                }
-
-                                <div [class]="columnActionsClass()" [attr.data-column-actions]="true">
-                                    @if (gridService.sortableOptions().showIndices && column.sortIndex !== null) {
-                                        <span>{{ column.sortIndex }}</span>
-                                    }
-                                    @if (column.columnSortDirection === "asc") {
-                                        <i class="ri-arrow-down-line"></i>
-                                    } @else if (column.columnSortDirection === "desc") {
-                                        <i class="ri-arrow-up-line"></i>
-                                    }
-                                    @if (filterMenuEnabled()) {
-                                        @if (column.kind === "data" && column.filterable) {
-                                            <mona-grid-filter-menu
-                                                [column]="column"
-                                                [type]="column.dataType"
-                                                (apply)="onColumnFilter(column, $event)"></mona-grid-filter-menu>
-                                        }
-                                    }
-                                </div>
-                            </div>
-                            @if (
-                                dropColumn() === column &&
-                                dragColumn() &&
-                                gridService.reorderableOptions().enabled &&
-                                !groupingInProgress()
-                            ) {
-                                <span [class]="columnDropHintClass()"> </span>
-                            }
-                            @if (gridService.resizableOptions().enabled && !columnDragging()) {
-                                <div
-                                    monaGridColumnResizeHandler
-                                    [column]="column"
-                                    [class]="columnResizerClass()"
-                                    (resizeStart)="onColumnResizeStart()"
-                                    (resizeEnd)="onColumnResizeEnd($event)"></div>
-                            }
-                            <ng-template cdkDragPreview>
-                                <div [class]="columnDragPreviewClass()">
-                                    <span>{{ column.title }}</span>
-                                </div>
-                            </ng-template>
-                            <ng-template cdkDragPlaceholder>
-                                @if (groupingInProgress()) {
-                                    <mona-chip
-                                        style="z-index: 10; pointer-events: none"
-                                        [removable]="true"
-                                        [rounded]="rounded()"
-                                        >{{ column.title }}</mona-chip
-                                    >
-                                }
-                            </ng-template>
-                        </th>
-                        @if (columnDragging() && dragColumn() === column) {
+                    @for (col of gridService.visibleColumns(); track $index) {
+                        <col [style.width.px]="col.calculatedWidth" />
+                    }
+                </colgroup>
+                <thead role="rowgroup" [style.visibility]="!gridWidthSet() ? 'hidden' : undefined">
+                    <tr
+                        role="row"
+                        cdkDropList
+                        [cdkDropListConnectedTo]="groupable() ? [groupColumnList()!] : []"
+                        (cdkDropListDropped)="onColumnDrop()"
+                        [class]="headerTableRowClass()">
+                        @for (_ of gridService.groupColumns(); track $index) {
                             <th
+                                monaGridLockedCell
+                                [lockedCellHeader]="true"
+                                [lockedStructuralOffset]="$index * gridService.groupColumnWidth"
+                                scope="col"
+                                class="border-e border-border"
+                                [attr.colspan]="1"
+                                [style.width.px]="gridService.groupColumnWidth"></th>
+                        }
+                        @if (gridService.rowReorderColumnVisible()) {
+                            <th
+                                monaGridLockedCell
+                                [lockedCellHeader]="true"
+                                [structuralColumn]="'reorder'"
+                                monaGridLogicalCell
+                                [cellKind]="'command'"
+                                [columnId]="'$rowReorder'"
+                                [rowIndex]="-1"
+                                [colIndex]="0"
+                                [section]="'header'"
+                                [firstInRow]="gridService.groupColumns().length === 0"
+                                [lastInRow]="
+                                    !gridService.masterDetailTemplate() &&
+                                    !gridService.selectionColumnVisible() &&
+                                    gridService.visibleColumns().length === 0
+                                "
+                                scope="col"
+                                [attr.aria-label]="gridService.messages().rowReorder"
+                                class="border-e border-border"
+                                [attr.colspan]="1"
+                                [style.width.px]="gridService.rowReorderColumnWidth"></th>
+                        }
+                        @if (gridService.masterDetailTemplate()) {
+                            <th
+                                monaGridLockedCell
+                                [lockedCellHeader]="true"
+                                [structuralColumn]="'detail'"
+                                scope="col"
+                                class="border-e border-border"
+                                [attr.colspan]="1"
+                                [style.width.px]="gridService.detailColumnWidth"></th>
+                        }
+                        @if (gridService.selectionColumnVisible()) {
+                            <th
+                                monaGridLockedCell
+                                [lockedCellHeader]="true"
+                                [structuralColumn]="'selection'"
+                                monaGridLogicalCell
+                                [cellKind]="'command'"
+                                [columnId]="'$selection'"
+                                [rowIndex]="-1"
+                                [colIndex]="
+                                    (gridService.rowReorderColumnVisible() ? 1 : 0) +
+                                    (gridService.masterDetailTemplate() ? 1 : 0)
+                                "
+                                [section]="'header'"
+                                [firstInRow]="
+                                    !gridService.rowReorderColumnVisible() &&
+                                    !gridService.masterDetailTemplate() &&
+                                    gridService.groupColumns().length === 0
+                                "
+                                [lastInRow]="gridService.visibleColumns().length === 0"
+                                scope="col"
+                                class="border-e border-border"
+                                [attr.colspan]="1"
+                                [style.width.px]="gridService.selectionColumnWidth">
+                                @if (
+                                    gridService.selectableOptions().mode === "multiple" &&
+                                    gridService.selectableOptions().showSelectAll !== false
+                                ) {
+                                    <mona-grid-select-all-checkbox />
+                                }
+                            </th>
+                        }
+                        @for (column of gridService.visibleColumns(); track $index) {
+                            @let colIndex = $index + gridService.leadingLogicalColumnCount();
+                            <th
+                                scope="col"
+                                role="columnheader"
+                                cdkDrag
                                 monaGridLockedCell
                                 [column]="column"
                                 [lockedCellHeader]="true"
+                                monaGridLogicalCell
+                                [cellKind]="'header'"
+                                [columnId]="column.id"
+                                [rowIndex]="-1"
+                                [colIndex]="colIndex"
+                                [section]="'header'"
+                                [firstInRow]="colIndex === gridService.leadingLogicalColumnCount()"
+                                [lastInRow]="
+                                    colIndex ===
+                                    gridService.leadingLogicalColumnCount() + gridService.visibleColumns().length - 1
+                                "
+                                (toggle)="onColumnSort(column)"
+                                [cdkDragData]="column"
+                                [cdkDragDisabled]="isColumnDragDisabled(column)"
                                 [class]="headerTableCellClass()"
+                                (mouseenter)="onColumnMouseEnter(column)"
+                                (cdkDragEntered)="onColumnDragEnter($event)"
+                                (cdkDragStarted)="onColumnDragStart($event)"
                                 [style.min-width.px]="column.minWidth"
+                                [style.width.px]="column.calculatedWidth"
                                 [attr.colspan]="1"
-                                [style.width.px]="column.calculatedWidth">
+                                [attr.aria-sort]="
+                                    gridService.sortableOptions().enabled
+                                        ? (column.columnSortDirection | columnAriaSort)
+                                        : null
+                                ">
                                 <div [class]="headerTableColumnWrapClass()">
                                     @if (column.headerTemplate) {
                                         <ng-container
@@ -297,190 +227,273 @@
                                             >{{ column.title }}</span
                                         >
                                     }
+
+                                    <div [class]="columnActionsClass()" [attr.data-column-actions]="true">
+                                        @if (gridService.sortableOptions().showIndices && column.sortIndex !== null) {
+                                            <span>{{ column.sortIndex }}</span>
+                                        }
+                                        @if (column.columnSortDirection === "asc") {
+                                            <i class="ri-arrow-down-line"></i>
+                                        } @else if (column.columnSortDirection === "desc") {
+                                            <i class="ri-arrow-up-line"></i>
+                                        }
+                                        @if (filterMenuEnabled()) {
+                                            @if (column.kind === "data" && column.filterable) {
+                                                <mona-grid-filter-menu
+                                                    [column]="column"
+                                                    [type]="column.dataType"
+                                                    (apply)="onColumnFilter(column, $event)"></mona-grid-filter-menu>
+                                            }
+                                        }
+                                    </div>
                                 </div>
-                            </th>
-                        }
-                    }
-                </tr>
-                @if (filterRowEnabled()) {
-                    <tr role="row" [class]="headerTableRowClass()">
-                        @for (_ of gridService.groupColumns(); track $index) {
-                            <th
-                                monaGridLockedCell
-                                [lockedCellHeader]="true"
-                                [lockedStructuralOffset]="$index * gridService.groupColumnWidth"
-                                scope="col"
-                                class="border-e border-border"
-                                [style.width.px]="gridService.groupColumnWidth"></th>
-                        }
-                        @if (gridService.rowReorderColumnVisible()) {
-                            <th
-                                monaGridLockedCell
-                                [lockedCellHeader]="true"
-                                [structuralColumn]="'reorder'"
-                                scope="col"
-                                class="border-e border-border"
-                                [style.width.px]="gridService.rowReorderColumnWidth"></th>
-                        }
-                        @if (gridService.masterDetailTemplate()) {
-                            <th
-                                monaGridLockedCell
-                                [lockedCellHeader]="true"
-                                [structuralColumn]="'detail'"
-                                scope="col"
-                                class="border-e border-border"
-                                [style.width.px]="gridService.detailColumnWidth"></th>
-                        }
-                        @if (gridService.selectionColumnVisible()) {
-                            <th
-                                monaGridLockedCell
-                                [lockedCellHeader]="true"
-                                [structuralColumn]="'selection'"
-                                scope="col"
-                                class="border-e border-border"
-                                [style.width.px]="gridService.selectionColumnWidth"></th>
-                        }
-                        @for (column of gridService.visibleColumns(); track $index) {
-                            <th
-                                monaGridLockedCell
-                                [column]="column"
-                                [lockedCellHeader]="true"
-                                scope="col"
-                                class="border-e border-border overflow-hidden"
-                                [style.width.px]="column.calculatedWidth"
-                                [attr.aria-label]="messages().filterByColumn(column.title)">
-                                @if (column.kind === "data" && column.field && column.filterable) {
-                                    <mona-grid-filter-row-cell
-                                        [column]="column"
-                                        (apply)="onColumnFilter(column, $event)" />
+                                @if (
+                                    dropColumn() === column &&
+                                    dragColumn() &&
+                                    gridService.reorderableOptions().enabled &&
+                                    !groupingInProgress()
+                                ) {
+                                    <span [class]="columnDropHintClass()"> </span>
                                 }
+                                @if (gridService.resizableOptions().enabled && !columnDragging()) {
+                                    <div
+                                        monaGridColumnResizeHandler
+                                        [column]="column"
+                                        [class]="columnResizerClass()"
+                                        (resizeStart)="onColumnResizeStart()"
+                                        (resizeEnd)="onColumnResizeEnd($event)"></div>
+                                }
+                                <ng-template cdkDragPreview>
+                                    <div [class]="columnDragPreviewClass()">
+                                        <span>{{ column.title }}</span>
+                                    </div>
+                                </ng-template>
+                                <ng-template cdkDragPlaceholder>
+                                    @if (groupingInProgress()) {
+                                        <mona-chip
+                                            style="z-index: 10; pointer-events: none"
+                                            [removable]="true"
+                                            [rounded]="rounded()"
+                                            >{{ column.title }}</mona-chip
+                                        >
+                                    }
+                                </ng-template>
                             </th>
+                            @if (columnDragging() && dragColumn() === column) {
+                                <th
+                                    monaGridLockedCell
+                                    [column]="column"
+                                    [lockedCellHeader]="true"
+                                    [class]="headerTableCellClass()"
+                                    [style.min-width.px]="column.minWidth"
+                                    [attr.colspan]="1"
+                                    [style.width.px]="column.calculatedWidth">
+                                    <div [class]="headerTableColumnWrapClass()">
+                                        @if (column.headerTemplate) {
+                                            <ng-container
+                                                [ngTemplateOutlet]="column.headerTemplate"
+                                                [ngTemplateOutletContext]="{
+                                                    $implicit: column,
+                                                    column
+                                                }"></ng-container>
+                                        } @else if (column.titleTemplate) {
+                                            <ng-container [ngTemplateOutlet]="column.titleTemplate"></ng-container>
+                                        } @else {
+                                            <span
+                                                [class]="headerTableColumnTitleClass()"
+                                                (click)="onColumnSort(column)"
+                                                [title]="column.title"
+                                                >{{ column.title }}</span
+                                            >
+                                        }
+                                    </div>
+                                </th>
+                            }
                         }
                     </tr>
-                }
-            </thead>
-        </table>
+                    @if (filterRowEnabled()) {
+                        <tr role="row" [class]="headerTableRowClass()">
+                            @for (_ of gridService.groupColumns(); track $index) {
+                                <th
+                                    monaGridLockedCell
+                                    [lockedCellHeader]="true"
+                                    [lockedStructuralOffset]="$index * gridService.groupColumnWidth"
+                                    scope="col"
+                                    class="border-e border-border"
+                                    [style.width.px]="gridService.groupColumnWidth"></th>
+                            }
+                            @if (gridService.rowReorderColumnVisible()) {
+                                <th
+                                    monaGridLockedCell
+                                    [lockedCellHeader]="true"
+                                    [structuralColumn]="'reorder'"
+                                    scope="col"
+                                    class="border-e border-border"
+                                    [style.width.px]="gridService.rowReorderColumnWidth"></th>
+                            }
+                            @if (gridService.masterDetailTemplate()) {
+                                <th
+                                    monaGridLockedCell
+                                    [lockedCellHeader]="true"
+                                    [structuralColumn]="'detail'"
+                                    scope="col"
+                                    class="border-e border-border"
+                                    [style.width.px]="gridService.detailColumnWidth"></th>
+                            }
+                            @if (gridService.selectionColumnVisible()) {
+                                <th
+                                    monaGridLockedCell
+                                    [lockedCellHeader]="true"
+                                    [structuralColumn]="'selection'"
+                                    scope="col"
+                                    class="border-e border-border"
+                                    [style.width.px]="gridService.selectionColumnWidth"></th>
+                            }
+                            @for (column of gridService.visibleColumns(); track $index) {
+                                <th
+                                    monaGridLockedCell
+                                    [column]="column"
+                                    [lockedCellHeader]="true"
+                                    scope="col"
+                                    class="border-e border-border overflow-hidden"
+                                    [style.width.px]="column.calculatedWidth"
+                                    [attr.aria-label]="messages().filterByColumn(column.title)">
+                                    @if (column.kind === "data" && column.field && column.filterable) {
+                                        <mona-grid-filter-row-cell
+                                            [column]="column"
+                                            (apply)="onColumnFilter(column, $event)" />
+                                    }
+                                </th>
+                            }
+                        </tr>
+                    }
+                </thead>
+            </table>
+        </div>
     </div>
-</div>
 
-@defer (when gridWidthSet()) {
-    @if (gridService.virtualScrollOptions().enabled) {
-        @if (gridService.viewRows().length !== 0 || gridService.addRowVisible()) {
-            <mona-grid-virtual-list [columns]="gridService.visibleColumns()" [data]="gridService.viewRows()" />
-        } @else {
-            <ng-container [ngTemplateOutlet]="emptyGridTemplate" />
-        }
-    } @else {
-        <div class="relative flex-1 min-h-0" data-grid-body-region>
-            @if (gridService.viewPageRows().length !== 0 || gridService.addRowVisible()) {
-                <mona-grid-list [columns]="gridService.visibleColumns()" [data]="gridService.viewPageRows()" />
-            } @else if (!gridService.serverLoading()) {
+    @defer (when gridWidthSet()) {
+        @if (gridService.virtualScrollOptions().enabled) {
+            @if (gridService.viewRows().length !== 0 || gridService.addRowVisible()) {
+                <mona-grid-virtual-list [columns]="gridService.visibleColumns()" [data]="gridService.viewRows()" />
+            } @else {
                 <ng-container [ngTemplateOutlet]="emptyGridTemplate" />
             }
-            @if (gridService.serverLoading()) {
-                <div class="absolute inset-0 z-20 flex items-center justify-center bg-surface/60" data-grid-loading>
-                    <mona-spinner size="large" />
-                </div>
-            }
-        </div>
-        @if (gridService.viewPageRows().length !== 0 || gridService.addRowVisible()) {
-            @if (footerVisible()) {
-                <div
-                    [class]="footerClass()"
-                    [style.margin-right.px]="gridService.scrollbarGutterWidth()"
-                    #footerScrollElement
-                    data-grid-footer-scroll>
-                    <div>
-                        <table [class]="footerTableClass()" [style.width.px]="gridService.tableWidth()">
-                            <colgroup>
-                                @for (_ of gridService.groupColumns(); track $index) {
-                                    <col [style.width.px]="gridService.groupColumnWidth" />
-                                }
-                                @if (gridService.rowReorderColumnVisible()) {
-                                    <col [style.width.px]="gridService.rowReorderColumnWidth" />
-                                }
-                                @if (gridService.masterDetailTemplate()) {
-                                    <col [style.width.px]="gridService.detailColumnWidth" />
-                                }
-                                @if (gridService.selectionColumnVisible()) {
-                                    <col [style.width.px]="gridService.selectionColumnWidth" />
-                                }
-                                @for (col of gridService.visibleColumns(); track $index) {
-                                    <col [style.width.px]="col.calculatedWidth" />
-                                }
-                            </colgroup>
-                            <tfoot role="rowgroup">
-                                <tr [class]="footerTableRowClass()">
+        } @else {
+            <div class="relative flex-1 min-h-0" data-grid-body-region>
+                @if (gridService.viewPageRows().length !== 0 || gridService.addRowVisible()) {
+                    <mona-grid-list [columns]="gridService.visibleColumns()" [data]="gridService.viewPageRows()" />
+                } @else if (!gridService.serverLoading()) {
+                    <ng-container [ngTemplateOutlet]="emptyGridTemplate" />
+                }
+                @if (gridService.serverLoading()) {
+                    <div class="absolute inset-0 z-20 flex items-center justify-center bg-surface/60" data-grid-loading>
+                        <mona-spinner size="large" />
+                    </div>
+                }
+            </div>
+            @if (gridService.viewPageRows().length !== 0 || gridService.addRowVisible()) {
+                @if (footerVisible()) {
+                    <div
+                        [class]="footerClass()"
+                        [style.margin-right.px]="gridService.scrollbarGutterWidth()"
+                        #footerScrollElement
+                        data-grid-footer-scroll>
+                        <div>
+                            <table
+                                role="presentation"
+                                [class]="footerTableClass()"
+                                [style.width.px]="gridService.tableWidth()">
+                                <colgroup>
                                     @for (_ of gridService.groupColumns(); track $index) {
-                                        <td
-                                            monaGridFooterTableCell
-                                            monaGridLockedCell
-                                            [lockedCellHeader]="true"
-                                            [lockedStructuralOffset]="$index * gridService.groupColumnWidth"
-                                            [footerCellWidth]="gridService.groupColumnWidth"></td>
+                                        <col [style.width.px]="gridService.groupColumnWidth" />
                                     }
                                     @if (gridService.rowReorderColumnVisible()) {
-                                        <td
-                                            monaGridFooterTableCell
-                                            monaGridLockedCell
-                                            [lockedCellHeader]="true"
-                                            [structuralColumn]="'reorder'"
-                                            [footerCellWidth]="gridService.rowReorderColumnWidth"></td>
+                                        <col [style.width.px]="gridService.rowReorderColumnWidth" />
                                     }
                                     @if (gridService.masterDetailTemplate()) {
-                                        <td
-                                            monaGridFooterTableCell
-                                            monaGridLockedCell
-                                            [lockedCellHeader]="true"
-                                            [structuralColumn]="'detail'"
-                                            [footerCellWidth]="gridService.detailColumnWidth"></td>
+                                        <col [style.width.px]="gridService.detailColumnWidth" />
                                     }
                                     @if (gridService.selectionColumnVisible()) {
-                                        <td
-                                            monaGridFooterTableCell
-                                            monaGridLockedCell
-                                            [lockedCellHeader]="true"
-                                            [structuralColumn]="'selection'"
-                                            [footerCellWidth]="gridService.selectionColumnWidth"></td>
+                                        <col [style.width.px]="gridService.selectionColumnWidth" />
                                     }
-                                    @for (column of gridService.visibleColumns(); track $index) {
-                                        <td
-                                            monaGridFooterTableCell
-                                            monaGridLockedCell
-                                            [column]="column"
-                                            [lockedCellHeader]="true"
-                                            [footerColumn]="column">
-                                            <mona-grid-footer-cell
+                                    @for (col of gridService.visibleColumns(); track $index) {
+                                        <col [style.width.px]="col.calculatedWidth" />
+                                    }
+                                </colgroup>
+                                <tfoot role="rowgroup">
+                                    <tr role="row" [class]="footerTableRowClass()">
+                                        @for (_ of gridService.groupColumns(); track $index) {
+                                            <td
+                                                monaGridFooterTableCell
+                                                monaGridLockedCell
+                                                [lockedCellHeader]="true"
+                                                [lockedStructuralOffset]="$index * gridService.groupColumnWidth"
+                                                [footerCellWidth]="gridService.groupColumnWidth"></td>
+                                        }
+                                        @if (gridService.rowReorderColumnVisible()) {
+                                            <td
+                                                monaGridFooterTableCell
+                                                monaGridLockedCell
+                                                [lockedCellHeader]="true"
+                                                [structuralColumn]="'reorder'"
+                                                [footerCellWidth]="gridService.rowReorderColumnWidth"></td>
+                                        }
+                                        @if (gridService.masterDetailTemplate()) {
+                                            <td
+                                                monaGridFooterTableCell
+                                                monaGridLockedCell
+                                                [lockedCellHeader]="true"
+                                                [structuralColumn]="'detail'"
+                                                [footerCellWidth]="gridService.detailColumnWidth"></td>
+                                        }
+                                        @if (gridService.selectionColumnVisible()) {
+                                            <td
+                                                monaGridFooterTableCell
+                                                monaGridLockedCell
+                                                [lockedCellHeader]="true"
+                                                [structuralColumn]="'selection'"
+                                                [footerCellWidth]="gridService.selectionColumnWidth"></td>
+                                        }
+                                        @for (column of gridService.visibleColumns(); track $index) {
+                                            <td
+                                                monaGridFooterTableCell
+                                                monaGridLockedCell
                                                 [column]="column"
-                                                [columnIndex]="$index"></mona-grid-footer-cell>
-                                        </td>
-                                    }
-                                </tr>
-                            </tfoot>
-                        </table>
+                                                [lockedCellHeader]="true"
+                                                [footerColumn]="column">
+                                                <mona-grid-footer-cell
+                                                    [column]="column"
+                                                    [columnIndex]="$index"></mona-grid-footer-cell>
+                                            </td>
+                                        }
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                     </div>
-                </div>
+                }
             }
         }
-        @if (
-            gridService.serverBindingEnabled() || gridService.viewPageRows().length !== 0 || gridService.addRowVisible()
-        ) {
-            <mona-pager
-                class="border-0 border-t border-t-border rounded-ss-none rounded-se-none"
-                [skip]="gridService.paginationState().skip"
-                [pageSize]="gridService.paginationState().take"
-                [total]="gridService.pagerTotal()"
-                [size]="'small'"
-                [rounded]="rounded()"
-                [pageInput]="true"
-                [pageSizeValues]="pageSizeValues()"
-                [responsive]="responsivePager()"
-                (pageSizeChange)="onPageSizeChange($event)"
-                (pageChange)="onPageChange($event)"></mona-pager>
-        }
+    } @placeholder {
+        <mona-placeholder text="Loading..." />
     }
-} @placeholder {
-    <mona-placeholder text="Loading..." />
+</div>
+@if (!gridService.virtualScrollOptions().enabled) {
+    @if (gridService.serverBindingEnabled() || gridService.viewPageRows().length !== 0 || gridService.addRowVisible()) {
+        <mona-pager
+            class="border-0 border-t border-t-border rounded-ss-none rounded-se-none"
+            [skip]="gridService.paginationState().skip"
+            [pageSize]="gridService.paginationState().take"
+            [total]="gridService.pagerTotal()"
+            [size]="'small'"
+            [rounded]="rounded()"
+            [pageInput]="true"
+            [pageSizeValues]="pageSizeValues()"
+            [responsive]="responsivePager()"
+            (pageSizeChange)="onPageSizeChange($event)"
+            (pageChange)="onPageChange($event)"></mona-pager>
+    }
 }
 
 <ng-template #emptyGridTemplate>

@@ -5,10 +5,17 @@
         <div class="flex gap-0.5 w-full">
             <mona-text-box
                 size="small"
+                [inputAttributes]="{ 'aria-label': messages().filterByColumn(column().title) }"
                 [ngModel]="stringValue()"
                 (ngModelChange)="onStringChange($event)"
                 [placeholder]="messages().filterPlaceholder" />
-            <button monaButton look="ghost" [iconOnly]="true" [size]="'small'" #filterButton>
+            <button
+                monaButton
+                look="ghost"
+                [iconOnly]="true"
+                [size]="'small'"
+                #filterButton
+                [attr.aria-label]="messages().filterByColumn(column().title)">
                 <svg lucideFunnel [size]="14" [class.text-info]="isFilterActive()"></svg>
             </button>
             <ng-container
@@ -28,11 +35,18 @@
         <div class="flex gap-0.5 w-full">
             <mona-numeric-text-box
                 size="small"
+                [aria-label]="messages().filterByColumn(column().title)"
                 [ngModel]="numberValue()"
                 (ngModelChange)="onNumberChange($event)"
                 [style.width.%]="100" />
 
-            <button monaButton look="ghost" [iconOnly]="true" [size]="'small'" #filterButton>
+            <button
+                monaButton
+                look="ghost"
+                [iconOnly]="true"
+                [size]="'small'"
+                #filterButton
+                [attr.aria-label]="messages().filterByColumn(column().title)">
                 <svg lucideFunnel [size]="14" [class.text-info]="isFilterActive()"></svg>
             </button>
             <mona-popup-menu [target]="filterButton" [size]="'small'">
@@ -57,7 +71,13 @@
                     (ngModelChange)="onDateChange($event)"
                     [style.width.%]="100" />
             }
-            <button monaButton look="ghost" [iconOnly]="true" [size]="'small'" #filterButton>
+            <button
+                monaButton
+                look="ghost"
+                [iconOnly]="true"
+                [size]="'small'"
+                #filterButton
+                [attr.aria-label]="messages().filterByColumn(column().title)">
                 <svg lucideFunnel [size]="14" [class.text-info]="isFilterActive()"></svg>
             </button>
             <ng-container
@@ -81,6 +101,7 @@
                 textField="text"
                 valueField="value"
                 [placeholder]="messages().all"
+                [aria-label]="messages().filterByColumn(column().title)"
                 [ngModel]="booleanValue()"
                 (ngModelChange)="onBooleanChange($event)"
                 [style.width.%]="100" />
@@ -92,7 +113,13 @@
 
 <ng-template #clearFilterButtonTemplate let-hasValue>
     @if (selectedOperator() != null && hasValue) {
-        <button monaButton look="ghost" [iconOnly]="true" [size]="'small'" (click)="onClear()">
+        <button
+            monaButton
+            look="ghost"
+            [iconOnly]="true"
+            [size]="'small'"
+            (click)="onClear()"
+            [attr.aria-label]="filterMessages().clear">
             <svg lucideFunnelX [size]="14" class="text-error"></svg>
         </button>
     }

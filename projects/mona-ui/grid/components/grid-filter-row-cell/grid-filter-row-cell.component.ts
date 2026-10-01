@@ -18,7 +18,13 @@ import { LucideFunnel, LucideFunnelX } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { DatePickerComponent } from "@nanahoshi/mona-ui/date-picker";
 import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
-import { type FilterMenuDataItem, type FilterMenuValue, FilterService } from "@nanahoshi/mona-ui/filter";
+import {
+    FILTER_DEFAULT_MESSAGES,
+    type FilterMenuDataItem,
+    type FilterMenuValue,
+    FilterService
+} from "@nanahoshi/mona-ui/filter";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
 import { PopupMenuCheckboxItemComponent, PopupMenuComponent } from "@nanahoshi/mona-ui/popup-menu";
 import type {
@@ -69,7 +75,11 @@ export class GridFilterRowCellComponent {
     protected readonly baseClass = computed(() => {
         return gridFilterRowCellThemeVariants();
     });
-    protected readonly messages = this.#gridService.messages;
+    protected readonly booleanFilterMenuItems = this.#filterService.booleanFilterMenuItems;
+    protected readonly booleanValue = signal<FilterMenuDataItem | null>(null);
+    protected readonly dateFilterMenuItems = this.#filterService.dateFilterMenuItems;
+    protected readonly dateValue = signal<Date | null>(null);
+    protected readonly filterMessages = inject(MonaI18nService).componentMessages("filter", FILTER_DEFAULT_MESSAGES);
     protected readonly isFilterActive = computed(() => {
         const op = this.selectedOperator();
         if (op === "isnull" || op === "isnotnull") {
@@ -94,10 +104,7 @@ export class GridFilterRowCellComponent {
                 return false;
         }
     });
-    protected readonly booleanFilterMenuItems = this.#filterService.booleanFilterMenuItems;
-    protected readonly booleanValue = signal<FilterMenuDataItem | null>(null);
-    protected readonly dateFilterMenuItems = this.#filterService.dateFilterMenuItems;
-    protected readonly dateValue = signal<Date | null>(null);
+    protected readonly messages = this.#gridService.messages;
     protected readonly numberValue = signal<number | null>(null);
     protected readonly numericFilterMenuItems = this.#filterService.numericFilterMenuItems;
     protected readonly selectedOperator = linkedSignal<RowFilterOperator>(() => this.#getDefaultOperator());
@@ -189,7 +196,7 @@ export class GridFilterRowCellComponent {
         const operator = this.selectedOperator();
         const field = this.column().field;
         let filter: CompositeFilterDescriptor;
-        let filterOperator = operator;
+        const filterOperator = operator;
         switch (this.column().dataType) {
             case "string":
                 filter = this.#filterService.buildStringFilterDescriptor({
@@ -268,11 +275,12 @@ export class GridFilterRowCellComponent {
                 this.selectedOperator.set(v.operator1 as RowFilterOperator);
                 this.dateValue.set((v.value1 as Date) ?? null);
                 break;
-            case "boolean":
+            case "boolean": {
                 this.selectedOperator.set(v.operator1 as RowFilterOperator);
                 const item = this.booleanFilterMenuItems.find(i => i.value === v.operator1) ?? null;
                 this.booleanValue.set(item);
                 break;
+            }
         }
     }
 

@@ -56,7 +56,7 @@ export class GridEditorComponent {
         return gridCellEditorBaseThemeVariants({ virtual: this.#gridService?.virtualScrollOptions().enabled ?? false });
     });
     protected readonly editTemplateContext = computed<GridEditTemplateContext>(() => ({
-        cancel: (): void => this.cancel.emit(),
+        cancel: (): void => this.cancelEdit.emit(),
         column: this.column().field,
         commit: (): void => this.commit.emit(),
         dataField: this.column().field,
@@ -96,7 +96,7 @@ export class GridEditorComponent {
      * @description Controls whether the editor focuses its input after it renders.
      */
     public readonly autoFocus = input(true);
-    public readonly cancel = output<void>();
+    public readonly cancelEdit = output<void>();
     public readonly column = input.required<Column>();
     public readonly commit = output<void>();
     public readonly isNew = input(false);
@@ -180,7 +180,7 @@ export class GridEditorComponent {
 
     protected onEditCancel(): void {
         if (!this.#datePopupOpen()) {
-            this.cancel.emit();
+            this.cancelEdit.emit();
         }
     }
 

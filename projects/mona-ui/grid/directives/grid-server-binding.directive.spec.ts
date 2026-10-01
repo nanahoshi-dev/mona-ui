@@ -16,10 +16,13 @@ import { GridServerBindingDirective } from "./grid-server-binding.directive";
         (dataStateChange)="events.push($event)" />`
 })
 class HostComponent {
-    public readonly total = signal(137);
-    public readonly skip = signal(40);
-    public readonly loading = signal(false);
     public readonly events: GridDataState[] = [];
+
+    public readonly loading = signal(false);
+
+    public readonly skip = signal(40);
+
+    public readonly total = signal(137);
 }
 
 describe("GridServerBindingDirective", () => {

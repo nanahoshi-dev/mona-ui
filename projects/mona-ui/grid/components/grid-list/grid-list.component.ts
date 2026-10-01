@@ -1,6 +1,16 @@
 import { CdkDrag, CdkDragDrop, CdkDragEnd, CdkDragPreview, CdkDragStart, CdkDropList } from "@angular/cdk/drag-drop";
 import { NgTemplateOutlet } from "@angular/common";
-import { afterNextRender, Component, computed, DestroyRef, ElementRef, inject, input, viewChild } from "@angular/core";
+import {
+    afterNextRender,
+    Component,
+    computed,
+    DestroyRef,
+    ElementRef,
+    inject,
+    input,
+    signal,
+    viewChild
+} from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ImmutableList, span } from "@mirei/ts-collections";
 import { SlicePipe } from "@nanahoshi/mona-ui/common";
@@ -74,6 +84,7 @@ export class GridListComponent implements GridListVariantInput {
     protected readonly baseClass = computed(() => {
         return gridListBaseThemeVariants({ virtual: false });
     });
+    protected readonly draggedRowHeight = signal<number | null>(null);
     protected readonly flattenedGroupedRows = computed<GridViewRow[]>(() => {
         const groupColumns = this.gridService.groupColumns();
         if (groupColumns.length === 0) {
@@ -100,6 +111,7 @@ export class GridListComponent implements GridListVariantInput {
     protected readonly rowDragPreviewClass = computed(() => {
         return gridRowDragPreviewThemeVariants();
     });
+    protected readonly span = span;
     protected readonly tableClass = computed(() => {
         return gridListTableThemeVariants();
     });
@@ -137,20 +149,37 @@ export class GridListComponent implements GridListVariantInput {
 
     public onRowDragEnded(_event: CdkDragEnd<Row>): void {
         this.gridService.draggingRowUid.set(null);
+        this.draggedRowHeight.set(null);
     }
 
     public onRowDragStarted(event: CdkDragStart<Row>): void {
+        const height = event.source.getRootElement().getBoundingClientRect().height;
+        if (height > 0) {
+            this.draggedRowHeight.set(height);
+        }
         this.gridService.draggingRowUid.set(event.source.data.uid);
     }
 
     public onRowDrop(event: CdkDragDrop<Row[]>): void {
         this.gridService.draggingRowUid.set(null);
+        this.draggedRowHeight.set(null);
         this.gridService.requestRowReorder(event.item.data, event.previousIndex, event.currentIndex);
+    }
+
+    public onRowPointerDown(event: PointerEvent): void {
+        // CDK may hide the source before dragStarted. Capture its height before that happens.
+        if (this.gridService.rowReorderInteractionEnabled() && event.currentTarget instanceof HTMLElement) {
+            this.draggedRowHeight.set(event.currentTarget.getBoundingClientRect().height);
+        }
     }
 
     public onToggleDetailClick(row: Row): void {
         const expanded = this.gridService.isRowExpanded(row);
         this.gridService.setRowExpanded(row, !expanded);
+    }
+
+    protected onBodyFocus(): void {
+        this.#gridNavigationService.focusActiveCellOrFirstHeader();
     }
 
     private setSubscriptions(): void {
@@ -160,6 +189,4 @@ export class GridListComponent implements GridListVariantInput {
                 this.#gridNavigationService.focusActiveCellOrFirstHeader();
             });
     }
-
-    protected readonly span = span;
 }

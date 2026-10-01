@@ -83,7 +83,7 @@
                     [isNew]="true"
                     [session]="session"
                     (commit)="onCommit()"
-                    (cancel)="onCancel()"></mona-grid-editor>
+                    (cancelEdit)="onCancel()"></mona-grid-editor>
             } @else {
                 <span class="block truncate px-2">{{ rowData[column.field] }}</span>
             }
