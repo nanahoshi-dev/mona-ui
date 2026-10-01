@@ -64,6 +64,20 @@ async function main(): Promise<void> {
         await expect(remote.locator("[data-request-count]")).toHaveText("Requests: 3");
         await expect(remote.locator("tbody tr[monaGridRow]")).toHaveCount(20);
         await expect(remote.locator("tbody tr[monaGridRow]").first()).toHaveAttribute("aria-rowindex", "2");
+        const [download] = await Promise.all([
+            page.waitForEvent("download"),
+            remote.getByRole("button", { name: "Export loaded page", exact: true }).click()
+        ]);
+        const downloadPath = await download.path();
+        if (downloadPath == null) {
+            throw new Error("Grid CSV was not downloaded.");
+        }
+        const csv = readFileSync(downloadPath, "utf8")
+            .replace(/^\uFEFF/, "")
+            .split("\r\n");
+        expect(csv).toHaveLength(21);
+        expect(csv[0]).toBe("ID,User");
+        expect(csv[1]).toBe("1,User 001");
         await remote.locator("th [title='User']").click();
         await expect(remote.locator("[data-request-count]")).toHaveText("Requests: 4");
         await expect(remote.locator("mona-grid")).not.toHaveAttribute("aria-busy", "true");
