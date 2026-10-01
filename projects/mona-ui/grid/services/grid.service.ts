@@ -445,6 +445,9 @@ export class GridService {
         return this.normalizeRenderedWidth(dataWidth + this.leadingStructuralWidth());
     });
     public readonly viewPageRows = computed(() => {
+        if (this.serverBindingEnabled()) {
+            return this.viewRows();
+        }
         const skip = this.paginationState().skip;
         const take = this.paginationState().take;
         const viewRows = this.viewRows();
@@ -454,8 +457,14 @@ export class GridService {
         return viewRows.skip(skip).take(take).toImmutableList();
     });
     public readonly viewRowCount = computed(() => this.viewRows().size());
+    public readonly pagerTotal = computed(() =>
+        this.serverBindingEnabled() ? this.serverTotal() : this.viewRowCount()
+    );
     public readonly viewRows = computed(() => {
         const rows = this.rows();
+        if (this.serverBindingEnabled()) {
+            return rows;
+        }
         const appliedFilters = this.appliedFilters();
         const appliedSorts = this.appliedSorts();
         const groupColumns = this.groupColumns();
@@ -1167,7 +1176,19 @@ export class GridService {
     }
 
     public setPageState(state: Partial<PaginationState>): void {
-        this.paginationState.update(v => ({ ...v, ...state }));
+        const current = this.paginationState();
+        const take = state.take ?? current.take;
+        const skip = state.skip ?? (state.page != null ? (state.page - 1) * take : current.skip);
+        if (this.serverBindingEnabled()) {
+            this.validateServerInteger(skip, "skip");
+            if (!Number.isSafeInteger(take) || take <= 0) {
+                throw new Error("monaGridServerBinding: pageSize must be a finite positive integer.");
+            }
+        }
+        const page = Math.floor(skip / take) + 1;
+        if (current.skip !== skip || current.take !== take || current.page !== page) {
+            this.paginationState.set({ skip, take, page });
+        }
     }
 
     public setServerBindingEnabled(enabled: boolean): void {
