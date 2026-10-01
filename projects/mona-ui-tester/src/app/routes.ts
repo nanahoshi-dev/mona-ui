@@ -413,6 +413,10 @@ export const routes: Routes = [
         ]
     },
     {
+        path: "browser-test/grid-geometry",
+        loadComponent: () => import("./browser-test/grid-geometry-fixture.component").then(m => m.GridGeometryFixtureComponent)
+    },
+    {
         path: "browser-test/direction-geometry",
         loadComponent: () =>
             import("./browser-test/direction-geometry-fixture.component").then(
