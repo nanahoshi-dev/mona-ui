@@ -1,4 +1,4 @@
-<table #bodyTable [class]="tableClass()" [style.width.px]="gridService.tableWidth()">
+<table role="presentation" #bodyTable [class]="tableClass()" [style.width.px]="gridService.tableWidth()">
     <colgroup>
         @for (_ of gridService.groupColumns(); track $index) {
             <col [style.width.px]="gridService.groupColumnWidth" />
@@ -18,6 +18,8 @@
     </colgroup>
     <tbody
         role="rowgroup"
+        tabindex="0"
+        (focus)="onBodyFocus()"
         cdkDropList
         [cdkDropListData]="data().toArray()"
         [cdkDropListDisabled]="!gridService.rowReorderInteractionEnabled()"
@@ -36,6 +38,7 @@
                     [cdkDragData]="row"
                     [cdkDragDisabled]="!gridService.canReorderRow(row)"
                     (cdkDragStarted)="onRowDragStarted($event)"
+                    (pointerdown)="onRowPointerDown($event)"
                     (cdkDragEnded)="onRowDragEnded($event)"
                     [index]="rowIndex"
                     [row]="row"
@@ -68,6 +71,7 @@
                             [masterDetailToggle]="true"
                             monaGridLogicalCell
                             [cellKind]="'detail'"
+                            (toggleExpand)="onToggleDetailClick(row)"
                             [colIndex]="gridService.structuralColIndexMap().get('detail') ?? 0"
                             [firstInRow]="gridService.structuralColIndexMap().get('detail') === 0"
                             [lastInRow]="columns().length === 0 && gridService.structuralLastKind() === 'detail'"
@@ -148,10 +152,11 @@
                         </div>
                     </ng-template>
                     <ng-template cdkDragPlaceholder>
-                        <tr [class]="rowDragPlaceholderClass()">
+                        <tr [class]="rowDragPlaceholderClass()" [style.height.px]="draggedRowHeight() ?? 36">
                             <td
                                 [attr.colspan]="gridService.leadingStructuralColumnCount() + columns().length"
-                                class="h-9 px-2">
+                                [style.height.px]="draggedRowHeight() ?? 36"
+                                class="px-2">
                                 <span class="flex items-center text-xs text-muted-foreground">{{
                                     gridService.messages().moveRow
                                 }}</span>
@@ -248,7 +253,7 @@
                             [firstInRow]="true"
                             [lastInRow]="columns().length === 0"
                             [groupKey]="viewRow.groupKey"
-                            (toggle)="onGroupExpandChange(viewRow.groupKey)"
+                            (toggleExpand)="onGroupExpandChange(viewRow.groupKey)"
                             [attr.colspan]="colspan">
                             <p class="flex min-h-9 items-center text-sm whitespace-nowrap">
                                 <mona-grid-toggle
@@ -364,6 +369,7 @@
                                 [rowUid]="viewRow.row.uid"
                                 [section]="'body'"
                                 [cellKind]="'detail'"
+                                (toggleExpand)="onToggleDetailClick(viewRow.row)"
                                 [colIndex]="gridService.structuralColIndexMap().get('detail') ?? 0"
                                 [firstInRow]="gridService.structuralColIndexMap().get('detail') === 0"
                                 [lastInRow]="columns().length === 0 && gridService.structuralLastKind() === 'detail'"

@@ -1,11 +1,12 @@
-import { computed, Directive, inject, input } from "@angular/core";
+import { computed, Directive, input } from "@angular/core";
 import type { GridRowNeighborType } from "../models/GridRowNeighbourType";
 import { gridDetailIndentCellThemeVariants } from "../styles/grid.styles";
 
 @Directive({
     selector: "td[monaGridDetailIndentCell]",
     host: {
-        "[class]": "baseClass()"
+        "[class]": "baseClass()",
+        role: "gridcell"
     }
 })
 export class GridDetailIndentCellDirective {

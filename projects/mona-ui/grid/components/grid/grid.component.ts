@@ -130,104 +130,153 @@ const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [ta
         "[class]": "baseClass()",
         "[attr.data-uid]": "uid",
         "[attr.aria-busy]": "gridService.serverLoading() || null",
-        role: "grid"
+        role: "group"
     }
 })
 export class GridComponent<T> implements GridVariantInput {
     readonly #destroyRef = inject(DestroyRef);
+
     readonly #fitViewInitialScrollbarGutterWidth = signal<number | null>(null);
+
     readonly #fitViewScrollbarSyncResolved = signal(false);
+
     readonly #gridNavigationService = inject(GridNavigationService);
+
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+
     readonly #injector = inject(Injector);
+
     readonly #manuallyResized = signal(false);
+
     readonly #platformId = inject(PLATFORM_ID);
+
     readonly #registeredFooterScrollElement = signal<HTMLDivElement | null>(null);
+
     readonly #toolbarActiveIndex = signal(0);
+
     #resizeObserver: ResizeObserver | null = null;
+
     private readonly columnDefinitions = contentChildren<GridColumnDefinition>(GRID_COLUMN_DEFINITION);
+
     private readonly footerScrollElement = viewChild<ElementRef<HTMLDivElement>>("footerScrollElement");
+
     protected readonly baseClass = computed(() => {
         const rounded = this.rounded();
         const variantClass = gridBaseThemeVariants({ rounded });
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
+
     protected readonly columnActionsClass = computed(() => {
         return gridColumnActionsThemeVariants();
     });
+
     protected readonly columnDragPreviewClass = computed(() => {
         return gridColumnDragPreviewThemeVariants();
     });
+
     protected readonly columnDragging = signal(false);
+
     protected readonly columnDropHintClass = computed(() => {
         return gridColumnDropHintThemeVariants();
     });
+
     protected readonly columnResizerClass = computed(() => {
         return gridColumnResizerThemeVariants();
     });
+
     protected readonly dragColumn = signal<Column | null>(null);
+
     protected readonly dropColumn = signal<Column | null>(null);
+
     protected readonly filterMenuEnabled = computed(() => {
         const opts = this.gridService.filterableOptions();
         return opts.enabled && (opts.type === "menu" || opts.type === "menu, row");
     });
+
     protected readonly filterRowEnabled = computed(() => {
         const opts = this.gridService.filterableOptions();
         return opts.enabled && (opts.type === "row" || opts.type === "menu, row");
     });
+
     protected readonly footerClass = computed(() => {
         return gridFooterThemeVariants();
     });
+
     protected readonly footerTableClass = computed(() => {
         return gridFooterTableThemeVariants();
     });
+
     protected readonly footerTableRowClass = computed(() => {
         return gridFooterTableRowThemeVariants();
     });
+
     protected readonly footerVisible = computed(
         () => !this.gridService.virtualScrollOptions().enabled && this.gridService.hasFooter()
     );
+
     protected readonly gridDetailTemplate = contentChild(GridDetailTemplateDirective, { read: TemplateRef });
+
     protected readonly gridHeaderElement = viewChild.required<ElementRef<HTMLDivElement>>("gridHeaderElement");
+
     protected readonly gridHeaderTableElement = viewChild.required<ElementRef<HTMLTableElement>>("headerTable");
+
     protected readonly gridService = inject(GridService);
-    protected readonly messages = this.gridService.messages;
+
     protected readonly gridWidthSet = signal(false);
+
     protected readonly groupColumnList = viewChild<CdkDropList>("groupColumnList");
-    protected readonly groupPanelPlaceholderClass = computed(() => {
-        return gridGroupPanelPlaceholderThemeVariants();
-    });
+
     protected readonly groupPanelClass = computed(() => {
         return gridGroupPanelThemeVariants();
     });
+
+    protected readonly groupPanelPlaceholderClass = computed(() => {
+        return gridGroupPanelPlaceholderThemeVariants();
+    });
+
     protected readonly groupPanelPlaceholderVisible = signal(true);
+
     protected readonly groupable = computed(() => this.gridService.groupableOptions().enabled);
+
     protected readonly groupingInProgress = signal(false);
+
     protected readonly headerClass = computed(() => {
         return gridHeaderThemeVariants();
     });
+
     protected readonly headerMarginRight = computed(() => this.gridService.scrollbarGutterWidth());
-    protected readonly headerTableClass = computed(() => {
-        return gridHeaderTableThemeVariants();
-    });
+
     protected readonly headerTableCellClass = computed(() => {
         return gridHeaderTableCellThemeVariants();
     });
+
+    protected readonly headerTableClass = computed(() => {
+        return gridHeaderTableThemeVariants();
+    });
+
     protected readonly headerTableColumnTitleClass = computed(() => {
         return gridHeaderTableColumnTitleThemeVariants();
     });
+
     protected readonly headerTableColumnWrapClass = computed(() => {
         return gridHeaderTableColumnWrapThemeVariants();
     });
+
     protected readonly headerTableRowClass = computed(() => {
         return gridHeaderTableRowThemeVariants();
     });
+
+    protected readonly messages = this.gridService.messages;
+
     protected readonly noDataClass = computed(() => {
         return gridNoDataThemeVariants();
     });
+
     protected readonly noDataTemplate = contentChild(GridNoDataTemplateDirective, { read: TemplateRef });
+
     protected readonly resizing = signal(false);
+
     protected readonly toolbarContext = computed(() => ({
         $implicit: this.gridService,
         addRowData: this.gridService.addRowData(),
@@ -237,8 +286,11 @@ export class GridComponent<T> implements GridVariantInput {
         saveAdd: (): boolean => this.gridService.saveAddRow(),
         startAdd: (): boolean => this.gridService.startAddRow()
     }));
+
     protected readonly toolbarElement = viewChild<ElementRef<HTMLDivElement>>("toolbarElement");
+
     protected readonly toolbarTemplate = contentChild(GridToolbarTemplateDirective, { read: TemplateRef });
+
     protected readonly uid = v4();
 
     /**
@@ -270,13 +322,6 @@ export class GridComponent<T> implements GridVariantInput {
     public readonly resizeMethod = input<ResizeMethod>("fitView");
 
     /**
-     * @description Field name or selector used to derive a stable identity for each row.
-     * The resolved value must be unique within the grid data.
-     * @default null
-     */
-    public readonly rowKey = input<GridKeySelector<unknown> | null>(null);
-
-    /**
      * @description Whether the pager is responsive.
      * If set to `true`, the pager will be displayed as a dropdown when the grid width gets smaller.
      * @default true
@@ -288,6 +333,13 @@ export class GridComponent<T> implements GridVariantInput {
      * @default "medium"
      */
     public readonly rounded = input<GridVariantProps["rounded"]>("medium");
+
+    /**
+     * @description Field name or selector used to derive a stable identity for each row.
+     * The resolved value must be unique within the grid data.
+     * @default null
+     */
+    public readonly rowKey = input<GridKeySelector<unknown> | null>(null);
 
     /**
      * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
@@ -461,14 +513,14 @@ export class GridComponent<T> implements GridVariantInput {
         this.gridService.columnSort$.next(new ColumnSortEvent(column));
     }
 
+    protected onGroupColumnReorder(column: Column, moveAs: "prev" | "next"): void {
+        this.gridService.moveGroupColumn(column, moveAs);
+    }
+
     protected onGroupingColumnRemove(event: Event, column: Column): void {
         event.stopPropagation();
         this.gridService.clearColumnGrouping(column);
         this.groupPanelPlaceholderVisible.set(this.gridService.groupColumns().length === 0);
-    }
-
-    protected onGroupColumnReorder(column: Column, moveAs: "prev" | "next"): void {
-        this.gridService.moveGroupColumn(column, moveAs);
     }
 
     protected onGroupingColumnSort(column: Column): void {
@@ -584,6 +636,10 @@ export class GridComponent<T> implements GridVariantInput {
         return widthByColumnId;
     }
 
+    private getColumnLockBucket(column: Column): "left" | "right" | "unlocked" {
+        return column.locked ? column.lockedPosition : "unlocked";
+    }
+
     private getTableColumnHeaderCellList(): HTMLTableCellElement[] {
         const headerElement = this.gridHeaderElement();
         if (!headerElement) {
@@ -604,10 +660,6 @@ export class GridComponent<T> implements GridVariantInput {
             headerCells.shift();
         }
         return headerCells;
-    }
-
-    private getColumnLockBucket(column: Column): "left" | "right" | "unlocked" {
-        return column.locked ? column.lockedPosition : "unlocked";
     }
 
     private getToolbarFocusTargets(): HTMLElement[] {

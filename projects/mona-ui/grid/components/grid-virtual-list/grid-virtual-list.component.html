@@ -3,7 +3,7 @@
         class="shrink-0 overflow-hidden border-b border-b-border"
         [style.margin-right.px]="gridService.scrollbarGutterWidth()"
         #addRowScrollElement>
-        <table [class]="tableClass()" [style.width.px]="gridService.tableWidth()">
+        <table role="presentation" [class]="tableClass()" [style.width.px]="gridService.tableWidth()">
             <colgroup>
                 @for (_ of gridService.groupColumns(); track $index) {
                     <col [style.width.px]="gridService.groupColumnWidth" />
@@ -33,7 +33,7 @@
     [itemSize]="gridService.virtualScrollOptions().height"
     [minBufferPx]="gridService.virtualGridMinBuffer()"
     [maxBufferPx]="gridService.virtualGridMaxBuffer()">
-    <table #bodyTable [class]="tableClass()" [style.width.px]="gridService.tableWidth()">
+    <table role="presentation" #bodyTable [class]="tableClass()" [style.width.px]="gridService.tableWidth()">
         <colgroup>
             @for (_ of gridService.groupColumns(); track $index) {
                 <col [style.width.px]="gridService.groupColumnWidth" />
@@ -51,7 +51,7 @@
                 <col [style.width.px]="col.calculatedWidth" />
             }
         </colgroup>
-        <tbody role="rowgroup">
+        <tbody role="rowgroup" tabindex="0" (focus)="onViewportFocus()">
             @if (gridService.groupColumns().length === 0) {
                 <ng-container *cdkVirtualFor="let row of data(); let rowIndex = index">
                     <tr
@@ -88,6 +88,7 @@
                                 [masterDetailToggle]="true"
                                 monaGridLogicalCell
                                 [cellKind]="'detail'"
+                                (toggleExpand)="onToggleDetailClick(row)"
                                 [colIndex]="gridService.structuralColIndexMap().get('detail') ?? 0"
                                 [firstInRow]="gridService.structuralColIndexMap().get('detail') === 0"
                                 [lastInRow]="columns().length === 0 && gridService.structuralLastKind() === 'detail'"
@@ -255,7 +256,7 @@
                                 [lastInRow]="columns().length === 0"
                                 [groupKey]="rowItem.groupKey"
                                 [attr.colspan]="colspan"
-                                (toggle)="onGroupExpandChange(rowItem.groupKey)">
+                                (toggleExpand)="onGroupExpandChange(rowItem.groupKey)">
                                 <p class="absolute inset-0 flex items-center text-sm whitespace-nowrap overflow-hidden">
                                     <mona-grid-toggle
                                         [expanded]="!isCollapsed"
@@ -371,6 +372,7 @@
                                     [rowUid]="rowItem.row.uid"
                                     [section]="'body'"
                                     [cellKind]="'detail'"
+                                    (toggleExpand)="onToggleDetailClick(rowItem.row)"
                                     [colIndex]="gridService.structuralColIndexMap().get('detail') ?? 0"
                                     [firstInRow]="gridService.structuralColIndexMap().get('detail') === 0"
                                     [lastInRow]="
@@ -515,7 +517,7 @@
 @if (gridService.hasFooter()) {
     <div [class]="footerClass()" [style.margin-right.px]="gridService.scrollbarGutterWidth()" #footerScrollElement>
         <div>
-            <table [class]="footerTableClass()" [style.width.px]="gridService.tableWidth()">
+            <table role="presentation" [class]="footerTableClass()" [style.width.px]="gridService.tableWidth()">
                 <colgroup>
                     @for (_ of gridService.groupColumns(); track $index) {
                         <col [style.width.px]="gridService.groupColumnWidth" />
@@ -534,7 +536,7 @@
                     }
                 </colgroup>
                 <tfoot role="rowgroup">
-                    <tr [class]="footerTableRowClass()">
+                    <tr role="row" [class]="footerTableRowClass()">
                         @for (_ of gridService.groupColumns(); track $index) {
                             <td
                                 monaGridFooterTableCell

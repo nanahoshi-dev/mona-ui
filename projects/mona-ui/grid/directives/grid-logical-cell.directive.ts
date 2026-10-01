@@ -29,7 +29,8 @@ const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [ta
     host: {
         "[class]": "baseClass()",
         "[attr.tabindex]": "focused() ? 0 : -1",
-        "[attr.aria-colindex]": "ariaColIndex()"
+        "[attr.aria-colindex]": "ariaColIndex()",
+        "[attr.aria-readonly]": "resolvedCellKind() === 'data' ? !editable() : null"
     }
 })
 export class GridLogicalCellDirective {
@@ -66,6 +67,7 @@ export class GridLogicalCellDirective {
             return "";
         }
         return gridListTableCellThemeVariants({
+            virtual: this.#gridService.virtualScrollOptions().enabled,
             groupHeader: this.groupHeader(),
             lastInRow: this.lastInRow() || this.groupHeader()
         });
@@ -113,7 +115,7 @@ export class GridLogicalCellDirective {
     public readonly rowIndex = input.required<number>();
     public readonly rowUid = input<string>();
     public readonly section = input<GridNavigationSection | null>(null);
-    public readonly toggle = output();
+    public readonly toggleExpand = output();
 
     public constructor() {
         afterRenderEffect({
@@ -195,6 +197,7 @@ export class GridLogicalCellDirective {
         return targets.filter(
             target =>
                 target !== host &&
+                !target.matches("mona-grid tbody[role='rowgroup']") &&
                 target.getAttribute("tabindex") !== "-1" &&
                 !this.#isElementDisabled(target) &&
                 !this.#isElementHidden(target)
@@ -253,8 +256,8 @@ export class GridLogicalCellDirective {
     }
 
     #onEnterKey(): void {
-        if (this.groupHeader() || this.resolvedSection() === "header") {
-            this.toggle.emit();
+        if (this.groupHeader() || this.resolvedSection() === "header" || this.resolvedCellKind() === "detail") {
+            this.toggleExpand.emit();
             return;
         }
         if (this.resolvedCellKind() === "command") {
@@ -310,7 +313,7 @@ export class GridLogicalCellDirective {
 
         if (event.key === "ArrowDown") {
             if (event.altKey) {
-                this.toggle.emit();
+                this.toggleExpand.emit();
                 event.preventDefault();
                 return;
             }

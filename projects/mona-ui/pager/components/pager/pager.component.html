@@ -133,16 +133,17 @@
                         <mona-dropdown-list
                             monaPagerFocusable
                             [data]="pageSizeDropdownData()"
+                            [aria-label]="messages().pageSizeLabel(pageSize())"
                             [ngModel]="pageSize()"
                             [rounded]="rounded()"
                             [size]="size()"
                             (ngModelChange)="onPageSizeValueChange($event)"
                             #pageSizeDropdownList>
                             <ng-template monaDropDownListValueTemplate let-item>
-                                 <span>{{ messages().pageSizeLabel(item) }}</span>
+                                <span>{{ messages().pageSizeLabel(item) }}</span>
                             </ng-template>
                             <ng-template monaDropDownItemTemplate let-item>
-                                 <span>{{ formatPageNumber(item) }}</span>
+                                <span>{{ formatPageNumber(item) }}</span>
                             </ng-template>
                         </mona-dropdown-list>
                     }

@@ -283,7 +283,7 @@ export const gridListBaseThemeVariants = cva(
         variants: {
             virtual: {
                 true: "overflow-x-hidden overflow-y-hidden flex flex-col min-h-0",
-                false: "overflow-x-auto overflow-y-scroll"
+                false: "block overflow-x-auto overflow-y-scroll"
             }
         }
     }

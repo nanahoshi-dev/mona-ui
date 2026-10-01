@@ -2,8 +2,8 @@ import type { CompositeFilterDescriptor, SortDescriptor } from "@nanahoshi/mona-
 
 /** The paging, sorting, and filtering requested by a server-bound Grid. */
 export interface GridDataState {
-    readonly skip: number;
-    readonly take: number;
-    readonly sort: readonly SortDescriptor[];
     readonly filter: readonly CompositeFilterDescriptor[];
+    readonly skip: number;
+    readonly sort: readonly SortDescriptor[];
+    readonly take: number;
 }

@@ -8,7 +8,8 @@ import { gridFooterTableCellThemeVariants } from "../styles/grid.styles";
     host: {
         "[class]": "className()",
         "[style.width.px]": "width()",
-        "[style.min-width.px]": "minWidth()"
+        "[style.min-width.px]": "minWidth()",
+        role: "gridcell"
     }
 })
 export class GridFooterTableCellDirective {
