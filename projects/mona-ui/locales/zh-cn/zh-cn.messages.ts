@@ -22,8 +22,7 @@ export const ZH_CN_MESSAGES = {
         previousMonth: "上个月",
         previousYear: "上一年",
         switchToDecadeView: (currentYear: string) => `切换到十年视图，当前为${currentYear}`,
-        switchToYearView: (currentMonthAndYear: string) =>
-            `切换到年视图，当前为${currentMonthAndYear}`,
+        switchToYearView: (currentMonthAndYear: string) => `切换到年视图，当前为${currentMonthAndYear}`,
         today: "今天",
         yearCellLabel: (year: number) => `${year}年`,
         yearViewLabel: (year: string) => `年视图，${year}`
@@ -39,12 +38,8 @@ export const ZH_CN_MESSAGES = {
         closeAbbreviation: "收",
         colorScale: "色标",
         conversion: "转化",
-        divergingRangeDescription: (
-            title: string,
-            minimum: string,
-            midpoint: string,
-            maximum: string
-        ) => `${title}，${minimum} 至 ${midpoint} 至 ${maximum}`,
+        divergingRangeDescription: (title: string, minimum: string, midpoint: string, maximum: string) =>
+            `${title}，${minimum} 至 ${midpoint} 至 ${maximum}`,
         dropOff: "流失",
         falling: "下跌",
         high: "最高价",
@@ -57,8 +52,7 @@ export const ZH_CN_MESSAGES = {
         openAbbreviation: "开",
         overall: "总体",
         range: "范围",
-        rangeDescription: (title: string, minimum: string, maximum: string) =>
-            `${title}，${minimum} 至 ${maximum}`,
+        rangeDescription: (title: string, minimum: string, maximum: string) => `${title}，${minimum} 至 ${maximum}`,
         rising: "上涨",
         runningTotal: "累计",
         size: "大小",
@@ -79,8 +73,7 @@ export const ZH_CN_MESSAGES = {
         currentColor: "当前颜色",
         previousColor: "先前颜色",
         saturationAndValue: "饱和度与明度",
-        saturationAndValueText: (saturation: number, value: number) =>
-            `饱和度${saturation}%，明度${value}%`,
+        saturationAndValueText: (saturation: number, value: number) => `饱和度${saturation}%，明度${value}%`,
         switchColorMode: "切换颜色模式"
     },
     colorPalette: {
@@ -119,8 +112,7 @@ export const ZH_CN_MESSAGES = {
         clear: "清除"
     },
     dropdowns: {
-        itemPosition: (text: string, position: number, total: number) =>
-            `${text}，第 ${position} 项（共 ${total} 项）`,
+        itemPosition: (text: string, position: number, total: number) => `${text}，第 ${position} 项（共 ${total} 项）`,
         noResultsFound: "未找到结果",
         resultsAvailable: (count: number) => `有 ${count} 条可用结果`
     },
@@ -233,6 +225,7 @@ export const ZH_CN_MESSAGES = {
         rowReorderDisabledEditing: "请完成编辑后再重新排列行。",
         rowReorderDisabledFiltered: "请清除筛选后再重新排列行。",
         rowReorderDisabledGrouped: "请清除分组后再重新排列行。",
+        rowReorderDisabledServerBinding: "服务器绑定时无法重新排列行。",
         rowReorderDisabledSingleRow: "至少需要两行才能重新排列。",
         rowReorderDisabledSorted: "请清除排序后再重新排列行。",
         rowReorderDisabledVirtualScroll: "启用虚拟滚动时无法重新排列行。",
@@ -290,8 +283,7 @@ export const ZH_CN_MESSAGES = {
         pageStatus: (page: number, totalPages: number) => `第 ${page} 页，共 ${totalPages} 页`,
         pageText: "页",
         previousPageLabel: "上一页",
-        rangeStatus: (start: number, end: number, total: number) =>
-            `第 ${start} - ${end} 项，共 ${total} 项`
+        rangeStatus: (start: number, end: number, total: number) => `第 ${start} - ${end} 项，共 ${total} 项`
     },
     rating: {
         notRated: "未评分",

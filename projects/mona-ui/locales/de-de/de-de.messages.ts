@@ -22,8 +22,7 @@ export const DE_DE_MESSAGES = {
         previousMonth: "Vorheriger Monat",
         previousYear: "Vorheriges Jahr",
         switchToDecadeView: (currentYear: string) => `Zur Jahrzehntansicht wechseln, aktuell ${currentYear}`,
-        switchToYearView: (currentMonthAndYear: string) =>
-            `Zur Jahresansicht wechseln, aktuell ${currentMonthAndYear}`,
+        switchToYearView: (currentMonthAndYear: string) => `Zur Jahresansicht wechseln, aktuell ${currentMonthAndYear}`,
         today: "Heute",
         yearCellLabel: (year: number) => `Jahr ${year}`,
         yearViewLabel: (year: string) => `Jahresansicht, ${year}`
@@ -39,12 +38,8 @@ export const DE_DE_MESSAGES = {
         closeAbbreviation: "S",
         colorScale: "Farbskala",
         conversion: "Konvertierung",
-        divergingRangeDescription: (
-            title: string,
-            minimum: string,
-            midpoint: string,
-            maximum: string
-        ) => `${title}, von ${minimum} bis ${maximum}, Mittelpunkt bei ${midpoint}`,
+        divergingRangeDescription: (title: string, minimum: string, midpoint: string, maximum: string) =>
+            `${title}, von ${minimum} bis ${maximum}, Mittelpunkt bei ${midpoint}`,
         dropOff: "Abbruch",
         falling: "Fallend",
         high: "Hoch",
@@ -119,11 +114,9 @@ export const DE_DE_MESSAGES = {
         clear: "Leeren"
     },
     dropdowns: {
-        itemPosition: (text: string, position: number, total: number) =>
-            `${text}, ${position} von ${total}`,
+        itemPosition: (text: string, position: number, total: number) => `${text}, ${position} von ${total}`,
         noResultsFound: "Keine Ergebnisse gefunden",
-        resultsAvailable: (count: number) =>
-            count === 1 ? "1 Ergebnis verfügbar" : `${count} Ergebnisse verfügbar`
+        resultsAvailable: (count: number) => (count === 1 ? "1 Ergebnis verfügbar" : `${count} Ergebnisse verfügbar`)
     },
     editor: {
         addColumnAfter: "Spalte danach einfügen",
@@ -210,8 +203,7 @@ export const DE_DE_MESSAGES = {
         cancel: "Abbrechen",
         cancelRowEdit: "Zeilenbearbeitung abbrechen",
         columns: "Spalten",
-        columnsSelected: (count: number) =>
-            count === 1 ? "1 Spalte ausgewählt" : `${count} Spalten ausgewählt`,
+        columnsSelected: (count: number) => (count === 1 ? "1 Spalte ausgewählt" : `${count} Spalten ausgewählt`),
         delete: "Löschen",
         deleteRowConfirmation: "Diese Zeile wirklich löschen?",
         deleteRowTitle: "Zeile löschen?",
@@ -235,6 +227,7 @@ export const DE_DE_MESSAGES = {
         rowReorderDisabledEditing: "Bearbeitung abschließen, um Zeilen neu anzuordnen.",
         rowReorderDisabledFiltered: "Filter aufheben, um Zeilen neu anzuordnen.",
         rowReorderDisabledGrouped: "Gruppierung aufheben, um Zeilen neu anzuordnen.",
+        rowReorderDisabledServerBinding: "Bei Serverbindung können Zeilen nicht neu angeordnet werden.",
         rowReorderDisabledSingleRow: "Zum Neuanordnen sind mindestens zwei Zeilen erforderlich.",
         rowReorderDisabledSorted: "Sortierung aufheben, um Zeilen neu anzuordnen.",
         rowReorderDisabledVirtualScroll:

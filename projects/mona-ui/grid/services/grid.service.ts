@@ -20,7 +20,7 @@ import {
     KeyValuePair,
     select
 } from "@mirei/ts-collections";
-import { VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
+import { deepEquals, VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { PopupMenuItem } from "@nanahoshi/mona-ui/popup-menu";
 import {
@@ -346,6 +346,9 @@ export class GridService {
         if (!this.rowReorderableOptions().enabled) {
             return "disabled";
         }
+        if (this.serverBindingEnabled()) {
+            return "server-binding";
+        }
         if (this.virtualScrollOptions().enabled) {
             return "virtual-scroll";
         }
@@ -530,6 +533,7 @@ export class GridService {
             return { ignoredColumns: [], missingColumns: [], status: "rejected-schema" };
         }
 
+        const previousDataState = this.getDataState();
         let columns = this.columns().toArray();
         const columnById = new Map<string, Column>();
         for (const column of columns) {
@@ -586,6 +590,13 @@ export class GridService {
 
         if (options.persistPageSize !== false && state.pageSize != null) {
             this.setPageState({ page: 1, skip: 0, take: state.pageSize });
+        }
+        if (this.serverBindingEnabled()) {
+            this.setPageState({ skip: 0 });
+        }
+
+        if (!deepEquals(previousDataState, this.getDataState())) {
+            this.requestDataStateChange({ resetPage: true });
         }
 
         return { ignoredColumns, missingColumns, status: "applied" };
@@ -1288,6 +1299,9 @@ export class GridService {
     }
 
     public setServerBindingEnabled(enabled: boolean): void {
+        if (enabled && this.virtualScrollOptions().enabled) {
+            throw new Error("monaGridServerBinding and monaGridVirtualScroll cannot be enabled together.");
+        }
         this.#serverBindingEnabled.set(enabled);
     }
 
@@ -1310,6 +1324,9 @@ export class GridService {
     }
 
     public setVirtualScrollOptions(options: VirtualScrollOptions): void {
+        if (options.enabled && this.serverBindingEnabled()) {
+            throw new Error("monaGridServerBinding and monaGridVirtualScroll cannot be enabled together.");
+        }
         this.virtualScrollOptions.update(v => ({ ...v, ...options }));
     }
 
@@ -2037,4 +2054,12 @@ export class GridService {
 }
 
 export type RowReorderDisabledReason =
-    "disabled" | "editing" | "filtered" | "grouped" | "single-row" | "sorted" | "virtual-scroll" | null;
+    | "disabled"
+    | "editing"
+    | "filtered"
+    | "grouped"
+    | "server-binding"
+    | "single-row"
+    | "sorted"
+    | "virtual-scroll"
+    | null;

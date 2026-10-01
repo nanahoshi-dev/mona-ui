@@ -162,6 +162,18 @@ describe("GridService", () => {
         expect(service.getDataState().filter[0].filters).toHaveLength(1);
     });
 
+    it("disables reordering and rejects virtual/server combinations in either configuration order", () => {
+        service.setServerBindingEnabled(true);
+        service.setRowReorderableOptions({ enabled: true });
+        expect(service.rowReorderDisabledReason()).toBe("server-binding");
+        expect(() => service.setVirtualScrollOptions({ enabled: true, height: 36 })).toThrow(
+            "cannot be enabled together"
+        );
+        service.setServerBindingEnabled(false);
+        service.setVirtualScrollOptions({ enabled: true, height: 36 });
+        expect(() => service.setServerBindingEnabled(true)).toThrow("cannot be enabled together");
+    });
+
     describe("row identity", () => {
         it("uses deterministic row uids when a row key is provided", () => {
             service.setRows([{ id: 1, name: "Jane" }], "id");

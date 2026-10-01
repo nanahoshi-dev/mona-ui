@@ -22,8 +22,7 @@ export const ES_ES_MESSAGES = {
         previousMonth: "Mes anterior",
         previousYear: "Año anterior",
         switchToDecadeView: (currentYear: string) => `Cambiar a vista de década, actualmente ${currentYear}`,
-        switchToYearView: (currentMonthAndYear: string) =>
-            `Cambiar a vista anual, actualmente ${currentMonthAndYear}`,
+        switchToYearView: (currentMonthAndYear: string) => `Cambiar a vista anual, actualmente ${currentMonthAndYear}`,
         today: "Hoy",
         yearCellLabel: (year: number) => `Año ${year}`,
         yearViewLabel: (year: string) => `Vista anual, ${year}`
@@ -39,12 +38,8 @@ export const ES_ES_MESSAGES = {
         closeAbbreviation: "C",
         colorScale: "Escala de colores",
         conversion: "Conversión",
-        divergingRangeDescription: (
-            title: string,
-            minimum: string,
-            midpoint: string,
-            maximum: string
-        ) => `${title}, de ${minimum} a ${maximum}, con punto medio en ${midpoint}`,
+        divergingRangeDescription: (title: string, minimum: string, midpoint: string, maximum: string) =>
+            `${title}, de ${minimum} a ${maximum}, con punto medio en ${midpoint}`,
         dropOff: "Abandono",
         falling: "En descenso",
         high: "Máximo",
@@ -57,8 +52,7 @@ export const ES_ES_MESSAGES = {
         openAbbreviation: "A",
         overall: "Global",
         range: "Rango",
-        rangeDescription: (title: string, minimum: string, maximum: string) =>
-            `${title}, de ${minimum} a ${maximum}`,
+        rangeDescription: (title: string, minimum: string, maximum: string) => `${title}, de ${minimum} a ${maximum}`,
         rising: "En alza",
         runningTotal: "Total acumulado",
         size: "tamaño",
@@ -79,8 +73,7 @@ export const ES_ES_MESSAGES = {
         currentColor: "Color actual",
         previousColor: "Color anterior",
         saturationAndValue: "Saturación y valor del color",
-        saturationAndValueText: (saturation: number, value: number) =>
-            `Saturación ${saturation}%, valor ${value}%`,
+        saturationAndValueText: (saturation: number, value: number) => `Saturación ${saturation}%, valor ${value}%`,
         switchColorMode: "Cambiar modo de color"
     },
     colorPalette: {
@@ -119,8 +112,7 @@ export const ES_ES_MESSAGES = {
         clear: "Limpiar"
     },
     dropdowns: {
-        itemPosition: (text: string, position: number, total: number) =>
-            `${text}, ${position} de ${total}`,
+        itemPosition: (text: string, position: number, total: number) => `${text}, ${position} de ${total}`,
         noResultsFound: "No se han encontrado resultados",
         resultsAvailable: (count: number) =>
             count === 1 ? "1 resultado disponible" : `${count} resultados disponibles`
@@ -235,6 +227,7 @@ export const ES_ES_MESSAGES = {
         rowReorderDisabledEditing: "Termina la edición para reordenar las filas.",
         rowReorderDisabledFiltered: "Limpia los filtros para reordenar las filas.",
         rowReorderDisabledGrouped: "Quita la agrupación para reordenar las filas.",
+        rowReorderDisabledServerBinding: "No se pueden reordenar filas con vinculación al servidor.",
         rowReorderDisabledSingleRow: "Se necesitan al menos dos filas para reordenarlas.",
         rowReorderDisabledSorted: "Quita la ordenación para reordenar las filas.",
         rowReorderDisabledVirtualScroll:
@@ -283,10 +276,8 @@ export const ES_ES_MESSAGES = {
     },
     pager: {
         firstPageLabel: "Primera página",
-        jumpBackwardLabel: (pages: number) =>
-            pages === 1 ? "Retroceder 1 página" : `Retroceder ${pages} páginas`,
-        jumpForwardLabel: (pages: number) =>
-            pages === 1 ? "Avanzar 1 página" : `Avanzar ${pages} páginas`,
+        jumpBackwardLabel: (pages: number) => (pages === 1 ? "Retroceder 1 página" : `Retroceder ${pages} páginas`),
+        jumpForwardLabel: (pages: number) => (pages === 1 ? "Avanzar 1 página" : `Avanzar ${pages} páginas`),
         lastPageLabel: "Última página",
         nextPageLabel: "Página siguiente",
         ofText: "de",

@@ -40,12 +40,8 @@ export const PT_BR_MESSAGES = {
         closeAbbreviation: "F",
         colorScale: "Escala de cores",
         conversion: "Conversão",
-        divergingRangeDescription: (
-            title: string,
-            minimum: string,
-            midpoint: string,
-            maximum: string
-        ) => `${title}, de ${minimum} a ${maximum}, ponto médio ${midpoint}`,
+        divergingRangeDescription: (title: string, minimum: string, midpoint: string, maximum: string) =>
+            `${title}, de ${minimum} a ${maximum}, ponto médio ${midpoint}`,
         dropOff: "Abandono",
         falling: "Em queda",
         high: "Máxima",
@@ -58,8 +54,7 @@ export const PT_BR_MESSAGES = {
         openAbbreviation: "A",
         overall: "Geral",
         range: "Intervalo",
-        rangeDescription: (title: string, minimum: string, maximum: string) =>
-            `${title}, de ${minimum} a ${maximum}`,
+        rangeDescription: (title: string, minimum: string, maximum: string) => `${title}, de ${minimum} a ${maximum}`,
         rising: "Em alta",
         runningTotal: "Total acumulado",
         size: "tamanho",
@@ -80,8 +75,7 @@ export const PT_BR_MESSAGES = {
         currentColor: "Cor atual",
         previousColor: "Cor anterior",
         saturationAndValue: "Saturação e valor da cor",
-        saturationAndValueText: (saturation: number, value: number) =>
-            `Saturação ${saturation}%, valor ${value}%`,
+        saturationAndValueText: (saturation: number, value: number) => `Saturação ${saturation}%, valor ${value}%`,
         switchColorMode: "Alternar modo de cor"
     },
     colorPalette: {
@@ -120,8 +114,7 @@ export const PT_BR_MESSAGES = {
         clear: "Limpar"
     },
     dropdowns: {
-        itemPosition: (text: string, position: number, total: number) =>
-            `${text}, ${position} de ${total}`,
+        itemPosition: (text: string, position: number, total: number) => `${text}, ${position} de ${total}`,
         noResultsFound: "Nenhum resultado encontrado",
         resultsAvailable: (count: number) =>
             count === 1 ? "1 resultado disponível" : `${count} resultados disponíveis`
@@ -211,8 +204,7 @@ export const PT_BR_MESSAGES = {
         cancel: "Cancelar",
         cancelRowEdit: "Cancelar edição da linha",
         columns: "Colunas",
-        columnsSelected: (count: number) =>
-            count === 1 ? "1 coluna selecionada" : `${count} colunas selecionadas`,
+        columnsSelected: (count: number) => (count === 1 ? "1 coluna selecionada" : `${count} colunas selecionadas`),
         delete: "Excluir",
         deleteRowConfirmation: "Tem certeza de que deseja excluir este item?",
         deleteRowTitle: "Excluir linha?",
@@ -236,10 +228,10 @@ export const PT_BR_MESSAGES = {
         rowReorderDisabledEditing: "Conclua a edição antes de reordenar as linhas.",
         rowReorderDisabledFiltered: "Remova os filtros antes de reordenar as linhas.",
         rowReorderDisabledGrouped: "Remova o agrupamento antes de reordenar as linhas.",
+        rowReorderDisabledServerBinding: "A reordenação de linhas não está disponível com vinculação ao servidor.",
         rowReorderDisabledSingleRow: "São necessárias pelo menos duas linhas para reordenar.",
         rowReorderDisabledSorted: "Remova a ordenação antes de reordenar as linhas.",
-        rowReorderDisabledVirtualScroll:
-            "A reordenação de linhas não está disponível com a rolagem virtual ativada.",
+        rowReorderDisabledVirtualScroll: "A reordenação de linhas não está disponível com a rolagem virtual ativada.",
         rowReorderHandleAriaLabel: (rowLabel: string, keyboardHint: string, disabledReason?: string) =>
             `${rowLabel}. ${keyboardHint}${disabledReason ? ` ${disabledReason}` : ""}`,
         rowReorderKeyboardHint: "Use Alt mais Seta para cima ou Alt mais Seta para baixo para mover.",
@@ -284,10 +276,8 @@ export const PT_BR_MESSAGES = {
     },
     pager: {
         firstPageLabel: "Primeira página",
-        jumpBackwardLabel: (pages: number) =>
-            pages === 1 ? "Retroceder 1 página" : `Retroceder ${pages} páginas`,
-        jumpForwardLabel: (pages: number) =>
-            pages === 1 ? "Avançar 1 página" : `Avançar ${pages} páginas`,
+        jumpBackwardLabel: (pages: number) => (pages === 1 ? "Retroceder 1 página" : `Retroceder ${pages} páginas`),
+        jumpForwardLabel: (pages: number) => (pages === 1 ? "Avançar 1 página" : `Avançar ${pages} páginas`),
         lastPageLabel: "Última página",
         nextPageLabel: "Próxima página",
         ofText: "de",
@@ -378,18 +368,14 @@ export const PT_BR_MESSAGES = {
         maximize: "Maximizar",
         minimize: "Minimizar",
         moveWindow: "Mover janela. Use as teclas de seta para mover.",
-        resizeBottom:
-            "Redimensionar janela a partir da borda inferior. Use as teclas de seta para redimensionar.",
+        resizeBottom: "Redimensionar janela a partir da borda inferior. Use as teclas de seta para redimensionar.",
         resizeBottomLeft:
             "Redimensionar janela a partir do canto inferior esquerdo. Use as teclas de seta para redimensionar.",
         resizeBottomRight:
             "Redimensionar janela a partir do canto inferior direito. Use as teclas de seta para redimensionar.",
-        resizeLeft:
-            "Redimensionar janela a partir da borda esquerda. Use as teclas de seta para redimensionar.",
-        resizeRight:
-            "Redimensionar janela a partir da borda direita. Use as teclas de seta para redimensionar.",
-        resizeTop:
-            "Redimensionar janela a partir da borda superior. Use as teclas de seta para redimensionar.",
+        resizeLeft: "Redimensionar janela a partir da borda esquerda. Use as teclas de seta para redimensionar.",
+        resizeRight: "Redimensionar janela a partir da borda direita. Use as teclas de seta para redimensionar.",
+        resizeTop: "Redimensionar janela a partir da borda superior. Use as teclas de seta para redimensionar.",
         resizeTopLeft:
             "Redimensionar janela a partir do canto superior esquerdo. Use as teclas de seta para redimensionar.",
         resizeTopRight:

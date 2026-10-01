@@ -10,6 +10,8 @@ import { GridComponent } from "../components/grid/grid.component";
 import { GridFilterableDirective } from "../directives/grid-filterable.directive";
 import { GridServerBindingDirective } from "../directives/grid-server-binding.directive";
 import { GridSortableDirective } from "../directives/grid-sortable.directive";
+import { GridStatePersistenceDirective } from "../directives/grid-state-persistence.directive";
+import type { GridState } from "../models/GridState";
 import type { GridDataState } from "../models/GridDataState";
 
 @Component({
@@ -18,7 +20,8 @@ import type { GridDataState } from "../models/GridDataState";
         GridColumnComponent,
         GridServerBindingDirective,
         GridSortableDirective,
-        GridFilterableDirective
+        GridFilterableDirective,
+        GridStatePersistenceDirective
     ],
     template: `<mona-grid
         [data]="data()"
@@ -35,7 +38,9 @@ import type { GridDataState } from "../models/GridDataState";
         (columnSort)="cancelSort && $event.preventDefault()"
         [monaGridFilterable]="{ enabled: true, type: 'row' }"
         [(filter)]="filter"
-        (dataStateChange)="events.push($event)">
+        (dataStateChange)="events.push($event)"
+        monaGridStatePersistence
+        [(state)]="state">
         <mona-grid-column field="name" title="Name" [width]="150" />
     </mona-grid>`
 })
@@ -46,6 +51,7 @@ class HostComponent {
     public readonly loading = signal(false);
     public readonly skip = signal(40);
     public readonly sort = signal<SortDescriptor[]>([]);
+    public readonly state = signal<GridState | null>(null);
     public readonly take = signal(10);
     public readonly total = signal(137);
     public cancelSort = false;
@@ -151,5 +157,44 @@ describe("server-bound grid interactions", () => {
         expect(host.events).toEqual([]);
         expect(names()).toEqual(["Zoe", "Ada"]);
         expect(element("tr[data-row-view-index='0']").getAttribute("aria-rowindex")).toBe("62");
+    });
+
+    it("preserves rows during loading and suppresses the empty state for an empty loading page", async () => {
+        host.loading.set(true);
+        await settle();
+        expect(element("mona-grid").getAttribute("aria-busy")).toBe("true");
+        expect(element("[data-grid-loading] mona-spinner").getAttribute("aria-label")).toBe("Loading");
+        expect(names()).toEqual(["Zoe", "Ada"]);
+        host.data.set([]);
+        await settle();
+        expect(fixture.nativeElement.textContent).not.toContain("No data");
+        expect(element("mona-pager")).toBeTruthy();
+        host.loading.set(false);
+        host.total.set(0);
+        await settle();
+        expect(element("mona-grid").hasAttribute("aria-busy")).toBe(false);
+        expect(fixture.nativeElement.textContent).toContain("No data");
+    });
+
+    it("requests one refresh after initial persisted query restoration", async () => {
+        fixture.destroy();
+        fixture = TestBed.createComponent(HostComponent);
+        host = fixture.componentInstance;
+        const filter: CompositeFilterDescriptor = {
+            logic: "and",
+            filters: [{ field: "name", operator: "eq", value: "Ada" }]
+        };
+        host.state.set({
+            version: 1,
+            columns: [],
+            group: [],
+            sort: [{ field: "name", dir: "desc" }],
+            filter: [{ logic: "and", filters: [{ field: "name", operator: "eq", value: "Ada" }] }],
+            pageSize: 20
+        });
+        await settle();
+        expect(host.events).toEqual([{ skip: 0, take: 20, sort: [{ field: "name", dir: "desc" }], filter: [filter] }]);
+        await settle();
+        expect(host.events).toHaveLength(1);
     });
 });

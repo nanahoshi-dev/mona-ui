@@ -29,7 +29,10 @@ export class GridStatePersistenceDirective {
         afterNextRender({
             read: () => {
                 if (this.#isEnabled()) {
-                    this.loadState(this.state());
+                    const result = this.loadState(this.state());
+                    if (result.status === "applied") {
+                        this.#gridService.requestDataStateChange({ resetPage: true });
+                    }
                 }
                 this.#initialized.set(true);
             }
@@ -41,7 +44,11 @@ export class GridStatePersistenceDirective {
             if (!this.#initialized() || this.#emittingState || !this.#isEnabled()) {
                 return;
             }
-            untracked(() => this.loadState(state, options));
+            untracked(() => {
+                if (!deepEquals(state, this.#gridService.captureState(options))) {
+                    this.loadState(state, options);
+                }
+            });
         });
 
         effect(() => {
