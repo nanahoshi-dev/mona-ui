@@ -89,6 +89,7 @@ import { GridFooterCellComponent } from "../grid-footer-cell/grid-footer-cell.co
 import { GridListComponent } from "../grid-list/grid-list.component";
 import { GridSelectAllCheckboxComponent } from "../grid-select-all-checkbox/grid-select-all-checkbox.component";
 import { GridVirtualListComponent } from "../grid-virtual-list/grid-virtual-list.component";
+import { SpinnerComponent } from "@nanahoshi/mona-ui/spinner";
 
 const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [tabindex]";
 
@@ -122,11 +123,13 @@ const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [ta
         ButtonDirective,
         PopupComponent,
         GridColumnChooserComponent,
-        GridSelectAllCheckboxComponent
+        GridSelectAllCheckboxComponent,
+        SpinnerComponent
     ],
     host: {
         "[class]": "baseClass()",
         "[attr.data-uid]": "uid",
+        "[attr.aria-busy]": "gridService.serverLoading() || null",
         role: "grid"
     }
 })

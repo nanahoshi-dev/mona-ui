@@ -22,8 +22,7 @@ export const JA_JP_MESSAGES = {
         previousMonth: "前の月",
         previousYear: "前の年",
         switchToDecadeView: (currentYear: string) => `10年表示に切り替える。現在は${currentYear}`,
-        switchToYearView: (currentMonthAndYear: string) =>
-            `年表示に切り替える。現在は${currentMonthAndYear}`,
+        switchToYearView: (currentMonthAndYear: string) => `年表示に切り替える。現在は${currentMonthAndYear}`,
         today: "今日",
         yearCellLabel: (year: number) => `${year}年`,
         yearViewLabel: (year: string) => `年表示、${year}`
@@ -39,12 +38,8 @@ export const JA_JP_MESSAGES = {
         closeAbbreviation: "終",
         colorScale: "カラースケール",
         conversion: "コンバージョン",
-        divergingRangeDescription: (
-            title: string,
-            minimum: string,
-            midpoint: string,
-            maximum: string
-        ) => `${title}、${minimum}から${maximum}まで、中間点${midpoint}`,
+        divergingRangeDescription: (title: string, minimum: string, midpoint: string, maximum: string) =>
+            `${title}、${minimum}から${maximum}まで、中間点${midpoint}`,
         dropOff: "離脱",
         falling: "下降",
         high: "高値",
@@ -57,8 +52,7 @@ export const JA_JP_MESSAGES = {
         openAbbreviation: "始",
         overall: "全体",
         range: "範囲",
-        rangeDescription: (title: string, minimum: string, maximum: string) =>
-            `${title}、${minimum}から${maximum}まで`,
+        rangeDescription: (title: string, minimum: string, maximum: string) => `${title}、${minimum}から${maximum}まで`,
         rising: "上昇",
         runningTotal: "累計",
         size: "サイズ",
@@ -79,8 +73,7 @@ export const JA_JP_MESSAGES = {
         currentColor: "現在の色",
         previousColor: "前の色",
         saturationAndValue: "彩度と明度",
-        saturationAndValueText: (saturation: number, value: number) =>
-            `彩度${saturation}%、明度${value}%`,
+        saturationAndValueText: (saturation: number, value: number) => `彩度${saturation}%、明度${value}%`,
         switchColorMode: "カラーモードを切り替え"
     },
     colorPalette: {
@@ -119,8 +112,7 @@ export const JA_JP_MESSAGES = {
         clear: "クリア"
     },
     dropdowns: {
-        itemPosition: (text: string, position: number, total: number) =>
-            `${text}、${total}件中${position}件目`,
+        itemPosition: (text: string, position: number, total: number) => `${text}、${total}件中${position}件目`,
         noResultsFound: "結果が見つかりません",
         resultsAvailable: (count: number) => `${count}件の結果があります`
     },
@@ -233,14 +225,13 @@ export const JA_JP_MESSAGES = {
         rowReorderDisabledEditing: "行を並べ替える前に編集を完了してください。",
         rowReorderDisabledFiltered: "行を並べ替える前にフィルターを解除してください。",
         rowReorderDisabledGrouped: "行を並べ替える前にグループ化を解除してください。",
+        rowReorderDisabledServerBinding: "サーバーバインディングでは行を並べ替えられません。",
         rowReorderDisabledSingleRow: "行を並べ替えるには2行以上必要です。",
         rowReorderDisabledSorted: "行を並べ替える前にソートを解除してください。",
-        rowReorderDisabledVirtualScroll:
-            "仮想スクロールが有効な場合、行の並べ替えは使用できません。",
+        rowReorderDisabledVirtualScroll: "仮想スクロールが有効な場合、行の並べ替えは使用できません。",
         rowReorderHandleAriaLabel: (rowLabel: string, keyboardHint: string, disabledReason?: string) =>
             `${rowLabel}。${keyboardHint}${disabledReason ?? ""}`,
-        rowReorderKeyboardHint:
-            "Alt + 上矢印または Alt + 下矢印で行を移動します。",
+        rowReorderKeyboardHint: "Alt + 上矢印または Alt + 下矢印で行を移動します。",
         rowReorderMoved: (fromRowNumber: number, toPosition: number) =>
             `${fromRowNumber}行目を${toPosition}番目の位置に移動しました。`,
         rowValidationError: "この行には入力エラーがあります。",
@@ -292,8 +283,7 @@ export const JA_JP_MESSAGES = {
         pageStatus: (page: number, totalPages: number) => `${totalPages}ページ中${page}ページ`,
         pageText: "ページ",
         previousPageLabel: "前のページ",
-        rangeStatus: (start: number, end: number, total: number) =>
-            `全${total}件中${start}～${end}件`
+        rangeStatus: (start: number, end: number, total: number) => `全${total}件中${start}～${end}件`
     },
     rating: {
         notRated: "未評価",
@@ -375,17 +365,13 @@ export const JA_JP_MESSAGES = {
         minimize: "最小化",
         moveWindow: "ウィンドウを移動。矢印キーで移動します。",
         resizeBottom: "下辺からウィンドウのサイズを変更。矢印キーでサイズを変更します。",
-        resizeBottomLeft:
-            "左下隅からウィンドウのサイズを変更。矢印キーでサイズを変更します。",
-        resizeBottomRight:
-            "右下隅からウィンドウのサイズを変更。矢印キーでサイズを変更します。",
+        resizeBottomLeft: "左下隅からウィンドウのサイズを変更。矢印キーでサイズを変更します。",
+        resizeBottomRight: "右下隅からウィンドウのサイズを変更。矢印キーでサイズを変更します。",
         resizeLeft: "左辺からウィンドウのサイズを変更。矢印キーでサイズを変更します。",
         resizeRight: "右辺からウィンドウのサイズを変更。矢印キーでサイズを変更します。",
         resizeTop: "上辺からウィンドウのサイズを変更。矢印キーでサイズを変更します。",
-        resizeTopLeft:
-            "左上隅からウィンドウのサイズを変更。矢印キーでサイズを変更します。",
-        resizeTopRight:
-            "右上隅からウィンドウのサイズを変更。矢印キーでサイズを変更します。",
+        resizeTopLeft: "左上隅からウィンドウのサイズを変更。矢印キーでサイズを変更します。",
+        resizeTopRight: "右上隅からウィンドウのサイズを変更。矢印キーでサイズを変更します。",
         restore: "元のサイズに戻す"
     }
 } satisfies MonaLocaleMessages;

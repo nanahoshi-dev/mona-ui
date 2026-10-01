@@ -366,17 +366,24 @@
 @defer (when gridWidthSet()) {
     @if (gridService.virtualScrollOptions().enabled) {
         @if (gridService.viewRows().length !== 0 || gridService.addRowVisible()) {
-            <mona-grid-virtual-list
-                [columns]="gridService.visibleColumns()"
-                [data]="gridService.viewRows()"></mona-grid-virtual-list>
+            <mona-grid-virtual-list [columns]="gridService.visibleColumns()" [data]="gridService.viewRows()" />
         } @else {
-            <ng-container [ngTemplateOutlet]="emptyGridTemplate"></ng-container>
+            <ng-container [ngTemplateOutlet]="emptyGridTemplate" />
         }
     } @else {
+        <div class="relative flex-1 min-h-0" data-grid-body-region>
+            @if (gridService.viewPageRows().length !== 0 || gridService.addRowVisible()) {
+                <mona-grid-list [columns]="gridService.visibleColumns()" [data]="gridService.viewPageRows()" />
+            } @else if (!gridService.serverLoading()) {
+                <ng-container [ngTemplateOutlet]="emptyGridTemplate" />
+            }
+            @if (gridService.serverLoading()) {
+                <div class="absolute inset-0 z-20 flex items-center justify-center bg-surface/60" data-grid-loading>
+                    <mona-spinner size="large" />
+                </div>
+            }
+        </div>
         @if (gridService.viewPageRows().length !== 0 || gridService.addRowVisible()) {
-            <mona-grid-list
-                [columns]="gridService.visibleColumns()"
-                [data]="gridService.viewPageRows()"></mona-grid-list>
             @if (footerVisible()) {
                 <div
                     [class]="footerClass()"
@@ -454,6 +461,10 @@
                     </div>
                 </div>
             }
+        }
+        @if (
+            gridService.serverBindingEnabled() || gridService.viewPageRows().length !== 0 || gridService.addRowVisible()
+        ) {
             <mona-pager
                 class="border-0 border-t border-t-border rounded-ss-none rounded-se-none"
                 [skip]="gridService.paginationState().skip"
@@ -466,12 +477,10 @@
                 [responsive]="responsivePager()"
                 (pageSizeChange)="onPageSizeChange($event)"
                 (pageChange)="onPageChange($event)"></mona-pager>
-        } @else {
-            <ng-container [ngTemplateOutlet]="emptyGridTemplate"></ng-container>
         }
     }
 } @placeholder {
-    <mona-placeholder text="Loading..."></mona-placeholder>
+    <mona-placeholder text="Loading..." />
 }
 
 <ng-template #emptyGridTemplate>

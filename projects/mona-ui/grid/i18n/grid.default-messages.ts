@@ -30,6 +30,7 @@ export const GRID_DEFAULT_MESSAGES = {
     rowReorderDisabledEditing: "Finish editing to reorder rows.",
     rowReorderDisabledFiltered: "Clear filters to reorder rows.",
     rowReorderDisabledGrouped: "Clear grouping to reorder rows.",
+    rowReorderDisabledServerBinding: "Row reordering isn't available with server binding.",
     rowReorderDisabledSingleRow: "At least two rows are needed to reorder.",
     rowReorderDisabledSorted: "Clear sorting to reorder rows.",
     rowReorderDisabledVirtualScroll: "Row reordering isn't available while virtual scrolling is enabled.",

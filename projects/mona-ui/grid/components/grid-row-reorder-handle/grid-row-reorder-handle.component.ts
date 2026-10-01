@@ -43,6 +43,8 @@ export class GridRowReorderHandleComponent {
                 return messages.rowReorderDisabledGrouped;
             case "single-row":
                 return messages.rowReorderDisabledSingleRow;
+            case "server-binding":
+                return messages.rowReorderDisabledServerBinding;
             case "sorted":
                 return messages.rowReorderDisabledSorted;
             case "virtual-scroll":

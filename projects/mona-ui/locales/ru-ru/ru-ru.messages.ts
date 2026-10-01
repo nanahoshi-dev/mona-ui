@@ -65,8 +65,7 @@ export const RU_RU_MESSAGES = {
         previousDecade: "Предыдущее десятилетие",
         previousMonth: "Предыдущий месяц",
         previousYear: "Предыдущий год",
-        switchToDecadeView: (currentYear: string) =>
-            `Перейти к просмотру десятилетия, текущий год: ${currentYear}`,
+        switchToDecadeView: (currentYear: string) => `Перейти к просмотру десятилетия, текущий год: ${currentYear}`,
         switchToYearView: (currentMonthAndYear: string) =>
             `Перейти к просмотру года, текущий месяц: ${currentMonthAndYear}`,
         today: "Сегодня",
@@ -100,8 +99,7 @@ export const RU_RU_MESSAGES = {
         openAbbreviation: "Откр.",
         overall: "Итого",
         range: "Диапазон",
-        rangeDescription: (title: string, minimum: string, maximum: string) =>
-            `${title}, от ${minimum} до ${maximum}`,
+        rangeDescription: (title: string, minimum: string, maximum: string) => `${title}, от ${minimum} до ${maximum}`,
         rising: "Рост",
         runningTotal: "Накопительный итог",
         size: "размер",
@@ -172,8 +170,7 @@ export const RU_RU_MESSAGES = {
     },
 
     dropdowns: {
-        itemPosition: (text: string, position: number, total: number) =>
-            `${text}, ${position} из ${total}`,
+        itemPosition: (text: string, position: number, total: number) => `${text}, ${position} из ${total}`,
         noResultsFound: "Результаты не найдены",
         resultsAvailable: (count: number) => `Доступно результатов: ${count}`
     },
@@ -289,14 +286,13 @@ export const RU_RU_MESSAGES = {
         rowReorderDisabledEditing: "Завершите редактирование перед изменением порядка строк.",
         rowReorderDisabledFiltered: "Очистите фильтры перед изменением порядка строк.",
         rowReorderDisabledGrouped: "Отмените группировку перед изменением порядка строк.",
+        rowReorderDisabledServerBinding: "Изменение порядка строк недоступно при привязке к серверу.",
         rowReorderDisabledSingleRow: "Для изменения порядка нужны как минимум две строки.",
         rowReorderDisabledSorted: "Сбросьте сортировку перед изменением порядка строк.",
-        rowReorderDisabledVirtualScroll:
-            "Нельзя изменять порядок строк при включённой виртуальной прокрутке.",
+        rowReorderDisabledVirtualScroll: "Нельзя изменять порядок строк при включённой виртуальной прокрутке.",
         rowReorderHandleAriaLabel: (rowLabel: string, keyboardHint: string, disabledReason?: string) =>
             `${rowLabel}. ${keyboardHint}${disabledReason ? ` ${disabledReason}` : ""}`,
-        rowReorderKeyboardHint:
-            "Используйте Alt + Стрелка вверх или Alt + Стрелка вниз, чтобы переместить строку.",
+        rowReorderKeyboardHint: "Используйте Alt + Стрелка вверх или Alt + Стрелка вниз, чтобы переместить строку.",
         rowReorderMoved: (fromRowNumber: number, toPosition: number) =>
             `Строка ${fromRowNumber} перемещена в позицию ${toPosition}.`,
         rowValidationError: "В строке есть ошибки проверки.",
@@ -391,8 +387,7 @@ export const RU_RU_MESSAGES = {
 
     splitButton: {
         menuButtonAriaLabel: "Показать параметры меню",
-        splitButton: (text: string) =>
-            text ? `${text}, разделённая кнопка` : "Разделённая кнопка"
+        splitButton: (text: string) => (text ? `${text}, разделённая кнопка` : "Разделённая кнопка")
     },
 
     splitter: {

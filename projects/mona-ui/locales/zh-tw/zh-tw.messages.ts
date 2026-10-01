@@ -22,8 +22,7 @@ export const ZH_TW_MESSAGES = {
         previousMonth: "上個月",
         previousYear: "上一年",
         switchToDecadeView: (currentYear: string) => `切換至十年檢視，目前為${currentYear}`,
-        switchToYearView: (currentMonthAndYear: string) =>
-            `切換至年份檢視，目前為${currentMonthAndYear}`,
+        switchToYearView: (currentMonthAndYear: string) => `切換至年份檢視，目前為${currentMonthAndYear}`,
         today: "今天",
         yearCellLabel: (year: number) => `${year}年`,
         yearViewLabel: (year: string) => `年份檢視，${year}`
@@ -39,12 +38,8 @@ export const ZH_TW_MESSAGES = {
         closeAbbreviation: "收",
         colorScale: "色標",
         conversion: "轉換",
-        divergingRangeDescription: (
-            title: string,
-            minimum: string,
-            midpoint: string,
-            maximum: string
-        ) => `${title}，${minimum} 至 ${midpoint} 至 ${maximum}`,
+        divergingRangeDescription: (title: string, minimum: string, midpoint: string, maximum: string) =>
+            `${title}，${minimum} 至 ${midpoint} 至 ${maximum}`,
         dropOff: "流失",
         falling: "下跌",
         high: "最高價",
@@ -57,8 +52,7 @@ export const ZH_TW_MESSAGES = {
         openAbbreviation: "開",
         overall: "整體",
         range: "範圍",
-        rangeDescription: (title: string, minimum: string, maximum: string) =>
-            `${title}，${minimum} 至 ${maximum}`,
+        rangeDescription: (title: string, minimum: string, maximum: string) => `${title}，${minimum} 至 ${maximum}`,
         rising: "上漲",
         runningTotal: "累計",
         size: "大小",
@@ -79,8 +73,7 @@ export const ZH_TW_MESSAGES = {
         currentColor: "目前顏色",
         previousColor: "先前顏色",
         saturationAndValue: "飽和度與明度",
-        saturationAndValueText: (saturation: number, value: number) =>
-            `飽和度${saturation}%，明度${value}%`,
+        saturationAndValueText: (saturation: number, value: number) => `飽和度${saturation}%，明度${value}%`,
         switchColorMode: "切換色彩模式"
     },
     colorPalette: {
@@ -119,8 +112,7 @@ export const ZH_TW_MESSAGES = {
         clear: "清除"
     },
     dropdowns: {
-        itemPosition: (text: string, position: number, total: number) =>
-            `${text}，第 ${position} 項（共 ${total} 項）`,
+        itemPosition: (text: string, position: number, total: number) => `${text}，第 ${position} 項（共 ${total} 項）`,
         noResultsFound: "找不到結果",
         resultsAvailable: (count: number) => `有 ${count} 個可用結果`
     },
@@ -233,6 +225,7 @@ export const ZH_TW_MESSAGES = {
         rowReorderDisabledEditing: "請完成編輯後再重新排列資料列。",
         rowReorderDisabledFiltered: "請清除篩選後再重新排列資料列。",
         rowReorderDisabledGrouped: "請清除群組後再重新排列資料列。",
+        rowReorderDisabledServerBinding: "伺服器繫結時無法重新排列資料列。",
         rowReorderDisabledSingleRow: "至少需要兩個資料列才能重新排序。",
         rowReorderDisabledSorted: "請清除排序後再重新排列資料列。",
         rowReorderDisabledVirtualScroll: "啟用虛擬捲動時無法重新排列資料列。",
@@ -290,8 +283,7 @@ export const ZH_TW_MESSAGES = {
         pageStatus: (page: number, totalPages: number) => `第 ${page} 頁，共 ${totalPages} 頁`,
         pageText: "頁",
         previousPageLabel: "上一頁",
-        rangeStatus: (start: number, end: number, total: number) =>
-            `第 ${start} - ${end} 項，共 ${total} 項`
+        rangeStatus: (start: number, end: number, total: number) => `第 ${start} - ${end} 項，共 ${total} 項`
     },
     rating: {
         notRated: "未評分",

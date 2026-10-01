@@ -67,12 +67,8 @@ export const AR_SA_MESSAGES = {
         closeAbbreviation: "إ",
         colorScale: "مقياس الألوان",
         conversion: "التحويل",
-        divergingRangeDescription: (
-            title: string,
-            minimum: string,
-            midpoint: string,
-            maximum: string
-        ) => `${title}، ${minimum} – ${midpoint} – ${maximum}`,
+        divergingRangeDescription: (title: string, minimum: string, midpoint: string, maximum: string) =>
+            `${title}، ${minimum} – ${midpoint} – ${maximum}`,
         dropOff: "الانخفاض",
         falling: "هبوط",
         high: "الأعلى",
@@ -85,8 +81,7 @@ export const AR_SA_MESSAGES = {
         openAbbreviation: "ا",
         overall: "الإجمالي",
         range: "النطاق",
-        rangeDescription: (title: string, minimum: string, maximum: string) =>
-            `${title}، ${minimum}–${maximum}`,
+        rangeDescription: (title: string, minimum: string, maximum: string) => `${title}، ${minimum}–${maximum}`,
         rising: "صعود",
         runningTotal: "المجموع التراكمي",
         size: "الحجم",
@@ -261,6 +256,7 @@ export const AR_SA_MESSAGES = {
         rowReorderDisabledEditing: "أكمل التحرير قبل إعادة ترتيب الصفوف.",
         rowReorderDisabledFiltered: "امسح التصفية قبل إعادة ترتيب الصفوف.",
         rowReorderDisabledGrouped: "ألغِ التجميع قبل إعادة ترتيب الصفوف.",
+        rowReorderDisabledServerBinding: "لا يمكن إعادة ترتيب الصفوف مع ربط الخادم.",
         rowReorderDisabledSingleRow: "يلزم صفّان على الأقل لإعادة ترتيب الصفوف.",
         rowReorderDisabledSorted: "ألغِ الفرز قبل إعادة ترتيب الصفوف.",
         rowReorderDisabledVirtualScroll: "لا يمكن إعادة ترتيب الصفوف أثناء استخدام التمرير الافتراضي.",
@@ -330,8 +326,7 @@ export const AR_SA_MESSAGES = {
         carousel: "دوّار",
         nextPage: "الصفحة التالية",
         page: (current: number) => `الصفحة ${formatInteger(current)}`,
-        pageOf: (current: number, total: number) =>
-            `الصفحة ${formatInteger(current)} من ${formatInteger(total)}`,
+        pageOf: (current: number, total: number) => `الصفحة ${formatInteger(current)} من ${formatInteger(total)}`,
         previousPage: "الصفحة السابقة",
         scrollPagerNext: "تمرير مؤشر الصفحات إلى التالي",
         scrollPagerPrevious: "تمرير مؤشر الصفحات إلى السابق",

@@ -39,12 +39,8 @@ export const FR_FR_MESSAGES = {
         closeAbbreviation: "C",
         colorScale: "Échelle de couleurs",
         conversion: "Conversion",
-        divergingRangeDescription: (
-            title: string,
-            minimum: string,
-            midpoint: string,
-            maximum: string
-        ) => `${title}, de ${minimum} à ${maximum}, point médian ${midpoint}`,
+        divergingRangeDescription: (title: string, minimum: string, midpoint: string, maximum: string) =>
+            `${title}, de ${minimum} à ${maximum}, point médian ${midpoint}`,
         dropOff: "Abandon",
         falling: "En baisse",
         high: "Haut",
@@ -57,8 +53,7 @@ export const FR_FR_MESSAGES = {
         openAbbreviation: "O",
         overall: "Total",
         range: "Plage",
-        rangeDescription: (title: string, minimum: string, maximum: string) =>
-            `${title}, de ${minimum} à ${maximum}`,
+        rangeDescription: (title: string, minimum: string, maximum: string) => `${title}, de ${minimum} à ${maximum}`,
         rising: "En hausse",
         runningTotal: "Total cumulé",
         size: "Taille",
@@ -119,11 +114,9 @@ export const FR_FR_MESSAGES = {
         clear: "Effacer"
     },
     dropdowns: {
-        itemPosition: (text: string, position: number, total: number) =>
-            `${text}, ${position} sur ${total}`,
+        itemPosition: (text: string, position: number, total: number) => `${text}, ${position} sur ${total}`,
         noResultsFound: "Aucun résultat trouvé",
-        resultsAvailable: (count: number) =>
-            count === 1 ? "1 résultat disponible" : `${count} résultats disponibles`
+        resultsAvailable: (count: number) => (count === 1 ? "1 résultat disponible" : `${count} résultats disponibles`)
     },
     editor: {
         addColumnAfter: "Insérer une colonne après",
@@ -235,6 +228,7 @@ export const FR_FR_MESSAGES = {
         rowReorderDisabledEditing: "Terminez la modification avant de réordonner les lignes.",
         rowReorderDisabledFiltered: "Supprimez les filtres avant de réordonner les lignes.",
         rowReorderDisabledGrouped: "Supprimez le regroupement avant de réordonner les lignes.",
+        rowReorderDisabledServerBinding: "La réorganisation des lignes est indisponible avec la liaison serveur.",
         rowReorderDisabledSingleRow: "Au moins deux lignes sont nécessaires pour les réordonner.",
         rowReorderDisabledSorted: "Supprimez le tri avant de réordonner les lignes.",
         rowReorderDisabledVirtualScroll:
@@ -284,10 +278,8 @@ export const FR_FR_MESSAGES = {
     },
     pager: {
         firstPageLabel: "Première page",
-        jumpBackwardLabel: (pages: number) =>
-            pages === 1 ? "Reculer de 1 page" : `Reculer de ${pages} pages`,
-        jumpForwardLabel: (pages: number) =>
-            pages === 1 ? "Avancer de 1 page" : `Avancer de ${pages} pages`,
+        jumpBackwardLabel: (pages: number) => (pages === 1 ? "Reculer de 1 page" : `Reculer de ${pages} pages`),
+        jumpForwardLabel: (pages: number) => (pages === 1 ? "Avancer de 1 page" : `Avancer de ${pages} pages`),
         lastPageLabel: "Dernière page",
         nextPageLabel: "Page suivante",
         ofText: "sur",

@@ -21,8 +21,7 @@ export const IT_IT_MESSAGES = {
         previousDecade: "Decennio precedente",
         previousMonth: "Mese precedente",
         previousYear: "Anno precedente",
-        switchToDecadeView: (currentYear: string) =>
-            `Passa alla vista del decennio, attualmente ${currentYear}`,
+        switchToDecadeView: (currentYear: string) => `Passa alla vista del decennio, attualmente ${currentYear}`,
         switchToYearView: (currentMonthAndYear: string) =>
             `Passa alla vista dell'anno, attualmente ${currentMonthAndYear}`,
         today: "Oggi",
@@ -40,12 +39,8 @@ export const IT_IT_MESSAGES = {
         closeAbbreviation: "C",
         colorScale: "Scala colori",
         conversion: "Conversione",
-        divergingRangeDescription: (
-            title: string,
-            minimum: string,
-            midpoint: string,
-            maximum: string
-        ) => `${title}, da ${minimum} a ${maximum}, valore intermedio ${midpoint}`,
+        divergingRangeDescription: (title: string, minimum: string, midpoint: string, maximum: string) =>
+            `${title}, da ${minimum} a ${maximum}, valore intermedio ${midpoint}`,
         dropOff: "Abbandono",
         falling: "In calo",
         high: "Massimo",
@@ -58,8 +53,7 @@ export const IT_IT_MESSAGES = {
         openAbbreviation: "A",
         overall: "Complessivo",
         range: "Intervallo",
-        rangeDescription: (title: string, minimum: string, maximum: string) =>
-            `${title}, da ${minimum} a ${maximum}`,
+        rangeDescription: (title: string, minimum: string, maximum: string) => `${title}, da ${minimum} a ${maximum}`,
         rising: "In rialzo",
         runningTotal: "Totale progressivo",
         size: "dimensione",
@@ -80,8 +74,7 @@ export const IT_IT_MESSAGES = {
         currentColor: "Colore corrente",
         previousColor: "Colore precedente",
         saturationAndValue: "Saturazione e valore del colore",
-        saturationAndValueText: (saturation: number, value: number) =>
-            `Saturazione ${saturation}%, valore ${value}%`,
+        saturationAndValueText: (saturation: number, value: number) => `Saturazione ${saturation}%, valore ${value}%`,
         switchColorMode: "Cambia modalità colore"
     },
     colorPalette: {
@@ -120,8 +113,7 @@ export const IT_IT_MESSAGES = {
         clear: "Cancella"
     },
     dropdowns: {
-        itemPosition: (text: string, position: number, total: number) =>
-            `${text}, ${position} di ${total}`,
+        itemPosition: (text: string, position: number, total: number) => `${text}, ${position} di ${total}`,
         noResultsFound: "Nessun risultato trovato",
         resultsAvailable: (count: number) =>
             count === 1 ? "1 risultato disponibile" : `${count} risultati disponibili`
@@ -211,8 +203,7 @@ export const IT_IT_MESSAGES = {
         cancel: "Annulla",
         cancelRowEdit: "Annulla modifica della riga",
         columns: "Colonne",
-        columnsSelected: (count: number) =>
-            count === 1 ? "1 colonna selezionata" : `${count} colonne selezionate`,
+        columnsSelected: (count: number) => (count === 1 ? "1 colonna selezionata" : `${count} colonne selezionate`),
         delete: "Elimina",
         deleteRowConfirmation: "Sei sicuro di voler eliminare questo elemento?",
         deleteRowTitle: "Eliminare la riga?",
@@ -236,6 +227,7 @@ export const IT_IT_MESSAGES = {
         rowReorderDisabledEditing: "Completa la modifica prima di riordinare le righe.",
         rowReorderDisabledFiltered: "Rimuovi i filtri prima di riordinare le righe.",
         rowReorderDisabledGrouped: "Rimuovi il raggruppamento prima di riordinare le righe.",
+        rowReorderDisabledServerBinding: "Il riordino delle righe non è disponibile con il binding al server.",
         rowReorderDisabledSingleRow: "Sono necessarie almeno due righe per riordinarle.",
         rowReorderDisabledSorted: "Rimuovi l'ordinamento prima di riordinare le righe.",
         rowReorderDisabledVirtualScroll:
@@ -286,8 +278,7 @@ export const IT_IT_MESSAGES = {
         firstPageLabel: "Prima pagina",
         jumpBackwardLabel: (pages: number) =>
             pages === 1 ? "Torna indietro di 1 pagina" : `Torna indietro di ${pages} pagine`,
-        jumpForwardLabel: (pages: number) =>
-            pages === 1 ? "Avanza di 1 pagina" : `Avanza di ${pages} pagine`,
+        jumpForwardLabel: (pages: number) => (pages === 1 ? "Avanza di 1 pagina" : `Avanza di ${pages} pagine`),
         lastPageLabel: "Ultima pagina",
         nextPageLabel: "Pagina successiva",
         ofText: "di",
@@ -378,18 +369,14 @@ export const IT_IT_MESSAGES = {
         maximize: "Massimizza",
         minimize: "Minimizza",
         moveWindow: "Sposta finestra. Usa i tasti freccia per spostarla.",
-        resizeBottom:
-            "Ridimensiona la finestra dal bordo inferiore. Usa i tasti freccia per ridimensionarla.",
+        resizeBottom: "Ridimensiona la finestra dal bordo inferiore. Usa i tasti freccia per ridimensionarla.",
         resizeBottomLeft:
             "Ridimensiona la finestra dall'angolo inferiore sinistro. Usa i tasti freccia per ridimensionarla.",
         resizeBottomRight:
             "Ridimensiona la finestra dall'angolo inferiore destro. Usa i tasti freccia per ridimensionarla.",
-        resizeLeft:
-            "Ridimensiona la finestra dal bordo sinistro. Usa i tasti freccia per ridimensionarla.",
-        resizeRight:
-            "Ridimensiona la finestra dal bordo destro. Usa i tasti freccia per ridimensionarla.",
-        resizeTop:
-            "Ridimensiona la finestra dal bordo superiore. Usa i tasti freccia per ridimensionarla.",
+        resizeLeft: "Ridimensiona la finestra dal bordo sinistro. Usa i tasti freccia per ridimensionarla.",
+        resizeRight: "Ridimensiona la finestra dal bordo destro. Usa i tasti freccia per ridimensionarla.",
+        resizeTop: "Ridimensiona la finestra dal bordo superiore. Usa i tasti freccia per ridimensionarla.",
         resizeTopLeft:
             "Ridimensiona la finestra dall'angolo superiore sinistro. Usa i tasti freccia per ridimensionarla.",
         resizeTopRight:

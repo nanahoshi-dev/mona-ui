@@ -21,10 +21,8 @@ export const TR_TR_MESSAGES = {
         previousDecade: "Önceki on yıl",
         previousMonth: "Önceki ay",
         previousYear: "Önceki yıl",
-        switchToDecadeView: (currentYear: string) =>
-            `On yıllık görünüme geç, şu anda ${currentYear}`,
-        switchToYearView: (currentMonthAndYear: string) =>
-            `Yıl görünümüne geç, şu anda ${currentMonthAndYear}`,
+        switchToDecadeView: (currentYear: string) => `On yıllık görünüme geç, şu anda ${currentYear}`,
+        switchToYearView: (currentMonthAndYear: string) => `Yıl görünümüne geç, şu anda ${currentMonthAndYear}`,
         today: "Bugün",
         yearCellLabel: (year: number) => `${year} yılı`,
         yearViewLabel: (year: string) => `Yıl görünümü, ${year}`
@@ -40,12 +38,8 @@ export const TR_TR_MESSAGES = {
         closeAbbreviation: "K",
         colorScale: "Renk ölçeği",
         conversion: "Dönüşüm",
-        divergingRangeDescription: (
-            title: string,
-            minimum: string,
-            midpoint: string,
-            maximum: string
-        ) => `${title}, ${minimum} ile ${maximum} arasında, orta değer ${midpoint}`,
+        divergingRangeDescription: (title: string, minimum: string, midpoint: string, maximum: string) =>
+            `${title}, ${minimum} ile ${maximum} arasında, orta değer ${midpoint}`,
         dropOff: "Kayıp",
         falling: "Düşüş",
         high: "En yüksek",
@@ -80,8 +74,7 @@ export const TR_TR_MESSAGES = {
         currentColor: "Geçerli renk",
         previousColor: "Önceki renk",
         saturationAndValue: "Renk doygunluğu ve değeri",
-        saturationAndValueText: (saturation: number, value: number) =>
-            `Doygunluk %${saturation}, değer %${value}`,
+        saturationAndValueText: (saturation: number, value: number) => `Doygunluk %${saturation}, değer %${value}`,
         switchColorMode: "Renk modunu değiştir"
     },
     colorPalette: {
@@ -120,8 +113,7 @@ export const TR_TR_MESSAGES = {
         clear: "Temizle"
     },
     dropdowns: {
-        itemPosition: (text: string, position: number, total: number) =>
-            `${text}, ${total} öğeden ${position}.`,
+        itemPosition: (text: string, position: number, total: number) => `${text}, ${total} öğeden ${position}.`,
         noResultsFound: "Sonuç bulunamadı",
         resultsAvailable: (count: number) => `${count} sonuç bulundu`
     },
@@ -234,6 +226,7 @@ export const TR_TR_MESSAGES = {
         rowReorderDisabledEditing: "Satırları yeniden sıralamadan önce düzenlemeyi tamamlayın.",
         rowReorderDisabledFiltered: "Satırları yeniden sıralamadan önce filtreleri kaldırın.",
         rowReorderDisabledGrouped: "Satırları yeniden sıralamadan önce gruplamayı kaldırın.",
+        rowReorderDisabledServerBinding: "Sunucu bağlaması etkinken satırlar yeniden sıralanamaz.",
         rowReorderDisabledSingleRow: "Yeniden sıralamak için en az iki satır gerekir.",
         rowReorderDisabledSorted: "Satırları yeniden sıralamadan önce sıralamayı kaldırın.",
         rowReorderDisabledVirtualScroll: "Sanal kaydırma etkinken satırlar yeniden sıralanamaz.",
@@ -291,8 +284,7 @@ export const TR_TR_MESSAGES = {
         pageStatus: (page: number, totalPages: number) => `Sayfa ${page} / ${totalPages}`,
         pageText: "Sayfa",
         previousPageLabel: "Önceki sayfa",
-        rangeStatus: (start: number, end: number, total: number) =>
-            `${start} - ${end} / ${total} öğe`
+        rangeStatus: (start: number, end: number, total: number) => `${start} - ${end} / ${total} öğe`
     },
     rating: {
         notRated: "Değerlendirilmedi",
@@ -379,12 +371,9 @@ export const TR_TR_MESSAGES = {
             "Pencereyi sol alt köşeden yeniden boyutlandırın. Yeniden boyutlandırmak için ok tuşlarını kullanın.",
         resizeBottomRight:
             "Pencereyi sağ alt köşeden yeniden boyutlandırın. Yeniden boyutlandırmak için ok tuşlarını kullanın.",
-        resizeLeft:
-            "Pencereyi sol kenardan yeniden boyutlandırın. Yeniden boyutlandırmak için ok tuşlarını kullanın.",
-        resizeRight:
-            "Pencereyi sağ kenardan yeniden boyutlandırın. Yeniden boyutlandırmak için ok tuşlarını kullanın.",
-        resizeTop:
-            "Pencereyi üst kenardan yeniden boyutlandırın. Yeniden boyutlandırmak için ok tuşlarını kullanın.",
+        resizeLeft: "Pencereyi sol kenardan yeniden boyutlandırın. Yeniden boyutlandırmak için ok tuşlarını kullanın.",
+        resizeRight: "Pencereyi sağ kenardan yeniden boyutlandırın. Yeniden boyutlandırmak için ok tuşlarını kullanın.",
+        resizeTop: "Pencereyi üst kenardan yeniden boyutlandırın. Yeniden boyutlandırmak için ok tuşlarını kullanın.",
         resizeTopLeft:
             "Pencereyi sol üst köşeden yeniden boyutlandırın. Yeniden boyutlandırmak için ok tuşlarını kullanın.",
         resizeTopRight:

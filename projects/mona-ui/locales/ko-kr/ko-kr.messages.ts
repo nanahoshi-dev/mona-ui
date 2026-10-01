@@ -22,8 +22,7 @@ export const KO_KR_MESSAGES = {
         previousMonth: "이전 달",
         previousYear: "이전 연도",
         switchToDecadeView: (currentYear: string) => `10년 보기로 전환. 현재 ${currentYear}`,
-        switchToYearView: (currentMonthAndYear: string) =>
-            `연도 보기로 전환. 현재 ${currentMonthAndYear}`,
+        switchToYearView: (currentMonthAndYear: string) => `연도 보기로 전환. 현재 ${currentMonthAndYear}`,
         today: "오늘",
         yearCellLabel: (year: number) => `${year}년`,
         yearViewLabel: (year: string) => `연도 보기, ${year}`
@@ -39,12 +38,8 @@ export const KO_KR_MESSAGES = {
         closeAbbreviation: "종",
         colorScale: "색상 스케일",
         conversion: "전환",
-        divergingRangeDescription: (
-            title: string,
-            minimum: string,
-            midpoint: string,
-            maximum: string
-        ) => `${title}, ${minimum} ~ ${midpoint} ~ ${maximum}`,
+        divergingRangeDescription: (title: string, minimum: string, midpoint: string, maximum: string) =>
+            `${title}, ${minimum} ~ ${midpoint} ~ ${maximum}`,
         dropOff: "이탈",
         falling: "하락",
         high: "고가",
@@ -57,8 +52,7 @@ export const KO_KR_MESSAGES = {
         openAbbreviation: "시",
         overall: "전체",
         range: "범위",
-        rangeDescription: (title: string, minimum: string, maximum: string) =>
-            `${title}, ${minimum}~${maximum}`,
+        rangeDescription: (title: string, minimum: string, maximum: string) => `${title}, ${minimum}~${maximum}`,
         rising: "상승",
         runningTotal: "누계",
         size: "크기",
@@ -79,8 +73,7 @@ export const KO_KR_MESSAGES = {
         currentColor: "현재 색상",
         previousColor: "이전 색상",
         saturationAndValue: "채도 및 명도",
-        saturationAndValueText: (saturation: number, value: number) =>
-            `채도 ${saturation}%, 명도 ${value}%`,
+        saturationAndValueText: (saturation: number, value: number) => `채도 ${saturation}%, 명도 ${value}%`,
         switchColorMode: "색상 모드 전환"
     },
     colorPalette: {
@@ -119,8 +112,7 @@ export const KO_KR_MESSAGES = {
         clear: "지우기"
     },
     dropdowns: {
-        itemPosition: (text: string, position: number, total: number) =>
-            `${text}, ${total}개 중 ${position}번째`,
+        itemPosition: (text: string, position: number, total: number) => `${text}, ${total}개 중 ${position}번째`,
         noResultsFound: "결과를 찾을 수 없습니다",
         resultsAvailable: (count: number) => `사용 가능한 결과 ${count}개`
     },
@@ -233,6 +225,7 @@ export const KO_KR_MESSAGES = {
         rowReorderDisabledEditing: "편집을 완료한 후 행 순서를 변경하세요.",
         rowReorderDisabledFiltered: "필터를 지운 후 행 순서를 변경하세요.",
         rowReorderDisabledGrouped: "그룹화를 해제한 후 행 순서를 변경하세요.",
+        rowReorderDisabledServerBinding: "서버 바인딩에서는 행 순서를 변경할 수 없습니다.",
         rowReorderDisabledSingleRow: "행 순서를 변경하려면 행이 두 개 이상 필요합니다.",
         rowReorderDisabledSorted: "정렬을 해제한 후 행 순서를 변경하세요.",
         rowReorderDisabledVirtualScroll: "가상 스크롤을 사용하는 동안에는 행 순서를 변경할 수 없습니다.",
@@ -290,8 +283,7 @@ export const KO_KR_MESSAGES = {
         pageStatus: (page: number, totalPages: number) => `전체 ${totalPages}페이지 중 ${page}페이지`,
         pageText: "페이지",
         previousPageLabel: "이전 페이지",
-        rangeStatus: (start: number, end: number, total: number) =>
-            `전체 ${total}개 중 ${start}~${end}`
+        rangeStatus: (start: number, end: number, total: number) => `전체 ${total}개 중 ${start}~${end}`
     },
     rating: {
         notRated: "평가되지 않음",

@@ -28,6 +28,7 @@ export interface MonaGridMessages {
     readonly rowReorderDisabledEditing: string;
     readonly rowReorderDisabledFiltered: string;
     readonly rowReorderDisabledGrouped: string;
+    readonly rowReorderDisabledServerBinding: string;
     readonly rowReorderDisabledSingleRow: string;
     readonly rowReorderDisabledSorted: string;
     readonly rowReorderDisabledVirtualScroll: string;

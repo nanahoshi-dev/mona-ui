@@ -269,6 +269,7 @@ export const ID_ID_MESSAGES = {
         rowReorderDisabledEditing: "Selesaikan pengeditan sebelum menyusun ulang baris.",
         rowReorderDisabledFiltered: "Hapus filter sebelum menyusun ulang baris.",
         rowReorderDisabledGrouped: "Hapus pengelompokan sebelum menyusun ulang baris.",
+        rowReorderDisabledServerBinding: "Baris tidak dapat disusun ulang saat pengikatan server aktif.",
         rowReorderDisabledSingleRow: "Diperlukan setidaknya dua baris untuk menyusun ulang.",
         rowReorderDisabledSorted: "Hapus pengurutan sebelum menyusun ulang baris.",
         rowReorderDisabledVirtualScroll: "Baris tidak dapat disusun ulang saat pengguliran virtual aktif.",
