@@ -3,6 +3,8 @@ import { VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
 
 const gridRowMinHeightClass = "min-h-9";
+const gridVirtualRowHeightClass =
+    "h-(--mona-grid-row-height) min-h-(--mona-grid-row-height) max-h-(--mona-grid-row-height)";
 
 export const gridBaseThemeVariants = cva(
     `
@@ -191,7 +193,10 @@ export const gridFooterTableThemeVariants = cva(
     `
 );
 
-export const gridFooterTableRowThemeVariants = cva(`relative inline-flex [&>td:last-child]:border-e-0`);
+export const gridFooterTableRowThemeVariants = cva(`relative inline-flex [&>td:last-child]:border-e-0`, {
+    variants: { virtual: { true: `${gridVirtualRowHeightClass} overflow-hidden`, false: "" } },
+    defaultVariants: { virtual: false }
+});
 
 export const gridFooterTableCellThemeVariants = cva(
     `
@@ -220,7 +225,8 @@ export const gridGroupRowThemeVariants = cva(
         relative z-10
         w-full
         bg-surface-muted border-e border-e-border-subtle
-    `
+    `,
+    { variants: { virtual: { true: gridVirtualRowHeightClass, false: "" } }, defaultVariants: { virtual: false } }
 );
 
 export const gridHeaderThemeVariants = cva(
@@ -299,7 +305,7 @@ export const gridListTableRowThemeVariants = cva(``, {
                 `,
             false: "bg-surface hover:bg-hover"
         },
-        virtual: { true: "h-9", false: "" }
+        virtual: { true: gridVirtualRowHeightClass, false: "" }
     },
     defaultVariants: { virtual: false }
 });
@@ -316,7 +322,7 @@ export const gridListTableCellThemeVariants = cva(
     `,
     {
         variants: {
-            virtual: { true: "h-9", false: "" },
+            virtual: { true: gridVirtualRowHeightClass, false: "" },
             groupHeader: {
                 true: "",
                 false: ""

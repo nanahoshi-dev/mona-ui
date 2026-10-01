@@ -499,7 +499,7 @@ export class GridService {
     });
     public readonly virtualGridMaxBuffer = computed(() => this.virtualGridMinBuffer() * 1.42857);
     public readonly virtualGridMinBuffer = signal(0);
-    public readonly virtualScrollOptions = signal<VirtualScrollOptions>({ enabled: false, height: 32 });
+    public readonly virtualScrollOptions = signal<VirtualScrollOptions>({ enabled: false, height: 36 });
     public readonly visibleColumns = computed(() =>
         this.columns()
             .where(column => !column.hidden)
@@ -1324,10 +1324,14 @@ export class GridService {
     }
 
     public setVirtualScrollOptions(options: VirtualScrollOptions): void {
+        const height = options.height ?? this.virtualScrollOptions().height ?? 36;
+        if (!Number.isFinite(height) || height <= 0) {
+            throw new Error("monaGridVirtualScroll: height must be finite and greater than zero.");
+        }
         if (options.enabled && this.serverBindingEnabled()) {
             throw new Error("monaGridServerBinding and monaGridVirtualScroll cannot be enabled together.");
         }
-        this.virtualScrollOptions.update(v => ({ ...v, ...options }));
+        this.virtualScrollOptions.update(v => ({ ...v, ...options, height }));
     }
 
     public startAddRow(originalEvent?: Event): boolean {

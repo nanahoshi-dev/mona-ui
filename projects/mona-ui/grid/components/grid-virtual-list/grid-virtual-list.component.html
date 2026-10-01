@@ -256,7 +256,7 @@
                                 [groupKey]="rowItem.groupKey"
                                 [attr.colspan]="colspan"
                                 (toggle)="onGroupExpandChange(rowItem.groupKey)">
-                                <p class="flex h-8 items-center text-sm whitespace-nowrap">
+                                <p class="absolute inset-0 flex items-center text-sm whitespace-nowrap overflow-hidden">
                                     <mona-grid-toggle
                                         [expanded]="!isCollapsed"
                                         [width]="gridService.groupColumnWidth"
@@ -350,7 +350,9 @@
                                     [section]="'body'"
                                     [colIndex]="gridService.structuralColIndexMap().get('reorder') ?? 0"
                                     [firstInRow]="gridService.structuralColIndexMap().get('reorder') === 0"
-                                    [lastInRow]="columns().length === 0 && gridService.structuralLastKind() === 'reorder'"
+                                    [lastInRow]="
+                                        columns().length === 0 && gridService.structuralLastKind() === 'reorder'
+                                    "
                                     [style.width.px]="gridService.rowReorderColumnWidth">
                                     <mona-grid-row-reorder-handle [row]="rowItem.row" [pageIndex]="rowIndex" />
                                 </td>
@@ -371,7 +373,9 @@
                                     [cellKind]="'detail'"
                                     [colIndex]="gridService.structuralColIndexMap().get('detail') ?? 0"
                                     [firstInRow]="gridService.structuralColIndexMap().get('detail') === 0"
-                                    [lastInRow]="columns().length === 0 && gridService.structuralLastKind() === 'detail'"
+                                    [lastInRow]="
+                                        columns().length === 0 && gridService.structuralLastKind() === 'detail'
+                                    "
                                     [style.width.px]="gridService.detailColumnWidth">
                                     <span class="flex h-full w-full items-stretch justify-center">
                                         <mona-grid-toggle
@@ -398,7 +402,9 @@
                                     [section]="'body'"
                                     [colIndex]="gridService.structuralColIndexMap().get('selection') ?? 0"
                                     [firstInRow]="gridService.structuralColIndexMap().get('selection') === 0"
-                                    [lastInRow]="columns().length === 0 && gridService.structuralLastKind() === 'selection'"
+                                    [lastInRow]="
+                                        columns().length === 0 && gridService.structuralLastKind() === 'selection'
+                                    "
                                     [style.width.px]="gridService.selectionColumnWidth">
                                     <mona-grid-selection-checkbox [row]="rowItem.row" [rowIndex]="rowIndex" />
                                 </td>

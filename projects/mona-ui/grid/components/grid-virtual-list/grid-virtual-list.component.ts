@@ -76,7 +76,8 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
     templateUrl: "./grid-virtual-list.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
-        "[class]": "baseClass()"
+        "[class]": "baseClass()",
+        "[style.--mona-grid-row-height]": "gridService.virtualScrollOptions().height + 'px'"
     }
 })
 export class GridVirtualListComponent {
@@ -90,7 +91,11 @@ export class GridVirtualListComponent {
     private readonly bodyTableElementRef = viewChild.required<ElementRef<HTMLTableElement>>("bodyTable");
     private readonly footerScrollElementRef = viewChild<ElementRef<HTMLDivElement>>("footerScrollElement");
     protected readonly baseClass = computed(() => {
-        return gridListBaseThemeVariants({ virtual: true });
+        return (
+            gridListBaseThemeVariants({ virtual: true }) +
+            " [&_mona-grid-toggle>span]:min-h-0 [&_mona-grid-toggle>span]:h-full" +
+            " [&_mona-grid-command-cell]:min-h-0 [&_mona-grid-command-cell>div]:min-h-0"
+        );
     });
     protected readonly flattenedGroupedRows = computed(() => {
         const groupColumns = this.gridService.groupColumns();
@@ -112,11 +117,11 @@ export class GridVirtualListComponent {
         return gridFooterTableThemeVariants();
     });
     protected readonly footerTableRowClass = computed(() => {
-        return gridFooterTableRowThemeVariants();
+        return gridFooterTableRowThemeVariants({ virtual: true });
     });
     protected readonly gridService = inject(GridService);
     protected readonly groupRowClass = computed(() => {
-        return gridGroupRowThemeVariants();
+        return gridGroupRowThemeVariants({ virtual: true });
     });
     protected readonly tableClass = computed(() => {
         return gridListTableThemeVariants();
