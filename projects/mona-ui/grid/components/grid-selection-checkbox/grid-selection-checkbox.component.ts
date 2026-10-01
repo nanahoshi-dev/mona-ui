@@ -23,7 +23,9 @@ export class GridSelectionCheckboxComponent {
         return this.#gridService.messages().selectRow(this.rowIndex() + 1);
     });
     protected readonly checked = computed(() => this.#gridService.isRowSelected(this.row()));
-    protected readonly hostClass = computed(() => gridSelectionCellThemeVariants());
+    protected readonly hostClass = computed(() =>
+        gridSelectionCellThemeVariants({ virtual: this.#gridService.virtualScrollOptions().enabled })
+    );
 
     /**
      * @description The grid row whose selected state this checkbox controls.

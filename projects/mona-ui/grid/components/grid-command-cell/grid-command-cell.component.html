@@ -3,7 +3,7 @@
         [ngTemplateOutlet]="column().commandTemplate"
         [ngTemplateOutletContext]="commandContext()"></ng-container>
 } @else {
-    <div class="flex h-full items-center gap-1 px-1">
+    <div class="flex min-h-9 items-center gap-1 px-1">
         @if (isEditing()) {
             @if (hasRowError()) {
                 <span class="shrink-0 px-1 text-error" #rowErrorIcon>

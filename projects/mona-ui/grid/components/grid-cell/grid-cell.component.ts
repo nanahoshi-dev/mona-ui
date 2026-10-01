@@ -32,11 +32,11 @@ export class GridCellComponent {
     readonly #locale = inject(LOCALE_ID);
     readonly #logicalCell = inject(GridLogicalCellDirective, { optional: true });
     protected readonly baseClass = computed(() => {
-        return gridCellBaseThemeVariants();
+        return gridCellBaseThemeVariants({ virtual: this.gridService.virtualScrollOptions().enabled });
     });
     protected readonly cellContainerClass = computed(() => {
         const editing = this.isEditing();
-        return gridCellContainerThemeVariants({ editing });
+        return gridCellContainerThemeVariants({ editing, virtual: this.gridService.virtualScrollOptions().enabled });
     });
     protected readonly cellDirtyIndicatorClass = computed(() => {
         return gridCellDirtyIndicatorThemeVariants();

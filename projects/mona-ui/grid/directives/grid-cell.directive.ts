@@ -1,4 +1,5 @@
 import { computed, Directive, inject, input } from "@angular/core";
+import { GridService } from "../services/grid.service";
 import { type GridRowNeighborType } from "../models/GridRowNeighbourType";
 import { gridListTableCellThemeVariants, type GridListTableCellVariantInput } from "../styles/grid.styles";
 
@@ -9,6 +10,7 @@ import { gridListTableCellThemeVariants, type GridListTableCellVariantInput } fr
     }
 })
 export class GridCellDirective implements GridListTableCellVariantInput {
+    readonly #gridService = inject(GridService, { optional: true });
     protected readonly baseClass = computed(() => {
         const dataCell = this.dataCell();
         const groupHeader = this.groupHeader();
@@ -19,6 +21,7 @@ export class GridCellDirective implements GridListTableCellVariantInput {
         const masterDetailToggle = this.masterDetailToggle();
         const lastInRow = this.lastInRow() || groupHeader || masterDetailContent;
         return gridListTableCellThemeVariants({
+            virtual: this.#gridService?.virtualScrollOptions().enabled ?? false,
             dataCell,
             groupHeader,
             groupToggle,

@@ -53,7 +53,7 @@ export class GridEditorComponent {
     private readonly numericTextBoxRef = viewChild(NumericTextBoxComponent);
     private readonly textBoxRef = viewChild(TextBoxComponent);
     protected readonly baseClass = computed(() => {
-        return gridCellEditorBaseThemeVariants();
+        return gridCellEditorBaseThemeVariants({ virtual: this.#gridService?.virtualScrollOptions().enabled ?? false });
     });
     protected readonly editTemplateContext = computed<GridEditTemplateContext>(() => ({
         cancel: (): void => this.cancel.emit(),
@@ -72,7 +72,9 @@ export class GridEditorComponent {
         value: this.formField()().value()
     }));
     protected readonly editorInputClass = computed(() => {
-        return gridCellEditorInputThemeVariants();
+        return gridCellEditorInputThemeVariants({
+            virtual: this.#gridService?.virtualScrollOptions().enabled ?? false
+        });
     });
     protected readonly fieldErrorMessage = computed(() => {
         const [firstError] = this.formField()().errors();

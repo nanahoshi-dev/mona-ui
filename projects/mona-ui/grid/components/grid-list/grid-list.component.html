@@ -76,7 +76,7 @@
                             [section]="'body'"
                             [style.width.px]="gridService.detailColumnWidth"
                             [attr.colspan]="1">
-                            <span class="flex h-full w-full items-stretch justify-center">
+                            <span class="flex min-h-9 w-full items-center justify-center">
                                 <mona-grid-toggle
                                     [expanded]="gridRow.expanded()"
                                     [type]="'detail'"
@@ -125,10 +125,7 @@
                             [rowUid]="row.uid"
                             [section]="'body'"
                             [firstInRow]="colIndex === gridService.leadingLogicalColumnCount()"
-                            [lastInRow]="
-                                colIndex ===
-                                gridService.leadingLogicalColumnCount() + columns().length - 1
-                            "
+                            [lastInRow]="colIndex === gridService.leadingLogicalColumnCount() + columns().length - 1"
                             [attr.colspan]="1"
                             [style.width.px]="column.calculatedWidth"
                             [style.min-width.px]="column.minWidth"
@@ -145,7 +142,9 @@
                     <ng-template cdkDragPreview>
                         <div [class]="rowDragPreviewClass()">
                             <i aria-hidden="true" class="ri-draggable"></i>
-                            <span>{{ gridService.getRowReorderAriaLabel(row, rowIndex + gridService.paginationState().skip) }}</span>
+                            <span>{{
+                                gridService.getRowReorderAriaLabel(row, rowIndex + gridService.paginationState().skip)
+                            }}</span>
                         </div>
                     </ng-template>
                     <ng-template cdkDragPlaceholder>
@@ -153,7 +152,9 @@
                             <td
                                 [attr.colspan]="gridService.leadingStructuralColumnCount() + columns().length"
                                 class="h-9 px-2">
-                                <span class="flex items-center text-xs text-muted-foreground">{{ gridService.messages().moveRow }}</span>
+                                <span class="flex items-center text-xs text-muted-foreground">{{
+                                    gridService.messages().moveRow
+                                }}</span>
                             </td>
                         </tr>
                     </ng-template>
@@ -249,7 +250,7 @@
                             [groupKey]="viewRow.groupKey"
                             (toggle)="onGroupExpandChange(viewRow.groupKey)"
                             [attr.colspan]="colspan">
-                            <p class="flex h-full items-center text-sm whitespace-nowrap">
+                            <p class="flex min-h-9 items-center text-sm whitespace-nowrap">
                                 <mona-grid-toggle
                                     [expanded]="!isCollapsed"
                                     [width]="gridService.groupColumnWidth"
@@ -367,7 +368,7 @@
                                 [firstInRow]="gridService.structuralColIndexMap().get('detail') === 0"
                                 [lastInRow]="columns().length === 0 && gridService.structuralLastKind() === 'detail'"
                                 [style.width.px]="gridService.detailColumnWidth">
-                                <span class="flex h-full w-full items-stretch justify-center">
+                                <span class="flex min-h-9 w-full items-center justify-center">
                                     <mona-grid-toggle
                                         [expanded]="gridRow.expanded()"
                                         [type]="'detail'"
@@ -419,8 +420,7 @@
                                 "
                                 [firstInRow]="colIndex === gridService.leadingLogicalColumnCount()"
                                 [lastInRow]="
-                                    colIndex ===
-                                    gridService.leadingLogicalColumnCount() + columns().length - 1
+                                    colIndex === gridService.leadingLogicalColumnCount() + columns().length - 1
                                 "
                                 [rowIndex]="rowIndex"
                                 [rowUid]="viewRow.row.uid"
