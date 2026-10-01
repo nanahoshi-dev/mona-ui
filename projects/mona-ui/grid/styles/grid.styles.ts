@@ -2,7 +2,7 @@ import { cva } from "class-variance-authority";
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
 
-const gridRowHeightClass = "h-9";
+const gridRowMinHeightClass = "min-h-9";
 
 export const gridBaseThemeVariants = cva(
     `
@@ -23,29 +23,37 @@ export const gridBaseThemeVariants = cva(
     }
 );
 
-export const gridCellBaseThemeVariants = cva(
-    `
-        absolute inset-0
-        flex w-full
-    `
-);
+export const gridCellBaseThemeVariants = cva("flex w-full min-w-0", {
+    variants: {
+        virtual: {
+            true: "absolute inset-0 overflow-hidden",
+            false: `relative ${gridRowMinHeightClass}`
+        }
+    },
+    defaultVariants: { virtual: false }
+});
 
 export const gridCellContainerThemeVariants = cva(
     `
-        flex h-full w-full items-center
+        flex w-full min-w-0 items-center
         flex-1 outline-none
-        overflow-hidden
     `,
     {
         variants: {
+            virtual: {
+                true: "h-full overflow-hidden",
+                false: gridRowMinHeightClass
+            },
             editing: {
                 true: "px-0",
                 false: "px-2"
             }
         },
         defaultVariants: {
-            editing: false
-        }
+            editing: false,
+            virtual: false
+        },
+        compoundVariants: [{ virtual: false, editing: false, class: "py-1" }]
     }
 );
 
@@ -56,16 +64,28 @@ export const gridCellDirtyIndicatorThemeVariants = cva(`
     pointer-events-none
 `);
 
-export const gridCellEditorBaseThemeVariants = cva(`
-    flex h-full w-full items-center
+export const gridCellEditorBaseThemeVariants = cva(
+    `
+    flex w-full min-w-0 items-center
     bg-input-background border border-focus-indicator/40
-`);
+`,
+    {
+        variants: { virtual: { true: "h-full overflow-hidden", false: gridRowMinHeightClass } },
+        defaultVariants: { virtual: false }
+    }
+);
 
-export const gridCellEditorInputThemeVariants = cva(`
-    h-full w-full border-transparent
+export const gridCellEditorInputThemeVariants = cva(
+    `
+    w-full border-transparent
     data-[expanded='true']:border-focus-indicator
     data-[expanded='true']:focus-within:border-focus-indicator/40
-`);
+`,
+    {
+        variants: { virtual: { true: "h-full", false: "min-h-8" } },
+        defaultVariants: { virtual: false }
+    }
+);
 
 export const gridCellTextThemeVariants = cva(`
     truncate cursor-default select-none
@@ -75,9 +95,10 @@ export const gridSelectAllCellThemeVariants = cva(`
     absolute inset-0 flex h-full w-full items-center justify-center
 `);
 
-export const gridSelectionCellThemeVariants = cva(`
-    absolute inset-0 flex h-full w-full items-center justify-center
-`);
+export const gridSelectionCellThemeVariants = cva("flex w-full items-center justify-center", {
+    variants: { virtual: { true: "absolute inset-0 h-full", false: gridRowMinHeightClass } },
+    defaultVariants: { virtual: false }
+});
 
 export const gridColumnActionsThemeVariants = cva(`
     flex items-center justify-center
@@ -127,7 +148,7 @@ export const gridDetailIndentCellThemeVariants = cva(
 export const gridDetailRowThemeVariants = cva(``);
 
 export const gridRowReorderHandleThemeVariants = cva(`
-    flex h-full w-full items-center justify-center
+    flex min-h-9 w-full items-center justify-center
     cursor-grab select-none touch-none
     text-muted-foreground
     hover:text-foreground
@@ -274,20 +295,20 @@ export const gridListTableRowThemeVariants = cva(``, {
     variants: {
         selected: {
             true: `
-                    ${gridRowHeightClass}
                     bg-(--color-selected) text-(--color-selected-foreground) hover:bg-(--color-selected-active)
                 `,
-            false: `${gridRowHeightClass} bg-surface hover:bg-hover`
-        }
-    }
+            false: "bg-surface hover:bg-hover"
+        },
+        virtual: { true: "h-9", false: "" }
+    },
+    defaultVariants: { virtual: false }
 });
 
 export const gridListTableCellThemeVariants = cva(
     `
         relative
-        ${gridRowHeightClass}
         outline-none z-1
-        align-top
+        align-middle
         border-b border-b-border-subtle
         after:content-[''] after:block
         after:absolute after:inset-0 after:pointer-events-none
@@ -295,6 +316,7 @@ export const gridListTableCellThemeVariants = cva(
     `,
     {
         variants: {
+            virtual: { true: "h-9", false: "" },
             groupHeader: {
                 true: "",
                 false: ""
@@ -328,6 +350,7 @@ export const gridListTableCellThemeVariants = cva(
                 false: ""
             }
         },
+        defaultVariants: { virtual: false },
         compoundVariants: [
             {
                 grouped: false,
@@ -425,7 +448,7 @@ export type GridHeaderVariantInput = VariantInputs<GridHeaderVariantProps>;
 
 export type GridListTableCellVariantProps = VariantProps<typeof gridListTableCellThemeVariants>;
 
-export type GridListTableCellVariantInput = VariantInputs<GridListTableCellVariantProps>;
+export type GridListTableCellVariantInput = Omit<VariantInputs<GridListTableCellVariantProps>, "virtual">;
 
 type GridListTableRowVariantProps = VariantProps<typeof gridListTableRowThemeVariants>;
 
@@ -446,7 +469,7 @@ export type GridListVariantProps = VariantProps<typeof gridListBaseThemeVariants
 
 export type GridListVariantInput = Omit<GridListBaseVariantInput, "virtual"> &
     GridListTableVariantInput &
-    Omit<GridListTableRowVariantInput, "selected">;
+    Omit<GridListTableRowVariantInput, "selected" | "virtual">;
 
 export type GridVariantProps = GridBaseVariantProps &
     GridHeaderTableCellVariantProps &

@@ -23,7 +23,7 @@ import { GridService } from "../../services/grid.service";
         TooltipComponent
     ],
     host: {
-        class: "w-full"
+        class: "flex items-center w-full min-h-9"
     }
 })
 export class GridCommandCellComponent {

@@ -20,7 +20,7 @@ export class GridRowDirective {
     protected readonly ariaRowIndex = computed(() => this.index() + this.#gridService.paginationState().skip + 2);
     protected readonly baseClass = computed(() => {
         const selected = this.selected();
-        return gridListTableRowThemeVariants({ selected });
+        return gridListTableRowThemeVariants({ selected, virtual: this.#gridService.virtualScrollOptions().enabled });
     });
     protected readonly selectable = computed(() => this.#gridService.selectableOptions().enabled);
     public readonly expanded = computed(() => this.#gridService.isRowExpanded(this.row()));
