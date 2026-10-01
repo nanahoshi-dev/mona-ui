@@ -1,5 +1,6 @@
 import { computed, Directive, inject, input } from "@angular/core";
 import { Column } from "../models/Column";
+import { GridService } from "../services/grid.service";
 import { gridFooterTableCellThemeVariants } from "../styles/grid.styles";
 
 @Directive({
@@ -11,8 +12,14 @@ import { gridFooterTableCellThemeVariants } from "../styles/grid.styles";
     }
 })
 export class GridFooterTableCellDirective {
+    readonly #gridService = inject(GridService, { optional: true });
     protected readonly className = computed(() => {
-        return gridFooterTableCellThemeVariants();
+        return (
+            gridFooterTableCellThemeVariants() +
+            (this.#gridService?.virtualScrollOptions().enabled
+                ? " h-(--mona-grid-row-height) max-h-(--mona-grid-row-height) overflow-hidden py-0! align-middle"
+                : "")
+        );
     });
     protected readonly minWidth = computed(() => this.footerColumn()?.minWidth ?? this.footerCellMinWidth());
     protected readonly width = computed(() => this.footerColumn()?.calculatedWidth ?? this.footerCellWidth());
