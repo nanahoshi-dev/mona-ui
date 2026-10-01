@@ -91,6 +91,45 @@ describe("GridService", () => {
         expect(service).toBeTruthy();
     });
 
+    it("displays the supplied server page without local sorting, filtering, or double paging", () => {
+        service.setColumnDefinitions([createColumn({ field: "id" })]);
+        service.setRows(createRowData(10, i => ({ id: 10 - i })));
+        service.loadSorts([{ field: "id", dir: "asc" }]);
+        service.loadFilters([{ logic: "and", filters: [{ field: "id", operator: "eq", value: 1 }] }]);
+        service.setServerBindingEnabled(true);
+        service.setServerTotal(137);
+        service.setPageState({ skip: 40, take: 10 });
+        expect(
+            service
+                .viewPageRows()
+                .select(row => row.data["id"])
+                .toArray()
+        ).toEqual([10, 9, 8, 7, 6, 5, 4, 3, 2, 1]);
+        expect(service.pagerTotal()).toBe(137);
+        expect(service.viewRowCount()).toBe(10);
+        expect(service.paginationState()).toEqual({ page: 5, skip: 40, take: 10 });
+        service.setServerBindingEnabled(false);
+        service.setPageState({ skip: 0 });
+        expect(
+            service
+                .viewPageRows()
+                .select(row => row.data["id"])
+                .toArray()
+        ).toEqual([1]);
+        expect(service.pagerTotal()).toBe(1);
+    });
+
+    it("normalizes controlled skip and page size without requesting data", () => {
+        service.setServerBindingEnabled(true);
+        const events = vi.fn();
+        service.dataStateChange$.subscribe(events);
+        service.setServerSkip(40);
+        service.setPageState({ take: 20 });
+        expect(service.paginationState()).toEqual({ page: 3, skip: 40, take: 20 });
+        expect(events).not.toHaveBeenCalled();
+        expect(() => service.setPageState({ take: 0 })).toThrow("pageSize must be");
+    });
+
     describe("row identity", () => {
         it("uses deterministic row uids when a row key is provided", () => {
             service.setRows([{ id: 1, name: "Jane" }], "id");
@@ -124,7 +163,13 @@ describe("GridService", () => {
                     .toArray()
             );
 
-            service.setRows([{ id: 2, name: "John moved" }, { id: 1, name: "Jane moved" }], "id");
+            service.setRows(
+                [
+                    { id: 2, name: "John moved" },
+                    { id: 1, name: "Jane moved" }
+                ],
+                "id"
+            );
 
             const reordered = service.rows().toArray();
             expect(reordered.map(row => row.data["id"])).toEqual([2, 1]);
@@ -211,7 +256,13 @@ describe("GridService", () => {
 
     describe("expansion identity", () => {
         beforeEach(() => {
-            service.setRows([{ id: 1, name: "Jane" }, { id: 2, name: "John" }], "id");
+            service.setRows(
+                [
+                    { id: 1, name: "Jane" },
+                    { id: 2, name: "John" }
+                ],
+                "id"
+            );
         });
 
         it("keys expansion state by row uid instead of the selection key", () => {
@@ -238,7 +289,13 @@ describe("GridService", () => {
             service.setRowExpanded(second, true);
             const expandedUid = second.uid;
 
-            service.setRows([{ id: 2, name: "John" }, { id: 1, name: "Jane" }], "id");
+            service.setRows(
+                [
+                    { id: 2, name: "John" },
+                    { id: 1, name: "Jane" }
+                ],
+                "id"
+            );
 
             const reordered = service.rows().toArray();
             expect(reordered[0]?.uid).toBe(expandedUid);
@@ -843,7 +900,12 @@ describe("GridService", () => {
         });
 
         it("affects only the filtered view for view scope", () => {
-            service.setSelectableOptions({ enabled: true, mode: "multiple", showCheckboxes: true, selectAllScope: "view" });
+            service.setSelectableOptions({
+                enabled: true,
+                mode: "multiple",
+                showCheckboxes: true,
+                selectAllScope: "view"
+            });
             service.loadFilters([
                 {
                     logic: "and",
@@ -1014,9 +1076,7 @@ describe("GridService", () => {
 
         it("offsets structuralColumnOffset by an explicit group-prefix width, independent of the full group width", () => {
             service.setRowReorderableOptions({ enabled: true });
-            service.columns.set(
-                ImmutableList.create([createColumn({ field: "a" }), createColumn({ field: "b" })])
-            );
+            service.columns.set(ImmutableList.create([createColumn({ field: "a" }), createColumn({ field: "b" })]));
             service.addGroupColumn(service.columns().get(0));
             service.addGroupColumn(service.columns().get(1));
 

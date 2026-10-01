@@ -189,9 +189,7 @@
                             [firstInRow]="colIndex === gridService.leadingLogicalColumnCount()"
                             [lastInRow]="
                                 colIndex ===
-                                gridService.leadingLogicalColumnCount() +
-                                    gridService.visibleColumns().length -
-                                    1
+                                gridService.leadingLogicalColumnCount() + gridService.visibleColumns().length - 1
                             "
                             (toggle)="onColumnSort(column)"
                             [cdkDragData]="column"
@@ -460,7 +458,7 @@
                 class="border-0 border-t border-t-border rounded-ss-none rounded-se-none"
                 [skip]="gridService.paginationState().skip"
                 [pageSize]="gridService.paginationState().take"
-                [total]="gridService.viewRowCount()"
+                [total]="gridService.pagerTotal()"
                 [size]="'small'"
                 [rounded]="rounded()"
                 [pageInput]="true"
