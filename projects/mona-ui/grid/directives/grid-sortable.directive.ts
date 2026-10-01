@@ -53,31 +53,23 @@ export class GridSortableDirective {
     }
 
     private applyColumnSort(column: Column, sortDirection: SortDirection | null): void {
-        let appliedSorts = this.#gridService.appliedSorts();
-        if (this.#gridService.sortableOptions().mode === "single") {
-            this.#gridService
-                .columns()
-                .where(c => c.field !== column.field)
-                .forEach(c => {
-                    appliedSorts = appliedSorts.remove(c.field);
-                });
-        }
+        const sorts =
+            this.#gridService.sortableOptions().mode === "single" ? [] : this.#gridService.getSortDescriptors();
+        const index = sorts.findIndex(sort => sort.field === column.field);
         if (sortDirection != null) {
             const sortDescriptor: SortDescriptor = {
                 field: column.field,
                 dir: sortDirection
             };
-            appliedSorts = appliedSorts.put(column.field, { sort: sortDescriptor });
-        } else {
-            appliedSorts = appliedSorts.remove(column.field);
+            if (index < 0) {
+                sorts.push(sortDescriptor);
+            } else {
+                sorts[index] = sortDescriptor;
+            }
+        } else if (index >= 0) {
+            sorts.splice(index, 1);
         }
-        this.#gridService.appliedSorts.set(appliedSorts);
-        this.#gridService.loadSorts(
-            appliedSorts
-                .values()
-                .select(s => s.sort)
-                .toArray()
-        );
+        this.#gridService.loadSorts(sorts);
     }
 
     #setSubscriptions(): void {
@@ -98,12 +90,9 @@ export class GridSortableDirective {
                 nextSortDirection = "asc";
             }
             this.applyColumnSort(column, nextSortDirection);
-            const sortDescriptors = this.#gridService
-                .appliedSorts()
-                .values()
-                .select(s => s.sort)
-                .toArray();
+            const sortDescriptors = this.#gridService.getSortDescriptors();
             this.sort.set(sortDescriptors);
+            this.#gridService.requestDataStateChange({ resetPage: true });
         });
     }
 }

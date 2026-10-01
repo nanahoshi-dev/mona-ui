@@ -93,41 +93,6 @@ const GRID_STATE_VERSION = 1;
 @Injectable()
 export class GridService {
     readonly #anchorRowKey = signal<unknown>(null);
-    readonly #document = inject(DOCUMENT);
-    readonly #editContext = signal<GridEditContext | null>(null);
-    readonly #editSession = signal<GridEditSession | null>(null);
-    readonly #editSource = computed(() =>
-        this.rows()
-            .select<RowEditDataItem>(r => ({ $rowId: r.uid, ...r.data }))
-            .toImmutableList()
-    );
-    readonly #filterableOptions = signal<FilterableOptions>({ enabled: false, type: "menu" });
-    readonly #groupColumnIds = signal<ImmutableList<string>>(ImmutableList.create());
-    readonly #horizontalScrollLeft = signal(0);
-    readonly #i18n = inject(MonaI18nService);
-    readonly #injector = inject(Injector);
-    readonly #platformId = inject(PLATFORM_ID);
-    readonly #reorderableOptions = signal<ReorderableOptions>({ enabled: false });
-    readonly #resizableOptions = signal<ResizableOptions>({ enabled: false });
-    readonly #rowReorderableOptions = signal<RowReorderableOptions>({ enabled: false });
-    readonly #scrollbarGutterMeasurementSource = signal<"body" | "fallback">("fallback");
-    readonly #scrollbarGutterWidth = signal(0);
-    readonly #rowUidByData = new WeakMap<Record<PropertyKey, unknown>, string>();
-    readonly #serverBindingEnabled = signal(false);
-    readonly #serverTotal = signal(0);
-    readonly #serverLoading = signal(false);
-    public readonly serverBindingEnabled = this.#serverBindingEnabled.asReadonly();
-    public readonly serverTotal = this.#serverTotal.asReadonly();
-    public readonly serverLoading = this.#serverLoading.asReadonly();
-    public readonly dataStateChange$ = new Subject<GridDataState>();
-    readonly #rowUidByKeyObject = new WeakMap<object, string>();
-    readonly #textMeasureCache = new Map<string, number>();
-    public readonly addRowData = computed(() => {
-        const session = this.#editSession();
-        return session?.operation === "create" ? session.model() : null;
-    });
-    public readonly addRowVisible = computed(() => this.addRowData() != null);
-    public readonly add$ = new Subject<GridAddEvent>();
     // Counts how many *selected* keys fall inside the current selection scope, iterating the
     // (usually much smaller) selection rather than rescanning the whole scope on every toggle.
     readonly #bulkSelectionRowKeys = computed(() => {
@@ -150,10 +115,38 @@ export class GridService {
         }
         return count;
     });
-    public readonly allBulkSelectionRowsSelected = computed(() => {
-        const scopeSize = this.#bulkSelectionRowKeys().size;
-        return scopeSize > 0 && this.#bulkSelectionSelectedCount() === scopeSize;
+    readonly #document = inject(DOCUMENT);
+    readonly #editContext = signal<GridEditContext | null>(null);
+    readonly #editSession = signal<GridEditSession | null>(null);
+    readonly #editSource = computed(() =>
+        this.rows()
+            .select<RowEditDataItem>(r => ({ $rowId: r.uid, ...r.data }))
+            .toImmutableList()
+    );
+    readonly #filterableOptions = signal<FilterableOptions>({ enabled: false, type: "menu" });
+    readonly #groupColumnIds = signal<ImmutableList<string>>(ImmutableList.create());
+    readonly #horizontalScrollLeft = signal(0);
+    readonly #i18n = inject(MonaI18nService);
+    readonly #injector = inject(Injector);
+    readonly #platformId = inject(PLATFORM_ID);
+    readonly #reorderableOptions = signal<ReorderableOptions>({ enabled: false });
+    readonly #resizableOptions = signal<ResizableOptions>({ enabled: false });
+    readonly #rowReorderableOptions = signal<RowReorderableOptions>({ enabled: false });
+    readonly #rowUidByData = new WeakMap<Record<PropertyKey, unknown>, string>();
+    readonly #rowUidByKeyObject = new WeakMap<object, string>();
+    readonly #scrollbarGutterMeasurementSource = signal<"body" | "fallback">("fallback");
+    readonly #scrollbarGutterWidth = signal(0);
+    readonly #serverBindingEnabled = signal(false);
+    readonly #serverLoading = signal(false);
+    readonly #serverTotal = signal(0);
+    readonly #textMeasureCache = new Map<string, number>();
+    #dataStateEmissionPending = false;
+    public readonly add$ = new Subject<GridAddEvent>();
+    public readonly addRowData = computed(() => {
+        const session = this.#editSession();
+        return session?.operation === "create" ? session.model() : null;
     });
+    public readonly addRowVisible = computed(() => this.addRowData() != null);
     public readonly aggregateColumns = computed(() => {
         return this.visibleColumns()
             .where(column => column.kind === "data" && column.aggregate != null)
@@ -171,6 +164,10 @@ export class GridService {
             .select(row => row.data)
             .toArray()
     );
+    public readonly allBulkSelectionRowsSelected = computed(() => {
+        const scopeSize = this.#bulkSelectionRowKeys().size;
+        return scopeSize > 0 && this.#bulkSelectionSelectedCount() === scopeSize;
+    });
     public readonly appliedFilters = signal(ImmutableDictionary.create<string, ColumnFilterState>());
     public readonly appliedGroupSorts = signal(ImmutableDictionary.create<string, ColumnSortState>());
     public readonly appliedSorts = signal(ImmutableDictionary.create<string, ColumnSortState>());
@@ -183,8 +180,8 @@ export class GridService {
         }
         return this.viewRows();
     });
-    public readonly cellEdit$ = new Subject<CellEditEvent>();
     public readonly cancel$ = new Subject<GridCancelEvent>();
+    public readonly cellEdit$ = new Subject<CellEditEvent>();
     /** Set of currently collapsed group keys (global, shared by both paginated and virtual list). */
     public readonly collapsedGroupKeys = signal(ImmutableSet.create<string>());
     public readonly columnReorder$ = new Subject<ColumnReorderEvent>();
@@ -192,19 +189,22 @@ export class GridService {
     public readonly columnSort$ = new Subject<ColumnSortEvent>();
     public readonly columns = signal<ImmutableList<Column>>(ImmutableList.create());
     public readonly contextMenuItems = signal(ImmutableSet.create<PopupMenuItem>());
-    public readonly detailColumnWidth = 36;
+    public readonly dataStateChange$ = new Subject<GridDataState>();
     public readonly detailColumnOffset = computed(() =>
         this.structuralColumnOffset("detail", this.groupStructuralWidth())
     );
+    public readonly detailColumnWidth = 36;
     public readonly detailStructuralWidth = computed(() =>
         this.masterDetailTemplate() != null ? this.detailColumnWidth : 0
     );
+    public readonly draggingRowUid = signal<string | null>(null);
+    public readonly edit$ = new Subject<GridEditEvent>();
     public readonly editBaseDict = computed(() => {
         const pairs = this.#editSource().select(item => new KeyValuePair(item.$rowId, item));
         return ImmutableDictionary.create(pairs);
     });
     public readonly editContext = this.#editContext.asReadonly();
-    public readonly edit$ = new Subject<GridEditEvent>();
+    public readonly editSession = this.#editSession.asReadonly();
     public readonly editViewDict = computed(() => {
         const session = this.#editSession();
         if (session == null || session.operation !== "update" || session.rowUid == null) {
@@ -214,7 +214,6 @@ export class GridService {
         const pairs = [new KeyValuePair(item.$rowId, item)];
         return ImmutableDictionary.create(pairs);
     });
-    public readonly editSession = this.#editSession.asReadonly();
     public readonly editableOptions = signal<EditableOptions>({ enabled: false, mode: "cell" });
     public readonly editingRowUid = computed(() => this.#editContext()?.rowUid ?? null);
     public readonly expandedKeys = signal(ImmutableSet.create<string>());
@@ -252,13 +251,13 @@ export class GridService {
     });
     public readonly groupStructuralWidth = computed(() => this.groupColumns().length * this.groupColumnWidth);
     public readonly groupableOptions = signal<GroupableOptions>({ enabled: false, showFooter: false });
+    public readonly hasFooter = computed(() => this.aggregateColumns().any());
     public readonly hasLeftLockedColumns = computed(
         () =>
             this.rowReorderColumnVisible() ||
             this.selectionColumnVisible() ||
             this.visibleColumns().any(column => column.locked && column.lockedPosition === "left")
     );
-    public readonly hasFooter = computed(() => this.aggregateColumns().any());
     public readonly hasLiveScrollbarGutterWidth = computed(() => this.#scrollbarGutterMeasurementSource() === "body");
     public readonly headerTableElement = signal<HTMLTableElement | null>(null);
     public readonly horizontalScrollLeft = this.#horizontalScrollLeft.asReadonly();
@@ -275,6 +274,15 @@ export class GridService {
         const groupCount = this.groupColumns().length;
         return groupCount > 0 ? (groupCount - 1) * this.groupColumnWidth : null;
     });
+    public readonly leadingLogicalColumnCount = computed(() => this.visibleStructuralColumns().length);
+    public readonly leadingStructuralColumnCount = computed(
+        () => this.groupColumns().length + this.visibleStructuralColumns().length
+    );
+    public readonly leadingStructuralWidth = computed(
+        () =>
+            this.groupStructuralWidth() +
+            this.visibleStructuralColumns().reduce((total, column) => total + column.width, 0)
+    );
     public readonly leftLockedStructuralWidth = computed(() => {
         if (!this.hasLeftLockedColumns()) {
             return 0;
@@ -307,15 +315,6 @@ export class GridService {
         }
         return states;
     });
-    public readonly leadingStructuralWidth = computed(
-        () =>
-            this.groupStructuralWidth() +
-            this.visibleStructuralColumns().reduce((total, column) => total + column.width, 0)
-    );
-    public readonly leadingStructuralColumnCount = computed(
-        () => this.groupColumns().length + this.visibleStructuralColumns().length
-    );
-    public readonly leadingLogicalColumnCount = computed(() => this.visibleStructuralColumns().length);
     public readonly masterDetailEmptyCellWidth = computed(() => {
         return this.detailColumnWidth * (this.groupColumns().length + 1);
     });
@@ -327,6 +326,9 @@ export class GridService {
     public readonly masterDetailTemplate = signal<TemplateRef<unknown> | null>(null);
     public readonly messages = this.#i18n.componentMessages("grid", GRID_DEFAULT_MESSAGES);
     public readonly newRowFactory = signal<() => Record<PropertyKey, unknown>>(() => ({}));
+    public readonly pagerTotal = computed(() =>
+        this.serverBindingEnabled() ? this.serverTotal() : this.viewRowCount()
+    );
     public readonly paginationState = signal<PaginationState>({ page: 1, skip: 0, take: 10 });
     public readonly remove$ = new Subject<GridRemoveEvent>();
     public readonly reorderableOptions = this.#reorderableOptions.asReadonly();
@@ -371,7 +373,6 @@ export class GridService {
     public readonly rowReorderableOptions = this.#rowReorderableOptions.asReadonly();
     public readonly rows = signal<ImmutableList<Row>>(ImmutableList.create());
     public readonly save$ = new Subject<GridSaveEvent>();
-    public readonly draggingRowUid = signal<string | null>(null);
     public readonly scrollEnd$ = new Subject<void>();
     public readonly scrollEndThreshold = signal<number>(5);
     public readonly scrollbarGutterWidth = this.#scrollbarGutterWidth.asReadonly();
@@ -394,17 +395,20 @@ export class GridService {
             .where(row => selectedKeys.contains(this.getRowSelectionKey(row)))
             .toImmutableSet();
     });
-    public readonly selectionColumnWidth = 40;
+    public readonly selectionColumnOffset = computed(() =>
+        this.structuralColumnOffset("selection", this.groupStructuralWidth())
+    );
     public readonly selectionColumnVisible = computed(() => {
         const options = this.selectableOptions();
         return options.enabled === true && options.showCheckboxes === true;
     });
-    public readonly selectionColumnOffset = computed(() =>
-        this.structuralColumnOffset("selection", this.groupStructuralWidth())
-    );
+    public readonly selectionColumnWidth = 40;
     public readonly selectionStructuralWidth = computed(() =>
         this.selectionColumnVisible() ? this.selectionColumnWidth : 0
     );
+    public readonly serverBindingEnabled = this.#serverBindingEnabled.asReadonly();
+    public readonly serverLoading = this.#serverLoading.asReadonly();
+    public readonly serverTotal = this.#serverTotal.asReadonly();
 
     public readonly someBulkSelectionRowsSelected = computed(() => {
         const scopeSize = this.#bulkSelectionRowKeys().size;
@@ -457,9 +461,6 @@ export class GridService {
         return viewRows.skip(skip).take(take).toImmutableList();
     });
     public readonly viewRowCount = computed(() => this.viewRows().size());
-    public readonly pagerTotal = computed(() =>
-        this.serverBindingEnabled() ? this.serverTotal() : this.viewRowCount()
-    );
     public readonly viewRows = computed(() => {
         const rows = this.rows();
         if (this.serverBindingEnabled()) {
@@ -655,10 +656,10 @@ export class GridService {
                 .where(filter => filter != null)
                 .toArray(),
             group: this.getGroupDescriptors(this.groupColumns()),
-            sort: this.appliedSorts()
-                .values()
-                .select<GridStateSortDescriptor>(state => ({ dir: state.sort.dir, field: state.sort.field }))
-                .toArray(),
+            sort: this.getSortDescriptors().map<GridStateSortDescriptor>(sort => ({
+                dir: sort.dir,
+                field: sort.field
+            })),
             version: GRID_STATE_VERSION
         };
         if (options.schemaVersion != null) {
@@ -763,6 +764,21 @@ export class GridService {
         return this.normalizeRenderedWidth(column.calculatedWidth ?? column.width ?? column.minWidth ?? 0);
     }
 
+    public getDataState(): GridDataState {
+        const { skip, take } = this.paginationState();
+        return {
+            skip,
+            take,
+            sort: this.getSortDescriptors(),
+            filter: this.appliedFilters()
+                .values()
+                .select(state => state.filter)
+                .where(filter => filter != null)
+                .select(filter => this.cloneFilter(filter))
+                .toArray()
+        };
+    }
+
     public getGroupDescriptors(columns: Iterable<Column>): GroupDescriptor[] {
         return select(columns, c => ({
             field: c.field,
@@ -774,6 +790,20 @@ export class GridService {
         const options = this.rowReorderableOptions();
         const label = options.rowAriaLabel?.(row.data, absoluteIndex);
         return label ?? this.messages().reorderRow(absoluteIndex + 1);
+    }
+
+    /** Sort order shared by models, persistence, and server requests. */
+    public getSortDescriptors(): SortDescriptor[] {
+        const columns = this.columns().toArray();
+        return this.appliedSorts()
+            .values()
+            .toArray()
+            .sort(
+                (left, right) =>
+                    (columns.find(c => c.field === left.sort.field)?.sortIndex ?? Number.MAX_SAFE_INTEGER) -
+                    (columns.find(c => c.field === right.sort.field)?.sortIndex ?? Number.MAX_SAFE_INTEGER)
+            )
+            .map(state => ({ ...state.sort }));
     }
 
     public handleMultipleSelection(event: MouseEvent, row: Row): void {
@@ -978,6 +1008,25 @@ export class GridService {
         const event = new GridRemoveEvent({ originalEvent, rowData: row.data });
         this.remove$.next(event);
         return !event.isDefaultPrevented();
+    }
+
+    public requestDataStateChange(options: { readonly resetPage?: boolean } = {}): void {
+        if (!this.serverBindingEnabled()) {
+            return;
+        }
+        if (options.resetPage) {
+            this.setPageState({ skip: 0 });
+        }
+        if (this.#dataStateEmissionPending) {
+            return;
+        }
+        this.#dataStateEmissionPending = true;
+        queueMicrotask(() => {
+            this.#dataStateEmissionPending = false;
+            if (this.serverBindingEnabled()) {
+                this.dataStateChange$.next(this.getDataState());
+            }
+        });
     }
 
     public requestRowReorder(row: Row, previousPageIndex: number, currentPageIndex: number): boolean {
@@ -1191,30 +1240,6 @@ export class GridService {
         }
     }
 
-    public setServerBindingEnabled(enabled: boolean): void {
-        this.#serverBindingEnabled.set(enabled);
-    }
-
-    public setServerTotal(total: number): void {
-        this.validateServerInteger(total, "total");
-        this.#serverTotal.set(total);
-    }
-
-    public setServerSkip(skip: number): void {
-        this.validateServerInteger(skip, "skip");
-        this.setPageState({ skip, page: Math.floor(skip / this.paginationState().take) + 1 });
-    }
-
-    public setServerLoading(loading: boolean): void {
-        this.#serverLoading.set(loading);
-    }
-
-    private validateServerInteger(value: number, name: string): void {
-        if (!Number.isSafeInteger(value) || value < 0) {
-            throw new Error(`monaGridServerBinding: ${name} must be a finite non-negative integer.`);
-        }
-    }
-
     public setReorderableOptions(options: Partial<ReorderableOptions>): void {
         this.#reorderableOptions.update(v => ({ ...v, ...options }));
     }
@@ -1229,17 +1254,6 @@ export class GridService {
 
     public setRowReorderableOptions(options: RowReorderableOptions): void {
         this.#rowReorderableOptions.set(options);
-    }
-
-    public setRows(
-        value: Iterable<Record<PropertyKey, unknown>>,
-        rowKey: GridKeySelector<unknown> | null = null
-    ): void {
-        this.rows.set(ImmutableList.create(select(value, r => new Row(r, this.getRowUid(r, rowKey)))));
-    }
-
-    public setSelectableOptions(options: SelectableOptions): void {
-        this.selectableOptions.update(v => ({ ...v, ...options }));
     }
 
     public setRowSelected(row: Row, selected: boolean): void {
@@ -1258,12 +1272,41 @@ export class GridService {
         this.selectedKeys.update(keys => keys.remove(key));
     }
 
-    public setSortableOptions(options: Partial<SortableOptions>): void {
-        this.sortableOptions.update(v => ({ ...v, ...options }));
+    public setRows(
+        value: Iterable<Record<PropertyKey, unknown>>,
+        rowKey: GridKeySelector<unknown> | null = null
+    ): void {
+        this.rows.set(ImmutableList.create(select(value, r => new Row(r, this.getRowUid(r, rowKey)))));
     }
 
     public setScrollEndThreshold(threshold: number): void {
         this.scrollEndThreshold.set(threshold);
+    }
+
+    public setSelectableOptions(options: SelectableOptions): void {
+        this.selectableOptions.update(v => ({ ...v, ...options }));
+    }
+
+    public setServerBindingEnabled(enabled: boolean): void {
+        this.#serverBindingEnabled.set(enabled);
+    }
+
+    public setServerLoading(loading: boolean): void {
+        this.#serverLoading.set(loading);
+    }
+
+    public setServerSkip(skip: number): void {
+        this.validateServerInteger(skip, "skip");
+        this.setPageState({ skip, page: Math.floor(skip / this.paginationState().take) + 1 });
+    }
+
+    public setServerTotal(total: number): void {
+        this.validateServerInteger(total, "total");
+        this.#serverTotal.set(total);
+    }
+
+    public setSortableOptions(options: Partial<SortableOptions>): void {
+        this.sortableOptions.update(v => ({ ...v, ...options }));
     }
 
     public setVirtualScrollOptions(options: VirtualScrollOptions): void {
@@ -1462,6 +1505,37 @@ export class GridService {
         return parentKey != null ? `${parentKey}/${segment}` : segment;
     }
 
+    private clearEditSession(): void {
+        this.#editContext.set(null);
+        this.#editSession.set(null);
+    }
+
+    private cloneFilter(filter: CompositeFilterDescriptor): CompositeFilterDescriptor {
+        return {
+            ...filter,
+            filters: filter.filters.map(descriptor =>
+                "filters" in descriptor
+                    ? this.cloneFilter(descriptor)
+                    : "value" in descriptor
+                      ? ({ ...descriptor, value: this.cloneFilterValue(descriptor.value) } as FilterDescriptor)
+                      : { ...descriptor }
+            )
+        };
+    }
+
+    private cloneFilterValue(value: unknown): unknown {
+        if (value instanceof Date) {
+            return new Date(value.getTime());
+        }
+        if (Array.isArray(value)) {
+            return value.map(item => this.cloneFilterValue(item));
+        }
+        if (value != null && typeof value === "object") {
+            return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, this.cloneFilterValue(item)]));
+        }
+        return value;
+    }
+
     private compareComparableValues(
         left: boolean | number | bigint | string,
         right: boolean | number | bigint | string | null
@@ -1533,6 +1607,37 @@ export class GridService {
             e => e.key,
             e => e.value
         );
+    }
+
+    private createEditSession(options: GridEditSessionOptions): GridEditSession {
+        const model = signal<Record<PropertyKey, unknown>>({ ...options.rowData });
+        const context: GridEditFormContext = {
+            column: options.column,
+            field: options.field,
+            isNew: options.isNew,
+            mode: options.mode,
+            operation: options.operation,
+            originalRowData: options.originalRowData,
+            rowData: options.rowData
+        };
+        const schema = this.editableOptions().schema?.(context) ?? null;
+        const editForm =
+            schema == null
+                ? form(model, { injector: this.#injector })
+                : form(model, schema as SchemaOrSchemaFn<Record<PropertyKey, unknown>>, { injector: this.#injector });
+
+        return {
+            column: options.column,
+            field: options.field,
+            form: editForm,
+            isNew: options.isNew,
+            mode: options.mode,
+            model,
+            operation: options.operation,
+            originalRowData: options.originalRowData,
+            row: options.row,
+            rowUid: options.rowUid
+        };
     }
 
     private deserializeCompositeFilter(filter: GridStateCompositeFilterDescriptor): CompositeFilterDescriptor | null {
@@ -1701,6 +1806,10 @@ export class GridService {
         return [...leftLockedColumns, ...unlockedColumns, ...rightLockedColumns];
     }
 
+    private patchSessionField(session: GridEditSession, field: string, value: unknown): void {
+        session.model.update(rowData => ({ ...rowData, [field]: value }));
+    }
+
     private reconcileColumn(config: ColumnConfig, previous: Column | undefined): Column {
         const hidden =
             previous != null && previous.configuredHidden === config.hidden ? previous.hidden : config.hidden;
@@ -1716,6 +1825,22 @@ export class GridService {
             minWidth: config.minWidth,
             sortIndex: previous?.sortIndex ?? null
         };
+    }
+
+    private resolveEditedRowData(
+        rowUid: string,
+        fallbackRowData: Record<PropertyKey, unknown>
+    ): Record<PropertyKey, unknown> {
+        const editedRowData = this.editViewDict().get(rowUid);
+        if (editedRowData == null) {
+            return fallbackRowData;
+        }
+        const { $rowId: _rowId, ...rowData } = editedRowData;
+        return rowData;
+    }
+
+    private resolveSessionRowData(session: GridEditSession): Record<PropertyKey, unknown> {
+        return { ...session.form().value() };
     }
 
     // Range selection is scoped to bulkSelectionRows() (current page, or full view when virtualized/
@@ -1743,76 +1868,6 @@ export class GridService {
         const [start, end] = anchorIndex <= targetIndex ? [anchorIndex, targetIndex] : [targetIndex, anchorIndex];
         const rangeKeys = rows.slice(start, end + 1).map(r => this.getRowSelectionKey(r));
         this.selectedKeys.set(ImmutableSet.create(rangeKeys));
-    }
-
-    private clearEditSession(): void {
-        this.#editContext.set(null);
-        this.#editSession.set(null);
-    }
-
-    private createEditSession(options: GridEditSessionOptions): GridEditSession {
-        const model = signal<Record<PropertyKey, unknown>>({ ...options.rowData });
-        const context: GridEditFormContext = {
-            column: options.column,
-            field: options.field,
-            isNew: options.isNew,
-            mode: options.mode,
-            operation: options.operation,
-            originalRowData: options.originalRowData,
-            rowData: options.rowData
-        };
-        const schema = this.editableOptions().schema?.(context) ?? null;
-        const editForm =
-            schema == null
-                ? form(model, { injector: this.#injector })
-                : form(model, schema as SchemaOrSchemaFn<Record<PropertyKey, unknown>>, { injector: this.#injector });
-
-        return {
-            column: options.column,
-            field: options.field,
-            form: editForm,
-            isNew: options.isNew,
-            mode: options.mode,
-            model,
-            operation: options.operation,
-            originalRowData: options.originalRowData,
-            row: options.row,
-            rowUid: options.rowUid
-        };
-    }
-
-    private patchSessionField(session: GridEditSession, field: string, value: unknown): void {
-        session.model.update(rowData => ({ ...rowData, [field]: value }));
-    }
-
-    private resolveEditedRowData(
-        rowUid: string,
-        fallbackRowData: Record<PropertyKey, unknown>
-    ): Record<PropertyKey, unknown> {
-        const editedRowData = this.editViewDict().get(rowUid);
-        if (editedRowData == null) {
-            return fallbackRowData;
-        }
-        const { $rowId, ...rowData } = editedRowData;
-        return rowData;
-    }
-
-    private resolveSessionRowData(session: GridEditSession): Record<PropertyKey, unknown> {
-        return { ...session.form().value() };
-    }
-
-    private validateSessionForSave(session: GridEditSession): boolean {
-        const rootField = session.form();
-        const editedField = session.mode === "cell" && session.field != null ? session.form[session.field] : null;
-        if (editedField == null) {
-            rootField.markAsTouched();
-            return !rootField.invalid() && !rootField.pending();
-        }
-        // A cell edit can only fix its own field. Row-level errors still block the save, but an invalid
-        // sibling field must not trap the user in a cell whose own value is valid.
-        const field = editedField();
-        field.markAsTouched();
-        return !field.invalid() && !field.pending() && rootField.errors().length === 0;
     }
 
     private serializeFilter(
@@ -1954,6 +2009,26 @@ export class GridService {
         this.columns.update(columns =>
             ImmutableList.create(this.applyColumnIndexes(columns.select(updater).toArray()))
         );
+    }
+
+    private validateServerInteger(value: number, name: string): void {
+        if (!Number.isSafeInteger(value) || value < 0) {
+            throw new Error(`monaGridServerBinding: ${name} must be a finite non-negative integer.`);
+        }
+    }
+
+    private validateSessionForSave(session: GridEditSession): boolean {
+        const rootField = session.form();
+        const editedField = session.mode === "cell" && session.field != null ? session.form[session.field] : null;
+        if (editedField == null) {
+            rootField.markAsTouched();
+            return !rootField.invalid() && !rootField.pending();
+        }
+        // A cell edit can only fix its own field. Row-level errors still block the save, but an invalid
+        // sibling field must not trap the user in a cell whose own value is valid.
+        const field = editedField();
+        field.markAsTouched();
+        return !field.invalid() && !field.pending() && rootField.errors().length === 0;
     }
 
     private withColumnIndices(columns: readonly Column[]): Column[] {
