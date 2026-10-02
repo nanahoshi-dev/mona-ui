@@ -1,6 +1,7 @@
 import { Clipboard } from "@angular/cdk/clipboard";
 import {
     afterNextRender,
+    afterEveryRender,
     afterRenderEffect,
     computed,
     DestroyRef,
@@ -9,7 +10,8 @@ import {
     inject,
     input,
     output,
-    signal
+    signal,
+    untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { filter, fromEvent } from "rxjs";
@@ -120,14 +122,20 @@ export class GridLogicalCellDirective {
     public constructor() {
         afterRenderEffect({
             read: () => {
-                const previousCellKey = this.#cellKey();
-                const nextCellKey = this.#gridNavigationService.registerCell(this.#cellData());
-                if (previousCellKey && previousCellKey !== nextCellKey) {
-                    this.#gridNavigationService.unregisterCell(previousCellKey);
-                }
-                this.#cellKey.set(nextCellKey);
-                this.#syncInnerFocusableTabIndexes();
+                const data = this.#cellData();
+                // Cached virtual views must not re-register in response to another view's registry writes.
+                untracked(() => {
+                    const previousCellKey = this.#cellKey();
+                    const nextCellKey = this.#gridNavigationService.registerCell(data);
+                    if (previousCellKey && previousCellKey !== nextCellKey) {
+                        this.#gridNavigationService.unregisterCell(previousCellKey, data.element);
+                    }
+                    this.#cellKey.set(nextCellKey);
+                });
             }
+        });
+        afterEveryRender({
+            mixedReadWrite: () => this.#syncInnerFocusableTabIndexes()
         });
         afterNextRender({
             read: () => {
@@ -140,7 +148,7 @@ export class GridLogicalCellDirective {
             if (!cellKey) {
                 return;
             }
-            this.#gridNavigationService.unregisterCell(cellKey);
+            this.#gridNavigationService.unregisterCell(cellKey, this.#hostElementRef.nativeElement);
         });
     }
 
@@ -377,7 +385,9 @@ export class GridLogicalCellDirective {
 
     #syncInnerFocusableTabIndexes(): void {
         for (const target of this.#getInnerFocusableTargets()) {
-            target.setAttribute("tabindex", "-1");
+            if (target.getAttribute("tabindex") !== "-1") {
+                target.setAttribute("tabindex", "-1");
+            }
         }
     }
 }

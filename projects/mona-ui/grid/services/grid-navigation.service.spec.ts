@@ -38,6 +38,19 @@ describe("GridNavigationService", () => {
         expect(service).toBeTruthy();
     });
 
+    it("keeps the current cell registered when a cached owner is removed", () => {
+        const cached = createData({ rowIndex: 0, colIndex: 0, rowUid: "row-1", columnId: "name" });
+        const current = createData({ rowIndex: 0, colIndex: 0, rowUid: "row-1", columnId: "name" });
+        const key = service.registerCell(cached);
+        expect(service.registerCell(current)).toBe(key);
+        service.unregisterCell(key, cached.element);
+        expect(service.focusActiveCellOrFirstHeader()).toBe(true);
+        expect(current.element.focus).toHaveBeenCalledTimes(1);
+        expect(cached.element.focus).not.toHaveBeenCalled();
+        service.unregisterCell(key, current.element);
+        expect(service.focusActiveCellOrFirstHeader()).toBe(false);
+    });
+
     describe("horizontal navigation", () => {
         it("moves focus to the next cell in the row on ArrowRight", () => {
             const first = createData({ rowIndex: 0, colIndex: 0, firstInRow: true });
