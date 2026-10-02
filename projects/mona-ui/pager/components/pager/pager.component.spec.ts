@@ -10,7 +10,12 @@ import { PagerNumericButtonsTemplateDirective } from "../../directives/pager-num
 import { PagerPageSizeTemplateDirective } from "../../directives/pager-page-size-template.directive";
 import type { PageChangeEvent } from "../../models/PageChangeEvent";
 import type { PageSizeChangeEvent } from "../../models/PageSizeChangeEvent";
-import { MONA_DEFAULT_LOCALE, MonaI18nService, type MonaLocale, normalizeLocalizedDigits } from "@nanahoshi/mona-ui/i18n";
+import {
+    MONA_DEFAULT_LOCALE,
+    MonaI18nService,
+    type MonaLocale,
+    normalizeLocalizedDigits
+} from "@nanahoshi/mona-ui/i18n";
 import { MONA_AR_SA_LOCALE } from "@nanahoshi/mona-ui/locales";
 import { pagerBaseThemeVariants, pagerInfoThemeVariants } from "../../styles/pager.styles";
 import { PagerComponent } from "./pager.component";
@@ -148,6 +153,46 @@ describe("PagerComponent", () => {
         fixture.detectChanges();
 
         expect(fixture.componentInstance).toBeTruthy();
+    });
+
+    describe("zero-result paging", () => {
+        beforeEach(() => {
+            fixture.componentRef.setInput("responsive", false);
+            setup(0, 10);
+        });
+
+        it("shows a zero range and disables every navigation control", () => {
+            expect(getInfoText()).toContain("0 - 0 of 0 items");
+            for (const label of ["First page", "Previous page", "Next page", "Last page"]) {
+                expect(getButtonByLabel(label).disabled).toBe(true);
+            }
+            expect(getRenderedPageLabels()).toEqual([]);
+        });
+
+        it.each(["numeric", "input"])("omits an impossible page input in %s mode", type => {
+            fixture.componentRef.setInput("type", type);
+            fixture.componentRef.setInput("pageInput", true);
+            fixture.detectChanges();
+            expect(fixture.debugElement.query(By.directive(NumericTextBoxComponent))).toBeNull();
+        });
+
+        it("keeps page-size selection usable and navigation silent", () => {
+            const events: PageChangeEvent[] = [];
+            const sizes: PageSizeChangeEvent[] = [];
+            fixture.componentInstance.pageChange.subscribe(event => events.push(event));
+            fixture.componentInstance.pageSizeChange.subscribe(event => sizes.push(event));
+            for (const label of ["First page", "Previous page", "Next page", "Last page"]) {
+                clickButton(label);
+            }
+            for (const key of ["Home", "End", "ArrowLeft", "ArrowRight", "PageUp", "PageDown"]) {
+                dispatchKeydown(fixture.nativeElement, key);
+            }
+            expect(events).toEqual([]);
+            triggerPageSizeChange(20);
+            expect(sizes).toHaveLength(1);
+            expect(events.every(event => event.page >= 1 && event.skip >= 0)).toBe(true);
+            expect(getInfoText()).toContain("0 - 0 of 0 items");
+        });
     });
 
     describe("numeric page window", () => {
@@ -558,6 +603,31 @@ describe("PagerComponent with info template", () => {
     `
 })
 class PagerNavigationTemplateHostComponent {}
+
+@Component({
+    imports: [PagerComponent, PagerNavigationButtonsTemplateDirective],
+    template: `<mona-pager [total]="0" [responsive]="false">
+        @for (type of types; track type) {
+            <ng-template monaPagerNavigationButtonsTemplate [type]="type" let-disabled="disabled">
+                <button [disabled]="disabled">{{ type }}</button>
+            </ng-template>
+        }
+    </mona-pager>`
+})
+class EmptyPagerNavigationHostComponent {
+    public readonly types = ["first", "previous", "next", "last"] as const;
+}
+
+describe("empty Pager navigation templates", () => {
+    it("passes disabled=true to all projected navigation contexts", () => {
+        TestBed.configureTestingModule({ imports: [EmptyPagerNavigationHostComponent] });
+        const fixture = TestBed.createComponent(EmptyPagerNavigationHostComponent);
+        fixture.detectChanges();
+        const buttons = Array.from(fixture.nativeElement.querySelectorAll("button")) as HTMLButtonElement[];
+        expect(buttons).toHaveLength(4);
+        expect(buttons.every(button => button.disabled)).toBe(true);
+    });
+});
 
 describe("PagerComponent with navigation button template", () => {
     let hostFixture: ComponentFixture<PagerNavigationTemplateHostComponent>;
@@ -1064,7 +1134,9 @@ describe("PagerComponent i18n and localization", () => {
             fixture.detectChanges();
             await fixture.whenStable();
 
-            const buttons = Array.from(fixture.nativeElement.querySelectorAll("ol > li > button")) as HTMLButtonElement[];
+            const buttons = Array.from(
+                fixture.nativeElement.querySelectorAll("ol > li > button")
+            ) as HTMLButtonElement[];
             const pageButtonTexts = buttons.map(b => b.textContent?.trim());
             expect(pageButtonTexts).toContain("١");
             expect(pageButtonTexts).toContain("١٠");
@@ -1087,7 +1159,9 @@ describe("PagerComponent i18n and localization", () => {
             fixture.detectChanges();
             await fixture.whenStable();
 
-            const enButtons = Array.from(fixture.nativeElement.querySelectorAll("ol > li > button")) as HTMLButtonElement[];
+            const enButtons = Array.from(
+                fixture.nativeElement.querySelectorAll("ol > li > button")
+            ) as HTMLButtonElement[];
             const enTexts = enButtons.map(b => b.textContent?.trim());
             expect(enTexts).toContain("1");
             expect(enTexts).toContain("10");
@@ -1141,7 +1215,9 @@ describe("PagerComponent i18n and localization", () => {
             fixture.detectChanges();
             await fixture.whenStable();
 
-            const options = Array.from(document.body.querySelectorAll("li[role='option']")).map(el => el.textContent?.trim());
+            const options = Array.from(document.body.querySelectorAll("li[role='option']")).map(el =>
+                el.textContent?.trim()
+            );
             expect(options).toEqual(["٥", "١٠", "٢٠", "٥٠", "١٠٠"]);
 
             // Switch to en-US reactively
@@ -1150,11 +1226,10 @@ describe("PagerComponent i18n and localization", () => {
             await fixture.whenStable();
 
             expect(valueSpan?.textContent?.trim()).toBe("10 / page");
-            const enOptions = Array.from(document.body.querySelectorAll("li[role='option']")).map(el => el.textContent?.trim());
+            const enOptions = Array.from(document.body.querySelectorAll("li[role='option']")).map(el =>
+                el.textContent?.trim()
+            );
             expect(enOptions).toEqual(["5", "10", "20", "50", "100"]);
         });
     });
 });
-
-
-

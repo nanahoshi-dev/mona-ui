@@ -10,6 +10,8 @@ import { GridComponent } from "../components/grid/grid.component";
 import { GridFilterableDirective } from "../directives/grid-filterable.directive";
 import { GridServerBindingDirective } from "../directives/grid-server-binding.directive";
 import { GridSortableDirective } from "../directives/grid-sortable.directive";
+import { GridGroupableDirective } from "../directives/grid-groupable.directive";
+import type { GroupDescriptor } from "../models/GroupDescriptor";
 import { GridStatePersistenceDirective } from "../directives/grid-state-persistence.directive";
 import type { GridState } from "../models/GridState";
 import type { GridDataState } from "../models/GridDataState";
@@ -20,6 +22,7 @@ import type { GridDataState } from "../models/GridDataState";
         GridColumnComponent,
         GridServerBindingDirective,
         GridSortableDirective,
+        GridGroupableDirective,
         GridFilterableDirective,
         GridStatePersistenceDirective
     ],
@@ -34,6 +37,9 @@ import type { GridDataState } from "../models/GridDataState";
         [responsivePager]="false"
         [resizeMethod]="150"
         monaGridSortable
+        monaGridGroupable
+        [group]="group()"
+        (groupChange)="groupEvents.push($event)"
         [(sort)]="sort"
         (columnSort)="cancelSort && $event.preventDefault()"
         [monaGridFilterable]="{ enabled: true, type: 'row' }"
@@ -48,6 +54,8 @@ class HostComponent {
     public readonly data = signal([{ name: "Zoe" }, { name: "Ada" }]);
     public readonly events: GridDataState[] = [];
     public readonly filter = signal<CompositeFilterDescriptor[]>([]);
+    public readonly group = signal<GroupDescriptor[]>([]);
+    public readonly groupEvents: GroupDescriptor[][] = [];
     public readonly loading = signal(false);
     public readonly skip = signal(40);
     public readonly sort = signal<SortDescriptor[]>([]);
@@ -102,6 +110,59 @@ describe("server-bound grid interactions", () => {
         await settle();
         expect(host.events).toEqual([{ skip: 50, take: 10, sort: [], filter: [] }]);
         expect(names()).toEqual(["Zoe", "Ada"]);
+    });
+
+    it("orders loaded-page groups locally without remote requests", async () => {
+        host.data.set([{ name: "B" }, { name: "A" }, { name: "B" }, { name: "A" }]);
+        host.group.set([{ field: "name", dir: "asc" }]);
+        await settle();
+        const headers = () =>
+            Array.from(fixture.nativeElement.querySelectorAll("tr[aria-level] span.font-bold"), (span: Element) =>
+                span.textContent?.trim()
+            );
+        expect(headers()).toEqual(["Name: A", "Name: B"]);
+        expect(names()).toEqual(["A", "A", "B", "B"]);
+        host.groupEvents.length = 0;
+        element("mona-chip").click();
+        await settle();
+        expect(headers()).toEqual(["Name: B", "Name: A"]);
+        expect(names()).toEqual(["B", "B", "A", "A"]);
+        expect(host.groupEvents).toEqual([[{ field: "name", dir: "desc" }]]);
+        expect(host.events).toEqual([]);
+    });
+
+    it.each([false, true])("keeps an empty server pager safe while loading=%s", async loading => {
+        host.data.set([]);
+        host.total.set(0);
+        host.skip.set(0);
+        host.loading.set(loading);
+        await settle();
+        expect(element("mona-grid").getAttribute("aria-busy")).toBe(loading ? "true" : null);
+        expect(fixture.nativeElement.textContent.includes("No data")).toBe(!loading);
+        expect(element("mona-pager").textContent).toContain("0 - 0 of 0 items");
+        for (const label of ["First page", "Previous page", "Next page", "Last page"]) {
+            const button = element(`button[aria-label='${label}']`);
+            expect(button.hasAttribute("disabled")).toBe(true);
+            button.click();
+        }
+        await settle();
+        expect(host.events).toEqual([]);
+    });
+
+    it("does not request again when a filter response has zero records", async () => {
+        const filter: CompositeFilterDescriptor = {
+            logic: "and",
+            filters: [{ field: "name", operator: "eq", value: "Missing" }]
+        };
+        fixture.debugElement.query(By.directive(GridFilterRowCellComponent)).triggerEventHandler("apply", { filter });
+        await settle();
+        host.data.set([]);
+        host.total.set(0);
+        host.skip.set(0);
+        await settle();
+        expect(element("button[aria-label='Next page']").hasAttribute("disabled")).toBe(true);
+        expect(element("button[aria-label='Last page']").hasAttribute("disabled")).toBe(true);
+        expect(host.events).toEqual([{ skip: 0, take: 10, sort: [], filter: [filter] }]);
     });
 
     it("requests one final first-page state after page-size selection", async () => {
