@@ -236,9 +236,9 @@
                                         ) {
                                             <div class="inline-flex shrink-0 items-center gap-0.5">
                                                 @if (column.columnSortDirection === "asc") {
-                                                    <svg lucideArrowDown [size]="16" aria-hidden="true"></svg>
-                                                } @else {
                                                     <svg lucideArrowUp [size]="16" aria-hidden="true"></svg>
+                                                } @else {
+                                                    <svg lucideArrowDown [size]="16" aria-hidden="true"></svg>
                                                 }
                                                 @if (
                                                     gridService.sortableOptions().mode === "multiple" &&

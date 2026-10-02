@@ -57,6 +57,16 @@ describe("Grid header sorting", () => {
         return header(index).querySelector("[data-column-actions] span")?.textContent?.trim();
     }
 
+    it("shows an up arrow for ascending and a down arrow for descending sorting", async () => {
+        await clickTitle(0);
+        expect(header(0).querySelector("svg[lucideArrowUp]")).not.toBeNull();
+        expect(header(0).querySelector("svg[lucideArrowDown]")).toBeNull();
+
+        await clickTitle(0);
+        expect(header(0).querySelector("svg[lucideArrowDown]")).not.toBeNull();
+        expect(header(0).querySelector("svg[lucideArrowUp]")).toBeNull();
+    });
+
     it("shows descriptor priorities beside the sort icons in activation order", async () => {
         await clickTitle(1);
         await clickTitle(0);
