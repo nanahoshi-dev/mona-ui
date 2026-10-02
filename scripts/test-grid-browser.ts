@@ -45,6 +45,11 @@ async function main(): Promise<void> {
         const errors: string[] = [];
         await page.route("https://**", route => route.abort());
         page.on("pageerror", error => errors.push(error.message));
+        page.on("console", message => {
+            if (message.type() === "error" && /^(ERROR\b|RuntimeError\b)|NG0103/.test(message.text())) {
+                errors.push(message.text());
+            }
+        });
         await page.goto(`http://127.0.0.1:${(server.address() as AddressInfo).port}/browser-test/grid-geometry`, {
             waitUntil: "networkidle"
         });
@@ -161,6 +166,16 @@ async function main(): Promise<void> {
             await expect(rows.first()).toBeVisible();
             for (const row of await rows.all()) {
                 expect(Math.abs((await box(row)).height - height)).toBeLessThan(1);
+            }
+            if (id === "virtual-grouped") {
+                await grid.locator("cdk-virtual-scroll-viewport").evaluate(async element => {
+                    const maximum = element.scrollHeight - element.clientHeight;
+                    for (let step = 0; step < 60; step++) {
+                        element.scrollTop = (step * 170) % maximum;
+                        await new Promise<void>(resolveFrame => requestAnimationFrame(() => resolveFrame()));
+                    }
+                });
+                expect(errors).toEqual([]);
             }
             await grid.locator("cdk-virtual-scroll-viewport").evaluate(element => {
                 element.scrollTop = element.scrollHeight;
