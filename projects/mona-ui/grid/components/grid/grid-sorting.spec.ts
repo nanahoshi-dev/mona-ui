@@ -57,6 +57,14 @@ describe("Grid header sorting", () => {
         return header(index).querySelector("[data-column-actions] span")?.textContent?.trim();
     }
 
+    function headerCursor(index: number): string {
+        const wrapper = header(index).firstElementChild;
+        if (!(wrapper instanceof HTMLElement)) {
+            throw new Error("Missing column header wrapper");
+        }
+        return wrapper.style.cursor;
+    }
+
     it("shows an up arrow for ascending and a down arrow for descending sorting", async () => {
         await clickTitle(0);
         expect(header(0).querySelector("svg[lucideArrowUp]")).not.toBeNull();
@@ -65,6 +73,25 @@ describe("Grid header sorting", () => {
         await clickTitle(0);
         expect(header(0).querySelector("svg[lucideArrowDown]")).not.toBeNull();
         expect(header(0).querySelector("svg[lucideArrowUp]")).toBeNull();
+    });
+
+    it("omits sortable affordances on non-sortable headers and restores them when enabled", async () => {
+        expect(headerCursor(1)).toBe("pointer");
+        expect(header(1).getAttribute("aria-sort")).toBe("none");
+
+        fixture.componentInstance.ageSortable.set(false);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(headerCursor(1)).toBe("default");
+        expect(header(1).hasAttribute("aria-sort")).toBe(false);
+        expect(headerCursor(0)).toBe("pointer");
+        expect(header(0).getAttribute("aria-sort")).toBe("none");
+
+        fixture.componentInstance.ageSortable.set(true);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(headerCursor(1)).toBe("pointer");
+        expect(header(1).getAttribute("aria-sort")).toBe("none");
     });
 
     it("shows descriptor priorities beside the sort icons in activation order", async () => {
@@ -149,7 +176,6 @@ describe("Grid header sorting", () => {
         await fixture.whenStable();
         expect(fixture.componentInstance.sort()).toEqual([]);
         expect(fixture.componentInstance.onColumnSort).not.toHaveBeenCalled();
-
         fixture.componentInstance.ageSortable.set(true);
         fixture.detectChanges();
         await fixture.whenStable();
@@ -169,6 +195,8 @@ describe("Grid header sorting", () => {
         await fixture.whenStable();
         expect(fixture.componentInstance.sort()).toEqual([]);
         expect(fixture.componentInstance.onColumnSort).not.toHaveBeenCalled();
+        expect(headerCursor(0)).toBe("default");
+        expect(header(0).hasAttribute("aria-sort")).toBe(false);
     });
 
     it("preserves applied sorting when disabling header interaction on a column", async () => {
@@ -178,7 +206,8 @@ describe("Grid header sorting", () => {
         await fixture.whenStable();
         await clickTitle(1);
         expect(fixture.componentInstance.sort()).toEqual([{ field: "age", dir: "asc" }]);
-        expect(header(1).getAttribute("aria-sort")).toBe("ascending");
+        expect(header(1).hasAttribute("aria-sort")).toBe(false);
+        expect(headerCursor(1)).toBe("default");
         expect(priority(1)).toBe("1");
         expect(fixture.componentInstance.onColumnSort).toHaveBeenCalledTimes(1);
     });
