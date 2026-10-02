@@ -323,7 +323,7 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
                 },
                 showIndices: {
                     code: ``,
-                    active: false,
+                    active: true,
                     description: "Show indices for sorted columns",
                     name: "Show Indices"
                 }

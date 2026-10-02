@@ -199,7 +199,7 @@
                                     colIndex ===
                                     gridService.leadingLogicalColumnCount() + gridService.visibleColumns().length - 1
                                 "
-                                (toggle)="onColumnSort(column)"
+                                (toggleExpand)="onColumnSort(column)"
                                 [cdkDragData]="column"
                                 [cdkDragDisabled]="isColumnDragDisabled(column)"
                                 [class]="headerTableCellClass()"
@@ -231,13 +231,23 @@
                                     }
 
                                     <div [class]="columnActionsClass()" [attr.data-column-actions]="true">
-                                        @if (gridService.sortableOptions().showIndices && column.sortIndex !== null) {
-                                            <span>{{ column.sortIndex }}</span>
-                                        }
-                                        @if (column.columnSortDirection === "asc") {
-                                            <svg lucideArrowDown [size]="16" aria-hidden="true"></svg>
-                                        } @else if (column.columnSortDirection === "desc") {
-                                            <svg lucideArrowUp [size]="16" aria-hidden="true"></svg>
+                                        @if (
+                                            gridService.sortableOptions().enabled && column.columnSortDirection !== null
+                                        ) {
+                                            <div class="inline-flex shrink-0 items-center gap-0.5">
+                                                @if (column.columnSortDirection === "asc") {
+                                                    <svg lucideArrowDown [size]="16" aria-hidden="true"></svg>
+                                                } @else {
+                                                    <svg lucideArrowUp [size]="16" aria-hidden="true"></svg>
+                                                }
+                                                @if (
+                                                    gridService.sortableOptions().mode === "multiple" &&
+                                                    gridService.sortableOptions().showIndices &&
+                                                    column.sortIndex !== null
+                                                ) {
+                                                    <span class="tabular-nums">{{ column.sortIndex }}</span>
+                                                }
+                                            </div>
                                         }
                                         @if (filterMenuEnabled()) {
                                             @if (column.kind === "data" && column.filterable) {
