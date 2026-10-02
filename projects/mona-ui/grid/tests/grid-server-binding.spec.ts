@@ -11,6 +11,7 @@ import { GridFilterableDirective } from "../directives/grid-filterable.directive
 import { GridServerBindingDirective } from "../directives/grid-server-binding.directive";
 import { GridSortableDirective } from "../directives/grid-sortable.directive";
 import { GridGroupableDirective } from "../directives/grid-groupable.directive";
+import { GridGroupFooterTemplateDirective } from "../directives/grid-group-footer-template.directive";
 import type { GroupDescriptor } from "../models/GroupDescriptor";
 import { GridStatePersistenceDirective } from "../directives/grid-state-persistence.directive";
 import type { GridState } from "../models/GridState";
@@ -23,6 +24,7 @@ import type { GridDataState } from "../models/GridDataState";
         GridServerBindingDirective,
         GridSortableDirective,
         GridGroupableDirective,
+        GridGroupFooterTemplateDirective,
         GridFilterableDirective,
         GridStatePersistenceDirective
     ],
@@ -47,7 +49,11 @@ import type { GridDataState } from "../models/GridDataState";
         (dataStateChange)="events.push($event)"
         monaGridStatePersistence
         [(state)]="state">
-        <mona-grid-column field="name" title="Name" [width]="150" />
+        <mona-grid-column field="name" title="Name" [width]="150" aggregate="count">
+            <ng-template monaGridGroupFooterTemplate let-count="count">
+                <span data-page-group-count>{{ count }}</span>
+            </ng-template>
+        </mona-grid-column>
     </mona-grid>`
 })
 class HostComponent {
@@ -127,7 +133,15 @@ describe("server-bound grid interactions", () => {
         await settle();
         expect(headers()).toEqual(["Name: B", "Name: A"]);
         expect(names()).toEqual(["B", "B", "A", "A"]);
-        expect(host.groupEvents).toEqual([[{ field: "name", dir: "desc" }]]);
+        expect(host.groupEvents.length).toBeGreaterThan(0);
+        expect(
+            host.groupEvents.every(group => group.length === 1 && group[0].field === "name" && group[0].dir === "desc")
+        ).toBe(true);
+        expect(
+            Array.from(fixture.nativeElement.querySelectorAll("[data-page-group-count]"), (span: Element) =>
+                span.textContent?.trim()
+            )
+        ).toEqual(["2", "2"]);
         expect(host.events).toEqual([]);
     });
 

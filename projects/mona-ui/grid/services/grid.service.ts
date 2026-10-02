@@ -1,3 +1,4 @@
+import { compareGridComparableValues, toGridComparableValue } from "../utils/grid-comparable-value";
 import { isPlatformBrowser } from "@angular/common";
 import {
     computed,
@@ -1557,22 +1558,6 @@ export class GridService {
         return value;
     }
 
-    private compareComparableValues(
-        left: boolean | number | bigint | string,
-        right: boolean | number | bigint | string | null
-    ): number {
-        if (right == null) {
-            return 1;
-        }
-        if (left < right) {
-            return -1;
-        }
-        if (left > right) {
-            return 1;
-        }
-        return 0;
-    }
-
     private createAggregateBucket(rows: readonly Row[], column: Column): GridAggregateBucket {
         const field = column.field;
         if (column.aggregate === "custom" || column.aggregate == null) {
@@ -1597,15 +1582,15 @@ export class GridService {
                 continue;
             }
 
-            const comparableValue = this.toComparableValue(value);
+            const comparableValue = toGridComparableValue(value);
             if (comparableValue == null) {
                 continue;
             }
 
-            if (min == null || this.compareComparableValues(comparableValue, this.toComparableValue(min)) < 0) {
+            if (min == null || compareGridComparableValues(comparableValue, toGridComparableValue(min)) < 0) {
                 min = value;
             }
-            if (max == null || this.compareComparableValues(comparableValue, this.toComparableValue(max)) > 0) {
+            if (max == null || compareGridComparableValues(comparableValue, toGridComparableValue(max)) > 0) {
                 max = value;
             }
         }
@@ -2009,21 +1994,6 @@ export class GridService {
             resizeObserver.observe(bodyElement);
             onCleanup(() => resizeObserver.disconnect());
         });
-    }
-
-    private toComparableValue(value: unknown): boolean | number | bigint | string | null {
-        if (value instanceof Date) {
-            return value.getTime();
-        }
-        switch (typeof value) {
-            case "bigint":
-            case "boolean":
-            case "number":
-            case "string":
-                return value;
-            default:
-                return null;
-        }
     }
 
     private updateColumns(updater: (column: Column) => Column): void {

@@ -4,6 +4,7 @@ import type { Column } from "../models/Column";
 import type { GridGroupAggregate } from "../models/GridAggregate";
 import type { GridViewDataRow, GridViewGroupFooterRow, GridViewGroupRow, GridViewRow } from "../models/GridGroup";
 import type { Row } from "../models/Row";
+import { compareGridComparableValues, toGridComparableValue } from "../utils/grid-comparable-value";
 
 /**
  * A stateless service that groups and flattens rows into a linear `GridViewRow[]`
@@ -11,31 +12,6 @@ import type { Row } from "../models/Row";
  */
 @Injectable()
 export class GridRowFlattenerService {
-    /**
-     * Groups rows by the given columns and flattens them into a linear `GridViewRow[]`.
-     *
-     * @param rows - The source data rows.
-     * @param groupColumns - The ordered list of columns to group by.
-     * @param collapsedKeys - The set of group keys that are currently collapsed.
-     * @param groupAggregates - The dictionary of group aggregates.
-     * @returns A flat array of `GridViewRow` items.
-     */
-    public flatten(
-        rows: Iterable<Row>,
-        groupColumns: Iterable<Column>,
-        collapsedKeys: ReadonlySet<string>,
-        showFooter: boolean,
-        groupAggregates: Dictionary<string, GridGroupAggregate> = new Dictionary<string, GridGroupAggregate>()
-    ): GridViewRow[] {
-        const columnArray = [...groupColumns];
-        if (columnArray.length === 0) {
-            return [];
-        }
-        const result: GridViewRow[] = [];
-        this.#flattenRecursive([...rows], columnArray, groupAggregates, 0, null, collapsedKeys, showFooter, result);
-        return result;
-    }
-
     /**
      * Builds a deterministic, hierarchical group key.
      *
@@ -48,6 +24,43 @@ export class GridRowFlattenerService {
         return parentKey != null ? `${parentKey}/${segment}` : segment;
     }
 
+    /**
+     * Groups rows by the given columns and flattens them into a linear `GridViewRow[]`.
+     *
+     * @param rows - The source data rows.
+     * @param groupColumns - The ordered list of columns to group by.
+     * @param collapsedKeys - The set of group keys that are currently collapsed.
+     * @param groupAggregates - The dictionary of group aggregates.
+     * @param orderGroups - Orders buckets by direction. Disable for client rows already ordered by Query.
+     * @returns A flat array of `GridViewRow` items.
+     */
+    public flatten(
+        rows: Iterable<Row>,
+        groupColumns: Iterable<Column>,
+        collapsedKeys: ReadonlySet<string>,
+        showFooter: boolean,
+        groupAggregates: Dictionary<string, GridGroupAggregate> = new Dictionary<string, GridGroupAggregate>(),
+        orderGroups = true
+    ): GridViewRow[] {
+        const columnArray = [...groupColumns];
+        if (columnArray.length === 0) {
+            return [];
+        }
+        const result: GridViewRow[] = [];
+        this.#flattenRecursive(
+            [...rows],
+            columnArray,
+            groupAggregates,
+            0,
+            null,
+            collapsedKeys,
+            showFooter,
+            orderGroups,
+            result
+        );
+        return result;
+    }
+
     #flattenRecursive(
         rows: Row[],
         groupColumns: Column[],
@@ -56,6 +69,7 @@ export class GridRowFlattenerService {
         parentKey: string | null,
         collapsedKeys: ReadonlySet<string>,
         showFooter: boolean,
+        orderGroups: boolean,
         result: GridViewRow[]
     ): void {
         const column = groupColumns[depth];
@@ -78,7 +92,19 @@ export class GridRowFlattenerService {
             groupMap.get(mapKey)!.push(row);
         }
 
-        for (const mapKey of keyOrder) {
+        const entries = keyOrder.map((mapKey, index) => ({ mapKey, index, rows: groupMap.get(mapKey)! }));
+        const direction = column.groupSortDirection;
+        if (orderGroups && direction != null) {
+            entries.sort((left, right) => {
+                const comparison = compareGridComparableValues(
+                    toGridComparableValue(left.rows[0].data[field]),
+                    toGridComparableValue(right.rows[0].data[field])
+                );
+                return (direction === "asc" ? comparison : -comparison) || left.index - right.index;
+            });
+        }
+
+        for (const { mapKey } of entries) {
             const groupRows = groupMap.get(mapKey)!;
             const groupValue = groupRows[0].data[field];
             const groupKey = this.buildGroupKey(parentKey, field, groupValue);
@@ -105,6 +131,7 @@ export class GridRowFlattenerService {
                         groupKey,
                         collapsedKeys,
                         showFooter,
+                        orderGroups,
                         result
                     );
                 } else {
@@ -132,3 +159,4 @@ export class GridRowFlattenerService {
         }
     }
 }
+

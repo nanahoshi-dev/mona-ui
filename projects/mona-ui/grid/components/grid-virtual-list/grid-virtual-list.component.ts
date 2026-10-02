@@ -108,7 +108,14 @@ export class GridVirtualListComponent {
             e => e.value
         );
         const showFooter = this.gridService.groupableOptions().showFooter;
-        return this.#rowFlattener.flatten(this.data(), groupColumns, collapsedKeys, showFooter, groupAggregateDict);
+        return this.#rowFlattener.flatten(
+            this.data(),
+            groupColumns,
+            collapsedKeys,
+            showFooter,
+            groupAggregateDict,
+            this.gridService.serverBindingEnabled()
+        );
     });
     protected readonly footerClass = computed(() => {
         return gridFooterThemeVariants();
