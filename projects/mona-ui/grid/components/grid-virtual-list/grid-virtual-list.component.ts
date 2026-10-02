@@ -1,3 +1,4 @@
+import { GRID_DEFAULT_VIRTUAL_ROW_HEIGHT } from "../../constants/grid-virtual-scroll.constants";
 import { CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport } from "@angular/cdk/scrolling";
 import { NgTemplateOutlet } from "@angular/common";
 import {
@@ -225,7 +226,7 @@ export class GridVirtualListComponent {
         const viewport = this.viewport();
         viewport.scrolledIndexChange.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             const bottomOffset = viewport.measureScrollOffset("bottom");
-            const itemHeight = this.gridService.virtualScrollOptions().height ?? 32;
+            const itemHeight = this.gridService.virtualScrollOptions().height ?? GRID_DEFAULT_VIRTUAL_ROW_HEIGHT;
             const threshold = this.gridService.scrollEndThreshold();
             if (bottomOffset <= threshold * itemHeight) {
                 this.gridService.scrollEnd$.next();

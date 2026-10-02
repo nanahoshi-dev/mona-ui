@@ -1,3 +1,4 @@
+import { GRID_DEFAULT_VIRTUAL_ROW_HEIGHT } from "../constants/grid-virtual-scroll.constants";
 import { CdkFixedSizeVirtualScroll } from "@angular/cdk/scrolling";
 import { Component, signal } from "@angular/core";
 import { DeferBlockState, TestBed } from "@angular/core/testing";
@@ -28,11 +29,12 @@ describe("GridVirtualScrollDirective", () => {
     });
     it("should create an instance", () => {
         expect(directive).toBeTruthy();
+        expect(TestBed.inject(GridService).virtualScrollOptions().height).toBe(GRID_DEFAULT_VIRTUAL_ROW_HEIGHT);
     });
 
     it.each([36, 48])("uses %spx for both CDK item size and rendered row sizing", async height => {
         const fixture = TestBed.createComponent(HostComponent);
-        if (height !== 36) {
+        if (height !== GRID_DEFAULT_VIRTUAL_ROW_HEIGHT) {
             fixture.componentInstance.options.set({ enabled: true, height });
         }
         fixture.detectChanges();
