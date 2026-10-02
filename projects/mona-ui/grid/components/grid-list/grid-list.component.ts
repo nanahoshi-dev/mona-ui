@@ -96,7 +96,14 @@ export class GridListComponent implements GridListVariantInput {
             e => e.value
         );
         const showFooter = this.gridService.groupableOptions().showFooter;
-        return this.#rowFlattener.flatten(this.data(), groupColumns, collapsedKeys, showFooter, groupAggregateDict);
+        return this.#rowFlattener.flatten(
+            this.data(),
+            groupColumns,
+            collapsedKeys,
+            showFooter,
+            groupAggregateDict,
+            this.gridService.serverBindingEnabled()
+        );
     });
     protected readonly footerTableRowClass = computed(() => {
         return gridFooterTableRowThemeVariants();

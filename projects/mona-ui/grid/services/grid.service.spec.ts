@@ -7,6 +7,7 @@ import type { GridEditSchemaFactory } from "../models/GridEditFormContext";
 import type { GridEditSession } from "../models/GridEditSession";
 import type { GridSaveEvent } from "../models/GridSaveEvent";
 import { GridService } from "./grid.service";
+import { GridRowFlattenerService } from "./grid-row-flattener.service";
 
 function createColumn(overrides: Partial<Column> & Pick<Column, "field">): Column {
     return {
@@ -525,6 +526,43 @@ describe("GridService", () => {
                     .select(c => c.field)
                     .toArray()
             ).toEqual(["team"]);
+        });
+
+        it("retains client nested grouping, ordinary sorting and filtering", () => {
+            service.setColumnDefinitions([
+                createColumn({ field: "team" }),
+                createColumn({ field: "name" }),
+                createColumn({ field: "id" })
+            ]);
+            service.setRows([
+                { team: "B", name: "Z", id: 1 },
+                { team: "A", name: "Z", id: 2 },
+                { team: "A", name: "A", id: 3 },
+                { team: "B", name: "A", id: 4 },
+                { team: "A", name: "Z", id: 5 }
+            ]);
+            service.loadGroupColumns([
+                { field: "team", dir: "asc" },
+                { field: "name", dir: "desc" }
+            ]);
+            service.loadSorts([{ field: "id", dir: "desc" }]);
+            service.loadFilters([{ logic: "and", filters: [{ field: "id", operator: "gte", value: 2 }] }]);
+            const result = new GridRowFlattenerService().flatten(
+                service.viewRows(),
+                service.groupColumns(),
+                new Set(),
+                false,
+                undefined,
+                false
+            );
+            expect(result.filter(row => row.type === "group").map(row => row.groupValue)).toEqual([
+                "A",
+                "Z",
+                "A",
+                "B",
+                "A"
+            ]);
+            expect(result.filter(row => row.type === "data").map(row => row.row.data["id"])).toEqual([5, 2, 3, 4]);
         });
 
         it("does not add a group column twice", () => {
