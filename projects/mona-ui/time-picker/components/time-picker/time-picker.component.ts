@@ -20,6 +20,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
+import { LucideClock } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import { HourFormat } from "@nanahoshi/mona-ui/date-input";
@@ -61,7 +62,14 @@ import {
             multi: false
         }
     ],
-    imports: [ButtonDirective, TimeSelectorComponent, TextBoxComponent, TextBoxSuffixTemplateDirective, CdkTrapFocus],
+    imports: [
+        LucideClock,
+        ButtonDirective,
+        TimeSelectorComponent,
+        TextBoxComponent,
+        TextBoxSuffixTemplateDirective,
+        CdkTrapFocus
+    ],
     hostDirectives: [DropdownPopupHandlerDirective],
     host: {
         "[attr.tabindex]": "disabled() ? null : -1",

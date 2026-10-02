@@ -23,8 +23,13 @@
             (keydown)="onPaletteContainerKeyDown($event)">
             @if (showClearButton()) {
                 <div class="flex items-center justify-end p-1">
-                    <button monaButton look="ghost" size="small" [attr.aria-label]="messages().clearColor" (click)="onClearClick()">
-                        <i class="ri-blur-off-line"></i>
+                    <button
+                        monaButton
+                        look="ghost"
+                        size="small"
+                        [attr.aria-label]="messages().clearColor"
+                        (click)="onClearClick()">
+                        <svg lucideDropletOff [size]="16" aria-hidden="true"></svg>
                     </button>
                 </div>
             }

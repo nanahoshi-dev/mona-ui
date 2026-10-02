@@ -17,7 +17,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
-import { LucideCircleX } from "@lucide/angular";
+import { LucideCircleX, LucideDropletOff } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ColorGradientComponent } from "@nanahoshi/mona-ui/color-gradient";
 import { ColorPaletteComponent } from "@nanahoshi/mona-ui/color-palette";
@@ -42,6 +42,7 @@ import {
     selector: "mona-color-picker",
     templateUrl: "./color-picker.component.html",
     imports: [
+        LucideDropletOff,
         ButtonDirective,
         ColorPaletteComponent,
         ColorGradientComponent,

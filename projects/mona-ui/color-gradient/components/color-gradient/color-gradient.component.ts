@@ -20,7 +20,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
-import { LucideCopy } from "@lucide/angular";
+import { LucideChevronsUpDown, LucideCopy, LucideDropletOff } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import {
     Channel,
@@ -70,6 +70,8 @@ import {
     selector: "mona-color-gradient",
     templateUrl: "./color-gradient.component.html",
     imports: [
+        LucideDropletOff,
+        LucideChevronsUpDown,
         NumericTextBoxComponent,
         NumericTextBoxPrefixTemplateDirective,
         ButtonDirective,

@@ -56,7 +56,7 @@
             (keydown)="onPreviousColorKeyDown($event, preview.onClick)"></div>
     }
     <button monaButton look="ghost" size="small" [attr.aria-label]="messages().clearColor" (click)="onClearClick()">
-        <i class="ri-blur-off-line"></i>
+        <svg lucideDropletOff [size]="16" aria-hidden="true"></svg>
     </button>
 </div>
 <div class="flex flex-col gap-2">
@@ -92,7 +92,7 @@
                     size="small"
                     [attr.aria-label]="messages().switchColorMode"
                     (click)="onSwitchColorModeClick()">
-                    <i class="ri-expand-up-down-line"></i>
+                    <svg lucideChevronsUpDown [size]="16" aria-hidden="true"></svg>
                 </button>
             </div>
         </div>
