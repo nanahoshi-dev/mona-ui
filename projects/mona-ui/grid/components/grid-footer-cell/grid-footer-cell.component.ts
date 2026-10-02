@@ -31,7 +31,10 @@ interface GridGroupFooterTemplateContext extends GridFooterTemplateContext {
         }
     `,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgTemplateOutlet]
+    imports: [NgTemplateOutlet],
+    host: {
+        class: "flex items-center h-full"
+    }
 })
 export class GridFooterCellComponent {
     readonly #gridService = inject(GridService);
