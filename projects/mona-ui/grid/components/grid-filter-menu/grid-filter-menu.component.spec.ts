@@ -37,6 +37,7 @@ function createColumn(): Column {
         maxWidth: null,
         minWidth: 10,
         removeConfirmation: false,
+        sortable: true,
         sortIndex: null,
         stateKey: null,
         title: "Test",

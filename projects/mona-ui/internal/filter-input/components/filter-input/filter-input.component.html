@@ -10,7 +10,7 @@
     (ngModelChange)="filter$.next($event)">
     <ng-template monaTextBoxPrefixTemplate>
         <div class="h-full flex items-center justify-center ps-2">
-            <i class="ri-search-line"></i>
+            <svg lucideSearch [size]="16" aria-hidden="true"></svg>
         </div>
     </ng-template>
 </mona-text-box>

@@ -35,15 +35,17 @@
                         [class]="nodeExpanderClass()"
                         [class.mona-disabled]="nodeComponent.disabled()"
                         [attr.aria-label]="
-                            (nodeComponent.expanded() ? messages().collapse : messages().expand) + ' ' + nodeComponent.nodeText()
+                            (nodeComponent.expanded() ? messages().collapse : messages().expand) +
+                            ' ' +
+                            nodeComponent.nodeText()
                         "
                         (click)="onExpandStateChange(node)">
                         @if (node.loading()) {
-                            <i class="ri-loader-2-line"></i>
+                            <svg lucideLoaderCircle [size]="16" aria-hidden="true" class="animate-spin"></svg>
                         } @else if (nodeComponent.expanded()) {
-                            <i class="ri-arrow-down-s-fill"></i>
+                            <svg lucideChevronDown [size]="16" aria-hidden="true"></svg>
                         } @else {
-                            <i class="ri-arrow-right-s-fill rtl:rotate-180"></i>
+                            <svg lucideChevronRight [size]="16" aria-hidden="true" class="rtl:rotate-180"></svg>
                         }
                     </button>
                 }
@@ -75,23 +77,23 @@
                         @switch (treeService.dropPositionSignal()?.position) {
                             @case ("before") {
                                 @if (treeService.dropAllowed()) {
-                                    <i class="ri-arrow-up-line"></i>
+                                    <svg lucideArrowUp [size]="16" aria-hidden="true"></svg>
                                 } @else {
-                                    <i class="ri-prohibited-2-line"></i>
+                                    <svg lucideBan [size]="16" aria-hidden="true"></svg>
                                 }
                             }
                             @case ("after") {
                                 @if (treeService.dropAllowed()) {
-                                    <i class="ri-arrow-down-line"></i>
+                                    <svg lucideArrowDown [size]="16" aria-hidden="true"></svg>
                                 } @else {
-                                    <i class="ri-prohibited-2-line"></i>
+                                    <svg lucideBan [size]="16" aria-hidden="true"></svg>
                                 }
                             }
                             @case ("inside") {
-                                <i class="ri-add-line"></i>
+                                <svg lucidePlus [size]="16" aria-hidden="true"></svg>
                             }
                             @default {
-                                <i class="ri-prohibited-2-line"></i>
+                                <svg lucideBan [size]="16" aria-hidden="true"></svg>
                             }
                         }
                     </span>

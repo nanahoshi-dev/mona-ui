@@ -1,4 +1,5 @@
 import { LiveAnnouncer } from "@angular/cdk/a11y";
+import { LucideGripVertical } from "@lucide/angular";
 import { CdkDragHandle } from "@angular/cdk/drag-drop";
 import { Component, computed, inject, input } from "@angular/core";
 import type { Row } from "../../models/Row";
@@ -8,7 +9,7 @@ import { gridRowReorderHandleThemeVariants } from "../../styles/grid.styles";
 @Component({
     selector: "mona-grid-row-reorder-handle",
     templateUrl: "./grid-row-reorder-handle.component.html",
-    imports: [CdkDragHandle],
+    imports: [LucideGripVertical, CdkDragHandle],
     host: {
         "(click)": "$event.stopPropagation()",
         "(contextmenu)": "$event.stopPropagation()",
@@ -79,9 +80,7 @@ export class GridRowReorderHandleComponent {
             const skip = this.#gridService.paginationState().skip;
             const fromRowNumber = skip + this.pageIndex() + 1;
             const toPosition = skip + targetIndex + 1;
-            this.#liveAnnouncer.announce(
-                this.#gridService.messages().rowReorderMoved(fromRowNumber, toPosition)
-            );
+            this.#liveAnnouncer.announce(this.#gridService.messages().rowReorderMoved(fromRowNumber, toPosition));
         }
     }
 }

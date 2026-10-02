@@ -1,14 +1,7 @@
-import {
-    afterRenderEffect,
-    Component,
-    computed,
-    ElementRef,
-    inject,
-    Signal
-} from "@angular/core";
+import { afterRenderEffect, Component, computed, ElementRef, inject, Signal } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
-import { twMerge } from "tailwind-merge";
-import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { LucideChevronRight } from "@lucide/angular";
+import { injectComponentDirection } from "@nanahoshi/mona-ui/i18n";
 import { DropPositionChangeEvent } from "../../models/DropPositionChangeEvent";
 import { TreeService } from "../../services/tree.service";
 import { treeDropHintBaseThemeVariants, treeDropHintIconThemeVariants } from "../../styles/tree.styles";
@@ -16,6 +9,7 @@ import { treeDropHintBaseThemeVariants, treeDropHintIconThemeVariants } from "..
 @Component({
     selector: "mona-tree-drop-hint",
     templateUrl: "./tree-drop-hint.component.html",
+    imports: [LucideChevronRight],
     host: {
         "[class]": "baseClass()"
     }
@@ -29,8 +23,6 @@ export class TreeDropHintComponent<T> {
         }
     );
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
-    readonly #i18n = inject(MonaI18nService);
-    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly baseClass = computed(() => {
         return treeDropHintBaseThemeVariants();
     });
@@ -70,10 +62,9 @@ export class TreeDropHintComponent<T> {
         }
     });
     protected readonly iconClass = computed(() => {
-        const icon = "ri-arrow-right-s-fill";
-        const variantClass = treeDropHintIconThemeVariants();
-        return twMerge(icon, variantClass);
+        return treeDropHintIconThemeVariants();
     });
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
 
     public constructor() {
         afterRenderEffect({

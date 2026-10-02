@@ -27,7 +27,6 @@ import type { GridColumnLockedPosition } from "../../models/GridColumnLockedPosi
     providers: [{ provide: GRID_COLUMN_DEFINITION, useExisting: forwardRef(() => GridColumnComponent) }]
 })
 export class GridColumnComponent implements GridColumnDefinition {
-    readonly #columnId = v4();
     readonly #column = computed<Column>(() => ({
         aggregate: this.aggregate(),
         calculatedWidth: null,
@@ -55,12 +54,14 @@ export class GridColumnComponent implements GridColumnDefinition {
         maxWidth: this.maxWidth(),
         minWidth: this.minWidth(),
         removeConfirmation: false,
+        sortable: this.sortable(),
         sortIndex: null,
         stateKey: this.stateKey(),
         title: this.title(),
         titleTemplate: this.titleTemplate() ?? null,
         width: this.width() ?? null
     }));
+    readonly #columnId = v4();
     private readonly cellTemplate = contentChild(GridCellTemplateDirective, { read: TemplateRef });
     private readonly editTemplate = contentChild(GridEditTemplateDirective, { read: TemplateRef });
     private readonly footerTemplate = contentChild(GridFooterTemplateDirective, { read: TemplateRef });
@@ -116,6 +117,11 @@ export class GridColumnComponent implements GridColumnDefinition {
      * @description The minimum width of this column in pixels.
      */
     public readonly minWidth = input<number>(40);
+
+    /**
+     * @description Whether this column can be sorted through its header when grid sorting is enabled. Has no effect if sorting is disabled on the grid.
+     */
+    public readonly sortable = input(true);
 
     /**
      * @description A stable key used to persist state for columns whose field is empty or unstable.

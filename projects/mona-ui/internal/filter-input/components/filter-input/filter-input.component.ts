@@ -11,6 +11,7 @@ import {
     signal,
     untracked
 } from "@angular/core";
+import { LucideSearch } from "@lucide/angular";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormsModule } from "@angular/forms";
 import { FilterChangeEvent } from "@nanahoshi/mona-ui/common";
@@ -19,7 +20,7 @@ import { debounceTime, fromEvent, Subject } from "rxjs";
 
 @Component({
     selector: "mona-filter-input",
-    imports: [TextBoxComponent, FormsModule, TextBoxPrefixTemplateDirective],
+    imports: [LucideSearch, TextBoxComponent, FormsModule, TextBoxPrefixTemplateDirective],
     templateUrl: "./filter-input.component.html"
 })
 export class FilterInputComponent implements OnInit {

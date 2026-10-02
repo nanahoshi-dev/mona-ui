@@ -36,6 +36,18 @@ describe("GridColumnComponent", () => {
         expect(component).toBeTruthy();
     });
 
+    it("enables column sorting by default and reflects input changes in the definition", () => {
+        expect(component.getColumn().sortable).toBe(true);
+
+        fixture.componentRef.setInput("sortable", false);
+        fixture.detectChanges();
+        expect(component.getColumn().sortable).toBe(false);
+
+        fixture.componentRef.setInput("sortable", true);
+        fixture.detectChanges();
+        expect(component.getColumn().sortable).toBe(true);
+    });
+
     it("adds format and header template to the column definition", () => {
         const hostFixture = TestBed.createComponent(GridColumnComponentTest);
         hostFixture.detectChanges();

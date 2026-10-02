@@ -312,6 +312,15 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
                     description: "Allow unsorting of columns",
                     name: "Allow Unsort"
                 },
+                disabledColumn: {
+                    code: ``,
+                    active: false,
+                    description: "Disable header sorting for an individual column",
+                    name: "Non-sortable Column",
+                    type: "dropdown",
+                    dropdownDataSource: ["Order ID", "Ship Name", "Freight", "Ship City", "Ship Country"],
+                    clearable: true
+                },
                 mode: {
                     code: ``,
                     active: false,
@@ -323,7 +332,7 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
                 },
                 showIndices: {
                     code: ``,
-                    active: false,
+                    active: true,
                     description: "Show indices for sorted columns",
                     name: "Show Indices"
                 }
@@ -512,6 +521,7 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
                     [locked]="lockedColumn() === column.title"
                     [lockedPosition]="lockedPosition() || 'left'"
                     [format]="column.format"
+                    [sortable]="sortingDisabledColumn() !== column.title"
                     [width]="width">
                     @if (featureData["cellTemplate"].active) {
                         <ng-template monaGridCellTemplate let-dataItem>
@@ -826,6 +836,10 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
             mode: subFeatures["mode"].dropdownValue ?? "single",
             showIndices: subFeatures["showIndices"].active ?? false
         };
+    });
+    protected readonly sortingDisabledColumn = computed(() => {
+        const feature = this.features()["sorting"].subFeatures?.["disabledColumn"];
+        return feature?.active ? feature.dropdownValue : null;
     });
     protected readonly state = signal<GridState | null>(null);
     protected readonly statePersistence = computed(() => {

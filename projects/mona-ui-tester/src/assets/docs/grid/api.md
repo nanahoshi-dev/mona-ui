@@ -212,6 +212,18 @@ Pass an object to `monaGridSortable` to configure sort mode, unsorting, or index
     [monaGridSortable]="{ mode: 'multiple', allowUnsort: true, showIndices: true }"></mona-grid>
 ```
 
+In multiple mode, sorted headers show their one-based priority next to the direction icon by default: the first sorted column is `1`, the next is `2`. Changing direction retains priority; unsorting a column renumbers the remaining columns. Set `showIndices: false` to hide the numbers. Single mode shows only the direction icon.
+
+Set `[sortable]="false"` on a column to disable sorting through its header. Columns default to `sortable: true`, and grid-level sorting must also be enabled. This setting controls header interaction; existing or externally supplied `sort` descriptors remain applied.
+
+```html
+<mona-grid [data]="orders()" [monaGridSortable]="{ mode: 'multiple' }" [(sort)]="sort">
+    <mona-grid-column field="id" title="Order ID" [sortable]="false" />
+    <mona-grid-column field="freight" title="Freight" type="number" />
+    <mona-grid-column field="shipName" title="Ship name" />
+</mona-grid>
+```
+
 ### Filtering
 
 `monaGridFilterable` renders filter UI either in the column header menu, a dedicated filter row, or both, per `type`. `filter` is a two-way bindable model of the applied `CompositeFilterDescriptor[]`.

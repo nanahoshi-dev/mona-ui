@@ -9606,6 +9606,13 @@
         "defaultValue": "40"
       },
       {
+        "description": "Whether this column can be sorted through its header when grid sorting is enabled. Has no effect if sorting is disabled on the grid.",
+        "kind": "input",
+        "name": "sortable",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
         "description": "A stable key used to persist state for columns whose field is empty or unstable.",
         "kind": "input",
         "name": "stateKey",

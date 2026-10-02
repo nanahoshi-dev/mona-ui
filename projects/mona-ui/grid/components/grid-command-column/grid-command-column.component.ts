@@ -40,6 +40,7 @@ export class GridCommandColumnComponent implements GridColumnDefinition {
             maxWidth: this.maxWidth(),
             minWidth: this.minWidth(),
             removeConfirmation: this.removeConfirmation(),
+            sortable: false,
             sortIndex: null,
             stateKey,
             title: this.title(),

@@ -1,4 +1,5 @@
 import { CdkDrag, CdkDragDrop, CdkDragEnd, CdkDragPreview, CdkDragStart, CdkDropList } from "@angular/cdk/drag-drop";
+import { LucideGripVertical } from "@lucide/angular";
 import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
@@ -50,6 +51,7 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
     selector: "mona-grid-list",
     templateUrl: "./grid-list.component.html",
     imports: [
+        LucideGripVertical,
         GridAddRowComponent,
         GridCellComponent,
         NgTemplateOutlet,

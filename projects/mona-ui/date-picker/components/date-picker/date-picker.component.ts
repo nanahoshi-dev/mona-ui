@@ -21,6 +21,7 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
 import { any } from "@mirei/ts-collections";
+import { LucideCalendar } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import {
     CalendarComponent,
@@ -80,6 +81,7 @@ import {
         }
     ],
     imports: [
+        LucideCalendar,
         CalendarComponent,
         TextBoxComponent,
         TextBoxSuffixTemplateDirective,
