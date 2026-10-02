@@ -27,7 +27,6 @@ import type { GridColumnLockedPosition } from "../../models/GridColumnLockedPosi
     providers: [{ provide: GRID_COLUMN_DEFINITION, useExisting: forwardRef(() => GridColumnComponent) }]
 })
 export class GridColumnComponent implements GridColumnDefinition {
-    readonly #columnId = v4();
     readonly #column = computed<Column>(() => ({
         aggregate: this.aggregate(),
         calculatedWidth: null,
@@ -62,6 +61,7 @@ export class GridColumnComponent implements GridColumnDefinition {
         titleTemplate: this.titleTemplate() ?? null,
         width: this.width() ?? null
     }));
+    readonly #columnId = v4();
     private readonly cellTemplate = contentChild(GridCellTemplateDirective, { read: TemplateRef });
     private readonly editTemplate = contentChild(GridEditTemplateDirective, { read: TemplateRef });
     private readonly footerTemplate = contentChild(GridFooterTemplateDirective, { read: TemplateRef });
