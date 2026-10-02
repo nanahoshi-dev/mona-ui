@@ -108,6 +108,7 @@ export class PagerComponent implements PagerVariantInputs {
         const navigationTemplates = this.navigationButtonsTemplateList();
         return navigationTemplates.find(t => t.type() === "first");
     });
+    protected readonly hasPages = computed(() => this.pageCount() > 0);
     protected readonly iconSize = computed(() => {
         const size = this.size();
         switch (size) {
@@ -174,8 +175,8 @@ export class PagerComponent implements PagerVariantInputs {
         viewChild("pageSizeDropdownList");
     protected readonly pageSizeTemplate = contentChild(PagerPageSizeTemplateDirective, { read: TemplateRef });
     protected readonly pagerInfo = computed(() => {
-        const start = (this.page() - 1) * this.pagerPageSize() + 1;
-        const end = Math.min(this.page() * this.pagerPageSize(), this.total());
+        const start = this.hasPages() ? Math.min(this.#skip() + 1, this.total()) : 0;
+        const end = this.hasPages() ? Math.min(this.#skip() + this.pagerPageSize(), this.total()) : 0;
         return this.messages().rangeStatus(start, end, this.total());
     });
     protected readonly pagerInfoTemplate = contentChild(PagerInfoTemplateDirective);
@@ -644,7 +645,10 @@ export class PagerComponent implements PagerVariantInputs {
     }
 
     private setPage(page: number): void {
-        this.#skip.set((page - 1) * this.pagerPageSize());
+        if (!this.hasPages() || !Number.isInteger(page) || page < 1) {
+            return;
+        }
+        this.#skip.set((Math.min(page, this.pageCount()) - 1) * this.pagerPageSize());
     }
 
     private syncFocusableTabIndexes(): void {

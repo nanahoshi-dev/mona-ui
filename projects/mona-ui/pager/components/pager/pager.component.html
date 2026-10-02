@@ -106,7 +106,7 @@
                 <ng-container [ngTemplateOutlet]="lastPageButton"></ng-container>
             }
 
-            @if (pageInputVisible() && pageInput()) {
+            @if (hasPages() && pageInputVisible() && pageInput()) {
                 <li>
                     <mona-numeric-text-box
                         monaPagerFocusable
@@ -171,22 +171,24 @@
                 @if (previousNext()) {
                     <ng-container [ngTemplateOutlet]="previousPageButton"></ng-container>
                 }
-                <li class="flex items-center gap-2 mx-2">
-                    <span>{{ messages().pageText }}</span>
-                    <mona-numeric-text-box
-                        monaPagerFocusable
-                        [spinners]="false"
-                        [minValue]="1"
-                        [maxValue]="pageCount()"
-                        [rounded]="rounded()"
-                        [size]="size()"
-                        [aria-label]="messages().pageStatus(page(), pageCount())"
-                        [ngModel]="inputValue()"
-                        (ngModelChange)="inputValue.set($event)"
-                        (inputBlur)="onPageInputBlur()"></mona-numeric-text-box>
-                    <span>{{ messages().ofText }}</span>
-                    <span>{{ formatPageNumber(pageCount()) }}</span>
-                </li>
+                @if (hasPages()) {
+                    <li class="flex items-center gap-2 mx-2">
+                        <span>{{ messages().pageText }}</span>
+                        <mona-numeric-text-box
+                            monaPagerFocusable
+                            [spinners]="false"
+                            [minValue]="1"
+                            [maxValue]="pageCount()"
+                            [rounded]="rounded()"
+                            [size]="size()"
+                            [aria-label]="messages().pageStatus(page(), pageCount())"
+                            [ngModel]="inputValue()"
+                            (ngModelChange)="inputValue.set($event)"
+                            (inputBlur)="onPageInputBlur()"></mona-numeric-text-box>
+                        <span>{{ messages().ofText }}</span>
+                        <span>{{ formatPageNumber(pageCount()) }}</span>
+                    </li>
+                }
                 @if (previousNext()) {
                     <ng-container [ngTemplateOutlet]="nextPageButton"></ng-container>
                 }
@@ -252,7 +254,7 @@
                 [ngTemplateOutletContext]="{
                     totalPages: pageCount(),
                     pageSize: pagerPageSize(),
-                    disabled: page() === 1
+                    disabled: !hasPages() || page() <= 1
                 }">
             </ng-container>
         } @else {
@@ -264,7 +266,7 @@
                 [size]="size()"
                 [attr.aria-label]="messages().firstPageLabel"
                 (click)="onPageClick(1)"
-                [disabled]="page() === 1">
+                [disabled]="!hasPages() || page() <= 1">
                 <svg lucideChevronsLeft class="rtl:rotate-180" [size]="iconSize()"></svg>
             </button>
         }
@@ -280,7 +282,7 @@
                 [ngTemplateOutletContext]="{
                     totalPages: pageCount(),
                     pageSize: pagerPageSize(),
-                    disabled: page() <= 1
+                    disabled: !hasPages() || page() <= 1
                 }">
             </ng-container>
         } @else {
@@ -290,7 +292,7 @@
                 look="ghost"
                 [rounded]="rounded()"
                 [size]="size()"
-                [disabled]="page() <= 1"
+                [disabled]="!hasPages() || page() <= 1"
                 [attr.aria-label]="messages().previousPageLabel"
                 (click)="onPreviousPageClick()">
                 <svg lucideChevronLeft class="rtl:rotate-180" [size]="iconSize()"></svg>
@@ -308,7 +310,7 @@
                 [ngTemplateOutletContext]="{
                     totalPages: pageCount(),
                     pageSize: pagerPageSize(),
-                    disabled: page() < 1 || page() === pageCount()
+                    disabled: !hasPages() || page() < 1 || page() >= pageCount()
                 }">
             </ng-container>
         } @else {
@@ -318,7 +320,7 @@
                 look="ghost"
                 [rounded]="rounded()"
                 [size]="size()"
-                [disabled]="page() < 1 || page() === pageCount()"
+                [disabled]="!hasPages() || page() < 1 || page() >= pageCount()"
                 [attr.aria-label]="messages().nextPageLabel"
                 (click)="onNextPageClick()">
                 <svg lucideChevronRight class="rtl:rotate-180" [size]="iconSize()"></svg>
@@ -336,7 +338,7 @@
                 [ngTemplateOutletContext]="{
                     totalPages: pageCount(),
                     pageSize: pagerPageSize(),
-                    disabled: page() === pageCount()
+                    disabled: !hasPages() || page() >= pageCount()
                 }">
             </ng-container>
         } @else {
@@ -348,7 +350,7 @@
                 [size]="size()"
                 [attr.aria-label]="messages().lastPageLabel"
                 (click)="onPageClick(pageCount())"
-                [disabled]="page() === pageCount()">
+                [disabled]="!hasPages() || page() >= pageCount()">
                 <svg lucideChevronsRight class="rtl:rotate-180" [size]="iconSize()"></svg>
             </button>
         }
