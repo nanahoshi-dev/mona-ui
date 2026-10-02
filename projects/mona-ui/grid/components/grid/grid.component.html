@@ -71,7 +71,7 @@
     </div>
 }
 <div class="flex flex-col flex-1 min-h-0" [attr.role]="groupable() ? 'treegrid' : 'grid'">
-    <div [class]="headerClass()" [style.margin-right.px]="headerMarginRight()" #gridHeaderElement>
+    <div [class]="headerClass()" [style.margin-inline-end.px]="headerMarginInlineEnd()" #gridHeaderElement>
         <div>
             <table
                 role="presentation"
@@ -396,7 +396,7 @@
                 @if (footerVisible()) {
                     <div
                         [class]="footerClass()"
-                        [style.margin-right.px]="gridService.scrollbarGutterWidth()"
+                        [style.margin-inline-end.px]="gridService.scrollbarGutterWidth()"
                         #footerScrollElement
                         data-grid-footer-scroll>
                         <div>

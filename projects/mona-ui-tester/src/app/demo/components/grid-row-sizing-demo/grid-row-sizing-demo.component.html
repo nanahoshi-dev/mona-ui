@@ -10,7 +10,7 @@
                 rowKey="id"
                 [pageSize]="10"
                 [responsivePager]="false"
-                [resizeMethod]="'auto'"
+                [resizeMethod]="'fitView'"
                 monaGridRowReorderable
                 (rowReorder)="onReorder($event)"
                 [monaGridSelectable]="{ enabled: true, mode: 'multiple', showCheckboxes: true }"
@@ -21,7 +21,7 @@
                     <button monaButton monaGridAddCommand>Add user</button>
                 </ng-template>
                 <mona-grid-column field="id" title="ID" [locked]="true" [width]="70" />
-                <mona-grid-column field="name" title="User" [width]="300" [editable]="true">
+                <mona-grid-column field="name" title="User" [editable]="true">
                     <ng-template monaGridCellTemplate let-user>
                         @if (user.id === 1) {
                             <span>{{ user.name }}</span>
@@ -72,8 +72,8 @@
             class="h-64 w-full"
             [data]="virtualRows"
             [monaGridVirtualScroll]="{ height: 48 }"
-            [resizeMethod]="'auto'">
-            <mona-grid-column field="name" title="User" [width]="300">
+            [resizeMethod]="'fitView'">
+            <mona-grid-column field="name" title="User">
                 <ng-template monaGridCellTemplate let-user>
                     <div class="h-24" data-oversized-template>
                         {{ user.name }}
@@ -85,8 +85,8 @@
     </section>
     <section id="virtual-default">
         <h4 class="font-medium mb-2">Virtual rows: default 36px</h4>
-        <mona-grid class="h-64 w-full" [data]="virtualRows" monaGridVirtualScroll [resizeMethod]="'auto'">
-            <mona-grid-column field="name" title="User" [width]="300" />
+        <mona-grid class="h-64 w-full" [data]="virtualRows" monaGridVirtualScroll [resizeMethod]="'fitView'">
+            <mona-grid-column field="name" title="User" />
         </mona-grid>
     </section>
     <section id="virtual-grouped">
@@ -95,12 +95,12 @@
             class="h-64 w-full"
             [data]="virtualRows"
             [monaGridVirtualScroll]="{ height: 48 }"
-            [resizeMethod]="'auto'"
+            [resizeMethod]="'fitView'"
             [monaGridGroupable]="{ enabled: true, showFooter: true }"
             [group]="[{ field: 'team' }]">
-            <mona-grid-column field="name" title="User" [width]="300" />
-            <mona-grid-column field="id" title="Count" [width]="100" [aggregate]="'count'" />
-            <mona-grid-column field="team" title="Team" [width]="100" />
+            <mona-grid-column field="name" title="User" />
+            <mona-grid-column field="id" title="Count" [aggregate]="'count'" />
+            <mona-grid-column field="team" title="Team" />
         </mona-grid>
     </section>
 </div>

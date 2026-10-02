@@ -53,7 +53,7 @@ async function requestPage(state: GridDataState) {
             [pageSize]="state().take"
             [pageSizeValues]="[10, 20, 50]"
             [responsivePager]="false"
-            [resizeMethod]="'auto'"
+            [resizeMethod]="'fitView'"
             monaGridServerBinding
             monaGridExport
             #export="monaGridExport"
@@ -65,8 +65,8 @@ async function requestPage(state: GridDataState) {
             [monaGridFilterable]="{ enabled: true, type: 'row' }"
             [(filter)]="filter"
             (dataStateChange)="load($event)">
-            <mona-grid-column field="id" title="ID" type="number" [width]="100" />
-            <mona-grid-column field="name" title="User" [width]="300" />
+            <mona-grid-column field="id" title="ID" type="number" />
+            <mona-grid-column field="name" title="User" />
         </mona-grid>
         <button monaButton (click)="export.exportCsv('server-page.csv')">Export loaded page</button>
         <p data-request-count>Requests: {{ requests() }}</p>
