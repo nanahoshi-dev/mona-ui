@@ -245,7 +245,7 @@ export class GridComponent<T> implements GridVariantInput {
         return gridHeaderThemeVariants();
     });
 
-    protected readonly headerMarginRight = computed(() => this.gridService.scrollbarGutterWidth());
+    protected readonly headerMarginInlineEnd = computed(() => this.gridService.scrollbarGutterWidth());
 
     protected readonly headerTableCellClass = computed(() => {
         return gridHeaderTableCellThemeVariants();
