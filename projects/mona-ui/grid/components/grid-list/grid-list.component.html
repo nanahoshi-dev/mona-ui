@@ -145,7 +145,7 @@
                     }
                     <ng-template cdkDragPreview>
                         <div [class]="rowDragPreviewClass()">
-                            <i aria-hidden="true" class="ri-draggable"></i>
+                            <svg lucideGripVertical [size]="16" aria-hidden="true"></svg>
                             <span>{{
                                 gridService.getRowReorderAriaLabel(row, rowIndex + gridService.paginationState().skip)
                             }}</span>

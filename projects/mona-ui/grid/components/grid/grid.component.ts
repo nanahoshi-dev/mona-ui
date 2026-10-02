@@ -7,6 +7,13 @@ import {
     CdkDragStart,
     CdkDropList
 } from "@angular/cdk/drag-drop";
+import {
+    LucideArrowDown,
+    LucideArrowLeft,
+    LucideArrowRight,
+    LucideArrowUp,
+    LucideEllipsisVertical
+} from "@lucide/angular";
 import { isPlatformBrowser, NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
@@ -99,6 +106,11 @@ const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [ta
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [GridService, GridNavigationService, GridRowFlattenerService, FilterService],
     imports: [
+        LucideArrowDown,
+        LucideArrowLeft,
+        LucideArrowRight,
+        LucideArrowUp,
+        LucideEllipsisVertical,
         CdkDropList,
         ChipComponent,
         CdkDrag,

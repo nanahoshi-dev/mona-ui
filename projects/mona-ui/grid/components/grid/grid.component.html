@@ -39,27 +39,29 @@
                     (click)="onGroupingColumnSort(groupColumn)"
                     (remove)="onGroupingColumnRemove($event, groupColumn)">
                     @if (groupColumn.groupSortDirection === "asc") {
-                        <i class="ri-arrow-down-line"></i>
+                        <svg lucideArrowDown [size]="16" aria-hidden="true"></svg>
                     } @else if (groupColumn.groupSortDirection === "desc") {
-                        <i class="ri-arrow-up-line"></i>
+                        <svg lucideArrowUp [size]="16" aria-hidden="true"></svg>
                     }
                     <span>{{ groupColumn.title }}</span>
                     <span class="ms-2" (click)="$event.stopPropagation()" #groupReorder>
-                        <i class="ri-more-2-fill"></i>
+                        <svg lucideEllipsisVertical [size]="16" aria-hidden="true"></svg>
                     </span>
                     <mona-popup-menu size="small" [target]="groupReorder">
                         <mona-popup-menu-item
                             [disabled]="$first"
                             (menuClick)="onGroupColumnReorder(groupColumn, 'prev')">
                             <ng-template monaPopupMenuTextTemplate>
-                                <i class="ri-arrow-left-fill rtl:rotate-180"></i> {{ messages().moveAsPrevious }}
+                                <svg lucideArrowLeft [size]="16" aria-hidden="true" class="rtl:rotate-180"></svg>
+                                {{ messages().moveAsPrevious }}
                             </ng-template>
                         </mona-popup-menu-item>
                         <mona-popup-menu-item
                             [disabled]="$last"
                             (menuClick)="onGroupColumnReorder(groupColumn, 'next')">
                             <ng-template monaPopupMenuTextTemplate>
-                                <i class="ri-arrow-right-fill rtl:rotate-180"></i> {{ messages().moveAsNext }}
+                                <svg lucideArrowRight [size]="16" aria-hidden="true" class="rtl:rotate-180"></svg>
+                                {{ messages().moveAsNext }}
                             </ng-template>
                         </mona-popup-menu-item>
                     </mona-popup-menu>
@@ -233,9 +235,9 @@
                                             <span>{{ column.sortIndex }}</span>
                                         }
                                         @if (column.columnSortDirection === "asc") {
-                                            <i class="ri-arrow-down-line"></i>
+                                            <svg lucideArrowDown [size]="16" aria-hidden="true"></svg>
                                         } @else if (column.columnSortDirection === "desc") {
-                                            <i class="ri-arrow-up-line"></i>
+                                            <svg lucideArrowUp [size]="16" aria-hidden="true"></svg>
                                         }
                                         @if (filterMenuEnabled()) {
                                             @if (column.kind === "data" && column.filterable) {
