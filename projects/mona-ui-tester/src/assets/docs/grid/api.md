@@ -144,7 +144,7 @@ While `loading` is true, the body shows a localized loading indicator, preserves
 
 Server mode has these boundaries:
 
-- Grouping and aggregates operate on the loaded page. `group` is not part of `GridDataState`, and no remote aggregate protocol is provided.
+- Grouping and aggregates operate on the loaded page. Each group direction controls the loaded page's group header order while preserving server row order within each leaf group. `group` is not part of `GridDataState`, and no remote aggregate protocol is provided.
 - CSV export contains loaded data only. Fetch a full export through your application when needed.
 - Select-all selects loaded rows only. Use `selectBy` and controlled `selectedKeys` to manage stable keys across pages; this does not select unloaded records.
 - Editing events continue to describe loaded rows; the application saves changes to its server.
