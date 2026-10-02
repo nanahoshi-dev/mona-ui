@@ -1,3 +1,4 @@
+import { GRID_DEFAULT_VIRTUAL_ROW_HEIGHT } from "../constants/grid-virtual-scroll.constants";
 import { compareGridComparableValues, toGridComparableValue } from "../utils/grid-comparable-value";
 import { isPlatformBrowser } from "@angular/common";
 import {
@@ -500,7 +501,10 @@ export class GridService {
     });
     public readonly virtualGridMaxBuffer = computed(() => this.virtualGridMinBuffer() * 1.42857);
     public readonly virtualGridMinBuffer = signal(0);
-    public readonly virtualScrollOptions = signal<VirtualScrollOptions>({ enabled: false, height: 36 });
+    public readonly virtualScrollOptions = signal<VirtualScrollOptions>({
+        enabled: false,
+        height: GRID_DEFAULT_VIRTUAL_ROW_HEIGHT
+    });
     public readonly visibleColumns = computed(() =>
         this.columns()
             .where(column => !column.hidden)
@@ -1325,7 +1329,7 @@ export class GridService {
     }
 
     public setVirtualScrollOptions(options: VirtualScrollOptions): void {
-        const height = options.height ?? this.virtualScrollOptions().height ?? 36;
+        const height = options.height ?? this.virtualScrollOptions().height ?? GRID_DEFAULT_VIRTUAL_ROW_HEIGHT;
         if (!Number.isFinite(height) || height <= 0) {
             throw new Error("monaGridVirtualScroll: height must be finite and greater than zero.");
         }

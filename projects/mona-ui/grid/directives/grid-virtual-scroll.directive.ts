@@ -1,3 +1,4 @@
+import { GRID_DEFAULT_VIRTUAL_ROW_HEIGHT } from "../constants/grid-virtual-scroll.constants";
 import { DestroyRef, Directive, effect, inject, input, output, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
@@ -9,7 +10,7 @@ import { GridService } from "../services/grid.service";
 export class GridVirtualScrollDirective {
     readonly #defaultOptions: VirtualScrollOptions = {
         enabled: true,
-        height: 36
+        height: GRID_DEFAULT_VIRTUAL_ROW_HEIGHT
     };
     readonly #destroyRef = inject(DestroyRef);
     readonly #gridService = inject(GridService);
