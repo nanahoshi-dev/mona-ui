@@ -39,6 +39,7 @@ class TestHostComponent {
         maxWidth: null,
         minWidth: 40,
         removeConfirmation: false,
+        sortable: true,
         sortIndex: null,
         stateKey: null,
         title: "",

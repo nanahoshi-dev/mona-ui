@@ -74,6 +74,9 @@ export class GridSortableDirective {
 
     #setSubscriptions(): void {
         this.#gridService.columnSort$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
+            if (!this.#gridService.sortableOptions().enabled || !event.column.sortable) {
+                return;
+            }
             this.columnSort.emit(event);
             if (event.isDefaultPrevented()) {
                 return;

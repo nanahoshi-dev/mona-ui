@@ -55,6 +55,7 @@ export class GridColumnComponent implements GridColumnDefinition {
         maxWidth: this.maxWidth(),
         minWidth: this.minWidth(),
         removeConfirmation: false,
+        sortable: this.sortable(),
         sortIndex: null,
         stateKey: this.stateKey(),
         title: this.title(),
@@ -116,6 +117,11 @@ export class GridColumnComponent implements GridColumnDefinition {
      * @description The minimum width of this column in pixels.
      */
     public readonly minWidth = input<number>(40);
+
+    /**
+     * @description Whether this column can be sorted through its header when grid sorting is enabled. Has no effect if sorting is disabled on the grid.
+     */
+    public readonly sortable = input(true);
 
     /**
      * @description A stable key used to persist state for columns whose field is empty or unstable.

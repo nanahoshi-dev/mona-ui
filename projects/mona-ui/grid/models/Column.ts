@@ -16,8 +16,8 @@ export interface ColumnConfig {
     readonly editable: boolean;
     readonly field: string;
     readonly filterable: boolean;
-    readonly format: ColumnFormat | null;
     readonly footerTemplate: TemplateRef<unknown> | null;
+    readonly format: ColumnFormat | null;
     readonly groupFooterTemplate: TemplateRef<unknown> | null;
     readonly headerTemplate: TemplateRef<unknown> | null;
     readonly hidden: boolean;
@@ -28,6 +28,7 @@ export interface ColumnConfig {
     readonly maxWidth: number | null;
     readonly minWidth: number | null;
     readonly removeConfirmation: boolean;
+    readonly sortable: boolean;
     readonly stateKey: string | null;
     readonly title: string;
     readonly titleTemplate: TemplateRef<unknown> | null;

@@ -70,6 +70,7 @@ function createColumn(field: string, locked: boolean, lockedPosition: GridColumn
         maxWidth: null,
         minWidth: 40,
         removeConfirmation: false,
+        sortable: true,
         sortIndex: null,
         stateKey: null,
         title: field,

@@ -29,6 +29,7 @@ function createColumn(overrides: Partial<Column> & Pick<Column, "field">): Colum
         maxWidth: null,
         minWidth: 40,
         removeConfirmation: false,
+        sortable: true,
         sortIndex: null,
         stateKey: null,
         title: overrides.field,

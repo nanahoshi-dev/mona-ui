@@ -33,6 +33,7 @@ function createColumn(overrides: Partial<Column> & Pick<Column, "field">): Colum
         maxWidth: null,
         minWidth: 40,
         removeConfirmation: false,
+        sortable: true,
         sortIndex: null,
         stateKey: null,
         title: overrides.field,
@@ -48,8 +49,8 @@ function createColumn(overrides: Partial<Column> & Pick<Column, "field">): Colum
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 class HostComponent {
-    public options: ResizableOptions | "" = "";
     public onColumnResize = vi.fn();
+    public options: ResizableOptions | "" = "";
 }
 
 describe("GridResizableDirective", () => {

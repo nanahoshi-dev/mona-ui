@@ -35,6 +35,7 @@ function createColumn(overrides: Partial<Column> & Pick<Column, "field">): Colum
         maxWidth: null,
         minWidth: 40,
         removeConfirmation: false,
+        sortable: true,
         sortIndex: null,
         stateKey: null,
         title: overrides.field,
@@ -53,9 +54,9 @@ function createColumn(overrides: Partial<Column> & Pick<Column, "field">): Colum
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 class HostComponent {
+    public onColumnSort: (event: ColumnSortEvent) => void = vi.fn();
     public options: SortableOptions | "" = "";
     public sort: SortDescriptor[] = [];
-    public onColumnSort: (event: ColumnSortEvent) => void = vi.fn();
 }
 
 describe("GridSortableDirective", () => {
@@ -153,6 +154,22 @@ describe("GridSortableDirective", () => {
         gridService.columnSort$.next(new ColumnSortEvent(getColumn("name")));
 
         expect(fixture.componentInstance.sort).toEqual([{ field: "name", dir: "asc" }]);
+    });
+
+    it("ignores sort requests for a non-sortable column", () => {
+        gridService.columnSort$.next(new ColumnSortEvent(createColumn({ field: "name", sortable: false })));
+
+        expect(fixture.componentInstance.onColumnSort).not.toHaveBeenCalled();
+        expect(fixture.componentInstance.sort).toEqual([]);
+        expect(getColumn("name").columnSortDirection).toBeNull();
+    });
+
+    it("ignores sort requests when grid sorting is disabled", () => {
+        gridService.setSortableOptions({ enabled: false });
+        gridService.columnSort$.next(new ColumnSortEvent(getColumn("name")));
+
+        expect(fixture.componentInstance.onColumnSort).not.toHaveBeenCalled();
+        expect(fixture.componentInstance.sort).toEqual([]);
     });
 
     it("skips applying the sort when the columnSort event is cancelled", () => {

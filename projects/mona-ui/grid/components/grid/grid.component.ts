@@ -513,7 +513,7 @@ export class GridComponent<T> implements GridVariantInput {
     }
 
     protected onColumnSort(column: Column): void {
-        if (column.kind === "command") {
+        if (column.kind === "command" || !column.sortable) {
             return;
         }
         if (!this.gridService.sortableOptions().enabled) {
