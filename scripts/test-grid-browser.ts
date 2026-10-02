@@ -86,6 +86,20 @@ async function main(): Promise<void> {
         await expect(remote.locator("mona-grid")).not.toHaveAttribute("aria-busy", "true");
         await expect(remote.locator("tbody tr[monaGridRow]")).toHaveCount(8);
 
+        await remote.locator("mona-grid-filter-row-cell input").last().fill("No matching user");
+        await expect(remote.locator("[data-request-count]")).toHaveText("Requests: 6");
+        await expect(remote.locator("mona-grid")).not.toHaveAttribute("aria-busy", "true");
+        await expect(remote.locator("tbody tr[monaGridRow]")).toHaveCount(0);
+        await expect(remote.locator("mona-grid")).toContainText("No data");
+        await expect(remote.locator("mona-pager")).toContainText("0 - 0 of 0 items");
+        for (const name of ["First page", "Previous page", "Next page", "Last page"]) {
+            await expect(remote.getByRole("button", { name, exact: true })).toBeDisabled();
+        }
+        await remote.locator("mona-pager").focus();
+        await page.keyboard.press("End");
+        await page.keyboard.press("PageDown");
+        await expect(remote.locator("[data-request-count]")).toHaveText("Requests: 6");
+
         for (const direction of ["ltr", "rtl"]) {
             const grid = page.locator(`#natural-${direction} mona-grid`);
             const rows = grid.locator("tbody tr[monaGridRow]");

@@ -169,6 +169,14 @@ describe("PagerComponent", () => {
             expect(getRenderedPageLabels()).toEqual([]);
         });
 
+        it("formats the zero range through the active localized message", () => {
+            TestBed.inject(MonaI18nService).patchMessages({
+                pager: { rangeStatus: (start, end, total) => `${start} ila ${end} arası (${total} kayıt)` }
+            });
+            fixture.detectChanges();
+            expect(getInfoText()).toContain("0 ila 0 arası (0 kayıt)");
+        });
+
         it.each(["numeric", "input"])("omits an impossible page input in %s mode", type => {
             fixture.componentRef.setInput("type", type);
             fixture.componentRef.setInput("pageInput", true);
@@ -193,6 +201,16 @@ describe("PagerComponent", () => {
             expect(events.every(event => event.page >= 1 && event.skip >= 0)).toBe(true);
             expect(getInfoText()).toContain("0 - 0 of 0 items");
         });
+    });
+
+    it("clamps the range and disables forward navigation for controlled skip beyond the total", () => {
+        fixture.componentRef.setInput("responsive", false);
+        setup(5, 10, 40);
+        expect(getInfoText()).toContain("5 - 5 of 5 items");
+        expect(getButtonByLabel("Next page").disabled).toBe(true);
+        expect(getButtonByLabel("Last page").disabled).toBe(true);
+        clickButton("Previous page");
+        expect(getActivePageButton().getAttribute("aria-label")).toBe("Page 1");
     });
 
     describe("numeric page window", () => {

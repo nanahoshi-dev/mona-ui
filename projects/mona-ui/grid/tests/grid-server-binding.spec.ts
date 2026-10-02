@@ -146,12 +146,16 @@ describe("server-bound grid interactions", () => {
     });
 
     it.each([false, true])("keeps an empty server pager safe while loading=%s", async loading => {
+        fixture.destroy();
+        fixture = TestBed.createComponent(HostComponent);
+        host = fixture.componentInstance;
         host.data.set([]);
         host.total.set(0);
         host.skip.set(0);
         host.loading.set(loading);
         await settle();
         expect(element("mona-grid").getAttribute("aria-busy")).toBe(loading ? "true" : null);
+        expect(fixture.nativeElement.querySelector("[data-grid-loading]") != null).toBe(loading);
         expect(fixture.nativeElement.textContent.includes("No data")).toBe(!loading);
         expect(element("mona-pager").textContent).toContain("0 - 0 of 0 items");
         for (const label of ["First page", "Previous page", "Next page", "Last page"]) {
