@@ -261,7 +261,7 @@ export const gridHeaderTableColumnWrapThemeVariants = cva(
     `
         w-full h-full px-1
         flex items-center justify-between
-        cursor-pointer overflow-hidden
+        overflow-hidden
     `
 );
 

@@ -181,6 +181,11 @@
                         }
                         @for (column of gridService.visibleColumns(); track $index) {
                             @let colIndex = $index + gridService.leadingLogicalColumnCount();
+                            @let columnSortable =
+                                gridService.sortableOptions().enabled &&
+                                column.kind === "data" &&
+                                column.sortable &&
+                                column.field !== "";
                             <th
                                 scope="col"
                                 role="columnheader"
@@ -210,11 +215,11 @@
                                 [style.width.px]="column.calculatedWidth"
                                 [attr.colspan]="1"
                                 [attr.aria-sort]="
-                                    gridService.sortableOptions().enabled
-                                        ? (column.columnSortDirection | columnAriaSort)
-                                        : null
+                                    columnSortable ? (column.columnSortDirection | columnAriaSort) : null
                                 ">
-                                <div [class]="headerTableColumnWrapClass()">
+                                <div
+                                    [class]="headerTableColumnWrapClass()"
+                                    [style.cursor]="columnSortable ? 'pointer' : 'default'">
                                     @if (column.headerTemplate) {
                                         <ng-container
                                             [ngTemplateOutlet]="column.headerTemplate"
