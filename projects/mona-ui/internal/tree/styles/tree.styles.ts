@@ -32,7 +32,7 @@ export const treeDropHintBaseThemeVariants = cva(
 export const treeDropHintIconThemeVariants = cva(
     `
         absolute flex items-center justify-center
-        -top-3.25 -start-3.5 text-xl rtl:rotate-180
+        -top-2.25 -start-3.5 text-xl rtl:rotate-180
     `
 );
 

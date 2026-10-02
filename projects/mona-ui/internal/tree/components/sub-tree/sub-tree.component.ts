@@ -7,6 +7,15 @@ import {
     CdkDragStart,
     CdkDropList
 } from "@angular/cdk/drag-drop";
+import {
+    LucideArrowDown,
+    LucideArrowUp,
+    LucideBan,
+    LucideChevronDown,
+    LucideChevronRight,
+    LucideLoaderCircle,
+    LucidePlus
+} from "@lucide/angular";
 import { ChangeDetectionStrategy, Component, computed, DOCUMENT, inject, input, NgZone } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ImmutableSet } from "@mirei/ts-collections";
@@ -34,6 +43,13 @@ import { TreeNodeComponent } from "../tree-node/tree-node.component";
     selector: "mona-sub-tree",
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
+        LucideArrowDown,
+        LucideArrowUp,
+        LucideBan,
+        LucideChevronDown,
+        LucideChevronRight,
+        LucideLoaderCircle,
+        LucidePlus,
         TreeNodeComponent,
         FormsModule,
         CdkDropList,
