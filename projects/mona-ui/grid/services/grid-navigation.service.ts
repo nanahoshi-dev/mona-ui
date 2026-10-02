@@ -102,8 +102,12 @@ export class GridNavigationService {
         }
     }
 
-    public unregisterCell(cellKey: string): void {
+    public unregisterCell(cellKey: string, element?: HTMLTableCellElement): void {
         const data = this.#cellElementDict().get(cellKey);
+        // A cached view may be destroyed after another view has taken over this logical identity.
+        if (!data || (element != null && data.element !== element)) {
+            return;
+        }
         this.#cellElementDict.update(dict => dict.remove(cellKey));
         if (this.#lastFocusedCellKey() !== cellKey) {
             return;
