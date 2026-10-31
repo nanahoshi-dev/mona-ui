@@ -9,11 +9,7 @@ import { GridService } from "../../services/grid.service";
     // A <colgroup> must be a direct child of <table>, so an element selector cannot be used here.
     // eslint-disable-next-line @angular-eslint/component-selector
     selector: "colgroup[monaGridColgroup]",
-    template: `
-        @for (layoutColumn of gridService.layout(); track layoutColumn.key) {
-            <col [style.width.px]="layoutColumn.width" />
-        }
-    `,
+    templateUrl: "./grid-colgroup.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GridColgroupComponent {

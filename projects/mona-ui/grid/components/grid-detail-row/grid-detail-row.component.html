@@ -1,0 +1,14 @@
+@for (layoutColumn of gridService.layout(); track layoutColumn.key) {
+    @if (layoutColumn.kind === "group") {
+        <td monaGridCell [monaGridLockedCell]="layoutColumn.key" [lockedCellHeader]="true" [groupIndent]="true"></td>
+    } @else if (layoutColumn.kind === "reorder") {
+        <td monaGridCell [monaGridLockedCell]="layoutColumn.key" [groupIndent]="grouped()"></td>
+    } @else if (layoutColumn.kind !== "column") {
+        <td monaGridCell [monaGridLockedCell]="layoutColumn.key"></td>
+    }
+}
+<td monaGridCell [lastInRow]="true" [attr.colspan]="contentColspan()">
+    <ng-container
+        [ngTemplateOutlet]="gridService.masterDetailTemplate()"
+        [ngTemplateOutletContext]="{ $implicit: row().data }" />
+</td>

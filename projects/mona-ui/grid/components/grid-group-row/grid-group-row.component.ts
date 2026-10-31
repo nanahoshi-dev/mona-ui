@@ -14,45 +14,7 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
     // Table rows cannot use element selectors.
     // eslint-disable-next-line @angular-eslint/component-selector
     selector: "tr[monaGridGroupRow]",
-    template: `
-        @for (layoutColumn of indentColumns(); track layoutColumn.key) {
-            <td
-                monaGridCell
-                [monaGridLockedCell]="layoutColumn.key"
-                [lockedCellHeader]="true"
-                [groupIndent]="true"></td>
-        }
-        @if (gridService.rowReorderColumnVisible()) {
-            <!-- Sits right after the indents, so it pins like the group column at this depth. -->
-            <td
-                monaGridCell
-                [monaGridLockedCell]="'group:' + group().depth"
-                [lockedCellHeader]="true"
-                [groupIndent]="true"></td>
-        }
-        <td
-            monaGridCell
-            monaGridLogicalCell
-            [cellKind]="'group'"
-            [rowIndex]="rowIndex()"
-            [colIndex]="0"
-            [section]="'body'"
-            [groupHeader]="true"
-            [firstInRow]="true"
-            [lastInRow]="gridService.visibleColumns().length === 0"
-            [groupKey]="group().groupKey"
-            [attr.colspan]="titleColspan()"
-            (toggleExpand)="toggle()">
-            <p [class]="titleClass()">
-                <mona-grid-toggle
-                    [expanded]="!collapsed()"
-                    [width]="gridService.groupColumnWidth"
-                    [type]="'group'"
-                    (expandedChange)="toggle()" />
-                <span class="font-bold">{{ group().title }}: {{ group().groupValue }}</span>
-            </p>
-        </td>
-    `,
+    templateUrl: "./grid-group-row.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [GridCellDirective, GridLockedCellDirective, GridLogicalCellDirective, GridToggleComponent],
     host: {

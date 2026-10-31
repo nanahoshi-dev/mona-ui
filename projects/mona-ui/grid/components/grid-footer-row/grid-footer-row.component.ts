@@ -13,28 +13,7 @@ import { GridFooterCellComponent } from "../grid-footer-cell/grid-footer-cell.co
     // Table rows cannot use element selectors.
     // eslint-disable-next-line @angular-eslint/component-selector
     selector: "tr[monaGridFooterRow]",
-    template: `
-        @for (layoutColumn of gridService.layout(); track layoutColumn.key) {
-            @if (layoutColumn.kind === "column") {
-                <td
-                    monaGridFooterTableCell
-                    [monaGridLockedCell]="layoutColumn.key"
-                    [lockedCellHeader]="true"
-                    [footerColumn]="layoutColumn.column">
-                    <mona-grid-footer-cell
-                        [column]="layoutColumn.column"
-                        [columnIndex]="layoutColumn.columnIndex"
-                        [groupKey]="groupKey()" />
-                </td>
-            } @else {
-                <td
-                    monaGridFooterTableCell
-                    [monaGridLockedCell]="layoutColumn.key"
-                    [lockedCellHeader]="true"
-                    [footerCellWidth]="layoutColumn.width"></td>
-            }
-        }
-    `,
+    templateUrl: "./grid-footer-row.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [GridFooterCellComponent, GridFooterTableCellDirective, GridLockedCellDirective],
     host: {

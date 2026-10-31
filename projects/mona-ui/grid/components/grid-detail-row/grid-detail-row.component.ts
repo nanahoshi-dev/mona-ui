@@ -13,26 +13,7 @@ import { GridService } from "../../services/grid.service";
     // Table rows cannot use element selectors.
     // eslint-disable-next-line @angular-eslint/component-selector
     selector: "tr[monaGridDetailRow]",
-    template: `
-        @for (layoutColumn of gridService.layout(); track layoutColumn.key) {
-            @if (layoutColumn.kind === "group") {
-                <td
-                    monaGridCell
-                    [monaGridLockedCell]="layoutColumn.key"
-                    [lockedCellHeader]="true"
-                    [groupIndent]="true"></td>
-            } @else if (layoutColumn.kind === "reorder") {
-                <td monaGridCell [monaGridLockedCell]="layoutColumn.key" [groupIndent]="grouped()"></td>
-            } @else if (layoutColumn.kind !== "column") {
-                <td monaGridCell [monaGridLockedCell]="layoutColumn.key"></td>
-            }
-        }
-        <td monaGridCell [lastInRow]="true" [attr.colspan]="contentColspan()">
-            <ng-container
-                [ngTemplateOutlet]="gridService.masterDetailTemplate()"
-                [ngTemplateOutletContext]="{ $implicit: row().data }" />
-        </td>
-    `,
+    templateUrl: "./grid-detail-row.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [GridCellDirective, GridLockedCellDirective, NgTemplateOutlet],
     host: {
