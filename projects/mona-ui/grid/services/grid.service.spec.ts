@@ -1253,15 +1253,27 @@ describe("GridService", () => {
             expect(stickyOf("column:e")).toEqual({ edge: false, offset: 0, side: "end" });
         });
 
-        it("derives colIndex/firstInRow/lastInRow from the same memoized registry", () => {
+        it("marks the arrow-key boundaries of the structural and user column segments", () => {
+            service.setRowReorderableOptions({ enabled: true });
+            service.masterDetailTemplate.set({} as never);
+            service.columns.set(ImmutableList.create([createColumn({ field: "a" }), createColumn({ field: "b" })]));
+
+            expect(service.layout().map(c => (c.kind === "group" ? null : [c.key, c.firstInRow, c.lastInRow]))).toEqual(
+                [
+                    ["structural:reorder", true, false],
+                    ["structural:detail", false, false],
+                    ["column:a", true, false],
+                    ["column:b", false, true]
+                ]
+            );
+        });
+
+        it("lets the last structural column end the row when there are no user columns", () => {
             service.setRowReorderableOptions({ enabled: true });
             service.masterDetailTemplate.set({} as never);
 
-            expect(service.structuralColIndexMap().get("reorder")).toBe(0);
-            expect(service.structuralColIndexMap().get("detail")).toBe(1);
-            expect(service.structuralColIndexMap().get("reorder") === 0).toBe(true);
-            expect(service.structuralColIndexMap().get("detail") === 0).toBe(false);
-            expect(service.structuralLastKind()).toBe("detail");
+            const last = service.layoutColumnByKey().get("structural:detail");
+            expect(last?.kind !== "group" && last?.lastInRow).toBe(true);
         });
 
         it("lays out group indents, structural columns, and user columns in one shared sequence", () => {
@@ -1285,13 +1297,10 @@ describe("GridService", () => {
             ]);
         });
 
-        it("keeps the structuralColIndexMap reference stable across reads when nothing structural changed", () => {
+        it("keeps the layout reference stable across reads when nothing changed", () => {
             service.setRowReorderableOptions({ enabled: true });
 
-            const first = service.structuralColIndexMap();
-            const second = service.structuralColIndexMap();
-
-            expect(first).toBe(second);
+            expect(service.layout()).toBe(service.layout());
         });
     });
 

@@ -78,7 +78,7 @@ import type { RowReorderableOptions } from "../models/RowReorderableOptions";
 import { RowReorderEvent } from "../models/RowReorderEvent";
 import { SelectableOptions } from "../models/SelectableOptions";
 import { SortableOptions } from "../models/SortableOptions";
-import type { StructuralColumnDescriptor, StructuralColumnKind } from "../models/StructuralColumn";
+import type { StructuralColumnDescriptor } from "../models/StructuralColumn";
 import { GRID_DEFAULT_MESSAGES } from "../i18n/grid.default-messages";
 import { GridRowFlattenerService } from "./grid-row-flattener.service";
 
@@ -339,18 +339,11 @@ export class GridService {
     public readonly layoutColumnByKey = computed<ReadonlyMap<string, GridLayoutColumn>>(
         () => new Map(this.layout().map(layoutColumn => [layoutColumn.key, layoutColumn]))
     );
-    public readonly leadingLogicalColumnCount = computed(() => this.visibleStructuralColumns().length);
-    public readonly leadingStructuralColumnCount = computed(
-        () => this.groupColumns().length + this.visibleStructuralColumns().length
-    );
     public readonly leadingStructuralWidth = computed(
         () =>
             this.groupStructuralWidth() +
             this.visibleStructuralColumns().reduce((total, column) => total + column.width, 0)
     );
-    public readonly masterDetailEmptyCellWidth = computed(() => {
-        return this.detailColumnWidth * (this.groupColumns().length + 1);
-    });
     public readonly masterDetailRowWidth = computed(() => {
         const columns = this.visibleColumns();
         const columnListWidth = columns.aggregate((acc, c) => acc + this.getColumnWidth(c), 0);
@@ -400,9 +393,6 @@ export class GridService {
         return null;
     });
     public readonly rowReorderInteractionEnabled = computed(() => this.rowReorderDisabledReason() == null);
-    public readonly rowReorderStructuralWidth = computed(() =>
-        this.rowReorderColumnVisible() ? this.rowReorderColumnWidth : 0
-    );
     public readonly rowReorderableOptions = this.#rowReorderableOptions.asReadonly();
     public readonly rows = signal<ImmutableList<Row>>(ImmutableList.create());
     public readonly save$ = new Subject<GridSaveEvent>();
@@ -448,22 +438,12 @@ export class GridService {
         allowUnsort: true,
         showIndices: true
     });
-    public readonly structuralColIndexMap = computed(() => {
-        const map = new Map<StructuralColumnKind, number>();
-        this.visibleStructuralColumns().forEach((column, index) => map.set(column.kind, index));
-        return map;
-    });
-    // Single source of truth for structural-column left-to-right order; every offset/colIndex
-    // consumer derives its answer from this array instead of independently re-deriving the order.
+    // The fixed order of the structural columns; GridService.layout places them after the group indents.
     public readonly structuralColumns = computed<readonly StructuralColumnDescriptor[]>(() => [
         { kind: "reorder", visible: this.rowReorderColumnVisible(), width: this.rowReorderColumnWidth },
         { kind: "detail", visible: this.masterDetailTemplate() != null, width: this.detailColumnWidth },
         { kind: "selection", visible: this.selectionColumnVisible(), width: this.selectionColumnWidth }
     ]);
-    public readonly structuralLastKind = computed<StructuralColumnKind | null>(() => {
-        const visible = this.visibleStructuralColumns();
-        return visible.length > 0 ? visible[visible.length - 1].kind : null;
-    });
     public readonly tableWidth = computed(() => {
         const columns = this.visibleColumns();
         if (!columns.any()) {

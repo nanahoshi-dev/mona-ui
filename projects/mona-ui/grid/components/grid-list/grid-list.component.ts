@@ -14,7 +14,6 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ImmutableList } from "@mirei/ts-collections";
 import { fromEvent } from "rxjs";
-import { Column } from "../../models/Column";
 import { Row } from "../../models/Row";
 import { GridNavigationService } from "../../services/grid-navigation.service";
 import { GridService } from "../../services/grid.service";
@@ -72,7 +71,6 @@ export class GridListComponent implements GridListVariantInput {
         return gridListTableThemeVariants();
     });
 
-    public readonly columns = input<ImmutableList<Column>>(ImmutableList.create());
     public readonly data = input<ImmutableList<Row>>(ImmutableList.create());
 
     public constructor() {

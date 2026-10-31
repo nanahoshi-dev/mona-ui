@@ -9,7 +9,7 @@
         [cdkDropListDisabled]="!gridService.rowReorderInteractionEnabled()"
         (cdkDropListDropped)="onRowDrop($event)">
         @if (gridService.addRowVisible()) {
-            <tr monaGridAddRow [columns]="columns()"></tr>
+            <tr monaGridAddRow></tr>
         }
         @for (bodyRow of bodyRows(); track bodyRow.key; let rowIndex = $index) {
             @if (bodyRow.type === "group") {

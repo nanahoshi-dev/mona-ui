@@ -1,87 +1,52 @@
 @if (gridService.addRowData(); as rowData) {
     @let session = gridService.editSession();
-    @for (_ of gridService.groupColumns(); track $index) {
-        <td
-            monaGridCell
-            [monaGridLockedCell]="'group:' + $index"
-            [lockedCellHeader]="true"
-            [grouped]="true"
-            [indentCell]="true"
-            [attr.colspan]="1"
-            [style.width.px]="gridService.groupColumnWidth"></td>
-    }
-    @if (gridService.rowReorderColumnVisible()) {
-        <td
-            monaGridCell
-            monaGridLogicalCell
-            [monaGridLockedCell]="'structural:reorder'"
-            [rowIndex]="-1"
-            [colIndex]="gridService.structuralColIndexMap().get('reorder') ?? 0"
-            [cellKind]="'command'"
-            [columnId]="'$rowReorder'"
-            [firstInRow]="gridService.structuralColIndexMap().get('reorder') === 0"
-            [lastInRow]="columns().length === 0 && gridService.structuralLastKind() === 'reorder'"
-            [section]="'add'"
-            [style.width.px]="gridService.rowReorderColumnWidth"></td>
-    }
-    @if (gridService.masterDetailTemplate()) {
-        <td
-            monaGridCell
-            monaGridLogicalCell
-            [monaGridLockedCell]="'structural:detail'"
-            [masterDetailToggle]="true"
-            [rowIndex]="-1"
-            [colIndex]="gridService.structuralColIndexMap().get('detail') ?? 0"
-            [cellKind]="'detail'"
-            [firstInRow]="gridService.structuralColIndexMap().get('detail') === 0"
-            [lastInRow]="columns().length === 0 && gridService.structuralLastKind() === 'detail'"
-            [section]="'add'"
-            [style.width.px]="gridService.detailColumnWidth"></td>
-    }
-    @if (gridService.selectionColumnVisible()) {
-        <td
-            monaGridCell
-            monaGridLogicalCell
-            [monaGridLockedCell]="'structural:selection'"
-            [rowIndex]="-1"
-            [colIndex]="gridService.structuralColIndexMap().get('selection') ?? 0"
-            [cellKind]="'command'"
-            [columnId]="'$selection'"
-            [firstInRow]="gridService.structuralColIndexMap().get('selection') === 0"
-            [lastInRow]="columns().length === 0 && gridService.structuralLastKind() === 'selection'"
-            [section]="'add'"
-            [style.width.px]="gridService.selectionColumnWidth"></td>
-    }
-    @for (column of columns(); track $index) {
-        @let colIndex = $index + gridService.leadingLogicalColumnCount();
-        <td
-            monaGridCell
-            [monaGridLockedCell]="'column:' + column.id"
-            [dataCell]="true"
-            monaGridLogicalCell
-            [cellKind]="column.kind"
-            [colIndex]="colIndex"
-            [columnId]="column.id"
-            [rowIndex]="-1"
-            [section]="'add'"
-            [firstInRow]="colIndex === gridService.leadingLogicalColumnCount()"
-            [lastInRow]="colIndex === gridService.leadingLogicalColumnCount() + columns().length - 1"
-            [attr.colspan]="1"
-            [style.width.px]="column.calculatedWidth"
-            [style.min-width.px]="column.minWidth">
-            @if (column.kind === "command") {
-                <mona-grid-command-cell [column]="column" [newRow]="true"></mona-grid-command-cell>
-            } @else if (column.editable && session) {
-                <mona-grid-editor
-                    [column]="column"
-                    [autoFocus]="isFirstEditableColumn(column)"
-                    [isNew]="true"
-                    [session]="session"
-                    (commit)="onCommit()"
-                    (cancelEdit)="onCancel()"></mona-grid-editor>
-            } @else {
-                <span class="block truncate px-2">{{ rowData[column.field] }}</span>
-            }
-        </td>
+    @for (layoutColumn of gridService.layout(); track layoutColumn.key) {
+        @if (layoutColumn.kind === "column") {
+            @let column = layoutColumn.column;
+            <td
+                monaGridCell
+                [monaGridLockedCell]="layoutColumn.key"
+                monaGridLogicalCell
+                [cellKind]="column.kind"
+                [colIndex]="layoutColumn.logicalIndex"
+                [columnId]="column.id"
+                [rowIndex]="-1"
+                [section]="'add'"
+                [firstInRow]="layoutColumn.firstInRow"
+                [lastInRow]="layoutColumn.lastInRow">
+                @if (column.kind === "command") {
+                    <mona-grid-command-cell [column]="column" [newRow]="true"></mona-grid-command-cell>
+                } @else if (column.editable && session) {
+                    <mona-grid-editor
+                        [column]="column"
+                        [autoFocus]="column === firstEditableColumn()"
+                        [isNew]="true"
+                        [session]="session"
+                        (commit)="onCommit()"
+                        (cancelEdit)="onCancel()"></mona-grid-editor>
+                } @else {
+                    <span class="block truncate px-2">{{ rowData[column.field] }}</span>
+                }
+            </td>
+        } @else if (layoutColumn.kind === "group") {
+            <td
+                monaGridCell
+                [monaGridLockedCell]="layoutColumn.key"
+                [lockedCellHeader]="true"
+                [grouped]="true"
+                [indentCell]="true"></td>
+        } @else {
+            <td
+                monaGridCell
+                monaGridLogicalCell
+                [monaGridLockedCell]="layoutColumn.key"
+                [rowIndex]="-1"
+                [colIndex]="layoutColumn.logicalIndex"
+                [cellKind]="layoutColumn.kind === 'detail' ? 'detail' : 'command'"
+                [columnId]="structuralColumnIds[layoutColumn.kind]"
+                [firstInRow]="layoutColumn.firstInRow"
+                [lastInRow]="layoutColumn.lastInRow"
+                [section]="'add'"></td>
+        }
     }
 }

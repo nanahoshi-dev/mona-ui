@@ -18,7 +18,6 @@ import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { ImmutableList } from "@mirei/ts-collections";
 import { rxTimeout } from "@nanahoshi/mona-ui/internal";
 import { fromEvent } from "rxjs";
-import { Column } from "../../models/Column";
 import type { GridViewRow } from "../../models/GridGroup";
 import { Row } from "../../models/Row";
 import { GridNavigationService } from "../../services/grid-navigation.service";
@@ -84,7 +83,6 @@ export class GridVirtualListComponent {
         return gridListTableThemeVariants();
     });
     protected readonly viewport = viewChild.required(CdkVirtualScrollViewport);
-    public readonly columns = input<ImmutableList<Column>>(ImmutableList.create());
     public readonly data = input<ImmutableList<Row>>(ImmutableList.create());
 
     public constructor() {
