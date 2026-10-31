@@ -69,9 +69,9 @@ export class GridNavigationService {
             case "ArrowUp":
                 return this.#navigateVertically("up", cellKey);
             case "ArrowLeft":
-                return this.#navigateHorizontally("left", cellKey);
+                return this.#navigateHorizontally("previous", cellKey);
             case "ArrowRight":
-                return this.#navigateHorizontally("right", cellKey);
+                return this.#navigateHorizontally("next", cellKey);
             case "Home":
                 return this.#navigateToRowEdge("first", cellKey);
             case "End":
@@ -253,31 +253,27 @@ export class GridNavigationService {
         return data ? { key, value: data } : null;
     }
 
-    #navigateHorizontally(direction: "left" | "right", cellKey: string): boolean {
+    // Moves in logical column order; callers map arrow keys to it according to the text direction.
+    #navigateHorizontally(direction: "next" | "previous", cellKey: string): boolean {
         const data = this.#cellElementDict().get(cellKey);
         if (!data || data.groupHeader) {
             return false;
         }
-        if (direction === "left") {
-            if (data.firstInRow) {
-                return false;
-            }
-            const prevCell = this.#findCellAt(data.section, data.rowIndex, data.colIndex - 1);
-            if (prevCell) {
-                this.#focusCell(prevCell.key, prevCell.value);
-                return true;
-            }
-        } else {
-            if (data.lastInRow) {
-                return false;
-            }
-            const nextCell = this.#findCellAt(data.section, data.rowIndex, data.colIndex + 1);
-            if (nextCell) {
-                this.#focusCell(nextCell.key, nextCell.value);
-                return true;
-            }
+        if (direction === "previous" ? data.firstInRow : data.lastInRow) {
+            return false;
         }
-        return false;
+        // Not every layout column registers a cell in every section (the header has no detail cell),
+        // so move to the nearest registered cell instead of the adjacent index.
+        const rowCells = this.#findCellsInRow(data.rowIndex, data.section);
+        const target =
+            direction === "previous"
+                ? rowCells.filter(cell => cell.value.colIndex < data.colIndex).at(-1)
+                : rowCells.find(cell => cell.value.colIndex > data.colIndex);
+        if (!target) {
+            return false;
+        }
+        this.#focusCell(target.key, target.value);
+        return true;
     }
 
     #navigateToGridEdge(edge: "first" | "last"): boolean {

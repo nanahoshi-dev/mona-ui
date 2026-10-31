@@ -225,13 +225,14 @@ export class GridLogicalCellDirective {
             return;
         }
 
-        if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+        const key = this.#toLogicalArrowKey(event.key);
+        if (key === "ArrowRight" || key === "ArrowDown") {
             event.preventDefault();
             this.#focusNextInnerTarget(target, false);
             return;
         }
 
-        if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+        if (key === "ArrowLeft" || key === "ArrowUp") {
             event.preventDefault();
             this.#focusNextInnerTarget(target, true);
         }
@@ -327,12 +328,8 @@ export class GridLogicalCellDirective {
             }
             event.preventDefault();
             this.#navigate("ArrowDown");
-        } else if (event.key === "ArrowLeft") {
-            if (this.#navigate("ArrowLeft")) {
-                event.preventDefault();
-            }
-        } else if (event.key === "ArrowRight") {
-            if (this.#navigate("ArrowRight")) {
+        } else if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+            if (this.#navigate(this.#toLogicalArrowKey(event.key))) {
                 event.preventDefault();
             }
         } else if (event.key === "ArrowUp") {
@@ -389,5 +386,21 @@ export class GridLogicalCellDirective {
                 target.setAttribute("tabindex", "-1");
             }
         }
+    }
+
+    /**
+     * Maps a horizontal arrow key to its logical meaning: ArrowRight moves to the next column in LTR
+     * and to the previous column in RTL, where columns run right to left.
+     */
+    #toLogicalArrowKey(key: string): string {
+        // Read on demand: a direction observer per cell would be costly in large grids.
+        const host = this.#hostElementRef.nativeElement;
+        if (host.ownerDocument.defaultView?.getComputedStyle(host).direction !== "rtl") {
+            return key;
+        }
+        if (key === "ArrowLeft") {
+            return "ArrowRight";
+        }
+        return key === "ArrowRight" ? "ArrowLeft" : key;
     }
 }

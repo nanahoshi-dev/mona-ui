@@ -184,6 +184,21 @@ async function main(): Promise<void> {
             expect(pinned.overflow).toBeGreaterThan(0);
             expect(Math.abs(pinned.startGap)).toBeLessThan(1);
             expect(Math.abs(pinned.endGap)).toBeLessThan(1);
+
+            // Arrow keys follow the screen in both directions and cross from user to structural columns.
+            const towardStart = direction === "rtl" ? "ArrowRight" : "ArrowLeft";
+            const towardEnd = direction === "rtl" ? "ArrowLeft" : "ArrowRight";
+            const focusedColumn = () =>
+                page.evaluate(() => document.activeElement?.getAttribute("aria-colindex") ?? null);
+            await rows.nth(0).locator('td[aria-colindex="4"]').focus();
+            await page.keyboard.press(towardStart);
+            expect(await focusedColumn()).toBe("3");
+            await page.keyboard.press(towardEnd);
+            expect(await focusedColumn()).toBe("4");
+            // The header has no detail cell, so navigation steps from the reorder header to the select-all header.
+            await grid.locator('thead th[aria-colindex="1"]').focus();
+            await page.keyboard.press(towardEnd);
+            expect(await focusedColumn()).toBe("3");
         }
 
         // Every grouped body row spans exactly the colgroup, and detail content lines up with the data columns.

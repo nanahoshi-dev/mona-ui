@@ -1253,7 +1253,7 @@ describe("GridService", () => {
             expect(stickyOf("column:e")).toEqual({ edge: false, offset: 0, side: "end" });
         });
 
-        it("marks the arrow-key boundaries of the structural and user column segments", () => {
+        it("marks only the outer cells of the row as arrow-key boundaries", () => {
             service.setRowReorderableOptions({ enabled: true });
             service.masterDetailTemplate.set({} as never);
             service.columns.set(ImmutableList.create([createColumn({ field: "a" }), createColumn({ field: "b" })]));
@@ -1262,7 +1262,7 @@ describe("GridService", () => {
                 [
                     ["structural:reorder", true, false],
                     ["structural:detail", false, false],
-                    ["column:a", true, false],
+                    ["column:a", false, false],
                     ["column:b", false, true]
                 ]
             );

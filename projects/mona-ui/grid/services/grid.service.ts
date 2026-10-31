@@ -293,7 +293,7 @@ export class GridService {
                 width: this.groupColumnWidth
             });
         }
-        // Arrow-key boundaries: structural columns and user columns are navigated as separate segments.
+        // Arrow keys move across structural and user columns as one row.
         for (const [index, structuralColumn] of structuralColumns.entries()) {
             layout.push({
                 firstInRow: index === 0,
@@ -325,7 +325,7 @@ export class GridService {
             layout.push({
                 column,
                 columnIndex,
-                firstInRow: columnIndex === 0,
+                firstInRow: structuralColumns.length === 0 && columnIndex === 0,
                 key: `column:${column.id}`,
                 kind: "column",
                 lastInRow: columnIndex === columns.length - 1,
