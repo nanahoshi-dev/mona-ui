@@ -193,13 +193,7 @@ export class GridService {
     public readonly columns = signal<ImmutableList<Column>>(ImmutableList.create());
     public readonly contextMenuItems = signal(ImmutableSet.create<PopupMenuItem>());
     public readonly dataStateChange$ = new Subject<GridDataState>();
-    public readonly detailColumnOffset = computed(() =>
-        this.structuralColumnOffset("detail", this.groupStructuralWidth())
-    );
     public readonly detailColumnWidth = 36;
-    public readonly detailStructuralWidth = computed(() =>
-        this.masterDetailTemplate() != null ? this.detailColumnWidth : 0
-    );
     public readonly draggingRowUid = signal<string | null>(null);
     public readonly edit$ = new Subject<GridEditEvent>();
     public readonly editBaseDict = computed(() => {
@@ -318,12 +312,6 @@ export class GridService {
             this.groupStructuralWidth() +
             this.visibleStructuralColumns().reduce((total, column) => total + column.width, 0)
     );
-    public readonly leftLockedStructuralWidth = computed(() => {
-        if (!this.hasLeftLockedColumns()) {
-            return 0;
-        }
-        return this.leadingStructuralWidth();
-    });
     public readonly lockedColumnStates = computed<ReadonlyMap<string, GridLockedColumnState>>(() => {
         const states = new Map<string, GridLockedColumnState>();
         const columns = this.visibleColumns().toArray();
@@ -372,9 +360,6 @@ export class GridService {
     public readonly rowEdit$ = new Subject<RowEditEvent>();
     public readonly rowKey = signal<GridKeySelector<unknown> | null>(null);
     public readonly rowReorder$ = new Subject<RowReorderEvent>();
-    public readonly rowReorderColumnOffset = computed(() =>
-        this.structuralColumnOffset("reorder", this.groupStructuralWidth())
-    );
     public readonly rowReorderColumnVisible = computed(() => this.rowReorderableOptions().enabled === true);
     public readonly rowReorderColumnWidth = 36;
     public readonly rowReorderDisabledReason = computed<RowReorderDisabledReason>(() => {
@@ -433,17 +418,11 @@ export class GridService {
             .where(row => selectedKeys.contains(this.getRowSelectionKey(row)))
             .toImmutableSet();
     });
-    public readonly selectionColumnOffset = computed(() =>
-        this.structuralColumnOffset("selection", this.groupStructuralWidth())
-    );
     public readonly selectionColumnVisible = computed(() => {
         const options = this.selectableOptions();
         return options.enabled === true && options.showCheckboxes === true;
     });
     public readonly selectionColumnWidth = 40;
-    public readonly selectionStructuralWidth = computed(() =>
-        this.selectionColumnVisible() ? this.selectionColumnWidth : 0
-    );
     public readonly serverBindingEnabled = this.#serverBindingEnabled.asReadonly();
     public readonly serverLoading = this.#serverLoading.asReadonly();
     public readonly serverTotal = this.#serverTotal.asReadonly();

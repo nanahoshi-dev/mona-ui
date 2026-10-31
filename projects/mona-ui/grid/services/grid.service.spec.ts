@@ -1187,9 +1187,9 @@ describe("GridService", () => {
             });
 
             expect(service.visibleStructuralColumns().map(c => c.kind)).toEqual(["reorder", "detail", "selection"]);
-            expect(service.rowReorderColumnOffset()).toBe(0);
-            expect(service.detailColumnOffset()).toBe(36);
-            expect(service.selectionColumnOffset()).toBe(72);
+            expect(service.structuralColumnOffset("reorder", service.groupStructuralWidth())).toBe(0);
+            expect(service.structuralColumnOffset("detail", service.groupStructuralWidth())).toBe(36);
+            expect(service.structuralColumnOffset("selection", service.groupStructuralWidth())).toBe(72);
         });
 
         it("omits invisible structural columns from the offset chain", () => {
@@ -1204,7 +1204,7 @@ describe("GridService", () => {
             });
 
             expect(service.visibleStructuralColumns().map(c => c.kind)).toEqual(["selection"]);
-            expect(service.selectionColumnOffset()).toBe(0);
+            expect(service.structuralColumnOffset("selection", service.groupStructuralWidth())).toBe(0);
         });
 
         it("offsets structuralColumnOffset by an explicit group-prefix width, independent of the full group width", () => {
@@ -1216,7 +1216,7 @@ describe("GridService", () => {
             expect(service.groupStructuralWidth()).toBe(72);
             expect(service.structuralColumnOffset("reorder", 0)).toBe(0);
             expect(service.structuralColumnOffset("reorder", service.groupColumnWidth)).toBe(36);
-            expect(service.rowReorderColumnOffset()).toBe(72);
+            expect(service.structuralColumnOffset("reorder", service.groupStructuralWidth())).toBe(72);
         });
 
         it("derives colIndex/firstInRow/lastInRow from the same memoized registry", () => {
