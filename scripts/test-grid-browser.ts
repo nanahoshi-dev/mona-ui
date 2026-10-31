@@ -281,7 +281,30 @@ async function main(): Promise<void> {
         const placeholder = page.locator("#natural-ltr .cdk-drag-placeholder");
         await expect(placeholder).toBeVisible();
         expect(Math.abs((await box(placeholder)).height - original.height)).toBeLessThan(1);
+        // Rows slide out of the dragged row's way, and the drop slot is dimmed.
+        expect(await placeholder.evaluate(element => getComputedStyle(element).opacity)).toBe("0.6");
+        expect(
+            await page
+                .locator("#natural-ltr tbody tr[monaGridRow]")
+                .first()
+                .evaluate(element => getComputedStyle(element).transitionDuration.split(",")[0])
+        ).toBe("0.2s");
         await page.mouse.up();
+        await expect(page.locator(".cdk-drag-preview")).toHaveCount(0);
+
+        // Keyboard moves slide the swapped rows and keep focus on the handle, so the row can keep moving.
+        const keyboardRows = page.locator("#natural-ltr tbody tr[monaGridRow]");
+        const movedUid = await keyboardRows.first().getAttribute("data-ruid");
+        await keyboardRows.first().locator("mona-grid-row-reorder-handle button").focus();
+        await page.keyboard.press("Alt+ArrowDown");
+        await expect(keyboardRows.nth(1)).toHaveAttribute("data-ruid", movedUid!);
+        expect(await keyboardRows.nth(1).evaluate(element => element.getAnimations().length)).toBe(1);
+        await page.keyboard.press("Alt+ArrowDown");
+        await expect(keyboardRows.nth(2)).toHaveAttribute("data-ruid", movedUid!);
+        await page.keyboard.press("Alt+ArrowUp");
+        await page.keyboard.press("Alt+ArrowUp");
+        await expect(keyboardRows.first()).toHaveAttribute("data-ruid", movedUid!);
+        await expect(keyboardRows.first().locator("mona-grid-row-reorder-handle button")).toBeFocused();
 
         const require = createRequire(import.meta.url);
         await page.addScriptTag({ content: readFileSync(require.resolve("axe-core/axe.min.js"), "utf8") });
@@ -299,7 +322,7 @@ async function main(): Promise<void> {
         expect(violations).toEqual([]);
         expect(errors).toEqual([]);
         console.log(
-            "Grid browser checks passed: server interactions, natural sizing, RTL/locked cells, editing, fixed virtual geometry, drag placeholder, and accessibility."
+            "Grid browser checks passed: server interactions, natural sizing, RTL/locked cells, editing, fixed virtual geometry, drag and keyboard row moves, and accessibility."
         );
     } finally {
         await browser.close();

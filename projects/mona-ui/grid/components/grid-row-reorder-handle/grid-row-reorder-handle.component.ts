@@ -1,7 +1,7 @@
 import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { LucideGripVertical } from "@lucide/angular";
 import { CdkDragHandle } from "@angular/cdk/drag-drop";
-import { Component, computed, inject, input } from "@angular/core";
+import { afterNextRender, Component, computed, ElementRef, inject, Injector, input } from "@angular/core";
 import type { Row } from "../../models/Row";
 import { GridService } from "../../services/grid.service";
 import { gridRowReorderHandleThemeVariants } from "../../styles/grid.styles";
@@ -18,6 +18,8 @@ import { gridRowReorderHandleThemeVariants } from "../../styles/grid.styles";
 })
 export class GridRowReorderHandleComponent {
     readonly #gridService = inject(GridService);
+    readonly #hostElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+    readonly #injector = inject(Injector);
     readonly #liveAnnouncer = inject(LiveAnnouncer);
     protected readonly ariaLabel = computed(() => {
         const absoluteIndex = this.pageIndex() + this.#gridService.paginationState().skip;
@@ -77,6 +79,18 @@ export class GridRowReorderHandleComponent {
         }
         const moved = this.#gridService.requestRowReorder(this.row(), this.pageIndex(), targetIndex);
         if (moved) {
+            // Re-rendering the new order moves this row in the DOM, which drops focus. Keep it so the row can move again.
+            afterNextRender(
+                {
+                    write: () => {
+                        const button = this.#hostElement.querySelector("button");
+                        if (button != null && this.#hostElement.ownerDocument.activeElement !== button) {
+                            button.focus();
+                        }
+                    }
+                },
+                { injector: this.#injector }
+            );
             const skip = this.#gridService.paginationState().skip;
             const fromRowNumber = skip + this.pageIndex() + 1;
             const toPosition = skip + targetIndex + 1;

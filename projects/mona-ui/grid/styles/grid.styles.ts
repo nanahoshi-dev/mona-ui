@@ -134,16 +134,16 @@ export const gridRowReorderHandleThemeVariants = cva(`
     disabled:cursor-not-allowed disabled:text-muted-foreground/35 disabled:hover:text-muted-foreground/35
 `);
 
+/** On drop, the preview glides into the row's new slot and fades out. */
 export const gridRowDragPreviewThemeVariants = cva(`
     flex items-center gap-2
     px-2! py-1!
     bg-surface-raised! text-foreground!
     border! border-border! rounded-md shadow-(--shadow-overlay)!
-`);
-
-export const gridRowDragPlaceholderThemeVariants = cva(`
-    opacity-40
-    [&>td]:bg-hover! [&>td]:border-dashed! [&>td]:border-border!
+    [&.cdk-drag-animating]:opacity-0
+    [&.cdk-drag-animating]:transition-[transform,opacity] [&.cdk-drag-animating]:duration-200
+    [&.cdk-drag-animating]:ease-[cubic-bezier(0.2,0,0,1)]
+    motion-reduce:[&.cdk-drag-animating]:transition-none
 `);
 
 export const gridFilterRowCellThemeVariants = cva(`
@@ -264,11 +264,17 @@ export const gridListBaseThemeVariants = cva(
     }
 );
 
+/**
+ * While a row is dragged, the other rows slide out of its way and the slot it will drop into shows the row dimmed.
+ */
 export const gridListTableThemeVariants = cva(
     `
         border-separate border-spacing-0 w-full table-fixed
-        [&_.cdk-drag-dragging]:z-10! [&_.cdk-drag-dragging]:shadow-(--shadow-overlay)
-        [&_.cdk-drag-animating]:transition-transform
+        [&_.cdk-drop-list-dragging>.cdk-drag]:transition-transform
+        [&_.cdk-drop-list-dragging>.cdk-drag]:duration-200
+        [&_.cdk-drop-list-dragging>.cdk-drag]:ease-[cubic-bezier(0.2,0,0,1)]
+        motion-reduce:[&_.cdk-drop-list-dragging>.cdk-drag]:transition-none
+        [&_.cdk-drag-placeholder]:opacity-60 [&_.cdk-drag-placeholder>td]:bg-hover!
     `
 );
 

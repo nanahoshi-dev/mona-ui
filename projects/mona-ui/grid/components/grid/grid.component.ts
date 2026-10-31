@@ -714,6 +714,11 @@ export class GridComponent<T> implements GridVariantInput {
                             if (this.gridService.editContext() != null) {
                                 return;
                             }
+                            // Focus that survived the render, or was already put back, stays where it is.
+                            const host = this.#hostElementRef.nativeElement;
+                            if (host.contains(host.ownerDocument.activeElement)) {
+                                return;
+                            }
                             this.#gridNavigationService.focusActiveCellOrFirstHeader();
                         }
                     },

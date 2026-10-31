@@ -138,9 +138,7 @@ function gridServiceOf(fixture: ComponentFixture<unknown>): GridService {
 }
 
 function gridListOf(fixture: ComponentFixture<unknown>): GridListComponent {
-    const listDebugElement = fixture.debugElement.query(
-        de => de.componentInstance instanceof GridListComponent
-    );
+    const listDebugElement = fixture.debugElement.query(de => de.componentInstance instanceof GridListComponent);
     if (listDebugElement == null) {
         throw new Error("Expected mona-grid-list component");
     }
@@ -169,7 +167,15 @@ async function simulatePointerDrag(handle: HTMLElement, targetRow: HTMLElement):
     const end = targetRow.getBoundingClientRect();
     const fire = (type: string, target: EventTarget, clientX: number, clientY: number): void => {
         target.dispatchEvent(
-            new MouseEvent(type, { bubbles: true, cancelable: true, clientX, clientY, button: 0, buttons: 1, detail: 1 })
+            new MouseEvent(type, {
+                bubbles: true,
+                cancelable: true,
+                clientX,
+                clientY,
+                button: 0,
+                buttons: 1,
+                detail: 1
+            })
         );
     };
     fire("mousedown", handle, start.x, start.y);
@@ -426,16 +432,13 @@ describe("grid row reordering integration", () => {
             dispatchAltArrow(firstHandle, "ArrowDown");
             await settleFixture(fixture);
 
-            // Known gap (not fixed here): GridNavigationService's active-cell tracking is keyed by
-            // logical cell (rowUid + columnId), not by the specific inner focusable element within a
-            // command-style cell. A keyboard-triggered reorder rebinds [data], which re-runs
-            // GridComponent's setDataEffect and calls focusActiveCellOrFirstHeader() - since the handle
-            // button was never registered as the tracked "active cell", it falls back to the first
-            // header. This is pre-existing GridNavigationService behavior shared by every command-cell
-            // button (edit/save/cancel, selection), not something introduced by row-reordering, so
-            // fixing it is out of scope here. This test documents the current, real behavior.
-            const reorderHeader = getRequiredElement(fixture.nativeElement, 'th[aria-label="Row reorder"]');
-            expect(document.activeElement).toBe(reorderHeader);
+            // The handle moved with its row, so Alt+Arrow can be pressed again to keep moving it.
+            const movedHandle = getRequiredElement(
+                fixture.nativeElement,
+                "tbody tr[monaGridRow]:nth-child(2) mona-grid-row-reorder-handle button"
+            );
+            expect(movedHandle).toBe(firstHandle);
+            expect(document.activeElement).toBe(firstHandle);
         });
 
         it("keeps the handle disabled when a per-row predicate rejects the row", async () => {
@@ -576,10 +579,7 @@ describe("grid row reordering integration", () => {
         it("sets and clears draggingRowUid through real CDK drag events", async () => {
             const [first] = gridService.rows().toArray();
             const firstHandle = getRequiredElement(fixture.nativeElement, "mona-grid-row-reorder-handle button");
-            const targetRow = getRequiredElement(
-                fixture.nativeElement,
-                "tbody tr[monaGridRow]:nth-child(3)"
-            );
+            const targetRow = getRequiredElement(fixture.nativeElement, "tbody tr[monaGridRow]:nth-child(3)");
 
             const start = firstHandle.getBoundingClientRect();
             const end = targetRow.getBoundingClientRect();
@@ -615,10 +615,7 @@ describe("grid row reordering integration", () => {
 
         it("reorders a row end-to-end through a real pointer drag", async () => {
             const firstHandle = getRequiredElement(fixture.nativeElement, "mona-grid-row-reorder-handle button");
-            const targetRow = getRequiredElement(
-                fixture.nativeElement,
-                "tbody tr[monaGridRow]:nth-child(3)"
-            );
+            const targetRow = getRequiredElement(fixture.nativeElement, "tbody tr[monaGridRow]:nth-child(3)");
 
             await simulatePointerDrag(firstHandle, targetRow);
             await settleFixture(fixture);
@@ -661,26 +658,30 @@ describe("grid row reordering integration", () => {
             await settleFixture(fixture);
             expect(gridService.rowReorderDisabledReason()).toBe("sorted");
             expect(
-                getRequiredElement(fixture.nativeElement, "mona-grid-row-reorder-handle button").hasAttribute("disabled")
+                getRequiredElement(fixture.nativeElement, "mona-grid-row-reorder-handle button").hasAttribute(
+                    "disabled"
+                )
             ).toBe(true);
 
             gridService.loadSorts([]);
             await settleFixture(fixture);
             expect(gridService.rowReorderDisabledReason()).toBeNull();
             expect(
-                getRequiredElement(fixture.nativeElement, "mona-grid-row-reorder-handle button").hasAttribute("disabled")
+                getRequiredElement(fixture.nativeElement, "mona-grid-row-reorder-handle button").hasAttribute(
+                    "disabled"
+                )
             ).toBe(false);
         });
 
         it("disables the handles while a filter is active", async () => {
-            gridService.loadFilters([
-                { logic: "and", filters: [{ field: "name", operator: "eq", value: "Row 1" }] }
-            ]);
+            gridService.loadFilters([{ logic: "and", filters: [{ field: "name", operator: "eq", value: "Row 1" }] }]);
             await settleFixture(fixture);
 
             expect(gridService.rowReorderDisabledReason()).toBe("filtered");
             expect(
-                getRequiredElement(fixture.nativeElement, "mona-grid-row-reorder-handle button").hasAttribute("disabled")
+                getRequiredElement(fixture.nativeElement, "mona-grid-row-reorder-handle button").hasAttribute(
+                    "disabled"
+                )
             ).toBe(true);
         });
 
@@ -694,7 +695,9 @@ describe("grid row reordering integration", () => {
 
             expect(gridService.rowReorderDisabledReason()).toBe("grouped");
             expect(
-                getRequiredElement(fixture.nativeElement, "mona-grid-row-reorder-handle button").hasAttribute("disabled")
+                getRequiredElement(fixture.nativeElement, "mona-grid-row-reorder-handle button").hasAttribute(
+                    "disabled"
+                )
             ).toBe(true);
         });
 
@@ -710,7 +713,9 @@ describe("grid row reordering integration", () => {
 
             expect(gridService.rowReorderDisabledReason()).toBe("editing");
             expect(
-                getRequiredElement(fixture.nativeElement, "mona-grid-row-reorder-handle button").hasAttribute("disabled")
+                getRequiredElement(fixture.nativeElement, "mona-grid-row-reorder-handle button").hasAttribute(
+                    "disabled"
+                )
             ).toBe(true);
         });
 
@@ -720,7 +725,9 @@ describe("grid row reordering integration", () => {
 
             expect(gridService.rowReorderDisabledReason()).toBe("single-row");
             expect(
-                getRequiredElement(fixture.nativeElement, "mona-grid-row-reorder-handle button").hasAttribute("disabled")
+                getRequiredElement(fixture.nativeElement, "mona-grid-row-reorder-handle button").hasAttribute(
+                    "disabled"
+                )
             ).toBe(true);
         });
 
@@ -742,10 +749,7 @@ describe("grid row reordering integration", () => {
             const service = gridServiceOf(virtualFixture);
 
             expect(service.rowReorderDisabledReason()).toBe("virtual-scroll");
-            const handle = getRequiredElement(
-                virtualFixture.nativeElement,
-                "mona-grid-row-reorder-handle button"
-            );
+            const handle = getRequiredElement(virtualFixture.nativeElement, "mona-grid-row-reorder-handle button");
             expect(handle.hasAttribute("disabled")).toBe(true);
         });
 

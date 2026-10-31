@@ -2,13 +2,13 @@ import { CdkDrag, CdkDragDrop, CdkDragEnd, CdkDragPreview, CdkDragStart, CdkDrop
 import { LucideGripVertical } from "@lucide/angular";
 import {
     afterNextRender,
+    afterRenderEffect,
     Component,
     computed,
     DestroyRef,
     ElementRef,
     inject,
     input,
-    signal,
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
@@ -20,7 +20,6 @@ import { GridService } from "../../services/grid.service";
 import {
     gridListBaseThemeVariants,
     gridListTableThemeVariants,
-    gridRowDragPlaceholderThemeVariants,
     gridRowDragPreviewThemeVariants,
     GridListVariantInput
 } from "../../styles/grid.styles";
@@ -30,6 +29,22 @@ import { GridDetailRowComponent } from "../grid-detail-row/grid-detail-row.compo
 import { GridFooterRowComponent } from "../grid-footer-row/grid-footer-row.component";
 import { GridGroupRowComponent } from "../grid-group-row/grid-group-row.component";
 import { GridRowComponent } from "../grid-row/grid-row.component";
+
+interface RowMove {
+    readonly element: HTMLTableRowElement;
+    /** How far the row has to travel back up to where it was drawn before the move, in pixels. */
+    readonly offset: number;
+}
+
+interface RowPosition {
+    readonly element: HTMLTableRowElement;
+    readonly top: number;
+}
+
+const ROW_MOVE_DURATION = 200;
+const ROW_MOVE_EASING = "cubic-bezier(0.2, 0, 0, 1)";
+/** Data that arrives later than this after a move request is not animated, since rows may have moved for other reasons. */
+const ROW_MOVE_SNAPSHOT_LIFETIME = 1000;
 
 @Component({
     selector: "mona-grid-list",
@@ -47,29 +62,22 @@ import { GridRowComponent } from "../grid-row/grid-row.component";
         CdkDragPreview
     ],
     host: {
-        "[class]": "baseClass()"
+        "[class]": "baseClass"
     }
 })
 export class GridListComponent implements GridListVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #gridNavigationService = inject(GridNavigationService);
     readonly #hostElementRef = inject(ElementRef<HTMLDivElement>);
+    readonly #rowMoveAnimations = new Map<HTMLTableRowElement, Animation>();
+    #dropping = false;
+    #rowPositionsBeforeMove: { readonly positions: ReadonlyMap<string, number>; readonly time: number } | null = null;
     private readonly bodyTableElementRef = viewChild.required<ElementRef<HTMLTableElement>>("bodyTable");
-    protected readonly baseClass = computed(() => {
-        return gridListBaseThemeVariants({ virtual: false });
-    });
+    protected readonly baseClass = gridListBaseThemeVariants({ virtual: false });
     protected readonly bodyRows = computed(() => this.gridService.createBodyRows(this.data()));
-    protected readonly draggedRowHeight = signal<number | null>(null);
     protected readonly gridService = inject(GridService);
-    protected readonly rowDragPlaceholderClass = computed(() => {
-        return gridRowDragPlaceholderThemeVariants();
-    });
-    protected readonly rowDragPreviewClass = computed(() => {
-        return gridRowDragPreviewThemeVariants();
-    });
-    protected readonly tableClass = computed(() => {
-        return gridListTableThemeVariants();
-    });
+    protected readonly rowDragPreviewClass = gridRowDragPreviewThemeVariants();
+    protected readonly tableClass = gridListTableThemeVariants();
 
     public readonly data = input<ImmutableList<Row>>(ImmutableList.create());
 
@@ -91,36 +99,95 @@ export class GridListComponent implements GridListVariantInput {
                 });
             }
         });
+        // Rows moved from the keyboard slide from where they were drawn to their new place.
+        afterRenderEffect({
+            earlyRead: () => {
+                this.bodyRows();
+                return this.#measureRowMoves();
+            },
+            write: moves => this.#playRowMoves(moves())
+        });
     }
 
     public onRowDragEnded(_event: CdkDragEnd<Row>): void {
         this.gridService.draggingRowUid.set(null);
-        this.draggedRowHeight.set(null);
     }
 
     public onRowDragStarted(event: CdkDragStart<Row>): void {
-        const height = event.source.getRootElement().getBoundingClientRect().height;
-        if (height > 0) {
-            this.draggedRowHeight.set(height);
-        }
         this.gridService.draggingRowUid.set(event.source.data.uid);
     }
 
     public onRowDrop(event: CdkDragDrop<Row[]>): void {
         this.gridService.draggingRowUid.set(null);
-        this.draggedRowHeight.set(null);
-        this.gridService.requestRowReorder(event.item.data, event.previousIndex, event.currentIndex);
-    }
-
-    public onRowPointerDown(event: PointerEvent): void {
-        // CDK may hide the source before dragStarted. Capture its height before that happens.
-        if (this.gridService.rowReorderInteractionEnabled() && event.currentTarget instanceof HTMLElement) {
-            this.draggedRowHeight.set(event.currentTarget.getBoundingClientRect().height);
+        // The drag already showed the rows in their new order, so the move must not be animated again.
+        this.#dropping = true;
+        try {
+            this.gridService.requestRowReorder(event.item.data, event.previousIndex, event.currentIndex);
+        } finally {
+            this.#dropping = false;
         }
     }
 
     protected onBodyFocus(): void {
         this.#gridNavigationService.focusActiveCellOrFirstHeader();
+    }
+
+    #canAnimateRowMoves(): boolean {
+        const view = this.#hostElementRef.nativeElement.ownerDocument.defaultView;
+        if (view == null || typeof this.#hostElementRef.nativeElement.animate !== "function") {
+            return false;
+        }
+        return !view.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    }
+
+    #measureRowMoves(): readonly RowMove[] {
+        const snapshot = this.#rowPositionsBeforeMove;
+        this.#rowPositionsBeforeMove = null;
+        if (snapshot == null || performance.now() - snapshot.time > ROW_MOVE_SNAPSHOT_LIFETIME) {
+            return [];
+        }
+        // Rows still sliding from an earlier move are measured where they finally belong.
+        for (const animation of this.#rowMoveAnimations.values()) {
+            animation.cancel();
+        }
+        this.#rowMoveAnimations.clear();
+        const moves: RowMove[] = [];
+        for (const [uid, position] of this.#readRowPositions()) {
+            const previousTop = snapshot.positions.get(uid);
+            if (previousTop != null && Math.abs(previousTop - position.top) >= 0.5) {
+                moves.push({ element: position.element, offset: previousTop - position.top });
+            }
+        }
+        return moves;
+    }
+
+    #playRowMoves(moves: readonly RowMove[]): void {
+        for (const { element, offset } of moves) {
+            const animation = element.animate(
+                [{ transform: `translateY(${offset}px)` }, { transform: "translateY(0)" }],
+                { duration: ROW_MOVE_DURATION, easing: ROW_MOVE_EASING }
+            );
+            this.#rowMoveAnimations.set(element, animation);
+            animation.addEventListener("finish", () => {
+                if (this.#rowMoveAnimations.get(element) === animation) {
+                    this.#rowMoveAnimations.delete(element);
+                }
+            });
+        }
+    }
+
+    /** Reads where each data row is drawn, relative to the top of the body table. */
+    #readRowPositions(): Map<string, RowPosition> {
+        const table = this.bodyTableElementRef().nativeElement;
+        const tableTop = table.getBoundingClientRect().top;
+        const positions = new Map<string, RowPosition>();
+        for (const element of table.querySelectorAll<HTMLTableRowElement>(":scope > tbody > tr[data-ruid]")) {
+            const uid = element.dataset["ruid"];
+            if (uid != null) {
+                positions.set(uid, { element, top: element.getBoundingClientRect().top - tableTop });
+            }
+        }
+        return positions;
     }
 
     private setSubscriptions(): void {
@@ -129,5 +196,15 @@ export class GridListComponent implements GridListVariantInput {
             .subscribe(() => {
                 this.#gridNavigationService.focusActiveCellOrFirstHeader();
             });
+        this.gridService.rowReorder$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
+            if (this.#dropping || !this.#canAnimateRowMoves()) {
+                return;
+            }
+            const positions = new Map<string, number>();
+            for (const [uid, position] of this.#readRowPositions()) {
+                positions.set(uid, position.top);
+            }
+            this.#rowPositionsBeforeMove = { positions, time: performance.now() };
+        });
     }
 }

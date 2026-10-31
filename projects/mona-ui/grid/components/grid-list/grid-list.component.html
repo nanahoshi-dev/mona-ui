@@ -1,4 +1,4 @@
-<table role="presentation" #bodyTable [class]="tableClass()" [style.width.px]="gridService.tableWidth()">
+<table role="presentation" #bodyTable [class]="tableClass" [style.width.px]="gridService.tableWidth()">
     <colgroup monaGridColgroup></colgroup>
     <tbody
         role="rowgroup"
@@ -26,10 +26,9 @@
                     [cdkDragData]="bodyRow.row"
                     [cdkDragDisabled]="!gridService.canReorderRow(bodyRow.row)"
                     (cdkDragStarted)="onRowDragStarted($event)"
-                    (pointerdown)="onRowPointerDown($event)"
                     (cdkDragEnded)="onRowDragEnded($event)">
                     <ng-template cdkDragPreview>
-                        <div [class]="rowDragPreviewClass()">
+                        <div [class]="rowDragPreviewClass">
                             <svg lucideGripVertical [size]="16" aria-hidden="true"></svg>
                             <span>{{
                                 gridService.getRowReorderAriaLabel(
@@ -38,18 +37,6 @@
                                 )
                             }}</span>
                         </div>
-                    </ng-template>
-                    <ng-template cdkDragPlaceholder>
-                        <tr [class]="rowDragPlaceholderClass()" [style.height.px]="draggedRowHeight() ?? 36">
-                            <td
-                                [attr.colspan]="gridService.layout().length"
-                                [style.height.px]="draggedRowHeight() ?? 36"
-                                class="px-2">
-                                <span class="flex items-center text-xs text-muted-foreground">{{
-                                    gridService.messages().moveRow
-                                }}</span>
-                            </td>
-                        </tr>
                     </ng-template>
                 </tr>
                 @if (gridService.isRowExpanded(bodyRow.row) && !gridService.rowDragInProgress()) {
