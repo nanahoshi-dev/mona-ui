@@ -20,21 +20,14 @@ import { GridService } from "../../services/grid.service";
                     monaGridCell
                     [monaGridLockedCell]="layoutColumn.key"
                     [lockedCellHeader]="true"
-                    [grouped]="true"
-                    [indentCell]="true"></td>
+                    [groupIndent]="true"></td>
             } @else if (layoutColumn.kind === "reorder") {
-                <td
-                    monaGridCell
-                    [monaGridLockedCell]="layoutColumn.key"
-                    [grouped]="grouped()"
-                    [indentCell]="grouped()"></td>
-            } @else if (layoutColumn.kind === "detail") {
-                <td monaGridCell [monaGridLockedCell]="layoutColumn.key" [indentCell]="true"></td>
-            } @else if (layoutColumn.kind === "selection") {
+                <td monaGridCell [monaGridLockedCell]="layoutColumn.key" [groupIndent]="grouped()"></td>
+            } @else if (layoutColumn.kind !== "column") {
                 <td monaGridCell [monaGridLockedCell]="layoutColumn.key"></td>
             }
         }
-        <td monaGridCell [masterDetailContent]="true" [attr.colspan]="contentColspan()">
+        <td monaGridCell [lastInRow]="true" [attr.colspan]="contentColspan()">
             <ng-container
                 [ngTemplateOutlet]="gridService.masterDetailTemplate()"
                 [ngTemplateOutletContext]="{ $implicit: row().data }" />

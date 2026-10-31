@@ -298,97 +298,10 @@ export const gridListTableCellThemeVariants = cva(
     {
         variants: {
             virtual: { true: gridVirtualRowHeightClass, false: "" },
-            groupHeader: {
-                true: "",
-                false: ""
-            },
-            groupToggle: {
-                true: "",
-                false: ""
-            },
-            grouped: {
-                true: "",
-                false: ""
-            },
-            indentCell: {
-                true: "",
-                false: ""
-            },
-            lastInRow: {
-                true: "",
-                false: "border-e border-e-border-subtle"
-            },
-            masterDetailContent: {
-                true: "",
-                false: ""
-            },
-            masterDetailToggle: {
-                true: "",
-                false: ""
-            },
-            dataCell: {
-                true: "",
-                false: ""
-            }
+            groupIndent: { true: "bg-surface-muted", false: "" },
+            lastInRow: { true: "", false: "border-e border-e-border-subtle" }
         },
-        defaultVariants: { virtual: false },
-        compoundVariants: [
-            {
-                grouped: false,
-                masterDetailToggle: true,
-                class: ""
-            },
-            {
-                grouped: false,
-                dataCell: true,
-                class: ""
-            },
-            {
-                grouped: false,
-                indentCell: true,
-                class: ""
-            },
-            {
-                grouped: false,
-                masterDetailContent: true,
-                class: ""
-            },
-            {
-                groupHeader: true,
-                class: ""
-            },
-            {
-                grouped: true,
-                masterDetailToggle: true,
-                class: ""
-            },
-            {
-                grouped: true,
-                dataCell: true,
-                class: ""
-            },
-            {
-                grouped: true,
-                indentCell: true,
-                class: "bg-surface-muted"
-            },
-            {
-                grouped: true,
-                indentCell: false,
-                class: ""
-            },
-            {
-                grouped: true,
-                indentCell: true,
-                masterDetailToggle: true,
-                class: ""
-            },
-            {
-                grouped: true,
-                groupToggle: true,
-                class: ""
-            }
-        ]
+        defaultVariants: { virtual: false }
     }
 );
 

@@ -43,8 +43,7 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
                     monaGridCell
                     [monaGridLockedCell]="layoutColumn.key"
                     [lockedCellHeader]="true"
-                    [grouped]="true"
-                    [indentCell]="true"></td>
+                    [groupIndent]="true"></td>
             } @else if (layoutColumn.kind === "reorder") {
                 <td
                     monaGridCell

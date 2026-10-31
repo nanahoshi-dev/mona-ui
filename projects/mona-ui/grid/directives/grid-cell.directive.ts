@@ -1,6 +1,5 @@
 import { computed, Directive, inject, input } from "@angular/core";
 import { GridService } from "../services/grid.service";
-import { type GridRowNeighborType } from "../models/GridRowNeighbourType";
 import { gridListTableCellThemeVariants, type GridListTableCellVariantInput } from "../styles/grid.styles";
 
 @Directive({
@@ -12,35 +11,17 @@ import { gridListTableCellThemeVariants, type GridListTableCellVariantInput } fr
 })
 export class GridCellDirective implements GridListTableCellVariantInput {
     readonly #gridService = inject(GridService, { optional: true });
-    protected readonly baseClass = computed(() => {
-        const dataCell = this.dataCell();
-        const groupHeader = this.groupHeader();
-        const groupToggle = this.groupToggle();
-        const grouped = this.grouped();
-        const indentCell = this.indentCell();
-        const masterDetailContent = this.masterDetailContent();
-        const masterDetailToggle = this.masterDetailToggle();
-        const lastInRow = this.lastInRow() || groupHeader || masterDetailContent;
-        return gridListTableCellThemeVariants({
+    protected readonly baseClass = computed(() =>
+        gridListTableCellThemeVariants({
             virtual: this.#gridService?.virtualScrollOptions().enabled ?? false,
-            dataCell,
-            groupHeader,
-            groupToggle,
-            grouped,
-            indentCell,
-            lastInRow,
-            masterDetailContent,
-            masterDetailToggle
-        });
-    });
-    public readonly dataCell = input(false);
+            groupIndent: this.groupIndent(),
+            lastInRow: this.lastInRow() || this.groupHeader()
+        })
+    );
+
+    /** Marks a group header title cell. It spans to the end of the row, so it draws no end border. */
     public readonly groupHeader = input(false);
-    public readonly groupToggle = input(false);
-    public readonly grouped = input(false);
-    public readonly indentCell = input(false);
+    /** Marks an indent cell under a group, which uses the muted group background. */
+    public readonly groupIndent = input(false);
     public readonly lastInRow = input(false);
-    public readonly masterDetailContent = input(false);
-    public readonly masterDetailToggle = input(false);
-    public readonly nextRowType = input<GridRowNeighborType>(null);
-    public readonly prevRowType = input<GridRowNeighborType>(null);
 }

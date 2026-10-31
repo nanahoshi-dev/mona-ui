@@ -20,8 +20,7 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
                 monaGridCell
                 [monaGridLockedCell]="layoutColumn.key"
                 [lockedCellHeader]="true"
-                [grouped]="true"
-                [indentCell]="true"></td>
+                [groupIndent]="true"></td>
         }
         @if (gridService.rowReorderColumnVisible()) {
             <!-- Sits right after the indents, so it pins like the group column at this depth. -->
@@ -29,8 +28,7 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
                 monaGridCell
                 [monaGridLockedCell]="'group:' + group().depth"
                 [lockedCellHeader]="true"
-                [grouped]="true"
-                [indentCell]="true"></td>
+                [groupIndent]="true"></td>
         }
         <td
             monaGridCell
@@ -39,7 +37,6 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
             [rowIndex]="rowIndex()"
             [colIndex]="0"
             [section]="'body'"
-            [grouped]="true"
             [groupHeader]="true"
             [firstInRow]="true"
             [lastInRow]="gridService.visibleColumns().length === 0"

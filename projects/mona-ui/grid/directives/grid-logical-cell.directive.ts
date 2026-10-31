@@ -22,14 +22,12 @@ import {
     NavigationData
 } from "../services/grid-navigation.service";
 import { GridService } from "../services/grid.service";
-import { gridListTableCellThemeVariants } from "../styles/grid.styles";
 
 const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [tabindex]";
 
 @Directive({
     selector: "td[monaGridLogicalCell], th[monaGridLogicalCell]",
     host: {
-        "[class]": "baseClass()",
         "[attr.tabindex]": "focused() ? 0 : -1",
         "[attr.aria-colindex]": "ariaColIndex()",
         "[attr.aria-readonly]": "resolvedCellKind() === 'data' ? !editable() : null"
@@ -64,16 +62,6 @@ export class GridLogicalCellDirective {
         this.edit.emit();
     };
     protected readonly ariaColIndex = computed(() => this.colIndex() + this.#gridService.groupColumns().length + 1);
-    protected readonly baseClass = computed(() => {
-        if (this.#hostElementRef.nativeElement.tagName === "TH") {
-            return "";
-        }
-        return gridListTableCellThemeVariants({
-            virtual: this.#gridService.virtualScrollOptions().enabled,
-            groupHeader: this.groupHeader(),
-            lastInRow: this.lastInRow() || this.groupHeader()
-        });
-    });
     protected readonly focused = computed(() => {
         const key = this.#cellKey();
         if (!key) {
