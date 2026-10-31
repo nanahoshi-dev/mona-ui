@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from "@angular/core";
+import { Component, computed, inject } from "@angular/core";
 import { CheckBoxComponent } from "@nanahoshi/mona-ui/check-box";
 import { GridService } from "../../services/grid.service";
 import { gridSelectAllCellThemeVariants } from "../../styles/grid.styles";
 
 @Component({
     selector: "mona-grid-select-all-checkbox",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: "./grid-select-all-checkbox.component.html",
     imports: [CheckBoxComponent],
     host: {

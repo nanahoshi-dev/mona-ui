@@ -2,7 +2,6 @@ import { CdkDrag, CdkDragDrop, CdkDragEnd, CdkDragPreview, CdkDragStart, CdkDrop
 import { LucideGripVertical } from "@lucide/angular";
 import {
     afterNextRender,
-    ChangeDetectionStrategy,
     Component,
     computed,
     DestroyRef,
@@ -34,7 +33,6 @@ import { GridRowComponent } from "../grid-row/grid-row.component";
 
 @Component({
     selector: "mona-grid-list",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: "./grid-list.component.html",
     imports: [
         LucideGripVertical,

@@ -1,13 +1,4 @@
-import {
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    DestroyRef,
-    inject,
-    linkedSignal,
-    output,
-    signal
-} from "@angular/core";
+import { Component, computed, DestroyRef, inject, linkedSignal, output, signal } from "@angular/core";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { FilterInputComponent } from "@nanahoshi/mona-ui/internal/filter-input";
 import {
@@ -20,7 +11,6 @@ import { GridService } from "../../services/grid.service";
 
 @Component({
     selector: "mona-grid-column-chooser",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         ListViewComponent,
         ListViewHeaderTemplateDirective,
