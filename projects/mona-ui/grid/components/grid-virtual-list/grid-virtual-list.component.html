@@ -1,7 +1,7 @@
 @if (gridService.addRowVisible()) {
     <div
         class="shrink-0 overflow-hidden border-b border-b-border"
-        [style.margin-right.px]="gridService.scrollbarGutterWidth()"
+        [style.margin-inline-end.px]="gridService.scrollbarGutterWidth()"
         #addRowScrollElement>
         <table role="presentation" [class]="tableClass()" [style.width.px]="gridService.tableWidth()">
             <colgroup monaGridColgroup></colgroup>
@@ -37,7 +37,7 @@
 </cdk-virtual-scroll-viewport>
 
 @if (gridService.hasFooter()) {
-    <div [class]="footerClass()" [style.margin-right.px]="gridService.scrollbarGutterWidth()" #footerScrollElement>
+    <div [class]="footerClass()" [style.margin-inline-end.px]="gridService.scrollbarGutterWidth()" #footerScrollElement>
         <div>
             <table role="presentation" [class]="footerTableClass()" [style.width.px]="gridService.tableWidth()">
                 <colgroup monaGridColgroup></colgroup>

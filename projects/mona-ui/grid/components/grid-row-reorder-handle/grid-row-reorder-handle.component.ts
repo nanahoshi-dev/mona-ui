@@ -52,7 +52,7 @@ export class GridRowReorderHandleComponent {
                 return messages.rowReorderDisabledVirtualScroll;
         }
     });
-    protected readonly handleClass = computed(() => gridRowReorderHandleThemeVariants());
+    protected readonly handleClass = gridRowReorderHandleThemeVariants();
 
     /**
      * @description The row's position within the current page, used to move the row and derive its accessible label.
