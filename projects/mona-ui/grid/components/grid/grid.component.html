@@ -396,47 +396,7 @@
                                 [style.width.px]="gridService.tableWidth()">
                                 <colgroup monaGridColgroup></colgroup>
                                 <tfoot role="rowgroup">
-                                    <tr role="row" [class]="footerTableRowClass()">
-                                        @for (_ of gridService.groupColumns(); track $index) {
-                                            <td
-                                                monaGridFooterTableCell
-                                                [monaGridLockedCell]="'group:' + $index"
-                                                [lockedCellHeader]="true"
-                                                [footerCellWidth]="gridService.groupColumnWidth"></td>
-                                        }
-                                        @if (gridService.rowReorderColumnVisible()) {
-                                            <td
-                                                monaGridFooterTableCell
-                                                [monaGridLockedCell]="'structural:reorder'"
-                                                [lockedCellHeader]="true"
-                                                [footerCellWidth]="gridService.rowReorderColumnWidth"></td>
-                                        }
-                                        @if (gridService.masterDetailTemplate()) {
-                                            <td
-                                                monaGridFooterTableCell
-                                                [monaGridLockedCell]="'structural:detail'"
-                                                [lockedCellHeader]="true"
-                                                [footerCellWidth]="gridService.detailColumnWidth"></td>
-                                        }
-                                        @if (gridService.selectionColumnVisible()) {
-                                            <td
-                                                monaGridFooterTableCell
-                                                [monaGridLockedCell]="'structural:selection'"
-                                                [lockedCellHeader]="true"
-                                                [footerCellWidth]="gridService.selectionColumnWidth"></td>
-                                        }
-                                        @for (column of gridService.visibleColumns(); track $index) {
-                                            <td
-                                                monaGridFooterTableCell
-                                                [monaGridLockedCell]="'column:' + column.id"
-                                                [lockedCellHeader]="true"
-                                                [footerColumn]="column">
-                                                <mona-grid-footer-cell
-                                                    [column]="column"
-                                                    [columnIndex]="$index"></mona-grid-footer-cell>
-                                            </td>
-                                        }
-                                    </tr>
+                                    <tr monaGridFooterRow></tr>
                                 </tfoot>
                             </table>
                         </div>

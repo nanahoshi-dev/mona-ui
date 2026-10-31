@@ -51,7 +51,6 @@ import { twMerge } from "tailwind-merge";
 import { v4 } from "uuid";
 import { GridColumnResizeHandlerDirective } from "../../directives/grid-column-resize-handler.directive";
 import { GridDetailTemplateDirective } from "../../directives/grid-detail-template.directive";
-import { GridFooterTableCellDirective } from "../../directives/grid-footer-table-cell.directive";
 import { GridLockedCellDirective } from "../../directives/grid-locked-cell.directive";
 import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
 import { GridNoDataTemplateDirective } from "../../directives/grid-no-data-template.directive";
@@ -74,7 +73,6 @@ import {
     gridColumnDragPreviewThemeVariants,
     gridColumnDropHintThemeVariants,
     gridColumnResizerThemeVariants,
-    gridFooterTableRowThemeVariants,
     gridFooterTableThemeVariants,
     gridFooterThemeVariants,
     gridGroupPanelPlaceholderThemeVariants,
@@ -93,7 +91,7 @@ import { GridColgroupComponent } from "../grid-colgroup/grid-colgroup.component"
 import { GridColumnChooserComponent } from "../grid-column-chooser/grid-column-chooser.component";
 import { GridFilterMenuComponent } from "../grid-filter-menu/grid-filter-menu.component";
 import { GridFilterRowCellComponent } from "../grid-filter-row-cell/grid-filter-row-cell.component";
-import { GridFooterCellComponent } from "../grid-footer-cell/grid-footer-cell.component";
+import { GridFooterRowComponent } from "../grid-footer-row/grid-footer-row.component";
 import { GridListComponent } from "../grid-list/grid-list.component";
 import { GridSelectAllCheckboxComponent } from "../grid-select-all-checkbox/grid-select-all-checkbox.component";
 import { GridVirtualListComponent } from "../grid-virtual-list/grid-virtual-list.component";
@@ -119,7 +117,7 @@ const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [ta
         GridColgroupComponent,
         GridFilterMenuComponent,
         GridFilterRowCellComponent,
-        GridFooterCellComponent,
+        GridFooterRowComponent,
         GridColumnResizeHandlerDirective,
         CdkDragPreview,
         GridListComponent,
@@ -131,7 +129,6 @@ const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [ta
         PopupMenuItemComponent,
         PopupMenuTextTemplateDirective,
         ColumnAriaSortPipe,
-        GridFooterTableCellDirective,
         GridLogicalCellDirective,
         GridLockedCellDirective,
         ButtonDirective,
@@ -219,10 +216,6 @@ export class GridComponent<T> implements GridVariantInput {
 
     protected readonly footerTableClass = computed(() => {
         return gridFooterTableThemeVariants();
-    });
-
-    protected readonly footerTableRowClass = computed(() => {
-        return gridFooterTableRowThemeVariants();
     });
 
     protected readonly footerVisible = computed(

@@ -11,6 +11,8 @@ export type GridLayoutColumn = GridLayoutDataColumn | GridLayoutGroupColumn | Gr
 /** A user-defined data or command column. */
 export interface GridLayoutDataColumn {
     readonly column: Column;
+    /** The index among the visible user columns. */
+    readonly columnIndex: number;
     readonly key: string;
     readonly kind: "column";
     /** The keyboard-navigation column index. */

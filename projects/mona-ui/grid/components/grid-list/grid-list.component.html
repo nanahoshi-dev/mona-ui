@@ -240,48 +240,7 @@
                         </td>
                     </tr>
                 } @else if (viewRow.type === "groupFooter") {
-                    <tr role="row" [class]="footerTableRowClass()">
-                        @for (_ of gridService.groupColumns(); track $index) {
-                            <td
-                                monaGridFooterTableCell
-                                [monaGridLockedCell]="'group:' + $index"
-                                [lockedCellHeader]="true"
-                                [footerCellWidth]="gridService.groupColumnWidth"></td>
-                        }
-                        @if (gridService.rowReorderColumnVisible()) {
-                            <td
-                                monaGridFooterTableCell
-                                [monaGridLockedCell]="'structural:reorder'"
-                                [lockedCellHeader]="true"
-                                [footerCellWidth]="gridService.rowReorderColumnWidth"></td>
-                        }
-                        @if (gridService.masterDetailTemplate()) {
-                            <td
-                                monaGridFooterTableCell
-                                [monaGridLockedCell]="'structural:detail'"
-                                [lockedCellHeader]="true"
-                                [footerCellWidth]="gridService.detailColumnWidth"></td>
-                        }
-                        @if (gridService.selectionColumnVisible()) {
-                            <td
-                                monaGridFooterTableCell
-                                [monaGridLockedCell]="'structural:selection'"
-                                [lockedCellHeader]="true"
-                                [footerCellWidth]="gridService.selectionColumnWidth"></td>
-                        }
-                        @for (column of columns(); track $index) {
-                            <td
-                                monaGridFooterTableCell
-                                [monaGridLockedCell]="'column:' + column.id"
-                                [lockedCellHeader]="true"
-                                [footerColumn]="column">
-                                <mona-grid-footer-cell
-                                    [column]="column"
-                                    [columnIndex]="$index"
-                                    [groupKey]="viewRow.groupAggregate.groupKey"></mona-grid-footer-cell>
-                            </td>
-                        }
-                    </tr>
+                    <tr monaGridFooterRow [groupKey]="viewRow.groupAggregate.groupKey"></tr>
                 } @else {
                     @let nextRow = flattenedGroupedRows()[rowIndex + 1];
                     @let prevRow = flattenedGroupedRows()[rowIndex - 1];

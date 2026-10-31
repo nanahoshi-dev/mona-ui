@@ -315,9 +315,10 @@ export class GridService {
             stickyByColumn.set(column, { edge: column === endLockedColumns[0], offset: endOffset, side: "end" });
             endOffset += this.getColumnWidth(column);
         }
-        for (const column of columns) {
+        for (const [columnIndex, column] of columns.entries()) {
             layout.push({
                 column,
+                columnIndex,
                 key: `column:${column.id}`,
                 kind: "column",
                 logicalIndex: logicalIndex++,

@@ -21,7 +21,6 @@ import { GridCellDirective } from "../../directives/grid-cell.directive";
 import { GridDetailContentCellDirective } from "../../directives/grid-detail-content-cell.directive";
 import { GridDetailIndentCellDirective } from "../../directives/grid-detail-indent-cell.directive";
 import { GridDetailRowDirective } from "../../directives/grid-detail-row.directive";
-import { GridFooterTableCellDirective } from "../../directives/grid-footer-table-cell.directive";
 import { GridLockedCellDirective } from "../../directives/grid-locked-cell.directive";
 import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
 import { GridRowDirective } from "../../directives/grid-row.directive";
@@ -32,7 +31,6 @@ import { GridNavigationService } from "../../services/grid-navigation.service";
 import { GridRowFlattenerService } from "../../services/grid-row-flattener.service";
 import { GridService } from "../../services/grid.service";
 import {
-    gridFooterTableRowThemeVariants,
     gridGroupRowThemeVariants,
     gridListBaseThemeVariants,
     gridListTableThemeVariants,
@@ -43,7 +41,7 @@ import {
 import { GridAddRowComponent } from "../grid-add-row/grid-add-row.component";
 import { GridCellComponent } from "../grid-cell/grid-cell.component";
 import { GridColgroupComponent } from "../grid-colgroup/grid-colgroup.component";
-import { GridFooterCellComponent } from "../grid-footer-cell/grid-footer-cell.component";
+import { GridFooterRowComponent } from "../grid-footer-row/grid-footer-row.component";
 import { GridRowReorderHandleComponent } from "../grid-row-reorder-handle/grid-row-reorder-handle.component";
 import { GridSelectionCheckboxComponent } from "../grid-selection-checkbox/grid-selection-checkbox.component";
 import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
@@ -65,10 +63,9 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
         GridDetailContentCellDirective,
         SlicePipe,
         GridToggleComponent,
-        GridFooterTableCellDirective,
         GridLogicalCellDirective,
         GridLockedCellDirective,
-        GridFooterCellComponent,
+        GridFooterRowComponent,
         GridSelectionCheckboxComponent,
         GridRowReorderHandleComponent,
         CdkDropList,
@@ -108,9 +105,6 @@ export class GridListComponent implements GridListVariantInput {
             groupAggregateDict,
             this.gridService.serverBindingEnabled()
         );
-    });
-    protected readonly footerTableRowClass = computed(() => {
-        return gridFooterTableRowThemeVariants();
     });
     protected readonly gridService = inject(GridService);
     protected readonly groupRowClass = computed(() => {
