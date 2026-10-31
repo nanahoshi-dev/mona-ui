@@ -45,6 +45,7 @@ import {
 } from "../../styles/grid.styles";
 import { GridAddRowComponent } from "../grid-add-row/grid-add-row.component";
 import { GridCellComponent } from "../grid-cell/grid-cell.component";
+import { GridColgroupComponent } from "../grid-colgroup/grid-colgroup.component";
 import { GridFooterCellComponent } from "../grid-footer-cell/grid-footer-cell.component";
 import { GridRowReorderHandleComponent } from "../grid-row-reorder-handle/grid-row-reorder-handle.component";
 import { GridSelectionCheckboxComponent } from "../grid-selection-checkbox/grid-selection-checkbox.component";
@@ -58,6 +59,7 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
         CdkVirtualForOf,
         GridAddRowComponent,
         GridCellComponent,
+        GridColgroupComponent,
         SlicePipe,
         NgTemplateOutlet,
         ContextMenuComponent,

@@ -4,23 +4,7 @@
         [style.margin-right.px]="gridService.scrollbarGutterWidth()"
         #addRowScrollElement>
         <table role="presentation" [class]="tableClass()" [style.width.px]="gridService.tableWidth()">
-            <colgroup>
-                @for (_ of gridService.groupColumns(); track $index) {
-                    <col [style.width.px]="gridService.groupColumnWidth" />
-                }
-                @if (gridService.rowReorderColumnVisible()) {
-                    <col [style.width.px]="gridService.rowReorderColumnWidth" />
-                }
-                @if (gridService.masterDetailTemplate()) {
-                    <col [style.width.px]="gridService.detailColumnWidth" />
-                }
-                @if (gridService.selectionColumnVisible()) {
-                    <col [style.width.px]="gridService.selectionColumnWidth" />
-                }
-                @for (col of columns(); track $index) {
-                    <col [style.width.px]="col.calculatedWidth" />
-                }
-            </colgroup>
+            <colgroup monaGridColgroup></colgroup>
             <tbody role="rowgroup">
                 <tr monaGridAddRow [columns]="columns()"></tr>
             </tbody>
@@ -34,23 +18,7 @@
     [minBufferPx]="gridService.virtualGridMinBuffer()"
     [maxBufferPx]="gridService.virtualGridMaxBuffer()">
     <table role="presentation" #bodyTable [class]="tableClass()" [style.width.px]="gridService.tableWidth()">
-        <colgroup>
-            @for (_ of gridService.groupColumns(); track $index) {
-                <col [style.width.px]="gridService.groupColumnWidth" />
-            }
-            @if (gridService.rowReorderColumnVisible()) {
-                <col [style.width.px]="gridService.rowReorderColumnWidth" />
-            }
-            @if (gridService.masterDetailTemplate()) {
-                <col [style.width.px]="gridService.detailColumnWidth" />
-            }
-            @if (gridService.selectionColumnVisible()) {
-                <col [style.width.px]="gridService.selectionColumnWidth" />
-            }
-            @for (col of columns(); track $index) {
-                <col [style.width.px]="col.calculatedWidth" />
-            }
-        </colgroup>
+        <colgroup monaGridColgroup></colgroup>
         <tbody role="rowgroup" tabindex="0" (focus)="onViewportFocus()">
             @if (gridService.groupColumns().length === 0) {
                 <ng-container *cdkVirtualFor="let row of data(); let rowIndex = index">
@@ -518,23 +486,7 @@
     <div [class]="footerClass()" [style.margin-right.px]="gridService.scrollbarGutterWidth()" #footerScrollElement>
         <div>
             <table role="presentation" [class]="footerTableClass()" [style.width.px]="gridService.tableWidth()">
-                <colgroup>
-                    @for (_ of gridService.groupColumns(); track $index) {
-                        <col [style.width.px]="gridService.groupColumnWidth" />
-                    }
-                    @if (gridService.rowReorderColumnVisible()) {
-                        <col [style.width.px]="gridService.rowReorderColumnWidth" />
-                    }
-                    @if (gridService.masterDetailTemplate()) {
-                        <col [style.width.px]="gridService.detailColumnWidth" />
-                    }
-                    @if (gridService.selectionColumnVisible()) {
-                        <col [style.width.px]="gridService.selectionColumnWidth" />
-                    }
-                    @for (col of columns(); track $index) {
-                        <col [style.width.px]="col.calculatedWidth" />
-                    }
-                </colgroup>
+                <colgroup monaGridColgroup></colgroup>
                 <tfoot role="rowgroup">
                     <tr role="row" [class]="footerTableRowClass()">
                         @for (_ of gridService.groupColumns(); track $index) {

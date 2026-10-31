@@ -1,21 +1,5 @@
 <table role="presentation" #bodyTable [class]="tableClass()" [style.width.px]="gridService.tableWidth()">
-    <colgroup>
-        @for (_ of gridService.groupColumns(); track $index) {
-            <col [style.width.px]="gridService.groupColumnWidth" />
-        }
-        @if (gridService.rowReorderColumnVisible()) {
-            <col [style.width.px]="gridService.rowReorderColumnWidth" />
-        }
-        @if (gridService.masterDetailTemplate()) {
-            <col [style.width.px]="gridService.detailColumnWidth" />
-        }
-        @if (gridService.selectionColumnVisible()) {
-            <col [style.width.px]="gridService.selectionColumnWidth" />
-        }
-        @for (col of columns(); track $index) {
-            <col [style.width.px]="col.calculatedWidth" />
-        }
-    </colgroup>
+    <colgroup monaGridColgroup></colgroup>
     <tbody
         role="rowgroup"
         tabindex="0"

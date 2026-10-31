@@ -89,6 +89,7 @@ import {
     GridVariantInput,
     GridVariantProps
 } from "../../styles/grid.styles";
+import { GridColgroupComponent } from "../grid-colgroup/grid-colgroup.component";
 import { GridColumnChooserComponent } from "../grid-column-chooser/grid-column-chooser.component";
 import { GridFilterMenuComponent } from "../grid-filter-menu/grid-filter-menu.component";
 import { GridFilterRowCellComponent } from "../grid-filter-row-cell/grid-filter-row-cell.component";
@@ -115,6 +116,7 @@ const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [ta
         ChipComponent,
         CdkDrag,
         NgTemplateOutlet,
+        GridColgroupComponent,
         GridFilterMenuComponent,
         GridFilterRowCellComponent,
         GridFooterCellComponent,
