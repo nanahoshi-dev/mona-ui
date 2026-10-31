@@ -186,6 +186,41 @@ async function main(): Promise<void> {
             expect(Math.abs(pinned.endGap)).toBeLessThan(1);
         }
 
+        // Every grouped body row spans exactly the colgroup, and detail content lines up with the data columns.
+        const groupedDetail = page.locator("#grouped-detail mona-grid");
+        await groupedDetail.scrollIntoViewIfNeeded();
+        await groupedDetail.locator("tbody tr[monaGridRow]").first().locator("mona-grid-toggle").click();
+        await expect(groupedDetail.locator("[data-grouped-detail]")).toBeVisible();
+        const groupedGeometry = await groupedDetail.evaluate(element => {
+            const table = element.querySelector<HTMLTableElement>("mona-grid-list table");
+            if (table == null) {
+                throw new Error("Expected the grouped body table");
+            }
+            const columnCount = table.querySelectorAll("colgroup > col").length;
+            const spans = Array.from(table.tBodies[0].rows, row =>
+                Array.from(row.cells).reduce((total, cell) => total + cell.colSpan, 0)
+            );
+            const detailRow = table.querySelector("tr[monaGridDetailRow]");
+            const dataRow = detailRow?.previousElementSibling;
+            const dataCells = Array.from(dataRow?.querySelectorAll(":scope > td:has(mona-grid-cell)") ?? []);
+            const content = detailRow?.lastElementChild?.getBoundingClientRect();
+            const first = dataCells[0]?.getBoundingClientRect();
+            const last = dataCells[dataCells.length - 1]?.getBoundingClientRect();
+            if (content == null || first == null || last == null) {
+                throw new Error("Expected an expanded detail row below a data row");
+            }
+            return {
+                columnCount,
+                spans,
+                startGap: content.left - first.left,
+                endGap: content.right - last.right
+            };
+        });
+        expect(groupedGeometry.spans.length).toBeGreaterThan(0);
+        expect(groupedGeometry.spans.every(span => span === groupedGeometry.columnCount)).toBe(true);
+        expect(Math.abs(groupedGeometry.startGap)).toBeLessThan(1);
+        expect(Math.abs(groupedGeometry.endGap)).toBeLessThan(1);
+
         for (const [id, height] of [
             ["virtual-explicit", 48],
             ["virtual-default", 36],
