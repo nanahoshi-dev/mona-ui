@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { Component, computed, inject, input } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
 import { LucideCheck, LucideOctagonAlert, LucidePencil, LucideTrash2, LucideX } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { DialogService } from "@nanahoshi/mona-ui/dialog";
@@ -11,6 +11,7 @@ import { GridService } from "../../services/grid.service";
 
 @Component({
     selector: "mona-grid-command-cell",
+    changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: "./grid-command-cell.component.html",
     imports: [
         ButtonDirective,

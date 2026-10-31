@@ -1,6 +1,7 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
+    ChangeDetectionStrategy,
     Component,
     computed,
     effect,
@@ -29,6 +30,7 @@ const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [ta
 
 @Component({
     selector: "mona-grid-editor",
+    changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: "./grid-editor.component.html",
     imports: [
         CheckBoxComponent,

@@ -1,6 +1,16 @@
 import { A11yModule } from "@angular/cdk/a11y";
 import { formatDate, NgTemplateOutlet } from "@angular/common";
-import { afterNextRender, Component, computed, ElementRef, inject, Injector, input, LOCALE_ID } from "@angular/core";
+import {
+    afterNextRender,
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    ElementRef,
+    inject,
+    Injector,
+    input,
+    LOCALE_ID
+} from "@angular/core";
 import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
 import { Column } from "../../models/Column";
 import { Row } from "../../models/Row";
@@ -19,6 +29,7 @@ const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [ta
 
 @Component({
     selector: "mona-grid-cell",
+    changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: "./grid-cell.component.html",
     imports: [A11yModule, GridCommandCellComponent, GridEditorComponent, NgTemplateOutlet],
     host: {

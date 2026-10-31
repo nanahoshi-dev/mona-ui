@@ -1,13 +1,14 @@
 import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { LucideGripVertical } from "@lucide/angular";
 import { CdkDragHandle } from "@angular/cdk/drag-drop";
-import { Component, computed, inject, input } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
 import type { Row } from "../../models/Row";
 import { GridService } from "../../services/grid.service";
 import { gridRowReorderHandleThemeVariants } from "../../styles/grid.styles";
 
 @Component({
     selector: "mona-grid-row-reorder-handle",
+    changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: "./grid-row-reorder-handle.component.html",
     imports: [LucideGripVertical, CdkDragHandle],
     host: {
