@@ -13,8 +13,12 @@ export interface GridLayoutDataColumn {
     readonly column: Column;
     /** The index among the visible user columns. */
     readonly columnIndex: number;
+    /** Whether ArrowLeft (inline-start) stops at this cell. */
+    readonly firstInRow: boolean;
     readonly key: string;
     readonly kind: "column";
+    /** Whether ArrowRight (inline-end) stops at this cell. */
+    readonly lastInRow: boolean;
     /** The keyboard-navigation column index. */
     readonly logicalIndex: number;
     readonly sticky: GridStickyState | null;
@@ -33,8 +37,12 @@ export interface GridLayoutGroupColumn {
 
 /** A built-in column such as the row reorder handle, the detail toggle or the selection checkbox. */
 export interface GridLayoutStructuralColumn {
+    /** Whether ArrowLeft (inline-start) stops at this cell. */
+    readonly firstInRow: boolean;
     readonly key: string;
     readonly kind: StructuralColumnKind;
+    /** Whether ArrowRight (inline-end) stops at this cell. */
+    readonly lastInRow: boolean;
     /** The keyboard-navigation column index. */
     readonly logicalIndex: number;
     readonly sticky: GridStickyState | null;

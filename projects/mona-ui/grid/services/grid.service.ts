@@ -52,6 +52,7 @@ import type { GridEditContext } from "../models/GridEditContext";
 import { GridEditEvent } from "../models/GridEditEvent";
 import type { GridEditFormContext } from "../models/GridEditFormContext";
 import type { GridEditSession } from "../models/GridEditSession";
+import type { GridViewRow } from "../models/GridGroup";
 import { GridKeySelector } from "../models/GridKeySelector";
 import type { GridLayoutColumn } from "../models/GridLayoutColumn";
 import { GridRemoveEvent } from "../models/GridRemoveEvent";
@@ -79,6 +80,7 @@ import { SelectableOptions } from "../models/SelectableOptions";
 import { SortableOptions } from "../models/SortableOptions";
 import type { StructuralColumnDescriptor, StructuralColumnKind } from "../models/StructuralColumn";
 import { GRID_DEFAULT_MESSAGES } from "../i18n/grid.default-messages";
+import { GridRowFlattenerService } from "./grid-row-flattener.service";
 
 // Flat projection of a Row used as the IterablePatchStore item type.
 // $rowId is injected to carry the row identity without modifying Row.data.
@@ -134,6 +136,7 @@ export class GridService {
     readonly #platformId = inject(PLATFORM_ID);
     readonly #reorderableOptions = signal<ReorderableOptions>({ enabled: false });
     readonly #resizableOptions = signal<ResizableOptions>({ enabled: false });
+    readonly #rowFlattener = inject(GridRowFlattenerService);
     readonly #rowReorderableOptions = signal<RowReorderableOptions>({ enabled: false });
     readonly #rowUidByData = new WeakMap<Record<PropertyKey, unknown>, string>();
     readonly #rowUidByKeyObject = new WeakMap<object, string>();
@@ -290,10 +293,13 @@ export class GridService {
                 width: this.groupColumnWidth
             });
         }
+        // Arrow-key boundaries: structural columns and user columns are navigated as separate segments.
         for (const [index, structuralColumn] of structuralColumns.entries()) {
             layout.push({
+                firstInRow: index === 0,
                 key: `structural:${structuralColumn.kind}`,
                 kind: structuralColumn.kind,
+                lastInRow: columns.length === 0 && index === structuralColumns.length - 1,
                 logicalIndex: index,
                 sticky: nextLeadingSticky(groupCount + index, structuralColumn.width),
                 width: structuralColumn.width
@@ -319,8 +325,10 @@ export class GridService {
             layout.push({
                 column,
                 columnIndex,
+                firstInRow: columnIndex === 0,
                 key: `column:${column.id}`,
                 kind: "column",
+                lastInRow: columnIndex === columns.length - 1,
                 logicalIndex: logicalIndex++,
                 sticky: stickyByColumn.get(column) ?? null,
                 width: column.calculatedWidth
@@ -740,6 +748,29 @@ export class GridService {
         this.clearEditSession();
         this.rowEdit$.next(new RowEditEvent({ originalRowData: context.row.data, rowData, session }));
         return true;
+    }
+
+    /**
+     * Builds the body rows for the given data rows: plain data rows when ungrouped, otherwise the flattened
+     * group headers, data rows and group footers. Reads grouping state, so call it inside a computed.
+     */
+    public createBodyRows(rows: Iterable<Row>): GridViewRow[] {
+        const groupColumns = this.groupColumns();
+        if (groupColumns.length === 0) {
+            return this.#rowFlattener.toDataRows(rows);
+        }
+        const groupAggregates = this.groupAggregateMap().toDictionary(
+            e => e.key,
+            e => e.value
+        );
+        return this.#rowFlattener.flatten(
+            rows,
+            groupColumns,
+            new Set(this.collapsedGroupKeys()),
+            this.groupableOptions().showFooter,
+            groupAggregates,
+            this.serverBindingEnabled()
+        );
     }
 
     public deselectAllRows(): void {

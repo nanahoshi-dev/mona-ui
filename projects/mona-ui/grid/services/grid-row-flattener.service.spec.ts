@@ -1,5 +1,6 @@
 import { Dictionary } from "@mirei/ts-collections";
 import type { Column } from "../models/Column";
+import type { GridGroupAggregate } from "../models/GridAggregate";
 import { Row } from "../models/Row";
 import { GridRowFlattenerService } from "./grid-row-flattener.service";
 function createColumn(overrides: Partial<Column> & Pick<Column, "field">): Column {
@@ -156,5 +157,38 @@ describe("page-local group bucket ordering", () => {
             false
         );
         expect(result.filter(row => row.type === "group").map(row => row.groupValue)).toEqual(["B", "A"]);
+    });
+});
+
+describe("body row keys", () => {
+    const service = new GridRowFlattenerService();
+
+    it("wraps ungrouped rows as data rows keyed by row uid", () => {
+        const rows = [new Row({ id: 1 }), new Row({ id: 2 })];
+
+        const result = service.toDataRows(rows);
+
+        expect(result.map(row => row.key)).toEqual(rows.map(row => `row:${row.uid}`));
+        expect(result.every(row => row.type === "data" && row.groupKey === null && row.depth === 0)).toBe(true);
+    });
+
+    it("gives group, data and footer rows distinct keys", () => {
+        const rows = [new Row({ category: "A", id: 1 }), new Row({ category: "B", id: 2 })];
+        const aggregates = new Dictionary<string, GridGroupAggregate>();
+        aggregates.put("category:A", { groupKey: "category:A" } as GridGroupAggregate);
+        aggregates.put("category:B", { groupKey: "category:B" } as GridGroupAggregate);
+
+        const result = service.flatten(rows, [createColumn({ field: "category" })], new Set(), false, aggregates);
+        const keys = result.map(row => row.key);
+
+        expect(keys).toEqual([
+            "group:category:A",
+            `row:${rows[0].uid}`,
+            "groupFooter:category:A",
+            "group:category:B",
+            `row:${rows[1].uid}`,
+            "groupFooter:category:B"
+        ]);
+        expect(new Set(keys).size).toBe(keys.length);
     });
 });

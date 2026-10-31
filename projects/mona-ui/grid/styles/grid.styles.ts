@@ -124,31 +124,6 @@ export const gridColumnResizerThemeVariants = cva(`
     absolute top-0 bottom-0 w-3 bg-transparent cursor-col-resize z-10 -end-1.5
 `);
 
-export const gridDetailContentCellThemeVariants = cva(`border-b border-b-border-subtle`, {
-    variants: {
-        nextIsGroup: {
-            true: "",
-            false: ""
-        }
-    }
-});
-
-export const gridDetailIndentCellThemeVariants = cva(
-    `
-        border-e border-e-border-subtle border-b border-b-border-subtle
-    `,
-    {
-        variants: {
-            nextIsGroup: {
-                true: "",
-                false: ""
-            }
-        }
-    }
-);
-
-export const gridDetailRowThemeVariants = cva(``);
-
 export const gridRowReorderHandleThemeVariants = cva(`
     flex min-h-9 w-full items-center justify-center
     cursor-grab select-none touch-none

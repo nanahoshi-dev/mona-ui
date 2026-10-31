@@ -1,6 +1,5 @@
 import { CdkDrag, CdkDragDrop, CdkDragEnd, CdkDragPreview, CdkDragStart, CdkDropList } from "@angular/cdk/drag-drop";
 import { LucideGripVertical } from "@lucide/angular";
-import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
     Component,
@@ -13,25 +12,13 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ImmutableList, span } from "@mirei/ts-collections";
-import { SlicePipe } from "@nanahoshi/mona-ui/common";
-import { ContextMenuComponent } from "@nanahoshi/mona-ui/contextmenu";
+import { ImmutableList } from "@mirei/ts-collections";
 import { fromEvent } from "rxjs";
-import { GridCellDirective } from "../../directives/grid-cell.directive";
-import { GridDetailContentCellDirective } from "../../directives/grid-detail-content-cell.directive";
-import { GridDetailIndentCellDirective } from "../../directives/grid-detail-indent-cell.directive";
-import { GridDetailRowDirective } from "../../directives/grid-detail-row.directive";
-import { GridLockedCellDirective } from "../../directives/grid-locked-cell.directive";
-import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
-import { GridRowDirective } from "../../directives/grid-row.directive";
 import { Column } from "../../models/Column";
-import type { GridViewRow } from "../../models/GridGroup";
 import { Row } from "../../models/Row";
 import { GridNavigationService } from "../../services/grid-navigation.service";
-import { GridRowFlattenerService } from "../../services/grid-row-flattener.service";
 import { GridService } from "../../services/grid.service";
 import {
-    gridGroupRowThemeVariants,
     gridListBaseThemeVariants,
     gridListTableThemeVariants,
     gridRowDragPlaceholderThemeVariants,
@@ -39,12 +26,11 @@ import {
     GridListVariantInput
 } from "../../styles/grid.styles";
 import { GridAddRowComponent } from "../grid-add-row/grid-add-row.component";
-import { GridCellComponent } from "../grid-cell/grid-cell.component";
 import { GridColgroupComponent } from "../grid-colgroup/grid-colgroup.component";
+import { GridDetailRowComponent } from "../grid-detail-row/grid-detail-row.component";
 import { GridFooterRowComponent } from "../grid-footer-row/grid-footer-row.component";
-import { GridRowReorderHandleComponent } from "../grid-row-reorder-handle/grid-row-reorder-handle.component";
-import { GridSelectionCheckboxComponent } from "../grid-selection-checkbox/grid-selection-checkbox.component";
-import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
+import { GridGroupRowComponent } from "../grid-group-row/grid-group-row.component";
+import { GridRowComponent } from "../grid-row/grid-row.component";
 
 @Component({
     selector: "mona-grid-list",
@@ -52,22 +38,11 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
     imports: [
         LucideGripVertical,
         GridAddRowComponent,
-        GridCellComponent,
         GridColgroupComponent,
-        NgTemplateOutlet,
-        ContextMenuComponent,
-        GridRowDirective,
-        GridCellDirective,
-        GridDetailRowDirective,
-        GridDetailIndentCellDirective,
-        GridDetailContentCellDirective,
-        SlicePipe,
-        GridToggleComponent,
-        GridLogicalCellDirective,
-        GridLockedCellDirective,
+        GridDetailRowComponent,
         GridFooterRowComponent,
-        GridSelectionCheckboxComponent,
-        GridRowReorderHandleComponent,
+        GridGroupRowComponent,
+        GridRowComponent,
         CdkDropList,
         CdkDrag,
         CdkDragPreview
@@ -80,43 +55,19 @@ export class GridListComponent implements GridListVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #gridNavigationService = inject(GridNavigationService);
     readonly #hostElementRef = inject(ElementRef<HTMLDivElement>);
-    readonly #rowFlattener = inject(GridRowFlattenerService);
     private readonly bodyTableElementRef = viewChild.required<ElementRef<HTMLTableElement>>("bodyTable");
     protected readonly baseClass = computed(() => {
         return gridListBaseThemeVariants({ virtual: false });
     });
+    protected readonly bodyRows = computed(() => this.gridService.createBodyRows(this.data()));
     protected readonly draggedRowHeight = signal<number | null>(null);
-    protected readonly flattenedGroupedRows = computed<GridViewRow[]>(() => {
-        const groupColumns = this.gridService.groupColumns();
-        if (groupColumns.length === 0) {
-            return [];
-        }
-        const collapsedKeys = new Set(this.gridService.collapsedGroupKeys());
-        const groupAggregateDict = this.gridService.groupAggregateMap().toDictionary(
-            e => e.key,
-            e => e.value
-        );
-        const showFooter = this.gridService.groupableOptions().showFooter;
-        return this.#rowFlattener.flatten(
-            this.data(),
-            groupColumns,
-            collapsedKeys,
-            showFooter,
-            groupAggregateDict,
-            this.gridService.serverBindingEnabled()
-        );
-    });
     protected readonly gridService = inject(GridService);
-    protected readonly groupRowClass = computed(() => {
-        return gridGroupRowThemeVariants();
-    });
     protected readonly rowDragPlaceholderClass = computed(() => {
         return gridRowDragPlaceholderThemeVariants();
     });
     protected readonly rowDragPreviewClass = computed(() => {
         return gridRowDragPreviewThemeVariants();
     });
-    protected readonly span = span;
     protected readonly tableClass = computed(() => {
         return gridListTableThemeVariants();
     });
@@ -144,14 +95,6 @@ export class GridListComponent implements GridListVariantInput {
         });
     }
 
-    public onGridRowClick(event: MouseEvent, row: Row): void {
-        this.gridService.handleRowClick(event, row);
-    }
-
-    public onGroupExpandChange(groupKey: string): void {
-        this.gridService.toggleGroupCollapse(groupKey);
-    }
-
     public onRowDragEnded(_event: CdkDragEnd<Row>): void {
         this.gridService.draggingRowUid.set(null);
         this.draggedRowHeight.set(null);
@@ -176,11 +119,6 @@ export class GridListComponent implements GridListVariantInput {
         if (this.gridService.rowReorderInteractionEnabled() && event.currentTarget instanceof HTMLElement) {
             this.draggedRowHeight.set(event.currentTarget.getBoundingClientRect().height);
         }
-    }
-
-    public onToggleDetailClick(row: Row): void {
-        const expanded = this.gridService.isRowExpanded(row);
-        this.gridService.setRowExpanded(row, !expanded);
     }
 
     protected onBodyFocus(): void {

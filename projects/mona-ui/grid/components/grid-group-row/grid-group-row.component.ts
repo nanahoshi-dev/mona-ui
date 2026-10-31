@@ -1,0 +1,95 @@
+import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
+import { GridCellDirective } from "../../directives/grid-cell.directive";
+import { GridLockedCellDirective } from "../../directives/grid-locked-cell.directive";
+import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
+import type { GridViewGroupRow } from "../../models/GridGroup";
+import { GridService } from "../../services/grid.service";
+import { gridGroupRowThemeVariants } from "../../styles/grid.styles";
+import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
+
+/**
+ * A group header row. It indents by the group depth, and its title cell spans the remaining columns.
+ */
+@Component({
+    // Table rows cannot use element selectors.
+    // eslint-disable-next-line @angular-eslint/component-selector
+    selector: "tr[monaGridGroupRow]",
+    template: `
+        @for (layoutColumn of indentColumns(); track layoutColumn.key) {
+            <td
+                monaGridCell
+                [monaGridLockedCell]="layoutColumn.key"
+                [lockedCellHeader]="true"
+                [grouped]="true"
+                [indentCell]="true"></td>
+        }
+        @if (gridService.rowReorderColumnVisible()) {
+            <!-- Sits right after the indents, so it pins like the group column at this depth. -->
+            <td
+                monaGridCell
+                [monaGridLockedCell]="'group:' + group().depth"
+                [lockedCellHeader]="true"
+                [grouped]="true"
+                [indentCell]="true"></td>
+        }
+        <td
+            monaGridCell
+            monaGridLogicalCell
+            [cellKind]="'group'"
+            [rowIndex]="rowIndex()"
+            [colIndex]="0"
+            [section]="'body'"
+            [grouped]="true"
+            [groupHeader]="true"
+            [firstInRow]="true"
+            [lastInRow]="gridService.visibleColumns().length === 0"
+            [groupKey]="group().groupKey"
+            [attr.colspan]="titleColspan()"
+            (toggleExpand)="toggle()">
+            <p [class]="titleClass()">
+                <mona-grid-toggle
+                    [expanded]="!collapsed()"
+                    [width]="gridService.groupColumnWidth"
+                    [type]="'group'"
+                    (expandedChange)="toggle()" />
+                <span class="font-bold">{{ group().title }}: {{ group().groupValue }}</span>
+            </p>
+        </td>
+    `,
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [GridCellDirective, GridLockedCellDirective, GridLogicalCellDirective, GridToggleComponent],
+    host: {
+        "[class]": "rowClass()",
+        role: "row",
+        "[attr.aria-level]": "group().depth + 1",
+        "[attr.aria-expanded]": "!collapsed()"
+    }
+})
+export class GridGroupRowComponent {
+    protected readonly collapsed = computed(() => this.gridService.isGroupCollapsed(this.group().groupKey));
+    protected readonly gridService = inject(GridService);
+    protected readonly indentColumns = computed(() =>
+        this.gridService.layout().filter(column => column.kind === "group" && column.depth < this.group().depth)
+    );
+    protected readonly rowClass = computed(() =>
+        gridGroupRowThemeVariants({ virtual: this.gridService.virtualScrollOptions().enabled })
+    );
+    protected readonly titleClass = computed(() =>
+        this.gridService.virtualScrollOptions().enabled
+            ? "absolute inset-0 flex items-center text-sm whitespace-nowrap overflow-hidden"
+            : "flex min-h-9 items-center text-sm whitespace-nowrap"
+    );
+    // Everything after the indents and the reorder placeholder.
+    protected readonly titleColspan = computed(
+        () =>
+            this.gridService.layout().length - this.group().depth - (this.gridService.rowReorderColumnVisible() ? 1 : 0)
+    );
+
+    public readonly group = input.required<GridViewGroupRow>();
+    /** The index of this row among the rendered body rows. */
+    public readonly rowIndex = input.required<number>();
+
+    protected toggle(): void {
+        this.gridService.toggleGroupCollapse(this.group().groupKey);
+    }
+}

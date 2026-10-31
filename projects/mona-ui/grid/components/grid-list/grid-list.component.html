@@ -11,130 +11,38 @@
         @if (gridService.addRowVisible()) {
             <tr monaGridAddRow [columns]="columns()"></tr>
         }
-        @if (gridService.groupColumns().length === 0) {
-            @for (row of data(); track row.uid) {
-                @let rowIndex = $index;
+        @for (bodyRow of bodyRows(); track bodyRow.key; let rowIndex = $index) {
+            @if (bodyRow.type === "group") {
+                <tr monaGridGroupRow [group]="bodyRow" [rowIndex]="rowIndex"></tr>
+            } @else if (bodyRow.type === "groupFooter") {
+                <tr monaGridFooterRow [groupKey]="bodyRow.groupAggregate.groupKey"></tr>
+            } @else {
                 <tr
-                    (click)="onGridRowClick($event, row)"
                     monaGridRow
+                    [row]="bodyRow.row"
+                    [index]="rowIndex"
                     cdkDrag
                     cdkDragLockAxis="y"
-                    [cdkDragData]="row"
-                    [cdkDragDisabled]="!gridService.canReorderRow(row)"
+                    [cdkDragData]="bodyRow.row"
+                    [cdkDragDisabled]="!gridService.canReorderRow(bodyRow.row)"
                     (cdkDragStarted)="onRowDragStarted($event)"
                     (pointerdown)="onRowPointerDown($event)"
-                    (cdkDragEnded)="onRowDragEnded($event)"
-                    [index]="rowIndex"
-                    [row]="row"
-                    #gridRow="monaGridRow"
-                    #rowElement>
-                    @if (gridService.rowReorderColumnVisible()) {
-                        <td
-                            monaGridCell
-                            [monaGridLockedCell]="'structural:reorder'"
-                            monaGridLogicalCell
-                            [cellKind]="'command'"
-                            [columnId]="'$rowReorder'"
-                            [rowIndex]="rowIndex"
-                            [rowUid]="row.uid"
-                            [section]="'body'"
-                            [colIndex]="gridService.structuralColIndexMap().get('reorder') ?? 0"
-                            [firstInRow]="gridService.structuralColIndexMap().get('reorder') === 0"
-                            [lastInRow]="columns().length === 0 && gridService.structuralLastKind() === 'reorder'"
-                            [style.width.px]="gridService.rowReorderColumnWidth"
-                            [attr.colspan]="1">
-                            <mona-grid-row-reorder-handle [row]="row" [pageIndex]="rowIndex" />
-                        </td>
-                    }
-                    @if (gridService.masterDetailTemplate()) {
-                        <td
-                            monaGridCell
-                            [monaGridLockedCell]="'structural:detail'"
-                            [masterDetailToggle]="true"
-                            monaGridLogicalCell
-                            [cellKind]="'detail'"
-                            (toggleExpand)="onToggleDetailClick(row)"
-                            [colIndex]="gridService.structuralColIndexMap().get('detail') ?? 0"
-                            [firstInRow]="gridService.structuralColIndexMap().get('detail') === 0"
-                            [lastInRow]="columns().length === 0 && gridService.structuralLastKind() === 'detail'"
-                            [rowIndex]="rowIndex"
-                            [rowUid]="row.uid"
-                            [section]="'body'"
-                            [style.width.px]="gridService.detailColumnWidth"
-                            [attr.colspan]="1">
-                            <span class="flex min-h-9 w-full items-center justify-center">
-                                <mona-grid-toggle
-                                    [expanded]="gridRow.expanded()"
-                                    [type]="'detail'"
-                                    [width]="gridService.detailColumnWidth"
-                                    (expandedChange)="onToggleDetailClick(row)"></mona-grid-toggle>
-                            </span>
-                        </td>
-                    }
-                    @if (gridService.selectionColumnVisible()) {
-                        <td
-                            monaGridCell
-                            [monaGridLockedCell]="'structural:selection'"
-                            monaGridLogicalCell
-                            [cellKind]="'command'"
-                            [columnId]="'$selection'"
-                            [rowIndex]="rowIndex"
-                            [rowUid]="row.uid"
-                            [section]="'body'"
-                            [colIndex]="gridService.structuralColIndexMap().get('selection') ?? 0"
-                            [firstInRow]="gridService.structuralColIndexMap().get('selection') === 0"
-                            [lastInRow]="columns().length === 0 && gridService.structuralLastKind() === 'selection'"
-                            [style.width.px]="gridService.selectionColumnWidth"
-                            [attr.colspan]="1">
-                            <mona-grid-selection-checkbox [row]="row" [rowIndex]="rowIndex" />
-                        </td>
-                    }
-                    @for (column of columns(); track $index) {
-                        @let colIndex = $index + gridService.leadingLogicalColumnCount();
-                        <td
-                            monaGridCell
-                            [monaGridLockedCell]="'column:' + column.id"
-                            [dataCell]="true"
-                            monaGridLogicalCell
-                            [cellKind]="column.kind"
-                            [colIndex]="colIndex"
-                            [columnId]="column.id"
-                            [editable]="
-                                gridService.editableOptions().enabled === true &&
-                                gridService.editableOptions().mode === 'cell' &&
-                                column.kind === 'data' &&
-                                column.editable === true
-                            "
-                            [rowIndex]="rowIndex"
-                            [rowUid]="row.uid"
-                            [section]="'body'"
-                            [firstInRow]="colIndex === gridService.leadingLogicalColumnCount()"
-                            [lastInRow]="colIndex === gridService.leadingLogicalColumnCount() + columns().length - 1"
-                            [attr.colspan]="1"
-                            [style.width.px]="column.calculatedWidth"
-                            [style.min-width.px]="column.minWidth"
-                            (edit)="gridCell.handleLogicalCellEnter()">
-                            <mona-grid-cell #gridCell [column]="column" [row]="row"></mona-grid-cell>
-                        </td>
-                    }
-                    @if (gridService.contextMenuItems().length !== 0) {
-                        <ng-container
-                            [ngTemplateOutlet]="contextMenuTemplate"
-                            [ngTemplateOutletContext]="{ $implicit: row.data, element: rowElement, index: $index }">
-                        </ng-container>
-                    }
+                    (cdkDragEnded)="onRowDragEnded($event)">
                     <ng-template cdkDragPreview>
                         <div [class]="rowDragPreviewClass()">
                             <svg lucideGripVertical [size]="16" aria-hidden="true"></svg>
                             <span>{{
-                                gridService.getRowReorderAriaLabel(row, rowIndex + gridService.paginationState().skip)
+                                gridService.getRowReorderAriaLabel(
+                                    bodyRow.row,
+                                    rowIndex + gridService.paginationState().skip
+                                )
                             }}</span>
                         </div>
                     </ng-template>
                     <ng-template cdkDragPlaceholder>
                         <tr [class]="rowDragPlaceholderClass()" [style.height.px]="draggedRowHeight() ?? 36">
                             <td
-                                [attr.colspan]="gridService.leadingStructuralColumnCount() + columns().length"
+                                [attr.colspan]="gridService.layout().length"
                                 [style.height.px]="draggedRowHeight() ?? 36"
                                 class="px-2">
                                 <span class="flex items-center text-xs text-muted-foreground">{{
@@ -144,282 +52,10 @@
                         </tr>
                     </ng-template>
                 </tr>
-                @if (gridRow.expanded() && !gridService.rowDragInProgress()) {
-                    <tr monaGridDetailRow [style.width.px]="gridService.masterDetailRowWidth()">
-                        @if (gridService.rowReorderColumnVisible()) {
-                            <td
-                                monaGridCell
-                                [monaGridLockedCell]="'structural:reorder'"
-                                [attr.colspan]="1"
-                                [style.width.px]="gridService.rowReorderColumnWidth"></td>
-                        }
-                        <td
-                            monaGridCell
-                            [monaGridLockedCell]="'structural:detail'"
-                            [indentCell]="true"
-                            [attr.colspan]="1"
-                            [style.width.px]="gridService.masterDetailEmptyCellWidth()"></td>
-                        @if (gridService.selectionColumnVisible()) {
-                            <td
-                                monaGridCell
-                                [monaGridLockedCell]="'structural:selection'"
-                                [attr.colspan]="1"
-                                [style.width.px]="gridService.selectionColumnWidth"></td>
-                        }
-                        <td monaGridCell [masterDetailContent]="true" [attr.colspan]="columns().length">
-                            <ng-container
-                                [ngTemplateOutlet]="gridService.masterDetailTemplate()"
-                                [ngTemplateOutletContext]="{ $implicit: row.data }"></ng-container>
-                        </td>
-                    </tr>
-                }
-            }
-        } @else {
-            @for (viewRow of flattenedGroupedRows(); track $index) {
-                @let rowIndex = $index;
-                @if (viewRow.type === "group") {
-                    @let isCollapsed = gridService.isGroupCollapsed(viewRow.groupKey);
-                    @let prevRow = flattenedGroupedRows()[rowIndex - 1];
-
-                    <tr
-                        [class]="groupRowClass()"
-                        role="row"
-                        [attr.aria-level]="viewRow.depth + 1"
-                        [attr.aria-expanded]="!isCollapsed">
-                        @for (_ of gridService.groupColumns() | monaSlice: 0 : viewRow.depth; track $index) {
-                            <td
-                                monaGridCell
-                                [monaGridLockedCell]="'group:' + $index"
-                                [lockedCellHeader]="true"
-                                [grouped]="true"
-                                [indentCell]="true"
-                                [attr.colspan]="1"
-                                [style.width.px]="gridService.groupColumnWidth"></td>
-                        }
-                        @if (gridService.rowReorderColumnVisible()) {
-                            <td
-                                monaGridCell
-                                [monaGridLockedCell]="'group:' + viewRow.depth"
-                                [lockedCellHeader]="true"
-                                [grouped]="true"
-                                [indentCell]="true"
-                                [attr.colspan]="1"
-                                [style.width.px]="gridService.rowReorderColumnWidth"></td>
-                        }
-                        @let colspan =
-                            columns().length +
-                            gridService.groupColumns().length +
-                            (gridService.masterDetailTemplate() ? 1 : 0) +
-                            (gridService.selectionColumnVisible() ? 1 : 0) -
-                            viewRow.depth +
-                            1;
-
-                        <td
-                            monaGridCell
-                            monaGridLogicalCell
-                            [cellKind]="'group'"
-                            [rowIndex]="rowIndex"
-                            [colIndex]="0"
-                            [section]="'body'"
-                            [grouped]="true"
-                            [groupHeader]="true"
-                            [prevRowType]="prevRow?.type"
-                            [firstInRow]="true"
-                            [lastInRow]="columns().length === 0"
-                            [groupKey]="viewRow.groupKey"
-                            (toggleExpand)="onGroupExpandChange(viewRow.groupKey)"
-                            [attr.colspan]="colspan">
-                            <p class="flex min-h-9 items-center text-sm whitespace-nowrap">
-                                <mona-grid-toggle
-                                    [expanded]="!isCollapsed"
-                                    [width]="gridService.groupColumnWidth"
-                                    [type]="'group'"
-                                    (expandedChange)="onGroupExpandChange(viewRow.groupKey)"></mona-grid-toggle>
-                                <span class="font-bold">{{ viewRow.title }}: {{ viewRow.groupValue }}</span>
-                            </p>
-                        </td>
-                    </tr>
-                } @else if (viewRow.type === "groupFooter") {
-                    <tr monaGridFooterRow [groupKey]="viewRow.groupAggregate.groupKey"></tr>
-                } @else {
-                    @let nextRow = flattenedGroupedRows()[rowIndex + 1];
-                    @let prevRow = flattenedGroupedRows()[rowIndex - 1];
-                    <tr
-                        (click)="onGridRowClick($event, viewRow.row)"
-                        monaGridRow
-                        [index]="rowIndex"
-                        [row]="viewRow.row"
-                        #gridRow="monaGridRow"
-                        #rowElement>
-                        @for (_ of gridService.groupColumns(); track $index) {
-                            <td
-                                monaGridCell
-                                [monaGridLockedCell]="'group:' + $index"
-                                [lockedCellHeader]="true"
-                                [grouped]="true"
-                                [indentCell]="true"
-                                [style.width.px]="gridService.groupColumnWidth"></td>
-                        }
-
-                        @if (gridService.rowReorderColumnVisible()) {
-                            <td
-                                monaGridCell
-                                [monaGridLockedCell]="'structural:reorder'"
-                                monaGridLogicalCell
-                                [grouped]="true"
-                                [cellKind]="'command'"
-                                [columnId]="'$rowReorder'"
-                                [prevRowType]="prevRow?.type"
-                                [nextRowType]="nextRow?.type"
-                                [rowIndex]="rowIndex"
-                                [rowUid]="viewRow.row.uid"
-                                [section]="'body'"
-                                [colIndex]="gridService.structuralColIndexMap().get('reorder') ?? 0"
-                                [firstInRow]="gridService.structuralColIndexMap().get('reorder') === 0"
-                                [lastInRow]="columns().length === 0 && gridService.structuralLastKind() === 'reorder'"
-                                [style.width.px]="gridService.rowReorderColumnWidth">
-                                <mona-grid-row-reorder-handle [row]="viewRow.row" [pageIndex]="rowIndex" />
-                            </td>
-                        }
-                        @if (gridService.masterDetailTemplate()) {
-                            <td
-                                monaGridCell
-                                monaGridLogicalCell
-                                [monaGridLockedCell]="'structural:detail'"
-                                [grouped]="true"
-                                [masterDetailToggle]="true"
-                                [prevRowType]="prevRow?.type"
-                                [nextRowType]="nextRow?.type"
-                                [rowIndex]="rowIndex"
-                                [rowUid]="viewRow.row.uid"
-                                [section]="'body'"
-                                [cellKind]="'detail'"
-                                (toggleExpand)="onToggleDetailClick(viewRow.row)"
-                                [colIndex]="gridService.structuralColIndexMap().get('detail') ?? 0"
-                                [firstInRow]="gridService.structuralColIndexMap().get('detail') === 0"
-                                [lastInRow]="columns().length === 0 && gridService.structuralLastKind() === 'detail'"
-                                [style.width.px]="gridService.detailColumnWidth">
-                                <span class="flex min-h-9 w-full items-center justify-center">
-                                    <mona-grid-toggle
-                                        [expanded]="gridRow.expanded()"
-                                        [type]="'detail'"
-                                        [width]="gridService.detailColumnWidth"
-                                        (expandedChange)="onToggleDetailClick(viewRow.row)"></mona-grid-toggle>
-                                </span>
-                            </td>
-                        }
-                        @if (gridService.selectionColumnVisible()) {
-                            <td
-                                monaGridCell
-                                [monaGridLockedCell]="'structural:selection'"
-                                [grouped]="true"
-                                monaGridLogicalCell
-                                [cellKind]="'command'"
-                                [columnId]="'$selection'"
-                                [prevRowType]="prevRow?.type"
-                                [nextRowType]="nextRow?.type"
-                                [rowIndex]="rowIndex"
-                                [rowUid]="viewRow.row.uid"
-                                [section]="'body'"
-                                [colIndex]="gridService.structuralColIndexMap().get('selection') ?? 0"
-                                [firstInRow]="gridService.structuralColIndexMap().get('selection') === 0"
-                                [lastInRow]="columns().length === 0 && gridService.structuralLastKind() === 'selection'"
-                                [style.width.px]="gridService.selectionColumnWidth">
-                                <mona-grid-selection-checkbox [row]="viewRow.row" [rowIndex]="rowIndex" />
-                            </td>
-                        }
-                        @for (column of columns(); track $index) {
-                            @let colIndex = $index + gridService.leadingLogicalColumnCount();
-                            <td
-                                monaGridCell
-                                [monaGridLockedCell]="'column:' + column.id"
-                                [grouped]="true"
-                                [dataCell]="true"
-                                [prevRowType]="prevRow?.type"
-                                [nextRowType]="nextRow?.type"
-                                monaGridLogicalCell
-                                [cellKind]="column.kind"
-                                [colIndex]="colIndex"
-                                [columnId]="column.id"
-                                [editable]="
-                                    gridService.editableOptions().enabled === true &&
-                                    gridService.editableOptions().mode === 'cell' &&
-                                    column.kind === 'data' &&
-                                    column.editable === true
-                                "
-                                [firstInRow]="colIndex === gridService.leadingLogicalColumnCount()"
-                                [lastInRow]="
-                                    colIndex === gridService.leadingLogicalColumnCount() + columns().length - 1
-                                "
-                                [rowIndex]="rowIndex"
-                                [rowUid]="viewRow.row.uid"
-                                [section]="'body'"
-                                [style.width.px]="column.calculatedWidth"
-                                [style.min-width.px]="column.minWidth"
-                                (edit)="gridCell.handleLogicalCellEnter()">
-                                <mona-grid-cell #gridCell [column]="column" [row]="viewRow.row"></mona-grid-cell>
-                            </td>
-                        }
-                        @if (gridService.contextMenuItems().length !== 0) {
-                            <ng-container
-                                [ngTemplateOutlet]="contextMenuTemplate"
-                                [ngTemplateOutletContext]="{
-                                    $implicit: viewRow.row.data,
-                                    element: rowElement,
-                                    index: rowIndex
-                                }">
-                            </ng-container>
-                        }
-                    </tr>
-                    @if (gridRow.expanded() && !gridService.rowDragInProgress()) {
-                        <tr monaGridDetailRow [style.width.px]="gridService.masterDetailRowWidth()">
-                            @for (_ of gridService.groupColumns() | monaSlice: 0 : viewRow.depth + 1; track $index) {
-                                <td
-                                    monaGridCell
-                                    [monaGridLockedCell]="'group:' + $index"
-                                    [lockedCellHeader]="true"
-                                    [grouped]="true"
-                                    [indentCell]="true"
-                                    [attr.colspan]="1"
-                                    [style.width.px]="gridService.groupColumnWidth"></td>
-                            }
-                            @if (gridService.rowReorderColumnVisible()) {
-                                <td
-                                    monaGridCell
-                                    [monaGridLockedCell]="'structural:reorder'"
-                                    [grouped]="true"
-                                    [indentCell]="true"
-                                    [attr.colspan]="1"
-                                    [style.width.px]="gridService.rowReorderColumnWidth"></td>
-                            }
-                            @let colspan = columns().length + gridService.groupColumns().length - 1;
-                            <td
-                                monaGridDetailIndentCell
-                                [monaGridLockedCell]="'structural:detail'"
-                                [nextRowType]="nextRow?.type"
-                                [attr.colspan]="1"
-                                [style.width.px]="gridService.masterDetailEmptyCellWidth()"></td>
-                            @if (gridService.selectionColumnVisible()) {
-                                <td
-                                    monaGridCell
-                                    [monaGridLockedCell]="'structural:selection'"
-                                    [attr.colspan]="1"
-                                    [style.width.px]="gridService.selectionColumnWidth"></td>
-                            }
-                            <td monaGridDetailContentCell [nextRowType]="nextRow?.type" [attr.colspan]="colspan">
-                                <ng-container
-                                    [ngTemplateOutlet]="gridService.masterDetailTemplate()"
-                                    [ngTemplateOutletContext]="{ $implicit: viewRow.row.data }"></ng-container>
-                            </td>
-                        </tr>
-                    }
+                @if (gridService.isRowExpanded(bodyRow.row) && !gridService.rowDragInProgress()) {
+                    <tr monaGridDetailRow [row]="bodyRow.row"></tr>
                 }
             }
         }
     </tbody>
 </table>
-
-<ng-template let-rowData let-element="element" let-rowIndex="index" #contextMenuTemplate>
-    <mona-contextmenu [target]="element" [items]="gridService.contextMenuItems()"></mona-contextmenu>
-    <!--    [context]="{rowData, element, rowIndex}"-->
-</ng-template>

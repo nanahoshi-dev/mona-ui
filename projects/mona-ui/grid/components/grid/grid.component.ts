@@ -65,7 +65,6 @@ import type { GridKeySelector } from "../../models/GridKeySelector";
 import { ResizeMethod } from "../../models/ResizeMethod";
 import { ColumnAriaSortPipe } from "../../pipes/column-aria-sort.pipe";
 import { GridNavigationService } from "../../services/grid-navigation.service";
-import { GridRowFlattenerService } from "../../services/grid-row-flattener.service";
 import { GridService } from "../../services/grid.service";
 import {
     gridBaseThemeVariants,
@@ -103,7 +102,7 @@ const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [ta
     selector: "mona-grid",
     templateUrl: "./grid.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [GridService, GridNavigationService, GridRowFlattenerService, FilterService],
+    providers: [GridService, GridNavigationService, FilterService],
     imports: [
         LucideArrowDown,
         LucideArrowLeft,

@@ -1,6 +1,5 @@
 import { GRID_DEFAULT_VIRTUAL_ROW_HEIGHT } from "../../constants/grid-virtual-scroll.constants";
 import { CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport } from "@angular/cdk/scrolling";
-import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
     ChangeDetectionStrategy,
@@ -17,37 +16,25 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { ImmutableList } from "@mirei/ts-collections";
-import { SlicePipe } from "@nanahoshi/mona-ui/common";
-import { ContextMenuComponent } from "@nanahoshi/mona-ui/contextmenu";
 import { rxTimeout } from "@nanahoshi/mona-ui/internal";
 import { fromEvent } from "rxjs";
-import { GridCellDirective } from "../../directives/grid-cell.directive";
-import { GridDetailContentCellDirective } from "../../directives/grid-detail-content-cell.directive";
-import { GridDetailIndentCellDirective } from "../../directives/grid-detail-indent-cell.directive";
-import { GridDetailRowDirective } from "../../directives/grid-detail-row.directive";
-import { GridLockedCellDirective } from "../../directives/grid-locked-cell.directive";
-import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
-import { GridRowDirective } from "../../directives/grid-row.directive";
 import { Column } from "../../models/Column";
 import type { GridViewRow } from "../../models/GridGroup";
 import { Row } from "../../models/Row";
 import { GridNavigationService } from "../../services/grid-navigation.service";
-import { GridRowFlattenerService } from "../../services/grid-row-flattener.service";
 import { GridService } from "../../services/grid.service";
 import {
     gridFooterTableThemeVariants,
     gridFooterThemeVariants,
-    gridGroupRowThemeVariants,
     gridListBaseThemeVariants,
     gridListTableThemeVariants
 } from "../../styles/grid.styles";
 import { GridAddRowComponent } from "../grid-add-row/grid-add-row.component";
-import { GridCellComponent } from "../grid-cell/grid-cell.component";
 import { GridColgroupComponent } from "../grid-colgroup/grid-colgroup.component";
+import { GridDetailRowComponent } from "../grid-detail-row/grid-detail-row.component";
 import { GridFooterRowComponent } from "../grid-footer-row/grid-footer-row.component";
-import { GridRowReorderHandleComponent } from "../grid-row-reorder-handle/grid-row-reorder-handle.component";
-import { GridSelectionCheckboxComponent } from "../grid-selection-checkbox/grid-selection-checkbox.component";
-import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
+import { GridGroupRowComponent } from "../grid-group-row/grid-group-row.component";
+import { GridRowComponent } from "../grid-row/grid-row.component";
 
 @Component({
     selector: "mona-grid-virtual-list",
@@ -56,22 +43,11 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
         CdkFixedSizeVirtualScroll,
         CdkVirtualForOf,
         GridAddRowComponent,
-        GridCellComponent,
         GridColgroupComponent,
-        SlicePipe,
-        NgTemplateOutlet,
-        ContextMenuComponent,
-        GridRowDirective,
-        GridCellDirective,
-        GridDetailRowDirective,
-        GridDetailIndentCellDirective,
-        GridDetailContentCellDirective,
-        GridLogicalCellDirective,
-        GridLockedCellDirective,
-        GridToggleComponent,
+        GridDetailRowComponent,
         GridFooterRowComponent,
-        GridSelectionCheckboxComponent,
-        GridRowReorderHandleComponent
+        GridGroupRowComponent,
+        GridRowComponent
     ],
     templateUrl: "./grid-virtual-list.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -86,7 +62,6 @@ export class GridVirtualListComponent {
     readonly #groupColumns$ = toObservable(inject(GridService).groupColumns);
     readonly #hostElementRef = inject(ElementRef<HTMLDivElement>);
     readonly #injector = inject(Injector);
-    readonly #rowFlattener = inject(GridRowFlattenerService);
     private readonly addRowScrollElementRef = viewChild<ElementRef<HTMLDivElement>>("addRowScrollElement");
     private readonly bodyTableElementRef = viewChild.required<ElementRef<HTMLTableElement>>("bodyTable");
     private readonly footerScrollElementRef = viewChild<ElementRef<HTMLDivElement>>("footerScrollElement");
@@ -97,26 +72,7 @@ export class GridVirtualListComponent {
             " [&_mona-grid-command-cell]:min-h-0 [&_mona-grid-command-cell>div]:min-h-0"
         );
     });
-    protected readonly flattenedGroupedRows = computed(() => {
-        const groupColumns = this.gridService.groupColumns();
-        if (groupColumns.length === 0) {
-            return [] as GridViewRow[];
-        }
-        const collapsedKeys = new Set(this.gridService.collapsedGroupKeys());
-        const groupAggregateDict = this.gridService.groupAggregateMap().toDictionary(
-            e => e.key,
-            e => e.value
-        );
-        const showFooter = this.gridService.groupableOptions().showFooter;
-        return this.#rowFlattener.flatten(
-            this.data(),
-            groupColumns,
-            collapsedKeys,
-            showFooter,
-            groupAggregateDict,
-            this.gridService.serverBindingEnabled()
-        );
-    });
+    protected readonly bodyRows = computed(() => this.gridService.createBodyRows(this.data()));
     protected readonly footerClass = computed(() => {
         return gridFooterThemeVariants();
     });
@@ -124,9 +80,6 @@ export class GridVirtualListComponent {
         return gridFooterTableThemeVariants();
     });
     protected readonly gridService = inject(GridService);
-    protected readonly groupRowClass = computed(() => {
-        return gridGroupRowThemeVariants({ virtual: true });
-    });
     protected readonly tableClass = computed(() => {
         return gridListTableThemeVariants();
     });
@@ -171,20 +124,12 @@ export class GridVirtualListComponent {
         this.setSelectedKeysLoadSubscription();
     }
 
-    public onGridRowClick(event: MouseEvent, row: Row): void {
-        this.gridService.handleRowClick(event, row);
-    }
-
-    public onGroupExpandChange(groupKey: string): void {
-        this.gridService.toggleGroupCollapse(groupKey);
-    }
-
-    public onToggleDetailClick(row: Row): void {
-        this.gridService.setRowExpanded(row, !this.gridService.isRowExpanded(row));
-    }
-
     protected onViewportFocus(): void {
         this.#gridNavigationService.focusActiveCellOrFirstHeader();
+    }
+
+    protected trackBodyRow(_: number, bodyRow: GridViewRow): string {
+        return bodyRow.key;
     }
 
     private setElementScrollLeft(element: HTMLElement | null, scrollLeft: number): void {
@@ -233,44 +178,21 @@ export class GridVirtualListComponent {
     private setSelectedKeysLoadSubscription(): void {
         this.gridService.selectedKeysLoad$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(selectedKeys => {
             const firstKey = selectedKeys.firstOrDefault();
-            if (firstKey == null) {
+            const selectBy = this.gridService.selectBy();
+            if (firstKey == null || selectBy == null) {
                 return;
             }
-            const selectBy = this.gridService.selectBy();
-            if (this.gridService.groupColumns().any()) {
-                const viewData = this.flattenedGroupedRows();
-                const selectedRow = viewData.find(r => {
-                    if (r.type !== "data" || selectBy == null) {
-                        return false;
-                    }
-                    if (typeof selectBy === "string") {
-                        return r.row.data[selectBy] === firstKey;
-                    }
-                    return selectBy(r.row.data) === firstKey;
-                });
-                if (selectedRow != null) {
-                    const index = viewData.indexOf(selectedRow);
-                    rxTimeout(this.#destroyRef, () => {
-                        this.viewport().scrollToIndex(index);
-                    });
+            const index = this.bodyRows().findIndex(bodyRow => {
+                if (bodyRow.type !== "data") {
+                    return false;
                 }
-            } else {
-                const viewData = this.data().toImmutableList();
-                const selectedRow = viewData.firstOrDefault(r => {
-                    if (selectBy == null) {
-                        return false;
-                    }
-                    if (typeof selectBy === "string") {
-                        return r.data[selectBy] === firstKey;
-                    }
-                    return selectBy(r.data) === firstKey;
+                const key = typeof selectBy === "string" ? bodyRow.row.data[selectBy] : selectBy(bodyRow.row.data);
+                return key === firstKey;
+            });
+            if (index !== -1) {
+                rxTimeout(this.#destroyRef, () => {
+                    this.viewport().scrollToIndex(index);
                 });
-                if (selectedRow != null) {
-                    const index = viewData.indexOf(selectedRow);
-                    rxTimeout(this.#destroyRef, () => {
-                        this.viewport().scrollToIndex(index);
-                    });
-                }
             }
         });
     }
