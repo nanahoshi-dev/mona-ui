@@ -153,6 +153,37 @@ async function main(): Promise<void> {
             await expect(grid.locator("[data-grid-add-row] [data-tall-editor]")).toBeVisible();
             await grid.getByRole("button", { name: "Cancel row edit", exact: true }).click();
             await expect(grid.locator("[data-grid-add-row]")).toHaveCount(0);
+
+            // Locked columns stay pinned to their logical side after scrolling to the far inline end.
+            const pinned = await grid.evaluate(async (element, rtl) => {
+                const originalWidth = element.style.width;
+                element.style.width = "420px";
+                await new Promise(resolveTimeout => setTimeout(resolveTimeout, 300));
+                const body = element.querySelector<HTMLElement>("mona-grid-list");
+                const row = body?.querySelector("tbody tr[monaGridRow]");
+                const cells = Array.from(row?.querySelectorAll<HTMLElement>(":scope > td") ?? []);
+                if (body == null || cells.length < 2) {
+                    throw new Error("Expected a rendered body row");
+                }
+                body.scrollLeft = rtl ? -body.scrollWidth : body.scrollWidth;
+                await new Promise(resolveFrame => requestAnimationFrame(() => resolveFrame(null)));
+                // clientLeft covers an RTL scrollbar that sits on the left.
+                const contentLeft = body.getBoundingClientRect().left + body.clientLeft;
+                const contentRight = contentLeft + body.clientWidth;
+                const first = cells[0].getBoundingClientRect();
+                const last = cells[cells.length - 1].getBoundingClientRect();
+                const result = {
+                    overflow: body.scrollWidth - body.clientWidth,
+                    startGap: rtl ? contentRight - first.right : first.left - contentLeft,
+                    endGap: rtl ? last.left - contentLeft : contentRight - last.right
+                };
+                body.scrollLeft = 0;
+                element.style.width = originalWidth;
+                return result;
+            }, direction === "rtl");
+            expect(pinned.overflow).toBeGreaterThan(0);
+            expect(Math.abs(pinned.startGap)).toBeLessThan(1);
+            expect(Math.abs(pinned.endGap)).toBeLessThan(1);
         }
 
         for (const [id, height] of [
