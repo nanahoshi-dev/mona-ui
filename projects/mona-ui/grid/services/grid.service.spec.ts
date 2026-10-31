@@ -1230,6 +1230,27 @@ describe("GridService", () => {
             expect(service.structuralLastKind()).toBe("detail");
         });
 
+        it("lays out group indents, structural columns, and user columns in one shared sequence", () => {
+            service.setRowReorderableOptions({ enabled: true });
+            service.masterDetailTemplate.set({} as never);
+            service.columns.set(
+                ImmutableList.create([
+                    createColumn({ field: "a", calculatedWidth: 120 }),
+                    createColumn({ field: "b", calculatedWidth: 80, hidden: true }),
+                    createColumn({ field: "c", calculatedWidth: null })
+                ])
+            );
+            service.addGroupColumn(service.columns().get(0));
+
+            expect(service.layout().map(c => ({ key: c.key, logicalIndex: c.logicalIndex, width: c.width }))).toEqual([
+                { key: "group:0", logicalIndex: null, width: 36 },
+                { key: "structural:reorder", logicalIndex: 0, width: 36 },
+                { key: "structural:detail", logicalIndex: 1, width: 36 },
+                { key: "column:a", logicalIndex: 2, width: 120 },
+                { key: "column:c", logicalIndex: 3, width: null }
+            ]);
+        });
+
         it("keeps the structuralColIndexMap reference stable across reads when nothing structural changed", () => {
             service.setRowReorderableOptions({ enabled: true });
 

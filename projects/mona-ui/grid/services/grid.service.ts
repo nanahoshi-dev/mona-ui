@@ -53,6 +53,7 @@ import { GridEditEvent } from "../models/GridEditEvent";
 import type { GridEditFormContext } from "../models/GridEditFormContext";
 import type { GridEditSession } from "../models/GridEditSession";
 import { GridKeySelector } from "../models/GridKeySelector";
+import type { GridLayoutColumn } from "../models/GridLayoutColumn";
 import type { GridLockedColumnState } from "../models/GridLockedColumnState";
 import { GridRemoveEvent } from "../models/GridRemoveEvent";
 import { GridSaveEvent } from "../models/GridSaveEvent";
@@ -275,6 +276,38 @@ export class GridService {
         }
         const groupCount = this.groupColumns().length;
         return groupCount > 0 ? (groupCount - 1) * this.groupColumnWidth : null;
+    });
+    // The physical column sequence shared by every table section: group indents, then the visible
+    // structural columns, then the visible user columns.
+    public readonly layout = computed<readonly GridLayoutColumn[]>(() => {
+        const layout: GridLayoutColumn[] = this.groupColumns()
+            .toArray()
+            .map((_, depth) => ({
+                depth,
+                key: `group:${depth}`,
+                kind: "group",
+                logicalIndex: null,
+                width: this.groupColumnWidth
+            }));
+        let logicalIndex = 0;
+        for (const structuralColumn of this.visibleStructuralColumns()) {
+            layout.push({
+                key: `structural:${structuralColumn.kind}`,
+                kind: structuralColumn.kind,
+                logicalIndex: logicalIndex++,
+                width: structuralColumn.width
+            });
+        }
+        for (const column of this.visibleColumns()) {
+            layout.push({
+                column,
+                key: `column:${column.id}`,
+                kind: "column",
+                logicalIndex: logicalIndex++,
+                width: column.calculatedWidth
+            });
+        }
+        return layout;
     });
     public readonly leadingLogicalColumnCount = computed(() => this.visibleStructuralColumns().length);
     public readonly leadingStructuralColumnCount = computed(
