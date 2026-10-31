@@ -6,19 +6,17 @@ import type { GridColumnLockedPosition } from "../models/GridColumnLockedPositio
 import { GridService } from "../services/grid.service";
 import { GridLockedCellDirective } from "./grid-locked-cell.directive";
 
+const EDGE_BORDER = "1px solid var(--color-border)";
+
 @Component({
     template: `
         <table>
             <tbody>
                 <tr>
-                    <td id="reorder" monaGridLockedCell [structuralColumn]="'reorder'"></td>
-                    <td id="detail" monaGridLockedCell [structuralColumn]="'detail'"></td>
-                    <td id="selection" monaGridLockedCell [structuralColumn]="'selection'"></td>
-                    <td
-                        id="reorder-with-group-prefix"
-                        monaGridLockedCell
-                        [structuralColumn]="'reorder'"
-                        [groupPrefixWidth]="36"></td>
+                    <td id="reorder" monaGridLockedCell="structural:reorder"></td>
+                    <td id="detail" monaGridLockedCell="structural:detail"></td>
+                    <td id="selection" monaGridLockedCell="structural:selection"></td>
+                    <td id="unknown" monaGridLockedCell="structural:missing"></td>
                 </tr>
             </tbody>
         </table>
@@ -87,28 +85,23 @@ function createColumn(field: string, locked: boolean, lockedPosition: GridColumn
                     <td
                         id="left-non-edge"
                         class="border-r border-r-border border-b border-b-border"
-                        monaGridLockedCell
-                        [column]="leftNonEdgeColumn"></td>
+                        monaGridLockedCell="column:leftNonEdge"></td>
                     <td
                         id="left-edge"
                         class="border-r border-r-border border-b border-b-border"
-                        monaGridLockedCell
-                        [column]="leftEdgeColumn"></td>
+                        monaGridLockedCell="column:leftEdge"></td>
                     <td
                         id="unlocked"
                         class="border-r border-r-border border-b border-b-border"
-                        monaGridLockedCell
-                        [column]="unlockedColumn"></td>
+                        monaGridLockedCell="column:unlocked"></td>
                     <td
                         id="right-edge"
                         class="border-r border-r-border border-b border-b-border"
-                        monaGridLockedCell
-                        [column]="rightEdgeColumn"></td>
+                        monaGridLockedCell="column:rightEdge"></td>
                     <td
                         id="right-non-edge"
                         class="border-r border-r-border border-b border-b-border"
-                        monaGridLockedCell
-                        [column]="rightNonEdgeColumn"></td>
+                        monaGridLockedCell="column:rightNonEdge"></td>
                 </tr>
             </tbody>
         </table>
@@ -117,23 +110,24 @@ function createColumn(field: string, locked: boolean, lockedPosition: GridColumn
 })
 class GridLockedCellHostComponent {
     protected readonly gridService = inject(GridService);
-    protected readonly leftEdgeColumn = createColumn("leftEdge", true, "left");
-    protected readonly leftNonEdgeColumn = createColumn("leftNonEdge", true, "left");
-    protected readonly rightEdgeColumn = createColumn("rightEdge", true, "right");
-    protected readonly rightNonEdgeColumn = createColumn("rightNonEdge", true, "right");
-    protected readonly unlockedColumn = createColumn("unlocked", false);
 
     public constructor() {
         this.gridService.columns.set(
             ImmutableList.create([
-                this.leftNonEdgeColumn,
-                this.leftEdgeColumn,
-                this.unlockedColumn,
-                this.rightEdgeColumn,
-                this.rightNonEdgeColumn
+                createColumn("leftNonEdge", true, "left"),
+                createColumn("leftEdge", true, "left"),
+                createColumn("unlocked", false),
+                createColumn("rightEdge", true, "right"),
+                createColumn("rightNonEdge", true, "right")
             ])
         );
     }
+}
+
+function getCell(fixture: ComponentFixture<unknown>, id: string): HTMLTableCellElement {
+    const cell = (fixture.nativeElement as HTMLElement).querySelector(`#${id}`);
+    expect(cell).not.toBeNull();
+    return cell as HTMLTableCellElement;
 }
 
 describe("GridLockedCellDirective", () => {
@@ -149,56 +143,52 @@ describe("GridLockedCellDirective", () => {
         fixture.detectChanges();
     });
 
-    it("preserves the existing right border for the left locked boundary", () => {
-        const cell = getCell("left-edge");
-
-        expect(cell.classList.contains("border-r")).toBe(true);
-        expect(cell.classList.contains("border-r-border")).toBe(true);
-        expect(cell.classList.contains("border-b")).toBe(true);
-        expect(cell.classList.contains("border-b-border")).toBe(true);
-        expect(cell.classList.contains("border-l")).toBe(false);
-        expect(cell.classList.contains("border-l-border")).toBe(false);
+    it("pins start-locked columns with logical start offsets", () => {
+        expect(getCell(fixture, "left-non-edge").style.position).toBe("sticky");
+        expect(getCell(fixture, "left-non-edge").style.insetInlineStart).toBe("0px");
+        expect(getCell(fixture, "left-edge").style.insetInlineStart).toBe("80px");
     });
 
-    it("does not remove gridline borders from the right locked boundary", () => {
-        const cell = getCell("right-edge");
-
-        expect(cell.classList.contains("border-r")).toBe(true);
-        expect(cell.classList.contains("border-r-border")).toBe(true);
-        expect(cell.classList.contains("border-b")).toBe(true);
-        expect(cell.classList.contains("border-b-border")).toBe(true);
+    it("pins end-locked columns with logical end offsets", () => {
+        expect(getCell(fixture, "right-non-edge").style.insetInlineEnd).toBe("0px");
+        expect(getCell(fixture, "right-edge").style.insetInlineEnd).toBe("80px");
     });
 
-    it("does not remove gridline borders from non-edge locked cells", () => {
-        const leftCell = getCell("left-non-edge");
-        const rightCell = getCell("right-non-edge");
-
-        expect(leftCell.classList.contains("border-l")).toBe(false);
-        expect(leftCell.classList.contains("border-l-border")).toBe(false);
-        expect(leftCell.classList.contains("border-r")).toBe(true);
-        expect(leftCell.classList.contains("border-r-border")).toBe(true);
-        expect(leftCell.classList.contains("border-b")).toBe(true);
-        expect(leftCell.classList.contains("border-b-border")).toBe(true);
-        expect(leftCell.style.boxShadow).toBe("");
-
-        expect(rightCell.classList.contains("border-l")).toBe(false);
-        expect(rightCell.classList.contains("border-l-border")).toBe(false);
-        expect(rightCell.classList.contains("border-r")).toBe(true);
-        expect(rightCell.classList.contains("border-r-border")).toBe(true);
-        expect(rightCell.classList.contains("border-b")).toBe(true);
-        expect(rightCell.classList.contains("border-b-border")).toBe(true);
-        expect(rightCell.style.boxShadow).toBe("");
+    it("never sets physical left or right offsets", () => {
+        for (const id of ["left-non-edge", "left-edge", "right-edge", "right-non-edge"]) {
+            const cell = getCell(fixture, id);
+            expect(cell.style.left).toBe("");
+            expect(cell.style.right).toBe("");
+        }
     });
 
-    function getCell(id: string): HTMLTableCellElement {
-        const hostElement = fixture.nativeElement as HTMLElement;
-        const cell = hostElement.querySelector(`#${id}`);
-        expect(cell).not.toBeNull();
-        return cell as HTMLTableCellElement;
-    }
+    it("draws the separator on the inner side of each pinned boundary only", () => {
+        expect(getCell(fixture, "left-edge").style.borderInlineEnd).toBe(EDGE_BORDER);
+        expect(getCell(fixture, "left-non-edge").style.borderInlineEnd).toBe("");
+        expect(getCell(fixture, "right-edge").style.borderInlineStart).toBe(EDGE_BORDER);
+        expect(getCell(fixture, "right-non-edge").style.borderInlineStart).toBe("");
+    });
+
+    it("leaves unlocked columns in normal flow", () => {
+        const cell = getCell(fixture, "unlocked");
+        expect(cell.style.position).toBe("");
+        expect(cell.style.insetInlineStart).toBe("");
+        expect(cell.style.zIndex).toBe("");
+    });
+
+    it("keeps the cell's own gridline border classes", () => {
+        for (const id of ["left-non-edge", "left-edge", "right-edge", "right-non-edge"]) {
+            const cell = getCell(fixture, id);
+            expect(cell.classList.contains("border-r")).toBe(true);
+            expect(cell.classList.contains("border-r-border")).toBe(true);
+            expect(cell.classList.contains("border-b")).toBe(true);
+            expect(cell.classList.contains("border-b-border")).toBe(true);
+            expect(cell.style.boxShadow).toBe("");
+        }
+    });
 });
 
-describe("GridLockedCellDirective structuralColumn input mode", () => {
+describe("GridLockedCellDirective structural columns", () => {
     let fixture: ComponentFixture<StructuralColumnHostComponent>;
 
     beforeEach(async () => {
@@ -211,26 +201,18 @@ describe("GridLockedCellDirective structuralColumn input mode", () => {
         fixture.detectChanges();
     });
 
-    function getCell(id: string): HTMLTableCellElement {
-        const hostElement = fixture.nativeElement as HTMLElement;
-        const cell = hostElement.querySelector(`#${id}`);
-        expect(cell).not.toBeNull();
-        return cell as HTMLTableCellElement;
-    }
-
-    it("resolves the offset for each kind from the registry, without a raw lockedStructuralOffset input", () => {
-        expect(getCell("reorder").style.left).toBe("0px");
-        expect(getCell("detail").style.left).toBe("36px");
-        expect(getCell("selection").style.left).toBe("72px");
+    it("resolves each structural column's offset from the layout", () => {
+        expect(getCell(fixture, "reorder").style.insetInlineStart).toBe("0px");
+        expect(getCell(fixture, "detail").style.insetInlineStart).toBe("36px");
+        expect(getCell(fixture, "selection").style.insetInlineStart).toBe("72px");
     });
 
     it("treats the last visible structural column as the sticky edge", () => {
-        expect(getCell("reorder").style.borderRight).toBe("");
-        expect(getCell("selection").style.borderRight).toBe("1px solid var(--color-border)");
+        expect(getCell(fixture, "reorder").style.borderInlineEnd).toBe("");
+        expect(getCell(fixture, "selection").style.borderInlineEnd).toBe(EDGE_BORDER);
     });
 
-    it("offsets by an explicit groupPrefixWidth instead of the full group width", () => {
-        expect(getCell("reorder-with-group-prefix").style.left).toBe("36px");
-        expect(getCell("reorder-with-group-prefix").style.borderRight).toBe("");
+    it("leaves a cell unpinned when its layout key is not in the layout", () => {
+        expect(getCell(fixture, "unknown").style.position).toBe("");
     });
 });

@@ -1,8 +1,9 @@
 import type { Column } from "./Column";
+import type { GridStickyState } from "./GridStickyState";
 import type { StructuralColumnKind } from "./StructuralColumn";
 
 /**
- * A single physical column of the grid tables, in left-to-right (inline-start to inline-end) order.
+ * A single physical column of the grid tables, in inline-start to inline-end order.
  * Every table section (header, body, add row, footer) renders the same sequence of layout columns.
  */
 export type GridLayoutColumn = GridLayoutDataColumn | GridLayoutGroupColumn | GridLayoutStructuralColumn;
@@ -14,6 +15,7 @@ export interface GridLayoutDataColumn {
     readonly kind: "column";
     /** The keyboard-navigation column index. */
     readonly logicalIndex: number;
+    readonly sticky: GridStickyState | null;
     readonly width: number | null;
 }
 
@@ -23,6 +25,7 @@ export interface GridLayoutGroupColumn {
     readonly key: string;
     readonly kind: "group";
     readonly logicalIndex: null;
+    readonly sticky: GridStickyState | null;
     readonly width: number;
 }
 
@@ -32,5 +35,6 @@ export interface GridLayoutStructuralColumn {
     readonly kind: StructuralColumnKind;
     /** The keyboard-navigation column index. */
     readonly logicalIndex: number;
+    readonly sticky: GridStickyState | null;
     readonly width: number;
 }

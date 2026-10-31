@@ -303,9 +303,9 @@ describe("grid row reordering integration", () => {
             if (reorderCell == null || detailCell == null || selectionCell == null) {
                 throw new Error("Expected structural cells");
             }
-            expect(reorderCell.style.left).toBe("0px");
-            expect(detailCell.style.left).toBe("36px");
-            expect(selectionCell.style.left).toBe("72px");
+            expect(reorderCell.style.insetInlineStart).toBe("0px");
+            expect(detailCell.style.insetInlineStart).toBe("36px");
+            expect(selectionCell.style.insetInlineStart).toBe("72px");
         });
 
         it("positions the reorder placeholder relative to the group header's own depth, not the full group width", async () => {
@@ -326,8 +326,8 @@ describe("grid row reordering integration", () => {
                 throw new Error("Expected reorder placeholder cells in both group-header rows");
             }
 
-            expect((depthZeroReorderCell as HTMLElement).style.left).toBe("0px");
-            expect((depthOneReorderCell as HTMLElement).style.left).toBe("36px");
+            expect((depthZeroReorderCell as HTMLElement).style.insetInlineStart).toBe("0px");
+            expect((depthOneReorderCell as HTMLElement).style.insetInlineStart).toBe("36px");
 
             const groupTitle = depthZeroHeader.querySelector("mona-grid-toggle");
             expect(groupTitle).not.toBeNull();

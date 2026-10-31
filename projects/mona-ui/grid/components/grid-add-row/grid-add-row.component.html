@@ -3,9 +3,8 @@
     @for (_ of gridService.groupColumns(); track $index) {
         <td
             monaGridCell
-            monaGridLockedCell
+            [monaGridLockedCell]="'group:' + $index"
             [lockedCellHeader]="true"
-            [lockedStructuralOffset]="$index * gridService.groupColumnWidth"
             [grouped]="true"
             [indentCell]="true"
             [attr.colspan]="1"
@@ -15,8 +14,7 @@
         <td
             monaGridCell
             monaGridLogicalCell
-            monaGridLockedCell
-            [structuralColumn]="'reorder'"
+            [monaGridLockedCell]="'structural:reorder'"
             [rowIndex]="-1"
             [colIndex]="gridService.structuralColIndexMap().get('reorder') ?? 0"
             [cellKind]="'command'"
@@ -30,8 +28,7 @@
         <td
             monaGridCell
             monaGridLogicalCell
-            monaGridLockedCell
-            [structuralColumn]="'detail'"
+            [monaGridLockedCell]="'structural:detail'"
             [masterDetailToggle]="true"
             [rowIndex]="-1"
             [colIndex]="gridService.structuralColIndexMap().get('detail') ?? 0"
@@ -45,8 +42,7 @@
         <td
             monaGridCell
             monaGridLogicalCell
-            monaGridLockedCell
-            [structuralColumn]="'selection'"
+            [monaGridLockedCell]="'structural:selection'"
             [rowIndex]="-1"
             [colIndex]="gridService.structuralColIndexMap().get('selection') ?? 0"
             [cellKind]="'command'"
@@ -60,8 +56,7 @@
         @let colIndex = $index + gridService.leadingLogicalColumnCount();
         <td
             monaGridCell
-            monaGridLockedCell
-            [column]="column"
+            [monaGridLockedCell]="'column:' + column.id"
             [dataCell]="true"
             monaGridLogicalCell
             [cellKind]="column.kind"

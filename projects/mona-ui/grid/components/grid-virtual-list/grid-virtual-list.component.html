@@ -32,9 +32,8 @@
                         @if (gridService.rowReorderColumnVisible()) {
                             <td
                                 monaGridCell
-                                monaGridLockedCell
+                                [monaGridLockedCell]="'structural:reorder'"
                                 monaGridLogicalCell
-                                [structuralColumn]="'reorder'"
                                 [cellKind]="'command'"
                                 [columnId]="'$rowReorder'"
                                 [rowIndex]="rowIndex"
@@ -51,8 +50,7 @@
                         @if (gridService.masterDetailTemplate()) {
                             <td
                                 monaGridCell
-                                monaGridLockedCell
-                                [structuralColumn]="'detail'"
+                                [monaGridLockedCell]="'structural:detail'"
                                 [masterDetailToggle]="true"
                                 monaGridLogicalCell
                                 [cellKind]="'detail'"
@@ -77,8 +75,7 @@
                         @if (gridService.selectionColumnVisible()) {
                             <td
                                 monaGridCell
-                                monaGridLockedCell
-                                [structuralColumn]="'selection'"
+                                [monaGridLockedCell]="'structural:selection'"
                                 monaGridLogicalCell
                                 [cellKind]="'command'"
                                 [columnId]="'$selection'"
@@ -97,8 +94,7 @@
                             @let colIndex = $index + gridService.leadingLogicalColumnCount();
                             <td
                                 monaGridCell
-                                monaGridLockedCell
-                                [column]="column"
+                                [monaGridLockedCell]="'column:' + column.id"
                                 [dataCell]="true"
                                 monaGridLogicalCell
                                 [cellKind]="column.kind"
@@ -140,23 +136,20 @@
                             @if (gridService.rowReorderColumnVisible()) {
                                 <td
                                     monaGridCell
-                                    monaGridLockedCell
-                                    [structuralColumn]="'reorder'"
+                                    [monaGridLockedCell]="'structural:reorder'"
                                     [attr.colspan]="1"
                                     [style.width.px]="gridService.rowReorderColumnWidth"></td>
                             }
                             <td
                                 monaGridCell
-                                monaGridLockedCell
-                                [lockedStructuralOffset]="gridService.rowReorderStructuralWidth()"
+                                [monaGridLockedCell]="'structural:detail'"
                                 [indentCell]="true"
                                 [attr.colspan]="1"
                                 [style.width.px]="gridService.masterDetailEmptyCellWidth()"></td>
                             @if (gridService.selectionColumnVisible()) {
                                 <td
                                     monaGridCell
-                                    monaGridLockedCell
-                                    [structuralColumn]="'selection'"
+                                    [monaGridLockedCell]="'structural:selection'"
                                     [attr.colspan]="1"
                                     [style.width.px]="gridService.selectionColumnWidth"></td>
                             }
@@ -181,9 +174,8 @@
                             @for (_ of gridService.groupColumns() | monaSlice: 0 : rowItem.depth; track $index) {
                                 <td
                                     monaGridCell
-                                    monaGridLockedCell
+                                    [monaGridLockedCell]="'group:' + $index"
                                     [lockedCellHeader]="true"
-                                    [lockedStructuralOffset]="$index * gridService.groupColumnWidth"
                                     [grouped]="true"
                                     [indentCell]="true"
                                     [attr.colspan]="1"
@@ -192,10 +184,8 @@
                             @if (gridService.rowReorderColumnVisible()) {
                                 <td
                                     monaGridCell
-                                    monaGridLockedCell
+                                    [monaGridLockedCell]="'group:' + rowItem.depth"
                                     [lockedCellHeader]="true"
-                                    [structuralColumn]="'reorder'"
-                                    [groupPrefixWidth]="rowItem.depth * gridService.groupColumnWidth"
                                     [grouped]="true"
                                     [indentCell]="true"
                                     [attr.colspan]="1"
@@ -240,40 +230,35 @@
                             @for (_ of gridService.groupColumns(); track $index) {
                                 <td
                                     monaGridFooterTableCell
-                                    monaGridLockedCell
+                                    [monaGridLockedCell]="'group:' + $index"
                                     [lockedCellHeader]="true"
-                                    [lockedStructuralOffset]="$index * gridService.groupColumnWidth"
                                     [footerCellWidth]="gridService.groupColumnWidth"></td>
                             }
                             @if (gridService.rowReorderColumnVisible()) {
                                 <td
                                     monaGridFooterTableCell
-                                    monaGridLockedCell
+                                    [monaGridLockedCell]="'structural:reorder'"
                                     [lockedCellHeader]="true"
-                                    [structuralColumn]="'reorder'"
                                     [footerCellWidth]="gridService.rowReorderColumnWidth"></td>
                             }
                             @if (gridService.masterDetailTemplate()) {
                                 <td
                                     monaGridFooterTableCell
-                                    monaGridLockedCell
+                                    [monaGridLockedCell]="'structural:detail'"
                                     [lockedCellHeader]="true"
-                                    [structuralColumn]="'detail'"
                                     [footerCellWidth]="gridService.detailColumnWidth"></td>
                             }
                             @if (gridService.selectionColumnVisible()) {
                                 <td
                                     monaGridFooterTableCell
-                                    monaGridLockedCell
+                                    [monaGridLockedCell]="'structural:selection'"
                                     [lockedCellHeader]="true"
-                                    [structuralColumn]="'selection'"
                                     [footerCellWidth]="gridService.selectionColumnWidth"></td>
                             }
                             @for (column of columns(); track $index) {
                                 <td
                                     monaGridFooterTableCell
-                                    monaGridLockedCell
-                                    [column]="column"
+                                    [monaGridLockedCell]="'column:' + column.id"
                                     [lockedCellHeader]="true"
                                     [footerColumn]="column">
                                     <mona-grid-footer-cell
@@ -296,9 +281,8 @@
                             @for (_ of gridService.groupColumns(); track $index) {
                                 <td
                                     monaGridCell
-                                    monaGridLockedCell
+                                    [monaGridLockedCell]="'group:' + $index"
                                     [lockedCellHeader]="true"
-                                    [lockedStructuralOffset]="$index * gridService.groupColumnWidth"
                                     [grouped]="true"
                                     [indentCell]="true"
                                     [style.width.px]="gridService.groupColumnWidth"></td>
@@ -306,9 +290,8 @@
                             @if (gridService.rowReorderColumnVisible()) {
                                 <td
                                     monaGridCell
-                                    monaGridLockedCell
+                                    [monaGridLockedCell]="'structural:reorder'"
                                     monaGridLogicalCell
-                                    [structuralColumn]="'reorder'"
                                     [grouped]="true"
                                     [cellKind]="'command'"
                                     [columnId]="'$rowReorder'"
@@ -330,8 +313,7 @@
                                 <td
                                     monaGridCell
                                     monaGridLogicalCell
-                                    monaGridLockedCell
-                                    [structuralColumn]="'detail'"
+                                    [monaGridLockedCell]="'structural:detail'"
                                     [grouped]="true"
                                     [masterDetailToggle]="true"
                                     [prevRowType]="prevRow?.type"
@@ -359,8 +341,7 @@
                             @if (gridService.selectionColumnVisible()) {
                                 <td
                                     monaGridCell
-                                    monaGridLockedCell
-                                    [structuralColumn]="'selection'"
+                                    [monaGridLockedCell]="'structural:selection'"
                                     [grouped]="true"
                                     monaGridLogicalCell
                                     [cellKind]="'command'"
@@ -383,8 +364,7 @@
                                 @let colIndex = $index + gridService.leadingLogicalColumnCount();
                                 <td
                                     monaGridCell
-                                    monaGridLockedCell
-                                    [column]="column"
+                                    [monaGridLockedCell]="'column:' + column.id"
                                     [grouped]="true"
                                     [dataCell]="true"
                                     [prevRowType]="prevRow?.type"
@@ -431,9 +411,8 @@
                                 ) {
                                     <td
                                         monaGridCell
-                                        monaGridLockedCell
+                                        [monaGridLockedCell]="'group:' + $index"
                                         [lockedCellHeader]="true"
-                                        [lockedStructuralOffset]="$index * gridService.groupColumnWidth"
                                         [grouped]="true"
                                         [indentCell]="true"
                                         [attr.colspan]="1"
@@ -442,8 +421,7 @@
                                 @if (gridService.rowReorderColumnVisible()) {
                                     <td
                                         monaGridCell
-                                        monaGridLockedCell
-                                        [structuralColumn]="'reorder'"
+                                        [monaGridLockedCell]="'structural:reorder'"
                                         [grouped]="true"
                                         [indentCell]="true"
                                         [attr.colspan]="1"
@@ -452,19 +430,14 @@
                                 @let colspan = columns().length + gridService.groupColumns().length;
                                 <td
                                     monaGridDetailIndentCell
-                                    monaGridLockedCell
-                                    [lockedStructuralOffset]="
-                                        (rowItem.depth + 1) * gridService.groupColumnWidth +
-                                        gridService.rowReorderStructuralWidth()
-                                    "
+                                    [monaGridLockedCell]="'structural:detail'"
                                     [nextRowType]="nextRow?.type"
                                     [attr.colspan]="1"
                                     [style.width.px]="gridService.masterDetailEmptyCellWidth()"></td>
                                 @if (gridService.selectionColumnVisible()) {
                                     <td
                                         monaGridCell
-                                        monaGridLockedCell
-                                        [structuralColumn]="'selection'"
+                                        [monaGridLockedCell]="'structural:selection'"
                                         [attr.colspan]="1"
                                         [style.width.px]="gridService.selectionColumnWidth"></td>
                                 }
@@ -492,40 +465,35 @@
                         @for (_ of gridService.groupColumns(); track $index) {
                             <td
                                 monaGridFooterTableCell
-                                monaGridLockedCell
+                                [monaGridLockedCell]="'group:' + $index"
                                 [lockedCellHeader]="true"
-                                [lockedStructuralOffset]="$index * gridService.groupColumnWidth"
                                 [footerCellWidth]="gridService.groupColumnWidth"></td>
                         }
                         @if (gridService.rowReorderColumnVisible()) {
                             <td
                                 monaGridFooterTableCell
-                                monaGridLockedCell
+                                [monaGridLockedCell]="'structural:reorder'"
                                 [lockedCellHeader]="true"
-                                [structuralColumn]="'reorder'"
                                 [footerCellWidth]="gridService.rowReorderColumnWidth"></td>
                         }
                         @if (gridService.masterDetailTemplate()) {
                             <td
                                 monaGridFooterTableCell
-                                monaGridLockedCell
+                                [monaGridLockedCell]="'structural:detail'"
                                 [lockedCellHeader]="true"
-                                [structuralColumn]="'detail'"
                                 [footerCellWidth]="gridService.detailColumnWidth"></td>
                         }
                         @if (gridService.selectionColumnVisible()) {
                             <td
                                 monaGridFooterTableCell
-                                monaGridLockedCell
+                                [monaGridLockedCell]="'structural:selection'"
                                 [lockedCellHeader]="true"
-                                [structuralColumn]="'selection'"
                                 [footerCellWidth]="gridService.selectionColumnWidth"></td>
                         }
                         @for (column of columns(); track $index) {
                             <td
                                 monaGridFooterTableCell
-                                monaGridLockedCell
-                                [column]="column"
+                                [monaGridLockedCell]="'column:' + column.id"
                                 [lockedCellHeader]="true"
                                 [footerColumn]="column">
                                 <mona-grid-footer-cell [column]="column" [columnIndex]="$index"></mona-grid-footer-cell>
