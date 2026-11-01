@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from "@angular/core";
 import { ContextMenuComponent } from "@nanahoshi/mona-ui/contextmenu";
+import { twMerge } from "tailwind-merge";
 import { GridCellDirective } from "../../directives/grid-cell.directive";
 import { GridLockedCellDirective } from "../../directives/grid-locked-cell.directive";
 import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
@@ -41,12 +42,14 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
 })
 export class GridRowComponent {
     protected readonly ariaRowIndex = computed(() => this.index() + this.gridService.paginationState().skip + 2);
-    protected readonly baseClass = computed(() =>
-        gridListTableRowThemeVariants({
+    protected readonly baseClass = computed(() => {
+        const variantClass = gridListTableRowThemeVariants({
             selected: this.selected(),
             virtual: this.gridService.virtualScrollOptions().enabled
-        })
-    );
+        });
+        const userClass = this.gridService.rowClass()?.(this.row().data);
+        return twMerge(variantClass, typeof userClass === "string" ? userClass : userClass?.join(" "));
+    });
     protected readonly cellEditMode = computed(() => {
         const options = this.gridService.editableOptions();
         return options.enabled === true && options.mode === "cell";

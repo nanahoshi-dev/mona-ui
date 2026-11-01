@@ -62,6 +62,7 @@ import type { ColumnResizeEvent } from "../../models/ColumnResizeEvent";
 import { ColumnSortEvent } from "../../models/ColumnSortEvent";
 import { GRID_COLUMN_DEFINITION, type GridColumnDefinition } from "../../models/GridColumnDefinition";
 import type { GridKeySelector } from "../../models/GridKeySelector";
+import type { GridRowClass } from "../../models/GridRowClass";
 import { ResizeMethod } from "../../models/ResizeMethod";
 import { ColumnAriaSortPipe } from "../../pipes/column-aria-sort.pipe";
 import { GridNavigationService } from "../../services/grid-navigation.service";
@@ -341,6 +342,17 @@ export class GridComponent<T> implements GridVariantInput {
     public readonly rounded = input<GridVariantProps["rounded"]>("medium");
 
     /**
+     * @description Returns extra CSS classes for the data row that shows an item, merged onto the row's own
+     * classes via `tailwind-merge`. It runs again whenever the item's row is rebound.
+     * Group, group footer and detail rows are not affected.
+     *
+     * To dim a row, prefer a text style such as `text-muted-foreground` over `opacity`: locked cells stay
+     * opaque so scrolled cells pass beneath them, and opacity on the row or its cells would let those show through.
+     * @default null
+     */
+    public readonly rowClass = input<GridRowClass<T> | null>(null);
+
+    /**
      * @description Field name or selector used to derive a stable identity for each row.
      * The resolved value must be unique within the grid data.
      * @default null
@@ -358,6 +370,7 @@ export class GridComponent<T> implements GridVariantInput {
             const columns = this.columnDefinitions().map(definition => definition.getColumn());
             untracked(() => this.gridService.setColumnDefinitions(columns));
         });
+        effect(() => this.gridService.rowClass.set(this.rowClass() as GridRowClass<unknown> | null));
         this.setPageSizeEffect();
         this.setGridDetailEffect();
         this.setDataEffect();

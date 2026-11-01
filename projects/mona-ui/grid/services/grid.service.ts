@@ -54,6 +54,7 @@ import type { GridEditFormContext } from "../models/GridEditFormContext";
 import type { GridEditSession } from "../models/GridEditSession";
 import type { GridViewRow } from "../models/GridGroup";
 import { GridKeySelector } from "../models/GridKeySelector";
+import type { GridRowClass } from "../models/GridRowClass";
 import type { GridLayoutColumn } from "../models/GridLayoutColumn";
 import { GridRemoveEvent } from "../models/GridRemoveEvent";
 import { GridSaveEvent } from "../models/GridSaveEvent";
@@ -359,6 +360,7 @@ export class GridService {
     public readonly remove$ = new Subject<GridRemoveEvent>();
     public readonly reorderableOptions = this.#reorderableOptions.asReadonly();
     public readonly resizableOptions = this.#resizableOptions.asReadonly();
+    public readonly rowClass = signal<GridRowClass<unknown> | null>(null);
     public readonly rowDragInProgress = computed(() => this.draggingRowUid() != null);
     public readonly rowEdit$ = new Subject<RowEditEvent>();
     public readonly rowKey = signal<GridKeySelector<unknown> | null>(null);

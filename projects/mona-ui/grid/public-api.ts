@@ -20,6 +20,7 @@ export * from "./models/GroupDescriptor";
 export { GroupableOptions } from "./models/GroupableOptions";
 export { FilterableOptions } from "./models/FilterableOptions";
 export type { GridColumnLockedPosition } from "./models/GridColumnLockedPosition";
+export type { GridRowClass, GridRowClassValue } from "./models/GridRowClass";
 export * from "./models/SortableOptions";
 export * from "./directives/grid-cell-template.directive";
 export * from "./directives/grid-command.directive";
