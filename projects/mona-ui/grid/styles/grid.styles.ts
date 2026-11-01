@@ -124,31 +124,6 @@ export const gridColumnResizerThemeVariants = cva(`
     absolute top-0 bottom-0 w-3 bg-transparent cursor-col-resize z-10 -end-1.5
 `);
 
-export const gridDetailContentCellThemeVariants = cva(`border-b border-b-border-subtle`, {
-    variants: {
-        nextIsGroup: {
-            true: "",
-            false: ""
-        }
-    }
-});
-
-export const gridDetailIndentCellThemeVariants = cva(
-    `
-        border-e border-e-border-subtle border-b border-b-border-subtle
-    `,
-    {
-        variants: {
-            nextIsGroup: {
-                true: "",
-                false: ""
-            }
-        }
-    }
-);
-
-export const gridDetailRowThemeVariants = cva(``);
-
 export const gridRowReorderHandleThemeVariants = cva(`
     flex min-h-9 w-full items-center justify-center
     cursor-grab select-none touch-none
@@ -159,16 +134,16 @@ export const gridRowReorderHandleThemeVariants = cva(`
     disabled:cursor-not-allowed disabled:text-muted-foreground/35 disabled:hover:text-muted-foreground/35
 `);
 
+/** On drop, the preview glides into the row's new slot and fades out. */
 export const gridRowDragPreviewThemeVariants = cva(`
     flex items-center gap-2
     px-2! py-1!
     bg-surface-raised! text-foreground!
     border! border-border! rounded-md shadow-(--shadow-overlay)!
-`);
-
-export const gridRowDragPlaceholderThemeVariants = cva(`
-    opacity-40
-    [&>td]:bg-hover! [&>td]:border-dashed! [&>td]:border-border!
+    [&.cdk-drag-animating]:opacity-0
+    [&.cdk-drag-animating]:transition-[transform,opacity] [&.cdk-drag-animating]:duration-200
+    [&.cdk-drag-animating]:ease-[cubic-bezier(0.2,0,0,1)]
+    motion-reduce:[&.cdk-drag-animating]:transition-none
 `);
 
 export const gridFilterRowCellThemeVariants = cva(`
@@ -289,11 +264,17 @@ export const gridListBaseThemeVariants = cva(
     }
 );
 
+/**
+ * While a row is dragged, the other rows slide out of its way and the slot it will drop into shows the row dimmed.
+ */
 export const gridListTableThemeVariants = cva(
     `
         border-separate border-spacing-0 w-full table-fixed
-        [&_.cdk-drag-dragging]:z-10! [&_.cdk-drag-dragging]:shadow-(--shadow-overlay)
-        [&_.cdk-drag-animating]:transition-transform
+        [&_.cdk-drop-list-dragging>.cdk-drag]:transition-transform
+        [&_.cdk-drop-list-dragging>.cdk-drag]:duration-200
+        [&_.cdk-drop-list-dragging>.cdk-drag]:ease-[cubic-bezier(0.2,0,0,1)]
+        motion-reduce:[&_.cdk-drop-list-dragging>.cdk-drag]:transition-none
+        [&_.cdk-drag-placeholder]:opacity-60 [&_.cdk-drag-placeholder>td]:bg-hover!
     `
 );
 
@@ -323,97 +304,10 @@ export const gridListTableCellThemeVariants = cva(
     {
         variants: {
             virtual: { true: gridVirtualRowHeightClass, false: "" },
-            groupHeader: {
-                true: "",
-                false: ""
-            },
-            groupToggle: {
-                true: "",
-                false: ""
-            },
-            grouped: {
-                true: "",
-                false: ""
-            },
-            indentCell: {
-                true: "",
-                false: ""
-            },
-            lastInRow: {
-                true: "",
-                false: "border-e border-e-border-subtle"
-            },
-            masterDetailContent: {
-                true: "",
-                false: ""
-            },
-            masterDetailToggle: {
-                true: "",
-                false: ""
-            },
-            dataCell: {
-                true: "",
-                false: ""
-            }
+            groupIndent: { true: "bg-surface-muted", false: "" },
+            lastInRow: { true: "", false: "border-e border-e-border-subtle" }
         },
-        defaultVariants: { virtual: false },
-        compoundVariants: [
-            {
-                grouped: false,
-                masterDetailToggle: true,
-                class: ""
-            },
-            {
-                grouped: false,
-                dataCell: true,
-                class: ""
-            },
-            {
-                grouped: false,
-                indentCell: true,
-                class: ""
-            },
-            {
-                grouped: false,
-                masterDetailContent: true,
-                class: ""
-            },
-            {
-                groupHeader: true,
-                class: ""
-            },
-            {
-                grouped: true,
-                masterDetailToggle: true,
-                class: ""
-            },
-            {
-                grouped: true,
-                dataCell: true,
-                class: ""
-            },
-            {
-                grouped: true,
-                indentCell: true,
-                class: "bg-surface-muted"
-            },
-            {
-                grouped: true,
-                indentCell: false,
-                class: ""
-            },
-            {
-                grouped: true,
-                indentCell: true,
-                masterDetailToggle: true,
-                class: ""
-            },
-            {
-                grouped: true,
-                groupToggle: true,
-                class: ""
-            }
-        ]
+        defaultVariants: { virtual: false }
     }
 );
 

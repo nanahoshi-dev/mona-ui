@@ -52,8 +52,10 @@ import type { GridEditContext } from "../models/GridEditContext";
 import { GridEditEvent } from "../models/GridEditEvent";
 import type { GridEditFormContext } from "../models/GridEditFormContext";
 import type { GridEditSession } from "../models/GridEditSession";
+import type { GridViewRow } from "../models/GridGroup";
 import { GridKeySelector } from "../models/GridKeySelector";
-import type { GridLockedColumnState } from "../models/GridLockedColumnState";
+import type { GridRowClass } from "../models/GridRowClass";
+import type { GridLayoutColumn } from "../models/GridLayoutColumn";
 import { GridRemoveEvent } from "../models/GridRemoveEvent";
 import { GridSaveEvent } from "../models/GridSaveEvent";
 import type {
@@ -65,6 +67,7 @@ import type {
     GridStatePersistenceOptions,
     GridStateSortDescriptor
 } from "../models/GridState";
+import type { GridStickyState } from "../models/GridStickyState";
 import { GroupableOptions } from "../models/GroupableOptions";
 import { GroupDescriptor } from "../models/GroupDescriptor";
 import { PaginationState } from "../models/PaginationState";
@@ -76,8 +79,9 @@ import type { RowReorderableOptions } from "../models/RowReorderableOptions";
 import { RowReorderEvent } from "../models/RowReorderEvent";
 import { SelectableOptions } from "../models/SelectableOptions";
 import { SortableOptions } from "../models/SortableOptions";
-import type { StructuralColumnDescriptor, StructuralColumnKind } from "../models/StructuralColumn";
+import type { StructuralColumnDescriptor } from "../models/StructuralColumn";
 import { GRID_DEFAULT_MESSAGES } from "../i18n/grid.default-messages";
+import { GridRowFlattenerService } from "./grid-row-flattener.service";
 
 // Flat projection of a Row used as the IterablePatchStore item type.
 // $rowId is injected to carry the row identity without modifying Row.data.
@@ -133,6 +137,7 @@ export class GridService {
     readonly #platformId = inject(PLATFORM_ID);
     readonly #reorderableOptions = signal<ReorderableOptions>({ enabled: false });
     readonly #resizableOptions = signal<ResizableOptions>({ enabled: false });
+    readonly #rowFlattener = inject(GridRowFlattenerService);
     readonly #rowReorderableOptions = signal<RowReorderableOptions>({ enabled: false });
     readonly #rowUidByData = new WeakMap<Record<PropertyKey, unknown>, string>();
     readonly #rowUidByKeyObject = new WeakMap<object, string>();
@@ -192,13 +197,7 @@ export class GridService {
     public readonly columns = signal<ImmutableList<Column>>(ImmutableList.create());
     public readonly contextMenuItems = signal(ImmutableSet.create<PopupMenuItem>());
     public readonly dataStateChange$ = new Subject<GridDataState>();
-    public readonly detailColumnOffset = computed(() =>
-        this.structuralColumnOffset("detail", this.groupStructuralWidth())
-    );
     public readonly detailColumnWidth = 36;
-    public readonly detailStructuralWidth = computed(() =>
-        this.masterDetailTemplate() != null ? this.detailColumnWidth : 0
-    );
     public readonly draggingRowUid = signal<string | null>(null);
     public readonly edit$ = new Subject<GridEditEvent>();
     public readonly editBaseDict = computed(() => {
@@ -264,62 +263,88 @@ export class GridService {
     public readonly headerTableElement = signal<HTMLTableElement | null>(null);
     public readonly horizontalScrollLeft = this.#horizontalScrollLeft.asReadonly();
     public readonly isInEditMode = computed(() => this.#editSession() != null);
-    public readonly lastLeftStructuralOffset = computed<number | null>(() => {
-        if (this.visibleColumns().any(column => column.locked && column.lockedPosition === "left")) {
-            return null;
-        }
-        const visible = this.visibleStructuralColumns();
-        const lastVisible = visible[visible.length - 1];
-        if (lastVisible != null) {
-            return this.structuralColumnOffset(lastVisible.kind, this.groupStructuralWidth());
-        }
+    // The physical column sequence shared by every table section: group indents, then the visible
+    // structural columns, then the visible user columns. Each entry also carries its sticky state.
+    public readonly layout = computed<readonly GridLayoutColumn[]>(() => {
+        const columns = this.visibleColumns().toArray();
+        const startLockedColumns = columns.filter(column => column.locked && column.lockedPosition === "left");
+        const endLockedColumns = columns.filter(column => column.locked && column.lockedPosition === "right");
         const groupCount = this.groupColumns().length;
-        return groupCount > 0 ? (groupCount - 1) * this.groupColumnWidth : null;
+        const structuralColumns = this.visibleStructuralColumns();
+        const leadingColumnCount = groupCount + structuralColumns.length;
+        // Group indents and structural columns stay pinned alongside any start-pinned column. The innermost
+        // pinned column draws the separator, so the leading columns only own it without start-locked columns.
+        const leadingSticky = this.hasLeftLockedColumns();
+        const leadingEdgeIndex = startLockedColumns.length === 0 ? leadingColumnCount - 1 : -1;
+        let startOffset = 0;
+        const nextLeadingSticky = (index: number, width: number): GridStickyState | null => {
+            const offset = startOffset;
+            startOffset += width;
+            return leadingSticky ? { edge: index === leadingEdgeIndex, offset, side: "start" } : null;
+        };
+
+        const layout: GridLayoutColumn[] = [];
+        for (let depth = 0; depth < groupCount; depth++) {
+            layout.push({
+                depth,
+                key: `group:${depth}`,
+                kind: "group",
+                logicalIndex: null,
+                sticky: nextLeadingSticky(depth, this.groupColumnWidth),
+                width: this.groupColumnWidth
+            });
+        }
+        // Arrow keys move across structural and user columns as one row.
+        for (const [index, structuralColumn] of structuralColumns.entries()) {
+            layout.push({
+                firstInRow: index === 0,
+                key: `structural:${structuralColumn.kind}`,
+                kind: structuralColumn.kind,
+                lastInRow: columns.length === 0 && index === structuralColumns.length - 1,
+                logicalIndex: index,
+                sticky: nextLeadingSticky(groupCount + index, structuralColumn.width),
+                width: structuralColumn.width
+            });
+        }
+        let logicalIndex = structuralColumns.length;
+
+        const stickyByColumn = new Map<Column, GridStickyState>();
+        for (const [index, column] of startLockedColumns.entries()) {
+            stickyByColumn.set(column, {
+                edge: index === startLockedColumns.length - 1,
+                offset: startOffset,
+                side: "start"
+            });
+            startOffset += this.getColumnWidth(column);
+        }
+        let endOffset = 0;
+        for (const column of [...endLockedColumns].reverse()) {
+            stickyByColumn.set(column, { edge: column === endLockedColumns[0], offset: endOffset, side: "end" });
+            endOffset += this.getColumnWidth(column);
+        }
+        for (const [columnIndex, column] of columns.entries()) {
+            layout.push({
+                column,
+                columnIndex,
+                firstInRow: structuralColumns.length === 0 && columnIndex === 0,
+                key: `column:${column.id}`,
+                kind: "column",
+                lastInRow: columnIndex === columns.length - 1,
+                logicalIndex: logicalIndex++,
+                sticky: stickyByColumn.get(column) ?? null,
+                width: column.calculatedWidth
+            });
+        }
+        return layout;
     });
-    public readonly leadingLogicalColumnCount = computed(() => this.visibleStructuralColumns().length);
-    public readonly leadingStructuralColumnCount = computed(
-        () => this.groupColumns().length + this.visibleStructuralColumns().length
+    public readonly layoutColumnByKey = computed<ReadonlyMap<string, GridLayoutColumn>>(
+        () => new Map(this.layout().map(layoutColumn => [layoutColumn.key, layoutColumn]))
     );
     public readonly leadingStructuralWidth = computed(
         () =>
             this.groupStructuralWidth() +
             this.visibleStructuralColumns().reduce((total, column) => total + column.width, 0)
     );
-    public readonly leftLockedStructuralWidth = computed(() => {
-        if (!this.hasLeftLockedColumns()) {
-            return 0;
-        }
-        return this.leadingStructuralWidth();
-    });
-    public readonly lockedColumnStates = computed<ReadonlyMap<string, GridLockedColumnState>>(() => {
-        const states = new Map<string, GridLockedColumnState>();
-        const columns = this.visibleColumns().toArray();
-        const leftColumns = columns.filter(column => column.locked && column.lockedPosition === "left");
-        const rightColumns = columns.filter(column => column.locked && column.lockedPosition === "right");
-        let leftOffset = this.leadingStructuralWidth();
-        for (const [index, column] of leftColumns.entries()) {
-            states.set(column.id, {
-                edge: index === leftColumns.length - 1,
-                offset: leftOffset,
-                side: "left"
-            });
-            leftOffset += this.getColumnWidth(column);
-        }
-
-        let rightOffset = 0;
-        for (const column of [...rightColumns].reverse()) {
-            states.set(column.id, {
-                edge: column === rightColumns[0],
-                offset: rightOffset,
-                side: "right"
-            });
-            rightOffset += this.getColumnWidth(column);
-        }
-        return states;
-    });
-    public readonly masterDetailEmptyCellWidth = computed(() => {
-        return this.detailColumnWidth * (this.groupColumns().length + 1);
-    });
     public readonly masterDetailRowWidth = computed(() => {
         const columns = this.visibleColumns();
         const columnListWidth = columns.aggregate((acc, c) => acc + this.getColumnWidth(c), 0);
@@ -335,13 +360,11 @@ export class GridService {
     public readonly remove$ = new Subject<GridRemoveEvent>();
     public readonly reorderableOptions = this.#reorderableOptions.asReadonly();
     public readonly resizableOptions = this.#resizableOptions.asReadonly();
+    public readonly rowClass = signal<GridRowClass<unknown> | null>(null);
     public readonly rowDragInProgress = computed(() => this.draggingRowUid() != null);
     public readonly rowEdit$ = new Subject<RowEditEvent>();
     public readonly rowKey = signal<GridKeySelector<unknown> | null>(null);
     public readonly rowReorder$ = new Subject<RowReorderEvent>();
-    public readonly rowReorderColumnOffset = computed(() =>
-        this.structuralColumnOffset("reorder", this.groupStructuralWidth())
-    );
     public readonly rowReorderColumnVisible = computed(() => this.rowReorderableOptions().enabled === true);
     public readonly rowReorderColumnWidth = 36;
     public readonly rowReorderDisabledReason = computed<RowReorderDisabledReason>(() => {
@@ -372,9 +395,6 @@ export class GridService {
         return null;
     });
     public readonly rowReorderInteractionEnabled = computed(() => this.rowReorderDisabledReason() == null);
-    public readonly rowReorderStructuralWidth = computed(() =>
-        this.rowReorderColumnVisible() ? this.rowReorderColumnWidth : 0
-    );
     public readonly rowReorderableOptions = this.#rowReorderableOptions.asReadonly();
     public readonly rows = signal<ImmutableList<Row>>(ImmutableList.create());
     public readonly save$ = new Subject<GridSaveEvent>();
@@ -400,17 +420,11 @@ export class GridService {
             .where(row => selectedKeys.contains(this.getRowSelectionKey(row)))
             .toImmutableSet();
     });
-    public readonly selectionColumnOffset = computed(() =>
-        this.structuralColumnOffset("selection", this.groupStructuralWidth())
-    );
     public readonly selectionColumnVisible = computed(() => {
         const options = this.selectableOptions();
         return options.enabled === true && options.showCheckboxes === true;
     });
     public readonly selectionColumnWidth = 40;
-    public readonly selectionStructuralWidth = computed(() =>
-        this.selectionColumnVisible() ? this.selectionColumnWidth : 0
-    );
     public readonly serverBindingEnabled = this.#serverBindingEnabled.asReadonly();
     public readonly serverLoading = this.#serverLoading.asReadonly();
     public readonly serverTotal = this.#serverTotal.asReadonly();
@@ -426,22 +440,12 @@ export class GridService {
         allowUnsort: true,
         showIndices: true
     });
-    public readonly structuralColIndexMap = computed(() => {
-        const map = new Map<StructuralColumnKind, number>();
-        this.visibleStructuralColumns().forEach((column, index) => map.set(column.kind, index));
-        return map;
-    });
-    // Single source of truth for structural-column left-to-right order; every offset/colIndex
-    // consumer derives its answer from this array instead of independently re-deriving the order.
+    // The fixed order of the structural columns; GridService.layout places them after the group indents.
     public readonly structuralColumns = computed<readonly StructuralColumnDescriptor[]>(() => [
         { kind: "reorder", visible: this.rowReorderColumnVisible(), width: this.rowReorderColumnWidth },
         { kind: "detail", visible: this.masterDetailTemplate() != null, width: this.detailColumnWidth },
         { kind: "selection", visible: this.selectionColumnVisible(), width: this.selectionColumnWidth }
     ]);
-    public readonly structuralLastKind = computed<StructuralColumnKind | null>(() => {
-        const visible = this.visibleStructuralColumns();
-        return visible.length > 0 ? visible[visible.length - 1].kind : null;
-    });
     public readonly tableWidth = computed(() => {
         const columns = this.visibleColumns();
         if (!columns.any()) {
@@ -726,6 +730,29 @@ export class GridService {
         this.clearEditSession();
         this.rowEdit$.next(new RowEditEvent({ originalRowData: context.row.data, rowData, session }));
         return true;
+    }
+
+    /**
+     * Builds the body rows for the given data rows: plain data rows when ungrouped, otherwise the flattened
+     * group headers, data rows and group footers. Reads grouping state, so call it inside a computed.
+     */
+    public createBodyRows(rows: Iterable<Row>): GridViewRow[] {
+        const groupColumns = this.groupColumns();
+        if (groupColumns.length === 0) {
+            return this.#rowFlattener.toDataRows(rows);
+        }
+        const groupAggregates = this.groupAggregateMap().toDictionary(
+            e => e.key,
+            e => e.value
+        );
+        return this.#rowFlattener.flatten(
+            rows,
+            groupColumns,
+            new Set(this.collapsedGroupKeys()),
+            this.groupableOptions().showFooter,
+            groupAggregates,
+            this.serverBindingEnabled()
+        );
     }
 
     public deselectAllRows(): void {
@@ -1472,17 +1499,6 @@ export class GridService {
         }
         this.clearEditSession();
         return true;
-    }
-
-    public structuralColumnOffset(kind: StructuralColumnKind, groupPrefixWidth: number): number {
-        let offset = groupPrefixWidth;
-        for (const column of this.visibleStructuralColumns()) {
-            if (column.kind === kind) {
-                return offset;
-            }
-            offset += column.width;
-        }
-        return offset;
     }
 
     public toggleGroupCollapse(groupKey: string): void {

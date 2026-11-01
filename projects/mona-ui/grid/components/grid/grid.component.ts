@@ -51,7 +51,6 @@ import { twMerge } from "tailwind-merge";
 import { v4 } from "uuid";
 import { GridColumnResizeHandlerDirective } from "../../directives/grid-column-resize-handler.directive";
 import { GridDetailTemplateDirective } from "../../directives/grid-detail-template.directive";
-import { GridFooterTableCellDirective } from "../../directives/grid-footer-table-cell.directive";
 import { GridLockedCellDirective } from "../../directives/grid-locked-cell.directive";
 import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
 import { GridNoDataTemplateDirective } from "../../directives/grid-no-data-template.directive";
@@ -63,10 +62,10 @@ import type { ColumnResizeEvent } from "../../models/ColumnResizeEvent";
 import { ColumnSortEvent } from "../../models/ColumnSortEvent";
 import { GRID_COLUMN_DEFINITION, type GridColumnDefinition } from "../../models/GridColumnDefinition";
 import type { GridKeySelector } from "../../models/GridKeySelector";
+import type { GridRowClass } from "../../models/GridRowClass";
 import { ResizeMethod } from "../../models/ResizeMethod";
 import { ColumnAriaSortPipe } from "../../pipes/column-aria-sort.pipe";
 import { GridNavigationService } from "../../services/grid-navigation.service";
-import { GridRowFlattenerService } from "../../services/grid-row-flattener.service";
 import { GridService } from "../../services/grid.service";
 import {
     gridBaseThemeVariants,
@@ -74,7 +73,6 @@ import {
     gridColumnDragPreviewThemeVariants,
     gridColumnDropHintThemeVariants,
     gridColumnResizerThemeVariants,
-    gridFooterTableRowThemeVariants,
     gridFooterTableThemeVariants,
     gridFooterThemeVariants,
     gridGroupPanelPlaceholderThemeVariants,
@@ -89,10 +87,11 @@ import {
     GridVariantInput,
     GridVariantProps
 } from "../../styles/grid.styles";
+import { GridColgroupComponent } from "../grid-colgroup/grid-colgroup.component";
 import { GridColumnChooserComponent } from "../grid-column-chooser/grid-column-chooser.component";
 import { GridFilterMenuComponent } from "../grid-filter-menu/grid-filter-menu.component";
 import { GridFilterRowCellComponent } from "../grid-filter-row-cell/grid-filter-row-cell.component";
-import { GridFooterCellComponent } from "../grid-footer-cell/grid-footer-cell.component";
+import { GridFooterRowComponent } from "../grid-footer-row/grid-footer-row.component";
 import { GridListComponent } from "../grid-list/grid-list.component";
 import { GridSelectAllCheckboxComponent } from "../grid-select-all-checkbox/grid-select-all-checkbox.component";
 import { GridVirtualListComponent } from "../grid-virtual-list/grid-virtual-list.component";
@@ -104,7 +103,7 @@ const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [ta
     selector: "mona-grid",
     templateUrl: "./grid.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [GridService, GridNavigationService, GridRowFlattenerService, FilterService],
+    providers: [GridService, GridNavigationService, FilterService],
     imports: [
         LucideArrowDown,
         LucideArrowLeft,
@@ -115,9 +114,10 @@ const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [ta
         ChipComponent,
         CdkDrag,
         NgTemplateOutlet,
+        GridColgroupComponent,
         GridFilterMenuComponent,
         GridFilterRowCellComponent,
-        GridFooterCellComponent,
+        GridFooterRowComponent,
         GridColumnResizeHandlerDirective,
         CdkDragPreview,
         GridListComponent,
@@ -129,7 +129,6 @@ const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [ta
         PopupMenuItemComponent,
         PopupMenuTextTemplateDirective,
         ColumnAriaSortPipe,
-        GridFooterTableCellDirective,
         GridLogicalCellDirective,
         GridLockedCellDirective,
         ButtonDirective,
@@ -217,10 +216,6 @@ export class GridComponent<T> implements GridVariantInput {
 
     protected readonly footerTableClass = computed(() => {
         return gridFooterTableThemeVariants();
-    });
-
-    protected readonly footerTableRowClass = computed(() => {
-        return gridFooterTableRowThemeVariants();
     });
 
     protected readonly footerVisible = computed(
@@ -347,6 +342,17 @@ export class GridComponent<T> implements GridVariantInput {
     public readonly rounded = input<GridVariantProps["rounded"]>("medium");
 
     /**
+     * @description Returns extra CSS classes for the data row that shows an item, merged onto the row's own
+     * classes via `tailwind-merge`. It runs again whenever the item's row is rebound.
+     * Group, group footer and detail rows are not affected.
+     *
+     * To dim a row, prefer a text style such as `text-muted-foreground` over `opacity`: locked cells stay
+     * opaque so scrolled cells pass beneath them, and opacity on the row or its cells would let those show through.
+     * @default null
+     */
+    public readonly rowClass = input<GridRowClass<T> | null>(null);
+
+    /**
      * @description Field name or selector used to derive a stable identity for each row.
      * The resolved value must be unique within the grid data.
      * @default null
@@ -364,6 +370,7 @@ export class GridComponent<T> implements GridVariantInput {
             const columns = this.columnDefinitions().map(definition => definition.getColumn());
             untracked(() => this.gridService.setColumnDefinitions(columns));
         });
+        effect(() => this.gridService.rowClass.set(this.rowClass() as GridRowClass<unknown> | null));
         this.setPageSizeEffect();
         this.setGridDetailEffect();
         this.setDataEffect();
@@ -718,6 +725,11 @@ export class GridComponent<T> implements GridVariantInput {
                         read: () => {
                             // An open editor owns its own focus; restoring the logical cell would steal it.
                             if (this.gridService.editContext() != null) {
+                                return;
+                            }
+                            // Focus that survived the render, or was already put back, stays where it is.
+                            const host = this.#hostElementRef.nativeElement;
+                            if (host.contains(host.ownerDocument.activeElement)) {
                                 return;
                             }
                             this.#gridNavigationService.focusActiveCellOrFirstHeader();

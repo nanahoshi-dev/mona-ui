@@ -22,14 +22,12 @@ import {
     NavigationData
 } from "../services/grid-navigation.service";
 import { GridService } from "../services/grid.service";
-import { gridListTableCellThemeVariants } from "../styles/grid.styles";
 
 const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [tabindex]";
 
 @Directive({
     selector: "td[monaGridLogicalCell], th[monaGridLogicalCell]",
     host: {
-        "[class]": "baseClass()",
         "[attr.tabindex]": "focused() ? 0 : -1",
         "[attr.aria-colindex]": "ariaColIndex()",
         "[attr.aria-readonly]": "resolvedCellKind() === 'data' ? !editable() : null"
@@ -64,16 +62,6 @@ export class GridLogicalCellDirective {
         this.edit.emit();
     };
     protected readonly ariaColIndex = computed(() => this.colIndex() + this.#gridService.groupColumns().length + 1);
-    protected readonly baseClass = computed(() => {
-        if (this.#hostElementRef.nativeElement.tagName === "TH") {
-            return "";
-        }
-        return gridListTableCellThemeVariants({
-            virtual: this.#gridService.virtualScrollOptions().enabled,
-            groupHeader: this.groupHeader(),
-            lastInRow: this.lastInRow() || this.groupHeader()
-        });
-    });
     protected readonly focused = computed(() => {
         const key = this.#cellKey();
         if (!key) {
@@ -225,13 +213,14 @@ export class GridLogicalCellDirective {
             return;
         }
 
-        if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+        const key = this.#toLogicalArrowKey(event.key);
+        if (key === "ArrowRight" || key === "ArrowDown") {
             event.preventDefault();
             this.#focusNextInnerTarget(target, false);
             return;
         }
 
-        if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+        if (key === "ArrowLeft" || key === "ArrowUp") {
             event.preventDefault();
             this.#focusNextInnerTarget(target, true);
         }
@@ -327,12 +316,8 @@ export class GridLogicalCellDirective {
             }
             event.preventDefault();
             this.#navigate("ArrowDown");
-        } else if (event.key === "ArrowLeft") {
-            if (this.#navigate("ArrowLeft")) {
-                event.preventDefault();
-            }
-        } else if (event.key === "ArrowRight") {
-            if (this.#navigate("ArrowRight")) {
+        } else if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+            if (this.#navigate(this.#toLogicalArrowKey(event.key))) {
                 event.preventDefault();
             }
         } else if (event.key === "ArrowUp") {
@@ -389,5 +374,21 @@ export class GridLogicalCellDirective {
                 target.setAttribute("tabindex", "-1");
             }
         }
+    }
+
+    /**
+     * Maps a horizontal arrow key to its logical meaning: ArrowRight moves to the next column in LTR
+     * and to the previous column in RTL, where columns run right to left.
+     */
+    #toLogicalArrowKey(key: string): string {
+        // Read on demand: a direction observer per cell would be costly in large grids.
+        const host = this.#hostElementRef.nativeElement;
+        if (host.ownerDocument.defaultView?.getComputedStyle(host).direction !== "rtl") {
+            return key;
+        }
+        if (key === "ArrowLeft") {
+            return "ArrowRight";
+        }
+        return key === "ArrowRight" ? "ArrowLeft" : key;
     }
 }

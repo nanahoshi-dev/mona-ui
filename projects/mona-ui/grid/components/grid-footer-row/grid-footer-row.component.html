@@ -1,0 +1,20 @@
+@for (layoutColumn of gridService.layout(); track layoutColumn.key) {
+    @if (layoutColumn.kind === "column") {
+        <td
+            monaGridFooterTableCell
+            [monaGridLockedCell]="layoutColumn.key"
+            [lockedCellHeader]="true"
+            [footerColumn]="layoutColumn.column">
+            <mona-grid-footer-cell
+                [column]="layoutColumn.column"
+                [columnIndex]="layoutColumn.columnIndex"
+                [groupKey]="groupKey()" />
+        </td>
+    } @else {
+        <td
+            monaGridFooterTableCell
+            [monaGridLockedCell]="layoutColumn.key"
+            [lockedCellHeader]="true"
+            [footerCellWidth]="layoutColumn.width"></td>
+    }
+}

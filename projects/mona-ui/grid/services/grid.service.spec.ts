@@ -6,6 +6,7 @@ import type { Column } from "../models/Column";
 import type { GridEditSchemaFactory } from "../models/GridEditFormContext";
 import type { GridEditSession } from "../models/GridEditSession";
 import type { GridSaveEvent } from "../models/GridSaveEvent";
+import type { GridStickyState } from "../models/GridStickyState";
 import { GridService } from "./grid.service";
 import { GridRowFlattenerService } from "./grid-row-flattener.service";
 
@@ -1174,6 +1175,10 @@ describe("GridService", () => {
     });
 
     describe("structural columns", () => {
+        function stickyOf(key: string): GridStickyState | null | undefined {
+            return service.layoutColumnByKey().get(key)?.sticky;
+        }
+
         it("keeps reorder, detail, and selection in a fixed left-to-right order", () => {
             service.setRowReorderableOptions({ enabled: true });
             service.masterDetailTemplate.set({} as never);
@@ -1187,9 +1192,9 @@ describe("GridService", () => {
             });
 
             expect(service.visibleStructuralColumns().map(c => c.kind)).toEqual(["reorder", "detail", "selection"]);
-            expect(service.rowReorderColumnOffset()).toBe(0);
-            expect(service.detailColumnOffset()).toBe(36);
-            expect(service.selectionColumnOffset()).toBe(72);
+            expect(stickyOf("structural:reorder")?.offset).toBe(0);
+            expect(stickyOf("structural:detail")?.offset).toBe(36);
+            expect(stickyOf("structural:selection")?.offset).toBe(72);
         });
 
         it("omits invisible structural columns from the offset chain", () => {
@@ -1204,39 +1209,98 @@ describe("GridService", () => {
             });
 
             expect(service.visibleStructuralColumns().map(c => c.kind)).toEqual(["selection"]);
-            expect(service.selectionColumnOffset()).toBe(0);
+            expect(stickyOf("structural:selection")?.offset).toBe(0);
         });
 
-        it("offsets structuralColumnOffset by an explicit group-prefix width, independent of the full group width", () => {
+        it("pins group indents before the structural columns", () => {
             service.setRowReorderableOptions({ enabled: true });
             service.columns.set(ImmutableList.create([createColumn({ field: "a" }), createColumn({ field: "b" })]));
             service.addGroupColumn(service.columns().get(0));
             service.addGroupColumn(service.columns().get(1));
 
             expect(service.groupStructuralWidth()).toBe(72);
-            expect(service.structuralColumnOffset("reorder", 0)).toBe(0);
-            expect(service.structuralColumnOffset("reorder", service.groupColumnWidth)).toBe(36);
-            expect(service.rowReorderColumnOffset()).toBe(72);
+            expect(stickyOf("group:0")).toEqual({ edge: false, offset: 0, side: "start" });
+            expect(stickyOf("group:1")).toEqual({ edge: false, offset: 36, side: "start" });
+            expect(stickyOf("structural:reorder")).toEqual({ edge: true, offset: 72, side: "start" });
         });
 
-        it("derives colIndex/firstInRow/lastInRow from the same memoized registry", () => {
+        it("leaves leading columns unpinned when nothing is start-locked", () => {
+            service.masterDetailTemplate.set({} as never);
+            service.columns.set(ImmutableList.create([createColumn({ field: "a" })]));
+            service.addGroupColumn(service.columns().get(0));
+
+            expect(stickyOf("group:0")).toBeNull();
+            expect(stickyOf("structural:detail")).toBeNull();
+        });
+
+        it("hands the start edge to start-locked user columns and pins end-locked ones from the end", () => {
+            service.setRowReorderableOptions({ enabled: true });
+            service.columns.set(
+                ImmutableList.create([
+                    createColumn({ field: "a", locked: true, calculatedWidth: 100 }),
+                    createColumn({ field: "b", locked: true, calculatedWidth: 50 }),
+                    createColumn({ field: "c" }),
+                    createColumn({ field: "d", locked: true, lockedPosition: "right", calculatedWidth: 60 }),
+                    createColumn({ field: "e", locked: true, lockedPosition: "right", calculatedWidth: 70 })
+                ])
+            );
+
+            expect(stickyOf("structural:reorder")).toEqual({ edge: false, offset: 0, side: "start" });
+            expect(stickyOf("column:a")).toEqual({ edge: false, offset: 36, side: "start" });
+            expect(stickyOf("column:b")).toEqual({ edge: true, offset: 136, side: "start" });
+            expect(stickyOf("column:c")).toBeNull();
+            expect(stickyOf("column:d")).toEqual({ edge: true, offset: 70, side: "end" });
+            expect(stickyOf("column:e")).toEqual({ edge: false, offset: 0, side: "end" });
+        });
+
+        it("marks only the outer cells of the row as arrow-key boundaries", () => {
+            service.setRowReorderableOptions({ enabled: true });
+            service.masterDetailTemplate.set({} as never);
+            service.columns.set(ImmutableList.create([createColumn({ field: "a" }), createColumn({ field: "b" })]));
+
+            expect(service.layout().map(c => (c.kind === "group" ? null : [c.key, c.firstInRow, c.lastInRow]))).toEqual(
+                [
+                    ["structural:reorder", true, false],
+                    ["structural:detail", false, false],
+                    ["column:a", false, false],
+                    ["column:b", false, true]
+                ]
+            );
+        });
+
+        it("lets the last structural column end the row when there are no user columns", () => {
             service.setRowReorderableOptions({ enabled: true });
             service.masterDetailTemplate.set({} as never);
 
-            expect(service.structuralColIndexMap().get("reorder")).toBe(0);
-            expect(service.structuralColIndexMap().get("detail")).toBe(1);
-            expect(service.structuralColIndexMap().get("reorder") === 0).toBe(true);
-            expect(service.structuralColIndexMap().get("detail") === 0).toBe(false);
-            expect(service.structuralLastKind()).toBe("detail");
+            const last = service.layoutColumnByKey().get("structural:detail");
+            expect(last?.kind !== "group" && last?.lastInRow).toBe(true);
         });
 
-        it("keeps the structuralColIndexMap reference stable across reads when nothing structural changed", () => {
+        it("lays out group indents, structural columns, and user columns in one shared sequence", () => {
+            service.setRowReorderableOptions({ enabled: true });
+            service.masterDetailTemplate.set({} as never);
+            service.columns.set(
+                ImmutableList.create([
+                    createColumn({ field: "a", calculatedWidth: 120 }),
+                    createColumn({ field: "b", calculatedWidth: 80, hidden: true }),
+                    createColumn({ field: "c", calculatedWidth: null })
+                ])
+            );
+            service.addGroupColumn(service.columns().get(0));
+
+            expect(service.layout().map(c => ({ key: c.key, logicalIndex: c.logicalIndex, width: c.width }))).toEqual([
+                { key: "group:0", logicalIndex: null, width: 36 },
+                { key: "structural:reorder", logicalIndex: 0, width: 36 },
+                { key: "structural:detail", logicalIndex: 1, width: 36 },
+                { key: "column:a", logicalIndex: 2, width: 120 },
+                { key: "column:c", logicalIndex: 3, width: null }
+            ]);
+        });
+
+        it("keeps the layout reference stable across reads when nothing changed", () => {
             service.setRowReorderableOptions({ enabled: true });
 
-            const first = service.structuralColIndexMap();
-            const second = service.structuralColIndexMap();
-
-            expect(first).toBe(second);
+            expect(service.layout()).toBe(service.layout());
         });
     });
 

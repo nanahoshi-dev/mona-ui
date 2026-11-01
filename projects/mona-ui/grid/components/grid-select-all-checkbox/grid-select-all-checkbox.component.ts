@@ -8,16 +8,16 @@ import { gridSelectAllCellThemeVariants } from "../../styles/grid.styles";
     templateUrl: "./grid-select-all-checkbox.component.html",
     imports: [CheckBoxComponent],
     host: {
-        "[class]": "hostClass()",
+        "[class]": "hostClass",
         "(click)": "$event.stopPropagation()"
     }
 })
 export class GridSelectAllCheckboxComponent {
     readonly #gridService = inject(GridService);
-    protected readonly messages = this.#gridService.messages;
     protected readonly checked = computed(() => this.#gridService.allBulkSelectionRowsSelected());
-    protected readonly hostClass = computed(() => gridSelectAllCellThemeVariants());
+    protected readonly hostClass = gridSelectAllCellThemeVariants();
     protected readonly indeterminate = computed(() => this.#gridService.someBulkSelectionRowsSelected());
+    protected readonly messages = this.#gridService.messages;
 
     protected onCheckedChange(checked: boolean): void {
         this.#gridService.setBulkSelection(checked);

@@ -1,86 +1,46 @@
 import { computed, Directive, ElementRef, inject, input } from "@angular/core";
-import type { Column } from "../models/Column";
-import type { StructuralColumnKind } from "../models/StructuralColumn";
 import { GridService } from "../services/grid.service";
 
+const STICKY_EDGE_BORDER = "1px solid var(--color-border)";
+
+/**
+ * Pins a cell while the grid scrolls horizontally, using the sticky state of its layout column.
+ * Offsets and separator borders use logical properties so pinning follows the text direction.
+ */
 @Directive({
     selector: "td[monaGridLockedCell], th[monaGridLockedCell]",
     host: {
-        "[style.position]": "position()",
-        "[style.left.px]": "leftOffset()",
-        "[style.right.px]": "rightOffset()",
+        "[style.position]": "state() == null ? null : 'sticky'",
+        "[style.inset-inline-start.px]": "startOffset()",
+        "[style.inset-inline-end.px]": "endOffset()",
         "[style.z-index]": "zIndex()",
         "[class.bg-header-background]": "headerLocked() || footerCell",
         "[class.bg-inherit]": "bodyLocked()",
-        "[style.border-left]": "borderLeft()",
-        "[style.border-right]": "borderRight()"
+        "[style.border-inline-start]": "endEdge() ? stickyEdgeBorder : null",
+        "[style.border-inline-end]": "startEdge() ? stickyEdgeBorder : null"
     }
 })
 export class GridLockedCellDirective {
-    readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #gridService = inject(GridService);
+    readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     protected readonly bodyLocked = computed(() => this.state() != null && !this.lockedCellHeader());
-    protected readonly borderLeft = computed(() => {
-        if (!this.rightEdge()) {
-            return null;
-        }
-        return `1px solid var(--color-border)`;
-    });
-    protected readonly borderRight = computed(() => {
-        if (!this.leftEdge()) {
-            return null;
-        }
-        return `1px solid var(--color-border)`;
+    protected readonly endEdge = computed(() => this.state()?.side === "end" && this.state()?.edge === true);
+    protected readonly endOffset = computed(() => {
+        const state = this.state();
+        return state?.side === "end" ? state.offset : null;
     });
     protected readonly footerCell = this.#hostElementRef.nativeElement.hasAttribute("monaGridFooterTableCell");
     protected readonly headerLocked = computed(() => this.state() != null && this.lockedCellHeader());
-    protected readonly leftEdge = computed(() => {
+    protected readonly startEdge = computed(() => this.state()?.side === "start" && this.state()?.edge === true);
+    protected readonly startOffset = computed(() => {
         const state = this.state();
-        return state?.side === "left" && state.edge;
-    });
-    protected readonly leftOffset = computed(() => {
-        const state = this.state();
-        return state?.side === "left" ? state.offset : null;
-    });
-    protected readonly position = computed(() => (this.state() == null ? null : "sticky"));
-    protected readonly rightEdge = computed(() => {
-        const state = this.state();
-        return state?.side === "right" && state.edge;
-    });
-    protected readonly rightOffset = computed(() => {
-        const state = this.state();
-        return state?.side === "right" ? state.offset : null;
+        return state?.side === "start" ? state.offset : null;
     });
     protected readonly state = computed(() => {
-        const column = this.column();
-        if (column != null) {
-            return this.#gridService.lockedColumnStates().get(column.id) ?? null;
-        }
-
-        const structuralColumn = this.structuralColumn();
-        if (structuralColumn != null) {
-            if (!this.#gridService.hasLeftLockedColumns()) {
-                return null;
-            }
-            const groupPrefixWidth = this.groupPrefixWidth() ?? this.#gridService.groupStructuralWidth();
-            const offset = this.#gridService.structuralColumnOffset(structuralColumn, groupPrefixWidth);
-            return {
-                edge: offset === this.#gridService.lastLeftStructuralOffset(),
-                offset,
-                side: "left" as const
-            };
-        }
-
-        const structuralOffset = this.lockedStructuralOffset();
-        if (structuralOffset == null || !this.#gridService.hasLeftLockedColumns()) {
-            return null;
-        }
-        return {
-            edge: structuralOffset === this.#gridService.lastLeftStructuralOffset(),
-            offset: structuralOffset,
-            side: "left" as const
-        };
+        const layoutKey = this.layoutKey();
+        return layoutKey ? (this.#gridService.layoutColumnByKey().get(layoutKey)?.sticky ?? null) : null;
     });
+    protected readonly stickyEdgeBorder = STICKY_EDGE_BORDER;
     protected readonly zIndex = computed(() => {
         if (this.state() == null) {
             return null;
@@ -88,9 +48,10 @@ export class GridLockedCellDirective {
         return this.lockedCellHeader() ? 4 : 2;
     });
 
-    public readonly column = input<Column>();
-    public readonly groupPrefixWidth = input<number | null>(null);
+    /**
+     * The key of the layout column whose sticky state this cell follows, such as `column:<id>`,
+     * `structural:selection` or `group:0`.
+     */
+    public readonly layoutKey = input<string | null>(null, { alias: "monaGridLockedCell" });
     public readonly lockedCellHeader = input(false);
-    public readonly lockedStructuralOffset = input<number | null>(null);
-    public readonly structuralColumn = input<StructuralColumnKind | null>(null);
 }

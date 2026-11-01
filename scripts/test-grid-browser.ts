@@ -153,7 +153,88 @@ async function main(): Promise<void> {
             await expect(grid.locator("[data-grid-add-row] [data-tall-editor]")).toBeVisible();
             await grid.getByRole("button", { name: "Cancel row edit", exact: true }).click();
             await expect(grid.locator("[data-grid-add-row]")).toHaveCount(0);
+
+            // Locked columns stay pinned to their logical side after scrolling to the far inline end.
+            const pinned = await grid.evaluate(async (element, rtl) => {
+                const originalWidth = element.style.width;
+                element.style.width = "420px";
+                await new Promise(resolveTimeout => setTimeout(resolveTimeout, 300));
+                const body = element.querySelector<HTMLElement>("mona-grid-list");
+                const row = body?.querySelector("tbody tr[monaGridRow]");
+                const cells = Array.from(row?.querySelectorAll<HTMLElement>(":scope > td") ?? []);
+                if (body == null || cells.length < 2) {
+                    throw new Error("Expected a rendered body row");
+                }
+                body.scrollLeft = rtl ? -body.scrollWidth : body.scrollWidth;
+                await new Promise(resolveFrame => requestAnimationFrame(() => resolveFrame(null)));
+                // clientLeft covers an RTL scrollbar that sits on the left.
+                const contentLeft = body.getBoundingClientRect().left + body.clientLeft;
+                const contentRight = contentLeft + body.clientWidth;
+                const first = cells[0].getBoundingClientRect();
+                const last = cells[cells.length - 1].getBoundingClientRect();
+                const result = {
+                    overflow: body.scrollWidth - body.clientWidth,
+                    startGap: rtl ? contentRight - first.right : first.left - contentLeft,
+                    endGap: rtl ? last.left - contentLeft : contentRight - last.right
+                };
+                body.scrollLeft = 0;
+                element.style.width = originalWidth;
+                return result;
+            }, direction === "rtl");
+            expect(pinned.overflow).toBeGreaterThan(0);
+            expect(Math.abs(pinned.startGap)).toBeLessThan(1);
+            expect(Math.abs(pinned.endGap)).toBeLessThan(1);
+
+            // Arrow keys follow the screen in both directions and cross from user to structural columns.
+            const towardStart = direction === "rtl" ? "ArrowRight" : "ArrowLeft";
+            const towardEnd = direction === "rtl" ? "ArrowLeft" : "ArrowRight";
+            const focusedColumn = () =>
+                page.evaluate(() => document.activeElement?.getAttribute("aria-colindex") ?? null);
+            await rows.nth(0).locator('td[aria-colindex="4"]').focus();
+            await page.keyboard.press(towardStart);
+            expect(await focusedColumn()).toBe("3");
+            await page.keyboard.press(towardEnd);
+            expect(await focusedColumn()).toBe("4");
+            // The header has no detail cell, so navigation steps from the reorder header to the select-all header.
+            await grid.locator('thead th[aria-colindex="1"]').focus();
+            await page.keyboard.press(towardEnd);
+            expect(await focusedColumn()).toBe("3");
         }
+
+        // Every grouped body row spans exactly the colgroup, and detail content lines up with the data columns.
+        const groupedDetail = page.locator("#grouped-detail mona-grid");
+        await groupedDetail.scrollIntoViewIfNeeded();
+        await groupedDetail.locator("tbody tr[monaGridRow]").first().locator("mona-grid-toggle").click();
+        await expect(groupedDetail.locator("[data-grouped-detail]")).toBeVisible();
+        const groupedGeometry = await groupedDetail.evaluate(element => {
+            const table = element.querySelector<HTMLTableElement>("mona-grid-list table");
+            if (table == null) {
+                throw new Error("Expected the grouped body table");
+            }
+            const columnCount = table.querySelectorAll("colgroup > col").length;
+            const spans = Array.from(table.tBodies[0].rows, row =>
+                Array.from(row.cells).reduce((total, cell) => total + cell.colSpan, 0)
+            );
+            const detailRow = table.querySelector("tr[monaGridDetailRow]");
+            const dataRow = detailRow?.previousElementSibling;
+            const dataCells = Array.from(dataRow?.querySelectorAll(":scope > td:has(mona-grid-cell)") ?? []);
+            const content = detailRow?.lastElementChild?.getBoundingClientRect();
+            const first = dataCells[0]?.getBoundingClientRect();
+            const last = dataCells[dataCells.length - 1]?.getBoundingClientRect();
+            if (content == null || first == null || last == null) {
+                throw new Error("Expected an expanded detail row below a data row");
+            }
+            return {
+                columnCount,
+                spans,
+                startGap: content.left - first.left,
+                endGap: content.right - last.right
+            };
+        });
+        expect(groupedGeometry.spans.length).toBeGreaterThan(0);
+        expect(groupedGeometry.spans.every(span => span === groupedGeometry.columnCount)).toBe(true);
+        expect(Math.abs(groupedGeometry.startGap)).toBeLessThan(1);
+        expect(Math.abs(groupedGeometry.endGap)).toBeLessThan(1);
 
         for (const [id, height] of [
             ["virtual-explicit", 48],
@@ -200,7 +281,30 @@ async function main(): Promise<void> {
         const placeholder = page.locator("#natural-ltr .cdk-drag-placeholder");
         await expect(placeholder).toBeVisible();
         expect(Math.abs((await box(placeholder)).height - original.height)).toBeLessThan(1);
+        // Rows slide out of the dragged row's way, and the drop slot is dimmed.
+        expect(await placeholder.evaluate(element => getComputedStyle(element).opacity)).toBe("0.6");
+        expect(
+            await page
+                .locator("#natural-ltr tbody tr[monaGridRow]")
+                .first()
+                .evaluate(element => getComputedStyle(element).transitionDuration.split(",")[0])
+        ).toBe("0.2s");
         await page.mouse.up();
+        await expect(page.locator(".cdk-drag-preview")).toHaveCount(0);
+
+        // Keyboard moves slide the swapped rows and keep focus on the handle, so the row can keep moving.
+        const keyboardRows = page.locator("#natural-ltr tbody tr[monaGridRow]");
+        const movedUid = await keyboardRows.first().getAttribute("data-ruid");
+        await keyboardRows.first().locator("mona-grid-row-reorder-handle button").focus();
+        await page.keyboard.press("Alt+ArrowDown");
+        await expect(keyboardRows.nth(1)).toHaveAttribute("data-ruid", movedUid!);
+        expect(await keyboardRows.nth(1).evaluate(element => element.getAnimations().length)).toBe(1);
+        await page.keyboard.press("Alt+ArrowDown");
+        await expect(keyboardRows.nth(2)).toHaveAttribute("data-ruid", movedUid!);
+        await page.keyboard.press("Alt+ArrowUp");
+        await page.keyboard.press("Alt+ArrowUp");
+        await expect(keyboardRows.first()).toHaveAttribute("data-ruid", movedUid!);
+        await expect(keyboardRows.first().locator("mona-grid-row-reorder-handle button")).toBeFocused();
 
         const require = createRequire(import.meta.url);
         await page.addScriptTag({ content: readFileSync(require.resolve("axe-core/axe.min.js"), "utf8") });
@@ -218,7 +322,7 @@ async function main(): Promise<void> {
         expect(violations).toEqual([]);
         expect(errors).toEqual([]);
         console.log(
-            "Grid browser checks passed: server interactions, natural sizing, RTL/locked cells, editing, fixed virtual geometry, drag placeholder, and accessibility."
+            "Grid browser checks passed: server interactions, natural sizing, RTL/locked cells, editing, fixed virtual geometry, drag and keyboard row moves, and accessibility."
         );
     } finally {
         await browser.close();

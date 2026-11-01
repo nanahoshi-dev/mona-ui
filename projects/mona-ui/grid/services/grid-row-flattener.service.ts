@@ -10,7 +10,7 @@ import { compareGridComparableValues, toGridComparableValue } from "../utils/gri
  * A stateless service that groups and flattens rows into a linear `GridViewRow[]`
  * suitable for rendering by both paginated and virtual-scrolled grid list components.
  */
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class GridRowFlattenerService {
     /**
      * Builds a deterministic, hierarchical group key.
@@ -59,6 +59,17 @@ export class GridRowFlattenerService {
             result
         );
         return result;
+    }
+
+    /**
+     * Wraps ungrouped rows as data view rows, so grouped and ungrouped bodies render from the same shape.
+     */
+    public toDataRows(rows: Iterable<Row>): GridViewDataRow[] {
+        return Array.from(rows, row => this.#createDataRow(row, 0, null));
+    }
+
+    #createDataRow(row: Row, depth: number, groupKey: string | null): GridViewDataRow {
+        return { depth, groupKey, key: `row:${row.uid}`, row, type: "data" };
     }
 
     #flattenRecursive(
@@ -110,13 +121,14 @@ export class GridRowFlattenerService {
             const groupKey = this.buildGroupKey(parentKey, field, groupValue);
 
             const groupRow: GridViewGroupRow = {
-                type: "group",
+                count: groupRows.length,
                 depth,
                 field,
                 groupKey,
                 groupValue,
-                count: groupRows.length,
-                title: column.title
+                key: `group:${groupKey}`,
+                title: column.title,
+                type: "group"
             };
             result.push(groupRow);
 
@@ -136,13 +148,7 @@ export class GridRowFlattenerService {
                     );
                 } else {
                     for (const row of groupRows) {
-                        const dataRow: GridViewDataRow = {
-                            type: "data",
-                            depth,
-                            row,
-                            groupKey
-                        };
-                        result.push(dataRow);
+                        result.push(this.#createDataRow(row, depth, groupKey));
                     }
                 }
             }
@@ -150,9 +156,10 @@ export class GridRowFlattenerService {
             const groupAggregate = groupAggregates.get(groupKey);
             if (groupAggregate != null && (!isCollapsed || showFooter)) {
                 const groupFooterRow: GridViewGroupFooterRow = {
-                    type: "groupFooter",
                     depth,
-                    groupAggregate
+                    groupAggregate,
+                    key: `groupFooter:${groupKey}`,
+                    type: "groupFooter"
                 };
                 result.push(groupFooterRow);
             }

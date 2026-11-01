@@ -84,6 +84,18 @@ describe("GridNavigationService", () => {
             expect(moved).toBe(false);
         });
 
+        it("skips column indices that have no registered cell in the row", () => {
+            const reorder = createData({ rowIndex: -1, colIndex: 0, section: "header", firstInRow: true });
+            const selection = createData({ rowIndex: -1, colIndex: 2, section: "header", lastInRow: true });
+            const reorderKey = service.registerCell(reorder);
+            const selectionKey = service.registerCell(selection);
+
+            expect(service.navigate(reorderKey, "ArrowRight")).toBe(true);
+            expect(selection.element.focus).toHaveBeenCalledTimes(1);
+            expect(service.navigate(selectionKey, "ArrowLeft")).toBe(true);
+            expect(reorder.element.focus).toHaveBeenCalledTimes(1);
+        });
+
         it("does not navigate horizontally out of a group header row", () => {
             const groupHeader = createData({ rowIndex: 0, colIndex: 0, groupHeader: true });
             const key = service.registerCell(groupHeader);
