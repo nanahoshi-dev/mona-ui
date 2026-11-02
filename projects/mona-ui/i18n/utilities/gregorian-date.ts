@@ -1,4 +1,4 @@
-import { DateTime } from "luxon";
+import { DateTime, type DateTimeOptions } from "luxon";
 import { normalizeLocalizedDigits } from "./locale-formatters";
 import { canonicalizeLocaleId } from "./locale-id";
 
@@ -83,6 +83,18 @@ export function sanitizeDateText(value: string): string {
 }
 
 /**
+ * Luxon throws for formats that mix incompatible fields (e.g. ordinal and month/day tokens). Callers treat
+ * such input as unparsable, so the error becomes an invalid DateTime.
+ */
+function fromFormatSafe(text: string, format: string, options: DateTimeOptions): DateTime {
+    try {
+        return DateTime.fromFormat(text, format, options);
+    } catch (error) {
+        return DateTime.invalid("unparsable", error instanceof Error ? error.message : String(error));
+    }
+}
+
+/**
  * Parses a date string using the specified format and locale, forcing Gregorian calendar.
  * Localized digits are normalized first to support locales that use native numbering systems.
  */
@@ -92,11 +104,11 @@ export function parseGregorianDate(
     localeId: string
 ): DateTime {
     const locale = normalizeGregorianLocale(localeId);
-    let dt = DateTime.fromFormat(text, format, { locale, outputCalendar: "gregory" });
+    let dt = fromFormatSafe(text, format, { locale, outputCalendar: "gregory" });
     if (!dt.isValid) {
         const sanitizedText = sanitizeDateText(text);
         const sanitizedFormat = sanitizeDateText(format);
-        dt = DateTime.fromFormat(sanitizedText, sanitizedFormat, { locale, outputCalendar: "gregory" });
+        dt = fromFormatSafe(sanitizedText, sanitizedFormat, { locale, outputCalendar: "gregory" });
         if (!dt.isValid) {
             let normalizedText = normalizeLocalizedDigits(sanitizedText, locale);
             let latnLocale = locale;
@@ -107,9 +119,9 @@ export function parseGregorianDate(
             } catch {
                 // fallback
             }
-            dt = DateTime.fromFormat(normalizedText, sanitizedFormat, { locale: latnLocale, outputCalendar: "gregory" });
+            dt = fromFormatSafe(normalizedText, sanitizedFormat, { locale: latnLocale, outputCalendar: "gregory" });
             if (!dt.isValid) {
-                dt = DateTime.fromFormat(normalizedText, sanitizedFormat, { locale, outputCalendar: "gregory" });
+                dt = fromFormatSafe(normalizedText, sanitizedFormat, { locale, outputCalendar: "gregory" });
             }
 
             if (!dt.isValid) {
@@ -117,12 +129,12 @@ export function parseGregorianDate(
 
                 if (sanitizedFormat.includes(". ") && !normalizedText.includes(". ")) {
                     const textWithDotSpaces = normalizedText.replace(/\.(?!\s|$)/g, ". ");
-                    dt = DateTime.fromFormat(textWithDotSpaces, sanitizedFormat, {
+                    dt = fromFormatSafe(textWithDotSpaces, sanitizedFormat, {
                         locale: effectiveLocale,
                         outputCalendar: "gregory"
                     });
                     if (!dt.isValid && effectiveLocale !== locale) {
-                        dt = DateTime.fromFormat(textWithDotSpaces, sanitizedFormat, {
+                        dt = fromFormatSafe(textWithDotSpaces, sanitizedFormat, {
                             locale,
                             outputCalendar: "gregory"
                         });
@@ -141,12 +153,12 @@ export function parseGregorianDate(
                         /(\b\d{4}\.\s*\d{1,2}\.\s*\d{1,2})\.?\s+/,
                         (_match, datePart) => `${datePart}. `
                     );
-                    dt = DateTime.fromFormat(withDotBeforeTime, sanitizedFormat, {
+                    dt = fromFormatSafe(withDotBeforeTime, sanitizedFormat, {
                         locale: effectiveLocale,
                         outputCalendar: "gregory"
                     });
                     if (!dt.isValid && effectiveLocale !== locale) {
-                        dt = DateTime.fromFormat(withDotBeforeTime, sanitizedFormat, {
+                        dt = fromFormatSafe(withDotBeforeTime, sanitizedFormat, {
                             locale,
                             outputCalendar: "gregory"
                         });
@@ -160,12 +172,12 @@ export function parseGregorianDate(
                 const trimmedText = normalizedText.trim();
                 if (trimmedFormat.endsWith(".")) {
                     const textWithDot = trimmedText.endsWith(".") ? trimmedText : trimmedText + ".";
-                    dt = DateTime.fromFormat(textWithDot, trimmedFormat, {
+                    dt = fromFormatSafe(textWithDot, trimmedFormat, {
                         locale: effectiveLocale,
                         outputCalendar: "gregory"
                     });
                     if (!dt.isValid && effectiveLocale !== locale) {
-                        dt = DateTime.fromFormat(textWithDot, trimmedFormat, {
+                        dt = fromFormatSafe(textWithDot, trimmedFormat, {
                             locale,
                             outputCalendar: "gregory"
                         });

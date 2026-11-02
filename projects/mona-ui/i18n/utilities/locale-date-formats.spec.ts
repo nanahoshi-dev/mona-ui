@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 import { describe, expect, it } from "vitest";
-import { parseGregorianDate } from "./gregorian-date";
+import { gregorianDateTime, parseGregorianDate } from "./gregorian-date";
 import {
     getLocaleDateInputFormat,
     getLocaleDateTimeInputFormat,
@@ -781,6 +781,56 @@ describe("locale-date-formats", () => {
 
     describe("roundtrip formatting and parsing", () => {
         const testDate = new Date(2026, 8, 15, 21, 30, 45);
+
+        // prettier-ignore
+        const roundTripLocales = [
+            "en-US", "en-GB", "en-CA", "en-AU", "en-IN", "fr-FR", "fr-CA", "fr-CH", "de-DE", "de-CH", "de-AT",
+            "it-IT", "es-ES", "es-MX", "pt-BR", "pt-PT", "nl-NL", "nl-BE", "sv-SE", "nb-NO", "da-DK", "fi-FI",
+            "is-IS", "pl-PL", "cs-CZ", "sk-SK", "hu-HU", "ro-RO", "bg-BG", "hr-HR", "sr-RS", "sl-SI", "uk-UA",
+            "ru-RU", "be-BY", "lt-LT", "lv-LV", "et-EE", "el-GR", "tr-TR", "he-IL", "ar-SA", "ar-EG", "fa-IR",
+            "ur-PK", "hi-IN", "bn-BD", "ta-IN", "te-IN", "mr-IN", "th-TH", "vi-VN", "id-ID", "ms-MY", "fil-PH",
+            "ja-JP", "ko-KR", "zh-CN", "zh-TW", "zh-HK", "ka-GE", "hy-AM", "az-AZ", "kk-KZ", "uz-UZ", "sw-KE",
+            "af-ZA", "am-ET", "ca-ES", "eu-ES", "gl-ES", "ga-IE", "cy-GB", "sq-AL", "mk-MK", "mn-MN", "km-KH",
+            "lo-LA", "my-MM", "ne-NP", "si-LK"
+        ];
+
+        it("round-trips every derived date, time and date-time format", () => {
+            for (const locale of roundTripLocales) {
+                const formats = {
+                    date: getLocaleDateInputFormat(locale),
+                    time24: getLocaleTimeInputFormat(locale),
+                    time12: getLocaleTimeInputFormat(locale, { hourFormat: "12", showSeconds: true }),
+                    dateTime24: getLocaleDateTimeInputFormat(locale),
+                    dateTime12: getLocaleDateTimeInputFormat(locale, { hourFormat: "12" })
+                };
+                for (const [kind, format] of Object.entries(formats)) {
+                    const label = `${locale} ${kind} "${format}"`;
+                    const text = gregorianDateTime(testDate, locale).toFormat(format);
+                    const parsed = parseGregorianDate(text, format, locale);
+                    expect(parsed.isValid, `${label} -> "${text}"`).toBe(true);
+                    if (kind !== "time24" && kind !== "time12") {
+                        expect([parsed.year, parsed.month, parsed.day], label).toEqual([2026, 9, 15]);
+                    }
+                    if (kind !== "date") {
+                        expect([parsed.hour, parsed.minute], label).toEqual([21, 30]);
+                    }
+                }
+            }
+        });
+
+        it("quotes letters in Intl literals so Luxon does not read them as tokens", () => {
+            expect(getLocaleTimeInputFormat("fr-CA")).toBe("HH 'h' mm");
+            expect(gregorianDateTime(testDate, "fr-CA").toFormat(getLocaleTimeInputFormat("fr-CA"))).toBe("21 h 30");
+
+            const fiFormat = getLocaleDateTimeInputFormat("fi-FI");
+            expect(fiFormat).toBe("dd.MM.yyyy 'klo' HH.mm");
+            expect(gregorianDateTime(testDate, "fi-FI").toFormat(fiFormat)).toBe("15.09.2026 klo 21.30");
+        });
+
+        it("returns an invalid date instead of throwing for a conflicting custom format", () => {
+            expect(() => parseGregorianDate("2026-100 09", "yyyy-ooo MM", "en-US")).not.toThrow();
+            expect(parseGregorianDate("2026-100 09", "yyyy-ooo MM", "en-US").isValid).toBe(false);
+        });
 
         it("formats and parses Japanese date correctly", () => {
             const format = getLocaleDateInputFormat("ja-JP");
