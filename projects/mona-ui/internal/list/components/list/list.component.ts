@@ -20,7 +20,7 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FilterChangeEvent } from "@nanahoshi/mona-ui/common";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { isTypeaheadKey, setupTypeahead } from "@nanahoshi/mona-ui/internal";
+import { createElementControlId, isTypeaheadKey, setupTypeahead } from "@nanahoshi/mona-ui/internal";
 import { FilterInputComponent } from "@nanahoshi/mona-ui/internal/filter-input";
 import { PlaceholderComponent } from "@nanahoshi/mona-ui/placeholder";
 import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
@@ -66,14 +66,26 @@ import { ListItemComponent } from "../list-item/list-item.component";
 })
 export class ListComponent<TData> implements OnInit {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
+    readonly #generatedListId = createElementControlId();
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
     readonly #typeaheadKey$ = new Subject<string>();
     private readonly filterInput = viewChild(FilterInputComponent);
+    /**
+     * Id of the highlighted option, used as `aria-activedescendant` by the filter input.
+     */
+    protected readonly activeDescendant = computed(() => {
+        const item = this.listService.highlightedItem();
+        return item && !item.isHeader ? item.uid : null;
+    });
     protected readonly classes = computed(() => {
         const classes = listThemeVariants();
         return twMerge(classes);
     });
+    /**
+     * The `listId` input, or a generated id so the listbox can always be referenced by `aria-controls`.
+     */
+    protected readonly effectiveListId = computed(() => this.listId() || this.#generatedListId);
     protected readonly footerTemplate = contentChild(ListFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderClasses = computed(() => {
         const listItemClass = this.listItemClass();
@@ -203,10 +215,6 @@ export class ListComponent<TData> implements OnInit {
         }
     }
 
-    protected onListItemCheck(item: ListItem<TData>): void {
-        this.toggleItem(item);
-    }
-
     protected onListItemClick(item: ListItem<TData>): void {
         this.toggleItem(item);
     }
@@ -232,7 +240,34 @@ export class ListComponent<TData> implements OnInit {
         if (this.listService.navigableOptions().enabled) {
             this.listService.highlightedItem.set(item);
         }
-        this.scrollToItem(item, true);
+        this.scrollToItem(item, this.filterInput() == null);
+    }
+
+    /**
+     * Handles multiple-selection shortcuts from the WAI-ARIA listbox pattern:
+     * Space toggles the highlighted option and Ctrl/Cmd+A selects every enabled option.
+     * @returns whether the event was handled.
+     */
+    private handleMultipleSelectionKeys(event: KeyboardEvent): boolean {
+        const selectableOptions = this.listService.selectableOptions();
+        if (!selectableOptions.enabled || selectableOptions.mode !== "multiple") {
+            return false;
+        }
+        if (event.key === " " && !event.ctrlKey && !event.metaKey && !event.altKey) {
+            const highlightedItem = this.listService.highlightedItem();
+            if (highlightedItem && !this.listService.isDisabled(highlightedItem)) {
+                this.selectItem(highlightedItem);
+                this.itemSelect.emit({ item: highlightedItem, source: { via: "keyboard", key: event.key } });
+            }
+            return true;
+        }
+        if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === "a") {
+            if (this.listService.selectAllItems()) {
+                this.listService.selectedKeysChange$.next(this.listService.selectedKeys().toArray());
+            }
+            return true;
+        }
+        return false;
     }
 
     private handleNavigation(key: string): void {
@@ -247,7 +282,9 @@ export class ListComponent<TData> implements OnInit {
         const navigableOptions = this.listService.navigableOptions();
         const selectableOptions = this.listService.selectableOptions();
         const previousSelectedItems = this.listService.selectedListItems();
-        const item = this.listService.navigate(direction, navigableOptions.mode, true);
+        const filterInput = this.filterInput();
+        // With a filter input, focus stays in the input and the active option is conveyed by aria-activedescendant.
+        const item = this.listService.navigate(direction, navigableOptions.mode, filterInput == null);
         if (item && navigableOptions.mode === "select" && selectableOptions.enabled) {
             this.itemSelect.emit({ item, source: { via: "keyboard", key } });
             if (previousSelectedItems.contains(item)) {
@@ -255,7 +292,6 @@ export class ListComponent<TData> implements OnInit {
             }
             this.listService.selectedKeysChange$.next(this.listService.selectedKeys().toArray());
         }
-        const filterInput = this.filterInput();
         if (filterInput) {
             filterInput.focus();
         }
@@ -298,9 +334,10 @@ export class ListComponent<TData> implements OnInit {
     private scrollToItem(item: ListItem<TData>, focus: boolean, behavior: ScrollBehavior = "auto"): void {
         const element = this.#hostElementRef.nativeElement.querySelector(`[data-uid="${item.uid}"]`) as HTMLElement;
         if (element) {
-            element.scrollIntoView({ block: "center", behavior });
+            // "nearest" avoids scrolling the page when the option is already visible.
+            element.scrollIntoView({ block: "nearest", behavior });
             if (focus) {
-                element.focus();
+                element.focus({ preventScroll: true });
             }
         } else if (this.listService.virtualScrollOptions().enabled) {
             const index = this.listService.viewItems().toList().indexOf(item);
@@ -313,7 +350,7 @@ export class ListComponent<TData> implements OnInit {
                     `[data-uid="${item.uid}"]`
                 ) as HTMLElement;
                 if (scrolledElement && focus) {
-                    scrolledElement.focus();
+                    scrolledElement.focus({ preventScroll: true });
                 }
             });
         }
@@ -385,6 +422,10 @@ export class ListComponent<TData> implements OnInit {
                 filter(() => this.listService.navigableOptions().enabled)
             )
             .subscribe(event => {
+                if (this.handleMultipleSelectionKeys(event)) {
+                    event.preventDefault();
+                    return;
+                }
                 if (isTypeaheadKey(event.key, event)) {
                     event.preventDefault();
                     this.#typeaheadKey$.next(event.key);

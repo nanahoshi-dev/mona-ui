@@ -80,10 +80,12 @@ describe("ListService", () => {
             service.setValueField("id");
             service.setSelectedDataItems([PRODUCTS[0], PRODUCTS[2]]);
             expect(service.selectedKeys().toArray()).toEqual([1, 3]);
-            expect(service.selectedListItems().select(i => i.data.name).toArray()).toEqual([
-                "Keyboard",
-                "Monitor"
-            ]);
+            expect(
+                service
+                    .selectedListItems()
+                    .select(i => i.data.name)
+                    .toArray()
+            ).toEqual(["Keyboard", "Monitor"]);
         });
 
         it("setSelectedKeys stores already resolved keys directly", () => {
@@ -107,7 +109,10 @@ describe("ListService", () => {
                 { id: 3, name: "Monitor v2" }
             ];
             service.setData(replacements);
-            const selectedNames = service.selectedListItems().select(i => i.data.name).toArray();
+            const selectedNames = service
+                .selectedListItems()
+                .select(i => i.data.name)
+                .toArray();
             expect(selectedNames).toEqual(["Keyboard v2", "Monitor v2"]);
         });
 
@@ -146,7 +151,12 @@ describe("ListService", () => {
         it("does not throw when filtering a numeric text field", () => {
             service.setTextField("id");
             service.setFilter("2");
-            expect(service.viewItems().select(i => i.data.id).toArray()).toEqual([2]);
+            expect(
+                service
+                    .viewItems()
+                    .select(i => i.data.id)
+                    .toArray()
+            ).toEqual([2]);
         });
     });
 
@@ -265,6 +275,81 @@ describe("ListService", () => {
             const selected = service.selectedListItems().single();
             expect(selected.data.id).toBe(2);
             expect(service.viewItems().contains(selected)).toBe(true);
+        });
+    });
+
+    describe("navigation", () => {
+        beforeEach(() => {
+            service.setTextField("name");
+            service.setNavigableOptions({ enabled: true, mode: "highlight" });
+        });
+
+        it("moves to the first and last items with Home/End in multiple selection", () => {
+            service.setSelectableOptions({ enabled: true, mode: "multiple" });
+            service.highlightedItem.set(service.viewItems().elementAt(1));
+            expect(service.navigate("last", "highlight", false)?.data.name).toBe("Monitor");
+            expect(service.navigate("first", "highlight", false)?.data.name).toBe("Keyboard");
+        });
+
+        it("goes to the last item with End when nothing is selected or highlighted", () => {
+            expect(service.navigate("last", "highlight", false)?.data.name).toBe("Monitor");
+        });
+
+        it("does not deselect the edge item with Home in toggleable select mode", () => {
+            service.setSelectableOptions({ enabled: true, mode: "single", toggleable: true });
+            service.setValueField("id");
+            service.setSelectedKeys([1]);
+            service.navigate("first", "select", false);
+            expect(service.selectedKeys().toArray()).toEqual([1]);
+        });
+
+        it("restarts from the first item when the highlighted item was filtered out", () => {
+            service.highlightedItem.set(service.viewItems().elementAt(0));
+            service.setFilter("mo");
+            expect(service.navigate("next", "highlight", false)?.data.name).toBe("Mouse");
+        });
+    });
+
+    describe("selectAllItems", () => {
+        it("selects every enabled item in multiple mode", () => {
+            service.setValueField("id");
+            service.setSelectableOptions({ enabled: true, mode: "multiple" });
+            service.setDisabledBy(p => p.id === 2);
+            expect(service.selectAllItems()).toBe(true);
+            expect(service.selectedKeys().toArray().sort()).toEqual([1, 3]);
+            expect(service.selectAllItems()).toBe(false);
+        });
+
+        it("does nothing in single mode", () => {
+            expect(service.selectAllItems()).toBe(false);
+            expect(service.selectedKeys().isEmpty()).toBe(true);
+        });
+    });
+
+    describe("item positions", () => {
+        it("reports the total across all pages for aria-setsize", () => {
+            service.setPageableOptions({ ...service.pageableOptions(), enabled: true });
+            service.pageState.set({ page: 1, skip: 0, take: 2 });
+            const [first] = service.viewItems().toArray();
+            expect(service.viewItems().size()).toBe(2);
+            expect(service.getItemPosition(first)).toEqual({ position: 1, total: 3 });
+        });
+
+        it("links options to the uid of their group header", () => {
+            service.setGroupBy(p => (p.id === 1 ? "Input" : "Output"));
+            service.setGroupableOptions({ enabled: true, headerOrder: "asc" });
+            const [inputHeader, keyboard, outputHeader, mouse] = service.viewItems().toArray();
+            expect(service.getGroupHeaderUid(keyboard)).toBe(inputHeader.uid);
+            expect(service.getGroupHeaderUid(mouse)).toBe(outputHeader.uid);
+        });
+
+        it("keeps group header uids stable between recomputations", () => {
+            service.setGroupBy(p => (p.id === 1 ? "Input" : "Output"));
+            service.setGroupableOptions({ enabled: true, headerOrder: "asc" });
+            service.setTextField("name");
+            const header = service.viewItems().first();
+            service.setFilter("k");
+            expect(service.viewItems().first().uid).toBe(header.uid);
         });
     });
 });

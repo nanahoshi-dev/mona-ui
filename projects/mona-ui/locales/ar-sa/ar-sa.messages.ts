@@ -272,6 +272,7 @@ export const AR_SA_MESSAGES = {
         selectRow: (rowNumber: number) => `تحديد الصف ${formatInteger(rowNumber)}`
     },
     list: {
+        filterList: "تصفية القائمة",
         noData: "لا توجد بيانات"
     },
     listBox: {

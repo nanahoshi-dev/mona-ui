@@ -244,6 +244,7 @@ export const DE_DE_MESSAGES = {
         selectRow: (rowNumber: number) => `Zeile ${rowNumber} auswählen`
     },
     list: {
+        filterList: "Liste filtern",
         noData: "Keine Daten"
     },
     listBox: {

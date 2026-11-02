@@ -1,15 +1,5 @@
 import { NgTemplateOutlet } from "@angular/common";
-import {
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    inject,
-    input,
-    output,
-    Signal,
-    TemplateRef
-} from "@angular/core";
-import { FormsModule } from "@angular/forms";
+import { Component, computed, inject, input, Signal, TemplateRef } from "@angular/core";
 import { CheckboxDirective } from "@nanahoshi/mona-ui/check-box";
 import { twMerge } from "tailwind-merge";
 import { ListItem } from "../../models/ListItem";
@@ -19,9 +9,8 @@ import { listGroupHeaderTextThemeVariants, listItemBaseThemeVariants } from "../
 
 @Component({
     selector: "mona-list-item",
-    imports: [NgTemplateOutlet, CheckboxDirective, FormsModule],
+    imports: [NgTemplateOutlet, CheckboxDirective],
     templateUrl: "./list-item.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         "[class]": "baseClass()"
     }
@@ -61,11 +50,6 @@ export class ListItemComponent<TData> {
         return ``; // TODO
     });
 
-    public readonly checked = output<boolean>();
     public readonly item = input.required<ListItem<TData>>();
     public readonly template = input<TemplateRef<ListItemTemplateContext<TData>> | null>();
-
-    protected onCheckboxChange(checked: boolean): void {
-        this.checked.emit(checked);
-    }
 }

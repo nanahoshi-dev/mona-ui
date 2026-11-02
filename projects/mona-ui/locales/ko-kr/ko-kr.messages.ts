@@ -241,6 +241,7 @@ export const KO_KR_MESSAGES = {
         selectRow: (rowNumber: number) => `${rowNumber}행 선택`
     },
     list: {
+        filterList: "목록 필터",
         noData: "데이터 없음"
     },
     listBox: {

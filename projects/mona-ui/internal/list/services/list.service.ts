@@ -23,6 +23,46 @@ import { cycleThroughMatchedItems } from "../utils/cycleThroughMatchedItems";
 
 @Injectable()
 export class ListService<TData> {
+    readonly #arrangedItems = computed(() => {
+        const listItems = this.#listItems();
+        const filterText = this.filterText();
+        const groupableOptions = this.groupableOptions();
+        let enumerable: IEnumerable<ListItem<TData>> = listItems;
+        if (filterText) {
+            enumerable = enumerable.where(item => this.filterItem(item, filterText));
+        }
+        if (!groupableOptions.enabled) {
+            return enumerable.toImmutableSet();
+        }
+        if (groupableOptions.orderBy) {
+            if (groupableOptions.orderByDirection === "desc") {
+                enumerable = enumerable.orderByDescending(item => this.getOrderKey(item));
+            } else {
+                enumerable = enumerable.orderBy(item => this.getOrderKey(item));
+            }
+        }
+        let groupedEnumerable = enumerable.groupBy(item => this.getGroupField(item));
+        if (groupableOptions.headerOrder) {
+            if (groupableOptions.headerOrder === "desc") {
+                groupedEnumerable = groupedEnumerable.orderByDescending(g => g.key);
+            } else {
+                groupedEnumerable = groupedEnumerable.orderBy(g => g.key);
+            }
+        }
+        const previousHeaders = this.#groupHeaders;
+        const headers = new Map<unknown, ListItem<TData>>();
+        const items = groupedEnumerable
+            .selectMany(g => {
+                const header =
+                    previousHeaders.get(g.key) ??
+                    new ListItem<TData>({ data: g.key, header: String(g.key ?? ""), isHeader: true });
+                headers.set(g.key, header);
+                return g.source.prepend(header);
+            })
+            .toImmutableSet();
+        this.#groupHeaders = headers;
+        return items;
+    });
     readonly #data = signal(ImmutableList.create<TData>());
     /**
      * First list item for each selection key, so key lookups are O(1) instead of a scan per key.
@@ -82,6 +122,12 @@ export class ListService<TData> {
             return toImmutableSet(items);
         }
     });
+
+    /**
+     * Group header items from the last grouping pass, reused so header rows keep their uid between recomputations.
+     */
+    #groupHeaders = new Map<unknown, ListItem<TData>>();
+
     public readonly disabledBy = signal<string | Predicate<TData>>("");
     public readonly filterChange$ = new Subject<FilterChangeEvent>();
     public readonly filterInputVisible = signal(true);
@@ -106,6 +152,21 @@ export class ListService<TData> {
         return this.viewItems().firstOrDefault(i => !i.isHeader && !this.isDisabled(i));
     });
     public readonly groupBy = signal<ListKeySelector<TData>>(null);
+    /**
+     * Maps each option uid to the uid of the group header it is listed under.
+     */
+    public readonly groupHeaderUids = computed(() => {
+        const headerUids = new Map<string, string>();
+        let headerUid: string | null = null;
+        for (const item of this.#arrangedItems()) {
+            if (item.isHeader) {
+                headerUid = item.uid;
+            } else if (headerUid != null) {
+                headerUids.set(item.uid, headerUid);
+            }
+        }
+        return headerUids;
+    });
     public readonly groupableOptions = signal<GroupableOptions<TData, any>>({
         enabled: false,
         headerOrder: "asc"
@@ -125,12 +186,26 @@ export class ListService<TData> {
         }
     });
     public readonly itemFocusOut$ = new Subject<ListItem<TData>>();
-    public readonly navigatedItem$ = new Subject<ListItem<TData> | null>();
+    /**
+     * Position of each option among all filtered options (not only the current page), for `aria-posinset`
+     * and `aria-setsize`.
+     */
+    public readonly itemPositions = computed(() => {
+        const options = this.#arrangedItems()
+            .where(i => !i.isHeader)
+            .toArray();
+        const positions = new Map<string, { position: number; total: number }>();
+        options.forEach((item, index) => {
+            positions.set(item.uid, { position: index + 1, total: options.length });
+        });
+        return positions;
+    });
     public readonly navigableOptions = signal<NavigableOptions>({
         enabled: false,
         mode: "select",
         wrap: false
     });
+    public readonly navigatedItem$ = new Subject<ListItem<TData> | null>();
     public readonly pageState = signal<PageState>({ page: 1, skip: 0, take: 10 });
     public readonly pageableOptions = signal<PagerSettings>({
         enabled: false,
@@ -165,93 +240,22 @@ export class ListService<TData> {
     public readonly selectionChange$ = new Subject<ListItem<TData>>();
     public readonly textField = signal<string | Selector<TData, string>>("");
     public readonly valueField = signal<string | Selector<TData, unknown>>("");
+    /**
+     * Visible items in display order: filtered, ordered and grouped (with header rows), but not paged.
+     */
     public readonly viewItems = computed(() => {
-        const listItems = this.#listItems();
-        const filterText = this.filterText();
-        const groupableOptions = this.groupableOptions();
-        const virtualScrollOptions = this.virtualScrollOptions();
-        let enumerable: IEnumerable<ListItem<TData>> = listItems;
-        if (filterText) {
-            enumerable = enumerable.where(item => this.filterItem(item, filterText));
-        }
-        let resultEnumerable: IEnumerable<ListItem<TData>>;
-        if (groupableOptions.enabled) {
-            if (groupableOptions.orderBy) {
-                if (groupableOptions.orderByDirection === "desc") {
-                    enumerable = enumerable.orderByDescending(item => this.getOrderKey(item));
-                } else {
-                    enumerable = enumerable.orderBy(item => this.getOrderKey(item));
-                }
-            }
-            let groupedEnumerable = enumerable.groupBy(item => this.getGroupField(item));
-            if (groupableOptions.headerOrder) {
-                if (groupableOptions.headerOrder === "desc") {
-                    groupedEnumerable = groupedEnumerable.orderByDescending(g => g.key);
-                } else {
-                    groupedEnumerable = groupedEnumerable.orderBy(g => g.key);
-                }
-            }
-            resultEnumerable = groupedEnumerable.selectMany(g => {
-                const groupHeaderItem = new ListItem({ data: g.key, header: String(g.key ?? ""), isHeader: true });
-                return g.source.prepend(groupHeaderItem);
-            });
-        } else {
-            resultEnumerable = enumerable;
-        }
+        const arrangedItems = this.#arrangedItems();
         const pageableOptions = this.pageableOptions();
-        if (virtualScrollOptions.enabled) {
-            return resultEnumerable.toImmutableSet();
+        if (this.virtualScrollOptions().enabled || !pageableOptions.enabled) {
+            return arrangedItems;
         }
-        if (pageableOptions.enabled) {
-            const pageState = this.pageState();
-            const skip = pageState.skip;
-            const take = pageState.take;
-            return toImmutableSet(this.skipTakeWithGroups(resultEnumerable.toArray(), skip, take));
-        }
-        return resultEnumerable.toImmutableSet();
+        const pageState = this.pageState();
+        return toImmutableSet(this.skipTakeWithGroups(arrangedItems.toArray(), pageState.skip, pageState.take));
     });
     public readonly virtualScrollOptions = signal<VirtualScrollOptions>({
         enabled: false,
         height: 28
     });
-    public readonly itemPositions = computed(() => {
-        const viewItems = this.viewItems();
-        const nonHeaderItems = viewItems.where(i => !i.isHeader).toArray();
-        const positions = new Map<string, { position: number; total: number }>();
-
-        nonHeaderItems.forEach((item, index) => {
-            positions.set(item.uid, { position: index + 1, total: nonHeaderItems.length });
-        });
-
-        return positions;
-    });
-
-    public getItemPosition(item: ListItem<TData>): { position: number; total: number } | null {
-        return this.itemPositions().get(item.uid) ?? null;
-    }
-
-    /**
-     * Resolves the selection value of a data item through `valueField`.
-     *
-     * When no `valueField` is configured, the data item itself is the value.
-     * When `valueField` is a string, the item property is read with a nullish fallback to the item.
-     * When `valueField` is a function, its result is used as-is.
-     *
-     * Falsy results such as `0`, `false`, and `""` are valid values and do not fall back to the item.
-     */
-    public getDataItemValue(dataItem: TData): unknown {
-        const valueField = this.valueField();
-
-        if (!valueField) {
-            return dataItem;
-        }
-
-        if (typeof valueField === "string") {
-            return (dataItem as Record<string, unknown> | null)?.[valueField] ?? dataItem;
-        }
-
-        return valueField(dataItem);
-    }
 
     public clearFilter(): void {
         this.filterText.set("");
@@ -288,6 +292,29 @@ export class ListService<TData> {
         this.selectedKeys.update(set => set.removeAll(keys));
     }
 
+    /**
+     * Resolves the selection value of a data item through `valueField`.
+     *
+     * When no `valueField` is configured, the data item itself is the value.
+     * When `valueField` is a string, the item property is read with a nullish fallback to the item.
+     * When `valueField` is a function, its result is used as-is.
+     *
+     * Falsy results such as `0`, `false`, and `""` are valid values and do not fall back to the item.
+     */
+    public getDataItemValue(dataItem: TData): unknown {
+        const valueField = this.valueField();
+
+        if (!valueField) {
+            return dataItem;
+        }
+
+        if (typeof valueField === "string") {
+            return (dataItem as Record<string, unknown> | null)?.[valueField] ?? dataItem;
+        }
+
+        return valueField(dataItem);
+    }
+
     public getFilterDebounceDuration(): number {
         const filterableOptions = this.filterableOptions();
         return filterableOptions.enabled ? filterableOptions.debounce : 0;
@@ -302,6 +329,17 @@ export class ListService<TData> {
             return (item.data as any)?.[groupSelector] ?? "";
         }
         return groupSelector(item.data);
+    }
+
+    /**
+     * Returns the uid of the group header an item is rendered under, or `null` when the list is not grouped.
+     */
+    public getGroupHeaderUid(item: ListItem<TData>): string | null {
+        return this.groupHeaderUids().get(item.uid) ?? null;
+    }
+
+    public getItemPosition(item: ListItem<TData>): { position: number; total: number } | null {
+        return this.itemPositions().get(item.uid) ?? null;
     }
 
     /**
@@ -404,6 +442,27 @@ export class ListService<TData> {
 
     public scrollToItem(item: ListItem<TData>, focus: boolean): void {
         this.scrollToItem$.next({ item, focus });
+    }
+
+    /**
+     * Selects every enabled item currently in view, keeping existing selections. Only applies in multiple mode.
+     * @returns whether the selection changed.
+     */
+    public selectAllItems(): boolean {
+        const options = this.selectableOptions();
+        if (!options.enabled || options.mode !== "multiple") {
+            return false;
+        }
+        const keys = this.viewItems()
+            .where(i => !i.isHeader && !this.isDisabled(i))
+            .select(i => this.getSelectionKey(i))
+            .toArray();
+        const selectedKeys = this.selectedKeys();
+        if (keys.every(key => selectedKeys.contains(key))) {
+            return false;
+        }
+        this.selectedKeys.update(set => set.addAll(keys));
+        return true;
     }
 
     public selectItem(item: ListItem<TData>, scroll: boolean = false, focus: boolean = false): void {
@@ -527,6 +586,17 @@ export class ListService<TData> {
         }
     }
 
+    /**
+     * Returns the item when it is one of the navigable items, otherwise `null`.
+     * An anchor that was filtered out or removed must not be navigated from.
+     */
+    private getItemInView(
+        viewItems: ImmutableSet<ListItem<TData>>,
+        item: ListItem<TData> | null
+    ): ListItem<TData> | null {
+        return item != null && viewItems.contains(item) ? item : null;
+    }
+
     private getOrderKey(item: ListItem<TData>): any {
         const orderBy = this.groupableOptions().orderBy;
         if (orderBy) {
@@ -559,19 +629,40 @@ export class ListService<TData> {
         return this.getDataItemValue(item.data);
     }
 
+    private navigateFirstForSingleSelection(
+        viewItems: ImmutableSet<ListItem<TData>>,
+        mode: NavigationMode
+    ): ListItem<TData> | null {
+        const firstItem = viewItems.first();
+        if (mode === "select") {
+            if (!this.isSelected(firstItem)) {
+                this.selectItem(firstItem);
+            }
+            this.highlightedItem.set(null);
+        } else {
+            this.highlightedItem.set(firstItem);
+        }
+        return firstItem;
+    }
+
     private navigateForMultipleSelection(
-        viewItems: IEnumerable<ListItem<TData>>,
+        viewItems: ImmutableSet<ListItem<TData>>,
         direction: NavigationDirection
     ): ListItem<TData> | null {
         const selectedKeys = this.selectedKeys();
         const firstItem = viewItems.first();
-        if (selectedKeys.isEmpty() && !this.highlightedItem()) {
+        if (direction === "first" || direction === "last") {
+            const edgeItem = direction === "first" ? firstItem : viewItems.last();
+            this.highlightedItem.set(edgeItem);
+            return edgeItem;
+        }
+        const lastHighlightedItem = this.getItemInView(viewItems, this.highlightedItem());
+        if (selectedKeys.isEmpty() && !lastHighlightedItem) {
             this.highlightedItem.set(firstItem);
             return firstItem;
         }
         const firstSelectedItem = viewItems.firstOrDefault(i => selectedKeys.contains(this.getSelectionKey(i)));
         const lastSelectedItem = viewItems.lastOrDefault(i => selectedKeys.contains(this.getSelectionKey(i)));
-        const lastHighlightedItem = this.highlightedItem();
 
         if (direction === "next") {
             const navigationItem = lastHighlightedItem ?? lastSelectedItem ?? firstItem;
@@ -602,20 +693,6 @@ export class ListService<TData> {
         return null;
     }
 
-    private navigateFirstForSingleSelection(
-        viewItems: ImmutableSet<ListItem<TData>>,
-        mode: NavigationMode
-    ): ListItem<TData> | null {
-        const firstItem = viewItems.first();
-        if (mode === "select") {
-            this.selectItem(firstItem);
-            this.highlightedItem.set(null);
-        } else {
-            this.highlightedItem.set(firstItem);
-        }
-        return firstItem;
-    }
-
     private navigateForSingleSelection(
         viewItems: ImmutableSet<ListItem<TData>>,
         direction: NavigationDirection,
@@ -623,22 +700,24 @@ export class ListService<TData> {
     ): ListItem<TData> | null {
         const selectedKeys = this.selectedKeys();
         const firstItem = viewItems.first();
-        if (selectedKeys.isEmpty() && !this.highlightedItem()) {
+        const lastHighlightedItem = this.getItemInView(viewItems, this.highlightedItem());
+        if (selectedKeys.isEmpty() && !lastHighlightedItem) {
+            if (direction === "last") {
+                return this.navigateLastForSingleSelection(viewItems, mode);
+            }
             if (mode === "select") {
                 this.selectItem(firstItem);
             } else {
                 this.highlightedItem.set(firstItem);
             }
             return firstItem;
-        } else if (selectedKeys.isEmpty() && this.highlightedItem()) {
-            const highlightedItem = this.highlightedItem() as ListItem<TData>;
+        } else if (selectedKeys.isEmpty() && lastHighlightedItem) {
             if (mode === "select") {
-                this.selectItem(highlightedItem);
-                return highlightedItem;
+                this.selectItem(lastHighlightedItem);
+                return lastHighlightedItem;
             }
         }
         const selectedItem = viewItems.lastOrDefault(i => selectedKeys.contains(this.getSelectionKey(i)));
-        const lastHighlightedItem = this.highlightedItem();
         const navigationItem = lastHighlightedItem ?? selectedItem ?? firstItem;
         if (direction === "next") {
             return this.navigateNextForSingleSelection(viewItems, navigationItem, mode, firstItem);
@@ -658,7 +737,9 @@ export class ListService<TData> {
     ): ListItem<TData> | null {
         const lastItem = viewItems.last();
         if (mode === "select") {
-            this.selectItem(lastItem);
+            if (!this.isSelected(lastItem)) {
+                this.selectItem(lastItem);
+            }
             this.highlightedItem.set(null);
         } else {
             this.highlightedItem.set(lastItem);

@@ -241,6 +241,7 @@ export const JA_JP_MESSAGES = {
         selectRow: (rowNumber: number) => `${rowNumber}行目を選択`
     },
     list: {
+        filterList: "リストをフィルター",
         noData: "データがありません"
     },
     listBox: {

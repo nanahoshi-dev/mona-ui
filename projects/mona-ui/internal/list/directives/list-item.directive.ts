@@ -8,9 +8,8 @@ import { listItemContentThemeVariants } from "../styles/list.styles";
 
 @Directive({
     selector: "li[monaListItem]",
-    standalone: true,
     host: {
-        "[attr.aria-current]": "highlighted()",
+        "[attr.aria-describedby]": "groupHeaderUid()",
         "[attr.aria-disabled]": "disabled()",
         "[attr.aria-posinset]": "position()",
         "[attr.aria-selected]": "selected()",
@@ -26,6 +25,7 @@ import { listItemContentThemeVariants } from "../styles/list.styles";
 export class ListItemDirective<TData> {
     readonly #listService = inject(ListService<TData>);
     protected readonly disabled = computed(() => this.#listService.isDisabled(this.item()));
+    protected readonly groupHeaderUid = computed(() => this.#listService.getGroupHeaderUid(this.item()));
     protected readonly highlighted = computed(() => this.#listService.isHighlighted(this.item()));
     protected readonly position = computed(() => {
         const positionInfo = this.#listService.getItemPosition(this.item());

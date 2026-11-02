@@ -1,7 +1,6 @@
 import { Directive } from "@angular/core";
 
 @Directive({
-    selector: "ng-template[monaListNoDataTemplate]",
-    standalone: true
+    selector: "ng-template[monaListNoDataTemplate]"
 })
 export class ListNoDataTemplateDirective {}
