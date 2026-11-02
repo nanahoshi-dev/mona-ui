@@ -1,6 +1,7 @@
 /**
  * Generates a unique control ID for an element.
- * The ID consists of a prefix, a random hexadecimal string, and a suffix.
+ * The ID consists of the `mona-` prefix followed by a random hexadecimal string.
+ * It contains only characters that are safe in CSS selectors, so it can be used with `querySelector("#…")` unescaped.
  * @param {number} [level=0] - The nesting level of the element. This increases the length of the generated ID.
  * @param {number} [length=7] - The base length of the random part of the ID.
  * @returns {string} A unique control ID string for use for elements.
@@ -14,7 +15,7 @@ export const createElementControlId = (level: number = 0, length: number = 7): s
         const randomId = Array.from(array, byte => byte.toString(16).padStart(2, "0"))
             .join("")
             .substring(0, idLength);
-        return `${prefix}:${randomId}:`;
+        return `${prefix}${randomId}`;
     }
     let hex = "";
     const chars = "0123456789abcdef";
@@ -22,5 +23,5 @@ export const createElementControlId = (level: number = 0, length: number = 7): s
     for (let i = 0; i < idLength; i++) {
         hex += chars[Math.floor(Math.random() * 16)];
     }
-    return `${prefix}:${hex}:`;
+    return `${prefix}${hex}`;
 };

@@ -188,7 +188,7 @@ describe("SegmentedComponent", () => {
             const radios = getRadios(fixture);
             const names = new Set(radios.map(radio => radio.name));
             expect(names.size).toBe(1);
-            expect(radios[0].name).toMatch(/^mona-:/);
+            expect(radios[0].name).toMatch(/^mona-[0-9a-f]+$/);
         });
 
         it("uses different generated names across component instances", async () => {

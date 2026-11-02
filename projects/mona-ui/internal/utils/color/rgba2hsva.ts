@@ -11,10 +11,9 @@ export const rgba2hsva = (r: number | null, g: number | null, b: number | null, 
     const max = Math.max(r, g, b);
     const min = Math.min(r, g, b);
     let h = 0;
-    let s: number;
     const v = max;
     const d = max - min;
-    s = max === 0 ? 0 : d / max;
+    const s = max === 0 ? 0 : d / max;
     if (max !== min) {
         if (max === r) {
             h = (g - b) / d + (g < b ? 6 : 0);
