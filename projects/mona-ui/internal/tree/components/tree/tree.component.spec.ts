@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import axe from "axe-core";
+import { of } from "rxjs";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { TreeService } from "../../services/tree.service";
 import { SubTreeComponent } from "../sub-tree/sub-tree.component";
@@ -166,6 +168,101 @@ describe("TreeComponent", () => {
             expect(fixture.nativeElement.getAttribute("aria-activedescendant")).toBe(
                 treeService.getNodeElementId(node2.uid)
             );
+        });
+    });
+
+    describe("WAI-ARIA tree keyboard contract", () => {
+        it("moves to the parent with ArrowLeft on a child, and to the first child with ArrowRight on an open node", () => {
+            setupTree();
+            const node1 = treeService.nodeSet().first();
+            treeService.setExpandedKeys([node1.data]);
+            treeService.navigatedNode.set(node1.children().first());
+            fixture.detectChanges();
+
+            dispatchKeydown("ArrowLeft");
+            expect(treeService.navigatedNode()).toBe(node1);
+            expect(treeService.isExpanded(node1)).toBe(true);
+
+            dispatchKeydown("ArrowRight");
+            expect(treeService.navigatedNode()?.data.id).toBe("1.1");
+        });
+
+        it("expands all siblings with *", () => {
+            const data: TestItem[] = [
+                { id: "1", text: "One", children: [{ id: "1.1", text: "One.One" }] },
+                { id: "2", text: "Two", children: [{ id: "2.1", text: "Two.One" }] }
+            ];
+            treeService.setChildrenSelector("children");
+            treeService.setTextField("text");
+            treeService.setData(data);
+            treeService.setExpandableOptions({ enabled: true });
+            treeService.navigatedNode.set(treeService.nodeSet().first());
+            fixture.detectChanges();
+
+            dispatchKeydown("*");
+            expect(treeService.nodeSet().all(n => treeService.isExpanded(n))).toBe(true);
+        });
+
+        it("moves to the next node starting with a typed character", () => {
+            vi.useFakeTimers();
+            try {
+                setupTree();
+                treeService.navigatedNode.set(treeService.nodeSet().first());
+                fixture.detectChanges();
+                dispatchKeydown("n");
+                vi.advanceTimersByTime(250);
+                expect(treeService.navigatedNode()?.data.id).toBe("2");
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("expands a lazily loaded node with the keyboard and loads its children once", () => {
+            const load = vi.fn((item: TestItem) =>
+                of<TestItem[]>(item.id === "1" ? [{ id: "1.1", text: "Lazy" }] : [])
+            );
+            treeService.setChildrenSelector(load);
+            treeService.setHasChildrenPredicate((item: TestItem) => item.id === "1");
+            treeService.setTextField("text");
+            treeService.setData([{ id: "1", text: "Node 1" }]);
+            treeService.setExpandableOptions({ enabled: true });
+            treeService.navigatedNode.set(treeService.nodeSet().first());
+            fixture.detectChanges();
+            load.mockClear();
+
+            dispatchKeydown("ArrowRight");
+            const node = treeService.nodeSet().first();
+            expect(treeService.isExpanded(node)).toBe(true);
+            expect(node.children().single().data.text).toBe("Lazy");
+
+            dispatchKeydown("ArrowLeft");
+            dispatchKeydown("ArrowRight");
+            expect(load).toHaveBeenCalledTimes(1);
+        });
+
+        it("does not expand a disabled node from its expander button", () => {
+            setupTree();
+            const node1 = treeService.nodeSet().first();
+            treeService.setDisableOptions({ enabled: true });
+            treeService.setDisabledKeys([node1.data]);
+            fixture.detectChanges();
+            const expander = fixture.nativeElement.querySelector("li[role=treeitem] button") as HTMLButtonElement;
+            expect(expander.disabled).toBe(true);
+            expect(treeService.toggleNodeExpand(node1, true)).toBe(false);
+            expect(treeService.isExpanded(node1)).toBe(false);
+        });
+    });
+
+    describe("accessibility", () => {
+        it("has no axe violations for an expanded tree", async () => {
+            setupTree();
+            fixture.componentRef.setInput("ariaLabel", "Files");
+            treeService.setExpandedKeys([treeService.nodeSet().first().data]);
+            fixture.detectChanges();
+            await fixture.whenStable();
+            const results = await axe.run(fixture.nativeElement, { rules: { "color-contrast": { enabled: false } } });
+            const summary = results.violations.map(v => `${v.id}: ${v.nodes.map(n => n.target.join(" ")).join(", ")}`);
+            expect(summary).toEqual([]);
         });
     });
 });

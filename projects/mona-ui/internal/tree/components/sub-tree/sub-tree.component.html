@@ -1,6 +1,6 @@
 <ul
     [class]="listClass()"
-    [attr.role]="parent() ? 'group' : null"
+    [attr.role]="parent() ? 'group' : 'none'"
     cdkDropList
     [cdkDropListSortingDisabled]="true"
     (cdkDropListDropped)="onNodeDrop($event)">
@@ -34,6 +34,7 @@
                         tabindex="-1"
                         [class]="nodeExpanderClass()"
                         [class.mona-disabled]="nodeComponent.disabled()"
+                        [disabled]="nodeComponent.disabled()"
                         [attr.aria-label]="
                             (nodeComponent.expanded() ? messages().collapse : messages().expand) +
                             ' ' +

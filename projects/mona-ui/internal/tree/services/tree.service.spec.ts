@@ -1,4 +1,7 @@
 import { TestBed } from "@angular/core/testing";
+import { NodeDropEvent } from "../models/NodeDropEvent";
+import { moveFlatTreeNode } from "../utils/moveFlatTreeNode";
+import { moveTreeNode } from "../utils/moveTreeNode";
 import { of } from "rxjs";
 
 import { TreeNode } from "../models/TreeNode";
@@ -277,6 +280,107 @@ describe("TreeService", () => {
             expect(node1.parent).toBeNull();
             expect(child.parent).toBe(node1);
             expect(service.nodeSet().first()).toBe(node1);
+        });
+    });
+
+    describe("check state with disabled children", () => {
+        function setupParentWithDisabledChild(): { parent: TreeNode<TestItem>; enabled: TreeNode<TestItem> } {
+            const { node1 } = setupTree();
+            service.setCheckableOptions({ enabled: true, mode: "multiple", checkDisabledChildren: false });
+            service.setDisableOptions({ enabled: true, disableChildren: false });
+            const [enabled, disabled] = node1.children().toArray();
+            service.setDisabledKeys([disabled.data]);
+            return { parent: node1, enabled };
+        }
+
+        it("does not show a checked parent as mixed when only a disabled child is unchecked", () => {
+            const { parent } = setupParentWithDisabledChild();
+            service.setNodeCheck(parent, true);
+            expect(parent.checked()).toBe(true);
+            expect(service.isIndeterminate(parent)).toBe(false);
+        });
+
+        it("derives the same parent state from checking the parent or its enabled children", () => {
+            const { parent, enabled } = setupParentWithDisabledChild();
+            service.setNodeCheck(parent, true);
+            service.setNodeCheck(enabled, false);
+            expect(parent.checked()).toBe(false);
+            service.setNodeCheck(enabled, true);
+            expect(parent.checked()).toBe(true);
+        });
+    });
+
+    describe("setCheckedKeys", () => {
+        it("derives parents the same way a data refresh does", () => {
+            const { node1, data } = setupTree();
+            service.setCheckableOptions({ enabled: true, mode: "multiple" });
+            service.setCheckedKeys(
+                node1
+                    .children()
+                    .select(c => c.data)
+                    .toArray()
+            );
+            expect(node1.checked()).toBe(true);
+            service.setData([...data]);
+            expect(node1.checked()).toBe(true);
+        });
+
+        it("keeps a parent key supplied without its children", () => {
+            const { node1, data } = setupTree();
+            service.setCheckableOptions({ enabled: true, mode: "multiple" });
+            service.setCheckedKeys([node1.data]);
+            service.setData([...data]);
+            expect(node1.checked()).toBe(true);
+        });
+    });
+
+    describe("navigated node after data changes", () => {
+        it("is cleared when its node is removed", () => {
+            const { node2, data } = setupTree();
+            service.navigatedNode.set(node2);
+            service.setData([data[0]]);
+            expect(service.navigatedNode()).toBeNull();
+        });
+    });
+
+    describe("move utilities", () => {
+        interface Row {
+            id: number;
+            items?: Row[];
+            parentId?: number | null;
+        }
+        const dropEvent = (dragged: Row, target: Row, position: "before" | "after" | "inside" | "outside") =>
+            ({ nodeItem: { data: dragged }, targetNode: { data: target }, position }) as unknown as NodeDropEvent<Row>;
+
+        it("moveTreeNode never drops a node into its own subtree", () => {
+            const child: Row = { id: 2 };
+            const parent: Row = { id: 1, items: [child] };
+            const result = moveTreeNode([parent], dropEvent(parent, child, "inside"), "id", "items");
+            expect(result).toEqual([parent]);
+            expect(parent.items).toEqual([child]);
+        });
+
+        it("moveTreeNode keeps the node when the position is outside", () => {
+            const a: Row = { id: 1 };
+            const b: Row = { id: 2 };
+            expect(moveTreeNode([a, b], dropEvent(a, b, "outside"), "id", "items")).toEqual([a, b]);
+        });
+
+        it("moveTreeNode moves a node inside another", () => {
+            const a: Row = { id: 1 };
+            const b: Row = { id: 2 };
+            const result = moveTreeNode([a, b], dropEvent(a, b, "inside"), "id", "items");
+            expect(result).toEqual([{ id: 2, items: [a] }]);
+        });
+
+        it("moveFlatTreeNode refuses to create a parent cycle", () => {
+            const rows: Row[] = [
+                { id: 1, parentId: null },
+                { id: 2, parentId: 1 },
+                { id: 3, parentId: 2 }
+            ];
+            const result = moveFlatTreeNode(rows, dropEvent(rows[0], rows[2], "inside"), "id", "parentId");
+            expect(result).toEqual(rows);
         });
     });
 });
