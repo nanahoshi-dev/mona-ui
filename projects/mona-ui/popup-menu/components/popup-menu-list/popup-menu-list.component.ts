@@ -364,7 +364,7 @@ export class PopupMenuListComponent implements OnInit {
                         e.preventDefault();
                         this.#typeaheadKey$.next("");
                         this.handleNavigationKey(e);
-                    } else if (isTypeaheadKey(e.key)) {
+                    } else if (isTypeaheadKey(e.key, e)) {
                         e.preventDefault();
                         this.handleTypeaheadKey(e);
                     }

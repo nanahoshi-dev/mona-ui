@@ -39,7 +39,6 @@ import { ListSizeInputType, ListSizeType } from "../../models/ListSizeType";
 import { SelectionChangeEvent, SelectionSource } from "../../models/SelectionChangeEvent";
 import { ListService } from "../../services/list.service";
 import { listGroupHeaderThemeVariants, listInnerListThemeVariants, listThemeVariants } from "../../styles/list.styles";
-import { cycleThroughMatchedItems } from "../../utils/cycleThroughMatchedItems";
 import { getListNavigationDirection } from "../../utils/getListNavigationDirection";
 import { ListItemComponent } from "../list-item/list-item.component";
 
@@ -142,7 +141,7 @@ export class ListComponent<TData> implements OnInit {
         const items = this.listService.viewItems().size();
         const headerItems = this.listService
             .viewItems()
-            .where(i => !!i.header)
+            .where(i => i.isHeader)
             .count();
         const itemHeight = this.listService.virtualScrollOptions().height ?? 28;
         const height = items * itemHeight + headerItems * 2;
@@ -213,19 +212,13 @@ export class ListComponent<TData> implements OnInit {
     }
 
     private cycleThroughMatchedItems(buffer: string): void {
-        const nextItem = cycleThroughMatchedItems(
-            this.listService.viewItems(),
-            this.listService.highlightedItem(),
-            item => {
-                const text = this.listService.getItemText(item);
-                return text.toLowerCase().startsWith(buffer.toLowerCase());
-            }
-        );
+        const nextItem = this.listService.cycleThroughMatchedItems(buffer);
         if (nextItem) {
             const navigationMode = this.listService.navigableOptions().mode;
             this.listService.highlightedItem.set(nextItem);
-            if (navigationMode === "select") {
+            if (navigationMode === "select" && this.listService.selectableOptions().enabled) {
                 this.selectItem(nextItem);
+                this.itemSelect.emit({ item: nextItem, source: { via: "keyboard", key: buffer } });
             }
             this.scrollToItem(nextItem, true, "instant");
         }
@@ -353,7 +346,7 @@ export class ListComponent<TData> implements OnInit {
         }
         const firstItem = this.listService
             .viewItems()
-            .where(i => !i.header && !this.listService.isDisabled(i))
+            .where(i => !i.isHeader && !this.listService.isDisabled(i))
             .firstOrDefault();
         if (firstItem) {
             this.focusToItem(firstItem);
@@ -364,7 +357,8 @@ export class ListComponent<TData> implements OnInit {
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                filter(event => event.key === "Enter" || event.key === "NumPadEnter")
+                filter(event => event.key === "Enter"),
+                tap(event => event.preventDefault())
             )
             .subscribe((event: KeyboardEvent) => {
                 const highlightedItem = this.listService.highlightedItem();
@@ -384,21 +378,18 @@ export class ListComponent<TData> implements OnInit {
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                filter(event => event.key !== "Tab"),
-                filter(() => this.listService.navigableOptions().enabled),
-                tap(event => {
-                    const navigableOptions = this.listService.navigableOptions();
-                    if (navigableOptions.enabled) {
-                        event.preventDefault();
-                    }
-                })
+                filter(() => this.listService.navigableOptions().enabled)
             )
             .subscribe(event => {
-                if (isTypeaheadKey(event.key)) {
+                if (isTypeaheadKey(event.key, event)) {
                     event.preventDefault();
                     this.#typeaheadKey$.next(event.key);
                     return;
                 }
+                if (getListNavigationDirection(event.key) == null) {
+                    return;
+                }
+                event.preventDefault();
                 this.#typeaheadKey$.next("");
                 this.handleNavigation(event.key);
             });

@@ -4,6 +4,7 @@ import { createElementControlId } from "./core/createElementControlId";
 import { rxFromResize } from "./core/rxFromResize";
 import { setWindowStyles } from "./setWindowStyles";
 import { toCssValue } from "./toCssValue";
+import { isTypeaheadKey } from "./typeahead.util";
 
 describe("internal utils", () => {
     describe("setWindowStyles", () => {
@@ -106,6 +107,27 @@ describe("internal utils", () => {
 
         it("should grow the random part with the nesting level", () => {
             expect(createElementControlId(2, 7).length).toBe("mona-".length + 9);
+        });
+    });
+
+    describe("isTypeaheadKey", () => {
+        it("should accept letters and digits from any script", () => {
+            for (const key of ["a", "Z", "7", "é", "ü", "ж", "ğ", "あ", "ا"]) {
+                expect(isTypeaheadKey(key), key).toBe(true);
+            }
+        });
+
+        it("should reject named keys", () => {
+            for (const key of ["Enter", "ArrowDown", "Tab", "Escape", "F5"]) {
+                expect(isTypeaheadKey(key)).toBe(false);
+            }
+        });
+
+        it("should ignore keys pressed with Ctrl, Meta or Alt", () => {
+            expect(isTypeaheadKey("a", { ctrlKey: true })).toBe(false);
+            expect(isTypeaheadKey("c", { metaKey: true })).toBe(false);
+            expect(isTypeaheadKey("x", { altKey: true })).toBe(false);
+            expect(isTypeaheadKey("A", { ctrlKey: false })).toBe(true);
         });
     });
 });

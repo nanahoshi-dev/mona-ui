@@ -27,7 +27,7 @@ export class ListService<TData> {
     readonly #listItems = computed(() => {
         const data = this.#data();
         return from(data)
-            .select(item => new ListItem({ data: item, header: "" }))
+            .select(item => new ListItem({ data: item }))
             .toImmutableSet();
     });
     public readonly disabledBy = signal<string | Predicate<TData>>("");
@@ -51,7 +51,7 @@ export class ListService<TData> {
         if (selected) {
             return selected;
         }
-        return this.viewItems().firstOrDefault(i => !i.header && !this.isDisabled(i));
+        return this.viewItems().firstOrDefault(i => !i.isHeader && !this.isDisabled(i));
     });
     public readonly groupBy = signal<ListKeySelector<TData>>(null);
     public readonly groupableOptions = signal<GroupableOptions<TData, any>>({
@@ -126,7 +126,7 @@ export class ListService<TData> {
                 }
             }
             resultEnumerable = groupedEnumerable.selectMany(g => {
-                const groupHeaderItem = new ListItem({ data: g.key, header: String(g.key) });
+                const groupHeaderItem = new ListItem({ data: g.key, header: String(g.key ?? ""), isHeader: true });
                 return g.source.prepend(groupHeaderItem);
             });
         } else {
@@ -150,7 +150,7 @@ export class ListService<TData> {
     });
     public readonly itemPositions = computed(() => {
         const viewItems = this.viewItems();
-        const nonHeaderItems = viewItems.where(i => !i.header).toArray();
+        const nonHeaderItems = viewItems.where(i => !i.isHeader).toArray();
         const positions = new Map<string, { position: number; total: number }>();
 
         nonHeaderItems.forEach((item, index) => {
@@ -200,12 +200,18 @@ export class ListService<TData> {
         this.highlightedItem.set(null);
     }
 
+    /**
+     * Finds the next item whose text starts with the typeahead buffer, starting after the active item.
+     * Group headers and disabled items are never matched.
+     */
     public cycleThroughMatchedItems(buffer: string): ListItem<TData> | null {
         const activeItem = this.highlightedItem() || this.selectedListItems().lastOrDefault();
-        const viewItems = this.viewItems();
-        return cycleThroughMatchedItems(viewItems, activeItem, item => {
-            const text = this.getItemText(item);
-            return text.toLowerCase().startsWith(buffer.toLowerCase());
+        const prefix = buffer.toLowerCase();
+        return cycleThroughMatchedItems(this.viewItems(), activeItem ?? null, item => {
+            if (item.isHeader || this.isDisabled(item)) {
+                return false;
+            }
+            return this.getItemText(item).toLowerCase().startsWith(prefix);
         });
     }
 
@@ -232,35 +238,45 @@ export class ListService<TData> {
         return groupSelector(item.data);
     }
 
+    /**
+     * Resolves the display text of an item through `textField`.
+     * Non-string field values (numbers, dates, …) are converted with `String()`, and nullish values become `""`.
+     */
     public getItemText(item: ListItem<TData>): string {
         const textField = this.textField();
+        let text: unknown;
         if (!textField) {
-            return item.data?.toString() ?? "";
+            text = item.data;
+        } else if (typeof textField === "string") {
+            text = (item.data as Record<string, unknown> | null)?.[textField];
+        } else {
+            text = textField(item.data);
         }
-        if (typeof textField === "string") {
-            return (item.data as any)?.[textField] ?? "";
-        }
-        return textField(item.data);
+        return text == null ? "" : String(text);
     }
 
+    /**
+     * Finds the item that typed text should resolve to: an exact text match first (respecting `caseSensitive`),
+     * otherwise the first item accepted by the filter operator. Group headers and disabled items are skipped.
+     */
     public getMatchingFilteredItem(text: string): ListItem<TData> | null {
         const filterableOptions = this.filterableOptions();
         const caseSensitive = filterableOptions.enabled ? filterableOptions.caseSensitive : false;
-        const viewItems = this.viewItems();
-        const allMatchingItems = viewItems.where(i => this.filterItem(i, text));
-        const fullMatchingItem = viewItems.firstOrDefault(i => {
-            if (!caseSensitive) {
-                return this.getItemText(i) === text;
-            }
-            return this.getItemText(i).toLowerCase() === text.toLowerCase();
+        const candidates = this.viewItems().where(i => !i.isHeader && !this.isDisabled(i));
+        const fullMatchingItem = candidates.firstOrDefault(i => {
+            const itemText = this.getItemText(i);
+            return caseSensitive ? itemText === text : itemText.toLowerCase() === text.toLowerCase();
         });
         if (fullMatchingItem) {
             return fullMatchingItem;
         }
-        return allMatchingItems.firstOrDefault();
+        return candidates.firstOrDefault(i => this.filterItem(i, text));
     }
 
     public isDisabled(item: ListItem<TData>): boolean {
+        if (item.isHeader) {
+            return false;
+        }
         const disabledBy = this.disabledBy();
         if (typeof disabledBy === "string") {
             return (item.data as any)?.[disabledBy] ?? false;
@@ -294,7 +310,7 @@ export class ListService<TData> {
             return null;
         }
         const viewItems = this.viewItems()
-            .where(i => !i.header && !this.isDisabled(i))
+            .where(i => !i.isHeader && !this.isDisabled(i))
             .toImmutableSet();
         if (viewItems.isEmpty()) {
             return null;
@@ -646,7 +662,7 @@ export class ListService<TData> {
         const result: ListItem<TData>[] = [];
 
         for (const item of items) {
-            if (item.header) {
+            if (item.isHeader) {
                 // Include group headers when we're capturing
                 if (capturing) {
                     result.push(item);
@@ -663,7 +679,7 @@ export class ListService<TData> {
                         // Find the group header for this item
                         const itemIndex = items.indexOf(item);
                         for (let i = itemIndex - 1; i >= 0; i--) {
-                            if (items[i].header) {
+                            if (items[i].isHeader) {
                                 result.push(items[i]);
                                 break;
                             }
@@ -680,7 +696,7 @@ export class ListService<TData> {
 
         // Remove trailing group headers if they are at the end
         let lastIndex = result.length - 1;
-        while (lastIndex >= 0 && result[lastIndex].header) {
+        while (lastIndex >= 0 && result[lastIndex].isHeader) {
             result.pop();
             lastIndex--;
         }

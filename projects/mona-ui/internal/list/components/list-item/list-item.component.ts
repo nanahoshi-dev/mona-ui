@@ -44,12 +44,12 @@ export class ListItemComponent<TData> {
         if (item == null) {
             return "";
         }
-        if (item.header) {
+        if (item.isHeader) {
             return item.header;
         }
         return this.listService.getItemText(item);
     });
-    protected readonly isHeader = computed(() => this.item()?.header ?? false);
+    protected readonly isHeader = computed(() => this.item()?.isHeader ?? false);
     protected readonly listService = inject(ListService);
     protected readonly textClasses = computed(() => {
         const isHeader = this.isHeader();

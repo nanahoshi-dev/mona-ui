@@ -1,5 +1,6 @@
 import { TestBed } from "@angular/core/testing";
 
+import { ListItem } from "../models/ListItem";
 import { ListService } from "./list.service";
 
 interface Product {
@@ -126,6 +127,92 @@ describe("ListService", () => {
             service.setData(PRODUCTS);
             expect(service.selectedKeys().toArray()).toEqual([99]);
             expect(service.selectedListItems().isEmpty()).toBe(true);
+        });
+    });
+
+    describe("getItemText", () => {
+        it("converts non-string field values to strings", () => {
+            service.setTextField("price");
+            const item = new ListItem<Product>({ data: { id: 9, name: "Cable", price: 0 } });
+            expect(service.getItemText(item)).toBe("0");
+        });
+
+        it("returns an empty string for nullish field values", () => {
+            service.setTextField("price");
+            const item = new ListItem<Product>({ data: { id: 9, name: "Cable", price: null } });
+            expect(service.getItemText(item)).toBe("");
+        });
+
+        it("does not throw when filtering a numeric text field", () => {
+            service.setTextField("id");
+            service.setFilter("2");
+            expect(service.viewItems().select(i => i.data.id).toArray()).toEqual([2]);
+        });
+    });
+
+    describe("getMatchingFilteredItem", () => {
+        const FRUITS: readonly Product[] = [
+            { id: 1, name: "Pineapple" },
+            { id: 2, name: "Apple" },
+            { id: 3, name: "Apricot", inStock: false }
+        ];
+
+        beforeEach(() => {
+            service.setData(FRUITS);
+            service.setTextField("name");
+        });
+
+        it("prefers a case-insensitive exact match by default", () => {
+            expect(service.getMatchingFilteredItem("apple")?.data.name).toBe("Apple");
+        });
+
+        it("only accepts exact matches with the same case when caseSensitive is on", () => {
+            service.setFilterableOptions({ enabled: true, caseSensitive: true, operator: "startsWith" });
+            expect(service.getMatchingFilteredItem("APPLE")).toBeNull();
+            expect(service.getMatchingFilteredItem("Apple")?.data.name).toBe("Apple");
+        });
+
+        it("falls back to the first filter match", () => {
+            service.setFilterableOptions({ enabled: true, operator: "contains" });
+            expect(service.getMatchingFilteredItem("appl")?.data.name).toBe("Pineapple");
+        });
+
+        it("never resolves to a disabled item", () => {
+            service.setDisabledBy(p => p.inStock === false);
+            expect(service.getMatchingFilteredItem("apricot")).toBeNull();
+        });
+    });
+
+    describe("typeahead", () => {
+        beforeEach(() => service.setTextField("name"));
+
+        it("skips disabled items", () => {
+            service.setDisabledBy(p => p.id === 3);
+            expect(service.cycleThroughMatchedItems("m")?.data.name).toBe("Mouse");
+            service.highlightedItem.set(service.cycleThroughMatchedItems("m"));
+            expect(service.cycleThroughMatchedItems("m")?.data.name).toBe("Mouse");
+        });
+
+        it("never matches group headers", () => {
+            const strings = TestBed.inject(ListService) as unknown as ListService<string>;
+            strings.setTextField("");
+            strings.setData(["Mango", "Melon"]);
+            strings.setGroupBy(item => item.charAt(0));
+            strings.setGroupableOptions({ enabled: true, headerOrder: "asc" });
+            const matched = strings.cycleThroughMatchedItems("m");
+            expect(matched?.isHeader).toBe(false);
+            expect(matched?.data).toBe("Mango");
+        });
+    });
+
+    describe("grouping", () => {
+        it("keeps a header row for groups whose key is empty", () => {
+            service.setGroupBy("missing");
+            service.setGroupableOptions({ enabled: true, headerOrder: "asc" });
+            const items = service.viewItems().toArray();
+            expect(items[0].isHeader).toBe(true);
+            expect(items.slice(1).every(i => !i.isHeader)).toBe(true);
+            expect(service.isDisabled(items[0])).toBe(false);
         });
     });
 });
