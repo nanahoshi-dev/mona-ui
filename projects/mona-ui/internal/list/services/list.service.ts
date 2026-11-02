@@ -1,4 +1,4 @@
-import { computed, Injectable, signal } from "@angular/core";
+import { computed, Injectable, linkedSignal, signal } from "@angular/core";
 import {
     from,
     IEnumerable,
@@ -24,11 +24,63 @@ import { cycleThroughMatchedItems } from "../utils/cycleThroughMatchedItems";
 @Injectable()
 export class ListService<TData> {
     readonly #data = signal(ImmutableList.create<TData>());
-    readonly #listItems = computed(() => {
-        const data = this.#data();
-        return from(data)
-            .select(item => new ListItem({ data: item }))
-            .toImmutableSet();
+    /**
+     * First list item for each selection key, so key lookups are O(1) instead of a scan per key.
+     */
+    readonly #itemsByKey = computed(() => {
+        const itemsByKey = new Map<unknown, ListItem<TData>>();
+        for (const item of this.#listItems()) {
+            const key = this.getSelectionKey(item);
+            if (!itemsByKey.has(key)) {
+                itemsByKey.set(key, item);
+            }
+        }
+        return itemsByKey;
+    });
+    readonly #itemsByUid = computed(() => {
+        const itemsByUid = new Map<string, ListItem<TData>>();
+        for (const item of this.#listItems()) {
+            itemsByUid.set(item.uid, item);
+        }
+        return itemsByUid;
+    });
+    /**
+     * Wraps the data in list items while keeping item identity across data changes:
+     * an item whose selection key existed before keeps its `uid`, and keeps its instance when the data
+     * object is also unchanged. Highlight, `aria-activedescendant` ids and rendered rows therefore survive
+     * a refresh (for example server-side filtering) instead of pointing at items that no longer exist.
+     */
+    readonly #listItems = linkedSignal<
+        { data: ImmutableList<TData>; valueField: string | Selector<TData, unknown> },
+        ImmutableSet<ListItem<TData>>
+    >({
+        source: () => ({ data: this.#data(), valueField: this.valueField() }),
+        computation: ({ data }, previous) => {
+            const previousByKey = new Map<unknown, ListItem<TData>>();
+            for (const item of previous?.value ?? []) {
+                const key = this.getSelectionKey(item);
+                if (!previousByKey.has(key)) {
+                    previousByKey.set(key, item);
+                }
+            }
+            const usedUids = new Set<string>();
+            const items: Array<ListItem<TData>> = [];
+            for (const dataItem of data) {
+                const previousItem = previousByKey.get(this.getDataItemValue(dataItem));
+                let item: ListItem<TData>;
+                if (previousItem && !usedUids.has(previousItem.uid)) {
+                    item =
+                        previousItem.data === dataItem
+                            ? previousItem
+                            : new ListItem({ data: dataItem, uid: previousItem.uid });
+                } else {
+                    item = new ListItem({ data: dataItem });
+                }
+                usedUids.add(item.uid);
+                items.push(item);
+            }
+            return toImmutableSet(items);
+        }
     });
     public readonly disabledBy = signal<string | Predicate<TData>>("");
     public readonly filterChange$ = new Subject<FilterChangeEvent>();
@@ -58,7 +110,20 @@ export class ListService<TData> {
         enabled: false,
         headerOrder: "asc"
     });
-    public readonly highlightedItem = signal<ListItem<TData> | null>(null);
+    /**
+     * The highlighted (active) item. When the data changes, it is re-resolved to the item with the same `uid`,
+     * or cleared when that item is gone.
+     */
+    public readonly highlightedItem = linkedSignal<ImmutableSet<ListItem<TData>>, ListItem<TData> | null>({
+        source: this.#listItems,
+        computation: (_, previous) => {
+            const highlighted = previous?.value;
+            if (!highlighted || highlighted.isHeader) {
+                return null;
+            }
+            return this.#itemsByUid().get(highlighted.uid) ?? null;
+        }
+    });
     public readonly itemFocusOut$ = new Subject<ListItem<TData>>();
     public readonly navigatedItem$ = new Subject<ListItem<TData> | null>();
     public readonly navigableOptions = signal<NavigableOptions>({
@@ -91,9 +156,10 @@ export class ListService<TData> {
     public readonly selectedKeysChange$ = new Subject<Array<any>>();
     public readonly selectedListItems = computed(() => {
         const selectedKeys = this.selectedKeys();
+        const itemsByKey = this.#itemsByKey();
         return selectedKeys
-            .select(key => this.#listItems().firstOrDefault(i => this.getSelectionKey(i) === key))
-            .where(i => i != null)
+            .select(key => itemsByKey.get(key))
+            .where((i): i is ListItem<TData> => i != null)
             .toImmutableSet();
     });
     public readonly selectionChange$ = new Subject<ListItem<TData>>();

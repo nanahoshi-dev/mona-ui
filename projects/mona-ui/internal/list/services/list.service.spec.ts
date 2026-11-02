@@ -215,4 +215,56 @@ describe("ListService", () => {
             expect(service.isDisabled(items[0])).toBe(false);
         });
     });
+
+    describe("item identity across data changes", () => {
+        beforeEach(() => service.setValueField("id"));
+
+        it("keeps the same item instance when the data object is unchanged", () => {
+            const before = service.viewItems().toArray();
+            service.setData([...PRODUCTS]);
+            const after = service.viewItems().toArray();
+            expect(after[0]).toBe(before[0]);
+            expect(after[2]).toBe(before[2]);
+        });
+
+        it("keeps the uid when a new object with the same key arrives", () => {
+            const before = service.viewItems().toArray();
+            service.setData(PRODUCTS.map(p => ({ ...p, name: `${p.name}!` })));
+            const after = service.viewItems().toArray();
+            expect(after[1]).not.toBe(before[1]);
+            expect(after[1].uid).toBe(before[1].uid);
+            expect(after[1].data.name).toBe("Mouse!");
+        });
+
+        it("gives duplicate keys distinct uids", () => {
+            service.setData([PRODUCTS[0], { ...PRODUCTS[0] }]);
+            const [first, second] = service.viewItems().toArray();
+            expect(first.uid).not.toBe(second.uid);
+        });
+
+        it("re-resolves the highlighted item after a refresh with fresh objects", () => {
+            service.setNavigableOptions({ enabled: true, mode: "highlight" });
+            const mouse = service.viewItems().elementAt(1);
+            service.highlightedItem.set(mouse);
+            service.setData(PRODUCTS.map(p => ({ ...p })));
+            const highlighted = service.highlightedItem();
+            expect(highlighted?.uid).toBe(mouse.uid);
+            expect(service.viewItems().contains(highlighted as ListItem<Product>)).toBe(true);
+            expect(service.navigate("next", "highlight", false)?.data.name).toBe("Monitor");
+        });
+
+        it("clears the highlight when the highlighted item is removed", () => {
+            service.highlightedItem.set(service.viewItems().elementAt(1));
+            service.setData([PRODUCTS[0], PRODUCTS[2]]);
+            expect(service.highlightedItem()).toBeNull();
+        });
+
+        it("resolves selected keys to the refreshed items", () => {
+            service.setSelectedKeys([2]);
+            service.setData(PRODUCTS.map(p => ({ ...p })));
+            const selected = service.selectedListItems().single();
+            expect(selected.data.id).toBe(2);
+            expect(service.viewItems().contains(selected)).toBe(true);
+        });
+    });
 });

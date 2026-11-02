@@ -211,6 +211,10 @@ export class ListComponent<TData> implements OnInit {
         this.toggleItem(item);
     }
 
+    protected trackByUid(_: number, item: ListItem<TData>): string {
+        return item.uid;
+    }
+
     private cycleThroughMatchedItems(buffer: string): void {
         const nextItem = this.listService.cycleThroughMatchedItems(buffer);
         if (nextItem) {
