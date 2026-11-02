@@ -5,6 +5,7 @@
     (inputFocus)="inputFocus.emit($event)"
     (inputBlur)="inputBlur.emit($event)"
     [tabindex]="0"
+    [inputAttributes]="inputAttributes()"
     [size]="size()"
     class="outline-none shadow-none focus-within:ring-1 focus-within:ring-primary/40"
     (ngModelChange)="filter$.next($event)">

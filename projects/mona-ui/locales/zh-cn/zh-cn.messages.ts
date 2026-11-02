@@ -241,6 +241,7 @@ export const ZH_CN_MESSAGES = {
         selectRow: (rowNumber: number) => `选择第 ${rowNumber} 行`
     },
     list: {
+        filterList: "筛选列表",
         noData: "没有数据"
     },
     listBox: {

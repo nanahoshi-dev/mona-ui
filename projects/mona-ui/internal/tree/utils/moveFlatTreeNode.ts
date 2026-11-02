@@ -7,6 +7,8 @@ import { NodeDropEvent } from "../models/NodeDropEvent";
  * @param idKey - The property key used to uniquely identify each node (e.g., 'id').
  * @param parentIdKey - The property key holding the parent node's id, or null for roots (e.g., 'parentId').
  * @returns A new array representing the updated flat tree, with the moved node's parentIdKey updated.
+ * The array is returned unchanged when the position is "outside" or the target is the dragged node or one of its
+ * descendants, which would otherwise create a parent cycle.
  */
 export function moveFlatTreeNode<T extends Record<string, any>>(
     treeData: Iterable<T>,
@@ -19,8 +21,20 @@ export function moveFlatTreeNode<T extends Record<string, any>>(
     const targetId = event.targetNode.data[idKey];
     const position = event.position;
 
-    if (position === "outside") {
+    if (position === "outside" || draggedId === targetId) {
         return workingArray;
+    }
+
+    const itemsById = new Map<unknown, T>(workingArray.map(item => [item[idKey], item]));
+    const visited = new Set<unknown>();
+    for (let current = itemsById.get(targetId); current != null; current = itemsById.get(current[parentIdKey])) {
+        if (current[idKey] === draggedId) {
+            return workingArray;
+        }
+        if (visited.has(current[idKey])) {
+            break;
+        }
+        visited.add(current[idKey]);
     }
 
     const draggedIndex = workingArray.findIndex(item => item[idKey] === draggedId);

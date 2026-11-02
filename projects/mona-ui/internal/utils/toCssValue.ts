@@ -8,7 +8,7 @@
  * @returns A CSS-compliant string value.
  */
 export const toCssValue = (value: number | string | undefined | null): string => {
-    if (value == null || value === "") {
+    if (value == null || (typeof value === "string" && value.trim() === "")) {
         return "";
     }
     if (typeof value === "number" || isFinite(Number(value))) {

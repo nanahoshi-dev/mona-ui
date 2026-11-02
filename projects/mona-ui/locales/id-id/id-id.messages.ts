@@ -291,6 +291,7 @@ export const ID_ID_MESSAGES = {
     },
 
     list: {
+        filterList: "Saring daftar",
         noData: "Tidak ada data"
     },
 

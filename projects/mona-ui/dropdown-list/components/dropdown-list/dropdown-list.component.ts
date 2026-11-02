@@ -556,7 +556,7 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
             } else if (event.key === "Home" || event.key === "End") {
                 event.preventDefault();
                 this.handleHomeEndKeys(event);
-            } else if (isTypeaheadKey(event.key)) {
+            } else if (isTypeaheadKey(event.key, event)) {
                 this.#typeaheadKey.next(event.key);
             }
         });

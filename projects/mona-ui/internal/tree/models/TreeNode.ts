@@ -9,6 +9,11 @@ export class TreeNode<T> {
     public readonly data: T;
     public readonly loading = signal(false);
     public readonly uid = v4();
+    /**
+     * Whether children from an asynchronous children selector have been loaded. Loaded children are cached,
+     * so collapsing and re-expanding the node does not request them again.
+     */
+    public childrenLoaded = false;
     public index: string = "";
     public parent: TreeNode<T> | null = null;
 

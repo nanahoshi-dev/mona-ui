@@ -1,10 +1,10 @@
-import { computed, effect, Injectable, signal, TemplateRef, untracked } from "@angular/core";
+import { computed, DestroyRef, effect, inject, Injectable, signal, TemplateRef, untracked } from "@angular/core";
 import { toObservable, toSignal } from "@angular/core/rxjs-interop";
 import {
-    contains,
     EnumerableSet,
     forEach,
     from,
+    IEnumerable,
     ImmutableDictionary,
     ImmutableSet,
     List,
@@ -20,6 +20,7 @@ import {
     Observable,
     ReplaySubject,
     Subject,
+    Subscription,
     switchMap,
     take
 } from "rxjs";
@@ -48,6 +49,10 @@ import { getTreeNodeElementId } from "../utils/getTreeNodeElementId";
 @Injectable()
 export class TreeService<T> {
     readonly #checkedKeys = signal(ImmutableSet.create<any>());
+    /**
+     * Pending asynchronous child loads by node uid, so a new load for a node cancels the previous one.
+     */
+    readonly #childLoads = new Map<string, Subscription>();
     readonly #data = signal(ImmutableSet.create<T>());
     readonly #filteredExpandedKeys = signal(ImmutableSet.create<any>());
     readonly #flatIdField = signal("");
@@ -57,15 +62,12 @@ export class TreeService<T> {
     readonly #navigableNodes = computed(() => {
         const visibleUids = this.#visibleUids();
         const allFlatNodes = TreeService.flatten(this.nodeSet());
+        // flatten() walks the tree depth-first, so its order already is the visual (navigation) order.
         if (visibleUids === null) {
-            return allFlatNodes
-                .where(n => n.parent === null || !this.isAnyParentCollapsed(n))
-                .orderBy(n => n.index)
-                .toImmutableSet();
+            return allFlatNodes.where(n => n.parent === null || !this.isAnyParentCollapsed(n)).toImmutableSet();
         }
         return allFlatNodes
             .where(n => visibleUids.has(n.uid) && (n.parent === null || !this.isAnyParentCollapsed(n)))
-            .orderBy(n => n.index)
             .toImmutableSet();
     });
     readonly #nodeDictionary = computed(() => {
@@ -79,8 +81,8 @@ export class TreeService<T> {
         if (!filterText) {
             return null;
         }
-        const nodeSet = this.nodeSet();
-        return untracked(() => this.computeVisibleUids(nodeSet, filterText));
+        // Tracked on purpose: moves, lazily loaded children and filter option changes re-run the filter.
+        return this.computeVisibleUids(this.nodeSet(), filterText);
     });
     public readonly animationTemporarilyDisabled = signal(false);
     public readonly animationEnabled = signal(true);
@@ -183,6 +185,10 @@ export class TreeService<T> {
     });
 
     public constructor() {
+        inject(DestroyRef).onDestroy(() => {
+            this.#childLoads.forEach(subscription => subscription.unsubscribe());
+            this.#childLoads.clear();
+        });
         effect(() => {
             const visibleUids = this.#visibleUids();
             untracked(() => {
@@ -226,6 +232,36 @@ export class TreeService<T> {
         this.updateNodeIndices();
     }
 
+    /**
+     * Expands every expandable, enabled sibling of a node (the `*` key of the WAI-ARIA tree pattern).
+     */
+    public expandSiblings(node: TreeNode<T>): void {
+        const siblings = node.parent ? node.parent.children() : this.nodeSet();
+        for (const sibling of siblings) {
+            if (this.hasChildren(sibling)) {
+                this.toggleNodeExpand(sibling, true);
+            }
+        }
+    }
+
+    /**
+     * Finds the next visible node, after the navigated node and wrapping around, whose text starts with `prefix`
+     * (case-insensitive). Used for typeahead.
+     */
+    public findNodeByText(prefix: string): TreeNode<T> | null {
+        const normalizedPrefix = prefix.toLowerCase();
+        const nodes = this.#navigableNodes().toArray();
+        const navigatedNode = this.navigatedNode();
+        const start = navigatedNode ? nodes.indexOf(navigatedNode) : -1;
+        for (let offset = 1; offset <= nodes.length; offset++) {
+            const node = nodes[(start + offset) % nodes.length];
+            if (this.getNodeText(node).toLowerCase().startsWith(normalizedPrefix)) {
+                return node;
+            }
+        }
+        return null;
+    }
+
     public getNodeByUid(uid: string): TreeNode<T> | null {
         const nodeDictionary = this.#nodeDictionary();
         return nodeDictionary.get(uid) ?? null;
@@ -237,13 +273,15 @@ export class TreeService<T> {
 
     public getNodeText(node: TreeNode<T>): string {
         const textField = this.textField();
+        let text: unknown;
         if (!textField) {
-            return String(node.data) || "";
+            text = node.data;
+        } else if (typeof textField === "string") {
+            text = (node.data as Record<string, unknown> | null)?.[textField];
+        } else {
+            text = textField(node.data);
         }
-        if (typeof textField === "string") {
-            return (node.data as any)[textField];
-        }
-        return textField(node.data);
+        return text == null ? "" : String(text);
     }
 
     public hasChildren(node: TreeNode<T> | null): boolean {
@@ -298,17 +336,23 @@ export class TreeService<T> {
 
     public isDisabled(node: TreeNode<T>): boolean {
         const disableOptions = this.disableOptions();
-        const disabledKeys = this.disabledKeys();
         if (!disableOptions.enabled) {
             return false;
         }
-        const key = this.getDisableKey(node);
-        const disabled = disabledKeys.contains(key);
-        if (!disableOptions.disableChildren) {
-            return disabled;
+        const disabledKeys = this.disabledKeys();
+        if (disabledKeys.contains(this.getDisableKey(node))) {
+            return true;
         }
-        const anyParentDisabled = this.isAnyParentDisabled(node);
-        return disabled || (disableOptions.disableChildren && anyParentDisabled);
+        if (!disableOptions.disableChildren) {
+            return false;
+        }
+        // A single walk up the ancestors: O(depth) instead of re-evaluating every ancestor's own ancestors.
+        for (let parent = node.parent; parent != null; parent = parent.parent) {
+            if (disabledKeys.contains(this.getDisableKey(parent))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public isExpanded(node: TreeNode<T>): boolean {
@@ -332,9 +376,7 @@ export class TreeService<T> {
         if (node.children().isEmpty()) {
             return false;
         }
-        const hasCheckbox = this.#hasCheckboxPredicate();
-        const childNodes =
-            hasCheckbox !== null ? node.children().where(n => hasCheckbox(n.data, n.uid)) : node.children();
+        const childNodes = this.getCheckStateChildren(node);
         if (childNodes.none()) {
             return false;
         }
@@ -371,18 +413,25 @@ export class TreeService<T> {
         return visibleUids.has(node.uid);
     }
 
-    public loadNodeChildren(node: TreeNode<T>): void {
+    /**
+     * Loads the children of a node from an asynchronous children selector.
+     * Children are loaded once and cached; pass `reload` to request them again. A new load cancels a pending one.
+     */
+    public loadNodeChildren(node: TreeNode<T>, reload: boolean = false): void {
         const childrenSelector = this.children();
         if (typeof childrenSelector !== "function") {
+            return;
+        }
+        if (!reload && (node.childrenLoaded || node.loading())) {
             return;
         }
         const children = childrenSelector(node.data);
         if (!(children instanceof Observable)) {
             return;
         }
-        node.children.set(ImmutableSet.create());
+        this.#childLoads.get(node.uid)?.unsubscribe();
         node.loading.set(true);
-        children.pipe(take(1)).subscribe({
+        const subscription = children.pipe(take(1)).subscribe({
             next: c => {
                 const childNodes = new List<TreeNode<T>>();
                 for (const child of c) {
@@ -392,16 +441,36 @@ export class TreeService<T> {
                 }
                 this.loadCheckedKeysForChildren(node, childNodes);
                 node.children.update(list => list.clear().addAll(childNodes));
+                this.updateNodeIndices();
+                node.childrenLoaded = true;
                 node.loading.set(false);
+                this.#childLoads.delete(node.uid);
                 this.restoreExpandedChildren(childNodes);
             },
             error: () => {
                 node.loading.set(false);
+                this.#childLoads.delete(node.uid);
+            },
+            complete: () => {
+                if (node.loading()) {
+                    node.loading.set(false);
+                }
+                this.#childLoads.delete(node.uid);
             }
         });
+        if (node.loading()) {
+            this.#childLoads.set(node.uid, subscription);
+        }
     }
 
+    /**
+     * Moves a node relative to a target node. Moving a node onto itself or into its own subtree is ignored,
+     * because it would detach the subtree and create a parent cycle.
+     */
     public moveNode(sourceNode: TreeNode<T>, targetNode: TreeNode<T>, position: DropPosition): void {
+        if (sourceNode === targetNode || targetNode.isDescendantOf(sourceNode)) {
+            return;
+        }
         const oldParent = sourceNode.parent;
         switch (position) {
             case "inside":
@@ -479,14 +548,13 @@ export class TreeService<T> {
         if (sequenceEqual(checkedKeys, orderedKeys)) {
             return;
         }
-        const checkedKeysSet = this.#nodeDictionary()
-            .values()
-            .where(n => contains(keys, this.getCheckKey(n)))
-            .toEnumerableSet();
+        const keyList = Array.from(keys);
+        const keySet = new Set<unknown>(keyList);
         this.#nodeDictionary().forEach(n => {
-            n.value.checked.set(checkedKeysSet.contains(n.value));
+            n.value.checked.set(keySet.has(this.getCheckKey(n.value)));
         });
-        this.#checkedKeys.set(ImmutableSet.create(keys));
+        this.#checkedKeys.set(ImmutableSet.create(keyList));
+        this.applyCheckedKeysToNodes();
     }
 
     public setData(data: Iterable<T>): void {
@@ -494,6 +562,11 @@ export class TreeService<T> {
         this.nodeSet.set(this.createNodes(data));
         this.updateNodeIndices();
         this.applyCheckedKeysToNodes();
+        const navigatedNode = this.navigatedNode();
+        if (navigatedNode && this.#nodeDictionary().get(navigatedNode.uid) == null) {
+            // The node was removed: drop it so aria-activedescendant never points at a missing element.
+            this.navigatedNode.set(null);
+        }
     }
 
     public setDataStructure(structure: DataStructure): void {
@@ -608,12 +681,12 @@ export class TreeService<T> {
             });
         }
         if (mode !== "single" && checkParents && !childrenOnly) {
-            const hasCheckbox = this.#hasCheckboxPredicate();
             const parentNodes = this.getParentNodes(node);
             parentNodes.forEach(n => {
-                const siblings =
-                    hasCheckbox !== null ? n.children().where(c => hasCheckbox(c.data, c.uid)) : n.children();
-                const allChecked = siblings.all(c => c.checked());
+                const allChecked = this.deriveParentChecked(n);
+                if (allChecked === null) {
+                    return;
+                }
                 const parentKey = this.getCheckKey(n);
                 if (allChecked) {
                     checkedKeys.add(parentKey);
@@ -697,6 +770,23 @@ export class TreeService<T> {
         this.textField.set(selector);
     }
 
+    /**
+     * Expands or collapses a node the way user interaction does: disabled nodes are left alone, children of an
+     * asynchronous children selector are loaded on first expand, and `nodeExpand$` is notified.
+     * @returns whether the expand state changed.
+     */
+    public toggleNodeExpand(node: TreeNode<T>, expanded: boolean): boolean {
+        if (this.isDisabled(node) || this.isExpanded(node) === expanded) {
+            return false;
+        }
+        if (expanded) {
+            this.loadNodeChildren(node);
+        }
+        this.setNodeExpand(node, expanded);
+        this.nodeExpand$.next({ node, expanded });
+        return true;
+    }
+
     public getCheckKey(node: TreeNode<T>): any {
         const checkBy = this.checkBy();
         if (!checkBy) {
@@ -734,23 +824,15 @@ export class TreeService<T> {
             const allNodes = TreeService.flatten(this.nodeSet());
             const updatedCheckedKeys = this.#checkedKeys().toEnumerableSet();
             let changed = false;
+            // Children before parents, so derived parents feed their own ancestors. Parents are only ever added:
+            // a parent key supplied by the consumer is kept even when its children are not all checked.
             allNodes.reverse().forEach(node => {
-                const childNodes = node.children();
-                if (!childNodes.isEmpty()) {
-                    const allChildrenChecked = childNodes.all(c => c.checked());
-                    const key = this.getCheckKey(node);
-                    if (allChildrenChecked !== node.checked()) {
-                        node.checked.set(allChildrenChecked);
-                        changed = true;
-                    }
-                    if (allChildrenChecked && !updatedCheckedKeys.contains(key)) {
-                        updatedCheckedKeys.add(key);
-                        changed = true;
-                    } else if (!allChildrenChecked && updatedCheckedKeys.contains(key)) {
-                        updatedCheckedKeys.remove(key);
-                        changed = true;
-                    }
+                if (this.deriveParentChecked(node) !== true || node.checked()) {
+                    return;
                 }
+                node.checked.set(true);
+                updatedCheckedKeys.add(this.getCheckKey(node));
+                changed = true;
             });
             if (changed) {
                 this.#checkedKeys.set(updatedCheckedKeys.toImmutableSet());
@@ -802,38 +884,38 @@ export class TreeService<T> {
         return buildNodes(parentId, null);
     }
 
+    /**
+     * Builds tree nodes for hierarchical data, reusing the existing node of each data item so node state survives
+     * a data refresh. A data object that appears more than once gets a node of its own for every extra occurrence.
+     */
     private createHierarchicalNodes(
         root: Iterable<T>,
         parent: TreeNode<T> | null,
-        nodeDict: ImmutableDictionary<string, TreeNode<T>>
+        existingNodes: Map<T, TreeNode<T>>,
+        usedNodes: Set<TreeNode<T>>
     ): ImmutableSet<TreeNode<T>> | null {
         const rootList = new List(root);
         const children = this.children();
-        if (rootList.isEmpty() || !children) {
+        if (rootList.isEmpty()) {
             return null;
         }
         const nodes = new EnumerableSet<TreeNode<T>>();
         for (const dataItem of rootList) {
-            const existingNode = nodeDict.firstOrDefault(n => n.value.data === dataItem);
-            let node: TreeNode<T>;
-            if (existingNode) {
-                node = existingNode.value;
-                node.parent = parent;
-            } else {
-                node = new TreeNode(dataItem);
-                node.parent = parent;
-            }
+            const existingNode = existingNodes.get(dataItem);
+            const node = existingNode && !usedNodes.has(existingNode) ? existingNode : new TreeNode(dataItem);
+            node.parent = parent;
+            usedNodes.add(node);
 
             if (typeof children === "string") {
                 const subNodes = (dataItem as any)[children];
                 if (subNodes) {
-                    const childNodes = this.createHierarchicalNodes(subNodes, node, nodeDict);
+                    const childNodes = this.createHierarchicalNodes(subNodes, node, existingNodes, usedNodes);
                     node.children.update(list => list.clear().addAll(childNodes ?? []));
                 }
             } else {
                 const result = children(dataItem);
                 if (!(result instanceof Observable)) {
-                    const childNodes = this.createHierarchicalNodes(result, node, nodeDict);
+                    const childNodes = this.createHierarchicalNodes(result, node, existingNodes, usedNodes);
                     node.children.update(list => list.clear().addAll(childNodes ?? []));
                 }
             }
@@ -855,8 +937,38 @@ export class TreeService<T> {
         if (structure === "flat") {
             return this.createFlatNodes(data, null).toImmutableSet();
         }
-        const nodeDictionary = this.#nodeDictionary();
-        return this.createHierarchicalNodes(data, null, nodeDictionary) ?? ImmutableSet.create();
+        const existingNodes = new Map<T, TreeNode<T>>();
+        for (const node of this.#nodeDictionary().values()) {
+            if (!existingNodes.has(node.data)) {
+                existingNodes.set(node.data, node);
+            }
+        }
+        return this.createHierarchicalNodes(data, null, existingNodes, new Set()) ?? ImmutableSet.create();
+    }
+
+    /**
+     * The derived check state of a parent: `true` when all of its check-state children are checked,
+     * or `null` when it has none (its own state then stands).
+     */
+    private deriveParentChecked(node: TreeNode<T>): boolean | null {
+        const children = this.getCheckStateChildren(node);
+        return children.none() ? null : children.all(c => c.checked());
+    }
+
+    /**
+     * Children that determine a parent's derived check state: those with a checkbox and, unless
+     * `checkDisabledChildren` is set, only enabled ones, because the user cannot change disabled children.
+     */
+    private getCheckStateChildren(node: TreeNode<T>): IEnumerable<TreeNode<T>> {
+        const hasCheckbox = this.#hasCheckboxPredicate();
+        const checkDisabledChildren = this.checkableOptions().checkDisabledChildren;
+        return node
+            .children()
+            .where(
+                c =>
+                    (hasCheckbox === null || hasCheckbox(c.data, c.uid)) &&
+                    (checkDisabledChildren || !this.isDisabled(c))
+            );
     }
 
     private getExpandKey(node: TreeNode<T>): any {
@@ -910,13 +1022,6 @@ export class TreeService<T> {
     private isAnyParentCollapsed(node: TreeNode<T>): boolean {
         if (node.parent) {
             return !this.isExpanded(node.parent) || this.isAnyParentCollapsed(node.parent);
-        }
-        return false;
-    }
-
-    private isAnyParentDisabled(node: TreeNode<T>): boolean {
-        if (node.parent) {
-            return this.isDisabled(node.parent) || this.isAnyParentDisabled(node.parent);
         }
         return false;
     }
@@ -1061,7 +1166,7 @@ export class TreeService<T> {
         const navigableNodes = this.#navigableNodes();
         const navigatedNode = this.navigatedNode();
         const firstNode = navigableNodes.first();
-        let nextNode: TreeNode<T> | null = navigableNodes
+        const nextNode: TreeNode<T> | null = navigableNodes
             .skipWhile(n => n !== navigatedNode)
             .skip(1)
             .firstOrDefault();
@@ -1077,7 +1182,7 @@ export class TreeService<T> {
     private navigateToPreviousNode(): TreeNode<T> {
         const navigableNodes = this.#navigableNodes();
         const navigatedNode = this.navigatedNode();
-        let previousNode: TreeNode<T> | null = navigableNodes.takeWhile(n => n !== navigatedNode).lastOrDefault();
+        const previousNode: TreeNode<T> | null = navigableNodes.takeWhile(n => n !== navigatedNode).lastOrDefault();
         if (previousNode === null) {
             this.navigatedNode.set(navigableNodes.last());
             return navigableNodes.last();
@@ -1098,12 +1203,11 @@ export class TreeService<T> {
         const recalculateNodeChain = (start: TreeNode<T> | null): void => {
             let current = start;
             while (current !== null) {
-                const childNodes = current.children();
-                if (childNodes.isEmpty()) {
+                const allChecked = this.deriveParentChecked(current);
+                if (allChecked === null) {
                     current = current.parent;
                     continue;
                 }
-                const allChecked = childNodes.all(c => c.checked());
                 const key = this.getCheckKey(current);
                 if (allChecked !== current.checked()) {
                     current.checked.set(allChecked);

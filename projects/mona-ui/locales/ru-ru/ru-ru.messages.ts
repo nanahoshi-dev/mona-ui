@@ -303,6 +303,7 @@ export const RU_RU_MESSAGES = {
     },
 
     list: {
+        filterList: "Фильтр списка",
         noData: "Нет данных"
     },
 

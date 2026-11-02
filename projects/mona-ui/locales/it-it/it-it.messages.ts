@@ -244,6 +244,7 @@ export const IT_IT_MESSAGES = {
         selectRow: (rowNumber: number) => `Seleziona riga ${rowNumber}`
     },
     list: {
+        filterList: "Filtra elenco",
         noData: "Nessun dato disponibile"
     },
     listBox: {

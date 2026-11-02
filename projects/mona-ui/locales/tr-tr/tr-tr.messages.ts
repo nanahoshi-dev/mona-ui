@@ -242,6 +242,7 @@ export const TR_TR_MESSAGES = {
         selectRow: (rowNumber: number) => `${rowNumber}. satırı seç`
     },
     list: {
+        filterList: "Listeyi filtrele",
         noData: "Veri yok"
     },
     listBox: {

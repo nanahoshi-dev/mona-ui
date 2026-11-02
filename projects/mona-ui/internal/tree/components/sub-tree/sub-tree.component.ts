@@ -141,12 +141,7 @@ export class SubTreeComponent<T> {
     public readonly parent = input.required<TreeNode<T> | null>();
 
     public onExpandStateChange(node: TreeNode<T>): void {
-        const expanded = this.treeService.isExpanded(node);
-        if (!expanded) {
-            this.treeService.loadNodeChildren(node);
-        }
-        this.treeService.setNodeExpand(node, !expanded);
-        this.treeService.nodeExpand$.next({ node, expanded: !expanded });
+        this.treeService.toggleNodeExpand(node, !this.treeService.isExpanded(node));
     }
 
     public onNodeDragEnd(event: CdkDragEnd<TreeNode<T>>): void {
@@ -237,7 +232,7 @@ export class SubTreeComponent<T> {
         this.treeService.navigatedNode.set(node);
         const element = this.#document
             .querySelector(`li[data-uid="${node.uid}"]`)
-            ?.closest(".mona-tree") as HTMLElement;
+            ?.closest("[role=tree]") as HTMLElement;
         if (element == null) {
             return;
         }

@@ -6,7 +6,7 @@ export const rxFromResize = (
     options?: ResizeObserverOptions
 ): Observable<ResizeObserverEntry[]> => {
     return new Observable(observer => {
-        const elements = Array.isArray(target) ? target : [target];
+        const elements = target instanceof Element ? [target] : Array.from(target ?? []);
         for (const element of elements) {
             if (!(element instanceof Element)) {
                 observer.error(new TypeError("target must be an Element or an iterable of Elements"));

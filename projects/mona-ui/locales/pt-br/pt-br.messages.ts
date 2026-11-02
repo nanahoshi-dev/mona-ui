@@ -244,6 +244,7 @@ export const PT_BR_MESSAGES = {
         selectRow: (rowNumber: number) => `Selecionar linha ${rowNumber}`
     },
     list: {
+        filterList: "Filtrar lista",
         noData: "Nenhum dado disponível"
     },
     listBox: {

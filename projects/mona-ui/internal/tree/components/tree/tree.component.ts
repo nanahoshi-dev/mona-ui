@@ -16,7 +16,8 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { asapScheduler, filter, fromEvent, switchMap, takeWhile } from "rxjs";
+import { isTypeaheadKey, setupTypeahead } from "@nanahoshi/mona-ui/internal";
+import { asapScheduler, filter, fromEvent, Subject, switchMap, takeWhile } from "rxjs";
 import { TreeNodeTemplateDirective } from "../../directives/tree-node-template.directive";
 import { NodeCheckEvent } from "../../models/NodeCheckEvent";
 import { NodeSelectEvent } from "../../models/NodeSelectEvent";
@@ -46,6 +47,7 @@ export class TreeComponent<T> {
     readonly #focusMonitor = inject(FocusMonitor);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
+    readonly #typeaheadKey$ = new Subject<string>();
     readonly #zone: NgZone = inject(NgZone);
     #lastNavigatedNode: TreeNode<T> | null = null;
     protected readonly isRtl = computed(() => this.#direction() === "rtl");
@@ -197,26 +199,38 @@ export class TreeComponent<T> {
                     event.preventDefault();
                     this.treeService.navigate("next");
                 } else if (event.key === collapseKey) {
+                    // WAI-ARIA tree: collapse an open node, otherwise move to the parent.
                     event.preventDefault();
-                    if (!navigatedNode || !navigatedNode.nodeItem.hasChildren) {
+                    if (!navigatedNode) {
                         return;
                     }
-                    const expanded = this.treeService.isExpanded(navigatedNode);
-                    const disabled = this.treeService.isDisabled(navigatedNode);
-                    if (!disabled && expanded) {
-                        this.treeService.setNodeExpand(navigatedNode, false);
+                    const collapsible =
+                        this.treeService.hasChildren(navigatedNode) && this.treeService.isExpanded(navigatedNode);
+                    if (collapsible && this.treeService.toggleNodeExpand(navigatedNode, false)) {
+                        return;
                     }
-                    this.treeService.navigatedNode.set(navigatedNode);
+                    if (!collapsible && navigatedNode.parent) {
+                        this.treeService.navigatedNode.set(navigatedNode.parent);
+                    }
                 } else if (event.key === expandKey) {
+                    // WAI-ARIA tree: open a closed node, otherwise move to its first child.
                     event.preventDefault();
-                    if (!navigatedNode || !navigatedNode.nodeItem.hasChildren) {
+                    if (!navigatedNode || !this.treeService.hasChildren(navigatedNode)) {
                         return;
                     }
-                    const expanded = this.treeService.isExpanded(navigatedNode);
-                    const disabled = this.treeService.isDisabled(navigatedNode);
-                    if (!disabled && !expanded) {
-                        this.treeService.setNodeExpand(navigatedNode, true);
+                    if (!this.treeService.isExpanded(navigatedNode)) {
+                        this.treeService.toggleNodeExpand(navigatedNode, true);
+                    } else if (!navigatedNode.children().isEmpty()) {
+                        this.treeService.navigate("next");
                     }
+                } else if (event.key === "*") {
+                    event.preventDefault();
+                    if (navigatedNode) {
+                        this.treeService.expandSiblings(navigatedNode);
+                    }
+                } else if (event.key !== " " && isTypeaheadKey(event.key, event)) {
+                    event.preventDefault();
+                    this.#typeaheadKey$.next(event.key);
                 } else if (event.key === " ") {
                     event.preventDefault();
                     if (!navigatedNode || this.treeService.isDisabled(navigatedNode)) {
@@ -289,5 +303,17 @@ export class TreeComponent<T> {
         this.setFocusSubscription();
         this.setKeydownSubscription();
         this.setNodeDragHandlerSubscription();
+        this.setTypeaheadSubscription();
+    }
+
+    private setTypeaheadSubscription(): void {
+        setupTypeahead(this.#typeaheadKey$)
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(buffer => {
+                const node = this.treeService.findNodeByText(buffer);
+                if (node) {
+                    this.treeService.navigatedNode.set(node);
+                }
+            });
     }
 }

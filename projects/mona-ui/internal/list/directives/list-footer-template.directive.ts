@@ -1,7 +1,6 @@
 import { Directive } from "@angular/core";
 
 @Directive({
-    selector: "ng-template[monaListFooterTemplate]",
-    standalone: true
+    selector: "ng-template[monaListFooterTemplate]"
 })
 export class ListFooterTemplateDirective {}

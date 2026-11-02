@@ -1,12 +1,6 @@
 @if (checkboxes()) {
-    <input
-        type="checkbox"
-        [ngModel]="itemChecked()"
-        monaCheckbox
-        class="aspect-square"
-        (click)="$event.stopPropagation()"
-        (ngModelChange)="onCheckboxChange($event)"
-        (change)="$event.preventDefault()" />
+    <!-- Visual only: the option row owns selection, so the checkbox is inert (not focusable, clicks reach the row). -->
+    <input type="checkbox" [checked]="itemChecked()" monaCheckbox class="aspect-square" inert aria-hidden="true" />
 }
 
 @if (template()) {

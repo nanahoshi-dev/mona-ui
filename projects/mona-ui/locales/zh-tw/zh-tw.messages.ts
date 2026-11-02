@@ -241,6 +241,7 @@ export const ZH_TW_MESSAGES = {
         selectRow: (rowNumber: number) => `選取第 ${rowNumber} 個資料列`
     },
     list: {
+        filterList: "篩選清單",
         noData: "沒有資料"
     },
     listBox: {
