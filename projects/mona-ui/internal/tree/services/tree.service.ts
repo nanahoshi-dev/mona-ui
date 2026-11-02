@@ -57,15 +57,12 @@ export class TreeService<T> {
     readonly #navigableNodes = computed(() => {
         const visibleUids = this.#visibleUids();
         const allFlatNodes = TreeService.flatten(this.nodeSet());
+        // flatten() walks the tree depth-first, so its order already is the visual (navigation) order.
         if (visibleUids === null) {
-            return allFlatNodes
-                .where(n => n.parent === null || !this.isAnyParentCollapsed(n))
-                .orderBy(n => n.index)
-                .toImmutableSet();
+            return allFlatNodes.where(n => n.parent === null || !this.isAnyParentCollapsed(n)).toImmutableSet();
         }
         return allFlatNodes
             .where(n => visibleUids.has(n.uid) && (n.parent === null || !this.isAnyParentCollapsed(n)))
-            .orderBy(n => n.index)
             .toImmutableSet();
     });
     readonly #nodeDictionary = computed(() => {
@@ -298,17 +295,23 @@ export class TreeService<T> {
 
     public isDisabled(node: TreeNode<T>): boolean {
         const disableOptions = this.disableOptions();
-        const disabledKeys = this.disabledKeys();
         if (!disableOptions.enabled) {
             return false;
         }
-        const key = this.getDisableKey(node);
-        const disabled = disabledKeys.contains(key);
-        if (!disableOptions.disableChildren) {
-            return disabled;
+        const disabledKeys = this.disabledKeys();
+        if (disabledKeys.contains(this.getDisableKey(node))) {
+            return true;
         }
-        const anyParentDisabled = this.isAnyParentDisabled(node);
-        return disabled || (disableOptions.disableChildren && anyParentDisabled);
+        if (!disableOptions.disableChildren) {
+            return false;
+        }
+        // A single walk up the ancestors: O(depth) instead of re-evaluating every ancestor's own ancestors.
+        for (let parent = node.parent; parent != null; parent = parent.parent) {
+            if (disabledKeys.contains(this.getDisableKey(parent))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public isExpanded(node: TreeNode<T>): boolean {
@@ -392,6 +395,7 @@ export class TreeService<T> {
                 }
                 this.loadCheckedKeysForChildren(node, childNodes);
                 node.children.update(list => list.clear().addAll(childNodes));
+                this.updateNodeIndices();
                 node.loading.set(false);
                 this.restoreExpandedChildren(childNodes);
             },
@@ -401,7 +405,14 @@ export class TreeService<T> {
         });
     }
 
+    /**
+     * Moves a node relative to a target node. Moving a node onto itself or into its own subtree is ignored,
+     * because it would detach the subtree and create a parent cycle.
+     */
     public moveNode(sourceNode: TreeNode<T>, targetNode: TreeNode<T>, position: DropPosition): void {
+        if (sourceNode === targetNode || targetNode.isDescendantOf(sourceNode)) {
+            return;
+        }
         const oldParent = sourceNode.parent;
         switch (position) {
             case "inside":
@@ -802,38 +813,38 @@ export class TreeService<T> {
         return buildNodes(parentId, null);
     }
 
+    /**
+     * Builds tree nodes for hierarchical data, reusing the existing node of each data item so node state survives
+     * a data refresh. A data object that appears more than once gets a node of its own for every extra occurrence.
+     */
     private createHierarchicalNodes(
         root: Iterable<T>,
         parent: TreeNode<T> | null,
-        nodeDict: ImmutableDictionary<string, TreeNode<T>>
+        existingNodes: Map<T, TreeNode<T>>,
+        usedNodes: Set<TreeNode<T>>
     ): ImmutableSet<TreeNode<T>> | null {
         const rootList = new List(root);
         const children = this.children();
-        if (rootList.isEmpty() || !children) {
+        if (rootList.isEmpty()) {
             return null;
         }
         const nodes = new EnumerableSet<TreeNode<T>>();
         for (const dataItem of rootList) {
-            const existingNode = nodeDict.firstOrDefault(n => n.value.data === dataItem);
-            let node: TreeNode<T>;
-            if (existingNode) {
-                node = existingNode.value;
-                node.parent = parent;
-            } else {
-                node = new TreeNode(dataItem);
-                node.parent = parent;
-            }
+            const existingNode = existingNodes.get(dataItem);
+            const node = existingNode && !usedNodes.has(existingNode) ? existingNode : new TreeNode(dataItem);
+            node.parent = parent;
+            usedNodes.add(node);
 
             if (typeof children === "string") {
                 const subNodes = (dataItem as any)[children];
                 if (subNodes) {
-                    const childNodes = this.createHierarchicalNodes(subNodes, node, nodeDict);
+                    const childNodes = this.createHierarchicalNodes(subNodes, node, existingNodes, usedNodes);
                     node.children.update(list => list.clear().addAll(childNodes ?? []));
                 }
             } else {
                 const result = children(dataItem);
                 if (!(result instanceof Observable)) {
-                    const childNodes = this.createHierarchicalNodes(result, node, nodeDict);
+                    const childNodes = this.createHierarchicalNodes(result, node, existingNodes, usedNodes);
                     node.children.update(list => list.clear().addAll(childNodes ?? []));
                 }
             }
@@ -855,8 +866,13 @@ export class TreeService<T> {
         if (structure === "flat") {
             return this.createFlatNodes(data, null).toImmutableSet();
         }
-        const nodeDictionary = this.#nodeDictionary();
-        return this.createHierarchicalNodes(data, null, nodeDictionary) ?? ImmutableSet.create();
+        const existingNodes = new Map<T, TreeNode<T>>();
+        for (const node of this.#nodeDictionary().values()) {
+            if (!existingNodes.has(node.data)) {
+                existingNodes.set(node.data, node);
+            }
+        }
+        return this.createHierarchicalNodes(data, null, existingNodes, new Set()) ?? ImmutableSet.create();
     }
 
     private getExpandKey(node: TreeNode<T>): any {
@@ -910,13 +926,6 @@ export class TreeService<T> {
     private isAnyParentCollapsed(node: TreeNode<T>): boolean {
         if (node.parent) {
             return !this.isExpanded(node.parent) || this.isAnyParentCollapsed(node.parent);
-        }
-        return false;
-    }
-
-    private isAnyParentDisabled(node: TreeNode<T>): boolean {
-        if (node.parent) {
-            return this.isDisabled(node.parent) || this.isAnyParentDisabled(node.parent);
         }
         return false;
     }

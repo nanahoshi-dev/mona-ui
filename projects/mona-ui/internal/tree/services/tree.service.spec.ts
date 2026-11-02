@@ -1,4 +1,5 @@
 import { TestBed } from "@angular/core/testing";
+import { of } from "rxjs";
 
 import { TreeNode } from "../models/TreeNode";
 import { TreeService } from "./tree.service";
@@ -174,6 +175,108 @@ describe("TreeService", () => {
 
             const next = service.navigate("next");
             expect(next?.data.id).toBe("2");
+        });
+    });
+
+    describe("navigation order", () => {
+        it("follows document order with ten or more siblings", () => {
+            const data: TestItem[] = Array.from({ length: 12 }, (_, i) => ({ id: String(i), text: `Node ${i}` }));
+            service.setChildrenSelector("children");
+            service.setTextField("text");
+            service.setData(data);
+            const visited: string[] = [service.navigate("first")?.data.id ?? ""];
+            for (let i = 0; i < 11; i++) {
+                visited.push(service.navigate("next")?.data.id ?? "");
+            }
+            expect(visited).toEqual(data.map(d => d.id));
+        });
+
+        it("places lazily loaded children right after their parent", () => {
+            const lazyChildren: TestItem[] = [
+                { id: "1.1", text: "Lazy 1.1" },
+                { id: "1.2", text: "Lazy 1.2" }
+            ];
+            const data: TestItem[] = [
+                { id: "1", text: "Node 1" },
+                { id: "2", text: "Node 2" }
+            ];
+            service.setChildrenSelector(item => (item.id === "1" ? of(lazyChildren) : []));
+            service.setTextField("text");
+            service.setData(data);
+            service.setExpandableOptions({ enabled: true });
+            service.setExpandedKeys([data[0]]);
+            service.loadNodeChildren(service.nodeSet().first());
+
+            expect(service.navigate("first")?.data.id).toBe("1");
+            expect(service.navigate("next")?.data.id).toBe("1.1");
+            expect(service.navigate("next")?.data.id).toBe("1.2");
+            expect(service.navigate("next")?.data.id).toBe("2");
+        });
+    });
+
+    describe("data", () => {
+        it("renders leaf items when no children selector is set", () => {
+            service.setTextField("text");
+            service.setData([
+                { id: "a", text: "A" },
+                { id: "b", text: "B" }
+            ]);
+            expect(service.nodeSet().size()).toBe(2);
+        });
+
+        it("gives a data object that appears twice a node for each occurrence", () => {
+            const shared: TestItem = { id: "s", text: "Shared" };
+            const data: TestItem[] = [
+                { id: "1", text: "Node 1", children: [shared] },
+                { id: "2", text: "Node 2", children: [shared] }
+            ];
+            service.setChildrenSelector("children");
+            service.setTextField("text");
+            service.setData(data);
+            expect(() => service.setData([...data])).not.toThrow();
+            const [first, second] = service.nodeSet().toArray();
+            const firstChild = first.children().single();
+            const secondChild = second.children().single();
+            expect(firstChild).not.toBe(secondChild);
+            expect(firstChild.parent).toBe(first);
+            expect(secondChild.parent).toBe(second);
+        });
+
+        it("keeps node instances when the same data is set again", () => {
+            const { node1, data } = setupTree();
+            service.setData([...data]);
+            expect(service.nodeSet().first()).toBe(node1);
+        });
+    });
+
+    describe("disabling performance", () => {
+        it("checks ancestors in linear time", () => {
+            let data: TestItem = { id: "leaf", text: "Leaf" };
+            for (let depth = 0; depth < 24; depth++) {
+                data = { id: `d${depth}`, text: `Depth ${depth}`, children: [data] };
+            }
+            service.setChildrenSelector("children");
+            service.setTextField("text");
+            service.setData([data]);
+            service.setDisableOptions({ enabled: true, disableChildren: true });
+            service.setDisabledKeys([]);
+            const leaf = TreeService.flatten(service.nodeSet()).last();
+            const getDisableKey = vi.spyOn(service as unknown as { getDisableKey: () => unknown }, "getDisableKey");
+            expect(service.isDisabled(leaf)).toBe(false);
+            expect(getDisableKey.mock.calls.length).toBeLessThanOrEqual(26);
+        });
+    });
+
+    describe("moveNode", () => {
+        it("ignores moving a node into its own subtree", () => {
+            const { node1 } = setupTree();
+            const child = node1.children().first();
+            service.moveNode(node1, child, "inside");
+            service.moveNode(node1, child, "before");
+            service.moveNode(node1, node1, "after");
+            expect(node1.parent).toBeNull();
+            expect(child.parent).toBe(node1);
+            expect(service.nodeSet().first()).toBe(node1);
         });
     });
 });
