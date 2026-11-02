@@ -1,5 +1,5 @@
 import { TestBed } from "@angular/core/testing";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { MonaPagerMessages } from "../message-types/pager.messages";
 import type { MonaLocale } from "../models/mona-locale";
 import { provideMonaI18n } from "../providers/provide-mona-i18n";
@@ -92,6 +92,26 @@ describe("MonaI18nService", () => {
         service.use(SAMPLE_TR_LOCALE);
         expect(service.localeId()).toBe("tr-TR");
         expect(service.direction()).toBe("ltr");
+    });
+
+    it("exposes a canonical localeId for POSIX style and malformed ids", () => {
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+        try {
+            TestBed.configureTestingModule({});
+            const service = TestBed.inject(MonaI18nService);
+
+            service.use({ ...SAMPLE_TR_LOCALE, id: "tr_TR" });
+            expect(service.localeId()).toBe("tr-TR");
+            expect(service.locale().id).toBe("tr_TR");
+            expect(warn).not.toHaveBeenCalled();
+
+            service.use({ ...SAMPLE_TR_LOCALE, id: "not a locale" });
+            expect(service.localeId()).toBe("en-US");
+            expect(warn).toHaveBeenCalledOnce();
+            expect(String(warn.mock.calls[0][0])).toContain("not a locale");
+        } finally {
+            warn.mockRestore();
+        }
     });
 
     it("updates messages reactively when setMessages() is called", () => {

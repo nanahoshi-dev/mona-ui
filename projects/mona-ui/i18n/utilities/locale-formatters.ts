@@ -1,3 +1,5 @@
+import { canonicalizeLocaleId } from "./locale-id";
+
 export interface NumberSymbols {
     readonly decimal: string;
     readonly group: string;
@@ -24,7 +26,8 @@ function serializeOptions(options?: Intl.NumberFormatOptions): string {
     return keys.map(k => `${k}:${String((options as Record<string, unknown>)[k])}`).join(";");
 }
 
-export function getNumberGroupingPattern(localeId: string): NumberGroupingPattern {
+export function getNumberGroupingPattern(locale: string): NumberGroupingPattern {
+    const localeId = canonicalizeLocaleId(locale);
     let pattern = numberGroupingCache.get(localeId);
     if (!pattern) {
         try {
@@ -87,7 +90,8 @@ export function getNumberGroupingPattern(localeId: string): NumberGroupingPatter
     return pattern;
 }
 
-export function getNumberSymbols(localeId: string): NumberSymbols {
+export function getNumberSymbols(locale: string): NumberSymbols {
+    const localeId = canonicalizeLocaleId(locale);
     let symbols = numberSymbolsCache.get(localeId);
     if (!symbols) {
         const digitMap = new Map<string, string>();
@@ -133,7 +137,7 @@ export function getNumberSymbols(localeId: string): NumberSymbols {
 }
 
 export function getNumberFormatter(locale: string, options?: Intl.NumberFormatOptions): Intl.NumberFormat {
-    const cleanLocale = (locale ?? "").trim() || "en-US";
+    const cleanLocale = canonicalizeLocaleId(locale);
     const key = `${cleanLocale}:${serializeOptions(options)}`;
     let formatter = numberFormatterCache.get(key);
     if (!formatter) {

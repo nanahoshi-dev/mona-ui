@@ -1,4 +1,5 @@
 import { normalizeGregorianLocale, sanitizeDateText } from "./gregorian-date";
+import { canonicalizeLocaleId } from "./locale-id";
 import { type LocaleFirstDayOfWeek, resolveLocaleFirstDayOfWeek } from "./locale-week-data";
 
 export type { LocaleFirstDayOfWeek };
@@ -162,7 +163,7 @@ export function getLocaleDateTimeInputFormat(localeId: string, options?: LocaleT
  * Intl.Locale.getWeekInfo(), or CLDR fallbacks.
  */
 export function getLocaleFirstDayOfWeek(localeId: string): LocaleFirstDayOfWeek {
-    const normalizedLocaleId = (localeId ?? "").trim();
+    const normalizedLocaleId = canonicalizeLocaleId(localeId);
     let firstDay = firstDayCache.get(normalizedLocaleId);
     if (!firstDay) {
         firstDay = resolveLocaleFirstDayOfWeek(normalizedLocaleId);

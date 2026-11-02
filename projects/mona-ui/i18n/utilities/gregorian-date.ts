@@ -1,24 +1,23 @@
 import { DateTime } from "luxon";
 import { normalizeLocalizedDigits } from "./locale-formatters";
+import { canonicalizeLocaleId } from "./locale-id";
 
 /**
  * Normalizes a locale string to ensure it uses the Gregorian calendar system
  * and doesn't contain a conflicting -u-ca-* extension.
+ * Empty or malformed ids resolve to `MONA_FALLBACK_LOCALE_ID` (en-US).
  */
 export function normalizeGregorianLocale(localeId: string): string {
-    const trimmed = (localeId ?? "").trim();
-    if (!trimmed) {
-        return trimmed;
-    }
+    const canonical = canonicalizeLocaleId(localeId);
     try {
         if (typeof Intl !== "undefined" && typeof Intl.Locale === "function") {
-            const loc = new Intl.Locale(trimmed, { calendar: "gregory" });
+            const loc = new Intl.Locale(canonical, { calendar: "gregory" });
             return loc.toString();
         }
     } catch {
-        // Fallback safely if localeId is malformed
+        // Canonical tags are always accepted; keep the canonical id if Intl.Locale still refuses it
     }
-    return trimmed;
+    return canonical;
 }
 
 /**

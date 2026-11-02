@@ -70,9 +70,14 @@ describe("locale-date-formats", () => {
             expect(getLocaleDateInputFormat("ru-RU")).toBe("dd.MM.yyyy");
         });
 
-        it("falls back gracefully for invalid or empty locale", () => {
-            expect(getLocaleDateInputFormat("")).toBe("dd/MM/yyyy");
-            expect(getLocaleDateInputFormat("invalid-locale-!!!")).toBe("dd/MM/yyyy");
+        it("falls back to the en-US format for invalid or empty locale", () => {
+            expect(getLocaleDateInputFormat("")).toBe("MM/dd/yyyy");
+            expect(getLocaleDateInputFormat("invalid-locale-!!!")).toBe("MM/dd/yyyy");
+        });
+
+        it("accepts POSIX style locale ids", () => {
+            expect(getLocaleDateInputFormat("en_US")).toBe("MM/dd/yyyy");
+            expect(getLocaleDateInputFormat("de_DE")).toBe("dd.MM.yyyy");
         });
     });
 
@@ -372,8 +377,13 @@ describe("locale-date-formats", () => {
             });
 
             it("falls back to monday safely for unknown locales", () => {
-                expect(getLocaleFirstDayOfWeek("")).toBe("monday");
                 expect(getLocaleFirstDayOfWeek("xyz-unknown")).toBe("monday");
+            });
+
+            it("uses the en-US fallback for empty or malformed locales, matching the date format fallback", () => {
+                expect(getLocaleFirstDayOfWeek("")).toBe("sunday");
+                expect(getLocaleFirstDayOfWeek("invalid---locale")).toBe("sunday");
+                expect(getLocaleFirstDayOfWeek("en_US")).toBe("sunday");
             });
 
             it("reads weekInfo accessor when available without getWeekInfo method", () => {
