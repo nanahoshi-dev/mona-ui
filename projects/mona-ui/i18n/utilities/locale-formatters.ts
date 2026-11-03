@@ -165,8 +165,13 @@ export function getNumberFormatter(locale: string, options?: Intl.NumberFormatOp
     return formatter;
 }
 
-export function formatNumber(value: number, locale: string, options?: Intl.NumberFormatOptions): string {
-    return getNumberFormatter(locale, options).format(value);
+/**
+ * Formats a number for the locale. A decimal string, such as one returned by {@link parseLocalizedDecimal}, is
+ * formatted exactly, without converting it to a `number` first.
+ */
+export function formatNumber(value: number | string, locale: string, options?: Intl.NumberFormatOptions): string {
+    // Intl.NumberFormat formats decimal strings exactly (Intl.NumberFormat v3); the ES2022 lib types only declare numbers.
+    return getNumberFormatter(locale, options).format(value as number);
 }
 
 /**
@@ -299,24 +304,62 @@ function isRepresentableAsNumber(intDigits: string, fracDigits: string): boolean
     return (integer + fraction).replace(/^0+/, "").length <= MAX_EXACT_SIGNIFICANT_DIGITS;
 }
 
+/** A parsed number as ASCII digits, before it is converted to a `number` or a decimal string. */
+interface LocalizedNumberParts {
+    readonly fraction: string;
+    readonly integer: string;
+    readonly negative: boolean;
+}
+
+function partsToNumber(parts: LocalizedNumberParts): number | "precision" {
+    if (!isRepresentableAsNumber(parts.integer, parts.fraction)) {
+        return "precision";
+    }
+    return Number((parts.negative ? "-" : "") + parts.integer + (parts.fraction ? "." + parts.fraction : ""));
+}
+
+/** Leading zeros, trailing fraction zeros and the sign of zero are dropped: `"-0012.500"` becomes `"-12.5"`. */
+function partsToDecimal(parts: LocalizedNumberParts): string {
+    const integer = parts.integer.replace(/^0+(?=\d)/, "") || "0";
+    const fraction = parts.fraction.replace(/0+$/, "");
+    const digits = fraction ? `${integer}.${fraction}` : integer;
+    return parts.negative && /[1-9]/.test(digits) ? `-${digits}` : digits;
+}
+
 /**
  * Parses localized text to a number. Returns `null` when the text is not a number in the locale, or when a
  * `number` cannot hold it exactly (see {@link LocalizedNumberInvalidReason}); it never rounds silently.
+ * Use {@link parseLocalizedDecimal} for values that need more precision.
  */
 export function parseLocalizedNumber(
     text: string | null | undefined,
     localeId: string,
     options?: ParseLocalizedNumberOptions
 ): number | null {
-    const outcome = parseLocalizedNumberOutcome(text, localeId, options);
-    return outcome === "precision" ? null : outcome;
+    const parts = parseLocalizedNumberParts(text, localeId, options);
+    const value = parts === null ? null : partsToNumber(parts);
+    return value === "precision" ? null : value;
 }
 
-function parseLocalizedNumberOutcome(
+/**
+ * Parses localized text with the same rules as {@link parseLocalizedNumber}, but returns a canonical decimal string
+ * (`"-1234.5"`: ASCII digits, `.` as the decimal separator, no grouping, exponent, leading zeros or trailing
+ * fraction zeros) and has no precision limit. Returns `null` when the text is not a number in the locale.
+ */
+export function parseLocalizedDecimal(
     text: string | null | undefined,
     localeId: string,
     options?: ParseLocalizedNumberOptions
-): number | "precision" | null {
+): string | null {
+    const parts = parseLocalizedNumberParts(text, localeId, options);
+    return parts === null ? null : partsToDecimal(parts);
+}
+
+function parseLocalizedNumberParts(
+    text: string | null | undefined,
+    localeId: string,
+    options?: ParseLocalizedNumberOptions
+): LocalizedNumberParts | null {
     if (text == null) {
         return null;
     }
@@ -476,12 +519,7 @@ function parseLocalizedNumberOutcome(
             }
         }
 
-        if (!isRepresentableAsNumber(intPart, fracPart ?? "")) {
-            return "precision";
-        }
-        const normalizedStr = sign + intPart + (fracPart && fracPart.length > 0 ? "." + fracPart : "");
-        const num = Number(normalizedStr);
-        return Number.isFinite(num) ? num : null;
+        return { fraction: fracPart ?? "", integer: intPart, negative: sign === "-" };
     } else {
         // mode === "edit": editor buffer grammar with exactly one decimal separator (locale primary or alternate)
         // No group separators or internal whitespace permitted in editor buffer
@@ -541,15 +579,7 @@ function parseLocalizedNumberOutcome(
             fracPart = "";
         }
 
-        if (!isRepresentableAsNumber(intPart, fracPart)) {
-            return "precision";
-        }
-        const normalizedStr =
-            sign +
-            (intPart.length > 0 ? intPart : "0") +
-            (fracPart.length > 0 ? "." + fracPart : cleaned.endsWith(foundSep ?? "") ? "" : "");
-        const num = Number(normalizedStr);
-        return Number.isFinite(num) ? num : null;
+        return { fraction: fracPart, integer: intPart.length > 0 ? intPart : "0", negative: sign === "-" };
     }
 }
 
@@ -570,7 +600,8 @@ export function validateLocalizedNumber(
     }
 
     const mode: LocalizedNumberParseMode = options?.mode ?? "locale";
-    const parsed = parseLocalizedNumberOutcome(trimmed, localeId, { mode });
+    const parts = parseLocalizedNumberParts(trimmed, localeId, { mode });
+    const parsed = parts === null ? null : partsToNumber(parts);
     if (parsed === "precision") {
         return { value: null, valid: false, fractionDigits: 0, reason: "precision" };
     }
@@ -635,6 +666,43 @@ export function validateLocalizedNumber(
     return { value: parsed, valid: true, fractionDigits };
 }
 
+export interface LocalizedDecimalValidationResult {
+    fractionDigits: number;
+    /** Set when `valid` is false. */
+    reason?: LocalizedNumberInvalidReason;
+    valid: boolean;
+    /** A canonical decimal string, see {@link parseLocalizedDecimal}. */
+    value: string | null;
+}
+
+/**
+ * Validates localized text like {@link validateLocalizedNumber}, but returns a canonical decimal string and has no
+ * precision limit, so `reason` is never `"precision"`.
+ */
+export function validateLocalizedDecimal(
+    text: string | null | undefined,
+    localeId: string,
+    options?: {
+        mode?: LocalizedNumberParseMode;
+        decimals?: number;
+    }
+): LocalizedDecimalValidationResult {
+    const trimmed = text == null ? "" : String(text).trim();
+    if (trimmed === "" || trimmed === "-" || trimmed === "+") {
+        return { fractionDigits: 0, valid: true, value: null };
+    }
+    const parts = parseLocalizedNumberParts(trimmed, localeId, { mode: options?.mode ?? "locale" });
+    if (parts === null) {
+        return { fractionDigits: 0, reason: "syntax", valid: false, value: null };
+    }
+    const value = partsToDecimal(parts);
+    const fractionDigits = parts.fraction.length;
+    if (options?.decimals !== undefined && fractionDigits > options.decimals) {
+        return { fractionDigits, reason: "decimals", valid: false, value };
+    }
+    return { fractionDigits, valid: true, value };
+}
+
 export interface LocalizedNumberEditValidationResult {
     readonly complete: boolean;
     /** Set when `valid` is false. */
@@ -643,12 +711,23 @@ export interface LocalizedNumberEditValidationResult {
     readonly value: number | null;
 }
 
-const EDIT_SYNTAX_ERROR: LocalizedNumberEditValidationResult = {
-    valid: false,
-    complete: false,
-    value: null,
-    reason: "syntax"
-};
+export interface LocalizedDecimalEditValidationResult {
+    readonly complete: boolean;
+    /** Set when `valid` is false. */
+    readonly reason?: LocalizedNumberInvalidReason;
+    readonly valid: boolean;
+    /** A canonical decimal string, see {@link parseLocalizedDecimal}. */
+    readonly value: string | null;
+}
+
+interface EditValidationResult<T> {
+    readonly complete: boolean;
+    readonly reason?: LocalizedNumberInvalidReason;
+    readonly valid: boolean;
+    readonly value: T | null;
+}
+
+const EDIT_SYNTAX_ERROR = { complete: false, reason: "syntax", valid: false, value: null } as const;
 
 export interface ValidateLocalizedNumberEditOptions {
     readonly decimals?: number;
@@ -660,6 +739,27 @@ export function validateLocalizedNumberEdit(
     localeId: string,
     options?: ValidateLocalizedNumberEditOptions
 ): LocalizedNumberEditValidationResult {
+    return validateEditInput(text, localeId, options, partsToNumber);
+}
+
+/**
+ * Validates text while it is typed, like {@link validateLocalizedNumberEdit}, but returns a canonical decimal string
+ * and has no precision limit.
+ */
+export function validateLocalizedDecimalEdit(
+    text: string | null | undefined,
+    localeId: string,
+    options?: ValidateLocalizedNumberEditOptions
+): LocalizedDecimalEditValidationResult {
+    return validateEditInput(text, localeId, options, partsToDecimal);
+}
+
+function validateEditInput<T>(
+    text: string | null | undefined,
+    localeId: string,
+    options: ValidateLocalizedNumberEditOptions | undefined,
+    convert: (parts: LocalizedNumberParts) => T | "precision"
+): EditValidationResult<T> {
     if (text == null) {
         return { valid: true, complete: false, value: null };
     }
@@ -744,12 +844,12 @@ export function validateLocalizedNumberEdit(
             return { valid: false, complete: false, value: null, reason: "decimals" };
         }
 
-        // Refuse the keystroke that would make the value too precise for a number, instead of rounding it.
-        if (!isRepresentableAsNumber(intPart, fracPart)) {
+        const parts = parseLocalizedNumberParts(raw, localeId, { mode: "edit" });
+        const parsed = parts === null ? null : convert(parts);
+        // Refuse the keystroke that would make the value too precise for the target type, instead of rounding it.
+        if (parsed === "precision") {
             return { valid: false, complete: false, value: null, reason: "precision" };
         }
-
-        const parsed = parseLocalizedNumber(raw, localeId, { mode: "edit" });
         const complete = fracPart.length > 0 && (intPart.length > 0 || fracPart.length > 0);
 
         return {
@@ -764,11 +864,11 @@ export function validateLocalizedNumberEdit(
         return EDIT_SYNTAX_ERROR;
     }
 
-    if (!isRepresentableAsNumber(normalized, "")) {
+    const parts = parseLocalizedNumberParts(raw, localeId, { mode: "edit" });
+    const parsed = parts === null ? null : convert(parts);
+    if (parsed === "precision") {
         return { valid: false, complete: false, value: null, reason: "precision" };
     }
-
-    const parsed = parseLocalizedNumber(raw, localeId, { mode: "edit" });
     return {
         valid: true,
         complete: true,
