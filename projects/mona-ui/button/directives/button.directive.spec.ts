@@ -1,4 +1,4 @@
-import { Component, signal, viewChild } from "@angular/core";
+import { ApplicationRef, Component, inject, signal, viewChild, viewChildren } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -53,6 +53,10 @@ class TestButtonHostComponent {
 // =============================================================================
 // Helper Functions
 // =============================================================================
+
+function loaderSvg(button: HTMLButtonElement): SVGElement | null {
+    return button.querySelector("mona-indicator-icon svg");
+}
 
 async function waitForStable(fixture: ComponentFixture<unknown>): Promise<void> {
     fixture.detectChanges();
@@ -206,28 +210,35 @@ describe("ButtonDirective", () => {
             expect(buttonElement.querySelector("mona-indicator-icon")).toBeNull();
         });
 
-        it("should set loader size=14 for size='small'", async () => {
+        it("should set loader size=12 for size='small'", async () => {
             component.size.set("small");
             component.loading.set(true);
             await waitForStable(fixture);
-            const loader = buttonElement.querySelector("mona-indicator-icon");
-            expect(loader).toBeTruthy();
+            expect(loaderSvg(buttonElement)?.getAttribute("width")).toBe("12");
         });
 
-        it("should set loader size=16 for size='medium'", async () => {
+        it("should set loader size=14 for size='medium'", async () => {
             component.size.set("medium");
             component.loading.set(true);
             await waitForStable(fixture);
-            const loader = buttonElement.querySelector("mona-indicator-icon");
-            expect(loader).toBeTruthy();
+            expect(loaderSvg(buttonElement)?.getAttribute("width")).toBe("14");
         });
 
-        it("should set loader size=20 for size='large'", async () => {
+        it("should set loader size=16 for size='large'", async () => {
             component.size.set("large");
             component.loading.set(true);
             await waitForStable(fixture);
-            const loader = buttonElement.querySelector("mona-indicator-icon");
-            expect(loader).toBeTruthy();
+            expect(loaderSvg(buttonElement)?.getAttribute("width")).toBe("16");
+        });
+
+        it("should resize the loader when size changes while loading", async () => {
+            component.size.set("small");
+            component.loading.set(true);
+            await waitForStable(fixture);
+            component.size.set("large");
+            await waitForStable(fixture);
+            expect(buttonElement.querySelectorAll("mona-indicator-icon").length).toBe(1);
+            expect(loaderSvg(buttonElement)?.getAttribute("width")).toBe("16");
         });
     });
 
@@ -629,6 +640,13 @@ describe("ButtonDirective", () => {
 // =============================================================================
 
 @Component({
+    selector: "mona-test-nested-button",
+    template: `<button monaButton id="nested">Nested</button>`,
+    imports: [ButtonDirective]
+})
+class TestNestedButtonComponent {}
+
+@Component({
     template: `
         <button
             monaButton
@@ -640,11 +658,14 @@ describe("ButtonDirective", () => {
             (selectedChange)="onSelectedChange($event)">
             Test Button
         </button>
+        <button monaButton id="action" [toggleable]="false">Action</button>
+        <mona-test-nested-button />
     `,
-    imports: [ButtonDirective],
+    imports: [ButtonDirective, TestNestedButtonComponent],
     providers: [ButtonService]
 })
 class TestButtonWithServiceHostComponent {
+    readonly buttons = viewChildren(ButtonDirective);
     disabled = signal(false);
     look = signal<ButtonVariantProps["look"]>("default");
     size = signal<ButtonVariantProps["size"]>("medium");
@@ -653,6 +674,10 @@ class TestButtonWithServiceHostComponent {
 
     onSelectedChange = vi.fn();
     buttonDirective = viewChild.required(ButtonDirective);
+
+    public constructor() {
+        inject(ButtonService).setMembers(this.buttons);
+    }
 }
 
 describe("ButtonDirective with ButtonService", () => {
@@ -847,5 +872,143 @@ describe("ButtonDirective with ButtonService", () => {
 
             expect(component.buttonDirective().selected()).toBe(false);
         });
+    });
+});
+
+// =============================================================================
+// Bare Attribute Tests
+// =============================================================================
+
+@Component({
+    template: `
+        <button monaButton disabled id="disabled">Disabled</button>
+        <button monaButton loading id="loading">Loading</button>
+        <button monaButton iconOnly aria-label="Icon" id="icon-only">I</button>
+        <button monaButton toggleable id="toggleable">Toggle</button>
+        <button monaButton toggleable="false" id="not-toggleable">Plain</button>
+        <button monaButton tabindex="abc" id="bad-tabindex">Tab</button>
+    `,
+    imports: [ButtonDirective]
+})
+class TestBareAttributesHostComponent {}
+
+describe("ButtonDirective bare attributes", () => {
+    let fixture: ComponentFixture<TestBareAttributesHostComponent>;
+    const button = (id: string): HTMLButtonElement => fixture.nativeElement.querySelector(`#${id}`);
+
+    beforeEach(async () => {
+        fixture = TestBed.createComponent(TestBareAttributesHostComponent);
+        await waitForStable(fixture);
+    });
+
+    it("should keep a bare disabled button disabled", () => {
+        const onClick = vi.fn();
+        button("disabled").addEventListener("click", onClick);
+        button("disabled").click();
+        expect(button("disabled").disabled).toBe(true);
+        expect(button("disabled").getAttribute("aria-disabled")).toBe("true");
+        expect(onClick).not.toHaveBeenCalled();
+    });
+
+    it("should show the loader for a bare loading attribute", () => {
+        expect(button("loading").getAttribute("aria-busy")).toBe("true");
+        expect(button("loading").querySelector("mona-indicator-icon")).toBeTruthy();
+    });
+
+    it("should apply icon-only styles for a bare iconOnly attribute", () => {
+        expect(button("icon-only").classList).toContain("aspect-square");
+    });
+
+    it("should toggle with a bare toggleable attribute", async () => {
+        expect(button("toggleable").getAttribute("aria-pressed")).toBe("false");
+        button("toggleable").click();
+        await waitForStable(fixture);
+        expect(button("toggleable").getAttribute("aria-pressed")).toBe("true");
+    });
+
+    it("should treat a toggleable attribute of false as not toggleable", () => {
+        expect(button("not-toggleable").hasAttribute("aria-pressed")).toBe(false);
+    });
+
+    it("should fall back to tabindex 0 for a non-numeric tabindex", () => {
+        expect(button("bad-tabindex").getAttribute("tabindex")).toBe("0");
+    });
+});
+
+// =============================================================================
+// Loader Lifecycle Tests
+// =============================================================================
+
+@Component({
+    template: `
+        @if (shown()) {
+            <button monaButton [loading]="loading()">Save</button>
+        }
+    `,
+    imports: [ButtonDirective]
+})
+class TestLoaderLifecycleHostComponent {
+    loading = signal(true);
+    shown = signal(true);
+}
+
+describe("ButtonDirective loader lifecycle", () => {
+    it("should detach the loader when a loading button is destroyed", async () => {
+        const appRef = TestBed.inject(ApplicationRef);
+        const fixture = TestBed.createComponent(TestLoaderLifecycleHostComponent);
+        await waitForStable(fixture);
+        const viewCount = appRef.viewCount;
+        expect(fixture.nativeElement.querySelector("mona-indicator-icon")).toBeTruthy();
+
+        fixture.componentInstance.shown.set(false);
+        await waitForStable(fixture);
+        expect(appRef.viewCount).toBe(viewCount - 1);
+
+        fixture.componentInstance.shown.set(true);
+        await waitForStable(fixture);
+        fixture.componentInstance.shown.set(false);
+        await waitForStable(fixture);
+        expect(appRef.viewCount).toBe(viewCount - 1);
+    });
+});
+
+// =============================================================================
+// Group Membership Tests
+// =============================================================================
+
+describe("ButtonDirective group membership", () => {
+    let fixture: ComponentFixture<TestButtonWithServiceHostComponent>;
+    let buttonService: ButtonService;
+    const button = (id: string): HTMLButtonElement => fixture.nativeElement.querySelector(`#${id}`);
+
+    beforeEach(async () => {
+        fixture = TestBed.createComponent(TestButtonWithServiceHostComponent);
+        buttonService = fixture.debugElement.injector.get(ButtonService);
+        await waitForStable(fixture);
+    });
+
+    it("should not announce a member with toggleable=false as a toggle", async () => {
+        const clicks = vi.fn();
+        buttonService.buttonClick$.subscribe(clicks);
+        expect(button("action").hasAttribute("aria-pressed")).toBe(false);
+        button("action").click();
+        await waitForStable(fixture);
+        expect(clicks).not.toHaveBeenCalled();
+    });
+
+    it("should leave buttons inside a nested component out of the group", async () => {
+        const clicks = vi.fn();
+        buttonService.buttonClick$.subscribe(clicks);
+        buttonService.groupLook.set("warning");
+        buttonService.groupDisabled.set(true);
+        await waitForStable(fixture);
+
+        expect(button("nested").hasAttribute("aria-pressed")).toBe(false);
+        expect(button("nested").getAttribute("data-look")).toBe("default");
+        expect(button("nested").disabled).toBe(false);
+        button("nested").click();
+        await waitForStable(fixture);
+        expect(clicks).not.toHaveBeenCalled();
+        expect(button("action").getAttribute("data-look")).toBe("warning");
     });
 });

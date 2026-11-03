@@ -113,6 +113,7 @@ export class ButtonGroupComponent implements ButtonGroupVariantsInput {
     public readonly userClass = input<string>("", { alias: "class" });
 
     public constructor() {
+        this.#buttonService.setMembers(this.buttons);
         effect(() => {
             const disabled = this.disabled();
             untracked(() => this.#buttonService.groupDisabled.set(disabled));

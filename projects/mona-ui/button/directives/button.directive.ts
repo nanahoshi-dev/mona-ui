@@ -1,6 +1,7 @@
 import {
     afterNextRender,
     ApplicationRef,
+    booleanAttribute,
     ComponentRef,
     computed,
     createComponent,
@@ -12,6 +13,7 @@ import {
     Injector,
     input,
     model,
+    numberAttribute,
     Renderer2,
     untracked
 } from "@angular/core";
@@ -28,7 +30,7 @@ import { buttonThemeVariants, ButtonVariantProps, ButtonVariantsInput } from "..
         "[attr.aria-busy]": "loading() ? 'true' : undefined",
         "[attr.aria-disabled]": "effectiveDisabled() || loading() ? 'true' : undefined",
         "[attr.aria-haspopup]": "ariaHasPopup() !== 'false' ? ariaHasPopup() : null",
-        "[attr.aria-pressed]": "displaysPressedState() ? (selected() ? 'true' : 'false') : undefined",
+        "[attr.aria-pressed]": "effectiveToggleable() ? (selected() ? 'true' : 'false') : undefined",
         "[attr.data-look]": "effectiveLook()",
         "[attr.data-size]": "effectiveSize()",
         "[attr.disabled]": "effectiveDisabled() || loading() ? '' : undefined",
@@ -41,19 +43,16 @@ export class ButtonDirective implements ButtonVariantsInput {
     readonly #appRef = inject(ApplicationRef);
     readonly #buttonService = inject(ButtonService, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
+    /**
+     * The service of the group this button belongs to. A `ButtonService` higher up the injector tree is not enough:
+     * buttons inside a component projected into a group, or inside a popup opened from one, are not members.
+     */
+    readonly #group = computed(() => (this.#buttonService?.members().includes(this) ? this.#buttonService : null));
     readonly #hostElementRef: ElementRef<HTMLButtonElement> = inject(ElementRef);
     readonly #injector = inject(Injector);
     readonly #renderer = inject(Renderer2);
     #loaderComponentRef: ComponentRef<IndicatorIconComponent> | null = null;
     #toggleSubscription: Subscription | null = null;
-
-    protected readonly displaysPressedState = computed(() => this.isInButtonGroup() || !!this.toggleable());
-    protected readonly effectiveDisabled = computed(() => this.#buttonService?.groupDisabled() || this.disabled());
-    protected readonly effectiveLook = computed(() => this.#buttonService?.groupLook() ?? this.look());
-    protected readonly effectiveRounded = computed(() => this.#buttonService?.groupRounded() ?? this.rounded());
-    protected readonly effectiveSize = computed(() => this.#buttonService?.groupSize() ?? this.size());
-    protected readonly effectiveToggleable = computed(() => this.toggleable() ?? this.isInButtonGroup());
-    protected readonly isInButtonGroup = computed(() => !!this.#buttonService);
 
     protected readonly baseClass = computed(() => {
         const disabled = this.effectiveDisabled();
@@ -67,6 +66,11 @@ export class ButtonDirective implements ButtonVariantsInput {
         const variantClasses = buttonThemeVariants({ disabled, iconOnly, loading, look, rounded, selected, size });
         return twMerge(variantClasses, userClass);
     });
+    protected readonly effectiveDisabled = computed(() => this.#group()?.groupDisabled() || this.disabled());
+    protected readonly effectiveLook = computed(() => this.#group()?.groupLook() ?? this.look());
+    protected readonly effectiveRounded = computed(() => this.#group()?.groupRounded() ?? this.rounded());
+    protected readonly effectiveSize = computed(() => this.#group()?.groupSize() ?? this.size());
+    protected readonly effectiveToggleable = computed(() => this.toggleable() ?? !!this.#group());
     protected readonly loadingSize = computed(() => {
         const size = this.effectiveSize();
         switch (size) {
@@ -89,24 +93,25 @@ export class ButtonDirective implements ButtonVariantsInput {
 
     /**
      * @description Renders the component with reduced visual emphasis and removes pointer interaction.
-     * When inside a `ButtonGroup`, the group's disabled state takes precedence.
+     * Accepts the bare attribute form (`<button monaButton disabled>`).
+     * When inside a `ButtonGroup`, the button is disabled when either it or the group is disabled.
      * @default false
      */
-    public readonly disabled = model<boolean>(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
      * @description Removes horizontal padding and fixes a square aspect ratio sized to match `size`.
      * Provide `aria-label` on the host when using icon-only buttons.
      * @default false
      */
-    public readonly iconOnly = input(false);
+    public readonly iconOnly = input(false, { transform: booleanAttribute });
 
     /**
      * @description Displays a loading indicator and prevents interaction while an operation is in progress.
      * Sets `aria-busy="true"` on the host.
      * @default false
      */
-    public readonly loading = model<boolean>(false);
+    public readonly loading = input(false, { transform: booleanAttribute });
 
     /**
      * @description Visual style variant of the button. When inside a `ButtonGroup`, the group's look takes precedence.
@@ -137,11 +142,20 @@ export class ButtonDirective implements ButtonVariantsInput {
 
     /**
      * @description Tab index of the host element. Automatically overridden to `-1` when the button is disabled or loading.
-     * Accepts a numeric string and converts it to a number.
+     * Accepts a numeric string and converts it to a number; a value that is not a number falls back to `0`.
      * @default 0
      */
     public readonly tabindex = input<number, number | string>(0, {
-        transform: (value: number | string) => (typeof value === "string" ? parseInt(value, 10) : value)
+        transform: (value: number | string) => numberAttribute(value, 0)
+    });
+
+    /**
+     * @description Enables toggle behavior — each click flips the `selected` state and `aria-pressed` is managed.
+     * Accepts the bare attribute form. Buttons in a `ButtonGroup` are toggleable unless this is set to `false`.
+     * @default undefined
+     */
+    public readonly toggleable = input<boolean | undefined, unknown>(undefined, {
+        transform: (value: unknown) => (value === undefined ? undefined : booleanAttribute(value))
     });
 
     /**
@@ -150,13 +164,6 @@ export class ButtonDirective implements ButtonVariantsInput {
      * @default "button"
      */
     public readonly type = input<"button" | "reset" | "submit">("button");
-
-    /**
-     * @description Enables toggle behavior — each click flips the `selected` state and `aria-pressed` is managed.
-     * Must use `[toggleable]="true"` binding syntax, not bare attribute form.
-     * @default undefined
-     */
-    public readonly toggleable = input<boolean>();
 
     /**
      * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
@@ -182,6 +189,7 @@ export class ButtonDirective implements ButtonVariantsInput {
                 }
             });
         });
+        this.#destroyRef.onDestroy(() => this.#removeLoader());
         afterNextRender({
             read: () => this.#setSubscriptions()
         });
@@ -189,6 +197,7 @@ export class ButtonDirective implements ButtonVariantsInput {
 
     #createLoader(size: number): void {
         if (this.#loaderComponentRef) {
+            this.#loaderComponentRef.setInput("size", size);
             return;
         }
 
@@ -238,8 +247,9 @@ export class ButtonDirective implements ButtonVariantsInput {
                     return;
                 }
                 const wasSelected = this.selected();
-                if (this.#buttonService) {
-                    this.#buttonService.buttonClick$.next([this, wasSelected]);
+                const group = this.#group();
+                if (group) {
+                    group.buttonClick$.next([this, wasSelected]);
                 } else {
                     this.selected.set(!this.selected());
                 }
