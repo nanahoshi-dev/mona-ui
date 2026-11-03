@@ -50,6 +50,8 @@ export interface ConsumerSmokeTestOptions {
     expectedLocales: readonly ExpectedLocaleExport[];
     repoRoot?: string;
     tscPath?: string;
+    /** Also smoke-tests `@nanahoshi/mona-ui/i18n/icu`. */
+    verifyIcu?: boolean;
 }
 
 export function resolveTypeScriptCompilerPath(repoRoot: string = process.cwd()): string {
@@ -127,6 +129,23 @@ import {
     getLocaleDateTimeInputFormat,
     getLocaleFirstDayOfWeek
 } from "@nanahoshi/mona-ui/i18n";
+if (${JSON.stringify(options.verifyIcu === true)}) {
+const { compileMonaLocale, validateMonaLocaleData } = await import("@nanahoshi/mona-ui/i18n/icu");
+const icuLocale = compileMonaLocale({
+    direction: "ltr",
+    id: "de-DE",
+    messages: { pager: { pageStatus: "Seite {page, number} von {totalPages, plural, one {# Seite} other {# Seiten}}" } }
+});
+const icuStatus = icuLocale.messages.pager.pageStatus(1200, 2);
+if (icuStatus !== "Seite 1.200 von 2 Seiten") {
+    console.error("Invalid compileMonaLocale output: " + icuStatus);
+    process.exit(1);
+}
+if (validateMonaLocaleData({ direction: "ltr", id: "de-DE", messages: { pager: { nope: "x" } } }).length !== 1) {
+    console.error("validateMonaLocaleData did not report an unknown key");
+    process.exit(1);
+}
+}
 
 const expectedLocales = ${JSON.stringify(options.expectedLocales)};
 for (const expected of expectedLocales) {
@@ -657,11 +676,24 @@ export function verifyBuiltPackage(options: PackageVerificationOptions = {}): vo
     }
     console.log(`✓ Resolved hermetic TypeScript compiler at: ${tscPath}`);
 
+    // The ICU entry point is required once the source has it.
+    const verifyIcu = existsSync(resolve(sourceLocalesDir, "../i18n/icu/ng-package.json"));
+    if (verifyIcu) {
+        const icuTargets = resolveExportTargets(pkgJsonPath, "./i18n/icu");
+        for (const target of [icuTargets.runtimeRelPath, icuTargets.typesRelPath]) {
+            if (!existsSync(resolve(distDir, target))) {
+                throw new Error(`exports["./i18n/icu"] target not found at: ${resolve(distDir, target)}`);
+            }
+        }
+        console.log('✓ Found exports["./i18n/icu"] and its targets in dist/mona-ui/package.json');
+    }
+
     runConsumerSmokeTest({
         distDir,
         expectedLocales,
         tscPath,
-        repoRoot
+        repoRoot,
+        verifyIcu
     });
 
     console.log("\nPackage verification SUCCESS: All packaging criteria satisfied.");
