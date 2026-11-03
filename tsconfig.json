@@ -4,6 +4,7 @@
     "compilerOptions": {
         "declaration": false,
         "esModuleInterop": true,
+        "resolveJsonModule": true,
         "experimentalDecorators": true,
         "forceConsistentCasingInFileNames": true,
         "importHelpers": true,

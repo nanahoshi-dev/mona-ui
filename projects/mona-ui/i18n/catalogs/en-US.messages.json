@@ -1,0 +1,373 @@
+{
+    "autoComplete": {
+        "clear": "Clear"
+    },
+    "breadcrumb": {
+        "breadcrumb": "Breadcrumb"
+    },
+    "buttonGroup": {
+        "buttonGroup": "Button group"
+    },
+    "calendar": {
+        "calendarLabel": "Calendar, {formattedMonthAndYear}",
+        "decadeRange": "{start, number, ::group-off} to {end, number, ::group-off}",
+        "decadeViewLabel": "Decade view, {start, number, ::group-off} - {end, number, ::group-off}",
+        "goToToday": "Go to today, {formattedDate}",
+        "nextDecade": "Next decade",
+        "nextMonth": "Next month",
+        "nextYear": "Next year",
+        "previousDecade": "Previous decade",
+        "previousMonth": "Previous month",
+        "previousYear": "Previous year",
+        "switchToDecadeView": "Switch to decade view, currently {currentYear}",
+        "switchToYearView": "Switch to year view, currently {currentMonthAndYear}",
+        "today": "Today",
+        "yearCellLabel": "Year {year, number, ::group-off}",
+        "yearViewLabel": "Year view, {year}"
+    },
+    "card": {
+        "actionsLabel": "Card actions"
+    },
+    "chart": {
+        "change": "Change",
+        "chart": "Chart",
+        "chartLegend": "Chart legend",
+        "close": "Close",
+        "closeAbbreviation": "C",
+        "colorScale": "Color scale",
+        "conversion": "Conversion",
+        "divergingRangeDescription": "{title}, {minimum} to {midpoint} to {maximum}",
+        "dropOff": "Drop-off",
+        "falling": "Falling",
+        "high": "High",
+        "highAbbreviation": "H",
+        "labelValueSeparator": ":",
+        "low": "Low",
+        "lowAbbreviation": "L",
+        "noData": "No data available",
+        "open": "Open",
+        "openAbbreviation": "O",
+        "overall": "Overall",
+        "range": "Range",
+        "rangeDescription": "{title}, {minimum} to {maximum}",
+        "rising": "Rising",
+        "runningTotal": "Running Total",
+        "size": "size",
+        "unchanged": "Unchanged",
+        "value": "Value",
+        "visualIndicatorClamped": "Visual indicator clamped"
+    },
+    "chip": {
+        "removeLabel": "{label, select, undefined {Remove, item} other {Remove, {label}}}"
+    },
+    "colorGradient": {
+        "apply": "Apply",
+        "cancel": "Cancel",
+        "clearColor": "Clear color",
+        "copyAsHex": "Copy as HEX",
+        "copyAsRgb": "Copy as RGB",
+        "copyColor": "Copy color",
+        "currentColor": "Current color",
+        "previousColor": "Previous color",
+        "saturationAndValue": "Color saturation and value",
+        "saturationAndValueText": "Saturation {saturation}%, Value {value}%",
+        "switchColorMode": "Switch color mode"
+    },
+    "colorPalette": {
+        "color": "Color {color}",
+        "colorPalette": "Color palette"
+    },
+    "colorPicker": {
+        "clearColor": "Clear color",
+        "colorGradientPicker": "Color gradient picker",
+        "colorPalettePicker": "Color palette picker",
+        "colorPicker": "Color picker"
+    },
+    "comboBox": {
+        "clear": "Clear"
+    },
+    "datePicker": {
+        "datePicker": "Date picker",
+        "openCalendar": "Open calendar"
+    },
+    "dateTimePicker": {
+        "calendar": "Calendar",
+        "cancel": "Cancel",
+        "date": "Date",
+        "dateTimePicker": "Date and time picker",
+        "openDateTimePicker": "Open date and time picker",
+        "set": "Set",
+        "time": "Time",
+        "timePicker": "Time picker"
+    },
+    "dialog": {
+        "cancel": "Cancel",
+        "closeDialog": "Close dialog",
+        "ok": "OK"
+    },
+    "dropdownList": {
+        "clear": "Clear"
+    },
+    "dropdowns": {
+        "itemPosition": "{text}, {position} of {total}",
+        "noResultsFound": "No results found",
+        "resultsAvailable": "{count, plural, =1 {# result available} other {# results available}}"
+    },
+    "editor": {
+        "addColumnAfter": "Add column after",
+        "addColumnBefore": "Add column before",
+        "addHorizontalLine": "Add horizontal line",
+        "addRowAfter": "Add row after",
+        "addRowBefore": "Add row before",
+        "alignCenter": "Center text",
+        "alignLeft": "Align text left",
+        "alignRight": "Align text right",
+        "altText": "Alt Text",
+        "backgroundColor": "Background color",
+        "bold": "Bold",
+        "cancel": "Cancel",
+        "codeBlock": "Code block",
+        "color": "Color",
+        "deleteColumn": "Delete column",
+        "deleteRow": "Delete row",
+        "deleteTable": "Delete table",
+        "enterUrl": "Enter the URL",
+        "fontSize": "Font Size",
+        "format": "Format",
+        "heading": "Heading {level}",
+        "heightPx": "Height (px)",
+        "imageUrl": "Image URL",
+        "indent": "Indent",
+        "insert": "Insert",
+        "insertImage": "Insert image",
+        "insertLink": "Insert Link",
+        "insertOrderedList": "Insert ordered list",
+        "insertTable": "Insert table",
+        "insertTaskList": "Insert task list",
+        "insertUnorderedList": "Insert unordered list",
+        "italic": "Italic",
+        "justify": "Justify",
+        "mergeCells": "Merge selected cells",
+        "outdent": "Outdent",
+        "paragraph": "Paragraph",
+        "quotation": "Quotation",
+        "redo": "Redo",
+        "removeLink": "Remove Link",
+        "selectFontFamily": "Select font family",
+        "selectFontSize": "Select font size",
+        "splitCell": "Split cell",
+        "strikethrough": "Strikethrough",
+        "subscript": "Subscript",
+        "superscript": "Superscript",
+        "toggleHeaderRow": "Toggle header row",
+        "underline": "Underline",
+        "undo": "Undo",
+        "widthPx": "Width (px)"
+    },
+    "filter": {
+        "and": "AND",
+        "apply": "Apply",
+        "clear": "Clear",
+        "contains": "Contains",
+        "doesNotContain": "Does not contain",
+        "endsWith": "Ends with",
+        "isAfter": "Is after",
+        "isAfterOrEqualTo": "Is after or equal to",
+        "isBefore": "Is before",
+        "isBeforeOrEqualTo": "Is before or equal to",
+        "isEmpty": "Is empty",
+        "isEqualTo": "Is equal to",
+        "isFalse": "Is false",
+        "isGreaterThan": "Is greater than",
+        "isGreaterThanOrEqualTo": "Is greater than or equal to",
+        "isLessThan": "Is less than",
+        "isLessThanOrEqualTo": "Is less than or equal to",
+        "isNotEmpty": "Is not empty",
+        "isNotEqualTo": "Is not equal to",
+        "isNotNull": "Is not null",
+        "isNotNullOrEmpty": "Is not null or empty",
+        "isNull": "Is null",
+        "isNullOrEmpty": "Is null or empty",
+        "isTrue": "Is true",
+        "or": "OR",
+        "startsWith": "Starts with"
+    },
+    "grid": {
+        "all": "(All)",
+        "apply": "Apply",
+        "cancel": "Cancel",
+        "cancelRowEdit": "Cancel row edit",
+        "columns": "Columns",
+        "columnsSelected": "{count} selected columns",
+        "delete": "Delete",
+        "deleteRowConfirmation": "Are you sure you want to delete this item?",
+        "deleteRowTitle": "Delete row?",
+        "dragColumnHeaderToGroup": "Drag a column header here to group",
+        "edit": "Edit",
+        "editRow": "Edit row",
+        "fieldValidationError": "Invalid value.",
+        "filterByColumn": "Filter by {column}",
+        "filterPlaceholder": "Filter...",
+        "modified": "Modified",
+        "moveAsNext": "Move as next",
+        "moveAsPrevious": "Move as previous",
+        "moveRow": "Move row",
+        "noData": "No data",
+        "remove": "Remove",
+        "removeRow": "Remove row",
+        "reorderRow": "Reorder row {rowNumber}",
+        "resizeColumn": "Resize column",
+        "rowReorder": "Row reorder",
+        "rowReorderDisabled": "Row reordering is disabled.",
+        "rowReorderDisabledEditing": "Finish editing to reorder rows.",
+        "rowReorderDisabledFiltered": "Clear filters to reorder rows.",
+        "rowReorderDisabledGrouped": "Clear grouping to reorder rows.",
+        "rowReorderDisabledServerBinding": "Row reordering isn't available with server binding.",
+        "rowReorderDisabledSingleRow": "At least two rows are needed to reorder.",
+        "rowReorderDisabledSorted": "Clear sorting to reorder rows.",
+        "rowReorderDisabledVirtualScroll": "Row reordering isn't available while virtual scrolling is enabled.",
+        "rowReorderHandleAriaLabel": "{rowLabel}. {keyboardHint}{disabledReason, select, undefined {} other { {disabledReason}}}",
+        "rowReorderKeyboardHint": "Use Alt plus Up Arrow or Alt plus Down Arrow to move.",
+        "rowReorderMoved": "Moved row {fromRowNumber} to position {toPosition}.",
+        "rowValidationError": "This row has validation errors.",
+        "save": "Save",
+        "saveRow": "Save row",
+        "selectAllRows": "Select all rows",
+        "selectRow": "Select row {rowNumber}"
+    },
+    "list": {
+        "filterList": "Filter list",
+        "noData": "No data"
+    },
+    "listBox": {
+        "clearSelection": "Clear Selection",
+        "moveDown": "Move Down",
+        "moveUp": "Move Up",
+        "remove": "Remove",
+        "transferAllFrom": "Transfer All From",
+        "transferAllTo": "Transfer All To",
+        "transferFrom": "Transfer From",
+        "transferTo": "Transfer To"
+    },
+    "multiSelect": {
+        "clear": "Clear",
+        "itemsCount": "{count, plural, =1 {+ # item} other {+ # items}}"
+    },
+    "notification": {
+        "close": "Close",
+        "error": "Error",
+        "info": "Info",
+        "success": "Success",
+        "warning": "Warning"
+    },
+    "numericTextBox": {
+        "decrease": "Decrease value",
+        "increase": "Increase value"
+    },
+    "otpInput": {
+        "verificationCode": "Verification code"
+    },
+    "pager": {
+        "firstPageLabel": "First page",
+        "jumpBackwardLabel": "Jump back {pages} pages",
+        "jumpForwardLabel": "Jump forward {pages} pages",
+        "lastPageLabel": "Last page",
+        "nextPageLabel": "Next page",
+        "ofText": "of",
+        "pageLabel": "Page {page}",
+        "pageSizeLabel": "{pageSize} / page",
+        "pageStatus": "Page {page} of {totalPages}",
+        "pageText": "Page",
+        "previousPageLabel": "Previous page",
+        "rangeStatus": "{start} - {end} of {total} items"
+    },
+    "rating": {
+        "notRated": "Not rated",
+        "valueText": "{value} out of {max}"
+    },
+    "scrollView": {
+        "carousel": "carousel",
+        "nextPage": "Next page",
+        "page": "Page {current}",
+        "pageOf": "Page {current} of {total}",
+        "previousPage": "Previous page",
+        "scrollPagerNext": "Scroll pager next",
+        "scrollPagerPrevious": "Scroll pager previous",
+        "slide": "slide"
+    },
+    "sheet": {
+        "closeSheet": "Close sheet"
+    },
+    "slider": {
+        "maximumValue": "Maximum value",
+        "minimumValue": "Minimum value",
+        "sliderValue": "Slider value"
+    },
+    "spinner": {
+        "cancel": "Cancel",
+        "loading": "Loading"
+    },
+    "splitButton": {
+        "menuButtonAriaLabel": "Show menu options",
+        "splitButton": "{text, select, undefined {Split button} other {{text} splitbutton}}"
+    },
+    "splitter": {
+        "collapseDown": "Collapse pane below",
+        "collapseNext": "Collapse next pane",
+        "collapsePrevious": "Collapse previous pane",
+        "collapseUp": "Collapse pane above",
+        "resizer": "Resizer"
+    },
+    "stepper": {
+        "stepProgress": "Step progress",
+        "stepper": "Progress"
+    },
+    "tabs": {
+        "closeTab": "Close tab",
+        "scrollNext": "Scroll tabs next",
+        "scrollPrevious": "Scroll tabs previous"
+    },
+    "textBox": {
+        "clear": "Clear"
+    },
+    "timePicker": {
+        "openTimePicker": "Open time picker",
+        "timePicker": "Time picker"
+    },
+    "timeSelector": {
+        "am": "AM",
+        "amPm": "AM/PM",
+        "headerHours": "Hr",
+        "headerMinutes": "Min",
+        "headerSeconds": "Sec",
+        "hours": "Hours",
+        "minutes": "Minutes",
+        "now": "Now",
+        "pm": "PM",
+        "seconds": "Seconds",
+        "set": "Set",
+        "timeSelector": "Time selector"
+    },
+    "treeView": {
+        "collapse": "Collapse",
+        "expand": "Expand",
+        "filter": "Filter",
+        "filterTree": "Filter tree"
+    },
+    "window": {
+        "close": "Close",
+        "closeWindow": "Close window",
+        "maximize": "Maximize",
+        "minimize": "Minimize",
+        "moveWindow": "Move window. Use arrow keys to move.",
+        "resizeBottom": "Resize window from the bottom. Use arrow keys to resize.",
+        "resizeBottomLeft": "Resize window from the bottom-left corner. Use arrow keys to resize.",
+        "resizeBottomRight": "Resize window from the bottom-right corner. Use arrow keys to resize.",
+        "resizeLeft": "Resize window from the left. Use arrow keys to resize.",
+        "resizeRight": "Resize window from the right. Use arrow keys to resize.",
+        "resizeTop": "Resize window from the top. Use arrow keys to resize.",
+        "resizeTopLeft": "Resize window from the top-left corner. Use arrow keys to resize.",
+        "resizeTopRight": "Resize window from the top-right corner. Use arrow keys to resize.",
+        "restore": "Restore"
+    }
+}
