@@ -39,7 +39,7 @@ export const switchThemeVariants = cva(
                 small: "rounded-sm"
             },
             size: {
-                large: "h-7.5 w-14 text-md",
+                large: "h-7.5 w-14 text-base",
                 medium: "h-6.5 w-12 text-sm",
                 small: "h-5.5 w-10 text-xs"
             }

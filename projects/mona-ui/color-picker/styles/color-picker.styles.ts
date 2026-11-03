@@ -43,7 +43,7 @@ export const colorPickerBaseThemeVariants = cva(
                 full: "rounded-full"
             },
             size: {
-                large: "h-10 text-md",
+                large: "h-10 text-base",
                 medium: "h-9 text-sm",
                 small: "h-8 text-xs"
             }

@@ -38,7 +38,7 @@ export const popupMenuGroupHeaderThemeVariants = cva(
             size: {
                 small: "text-xs",
                 medium: "text-sm",
-                large: "text-md"
+                large: "text-base"
             }
         }
     }
@@ -69,7 +69,7 @@ export const popupMenuItemThemeVariants = cva(
             size: {
                 small: "text-xs",
                 medium: "text-sm",
-                large: "text-md"
+                large: "text-base"
             }
         }
     }

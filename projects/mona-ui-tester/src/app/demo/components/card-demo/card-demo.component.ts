@@ -86,12 +86,15 @@ export class CardDemoComponent extends AbstractDemoComponent<CardComponent> {
 
             <div class="px-4 flex flex-col gap-4" *monaCardContent>
                 <div class="flex flex-col gap-2">
-                    <mona-label [for]="username">Username</mona-label>
-                    <mona-text-box placeholder="Enter your username..." #username></mona-text-box>
+                    <mona-label for="card-demo-username">Username</mona-label>
+                    <mona-text-box inputId="card-demo-username" placeholder="Enter your username..."></mona-text-box>
                 </div>
                 <div class="flex flex-col gap-2">
-                    <mona-label [for]="password">Password</mona-label>
-                    <mona-text-box placeholder="Enter your password..." #password></mona-text-box>
+                    <mona-label for="card-demo-password">Password</mona-label>
+                    <mona-text-box
+                        inputId="card-demo-password"
+                        placeholder="Enter your password..."
+                        type="password"></mona-text-box>
                 </div>
             </div>
 

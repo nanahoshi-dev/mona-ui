@@ -90,6 +90,7 @@
             @switch (entry().configType) {
                 @case ("string") {
                     <mona-text-box
+                        [aria-label]="entry().name"
                         [disabled]="entry().disabled ?? false"
                         [ngModel]="entry().value"
                         [style.width.px]="150"

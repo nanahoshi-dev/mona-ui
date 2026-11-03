@@ -1,6 +1,5 @@
-import { cva } from "class-variance-authority";
-import { VariantProps } from "class-variance-authority";
-import { themeControlSurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { cva, type VariantProps } from "class-variance-authority";
+import { themeControlSurfaceClasses, type VariantInputs } from "@nanahoshi/mona-ui/internal";
 
 export const textBoxThemeVariants = cva(
     `
@@ -44,7 +43,7 @@ export const textBoxThemeVariants = cva(
                 small: "rounded-sm"
             },
             size: {
-                large: "h-10 text-md",
+                large: "h-10 text-base",
                 medium: "h-9 text-sm",
                 small: "h-8 text-xs"
             }
@@ -89,28 +88,11 @@ export const inputThemeVariants = cva(
                 small: "rounded-sm"
             },
             size: {
-                large: "h-10 text-md",
+                large: "h-10 text-base",
                 medium: "h-9 text-sm",
                 small: "h-8 text-xs"
             }
-        },
-        compoundVariants: [
-            {
-                rounded: "full",
-                size: "large",
-                class: "px-4"
-            },
-            {
-                rounded: "full",
-                size: "medium",
-                class: "px-4"
-            },
-            {
-                rounded: "full",
-                size: "small",
-                class: "px-4"
-            }
-        ]
+        }
     }
 );
 
