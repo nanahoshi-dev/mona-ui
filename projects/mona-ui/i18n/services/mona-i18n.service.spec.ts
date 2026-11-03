@@ -203,6 +203,99 @@ describe("MonaI18nService", () => {
         expect(messages().lastPageLabel).toBe("Last page");
     });
 
+    describe("per-locale overrides", () => {
+        const DE_LOCALE: MonaLocale = { direction: "ltr", id: "de-DE", messages: {} };
+        const EN_LOCALE: MonaLocale = { direction: "ltr", id: "en-US", messages: {} };
+
+        it("applies overrides patched for a locale only while that locale is active", () => {
+            TestBed.configureTestingModule({});
+            const service = TestBed.inject(MonaI18nService);
+            service.use(DE_LOCALE);
+            const messages = service.componentMessages("pager", SAMPLE_PAGER_FALLBACK);
+
+            service.patchMessages({ pager: { nextPageLabel: "Weiter" } }, { locale: "de-DE" });
+            expect(messages().nextPageLabel).toBe("Weiter");
+
+            service.use(EN_LOCALE);
+            expect(messages().nextPageLabel).toBe("Next page");
+
+            service.use(DE_LOCALE);
+            expect(messages().nextPageLabel).toBe("Weiter");
+        });
+
+        it("gives per-locale overrides precedence over global overrides", () => {
+            TestBed.configureTestingModule({});
+            const service = TestBed.inject(MonaI18nService);
+            service.use(DE_LOCALE);
+            const messages = service.componentMessages("pager", SAMPLE_PAGER_FALLBACK);
+
+            service.patchMessages({ pager: { nextPageLabel: "Global", lastPageLabel: "Global last" } });
+            service.patchMessages({ pager: { nextPageLabel: "Weiter" } }, { locale: "de-DE" });
+
+            expect(messages().nextPageLabel).toBe("Weiter");
+            expect(messages().lastPageLabel).toBe("Global last");
+
+            service.use(EN_LOCALE);
+            expect(messages().nextPageLabel).toBe("Global");
+        });
+
+        it("canonicalizes the locale key, so POSIX ids address the same overrides", () => {
+            TestBed.configureTestingModule({});
+            const service = TestBed.inject(MonaI18nService);
+            service.use(DE_LOCALE);
+            const messages = service.componentMessages("pager", SAMPLE_PAGER_FALLBACK);
+
+            service.patchMessages({ pager: { nextPageLabel: "Weiter" } }, { locale: "de_DE" });
+            expect(messages().nextPageLabel).toBe("Weiter");
+        });
+
+        it("replaces and clears only the addressed locale's overrides", () => {
+            TestBed.configureTestingModule({});
+            const service = TestBed.inject(MonaI18nService);
+            service.use(DE_LOCALE);
+            const messages = service.componentMessages("pager", SAMPLE_PAGER_FALLBACK);
+
+            service.patchMessages({ pager: { nextPageLabel: "Global" } });
+            service.patchMessages({ pager: { firstPageLabel: "Erste", lastPageLabel: "Letzte" } }, { locale: "de-DE" });
+            service.patchMessages({ pager: { firstPageLabel: "Primeira" } }, { locale: "pt-BR" });
+
+            service.setMessages({ pager: { lastPageLabel: "Letzte Seite" } }, { locale: "de-DE" });
+            expect(messages().firstPageLabel).toBe("First page");
+            expect(messages().lastPageLabel).toBe("Letzte Seite");
+
+            service.clearMessages({ locale: "de-DE" });
+            expect(messages().lastPageLabel).toBe("Last page");
+            expect(messages().nextPageLabel).toBe("Global");
+
+            service.use({ direction: "ltr", id: "pt-BR", messages: {} });
+            expect(messages().firstPageLabel).toBe("Primeira");
+
+            service.clearMessages();
+            expect(messages().firstPageLabel).toBe("First page");
+            expect(messages().nextPageLabel).toBe("Next page");
+        });
+
+        it("accepts per-locale overrides through provideMonaI18n", () => {
+            TestBed.configureTestingModule({
+                providers: [
+                    provideMonaI18n({
+                        locale: DE_LOCALE,
+                        localeMessages: {
+                            "de-DE": { pager: { nextPageLabel: "Weiter" } },
+                            "en-US": { pager: { nextPageLabel: "Onward" } }
+                        }
+                    })
+                ]
+            });
+            const service = TestBed.inject(MonaI18nService);
+            const messages = service.componentMessages("pager", SAMPLE_PAGER_FALLBACK);
+
+            expect(messages().nextPageLabel).toBe("Weiter");
+            service.use(EN_LOCALE);
+            expect(messages().nextPageLabel).toBe("Onward");
+        });
+    });
+
     it("supports en-XA pseudo-localization with expanded Unicode characters and delimiters", () => {
         const PSEUDO_EN_XA_LOCALE: MonaLocale = {
             direction: "ltr",
