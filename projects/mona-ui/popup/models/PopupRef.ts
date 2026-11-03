@@ -11,8 +11,15 @@ export class PopupRef {
         this.#options = options;
     }
 
-    public close<R>(result?: R, delay?: number): void {
-        this.#options.close(result, delay);
+    /**
+     * Requests the popup to close.
+     * @param result optional result passed to `beforeClose` and `closed` as the event's `result`
+     * @param delay optional delay in milliseconds before the popup is removed, instead of waiting for the
+     * leave animation
+     * @returns `false` when the close was prevented or the popup is already closing, `true` otherwise.
+     */
+    public close<R>(result?: R, delay?: number): boolean {
+        return this.#options.close(result, delay);
     }
 
     /**

@@ -5,7 +5,6 @@ import { DataType } from "@nanahoshi/mona-ui/common";
 import type { FilterMenuDateOptions, FilterMenuDateType } from "@nanahoshi/mona-ui/filter";
 import { FilterMenuComponent, FilterService } from "@nanahoshi/mona-ui/filter";
 import { PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
-import { take } from "rxjs";
 import { Column } from "../../models/Column";
 import { ColumnFilterState } from "../../models/ColumnFilterState";
 import { GridService } from "../../services/grid.service";
@@ -31,7 +30,6 @@ export class GridFilterMenuComponent {
         this.#popupRef = this.#popupService.create({
             anchor: this.#hostElementRef.nativeElement,
             content: FilterMenuComponent,
-            closeOnBackdropClick: false,
             hasBackdrop: true,
             preventClose: event => {
                 if (event.originalEvent instanceof MouseEvent) {
@@ -44,10 +42,6 @@ export class GridFilterMenuComponent {
             },
             providers: [{ provide: FilterService, useValue: this.#filterService }]
         });
-        this.#popupRef.overlayRef
-            .backdropClick()
-            .pipe(take(1))
-            .subscribe(() => this.#popupRef?.close());
 
         const filterState = this.#gridService.appliedFilters().get(this.column().field);
         const componentRef = this.#popupRef.component as ComponentRef<FilterMenuComponent>;

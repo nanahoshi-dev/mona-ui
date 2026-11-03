@@ -566,7 +566,9 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
         this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             const navigatedItem = this.#navigatedItem();
             this.updateValue(navigatedItem ? this.getControlValue(navigatedItem) : null, true);
-            window.setTimeout(() => this.focus());
+            if (this.#dropdownService.focusCanReturn()) {
+                window.setTimeout(() => this.focus());
+            }
         });
     }
 

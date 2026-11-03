@@ -1,6 +1,7 @@
-import { afterNextRender, DestroyRef, Directive, ElementRef, inject, TemplateRef } from "@angular/core";
+import { afterNextRender, DestroyRef, Directive, DOCUMENT, ElementRef, inject, TemplateRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { PreventableEvent } from "@nanahoshi/mona-ui/common";
+import { focusCanReturn } from "@nanahoshi/mona-ui/internal";
 import { dropdownPopupAnimation, PopupRef, PopupService, PopupSettings } from "@nanahoshi/mona-ui/popup";
 import { take, takeUntil } from "rxjs";
 import { DROPDOWN_POPUP_INPUT_TOKEN } from "../models/DropdownPopupInput";
@@ -11,6 +12,7 @@ import { DropdownService } from "../services/dropdown.service";
 })
 export class DropdownPopupHandlerDirective {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #document = inject(DOCUMENT);
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #host = inject(DROPDOWN_POPUP_INPUT_TOKEN);
@@ -125,6 +127,10 @@ export class DropdownPopupHandlerDirective {
             this.#dropdownService.popupCloseStart$.next(event);
         });
         popupRef.closed.pipe(take(1)).subscribe(event => {
+            // Checked before the overlay is disposed, while focus inside the popup is still there to see.
+            this.#dropdownService.focusCanReturn.set(
+                focusCanReturn(this.#document, this.#hostElementRef.nativeElement, popupRef.overlayRef.overlayElement)
+            );
             this.#dropdownService.popupRef.set(null);
             this.#dropdownService.popupCloseComplete$.next(event);
             this.#host.closed.emit();

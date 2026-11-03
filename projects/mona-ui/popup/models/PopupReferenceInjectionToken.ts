@@ -4,4 +4,4 @@ import { PopupReference } from "./PopupReference";
 /**
  * @internal - used by the popup service. Do not use directly or export.
  */
-export const PopupReferenceInjectionToken = new InjectionToken<PopupReference>("PopupReferenceInjectionToken");
+export const POPUP_REFERENCE = new InjectionToken<PopupReference>("POPUP_REFERENCE");

@@ -10,16 +10,16 @@ import { PopupRefParams } from "./PopupRefParams";
  * @internal - used by the popup service. Do not use directly or export.
  */
 export class PopupReference implements PopupRefParams {
+    #closed = false;
+    #closing = false;
     public readonly beforeClosed$ = new Subject<PopupCloseEvent>();
     public readonly closeStart$ = new Subject<PopupCloseEvent>();
     public readonly closed$ = new Subject<PopupCloseEvent>();
     public readonly opened$ = new ReplaySubject<void>(1);
-    public readonly positionChanges$ = new Subject<ConnectionPositionPair>();
-    public componentRef?: ComponentRef<any>;
-    public wrapperComponentRef?: ComponentRef<any>;
     public readonly popupRef: PopupRef;
-    #closed = false;
-    #closing = false;
+    public readonly positionChanges$ = new Subject<ConnectionPositionPair>();
+    public componentRef?: ComponentRef<unknown>;
+    public wrapperComponentRef?: ComponentRef<unknown>;
 
     public constructor(
         public readonly overlayReference: OverlayRef,
@@ -65,8 +65,20 @@ export class PopupReference implements PopupRefParams {
         return true;
     }
 
-    public notifyOpen(): void {
-        this.opened$.next();
+    /**
+     * Finishes a close that bypassed {@link close}: the overlay was detached or disposed directly. Nothing can
+     * prevent it any more, so `beforeClose` is skipped; `closeStart` and `closed` still fire, in that order.
+     */
+    public closeDetached(): void {
+        if (this.#closed) {
+            return;
+        }
+        const event = new PopupCloseEvent({ via: PopupCloseSource.Programmatic });
+        if (!this.#closing) {
+            this.#closing = true;
+            this.closeStart$.next(event);
+        }
+        this.completeClose(event);
     }
 
     public completeClose(event: PopupCloseEvent): void {
@@ -78,6 +90,10 @@ export class PopupReference implements PopupRefParams {
         this.closed$.complete();
         this.positionChanges$.complete();
         this.overlayRef.dispose();
+    }
+
+    public notifyOpen(): void {
+        this.opened$.next();
     }
 
     public get beforeClose$(): Observable<PopupCloseEvent> {
@@ -92,7 +108,7 @@ export class PopupReference implements PopupRefParams {
         return this.closed$.asObservable();
     }
 
-    public get component(): ComponentRef<any> | null {
+    public get component(): ComponentRef<unknown> | null {
         return this.componentRef ?? null;
     }
 

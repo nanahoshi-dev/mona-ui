@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, DOCUMENT, inject, input, signal } from "@angular/core";
+import { booleanAttribute, ChangeDetectionStrategy, Component, DOCUMENT, inject, input, signal } from "@angular/core";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { themeOverlaySurfaceClasses } from "@nanahoshi/mona-ui/internal";
 import { PopupComponent } from "@nanahoshi/mona-ui/popup";
@@ -226,13 +226,13 @@ export class PopupWrapperComponent implements ComponentInputsAsSignal<PopupCompo
     public readonly anchorConnectionPoint = input<ReturnType<PopupComponent["anchorConnectionPoint"]>>("bottomcenter");
     public readonly animation = input<ReturnType<PopupComponent["animation"]>>(true);
     public readonly backdropClass = input<ReturnType<PopupComponent["backdropClass"]>>("");
-    public readonly closeOnBackdropClick = input<ReturnType<PopupComponent["closeOnBackdropClick"]>>(false);
-    public readonly closeOnEscape = input<ReturnType<PopupComponent["closeOnEscape"]>>(true);
-    public readonly closeOnMouseLeave = input<ReturnType<PopupComponent["closeOnMouseLeave"]>>(false);
-    public readonly closeOnOutsideClick = input<ReturnType<PopupComponent["closeOnOutsideClick"]>>(true);
-    public readonly closeOnScroll = input<ReturnType<PopupComponent["closeOnScroll"]>>(false);
+    public readonly closeOnBackdropClick = input(false, { transform: booleanAttribute });
+    public readonly closeOnEscape = input(true, { transform: booleanAttribute });
+    public readonly closeOnMouseLeave = input(false, { transform: booleanAttribute });
+    public readonly closeOnOutsideClick = input(true, { transform: booleanAttribute });
+    public readonly closeOnScroll = input(false, { transform: booleanAttribute });
     public readonly data = input<ReturnType<PopupComponent["data"]>>({});
-    public readonly hasBackdrop = input<ReturnType<PopupComponent["hasBackdrop"]>>(false);
+    public readonly hasBackdrop = input(false, { transform: booleanAttribute });
     public readonly height = input<ReturnType<PopupComponent["height"]>>("auto");
     public readonly maxHeight = input<ReturnType<PopupComponent["maxHeight"]>>("100%");
     public readonly maxWidth = input<ReturnType<PopupComponent["maxWidth"]>>("100%");
@@ -248,9 +248,11 @@ export class PopupWrapperComponent implements ComponentInputsAsSignal<PopupCompo
         return false;
     });
     public readonly providers = input<ReturnType<PopupComponent["providers"]>>([]);
-    public readonly restoreFocus = input<ReturnType<PopupComponent["restoreFocus"]>>("auto");
+    public readonly restoreFocus = input<ReturnType<PopupComponent["restoreFocus"]>, unknown>("auto", {
+        transform: (value: unknown) => (value === "auto" ? "auto" : booleanAttribute(value))
+    });
     public readonly trigger = input<ReturnType<PopupComponent["trigger"]>>("click");
     public readonly width = input<ReturnType<PopupComponent["width"]>>("auto");
-    public readonly withPush = input<ReturnType<PopupComponent["withPush"]>>(false);
-    public readonly withScrollTracking = input<ReturnType<PopupComponent["withScrollTracking"]>>(true);
+    public readonly withPush = input(false, { transform: booleanAttribute });
+    public readonly withScrollTracking = input(true, { transform: booleanAttribute });
 }

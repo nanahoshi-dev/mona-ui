@@ -4,7 +4,7 @@ import {
     FlexibleConnectedPositionStrategyOrigin
 } from "@angular/cdk/overlay";
 import {
-    AfterViewInit,
+    booleanAttribute,
     Component,
     DestroyRef,
     DOCUMENT,
@@ -19,7 +19,7 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { Action, rxTimeout } from "@nanahoshi/mona-ui/internal";
+import { Action } from "@nanahoshi/mona-ui/internal";
 import { fromEvent, Subject, take, takeUntil } from "rxjs";
 import { PopupCloseEvent } from "../../models/PopupCloseEvent";
 import { PopupOffset } from "../../models/PopupOffset";
@@ -32,12 +32,12 @@ import { ConnectionPoint } from "../../utils/connectionPosition";
     selector: "mona-popup",
     templateUrl: "./popup.component.html"
 })
-export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
+export class PopupComponent<T = unknown> implements OnDestroy {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #document = inject(DOCUMENT);
     readonly #popupService: PopupService = inject(PopupService);
-    #popupOpened: boolean = false;
     #eventListenerCleanup$ = new Subject<void>();
+    #popupOpened: boolean = false;
     protected readonly contentTemplate = viewChild.required(TemplateRef);
     protected popupRef: PopupRef | null = null;
 
@@ -64,28 +64,35 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
     /**
      * @description Emits when the popup is closed.
      */
+    // eslint-disable-next-line @angular-eslint/no-output-native -- public API name, kept for compatibility.
     public readonly close = output();
 
     /**
      * @description Whether to close the popup when clicking on the backdrop.
      * Only applies when the popup has a backdrop.
      */
-    public readonly closeOnBackdropClick = input(true);
+    public readonly closeOnBackdropClick = input(true, { transform: booleanAttribute });
 
     /**
      * @description Whether to close the popup when the escape key is pressed.
+     * Escape only reaches the topmost open popup.
      */
-    public readonly closeOnEscape = input(true);
+    public readonly closeOnEscape = input(true, { transform: booleanAttribute });
 
     /**
      * @description Whether to close the popup when the mouse leaves the anchor element.
      */
-    public readonly closeOnMouseLeave = input(false);
+    public readonly closeOnMouseLeave = input(false, { transform: booleanAttribute });
 
     /**
      * @description Whether to close the popup when clicking outside of it.
      */
-    public readonly closeOnOutsideClick = input(true);
+    public readonly closeOnOutsideClick = input(true, { transform: booleanAttribute });
+
+    /**
+     * @description Whether to close the popup when the user scrolls the page or a scrollable container around the anchor.
+     */
+    public readonly closeOnScroll = input(false, { transform: booleanAttribute });
 
     /**
      * @description Arbitrary data to pass to the popup.
@@ -95,7 +102,7 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
     /**
      * @description Whether the popup should have a backdrop.
      */
-    public readonly hasBackdrop = input(false);
+    public readonly hasBackdrop = input(false, { transform: booleanAttribute });
 
     /**
      * @description The height of the popup.
@@ -173,6 +180,18 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
     public readonly providers = input<StaticProvider[]>([]);
 
     /**
+     * @description Controls focus restoration when the popup closes.
+     * - `true`: always restore focus to the anchor element.
+     * - `false`: never restore focus (recommended for tooltips).
+     * - `"auto"`: restore focus only if the anchor, or an element inside it, was focused when the popup opened.
+     *
+     * Focus is left alone if the user moved it outside the popup and the anchor before it closed.
+     */
+    public readonly restoreFocus = input<boolean | "auto", unknown>("auto", {
+        transform: (value: unknown) => (value === "auto" ? "auto" : booleanAttribute(value))
+    });
+
+    /**
      * @description The trigger event for opening the popup.
      */
     public readonly trigger = input("click");
@@ -185,25 +204,12 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
     /**
      * @description Whether to push the popup into the screen when it is opened.
      */
-    public readonly withPush = input<boolean>(true);
-
-    /**
-     * @description Whether to close the popup when the user scrolls within a scrollable container.
-     */
-    public readonly closeOnScroll = input(false);
-
-    /**
-     * @description Controls focus restoration when the popup closes.
-     * - `true`: always restore focus to the anchor element.
-     * - `false`: never restore focus (recommended for tooltips).
-     * - `"auto"`: restore focus only if the anchor was focused when the popup opened.
-     */
-    public readonly restoreFocus = input<boolean | "auto">("auto");
+    public readonly withPush = input(true, { transform: booleanAttribute });
 
     /**
      * @description Whether the popup should track scroll events and reposition itself.
      */
-    public readonly withScrollTracking = input<boolean>(true);
+    public readonly withScrollTracking = input(true, { transform: booleanAttribute });
 
     public constructor() {
         effect(() => this.setupEventListeners());
@@ -211,10 +217,6 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
 
     public closePopup(): void {
         this.popupRef?.close();
-    }
-
-    public ngAfterViewInit(): void {
-        rxTimeout(this.#destroyRef, () => this.setupEventListeners());
     }
 
     public ngOnDestroy(): void {
@@ -262,8 +264,6 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
             pointAnchor = true;
         }
 
-        const width = this.getPopupWidth();
-
         fromEvent<PointerEvent>(target, trigger)
             .pipe(takeUntil(this.#eventListenerCleanup$), takeUntilDestroyed(this.#destroyRef))
             .subscribe(event => {
@@ -303,7 +303,8 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
                     preventClose: this.preventClose(),
                     providers: this.providers(),
                     restoreFocus: this.restoreFocus(),
-                    width,
+                    // Measured now rather than when the listener was set up, so it follows the anchor's size.
+                    width: this.getPopupWidth(),
                     withPush: this.withPush(),
                     withScrollTracking: this.withScrollTracking()
                 };

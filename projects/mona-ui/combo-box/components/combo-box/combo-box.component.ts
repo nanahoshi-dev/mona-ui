@@ -648,7 +648,9 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
     private setPopupCloseSubscriptions(): void {
         this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             this.#userNavigatedViaArrows.set(false);
-            this.focus();
+            if (this.#dropdownService.focusCanReturn()) {
+                this.focus();
+            }
             window.setTimeout(() => {
                 this.comboBoxValue$.next(null);
             });

@@ -4,7 +4,7 @@ import {
     ConnectionPositionPair,
     FlexibleConnectedPositionStrategyOrigin
 } from "@angular/cdk/overlay";
-import { StaticProvider, TemplateRef } from "@angular/core";
+import { Injector, StaticProvider, TemplateRef } from "@angular/core";
 import { Action } from "@nanahoshi/mona-ui/internal";
 import { ConnectionPoint } from "../utils/connectionPosition";
 import { PopupCloseEvent } from "./PopupCloseEvent";
@@ -45,20 +45,17 @@ export interface PopupSettings<T = unknown, C = void> {
     blockScroll?: boolean;
 
     /**
-     * The content to display in the popup.
-     * @type {TemplateRef | ComponentType}
-     */
-    content: TemplateRef<C> | ComponentType<C>;
-
-    /**
      * Whether the popup will be closed when the user clicks on the backdrop.
      * Only applies if `hasBackdrop` is true.
+     * Default: true.
      * @type {boolean}
      */
     closeOnBackdropClick?: boolean;
 
     /**
      * Whether the popup will be closed when the user presses the escape key.
+     * Escape only reaches the topmost open popup. When that popup sets this to `false`, Escape closes nothing,
+     * not even the popups underneath it.
      * Default: true.
      * @type {boolean}
      */
@@ -73,16 +70,24 @@ export interface PopupSettings<T = unknown, C = void> {
 
     /**
      * Whether the popup will be closed when the user clicks outside of it.
+     * Clicks on the backdrop are governed by `closeOnBackdropClick` instead.
+     * Default: true.
      * @type {boolean}
      */
     closeOnOutsideClick?: boolean;
 
     /**
-     * Whether the popup will be closed when the user scrolls.
+     * Whether the popup will be closed when the user scrolls the page or a scrollable container around the anchor.
      * Default: false.
      * @type {boolean}
      */
     closeOnScroll?: boolean;
+
+    /**
+     * The content to display in the popup.
+     * @type {TemplateRef | ComponentType}
+     */
+    content: TemplateRef<C> | ComponentType<C>;
 
     /**
      * Optional data to pass to the popup context.
@@ -91,7 +96,7 @@ export interface PopupSettings<T = unknown, C = void> {
 
     /**
      * Whether the popup will have a backdrop.
-     * Default: true.
+     * Default: false.
      */
     hasBackdrop?: boolean;
 
@@ -100,6 +105,15 @@ export interface PopupSettings<T = unknown, C = void> {
      * @type {number | string}
      */
     height?: number | string;
+
+    /**
+     * Parent injector for the popup content. Component content resolves its dependencies here, after
+     * `providers`. Pass the injector of the component that opens the popup so its content can use services
+     * provided by that component, its ancestors or a lazy-loaded route.
+     * Default: the root injector.
+     * @type {Injector}
+     */
+    injector?: Injector;
 
     /**
      * Maximum height of the popup.
@@ -181,7 +195,10 @@ export interface PopupSettings<T = unknown, C = void> {
      * Controls focus restoration behavior when the popup is closed.
      * - true: Always restore focus to anchor
      * - false: Never restore focus (recommended for tooltips)
-     * - "auto": Only restore focus if the anchor was focused when the popup opened (smart behavior)
+     * - "auto": Only restore focus if the anchor, or an element inside it, was focused when the popup opened;
+     *   focus returns to that element
+     * Focus is only restored while it is on the page itself, inside the popup or inside the anchor. If the user
+     * moved it elsewhere, for example by clicking another field, it stays there.
      * Default: "auto".
      * @type {boolean | "auto"}
      */
@@ -203,6 +220,7 @@ export interface PopupSettings<T = unknown, C = void> {
 
     /**
      * Whether the popup should track scroll events and reposition itself.
+     * Default: true.
      * @type {boolean}
      */
     withScrollTracking?: boolean;

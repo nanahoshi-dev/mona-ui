@@ -130,31 +130,35 @@ const generateFallbackPositions = (primaryPosition: ConnectionPositionPair): Con
         fallbacks.push({ originX: "start", originY: "bottom", overlayX: "end", overlayY: "top" });
     }
 
-    //6. Complete mirroring:
-    if (
-        !fallbacks.find(
-            f => f.originX !== originX && f.overlayX !== overlayX && f.originY !== originY && f.overlayY !== overlayY
-        )
-    ) {
-        if (originX === "start" && originY === "top") {
-            fallbacks.push({ originX: "end", originY: "bottom", overlayX: "end", overlayY: "bottom" });
-        } else if (originX === "center" && originY === "top") {
-            fallbacks.push({ originX: "center", originY: "bottom", overlayX: "center", overlayY: "bottom" });
-        } else if (originX === "end" && originY === "top") {
-            fallbacks.push({ originX: "start", originY: "bottom", overlayX: "start", overlayY: "bottom" });
-        } else if (originX === "start" && originY === "center") {
-            fallbacks.push({ originX: "end", originY: "center", overlayX: "end", overlayY: "center" });
-        } else if (originX === "center" && originY === "center") {
-            fallbacks.push({ originX: "center", originY: "center", overlayX: "center", overlayY: "center" });
-        } else if (originX === "end" && originY === "center") {
-            fallbacks.push({ originX: "start", originY: "center", overlayX: "start", overlayY: "center" });
-        } else if (originX === "start" && originY === "bottom") {
-            fallbacks.push({ originX: "end", originY: "top", overlayX: "end", overlayY: "top" });
-        } else if (originX === "center" && originY === "bottom") {
-            fallbacks.push({ originX: "center", originY: "top", overlayX: "center", overlayY: "top" });
-        } else if (originX === "end" && originY === "bottom") {
-            fallbacks.push({ originX: "start", originY: "top", overlayX: "start", overlayY: "top" });
-        }
+    // 6. Complete mirroring: flip both the anchor corner and the popup corner on both axes, so the popup lands on
+    // the opposite side and alignment of the anchor. Flipping only the anchor corner and copying it onto the popup
+    // corner, as this used to do, placed the popup over the anchor.
+    const mirrored: ConnectionPositionPair = {
+        originX: flipX(originX),
+        originY: flipY(originY),
+        overlayX: flipX(overlayX),
+        overlayY: flipY(overlayY)
+    };
+    const isPrimary =
+        mirrored.originX === originX &&
+        mirrored.originY === originY &&
+        mirrored.overlayX === overlayX &&
+        mirrored.overlayY === overlayY;
+    const isListed = fallbacks.some(
+        f =>
+            f.originX === mirrored.originX &&
+            f.originY === mirrored.originY &&
+            f.overlayX === mirrored.overlayX &&
+            f.overlayY === mirrored.overlayY
+    );
+    if (!isPrimary && !isListed) {
+        fallbacks.push(mirrored);
     }
     return fallbacks;
 };
+
+const flipX = <T extends "start" | "center" | "end">(value: T): T =>
+    (value === "start" ? "end" : value === "end" ? "start" : value) as T;
+
+const flipY = <T extends "top" | "center" | "bottom">(value: T): T =>
+    (value === "top" ? "bottom" : value === "bottom" ? "top" : value) as T;

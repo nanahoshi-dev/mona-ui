@@ -626,7 +626,9 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
 
     private setPopupCloseSubscriptions(): void {
         this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
-            this.focus();
+            if (this.#dropdownService.focusCanReturn()) {
+                this.focus();
+            }
             this.activeView.set("date");
             this.navigatedDate.set(this.value() ?? new Date());
         });
