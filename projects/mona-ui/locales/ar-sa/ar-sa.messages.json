@@ -251,7 +251,8 @@
     },
     "multiSelect": {
         "clear": "مسح",
-        "itemsCount": "+ {count}"
+        "itemsCount": "+ {count}",
+        "removeMoreItems": "حذف العناصر الإضافية ({count})"
     },
     "notification": {
         "close": "إغلاق",

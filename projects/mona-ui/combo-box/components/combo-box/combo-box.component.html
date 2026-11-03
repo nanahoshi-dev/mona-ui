@@ -8,11 +8,11 @@
     monaTextBox
     [class]="inputClass()"
     [disabled]="disabled()"
-    [id]="id"
+    [id]="inputId()"
     [placeholder]="placeholder()"
     [readonly]="readonly()"
     [required]="required()"
-    [ngModel]="comboBoxValue()"
+    [value]="comboBoxValue()"
     [attr.aria-activedescendant]="activeDescendant()"
     [attr.aria-autocomplete]="'list'"
     [attr.aria-busy]="loading()"
@@ -21,13 +21,13 @@
     [attr.aria-expanded]="expanded()"
     [attr.aria-haspopup]="'listbox'"
     [attr.aria-invalid]="invalidState() || undefined"
-    [attr.aria-label]="effectiveAriaLabel() || undefined"
+    [attr.aria-label]="ariaLabel() || undefined"
     [attr.aria-labelledby]="ariaLabelledBy() || undefined"
     role="combobox"
-    (ngModelChange)="comboBoxValue$.next($event)"
-    (blur)="onInputBlur($event)" />
+    (input)="onInput(textInput.value)"
+    #textInput />
 
-@if (showClearButton() && selectedListItem() && !loading()) {
+@if (clearButtonVisible()) {
     <mona-indicator-icon
         preset="clear"
         [interactive]="true"
@@ -40,8 +40,6 @@
 }
 
 <mona-indicator-icon preset="dropdown" [size]="18"></mona-indicator-icon>
-
-<span monaDropdownLiveRegion></span>
 
 <ng-template #popupTemplate>
     <div [class]="listPopupClass()" (pointerdown)="onPopupPointerDown($event)">

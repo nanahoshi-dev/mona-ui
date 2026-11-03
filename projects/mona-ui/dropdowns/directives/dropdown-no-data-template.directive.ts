@@ -8,7 +8,6 @@ import { Directive } from "@angular/core";
         ng-template[monaDropDownTreeNoDataTemplate],
         ng-template[monaComboBoxNoDataTemplate],
         ng-template[monaMultiSelectNoDataTemplate]
-    `,
-    standalone: true
+    `
 })
 export class DropdownNoDataTemplateDirective {}

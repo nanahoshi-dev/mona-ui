@@ -21,9 +21,12 @@ export const isTypeaheadKey = (key: string, modifiers?: TypeaheadModifiers): boo
     return /^[\p{L}\p{M}\p{N}\-_\s]$/u.test(key);
 };
 
+/** How long typeahead waits after the last key before it starts a new search, in milliseconds. */
+export const TYPEAHEAD_RESET_DELAY = 200;
+
 export const setupTypeahead = (typeaheadKey$: Observable<string>): Observable<string> => {
     const resetTrigger$ = typeaheadKey$.pipe(
-        debounceTime(200),
+        debounceTime(TYPEAHEAD_RESET_DELAY),
         map(() => ({ type: "reset", value: "" }))
     );
     const keypress$ = typeaheadKey$.pipe(map(key => ({ type: "key", value: key })));

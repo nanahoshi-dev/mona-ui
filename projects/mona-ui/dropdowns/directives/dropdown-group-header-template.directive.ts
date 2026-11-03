@@ -7,7 +7,6 @@ import { Directive } from "@angular/core";
         ng-template[monaDropDownListGroupHeaderTemplate],
         ng-template[monaComboBoxGroupHeaderTemplate],
         ng-template[monaMultiSelectGroupHeaderTemplate]
-  `,
-    standalone: true
+  `
 })
 export class DropdownGroupHeaderTemplateDirective {}

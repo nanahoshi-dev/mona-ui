@@ -20,7 +20,7 @@
     }
 </span>
 
-@if (selectedListItem() && showClearButton() && !loading()) {
+@if (clearButtonVisible()) {
     <mona-indicator-icon
         preset="clear"
         [interactive]="true"
@@ -33,8 +33,6 @@
 }
 
 <mona-indicator-icon preset="dropdown" [size]="18"></mona-indicator-icon>
-
-<span monaDropdownLiveRegion></span>
 
 <ng-template #popupTemplate>
     <div [class]="listPopupClass()" (pointerdown)="onPopupPointerDown($event)">

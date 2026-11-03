@@ -251,7 +251,8 @@
     },
     "multiSelect": {
         "clear": "Temizle",
-        "itemsCount": "+ {count} öğe"
+        "itemsCount": "+ {count} öğe",
+        "removeMoreItems": "Diğer {count} öğeyi kaldır"
     },
     "notification": {
         "close": "Kapat",

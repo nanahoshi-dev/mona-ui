@@ -1,5 +1,5 @@
-import { ApplicationRef, Component, signal, TemplateRef, viewChild } from "@angular/core";
-import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { ApplicationRef, Component, signal, type TemplateRef, viewChild } from "@angular/core";
+import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { DROPDOWN_POPUP_INPUT_TOKEN, type DropdownPopupInput } from "../models/DropdownPopupInput";
 import { DropdownService } from "../services/dropdown.service";
 import { DropdownPopupHandlerDirective } from "./dropdown-popup-handler.directive";

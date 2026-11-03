@@ -1,5 +1,5 @@
 import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
+import { booleanAttribute, ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideBox, LucideUtensils } from "@lucide/angular";
 import { PreventableEvent } from "@nanahoshi/mona-ui/common";
@@ -125,6 +125,10 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
     });
     protected readonly config = computed(() => ({
         inputs: deriveInputConfig<DropdownListComponent<any>>(this.metadata(), {
+            // The demo labels the field with visible text referenced through aria-labelledby.
+            ariaDescribedBy: undefined,
+            ariaLabel: undefined,
+            ariaLabelledBy: undefined,
             data: {
                 type: "object"
             },
@@ -210,9 +214,9 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
         @let featureData = features();
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
         <span>Selected Value: {{ formValueText() }}</span>
+        <span id="dropdown-list-demo-label" class="text-sm font-medium">Favourite food</span>
         <mona-dropdown-list
-            [aria-label]="ariaLabel()"
-            [aria-labelledby]="ariaLabelledBy()"
+            aria-labelledby="dropdown-list-demo-label"
             [data]="dropdownData()"
             [itemDisabled]="itemDisabled()"
             [loading]="loading()"
@@ -329,25 +333,23 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
     });
     protected readonly grouping = computed(() => buildGroupableOptions(this.features()));
     protected readonly virtualization = computed(() => buildVirtualScrollOptions(this.features()));
-    public readonly ariaLabel = input<ReturnType<DropdownListComponent["ariaLabel"]>>("");
-    public readonly ariaLabelledBy = input<ReturnType<DropdownListComponent["ariaLabelledBy"]>>("");
     public readonly data = input<ReturnType<DropdownListComponent["data"]>>([]);
-    public readonly disabled = model<ReturnType<DropdownListComponent["disabled"]>>(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly itemDisabled = input<ReturnType<DropdownListComponent["itemDisabled"]>>("active");
-    public readonly loading = input<ReturnType<DropdownListComponent["loading"]>>(false);
+    public readonly loading = input(false, { transform: booleanAttribute });
     public readonly placeholder = input<ReturnType<DropdownListComponent["placeholder"]>>("Select an option");
     public readonly popupClass = input<ReturnType<DropdownListComponent["popupClass"]>>("");
     public readonly popupHeight = input<ReturnType<DropdownListComponent["popupHeight"]>>(null);
     public readonly popupWidth = input<ReturnType<DropdownListComponent["popupWidth"]>>(null);
-    public readonly readonly = input<ReturnType<DropdownListComponent["readonly"]>>(false);
-    public readonly required = input<ReturnType<DropdownListComponent["required"]>>(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<DropdownListComponent["rounded"]>>("medium");
-    public readonly showClearButton = input<ReturnType<DropdownListComponent["showClearButton"]>>(false);
+    public readonly showClearButton = input(false, { transform: booleanAttribute });
     public readonly size = input<ReturnType<DropdownListComponent["size"]>>("medium");
     public readonly textField = input<ReturnType<DropdownListComponent["textField"]>>("text");
     public readonly userClass = input<ReturnType<DropdownListComponent["userClass"]>>("w-44");
     public readonly valueField = input<ReturnType<DropdownListComponent["valueField"]>>("value");
-    public readonly valuePrimitive = input<ReturnType<DropdownListComponent["valuePrimitive"]>>(false);
+    public readonly valuePrimitive = input(false, { transform: booleanAttribute });
 
     protected onPopupClose(event: PreventableEvent) {
         const preventClose = this.features()["preventClose"].active;

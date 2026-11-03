@@ -1,5 +1,5 @@
 import { Component, signal } from "@angular/core";
-import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import {
     disabled as fieldDisabled,
@@ -8,7 +8,8 @@ import {
     readonly as fieldReadonly,
     required
 } from "@angular/forms/signals";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import axe from "axe-core";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 
 import { DropdownListValueTemplateDirective } from "../../directives/dropdown-list-value-template.directive";
@@ -20,6 +21,42 @@ const FOOD_ITEMS: readonly FoodItem[] = [
     { text: "Carrot", value: 3 },
     { text: "Date", value: 0 }
 ];
+
+@Component({
+    template: `
+        <span id="food-label">Food</span>
+        <mona-dropdown-list
+            aria-labelledby="food-label"
+            aria-describedby="food-help"
+            disabled
+            readonly
+            required
+            showClearButton
+            textField="text"
+            [data]="data"></mona-dropdown-list>
+        <span id="food-help">Pick a food</span>
+    `,
+    imports: [DropdownListComponent]
+})
+class AttributeDropdownListHostComponent {
+    protected readonly data = FOOD_ITEMS;
+}
+
+@Component({
+    template: `
+        <span id="food-label">Food</span>
+        <mona-dropdown-list
+            aria-labelledby="food-label"
+            textField="text"
+            [data]="data"
+            [required]="true"
+            [value]="data[1]"></mona-dropdown-list>
+    `,
+    imports: [DropdownListComponent]
+})
+class LabelledDropdownListHostComponent {
+    protected readonly data = FOOD_ITEMS;
+}
 
 @Component({
     template: `
@@ -38,14 +75,14 @@ class ObjectModeHostComponent {
     readonly #formModel = signal<DropdownListFormModel>({ value: FOOD_ITEMS[1] });
     protected readonly data = FOOD_ITEMS;
     public readonly disabled = signal(false);
-    public readonly loading = signal(false);
-    public readonly readonlyState = signal(false);
-    public readonly requiredState = signal(false);
     public readonly form = form(this.#formModel, schema => {
         fieldDisabled(schema.value, { when: () => this.disabled() });
         fieldReadonly(schema.value, { when: () => this.readonlyState() });
         required(schema.value, { when: () => this.requiredState() });
     });
+    public readonly loading = signal(false);
+    public readonly readonlyState = signal(false);
+    public readonly requiredState = signal(false);
 }
 
 @Component({
@@ -66,14 +103,14 @@ class PrimitiveModeHostComponent {
     readonly #formModel = signal<PrimitiveDropdownListFormModel>({ value: 2 });
     public readonly data = signal<readonly FoodItem[]>(FOOD_ITEMS);
     public readonly disabled = signal(false);
-    public readonly loading = signal(false);
-    public readonly readonlyState = signal(false);
-    public readonly requiredState = signal(false);
     public readonly form = form(this.#formModel, schema => {
         fieldDisabled(schema.value, { when: () => this.disabled() });
         fieldReadonly(schema.value, { when: () => this.readonlyState() });
         required(schema.value, { when: () => this.requiredState() });
     });
+    public readonly loading = signal(false);
+    public readonly readonlyState = signal(false);
+    public readonly requiredState = signal(false);
 }
 
 @Component({
@@ -95,11 +132,7 @@ class PrimitiveTwoWayHostComponent {
 
 @Component({
     template: `
-        <mona-dropdown-list
-            [data]="data"
-            textField="text"
-            valueField="value"
-            [(value)]="selected">
+        <mona-dropdown-list [data]="data" textField="text" valueField="value" [(value)]="selected">
             <ng-template monaDropDownListValueTemplate let-item>
                 <span>{{ item.text }}:{{ item.value }}</span>
             </ng-template>
@@ -126,8 +159,24 @@ class ObjectTwoWayHostComponent {
 })
 class FunctionValueFieldHostComponent {
     protected readonly data = FOOD_ITEMS;
-    protected readonly valueField = (item: FoodItem) => item.value;
     public selectedId: number | null = 2;
+    protected readonly valueField = (item: FoodItem) => item.value;
+}
+
+@Component({
+    template: `
+        <mona-dropdown-list
+            aria-label="City"
+            [data]="cities"
+            [popupHeight]="popupHeight()"
+            [(value)]="city"></mona-dropdown-list>
+    `,
+    imports: [DropdownListComponent]
+})
+class CityDropdownListHostComponent {
+    protected readonly cities = ["Boston", "Newark", "New York"];
+    public readonly popupHeight = signal<number | null>(null);
+    public city: string | null = null;
 }
 
 describe("DropdownListComponent", () => {
@@ -214,7 +263,7 @@ describe("DropdownListComponent", () => {
             await waitForStable(fixture);
 
             expect(fixture.componentInstance.form.value().value()).toEqual(FOOD_ITEMS[2]);
-            expect(fixture.componentInstance.form.value().touched()).toBe(true);
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
             expect(getHost(fixture).textContent).toContain("Carrot");
         });
 
@@ -225,7 +274,7 @@ describe("DropdownListComponent", () => {
             await waitForStable(fixture);
 
             expect(fixture.componentInstance.form.value().value()).toBeNull();
-            expect(fixture.componentInstance.form.value().touched()).toBe(true);
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
         });
 
         it("writes the complete object through a two-way value binding", async () => {
@@ -273,7 +322,7 @@ describe("DropdownListComponent", () => {
             await waitForStable(fixture);
 
             expect(fixture.componentInstance.form.value().value()).toBe(3);
-            expect(fixture.componentInstance.form.value().touched()).toBe(true);
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
             expect(getHost(fixture).textContent).toContain("Carrot");
         });
 
@@ -319,7 +368,20 @@ describe("DropdownListComponent", () => {
             expect(fixture.componentInstance.form.value().value()).toBe(3);
         });
 
-        it("commits the navigated item when the popup closes", async () => {
+        it("commits the navigated item when Tab closes the popup", async () => {
+            const fixture = await createPrimitiveModeFixture();
+
+            await openPopup(fixture);
+            pressKey(fixture, "ArrowDown");
+            pressKey(fixture, "Tab");
+            await waitForStable(fixture);
+            await new Promise(resolve => setTimeout(resolve, 0));
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.form.value().value()).toBe(3);
+        });
+
+        it("keeps the value when Escape closes the popup", async () => {
             const fixture = await createPrimitiveModeFixture();
 
             await openPopup(fixture);
@@ -329,7 +391,8 @@ describe("DropdownListComponent", () => {
             await new Promise(resolve => setTimeout(resolve, 0));
             await waitForStable(fixture);
 
-            expect(fixture.componentInstance.form.value().value()).toBe(3);
+            expect(fixture.componentInstance.form.value().value()).toBe(2);
+            expect(getHost(fixture).textContent).toContain("Banana");
         });
 
         it("clears the signal form value from the clear button", async () => {
@@ -339,7 +402,7 @@ describe("DropdownListComponent", () => {
             await waitForStable(fixture);
 
             expect(fixture.componentInstance.form.value().value()).toBeNull();
-            expect(fixture.componentInstance.form.value().touched()).toBe(true);
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
         });
 
         it("treats zero as a valid selected value", async () => {
@@ -438,11 +501,10 @@ describe("DropdownListComponent", () => {
         });
     });
 
-    it("emits touch on blur", async () => {
+    it("emits touch when focus leaves the dropdown list", async () => {
         const fixture = await createObjectModeFixture();
 
-        getHost(fixture).dispatchEvent(new FocusEvent("blur"));
-        await waitForStable(fixture);
+        await leaveField(fixture);
 
         expect(fixture.componentInstance.form.value().touched()).toBe(true);
     });
@@ -570,6 +632,198 @@ describe("DropdownListComponent", () => {
         expect(fixture.nativeElement.getAttribute("aria-label")).toBe("Select a food");
     });
 
+    describe("cancelling the popup", () => {
+        it("keeps the value when a click outside closes the popup", async () => {
+            const fixture = await createPrimitiveModeFixture();
+
+            await openPopup(fixture);
+            pressKey(fixture, "ArrowDown");
+            await waitForStable(fixture);
+            document.body.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
+            document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+            await waitForStable(fixture);
+            await new Promise(resolve => setTimeout(resolve, 0));
+            await waitForStable(fixture);
+
+            expect(getHost(fixture).getAttribute("aria-expanded")).toBe("false");
+            expect(fixture.componentInstance.form.value().value()).toBe(2);
+            expect(getHost(fixture).textContent).toContain("Banana");
+        });
+
+        it("commits the navigated item on Alt+ArrowUp", async () => {
+            const fixture = await createPrimitiveModeFixture();
+
+            await openPopup(fixture);
+            pressKey(fixture, "ArrowDown");
+            getHost(fixture).dispatchEvent(
+                new KeyboardEvent("keydown", { key: "ArrowUp", altKey: true, bubbles: true, cancelable: true })
+            );
+            await waitForStable(fixture);
+            await new Promise(resolve => setTimeout(resolve, 0));
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.form.value().value()).toBe(3);
+        });
+
+        it("reopens on the selected item after Escape", async () => {
+            const fixture = await createPrimitiveModeFixture();
+
+            await openPopup(fixture);
+            pressKey(fixture, "ArrowDown");
+            pressKey(fixture, "Escape");
+            await waitForStable(fixture);
+            await new Promise(resolve => setTimeout(resolve, 0));
+            await waitForStable(fixture);
+            await openPopup(fixture);
+
+            expect(getOption("Banana").getAttribute("aria-selected")).toBe("true");
+            expect(getOption("Carrot").getAttribute("aria-selected")).not.toBe("true");
+        });
+    });
+
+    describe("clear button state", () => {
+        it("is hidden on a read-only dropdown list", async () => {
+            const fixture = await createPrimitiveModeFixture();
+            fixture.componentInstance.readonlyState.set(true);
+            await waitForStable(fixture);
+
+            expect(getIndicator(fixture, "clear")).toBeNull();
+        });
+
+        it("is hidden on a disabled dropdown list", async () => {
+            const fixture = await createPrimitiveModeFixture();
+            fixture.componentInstance.disabled.set(true);
+            await waitForStable(fixture);
+
+            expect(getIndicator(fixture, "clear")).toBeNull();
+        });
+    });
+
+    describe("API", () => {
+        it("caps the popup at popupHeight and lifts the default height limit", async () => {
+            const fixture = await createObjectFixture(CityDropdownListHostComponent);
+            fixture.componentInstance.popupHeight.set(320);
+            await waitForStable(fixture);
+
+            await openPopup(fixture);
+
+            const pane = document.querySelector(".cdk-overlay-pane") as HTMLElement;
+            // The connected position strategy puts the limit on the box around the pane.
+            expect(pane.parentElement?.style.maxHeight).toBe("320px");
+            expect(pane.querySelector("mona-list")?.parentElement?.classList.contains("max-h-none")).toBe(true);
+        });
+
+        it("keeps the default popup height limit when popupHeight isn't set", async () => {
+            const fixture = await createObjectFixture(CityDropdownListHostComponent);
+
+            await openPopup(fixture);
+
+            const pane = document.querySelector(".cdk-overlay-pane") as HTMLElement;
+            // The connected position strategy puts the limit on the box around the pane.
+            expect(pane.parentElement?.style.maxHeight).toBe("200px");
+            expect(pane.querySelector("mona-list")?.parentElement?.classList.contains("max-h-64")).toBe(true);
+        });
+
+        it("passes focus options through to the host", async () => {
+            const fixture = await createObjectModeFixture();
+            const host = getHost(fixture);
+            const focusSpy = vi.spyOn(host, "focus");
+
+            getDropdownListComponent(fixture).focus({ preventScroll: true });
+
+            expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
+            expect(document.activeElement).toBe(host);
+        });
+    });
+
+    describe("typeahead", () => {
+        it("treats Space as part of a typeahead search", async () => {
+            const fixture = await createObjectFixture(CityDropdownListHostComponent);
+
+            for (const key of ["n", "e", "w", " ", "y"]) {
+                pressKey(fixture, key);
+            }
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.city).toBe("New York");
+            expect(getHost(fixture).getAttribute("aria-expanded")).toBe("false");
+        });
+
+        it("opens the popup with Space once the typeahead search has lapsed", async () => {
+            const fixture = await createObjectFixture(CityDropdownListHostComponent);
+
+            pressKey(fixture, "b");
+            await new Promise(resolve => setTimeout(resolve, 250));
+            pressKey(fixture, " ");
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.city).toBe("Boston");
+            expect(getHost(fixture).getAttribute("aria-expanded")).toBe("true");
+        });
+    });
+
+    describe("forms and accessibility", () => {
+        it("doesn't mark the field touched while focus moves to its clear button", async () => {
+            const fixture = await createObjectModeFixture();
+
+            await leaveField(fixture, getClearButton(fixture));
+
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
+        });
+
+        it("doesn't mark the field touched when the arrow keys change the value", async () => {
+            const fixture = await createObjectModeFixture();
+
+            pressKey(fixture, "ArrowDown");
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.form.value().value()).toEqual(FOOD_ITEMS[2]);
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
+        });
+
+        it("accepts bare boolean attributes", async () => {
+            const fixture = await createObjectFixture(AttributeDropdownListHostComponent);
+            const host = getHost(fixture);
+
+            expect(host.getAttribute("aria-disabled")).toBe("true");
+            expect(host.getAttribute("aria-readonly")).toBe("true");
+            expect(host.getAttribute("aria-required")).toBe("true");
+            expect(host.hasAttribute("tabindex")).toBe(false);
+        });
+
+        it("links a description through aria-describedby", async () => {
+            const fixture = await createObjectFixture(AttributeDropdownListHostComponent);
+
+            expect(getHost(fixture).getAttribute("aria-describedby")).toBe("food-help");
+            expect(getHost(fixture).getAttribute("aria-labelledby")).toBe("food-label");
+            expect(getHost(fixture).hasAttribute("aria-label")).toBe(false);
+        });
+
+        it("leaves empty ARIA references off the host", async () => {
+            const fixture = await createObjectModeFixture();
+
+            expect(getHost(fixture).hasAttribute("aria-describedby")).toBe(false);
+            expect(getHost(fixture).hasAttribute("aria-labelledby")).toBe(false);
+        });
+
+        it("keeps the result count out of the combobox's content", async () => {
+            const fixture = await createObjectModeFixture();
+
+            expect(getHost(fixture).querySelector("[aria-live]")).toBeNull();
+            expect(getHost(fixture).textContent?.trim()).toBe("Banana");
+        });
+
+        it("has no AXE violations when labelled and required", async () => {
+            const fixture = await createObjectFixture(LabelledDropdownListHostComponent);
+
+            const results = await axe.run(fixture.nativeElement as HTMLElement, {
+                rules: { "color-contrast": { enabled: false } }
+            });
+
+            expect(results.violations).toEqual([]);
+        });
+    });
+
     describe("i18n", () => {
         it("renders default English clear label on indicator icon", async () => {
             const fixture = await createObjectModeFixture();
@@ -638,6 +892,11 @@ async function openPopup(fixture: ComponentFixture<unknown>): Promise<void> {
     await waitForStable(fixture);
 }
 
+async function leaveField(fixture: ComponentFixture<unknown>, relatedTarget: EventTarget | null = null): Promise<void> {
+    getHost(fixture).dispatchEvent(new FocusEvent("focusout", { bubbles: true, relatedTarget }));
+    await waitForStable(fixture);
+}
+
 function pressKey(fixture: ComponentFixture<unknown>, key: string): void {
     getHost(fixture).dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
 }
@@ -681,8 +940,8 @@ interface FoodItem {
 }
 
 interface StockItem {
-    readonly text: string;
     readonly inStock: boolean;
+    readonly text: string;
 }
 
 interface DropdownListFormModel {

@@ -12,6 +12,7 @@
             [removable]="true"
             [removeTabIndex]="-1"
             [disabled]="disabled()"
+            [removeLabel]="chipMessages().removeLabel(pair.value)"
             [rounded]="rounded()"
             [size]="size()"
             (remove)="onSelectedItemRemove($event, pair.key!)">
@@ -26,16 +27,17 @@
     }
 
     @if (tagCount() >= 0 && selectedListItems().length > tagCount()) {
+        @let remainingCount = selectedDataItems().length - tagCount();
         <mona-chip
             look="outline"
             [tabindex]="-1"
             [removable]="true"
             [removeTabIndex]="-1"
             [disabled]="disabled()"
+            [removeLabel]="messages().removeMoreItems(remainingCount)"
             [rounded]="rounded()"
             [size]="size()"
             (remove)="onSelectedItemGroupRemove($event)">
-            @let remainingCount = selectedDataItems().length - tagCount();
             @if (summaryTagTemplate()) {
                 <ng-container
                     [ngTemplateOutlet]="summaryTagTemplate()"
@@ -45,9 +47,13 @@
             }
         </mona-chip>
     }
+
+    @if (placeholder() && selectedListItems().isEmpty()) {
+        <span class="px-1.5 text-muted-foreground">{{ placeholder() }}</span>
+    }
 </div>
 
-@if (showClearButton() && selectedListItems().length !== 0 && !loading()) {
+@if (clearButtonVisible()) {
     <mona-indicator-icon
         preset="clear"
         [class]="indicatorClass()"
@@ -61,8 +67,6 @@
 }
 
 <mona-indicator-icon preset="dropdown" [class]="indicatorClass()" [size]="18"></mona-indicator-icon>
-
-<span monaDropdownLiveRegion></span>
 
 <ng-template #popupTemplate>
     <div [class]="listPopupClass()" (pointerdown)="onPopupPointerDown($event)">

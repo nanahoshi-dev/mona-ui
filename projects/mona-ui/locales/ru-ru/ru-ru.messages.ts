@@ -278,7 +278,9 @@ export const RU_RU_MESSAGES = {
     multiSelect: {
         clear: "Очистить",
         itemsCount: (count: number) =>
-            `+ ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} элемент`, few: () => `${localizeNumber(count)} элемента`, many: () => `${localizeNumber(count)} элементов`, other: () => `${localizeNumber(count)} элемента` })}`
+            `+ ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} элемент`, few: () => `${localizeNumber(count)} элемента`, many: () => `${localizeNumber(count)} элементов`, other: () => `${localizeNumber(count)} элемента` })}`,
+        removeMoreItems: (count: number) =>
+            `Удалить ещё ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} элемент`, few: () => `${localizeNumber(count)} элемента`, many: () => `${localizeNumber(count)} элементов`, other: () => `${localizeNumber(count)} элемента` })}`
     },
     notification: {
         close: "Закрыть",

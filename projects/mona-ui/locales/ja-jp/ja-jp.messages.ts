@@ -267,7 +267,8 @@ export const JA_JP_MESSAGES = {
     },
     multiSelect: {
         clear: "クリア",
-        itemsCount: (count: number) => `+ ${localizeNumber(count)}件`
+        itemsCount: (count: number) => `+ ${localizeNumber(count)}件`,
+        removeMoreItems: (count: number) => `他の${localizeNumber(count)}件を削除`
     },
     notification: {
         close: "閉じる",

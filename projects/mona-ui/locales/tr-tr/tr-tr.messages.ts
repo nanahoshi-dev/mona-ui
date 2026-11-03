@@ -268,7 +268,8 @@ export const TR_TR_MESSAGES = {
     },
     multiSelect: {
         clear: "Temizle",
-        itemsCount: (count: number) => `+ ${localizeNumber(count)} öğe`
+        itemsCount: (count: number) => `+ ${localizeNumber(count)} öğe`,
+        removeMoreItems: (count: number) => `Diğer ${localizeNumber(count)} öğeyi kaldır`
     },
     notification: {
         close: "Kapat",

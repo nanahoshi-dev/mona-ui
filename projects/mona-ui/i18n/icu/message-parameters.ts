@@ -291,7 +291,8 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
     },
     multiSelect: {
         clear: null,
-        itemsCount: [{ name: "count", type: "number" }]
+        itemsCount: [{ name: "count", type: "number" }],
+        removeMoreItems: [{ name: "count", type: "number" }]
     },
     notification: {
         close: null,

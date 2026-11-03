@@ -1,7 +1,7 @@
 import { signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { ListService } from "@nanahoshi/mona-ui/internal/list";
-import { DropdownDataInputToken } from "../models/DropdownDataInput";
+import { DROPDOWN_DATA_INPUT_TOKEN } from "../models/DropdownDataInput";
 import { DropdownDataHandlerDirective } from "./dropdown-data-handler.directive";
 
 describe("DropdownDataHandlerDirective", () => {
@@ -10,7 +10,7 @@ describe("DropdownDataHandlerDirective", () => {
             providers: [
                 ListService,
                 {
-                    provide: DropdownDataInputToken,
+                    provide: DROPDOWN_DATA_INPUT_TOKEN,
                     useValue: {
                         data: signal([]),
                         itemDisabled: signal(""),

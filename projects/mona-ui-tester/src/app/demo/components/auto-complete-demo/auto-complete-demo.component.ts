@@ -1,8 +1,9 @@
 import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
+import { booleanAttribute, ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideBox, LucideCheck, LucideSearch, LucideTriangleAlert } from "@lucide/angular";
 import { AutoCompleteComponent } from "@nanahoshi/mona-ui/auto-complete";
+import { LabelComponent } from "@nanahoshi/mona-ui/label";
 import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import {
     DropdownFilterableDirective,
@@ -109,6 +110,11 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
     });
     protected readonly config = computed<ComponentConfig<AutoCompleteComponent<any>>>(() => ({
         inputs: deriveInputConfig<AutoCompleteComponent<any>>(this.metadata(), {
+            // The demo labels the field with a visible <mona-label> pointed at a fixed inputId.
+            ariaDescribedBy: undefined,
+            ariaLabel: undefined,
+            ariaLabelledBy: undefined,
+            inputId: undefined,
             data: {
                 type: "iterable",
                 value: []
@@ -175,6 +181,7 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
 @Component({
     imports: [
         AutoCompleteComponent,
+        LabelComponent,
         DropdownGroupableDirective,
         DropdownGroupHeaderTemplateDirective,
         DropdownVirtualScrollDirective,
@@ -197,10 +204,9 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
         @let featureData = features();
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
         <span>Selected Value: {{ form.value().value() }}</span>
+        <mona-label for="auto-complete-demo-input" text="Favourite food"></mona-label>
         <mona-auto-complete
-            [aria-describedby]="ariaDescribedBy()"
-            [aria-label]="ariaLabel()"
-            [aria-labelledby]="ariaLabelledBy()"
+            inputId="auto-complete-demo-input"
             [data]="autoCompleteData()"
             [highlightFirst]="highlightFirst()"
             [itemDisabled]="itemDisabled()"
@@ -315,22 +321,19 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
     protected readonly grouping = computed(() => buildGroupableOptions(this.features()));
     protected readonly selectedItem = signal<unknown>(null);
     protected readonly virtualization = computed(() => buildVirtualScrollOptions(this.features()));
-    public readonly ariaDescribedBy = input<ReturnType<AutoCompleteComponent["ariaDescribedBy"]>>("");
-    public readonly ariaLabel = input<ReturnType<AutoCompleteComponent["ariaLabel"]>>("");
-    public readonly ariaLabelledBy = input<ReturnType<AutoCompleteComponent["ariaLabelledBy"]>>("");
     public readonly data = input<ReturnType<AutoCompleteComponent["data"]>>([]);
-    public readonly disabled = model<ReturnType<AutoCompleteComponent["disabled"]>>(false);
-    public readonly highlightFirst = input<ReturnType<AutoCompleteComponent["highlightFirst"]>>(true);
+    public readonly disabled = input(false, { transform: booleanAttribute });
+    public readonly highlightFirst = input(true, { transform: booleanAttribute });
     public readonly itemDisabled = input<ReturnType<AutoCompleteComponent["itemDisabled"]>>(null);
-    public readonly loading = input<ReturnType<AutoCompleteComponent["loading"]>>(false);
+    public readonly loading = input(false, { transform: booleanAttribute });
     public readonly placeholder = input<ReturnType<AutoCompleteComponent["placeholder"]>>("");
     public readonly popupClass = input<ReturnType<AutoCompleteComponent["popupClass"]>>("");
     public readonly popupHeight = input<ReturnType<AutoCompleteComponent["popupHeight"]>>(null);
     public readonly popupWidth = input<ReturnType<AutoCompleteComponent["popupWidth"]>>(null);
-    public readonly readonly = input<ReturnType<AutoCompleteComponent["readonly"]>>(false);
-    public readonly required = input<ReturnType<AutoCompleteComponent["required"]>>(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<AutoCompleteComponent["rounded"]>>("medium");
-    public readonly showClearButton = input<ReturnType<AutoCompleteComponent["showClearButton"]>>(false);
+    public readonly showClearButton = input(false, { transform: booleanAttribute });
     public readonly size = input<ReturnType<AutoCompleteComponent["size"]>>("small");
     public readonly textField = input<ReturnType<AutoCompleteComponent["textField"]>>("text");
     public readonly userClass = input<ReturnType<AutoCompleteComponent["userClass"]>>("w-50");

@@ -5,7 +5,7 @@ import { MultiSelectSummaryTagTemplateDirective } from "./multi-select-summary-t
 @Directive({
     selector: "mona-multi-select[monaMultiSelectSummaryTag]"
 })
-export class MultiSelectSummaryTagDirective<TData> {
+export class MultiSelectSummaryTagDirective {
     readonly #multiSelectService = inject(MultiSelectService);
     private readonly summaryTagTemplate = contentChild(MultiSelectSummaryTagTemplateDirective, { read: TemplateRef });
 

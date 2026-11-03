@@ -21,6 +21,7 @@ A modern, high-performance, accessible UI component library built for Angular an
 - [Buttons](docs/button.md)
 - [Popups](docs/popup.md)
 - [Text Boxes](docs/text-box.md)
+- [Dropdowns](docs/dropdowns.md)
 - [Patch Stores & Merge Utilities](docs/patch-store.md)
 - [Component Migration Inventory](docs/internal/i18n-rtl-migration-inventory.md)
 

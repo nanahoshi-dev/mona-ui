@@ -9,12 +9,13 @@
     role="combobox"
     [class]="inputClass()"
     [disabled]="disabled()"
-    [id]="id"
+    [id]="inputId()"
     [placeholder]="placeholder()"
     [readonly]="readonly()"
+    [required]="required()"
     [rounded]="rounded()"
     [size]="size()"
-    [ngModel]="autoCompleteValue()"
+    [value]="autoCompleteValue()"
     [attr.aria-activedescendant]="activeDescendant()"
     [attr.aria-autocomplete]="'list'"
     [attr.aria-busy]="loading()"
@@ -23,12 +24,12 @@
     [attr.aria-expanded]="expanded()"
     [attr.aria-haspopup]="'listbox'"
     [attr.aria-invalid]="invalidState() || undefined"
-    [attr.aria-label]="effectiveAriaLabel() || undefined"
+    [attr.aria-label]="ariaLabel() || undefined"
     [attr.aria-labelledby]="ariaLabelledBy() || undefined"
-    (ngModelChange)="autoCompleteValue$.next($event)"
-    (blur)="onInputBlur($event)" />
+    (input)="onInput(textInput.value)"
+    #textInput />
 
-@if (showClearButton() && autoCompleteValue() && !loading()) {
+@if (clearButtonVisible()) {
     <mona-indicator-icon
         preset="clear"
         [interactive]="true"
@@ -45,8 +46,6 @@
         <ng-container [ngTemplateOutlet]="suffixTemplate()"></ng-container>
     </span>
 }
-
-<span monaDropdownLiveRegion></span>
 
 <ng-template #popupTemplate>
     <div [class]="listPopupClass()" (pointerdown)="onPopupPointerDown($event)">

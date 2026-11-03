@@ -251,7 +251,8 @@
     },
     "multiSelect": {
         "clear": "清除",
-        "itemsCount": "+ {count} 項"
+        "itemsCount": "+ {count} 項",
+        "removeMoreItems": "移除其餘 {count} 項"
     },
     "notification": {
         "close": "關閉",

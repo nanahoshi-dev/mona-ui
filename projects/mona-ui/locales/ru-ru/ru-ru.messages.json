@@ -251,7 +251,8 @@
     },
     "multiSelect": {
         "clear": "Очистить",
-        "itemsCount": "+ {count, plural, one {# элемент} few {# элемента} many {# элементов} other {# элемента}}"
+        "itemsCount": "+ {count, plural, one {# элемент} few {# элемента} many {# элементов} other {# элемента}}",
+        "removeMoreItems": "Удалить ещё {count, plural, one {# элемент} few {# элемента} many {# элементов} other {# элемента}}"
     },
     "notification": {
         "close": "Закрыть",

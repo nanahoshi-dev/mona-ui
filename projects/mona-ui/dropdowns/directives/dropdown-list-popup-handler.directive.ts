@@ -2,6 +2,7 @@ import { afterNextRender, DestroyRef, Directive, ElementRef, inject } from "@ang
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import { ListService } from "@nanahoshi/mona-ui/internal/list";
+import { PopupCloseEvent, PopupCloseSource } from "@nanahoshi/mona-ui/popup";
 import { filter, fromEvent, switchMap, take } from "rxjs";
 import { DROPDOWN_POPUP_INPUT_TOKEN } from "../models/DropdownPopupInput";
 import { DropdownListService } from "../services/dropdown-list.service";
@@ -72,6 +73,11 @@ export class DropdownListPopupHandlerDirective {
     }
 
     private handleKeyDown(e: KeyboardEvent): void {
+        // Keys pressed while an IME is composing text (Enter to confirm a conversion, arrows to pick a candidate)
+        // belong to the IME. Safari reports the confirming Enter with isComposing false but keyCode 229.
+        if (e.isComposing || e.keyCode === 229) {
+            return;
+        }
         const event = new PreventableEvent("beforeKeydown", e);
         this.#dropdownService.beforeKeydown$.next(event);
         if (event.isDefaultPrevented()) {
@@ -80,7 +86,9 @@ export class DropdownListPopupHandlerDirective {
         if (e.key === "ArrowDown" || e.key === "ArrowUp") {
             this.handleArrowKeys(e);
         } else if (e.key === "Escape") {
-            this.closePopup();
+            this.#dropdownService
+                .popupRef()
+                ?.close(new PopupCloseEvent({ event: e, originalEvent: e, via: PopupCloseSource.Escape }));
         } else if (e.key === "Tab") {
             this.closePopup();
         } else if (e.key === " ") {

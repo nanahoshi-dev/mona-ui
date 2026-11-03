@@ -1,8 +1,8 @@
 import { afterNextRender, DestroyRef, Directive, effect, inject, input, output, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { FilterChangeEvent } from "@nanahoshi/mona-ui/common";
+import type { FilterChangeEvent } from "@nanahoshi/mona-ui/common";
 import { ListService } from "@nanahoshi/mona-ui/internal/list";
-import { FilterableOptions } from "@nanahoshi/mona-ui/common";
+import type { FilterableOptions } from "@nanahoshi/mona-ui/common";
 
 @Directive({
     selector: `
@@ -12,7 +12,7 @@ import { FilterableOptions } from "@nanahoshi/mona-ui/common";
         mona-multi-select[monaDropDownFilterable]
     `
 })
-export class DropdownFilterableDirective<TData> {
+export class DropdownFilterableDirective {
     readonly #defaultOptions: FilterableOptions = {
         enabled: true,
         operator: "contains",

@@ -251,7 +251,8 @@
     },
     "multiSelect": {
         "clear": "지우기",
-        "itemsCount": "+ {count}개"
+        "itemsCount": "+ {count}개",
+        "removeMoreItems": "나머지 {count}개 삭제"
     },
     "notification": {
         "close": "닫기",
