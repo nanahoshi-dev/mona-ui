@@ -2,6 +2,7 @@ import { ApplicationRef, Component, inject, signal, viewChild, viewChildren } fr
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { ButtonAriaHasPopup } from "../models/ButtonAriaHasPopup";
 import { ButtonService } from "../services/button.service";
 import { ButtonVariantProps } from "../styles/button.styles";
 import { ButtonDirective } from "./button.directive";
@@ -33,21 +34,20 @@ import { ButtonDirective } from "./button.directive";
     imports: [ButtonDirective]
 })
 class TestButtonHostComponent {
+    ariaHasPopup = signal<ButtonAriaHasPopup>("false");
+    buttonDirective = viewChild.required(ButtonDirective);
     disabled = signal(false);
+    iconOnly = signal(false);
     loading = signal(false);
     look = signal<ButtonVariantProps["look"]>("default");
-    size = signal<ButtonVariantProps["size"]>("medium");
+    onSelectedChange = vi.fn();
     rounded = signal<ButtonVariantProps["rounded"]>("medium");
-    iconOnly = signal(false);
     selected = signal(false);
+    size = signal<ButtonVariantProps["size"]>("medium");
     tabindex = signal<number | string>(0);
     toggleable = signal(false);
-    ariaHasPopup = signal("false");
-    userClass = signal("");
     type = signal<"button" | "reset" | "submit">("button");
-
-    onSelectedChange = vi.fn();
-    buttonDirective = viewChild.required(ButtonDirective);
+    userClass = signal("");
 }
 
 // =============================================================================
@@ -721,14 +721,13 @@ class TestNestedButtonComponent {}
 })
 class TestButtonWithServiceHostComponent {
     readonly buttons = viewChildren(ButtonDirective);
+    buttonDirective = viewChild.required(ButtonDirective);
     disabled = signal(false);
     look = signal<ButtonVariantProps["look"]>("default");
-    size = signal<ButtonVariantProps["size"]>("medium");
+    onSelectedChange = vi.fn();
     rounded = signal<ButtonVariantProps["rounded"]>("medium");
     selected = signal(false);
-
-    onSelectedChange = vi.fn();
-    buttonDirective = viewChild.required(ButtonDirective);
+    size = signal<ButtonVariantProps["size"]>("medium");
 
     public constructor() {
         inject(ButtonService).setMembers(this.buttons);
@@ -1065,5 +1064,59 @@ describe("ButtonDirective group membership", () => {
         await waitForStable(fixture);
         expect(clicks).not.toHaveBeenCalled();
         expect(button("action").getAttribute("data-look")).toBe("warning");
+    });
+});
+
+// =============================================================================
+// Icon-Only Accessible Name Warning Tests
+// =============================================================================
+
+@Component({
+    template: `
+        @switch (variant()) {
+            @case ("unnamed") {
+                <button monaButton iconOnly><svg aria-hidden="true"></svg></button>
+            }
+            @case ("labelled") {
+                <button monaButton iconOnly aria-label="Close"><svg aria-hidden="true"></svg></button>
+            }
+            @case ("text") {
+                <button monaButton iconOnly><span class="sr-only">Close</span></button>
+            }
+        }
+    `,
+    imports: [ButtonDirective]
+})
+class TestIconOnlyNameHostComponent {
+    variant = signal<"labelled" | "text" | "unnamed">("unnamed");
+}
+
+describe("ButtonDirective icon-only accessible name warning", () => {
+    async function render(variant: "labelled" | "text" | "unnamed"): Promise<ReturnType<typeof vi.spyOn>> {
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+        const fixture = TestBed.createComponent(TestIconOnlyNameHostComponent);
+        fixture.componentInstance.variant.set(variant);
+        await waitForStable(fixture);
+        await waitForStable(fixture);
+        return warn;
+    }
+
+    it("should warn once for an icon-only button without a name", async () => {
+        const warn = await render("unnamed");
+        expect(warn).toHaveBeenCalledTimes(1);
+        expect(warn.mock.calls[0][0]).toContain("[Mona Button]");
+        warn.mockRestore();
+    });
+
+    it("should not warn when the button has an aria-label", async () => {
+        const warn = await render("labelled");
+        expect(warn).not.toHaveBeenCalled();
+        warn.mockRestore();
+    });
+
+    it("should not warn when the button has text content", async () => {
+        const warn = await render("text");
+        expect(warn).not.toHaveBeenCalled();
+        warn.mockRestore();
     });
 });

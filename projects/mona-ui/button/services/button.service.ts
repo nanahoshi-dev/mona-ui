@@ -4,6 +4,11 @@ import { Subject } from "rxjs";
 import type { ButtonDirective } from "../directives/button.directive";
 import { ButtonVariantProps } from "../styles/button.styles";
 
+/**
+ * Coordinates a `mona-button-group` with its buttons: the group publishes its look, size, rounding, disabled state
+ * and members here, and buttons report clicks and receive selection changes through it. It is public so the
+ * button-group entry point can provide it; applications don't need to use it directly.
+ */
 @Injectable()
 export class ButtonService {
     readonly #members = signal<Signal<readonly ButtonDirective[]> | null>(null);

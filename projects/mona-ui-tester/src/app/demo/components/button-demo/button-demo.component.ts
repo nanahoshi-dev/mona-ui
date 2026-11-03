@@ -26,8 +26,9 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
         inputs: deriveInputConfig<ButtonDirective>(this.metadata(), {
             ariaHasPopup: {
                 alias: "aria-haspopup",
-                type: "string",
-                value: "false"
+                type: "dropdown",
+                value: ["false", "true", "menu", "listbox", "tree", "grid", "dialog"],
+                defaultValue: "false"
             },
             look: {
                 type: "dropdown",

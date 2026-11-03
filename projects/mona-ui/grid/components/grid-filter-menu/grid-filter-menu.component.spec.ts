@@ -67,6 +67,11 @@ describe("GridFilterMenuComponent", () => {
         expect(component).toBeTruthy();
     });
 
+    it("names the icon-only filter button after its column", () => {
+        const button: HTMLButtonElement = fixture.nativeElement.querySelector("button");
+        expect(button.getAttribute("aria-label")).toBe("Filter by Test");
+    });
+
     it("uses the column string format for date options", () => {
         setColumnInput({
             ...createColumn(),

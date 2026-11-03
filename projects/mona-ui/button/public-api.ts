@@ -3,5 +3,6 @@
  */
 
 export { ButtonDirective } from "./directives/button.directive";
+export type { ButtonAriaHasPopup } from "./models/ButtonAriaHasPopup";
 export { ButtonService } from "./services/button.service";
 export type { ButtonVariantProps, ButtonVariantsInput } from "./styles/button.styles";

@@ -1,5 +1,6 @@
 import {
     afterNextRender,
+    afterRenderEffect,
     ApplicationRef,
     booleanAttribute,
     ComponentRef,
@@ -12,6 +13,7 @@ import {
     inject,
     Injector,
     input,
+    isDevMode,
     model,
     numberAttribute,
     Renderer2,
@@ -21,6 +23,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { IndicatorIconComponent } from "@nanahoshi/mona-ui/internal/indicator-icon";
 import { fromEvent, Subscription, takeWhile } from "rxjs";
 import { twMerge } from "tailwind-merge";
+import type { ButtonAriaHasPopup } from "../models/ButtonAriaHasPopup";
 import { ButtonService } from "../services/button.service";
 import { buttonThemeVariants, ButtonVariantProps, ButtonVariantsInput } from "../styles/button.styles";
 
@@ -89,7 +92,7 @@ export class ButtonDirective implements ButtonVariantsInput {
      * listbox, tree, grid, or dialog. Omit or leave as `"false"` for plain action buttons.
      * @default "false"
      */
-    public readonly ariaHasPopup = input<string>("false", { alias: "aria-haspopup" });
+    public readonly ariaHasPopup = input<ButtonAriaHasPopup>("false", { alias: "aria-haspopup" });
 
     /**
      * @description Renders the component with reduced visual emphasis and removes pointer interaction.
@@ -101,7 +104,8 @@ export class ButtonDirective implements ButtonVariantsInput {
 
     /**
      * @description Removes horizontal padding and fixes a square aspect ratio sized to match `size`.
-     * Provide `aria-label` on the host when using icon-only buttons.
+     * Provide `aria-label` on the host when using icon-only buttons; in dev mode, an icon-only button without an
+     * accessible name logs a warning.
      * @default false
      */
     public readonly iconOnly = input(false, { transform: booleanAttribute });
@@ -194,9 +198,14 @@ export class ButtonDirective implements ButtonVariantsInput {
         });
         this.#blockClicksWhileLoading();
         this.#destroyRef.onDestroy(() => this.#removeLoader());
-        afterNextRender({
-            read: () => this.#setSubscriptions()
-        });
+        if (this.#buttonService) {
+            afterNextRender({
+                read: () => this.#setSubscriptions()
+            });
+        }
+        if (isDevMode()) {
+            this.#warnIfIconOnlyWithoutName();
+        }
     }
 
     /**
@@ -255,6 +264,12 @@ export class ButtonDirective implements ButtonVariantsInput {
         });
     }
 
+    #hasAccessibleName(): boolean {
+        const host = this.#hostElementRef.nativeElement;
+        const named = ["aria-label", "aria-labelledby", "title"].some(name => !!host.getAttribute(name)?.trim());
+        return named || !!host.textContent?.trim();
+    }
+
     #setToggleableEvent(): void {
         this.#toggleSubscription?.unsubscribe();
         this.#toggleSubscription = fromEvent<MouseEvent>(this.#hostElementRef.nativeElement, "click")
@@ -274,5 +289,21 @@ export class ButtonDirective implements ButtonVariantsInput {
                     this.selected.set(!this.selected());
                 }
             });
+    }
+
+    #warnIfIconOnlyWithoutName(): void {
+        let warned = false;
+        afterRenderEffect({
+            read: () => {
+                if (warned || !this.iconOnly() || this.#hasAccessibleName()) {
+                    return;
+                }
+                warned = true;
+                console.warn(
+                    "[Mona Button] An icon-only button needs an accessible name. Add aria-label, aria-labelledby or title.",
+                    this.#hostElementRef.nativeElement
+                );
+            }
+        });
     }
 }
