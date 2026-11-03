@@ -1,6 +1,6 @@
 import { booleanAttribute, computed, Directive, input } from "@angular/core";
-import { inputThemeVariants, InputVariantInput, InputVariantProps } from "../styles/textbox.styles";
 import { twMerge } from "tailwind-merge";
+import { inputThemeVariants, type InputVariantInput, type InputVariantProps } from "../styles/textbox.styles";
 
 @Directive({
     selector: "input[monaTextBox]",

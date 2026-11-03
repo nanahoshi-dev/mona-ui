@@ -22,7 +22,7 @@ import { TextBoxPrefixTemplateDirective } from "../../directives/text-box-prefix
 import { TextBoxSuffixTemplateDirective } from "../../directives/text-box-suffix-template.directive";
 import { TEXT_BOX_DEFAULT_MESSAGES } from "../../i18n/text-box.default-messages";
 import type { InputType } from "../../models/InputType";
-import { textBoxThemeVariants, TextBoxVariantInput, TextBoxVariantProps } from "../../styles/textbox.styles";
+import { textBoxThemeVariants, type TextBoxVariantInput, type TextBoxVariantProps } from "../../styles/textbox.styles";
 
 /** Input types that support `setSelectionRange`; `email` throws. */
 const selectableInputTypes: ReadonlySet<string> = new Set(["password", "search", "tel", "text", "url"]);

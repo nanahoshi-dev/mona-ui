@@ -58,7 +58,7 @@ export const otpInputSlotThemeVariants = cva(
                 small: "rounded-sm"
             },
             size: {
-                large: "h-10 w-10 min-w-10 text-md",
+                large: "h-10 w-10 min-w-10 text-base",
                 medium: "h-9 w-9 min-w-9 text-sm",
                 small: "h-8 w-8 min-w-8 text-xs"
             }

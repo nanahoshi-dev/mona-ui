@@ -38,7 +38,7 @@ export const comboBoxBaseThemeVariants = cva(
             size: {
                 small: "h-8 text-xs",
                 medium: "h-9 text-sm",
-                large: "h-10 text-md"
+                large: "h-10 text-base"
             }
         },
         compoundVariants: [

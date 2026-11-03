@@ -34,7 +34,7 @@ export const menuItemGroupHeaderThemeVariants = cva(
             size: {
                 small: "text-xs",
                 medium: "text-sm",
-                large: "text-md"
+                large: "text-base"
             }
         }
     }
@@ -65,7 +65,7 @@ export const menuItemThemeVariants = cva(
             size: {
                 small: "px-2 py-1 text-xs",
                 medium: "px-2 py-1.5 text-sm",
-                large: "px-3 py-2 text-md"
+                large: "px-3 py-2 text-base"
             }
         }
     }
@@ -94,7 +94,7 @@ export const menubarBaseThemeVariants = cva(
             size: {
                 small: "h-8 text-xs",
                 medium: "h-10 text-sm",
-                large: "h-12 text-md"
+                large: "h-12 text-base"
             }
         }
     }

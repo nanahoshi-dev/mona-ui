@@ -152,7 +152,7 @@ export class SidebarDemoComponent extends AbstractDemoComponent<SidebarLayoutCom
                         <li monaSidebarMenuItem #headerMenu>
                             <button monaSidebarMenuButton tooltip="Nanahoshi">
                                 <svg lucideCommand [size]="14"></svg>
-                                <span class="text-md font-semibold">Nanahoshi</span>
+                                <span class="text-base font-semibold">Nanahoshi</span>
                                 <svg lucideChevronDown [size]="14"></svg>
                             </button>
                         </li>

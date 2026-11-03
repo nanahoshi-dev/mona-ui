@@ -38,7 +38,7 @@ export const multiSelectBaseThemeVariants = cva(
             size: {
                 small: "min-h-8 text-xs",
                 medium: "min-h-9 text-sm",
-                large: "min-h-10 text-md"
+                large: "min-h-10 text-base"
             }
         },
         compoundVariants: [

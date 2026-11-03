@@ -21,7 +21,7 @@ export const dropdownPopupThemeVariants = cva(
                 full: "rounded-lg"
             },
             size: {
-                large: "text-md",
+                large: "text-base",
                 medium: "text-sm",
                 small: "text-xs"
             }

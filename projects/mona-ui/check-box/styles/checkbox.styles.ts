@@ -60,7 +60,7 @@ export const checkboxContainerLabelThemeVariants = cva(
         variants: {
             labelSize: {
                 large: "text-lg",
-                medium: "text-md",
+                medium: "text-base",
                 small: "text-sm"
             }
         }

@@ -17,7 +17,7 @@ export const subTreeListItemThemeVariants = cva(
 export const treeBaseThemeVariants = cva(
     `
         relative outline-none select-none
-        text-md
+        text-base
     `
 );
 

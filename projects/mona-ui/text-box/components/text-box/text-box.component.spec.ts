@@ -5,7 +5,20 @@ import { form, FormField, maxLength, required } from "@angular/forms/signals";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { LabelComponent } from "@nanahoshi/mona-ui/label";
 import axe from "axe-core";
+import { TextBoxPrefixTemplateDirective } from "../../directives/text-box-prefix-template.directive";
+import { TextBoxSuffixTemplateDirective } from "../../directives/text-box-suffix-template.directive";
 import { TextBoxComponent } from "./text-box.component";
+
+@Component({
+    template: `
+        <mona-text-box [clearButton]="true" value="Hello">
+            <ng-template monaTextBoxPrefixTemplate><span data-testid="prefix">$</span></ng-template>
+            <ng-template monaTextBoxSuffixTemplate><button type="button" data-testid="suffix">Go</button></ng-template>
+        </mona-text-box>
+    `,
+    imports: [TextBoxComponent, TextBoxPrefixTemplateDirective, TextBoxSuffixTemplateDirective]
+})
+class AffixHostComponent {}
 
 @Component({
     template: `<mona-text-box clearButton disabled readonly required value="abc" />`,
@@ -439,6 +452,85 @@ describe("TextBoxComponent", () => {
             expect(button.classList.contains("size-6")).toBe(true);
             expect(button.classList.contains("text-muted-foreground")).toBe(true);
             expect(button.querySelector("svg")?.classList.contains("opacity-50")).toBe(false);
+        });
+    });
+
+    describe("invalid state", () => {
+        function isInvalid(): boolean {
+            return (
+                getHost().getAttribute("data-invalid") === "true" && getInput().getAttribute("aria-invalid") === "true"
+            );
+        }
+
+        it("isn't shown before the field is touched", () => {
+            fixture.componentRef.setInput("required", true);
+            fixture.componentRef.setInput("invalid", true);
+            fixture.detectChanges();
+
+            expect(getHost().hasAttribute("data-invalid")).toBe(false);
+            expect(getInput().hasAttribute("aria-invalid")).toBe(false);
+        });
+
+        it("is shown for an empty required field once touched", () => {
+            fixture.componentRef.setInput("required", true);
+            fixture.componentRef.setInput("touched", true);
+            fixture.detectChanges();
+
+            expect(isInvalid()).toBe(true);
+        });
+
+        it("clears when a required field gets a value", () => {
+            fixture.componentRef.setInput("required", true);
+            fixture.componentRef.setInput("touched", true);
+            fixture.componentRef.setInput("value", "a");
+            fixture.detectChanges();
+
+            expect(getHost().hasAttribute("data-invalid")).toBe(false);
+        });
+
+        it("follows the invalid input once touched", () => {
+            fixture.componentRef.setInput("invalid", true);
+            fixture.componentRef.setInput("touched", true);
+            fixture.detectChanges();
+
+            expect(isInvalid()).toBe(true);
+        });
+    });
+
+    describe("affixes", () => {
+        it("renders the prefix before the input and the suffix after the clear button", () => {
+            const host = TestBed.createComponent(AffixHostComponent);
+            host.detectChanges();
+            const textBox = host.nativeElement.querySelector("mona-text-box") as HTMLElement;
+            const order = Array.from(textBox.querySelectorAll("[data-testid], input, button[aria-label]")).map(
+                element => element.getAttribute("data-testid") ?? element.tagName.toLowerCase()
+            );
+
+            expect(order).toEqual(["prefix", "input", "button", "suffix"]);
+        });
+
+        it("doesn't count focus moving into the suffix as leaving", () => {
+            const host = TestBed.createComponent(AffixHostComponent);
+            host.detectChanges();
+            document.body.appendChild(host.nativeElement);
+            const textBox = host.debugElement.children[0].componentInstance as TextBoxComponent;
+            let touches = 0;
+            textBox.touch.subscribe(() => touches++);
+
+            (host.nativeElement.querySelector("input") as HTMLInputElement).focus();
+            (host.nativeElement.querySelector("[data-testid=suffix]") as HTMLButtonElement).focus();
+
+            expect(touches).toBe(0);
+            host.nativeElement.remove();
+        });
+    });
+
+    describe("sizes", () => {
+        it("uses text-base for the large size", () => {
+            fixture.componentRef.setInput("size", "large");
+            fixture.detectChanges();
+
+            expect(getHost().classList.contains("text-base")).toBe(true);
         });
     });
 });
