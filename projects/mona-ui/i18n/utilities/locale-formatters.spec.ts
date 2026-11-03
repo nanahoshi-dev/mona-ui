@@ -148,6 +148,41 @@ describe("locale-formatters", () => {
         it("leaves ASCII digits unchanged", () => {
             expect(normalizeLocalizedDigits("0123456789", "en-US")).toBe("0123456789");
         });
+
+        it("folds full-width digits and punctuation typed by CJK input methods", () => {
+            expect(normalizeLocalizedDigits("０１２３４５６７８９", "ja-JP")).toBe("0123456789");
+            expect(normalizeLocalizedDigits("１，２３４．５", "zh-CN")).toBe("1,234.5");
+            expect(normalizeLocalizedDigits("＋１２", "ko-KR")).toBe("+12");
+        });
+
+        it("normalizes decimal digits of any script, including astral ones", () => {
+            expect(normalizeLocalizedDigits("๐๑๒๓๔๕๖๗๘๙", "th-TH")).toBe("0123456789");
+            expect(normalizeLocalizedDigits("༠༡༢༣༤༥༦༧༨༩")).toBe("0123456789");
+            expect(normalizeLocalizedDigits("𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗")).toBe("0123456789");
+            expect(normalizeLocalizedDigits("০১২৩৪৫৬৭৮৯", "bn-BD")).toBe("0123456789");
+        });
+
+        it("does not treat superscripts or other non-decimal numerals as digits", () => {
+            expect(normalizeLocalizedDigits("²½Ⅻ", "en-US")).toBe("²½Ⅻ");
+        });
+    });
+
+    describe("full-width input", () => {
+        it("parses full-width numbers in CJK locales", () => {
+            expect(parseLocalizedNumber("１２３", "ja-JP")).toBe(123);
+            expect(parseLocalizedNumber("１，２３４．５", "ja-JP")).toBe(1234.5);
+            expect(parseLocalizedNumber("－３．２５", "zh-CN")).toBe(-3.25);
+            expect(validateLocalizedNumber("＋１２", "ko-KR")).toEqual({ value: 12, valid: true, fractionDigits: 0 });
+        });
+
+        it("accepts full-width digits and separators while editing", () => {
+            expect(validateLocalizedNumberEdit("１２．５", "ja-JP", { decimals: 2 })).toEqual({
+                valid: true,
+                complete: true,
+                value: 12.5
+            });
+            expect(validateLocalizedNumberEdit("１２．５６７", "ja-JP", { decimals: 2 }).valid).toBe(false);
+        });
     });
 
     describe("normalizeLocalizedMinus", () => {

@@ -14,6 +14,13 @@ export interface NumberGroupingPattern {
     readonly minimumGroupedIntegerDigits: number;
 }
 
+/** Full-width forms of printable ASCII ("！" to "～"), offset from ASCII by U+FEE0. */
+const FULLWIDTH_ASCII_START = 0xff01;
+const FULLWIDTH_ASCII_END = 0xff5e;
+const FULLWIDTH_ASCII_OFFSET = 0xfee0;
+const DECIMAL_DIGIT_REGEX = /^\p{Nd}$/u;
+
+const asciiDigitCache = new Map<string, string | null>();
 const numberSymbolsCache = new Map<string, NumberSymbols>();
 const numberFormatterCache = new Map<string, Intl.NumberFormat>();
 const numberGroupingCache = new Map<string, NumberGroupingPattern>();
@@ -155,6 +162,31 @@ export function formatNumber(value: number, locale: string, options?: Intl.Numbe
     return getNumberFormatter(locale, options).format(value);
 }
 
+/**
+ * ASCII value of a Unicode decimal digit (\p{Nd}), or null for any other character. Unicode encodes every
+ * decimal digit set as a contiguous 0-9 run, so the value is the distance from the start of the run.
+ */
+function toAsciiDigit(char: string): string | null {
+    let digit = asciiDigitCache.get(char);
+    if (digit === undefined) {
+        digit = null;
+        if (DECIMAL_DIGIT_REGEX.test(char)) {
+            const code = char.codePointAt(0)!;
+            let runStart = code;
+            while (DECIMAL_DIGIT_REGEX.test(String.fromCodePoint(runStart - 1))) {
+                runStart--;
+            }
+            digit = String((code - runStart) % 10);
+        }
+        asciiDigitCache.set(char, digit);
+    }
+    return digit;
+}
+
+/**
+ * Converts digits of any script to ASCII digits. Full-width forms typed by CJK input methods
+ * ("１２．５", "－３", "１，０００") are folded to ASCII first.
+ */
 export function normalizeLocalizedDigits(text: string, localeId?: string): string {
     if (!text) {
         return text;
@@ -162,22 +194,12 @@ export function normalizeLocalizedDigits(text: string, localeId?: string): strin
     const symbols = localeId ? getNumberSymbols(localeId) : null;
     let result = "";
     for (const char of text) {
-        if (symbols?.digits.has(char)) {
-            result += symbols.digits.get(char)!;
-        } else {
-            const code = char.charCodeAt(0);
-            if (code >= 0x0660 && code <= 0x0669) {
-                result += String(code - 0x0660);
-            } else if (code >= 0x06f0 && code <= 0x06f9) {
-                result += String(code - 0x06f0);
-            } else if (code >= 0x09e6 && code <= 0x09ef) {
-                result += String(code - 0x09e6);
-            } else if (code >= 0x0966 && code <= 0x096f) {
-                result += String(code - 0x0966);
-            } else {
-                result += char;
-            }
-        }
+        const code = char.codePointAt(0)!;
+        const folded =
+            code >= FULLWIDTH_ASCII_START && code <= FULLWIDTH_ASCII_END
+                ? String.fromCharCode(code - FULLWIDTH_ASCII_OFFSET)
+                : char;
+        result += symbols?.digits.get(folded) ?? toAsciiDigit(folded) ?? folded;
     }
     return result;
 }
