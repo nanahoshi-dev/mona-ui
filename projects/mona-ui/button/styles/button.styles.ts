@@ -7,15 +7,15 @@ export const buttonThemeVariants = cva(
         inline-flex items-center justify-center gap-2
         cursor-pointer whitespace-nowrap
         text-sm font-medium
-        outline-none
         transition-colors duration-100 ease-in-out
+        focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-indicator
     `,
 
     {
         variants: {
             disabled: {
                 true: `
-                    pointer-events-none cursor-not-allowed select-none
+                    pointer-events-none select-none
                     disabled:border-disabled-border disabled:bg-disabled-background disabled:text-disabled-foreground
                     disabled:shadow-none
                 `,
@@ -34,66 +34,57 @@ export const buttonThemeVariants = cva(
                     ${themeControlSurfaceClasses} text-foreground
                     border border-input-border
                     hover:bg-hover active:bg-active
-                    focus-visible:border-focus-indicator focus-visible:ring-2 focus-visible:ring-focus-indicator/35
+                    focus-visible:border-focus-indicator
                 `,
                 primary: `
                     bg-primary text-primary-foreground
                     hover:bg-primary-hover active:bg-primary-active
-                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 success: `
                     bg-success text-success-foreground
                     hover:bg-success-hover
                     active:bg-success-active
-                    focus-visible:ring-2 focus-visible:ring-success/35
                 `,
                 error: `
                     bg-error text-error-foreground
                     hover:bg-error-hover
                     active:bg-error-active
-                    focus-visible:ring-2 focus-visible:ring-error/35
                 `,
                 warning: `
                     bg-warning text-warning-foreground
                     hover:bg-warning-hover
                     active:bg-warning-active
-                    focus-visible:ring-2 focus-visible:ring-warning/35
                 `,
                 info: `
                     bg-info text-info-foreground
                     hover:bg-info-hover
                     active:bg-info-active
-                    focus-visible:ring-2 focus-visible:ring-info/35
                 `,
                 outline: `
                     ${themeControlSurfaceClasses} text-foreground
                     border border-input-border
                     hover:bg-hover active:bg-active
-                    focus-visible:border-focus-indicator focus-visible:ring-2 focus-visible:ring-focus-indicator/35
+                    focus-visible:border-focus-indicator
                 `,
                 secondary: `
                     bg-secondary text-secondary-foreground
                     hover:bg-secondary-hover
                     active:bg-secondary-active
-                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 ghost: `
                     bg-transparent text-foreground
                     shadow-none
                     hover:bg-hover active:bg-active
-                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 link: `
                     bg-transparent text-foreground
                     shadow-none
                     underline-offset-4 hover:underline
-                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 clear: `
                     bg-transparent
                     border-0 shadow-none
                     hover:bg-transparent active:bg-transparent
-                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `
             },
             rounded: {
@@ -218,19 +209,21 @@ export const buttonThemeVariants = cva(
             },
             {
                 iconOnly: true,
-                loading: false,
+                loading: true,
+                class: "[&>:not(mona-indicator-icon)]:hidden"
+            },
+            {
+                iconOnly: true,
                 size: "small",
                 class: "h-8 w-8 p-0"
             },
             {
                 iconOnly: true,
-                loading: false,
                 size: "medium",
                 class: "h-9 w-9 p-0"
             },
             {
                 iconOnly: true,
-                loading: false,
                 size: "large",
                 class: "h-10 w-10 p-0"
             }

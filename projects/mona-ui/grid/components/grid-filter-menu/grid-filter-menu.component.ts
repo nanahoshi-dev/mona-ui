@@ -22,6 +22,7 @@ export class GridFilterMenuComponent {
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #popupService = inject(PopupService);
     #popupRef?: PopupRef;
+    protected readonly messages = this.#gridService.messages;
     public readonly apply = output<ColumnFilterState>();
     public readonly column = input.required<Column>();
     public readonly type = input<DataType>("string");

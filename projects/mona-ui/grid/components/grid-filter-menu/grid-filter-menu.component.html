@@ -7,6 +7,7 @@
     class="overflow-hidden w-5 h-5"
     size="small"
     [tabindex]="-1"
+    [attr.aria-label]="messages().filterByColumn(column().title)"
     [class.text-info]="column().filtered">
     <svg lucideFunnel [size]="12"></svg>
 </button>

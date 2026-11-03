@@ -1,5 +1,13 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, input, model } from "@angular/core";
+import {
+    booleanAttribute,
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    input,
+    model,
+    numberAttribute
+} from "@angular/core";
 import { LucideLayers } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
@@ -18,8 +26,9 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
         inputs: deriveInputConfig<ButtonDirective>(this.metadata(), {
             ariaHasPopup: {
                 alias: "aria-haspopup",
-                type: "string",
-                value: "false"
+                type: "dropdown",
+                value: ["false", "true", "menu", "listbox", "tree", "grid", "dialog"],
+                defaultValue: "false"
             },
             look: {
                 type: "dropdown",
@@ -93,17 +102,19 @@ export class ButtonWrapperComponent implements ComponentInputsAsSignal<ButtonDir
     public readonly ariaHasPopup = input<ReturnType<ButtonDirective["ariaHasPopup"]>>("false");
     public readonly ariaLabel = input("Button");
     public readonly ariaLabelledby = input("aria-labelledby");
-    public readonly disabled = model(false);
-    public readonly iconOnly = input(false);
-    public readonly loading = model(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
+    public readonly iconOnly = input(false, { transform: booleanAttribute });
+    public readonly loading = input(false, { transform: booleanAttribute });
     public readonly look = model<ReturnType<ButtonDirective["look"]>>("default");
     public readonly rounded = input<ReturnType<ButtonDirective["rounded"]>>("medium");
     public readonly selected = model<ReturnType<ButtonDirective["selected"]>>(false);
     public readonly size = input<ReturnType<ButtonDirective["size"]>>("medium");
     public readonly tabindex = input<number, number | string>(0, {
-        transform: (value: number | string) => (typeof value === "string" ? parseInt(value, 10) : value)
+        transform: (value: number | string) => numberAttribute(value, 0)
     });
-    public readonly toggleable = input<boolean>();
+    public readonly toggleable = input<boolean | undefined, unknown>(undefined, {
+        transform: (value: unknown) => (value === undefined ? undefined : booleanAttribute(value))
+    });
     public readonly type = input<ReturnType<ButtonDirective["type"]>>("button");
     public readonly userClass = input<ReturnType<ButtonDirective["userClass"]>>("");
 }
