@@ -1,5 +1,6 @@
 import { Component, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import type { PopupRef } from "../../models/PopupRef";
 import { PopupService } from "../../services/popup.service";
 
 import { PopupComponent } from "./popup.component";
@@ -16,8 +17,13 @@ import { PopupComponent } from "./popup.component";
     imports: [PopupComponent]
 })
 class PopupComponentTestComponent {
-    public trigger: string = "click";
     public popupComponent = viewChild.required(PopupComponent);
+    public trigger: string = "click";
+}
+
+/** `popupRef` is protected; the specs read it to see whether a popup is open. */
+function popupRefOf(component: PopupComponent): PopupRef | null {
+    return (component as unknown as { popupRef: PopupRef | null }).popupRef;
 }
 
 describe("PopupComponent", () => {
@@ -43,8 +49,8 @@ describe("PopupComponent", () => {
         hostFixture.detectChanges();
 
         const popupComponent = hostComponent.popupComponent();
-        expect((popupComponent as any).popupRef).not.toBeNull();
-        (popupComponent as any).popupRef?.close(undefined, 0);
+        expect(popupRefOf(popupComponent)).not.toBeNull();
+        popupRefOf(popupComponent)?.close(undefined, 0);
     });
 
     it("should close and not reopen when the trigger fires a second time while the popup is open", async () => {
@@ -54,17 +60,17 @@ describe("PopupComponent", () => {
         hostFixture.detectChanges();
 
         const popupComponent = hostComponent.popupComponent();
-        const firstRef = (popupComponent as any).popupRef;
+        const firstRef = popupRefOf(popupComponent);
         expect(firstRef).not.toBeNull();
 
-        const closedPromise = new Promise<void>(resolve => firstRef.closed.subscribe(() => resolve()));
+        const closedPromise = new Promise<void>(resolve => firstRef?.closed.subscribe(() => resolve()));
 
         anchor.dispatchEvent(new PointerEvent("click", { bubbles: true }));
         hostFixture.detectChanges();
 
         await closedPromise;
 
-        expect((popupComponent as any).popupRef).toBeNull();
+        expect(popupRefOf(popupComponent)).toBeNull();
     });
 
     it("should forward closeOnScroll to PopupService.create", () => {
@@ -79,7 +85,7 @@ describe("PopupComponent", () => {
         const settings = createSpy.mock.calls[0][0];
         expect(settings.closeOnScroll).toBe(false);
 
-        (hostComponent.popupComponent() as any).popupRef?.close(undefined, 0);
+        popupRefOf(hostComponent.popupComponent())?.close(undefined, 0);
     });
 
     it("should forward restoreFocus to PopupService.create", () => {
@@ -94,7 +100,7 @@ describe("PopupComponent", () => {
         const settings = createSpy.mock.calls[0][0];
         expect(settings.restoreFocus).toBe("auto");
 
-        (hostComponent.popupComponent() as any).popupRef?.close(undefined, 0);
+        popupRefOf(hostComponent.popupComponent())?.close(undefined, 0);
     });
 
     it("accepts the bare attribute form of its boolean inputs", () => {
@@ -145,7 +151,7 @@ describe("PopupComponent", () => {
         anchor.dispatchEvent(new PointerEvent("click", { bubbles: true }));
 
         expect(createSpy.mock.calls.at(-1)![0].width).toBe(240);
-        (hostComponent.popupComponent() as any).popupRef?.close(undefined, 0);
+        popupRefOf(hostComponent.popupComponent())?.close(undefined, 0);
     });
 
     it("listens for the trigger only once", () => {
@@ -156,7 +162,7 @@ describe("PopupComponent", () => {
         anchor.dispatchEvent(new PointerEvent("click", { bubbles: true }));
 
         expect(createSpy).toHaveBeenCalledOnce();
-        (hostComponent.popupComponent() as any).popupRef?.close(undefined, 0);
+        popupRefOf(hostComponent.popupComponent())?.close(undefined, 0);
     });
 
     it("should forward custom positions array to PopupService.create", () => {

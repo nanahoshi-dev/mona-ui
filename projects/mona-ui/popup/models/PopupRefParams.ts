@@ -4,9 +4,9 @@ import { Observable } from "rxjs";
 import { PopupCloseEvent } from "./PopupCloseEvent";
 
 export interface PopupRefParams {
-    close: <R>(result?: R, delay?: number) => boolean;
-
     get beforeClose$(): Observable<PopupCloseEvent>;
+
+    close: <R>(result?: R, delay?: number) => boolean;
 
     get closeStart$(): Observable<PopupCloseEvent>;
 

@@ -18,10 +18,10 @@ import { focusCanReturn } from "@nanahoshi/mona-ui/internal";
 import { fromEvent, merge, Subject, Subscription, take, takeUntil } from "rxjs";
 import { PopupWrapperComponent } from "../components/popup-wrapper/popup-wrapper.component";
 import { PopupCloseEvent, PopupCloseSource } from "../models/PopupCloseEvent";
-import { PopupDataInjectionToken, PopupSettingsInjectionToken } from "../models/PopupInjectionToken";
+import { PopupDataInjectionToken, POPUP_SETTINGS } from "../models/PopupInjectionToken";
 import { PopupRef } from "../models/PopupRef";
 import { PopupReference } from "../models/PopupReference";
-import { PopupReferenceInjectionToken } from "../models/PopupReferenceInjectionToken";
+import { POPUP_REFERENCE } from "../models/PopupReferenceInjectionToken";
 import { PopupAnchor, PopupSettings } from "../models/PopupSettings";
 import { ConnectionPoint, connectionPosition } from "../utils/connectionPosition";
 
@@ -104,8 +104,8 @@ export class PopupService {
             providers: [
                 { provide: PopupRef, useFactory: () => popupReference.popupRef },
                 { provide: PopupDataInjectionToken, useValue: settings.data },
-                { provide: PopupReferenceInjectionToken, useValue: popupReference },
-                { provide: PopupSettingsInjectionToken, useValue: settings },
+                { provide: POPUP_REFERENCE, useValue: popupReference },
+                { provide: POPUP_SETTINGS, useValue: settings },
                 ...(settings.providers ?? [])
             ]
         });
@@ -486,6 +486,36 @@ export class PopupService {
     }
 
     /**
+     * `PopupRef.overlayRef` is public, so the overlay can be detached or disposed without going through
+     * `close()`. Finish the close then too, or `closed` never fires and focus, subscriptions and consumers
+     * waiting for it (the dropdowns won't reopen until it does) stay stuck.
+     */
+    private setupDetachTracking(overlayRef: OverlayRef, popupReference: PopupReference): void {
+        overlayRef
+            .detachments()
+            .pipe(take(1), takeUntil(popupReference.closed))
+            .subscribe(() => popupReference.closeDetached());
+    }
+
+    private setupDirectionTracking(
+        settings: PopupSettings,
+        overlayRef: OverlayRef,
+        popupReference: PopupReference
+    ): void {
+        const resolvedAnchor = this.resolveAnchor(settings.anchor);
+        const anchorElement = this.getAnchorElement(resolvedAnchor);
+        const cleanup = observeComponentDirection(anchorElement, this.#directionality, nextDir => {
+            overlayRef.setDirection(nextDir);
+            overlayRef.updatePosition();
+            popupReference.componentRef?.changeDetectorRef.markForCheck();
+        });
+
+        popupReference.closed.pipe(take(1)).subscribe(() => {
+            cleanup();
+        });
+    }
+
+    /**
      * Listens on the document rather than on the elements matched at creation time, so elements added later
      * get a popup too. One popup shows at a time; it closes when the pointer leaves its element, and the
      * returned subscription's teardown closes it as well.
@@ -593,36 +623,6 @@ export class PopupService {
                 .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
                 .subscribe(change => popupReference.positionChanges$.next(change.connectionPair));
         }
-    }
-
-    /**
-     * `PopupRef.overlayRef` is public, so the overlay can be detached or disposed without going through
-     * `close()`. Finish the close then too, or `closed` never fires and focus, subscriptions and consumers
-     * waiting for it (the dropdowns won't reopen until it does) stay stuck.
-     */
-    private setupDetachTracking(overlayRef: OverlayRef, popupReference: PopupReference): void {
-        overlayRef
-            .detachments()
-            .pipe(take(1), takeUntil(popupReference.closed))
-            .subscribe(() => popupReference.closeDetached());
-    }
-
-    private setupDirectionTracking(
-        settings: PopupSettings,
-        overlayRef: OverlayRef,
-        popupReference: PopupReference
-    ): void {
-        const resolvedAnchor = this.resolveAnchor(settings.anchor);
-        const anchorElement = this.getAnchorElement(resolvedAnchor);
-        const cleanup = observeComponentDirection(anchorElement, this.#directionality, nextDir => {
-            overlayRef.setDirection(nextDir);
-            overlayRef.updatePosition();
-            popupReference.componentRef?.changeDetectorRef.markForCheck();
-        });
-
-        popupReference.closed.pipe(take(1)).subscribe(() => {
-            cleanup();
-        });
     }
 
     private setupScrollClosing(settings: PopupSettings, popupReference: PopupReference, overlayRef: OverlayRef): void {

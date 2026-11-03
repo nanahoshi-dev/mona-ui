@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Subject } from "rxjs";
 import { PopupCloseEvent } from "../../models/PopupCloseEvent";
-import { PopupSettingsInjectionToken } from "../../models/PopupInjectionToken";
-import { PopupReferenceInjectionToken } from "../../models/PopupReferenceInjectionToken";
+import { POPUP_SETTINGS } from "../../models/PopupInjectionToken";
+import { POPUP_REFERENCE } from "../../models/PopupReferenceInjectionToken";
 import { PopupSettings } from "../../models/PopupSettings";
 
 import { PopupWrapperComponent } from "./popup-wrapper.component";
@@ -24,14 +24,14 @@ describe("PopupWrapperComponent", () => {
             imports: [PopupWrapperComponent],
             providers: [
                 {
-                    provide: PopupReferenceInjectionToken,
+                    provide: POPUP_REFERENCE,
                     useValue: {
                         closeStart$,
                         completeClose
                     }
                 },
                 {
-                    provide: PopupSettingsInjectionToken,
+                    provide: POPUP_SETTINGS,
                     useValue: popupSettings
                 }
             ]

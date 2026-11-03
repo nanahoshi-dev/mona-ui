@@ -36,8 +36,8 @@ export class PopupComponent<T = unknown> implements OnDestroy {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #document = inject(DOCUMENT);
     readonly #popupService: PopupService = inject(PopupService);
-    #popupOpened: boolean = false;
     #eventListenerCleanup$ = new Subject<void>();
+    #popupOpened: boolean = false;
     protected readonly contentTemplate = viewChild.required(TemplateRef);
     protected popupRef: PopupRef | null = null;
 
@@ -64,6 +64,7 @@ export class PopupComponent<T = unknown> implements OnDestroy {
     /**
      * @description Emits when the popup is closed.
      */
+    // eslint-disable-next-line @angular-eslint/no-output-native -- public API name, kept for compatibility.
     public readonly close = output();
 
     /**
@@ -87,6 +88,11 @@ export class PopupComponent<T = unknown> implements OnDestroy {
      * @description Whether to close the popup when clicking outside of it.
      */
     public readonly closeOnOutsideClick = input(true, { transform: booleanAttribute });
+
+    /**
+     * @description Whether to close the popup when the user scrolls the page or a scrollable container around the anchor.
+     */
+    public readonly closeOnScroll = input(false, { transform: booleanAttribute });
 
     /**
      * @description Arbitrary data to pass to the popup.
@@ -174,6 +180,18 @@ export class PopupComponent<T = unknown> implements OnDestroy {
     public readonly providers = input<StaticProvider[]>([]);
 
     /**
+     * @description Controls focus restoration when the popup closes.
+     * - `true`: always restore focus to the anchor element.
+     * - `false`: never restore focus (recommended for tooltips).
+     * - `"auto"`: restore focus only if the anchor, or an element inside it, was focused when the popup opened.
+     *
+     * Focus is left alone if the user moved it outside the popup and the anchor before it closed.
+     */
+    public readonly restoreFocus = input<boolean | "auto", unknown>("auto", {
+        transform: (value: unknown) => (value === "auto" ? "auto" : booleanAttribute(value))
+    });
+
+    /**
      * @description The trigger event for opening the popup.
      */
     public readonly trigger = input("click");
@@ -187,23 +205,6 @@ export class PopupComponent<T = unknown> implements OnDestroy {
      * @description Whether to push the popup into the screen when it is opened.
      */
     public readonly withPush = input(true, { transform: booleanAttribute });
-
-    /**
-     * @description Whether to close the popup when the user scrolls within a scrollable container.
-     */
-    public readonly closeOnScroll = input(false, { transform: booleanAttribute });
-
-    /**
-     * @description Controls focus restoration when the popup closes.
-     * - `true`: always restore focus to the anchor element.
-     * - `false`: never restore focus (recommended for tooltips).
-     * - `"auto"`: restore focus only if the anchor, or an element inside it, was focused when the popup opened.
-     *
-     * Focus is left alone if the user moved it outside the popup and the anchor before it closed.
-     */
-    public readonly restoreFocus = input<boolean | "auto", unknown>("auto", {
-        transform: (value: unknown) => (value === "auto" ? "auto" : booleanAttribute(value))
-    });
 
     /**
      * @description Whether the popup should track scroll events and reposition itself.

@@ -45,14 +45,9 @@ export interface PopupSettings<T = unknown, C = void> {
     blockScroll?: boolean;
 
     /**
-     * The content to display in the popup.
-     * @type {TemplateRef | ComponentType}
-     */
-    content: TemplateRef<C> | ComponentType<C>;
-
-    /**
      * Whether the popup will be closed when the user clicks on the backdrop.
      * Only applies if `hasBackdrop` is true.
+     * Default: true.
      * @type {boolean}
      */
     closeOnBackdropClick?: boolean;
@@ -75,16 +70,24 @@ export interface PopupSettings<T = unknown, C = void> {
 
     /**
      * Whether the popup will be closed when the user clicks outside of it.
+     * Clicks on the backdrop are governed by `closeOnBackdropClick` instead.
+     * Default: true.
      * @type {boolean}
      */
     closeOnOutsideClick?: boolean;
 
     /**
-     * Whether the popup will be closed when the user scrolls.
+     * Whether the popup will be closed when the user scrolls the page or a scrollable container around the anchor.
      * Default: false.
      * @type {boolean}
      */
     closeOnScroll?: boolean;
+
+    /**
+     * The content to display in the popup.
+     * @type {TemplateRef | ComponentType}
+     */
+    content: TemplateRef<C> | ComponentType<C>;
 
     /**
      * Optional data to pass to the popup context.
@@ -93,7 +96,7 @@ export interface PopupSettings<T = unknown, C = void> {
 
     /**
      * Whether the popup will have a backdrop.
-     * Default: true.
+     * Default: false.
      */
     hasBackdrop?: boolean;
 
@@ -217,6 +220,7 @@ export interface PopupSettings<T = unknown, C = void> {
 
     /**
      * Whether the popup should track scroll events and reposition itself.
+     * Default: true.
      * @type {boolean}
      */
     withScrollTracking?: boolean;

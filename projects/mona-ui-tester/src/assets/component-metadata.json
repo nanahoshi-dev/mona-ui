@@ -11695,7 +11695,7 @@
         "defaultValue": "true"
       },
       {
-        "description": "Whether to close the popup when the user scrolls within a scrollable container.",
+        "description": "Whether to close the popup when the user scrolls the page or a scrollable container around the anchor.",
         "kind": "input",
         "name": "closeOnScroll",
         "type": "boolean",

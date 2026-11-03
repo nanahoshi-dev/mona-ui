@@ -9,7 +9,6 @@ import {
     ElementRef,
     inject,
     Injector,
-    OnInit,
     signal,
     TemplateRef,
     viewChild,
@@ -19,8 +18,8 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { take } from "rxjs";
 import { defaultPopupAnimation } from "../../models/PopupAnimationClasses";
 import { PopupCloseEvent } from "../../models/PopupCloseEvent";
-import { PopupSettingsInjectionToken } from "../../models/PopupInjectionToken";
-import { PopupReferenceInjectionToken } from "../../models/PopupReferenceInjectionToken";
+import { POPUP_SETTINGS } from "../../models/PopupInjectionToken";
+import { POPUP_REFERENCE } from "../../models/PopupReferenceInjectionToken";
 import { PopupAnimationSettings, PopupSettings } from "../../models/PopupSettings";
 
 @Component({
@@ -309,23 +308,23 @@ import { PopupAnimationSettings, PopupSettings } from "../../models/PopupSetting
         "[class]": "hostClasses()"
     }
 })
-export class PopupWrapperComponent implements OnInit {
+export class PopupWrapperComponent {
     readonly #destroyRef = inject(DestroyRef);
     readonly #document = inject(DOCUMENT);
-    readonly #popupReference = inject(PopupReferenceInjectionToken);
-    readonly #popupSettings = inject<PopupSettings>(PopupSettingsInjectionToken);
+    readonly #popupReference = inject(POPUP_REFERENCE);
+    readonly #popupSettings = inject<PopupSettings>(POPUP_SETTINGS);
     #closeEvent: PopupCloseEvent | null = null;
     #fallbackTimer: number | null = null;
     #leaveCompleted = false;
     protected readonly animationElement = viewChild.required<ElementRef<HTMLElement>>("animationElement");
     protected readonly componentOutlet = viewChild.required("componentOutlet", { read: ViewContainerRef });
+    protected readonly enterAnimationClasses = computed(() => this.#getAnimationConfig()?.enter ?? "");
     protected readonly hostClasses = computed(() => {
         const wrapperClass = this.wrapperClass();
         return ["mona-popup-wrapper", "w-full", "h-full", wrapperClass].filter(Boolean).join(" ");
     });
-    protected readonly enterAnimationClasses = computed(() => this.#getAnimationConfig()?.enter ?? "");
     protected readonly leaveAnimationClasses = computed(() => this.#getAnimationConfig()?.leave ?? "");
-    public readonly templateRef = signal<TemplateRef<any> | null>(null);
+    public readonly templateRef = signal<TemplateRef<unknown> | null>(null);
     public readonly visible = signal(true);
     public readonly wrapperClass = signal(
         this.#popupSettings.popupWrapperClass instanceof Array
@@ -347,12 +346,10 @@ export class PopupWrapperComponent implements OnInit {
         this.#destroyRef.onDestroy(() => this.#clearFallbackTimer());
     }
 
-    public ngOnInit(): void {}
-
     public attachContent(
         content: TemplateRef<unknown> | ComponentType<unknown>,
         injector: Injector
-    ): ComponentRef<any> | null {
+    ): ComponentRef<unknown> | null {
         if (content instanceof TemplateRef) {
             this.templateRef.set(content);
             return null;
