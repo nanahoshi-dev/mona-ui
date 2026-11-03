@@ -1,4 +1,8 @@
-import type { MonaEditorMessages } from "@nanahoshi/mona-ui/i18n";
+import { formatNumber, type MonaEditorMessages } from "@nanahoshi/mona-ui/i18n";
+
+function localizeNumber(value: number): string {
+    return formatNumber(value, "en-US");
+}
 
 export const EDITOR_DEFAULT_MESSAGES: MonaEditorMessages = {
     addColumnAfter: "Add column after",
@@ -21,7 +25,7 @@ export const EDITOR_DEFAULT_MESSAGES: MonaEditorMessages = {
     enterUrl: "Enter the URL",
     fontSize: "Font Size",
     format: "Format",
-    heading: (level: number) => `Heading ${level}`,
+    heading: (level: number) => `Heading ${localizeNumber(level)}`,
     heightPx: "Height (px)",
     imageUrl: "Image URL",
     indent: "Indent",

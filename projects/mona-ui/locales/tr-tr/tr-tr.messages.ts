@@ -1,4 +1,12 @@
-import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+import { formatNumber, type MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+
+function localizeNumber(value: number): string {
+    return formatNumber(value, "tr-TR");
+}
+
+function localizeYear(year: number): string {
+    return formatNumber(year, "tr-TR", { useGrouping: false });
+}
 
 export const TR_TR_MESSAGES = {
     autoComplete: {
@@ -12,8 +20,9 @@ export const TR_TR_MESSAGES = {
     },
     calendar: {
         calendarLabel: (formattedMonthAndYear: string) => `Takvim, ${formattedMonthAndYear}`,
-        decadeRange: (start: number, end: number) => `${start} - ${end}`,
-        decadeViewLabel: (start: number, end: number) => `On yıllık görünüm, ${start} - ${end}`,
+        decadeRange: (start: number, end: number) => `${localizeYear(start)} - ${localizeYear(end)}`,
+        decadeViewLabel: (start: number, end: number) =>
+            `On yıllık görünüm, ${localizeYear(start)} - ${localizeYear(end)}`,
         goToToday: (formattedDate: string) => `Bugüne git, ${formattedDate}`,
         nextDecade: "Sonraki on yıl",
         nextMonth: "Sonraki ay",
@@ -24,7 +33,7 @@ export const TR_TR_MESSAGES = {
         switchToDecadeView: (currentYear: string) => `On yıllık görünüme geç, şu anda ${currentYear}`,
         switchToYearView: (currentMonthAndYear: string) => `Yıl görünümüne geç, şu anda ${currentMonthAndYear}`,
         today: "Bugün",
-        yearCellLabel: (year: number) => `${year} yılı`,
+        yearCellLabel: (year: number) => `${localizeYear(year)} yılı`,
         yearViewLabel: (year: string) => `Yıl görünümü, ${year}`
     },
     card: {
@@ -74,7 +83,8 @@ export const TR_TR_MESSAGES = {
         currentColor: "Geçerli renk",
         previousColor: "Önceki renk",
         saturationAndValue: "Renk doygunluğu ve değeri",
-        saturationAndValueText: (saturation: number, value: number) => `Doygunluk %${saturation}, değer %${value}`,
+        saturationAndValueText: (saturation: number, value: number) =>
+            `Doygunluk %${localizeNumber(saturation)}, değer %${localizeNumber(value)}`,
         switchColorMode: "Renk modunu değiştir"
     },
     colorPalette: {
@@ -113,9 +123,10 @@ export const TR_TR_MESSAGES = {
         clear: "Temizle"
     },
     dropdowns: {
-        itemPosition: (text: string, position: number, total: number) => `${text}, ${total} öğeden ${position}.`,
+        itemPosition: (text: string, position: number, total: number) =>
+            `${text}, ${localizeNumber(total)} öğeden ${localizeNumber(position)}.`,
         noResultsFound: "Sonuç bulunamadı",
-        resultsAvailable: (count: number) => `${count} sonuç bulundu`
+        resultsAvailable: (count: number) => `${localizeNumber(count)} sonuç bulundu`
     },
     editor: {
         addColumnAfter: "Sonrasına sütun ekle",
@@ -138,7 +149,7 @@ export const TR_TR_MESSAGES = {
         enterUrl: "URL'yi gir",
         fontSize: "Yazı tipi boyutu",
         format: "Biçim",
-        heading: (level: number) => `Başlık ${level}`,
+        heading: (level: number) => `Başlık ${localizeNumber(level)}`,
         heightPx: "Yükseklik (px)",
         imageUrl: "Görsel URL'si",
         indent: "Girintiyi artır",
@@ -202,7 +213,7 @@ export const TR_TR_MESSAGES = {
         cancel: "İptal",
         cancelRowEdit: "Satır düzenlemeyi iptal et",
         columns: "Sütunlar",
-        columnsSelected: (count: number) => `${count} sütun seçildi`,
+        columnsSelected: (count: number) => `${localizeNumber(count)} sütun seçildi`,
         delete: "Sil",
         deleteRowConfirmation: "Bu öğeyi silmek istediğinizden emin misiniz?",
         deleteRowTitle: "Satır silinsin mi?",
@@ -219,7 +230,7 @@ export const TR_TR_MESSAGES = {
         noData: "Veri yok",
         remove: "Kaldır",
         removeRow: "Satırı kaldır",
-        reorderRow: (rowNumber: number) => `${rowNumber}. satırı yeniden sırala`,
+        reorderRow: (rowNumber: number) => `${localizeNumber(rowNumber)}. satırı yeniden sırala`,
         resizeColumn: "Sütunu yeniden boyutlandır",
         rowReorder: "Satırları yeniden sırala",
         rowReorderDisabled: "Satırları yeniden sıralama devre dışı.",
@@ -234,12 +245,12 @@ export const TR_TR_MESSAGES = {
             `${rowLabel}. ${keyboardHint}${disabledReason ? ` ${disabledReason}` : ""}`,
         rowReorderKeyboardHint: "Satırı taşımak için Alt + Yukarı Ok veya Alt + Aşağı Ok tuşlarını kullanın.",
         rowReorderMoved: (fromRowNumber: number, toPosition: number) =>
-            `${fromRowNumber}. satır ${toPosition}. konuma taşındı.`,
+            `${localizeNumber(fromRowNumber)}. satır ${localizeNumber(toPosition)}. konuma taşındı.`,
         rowValidationError: "Bu satırda doğrulama hataları var.",
         save: "Kaydet",
         saveRow: "Satırı kaydet",
         selectAllRows: "Tüm satırları seç",
-        selectRow: (rowNumber: number) => `${rowNumber}. satırı seç`
+        selectRow: (rowNumber: number) => `${localizeNumber(rowNumber)}. satırı seç`
     },
     list: {
         filterList: "Listeyi filtrele",
@@ -257,7 +268,7 @@ export const TR_TR_MESSAGES = {
     },
     multiSelect: {
         clear: "Temizle",
-        itemsCount: (count: number) => `+ ${count} öğe`
+        itemsCount: (count: number) => `+ ${localizeNumber(count)} öğe`
     },
     notification: {
         close: "Kapat",
@@ -275,27 +286,29 @@ export const TR_TR_MESSAGES = {
     },
     pager: {
         firstPageLabel: "İlk sayfa",
-        jumpBackwardLabel: (pages: number) => `${pages} sayfa geri git`,
-        jumpForwardLabel: (pages: number) => `${pages} sayfa ileri git`,
+        jumpBackwardLabel: (pages: number) => `${localizeNumber(pages)} sayfa geri git`,
+        jumpForwardLabel: (pages: number) => `${localizeNumber(pages)} sayfa ileri git`,
         lastPageLabel: "Son sayfa",
         nextPageLabel: "Sonraki sayfa",
         ofText: "/",
-        pageLabel: (page: number) => `${page}. sayfa`,
-        pageSizeLabel: (pageSize: number) => `Sayfa başına ${pageSize}`,
-        pageStatus: (page: number, totalPages: number) => `Sayfa ${page} / ${totalPages}`,
+        pageLabel: (page: number) => `${localizeNumber(page)}. sayfa`,
+        pageSizeLabel: (pageSize: number) => `Sayfa başına ${localizeNumber(pageSize)}`,
+        pageStatus: (page: number, totalPages: number) =>
+            `Sayfa ${localizeNumber(page)} / ${localizeNumber(totalPages)}`,
         pageText: "Sayfa",
         previousPageLabel: "Önceki sayfa",
-        rangeStatus: (start: number, end: number, total: number) => `${start} - ${end} / ${total} öğe`
+        rangeStatus: (start: number, end: number, total: number) =>
+            `${localizeNumber(start)} - ${localizeNumber(end)} / ${localizeNumber(total)} öğe`
     },
     rating: {
         notRated: "Değerlendirilmedi",
-        valueText: (value: number, max: number) => `${max} üzerinden ${value}`
+        valueText: (value: number, max: number) => `${localizeNumber(max)} üzerinden ${localizeNumber(value)}`
     },
     scrollView: {
         carousel: "atlıkarınca",
         nextPage: "Sonraki sayfa",
-        page: (current: number) => `${current}. sayfa`,
-        pageOf: (current: number, total: number) => `Sayfa ${current} / ${total}`,
+        page: (current: number) => `${localizeNumber(current)}. sayfa`,
+        pageOf: (current: number, total: number) => `Sayfa ${localizeNumber(current)} / ${localizeNumber(total)}`,
         previousPage: "Önceki sayfa",
         scrollPagerNext: "Sayfalama seçeneklerini ileri kaydır",
         scrollPagerPrevious: "Sayfalama seçeneklerini geri kaydır",

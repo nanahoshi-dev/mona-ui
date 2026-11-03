@@ -1,4 +1,12 @@
-import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+import { formatNumber, type MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+
+function localizeNumber(value: number): string {
+    return formatNumber(value, "pt-BR");
+}
+
+function localizeYear(year: number): string {
+    return formatNumber(year, "pt-BR", { useGrouping: false });
+}
 
 export const PT_BR_MESSAGES = {
     autoComplete: {
@@ -12,8 +20,9 @@ export const PT_BR_MESSAGES = {
     },
     calendar: {
         calendarLabel: (formattedMonthAndYear: string) => `Calendário, ${formattedMonthAndYear}`,
-        decadeRange: (start: number, end: number) => `${start} a ${end}`,
-        decadeViewLabel: (start: number, end: number) => `Visualização de década, ${start} - ${end}`,
+        decadeRange: (start: number, end: number) => `${localizeYear(start)} a ${localizeYear(end)}`,
+        decadeViewLabel: (start: number, end: number) =>
+            `Visualização de década, ${localizeYear(start)} - ${localizeYear(end)}`,
         goToToday: (formattedDate: string) => `Ir para hoje, ${formattedDate}`,
         nextDecade: "Próxima década",
         nextMonth: "Próximo mês",
@@ -26,7 +35,7 @@ export const PT_BR_MESSAGES = {
         switchToYearView: (currentMonthAndYear: string) =>
             `Alternar para a visualização de ano, atualmente ${currentMonthAndYear}`,
         today: "Hoje",
-        yearCellLabel: (year: number) => `Ano ${year}`,
+        yearCellLabel: (year: number) => `Ano ${localizeYear(year)}`,
         yearViewLabel: (year: string) => `Visualização de ano, ${year}`
     },
     card: {
@@ -75,7 +84,8 @@ export const PT_BR_MESSAGES = {
         currentColor: "Cor atual",
         previousColor: "Cor anterior",
         saturationAndValue: "Saturação e valor da cor",
-        saturationAndValueText: (saturation: number, value: number) => `Saturação ${saturation}%, valor ${value}%`,
+        saturationAndValueText: (saturation: number, value: number) =>
+            `Saturação ${localizeNumber(saturation)}%, valor ${localizeNumber(value)}%`,
         switchColorMode: "Alternar modo de cor"
     },
     colorPalette: {
@@ -114,10 +124,11 @@ export const PT_BR_MESSAGES = {
         clear: "Limpar"
     },
     dropdowns: {
-        itemPosition: (text: string, position: number, total: number) => `${text}, ${position} de ${total}`,
+        itemPosition: (text: string, position: number, total: number) =>
+            `${text}, ${localizeNumber(position)} de ${localizeNumber(total)}`,
         noResultsFound: "Nenhum resultado encontrado",
         resultsAvailable: (count: number) =>
-            count === 1 ? "1 resultado disponível" : `${count} resultados disponíveis`
+            count === 1 ? "1 resultado disponível" : `${localizeNumber(count)} resultados disponíveis`
     },
     editor: {
         addColumnAfter: "Inserir coluna depois",
@@ -140,7 +151,7 @@ export const PT_BR_MESSAGES = {
         enterUrl: "Inserir a URL",
         fontSize: "Tamanho da fonte",
         format: "Formatação",
-        heading: (level: number) => `Título ${level}`,
+        heading: (level: number) => `Título ${localizeNumber(level)}`,
         heightPx: "Altura (px)",
         imageUrl: "URL da imagem",
         indent: "Aumentar recuo",
@@ -204,7 +215,8 @@ export const PT_BR_MESSAGES = {
         cancel: "Cancelar",
         cancelRowEdit: "Cancelar edição da linha",
         columns: "Colunas",
-        columnsSelected: (count: number) => (count === 1 ? "1 coluna selecionada" : `${count} colunas selecionadas`),
+        columnsSelected: (count: number) =>
+            count === 1 ? "1 coluna selecionada" : `${localizeNumber(count)} colunas selecionadas`,
         delete: "Excluir",
         deleteRowConfirmation: "Tem certeza de que deseja excluir este item?",
         deleteRowTitle: "Excluir linha?",
@@ -221,7 +233,7 @@ export const PT_BR_MESSAGES = {
         noData: "Nenhum dado disponível",
         remove: "Remover",
         removeRow: "Remover linha",
-        reorderRow: (rowNumber: number) => `Reordenar linha ${rowNumber}`,
+        reorderRow: (rowNumber: number) => `Reordenar linha ${localizeNumber(rowNumber)}`,
         resizeColumn: "Redimensionar coluna",
         rowReorder: "Reordenar linhas",
         rowReorderDisabled: "A reordenação de linhas está desabilitada.",
@@ -236,12 +248,12 @@ export const PT_BR_MESSAGES = {
             `${rowLabel}. ${keyboardHint}${disabledReason ? ` ${disabledReason}` : ""}`,
         rowReorderKeyboardHint: "Use Alt mais Seta para cima ou Alt mais Seta para baixo para mover.",
         rowReorderMoved: (fromRowNumber: number, toPosition: number) =>
-            `Linha ${fromRowNumber} movida para a posição ${toPosition}.`,
+            `Linha ${localizeNumber(fromRowNumber)} movida para a posição ${localizeNumber(toPosition)}.`,
         rowValidationError: "Esta linha contém erros de validação.",
         save: "Salvar",
         saveRow: "Salvar linha",
         selectAllRows: "Selecionar todas as linhas",
-        selectRow: (rowNumber: number) => `Selecionar linha ${rowNumber}`
+        selectRow: (rowNumber: number) => `Selecionar linha ${localizeNumber(rowNumber)}`
     },
     list: {
         filterList: "Filtrar lista",
@@ -259,7 +271,7 @@ export const PT_BR_MESSAGES = {
     },
     multiSelect: {
         clear: "Limpar",
-        itemsCount: (count: number) => (count === 1 ? "+ 1 item" : `+ ${count} itens`)
+        itemsCount: (count: number) => (count === 1 ? "+ 1 item" : `+ ${localizeNumber(count)} itens`)
     },
     notification: {
         close: "Fechar",
@@ -277,28 +289,31 @@ export const PT_BR_MESSAGES = {
     },
     pager: {
         firstPageLabel: "Primeira página",
-        jumpBackwardLabel: (pages: number) => (pages === 1 ? "Retroceder 1 página" : `Retroceder ${pages} páginas`),
-        jumpForwardLabel: (pages: number) => (pages === 1 ? "Avançar 1 página" : `Avançar ${pages} páginas`),
+        jumpBackwardLabel: (pages: number) =>
+            pages === 1 ? "Retroceder 1 página" : `Retroceder ${localizeNumber(pages)} páginas`,
+        jumpForwardLabel: (pages: number) =>
+            pages === 1 ? "Avançar 1 página" : `Avançar ${localizeNumber(pages)} páginas`,
         lastPageLabel: "Última página",
         nextPageLabel: "Próxima página",
         ofText: "de",
-        pageLabel: (page: number) => `Página ${page}`,
-        pageSizeLabel: (pageSize: number) => `${pageSize} / página`,
-        pageStatus: (page: number, totalPages: number) => `Página ${page} de ${totalPages}`,
+        pageLabel: (page: number) => `Página ${localizeNumber(page)}`,
+        pageSizeLabel: (pageSize: number) => `${localizeNumber(pageSize)} / página`,
+        pageStatus: (page: number, totalPages: number) =>
+            `Página ${localizeNumber(page)} de ${localizeNumber(totalPages)}`,
         pageText: "Página",
         previousPageLabel: "Página anterior",
         rangeStatus: (start: number, end: number, total: number) =>
-            `${start} - ${end} de ${total} ${total === 1 ? "item" : "itens"}`
+            `${localizeNumber(start)} - ${localizeNumber(end)} de ${localizeNumber(total)} ${total === 1 ? "item" : "itens"}`
     },
     rating: {
         notRated: "Não avaliado",
-        valueText: (value: number, max: number) => `${value} de ${max}`
+        valueText: (value: number, max: number) => `${localizeNumber(value)} de ${localizeNumber(max)}`
     },
     scrollView: {
         carousel: "carrossel",
         nextPage: "Próxima página",
-        page: (current: number) => `Página ${current}`,
-        pageOf: (current: number, total: number) => `Página ${current} de ${total}`,
+        page: (current: number) => `Página ${localizeNumber(current)}`,
+        pageOf: (current: number, total: number) => `Página ${localizeNumber(current)} de ${localizeNumber(total)}`,
         previousPage: "Página anterior",
         scrollPagerNext: "Rolar opções do paginador para a frente",
         scrollPagerPrevious: "Rolar opções do paginador para trás",

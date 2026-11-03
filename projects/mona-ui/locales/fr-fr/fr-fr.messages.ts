@@ -1,4 +1,12 @@
-import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+import { formatNumber, type MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+
+function localizeNumber(value: number): string {
+    return formatNumber(value, "fr-FR");
+}
+
+function localizeYear(year: number): string {
+    return formatNumber(year, "fr-FR", { useGrouping: false });
+}
 
 export const FR_FR_MESSAGES = {
     autoComplete: {
@@ -12,8 +20,9 @@ export const FR_FR_MESSAGES = {
     },
     calendar: {
         calendarLabel: (formattedMonthAndYear: string) => `Calendrier, ${formattedMonthAndYear}`,
-        decadeRange: (start: number, end: number) => `${start} à ${end}`,
-        decadeViewLabel: (start: number, end: number) => `Vue par décennie, ${start}–${end}`,
+        decadeRange: (start: number, end: number) => `${localizeYear(start)} à ${localizeYear(end)}`,
+        decadeViewLabel: (start: number, end: number) =>
+            `Vue par décennie, ${localizeYear(start)}–${localizeYear(end)}`,
         goToToday: (formattedDate: string) => `Aller à la date d’aujourd’hui, ${formattedDate}`,
         nextDecade: "Décennie suivante",
         nextMonth: "Mois suivant",
@@ -25,7 +34,7 @@ export const FR_FR_MESSAGES = {
         switchToYearView: (currentMonthAndYear: string) =>
             `Passer à la vue annuelle, actuellement ${currentMonthAndYear}`,
         today: "Aujourd’hui",
-        yearCellLabel: (year: number) => `Année ${year}`,
+        yearCellLabel: (year: number) => `Année ${localizeYear(year)}`,
         yearViewLabel: (year: string) => `Vue annuelle, ${year}`
     },
     card: {
@@ -75,7 +84,7 @@ export const FR_FR_MESSAGES = {
         previousColor: "Couleur précédente",
         saturationAndValue: "Saturation et luminosité",
         saturationAndValueText: (saturation: number, value: number) =>
-            `Saturation ${saturation}\u00A0%, luminosité ${value}\u00A0%`,
+            `Saturation ${localizeNumber(saturation)}\u00A0%, luminosité ${localizeNumber(value)}\u00A0%`,
         switchColorMode: "Changer de mode colorimétrique"
     },
     colorPalette: {
@@ -114,9 +123,11 @@ export const FR_FR_MESSAGES = {
         clear: "Effacer"
     },
     dropdowns: {
-        itemPosition: (text: string, position: number, total: number) => `${text}, ${position} sur ${total}`,
+        itemPosition: (text: string, position: number, total: number) =>
+            `${text}, ${localizeNumber(position)} sur ${localizeNumber(total)}`,
         noResultsFound: "Aucun résultat trouvé",
-        resultsAvailable: (count: number) => (count === 1 ? "1 résultat disponible" : `${count} résultats disponibles`)
+        resultsAvailable: (count: number) =>
+            count === 1 ? "1 résultat disponible" : `${localizeNumber(count)} résultats disponibles`
     },
     editor: {
         addColumnAfter: "Insérer une colonne après",
@@ -139,7 +150,7 @@ export const FR_FR_MESSAGES = {
         enterUrl: "Saisir l’URL",
         fontSize: "Taille de police",
         format: "Format",
-        heading: (level: number) => `Titre ${level}`,
+        heading: (level: number) => `Titre ${localizeNumber(level)}`,
         heightPx: "Hauteur (px)",
         imageUrl: "URL de l’image",
         indent: "Augmenter le retrait",
@@ -204,7 +215,7 @@ export const FR_FR_MESSAGES = {
         cancelRowEdit: "Annuler la modification de la ligne",
         columns: "Colonnes",
         columnsSelected: (count: number) =>
-            count === 1 ? "1 colonne sélectionnée" : `${count} colonnes sélectionnées`,
+            count === 1 ? "1 colonne sélectionnée" : `${localizeNumber(count)} colonnes sélectionnées`,
         delete: "Supprimer",
         deleteRowConfirmation: "Supprimer cette ligne ?",
         deleteRowTitle: "Supprimer la ligne ?",
@@ -221,7 +232,7 @@ export const FR_FR_MESSAGES = {
         noData: "Aucune donnée",
         remove: "Retirer",
         removeRow: "Retirer la ligne",
-        reorderRow: (rowNumber: number) => `Réordonner la ligne ${rowNumber}`,
+        reorderRow: (rowNumber: number) => `Réordonner la ligne ${localizeNumber(rowNumber)}`,
         resizeColumn: "Redimensionner la colonne",
         rowReorder: "Réorganisation des lignes",
         rowReorderDisabled: "La réorganisation des lignes est désactivée.",
@@ -238,12 +249,12 @@ export const FR_FR_MESSAGES = {
         rowReorderKeyboardHint:
             "Utilisez Alt + Flèche vers le haut ou Alt + Flèche vers le bas pour déplacer la ligne.",
         rowReorderMoved: (fromRowNumber: number, toPosition: number) =>
-            `Ligne ${fromRowNumber} déplacée à la position ${toPosition}.`,
+            `Ligne ${localizeNumber(fromRowNumber)} déplacée à la position ${localizeNumber(toPosition)}.`,
         rowValidationError: "Cette ligne contient des erreurs de validation.",
         save: "Enregistrer",
         saveRow: "Enregistrer la ligne",
         selectAllRows: "Sélectionner toutes les lignes",
-        selectRow: (rowNumber: number) => `Sélectionner la ligne ${rowNumber}`
+        selectRow: (rowNumber: number) => `Sélectionner la ligne ${localizeNumber(rowNumber)}`
     },
     list: {
         filterList: "Filtrer la liste",
@@ -261,7 +272,7 @@ export const FR_FR_MESSAGES = {
     },
     multiSelect: {
         clear: "Effacer",
-        itemsCount: (count: number) => `+ ${count} ${count === 1 ? "élément" : "éléments"}`
+        itemsCount: (count: number) => `+ ${localizeNumber(count)} ${count === 1 ? "élément" : "éléments"}`
     },
     notification: {
         close: "Fermer",
@@ -279,28 +290,31 @@ export const FR_FR_MESSAGES = {
     },
     pager: {
         firstPageLabel: "Première page",
-        jumpBackwardLabel: (pages: number) => (pages === 1 ? "Reculer de 1 page" : `Reculer de ${pages} pages`),
-        jumpForwardLabel: (pages: number) => (pages === 1 ? "Avancer de 1 page" : `Avancer de ${pages} pages`),
+        jumpBackwardLabel: (pages: number) =>
+            pages === 1 ? "Reculer de 1 page" : `Reculer de ${localizeNumber(pages)} pages`,
+        jumpForwardLabel: (pages: number) =>
+            pages === 1 ? "Avancer de 1 page" : `Avancer de ${localizeNumber(pages)} pages`,
         lastPageLabel: "Dernière page",
         nextPageLabel: "Page suivante",
         ofText: "sur",
-        pageLabel: (page: number) => `Page ${page}`,
-        pageSizeLabel: (pageSize: number) => `${pageSize} par page`,
-        pageStatus: (page: number, totalPages: number) => `Page ${page} sur ${totalPages}`,
+        pageLabel: (page: number) => `Page ${localizeNumber(page)}`,
+        pageSizeLabel: (pageSize: number) => `${localizeNumber(pageSize)} par page`,
+        pageStatus: (page: number, totalPages: number) =>
+            `Page ${localizeNumber(page)} sur ${localizeNumber(totalPages)}`,
         pageText: "Page",
         previousPageLabel: "Page précédente",
         rangeStatus: (start: number, end: number, total: number) =>
-            `${start}–${end} sur ${total} ${total === 1 ? "élément" : "éléments"}`
+            `${localizeNumber(start)}–${localizeNumber(end)} sur ${localizeNumber(total)} ${total === 1 ? "élément" : "éléments"}`
     },
     rating: {
         notRated: "Non évalué",
-        valueText: (value: number, max: number) => `${value} sur ${max}`
+        valueText: (value: number, max: number) => `${localizeNumber(value)} sur ${localizeNumber(max)}`
     },
     scrollView: {
         carousel: "Carrousel",
         nextPage: "Page suivante",
-        page: (current: number) => `Page ${current}`,
-        pageOf: (current: number, total: number) => `Page ${current} sur ${total}`,
+        page: (current: number) => `Page ${localizeNumber(current)}`,
+        pageOf: (current: number, total: number) => `Page ${localizeNumber(current)} sur ${localizeNumber(total)}`,
         previousPage: "Page précédente",
         scrollPagerNext: "Faire défiler la pagination vers l’avant",
         scrollPagerPrevious: "Faire défiler la pagination vers l’arrière",

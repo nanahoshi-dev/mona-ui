@@ -1,4 +1,12 @@
-import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+import { formatNumber, type MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+
+function localizeNumber(value: number): string {
+    return formatNumber(value, "ru-RU");
+}
+
+function localizeYear(year: number): string {
+    return formatNumber(year, "ru-RU", { useGrouping: false });
+}
 
 const RU_RU_PLURAL_RULES = new Intl.PluralRules("ru-RU");
 
@@ -26,7 +34,7 @@ function russianPlural(
 }
 
 function formatPageCount(count: number): string {
-    return `${count} ${russianPlural(count, {
+    return `${localizeNumber(count)} ${russianPlural(count, {
         one: "страницу",
         few: "страницы",
         many: "страниц"
@@ -34,7 +42,7 @@ function formatPageCount(count: number): string {
 }
 
 function formatItemCount(count: number): string {
-    return `${count} ${russianPlural(count, {
+    return `${localizeNumber(count)} ${russianPlural(count, {
         one: "элемент",
         few: "элемента",
         many: "элементов"
@@ -56,8 +64,9 @@ export const RU_RU_MESSAGES = {
 
     calendar: {
         calendarLabel: (formattedMonthAndYear: string) => `Календарь, ${formattedMonthAndYear}`,
-        decadeRange: (start: number, end: number) => `${start}–${end}`,
-        decadeViewLabel: (start: number, end: number) => `Просмотр десятилетия, ${start}–${end}`,
+        decadeRange: (start: number, end: number) => `${localizeYear(start)}–${localizeYear(end)}`,
+        decadeViewLabel: (start: number, end: number) =>
+            `Просмотр десятилетия, ${localizeYear(start)}–${localizeYear(end)}`,
         goToToday: (formattedDate: string) => `Перейти к сегодняшней дате, ${formattedDate}`,
         nextDecade: "Следующее десятилетие",
         nextMonth: "Следующий месяц",
@@ -69,7 +78,7 @@ export const RU_RU_MESSAGES = {
         switchToYearView: (currentMonthAndYear: string) =>
             `Перейти к просмотру года, текущий месяц: ${currentMonthAndYear}`,
         today: "Сегодня",
-        yearCellLabel: (year: number) => `Год ${year}`,
+        yearCellLabel: (year: number) => `Год ${localizeYear(year)}`,
         yearViewLabel: (year: string) => `Просмотр года, ${year}`
     },
 
@@ -123,7 +132,7 @@ export const RU_RU_MESSAGES = {
         previousColor: "Предыдущий цвет",
         saturationAndValue: "Насыщенность и значение",
         saturationAndValueText: (saturation: number, value: number) =>
-            `Насыщенность ${saturation}%, значение ${value}%`,
+            `Насыщенность ${localizeNumber(saturation)}%, значение ${localizeNumber(value)}%`,
         switchColorMode: "Переключить цветовой режим"
     },
 
@@ -170,9 +179,10 @@ export const RU_RU_MESSAGES = {
     },
 
     dropdowns: {
-        itemPosition: (text: string, position: number, total: number) => `${text}, ${position} из ${total}`,
+        itemPosition: (text: string, position: number, total: number) =>
+            `${text}, ${localizeNumber(position)} из ${localizeNumber(total)}`,
         noResultsFound: "Результаты не найдены",
-        resultsAvailable: (count: number) => `Доступно результатов: ${count}`
+        resultsAvailable: (count: number) => `Доступно результатов: ${localizeNumber(count)}`
     },
 
     editor: {
@@ -196,7 +206,7 @@ export const RU_RU_MESSAGES = {
         enterUrl: "Введите URL",
         fontSize: "Размер шрифта",
         format: "Форматирование",
-        heading: (level: number) => `Заголовок ${level}`,
+        heading: (level: number) => `Заголовок ${localizeNumber(level)}`,
         heightPx: "Высота (px)",
         imageUrl: "URL изображения",
         indent: "Увеличить отступ",
@@ -262,7 +272,7 @@ export const RU_RU_MESSAGES = {
         cancel: "Отмена",
         cancelRowEdit: "Отменить редактирование строки",
         columns: "Столбцы",
-        columnsSelected: (count: number) => `Выбрано столбцов: ${count}`,
+        columnsSelected: (count: number) => `Выбрано столбцов: ${localizeNumber(count)}`,
         delete: "Удалить",
         deleteRowConfirmation: "Удалить этот элемент?",
         deleteRowTitle: "Удалить строку?",
@@ -279,7 +289,7 @@ export const RU_RU_MESSAGES = {
         noData: "Нет данных",
         remove: "Удалить",
         removeRow: "Удалить строку",
-        reorderRow: (rowNumber: number) => `Изменить порядок строки ${rowNumber}`,
+        reorderRow: (rowNumber: number) => `Изменить порядок строки ${localizeNumber(rowNumber)}`,
         resizeColumn: "Изменить ширину столбца",
         rowReorder: "Изменение порядка строк",
         rowReorderDisabled: "Изменение порядка строк недоступно.",
@@ -294,12 +304,12 @@ export const RU_RU_MESSAGES = {
             `${rowLabel}. ${keyboardHint}${disabledReason ? ` ${disabledReason}` : ""}`,
         rowReorderKeyboardHint: "Используйте Alt + Стрелка вверх или Alt + Стрелка вниз, чтобы переместить строку.",
         rowReorderMoved: (fromRowNumber: number, toPosition: number) =>
-            `Строка ${fromRowNumber} перемещена в позицию ${toPosition}.`,
+            `Строка ${localizeNumber(fromRowNumber)} перемещена в позицию ${localizeNumber(toPosition)}.`,
         rowValidationError: "В строке есть ошибки проверки.",
         save: "Сохранить",
         saveRow: "Сохранить строку",
         selectAllRows: "Выбрать все строки",
-        selectRow: (rowNumber: number) => `Выбрать строку ${rowNumber}`
+        selectRow: (rowNumber: number) => `Выбрать строку ${localizeNumber(rowNumber)}`
     },
 
     list: {
@@ -347,24 +357,26 @@ export const RU_RU_MESSAGES = {
         lastPageLabel: "Последняя страница",
         nextPageLabel: "Следующая страница",
         ofText: "из",
-        pageLabel: (page: number) => `Страница ${page}`,
-        pageSizeLabel: (pageSize: number) => `${pageSize} на странице`,
-        pageStatus: (page: number, totalPages: number) => `Страница ${page} из ${totalPages}`,
+        pageLabel: (page: number) => `Страница ${localizeNumber(page)}`,
+        pageSizeLabel: (pageSize: number) => `${localizeNumber(pageSize)} на странице`,
+        pageStatus: (page: number, totalPages: number) =>
+            `Страница ${localizeNumber(page)} из ${localizeNumber(totalPages)}`,
         pageText: "Страница",
         previousPageLabel: "Предыдущая страница",
-        rangeStatus: (start: number, end: number, total: number) => `${start}–${end} из ${total}`
+        rangeStatus: (start: number, end: number, total: number) =>
+            `${localizeNumber(start)}–${localizeNumber(end)} из ${localizeNumber(total)}`
     },
 
     rating: {
         notRated: "Без оценки",
-        valueText: (value: number, max: number) => `${value} из ${max}`
+        valueText: (value: number, max: number) => `${localizeNumber(value)} из ${localizeNumber(max)}`
     },
 
     scrollView: {
         carousel: "карусель",
         nextPage: "Следующая страница",
-        page: (current: number) => `Страница ${current}`,
-        pageOf: (current: number, total: number) => `Страница ${current} из ${total}`,
+        page: (current: number) => `Страница ${localizeNumber(current)}`,
+        pageOf: (current: number, total: number) => `Страница ${localizeNumber(current)} из ${localizeNumber(total)}`,
         previousPage: "Предыдущая страница",
         scrollPagerNext: "Прокрутить список страниц вперёд",
         scrollPagerPrevious: "Прокрутить список страниц назад",
