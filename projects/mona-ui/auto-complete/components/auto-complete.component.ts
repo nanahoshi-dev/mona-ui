@@ -158,6 +158,14 @@ export class AutoCompleteComponent<TData = unknown>
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
+    protected readonly clearButtonVisible = computed(
+        () =>
+            this.showClearButton() &&
+            !!this.autoCompleteValue() &&
+            !this.loading() &&
+            !this.disabled() &&
+            !this.readonly()
+    );
     protected readonly effectiveAriaLabel = computed(
         () => this.ariaLabel() || (this.ariaLabelledBy() ? "" : this.placeholder())
     );
@@ -415,7 +423,11 @@ export class AutoCompleteComponent<TData = unknown>
     }
 
     protected onValueClear(event: MouseEvent | KeyboardEvent): void {
-        if (this.readonly() || (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ")) {
+        if (
+            this.disabled() ||
+            this.readonly() ||
+            (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ")
+        ) {
             return;
         }
         event.stopImmediatePropagation();
@@ -482,10 +494,14 @@ export class AutoCompleteComponent<TData = unknown>
                 }
 
                 if (!value) {
-                    this.#popupRef()
-                        ?.closed.pipe(take(1))
-                        .subscribe(() => this.clear(false));
-                    this.closePopup();
+                    const popupRef = this.#popupRef();
+                    if (popupRef) {
+                        popupRef.closed.pipe(take(1)).subscribe(() => this.clear(false));
+                        this.closePopup();
+                    } else {
+                        // Deleting the text with the popup closed still has to reach the value on blur.
+                        this.clear(false);
+                    }
                     return;
                 }
 
@@ -534,17 +550,16 @@ export class AutoCompleteComponent<TData = unknown>
             .pipe(
                 filter(e => e.originalEvent?.key === "Escape"),
                 takeUntilDestroyed(this.#destroyRef),
-                tap(e => {
-                    e.preventDefault();
-                    e.originalEvent?.stopImmediatePropagation();
-                })
+                tap(e => e.preventDefault())
             )
-            .subscribe(() => {
+            .subscribe(event => {
                 if (this.#popupRef()) {
                     this.closePopup();
                     return;
                 }
                 if (this.autoCompleteValue()) {
+                    // This Escape was used to clear the text; a dialog or window around the field waits for the next.
+                    event.originalEvent?.stopPropagation();
                     this.clear(false);
                 }
             });

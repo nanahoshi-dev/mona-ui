@@ -427,6 +427,24 @@ describe("MultiSelectComponent", () => {
         expect(getHost(fixture).className).toContain("focus-within:ring-error/35");
     });
 
+    describe("clear button state", () => {
+        it("is hidden on a read-only multi-select", async () => {
+            const fixture = await createObjectModeFixture();
+            fixture.componentInstance.readonlyState.set(true);
+            await waitForStable(fixture);
+
+            expect(getIndicator(fixture, "clear")).toBeNull();
+        });
+
+        it("is hidden on a disabled multi-select", async () => {
+            const fixture = await createObjectModeFixture();
+            fixture.componentInstance.disabled.set(true);
+            await waitForStable(fixture);
+
+            expect(getIndicator(fixture, "clear")).toBeNull();
+        });
+    });
+
     describe("i18n", () => {
         it("renders default English clear label on indicator icon", async () => {
             const fixture = await createObjectModeFixture();

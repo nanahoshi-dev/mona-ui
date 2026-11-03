@@ -1,5 +1,6 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
 import {
     disabled as fieldDisabled,
     form,
@@ -405,6 +406,173 @@ describe("ComboBoxComponent", () => {
         expect(getHost(fixture).querySelectorAll("[role='combobox']").length).toBe(1);
     });
 
+    describe("leaving the field", () => {
+        it("restores the selected item's text when the typed text matches nothing", async () => {
+            const fixture = await createObjectModeFixture();
+
+            await typeText(fixture, "Bananazzz");
+            await leaveField(fixture);
+
+            expect(getInput(fixture).value).toBe("Banana");
+            expect(fixture.componentInstance.form.value().value()).toEqual(FOOD_ITEMS[1]);
+        });
+
+        it("restores the selected item's text when the typed text only starts an item", async () => {
+            const fixture = await createObjectModeFixture();
+
+            await typeText(fixture, "Car");
+            await leaveField(fixture);
+
+            expect(getInput(fixture).value).toBe("Banana");
+            expect(fixture.componentInstance.form.value().value()).toEqual(FOOD_ITEMS[1]);
+        });
+
+        it("selects the item whose text matches, ignoring case", async () => {
+            const fixture = await createObjectModeFixture();
+
+            await typeText(fixture, "carrot");
+            await leaveField(fixture);
+
+            expect(fixture.componentInstance.form.value().value()).toEqual(FOOD_ITEMS[2]);
+            expect(getInput(fixture).value).toBe("Carrot");
+        });
+
+        it("clears the value when the text was deleted", async () => {
+            const fixture = await createObjectModeFixture();
+
+            await typeText(fixture, "");
+            await leaveField(fixture);
+
+            expect(fixture.componentInstance.form.value().value()).toBeNull();
+            expect(getInput(fixture).value).toBe("");
+        });
+
+        it("offers unmatched text through valueAdd when custom values are allowed", async () => {
+            const fixture = await createObjectFixture(CustomValueHostComponent);
+
+            await typeText(fixture, "Kiwi");
+            await leaveField(fixture);
+
+            expect(fixture.componentInstance.addedValue).toBe("Kiwi");
+        });
+
+        it("leaves the text alone while focus moves to the clear button", async () => {
+            const fixture = await createObjectModeFixture();
+
+            await typeText(fixture, "Bananazzz");
+            getInput(fixture).dispatchEvent(
+                new FocusEvent("focusout", { bubbles: true, relatedTarget: getClearButton(fixture) })
+            );
+            await waitForStable(fixture);
+
+            expect(getInput(fixture).value).toBe("Bananazzz");
+        });
+    });
+
+    describe("focus", () => {
+        it("lets focus stay on the clear button", async () => {
+            const fixture = await createObjectModeFixture();
+            const clearButton = getClearButton(fixture);
+
+            getInput(fixture).focus();
+            clearButton.focus();
+            await waitForStable(fixture);
+            await new Promise(resolve => setTimeout(resolve, 0));
+
+            expect(document.activeElement).toBe(clearButton);
+        });
+
+        it("focuses the input when the arrow is pressed", async () => {
+            const fixture = await createObjectModeFixture();
+            const event = new MouseEvent("pointerdown", { bubbles: true, cancelable: true });
+
+            getIndicator(fixture, "toggle")!.dispatchEvent(event);
+
+            expect(event.defaultPrevented).toBe(true);
+            expect(document.activeElement).toBe(getInput(fixture));
+        });
+
+        it("leaves a press on the clear button to the button", async () => {
+            const fixture = await createObjectModeFixture();
+            const event = new MouseEvent("pointerdown", { bubbles: true, cancelable: true });
+
+            getClearButton(fixture).dispatchEvent(event);
+
+            expect(event.defaultPrevented).toBe(false);
+        });
+
+        it("focuses a read-only combo box through focus()", async () => {
+            const fixture = await createObjectModeFixture();
+            fixture.componentInstance.readonlyState.set(true);
+            await waitForStable(fixture);
+
+            fixture.debugElement.query(By.directive(ComboBoxComponent)).componentInstance.focus();
+            await new Promise(resolve => setTimeout(resolve, 0));
+
+            expect(document.activeElement).toBe(getInput(fixture));
+        });
+    });
+
+    describe("keyboard", () => {
+        it("ignores Enter while an IME is composing", async () => {
+            const fixture = await createObjectModeFixture();
+
+            await typeText(fixture, "car");
+            const event = new KeyboardEvent("keydown", {
+                key: "Enter",
+                bubbles: true,
+                cancelable: true,
+                isComposing: true
+            });
+            getInput(fixture).dispatchEvent(event);
+            await waitForStable(fixture);
+
+            expect(event.defaultPrevented).toBe(false);
+            expect(fixture.componentInstance.form.value().value()).toEqual(FOOD_ITEMS[1]);
+            expect(getInput(fixture).getAttribute("aria-expanded")).toBe("true");
+        });
+
+        it("keeps an Escape that clears the field from closing a surrounding dialog", async () => {
+            const fixture = await createObjectModeFixture();
+            const escapes = countDocumentEscapes();
+
+            pressKey(fixture, "Escape");
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.form.value().value()).toBeNull();
+            expect(escapes.stop()).toBe(0);
+        });
+
+        it("lets Escape through when there is nothing to clear", async () => {
+            const fixture = await createObjectModeFixture();
+            pressKey(fixture, "Escape");
+            await waitForStable(fixture);
+            const escapes = countDocumentEscapes();
+
+            pressKey(fixture, "Escape");
+
+            expect(escapes.stop()).toBe(1);
+        });
+    });
+
+    describe("clear button state", () => {
+        it("is hidden on a read-only combo box", async () => {
+            const fixture = await createObjectModeFixture();
+            fixture.componentInstance.readonlyState.set(true);
+            await waitForStable(fixture);
+
+            expect(getIndicator(fixture, "clear")).toBeNull();
+        });
+
+        it("is hidden on a disabled combo box", async () => {
+            const fixture = await createObjectModeFixture();
+            fixture.componentInstance.disabled.set(true);
+            await waitForStable(fixture);
+
+            expect(getIndicator(fixture, "clear")).toBeNull();
+        });
+    });
+
     describe("i18n", () => {
         it("renders default English clear label on indicator icon", async () => {
             const fixture = await createObjectModeFixture();
@@ -480,6 +648,30 @@ async function typeText(fixture: ComponentFixture<unknown>, text: string): Promi
     fixture.detectChanges();
     await new Promise(resolve => setTimeout(resolve, 0));
     await waitForStable(fixture);
+}
+
+async function leaveField(fixture: ComponentFixture<unknown>): Promise<void> {
+    const outside = document.createElement("button");
+    document.body.appendChild(outside);
+    getInput(fixture).dispatchEvent(new FocusEvent("focusout", { bubbles: true, relatedTarget: outside }));
+    outside.remove();
+    await waitForStable(fixture);
+}
+
+function countDocumentEscapes(): { stop(): number } {
+    let count = 0;
+    const listener = (event: KeyboardEvent): void => {
+        if (event.key === "Escape") {
+            count++;
+        }
+    };
+    document.addEventListener("keydown", listener);
+    return {
+        stop: () => {
+            document.removeEventListener("keydown", listener);
+            return count;
+        }
+    };
 }
 
 function pressKey(fixture: ComponentFixture<unknown>, key: string): void {

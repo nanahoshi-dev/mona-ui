@@ -60,7 +60,7 @@ import {
 import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import { TextBoxDirective } from "@nanahoshi/mona-ui/text-box";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { debounceTime, filter, fromEvent, Subject, take, tap } from "rxjs";
+import { debounceTime, filter, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { COMBO_BOX_DEFAULT_MESSAGES } from "../../i18n/combo-box.default-messages";
 
@@ -113,7 +113,9 @@ import {
         "[attr.data-invalid]": "invalidState() || null",
         "[attr.data-readonly]": "readonly() || null",
         "[attr.tabindex]": "-1",
-        "[class]": "baseClass()"
+        "[class]": "baseClass()",
+        "(focusout)": "onFocusOut($event)",
+        "(pointerdown)": "onHostPointerDown($event)"
     }
 })
 export class ComboBoxComponent<TData = unknown, TValue = TData>
@@ -130,7 +132,6 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
     readonly #hostElementRef = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
     readonly #listService = inject(ListService);
-    readonly #navigatedItem = signal<TData | null>(null);
     readonly #popupRef = this.#dropdownService.popupRef;
     readonly #userNavigatedViaArrows = signal(false);
 
@@ -151,6 +152,14 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
+    protected readonly clearButtonVisible = computed(
+        () =>
+            this.showClearButton() &&
+            this.selectedListItem() != null &&
+            !this.loading() &&
+            !this.disabled() &&
+            !this.readonly()
+    );
     protected readonly comboBoxValue = signal("");
     protected readonly comboBoxValue$ = new Subject<string | null>();
     protected readonly effectiveAriaLabel = computed(
@@ -412,22 +421,40 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
                 this.setSubscriptions();
             }
         });
-        fromEvent(this.#hostElementRef.nativeElement, "focusin")
-            .pipe(
-                takeUntilDestroyed(),
-                filter(() => !this.readonly())
-            )
-            .subscribe(() => this.focus());
     }
 
     public focus(): void {
         rxTimeout(this.#destroyRef, () => {
             const input = this.#hostElementRef.nativeElement.querySelector("input");
-            if (input && !this.readonly()) {
+            if (input) {
                 input.focus();
                 input.setSelectionRange(input.value.length, input.value.length);
             }
         });
+    }
+
+    protected onFocusOut(event: FocusEvent): void {
+        const nextTarget = event.relatedTarget;
+        if (nextTarget instanceof Node) {
+            const popupElement = this.#dropdownService.popupRef()?.overlayRef.overlayElement;
+            if (this.#hostElementRef.nativeElement.contains(nextTarget) || popupElement?.contains(nextTarget)) {
+                return;
+            }
+        }
+        this.resolveText();
+    }
+
+    protected onHostPointerDown(event: PointerEvent): void {
+        // A press on the padding, the affixes or the arrow focuses the input instead of the host. Controls of
+        // their own (the input, the clear button, links or buttons in a prefix) keep the press.
+        const host = this.#hostElementRef.nativeElement as HTMLElement;
+        const target = event.target as HTMLElement | null;
+        const control = target?.closest("a, button, input, select, textarea, [tabindex]");
+        if (this.disabled() || (control != null && control !== host)) {
+            return;
+        }
+        event.preventDefault();
+        host.querySelector("input")?.focus();
     }
 
     protected onInputBlur(event: FocusEvent): void {
@@ -444,7 +471,6 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
             event.source.via === "keyboard" &&
             event.source.key !== "Enter"
         ) {
-            this.#navigatedItem.set(event.item.data);
             return;
         }
         this.updateValue(this.getControlValue(event.item.data), true);
@@ -459,7 +485,11 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
     }
 
     protected onValueClear(event: Event): void {
-        if (this.readonly() || (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ")) {
+        if (
+            this.disabled() ||
+            this.readonly() ||
+            (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ")
+        ) {
             return;
         }
         event.preventDefault();
@@ -471,7 +501,6 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
     }
 
     private clear(): void {
-        this.#navigatedItem.set(null);
         this.updateValue(null);
         this.comboBoxValue.set("");
         this.#listService.clearSelections();
@@ -544,6 +573,37 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
         return event;
     }
 
+    /**
+     * Settles typed text when focus leaves the combo box, so the field never shows text that isn't its value:
+     * an item whose text matches is selected, empty text clears the value, other text is offered through
+     * `valueAdd` when custom values are allowed, and otherwise the selected item's text comes back.
+     */
+    private resolveText(): void {
+        // Read the input itself: with a filter debounce, the last keystrokes may not have reached comboBoxValue yet.
+        const input = (this.#hostElementRef.nativeElement as HTMLElement).querySelector("input");
+        const text = input?.value ?? this.comboBoxValue();
+        this.comboBoxValue.set(text);
+        const selectedItem = this.selectedListItem();
+        const selectedText = selectedItem ? this.#listService.getItemText(selectedItem) : "";
+        if (text === selectedText) {
+            return;
+        }
+        if (!text) {
+            this.clear();
+            return;
+        }
+        const matchingItem = this.#listService.getMatchingFilteredItem(text);
+        if (matchingItem && this.#listService.getItemText(matchingItem).toLowerCase() === text.toLowerCase()) {
+            this.selectItem(matchingItem);
+            return;
+        }
+        if (this.allowCustomValue()) {
+            this.valueAdd.emit(text);
+            return;
+        }
+        this.comboBoxValue.set(selectedText);
+    }
+
     private selectItem(item: ListItem<TData>): void {
         this.#listService.selectItem(item);
         this.updateValue(this.getControlValue(item.data));
@@ -555,7 +615,6 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
                 this.#listService.selectItem(item);
                 this.updateValue(this.getControlValue(item.data), true);
             } else {
-                this.#navigatedItem.set(item.data);
                 this.#userNavigatedViaArrows.set(true);
             }
         });
@@ -589,7 +648,6 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
                 this.comboBoxValue.set(value ?? "");
                 const item = this.#listService.getMatchingFilteredItem(value);
                 if (item) {
-                    this.#navigatedItem.set(item.data);
                     this.#listService.highlightedItem.set(item);
 
                     if (this.#popupRef()) {
@@ -610,17 +668,18 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
                 filter(e => e.originalEvent?.key === "Escape"),
                 tap(e => e.preventDefault())
             )
-            .subscribe(() => {
+            .subscribe(event => {
                 if (this.#popupRef()) {
                     const selectedItem = this.selectedListItem();
                     if (selectedItem) {
                         this.comboBoxValue.set(this.#listService.getItemText(selectedItem));
-                        this.#navigatedItem.set(selectedItem.data);
                     } else {
                         this.clear();
                     }
                     this.closePopup();
-                } else {
+                } else if (this.comboBoxValue() || this.value() != null) {
+                    // This Escape was used to clear the field; a dialog or window around it waits for the next.
+                    event.originalEvent?.stopPropagation();
                     this.clear();
                     this.focus();
                 }
@@ -636,12 +695,6 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
             } else if (event.key === "Tab") {
                 this.closePopup();
             }
-        });
-    }
-
-    private setNavigatedItemSubscription(): void {
-        this.#listService.navigatedItem$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(e => {
-            this.#navigatedItem.set(e?.data ?? null);
         });
     }
 
@@ -672,7 +725,6 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
         this.setComboboxValueSubscription();
         this.setEscapeKeySubscription();
         this.setKeydownSubscription();
-        this.setNavigatedItemSubscription();
         this.setPopupCloseSubscriptions();
         this.setSpaceKeySubscription();
     }

@@ -201,6 +201,86 @@ describe("AutoCompleteComponent", () => {
         expect(getHost(fixture).querySelectorAll("[role='combobox']").length).toBe(1);
     });
 
+    describe("keyboard", () => {
+        it("ignores Enter while an IME is composing", async () => {
+            const fixture = await createSignalFormFixture();
+
+            await typeText(fixture, "car");
+            const event = pressKey(fixture, "Enter", { isComposing: true });
+            await waitForStable(fixture);
+
+            expect(event.defaultPrevented).toBe(false);
+            expect(fixture.componentInstance.form.value().value()).toBe("Banana");
+            expect(getInput(fixture).getAttribute("aria-expanded")).toBe("true");
+        });
+
+        it("ignores the Enter Safari sends to confirm a conversion", async () => {
+            const fixture = await createSignalFormFixture();
+
+            await typeText(fixture, "car");
+            pressKey(fixture, "Enter", { keyCode: 229 });
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.form.value().value()).toBe("Banana");
+        });
+
+        it("lets Escape through when the popup is closed and the field is empty", async () => {
+            const fixture = await createSignalFormFixture();
+            getInput(fixture).value = "";
+            getInput(fixture).dispatchEvent(new Event("input", { bubbles: true }));
+            await waitForStable(fixture);
+            await new Promise(resolve => setTimeout(resolve, 0));
+            await waitForStable(fixture);
+            const escapes = countDocumentEscapes();
+
+            pressKey(fixture, "Escape");
+
+            expect(escapes.stop()).toBe(1);
+        });
+
+        it("keeps an Escape that clears the text from closing a surrounding dialog", async () => {
+            const fixture = await createSignalFormFixture();
+            const escapes = countDocumentEscapes();
+
+            pressKey(fixture, "Escape");
+            await waitForStable(fixture);
+
+            expect(getInput(fixture).value).toBe("");
+            expect(escapes.stop()).toBe(0);
+        });
+    });
+
+    describe("leaving the field", () => {
+        it("clears the value when the text was deleted with the popup closed", async () => {
+            const fixture = await createSignalFormFixture();
+
+            await typeText(fixture, "");
+            getInput(fixture).dispatchEvent(new FocusEvent("blur"));
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.form.value().value()).toBeNull();
+            expect(getIndicator(fixture, "clear")).toBeNull();
+        });
+    });
+
+    describe("clear button state", () => {
+        it("is hidden on a read-only auto-complete", async () => {
+            const fixture = await createSignalFormFixture();
+            fixture.componentInstance.readonlyState.set(true);
+            await waitForStable(fixture);
+
+            expect(getIndicator(fixture, "clear")).toBeNull();
+        });
+
+        it("is hidden on a disabled auto-complete", async () => {
+            const fixture = await createSignalFormFixture();
+            fixture.componentInstance.disabled.set(true);
+            await waitForStable(fixture);
+
+            expect(getIndicator(fixture, "clear")).toBeNull();
+        });
+    });
+
     describe("i18n", () => {
         it("renders default English clear label on indicator icon", async () => {
             const fixture = await createSignalFormFixture();
@@ -249,6 +329,40 @@ async function openPopup(fixture: ComponentFixture<unknown>): Promise<void> {
     await waitForStable(fixture);
     await new Promise(resolve => setTimeout(resolve, 0));
     await waitForStable(fixture);
+}
+
+async function typeText(fixture: ComponentFixture<unknown>, text: string): Promise<void> {
+    const input = getInput(fixture);
+    input.focus();
+    input.value = text;
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    fixture.detectChanges();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    await waitForStable(fixture);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    await waitForStable(fixture);
+}
+
+function pressKey(fixture: ComponentFixture<unknown>, key: string, init: KeyboardEventInit = {}): KeyboardEvent {
+    const event = new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true, ...init });
+    getInput(fixture).dispatchEvent(event);
+    return event;
+}
+
+function countDocumentEscapes(): { stop(): number } {
+    let count = 0;
+    const listener = (event: KeyboardEvent): void => {
+        if (event.key === "Escape") {
+            count++;
+        }
+    };
+    document.addEventListener("keydown", listener);
+    return {
+        stop: () => {
+            document.removeEventListener("keydown", listener);
+            return count;
+        }
+    };
 }
 
 function getHost(fixture: ComponentFixture<unknown>): HTMLElement {

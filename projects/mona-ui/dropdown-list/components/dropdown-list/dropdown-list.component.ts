@@ -54,7 +54,7 @@ import {
     SelectableOptions,
     SelectionChangeEvent
 } from "@nanahoshi/mona-ui/internal/list";
-import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
+import { PopupCloseEvent, PopupCloseSource } from "@nanahoshi/mona-ui/popup";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { Subject } from "rxjs";
 import { twMerge } from "tailwind-merge";
@@ -67,6 +67,13 @@ import {
     DropDownListVariantInput,
     DropDownListVariantProps
 } from "../../styles/dropdown-list.styles";
+
+const cancellingCloseSources: ReadonlySet<PopupCloseSource | undefined> = new Set([
+    PopupCloseSource.BackdropClick,
+    PopupCloseSource.Escape,
+    PopupCloseSource.OutsideClick,
+    PopupCloseSource.Scroll
+]);
 
 @Component({
     selector: "mona-dropdown-list",
@@ -156,6 +163,14 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
+    protected readonly clearButtonVisible = computed(
+        () =>
+            this.showClearButton() &&
+            this.selectedListItem() != null &&
+            !this.loading() &&
+            !this.disabled() &&
+            !this.readonly()
+    );
     protected readonly effectiveAriaLabel = computed(
         () => this.ariaLabel() || (this.ariaLabelledBy() ? "" : this.placeholder())
     );
@@ -448,7 +463,11 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
     }
 
     protected onValueClear(event: MouseEvent | KeyboardEvent): void {
-        if (this.readonly() || (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ")) {
+        if (
+            this.disabled() ||
+            this.readonly() ||
+            (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ")
+        ) {
             return;
         }
         event.stopImmediatePropagation();
@@ -563,9 +582,15 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
     }
 
     private setPopupCloseSubscriptions(): void {
-        this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
-            const navigatedItem = this.#navigatedItem();
-            this.updateValue(navigatedItem ? this.getControlValue(navigatedItem) : null, true);
+        this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
+            if (cancellingCloseSources.has(event.via)) {
+                // Escape, an outside click or a scroll cancels: drop the option the arrow keys reached.
+                this.synchronizeSelection(this.value());
+                this.#navigatedItem.set(this.selectedDataItem());
+            } else {
+                const navigatedItem = this.#navigatedItem();
+                this.updateValue(navigatedItem ? this.getControlValue(navigatedItem) : null, true);
+            }
             if (this.#dropdownService.focusCanReturn()) {
                 window.setTimeout(() => this.focus());
             }

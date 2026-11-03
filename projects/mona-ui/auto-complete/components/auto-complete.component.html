@@ -28,7 +28,7 @@
     (ngModelChange)="autoCompleteValue$.next($event)"
     (blur)="onInputBlur($event)" />
 
-@if (showClearButton() && autoCompleteValue() && !loading()) {
+@if (clearButtonVisible()) {
     <mona-indicator-icon
         preset="clear"
         [interactive]="true"

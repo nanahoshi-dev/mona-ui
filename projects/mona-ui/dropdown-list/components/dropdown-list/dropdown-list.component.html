@@ -20,7 +20,7 @@
     }
 </span>
 
-@if (selectedListItem() && showClearButton() && !loading()) {
+@if (clearButtonVisible()) {
     <mona-indicator-icon
         preset="clear"
         [interactive]="true"

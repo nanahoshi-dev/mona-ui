@@ -319,7 +319,20 @@ describe("DropdownListComponent", () => {
             expect(fixture.componentInstance.form.value().value()).toBe(3);
         });
 
-        it("commits the navigated item when the popup closes", async () => {
+        it("commits the navigated item when Tab closes the popup", async () => {
+            const fixture = await createPrimitiveModeFixture();
+
+            await openPopup(fixture);
+            pressKey(fixture, "ArrowDown");
+            pressKey(fixture, "Tab");
+            await waitForStable(fixture);
+            await new Promise(resolve => setTimeout(resolve, 0));
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.form.value().value()).toBe(3);
+        });
+
+        it("keeps the value when Escape closes the popup", async () => {
             const fixture = await createPrimitiveModeFixture();
 
             await openPopup(fixture);
@@ -329,7 +342,8 @@ describe("DropdownListComponent", () => {
             await new Promise(resolve => setTimeout(resolve, 0));
             await waitForStable(fixture);
 
-            expect(fixture.componentInstance.form.value().value()).toBe(3);
+            expect(fixture.componentInstance.form.value().value()).toBe(2);
+            expect(getHost(fixture).textContent).toContain("Banana");
         });
 
         it("clears the signal form value from the clear button", async () => {
@@ -568,6 +582,73 @@ describe("DropdownListComponent", () => {
         fixture.detectChanges();
 
         expect(fixture.nativeElement.getAttribute("aria-label")).toBe("Select a food");
+    });
+
+    describe("cancelling the popup", () => {
+        it("keeps the value when a click outside closes the popup", async () => {
+            const fixture = await createPrimitiveModeFixture();
+
+            await openPopup(fixture);
+            pressKey(fixture, "ArrowDown");
+            await waitForStable(fixture);
+            document.body.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
+            document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+            await waitForStable(fixture);
+            await new Promise(resolve => setTimeout(resolve, 0));
+            await waitForStable(fixture);
+
+            expect(getHost(fixture).getAttribute("aria-expanded")).toBe("false");
+            expect(fixture.componentInstance.form.value().value()).toBe(2);
+            expect(getHost(fixture).textContent).toContain("Banana");
+        });
+
+        it("commits the navigated item on Alt+ArrowUp", async () => {
+            const fixture = await createPrimitiveModeFixture();
+
+            await openPopup(fixture);
+            pressKey(fixture, "ArrowDown");
+            getHost(fixture).dispatchEvent(
+                new KeyboardEvent("keydown", { key: "ArrowUp", altKey: true, bubbles: true, cancelable: true })
+            );
+            await waitForStable(fixture);
+            await new Promise(resolve => setTimeout(resolve, 0));
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.form.value().value()).toBe(3);
+        });
+
+        it("reopens on the selected item after Escape", async () => {
+            const fixture = await createPrimitiveModeFixture();
+
+            await openPopup(fixture);
+            pressKey(fixture, "ArrowDown");
+            pressKey(fixture, "Escape");
+            await waitForStable(fixture);
+            await new Promise(resolve => setTimeout(resolve, 0));
+            await waitForStable(fixture);
+            await openPopup(fixture);
+
+            expect(getOption("Banana").getAttribute("aria-selected")).toBe("true");
+            expect(getOption("Carrot").getAttribute("aria-selected")).not.toBe("true");
+        });
+    });
+
+    describe("clear button state", () => {
+        it("is hidden on a read-only dropdown list", async () => {
+            const fixture = await createPrimitiveModeFixture();
+            fixture.componentInstance.readonlyState.set(true);
+            await waitForStable(fixture);
+
+            expect(getIndicator(fixture, "clear")).toBeNull();
+        });
+
+        it("is hidden on a disabled dropdown list", async () => {
+            const fixture = await createPrimitiveModeFixture();
+            fixture.componentInstance.disabled.set(true);
+            await waitForStable(fixture);
+
+            expect(getIndicator(fixture, "clear")).toBeNull();
+        });
     });
 
     describe("i18n", () => {

@@ -155,6 +155,14 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
+    protected readonly clearButtonVisible = computed(
+        () =>
+            this.showClearButton() &&
+            this.selectedListItems().any() &&
+            !this.loading() &&
+            !this.disabled() &&
+            !this.readonly()
+    );
     protected readonly expanded = computed(() => this.#dropdownService.popupRef() !== null);
     protected readonly footerTemplate = contentChild(DropdownFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderTemplate = contentChild(DropdownGroupHeaderTemplateDirective, {
@@ -472,7 +480,11 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
     }
 
     protected onValueClear(event: Event): void {
-        if (this.readonly() || (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ")) {
+        if (
+            this.disabled() ||
+            this.readonly() ||
+            (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ")
+        ) {
             return;
         }
         event.preventDefault();

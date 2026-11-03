@@ -27,7 +27,7 @@
     (ngModelChange)="comboBoxValue$.next($event)"
     (blur)="onInputBlur($event)" />
 
-@if (showClearButton() && selectedListItem() && !loading()) {
+@if (clearButtonVisible()) {
     <mona-indicator-icon
         preset="clear"
         [interactive]="true"
