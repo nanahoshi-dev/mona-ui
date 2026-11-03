@@ -10,12 +10,21 @@ export type DeepPartial<T> = T extends BuiltIn
       ? Array<DeepPartial<U>>
       : { [P in keyof T]?: DeepPartial<T[P]> };
 
-export type Path<T> = T extends object
-    ? {
-          [K in keyof T]-?:
-              [K] | (Path<T[K]> extends infer P ? (P extends ReadonlyArray<PropertyKey> ? [K, ...P] : never) : never);
-      }[keyof T]
-    : never;
+/**
+ * Every key path into `T`. Paths stop at built-in values (dates, maps, sets, functions), and index arrays by
+ * number, so `['tags', 0]` is a path and `['tags', 'map']` is not.
+ */
+export type Path<T> = T extends BuiltIn
+    ? never
+    : T extends ReadonlyArray<infer U>
+      ? [number] | (Path<U> extends infer P ? (P extends ReadonlyArray<PropertyKey> ? [number, ...P] : never) : never)
+      : T extends object
+        ? {
+              [K in keyof T]-?:
+                  | [K]
+                  | (Path<T[K]> extends infer P ? (P extends ReadonlyArray<PropertyKey> ? [K, ...P] : never) : never);
+          }[keyof T]
+        : never;
 
 export type PathValue<T, P> = P extends readonly [infer K, ...infer R]
     ? K extends keyof T
@@ -46,6 +55,12 @@ export const isPlainObject = (v: unknown): v is Record<PropertyKey, unknown> => 
     return !!v && typeof v === "object" && Object.getPrototypeOf(v) === Object.prototype;
 };
 
+/**
+ * Merges `patch` into a copy of `base`. Only plain objects (object literals, `JSON.parse` output) are merged
+ * key by key. Any other value in the patch, including a class instance, a `Date`, a `Map` or a `Set`, replaces
+ * the base value as a whole, so a partial patch for a class-instance field must carry the whole value.
+ * `__proto__` keys in the patch are ignored.
+ */
 export function deepMerge<T>(
     base: T,
     patch: DeepPartial<T>,
@@ -72,6 +87,9 @@ export function deepMerge<T>(
     const keys = Object.keys(patch) as Array<keyof T>;
 
     for (const key of keys) {
+        if (key === "__proto__") {
+            continue;
+        }
         const patchValue = patch[key];
         if (patchValue === undefined) {
             if (options.undefinedValues === "assign") {
@@ -94,34 +112,36 @@ export function deepMerge<T>(
                     ...patchValue
                 ] as unknown as T[typeof key];
             } else {
-                // unionBy Strategy
-                const by = strategy.key;
-                const map = new Map<string, unknown>();
-
-                const getIdentifier = (item: unknown): string => {
-                    if (Array.isArray(by)) {
-                        return by.map(k => String((item as Record<PropertyKey, never>)?.[k] ?? "")).join("|");
+                // unionBy strategy: a patch item is merged into the base item with the same key; items without a
+                // key are kept as they are.
+                const identify = createUnionIdentifier(strategy.key);
+                const items: unknown[] = [];
+                const indexById = new Map<string, number>();
+                const add = (item: unknown, merge: boolean): void => {
+                    const id = identify(item);
+                    const index = id === undefined ? undefined : indexById.get(id);
+                    if (index === undefined) {
+                        if (id !== undefined) {
+                            indexById.set(id, items.length);
+                        }
+                        items.push(item);
+                        return;
                     }
-                    return String((item as Record<PropertyKey, never>)?.[by] ?? "");
+                    const existing = items[index];
+                    items[index] = !merge
+                        ? item
+                        : isPlainObject(item) && isPlainObject(existing)
+                          ? deepMerge(existing, item as DeepPartial<typeof existing>, options, currentPath)
+                          : { ...(existing as object | undefined), ...(item as object) };
                 };
 
                 for (const item of baseValue) {
-                    map.set(getIdentifier(item), item);
+                    add(item, false);
                 }
-
                 for (const item of patchValue) {
-                    const id = getIdentifier(item);
-                    const existing = map.get(id);
-
-                    const mergedItem =
-                        isPlainObject(item) && isPlainObject(existing)
-                            ? // @ts-ignore // TODO: Remove this when it is no longer flagged as error
-                              deepMerge(existing, item, options)
-                            : { ...(existing as object | undefined), ...item };
-
-                    map.set(id, mergedItem);
+                    add(item, true);
                 }
-                (out as T)[key] = Array.from(map.values()) as unknown as T[typeof key];
+                (out as T)[key] = items as unknown as T[typeof key];
             }
             continue;
         }
@@ -149,25 +169,30 @@ export function mergePatchInto<T>(
     return deepMerge(base, patch, options);
 }
 
-export function buildNested(keys: ReadonlyArray<PropertyKey>, leaf: unknown): Record<PropertyKey, unknown> {
-    const [head, ...rest] = keys;
-    if (head === undefined) {
+/**
+ * Builds a patch that sets `leaf` at `keys`. When `current` (the value the patch will be merged into) holds an
+ * array along the path, the patch carries a copy of that array with the one element replaced, since arrays are
+ * replaced rather than merged. Without `current`, every level is an object.
+ */
+export function buildNested(
+    keys: ReadonlyArray<PropertyKey>,
+    leaf: unknown,
+    current?: unknown
+): Record<PropertyKey, unknown> {
+    if (keys.length === 0) {
         return {};
     }
-    if (rest.length === 0) {
-        return { [head]: leaf };
-    }
-    return { [head]: buildNested(rest, leaf) };
+    return buildLevel(keys, leaf, current, false) as Record<PropertyKey, unknown>;
 }
 
-export function patchAt<T, P extends Path<T>>(path: P, value: PathValue<T, P>): DeepPartial<T> {
+export function patchAt<T, P extends Path<T>>(path: P, value: PathValue<T, P>, current?: T): DeepPartial<T> {
     const keys = path as ReadonlyArray<PropertyKey>;
-    const nested = buildNested(keys, value);
+    const nested = buildNested(keys, value, current);
     return nested as DeepPartial<T>;
 }
 
 export function setAt<T, P extends Path<T>>(obj: T, path: P, value: PathValue<T, P>, options?: DeepMergeOptions): T {
-    return deepMerge(obj, patchAt(path, value), options);
+    return deepMerge(obj, patchAt(path, value, obj), options);
 }
 
 export function prunePatch<T>(base: T, patch: DeepPartial<T>): DeepPartial<T> | undefined;
@@ -182,6 +207,10 @@ export function prunePatch<T>(base: T | DeepPartial<T>, patch: DeepPartial<T>): 
     const result: Record<string, never> = { ...patchObj };
 
     for (const key of Object.keys(patchObj)) {
+        if (key === "__proto__") {
+            delete result[key];
+            continue;
+        }
         if (!(key in baseObj)) {
             // An undefined field the base doesn't have is no change.
             if (patchObj[key] === undefined) {
@@ -272,4 +301,45 @@ function setsEqual(s1: Set<unknown>, s2: Set<unknown>): boolean {
         }
     }
     return true;
+}
+
+/**
+ * One level of `buildNested`. Inside an array (`whole`), each level must be the whole value, since the array
+ * element replaces the old one; outside, a level holds only the key on the path.
+ */
+function buildLevel(keys: ReadonlyArray<PropertyKey>, leaf: unknown, current: unknown, whole: boolean): unknown {
+    const [head, ...rest] = keys;
+    const isArray = Array.isArray(current);
+    const child =
+        current != null && typeof current === "object"
+            ? (current as Record<PropertyKey, unknown>)[head as PropertyKey]
+            : undefined;
+    const value = rest.length === 0 ? leaf : buildLevel(rest, leaf, child, whole || isArray);
+    if (isArray) {
+        const copy = [...current];
+        copy[Number(head)] = value;
+        return copy;
+    }
+    if (whole && isPlainObject(current)) {
+        return { ...current, [head as PropertyKey]: value };
+    }
+    return { [head as PropertyKey]: value };
+}
+
+/**
+ * Returns a function that tells `unionBy` items apart by the values of their key fields, or returns `undefined` for
+ * an item that lacks one. Values keep their type (`1` and `"1"` differ), and composite keys can't collide.
+ */
+function createUnionIdentifier(by: string | string[]): (item: unknown) => string | undefined {
+    const keys = Array.isArray(by) ? by : [by];
+    return item => {
+        const values = keys.map(key =>
+            item != null && typeof item === "object" ? (item as Record<string, unknown>)[key] : undefined
+        );
+        return values.some(value => value == null) ? undefined : JSON.stringify(values, unionKeyReplacer);
+    };
+}
+
+function unionKeyReplacer(_key: string, value: unknown): unknown {
+    return typeof value === "bigint" ? { bigint: String(value) } : value;
 }

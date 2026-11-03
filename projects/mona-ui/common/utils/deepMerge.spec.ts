@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deepEquals, deepMerge, prunePatch } from "./deepMerge";
+import { buildNested, deepEquals, deepMerge, type Path, prunePatch, setAt } from "./deepMerge";
 
 describe("deepMerge", () => {
     it("merges nested plain objects without mutating the base", () => {
@@ -45,6 +45,126 @@ describe("deepMerge", () => {
             { id: 1, v: "b" },
             { id: 2, v: "c" }
         ]);
+    });
+});
+
+describe("deepMerge unionBy", () => {
+    const unionBy = { arrayStrategy: { key: "id", kind: "unionBy" as const } };
+
+    it("keeps items without the key instead of collapsing them", () => {
+        const merged = deepMerge(
+            { items: [{ name: "a" }, { id: 1, name: "b" }, { name: "c" }] as Array<{ id?: number; name: string }> },
+            { items: [{ name: "d" }, { id: 1, name: "e" }] },
+            unionBy
+        );
+
+        expect(merged.items).toEqual([{ name: "a" }, { id: 1, name: "e" }, { name: "c" }, { name: "d" }]);
+    });
+
+    it("tells key values of different types apart", () => {
+        const merged = deepMerge(
+            { items: [{ id: 1 as number | string, v: "num" }] },
+            { items: [{ id: "1", v: "str" }] },
+            unionBy
+        );
+
+        expect(merged.items).toEqual([
+            { id: 1, v: "num" },
+            { id: "1", v: "str" }
+        ]);
+    });
+
+    it("does not let composite keys collide", () => {
+        const merged = deepMerge(
+            { items: [{ v: 1, x: "a|b", y: "c" }] },
+            { items: [{ v: 2, x: "a", y: "b|c" }] },
+            { arrayStrategy: { key: ["x", "y"], kind: "unionBy" } }
+        );
+
+        expect(merged.items).toHaveLength(2);
+    });
+
+    it("passes the full path to a strategy function inside merged items", () => {
+        const paths: PropertyKey[][] = [];
+        deepMerge(
+            { list: [{ id: 1, tags: ["a"] }] },
+            { list: [{ id: 1, tags: ["b"] }] },
+            {
+                arrayStrategy: (_key, path) => {
+                    paths.push([...path]);
+                    return path.length === 1 ? { key: "id", kind: "unionBy" } : { kind: "concat" };
+                }
+            }
+        );
+
+        expect(paths).toEqual([["list"], ["list", "tags"]]);
+    });
+});
+
+describe("deepMerge with unusual values", () => {
+    it("ignores __proto__ keys from parsed JSON", () => {
+        const patch = JSON.parse('{"__proto__":{"polluted":true},"b":2}') as Record<string, number>;
+        const merged = deepMerge<Record<string, number>>({ a: 1 }, patch);
+
+        expect(Object.getPrototypeOf(merged)).toBe(Object.prototype);
+        expect(merged["polluted"]).toBeUndefined();
+        expect(merged).toEqual({ a: 1, b: 2 });
+        expect(prunePatch<Record<string, number>>({ a: 1 }, patch)).toEqual({ b: 2 });
+    });
+
+    it("replaces a class instance as a whole", () => {
+        class Address {
+            public city = "Paris";
+            public zip = "75001";
+        }
+        const replacement = new Address();
+        replacement.city = "Lyon";
+
+        expect(deepMerge({ address: new Address() }, { address: replacement }).address).toBe(replacement);
+    });
+});
+
+describe("buildNested and setAt", () => {
+    it("builds objects without a current value", () => {
+        expect(buildNested(["a", "b"], 1)).toEqual({ a: { b: 1 } });
+        expect(buildNested([], 1)).toEqual({});
+    });
+
+    it("copies arrays along the path from the current value", () => {
+        const current = {
+            items: [
+                { id: 1, name: "a" },
+                { id: 2, name: "b" }
+            ],
+            tags: ["a", "b"]
+        };
+
+        expect(buildNested(["tags", 0], "z", current)).toEqual({ tags: ["z", "b"] });
+        expect(buildNested(["items", 1, "name"], "c", current)).toEqual({
+            items: [
+                { id: 1, name: "a" },
+                { id: 2, name: "c" }
+            ]
+        });
+    });
+
+    it("sets values inside arrays", () => {
+        const base = { items: [{ id: 1, name: "a" }], tags: ["a", "b"] };
+
+        expect(setAt(base, ["tags", 1], "z").tags).toEqual(["a", "z"]);
+        expect(setAt(base, ["items", 0, "name"], "b").items).toEqual([{ id: 1, name: "b" }]);
+        expect(base.tags).toEqual(["a", "b"]);
+    });
+
+    it("stops paths at array methods and built-ins", () => {
+        type Model = { created: Date; tags: string[] };
+        const valid: Path<Model>[] = [["tags"], ["tags", 0], ["created"]];
+        // @ts-expect-error: array methods are not paths
+        const method: Path<Model> = ["tags", "map"];
+        // @ts-expect-error: Date methods are not paths
+        const dateMethod: Path<Model> = ["created", "getTime"];
+
+        expect([valid, method, dateMethod]).toHaveLength(3);
     });
 });
 

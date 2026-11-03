@@ -90,6 +90,18 @@ describe("ObjectPatchStore", () => {
         expect(store.view().tags).toEqual(["a", "b", "c", "d"]);
     });
 
+    it("sets an array element by path without turning the array into an object", () => {
+        const store = createObjectPatchStore({ source: () => signal(person()) });
+
+        store.patchPath(["tags", 0], "z");
+
+        expect(store.view().tags).toEqual(["z", "b"]);
+
+        store.setPath(["tags", 1], "y");
+
+        expect(store.view().tags).toEqual(["z", "y"]);
+    });
+
     it("tracks pristine against the committed draft", () => {
         const store = createObjectPatchStore({ source: () => signal(person()) });
 
@@ -211,6 +223,30 @@ describe("IterablePatchStore", () => {
 
         expect(store.view()[0].note).toBeUndefined();
         expect(store.hasDraft(1)).toBe(true);
+    });
+
+    it("sets an item's array element by path", () => {
+        const store = create();
+
+        store.patchPath(1, ["tags", 0], "y");
+
+        expect(store.view()[0].tags).toEqual(["y"]);
+
+        store.patchPath(1, ["tags", 1], "z");
+
+        expect(store.view()[0].tags).toEqual(["y", "z"]);
+    });
+
+    it("stays pristine after committing many drafts", () => {
+        const store = create(signal(Array.from({ length: 50 }, (_, i) => row(i))));
+        store.patchMany(Array.from({ length: 20 }, (_, i) => [i * 2, { name: "Edited" }] as [number, Partial<Row>]));
+
+        expect(store.pristine()).toBe(false);
+
+        store.commit();
+
+        expect(store.pristine()).toBe(true);
+        expect(store.dirtyCount()).toBe(20);
     });
 
     it("patches many items at once, pruning each against its base item", () => {
