@@ -4,6 +4,7 @@
     </span>
 }
 <input
+    [id]="inputId()"
     [disabled]="disabled()"
     [readonly]="readonly()"
     [required]="required()"
@@ -11,7 +12,13 @@
     [type]="type()"
     [class]="inputClass()"
     [style]="inputStyle()"
+    [attr.aria-describedby]="ariaDescribedBy() || null"
     [attr.aria-invalid]="invalidInput() ? 'true' : null"
+    [attr.aria-label]="ariaLabel() || null"
+    [attr.aria-labelledby]="ariaLabelledBy() || null"
+    [attr.maxlength]="maxLength() ?? null"
+    [attr.minlength]="minLength() ?? null"
+    [attr.name]="name() || null"
     [monaAttributeBinder]="inputAttributes()"
     [value]="value()"
     (input)="onValueChange(input.value)"
@@ -20,8 +27,14 @@
     #input />
 
 @if (showClearButton()) {
-    <button monaButton look="link" size="small" class="me-2 p-0" [attr.aria-label]="messages().clear" (click)="onClearClick()">
-        <svg lucideX class="size-4 opacity-50 hover:opacity-90"></svg>
+    <button
+        monaButton
+        look="ghost"
+        size="small"
+        class="me-1 size-6 shrink-0 p-0 text-muted-foreground hover:text-foreground"
+        [attr.aria-label]="messages().clear"
+        (click)="onClearClick()">
+        <svg lucideX class="size-4"></svg>
     </button>
 }
 

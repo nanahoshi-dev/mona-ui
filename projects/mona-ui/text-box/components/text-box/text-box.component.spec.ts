@@ -1,8 +1,10 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormsModule } from "@angular/forms";
-import { form, FormField, required } from "@angular/forms/signals";
+import { form, FormField, maxLength, required } from "@angular/forms/signals";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { LabelComponent } from "@nanahoshi/mona-ui/label";
+import axe from "axe-core";
 import { TextBoxComponent } from "./text-box.component";
 
 @Component({
@@ -10,6 +12,33 @@ import { TextBoxComponent } from "./text-box.component";
     imports: [TextBoxComponent]
 })
 class BareAttributeHostComponent {}
+
+@Component({
+    template: `
+        <mona-label for="email" text="Email"></mona-label>
+        <mona-text-box
+            inputId="email"
+            type="email"
+            aria-describedby="email-hint"
+            [clearButton]="true"
+            value="ada@example.com" />
+        <p id="email-hint">We never share it.</p>
+        <span id="search-label">Search</span>
+        <mona-text-box aria-labelledby="search-label" type="search" />
+        <mona-text-box aria-label="Code" />
+    `,
+    imports: [TextBoxComponent, LabelComponent]
+})
+class LabelledHostComponent {}
+
+@Component({
+    template: `<mona-text-box [formField]="form.code" />`,
+    imports: [TextBoxComponent, FormField]
+})
+class MaxLengthFormHostComponent {
+    readonly #model = signal({ code: "" });
+    public readonly form = form(this.#model, schema => maxLength(schema.code, 6));
+}
 
 @Component({
     template: `
@@ -274,6 +303,142 @@ describe("TextBoxComponent", () => {
             host.detectChanges();
             expect(textBox.classList.contains("ng-touched")).toBe(true);
             host.nativeElement.remove();
+        });
+    });
+
+    describe("labelling", () => {
+        let host: ComponentFixture<LabelledHostComponent>;
+
+        beforeEach(() => {
+            host = TestBed.createComponent(LabelledHostComponent);
+            host.detectChanges();
+        });
+
+        function getTextBoxes(): HTMLElement[] {
+            return Array.from(host.nativeElement.querySelectorAll("mona-text-box"));
+        }
+
+        it("gives the inner input a unique generated id by default", () => {
+            const other = TestBed.createComponent(TextBoxComponent);
+            other.detectChanges();
+            const id = getInput().id;
+
+            expect(id).toMatch(/^mona-/);
+            expect(other.nativeElement.querySelector("input").id).not.toBe(id);
+        });
+
+        it("names the input through a label pointed at inputId", () => {
+            const input = getTextBoxes()[0].querySelector("input") as HTMLInputElement;
+
+            expect(input.id).toBe("email");
+            expect(input.labels?.[0]?.textContent).toContain("Email");
+        });
+
+        it("moves the ARIA attributes from the host to the inner input", () => {
+            const [email, search, code] = getTextBoxes();
+
+            expect(email.querySelector("input")?.getAttribute("aria-describedby")).toBe("email-hint");
+            expect(search.querySelector("input")?.getAttribute("aria-labelledby")).toBe("search-label");
+            expect(code.querySelector("input")?.getAttribute("aria-label")).toBe("Code");
+            expect(email.hasAttribute("aria-describedby")).toBe(false);
+            expect(search.hasAttribute("aria-labelledby")).toBe(false);
+            expect(code.hasAttribute("aria-label")).toBe(false);
+        });
+
+        it("leaves the ARIA attributes off the input when they aren't set", () => {
+            const input = getInput();
+
+            expect(input.hasAttribute("aria-label")).toBe(false);
+            expect(input.hasAttribute("aria-labelledby")).toBe(false);
+            expect(input.hasAttribute("aria-describedby")).toBe(false);
+        });
+
+        it("has no AXE violations when labelled", async () => {
+            const results = await axe.run(host.nativeElement as HTMLElement, {
+                rules: { "color-contrast": { enabled: false } }
+            });
+
+            expect(results.violations).toEqual([]);
+        });
+    });
+
+    describe("form attributes", () => {
+        it("forwards name, maxLength and minLength to the inner input", () => {
+            fixture.componentRef.setInput("name", "postcode");
+            fixture.componentRef.setInput("maxLength", 8);
+            fixture.componentRef.setInput("minLength", 3);
+            fixture.detectChanges();
+
+            expect(getInput().name).toBe("postcode");
+            expect(getInput().maxLength).toBe(8);
+            expect(getInput().minLength).toBe(3);
+        });
+
+        it("leaves them off when they aren't set", () => {
+            expect(getInput().hasAttribute("name")).toBe(false);
+            expect(getInput().hasAttribute("maxlength")).toBe(false);
+            expect(getInput().hasAttribute("minlength")).toBe(false);
+        });
+
+        it("receives the maxLength rule and the field name from a signal form", () => {
+            const host = TestBed.createComponent(MaxLengthFormHostComponent);
+            host.detectChanges();
+            const input = host.nativeElement.querySelector("input") as HTMLInputElement;
+
+            expect(input.maxLength).toBe(6);
+            expect(input.name).not.toBe("");
+        });
+    });
+
+    describe("focus()", () => {
+        beforeEach(() => {
+            document.body.appendChild(getHost());
+        });
+
+        afterEach(() => {
+            getHost().remove();
+        });
+
+        it("focuses the input with the caret after the value", () => {
+            fixture.componentRef.setInput("value", "Hello world");
+            fixture.detectChanges();
+            getInput().setSelectionRange(0, 0);
+
+            component.focus();
+
+            expect(document.activeElement).toBe(getInput());
+            expect(getInput().selectionStart).toBe(11);
+            expect(getInput().selectionEnd).toBe(11);
+        });
+
+        it("passes focus options to the input", () => {
+            const focusSpy = vi.spyOn(getInput(), "focus");
+
+            component.focus({ preventScroll: true });
+
+            expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
+        });
+
+        it("focuses an email input without moving the caret", () => {
+            fixture.componentRef.setInput("type", "email");
+            fixture.componentRef.setInput("value", "ada@example.com");
+            fixture.detectChanges();
+
+            expect(() => component.focus()).not.toThrow();
+            expect(document.activeElement).toBe(getInput());
+        });
+    });
+
+    describe("clear button size", () => {
+        it("is a 24 px target with a full-opacity muted icon", () => {
+            fixture.componentRef.setInput("clearButton", true);
+            fixture.componentRef.setInput("value", "Hello");
+            fixture.detectChanges();
+            const button = getClearButton() as HTMLButtonElement;
+
+            expect(button.classList.contains("size-6")).toBe(true);
+            expect(button.classList.contains("text-muted-foreground")).toBe(true);
+            expect(button.querySelector("svg")?.classList.contains("opacity-50")).toBe(false);
         });
     });
 });

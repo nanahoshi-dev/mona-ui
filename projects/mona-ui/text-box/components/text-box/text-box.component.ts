@@ -4,7 +4,6 @@ import {
     Component,
     computed,
     contentChildren,
-    DestroyRef,
     ElementRef,
     inject,
     input,
@@ -17,19 +16,26 @@ import { type FormValueControl } from "@angular/forms/signals";
 import { LucideX } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { AttributeBinderDirective, AttributeConfig, rxTimeout } from "@nanahoshi/mona-ui/internal";
+import { AttributeBinderDirective, type AttributeConfig, createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { TextBoxPrefixTemplateDirective } from "../../directives/text-box-prefix-template.directive";
 import { TextBoxSuffixTemplateDirective } from "../../directives/text-box-suffix-template.directive";
 import { TEXT_BOX_DEFAULT_MESSAGES } from "../../i18n/text-box.default-messages";
-import { InputType } from "../../models/InputType";
+import type { InputType } from "../../models/InputType";
 import { textBoxThemeVariants, TextBoxVariantInput, TextBoxVariantProps } from "../../styles/textbox.styles";
+
+/** Input types that support `setSelectionRange`; `email` throws. */
+const selectableInputTypes: ReadonlySet<string> = new Set(["password", "search", "tel", "text", "url"]);
 
 @Component({
     selector: "mona-text-box",
     templateUrl: "./text-box.component.html",
     imports: [NgTemplateOutlet, ButtonDirective, AttributeBinderDirective, LucideX],
     host: {
+        // The ARIA inputs below are applied to the inner input, so the host must not keep the static attributes.
+        "[attr.aria-describedby]": "null",
+        "[attr.aria-label]": "null",
+        "[attr.aria-labelledby]": "null",
         "[attr.data-disabled]": "disabled() || null",
         "[attr.data-readonly]": "readonly() || null",
         "[attr.data-required]": "required() || null",
@@ -39,7 +45,6 @@ import { textBoxThemeVariants, TextBoxVariantInput, TextBoxVariantProps } from "
     }
 })
 export class TextBoxComponent implements TextBoxVariantInput, FormValueControl<string> {
-    readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #i18n = inject(MonaI18nService);
     protected readonly classes = computed(() => {
@@ -59,6 +64,25 @@ export class TextBoxComponent implements TextBoxVariantInput, FormValueControl<s
         () => this.clearButton() && !this.disabled() && !this.readonly() && !!this.value()
     );
     protected readonly suffixTemplateList = contentChildren(TextBoxSuffixTemplateDirective, { read: TemplateRef });
+
+    /**
+     * @description Id of an element that describes the inner input, such as a hint or an error message.
+     * @default ""
+     */
+    public readonly ariaDescribedBy = input("", { alias: "aria-describedby" });
+
+    /**
+     * @description Accessible name of the inner input. Prefer a visible label, linked through {@link inputId} or
+     * {@link ariaLabelledBy}; the placeholder is not a label.
+     * @default ""
+     */
+    public readonly ariaLabel = input("", { alias: "aria-label" });
+
+    /**
+     * @description Id of the element that labels the inner input.
+     * @default ""
+     */
+    public readonly ariaLabelledBy = input("", { alias: "aria-labelledby" });
 
     /**
      * @description Displays a clear button that resets the value to empty.
@@ -97,6 +121,13 @@ export class TextBoxComponent implements TextBoxVariantInput, FormValueControl<s
     public readonly inputFocus = output<FocusEvent>();
 
     /**
+     * @description Id of the inner `<input>` element. Point a `<label for>` or `<mona-label for>` at it to label the
+     * text box. A unique id is generated when it isn't set.
+     * @default generated
+     */
+    public readonly inputId = input(createElementControlId());
+
+    /**
      * @description Inline styles applied to the inner `<input>` element.
      * Accepts a style string or a `CSSStyleDeclaration` partial.
      * @default null
@@ -109,6 +140,27 @@ export class TextBoxComponent implements TextBoxVariantInput, FormValueControl<s
      * @default false
      */
     public readonly invalid = input(false, { transform: booleanAttribute });
+
+    /**
+     * @description Maximum number of characters, set as `maxlength` on the inner input. When bound to a signal form
+     * field via `[formField]`, this is written from the field's `maxLength` rule.
+     * @default undefined
+     */
+    public readonly maxLength = input<number | undefined>(undefined);
+
+    /**
+     * @description Minimum number of characters, set as `minlength` on the inner input. When bound to a signal form
+     * field via `[formField]`, this is written from the field's `minLength` rule.
+     * @default undefined
+     */
+    public readonly minLength = input<number | undefined>(undefined);
+
+    /**
+     * @description Name of the inner input, used by browsers and password managers for autofill. When bound to a
+     * signal form field via `[formField]`, this is written by the `FormField` directive.
+     * @default ""
+     */
+    public readonly name = input("");
 
     /**
      * @description Placeholder text shown when no value has been entered.
@@ -172,12 +224,17 @@ export class TextBoxComponent implements TextBoxVariantInput, FormValueControl<s
      */
     public readonly value = model("");
 
-    public focus(): void {
-        const el = this.inputRef().nativeElement;
-        el.focus();
-        rxTimeout(this.#destroyRef, () => {
-            el.scrollLeft = el.scrollWidth;
-        });
+    /**
+     * Focuses the inner input and places the caret after the value, so the end of a long value is in view.
+     * @param options Options passed to the native `focus()` call, such as `preventScroll`.
+     */
+    public focus(options?: FocusOptions): void {
+        const input = this.inputRef().nativeElement;
+        input.focus(options);
+        if (selectableInputTypes.has(input.type)) {
+            const end = input.value.length;
+            input.setSelectionRange(end, end);
+        }
     }
 
     public onClearClick(): void {

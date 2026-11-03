@@ -14040,6 +14040,27 @@
     "selector": "\"mona-text-box\"",
     "inputs": [
       {
+        "description": "Id of an element that describes the inner input, such as a hint or an error message.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Accessible name of the inner input. Prefer a visible label, linked through {@link inputId} or\n{@link ariaLabelledBy}; the placeholder is not a label.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Id of the element that labels the inner input.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Displays a clear button that resets the value to empty.\nThe button is hidden while the value is empty or the text box is disabled or read-only.",
         "kind": "input",
         "name": "clearButton",
@@ -14080,6 +14101,13 @@
         "type": "FocusEvent"
       },
       {
+        "description": "Id of the inner `<input>` element. Point a `<label for>` or `<mona-label for>` at it to label the\ntext box. A unique id is generated when it isn't set.",
+        "kind": "input",
+        "name": "inputId",
+        "type": "string",
+        "defaultValue": "generated"
+      },
+      {
         "description": "Inline styles applied to the inner `<input>` element.\nAccepts a style string or a `CSSStyleDeclaration` partial.",
         "kind": "input",
         "name": "inputStyle",
@@ -14092,6 +14120,27 @@
         "name": "invalid",
         "type": "boolean",
         "defaultValue": "false"
+      },
+      {
+        "description": "Maximum number of characters, set as `maxlength` on the inner input. When bound to a signal form\nfield via `[formField]`, this is written from the field's `maxLength` rule.",
+        "kind": "input",
+        "name": "maxLength",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Minimum number of characters, set as `minlength` on the inner input. When bound to a signal form\nfield via `[formField]`, this is written from the field's `minLength` rule.",
+        "kind": "input",
+        "name": "minLength",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Name of the inner input, used by browsers and password managers for autofill. When bound to a\nsignal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "name",
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Placeholder text shown when no value has been entered.",

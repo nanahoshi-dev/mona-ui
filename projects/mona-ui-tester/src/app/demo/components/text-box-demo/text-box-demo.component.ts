@@ -18,6 +18,7 @@ import {
     DropdownButtonItemComponent,
     DropdownButtonTextTemplateDirective
 } from "@nanahoshi/mona-ui/dropdown-button";
+import { LabelComponent } from "@nanahoshi/mona-ui/label";
 import {
     TextBoxComponent,
     TextBoxPrefixTemplateDirective,
@@ -58,10 +59,18 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
                 type: "string",
                 value: ""
             },
-            // invalid/touched are written by the FormField directive via [formField] below;
-            // Angular forbids binding them directly, so exclude them rather than expose a dead control.
+            // invalid, touched, name, maxLength and minLength are written by the FormField directive via
+            // [formField] below; Angular forbids binding them directly, so exclude them rather than expose a dead control.
             invalid: undefined,
+            maxLength: undefined,
+            minLength: undefined,
+            name: undefined,
             touched: undefined,
+            // The demo labels the text box with a visible <mona-label> pointed at a fixed inputId.
+            ariaDescribedBy: undefined,
+            ariaLabel: undefined,
+            ariaLabelledBy: undefined,
+            inputId: undefined,
             rounded: {
                 type: "dropdown",
                 value: ["none", "small", "medium", "large", "full"],
@@ -74,7 +83,7 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
             },
             type: {
                 type: "dropdown",
-                value: ["text", "password", "email"], // Add more types as needed
+                value: ["text", "password", "email", "search", "tel", "url"],
                 defaultValue: "text"
             },
             userClass: {
@@ -101,13 +110,16 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
         DropdownButtonTextTemplateDirective,
         LucideSearch,
         LucideList,
-        FormField
+        FormField,
+        LabelComponent
     ],
     template: `
         @let featureData = features();
         <div class="flex flex-col gap-2">
             <span>Value: {{ form.text().value() }}</span>
+            <mona-label for="text-box-demo-input" text="Name"></mona-label>
             <mona-text-box
+                inputId="text-box-demo-input"
                 [clearButton]="clearButton()"
                 [size]="size()"
                 [inputClass]="inputClass()"

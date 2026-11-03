@@ -136,6 +136,7 @@
                         </mona-dropdown-list>
                     } @else if (entry[1].type === "string") {
                         <mona-text-box
+                            [aria-label]="entry[0]"
                             [ngModel]="entry[1].stringValue"
                             (ngModelChange)="
                                 parentKey
