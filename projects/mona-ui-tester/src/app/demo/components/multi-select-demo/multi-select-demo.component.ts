@@ -120,6 +120,10 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
     protected readonly MultiSelectWrapperComponent = MultiSelectWrapperComponent;
     protected readonly config = computed<ComponentConfig<MultiSelectComponent>>(() => ({
         inputs: deriveInputConfig<MultiSelectComponent>(this.metadata(), {
+            // The demo labels the field with visible text referenced through aria-labelledby.
+            ariaDescribedBy: undefined,
+            ariaLabel: undefined,
+            ariaLabelledBy: undefined,
             data: {
                 type: "object"
             },
@@ -132,6 +136,10 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
                 defaultValue: null,
                 clearable: true,
                 placeholder: "Select a condition..."
+            },
+            placeholder: {
+                type: "string",
+                value: "Select foods"
             },
             popupHeight: {
                 type: "number",
@@ -207,14 +215,15 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
         @let featureData = features();
         @let tagConfigData = tagConfig();
         <span>Selected Items: {{ formValueText() }}</span>
+        <span id="multi-select-demo-label" class="text-sm font-medium">Favourite foods</span>
         <mona-multi-select
-            [aria-label]="ariaLabel()"
-            [aria-labelledby]="ariaLabelledBy()"
+            aria-labelledby="multi-select-demo-label"
             [autoClose]="autoClose()"
             [checkboxes]="checkboxes()"
             [data]="multiSelectData()"
             [itemDisabled]="itemDisabled()"
             [loading]="loading()"
+            [placeholder]="placeholder()"
             [popupClass]="popupClass()"
             [popupHeight]="popupHeight()"
             [popupWidth]="popupWidth()"
@@ -340,14 +349,13 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
     });
     protected readonly virtualization = computed(() => buildVirtualScrollOptions(this.features()));
 
-    public readonly ariaLabel = input<ReturnType<MultiSelectComponent["ariaLabel"]>>("");
-    public readonly ariaLabelledBy = input<ReturnType<MultiSelectComponent["ariaLabelledBy"]>>("");
     public readonly autoClose = input(false, { transform: booleanAttribute });
     public readonly checkboxes = input(false, { transform: booleanAttribute });
     public readonly data = input<ReturnType<MultiSelectComponent["data"]>>([]);
     public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly itemDisabled = input<ReturnType<MultiSelectComponent["itemDisabled"]>>(() => false);
     public readonly loading = input(false, { transform: booleanAttribute });
+    public readonly placeholder = input<ReturnType<MultiSelectComponent["placeholder"]>>("Select foods");
     public readonly popupClass = input<ReturnType<MultiSelectComponent["popupClass"]>>("");
     public readonly popupHeight = input<ReturnType<MultiSelectComponent["popupHeight"]>>(null);
     public readonly popupWidth = input<ReturnType<MultiSelectComponent["popupWidth"]>>(null);

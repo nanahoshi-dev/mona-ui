@@ -21,13 +21,13 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
 import { none } from "@mirei/ts-collections";
 import { CHIP_DEFAULT_MESSAGES, ChipComponent } from "@nanahoshi/mona-ui/chip";
-import { PreventableEvent } from "@nanahoshi/mona-ui/common";
+import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import {
     DropdownDataHandlerDirective,
-    DropdownDataInput,
-    DropdownDataInputToken,
-    DropdownFieldPredicateType,
-    DropdownFieldSelectorType,
+    type DropdownDataInput,
+    DROPDOWN_DATA_INPUT_TOKEN,
+    type DropdownFieldPredicateType,
+    type DropdownFieldSelectorType,
     DropdownFooterTemplateDirective,
     DropdownGroupHeaderTemplateDirective,
     DropdownHeaderTemplateDirective,
@@ -35,10 +35,10 @@ import {
     DropdownListPopupHandlerDirective,
     DropdownLiveRegionDirective,
     DropdownNoDataTemplateDirective,
-    DropdownPopupInput,
+    type DropdownPopupInput,
     DROPDOWN_POPUP_INPUT_TOKEN,
     dropdownPopupThemeVariants,
-    DropdownPopupVariantInput,
+    type DropdownPopupVariantInput,
     DropdownPrefixTemplateDirective,
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
@@ -50,13 +50,13 @@ import {
     ListFooterTemplateDirective,
     ListGroupHeaderTemplateDirective,
     ListHeaderTemplateDirective,
-    ListItem,
+    type ListItem,
     ListItemTemplateDirective,
     ListNoDataTemplateDirective,
     ListService,
-    ListSizeInputType
+    type ListSizeInputType
 } from "@nanahoshi/mona-ui/internal/list";
-import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
+import type { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import { filter, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { MultiSelectTagTemplateDirective } from "../../directives/multi-select-tag-template.directive";
@@ -67,8 +67,8 @@ import {
     multiSelectBaseThemeVariants,
     multiSelectIndicatorContainerThemeVariants,
     multiSelectItemContainerThemeVariants,
-    MultiSelectVariantInput,
-    MultiSelectVariantProps
+    type MultiSelectVariantInput,
+    type MultiSelectVariantProps
 } from "../../styles/multi-select.styles";
 
 @Component({
@@ -79,7 +79,7 @@ import {
         DropdownService,
         MultiSelectService,
         {
-            provide: DropdownDataInputToken,
+            provide: DROPDOWN_DATA_INPUT_TOKEN,
             useExisting: forwardRef(() => MultiSelectComponent),
             multi: false
         },
@@ -192,7 +192,9 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
         const size = this.size();
         const userClass = this.popupClass();
         const variantClass = dropdownPopupThemeVariants({ rounded, size });
-        return twMerge(variantClass, userClass);
+        // With a popupHeight, the overlay sets the limit; the default max-h-64 would cut a taller popup short.
+        const heightClass = this.popupHeight() ? "max-h-none" : "";
+        return twMerge(variantClass, heightClass, userClass);
     });
     protected readonly messages = this.#i18n.componentMessages("multiSelect", MULTI_SELECT_DEFAULT_MESSAGES);
     protected readonly noDataTemplate = contentChild(DropdownNoDataTemplateDirective, { read: TemplateRef });
@@ -261,6 +263,7 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
     /**
      * @description Emits when the popup is about to close. This event is preventable.
      */
+    // eslint-disable-next-line @angular-eslint/no-output-native -- renaming the output would break existing (close) bindings
     public readonly close = output<PopupCloseEvent>();
 
     /**
@@ -293,7 +296,8 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
     public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
 
     /**
-     * @description Sets the loading state of the multi select component.
+     * @description Shows a loading indicator, in place of the clear button, and marks the field busy. It doesn't
+     * block interaction: the field stays usable while data loads.
      * @default false
      */
     public readonly loading = input(false, { transform: booleanAttribute });
@@ -322,7 +326,8 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
     public readonly popupClass = input("");
 
     /**
-     * @description Sets the height of the popup element.
+     * @description Maximum height of the popup, in pixels or as a CSS length. Shorter lists shrink to fit. When
+     * unset, the popup is at most 200 pixels tall.
      * @default null
      */
     public readonly popupHeight = input<ListSizeInputType>(null);
@@ -448,8 +453,12 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
         });
     }
 
-    public focus(): void {
-        this.#hostElementRef.nativeElement.focus();
+    /**
+     * @description Moves focus to the multi select.
+     * @param options Passed to `HTMLElement.focus()`, for example `{ preventScroll: true }`.
+     */
+    public focus(options?: FocusOptions): void {
+        this.#hostElementRef.nativeElement.focus(options);
     }
 
     protected onFocusOut(event: FocusEvent): void {

@@ -20,7 +20,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
-import { PreventableEvent } from "@nanahoshi/mona-ui/common";
+import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import { createElementControlId, rxTimeout } from "@nanahoshi/mona-ui/internal";
 import { FilterChangeEvent } from "@nanahoshi/mona-ui/common";
 import { IndicatorIconComponent } from "@nanahoshi/mona-ui/internal/indicator-icon";
@@ -32,16 +32,16 @@ import {
     ListItemTemplateDirective,
     ListNoDataTemplateDirective,
     ListService,
-    ListSizeInputType,
-    SelectableOptions,
-    SelectionChangeEvent
+    type ListSizeInputType,
+    type SelectableOptions,
+    type SelectionChangeEvent
 } from "@nanahoshi/mona-ui/internal/list";
 import {
     DropdownDataHandlerDirective,
-    DropdownDataInput,
-    DropdownDataInputToken,
-    DropdownFieldPredicateType,
-    DropdownFieldSelectorType,
+    type DropdownDataInput,
+    DROPDOWN_DATA_INPUT_TOKEN,
+    type DropdownFieldPredicateType,
+    type DropdownFieldSelectorType,
     DropdownFooterTemplateDirective,
     DropdownGroupHeaderTemplateDirective,
     DropdownHeaderTemplateDirective,
@@ -49,15 +49,15 @@ import {
     DropdownListPopupHandlerDirective,
     DropdownLiveRegionDirective,
     DropdownNoDataTemplateDirective,
-    DropdownPopupInput,
+    type DropdownPopupInput,
     DROPDOWN_POPUP_INPUT_TOKEN,
     dropdownPopupThemeVariants,
-    DropdownPopupVariantInput,
+    type DropdownPopupVariantInput,
     DropdownPrefixTemplateDirective,
     DropdownService,
     DropdownSuffixTemplateDirective
 } from "@nanahoshi/mona-ui/dropdowns";
-import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
+import type { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import { TextBoxDirective } from "@nanahoshi/mona-ui/text-box";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { debounceTime, filter, identity, Subject, take, tap } from "rxjs";
@@ -68,8 +68,8 @@ import {
     autoCompleteAffixContainerThemeVariants,
     autoCompleteBaseThemeVariants,
     autoCompleteTextInputThemeVariants,
-    AutoCompleteVariantInput,
-    AutoCompleteVariantProps
+    type AutoCompleteVariantInput,
+    type AutoCompleteVariantProps
 } from "../styles/auto-complete.styles";
 
 @Component({
@@ -80,7 +80,7 @@ import {
         ListService,
         DropdownService,
         {
-            provide: DropdownDataInputToken,
+            provide: DROPDOWN_DATA_INPUT_TOKEN,
             useExisting: forwardRef(() => AutoCompleteComponent),
             multi: false
         },
@@ -186,7 +186,9 @@ export class AutoCompleteComponent<TData = unknown>
         const size = this.size();
         const userClass = this.popupClass();
         const variantClass = dropdownPopupThemeVariants({ rounded, size });
-        return twMerge(variantClass, userClass);
+        // With a popupHeight, the overlay sets the limit; the default max-h-64 would cut a taller popup short.
+        const heightClass = this.popupHeight() ? "max-h-none" : "";
+        return twMerge(variantClass, heightClass, userClass);
     });
     protected readonly messages = this.#i18n.componentMessages("autoComplete", AUTO_COMPLETE_DEFAULT_MESSAGES);
     protected readonly noDataTemplate = contentChild(DropdownNoDataTemplateDirective, { read: TemplateRef });
@@ -223,6 +225,7 @@ export class AutoCompleteComponent<TData = unknown>
     /**
      * @description Emits when the popup is about to close. This event is preventable.
      */
+    // eslint-disable-next-line @angular-eslint/no-output-native -- renaming the output would break existing (close) bindings
     public readonly close = output<PopupCloseEvent>();
 
     /**
@@ -269,7 +272,8 @@ export class AutoCompleteComponent<TData = unknown>
     public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
 
     /**
-     * @description Displays a loading indicator and prevents interaction while an operation is in progress.
+     * @description Shows a loading indicator, in place of the clear button, and marks the field busy. It doesn't
+     * block interaction: the field stays usable while data loads.
      * @default false
      */
     public readonly loading = input(false, { transform: booleanAttribute });
@@ -297,7 +301,8 @@ export class AutoCompleteComponent<TData = unknown>
     public readonly popupClass = input("");
 
     /**
-     * @description Height of the popup element.
+     * @description Maximum height of the popup, in pixels or as a CSS length. Shorter lists shrink to fit. When
+     * unset, the popup is at most 200 pixels tall.
      * @default null
      */
     public readonly popupHeight = input<ListSizeInputType>(null);
@@ -392,10 +397,14 @@ export class AutoCompleteComponent<TData = unknown>
         });
     }
 
-    public focus(): void {
+    /**
+     * @description Moves focus to the inner input. The caret goes to the end of the text.
+     * @param options Passed to `HTMLElement.focus()`, for example `{ preventScroll: true }`.
+     */
+    public focus(options?: FocusOptions): void {
         const input = this.#hostElementRef.nativeElement.querySelector("input");
         if (input) {
-            input.focus();
+            input.focus(options);
             input.setSelectionRange(input.value.length, input.value.length);
         }
     }

@@ -3,6 +3,7 @@ import { booleanAttribute, ChangeDetectionStrategy, Component, computed, inject,
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideBox, LucideCheck, LucideSearch, LucideTriangleAlert } from "@lucide/angular";
 import { AutoCompleteComponent } from "@nanahoshi/mona-ui/auto-complete";
+import { LabelComponent } from "@nanahoshi/mona-ui/label";
 import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import {
     DropdownFilterableDirective,
@@ -109,6 +110,11 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
     });
     protected readonly config = computed<ComponentConfig<AutoCompleteComponent<any>>>(() => ({
         inputs: deriveInputConfig<AutoCompleteComponent<any>>(this.metadata(), {
+            // The demo labels the field with a visible <mona-label> pointed at a fixed inputId.
+            ariaDescribedBy: undefined,
+            ariaLabel: undefined,
+            ariaLabelledBy: undefined,
+            inputId: undefined,
             data: {
                 type: "iterable",
                 value: []
@@ -175,6 +181,7 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
 @Component({
     imports: [
         AutoCompleteComponent,
+        LabelComponent,
         DropdownGroupableDirective,
         DropdownGroupHeaderTemplateDirective,
         DropdownVirtualScrollDirective,
@@ -197,10 +204,9 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
         @let featureData = features();
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
         <span>Selected Value: {{ form.value().value() }}</span>
+        <mona-label for="auto-complete-demo-input" text="Favourite food"></mona-label>
         <mona-auto-complete
-            [aria-describedby]="ariaDescribedBy()"
-            [aria-label]="ariaLabel()"
-            [aria-labelledby]="ariaLabelledBy()"
+            inputId="auto-complete-demo-input"
             [data]="autoCompleteData()"
             [highlightFirst]="highlightFirst()"
             [itemDisabled]="itemDisabled()"
@@ -315,9 +321,6 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
     protected readonly grouping = computed(() => buildGroupableOptions(this.features()));
     protected readonly selectedItem = signal<unknown>(null);
     protected readonly virtualization = computed(() => buildVirtualScrollOptions(this.features()));
-    public readonly ariaDescribedBy = input<ReturnType<AutoCompleteComponent["ariaDescribedBy"]>>("");
-    public readonly ariaLabel = input<ReturnType<AutoCompleteComponent["ariaLabel"]>>("");
-    public readonly ariaLabelledBy = input<ReturnType<AutoCompleteComponent["ariaLabelledBy"]>>("");
     public readonly data = input<ReturnType<AutoCompleteComponent["data"]>>([]);
     public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly highlightFirst = input(true, { transform: booleanAttribute });

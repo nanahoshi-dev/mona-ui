@@ -1,4 +1,4 @@
-import { Injectable, signal, TemplateRef } from "@angular/core";
+import { Injectable, signal, type TemplateRef } from "@angular/core";
 
 @Injectable()
 export class MultiSelectService {

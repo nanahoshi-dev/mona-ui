@@ -3,6 +3,7 @@ import { booleanAttribute, ChangeDetectionStrategy, Component, computed, inject,
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideBox, LucideSearch } from "@lucide/angular";
 import { ComboBoxComponent } from "@nanahoshi/mona-ui/combo-box";
+import { LabelComponent } from "@nanahoshi/mona-ui/label";
 import {
     DropdownFilterableDirective,
     DropdownFooterTemplateDirective,
@@ -86,6 +87,11 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
     });
     protected readonly config = computed<ComponentConfig<ComboBoxComponent>>(() => ({
         inputs: deriveInputConfig<ComboBoxComponent>(this.metadata(), {
+            // The demo labels the field with a visible <mona-label> pointed at a fixed inputId.
+            ariaDescribedBy: undefined,
+            ariaLabel: undefined,
+            ariaLabelledBy: undefined,
+            inputId: undefined,
             data: {
                 type: "iterable",
                 value: []
@@ -148,6 +154,7 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
 @Component({
     imports: [
         ComboBoxComponent,
+        LabelComponent,
         DropdownVirtualScrollDirective,
         DropdownNoDataTemplateDirective,
         DropdownPrefixTemplateDirective,
@@ -167,11 +174,10 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
         @let featureData = features();
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
         <span>Selected Value: {{ formValueText() }}</span>
+        <mona-label for="combo-box-demo-input" text="Favourite food"></mona-label>
         <mona-combo-box
+            inputId="combo-box-demo-input"
             [allowCustomValue]="allowCustomValue()"
-            [aria-describedby]="ariaDescribedBy()"
-            [aria-label]="ariaLabel()"
-            [aria-labelledby]="ariaLabelledBy()"
             [data]="comboBoxData()"
             [itemDisabled]="itemDisabled()"
             [loading]="loading()"
@@ -283,9 +289,6 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
     protected readonly grouping = computed(() => buildGroupableOptions(this.features()));
     protected readonly virtualization = computed(() => buildVirtualScrollOptions(this.features()));
     public readonly allowCustomValue = input(false, { transform: booleanAttribute });
-    public readonly ariaDescribedBy = input<ReturnType<ComboBoxComponent["ariaDescribedBy"]>>("");
-    public readonly ariaLabel = input<ReturnType<ComboBoxComponent["ariaLabel"]>>("");
-    public readonly ariaLabelledBy = input<ReturnType<ComboBoxComponent["ariaLabelledBy"]>>("");
     public readonly data = input<ReturnType<ComboBoxComponent["data"]>>([]);
     public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly itemDisabled = input<ReturnType<ComboBoxComponent["itemDisabled"]>>(null);

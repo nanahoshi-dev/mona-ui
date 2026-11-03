@@ -8,8 +8,8 @@ export const indicatorIconHostThemeVariants = cva(
         variants: {
             interactive: {
                 true: `
-                    opacity-50
-                    hover:opacity-90
+                    text-muted-foreground
+                    hover:text-foreground
                     focus-visible:ring-2 focus-visible:ring-focus-indicator/35 focus-visible:outline-none
                 `,
                 false: ""

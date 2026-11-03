@@ -1,12 +1,12 @@
 import { Directive, effect, inject, untracked } from "@angular/core";
 import { ListService } from "@nanahoshi/mona-ui/internal/list";
-import { DropdownDataInputToken } from "../models/DropdownDataInput";
+import { DROPDOWN_DATA_INPUT_TOKEN } from "../models/DropdownDataInput";
 
 @Directive({
     selector: "[monaDropdownDataHandler]"
 })
 export class DropdownDataHandlerDirective {
-    readonly #host = inject(DropdownDataInputToken);
+    readonly #host = inject(DROPDOWN_DATA_INPUT_TOKEN);
     readonly #listService = inject(ListService);
     public constructor() {
         effect(() => {

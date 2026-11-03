@@ -1,9 +1,12 @@
+import { TestBed } from "@angular/core/testing";
+import { describe, expect, it } from "vitest";
+import { MultiSelectService } from "../services/multi-select.service";
 import { MultiSelectSummaryTagDirective } from "./multi-select-summary-tag.directive";
 
 describe("MultiSelectSummaryTagDirective", () => {
-    it("should create an instance", () => {
-        // TODO: vitest-migration: expect().nothing() has been removed because it is redundant in Vitest. Tests without assertions pass by default.
-        // // const directive = new MultiSelectSummaryTagDirective();
-        // expect(directive).toBeTruthy();
+    it("creates an instance", () => {
+        TestBed.configureTestingModule({ providers: [MultiSelectService] });
+        const directive = TestBed.runInInjectionContext(() => new MultiSelectSummaryTagDirective());
+        expect(directive).toBeTruthy();
     });
 });

@@ -1,5 +1,5 @@
 import { Component, signal } from "@angular/core";
-import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import {
     disabled as fieldDisabled,
@@ -9,7 +9,7 @@ import {
     required
 } from "@angular/forms/signals";
 import axe from "axe-core";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 
 import { DropdownListValueTemplateDirective } from "../../directives/dropdown-list-value-template.directive";
@@ -75,14 +75,14 @@ class ObjectModeHostComponent {
     readonly #formModel = signal<DropdownListFormModel>({ value: FOOD_ITEMS[1] });
     protected readonly data = FOOD_ITEMS;
     public readonly disabled = signal(false);
-    public readonly loading = signal(false);
-    public readonly readonlyState = signal(false);
-    public readonly requiredState = signal(false);
     public readonly form = form(this.#formModel, schema => {
         fieldDisabled(schema.value, { when: () => this.disabled() });
         fieldReadonly(schema.value, { when: () => this.readonlyState() });
         required(schema.value, { when: () => this.requiredState() });
     });
+    public readonly loading = signal(false);
+    public readonly readonlyState = signal(false);
+    public readonly requiredState = signal(false);
 }
 
 @Component({
@@ -103,14 +103,14 @@ class PrimitiveModeHostComponent {
     readonly #formModel = signal<PrimitiveDropdownListFormModel>({ value: 2 });
     public readonly data = signal<readonly FoodItem[]>(FOOD_ITEMS);
     public readonly disabled = signal(false);
-    public readonly loading = signal(false);
-    public readonly readonlyState = signal(false);
-    public readonly requiredState = signal(false);
     public readonly form = form(this.#formModel, schema => {
         fieldDisabled(schema.value, { when: () => this.disabled() });
         fieldReadonly(schema.value, { when: () => this.readonlyState() });
         required(schema.value, { when: () => this.requiredState() });
     });
+    public readonly loading = signal(false);
+    public readonly readonlyState = signal(false);
+    public readonly requiredState = signal(false);
 }
 
 @Component({
@@ -132,11 +132,7 @@ class PrimitiveTwoWayHostComponent {
 
 @Component({
     template: `
-        <mona-dropdown-list
-            [data]="data"
-            textField="text"
-            valueField="value"
-            [(value)]="selected">
+        <mona-dropdown-list [data]="data" textField="text" valueField="value" [(value)]="selected">
             <ng-template monaDropDownListValueTemplate let-item>
                 <span>{{ item.text }}:{{ item.value }}</span>
             </ng-template>
@@ -163,8 +159,24 @@ class ObjectTwoWayHostComponent {
 })
 class FunctionValueFieldHostComponent {
     protected readonly data = FOOD_ITEMS;
-    protected readonly valueField = (item: FoodItem) => item.value;
     public selectedId: number | null = 2;
+    protected readonly valueField = (item: FoodItem) => item.value;
+}
+
+@Component({
+    template: `
+        <mona-dropdown-list
+            aria-label="City"
+            [data]="cities"
+            [popupHeight]="popupHeight()"
+            [(value)]="city"></mona-dropdown-list>
+    `,
+    imports: [DropdownListComponent]
+})
+class CityDropdownListHostComponent {
+    protected readonly cities = ["Boston", "Newark", "New York"];
+    public readonly popupHeight = signal<number | null>(null);
+    public city: string | null = null;
 }
 
 describe("DropdownListComponent", () => {
@@ -687,6 +699,69 @@ describe("DropdownListComponent", () => {
         });
     });
 
+    describe("API", () => {
+        it("caps the popup at popupHeight and lifts the default height limit", async () => {
+            const fixture = await createObjectFixture(CityDropdownListHostComponent);
+            fixture.componentInstance.popupHeight.set(320);
+            await waitForStable(fixture);
+
+            await openPopup(fixture);
+
+            const pane = document.querySelector(".cdk-overlay-pane") as HTMLElement;
+            // The connected position strategy puts the limit on the box around the pane.
+            expect(pane.parentElement?.style.maxHeight).toBe("320px");
+            expect(pane.querySelector("mona-list")?.parentElement?.classList.contains("max-h-none")).toBe(true);
+        });
+
+        it("keeps the default popup height limit when popupHeight isn't set", async () => {
+            const fixture = await createObjectFixture(CityDropdownListHostComponent);
+
+            await openPopup(fixture);
+
+            const pane = document.querySelector(".cdk-overlay-pane") as HTMLElement;
+            // The connected position strategy puts the limit on the box around the pane.
+            expect(pane.parentElement?.style.maxHeight).toBe("200px");
+            expect(pane.querySelector("mona-list")?.parentElement?.classList.contains("max-h-64")).toBe(true);
+        });
+
+        it("passes focus options through to the host", async () => {
+            const fixture = await createObjectModeFixture();
+            const host = getHost(fixture);
+            const focusSpy = vi.spyOn(host, "focus");
+
+            getDropdownListComponent(fixture).focus({ preventScroll: true });
+
+            expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
+            expect(document.activeElement).toBe(host);
+        });
+    });
+
+    describe("typeahead", () => {
+        it("treats Space as part of a typeahead search", async () => {
+            const fixture = await createObjectFixture(CityDropdownListHostComponent);
+
+            for (const key of ["n", "e", "w", " ", "y"]) {
+                pressKey(fixture, key);
+            }
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.city).toBe("New York");
+            expect(getHost(fixture).getAttribute("aria-expanded")).toBe("false");
+        });
+
+        it("opens the popup with Space once the typeahead search has lapsed", async () => {
+            const fixture = await createObjectFixture(CityDropdownListHostComponent);
+
+            pressKey(fixture, "b");
+            await new Promise(resolve => setTimeout(resolve, 250));
+            pressKey(fixture, " ");
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.city).toBe("Boston");
+            expect(getHost(fixture).getAttribute("aria-expanded")).toBe("true");
+        });
+    });
+
     describe("forms and accessibility", () => {
         it("doesn't mark the field touched while focus moves to its clear button", async () => {
             const fixture = await createObjectModeFixture();
@@ -865,8 +940,8 @@ interface FoodItem {
 }
 
 interface StockItem {
-    readonly text: string;
     readonly inStock: boolean;
+    readonly text: string;
 }
 
 interface DropdownListFormModel {

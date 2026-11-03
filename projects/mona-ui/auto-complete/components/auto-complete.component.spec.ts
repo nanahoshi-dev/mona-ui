@@ -1,5 +1,5 @@
 import { Component, signal } from "@angular/core";
-import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import {
     disabled as fieldDisabled,
     form,
@@ -8,7 +8,7 @@ import {
     required
 } from "@angular/forms/signals";
 import axe from "axe-core";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 
 import { AutoCompleteComponent } from "./auto-complete.component";
@@ -303,6 +303,21 @@ describe("AutoCompleteComponent", () => {
             await waitForStable(fixture);
 
             expect(getIndicator(fixture, "clear")).toBeNull();
+        });
+    });
+
+    describe("API", () => {
+        it("passes focus options on to the input", async () => {
+            await TestBed.configureTestingModule({
+                imports: [AutoCompleteComponent]
+            }).compileComponents();
+            const fixture = TestBed.createComponent(AutoCompleteComponent);
+            fixture.detectChanges();
+            const focusSpy = vi.spyOn(getInput(fixture), "focus");
+
+            fixture.componentInstance.focus({ preventScroll: true });
+
+            expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
         });
     });
 

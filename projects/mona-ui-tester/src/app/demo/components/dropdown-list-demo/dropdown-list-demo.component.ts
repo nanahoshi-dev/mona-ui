@@ -125,6 +125,10 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
     });
     protected readonly config = computed(() => ({
         inputs: deriveInputConfig<DropdownListComponent<any>>(this.metadata(), {
+            // The demo labels the field with visible text referenced through aria-labelledby.
+            ariaDescribedBy: undefined,
+            ariaLabel: undefined,
+            ariaLabelledBy: undefined,
             data: {
                 type: "object"
             },
@@ -210,9 +214,9 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
         @let featureData = features();
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
         <span>Selected Value: {{ formValueText() }}</span>
+        <span id="dropdown-list-demo-label" class="text-sm font-medium">Favourite food</span>
         <mona-dropdown-list
-            [aria-label]="ariaLabel()"
-            [aria-labelledby]="ariaLabelledBy()"
+            aria-labelledby="dropdown-list-demo-label"
             [data]="dropdownData()"
             [itemDisabled]="itemDisabled()"
             [loading]="loading()"
@@ -329,8 +333,6 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
     });
     protected readonly grouping = computed(() => buildGroupableOptions(this.features()));
     protected readonly virtualization = computed(() => buildVirtualScrollOptions(this.features()));
-    public readonly ariaLabel = input<ReturnType<DropdownListComponent["ariaLabel"]>>("");
-    public readonly ariaLabelledBy = input<ReturnType<DropdownListComponent["ariaLabelledBy"]>>("");
     public readonly data = input<ReturnType<DropdownListComponent["data"]>>([]);
     public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly itemDisabled = input<ReturnType<DropdownListComponent["itemDisabled"]>>("active");

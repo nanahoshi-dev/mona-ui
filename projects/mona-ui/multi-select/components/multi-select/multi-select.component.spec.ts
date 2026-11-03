@@ -1,5 +1,5 @@
 import { Component, signal } from "@angular/core";
-import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import {
     disabled as fieldDisabled,
     form,
@@ -8,10 +8,10 @@ import {
     required
 } from "@angular/forms/signals";
 import axe from "axe-core";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 
-import { MultiSelectVariantProps } from "../../styles/multi-select.styles";
+import type { MultiSelectVariantProps } from "../../styles/multi-select.styles";
 import { MultiSelectSummaryTagDirective } from "../../directives/multi-select-summary-tag.directive";
 import { MultiSelectComponent } from "./multi-select.component";
 
@@ -508,6 +508,22 @@ describe("MultiSelectComponent", () => {
 
             expect(getHost(fixture).getAttribute("aria-expanded")).toBe("true");
             expect(fixture.componentInstance.form.value().value()).toEqual([2]);
+        });
+    });
+
+    describe("API", () => {
+        it("passes focus options on to the host", async () => {
+            await TestBed.configureTestingModule({
+                imports: [MultiSelectComponent]
+            }).compileComponents();
+            const fixture = TestBed.createComponent(MultiSelectComponent);
+            fixture.detectChanges();
+            const host = fixture.nativeElement as HTMLElement;
+            const focusSpy = vi.spyOn(host, "focus");
+
+            fixture.componentInstance.focus({ preventScroll: true });
+
+            expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
         });
     });
 

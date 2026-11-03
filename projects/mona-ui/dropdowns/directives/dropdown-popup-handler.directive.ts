@@ -1,8 +1,8 @@
-import { afterNextRender, DestroyRef, Directive, DOCUMENT, ElementRef, inject, TemplateRef } from "@angular/core";
+import { afterNextRender, DestroyRef, Directive, DOCUMENT, ElementRef, inject, type TemplateRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import { focusCanReturn } from "@nanahoshi/mona-ui/internal";
-import { dropdownPopupAnimation, PopupRef, PopupService, PopupSettings } from "@nanahoshi/mona-ui/popup";
+import { dropdownPopupAnimation, type PopupRef, PopupService, type PopupSettings } from "@nanahoshi/mona-ui/popup";
 import { take, takeUntil } from "rxjs";
 import { DROPDOWN_POPUP_INPUT_TOKEN } from "../models/DropdownPopupInput";
 import { DropdownService } from "../services/dropdown.service";
@@ -14,8 +14,8 @@ export class DropdownPopupHandlerDirective {
     readonly #destroyRef = inject(DestroyRef);
     readonly #document = inject(DOCUMENT);
     readonly #dropdownService = inject(DropdownService);
-    readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #host = inject(DROPDOWN_POPUP_INPUT_TOKEN);
+    readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #popupService = inject(PopupService);
 
     public constructor() {
@@ -79,12 +79,13 @@ export class DropdownPopupHandlerDirective {
 
         const anchor = this.#hostElementRef.nativeElement;
         const anchorConnectionPoint = settings.anchorConnectionPoint ?? "bottomleft";
-        const content = this.#dropdownService.popupTemplate() as TemplateRef<any>;
+        const content = this.#dropdownService.popupTemplate() as TemplateRef<void>;
         const closeOnOutsideClick = settings.closeOnOutsideClick ?? true;
         const closeOnScroll = settings.closeOnScroll ?? true;
         const hasBackdrop = settings.hasBackdrop ?? false;
         const height = settings.height;
-        const maxHeight = this.getMaxHeight(settings.maxHeight, settings.height);
+        // The host's popupHeight caps the popup; shorter lists still shrink to fit.
+        const maxHeight = this.getMaxHeight(settings.maxHeight ?? (this.#host.popupHeight() || undefined), height);
         const minWidth = this.getMinWidth(settings.minWidth, settings.width);
         const offset = settings.offset ?? { horizontal: 0, vertical: 4 };
         const popupConnectionPoint = settings.popupConnectionPoint ?? "topleft";

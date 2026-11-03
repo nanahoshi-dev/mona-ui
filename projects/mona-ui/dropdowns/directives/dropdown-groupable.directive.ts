@@ -1,24 +1,24 @@
 import { Directive, effect, inject, input, untracked } from "@angular/core";
-import { GroupableOptions, ListService } from "@nanahoshi/mona-ui/internal/list";
-import { Selector } from "@mirei/ts-collections";
+import type { Selector } from "@mirei/ts-collections";
+import { type GroupableOptions, ListService } from "@nanahoshi/mona-ui/internal/list";
 
 @Directive({
     selector: `
         mona-auto-complete[monaDropDownGroupable],
         mona-combo-box[monaDropDownGroupable],
         mona-dropdown-list[monaDropDownGroupable],
-        mona-multi-select[monaDropDownGroupable],
+        mona-multi-select[monaDropDownGroupable]
     `
 })
 export class DropdownGroupableDirective<TData> {
-    readonly #defaultOptions: GroupableOptions<TData, any> = {
+    readonly #defaultOptions: GroupableOptions<TData, unknown> = {
         enabled: true,
         headerOrder: "asc"
     };
     readonly #listService: ListService<TData> = inject(ListService);
 
-    public readonly groupBy = input<string | Selector<TData, any> | null | undefined>("");
-    public readonly options = input<GroupableOptions<TData, any> | "">("", {
+    public readonly groupBy = input<string | Selector<TData, unknown> | null | undefined>("");
+    public readonly options = input<GroupableOptions<TData, unknown> | "">("", {
         alias: "monaDropDownGroupable"
     });
 

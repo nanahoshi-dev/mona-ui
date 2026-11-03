@@ -1,10 +1,10 @@
 import { ConnectionPositionPair } from "@angular/cdk/overlay";
-import { Injectable, signal, TemplateRef } from "@angular/core";
+import { Injectable, signal, type TemplateRef } from "@angular/core";
 import { Subject } from "rxjs";
-import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
-import { PopupRef } from "@nanahoshi/mona-ui/popup";
-import { PopupSettings } from "@nanahoshi/mona-ui/popup";
-import { PreventableEvent } from "@nanahoshi/mona-ui/common";
+import type { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
+import type { PopupRef } from "@nanahoshi/mona-ui/popup";
+import type { PopupSettings } from "@nanahoshi/mona-ui/popup";
+import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
 
 @Injectable()
 export class DropdownService {

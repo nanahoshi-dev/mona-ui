@@ -20,13 +20,13 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
-import { PreventableEvent } from "@nanahoshi/mona-ui/common";
+import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import {
     DropdownDataHandlerDirective,
-    DropdownDataInput,
-    DropdownDataInputToken,
-    DropdownFieldPredicateType,
-    DropdownFieldSelectorType,
+    type DropdownDataInput,
+    DROPDOWN_DATA_INPUT_TOKEN,
+    type DropdownFieldPredicateType,
+    type DropdownFieldSelectorType,
     DropdownFooterTemplateDirective,
     DropdownGroupHeaderTemplateDirective,
     DropdownHeaderTemplateDirective,
@@ -35,13 +35,18 @@ import {
     DropdownListService,
     DropdownLiveRegionDirective,
     DropdownNoDataTemplateDirective,
-    DropdownPopupInput,
+    type DropdownPopupInput,
     DROPDOWN_POPUP_INPUT_TOKEN,
     dropdownPopupThemeVariants,
     DropdownPrefixTemplateDirective,
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
-import { createElementControlId, isTypeaheadKey, setupTypeahead } from "@nanahoshi/mona-ui/internal";
+import {
+    createElementControlId,
+    isTypeaheadKey,
+    setupTypeahead,
+    TYPEAHEAD_RESET_DELAY
+} from "@nanahoshi/mona-ui/internal";
 import { IndicatorIconComponent } from "@nanahoshi/mona-ui/internal/indicator-icon";
 import {
     ListComponent,
@@ -51,13 +56,13 @@ import {
     ListItemTemplateDirective,
     ListNoDataTemplateDirective,
     ListService,
-    ListSizeInputType,
-    SelectableOptions,
-    SelectionChangeEvent
+    type ListSizeInputType,
+    type SelectableOptions,
+    type SelectionChangeEvent
 } from "@nanahoshi/mona-ui/internal/list";
-import { PopupCloseEvent, PopupCloseSource } from "@nanahoshi/mona-ui/popup";
+import { type PopupCloseEvent, PopupCloseSource } from "@nanahoshi/mona-ui/popup";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { Subject } from "rxjs";
+import { filter, Subject } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { DropdownListValueTemplateDirective } from "../../directives/dropdown-list-value-template.directive";
 import { DROPDOWN_LIST_DEFAULT_MESSAGES } from "../../i18n/dropdown-list.default-messages";
@@ -65,8 +70,8 @@ import {
     dropdownListAffixContainerThemeVariants,
     dropdownListInputThemeVariants,
     dropdownListValueContainerThemeVariants,
-    DropDownListVariantInput,
-    DropDownListVariantProps
+    type DropDownListVariantInput,
+    type DropDownListVariantProps
 } from "../../styles/dropdown-list.styles";
 
 const cancellingCloseSources: ReadonlySet<PopupCloseSource | undefined> = new Set([
@@ -85,7 +90,7 @@ const cancellingCloseSources: ReadonlySet<PopupCloseSource | undefined> = new Se
         DropdownService,
         DropdownListService,
         {
-            provide: DropdownDataInputToken,
+            provide: DROPDOWN_DATA_INPUT_TOKEN,
             useExisting: forwardRef(() => DropdownListComponent),
             multi: false
         },
@@ -131,13 +136,14 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
     implements FormValueControl<TValue | null>, DropDownListVariantInput, DropdownDataInput<TData>, DropdownPopupInput
 {
     readonly #destroyRef = inject(DestroyRef);
-    readonly #dropdownListService = inject(DropdownListService);
+    readonly #dropdownListService = inject<DropdownListService<TData>>(DropdownListService);
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #i18n = inject(MonaI18nService);
     readonly #listService = inject<ListService<TData>>(ListService);
     readonly #navigatedItem = linkedSignal<TData | null>(() => this.selectedDataItem());
     readonly #typeaheadKey = new Subject<string>();
+    #lastTypeaheadKeyTime = Number.NEGATIVE_INFINITY;
 
     protected readonly activeDescendant = computed(() => {
         const highlightedItem = this.#listService.highlightedItem();
@@ -192,7 +198,9 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
         const size = this.size();
         const userClass = this.popupClass();
         const variantClass = dropdownPopupThemeVariants({ rounded, size });
-        return twMerge(variantClass, userClass);
+        // With a popupHeight, the overlay sets the limit; the default max-h-64 would cut a taller popup short.
+        const heightClass = this.popupHeight() ? "max-h-none" : "";
+        return twMerge(variantClass, heightClass, userClass);
     });
     protected readonly messages = this.#i18n.componentMessages("dropdownList", DROPDOWN_LIST_DEFAULT_MESSAGES);
     protected readonly noDataTemplate = contentChild(DropdownNoDataTemplateDirective, { read: TemplateRef });
@@ -244,6 +252,7 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
     /**
      * @description Emitted when the popup is about to close. This event is preventable.
      */
+    // eslint-disable-next-line @angular-eslint/no-output-native -- renaming the output would break existing (close) bindings
     public readonly close = output<PopupCloseEvent>();
 
     /**
@@ -276,7 +285,8 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
     public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
 
     /**
-     * @description Displays a loading indicator and prevents interaction while an operation is in progress.
+     * @description Shows a loading indicator, in place of the clear button, and marks the field busy. It doesn't
+     * block interaction: the field stays usable while data loads.
      * @default false
      */
     public readonly loading = input(false, { transform: booleanAttribute });
@@ -304,7 +314,8 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
     public readonly popupClass = input("");
 
     /**
-     * @description Height of the popup element.
+     * @description Maximum height of the popup, in pixels or as a CSS length. Shorter lists shrink to fit. When
+     * unset, the popup is at most 200 pixels tall.
      * @default null
      */
     public readonly popupHeight = input<ListSizeInputType>(null);
@@ -431,8 +442,12 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
         });
     }
 
-    public focus(): void {
-        this.#hostElementRef.nativeElement?.focus();
+    /**
+     * @description Moves focus to the dropdown list.
+     * @param options Passed to `HTMLElement.focus()`, for example `{ preventScroll: true }`.
+     */
+    public focus(options?: FocusOptions): void {
+        this.#hostElementRef.nativeElement?.focus(options);
     }
 
     public setValue(value: TValue): void {
@@ -552,6 +567,11 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
         this.#listService.setSelectableOptions(this.selectableOptions);
     }
 
+    private pushTypeaheadKey(key: string): void {
+        this.#lastTypeaheadKeyTime = Date.now();
+        this.#typeaheadKey.next(key);
+    }
+
     private scrollToSelectedItem(): void {
         const item = this.selectedListItem();
         if (!item) {
@@ -590,7 +610,7 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
                 event.preventDefault();
                 this.handleHomeEndKeys(event);
             } else if (isTypeaheadKey(event.key, event)) {
-                this.#typeaheadKey.next(event.key);
+                this.pushTypeaheadKey(event.key);
             }
         });
     }
@@ -619,7 +639,24 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
         this.setKeydownSubscription();
         this.setFilterChangeSubscription();
         this.setPopupCloseSubscriptions();
+        this.setTypeaheadSpaceSubscription();
         this.setTypeaheadSubscription();
+    }
+
+    private setTypeaheadSpaceSubscription(): void {
+        // While a typeahead search is under way, Space is part of it ("New York"), not the popup toggle.
+        this.#dropdownService.beforeKeydown$
+            .pipe(
+                takeUntilDestroyed(this.#destroyRef),
+                filter(
+                    e => e.originalEvent?.key === " " && Date.now() - this.#lastTypeaheadKeyTime < TYPEAHEAD_RESET_DELAY
+                )
+            )
+            .subscribe(event => {
+                event.preventDefault();
+                event.originalEvent?.preventDefault();
+                this.pushTypeaheadKey(" ");
+            });
     }
 
     private setTypeaheadSubscription(): void {

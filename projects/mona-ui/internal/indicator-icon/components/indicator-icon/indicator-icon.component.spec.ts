@@ -65,6 +65,14 @@ describe("IndicatorIconComponent", () => {
         expect(getIndicator(fixture).querySelector("svg")).toBeNull();
     });
 
+    it("draws an interactive icon in the muted foreground colour at full opacity", async () => {
+        const fixture = await createFixture("clear", false, true, "Clear");
+        const classes = getIndicator(fixture).classList;
+
+        expect(classes.contains("text-muted-foreground")).toBe(true);
+        expect(classes.contains("opacity-50")).toBe(false);
+    });
+
     it("adds button semantics only when interactive", async () => {
         const fixture = await createFixture("clear");
 

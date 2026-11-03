@@ -3,7 +3,7 @@ import { ListService } from "@nanahoshi/mona-ui/internal/list";
 import { DropdownGroupableDirective } from "./dropdown-groupable.directive";
 
 describe("DropdownGroupableDirective", () => {
-    let directive: DropdownGroupableDirective<any>;
+    let directive: DropdownGroupableDirective<unknown>;
     beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [ListService]

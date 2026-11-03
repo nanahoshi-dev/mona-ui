@@ -1,5 +1,5 @@
 import { Directive, effect, inject, input, untracked } from "@angular/core";
-import { VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
+import type { VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
 import { ListService } from "@nanahoshi/mona-ui/internal/list";
 
 @Directive({
@@ -8,10 +8,9 @@ import { ListService } from "@nanahoshi/mona-ui/internal/list";
         mona-dropdown-list[monaDropDownVirtualScroll],
         mona-combo-box[monaDropDownVirtualScroll],
         mona-multi-select[monaDropDownVirtualScroll]
-    `,
-    standalone: true
+    `
 })
-export class DropdownVirtualScrollDirective<TData> {
+export class DropdownVirtualScrollDirective {
     readonly #defaultOptions: VirtualScrollOptions = {
         enabled: true,
         height: 28

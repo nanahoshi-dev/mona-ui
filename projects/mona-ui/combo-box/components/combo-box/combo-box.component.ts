@@ -19,14 +19,14 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { type FormValueControl } from "@angular/forms/signals";
-import { FilterChangeEvent, PreventableEvent } from "@nanahoshi/mona-ui/common";
+import type { FormValueControl } from "@angular/forms/signals";
+import { FilterChangeEvent, type PreventableEvent } from "@nanahoshi/mona-ui/common";
 import {
     DropdownDataHandlerDirective,
-    DropdownDataInput,
-    DropdownDataInputToken,
-    DropdownFieldPredicateType,
-    DropdownFieldSelectorType,
+    type DropdownDataInput,
+    DROPDOWN_DATA_INPUT_TOKEN,
+    type DropdownFieldPredicateType,
+    type DropdownFieldSelectorType,
     DropdownFooterTemplateDirective,
     DropdownGroupHeaderTemplateDirective,
     DropdownHeaderTemplateDirective,
@@ -35,29 +35,29 @@ import {
     DropdownListService,
     DropdownLiveRegionDirective,
     DropdownNoDataTemplateDirective,
-    DropdownPopupInput,
+    type DropdownPopupInput,
     DROPDOWN_POPUP_INPUT_TOKEN,
     dropdownPopupThemeVariants,
-    DropdownPopupVariantInput,
+    type DropdownPopupVariantInput,
     DropdownPrefixTemplateDirective,
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
-import { createElementControlId, rxTimeout } from "@nanahoshi/mona-ui/internal";
+import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { IndicatorIconComponent } from "@nanahoshi/mona-ui/internal/indicator-icon";
 import {
     ListComponent,
     ListFooterTemplateDirective,
     ListGroupHeaderTemplateDirective,
     ListHeaderTemplateDirective,
-    ListItem,
+    type ListItem,
     ListItemTemplateDirective,
     ListNoDataTemplateDirective,
     ListService,
-    ListSizeInputType,
-    SelectableOptions,
-    SelectionChangeEvent
+    type ListSizeInputType,
+    type SelectableOptions,
+    type SelectionChangeEvent
 } from "@nanahoshi/mona-ui/internal/list";
-import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
+import type { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import { TextBoxDirective } from "@nanahoshi/mona-ui/text-box";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { debounceTime, filter, Subject, take, tap } from "rxjs";
@@ -68,8 +68,8 @@ import {
     comboBoxAffixContainerThemeVariants,
     comboBoxBaseThemeVariants,
     comboBoxTextInputThemeVariants,
-    ComboBoxVariantInput,
-    ComboBoxVariantProps
+    type ComboBoxVariantInput,
+    type ComboBoxVariantProps
 } from "../../styles/combo-box.styles";
 
 @Component({
@@ -80,7 +80,7 @@ import {
         DropdownService,
         DropdownListService,
         {
-            provide: DropdownDataInputToken,
+            provide: DROPDOWN_DATA_INPUT_TOKEN,
             useExisting: forwardRef(() => ComboBoxComponent),
             multi: false
         },
@@ -126,7 +126,7 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
         DropdownPopupVariantInput
 {
     readonly #destroyRef = inject(DestroyRef);
-    readonly #dropdownListService = inject(DropdownListService);
+    readonly #dropdownListService = inject<DropdownListService<TData>>(DropdownListService);
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
@@ -179,7 +179,9 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
         const size = this.size();
         const userClass = this.popupClass();
         const variantClass = dropdownPopupThemeVariants({ rounded, size });
-        return twMerge(variantClass, userClass);
+        // With a popupHeight, the overlay sets the limit; the default max-h-64 would cut a taller popup short.
+        const heightClass = this.popupHeight() ? "max-h-none" : "";
+        return twMerge(variantClass, heightClass, userClass);
     });
     protected readonly messages = this.#i18n.componentMessages("comboBox", COMBO_BOX_DEFAULT_MESSAGES);
     protected readonly noDataTemplate = contentChild(DropdownNoDataTemplateDirective, { read: TemplateRef });
@@ -230,6 +232,7 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
     /**
      * @description Emitted when the popup is about to close. This event is preventable.
      */
+    // eslint-disable-next-line @angular-eslint/no-output-native -- renaming the output would break existing (close) bindings
     public readonly close = output<PopupCloseEvent>();
 
     /**
@@ -270,7 +273,8 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
     public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
 
     /**
-     * @description Displays a loading indicator and prevents interaction while an operation is in progress.
+     * @description Shows a loading indicator, in place of the clear button, and marks the field busy. It doesn't
+     * block interaction: the field stays usable while data loads.
      * @default false
      */
     public readonly loading = input(false, { transform: booleanAttribute });
@@ -298,7 +302,8 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
     public readonly popupClass = input("");
 
     /**
-     * @description Sets the height of the popup element.
+     * @description Maximum height of the popup, in pixels or as a CSS length. Shorter lists shrink to fit. When
+     * unset, the popup is at most 200 pixels tall.
      * @default null
      */
     public readonly popupHeight = input<ListSizeInputType>(null);
@@ -426,14 +431,16 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
         });
     }
 
-    public focus(): void {
-        rxTimeout(this.#destroyRef, () => {
-            const input = this.#hostElementRef.nativeElement.querySelector("input");
-            if (input) {
-                input.focus();
-                input.setSelectionRange(input.value.length, input.value.length);
-            }
-        });
+    /**
+     * @description Moves focus to the inner input. The caret goes to the end of the text.
+     * @param options Passed to `HTMLElement.focus()`, for example `{ preventScroll: true }`.
+     */
+    public focus(options?: FocusOptions): void {
+        const input = (this.#hostElementRef.nativeElement as HTMLElement).querySelector("input");
+        if (input) {
+            input.focus(options);
+            input.setSelectionRange(input.value.length, input.value.length);
+        }
     }
 
     protected onFocusOut(event: FocusEvent): void {

@@ -24,7 +24,8 @@ const projectPath = path.resolve(__dirname, "../../mona-ui"); // Path to your An
  * Simplifies a TypeScript type string by removing import paths and extracting generic arguments.
  * Examples:
  * - "import(\"...\").InputSignal<boolean>" becomes "boolean"
- * - "import(\"...\").InputSignalWithTransform<string, boolean>" becomes "boolean"
+ * - "import(\"...\").InputSignalWithTransform<string, string | number>" becomes "string | number" (what a
+ *   binding may pass), and "InputSignalWithTransform<boolean, unknown>" (booleanAttribute) becomes "boolean"
  * - "boolean | undefined" remains "boolean | undefined"
  * - "SomeNamespace.MyType" becomes "MyType"
  * @param fullType The full type string from ts-morph.
@@ -37,11 +38,25 @@ function simplifyType(fullType: string): string {
     // This handles cases like: import("L:/Codes/.../index").InputSignal<boolean>
     simplified = simplified.replace(/import\([^)]*\)\./g, "");
 
-    // 2. Handle InputSignalWithTransform specifically: extract the second generic parameter
-    // Regex to match "InputSignalWithTransform<T1, T2>" and capture T2
-    const inputSignalWithTransformMatch = simplified.match(/InputSignalWithTransform<[^,]+,\s*(.+?)>$/);
-    if (inputSignalWithTransformMatch && inputSignalWithTransformMatch[1]) {
-        return inputSignalWithTransformMatch[1].trim();
+    // 2. InputSignalWithTransform<T, TransformT>: T is the value the component reads, TransformT what a binding may
+    // pass. Report TransformT, unless it says nothing (booleanAttribute accepts unknown), then fall back to T.
+    const transformMatch = simplified.match(/^InputSignalWithTransform<(.+)>$/);
+    if (transformMatch) {
+        const args = transformMatch[1];
+        let depth = 0;
+        for (let index = 0; index < args.length; index++) {
+            const char = args[index];
+            if (char === "<" || char === "(" || char === "[" || char === "{") {
+                depth++;
+            } else if (char === ">" || char === ")" || char === "]" || char === "}") {
+                depth--;
+            } else if (char === "," && depth === 0) {
+                const valueType = args.slice(0, index).trim();
+                const acceptedType = args.slice(index + 1).trim();
+                return acceptedType === "unknown" || acceptedType === "any" ? valueType : acceptedType;
+            }
+        }
+        return args.trim();
     }
 
     // 3. Extract generic type argument if present (e.g., InputSignal<boolean> -> boolean)
@@ -166,9 +181,7 @@ function extractInputsFromInheritanceChain(
                     if (descriptionTag) {
                         description = descriptionTag.getCommentText()?.toString().trim() || "";
                     }
-                    const defaultTag = mainDoc
-                        .getTags()
-                        .find((tag: JSDocTag) => tag.getTagName() === "default");
+                    const defaultTag = mainDoc.getTags().find((tag: JSDocTag) => tag.getTagName() === "default");
                     if (defaultTag) {
                         defaultValue = defaultTag.getCommentText()?.toString().trim();
                     }

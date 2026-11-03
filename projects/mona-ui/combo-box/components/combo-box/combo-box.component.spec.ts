@@ -1,5 +1,5 @@
 import { Component, signal } from "@angular/core";
-import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import {
     disabled as fieldDisabled,
@@ -9,7 +9,7 @@ import {
     required
 } from "@angular/forms/signals";
 import axe from "axe-core";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 
 import { ComboBoxComponent } from "./combo-box.component";
@@ -38,14 +38,14 @@ class ObjectModeHostComponent {
     readonly #formModel = signal<ComboBoxFormModel>({ value: FOOD_ITEMS[1] });
     protected readonly data = FOOD_ITEMS;
     public readonly disabled = signal(false);
-    public readonly loading = signal(false);
-    public readonly readonlyState = signal(false);
-    public readonly requiredState = signal(false);
     public readonly form = form(this.#formModel, schema => {
         fieldDisabled(schema.value, { when: () => this.disabled() });
         fieldReadonly(schema.value, { when: () => this.readonlyState() });
         required(schema.value, { when: () => this.requiredState() });
     });
+    public readonly loading = signal(false);
+    public readonly readonlyState = signal(false);
+    public readonly requiredState = signal(false);
 }
 
 @Component({
@@ -66,14 +66,14 @@ class PrimitiveModeHostComponent {
     readonly #formModel = signal<PrimitiveComboBoxFormModel>({ value: 2 });
     public readonly data = signal<readonly FoodItem[]>(FOOD_ITEMS);
     public readonly disabled = signal(false);
-    public readonly loading = signal(false);
-    public readonly readonlyState = signal(false);
-    public readonly requiredState = signal(false);
     public readonly form = form(this.#formModel, schema => {
         fieldDisabled(schema.value, { when: () => this.disabled() });
         fieldReadonly(schema.value, { when: () => this.readonlyState() });
         required(schema.value, { when: () => this.requiredState() });
     });
+    public readonly loading = signal(false);
+    public readonly readonlyState = signal(false);
+    public readonly requiredState = signal(false);
 }
 
 @Component({
@@ -606,6 +606,22 @@ describe("ComboBoxComponent", () => {
             await waitForStable(fixture);
 
             expect(getIndicator(fixture, "clear")).toBeNull();
+        });
+    });
+
+    describe("API", () => {
+        it("focuses the input at once, with the caret at the end, and passes focus options on", async () => {
+            const fixture = await createObjectModeFixture();
+            const input = getInput(fixture);
+            const focusSpy = vi.spyOn(input, "focus");
+
+            fixture.debugElement
+                .query(By.directive(ComboBoxComponent))
+                .componentInstance.focus({ preventScroll: true });
+
+            expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
+            expect(document.activeElement).toBe(input);
+            expect(input.selectionStart).toBe("Banana".length);
         });
     });
 
