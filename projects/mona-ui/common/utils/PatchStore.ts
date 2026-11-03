@@ -31,6 +31,26 @@ import {
  */
 export type BaseChangeStrategy = "wipe" | "preserve" | "rebase";
 
+/**
+ * Drafts hold final values: an `undefined` in a patch clears the field, and the draft is applied over the base
+ * with `replace`, so an array strategy only ever applies once, to the patch that introduced it.
+ */
+const STORE_MERGE_OPTIONS: DeepMergeOptions = { undefinedValues: "assign" };
+
+/**
+ * Applies `patch` to the view of `base` with `draft`, and returns the fields that still differ from `base`.
+ */
+function applyPatch<T>(
+    base: T,
+    draft: DeepPartial<T>,
+    patch: DeepPartial<T>,
+    options: DeepMergeOptions | undefined
+): DeepPartial<T> {
+    const currentView = deepMerge(base, draft, STORE_MERGE_OPTIONS);
+    const nextView = deepMerge(currentView, patch, { ...STORE_MERGE_OPTIONS, ...options });
+    return prunePatch(base, nextView as DeepPartial<T>) ?? ({} as DeepPartial<T>);
+}
+
 // ---------------------------------------------------------------------------
 // ObjectPatchStore
 // ---------------------------------------------------------------------------
@@ -97,7 +117,8 @@ export interface IObjectPatchStore<T> {
      * Deep-merge `patch` into the current draft. Only the fields present in
      * `patch` are affected; all other fields retain their current draft or
      * base values. Automatically prunes fields that match the base value so
-     * the draft stays minimal.
+     * the draft stays minimal. A field set to `undefined` is cleared, unless
+     * `options.undefinedValues` is `"skip"`.
      */
     patch(patch: DeepPartial<T>, options?: DeepMergeOptions): void;
 
@@ -190,7 +211,7 @@ export class ObjectPatchStore<T> implements IObjectPatchStore<T> {
 
         return deepEquals(prunedDraft, prunedCommitted);
     });
-    public readonly view = computed(() => deepMerge<T>(this.#base(), this.#draft()));
+    public readonly view = computed(() => deepMerge<T>(this.#base(), this.#draft(), STORE_MERGE_OPTIONS));
 
     public constructor(options: ObjectPatchStoreOptions<T>) {
         this.#options = options;
@@ -219,12 +240,7 @@ export class ObjectPatchStore<T> implements IObjectPatchStore<T> {
 
     public patch(patch: DeepPartial<T>, options?: DeepMergeOptions): void {
         const effectiveOptions = options ?? this.#options.mergeOptions;
-        this.#draft.update(currentDraft => {
-            const currentFullView = deepMerge(this.#base(), currentDraft, effectiveOptions);
-            const updatedFullView = deepMerge(currentFullView, patch, effectiveOptions);
-            const nextDraft = prunePatch(this.#base(), updatedFullView as DeepPartial<T>);
-            return nextDraft ?? ({} as DeepPartial<T>);
-        });
+        this.#draft.update(currentDraft => applyPatch(this.#base(), currentDraft, patch, effectiveOptions));
     }
 
     public patchPath<P extends Path<T>>(path: P, value: PathValue<T, P>, options?: DeepMergeOptions): void {
@@ -325,6 +341,8 @@ export interface IIterablePatchStore<TItem, TId> {
      * Deep-merge `patch` into the draft for the item identified by `id`.
      * Automatically prunes fields that now match the base item so the draft
      * stays minimal. Removes the draft entry entirely if it becomes empty.
+     * A field set to `undefined` is cleared, unless `options.undefinedValues`
+     * is `"skip"`.
      */
     patch(id: TId, patch: DeepPartial<TItem>, options?: DeepMergeOptions): void;
 
@@ -391,11 +409,8 @@ export class IterablePatchStore<TItem, TId> implements IIterablePatchStore<TItem
     readonly #baseMap = computed(() => new Map(Array.from(this.#base()).map(item => [this.#options.idOf(item), item])));
     readonly #committed: WritableSignal<ImmutableDictionary<TId, DeepPartial<TItem>>>;
     readonly #drafts = linkedSignal({
-        source: () => this.#options.source(),
-        computation: (
-            newSource: Signal<Iterable<TItem>>,
-            previous?: { value: ImmutableDictionary<TId, DeepPartial<TItem>> }
-        ) => {
+        source: () => this.#base(),
+        computation: (newBase: Iterable<TItem>, previous?: { value: ImmutableDictionary<TId, DeepPartial<TItem>> }) => {
             const strategy = this.#options.baseChangeStrategy ?? "wipe";
             if (!previous) {
                 return ImmutableDictionary.create<TId, DeepPartial<TItem>>();
@@ -404,10 +419,10 @@ export class IterablePatchStore<TItem, TId> implements IIterablePatchStore<TItem
                 case "preserve":
                     return previous.value;
                 case "rebase": {
-                    const baseArray = Array.from(newSource());
+                    const baseMap = new Map(Array.from(newBase, item => [this.#options.idOf(item), item]));
                     let rebased = ImmutableDictionary.create<TId, DeepPartial<TItem>>();
                     for (const [id, draft] of previous.value.entries()) {
-                        const baseItem = baseArray.find(item => this.#options.idOf(item) === id);
+                        const baseItem = baseMap.get(id);
                         if (!baseItem) {
                             // Item no longer exists in base — drop the draft.
                             continue;
@@ -428,10 +443,11 @@ export class IterablePatchStore<TItem, TId> implements IIterablePatchStore<TItem
     readonly #options: IterablePatchStoreOptions<TItem, TId>;
     /**
      * Memoisation cache for the `view` computed. Keyed by item id; each
-     * entry stores the draft reference that produced the merged result so we
-     * can skip deepMerge when neither the base item nor its draft changed.
+     * entry stores the base item and draft references that produced the merged
+     * result, so we can skip deepMerge when neither of them changed. Rebuilt on
+     * every computation, so ids that leave the base or lose their draft drop out.
      */
-    readonly #viewCache = new Map<TId, { patchRef: DeepPartial<TItem>; merged: TItem }>();
+    #viewCache = new Map<TId, { baseRef: TItem; merged: TItem; patchRef: DeepPartial<TItem> }>();
 
     public readonly changes = computed(() => {
         const baseArray = Array.from(this.#base());
@@ -442,7 +458,9 @@ export class IterablePatchStore<TItem, TId> implements IIterablePatchStore<TItem
                 const draft = drafts.get(this.#options.idOf(b));
                 return draft != null && !isEmptyObject(draft as Record<PropertyKey, unknown>);
             })
-            .map(b => deepMerge<TItem>(b, drafts.get(this.#options.idOf(b)) as DeepPartial<TItem>));
+            .map(b =>
+                deepMerge<TItem>(b, drafts.get(this.#options.idOf(b)) as DeepPartial<TItem>, STORE_MERGE_OPTIONS)
+            );
     });
     public readonly pristine = computed(() => {
         const baseArray = Array.from(this.#base());
@@ -468,27 +486,29 @@ export class IterablePatchStore<TItem, TId> implements IIterablePatchStore<TItem
     });
     public readonly view = computed(() => {
         const drafts = this.#drafts();
-        return Array.from(this.#base()).map(b => {
+        const previousCache = this.#viewCache;
+        const nextCache: typeof previousCache = new Map();
+        const view = Array.from(this.#base()).map(b => {
             const id = this.#options.idOf(b);
             const patch = drafts.get(id);
 
             if (!patch || isEmptyObject(patch as Record<PropertyKey, unknown>)) {
-                // No draft — return base item directly and evict any stale cache entry.
-                this.#viewCache.delete(id);
+                // No draft — return base item directly.
                 return b;
             }
 
-            const cached = this.#viewCache.get(id);
-            if (cached && cached.patchRef === patch) {
-                // Draft reference hasn't changed — return cached merged value
-                // to avoid an unnecessary deepMerge and a new object allocation.
-                return cached.merged;
-            }
-
-            const merged = deepMerge<TItem>(b, patch);
-            this.#viewCache.set(id, { patchRef: patch, merged });
+            const cached = previousCache.get(id);
+            // Reuse the merged value only when neither the base item nor its
+            // draft changed, to avoid an unnecessary deepMerge and allocation.
+            const merged =
+                cached && cached.baseRef === b && cached.patchRef === patch
+                    ? cached.merged
+                    : deepMerge<TItem>(b, patch, STORE_MERGE_OPTIONS);
+            nextCache.set(id, { baseRef: b, merged, patchRef: patch });
             return merged;
         });
+        this.#viewCache = nextCache;
+        return view;
     });
 
     public constructor(options: IterablePatchStoreOptions<TItem, TId>) {
@@ -550,14 +570,10 @@ export class IterablePatchStore<TItem, TId> implements IIterablePatchStore<TItem
         this.#drafts.update(drafts => {
             let newDrafts = ImmutableDictionary.create<TId, DeepPartial<TItem>>(drafts);
             const prev = drafts.get(id) ?? ({} as DeepPartial<TItem>);
-            let next = deepMerge(prev, patch, options);
-
-            // Fix: use #baseMap for O(1) lookup instead of a linear scan.
             const originalItem = this.#baseMap().get(id);
-
-            if (originalItem) {
-                next = prunePatch(originalItem, next) ?? ({} as DeepPartial<TItem>);
-            }
+            const next = originalItem
+                ? applyPatch(originalItem, prev, patch, options)
+                : deepMerge(prev, patch, { ...STORE_MERGE_OPTIONS, ...options });
 
             if (isEmptyObject(next as Record<PropertyKey, unknown>)) {
                 newDrafts = newDrafts.remove(id);
@@ -576,12 +592,10 @@ export class IterablePatchStore<TItem, TId> implements IIterablePatchStore<TItem
             let newDrafts = ImmutableDictionary.create(drafts);
             for (const [id, value] of patchTuple) {
                 const prev = newDrafts.get(id) ?? ({} as DeepPartial<TItem>);
-                let next = deepMerge(prev, value, options);
-
                 const originalItem = baseMap.get(id);
-                if (originalItem) {
-                    next = prunePatch(originalItem, next) ?? ({} as DeepPartial<TItem>);
-                }
+                const next = originalItem
+                    ? applyPatch(originalItem, prev, value, options)
+                    : deepMerge(prev, value, { ...STORE_MERGE_OPTIONS, ...options });
 
                 if (isEmptyObject(next as Record<PropertyKey, unknown>)) {
                     newDrafts = newDrafts.remove(id);

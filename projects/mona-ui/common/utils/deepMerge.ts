@@ -29,6 +29,11 @@ export type ArrayStrategy = { kind: "replace" } | { kind: "concat" } | { kind: "
 
 export interface DeepMergeOptions {
     arrayStrategy?: ArrayStrategy | ((key: PropertyKey, path: ReadonlyArray<PropertyKey>) => ArrayStrategy);
+    /**
+     * What an own `undefined` value in the patch does. `"skip"` (the default) keeps the base value;
+     * `"assign"` sets the field to `undefined`.
+     */
+    undefinedValues?: "assign" | "skip";
 }
 
 const defaultOptions: DeepMergeOptions = { arrayStrategy: { kind: "replace" } };
@@ -69,6 +74,9 @@ export function deepMerge<T>(
     for (const key of keys) {
         const patchValue = patch[key];
         if (patchValue === undefined) {
+            if (options.undefinedValues === "assign") {
+                (out as T)[key] = undefined as T[typeof key];
+            }
             continue;
         }
 
@@ -175,6 +183,10 @@ export function prunePatch<T>(base: T | DeepPartial<T>, patch: DeepPartial<T>): 
 
     for (const key of Object.keys(patchObj)) {
         if (!(key in baseObj)) {
+            // An undefined field the base doesn't have is no change.
+            if (patchObj[key] === undefined) {
+                delete result[key];
+            }
             continue;
         }
         const baseValue = baseObj[key];
@@ -201,8 +213,17 @@ export function deepEquals<T>(o1: T, o2: T): boolean {
     if (typeof o1 !== typeof o2 || o1 === null || o2 === null || o1 === undefined || o2 === undefined) {
         return false;
     }
-    if (o1 instanceof Date && o2 instanceof Date) {
-        return DateTime.fromJSDate(o1).equals(DateTime.fromJSDate(o2));
+    if (o1 instanceof Date || o2 instanceof Date) {
+        return o1 instanceof Date && o2 instanceof Date && DateTime.fromJSDate(o1).equals(DateTime.fromJSDate(o2));
+    }
+    if (o1 instanceof RegExp || o2 instanceof RegExp) {
+        return o1 instanceof RegExp && o2 instanceof RegExp && o1.source === o2.source && o1.flags === o2.flags;
+    }
+    if (o1 instanceof Map || o2 instanceof Map) {
+        return o1 instanceof Map && o2 instanceof Map && mapsEqual(o1, o2);
+    }
+    if (o1 instanceof Set || o2 instanceof Set) {
+        return o1 instanceof Set && o2 instanceof Set && setsEqual(o1, o2);
     }
     if (Array.isArray(o1) !== Array.isArray(o2)) {
         return false;
@@ -225,4 +246,30 @@ export function deepEquals<T>(o1: T, o2: T): boolean {
         return true;
     }
     return false;
+}
+
+/** Maps are equal when they have the same keys (by `SameValueZero`) and deeply equal values. */
+function mapsEqual(m1: Map<unknown, unknown>, m2: Map<unknown, unknown>): boolean {
+    if (m1.size !== m2.size) {
+        return false;
+    }
+    for (const [key, value] of m1) {
+        if (!m2.has(key) || !deepEquals(value, m2.get(key))) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/** Sets are equal when they have the same members (by `SameValueZero`). */
+function setsEqual(s1: Set<unknown>, s2: Set<unknown>): boolean {
+    if (s1.size !== s2.size) {
+        return false;
+    }
+    for (const value of s1) {
+        if (!s2.has(value)) {
+            return false;
+        }
+    }
+    return true;
 }
