@@ -523,4 +523,201 @@ describe("MonaDirectionService and direction utilities", () => {
             document.body.removeChild(container);
         });
     });
+
+    describe("shared dir observation", () => {
+        const waitForMutations = () => new Promise(resolve => setTimeout(resolve, 20));
+
+        it("re-resolves only the instances inside the element whose dir changed", async () => {
+            const page = document.createElement("div");
+            const outsideHosts = Array.from({ length: 500 }, () => page.appendChild(document.createElement("span")));
+            // Stands in for an overlay pane, which CDK gives a dir each time a popup opens.
+            const pane = page.appendChild(document.createElement("div"));
+            const insideHosts = [
+                pane.appendChild(document.createElement("span")),
+                pane.appendChild(document.createElement("span"))
+            ];
+            document.body.appendChild(page);
+
+            const insideDirections: MonaTextDirection[] = ["ltr", "ltr"];
+            const cleanups = [
+                ...outsideHosts.map(host => observeComponentDirection(host, null, () => undefined)),
+                ...insideHosts.map((host, index) =>
+                    observeComponentDirection(host, null, dir => (insideDirections[index] = dir))
+                )
+            ];
+            const matchesSpy = vi.spyOn(Element.prototype, "matches");
+            try {
+                for (let i = 0; i < 20; i++) {
+                    pane.setAttribute("dir", i % 2 === 0 ? "rtl" : "ltr");
+                    await waitForMutations();
+                    expect(insideDirections).toEqual(i % 2 === 0 ? ["rtl", "rtl"] : ["ltr", "ltr"]);
+                }
+
+                const outside = new Set<Element>(outsideHosts);
+                const outsideResolutions = matchesSpy.mock.contexts.filter(context => outside.has(context as Element));
+                expect(outsideResolutions).toHaveLength(0);
+            } finally {
+                matchesSpy.mockRestore();
+                cleanups.forEach(cleanup => cleanup());
+                page.remove();
+            }
+        });
+
+        it("still re-resolves every instance when the document direction changes", async () => {
+            const hosts = Array.from({ length: 5 }, () => document.body.appendChild(document.createElement("span")));
+            const directions: MonaTextDirection[] = hosts.map(() => "ltr");
+            const cleanups = hosts.map((host, index) =>
+                observeComponentDirection(host, null, dir => (directions[index] = dir))
+            );
+            try {
+                document.documentElement.setAttribute("dir", "rtl");
+                await waitForMutations();
+
+                expect(directions).toEqual(["rtl", "rtl", "rtl", "rtl", "rtl"]);
+            } finally {
+                document.documentElement.removeAttribute("dir");
+                cleanups.forEach(cleanup => cleanup());
+                hosts.forEach(host => host.remove());
+            }
+        });
+
+        it("re-resolves instances under a dir='auto' root when dir changes inside that root", async () => {
+            // The Arabic span is the first strong text, so the root resolves RTL until the span gets its own direction.
+            const container = document.createElement("div");
+            container.setAttribute("dir", "auto");
+            container.innerHTML = "<span>مرحبا</span> Hello";
+            const host = container.appendChild(document.createElement("span"));
+            document.body.appendChild(container);
+
+            let observedDir: MonaTextDirection = resolveComponentDirection(host, null);
+            const cleanup = observeComponentDirection(host, null, dir => (observedDir = dir));
+            try {
+                expect(observedDir).toBe("rtl");
+
+                container.querySelector("span")?.setAttribute("dir", "rtl");
+                await waitForMutations();
+
+                expect(observedDir).toBe("ltr");
+            } finally {
+                cleanup();
+                container.remove();
+            }
+        });
+
+        it("observes dir changes inside a shadow root", async () => {
+            const shadowHost = document.body.appendChild(document.createElement("div"));
+            const shadowRoot = shadowHost.attachShadow({ mode: "open" });
+            const wrapper = shadowRoot.appendChild(document.createElement("div"));
+            const host = wrapper.appendChild(document.createElement("span"));
+
+            let observedDir: MonaTextDirection = "ltr";
+            const cleanup = observeComponentDirection(host, null, dir => (observedDir = dir));
+            try {
+                wrapper.setAttribute("dir", "rtl");
+                await waitForMutations();
+
+                expect(observedDir).toBe("rtl");
+            } finally {
+                cleanup();
+                shadowHost.remove();
+            }
+        });
+
+        it("disconnects the shared observer when the last instance under a root is destroyed", () => {
+            const observeSpy = vi.spyOn(MutationObserver.prototype, "observe");
+            const disconnectSpy = vi.spyOn(MutationObserver.prototype, "disconnect");
+            const detachedRoot = document.createElement("div");
+            const hosts = [
+                detachedRoot.appendChild(document.createElement("span")),
+                detachedRoot.appendChild(document.createElement("span"))
+            ];
+            try {
+                const cleanups = hosts.map(host => observeComponentDirection(host, null, () => undefined));
+                const sharedObservers = observeSpy.mock.calls
+                    .map((call, index) => ({ observer: observeSpy.mock.contexts[index], target: call[0] }))
+                    .filter(({ target }) => target === detachedRoot)
+                    .map(({ observer }) => observer);
+                const sharedDisconnects = () =>
+                    disconnectSpy.mock.contexts.filter(context => sharedObservers.includes(context)).length;
+
+                expect(sharedObservers).toHaveLength(1);
+                cleanups[0]();
+                expect(sharedDisconnects()).toBe(0);
+                cleanups[1]();
+                expect(sharedDisconnects()).toBe(1);
+            } finally {
+                observeSpy.mockRestore();
+                disconnectSpy.mockRestore();
+            }
+        });
+
+        it("sees the host's own dir change after it is moved into a detached tree", async () => {
+            const host = document.body.appendChild(document.createElement("span"));
+            let observedDir: MonaTextDirection = "ltr";
+            const cleanup = observeComponentDirection(host, null, dir => (observedDir = dir));
+            try {
+                document.createElement("div").appendChild(host);
+                host.setAttribute("dir", "rtl");
+                await waitForMutations();
+
+                expect(observedDir).toBe("rtl");
+            } finally {
+                cleanup();
+                host.remove();
+            }
+        });
+
+        it("follows a host into a shadow root once it is re-checked", async () => {
+            const detached = document.createElement("div");
+            const host = detached.appendChild(document.createElement("span"));
+            let observedDir: MonaTextDirection = "ltr";
+            const handle = observeComponentDirection(host, null, dir => (observedDir = dir));
+
+            const shadowHost = document.body.appendChild(document.createElement("div"));
+            const wrapper = shadowHost.attachShadow({ mode: "open" }).appendChild(document.createElement("div"));
+            try {
+                wrapper.appendChild(detached);
+                // injectComponentDirection does this after the first render.
+                handle.check();
+
+                wrapper.setAttribute("dir", "rtl");
+                await waitForMutations();
+
+                expect(observedDir).toBe("rtl");
+            } finally {
+                handle();
+                shadowHost.remove();
+            }
+        });
+
+        it("creates no observers while the direction signal is evaluated", async () => {
+            // Moved under a dir="auto" root after creation: the first read must resolve it without observing anything.
+            const container = document.body.appendChild(document.createElement("div"));
+            container.setAttribute("dir", "auto");
+            container.textContent = "مرحبا";
+            TestBed.configureTestingModule({ imports: [TestDirectionConsumerComponent] });
+            const fixture = TestBed.createComponent(TestDirectionConsumerComponent);
+            container.appendChild(fixture.nativeElement);
+
+            const observeSpy = vi.spyOn(MutationObserver.prototype, "observe");
+            const disconnectSpy = vi.spyOn(MutationObserver.prototype, "disconnect");
+            try {
+                expect(fixture.componentInstance.direction()).toBe("rtl");
+                expect(observeSpy).not.toHaveBeenCalled();
+                expect(disconnectSpy).not.toHaveBeenCalled();
+
+                // The content observer for the new root is installed after render instead.
+                fixture.detectChanges();
+                const contentObserverCalls = observeSpy.mock.calls.filter(
+                    ([target, options]) => target === container && options?.characterData === true
+                );
+                expect(contentObserverCalls).toHaveLength(1);
+            } finally {
+                observeSpy.mockRestore();
+                disconnectSpy.mockRestore();
+                fixture.destroy();
+                container.remove();
+            }
+        });
+    });
 });
