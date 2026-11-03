@@ -10,6 +10,12 @@ class TextBoxDirectiveHostComponent {
     public readonly invalid = signal(false);
 }
 
+@Component({
+    template: `<input monaTextBox invalid touched />`,
+    imports: [TextBoxDirective]
+})
+class BareAttributeHostComponent {}
+
 describe("TextBoxDirective", () => {
     let directive: TextBoxDirective;
     let fixture: ComponentFixture<TextBoxDirectiveHostComponent>;
@@ -42,6 +48,15 @@ describe("TextBoxDirective", () => {
         fixture.detectChanges();
 
         const element = fixture.nativeElement.querySelector("input") as HTMLInputElement;
+        expect(element.getAttribute("data-invalid")).toBe("true");
+        expect(element.getAttribute("aria-invalid")).toBe("true");
+    });
+
+    it("should accept bare boolean attributes", () => {
+        const host = TestBed.createComponent(BareAttributeHostComponent);
+        host.detectChanges();
+
+        const element = host.nativeElement.querySelector("input") as HTMLInputElement;
         expect(element.getAttribute("data-invalid")).toBe("true");
         expect(element.getAttribute("aria-invalid")).toBe("true");
     });

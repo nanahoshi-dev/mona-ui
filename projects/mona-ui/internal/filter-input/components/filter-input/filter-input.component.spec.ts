@@ -19,4 +19,11 @@ describe("FilterInputComponent", () => {
     it("should create", () => {
         expect(component).toBeTruthy();
     });
+
+    it("leaves the text box wrapper out of the tab order", () => {
+        const textBox = fixture.nativeElement.querySelector("mona-text-box") as HTMLElement;
+
+        expect(textBox.hasAttribute("tabindex")).toBe(false);
+        expect(textBox.querySelector("input")?.tabIndex).toBe(0);
+    });
 });

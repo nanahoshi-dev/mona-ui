@@ -1,5 +1,15 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, model, signal } from "@angular/core";
+import {
+    booleanAttribute,
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    effect,
+    inject,
+    input,
+    model,
+    signal
+} from "@angular/core";
 import { ReactiveFormsModule } from "@angular/forms";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideList, LucideSearch } from "@lucide/angular";
@@ -137,13 +147,13 @@ export class TextBoxWrapperComponent implements ComponentInputsAsSignal<TextBoxC
         readonly(schema.text, { when: () => this.readonly() });
         required(schema.text, { when: () => this.required() });
     });
-    public readonly clearButton = input(false);
-    public readonly disabled = input(false);
+    public readonly clearButton = input(false, { transform: booleanAttribute });
+    public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly inputClass = input<string | string[]>("");
     public readonly inputStyle = input<string | Partial<CSSStyleDeclaration> | null>("");
     public readonly placeholder = input("");
-    public readonly readonly = input(false);
-    public readonly required = input(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<TextBoxComponent["rounded"]>>("medium");
     public readonly size = input<ReturnType<TextBoxComponent["size"]>>("medium");
     public readonly type = input<ReturnType<TextBoxComponent["type"]>>("text");

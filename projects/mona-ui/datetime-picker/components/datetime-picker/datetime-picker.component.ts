@@ -172,6 +172,8 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
             "aria-haspopup": hasPopup,
             "aria-invalid": invalid,
             id: this.#id,
+            // The text box hides its clear button when read-only, so typing is blocked here instead.
+            readonly: this.readonly() || this.readonlyInput(),
             role: "group"
         };
     });

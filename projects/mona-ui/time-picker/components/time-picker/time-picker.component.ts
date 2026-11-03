@@ -128,6 +128,8 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
             "aria-haspopup": hasPopup,
             "aria-invalid": invalid,
             id: this.#id,
+            // The text box hides its clear button when read-only, so typing is blocked here instead.
+            readonly: this.readonly() || this.readonlyInput(),
             role: "combobox"
         };
     });

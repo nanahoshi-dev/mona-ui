@@ -14040,7 +14040,7 @@
     "selector": "\"mona-text-box\"",
     "inputs": [
       {
-        "description": "Displays a clear button that resets the value to empty.",
+        "description": "Displays a clear button that resets the value to empty.\nThe button is hidden while the value is empty or the text box is disabled or read-only.",
         "kind": "input",
         "name": "clearButton",
         "type": "boolean",
@@ -14061,7 +14061,7 @@
         "defaultValue": "{}"
       },
       {
-        "description": "Emitted when the inner input loses focus.",
+        "description": "Emitted when the inner input loses focus, including when focus moves to the clear button or to\ncontent in the prefix or suffix templates.",
         "kind": "output",
         "name": "inputBlur",
         "type": "FocusEvent"
@@ -14129,7 +14129,7 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Emitted when the text box is interacted with — on blur, value change, or clear.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when focus leaves the text box, including its clear button and prefix and suffix content.\nForm directives (`[formField]`, `ngModel`, `formControl`) listen to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"

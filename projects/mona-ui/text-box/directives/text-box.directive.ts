@@ -1,4 +1,4 @@
-import { computed, Directive, input } from "@angular/core";
+import { booleanAttribute, computed, Directive, input } from "@angular/core";
 import { inputThemeVariants, InputVariantInput, InputVariantProps } from "../styles/textbox.styles";
 import { twMerge } from "tailwind-merge";
 
@@ -24,7 +24,7 @@ export class TextBoxDirective implements InputVariantInput {
      * @description Marks the input as invalid, triggering error border and ring styling.
      * @default false
      */
-    public readonly invalid = input(false);
+    public readonly invalid = input(false, { transform: booleanAttribute });
 
     /**
      * @description Border-radius preset applied to the component.
@@ -42,7 +42,7 @@ export class TextBoxDirective implements InputVariantInput {
      * @description Marks the input as touched. Error styling is only shown when both `invalid` and `touched` are `true`.
      * @default false
      */
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
 
     /**
      * @description Additional CSS classes merged onto the host element via `tailwind-merge`.

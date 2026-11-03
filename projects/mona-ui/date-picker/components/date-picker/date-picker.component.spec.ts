@@ -153,3 +153,49 @@ class DatePickerHostComponent {
     });
     public readonly required = signal(false);
 }
+
+describe("DatePickerComponent clear button", () => {
+    let fixture: ComponentFixture<DatePickerComponent>;
+
+    beforeEach(() => {
+        fixture = TestBed.createComponent(DatePickerComponent);
+        fixture.componentRef.setInput("value", new Date(2026, 0, 2, 9, 30));
+        fixture.componentRef.setInput("showClearButton", true);
+        fixture.detectChanges();
+    });
+
+    function getInput(): HTMLInputElement {
+        return fixture.nativeElement.querySelector("mona-text-box input") as HTMLInputElement;
+    }
+
+    function getClearButton(): HTMLButtonElement | null {
+        return fixture.nativeElement.querySelector("mona-text-box button[aria-label='Clear']");
+    }
+
+    it("keeps the clear button when only typing is blocked", () => {
+        fixture.componentRef.setInput("readonlyInput", true);
+        fixture.detectChanges();
+
+        expect(getInput().readOnly).toBe(true);
+        expect(getClearButton()).not.toBeNull();
+    });
+
+    it("hides the clear button when the date picker is read-only", () => {
+        fixture.componentRef.setInput("readonly", true);
+        fixture.detectChanges();
+
+        expect(getInput().readOnly).toBe(true);
+        expect(getClearButton()).toBeNull();
+    });
+
+    it("keeps typing blocked when read-only is lifted but typing stays blocked", () => {
+        fixture.componentRef.setInput("readonlyInput", true);
+        fixture.componentRef.setInput("readonly", true);
+        fixture.detectChanges();
+        fixture.componentRef.setInput("readonly", false);
+        fixture.detectChanges();
+
+        expect(getInput().readOnly).toBe(true);
+        expect(getClearButton()).not.toBeNull();
+    });
+});
