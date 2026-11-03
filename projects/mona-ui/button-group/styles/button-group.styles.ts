@@ -11,7 +11,6 @@ export const buttonGroupThemeVariants = cva(
         [&>button:not(:last-child)]:border-e
         [&>button:not(:last-child)]:border-border-subtle
         [&>button]:rounded-none
-        [&>button]:focus-visible:ring-2
         [&>button]:focus-visible:z-10
     `,
     {

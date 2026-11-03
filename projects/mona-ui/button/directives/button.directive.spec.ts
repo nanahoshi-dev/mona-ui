@@ -108,7 +108,7 @@ describe("ButtonDirective", () => {
             expect(buttonElement.classList.contains("border-input-border")).toBe(true);
             expect(buttonElement.classList.contains("hover:bg-hover")).toBe(true);
             expect(buttonElement.classList.contains("active:bg-active")).toBe(true);
-            expect(buttonElement.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
+            expect(buttonElement.classList.contains("focus-visible:outline-focus-indicator")).toBe(true);
             expect(buttonElement.classList.contains("bg-accent")).toBe(false);
             expect(buttonElement.classList.contains("shadow-(--shadow-control)")).toBe(false);
         });
@@ -181,16 +181,39 @@ describe("ButtonDirective", () => {
             expect(buttonElement.getAttribute("aria-disabled")).toBe("true");
         });
 
-        it("should set disabled attribute when loading=true", () => {
+        it("should keep the button focusable when loading=true", () => {
             component.loading.set(true);
             fixture.detectChanges();
-            expect(buttonElement.hasAttribute("disabled")).toBe(true);
+            expect(buttonElement.hasAttribute("disabled")).toBe(false);
+            expect(buttonElement.getAttribute("tabindex")).toBe("0");
         });
 
-        it("should set tabindex=-1 when loading=true", () => {
+        it("should block clicks while loading", () => {
+            const onClick = vi.fn();
+            buttonElement.addEventListener("click", onClick);
+            component.toggleable.set(true);
             component.loading.set(true);
             fixture.detectChanges();
-            expect(buttonElement.getAttribute("tabindex")).toBe("-1");
+
+            const event = new MouseEvent("click", { bubbles: true, cancelable: true });
+            buttonElement.dispatchEvent(event);
+            fixture.detectChanges();
+
+            expect(event.defaultPrevented).toBe(true);
+            expect(onClick).not.toHaveBeenCalled();
+            expect(component.onSelectedChange).not.toHaveBeenCalled();
+        });
+
+        it("should accept clicks again when loading ends", () => {
+            const onClick = vi.fn();
+            buttonElement.addEventListener("click", onClick);
+            component.loading.set(true);
+            fixture.detectChanges();
+            component.loading.set(false);
+            fixture.detectChanges();
+
+            buttonElement.click();
+            expect(onClick).toHaveBeenCalledTimes(1);
         });
 
         it("should create loading indicator element when loading=true", async () => {
@@ -437,6 +460,15 @@ describe("ButtonDirective", () => {
             fixture.detectChanges();
             expect(buttonElement.classList.contains("aspect-square")).toBe(true);
         });
+
+        it("should keep the square size and show only the loader while loading", () => {
+            component.iconOnly.set(true);
+            component.loading.set(true);
+            fixture.detectChanges();
+            expect(buttonElement.classList).toContain("w-9");
+            expect(buttonElement.classList).toContain("p-0");
+            expect(buttonElement.classList).toContain("[&>:not(mona-indicator-icon)]:hidden");
+        });
     });
 
     // =========================================================================
@@ -567,6 +599,29 @@ describe("ButtonDirective", () => {
             expect(buttonElement.getAttribute("type")).toBe("button");
         });
 
+        it("should draw focus as a full-opacity outline for every look", () => {
+            const looks: ButtonVariantProps["look"][] = [
+                "default",
+                "primary",
+                "secondary",
+                "success",
+                "error",
+                "warning",
+                "info",
+                "outline",
+                "ghost",
+                "link",
+                "clear"
+            ];
+            for (const look of looks) {
+                component.look.set(look);
+                fixture.detectChanges();
+                expect(buttonElement.classList).toContain("focus-visible:outline-2");
+                expect(buttonElement.classList).toContain("focus-visible:outline-focus-indicator");
+                expect(buttonElement.className).not.toMatch(/ring-|outline-none/);
+            }
+        });
+
         it("should have correct aria-busy state when loading", () => {
             component.loading.set(false);
             fixture.detectChanges();
@@ -620,11 +675,11 @@ describe("ButtonDirective", () => {
             fixture.detectChanges();
             expect(buttonElement.getAttribute("tabindex")).toBe("-1");
 
-            // Loading also removes from tab order
+            // Loading keeps the button in the tab order so focus isn't lost
             component.disabled.set(false);
             component.loading.set(true);
             fixture.detectChanges();
-            expect(buttonElement.getAttribute("tabindex")).toBe("-1");
+            expect(buttonElement.getAttribute("tabindex")).toBe("0");
         });
 
         it("should have aria-haspopup for popup triggers", () => {

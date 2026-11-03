@@ -235,8 +235,8 @@
         "defaultValue": "\"false\""
       },
       {
-        "description": "Renders the component with reduced visual emphasis and removes pointer interaction.\nWhen inside a `ButtonGroup`, the group's disabled state takes precedence.",
-        "kind": "model",
+        "description": "Renders the component with reduced visual emphasis and removes pointer interaction.\nAccepts the bare attribute form (`<button monaButton disabled>`).\nWhen inside a `ButtonGroup`, the button is disabled when either it or the group is disabled.",
+        "kind": "input",
         "name": "disabled",
         "type": "boolean",
         "defaultValue": "false"
@@ -249,14 +249,14 @@
         "defaultValue": "false"
       },
       {
-        "description": "Displays a loading indicator and prevents interaction while an operation is in progress.\nSets `aria-busy=\"true\"` on the host.",
-        "kind": "model",
+        "description": "Displays a loading indicator and prevents interaction while an operation is in progress.\nSets `aria-busy=\"true\"` and `aria-disabled=\"true\"` on the host. The button stays focusable, so keyboard focus\nisn't lost when loading starts, and clicks (including form submission) are blocked until it ends.",
+        "kind": "input",
         "name": "loading",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Visual style variant of the button. When inside a `ButtonGroup`, the group's look takes precedence.",
+        "description": "Visual style variant of the button. When inside a `ButtonGroup`, the group's look takes precedence.\n`\"outline\"` looks the same as `\"default\"`. `\"clear\"` shows no selected state, so use another look for\ntoggle buttons.",
         "kind": "model",
         "name": "look",
         "type": "ButtonVariantProps[\"look\"]",
@@ -284,7 +284,7 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Tab index of the host element. Automatically overridden to `-1` when the button is disabled or loading.\nAccepts a numeric string and converts it to a number.",
+        "description": "Tab index of the host element. Automatically overridden to `-1` when the button is disabled.\nAccepts a numeric string and converts it to a number; a value that is not a number falls back to `0`.",
         "kind": "input",
         "name": "tabindex",
         "type": "number",
@@ -298,7 +298,7 @@
         "defaultValue": "\"button\""
       },
       {
-        "description": "Enables toggle behavior — each click flips the `selected` state and `aria-pressed` is managed.\nMust use `[toggleable]=\"true\"` binding syntax, not bare attribute form.",
+        "description": "Enables toggle behavior — each click flips the `selected` state and `aria-pressed` is managed.\nAccepts the bare attribute form. Buttons in a `ButtonGroup` are toggleable unless this is set to `false`.",
         "kind": "input",
         "name": "toggleable",
         "type": "boolean",

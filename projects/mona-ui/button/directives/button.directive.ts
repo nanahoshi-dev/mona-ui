@@ -33,8 +33,8 @@ import { buttonThemeVariants, ButtonVariantProps, ButtonVariantsInput } from "..
         "[attr.aria-pressed]": "effectiveToggleable() ? (selected() ? 'true' : 'false') : undefined",
         "[attr.data-look]": "effectiveLook()",
         "[attr.data-size]": "effectiveSize()",
-        "[attr.disabled]": "effectiveDisabled() || loading() ? '' : undefined",
-        "[attr.tabindex]": "effectiveDisabled() || loading() ? -1 : tabindex()",
+        "[attr.disabled]": "effectiveDisabled() ? '' : undefined",
+        "[attr.tabindex]": "effectiveDisabled() ? -1 : tabindex()",
         "[attr.type]": "type()",
         "[class]": "baseClass()"
     }
@@ -108,13 +108,16 @@ export class ButtonDirective implements ButtonVariantsInput {
 
     /**
      * @description Displays a loading indicator and prevents interaction while an operation is in progress.
-     * Sets `aria-busy="true"` on the host.
+     * Sets `aria-busy="true"` and `aria-disabled="true"` on the host. The button stays focusable, so keyboard focus
+     * isn't lost when loading starts, and clicks (including form submission) are blocked until it ends.
      * @default false
      */
     public readonly loading = input(false, { transform: booleanAttribute });
 
     /**
      * @description Visual style variant of the button. When inside a `ButtonGroup`, the group's look takes precedence.
+     * `"outline"` looks the same as `"default"`. `"clear"` shows no selected state, so use another look for
+     * toggle buttons.
      * @default "default"
      */
     public readonly look = model<ButtonVariantProps["look"]>("default");
@@ -141,7 +144,7 @@ export class ButtonDirective implements ButtonVariantsInput {
     public readonly size = input<ButtonVariantProps["size"]>("medium");
 
     /**
-     * @description Tab index of the host element. Automatically overridden to `-1` when the button is disabled or loading.
+     * @description Tab index of the host element. Automatically overridden to `-1` when the button is disabled.
      * Accepts a numeric string and converts it to a number; a value that is not a number falls back to `0`.
      * @default 0
      */
@@ -189,10 +192,27 @@ export class ButtonDirective implements ButtonVariantsInput {
                 }
             });
         });
+        this.#blockClicksWhileLoading();
         this.#destroyRef.onDestroy(() => this.#removeLoader());
         afterNextRender({
             read: () => this.#setSubscriptions()
         });
+    }
+
+    /**
+     * A loading button keeps focus, so it is not natively disabled. A capturing listener registered before any other
+     * stops activation from reaching the user's handlers, the toggle handler and form submission.
+     */
+    #blockClicksWhileLoading(): void {
+        const host = this.#hostElementRef.nativeElement;
+        const listener = (event: MouseEvent): void => {
+            if (this.loading()) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+            }
+        };
+        host.addEventListener("click", listener, { capture: true });
+        this.#destroyRef.onDestroy(() => host.removeEventListener("click", listener, { capture: true }));
     }
 
     #createLoader(size: number): void {

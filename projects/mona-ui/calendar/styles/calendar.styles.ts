@@ -39,7 +39,6 @@ export const calendarHeaderThemeVariants = cva(
         [&>button:nth-of-type(3)]:rounded-ee-none
         [&>button:nth-of-type(4)]:rounded-ss-none
         [&>button:nth-of-type(4)]:rounded-es-none
-        [&>button]:outline-none
     `
 );
 
