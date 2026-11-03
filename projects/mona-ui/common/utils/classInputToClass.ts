@@ -8,11 +8,12 @@ export const classInputToClass = (input: ClassInputType): string => {
         return input;
     }
     if (Array.isArray(input)) {
-        return input.join(" ");
+        return input.filter(Boolean).join(" ");
     }
     if (typeof input === "object") {
         return Object.entries(input)
-            .map(([key, value]) => (!!value ? key : ""))
+            .filter(([, value]) => value)
+            .map(([key]) => key)
             .join(" ");
     }
     return "";

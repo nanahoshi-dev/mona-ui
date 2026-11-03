@@ -18,6 +18,7 @@ A modern, high-performance, accessible UI component library built for Angular an
 ## Documentation
 
 - [Internationalization (i18n) & RTL Guide](docs/i18n.md)
+- [Patch Stores & Merge Utilities](docs/patch-store.md)
 - [Component Migration Inventory](docs/internal/i18n-rtl-migration-inventory.md)
 
 ---
