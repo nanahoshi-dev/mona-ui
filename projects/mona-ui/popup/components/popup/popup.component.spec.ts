@@ -97,6 +97,68 @@ describe("PopupComponent", () => {
         (hostComponent.popupComponent() as any).popupRef?.close(undefined, 0);
     });
 
+    it("accepts the bare attribute form of its boolean inputs", () => {
+        const service = TestBed.inject(PopupService);
+        const createSpy = vi.spyOn(service, "create");
+
+        @Component({
+            template: `
+                <button #target>Test</button>
+                <mona-popup
+                    [anchor]="target"
+                    closeOnMouseLeave
+                    closeOnScroll
+                    hasBackdrop
+                    restoreFocus
+                    withPush="false"
+                    withScrollTracking="false">
+                    <ng-template><div>Test</div></ng-template>
+                </mona-popup>
+            `,
+            imports: [PopupComponent]
+        })
+        class BareAttributesTestComponent {}
+
+        const fixture = TestBed.createComponent(BareAttributesTestComponent);
+        fixture.detectChanges();
+        (fixture.nativeElement.querySelector("button") as HTMLButtonElement).dispatchEvent(
+            new PointerEvent("click", { bubbles: true })
+        );
+
+        const settings = createSpy.mock.calls.at(-1)![0];
+        expect(settings.closeOnMouseLeave).toBe(true);
+        expect(settings.closeOnScroll).toBe(true);
+        expect(settings.hasBackdrop).toBe(true);
+        expect(settings.restoreFocus).toBe(true);
+        expect(settings.withPush).toBe(false);
+        expect(settings.withScrollTracking).toBe(false);
+
+        fixture.destroy();
+    });
+
+    it("measures the default width when the popup opens", () => {
+        const service = TestBed.inject(PopupService);
+        const createSpy = vi.spyOn(service, "create");
+        const anchor = hostFixture.nativeElement.querySelector("button") as HTMLButtonElement;
+        vi.spyOn(anchor, "getBoundingClientRect").mockReturnValue(new DOMRect(0, 0, 240, 32));
+
+        anchor.dispatchEvent(new PointerEvent("click", { bubbles: true }));
+
+        expect(createSpy.mock.calls.at(-1)![0].width).toBe(240);
+        (hostComponent.popupComponent() as any).popupRef?.close(undefined, 0);
+    });
+
+    it("listens for the trigger only once", () => {
+        const service = TestBed.inject(PopupService);
+        const createSpy = vi.spyOn(service, "create");
+        const anchor = hostFixture.nativeElement.querySelector("button") as HTMLButtonElement;
+
+        anchor.dispatchEvent(new PointerEvent("click", { bubbles: true }));
+
+        expect(createSpy).toHaveBeenCalledOnce();
+        (hostComponent.popupComponent() as any).popupRef?.close(undefined, 0);
+    });
+
     it("should forward custom positions array to PopupService.create", () => {
         const service = TestBed.inject(PopupService);
         const createSpy = vi.spyOn(service, "create");

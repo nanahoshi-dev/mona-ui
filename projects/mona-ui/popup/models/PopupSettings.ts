@@ -4,7 +4,7 @@ import {
     ConnectionPositionPair,
     FlexibleConnectedPositionStrategyOrigin
 } from "@angular/cdk/overlay";
-import { StaticProvider, TemplateRef } from "@angular/core";
+import { Injector, StaticProvider, TemplateRef } from "@angular/core";
 import { Action } from "@nanahoshi/mona-ui/internal";
 import { ConnectionPoint } from "../utils/connectionPosition";
 import { PopupCloseEvent } from "./PopupCloseEvent";
@@ -104,6 +104,15 @@ export interface PopupSettings<T = unknown, C = void> {
     height?: number | string;
 
     /**
+     * Parent injector for the popup content. Component content resolves its dependencies here, after
+     * `providers`. Pass the injector of the component that opens the popup so its content can use services
+     * provided by that component, its ancestors or a lazy-loaded route.
+     * Default: the root injector.
+     * @type {Injector}
+     */
+    injector?: Injector;
+
+    /**
      * Maximum height of the popup.
      * @type {number | string}
      */
@@ -183,7 +192,8 @@ export interface PopupSettings<T = unknown, C = void> {
      * Controls focus restoration behavior when the popup is closed.
      * - true: Always restore focus to anchor
      * - false: Never restore focus (recommended for tooltips)
-     * - "auto": Only restore focus if the anchor was focused when the popup opened (smart behavior)
+     * - "auto": Only restore focus if the anchor, or an element inside it, was focused when the popup opened;
+     *   focus returns to that element
      * Focus is only restored while it is on the page itself, inside the popup or inside the anchor. If the user
      * moved it elsewhere, for example by clicking another field, it stays there.
      * Default: "auto".

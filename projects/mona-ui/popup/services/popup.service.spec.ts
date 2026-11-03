@@ -1,5 +1,13 @@
 import { Overlay, OverlayContainer } from "@angular/cdk/overlay";
-import { ApplicationRef, Component, ElementRef } from "@angular/core";
+import {
+    ApplicationRef,
+    Component,
+    createEnvironmentInjector,
+    ElementRef,
+    EnvironmentInjector,
+    inject,
+    InjectionToken
+} from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { PopupCloseSource } from "../models/PopupCloseEvent";
@@ -17,6 +25,15 @@ class PopupTestContentComponent {}
     template: `<input aria-label="Popup field" />`
 })
 class PopupTestInputContentComponent {}
+
+const FEATURE_TOKEN = new InjectionToken<string>("FEATURE_TOKEN");
+
+@Component({
+    template: "{{ value }}"
+})
+class FeatureContentComponent {
+    protected readonly value = inject(FEATURE_TOKEN);
+}
 
 describe("PopupService", () => {
     let service: PopupService;
@@ -347,6 +364,33 @@ describe("PopupService", () => {
             expect(document.activeElement).toBe(anchor);
         });
 
+        it("returns focus to the element inside the anchor that had it", () => {
+            const anchor = document.createElement("div");
+            const button = document.createElement("button");
+            button.textContent = "Filter";
+            anchor.append(button);
+            document.body.append(anchor);
+            testElements.push(anchor);
+            button.focus();
+            popupRef = service.create({ anchor, animation: false, content: PopupTestContentComponent });
+
+            button.blur();
+            popupRef.close();
+
+            expect(document.activeElement).toBe(button);
+        });
+
+        it("does not focus an anchor that was not focused when the popup opened, by default", () => {
+            const anchor = createAnchor();
+            otherField.focus();
+            popupRef = service.create({ anchor, animation: false, content: PopupTestContentComponent });
+
+            otherField.blur();
+            popupRef.close();
+
+            expect(document.activeElement).not.toBe(anchor);
+        });
+
         it("does not take focus from another field with restoreFocus: true", () => {
             const anchor = createAnchor();
             popupRef = service.create({
@@ -374,6 +418,250 @@ describe("PopupService", () => {
             popupRef.close();
 
             expect(document.activeElement).toBe(anchor);
+        });
+    });
+
+    describe("backdrop clicks", () => {
+        function clickBackdrop(ref: PopupRef): void {
+            const backdrop = ref.overlayRef.backdropElement as HTMLElement;
+            backdrop.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true }));
+            backdrop.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        }
+
+        it("does not close when closeOnBackdropClick is false", () => {
+            const anchor = createAnchor();
+            popupRef = service.create({
+                anchor,
+                animation: false,
+                closeOnBackdropClick: false,
+                content: PopupTestContentComponent,
+                hasBackdrop: true
+            });
+            let closed = false;
+            popupRef.closed.subscribe(() => (closed = true));
+
+            clickBackdrop(popupRef);
+
+            expect(closed).toBe(false);
+        });
+
+        it("reports a backdrop click as BackdropClick", () => {
+            const anchor = createAnchor();
+            popupRef = service.create({
+                anchor,
+                animation: false,
+                content: PopupTestContentComponent,
+                hasBackdrop: true
+            });
+            let via: PopupCloseSource | undefined;
+            popupRef.closed.subscribe(event => (via = event.via));
+
+            clickBackdrop(popupRef);
+
+            expect(via).toBe(PopupCloseSource.BackdropClick);
+            popupRef = null;
+        });
+    });
+
+    describe("injector", () => {
+        it("resolves component content from the given injector", () => {
+            const anchor = createAnchor();
+            const injector = createEnvironmentInjector(
+                [{ provide: FEATURE_TOKEN, useValue: "from the feature" }],
+                TestBed.inject(EnvironmentInjector)
+            );
+
+            popupRef = service.create({ anchor, animation: false, content: FeatureContentComponent, injector });
+
+            expect(popupRef.overlayRef.overlayElement.textContent).toContain("from the feature");
+            injector.destroy();
+        });
+
+        it("still provides the popup's own tokens and providers over the given injector", () => {
+            const anchor = createAnchor();
+            const injector = createEnvironmentInjector(
+                [{ provide: FEATURE_TOKEN, useValue: "from the feature" }],
+                TestBed.inject(EnvironmentInjector)
+            );
+
+            popupRef = service.create({
+                anchor,
+                animation: false,
+                content: FeatureContentComponent,
+                injector,
+                providers: [{ provide: FEATURE_TOKEN, useValue: "from providers" }]
+            });
+
+            expect(popupRef.overlayRef.overlayElement.textContent).toContain("from providers");
+            injector.destroy();
+        });
+    });
+
+    describe("overlay detached directly", () => {
+        it("emits closeStart and closed when the overlay is disposed", () => {
+            const anchor = createAnchor();
+            popupRef = service.create({ anchor, animation: false, content: PopupTestContentComponent });
+            const events: string[] = [];
+            popupRef.closeStart.subscribe(() => events.push("closeStart"));
+            popupRef.closed.subscribe(event => events.push(`closed:${event.via}`));
+
+            popupRef.overlayRef.dispose();
+
+            expect(events).toEqual(["closeStart", `closed:${PopupCloseSource.Programmatic}`]);
+            popupRef = null;
+        });
+
+        it("returns focus to the anchor when the overlay is detached", () => {
+            const anchor = createAnchor();
+            anchor.focus();
+            popupRef = service.create({ anchor, animation: false, content: PopupTestInputContentComponent });
+            popupRef.overlayRef.overlayElement.querySelector("input")?.focus();
+
+            popupRef.overlayRef.detach();
+
+            expect(document.activeElement).toBe(anchor);
+        });
+    });
+
+    describe("closeOnScroll", () => {
+        it("closes on page scroll when the anchor also sits in a scrollable container", () => {
+            const { anchor } = createScrollableAnchor();
+            popupRef = service.create({
+                anchor,
+                animation: false,
+                closeOnScroll: true,
+                content: PopupTestContentComponent
+            });
+            let closed = false;
+            popupRef.closed.subscribe(() => (closed = true));
+
+            window.dispatchEvent(new Event("scroll"));
+
+            expect(closed).toBe(true);
+            popupRef = null;
+        });
+
+        it("closes when the scrollable container scrolls", () => {
+            const { anchor, scrollContainer } = createScrollableAnchor();
+            popupRef = service.create({
+                anchor,
+                animation: false,
+                closeOnScroll: true,
+                content: PopupTestContentComponent
+            });
+            let closed = false;
+            popupRef.closed.subscribe(() => (closed = true));
+
+            scrollContainer.dispatchEvent(new Event("scroll"));
+
+            expect(closed).toBe(true);
+            popupRef = null;
+        });
+    });
+
+    describe("close()", () => {
+        it("returns true when the popup closes", () => {
+            popupRef = service.create({ anchor: createAnchor(), animation: false, content: PopupTestContentComponent });
+
+            expect(popupRef.close()).toBe(true);
+            popupRef = null;
+        });
+
+        it("returns false when preventClose stops it, and when the popup is already closing", () => {
+            let prevent = true;
+            popupRef = service.create({
+                anchor: createAnchor(),
+                content: PopupTestContentComponent,
+                preventClose: () => prevent
+            });
+
+            expect(popupRef.close()).toBe(false);
+            prevent = false;
+            expect(popupRef.close()).toBe(true);
+            expect(popupRef.close()).toBe(false);
+        });
+    });
+
+    describe("selector anchors", () => {
+        let container: HTMLElement;
+        let selectorRef: PopupRef;
+
+        beforeEach(() => {
+            container = document.createElement("div");
+            container.innerHTML = `<span class="tip-target">One <b>bold</b></span><span class="tip-target">Two</span>`;
+            document.body.append(container);
+            testElements.push(container);
+            selectorRef = service.create({
+                anchor: ".tip-target",
+                animation: false,
+                content: PopupTestContentComponent
+            });
+        });
+
+        afterEach(() => selectorRef.close());
+
+        function contentPanes(): number {
+            return document.querySelectorAll(".mona-popup-content mona-popup-wrapper").length;
+        }
+
+        function pointer(
+            type: "pointerover" | "pointerout",
+            target: Element,
+            relatedTarget: Element | null = null
+        ): void {
+            target.dispatchEvent(new PointerEvent(type, { bubbles: true, relatedTarget }));
+        }
+
+        it("opens a popup over a matching element and closes it when the pointer leaves", () => {
+            const [first] = Array.from(container.querySelectorAll(".tip-target"));
+
+            pointer("pointerover", first);
+            expect(contentPanes()).toBe(1);
+
+            pointer("pointerout", first, document.body);
+            expect(contentPanes()).toBe(0);
+        });
+
+        it("keeps the popup open while the pointer moves inside the element", () => {
+            const first = container.querySelector(".tip-target") as HTMLElement;
+            const bold = first.querySelector("b") as HTMLElement;
+
+            pointer("pointerover", first);
+            pointer("pointerout", first, bold);
+            pointer("pointerover", bold);
+
+            expect(contentPanes()).toBe(1);
+        });
+
+        it("moves the popup from one element to the next", () => {
+            const [first, second] = Array.from(container.querySelectorAll(".tip-target"));
+
+            pointer("pointerover", first);
+            pointer("pointerout", first, second);
+            pointer("pointerover", second);
+
+            expect(contentPanes()).toBe(1);
+        });
+
+        it("opens for elements added after the popup was created", () => {
+            const late = document.createElement("span");
+            late.className = "tip-target";
+            container.append(late);
+
+            pointer("pointerover", late);
+
+            expect(contentPanes()).toBe(1);
+        });
+
+        it("closes the popup that is showing when the returned ref closes", () => {
+            pointer("pointerover", container.querySelector(".tip-target") as HTMLElement);
+            expect(contentPanes()).toBe(1);
+
+            selectorRef.close();
+
+            expect(contentPanes()).toBe(0);
+            pointer("pointerover", container.querySelector(".tip-target") as HTMLElement);
+            expect(contentPanes()).toBe(0);
         });
     });
 

@@ -15,7 +15,7 @@ import { DestroyRef, DOCUMENT, ElementRef, inject, Injectable, Injector, Templat
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MonaI18nService, observeComponentDirection, resolveComponentDirection } from "@nanahoshi/mona-ui/i18n";
 import { focusCanReturn } from "@nanahoshi/mona-ui/internal";
-import { exhaustMap, filter, fromEvent, merge, Subject, Subscription, take, takeUntil, tap } from "rxjs";
+import { fromEvent, merge, Subject, Subscription, take, takeUntil } from "rxjs";
 import { PopupWrapperComponent } from "../components/popup-wrapper/popup-wrapper.component";
 import { PopupCloseEvent, PopupCloseSource } from "../models/PopupCloseEvent";
 import { PopupDataInjectionToken, PopupSettingsInjectionToken } from "../models/PopupInjectionToken";
@@ -39,7 +39,6 @@ export class PopupService {
     readonly #outsideEventsToClose = ["click", "mousedown", "dblclick", "contextmenu", "auxclick"];
     readonly #overlay = inject(Overlay);
     readonly #scrollDispatcher = inject(ScrollDispatcher);
-    readonly #selectorSubscriptions = new Map<string, Subscription[]>();
     #escapeSubscription: Subscription | null = null;
     #escapeTarget: { event: KeyboardEvent; popup: OpenPopup | null } | null = null;
 
@@ -76,8 +75,13 @@ export class PopupService {
         return ["mona-popup-content"].concat(popupClass);
     }
 
+    /**
+     * With `"auto"` (also the default), remembers the focused element when it is the anchor or inside it, such
+     * as the button inside a host component or the input inside a date picker, and returns focus to that element.
+     */
     private captureOriginalFocus(settings: PopupSettings): HTMLElement | null {
-        if (typeof settings.anchor === "string" || settings.restoreFocus === false) {
+        const restoreFocus = settings.restoreFocus ?? "auto";
+        if (typeof settings.anchor === "string" || restoreFocus === false) {
             return null;
         }
 
@@ -86,25 +90,17 @@ export class PopupService {
             return null;
         }
 
-        if (settings.restoreFocus === "auto") {
+        if (restoreFocus === "auto") {
             const anchorElement = this.getAnchorElement(settings.anchor);
-            return activeElement === anchorElement ? activeElement : null;
+            return anchorElement?.contains(activeElement) ? activeElement : null;
         }
 
         return this.getAnchorElement(settings.anchor);
     }
 
-    private cleanupEventDelegation(selector: string): void {
-        const subscriptions = this.#selectorSubscriptions.get(selector);
-        if (subscriptions) {
-            subscriptions.forEach(sub => sub.unsubscribe());
-            this.#selectorSubscriptions.delete(selector);
-        }
-    }
-
     private createInjector(settings: PopupSettings, popupReference: PopupReference): Injector {
         return Injector.create({
-            parent: this.#injector,
+            parent: settings.injector ?? this.#injector,
             providers: [
                 { provide: PopupRef, useFactory: () => popupReference.popupRef },
                 { provide: PopupDataInjectionToken, useValue: settings.data },
@@ -122,13 +118,9 @@ export class PopupService {
         const virtualOverlayRef = this.#overlay.create({ hasBackdrop: false });
         const virtualPopupReference = new PopupReference(virtualOverlayRef);
 
-        // Set up the event delegation internally
-        this.setupInternalEventDelegation(selector, settings);
-
-        // Clean up when the virtual popup is closed
-        virtualPopupReference.popupRef.closed.subscribe(() => {
-            this.cleanupEventDelegation(selector);
-        });
+        // Closing the returned ref stops the delegation and closes the popup currently showing.
+        const delegation = this.setupInternalEventDelegation(selector, settings);
+        virtualPopupReference.popupRef.closed.pipe(take(1)).subscribe(() => delegation.unsubscribe());
 
         return virtualPopupReference.popupRef;
     }
@@ -217,6 +209,7 @@ export class PopupService {
         }
         this.setupScrollTracking(settings, overlayRef, popupReference);
         this.registerOpenPopup(settings, popupReference);
+        this.setupDetachTracking(overlayRef, popupReference);
         this.setupPositionChangeTracking(settings, overlayRef, popupReference);
         this.setupDirectionTracking(settings, overlayRef, popupReference);
 
@@ -492,42 +485,52 @@ export class PopupService {
         return combinedSubscription;
     }
 
-    private setupInternalEventDelegation(selector: string, settings: PopupSettings): void {
-        this.cleanupEventDelegation(selector);
+    /**
+     * Listens on the document rather than on the elements matched at creation time, so elements added later
+     * get a popup too. One popup shows at a time; it closes when the pointer leaves its element, and the
+     * returned subscription's teardown closes it as well.
+     */
+    private setupInternalEventDelegation(selector: string, settings: PopupSettings): Subscription {
+        let current: { element: HTMLElement; popupRef: PopupRef } | null = null;
+        const closeCurrent = (): void => {
+            const popup = current;
+            current = null;
+            popup?.popupRef.close();
+        };
 
-        let currentPopupRef: PopupRef | null = null;
-        const subscriptions: Subscription[] = [];
-        const elements = this.#document.querySelectorAll(selector);
-
-        elements.forEach(element => {
-            if (!(element instanceof HTMLElement)) {
-                return;
-            }
-
-            const pointerEnter$ = fromEvent<PointerEvent>(element, "pointerenter");
-            const pointerLeave$ = fromEvent<PointerEvent>(element, "pointerleave");
-
-            const subscription = pointerEnter$
-                .pipe(
-                    filter(() => !currentPopupRef),
-                    tap(() => {
-                        const elementSettings = { ...settings, anchor: element };
-                        currentPopupRef = this.createSingleElementPopup(elementSettings);
-                    }),
-                    exhaustMap(() => pointerLeave$.pipe(take(1))),
-                    tap(() => {
-                        if (currentPopupRef) {
-                            currentPopupRef.close();
-                            currentPopupRef = null;
+        const subscription = new Subscription(closeCurrent);
+        subscription.add(
+            fromEvent<PointerEvent>(this.#document, "pointerover")
+                .pipe(takeUntilDestroyed(this.#destroyRef))
+                .subscribe(event => {
+                    const target = event.target instanceof Element ? event.target : null;
+                    const element = target?.closest(selector);
+                    if (!(element instanceof HTMLElement) || element === current?.element) {
+                        return;
+                    }
+                    closeCurrent();
+                    const popupRef = this.createSingleElementPopup({ ...settings, anchor: element });
+                    current = { element, popupRef };
+                    popupRef.closed.pipe(take(1)).subscribe(() => {
+                        if (current?.popupRef === popupRef) {
+                            current = null;
                         }
-                    }),
-                    takeUntilDestroyed(this.#destroyRef)
-                )
-                .subscribe();
-
-            subscriptions.push(subscription);
-        });
-        this.#selectorSubscriptions.set(selector, subscriptions);
+                    });
+                })
+        );
+        subscription.add(
+            fromEvent<PointerEvent>(this.#document, "pointerout")
+                .pipe(takeUntilDestroyed(this.#destroyRef))
+                .subscribe(event => {
+                    const element = current?.element;
+                    const target = event.target instanceof Node ? event.target : null;
+                    const next = event.relatedTarget instanceof Node ? event.relatedTarget : null;
+                    if (element && target && element.contains(target) && !(next && element.contains(next))) {
+                        closeCurrent();
+                    }
+                })
+        );
+        return subscription;
     }
 
     private setupMouseLeaveSubscription(settings: PopupSettings, popupReference: PopupReference): Subscription | null {
@@ -562,7 +565,7 @@ export class PopupService {
             .outsidePointerEvents()
             .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
             .subscribe(event => {
-                if (this.shouldIgnoreOutsideClick(settings, event)) {
+                if (this.shouldIgnoreOutsideClick(settings, event, overlayRef)) {
                     return;
                 }
 
@@ -590,6 +593,18 @@ export class PopupService {
                 .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
                 .subscribe(change => popupReference.positionChanges$.next(change.connectionPair));
         }
+    }
+
+    /**
+     * `PopupRef.overlayRef` is public, so the overlay can be detached or disposed without going through
+     * `close()`. Finish the close then too, or `closed` never fires and focus, subscriptions and consumers
+     * waiting for it (the dropdowns won't reopen until it does) stay stuck.
+     */
+    private setupDetachTracking(overlayRef: OverlayRef, popupReference: PopupReference): void {
+        overlayRef
+            .detachments()
+            .pipe(take(1), takeUntil(popupReference.closed))
+            .subscribe(() => popupReference.closeDetached());
     }
 
     private setupDirectionTracking(
@@ -631,26 +646,27 @@ export class PopupService {
             popupReference.close(closeEvent, 0);
         };
 
+        // The page scrolls the anchor away whether or not it also sits in a scrollable container.
+        const win = this.#document.defaultView!;
+        const pageEvents = [
+            fromEvent(win, "scroll", { passive: true }),
+            fromEvent(this.#document, "scroll", { passive: true })
+        ];
         if (scrollableContainers.length === 0) {
-            const win = this.#document.defaultView!;
-            const globalScrollSubscription = merge(
-                fromEvent(win, "scroll", { passive: true }),
-                fromEvent(win, "resize", { passive: true }),
-                fromEvent(this.#document, "scroll", { passive: true })
-            )
-                .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
-                .subscribe(event => handleScrollClose(event));
-
-            subscriptions.push(globalScrollSubscription);
-        } else {
-            scrollableContainers.forEach(scrollable => {
-                const containerScrollSubscription = scrollable
-                    .elementScrolled()
-                    .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
-                    .subscribe(() => handleScrollClose());
-                subscriptions.push(containerScrollSubscription);
-            });
+            pageEvents.push(fromEvent(win, "resize", { passive: true }));
         }
+        const pageScrollSubscription = merge(...pageEvents)
+            .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
+            .subscribe(event => handleScrollClose(event));
+        subscriptions.push(pageScrollSubscription);
+
+        scrollableContainers.forEach(scrollable => {
+            const containerScrollSubscription = scrollable
+                .elementScrolled()
+                .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
+                .subscribe(() => handleScrollClose());
+            subscriptions.push(containerScrollSubscription);
+        });
         popupReference.closed.pipe(take(1)).subscribe(() => {
             subscriptions.forEach(sub => sub.unsubscribe());
         });
@@ -694,8 +710,14 @@ export class PopupService {
         });
     }
 
-    private shouldIgnoreOutsideClick(settings: PopupSettings, event: Event): boolean {
+    private shouldIgnoreOutsideClick(settings: PopupSettings, event: Event, overlayRef: OverlayRef): boolean {
         const eventTarget = event.target as HTMLElement;
+
+        // The backdrop lies outside the pane, so its clicks also arrive here. They belong to the backdrop
+        // handler, which honours closeOnBackdropClick and reports them as BackdropClick.
+        if (overlayRef.backdropElement?.contains(eventTarget)) {
+            return true;
+        }
 
         if (typeof settings.anchor === "string") {
             return !this.#outsideEventsToClose.includes(event.type);

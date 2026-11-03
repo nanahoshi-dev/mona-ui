@@ -65,6 +65,22 @@ export class PopupReference implements PopupRefParams {
         return true;
     }
 
+    /**
+     * Finishes a close that bypassed {@link close}: the overlay was detached or disposed directly. Nothing can
+     * prevent it any more, so `beforeClose` is skipped; `closeStart` and `closed` still fire, in that order.
+     */
+    public closeDetached(): void {
+        if (this.#closed) {
+            return;
+        }
+        const event = new PopupCloseEvent({ via: PopupCloseSource.Programmatic });
+        if (!this.#closing) {
+            this.#closing = true;
+            this.closeStart$.next(event);
+        }
+        this.completeClose(event);
+    }
+
     public notifyOpen(): void {
         this.opened$.next();
     }

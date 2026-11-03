@@ -11552,7 +11552,7 @@
         "defaultValue": "true"
       },
       {
-        "description": "Whether to close the popup when the escape key is pressed.",
+        "description": "Whether to close the popup when the escape key is pressed.\r\nEscape only reaches the topmost open popup.",
         "kind": "input",
         "name": "closeOnEscape",
         "type": "boolean",
@@ -11702,7 +11702,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Controls focus restoration when the popup closes.\r\n- `true`: always restore focus to the anchor element.\r\n- `false`: never restore focus (recommended for tooltips).\r\n- `\"auto\"`: restore focus only if the anchor was focused when the popup opened.",
+        "description": "Controls focus restoration when the popup closes.\r\n- `true`: always restore focus to the anchor element.\r\n- `false`: never restore focus (recommended for tooltips).\r\n- `\"auto\"`: restore focus only if the anchor, or an element inside it, was focused when the popup opened.\r\n\r\nFocus is left alone if the user moved it outside the popup and the anchor before it closed.",
         "kind": "input",
         "name": "restoreFocus",
         "type": "boolean | \"auto\"",
