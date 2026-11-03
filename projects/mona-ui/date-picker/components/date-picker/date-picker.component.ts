@@ -472,7 +472,9 @@ export class DatePickerComponent
 
     private setPopupCloseSubscriptions(): void {
         this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
-            this.focus();
+            if (this.#dropdownService.focusCanReturn()) {
+                this.focus();
+            }
         });
     }
 

@@ -10,6 +10,13 @@ import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 export class DropdownService {
     public readonly beforeKeydown$ = new Subject<PreventableEvent<KeyboardEvent>>();
     public readonly beforeNavigate$ = new Subject<PreventableEvent<KeyboardEvent>>();
+
+    /**
+     * Set when the popup finishes closing: whether focus may return to the dropdown. It is `false` when the user
+     * moved focus outside the dropdown and its popup first, for example by clicking another field or pressing
+     * Tab. Read it from `popupCloseComplete$` before calling `focus()`.
+     */
+    public readonly focusCanReturn = signal(true);
     public readonly keydown$ = new Subject<KeyboardEvent>();
     public readonly popupCloseComplete$ = new Subject<PopupCloseEvent>();
     public readonly popupCloseStart$ = new Subject<PopupCloseEvent>();

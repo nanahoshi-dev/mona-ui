@@ -2,7 +2,9 @@ import { Overlay, OverlayContainer } from "@angular/cdk/overlay";
 import { ApplicationRef, Component, ElementRef } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { PopupCloseSource } from "../models/PopupCloseEvent";
 import { PopupRef } from "../models/PopupRef";
+import type { PopupSettings } from "../models/PopupSettings";
 
 import { PopupService } from "./popup.service";
 
@@ -10,6 +12,11 @@ import { PopupService } from "./popup.service";
     template: "<div>Popup content</div>"
 })
 class PopupTestContentComponent {}
+
+@Component({
+    template: `<input aria-label="Popup field" />`
+})
+class PopupTestInputContentComponent {}
 
 describe("PopupService", () => {
     let service: PopupService;
@@ -165,6 +172,209 @@ describe("PopupService", () => {
         document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
 
         expect(closed).toBe(false);
+    });
+
+    describe("Escape with several popups open", () => {
+        let outerRef: PopupRef;
+        let innerAnchor: HTMLElement;
+        let outerClosed: boolean;
+        let innerClosed: boolean;
+
+        beforeEach(() => {
+            outerClosed = false;
+            innerClosed = false;
+        });
+
+        afterEach(() => {
+            outerRef.close(undefined, 0);
+        });
+
+        function openNested(outer: Partial<PopupSettings> = {}, inner: Partial<PopupSettings> = {}): void {
+            outerRef = service.create({
+                anchor: document.body,
+                animation: false,
+                content: PopupTestInputContentComponent,
+                positionStrategy: "global",
+                ...outer
+            });
+            innerAnchor = outerRef.overlayRef.overlayElement.querySelector("input") as HTMLElement;
+            popupRef = service.create({
+                anchor: innerAnchor,
+                animation: false,
+                content: PopupTestContentComponent,
+                ...inner
+            });
+            outerRef.closed.subscribe(() => (outerClosed = true));
+            popupRef.closed.subscribe(() => (innerClosed = true));
+        }
+
+        function pressEscape(target: EventTarget, init: KeyboardEventInit = {}): KeyboardEvent {
+            const event = new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "Escape", ...init });
+            target.dispatchEvent(event);
+            return event;
+        }
+
+        it("closes only the topmost popup", () => {
+            openNested();
+
+            pressEscape(innerAnchor);
+
+            expect(innerClosed).toBe(true);
+            expect(outerClosed).toBe(false);
+
+            pressEscape(innerAnchor);
+
+            expect(outerClosed).toBe(true);
+        });
+
+        it("gives a second Escape to the popup underneath while the top one plays its leave animation", () => {
+            openNested({}, { animation: { enter: "mona-popup-enter", leave: "mona-popup-leave" } });
+            TestBed.inject(ApplicationRef).tick();
+
+            pressEscape(innerAnchor);
+            expect(popupRef?.overlayRef.hasAttached()).toBe(true);
+            expect(outerClosed).toBe(false);
+
+            pressEscape(innerAnchor);
+
+            expect(outerClosed).toBe(true);
+        });
+
+        it("does not let Escape through a topmost popup that does not close on Escape", () => {
+            openNested({}, { closeOnEscape: false });
+
+            pressEscape(innerAnchor);
+
+            expect(innerClosed).toBe(false);
+            expect(outerClosed).toBe(false);
+        });
+
+        it("does not close the popup underneath when a control closes the top popup on Escape itself", () => {
+            openNested();
+            innerAnchor.addEventListener("keydown", event => {
+                if (event.key === "Escape") {
+                    popupRef?.close();
+                }
+            });
+
+            pressEscape(innerAnchor);
+
+            expect(innerClosed).toBe(true);
+            expect(outerClosed).toBe(false);
+        });
+
+        it("ignores an Escape whose propagation a control stopped", () => {
+            openNested();
+            innerAnchor.addEventListener("keydown", event => event.stopPropagation());
+
+            pressEscape(innerAnchor);
+
+            expect(innerClosed).toBe(false);
+            expect(outerClosed).toBe(false);
+        });
+
+        // Menus call preventDefault() on every navigation key, Escape included, and still expect to close.
+        it("closes the topmost popup on an Escape whose default a control prevented", () => {
+            openNested();
+            innerAnchor.addEventListener("keydown", event => event.preventDefault());
+
+            pressEscape(innerAnchor);
+
+            expect(innerClosed).toBe(true);
+            expect(outerClosed).toBe(false);
+        });
+
+        it("ignores an Escape that ends an IME composition", () => {
+            openNested();
+
+            pressEscape(innerAnchor, { isComposing: true });
+
+            expect(innerClosed).toBe(false);
+            expect(outerClosed).toBe(false);
+        });
+
+        it("reports Escape as the close source", () => {
+            openNested();
+            let via: PopupCloseSource | undefined;
+            popupRef?.closed.subscribe(event => (via = event.via));
+
+            pressEscape(innerAnchor);
+
+            expect(via).toBe(PopupCloseSource.Escape);
+        });
+    });
+
+    describe("focus restoration", () => {
+        let otherField: HTMLInputElement;
+
+        beforeEach(() => {
+            otherField = document.createElement("input");
+            otherField.setAttribute("aria-label", "Other field");
+            document.body.append(otherField);
+            testElements.push(otherField);
+        });
+
+        it("leaves focus in a field the user moved it to", () => {
+            const anchor = createAnchor();
+            anchor.focus();
+            popupRef = service.create({ anchor, animation: false, content: PopupTestContentComponent });
+
+            otherField.focus();
+            popupRef.close();
+
+            expect(document.activeElement).toBe(otherField);
+        });
+
+        it("returns focus to the anchor when focus is on the page", () => {
+            const anchor = createAnchor();
+            anchor.focus();
+            popupRef = service.create({ anchor, animation: false, content: PopupTestContentComponent });
+
+            anchor.blur();
+            popupRef.close();
+
+            expect(document.activeElement).toBe(anchor);
+        });
+
+        it("returns focus to the anchor when focus is inside the popup", () => {
+            const anchor = createAnchor();
+            anchor.focus();
+            popupRef = service.create({ anchor, animation: false, content: PopupTestInputContentComponent });
+
+            popupRef.overlayRef.overlayElement.querySelector("input")?.focus();
+            popupRef.close();
+
+            expect(document.activeElement).toBe(anchor);
+        });
+
+        it("does not take focus from another field with restoreFocus: true", () => {
+            const anchor = createAnchor();
+            popupRef = service.create({
+                anchor,
+                animation: false,
+                content: PopupTestContentComponent,
+                restoreFocus: true
+            });
+
+            otherField.focus();
+            popupRef.close();
+
+            expect(document.activeElement).toBe(otherField);
+        });
+
+        it("focuses the anchor with restoreFocus: true when focus is on the page", () => {
+            const anchor = createAnchor();
+            popupRef = service.create({
+                anchor,
+                animation: false,
+                content: PopupTestContentComponent,
+                restoreFocus: true
+            });
+
+            popupRef.close();
+
+            expect(document.activeElement).toBe(anchor);
+        });
     });
 
     it("should close the popup on an outside click", async () => {

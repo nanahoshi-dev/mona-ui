@@ -74,6 +74,7 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
 
     /**
      * @description Whether to close the popup when the escape key is pressed.
+     * Escape only reaches the topmost open popup.
      */
     public readonly closeOnEscape = input(true);
 
@@ -197,6 +198,8 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
      * - `true`: always restore focus to the anchor element.
      * - `false`: never restore focus (recommended for tooltips).
      * - `"auto"`: restore focus only if the anchor was focused when the popup opened.
+     *
+     * Focus is left alone if the user moved it outside the popup and the anchor before it closed.
      */
     public readonly restoreFocus = input<boolean | "auto">("auto");
 

@@ -14,6 +14,7 @@ import { ScrollDispatcher, type ScrollDispatcherTarget } from "@angular/cdk/scro
 import { DestroyRef, DOCUMENT, ElementRef, inject, Injectable, Injector, TemplateRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MonaI18nService, observeComponentDirection, resolveComponentDirection } from "@nanahoshi/mona-ui/i18n";
+import { focusCanReturn } from "@nanahoshi/mona-ui/internal";
 import { exhaustMap, filter, fromEvent, merge, Subject, Subscription, take, takeUntil, tap } from "rxjs";
 import { PopupWrapperComponent } from "../components/popup-wrapper/popup-wrapper.component";
 import { PopupCloseEvent, PopupCloseSource } from "../models/PopupCloseEvent";
@@ -33,10 +34,14 @@ export class PopupService {
     readonly #document = inject(DOCUMENT);
     readonly #i18n = inject(MonaI18nService, { optional: true });
     readonly #injector = inject(Injector);
+    /** Open popups in the order they were opened; the last one is on top. */
+    readonly #openPopups: OpenPopup[] = [];
     readonly #outsideEventsToClose = ["click", "mousedown", "dblclick", "contextmenu", "auxclick"];
     readonly #overlay = inject(Overlay);
     readonly #scrollDispatcher = inject(ScrollDispatcher);
     readonly #selectorSubscriptions = new Map<string, Subscription[]>();
+    #escapeSubscription: Subscription | null = null;
+    #escapeTarget: { event: KeyboardEvent; popup: OpenPopup | null } | null = null;
 
     public create(settings: PopupSettings): PopupRef {
         if (typeof settings.anchor === "string") {
@@ -211,7 +216,7 @@ export class PopupService {
             this.setupScrollClosing(settings, popupReference, overlayRef);
         }
         this.setupScrollTracking(settings, overlayRef, popupReference);
-        this.setupEscapeKeyListener(settings, popupReference);
+        this.registerOpenPopup(settings, popupReference);
         this.setupPositionChangeTracking(settings, overlayRef, popupReference);
         this.setupDirectionTracking(settings, overlayRef, popupReference);
 
@@ -270,20 +275,58 @@ export class PopupService {
         return Array.from(scrollablesByElement.values());
     }
 
-    private handleFocusRestoration(settings: PopupSettings, originallyFocusedElement?: HTMLElement | null): void {
-        const restoreFocus = settings.restoreFocus ?? "auto";
+    private getTopmostOpenPopup(): OpenPopup | null {
+        for (let index = this.#openPopups.length - 1; index >= 0; index--) {
+            const popup = this.#openPopups[index];
+            if (popup.reference.overlayRef.hasAttached()) {
+                return popup;
+            }
+        }
+        return null;
+    }
 
+    /**
+     * Escape goes to the topmost open popup only, so closing a dropdown inside a dialog leaves the dialog
+     * open. The topmost popup consumes the key even when it doesn't close on Escape, so a modal that can't
+     * be dismissed doesn't let it reach the popup underneath. An Escape that ends an IME composition is left
+     * alone. `preventDefault()` doesn't keep the popup open, because controls call it on every navigation key;
+     * a control that handles Escape itself stops its propagation instead.
+     */
+    private handleEscapeKey(event: KeyboardEvent): void {
+        const escapeTarget = this.#escapeTarget;
+        this.#escapeTarget = null;
+        if (event.key !== "Escape" || event.isComposing) {
+            return;
+        }
+
+        // The popup on top when the key was pressed, before handlers further down could close it.
+        const popup = escapeTarget?.event === event ? escapeTarget.popup : this.getTopmostOpenPopup();
+        if (!popup?.closeOnEscape) {
+            return;
+        }
+        popup.reference.popupRef.close(
+            new PopupCloseEvent({
+                event,
+                originalEvent: event,
+                via: PopupCloseSource.Escape
+            })
+        );
+    }
+
+    private handleFocusRestoration(
+        settings: PopupSettings,
+        overlayRef: OverlayRef,
+        originallyFocusedElement?: HTMLElement | null
+    ): void {
+        const restoreFocus = settings.restoreFocus ?? "auto";
         if (restoreFocus === false) {
             return;
         }
 
-        if (restoreFocus === "auto") {
-            if (originallyFocusedElement) {
-                originallyFocusedElement.focus();
-            }
-            return;
+        const target = restoreFocus === "auto" ? originallyFocusedElement : this.getAnchorElement(settings.anchor);
+        if (target && focusCanReturn(this.#document, target, overlayRef.overlayElement)) {
+            target.focus();
         }
-        this.restoreFocusToAnchor(settings.anchor);
     }
 
     private isScrollableElement(element: HTMLElement): boolean {
@@ -307,6 +350,39 @@ export class PopupService {
     }
 
     /**
+     * One pair of `document` listeners serves every open popup. The capturing one notes which popup is on
+     * top before the key reaches any control; the bubbling one closes it if nothing handled the key.
+     */
+    private listenForEscape(): void {
+        if (this.#escapeSubscription) {
+            return;
+        }
+        const subscription = new Subscription();
+        subscription.add(
+            fromEvent<KeyboardEvent>(this.#document, "keydown", { capture: true }).subscribe(event => {
+                this.#escapeTarget = event.key === "Escape" ? { event, popup: this.getTopmostOpenPopup() } : null;
+            })
+        );
+        subscription.add(
+            fromEvent<KeyboardEvent>(this.#document, "keydown").subscribe(event => this.handleEscapeKey(event))
+        );
+        this.#escapeSubscription = subscription;
+    }
+
+    /**
+     * A popup leaves the stack as soon as it starts closing, so a second Escape during its leave animation
+     * goes to the popup underneath.
+     */
+    private registerOpenPopup(settings: PopupSettings, popupReference: PopupReference): void {
+        const popup: OpenPopup = { closeOnEscape: settings.closeOnEscape ?? true, reference: popupReference };
+        this.#openPopups.push(popup);
+        this.listenForEscape();
+        merge(popupReference.closeStart, popupReference.closed)
+            .pipe(take(1))
+            .subscribe(() => this.unregisterOpenPopup(popup));
+    }
+
+    /**
      * Resolves a PopupAnchor to a FlexibleConnectedPositionStrategyOrigin.
      * This method should only receive actual elements or ElementRefs, not CSS selector strings.
      * CSS selectors are handled by the multi-element popup creation path.
@@ -321,17 +397,6 @@ export class PopupService {
             );
         }
         return anchor;
-    }
-
-    private restoreFocusToAnchor(anchor: PopupAnchor): void {
-        if (typeof anchor === "string") {
-            return;
-        }
-        const resolvedAnchor = this.resolveAnchor(anchor);
-        const anchorElement = this.getAnchorElement(resolvedAnchor);
-        if (anchorElement) {
-            anchorElement.focus();
-        }
     }
 
     private setupBackdropCloseSubscription(
@@ -386,7 +451,7 @@ export class PopupService {
     ): void {
         popupReference.closed.pipe(take(1)).subscribe(() => {
             subscription?.unsubscribe();
-            this.handleFocusRestoration(settings, originallyFocusedElement);
+            this.handleFocusRestoration(settings, popupReference.overlayRef, originallyFocusedElement);
         });
     }
 
@@ -425,28 +490,6 @@ export class PopupService {
         const combinedSubscription = new Subscription();
         subscriptions.forEach(sub => combinedSubscription.add(sub));
         return combinedSubscription;
-    }
-
-    private setupEscapeKeyListener(settings: PopupSettings, popupReference: PopupReference): void {
-        if (settings.closeOnEscape === false) {
-            return;
-        }
-
-        fromEvent<KeyboardEvent>(this.#document, "keydown")
-            .pipe(
-                filter(() => popupReference.overlayRef.hasAttached()),
-                filter(event => event.key === "Escape"),
-                takeUntil(popupReference.closed),
-                takeUntilDestroyed(this.#destroyRef)
-            )
-            .subscribe(event => {
-                const closeEvent = new PopupCloseEvent({
-                    event,
-                    originalEvent: event,
-                    via: PopupCloseSource.Escape
-                });
-                popupReference.popupRef.close(closeEvent);
-            });
     }
 
     private setupInternalEventDelegation(selector: string, settings: PopupSettings): void {
@@ -664,6 +707,23 @@ export class PopupService {
         const isRelevantEventType = this.#outsideEventsToClose.includes(event.type);
         return isAnchorClick || !isRelevantEventType;
     }
+
+    private unregisterOpenPopup(popup: OpenPopup): void {
+        const index = this.#openPopups.indexOf(popup);
+        if (index !== -1) {
+            this.#openPopups.splice(index, 1);
+        }
+        if (this.#openPopups.length === 0) {
+            this.#escapeSubscription?.unsubscribe();
+            this.#escapeSubscription = null;
+            this.#escapeTarget = null;
+        }
+    }
+}
+
+interface OpenPopup {
+    readonly closeOnEscape: boolean;
+    readonly reference: PopupReference;
 }
 
 /**

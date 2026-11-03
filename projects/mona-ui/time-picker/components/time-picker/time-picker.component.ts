@@ -42,7 +42,7 @@ import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import { TextBoxComponent, TextBoxSuffixTemplateDirective } from "@nanahoshi/mona-ui/text-box";
 import { TimeSelectorComponent } from "@nanahoshi/mona-ui/time-selector";
 import { DateTime } from "luxon";
-import { fromEvent } from "rxjs";
+import { filter, fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { TIME_PICKER_DEFAULT_MESSAGES } from "../../i18n/time-picker.default-messages";
 import {
@@ -454,7 +454,10 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(() => this.focus());
         this.#dropdownService.popupCloseComplete$
-            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .pipe(
+                filter(() => this.#dropdownService.focusCanReturn()),
+                takeUntilDestroyed(this.#destroyRef)
+            )
             .subscribe(() => this.focus());
     }
 

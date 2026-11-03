@@ -59,6 +59,8 @@ export interface PopupSettings<T = unknown, C = void> {
 
     /**
      * Whether the popup will be closed when the user presses the escape key.
+     * Escape only reaches the topmost open popup. When that popup sets this to `false`, Escape closes nothing,
+     * not even the popups underneath it.
      * Default: true.
      * @type {boolean}
      */
@@ -182,6 +184,8 @@ export interface PopupSettings<T = unknown, C = void> {
      * - true: Always restore focus to anchor
      * - false: Never restore focus (recommended for tooltips)
      * - "auto": Only restore focus if the anchor was focused when the popup opened (smart behavior)
+     * Focus is only restored while it is on the page itself, inside the popup or inside the anchor. If the user
+     * moved it elsewhere, for example by clicking another field, it stays there.
      * Default: "auto".
      * @type {boolean | "auto"}
      */
