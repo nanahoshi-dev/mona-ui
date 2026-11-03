@@ -80,20 +80,6 @@ export interface IObjectPatchStore<T> {
     readonly changes: Signal<DeepPartial<T> | undefined>;
 
     /**
-     * `true` when the current draft is structurally equal to the last
-     * committed snapshot, i.e. no unsaved changes exist relative to the
-     * last commit point.
-     */
-    readonly pristine: Signal<boolean>;
-
-    /**
-     * The live merged view of base + draft. Prefer `select()` over reading
-     * this directly in computed signals when you only care about a specific
-     * slice of the object, to avoid unnecessary downstream invalidations.
-     */
-    readonly view: Signal<T>;
-
-    /**
      * Discard the current draft without affecting the committed snapshot.
      * The view reverts to the base value.
      */
@@ -132,27 +118,17 @@ export interface IObjectPatchStore<T> {
     patchPath<P extends Path<T>>(path: P, value: PathValue<T, P>, options?: DeepMergeOptions): void;
 
     /**
+     * `true` when the current draft is structurally equal to the last
+     * committed snapshot, i.e. no unsaved changes exist relative to the
+     * last commit point.
+     */
+    readonly pristine: Signal<boolean>;
+
+    /**
      * Discard both the draft and the committed snapshot, fully resetting
      * the store to a pristine, empty state.
      */
     reset(): void;
-
-    /**
-     * Directly replace the draft with the given patch object, bypassing the
-     * merge logic. Use with care — this does not prune against the base.
-     * Prefer `patch()` for most use cases.
-     */
-    setDraft(patch: DeepPartial<T>): void;
-
-    /**
-     * Convenience wrapper over `patch` that sets a single path to a value.
-     * Unlike the old implementation, this merges rather than replaces the
-     * draft, so unrelated draft fields are preserved.
-     *
-     * @example
-     * store.setPath(['address', 'city'], 'London');
-     */
-    setPath<P extends Path<T>>(path: P, value: PathValue<T, P>, options?: DeepMergeOptions): void;
 
     /**
      * Returns a `Signal` that emits only the slice of `view` selected by
@@ -171,6 +147,31 @@ export interface IObjectPatchStore<T> {
      * readonly city = store.select(v => v.address.city);
      */
     select<R>(projector: (view: T) => R, equal?: (a: R, b: R) => boolean): Signal<R>;
+
+    /**
+     * Directly replace the draft with the given patch object, bypassing the
+     * merge logic. Use with care — this does not prune against the base, so
+     * a field equal to its base value still counts in `changes` and
+     * `hasDraft()`, while `pristine` ignores it. Prefer `patch()` for most use
+     * cases.
+     */
+    setDraft(patch: DeepPartial<T>): void;
+
+    /**
+     * Same as `patchPath`: sets a single path to a value, merging into the
+     * draft, so unrelated draft fields are preserved.
+     *
+     * @example
+     * store.setPath(['address', 'city'], 'London');
+     */
+    setPath<P extends Path<T>>(path: P, value: PathValue<T, P>, options?: DeepMergeOptions): void;
+
+    /**
+     * The live merged view of base + draft. Prefer `select()` over reading
+     * this directly in computed signals when you only care about a specific
+     * slice of the object, to avoid unnecessary downstream invalidations.
+     */
+    readonly view: Signal<T>;
 }
 
 export class ObjectPatchStore<T> implements IObjectPatchStore<T> {
@@ -181,8 +182,8 @@ export class ObjectPatchStore<T> implements IObjectPatchStore<T> {
         computation: (newBase, previous) => {
             const strategy = this.#options.baseChangeStrategy ?? "wipe";
             if (!previous) {
-                // First computation — initialise from options.initial if provided.
-                return this.#options.initial?.() ?? ({} as DeepPartial<T>);
+                // First computation; the constructor then sets the initial draft.
+                return {} as DeepPartial<T>;
             }
             switch (strategy) {
                 case "preserve":
@@ -254,16 +255,16 @@ export class ObjectPatchStore<T> implements IObjectPatchStore<T> {
         this.#committed.set({} as DeepPartial<T>);
     }
 
+    public select<R>(projector: (view: T) => R, equal: (a: R, b: R) => boolean = deepEquals): Signal<R> {
+        return computed(() => projector(this.view()), { equal });
+    }
+
     public setDraft(patch: DeepPartial<T>): void {
         this.#draft.set(patch);
     }
 
     public setPath<P extends Path<T>>(path: P, value: PathValue<T, P>, options?: DeepMergeOptions): void {
         this.patchPath(path, value, options);
-    }
-
-    public select<R>(projector: (view: T) => R, equal: (a: R, b: R) => boolean = deepEquals): Signal<R> {
-        return computed(() => projector(this.view()), { equal });
     }
 }
 
@@ -272,6 +273,11 @@ export class ObjectPatchStore<T> implements IObjectPatchStore<T> {
 // ---------------------------------------------------------------------------
 
 export interface IterablePatchStoreOptions<TItem, TId> {
+    /**
+     * Controls what happens to uncommitted drafts when the base signal emits
+     * a new value. Defaults to `'wipe'`.
+     */
+    baseChangeStrategy?: BaseChangeStrategy;
     /** Extracts the stable identity key from an item. */
     idOf: (item: TItem) => TId;
     /**
@@ -279,13 +285,10 @@ export interface IterablePatchStoreOptions<TItem, TId> {
      * per-row edits). Accepts either a `Map` or an `ImmutableDictionary`.
      */
     initial?: () => Map<TId, DeepPartial<TItem>> | ImmutableDictionary<TId, DeepPartial<TItem>>;
+    /** Default merge options applied to all patch operations unless overridden per-call. */
+    mergeOptions?: DeepMergeOptions;
     /** Factory that returns the authoritative base signal for this store. */
     source: () => Signal<Iterable<TItem>>;
-    /**
-     * Controls what happens to uncommitted drafts when the base signal emits
-     * a new value. Defaults to `'wipe'`.
-     */
-    baseChangeStrategy?: BaseChangeStrategy;
 }
 
 export interface IIterablePatchStore<TItem, TId> {
@@ -294,20 +297,6 @@ export interface IIterablePatchStore<TItem, TId> {
      * with its current draft. Items without a draft are excluded.
      */
     readonly changes: Signal<TItem[]>;
-
-    /**
-     * `true` when every item's current draft is structurally equal to its
-     * last committed snapshot.
-     */
-    readonly pristine: Signal<boolean>;
-
-    /**
-     * The live merged view of all base items with their drafts applied.
-     * Items without a draft are returned as-is (same reference).
-     * Prefer `select()` over reading this directly in computed signals when
-     * you only care about a specific slice.
-     */
-    readonly view: Signal<TItem[]>;
 
     /**
      * Discard the draft for the item identified by `id`.
@@ -361,27 +350,16 @@ export interface IIterablePatchStore<TItem, TId> {
     patchPath<P extends Path<TItem>>(id: TId, path: P, value: PathValue<TItem, P>, options?: DeepMergeOptions): void;
 
     /**
+     * `true` when every item's current draft is structurally equal to its
+     * last committed snapshot.
+     */
+    readonly pristine: Signal<boolean>;
+
+    /**
      * Discard all drafts and committed snapshots, fully resetting the store
      * to a pristine, empty state.
      */
     reset(): void;
-
-    /**
-     * Directly replace the draft for `id` with the given patch object,
-     * bypassing the merge logic. Use with care — this does not prune against
-     * the base item. Prefer `patch()` for most use cases.
-     */
-    setDraft(id: TId, patch: DeepPartial<TItem>): void;
-
-    /**
-     * Convenience wrapper over `patch` that sets a single path to a value
-     * for a specific item. Merges into the existing draft rather than
-     * replacing it, so unrelated draft fields are preserved.
-     *
-     * @example
-     * store.setPath(itemId, ['address', 'city'], 'London');
-     */
-    setPath<P extends Path<TItem>>(id: TId, path: P, value: PathValue<TItem, P>, options?: DeepMergeOptions): void;
 
     /**
      * Returns a `Signal` that emits only the slice of `view` selected by
@@ -396,6 +374,33 @@ export interface IIterablePatchStore<TItem, TId> {
      * readonly cities = store.select(items => items.map(i => i.address.city));
      */
     select<R>(projector: (view: TItem[]) => R, equal?: (a: R, b: R) => boolean): Signal<R>;
+
+    /**
+     * Directly replace the draft for `id` with the given patch object,
+     * bypassing the merge logic. An empty patch removes the draft. Use with
+     * care — this does not prune against the base item, so a field equal to
+     * its base value still counts in `changes`, `hasDraft()` and
+     * `dirtyCount()`, while `pristine` ignores it. Prefer `patch()` for most
+     * use cases.
+     */
+    setDraft(id: TId, patch: DeepPartial<TItem>): void;
+
+    /**
+     * Same as `patchPath`: sets a single path to a value for a specific item,
+     * merging into the existing draft, so unrelated draft fields are preserved.
+     *
+     * @example
+     * store.setPath(itemId, ['address', 'city'], 'London');
+     */
+    setPath<P extends Path<TItem>>(id: TId, path: P, value: PathValue<TItem, P>, options?: DeepMergeOptions): void;
+
+    /**
+     * The live merged view of all base items with their drafts applied.
+     * Items without a draft are returned as-is (same reference).
+     * Prefer `select()` over reading this directly in computed signals when
+     * you only care about a specific slice.
+     */
+    readonly view: Signal<TItem[]>;
 }
 
 export class IterablePatchStore<TItem, TId> implements IIterablePatchStore<TItem, TId> {
@@ -511,19 +516,14 @@ export class IterablePatchStore<TItem, TId> implements IIterablePatchStore<TItem
         this.#options = options;
         this.#base = options.source();
 
-        let initial: ImmutableDictionary<TId, DeepPartial<TItem>>;
-        if (options.initial) {
-            if (options.initial() instanceof ImmutableDictionary) {
-                initial = options.initial() as ImmutableDictionary<TId, DeepPartial<TItem>>;
-            } else {
-                initial = ImmutableDictionary.create<TId, DeepPartial<TItem>>(options.initial());
-            }
-        } else {
-            initial = ImmutableDictionary.create<TId, DeepPartial<TItem>>();
-        }
+        const initialValue = options.initial?.();
+        const initial =
+            initialValue instanceof ImmutableDictionary
+                ? initialValue
+                : ImmutableDictionary.create<TId, DeepPartial<TItem>>(initialValue ?? []);
         this.#committed = signal(initial);
-        if (options.initial) {
-            this.#drafts.set(ImmutableDictionary.create<TId, DeepPartial<TItem>>(initial));
+        if (initialValue) {
+            this.#drafts.set(initial);
         }
     }
 
@@ -561,7 +561,7 @@ export class IterablePatchStore<TItem, TId> implements IIterablePatchStore<TItem
         return patch != null && !isEmptyObject(patch as Record<PropertyKey, unknown>);
     }
 
-    public patch(id: TId, patch: DeepPartial<TItem>, options?: DeepMergeOptions): void {
+    public patch(id: TId, patch: DeepPartial<TItem>, options = this.#options.mergeOptions): void {
         this.#drafts.update(drafts => {
             const prev = drafts.get(id) ?? ({} as DeepPartial<TItem>);
             const originalItem = this.#baseMap().get(id);
@@ -573,7 +573,7 @@ export class IterablePatchStore<TItem, TId> implements IIterablePatchStore<TItem
         });
     }
 
-    public patchMany(patchTuple: Iterable<[TId, DeepPartial<TItem>]>, options?: DeepMergeOptions): void {
+    public patchMany(patchTuple: Iterable<[TId, DeepPartial<TItem>]>, options = this.#options.mergeOptions): void {
         const baseMap = this.#baseMap();
         this.#drafts.update(drafts => {
             // Each put on an ImmutableDictionary copies it, so collect the drafts in a Map and build one dictionary.
@@ -619,8 +619,14 @@ export class IterablePatchStore<TItem, TId> implements IIterablePatchStore<TItem
         this.#committed.set(empty);
     }
 
+    public select<R>(projector: (view: TItem[]) => R, equal: (a: R, b: R) => boolean = deepEquals): Signal<R> {
+        return computed(() => projector(this.view()), { equal });
+    }
+
     public setDraft(id: TId, patch: DeepPartial<TItem>): void {
-        this.#drafts.update(drafts => drafts.put(id, patch));
+        this.#drafts.update(drafts =>
+            isEmptyObject(patch as Record<PropertyKey, unknown>) ? drafts.remove(id) : drafts.put(id, patch)
+        );
     }
 
     public setPath<P extends Path<TItem>>(
@@ -630,10 +636,6 @@ export class IterablePatchStore<TItem, TId> implements IIterablePatchStore<TItem
         options?: DeepMergeOptions
     ): void {
         this.patchPath(id, path, value, options);
-    }
-
-    public select<R>(projector: (view: TItem[]) => R, equal: (a: R, b: R) => boolean = deepEquals): Signal<R> {
-        return computed(() => projector(this.view()), { equal });
     }
 }
 

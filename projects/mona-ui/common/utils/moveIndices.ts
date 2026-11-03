@@ -1,10 +1,16 @@
+/**
+ * Moves the items at `indices` by `offset` positions, keeping their relative order. Returns a copy of the array
+ * unchanged when the offset is 0 or not an integer, or when any index is not an integer, is out of bounds, or would
+ * move out of bounds. Duplicate indices count once.
+ */
 export function moveIndices<T>(array: T[], indices: number[], offset: number): T[] {
-    if (offset === 0 || indices.length === 0) {
+    if (offset === 0 || indices.length === 0 || !Number.isInteger(offset)) {
         return [...array];
     }
+    indices = [...new Set(indices)];
 
-    // Validate indices are within bounds
-    if (indices.some(i => i < 0 || i >= array.length)) {
+    // Validate indices are integers within bounds
+    if (indices.some(i => !Number.isInteger(i) || i < 0 || i >= array.length)) {
         return [...array];
     }
 

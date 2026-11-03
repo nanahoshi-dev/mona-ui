@@ -10,7 +10,7 @@ export class ContainsPipe implements PipeTransform {
             return false;
         }
         if (typeof value === "string") {
-            return contains(sequence, value as any);
+            return contains(sequence, value as T);
         }
         if (Symbol.iterator in Object(value)) {
             return all(value as Iterable<T>, item => contains(sequence, item));

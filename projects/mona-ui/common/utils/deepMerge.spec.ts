@@ -239,3 +239,29 @@ describe("deepEquals", () => {
         expect(deepEquals<unknown>(new Map(), new Set())).toBe(false);
     });
 });
+
+describe("deepEquals edge cases", () => {
+    it("treats NaN as equal to NaN", () => {
+        expect(deepEquals(NaN, NaN)).toBe(true);
+        expect(deepEquals({ a: NaN }, { a: NaN })).toBe(true);
+        expect(prunePatch({ a: NaN }, { a: NaN })).toBeUndefined();
+    });
+
+    it("compares dates by time, with invalid dates equal", () => {
+        expect(deepEquals(new Date("x"), new Date("y"))).toBe(true);
+        expect(deepEquals(new Date("x"), new Date(0))).toBe(false);
+    });
+
+    it("compares cyclic values without overflowing", () => {
+        type Node = { name: string; self?: Node };
+        const a: Node = { name: "a" };
+        a.self = a;
+        const b: Node = { name: "a" };
+        b.self = b;
+        const c: Node = { name: "c" };
+        c.self = c;
+
+        expect(deepEquals(a, b)).toBe(true);
+        expect(deepEquals(a, c)).toBe(false);
+    });
+});

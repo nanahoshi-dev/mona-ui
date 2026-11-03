@@ -1,5 +1,3 @@
-import { DateTime } from "luxon";
-
 type Primitive = string | number | boolean | bigint | symbol | null | undefined;
 // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 type BuiltIn = Primitive | Date | RegExp | Function | Map<unknown, unknown> | Set<unknown>;
@@ -235,55 +233,71 @@ export function prunePatch<T>(base: T | DeepPartial<T>, patch: DeepPartial<T>): 
     return Object.keys(result).length === 0 ? undefined : (result as DeepPartial<T>);
 }
 
+/**
+ * Structural equality for plain objects, arrays, `Date`, `RegExp`, `Map` and `Set`. Primitives are equal when
+ * `===` says so, and `NaN` equals `NaN`. Dates are equal when they hold the same time (two invalid dates are
+ * equal). Map keys and set members are matched by `SameValueZero`, like `Map.prototype.has`. Cyclic values are
+ * supported.
+ */
 export function deepEquals<T>(o1: T, o2: T): boolean {
-    if (o1 === o2) {
+    return valuesEqual(o1, o2, new Map());
+}
+
+function valuesEqual(o1: unknown, o2: unknown, visited: Map<object, Set<object>>): boolean {
+    if (o1 === o2 || (Number.isNaN(o1) && Number.isNaN(o2))) {
         return true;
     }
-    if (typeof o1 !== typeof o2 || o1 === null || o2 === null || o1 === undefined || o2 === undefined) {
+    if (o1 === null || o2 === null || typeof o1 !== "object" || typeof o2 !== "object") {
         return false;
     }
     if (o1 instanceof Date || o2 instanceof Date) {
-        return o1 instanceof Date && o2 instanceof Date && DateTime.fromJSDate(o1).equals(DateTime.fromJSDate(o2));
+        return o1 instanceof Date && o2 instanceof Date && Object.is(o1.getTime(), o2.getTime());
     }
     if (o1 instanceof RegExp || o2 instanceof RegExp) {
         return o1 instanceof RegExp && o2 instanceof RegExp && o1.source === o2.source && o1.flags === o2.flags;
     }
+
+    // A pair already being compared further up is assumed equal; any difference shows up there.
+    let seen = visited.get(o1);
+    if (seen?.has(o2)) {
+        return true;
+    }
+    if (!seen) {
+        seen = new Set();
+        visited.set(o1, seen);
+    }
+    seen.add(o2);
+
     if (o1 instanceof Map || o2 instanceof Map) {
-        return o1 instanceof Map && o2 instanceof Map && mapsEqual(o1, o2);
+        return o1 instanceof Map && o2 instanceof Map && mapsEqual(o1, o2, visited);
     }
     if (o1 instanceof Set || o2 instanceof Set) {
         return o1 instanceof Set && o2 instanceof Set && setsEqual(o1, o2);
     }
-    if (Array.isArray(o1) !== Array.isArray(o2)) {
+    if (Array.isArray(o1) || Array.isArray(o2)) {
+        return (
+            Array.isArray(o1) &&
+            Array.isArray(o2) &&
+            o1.length === o2.length &&
+            o1.every((value, index) => valuesEqual(value, o2[index], visited))
+        );
+    }
+    const keys1 = Object.keys(o1);
+    if (keys1.length !== Object.keys(o2).length) {
         return false;
     }
-    if (Array.isArray(o1) && Array.isArray(o2)) {
-        return o1.length === o2.length && o1.every((v, i) => deepEquals(v, o2[i]));
-    }
-    if (typeof o1 === "object" && typeof o2 === "object") {
-        const keys1 = Object.keys(o1);
-        const keys2 = Object.keys(o2);
-        if (keys1.length !== keys2.length) {
-            return false;
-        }
-        for (const key of keys1) {
-            const keyOfT = key as keyof T;
-            if (!Object.prototype.hasOwnProperty.call(o2, key) || !deepEquals(o1[keyOfT], o2[keyOfT])) {
-                return false;
-            }
-        }
-        return true;
-    }
-    return false;
+    const record1 = o1 as Record<string, unknown>;
+    const record2 = o2 as Record<string, unknown>;
+    return keys1.every(key => Object.hasOwn(record2, key) && valuesEqual(record1[key], record2[key], visited));
 }
 
 /** Maps are equal when they have the same keys (by `SameValueZero`) and deeply equal values. */
-function mapsEqual(m1: Map<unknown, unknown>, m2: Map<unknown, unknown>): boolean {
+function mapsEqual(m1: Map<unknown, unknown>, m2: Map<unknown, unknown>, visited: Map<object, Set<object>>): boolean {
     if (m1.size !== m2.size) {
         return false;
     }
     for (const [key, value] of m1) {
-        if (!m2.has(key) || !deepEquals(value, m2.get(key))) {
+        if (!m2.has(key) || !valuesEqual(value, m2.get(key), visited)) {
             return false;
         }
     }

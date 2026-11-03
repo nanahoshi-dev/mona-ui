@@ -261,3 +261,55 @@ describe("IterablePatchStore", () => {
         expect(store.view()[0].name).toBe("Edited");
     });
 });
+
+describe("patch store options", () => {
+    it("calls initial() once and starts from it", () => {
+        let objectCalls = 0;
+        const objectStore = createObjectPatchStore<Person>({
+            initial: () => (objectCalls++, { name: "Grace" }),
+            source: () => signal(person())
+        });
+        let iterableCalls = 0;
+        const iterableStore = createIterablePatchStore<Row, number>({
+            idOf: r => r.id,
+            initial: () => (iterableCalls++, new Map([[1, { name: "Edited" }]])),
+            source: () => signal([row(1)])
+        });
+
+        expect(objectStore.view().name).toBe("Grace");
+        expect(objectStore.pristine()).toBe(true);
+        expect(iterableStore.view()[0].name).toBe("Edited");
+        expect(iterableStore.pristine()).toBe(true);
+        expect([objectCalls, iterableCalls]).toEqual([1, 1]);
+    });
+
+    it("applies IterablePatchStore mergeOptions unless a call overrides them", () => {
+        const store = createIterablePatchStore<Row, number>({
+            idOf: r => r.id,
+            mergeOptions: { arrayStrategy: { kind: "concat" } },
+            source: () => signal([row(1), row(2)])
+        });
+
+        store.patch(1, { tags: ["y"] });
+        store.patchMany([[2, { tags: ["z"] }]]);
+
+        expect(store.view().map(r => r.tags)).toEqual([
+            ["x", "y"],
+            ["x", "z"]
+        ]);
+
+        store.patch(1, { tags: ["w"] }, { arrayStrategy: { kind: "replace" } });
+
+        expect(store.view()[0].tags).toEqual(["w"]);
+    });
+
+    it("removes an item's draft when setDraft gets an empty patch", () => {
+        const store = createIterablePatchStore<Row, number>({ idOf: r => r.id, source: () => signal([row(1)]) });
+        store.setDraft(1, { name: "Edited" });
+
+        store.setDraft(1, {});
+
+        expect(store.hasDraft(1)).toBe(false);
+        expect(store.getCommitted().size()).toBe(0);
+    });
+});
