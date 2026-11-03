@@ -2,6 +2,7 @@ import {
     ApplicationRef,
     ComponentRef,
     createComponent,
+    DestroyRef,
     DOCUMENT,
     inject,
     Injectable,
@@ -23,6 +24,7 @@ import { NotificationRef } from "../models/NotificationRef";
 export class NotificationService {
     readonly #appRef = inject(ApplicationRef);
     readonly #document = inject(DOCUMENT);
+    readonly #pendingTimeouts = new Set<number>();
     private notificationContainerMap: Map<NotificationPosition, NotificationContainerData> = new Map<
         NotificationPosition,
         NotificationContainerData
@@ -38,6 +40,12 @@ export class NotificationService {
 
     public constructor() {
         this.initialize();
+        // The ApplicationRef is destroyed with the same injector, so a timeout firing afterwards would detach
+        // views from a destroyed ApplicationRef.
+        inject(DestroyRef).onDestroy(() => {
+            this.#pendingTimeouts.forEach(handle => window.clearTimeout(handle));
+            this.#pendingTimeouts.clear();
+        });
     }
 
     public hide(id: string): void {
@@ -96,7 +104,7 @@ export class NotificationService {
         host.appendChild(notificationContainerComponent.location.nativeElement);
         this.#appRef.attachView(notificationContainerComponent.hostView);
         notificationContainerComponent.changeDetectorRef.detectChanges();
-        window.setTimeout(() => {
+        this.scheduleTimeout(() => {
             containerSubject.next(notificationContainerComponent);
         });
         return containerSubject;
@@ -211,12 +219,20 @@ export class NotificationService {
             container.componentRef = null;
             container.subscription = undefined;
             this.notificationContainerSubscriptions[position] = null;
-            window.setTimeout(() => {
+            this.scheduleTimeout(() => {
                 if (componentRefToDestroy) {
                     this.#appRef.detachView(componentRefToDestroy.hostView);
                     componentRefToDestroy.destroy();
                 }
             }, 300);
         }
+    }
+
+    private scheduleTimeout(callback: () => void, delay?: number): void {
+        const handle = window.setTimeout(() => {
+            this.#pendingTimeouts.delete(handle);
+            callback();
+        }, delay);
+        this.#pendingTimeouts.add(handle);
     }
 }
