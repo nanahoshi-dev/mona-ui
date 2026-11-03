@@ -7,6 +7,10 @@
         "type": "git",
         "url": "https://github.com/nanahoshi-dev/mona-ui"
     },
+    "exports": {
+        "./i18n/catalogs/*.json": "./i18n/catalogs/*.json",
+        "./locales/*.json": "./locales/*.json"
+    },
     "publishConfig": {
         "access": "public"
     },

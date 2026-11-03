@@ -1,11 +1,10 @@
+// Generated from pt-br.messages.json by scripts/generate-locale-catalogs.ts. Do not edit.
+// Edit the JSON file and run `npm run generate:locale-catalogs`.
+
 import { formatNumber, type MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
 
-function localizeNumber(value: number): string {
-    return formatNumber(value, "pt-BR");
-}
-
-function localizeYear(year: number): string {
-    return formatNumber(year, "pt-BR", { useGrouping: false });
+function localizeNumber(value: number, options?: Intl.NumberFormatOptions): string {
+    return formatNumber(value, "pt-BR", options);
 }
 
 export const PT_BR_MESSAGES = {
@@ -20,9 +19,10 @@ export const PT_BR_MESSAGES = {
     },
     calendar: {
         calendarLabel: (formattedMonthAndYear: string) => `Calendário, ${formattedMonthAndYear}`,
-        decadeRange: (start: number, end: number) => `${localizeYear(start)} a ${localizeYear(end)}`,
+        decadeRange: (start: number, end: number) =>
+            `${localizeNumber(start, { useGrouping: false })} a ${localizeNumber(end, { useGrouping: false })}`,
         decadeViewLabel: (start: number, end: number) =>
-            `Visualização de década, ${localizeYear(start)} - ${localizeYear(end)}`,
+            `Visualização de década, ${localizeNumber(start, { useGrouping: false })} - ${localizeNumber(end, { useGrouping: false })}`,
         goToToday: (formattedDate: string) => `Ir para hoje, ${formattedDate}`,
         nextDecade: "Próxima década",
         nextMonth: "Próximo mês",
@@ -35,7 +35,7 @@ export const PT_BR_MESSAGES = {
         switchToYearView: (currentMonthAndYear: string) =>
             `Alternar para a visualização de ano, atualmente ${currentMonthAndYear}`,
         today: "Hoje",
-        yearCellLabel: (year: number) => `Ano ${localizeYear(year)}`,
+        yearCellLabel: (year: number) => `Ano ${localizeNumber(year, { useGrouping: false })}`,
         yearViewLabel: (year: string) => `Visualização de ano, ${year}`
     },
     card: {
@@ -303,7 +303,9 @@ export const PT_BR_MESSAGES = {
         pageText: "Página",
         previousPageLabel: "Página anterior",
         rangeStatus: (start: number, end: number, total: number) =>
-            `${localizeNumber(start)} - ${localizeNumber(end)} de ${localizeNumber(total)} ${total === 1 ? "item" : "itens"}`
+            total === 1
+                ? `${localizeNumber(start)} - ${localizeNumber(end)} de ${localizeNumber(total)} item`
+                : `${localizeNumber(start)} - ${localizeNumber(end)} de ${localizeNumber(total)} itens`
     },
     rating: {
         notRated: "Não avaliado",

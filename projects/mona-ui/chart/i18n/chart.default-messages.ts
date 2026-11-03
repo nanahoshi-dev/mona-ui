@@ -1,3 +1,6 @@
+// Generated from i18n/catalogs/en-US.messages.json by scripts/generate-locale-catalogs.ts. Do not edit.
+// Edit the JSON file and run `npm run generate:locale-catalogs`.
+
 import type { MonaChartMessages } from "@nanahoshi/mona-ui/i18n";
 
 export const CHART_DEFAULT_MESSAGES: MonaChartMessages = {
@@ -8,7 +11,8 @@ export const CHART_DEFAULT_MESSAGES: MonaChartMessages = {
     closeAbbreviation: "C",
     colorScale: "Color scale",
     conversion: "Conversion",
-    divergingRangeDescription: (title, min, mid, max) => `${title}, ${min} to ${mid} to ${max}`,
+    divergingRangeDescription: (title: string, minimum: string, midpoint: string, maximum: string) =>
+        `${title}, ${minimum} to ${midpoint} to ${maximum}`,
     dropOff: "Drop-off",
     falling: "Falling",
     high: "High",
@@ -21,7 +25,7 @@ export const CHART_DEFAULT_MESSAGES: MonaChartMessages = {
     openAbbreviation: "O",
     overall: "Overall",
     range: "Range",
-    rangeDescription: (title, min, max) => `${title}, ${min} to ${max}`,
+    rangeDescription: (title: string, minimum: string, maximum: string) => `${title}, ${minimum} to ${maximum}`,
     rising: "Rising",
     runningTotal: "Running Total",
     size: "size",

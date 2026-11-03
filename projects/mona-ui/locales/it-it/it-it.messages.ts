@@ -1,11 +1,10 @@
+// Generated from it-it.messages.json by scripts/generate-locale-catalogs.ts. Do not edit.
+// Edit the JSON file and run `npm run generate:locale-catalogs`.
+
 import { formatNumber, type MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
 
-function localizeNumber(value: number): string {
-    return formatNumber(value, "it-IT");
-}
-
-function localizeYear(year: number): string {
-    return formatNumber(year, "it-IT", { useGrouping: false });
+function localizeNumber(value: number, options?: Intl.NumberFormatOptions): string {
+    return formatNumber(value, "it-IT", options);
 }
 
 export const IT_IT_MESSAGES = {
@@ -20,9 +19,10 @@ export const IT_IT_MESSAGES = {
     },
     calendar: {
         calendarLabel: (formattedMonthAndYear: string) => `Calendario, ${formattedMonthAndYear}`,
-        decadeRange: (start: number, end: number) => `${localizeYear(start)} - ${localizeYear(end)}`,
+        decadeRange: (start: number, end: number) =>
+            `${localizeNumber(start, { useGrouping: false })} - ${localizeNumber(end, { useGrouping: false })}`,
         decadeViewLabel: (start: number, end: number) =>
-            `Vista del decennio, ${localizeYear(start)} - ${localizeYear(end)}`,
+            `Vista del decennio, ${localizeNumber(start, { useGrouping: false })} - ${localizeNumber(end, { useGrouping: false })}`,
         goToToday: (formattedDate: string) => `Vai a oggi, ${formattedDate}`,
         nextDecade: "Decennio successivo",
         nextMonth: "Mese successivo",
@@ -34,7 +34,7 @@ export const IT_IT_MESSAGES = {
         switchToYearView: (currentMonthAndYear: string) =>
             `Passa alla vista dell'anno, attualmente ${currentMonthAndYear}`,
         today: "Oggi",
-        yearCellLabel: (year: number) => `Anno ${localizeYear(year)}`,
+        yearCellLabel: (year: number) => `Anno ${localizeNumber(year, { useGrouping: false })}`,
         yearViewLabel: (year: string) => `Vista dell'anno, ${year}`
     },
     card: {
@@ -303,7 +303,9 @@ export const IT_IT_MESSAGES = {
         pageText: "Pagina",
         previousPageLabel: "Pagina precedente",
         rangeStatus: (start: number, end: number, total: number) =>
-            `${localizeNumber(start)} - ${localizeNumber(end)} di ${localizeNumber(total)} ${total === 1 ? "elemento" : "elementi"}`
+            total === 1
+                ? `${localizeNumber(start)} - ${localizeNumber(end)} di ${localizeNumber(total)} elemento`
+                : `${localizeNumber(start)} - ${localizeNumber(end)} di ${localizeNumber(total)} elementi`
     },
     rating: {
         notRated: "Nessuna valutazione",

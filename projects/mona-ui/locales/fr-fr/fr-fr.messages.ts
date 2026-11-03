@@ -1,11 +1,10 @@
+// Generated from fr-fr.messages.json by scripts/generate-locale-catalogs.ts. Do not edit.
+// Edit the JSON file and run `npm run generate:locale-catalogs`.
+
 import { formatNumber, type MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
 
-function localizeNumber(value: number): string {
-    return formatNumber(value, "fr-FR");
-}
-
-function localizeYear(year: number): string {
-    return formatNumber(year, "fr-FR", { useGrouping: false });
+function localizeNumber(value: number, options?: Intl.NumberFormatOptions): string {
+    return formatNumber(value, "fr-FR", options);
 }
 
 export const FR_FR_MESSAGES = {
@@ -20,9 +19,10 @@ export const FR_FR_MESSAGES = {
     },
     calendar: {
         calendarLabel: (formattedMonthAndYear: string) => `Calendrier, ${formattedMonthAndYear}`,
-        decadeRange: (start: number, end: number) => `${localizeYear(start)} à ${localizeYear(end)}`,
+        decadeRange: (start: number, end: number) =>
+            `${localizeNumber(start, { useGrouping: false })} à ${localizeNumber(end, { useGrouping: false })}`,
         decadeViewLabel: (start: number, end: number) =>
-            `Vue par décennie, ${localizeYear(start)}–${localizeYear(end)}`,
+            `Vue par décennie, ${localizeNumber(start, { useGrouping: false })}–${localizeNumber(end, { useGrouping: false })}`,
         goToToday: (formattedDate: string) => `Aller à la date d’aujourd’hui, ${formattedDate}`,
         nextDecade: "Décennie suivante",
         nextMonth: "Mois suivant",
@@ -34,7 +34,7 @@ export const FR_FR_MESSAGES = {
         switchToYearView: (currentMonthAndYear: string) =>
             `Passer à la vue annuelle, actuellement ${currentMonthAndYear}`,
         today: "Aujourd’hui",
-        yearCellLabel: (year: number) => `Année ${localizeYear(year)}`,
+        yearCellLabel: (year: number) => `Année ${localizeNumber(year, { useGrouping: false })}`,
         yearViewLabel: (year: string) => `Vue annuelle, ${year}`
     },
     card: {
@@ -272,7 +272,8 @@ export const FR_FR_MESSAGES = {
     },
     multiSelect: {
         clear: "Effacer",
-        itemsCount: (count: number) => `+ ${localizeNumber(count)} ${count === 1 ? "élément" : "éléments"}`
+        itemsCount: (count: number) =>
+            count === 1 ? `+ ${localizeNumber(count)} élément` : `+ ${localizeNumber(count)} éléments`
     },
     notification: {
         close: "Fermer",
@@ -304,7 +305,9 @@ export const FR_FR_MESSAGES = {
         pageText: "Page",
         previousPageLabel: "Page précédente",
         rangeStatus: (start: number, end: number, total: number) =>
-            `${localizeNumber(start)}–${localizeNumber(end)} sur ${localizeNumber(total)} ${total === 1 ? "élément" : "éléments"}`
+            total === 1
+                ? `${localizeNumber(start)}–${localizeNumber(end)} sur ${localizeNumber(total)} élément`
+                : `${localizeNumber(start)}–${localizeNumber(end)} sur ${localizeNumber(total)} éléments`
     },
     rating: {
         notRated: "Non évalué",

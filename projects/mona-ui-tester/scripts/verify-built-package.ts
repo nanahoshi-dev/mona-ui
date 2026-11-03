@@ -52,6 +52,11 @@ export interface ConsumerSmokeTestOptions {
     tscPath?: string;
     /** Also smoke-tests `@nanahoshi/mona-ui/i18n/icu`. */
     verifyIcu?: boolean;
+    /**
+     * Also checks that the JSON (ICU) catalogs are exported, and, with `verifyIcu`, that each compiles to the same
+     * messages as the locale's TypeScript catalog.
+     */
+    verifyJsonCatalogs?: boolean;
 }
 
 export function resolveTypeScriptCompilerPath(repoRoot: string = process.cwd()): string {
@@ -145,6 +150,37 @@ if (validateMonaLocaleData({ direction: "ltr", id: "de-DE", messages: { pager: {
     console.error("validateMonaLocaleData did not report an unknown key");
     process.exit(1);
 }
+}
+
+if (${JSON.stringify(options.verifyJsonCatalogs === true)}) {
+    const loadJson = async specifier => (await import(specifier, { with: { type: "json" } })).default;
+    const english = await loadJson("@nanahoshi/mona-ui/i18n/catalogs/en-US.messages.json");
+    if (typeof english.pager?.nextPageLabel !== "string") {
+        console.error("Invalid JSON catalog @nanahoshi/mona-ui/i18n/catalogs/en-US.messages.json");
+        process.exit(1);
+    }
+    const icu = ${JSON.stringify(options.verifyIcu === true)} ? await import("@nanahoshi/mona-ui/i18n/icu") : null;
+    for (const expected of ${JSON.stringify(options.expectedLocales.filter(l => l.folder))}) {
+        const specifier =\`@nanahoshi/mona-ui/locales/\${expected.folder}/\${expected.folder}.messages.json\`;
+        const messages = await loadJson(specifier);
+        if (typeof messages.pager?.nextPageLabel !== "string") {
+            console.error("Invalid JSON catalog " + specifier);
+            process.exit(1);
+        }
+        if (icu != null) {
+            const compiled = icu.compileMonaLocale({ direction: "ltr", id: expected.id, messages }, { strict: true });
+            const official = locales[expected.symbol].messages;
+            const pairs = [
+                [compiled.messages.pager.nextPageLabel, official.pager.nextPageLabel],
+                [compiled.messages.pager.pageStatus(3, 1200), official.pager.pageStatus(3, 1200)],
+                [compiled.messages.pager.jumpForwardLabel(2), official.pager.jumpForwardLabel(2)]
+            ];
+            if (pairs.some(([a, b]) => a !== b)) {
+                console.error(\`\${specifier} does not compile to the messages of \${expected.symbol}\`);
+                process.exit(1);
+            }
+        }
+    }
 }
 
 const expectedLocales = ${JSON.stringify(options.expectedLocales)};
@@ -688,12 +724,33 @@ export function verifyBuiltPackage(options: PackageVerificationOptions = {}): vo
         console.log('✓ Found exports["./i18n/icu"] and its targets in dist/mona-ui/package.json');
     }
 
+    // The JSON catalogs are shipped once the source has them.
+    const verifyJsonCatalogs = existsSync(resolve(sourceLocalesDir, "../i18n/catalogs/en-US.messages.json"));
+    if (verifyJsonCatalogs) {
+        const files = [
+            "i18n/catalogs/en-US.messages.json",
+            ...expectedLocales.filter(l => l.folder).map(l => `locales/${l.folder}/${l.folder}.messages.json`)
+        ];
+        for (const file of files) {
+            const builtFile = resolve(distDir, file);
+            const sourceFile = resolve(sourceLocalesDir, "..", file);
+            if (!existsSync(builtFile)) {
+                throw new Error(`JSON catalog not found in the package at: ${builtFile}`);
+            }
+            if (readFileSync(builtFile, "utf-8").replace(/\r\n/g, "\n") !== readFileSync(sourceFile, "utf-8").replace(/\r\n/g, "\n")) {
+                throw new Error(`JSON catalog in the package differs from its source: ${file}`);
+            }
+        }
+        console.log(`✓ Found ${files.length} JSON catalogs in the package, identical to their sources`);
+    }
+
     runConsumerSmokeTest({
         distDir,
         expectedLocales,
         tscPath,
         repoRoot,
-        verifyIcu
+        verifyIcu,
+        verifyJsonCatalogs
     });
 
     console.log("\nPackage verification SUCCESS: All packaging criteria satisfied.");

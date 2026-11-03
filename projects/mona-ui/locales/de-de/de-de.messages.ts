@@ -1,11 +1,10 @@
+// Generated from de-de.messages.json by scripts/generate-locale-catalogs.ts. Do not edit.
+// Edit the JSON file and run `npm run generate:locale-catalogs`.
+
 import { formatNumber, type MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
 
-function localizeNumber(value: number): string {
-    return formatNumber(value, "de-DE");
-}
-
-function localizeYear(year: number): string {
-    return formatNumber(year, "de-DE", { useGrouping: false });
+function localizeNumber(value: number, options?: Intl.NumberFormatOptions): string {
+    return formatNumber(value, "de-DE", options);
 }
 
 export const DE_DE_MESSAGES = {
@@ -20,9 +19,10 @@ export const DE_DE_MESSAGES = {
     },
     calendar: {
         calendarLabel: (formattedMonthAndYear: string) => `Kalender, ${formattedMonthAndYear}`,
-        decadeRange: (start: number, end: number) => `${localizeYear(start)} bis ${localizeYear(end)}`,
+        decadeRange: (start: number, end: number) =>
+            `${localizeNumber(start, { useGrouping: false })} bis ${localizeNumber(end, { useGrouping: false })}`,
         decadeViewLabel: (start: number, end: number) =>
-            `Jahrzehntansicht, ${localizeYear(start)}–${localizeYear(end)}`,
+            `Jahrzehntansicht, ${localizeNumber(start, { useGrouping: false })}–${localizeNumber(end, { useGrouping: false })}`,
         goToToday: (formattedDate: string) => `Zum heutigen Datum wechseln, ${formattedDate}`,
         nextDecade: "Nächstes Jahrzehnt",
         nextMonth: "Nächster Monat",
@@ -33,7 +33,7 @@ export const DE_DE_MESSAGES = {
         switchToDecadeView: (currentYear: string) => `Zur Jahrzehntansicht wechseln, aktuell ${currentYear}`,
         switchToYearView: (currentMonthAndYear: string) => `Zur Jahresansicht wechseln, aktuell ${currentMonthAndYear}`,
         today: "Heute",
-        yearCellLabel: (year: number) => `Jahr ${localizeYear(year)}`,
+        yearCellLabel: (year: number) => `Jahr ${localizeNumber(year, { useGrouping: false })}`,
         yearViewLabel: (year: string) => `Jahresansicht, ${year}`
     },
     card: {
@@ -271,7 +271,8 @@ export const DE_DE_MESSAGES = {
     },
     multiSelect: {
         clear: "Leeren",
-        itemsCount: (count: number) => `+ ${localizeNumber(count)} ${count === 1 ? "Element" : "Elemente"}`
+        itemsCount: (count: number) =>
+            count === 1 ? `+ ${localizeNumber(count)} Element` : `+ ${localizeNumber(count)} Elemente`
     },
     notification: {
         close: "Schließen",
@@ -303,7 +304,9 @@ export const DE_DE_MESSAGES = {
         pageText: "Seite",
         previousPageLabel: "Vorherige Seite",
         rangeStatus: (start: number, end: number, total: number) =>
-            `${localizeNumber(start)}–${localizeNumber(end)} von ${localizeNumber(total)} ${total === 1 ? "Element" : "Elementen"}`
+            total === 1
+                ? `${localizeNumber(start)}–${localizeNumber(end)} von ${localizeNumber(total)} Element`
+                : `${localizeNumber(start)}–${localizeNumber(end)} von ${localizeNumber(total)} Elementen`
     },
     rating: {
         notRated: "Nicht bewertet",

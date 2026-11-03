@@ -1,11 +1,10 @@
+// Generated from tr-tr.messages.json by scripts/generate-locale-catalogs.ts. Do not edit.
+// Edit the JSON file and run `npm run generate:locale-catalogs`.
+
 import { formatNumber, type MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
 
-function localizeNumber(value: number): string {
-    return formatNumber(value, "tr-TR");
-}
-
-function localizeYear(year: number): string {
-    return formatNumber(year, "tr-TR", { useGrouping: false });
+function localizeNumber(value: number, options?: Intl.NumberFormatOptions): string {
+    return formatNumber(value, "tr-TR", options);
 }
 
 export const TR_TR_MESSAGES = {
@@ -20,9 +19,10 @@ export const TR_TR_MESSAGES = {
     },
     calendar: {
         calendarLabel: (formattedMonthAndYear: string) => `Takvim, ${formattedMonthAndYear}`,
-        decadeRange: (start: number, end: number) => `${localizeYear(start)} - ${localizeYear(end)}`,
+        decadeRange: (start: number, end: number) =>
+            `${localizeNumber(start, { useGrouping: false })} - ${localizeNumber(end, { useGrouping: false })}`,
         decadeViewLabel: (start: number, end: number) =>
-            `On yıllık görünüm, ${localizeYear(start)} - ${localizeYear(end)}`,
+            `On yıllık görünüm, ${localizeNumber(start, { useGrouping: false })} - ${localizeNumber(end, { useGrouping: false })}`,
         goToToday: (formattedDate: string) => `Bugüne git, ${formattedDate}`,
         nextDecade: "Sonraki on yıl",
         nextMonth: "Sonraki ay",
@@ -33,7 +33,7 @@ export const TR_TR_MESSAGES = {
         switchToDecadeView: (currentYear: string) => `On yıllık görünüme geç, şu anda ${currentYear}`,
         switchToYearView: (currentMonthAndYear: string) => `Yıl görünümüne geç, şu anda ${currentMonthAndYear}`,
         today: "Bugün",
-        yearCellLabel: (year: number) => `${localizeYear(year)} yılı`,
+        yearCellLabel: (year: number) => `${localizeNumber(year, { useGrouping: false })} yılı`,
         yearViewLabel: (year: string) => `Yıl görünümü, ${year}`
     },
     card: {
