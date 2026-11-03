@@ -267,7 +267,8 @@ export const KO_KR_MESSAGES = {
     },
     multiSelect: {
         clear: "지우기",
-        itemsCount: (count: number) => `+ ${localizeNumber(count)}개`
+        itemsCount: (count: number) => `+ ${localizeNumber(count)}개`,
+        removeMoreItems: (count: number) => `나머지 ${localizeNumber(count)}개 삭제`
     },
     notification: {
         close: "닫기",

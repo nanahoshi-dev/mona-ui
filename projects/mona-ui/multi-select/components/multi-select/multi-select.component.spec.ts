@@ -7,6 +7,7 @@ import {
     readonly as fieldReadonly,
     required
 } from "@angular/forms/signals";
+import axe from "axe-core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 
@@ -115,6 +116,42 @@ class SummaryTagHostComponent {
     public selectedValues: number[] = [2, 3, 1];
 }
 
+@Component({
+    template: `
+        <mona-multi-select
+            aria-describedby="food-help"
+            placeholder="Pick foods"
+            disabled
+            readonly
+            required
+            textField="text"
+            [data]="data"></mona-multi-select>
+        <span id="food-help">Pick one or more</span>
+    `,
+    imports: [MultiSelectComponent]
+})
+class AttributeMultiSelectHostComponent {
+    protected readonly data = FOOD_ITEMS;
+}
+
+@Component({
+    template: `
+        <mona-multi-select
+            placeholder="Pick foods"
+            textField="text"
+            valueField="value"
+            [valuePrimitive]="true"
+            [required]="true"
+            [data]="data"
+            [(value)]="selectedValues"></mona-multi-select>
+    `,
+    imports: [MultiSelectComponent]
+})
+class PlaceholderMultiSelectHostComponent {
+    protected readonly data = FOOD_ITEMS;
+    public selectedValues: number[] = [];
+}
+
 describe("MultiSelectComponent", () => {
     beforeEach(() => clearOverlays());
     afterEach(() => clearOverlays());
@@ -161,7 +198,7 @@ describe("MultiSelectComponent", () => {
             await waitForStable(fixture);
 
             expect(fixture.componentInstance.form.value().value()).toEqual([FOOD_ITEMS[1], FOOD_ITEMS[2]]);
-            expect(fixture.componentInstance.form.value().touched()).toBe(true);
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
             expect(getHost(fixture).textContent).toContain("Carrot");
         });
 
@@ -173,7 +210,7 @@ describe("MultiSelectComponent", () => {
             await waitForStable(fixture);
 
             expect(fixture.componentInstance.form.value().value()).toEqual([FOOD_ITEMS[2]]);
-            expect(fixture.componentInstance.form.value().touched()).toBe(true);
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
         });
 
         it("writes the remaining objects when the last tag is removed with Backspace", async () => {
@@ -195,7 +232,7 @@ describe("MultiSelectComponent", () => {
             await waitForStable(fixture);
 
             expect(fixture.componentInstance.form.value().value()).toEqual([]);
-            expect(fixture.componentInstance.form.value().touched()).toBe(true);
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
         });
 
         it("external object synchronization does not mark the field touched", async () => {
@@ -227,7 +264,7 @@ describe("MultiSelectComponent", () => {
             await waitForStable(fixture);
 
             expect(fixture.componentInstance.form.value().value()).toEqual([2, 3]);
-            expect(fixture.componentInstance.form.value().touched()).toBe(true);
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
             expect(getHost(fixture).textContent).toContain("Carrot");
         });
 
@@ -261,7 +298,7 @@ describe("MultiSelectComponent", () => {
             await waitForStable(fixture);
 
             expect(fixture.componentInstance.form.value().value()).toEqual([3]);
-            expect(fixture.componentInstance.form.value().touched()).toBe(true);
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
         });
 
         it("writes the remaining primitive values when the summary tag is removed", async () => {
@@ -295,7 +332,7 @@ describe("MultiSelectComponent", () => {
             await waitForStable(fixture);
 
             expect(fixture.componentInstance.form.value().value()).toEqual([]);
-            expect(fixture.componentInstance.form.value().touched()).toBe(true);
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
         });
 
         it("hydrates tags when primitive keys are set before data arrives", async () => {
@@ -345,11 +382,10 @@ describe("MultiSelectComponent", () => {
         });
     });
 
-    it("emits touch on blur", async () => {
+    it("emits touch when focus leaves the multi select", async () => {
         const fixture = await createObjectModeFixture();
 
-        getHost(fixture).dispatchEvent(new FocusEvent("blur"));
-        await waitForStable(fixture);
+        await leaveField(fixture);
 
         expect(fixture.componentInstance.form.value().touched()).toBe(true);
     });
@@ -442,6 +478,102 @@ describe("MultiSelectComponent", () => {
             await waitForStable(fixture);
 
             expect(getIndicator(fixture, "clear")).toBeNull();
+        });
+    });
+
+    describe("keyboard", () => {
+        it("toggles the highlighted option with Space while the popup is open", async () => {
+            const fixture = await createPrimitiveModeFixture();
+
+            await openPopup(fixture);
+            pressKey(fixture, "ArrowDown");
+            pressKey(fixture, " ");
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.form.value().value()).toEqual([2, 3]);
+            expect(getOptions().length).toBeGreaterThan(0);
+
+            pressKey(fixture, " ");
+            await waitForStable(fixture);
+            expect(fixture.componentInstance.form.value().value()).toEqual([2]);
+        });
+
+        it("opens the popup with Space while it is closed", async () => {
+            const fixture = await createPrimitiveModeFixture();
+
+            pressKey(fixture, " ");
+            await waitForStable(fixture);
+            await new Promise(resolve => setTimeout(resolve, 0));
+            await waitForStable(fixture);
+
+            expect(getHost(fixture).getAttribute("aria-expanded")).toBe("true");
+            expect(fixture.componentInstance.form.value().value()).toEqual([2]);
+        });
+    });
+
+    describe("forms and accessibility", () => {
+        it("doesn't mark the field touched while focus moves to its clear button", async () => {
+            const fixture = await createObjectModeFixture();
+
+            await leaveField(fixture, getClearButton(fixture));
+
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
+        });
+
+        it("names each chip's remove button after the item", async () => {
+            const fixture = await createPrimitiveModeFixture();
+            await selectPrimitiveOption(fixture, "Carrot");
+
+            expect(getRemoveLabels(fixture)).toEqual(["Remove, Banana", "Remove, Carrot"]);
+        });
+
+        it("says how many items the summary chip removes", async () => {
+            const fixture = await createObjectFixture(SummaryTagHostComponent);
+
+            expect(getRemoveLabels(fixture)).toEqual(["Remove, Banana", "Remove 2 more items"]);
+        });
+
+        it("shows the placeholder while nothing is selected and uses it as the name", async () => {
+            const fixture = await createObjectFixture(PlaceholderMultiSelectHostComponent);
+            const host = getHost(fixture);
+
+            expect(host.textContent).toContain("Pick foods");
+            expect(host.getAttribute("aria-label")).toBe("Pick foods");
+
+            await selectPrimitiveOption(fixture, "Apple");
+            expect(host.querySelector("mona-chip")).not.toBeNull();
+            expect(host.textContent).not.toContain("Pick foods");
+        });
+
+        it("accepts bare boolean attributes and links a description", async () => {
+            const fixture = await createObjectFixture(AttributeMultiSelectHostComponent);
+            const host = getHost(fixture);
+
+            expect(host.getAttribute("aria-disabled")).toBe("true");
+            expect(host.getAttribute("aria-readonly")).toBe("true");
+            expect(host.getAttribute("aria-required")).toBe("true");
+            expect(host.getAttribute("aria-describedby")).toBe("food-help");
+            expect(host.hasAttribute("tabindex")).toBe(false);
+        });
+
+        it("keeps the result count out of the combobox's content", async () => {
+            const fixture = await createObjectModeFixture();
+
+            expect(getHost(fixture).querySelector("[aria-live]")).toBeNull();
+            expect(getHost(fixture).textContent).not.toContain("result");
+        });
+
+        it("has no AXE violations with only a placeholder to name it", async () => {
+            const fixture = await createObjectFixture(PlaceholderMultiSelectHostComponent);
+            await selectPrimitiveOption(fixture, "Apple");
+            await new Promise(resolve => setTimeout(resolve, 0));
+            await waitForStable(fixture);
+
+            const results = await axe.run(fixture.nativeElement as HTMLElement, {
+                rules: { "color-contrast": { enabled: false } }
+            });
+
+            expect(results.violations).toEqual([]);
         });
     });
 
@@ -547,6 +679,17 @@ async function selectPrimitiveOption(fixture: ComponentFixture<unknown>, text: s
     await openPopup(fixture);
     getOption(text).click();
     await waitForStable(fixture);
+}
+
+async function leaveField(fixture: ComponentFixture<unknown>, relatedTarget: EventTarget | null = null): Promise<void> {
+    getHost(fixture).dispatchEvent(new FocusEvent("focusout", { bubbles: true, relatedTarget }));
+    await waitForStable(fixture);
+}
+
+function getRemoveLabels(fixture: ComponentFixture<unknown>): (string | null)[] {
+    return Array.from(getHost(fixture).querySelectorAll("button[data-chip-remove]")).map(button =>
+        button.getAttribute("aria-label")
+    );
 }
 
 function pressKey(fixture: ComponentFixture<unknown>, key: string): void {

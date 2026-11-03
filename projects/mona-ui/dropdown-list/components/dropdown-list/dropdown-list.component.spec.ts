@@ -8,6 +8,7 @@ import {
     readonly as fieldReadonly,
     required
 } from "@angular/forms/signals";
+import axe from "axe-core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 
@@ -20,6 +21,42 @@ const FOOD_ITEMS: readonly FoodItem[] = [
     { text: "Carrot", value: 3 },
     { text: "Date", value: 0 }
 ];
+
+@Component({
+    template: `
+        <span id="food-label">Food</span>
+        <mona-dropdown-list
+            aria-labelledby="food-label"
+            aria-describedby="food-help"
+            disabled
+            readonly
+            required
+            showClearButton
+            textField="text"
+            [data]="data"></mona-dropdown-list>
+        <span id="food-help">Pick a food</span>
+    `,
+    imports: [DropdownListComponent]
+})
+class AttributeDropdownListHostComponent {
+    protected readonly data = FOOD_ITEMS;
+}
+
+@Component({
+    template: `
+        <span id="food-label">Food</span>
+        <mona-dropdown-list
+            aria-labelledby="food-label"
+            textField="text"
+            [data]="data"
+            [required]="true"
+            [value]="data[1]"></mona-dropdown-list>
+    `,
+    imports: [DropdownListComponent]
+})
+class LabelledDropdownListHostComponent {
+    protected readonly data = FOOD_ITEMS;
+}
 
 @Component({
     template: `
@@ -214,7 +251,7 @@ describe("DropdownListComponent", () => {
             await waitForStable(fixture);
 
             expect(fixture.componentInstance.form.value().value()).toEqual(FOOD_ITEMS[2]);
-            expect(fixture.componentInstance.form.value().touched()).toBe(true);
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
             expect(getHost(fixture).textContent).toContain("Carrot");
         });
 
@@ -225,7 +262,7 @@ describe("DropdownListComponent", () => {
             await waitForStable(fixture);
 
             expect(fixture.componentInstance.form.value().value()).toBeNull();
-            expect(fixture.componentInstance.form.value().touched()).toBe(true);
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
         });
 
         it("writes the complete object through a two-way value binding", async () => {
@@ -273,7 +310,7 @@ describe("DropdownListComponent", () => {
             await waitForStable(fixture);
 
             expect(fixture.componentInstance.form.value().value()).toBe(3);
-            expect(fixture.componentInstance.form.value().touched()).toBe(true);
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
             expect(getHost(fixture).textContent).toContain("Carrot");
         });
 
@@ -353,7 +390,7 @@ describe("DropdownListComponent", () => {
             await waitForStable(fixture);
 
             expect(fixture.componentInstance.form.value().value()).toBeNull();
-            expect(fixture.componentInstance.form.value().touched()).toBe(true);
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
         });
 
         it("treats zero as a valid selected value", async () => {
@@ -452,11 +489,10 @@ describe("DropdownListComponent", () => {
         });
     });
 
-    it("emits touch on blur", async () => {
+    it("emits touch when focus leaves the dropdown list", async () => {
         const fixture = await createObjectModeFixture();
 
-        getHost(fixture).dispatchEvent(new FocusEvent("blur"));
-        await waitForStable(fixture);
+        await leaveField(fixture);
 
         expect(fixture.componentInstance.form.value().touched()).toBe(true);
     });
@@ -651,6 +687,68 @@ describe("DropdownListComponent", () => {
         });
     });
 
+    describe("forms and accessibility", () => {
+        it("doesn't mark the field touched while focus moves to its clear button", async () => {
+            const fixture = await createObjectModeFixture();
+
+            await leaveField(fixture, getClearButton(fixture));
+
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
+        });
+
+        it("doesn't mark the field touched when the arrow keys change the value", async () => {
+            const fixture = await createObjectModeFixture();
+
+            pressKey(fixture, "ArrowDown");
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.form.value().value()).toEqual(FOOD_ITEMS[2]);
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
+        });
+
+        it("accepts bare boolean attributes", async () => {
+            const fixture = await createObjectFixture(AttributeDropdownListHostComponent);
+            const host = getHost(fixture);
+
+            expect(host.getAttribute("aria-disabled")).toBe("true");
+            expect(host.getAttribute("aria-readonly")).toBe("true");
+            expect(host.getAttribute("aria-required")).toBe("true");
+            expect(host.hasAttribute("tabindex")).toBe(false);
+        });
+
+        it("links a description through aria-describedby", async () => {
+            const fixture = await createObjectFixture(AttributeDropdownListHostComponent);
+
+            expect(getHost(fixture).getAttribute("aria-describedby")).toBe("food-help");
+            expect(getHost(fixture).getAttribute("aria-labelledby")).toBe("food-label");
+            expect(getHost(fixture).hasAttribute("aria-label")).toBe(false);
+        });
+
+        it("leaves empty ARIA references off the host", async () => {
+            const fixture = await createObjectModeFixture();
+
+            expect(getHost(fixture).hasAttribute("aria-describedby")).toBe(false);
+            expect(getHost(fixture).hasAttribute("aria-labelledby")).toBe(false);
+        });
+
+        it("keeps the result count out of the combobox's content", async () => {
+            const fixture = await createObjectModeFixture();
+
+            expect(getHost(fixture).querySelector("[aria-live]")).toBeNull();
+            expect(getHost(fixture).textContent?.trim()).toBe("Banana");
+        });
+
+        it("has no AXE violations when labelled and required", async () => {
+            const fixture = await createObjectFixture(LabelledDropdownListHostComponent);
+
+            const results = await axe.run(fixture.nativeElement as HTMLElement, {
+                rules: { "color-contrast": { enabled: false } }
+            });
+
+            expect(results.violations).toEqual([]);
+        });
+    });
+
     describe("i18n", () => {
         it("renders default English clear label on indicator icon", async () => {
             const fixture = await createObjectModeFixture();
@@ -716,6 +814,11 @@ async function openPopup(fixture: ComponentFixture<unknown>): Promise<void> {
     getHost(fixture).click();
     await waitForStable(fixture);
     await new Promise(resolve => setTimeout(resolve, 0));
+    await waitForStable(fixture);
+}
+
+async function leaveField(fixture: ComponentFixture<unknown>, relatedTarget: EventTarget | null = null): Promise<void> {
+    getHost(fixture).dispatchEvent(new FocusEvent("focusout", { bubbles: true, relatedTarget }));
     await waitForStable(fixture);
 }
 

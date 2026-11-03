@@ -251,7 +251,8 @@
     },
     "multiSelect": {
         "clear": "クリア",
-        "itemsCount": "+ {count}件"
+        "itemsCount": "+ {count}件",
+        "removeMoreItems": "他の{count}件を削除"
     },
     "notification": {
         "close": "閉じる",

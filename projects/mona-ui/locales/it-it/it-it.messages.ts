@@ -271,7 +271,9 @@ export const IT_IT_MESSAGES = {
     },
     multiSelect: {
         clear: "Cancella",
-        itemsCount: (count: number) => (count === 1 ? "+ 1 elemento" : `+ ${localizeNumber(count)} elementi`)
+        itemsCount: (count: number) => (count === 1 ? "+ 1 elemento" : `+ ${localizeNumber(count)} elementi`),
+        removeMoreItems: (count: number) =>
+            count === 1 ? "Rimuovi un altro elemento" : `Rimuovi altri ${localizeNumber(count)} elementi`
     },
     notification: {
         close: "Chiudi",

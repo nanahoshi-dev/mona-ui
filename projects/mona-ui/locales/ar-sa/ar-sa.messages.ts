@@ -276,7 +276,8 @@ export const AR_SA_MESSAGES = {
     },
     multiSelect: {
         clear: "مسح",
-        itemsCount: (count: number) => `+ ${localizeNumber(count)}`
+        itemsCount: (count: number) => `+ ${localizeNumber(count)}`,
+        removeMoreItems: (count: number) => `حذف العناصر الإضافية (${localizeNumber(count)})`
     },
     notification: {
         close: "إغلاق",

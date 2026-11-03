@@ -1,6 +1,7 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
+    booleanAttribute,
     Component,
     computed,
     contentChild,
@@ -78,7 +79,7 @@ const cancellingCloseSources: ReadonlySet<PopupCloseSource | undefined> = new Se
 @Component({
     selector: "mona-dropdown-list",
     templateUrl: "./dropdown-list.component.html",
-    hostDirectives: [DropdownDataHandlerDirective, DropdownListPopupHandlerDirective],
+    hostDirectives: [DropdownDataHandlerDirective, DropdownListPopupHandlerDirective, DropdownLiveRegionDirective],
     providers: [
         ListService,
         DropdownService,
@@ -102,19 +103,19 @@ const cancellingCloseSources: ReadonlySet<PopupCloseSource | undefined> = new Se
         ListFooterTemplateDirective,
         ListHeaderTemplateDirective,
         ListNoDataTemplateDirective,
-        DropdownLiveRegionDirective,
         IndicatorIconComponent
     ],
     host: {
         "[attr.aria-activedescendant]": "activeDescendant()",
         "[attr.aria-busy]": "loading() ? 'true' : undefined",
         "[attr.aria-controls]": "listId",
+        "[attr.aria-describedby]": "ariaDescribedBy() || null",
         "[attr.aria-disabled]": "disabled() ? true : undefined",
         "[attr.aria-expanded]": "expanded()",
         "[attr.aria-haspopup]": "'listbox'",
         "[attr.aria-invalid]": "invalidState() ? true : undefined",
         "[attr.aria-label]": "effectiveAriaLabel() || null",
-        "[attr.aria-labelledby]": "ariaLabelledBy()",
+        "[attr.aria-labelledby]": "ariaLabelledBy() || null",
         "[attr.aria-readonly]": "readonly() ? true : undefined",
         "[attr.aria-required]": "required() ? true : undefined",
         "[attr.data-disabled]": "disabled() || null",
@@ -123,7 +124,7 @@ const cancellingCloseSources: ReadonlySet<PopupCloseSource | undefined> = new Se
         "[attr.role]": "'combobox'",
         "[attr.tabindex]": "disabled() ? null : 0",
         "[class]": "baseClass()",
-        "(blur)": "onBlur($event)"
+        "(focusout)": "onFocusOut($event)"
     }
 })
 export class DropdownListComponent<TData = unknown, TValue = TData>
@@ -222,6 +223,12 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
     });
 
     /**
+     * @description ID of an element that describes the dropdown list, such as help text or an error message.
+     * @default ""
+     */
+    public readonly ariaDescribedBy = input("", { alias: "aria-describedby" });
+
+    /**
      * @description Accessible name for the host element. Describe what the component represents.
      * When empty, falls back to the placeholder text.
      * @default ""
@@ -254,13 +261,13 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
      * @description Renders the component with reduced visual emphasis and removes pointer interaction.
      * @default false
      */
-    public readonly disabled = model(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
      * @description Marks the field as invalid. Set automatically by the `FormField` directive when bound via `[formField]`.
      * @default false
      */
-    public readonly invalid = input(false);
+    public readonly invalid = input(false, { transform: booleanAttribute });
 
     /**
      * @description Predicate or field name used to determine whether an individual item is disabled.
@@ -272,7 +279,7 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
      * @description Displays a loading indicator and prevents interaction while an operation is in progress.
      * @default false
      */
-    public readonly loading = input(false);
+    public readonly loading = input(false, { transform: booleanAttribute });
 
     /**
      * @description Emitted when the popup is about to open. This event is preventable.
@@ -312,13 +319,13 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
      * @description Prevents value changes while preserving the component's visual state.
      * @default false
      */
-    public readonly readonly = input(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
 
     /**
      * @description Marks the field as required for form validation.
      * @default false
      */
-    public readonly required = input(false);
+    public readonly required = input(false, { transform: booleanAttribute });
 
     /**
      * @description Border-radius preset applied to the component.
@@ -330,7 +337,7 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
      * @description Shows a clear button that resets the selected value when clicked.
      * @default false
      */
-    public readonly showClearButton = input(false);
+    public readonly showClearButton = input(false, { transform: booleanAttribute });
 
     /**
      * @description Size preset controlling the component's dimensions.
@@ -346,8 +353,8 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
     public readonly textField = input<DropdownFieldSelectorType<TData, string>>();
 
     /**
-     * @description Emitted when the control is interacted with via blur, selection, or clear.
-     * The `FormField` directive listens to this to mark the field as touched.
+     * @description Emitted when focus leaves the dropdown list. Moving between it, its clear button and its popup
+     * doesn't count. The `FormField` directive listens to this to mark the field as touched.
      */
     public readonly touch = output<void>();
 
@@ -355,7 +362,7 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
      * @description Marks the control as touched. Set automatically by the `FormField` directive when bound via `[formField]`.
      * @default false
      */
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
 
     /**
      * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
@@ -390,7 +397,7 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
      *
      * @default false
      */
-    public readonly valuePrimitive = input(false);
+    public readonly valuePrimitive = input(false, { transform: booleanAttribute });
 
     public constructor() {
         effect(() => {
@@ -432,10 +439,17 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
         this.updateValue(value);
     }
 
-    protected onBlur(event?: FocusEvent): void {
-        const popupElement = this.#dropdownService.popupRef()?.overlayRef.overlayElement;
-        if (popupElement && event?.relatedTarget instanceof Node && popupElement.contains(event.relatedTarget)) {
+    protected onFocusOut(event: FocusEvent): void {
+        // Removing a focused dropdown from the page fires focusout after it is destroyed.
+        if (this.#destroyRef.destroyed) {
             return;
+        }
+        const nextTarget = event.relatedTarget;
+        if (nextTarget instanceof Node) {
+            const popupElement = this.#dropdownService.popupRef()?.overlayRef.overlayElement;
+            if (this.#hostElementRef.nativeElement.contains(nextTarget) || popupElement?.contains(nextTarget)) {
+                return;
+            }
         }
         this.touch.emit();
     }
@@ -449,7 +463,7 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
             this.#navigatedItem.set(event.item.data);
             return;
         }
-        this.updateValue(this.getControlValue(event.item.data), true);
+        this.updateValue(this.getControlValue(event.item.data));
         if (event.source.via === "mouse" || event.source.key === "Enter" || event.source.key === "NumpadEnter") {
             this.closePopup();
         }
@@ -493,7 +507,7 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
         this.#listService.selectItem(nextItem);
         const expanded = this.expanded();
         if (!expanded) {
-            this.updateValue(this.getControlValue(nextItem.data), true);
+            this.updateValue(this.getControlValue(nextItem.data));
         } else {
             this.scrollToSelectedItem();
             this.#navigatedItem.set(nextItem.data);
@@ -512,7 +526,7 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
         }
         const navigatedItem = this.#navigatedItem();
         if (navigatedItem && this.value() !== this.getControlValue(navigatedItem)) {
-            this.updateValue(this.getControlValue(navigatedItem), true);
+            this.updateValue(this.getControlValue(navigatedItem));
         }
         this.closePopup();
     }
@@ -527,7 +541,7 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
         }
         this.#listService.selectItem(itemToSelect, true, false);
         if (!this.expanded()) {
-            this.updateValue(this.getControlValue(itemToSelect.data), true);
+            this.updateValue(this.getControlValue(itemToSelect.data));
         } else {
             this.#navigatedItem.set(itemToSelect.data);
         }
@@ -549,7 +563,7 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
     private setArrowKeyNavigationSubscription(): void {
         this.#dropdownListService.navigate$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(({ item }) => {
             if (!this.expanded()) {
-                this.updateValue(this.getControlValue(item.data), true);
+                this.updateValue(this.getControlValue(item.data));
             } else {
                 this.#navigatedItem.set(item.data);
             }
@@ -589,10 +603,13 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
                 this.#navigatedItem.set(this.selectedDataItem());
             } else {
                 const navigatedItem = this.#navigatedItem();
-                this.updateValue(navigatedItem ? this.getControlValue(navigatedItem) : null, true);
+                this.updateValue(navigatedItem ? this.getControlValue(navigatedItem) : null);
             }
             if (this.#dropdownService.focusCanReturn()) {
                 window.setTimeout(() => this.focus());
+            } else if (!this.#destroyRef.destroyed) {
+                // Focus left from inside the popup (its filter box), so the host never saw a focusout.
+                this.touch.emit();
             }
         });
     }
@@ -623,13 +640,9 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
         }
     }
 
-    private updateValue(value: TValue | null, notify: boolean = true): void {
-        const oldValue = this.value();
-        if (oldValue !== value) {
+    private updateValue(value: TValue | null): void {
+        if (this.value() !== value) {
             this.value.set(value);
-        }
-        if (notify && oldValue !== value) {
-            this.touch.emit();
         }
     }
 }

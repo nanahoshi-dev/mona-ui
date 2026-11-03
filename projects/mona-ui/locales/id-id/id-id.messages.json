@@ -251,7 +251,8 @@
     },
     "multiSelect": {
         "clear": "Bersihkan",
-        "itemsCount": "+ {count} item"
+        "itemsCount": "+ {count} item",
+        "removeMoreItems": "Hapus {count} item lainnya"
     },
     "notification": {
         "close": "Tutup",

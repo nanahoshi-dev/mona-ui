@@ -7,6 +7,7 @@ import {
     readonly as fieldReadonly,
     required
 } from "@angular/forms/signals";
+import axe from "axe-core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 
@@ -17,6 +18,25 @@ const FOOD_ITEMS: readonly FoodItem[] = [
     { text: "Banana", value: 2 },
     { text: "Carrot", value: 3 }
 ];
+
+@Component({
+    template: `
+        <label for="food-input">Food</label>
+        <mona-auto-complete
+            inputId="food-input"
+            aria-describedby="food-help"
+            disabled
+            readonly
+            required
+            showClearButton
+            [data]="data"></mona-auto-complete>
+        <span id="food-help">Pick a food</span>
+    `,
+    imports: [AutoCompleteComponent]
+})
+class AttributeAutoCompleteHostComponent {
+    protected readonly data = FOOD_ITEMS;
+}
 
 @Component({
     template: `
@@ -82,7 +102,7 @@ describe("AutoCompleteComponent", () => {
         expect(fixture.componentInstance.form.value().value()).toBe("Banana");
     });
 
-    it("updates the signal form value and touched state when an option is selected", async () => {
+    it("updates the signal form value when an option is selected, and marks it touched only on leaving", async () => {
         const fixture = await createSignalFormFixture();
 
         await openPopup(fixture);
@@ -90,15 +110,17 @@ describe("AutoCompleteComponent", () => {
         await waitForStable(fixture);
 
         expect(fixture.componentInstance.form.value().value()).toBe("Carrot");
-        expect(fixture.componentInstance.form.value().touched()).toBe(true);
+        expect(fixture.componentInstance.form.value().touched()).toBe(false);
         expect(getInput(fixture).value).toBe("Carrot");
+
+        await leaveField(fixture);
+        expect(fixture.componentInstance.form.value().touched()).toBe(true);
     });
 
-    it("emits touch on input blur", async () => {
+    it("emits touch when focus leaves the auto-complete", async () => {
         const fixture = await createSignalFormFixture();
 
-        getInput(fixture).dispatchEvent(new FocusEvent("blur"));
-        await waitForStable(fixture);
+        await leaveField(fixture);
 
         expect(fixture.componentInstance.form.value().touched()).toBe(true);
     });
@@ -111,7 +133,7 @@ describe("AutoCompleteComponent", () => {
         getHost(fixture).click();
         await waitForStable(fixture);
 
-        expect(getHost(fixture).getAttribute("aria-disabled")).toBe("true");
+        expect(getHost(fixture).hasAttribute("aria-disabled")).toBe(false);
         expect(getHost(fixture).getAttribute("data-disabled")).toBe("true");
         expect(getHost(fixture).classList.contains("bg-disabled-background")).toBe(true);
         expect(getHost(fixture).classList.contains("border-disabled-border")).toBe(true);
@@ -129,7 +151,7 @@ describe("AutoCompleteComponent", () => {
         getHost(fixture).click();
         await waitForStable(fixture);
 
-        expect(getHost(fixture).getAttribute("aria-readonly")).toBe("true");
+        expect(getHost(fixture).hasAttribute("aria-readonly")).toBe(false);
         expect(getHost(fixture).getAttribute("data-readonly")).toBe("true");
         expect(getInput(fixture).readOnly).toBe(true);
         expect(getOptions().length).toBe(0);
@@ -143,7 +165,7 @@ describe("AutoCompleteComponent", () => {
         await waitForStable(fixture);
 
         expect(fixture.componentInstance.form.value().value()).toBeNull();
-        expect(fixture.componentInstance.form.value().touched()).toBe(true);
+        expect(fixture.componentInstance.form.value().touched()).toBe(false);
         expect(getInput(fixture).value).toBe("");
     });
 
@@ -174,13 +196,15 @@ describe("AutoCompleteComponent", () => {
         await waitForStable(fixture);
 
         expect(field.invalid()).toBe(true);
-        expect(getHost(fixture).getAttribute("aria-invalid")).toBe("true");
+        expect(getHost(fixture).hasAttribute("aria-invalid")).toBe(false);
+        expect(getHost(fixture).hasAttribute("aria-required")).toBe(false);
         expect(getInput(fixture).getAttribute("aria-invalid")).toBe("true");
+        expect(getInput(fixture).required).toBe(true);
         expect(getHost(fixture).className).toContain("border-error");
         expect(getHost(fixture).className).toContain("focus-within:ring-error/35");
     });
 
-    it("falls back the input's accessible name to the placeholder when no aria-label is provided", async () => {
+    it("leaves the input's name to its placeholder when no label is given", async () => {
         await TestBed.configureTestingModule({
             imports: [AutoCompleteComponent]
         }).compileComponents();
@@ -189,7 +213,9 @@ describe("AutoCompleteComponent", () => {
         fixture.componentRef.setInput("placeholder", "Search foods");
         fixture.detectChanges();
 
-        expect(getInput(fixture).getAttribute("aria-label")).toBe("Search foods");
+        // An aria-label copied from the placeholder would hide a <label for> pointed at inputId.
+        expect(getInput(fixture).hasAttribute("aria-label")).toBe(false);
+        expect(getInput(fixture).placeholder).toBe("Search foods");
     });
 
     it("exposes a single combobox role and tab stop on the input, not the host", async () => {
@@ -255,8 +281,7 @@ describe("AutoCompleteComponent", () => {
             const fixture = await createSignalFormFixture();
 
             await typeText(fixture, "");
-            getInput(fixture).dispatchEvent(new FocusEvent("blur"));
-            await waitForStable(fixture);
+            await leaveField(fixture);
 
             expect(fixture.componentInstance.form.value().value()).toBeNull();
             expect(getIndicator(fixture, "clear")).toBeNull();
@@ -278,6 +303,97 @@ describe("AutoCompleteComponent", () => {
             await waitForStable(fixture);
 
             expect(getIndicator(fixture, "clear")).toBeNull();
+        });
+    });
+
+    describe("forms and accessibility", () => {
+        it("doesn't mark the field touched while focus moves to its clear button", async () => {
+            const fixture = await createSignalFormFixture();
+
+            await leaveField(fixture, getClearButton(fixture));
+
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
+        });
+
+        it("doesn't mark the field touched when typing changes the value", async () => {
+            const fixture = await createSignalFormFixture();
+
+            await typeText(fixture, "");
+
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
+        });
+
+        it("applies disabled to the input in the same change detection pass", async () => {
+            await TestBed.configureTestingModule({
+                imports: [AutoCompleteComponent]
+            }).compileComponents();
+            const fixture = TestBed.createComponent(AutoCompleteComponent);
+            fixture.detectChanges();
+
+            fixture.componentRef.setInput("disabled", true);
+            fixture.detectChanges();
+
+            expect(getInput(fixture).disabled).toBe(true);
+        });
+
+        it("shows the picked option's text even when that option was already the value", async () => {
+            const fixture = await createSignalFormFixture();
+
+            await typeText(fixture, "Ban");
+            getOption("Banana").click();
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.form.value().value()).toBe("Banana");
+            expect(getInput(fixture).value).toBe("Banana");
+        });
+
+        it("accepts bare boolean attributes and moves the state to the input", async () => {
+            await TestBed.configureTestingModule({
+                imports: [AttributeAutoCompleteHostComponent]
+            }).compileComponents();
+            const fixture = TestBed.createComponent(AttributeAutoCompleteHostComponent);
+            await waitForStable(fixture);
+            const input = getInput(fixture);
+
+            expect(input.disabled).toBe(true);
+            expect(input.readOnly).toBe(true);
+            expect(input.required).toBe(true);
+            expect(getHost(fixture).getAttribute("data-disabled")).toBe("true");
+        });
+
+        it("labels the input through inputId and keeps the host free of ARIA", async () => {
+            await TestBed.configureTestingModule({
+                imports: [AttributeAutoCompleteHostComponent]
+            }).compileComponents();
+            const fixture = TestBed.createComponent(AttributeAutoCompleteHostComponent);
+            await waitForStable(fixture);
+            const input = getInput(fixture);
+            const host = getHost(fixture);
+
+            expect(input.id).toBe("food-input");
+            expect(input.labels?.[0]?.textContent).toBe("Food");
+            expect(input.getAttribute("aria-describedby")).toBe("food-help");
+            expect(Array.from(host.attributes).filter(a => a.name.startsWith("aria-"))).toEqual([]);
+        });
+
+        it("renders no live region inside the field", async () => {
+            const fixture = await createSignalFormFixture();
+
+            expect(getHost(fixture).querySelector("[aria-live]")).toBeNull();
+        });
+
+        it("has no AXE violations when labelled, required and read-only", async () => {
+            await TestBed.configureTestingModule({
+                imports: [AttributeAutoCompleteHostComponent]
+            }).compileComponents();
+            const fixture = TestBed.createComponent(AttributeAutoCompleteHostComponent);
+            await waitForStable(fixture);
+
+            const results = await axe.run(fixture.nativeElement as HTMLElement, {
+                rules: { "color-contrast": { enabled: false } }
+            });
+
+            expect(results.violations).toEqual([]);
         });
     });
 
@@ -340,6 +456,11 @@ async function typeText(fixture: ComponentFixture<unknown>, text: string): Promi
     await new Promise(resolve => setTimeout(resolve, 0));
     await waitForStable(fixture);
     await new Promise(resolve => setTimeout(resolve, 0));
+    await waitForStable(fixture);
+}
+
+async function leaveField(fixture: ComponentFixture<unknown>, relatedTarget: EventTarget | null = null): Promise<void> {
+    getInput(fixture).dispatchEvent(new FocusEvent("focusout", { bubbles: true, relatedTarget }));
     await waitForStable(fixture);
 }
 

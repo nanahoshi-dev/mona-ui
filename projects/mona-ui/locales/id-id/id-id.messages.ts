@@ -267,7 +267,8 @@ export const ID_ID_MESSAGES = {
     },
     multiSelect: {
         clear: "Bersihkan",
-        itemsCount: (count: number) => `+ ${localizeNumber(count)} item`
+        itemsCount: (count: number) => `+ ${localizeNumber(count)} item`,
+        removeMoreItems: (count: number) => `Hapus ${localizeNumber(count)} item lainnya`
     },
     notification: {
         close: "Tutup",

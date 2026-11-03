@@ -1,6 +1,7 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
+    booleanAttribute,
     Component,
     computed,
     contentChild,
@@ -18,7 +19,6 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { FormsModule } from "@angular/forms";
 import type { FormValueControl } from "@angular/forms/signals";
 import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import { createElementControlId, rxTimeout } from "@nanahoshi/mona-ui/internal";
@@ -75,7 +75,7 @@ import {
 @Component({
     selector: "mona-auto-complete",
     templateUrl: "./auto-complete.component.html",
-    hostDirectives: [DropdownDataHandlerDirective, DropdownListPopupHandlerDirective],
+    hostDirectives: [DropdownDataHandlerDirective, DropdownListPopupHandlerDirective, DropdownLiveRegionDirective],
     providers: [
         ListService,
         DropdownService,
@@ -92,7 +92,6 @@ import {
     ],
     imports: [
         TextBoxDirective,
-        FormsModule,
         NgTemplateOutlet,
         ListComponent,
         ListGroupHeaderTemplateDirective,
@@ -100,20 +99,20 @@ import {
         ListHeaderTemplateDirective,
         ListNoDataTemplateDirective,
         ListItemTemplateDirective,
-        DropdownLiveRegionDirective,
         IndicatorIconComponent
     ],
     host: {
-        "[attr.aria-disabled]": "disabled() ? true : undefined",
-        "[attr.aria-haspopup]": "'listbox'",
-        "[attr.aria-invalid]": "invalidState() ? true : undefined",
-        "[attr.aria-readonly]": "readonly() ? true : undefined",
-        "[attr.aria-required]": "required() ? true : undefined",
+        // The host has no role: the inner input is the combobox and carries the name, description and state. A static
+        // aria-* attribute written on <mona-auto-complete> would otherwise stay on the host as well.
+        "[attr.aria-describedby]": "null",
+        "[attr.aria-label]": "null",
+        "[attr.aria-labelledby]": "null",
         "[attr.data-disabled]": "disabled() || null",
         "[attr.data-invalid]": "invalidState() || null",
         "[attr.data-readonly]": "readonly() || null",
         "[attr.tabindex]": "-1",
-        "[class]": "baseClass()"
+        "[class]": "baseClass()",
+        "(focusout)": "onFocusOut($event)"
     }
 })
 export class AutoCompleteComponent<TData = unknown>
@@ -166,16 +165,12 @@ export class AutoCompleteComponent<TData = unknown>
             !this.disabled() &&
             !this.readonly()
     );
-    protected readonly effectiveAriaLabel = computed(
-        () => this.ariaLabel() || (this.ariaLabelledBy() ? "" : this.placeholder())
-    );
     protected readonly expanded = computed(() => this.#popupRef() !== null);
     protected readonly footerTemplate = contentChild(DropdownFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderTemplate = contentChild(DropdownGroupHeaderTemplateDirective, {
         read: TemplateRef
     });
     protected readonly headerTemplate = contentChild(DropdownHeaderTemplateDirective, { read: TemplateRef });
-    protected readonly id = createElementControlId();
     protected readonly inputClass = computed(() => {
         const rounded = this.rounded();
         return autoCompleteTextInputThemeVariants({ rounded });
@@ -212,8 +207,9 @@ export class AutoCompleteComponent<TData = unknown>
     public readonly ariaDescribedBy = input("", { alias: "aria-describedby" });
 
     /**
-     * @description Accessible name for the input. Describe what the autocomplete represents.
-     * Falls back to {@link placeholder} when neither this nor {@link ariaLabelledBy} is set.
+     * @description Accessible name for the input. Describe what the autocomplete represents. Prefer a visible label,
+     * linked through {@link inputId} or {@link ariaLabelledBy}; without any of them, browsers fall back to the
+     * {@link placeholder}.
      * @default ""
      */
     public readonly ariaLabel = input("", { alias: "aria-label" });
@@ -244,20 +240,27 @@ export class AutoCompleteComponent<TData = unknown>
      * @description Renders the component with reduced visual emphasis and removes pointer interaction.
      * @default false
      */
-    public readonly disabled = model(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
      * @description Defines whether the first matching item should be highlighted while typing.
      * @default true
      */
-    public readonly highlightFirst = input(true);
+    public readonly highlightFirst = input(true, { transform: booleanAttribute });
+
+    /**
+     * @description Id of the inner `<input>` element. Point a `<label for>` or `<mona-label for>` at it to label the
+     * autocomplete. A unique id is generated when it isn't set.
+     * @default generated
+     */
+    public readonly inputId = input(createElementControlId());
 
     /**
      * @description Marks the autocomplete as invalid. When bound to a signal form field via `[formField]`,
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly invalid = input(false);
+    public readonly invalid = input(false, { transform: booleanAttribute });
 
     /**
      * @description Predicate or field name used to determine whether an individual item is disabled.
@@ -269,7 +272,7 @@ export class AutoCompleteComponent<TData = unknown>
      * @description Displays a loading indicator and prevents interaction while an operation is in progress.
      * @default false
      */
-    public readonly loading = input(false);
+    public readonly loading = input(false, { transform: booleanAttribute });
 
     /**
      * @description Emits when the popup is about to open. This event is preventable.
@@ -309,13 +312,13 @@ export class AutoCompleteComponent<TData = unknown>
      * @description Prevents value changes while preserving the component's visual state.
      * @default false
      */
-    public readonly readonly = input(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
 
     /**
      * @description Marks the field as required for form validation.
      * @default false
      */
-    public readonly required = input(false);
+    public readonly required = input(false, { transform: booleanAttribute });
 
     /**
      * @description Border-radius preset applied to the component.
@@ -324,10 +327,11 @@ export class AutoCompleteComponent<TData = unknown>
     public readonly rounded = input<AutoCompleteVariantProps["rounded"]>("medium");
 
     /**
-     * @description Displays a button that clears the current value when clicked.
+     * @description Displays a button that clears the current value when clicked. Unlike the other dropdowns, this
+     * defaults to `true`.
      * @default true
      */
-    public readonly showClearButton = input(true);
+    public readonly showClearButton = input(true, { transform: booleanAttribute });
 
     /**
      * @description Size preset controlling the component's dimensions.
@@ -343,8 +347,8 @@ export class AutoCompleteComponent<TData = unknown>
     public readonly textField = input<DropdownFieldSelectorType<TData, string>>(null);
 
     /**
-     * @description Emitted when the autocomplete is interacted with on blur, selection, clear, or committed input.
-     * The `FormField` directive listens to this to mark the field as touched.
+     * @description Emitted when focus leaves the autocomplete. Moving between its input, clear button and popup
+     * doesn't count. The `FormField` directive listens to this to mark the field as touched.
      */
     public readonly touch = output<void>();
 
@@ -353,7 +357,7 @@ export class AutoCompleteComponent<TData = unknown>
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
 
     /**
      * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
@@ -396,15 +400,29 @@ export class AutoCompleteComponent<TData = unknown>
         }
     }
 
-    protected onInputBlur(event: FocusEvent): void {
-        const popupElement = this.#dropdownService.popupRef()?.overlayRef.overlayElement;
-        if (popupElement && event?.relatedTarget instanceof Node && popupElement.contains(event.relatedTarget)) {
+    protected onFocusOut(event: FocusEvent): void {
+        // Removing a focused dropdown from the page fires focusout after it is destroyed.
+        if (this.#destroyRef.destroyed) {
             return;
         }
-        this.touch.emit();
+        const nextTarget = event.relatedTarget;
+        if (nextTarget instanceof Node) {
+            const popupElement = this.#popupRef()?.overlayRef.overlayElement;
+            if (this.#hostElementRef.nativeElement.contains(nextTarget) || popupElement?.contains(nextTarget)) {
+                return;
+            }
+        }
         if (this.value() !== this.autoCompleteValue() && !this.#popupRef()) {
             this.updateValue(this.autoCompleteValue());
         }
+        this.touch.emit();
+    }
+
+    protected onInput(text: string): void {
+        // Keep the signal in step with the input on every keystroke, so that writing the same text back still
+        // reaches the DOM through the [value] binding.
+        this.autoCompleteValue.set(text);
+        this.autoCompleteValue$.next(text);
     }
 
     protected onItemSelect(event: SelectionChangeEvent<TData>): void {
@@ -590,14 +608,10 @@ export class AutoCompleteComponent<TData = unknown>
         this.setSpaceKeySubscription();
     }
 
-    private updateValue(value: string | null, notify: boolean = true): void {
-        const oldValue = this.value();
-        if (notify && oldValue !== value) {
-            const notifyValue = value === "" || value == null ? null : value;
-            this.value.set(notifyValue);
-            this.touch.emit();
-            return;
+    private updateValue(value: string | null): void {
+        const nextValue = value || null;
+        if (this.value() !== nextValue) {
+            this.value.set(nextValue);
         }
-        this.value.set(value);
     }
 }

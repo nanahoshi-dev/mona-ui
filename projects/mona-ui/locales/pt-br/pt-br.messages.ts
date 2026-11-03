@@ -271,7 +271,9 @@ export const PT_BR_MESSAGES = {
     },
     multiSelect: {
         clear: "Limpar",
-        itemsCount: (count: number) => (count === 1 ? "+ 1 item" : `+ ${localizeNumber(count)} itens`)
+        itemsCount: (count: number) => (count === 1 ? "+ 1 item" : `+ ${localizeNumber(count)} itens`),
+        removeMoreItems: (count: number) =>
+            count === 1 ? "Remover mais 1 item" : `Remover mais ${localizeNumber(count)} itens`
     },
     notification: {
         close: "Fechar",

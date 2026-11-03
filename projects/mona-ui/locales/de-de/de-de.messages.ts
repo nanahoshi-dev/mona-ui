@@ -272,7 +272,11 @@ export const DE_DE_MESSAGES = {
     multiSelect: {
         clear: "Leeren",
         itemsCount: (count: number) =>
-            count === 1 ? `+ ${localizeNumber(count)} Element` : `+ ${localizeNumber(count)} Elemente`
+            count === 1 ? `+ ${localizeNumber(count)} Element` : `+ ${localizeNumber(count)} Elemente`,
+        removeMoreItems: (count: number) =>
+            count === 1
+                ? `${localizeNumber(count)} weiteres Element entfernen`
+                : `${localizeNumber(count)} weitere Elemente entfernen`
     },
     notification: {
         close: "Schließen",

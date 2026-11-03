@@ -1,5 +1,5 @@
 import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
+import { booleanAttribute, ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideBox, LucideSearch } from "@lucide/angular";
 import { ComboBoxComponent } from "@nanahoshi/mona-ui/combo-box";
@@ -282,27 +282,27 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
     });
     protected readonly grouping = computed(() => buildGroupableOptions(this.features()));
     protected readonly virtualization = computed(() => buildVirtualScrollOptions(this.features()));
-    public readonly allowCustomValue = model<ReturnType<ComboBoxComponent["allowCustomValue"]>>(false);
+    public readonly allowCustomValue = input(false, { transform: booleanAttribute });
     public readonly ariaDescribedBy = input<ReturnType<ComboBoxComponent["ariaDescribedBy"]>>("");
     public readonly ariaLabel = input<ReturnType<ComboBoxComponent["ariaLabel"]>>("");
     public readonly ariaLabelledBy = input<ReturnType<ComboBoxComponent["ariaLabelledBy"]>>("");
     public readonly data = input<ReturnType<ComboBoxComponent["data"]>>([]);
-    public readonly disabled = model<ReturnType<ComboBoxComponent["disabled"]>>(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly itemDisabled = input<ReturnType<ComboBoxComponent["itemDisabled"]>>(null);
-    public readonly loading = model<ReturnType<ComboBoxComponent["loading"]>>(false);
+    public readonly loading = input(false, { transform: booleanAttribute });
     public readonly placeholder = input<ReturnType<ComboBoxComponent["placeholder"]>>("");
     public readonly popupClass = input<ReturnType<ComboBoxComponent["popupClass"]>>("");
     public readonly popupHeight = input<ReturnType<ComboBoxComponent["popupHeight"]>>(null);
     public readonly popupWidth = input<ReturnType<ComboBoxComponent["popupWidth"]>>(null);
-    public readonly readonly = model<ReturnType<ComboBoxComponent["readonly"]>>(false);
-    public readonly required = model<ReturnType<ComboBoxComponent["required"]>>(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<ComboBoxComponent["rounded"]>>("medium");
-    public readonly showClearButton = input<ReturnType<ComboBoxComponent["showClearButton"]>>(false);
+    public readonly showClearButton = input(false, { transform: booleanAttribute });
     public readonly size = input<ReturnType<ComboBoxComponent["size"]>>("medium");
     public readonly textField = input<ReturnType<ComboBoxComponent["textField"]>>("text");
     public readonly userClass = input<ReturnType<ComboBoxComponent["userClass"]>>("w-50");
     public readonly valueField = input<ReturnType<ComboBoxComponent["valueField"]>>("value");
-    public readonly valuePrimitive = input<ReturnType<ComboBoxComponent["valuePrimitive"]>>(false);
+    public readonly valuePrimitive = input(false, { transform: booleanAttribute });
 
     protected onValueAdd(value: string): void {
         const newItem: (typeof dropdownFoodData)[0] = {

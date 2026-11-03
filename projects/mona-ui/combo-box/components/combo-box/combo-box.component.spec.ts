@@ -8,6 +8,7 @@ import {
     readonly as fieldReadonly,
     required
 } from "@angular/forms/signals";
+import axe from "axe-core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 
@@ -96,6 +97,38 @@ class CustomValueHostComponent {
     }
 }
 
+@Component({
+    template: `
+        <label for="food-input">Food</label>
+        <mona-combo-box
+            inputId="food-input"
+            aria-describedby="food-help"
+            aria-label="Favourite food"
+            disabled
+            readonly
+            required
+            showClearButton
+            textField="text"
+            [data]="data"></mona-combo-box>
+        <span id="food-help">Pick a food</span>
+    `,
+    imports: [ComboBoxComponent]
+})
+class AttributeComboBoxHostComponent {
+    protected readonly data = FOOD_ITEMS;
+}
+
+@Component({
+    template: `
+        <label for="food-input">Food</label>
+        <mona-combo-box inputId="food-input" textField="text" [data]="data" [required]="true"></mona-combo-box>
+    `,
+    imports: [ComboBoxComponent]
+})
+class LabelledComboBoxHostComponent {
+    protected readonly data = FOOD_ITEMS;
+}
+
 describe("ComboBoxComponent", () => {
     beforeEach(() => clearOverlays());
     afterEach(() => clearOverlays());
@@ -142,7 +175,7 @@ describe("ComboBoxComponent", () => {
             await waitForStable(fixture);
 
             expect(fixture.componentInstance.form.value().value()).toEqual(FOOD_ITEMS[2]);
-            expect(fixture.componentInstance.form.value().touched()).toBe(true);
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
             expect(getInput(fixture).value).toBe("Carrot");
         });
 
@@ -153,7 +186,7 @@ describe("ComboBoxComponent", () => {
             await waitForStable(fixture);
 
             expect(fixture.componentInstance.form.value().value()).toBeNull();
-            expect(fixture.componentInstance.form.value().touched()).toBe(true);
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
             expect(getInput(fixture).value).toBe("");
         });
 
@@ -187,7 +220,7 @@ describe("ComboBoxComponent", () => {
             await waitForStable(fixture);
 
             expect(fixture.componentInstance.form.value().value()).toBe(3);
-            expect(fixture.componentInstance.form.value().touched()).toBe(true);
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
             expect(getInput(fixture).value).toBe("Carrot");
         });
 
@@ -244,7 +277,7 @@ describe("ComboBoxComponent", () => {
             await waitForStable(fixture);
 
             expect(fixture.componentInstance.form.value().value()).toBeNull();
-            expect(fixture.componentInstance.form.value().touched()).toBe(true);
+            expect(fixture.componentInstance.form.value().touched()).toBe(false);
             expect(getInput(fixture).value).toBe("");
         });
 
@@ -298,11 +331,10 @@ describe("ComboBoxComponent", () => {
         });
     });
 
-    it("emits touch on input blur", async () => {
+    it("emits touch when focus leaves the combo box", async () => {
         const fixture = await createObjectModeFixture();
 
-        getInput(fixture).dispatchEvent(new FocusEvent("blur"));
-        await waitForStable(fixture);
+        await leaveField(fixture);
 
         expect(fixture.componentInstance.form.value().touched()).toBe(true);
     });
@@ -315,7 +347,7 @@ describe("ComboBoxComponent", () => {
         getHost(fixture).click();
         await waitForStable(fixture);
 
-        expect(getHost(fixture).getAttribute("aria-disabled")).toBe("true");
+        expect(getHost(fixture).hasAttribute("aria-disabled")).toBe(false);
         expect(getHost(fixture).getAttribute("data-disabled")).toBe("true");
         expect(getHost(fixture).classList.contains("bg-disabled-background")).toBe(true);
         expect(getHost(fixture).classList.contains("border-disabled-border")).toBe(true);
@@ -333,7 +365,7 @@ describe("ComboBoxComponent", () => {
         getHost(fixture).click();
         await waitForStable(fixture);
 
-        expect(getHost(fixture).getAttribute("aria-readonly")).toBe("true");
+        expect(getHost(fixture).hasAttribute("aria-readonly")).toBe(false);
         expect(getHost(fixture).getAttribute("data-readonly")).toBe("true");
         expect(getInput(fixture).readOnly).toBe(true);
         expect(getOptions().length).toBe(0);
@@ -367,8 +399,10 @@ describe("ComboBoxComponent", () => {
         await waitForStable(fixture);
 
         expect(field.invalid()).toBe(true);
-        expect(getHost(fixture).getAttribute("aria-invalid")).toBe("true");
+        expect(getHost(fixture).hasAttribute("aria-invalid")).toBe(false);
+        expect(getHost(fixture).hasAttribute("aria-required")).toBe(false);
         expect(getInput(fixture).getAttribute("aria-invalid")).toBe("true");
+        expect(getInput(fixture).required).toBe(true);
         expect(getHost(fixture).className).toContain("border-error");
         expect(getHost(fixture).className).toContain("focus-within:ring-error/35");
     });
@@ -381,11 +415,11 @@ describe("ComboBoxComponent", () => {
         field.markAsTouched();
         await waitForStable(fixture);
 
-        expect(getHost(fixture).getAttribute("aria-invalid")).toBeNull();
+        expect(getInput(fixture).getAttribute("aria-invalid")).toBeNull();
         expect(getHost(fixture).className).not.toContain("border-error");
     });
 
-    it("falls back the input's accessible name to the placeholder when no aria-label is provided", async () => {
+    it("leaves the input's name to its placeholder when no label is given", async () => {
         await TestBed.configureTestingModule({
             imports: [ComboBoxComponent]
         }).compileComponents();
@@ -394,7 +428,9 @@ describe("ComboBoxComponent", () => {
         fixture.componentRef.setInput("placeholder", "Select a food");
         fixture.detectChanges();
 
-        expect(getInput(fixture).getAttribute("aria-label")).toBe("Select a food");
+        // An aria-label copied from the placeholder would hide a <label for> pointed at inputId.
+        expect(getInput(fixture).hasAttribute("aria-label")).toBe(false);
+        expect(getInput(fixture).placeholder).toBe("Select a food");
     });
 
     it("exposes a single combobox role and tab stop on the input, not the host", async () => {
@@ -570,6 +606,83 @@ describe("ComboBoxComponent", () => {
             await waitForStable(fixture);
 
             expect(getIndicator(fixture, "clear")).toBeNull();
+        });
+    });
+
+    describe("forms and accessibility", () => {
+        it("marks the field touched only when focus leaves, not on typing or the clear button", async () => {
+            const fixture = await createObjectModeFixture();
+            const field = fixture.componentInstance.form.value();
+
+            await typeText(fixture, "Car");
+            getInput(fixture).dispatchEvent(
+                new FocusEvent("focusout", { bubbles: true, relatedTarget: getClearButton(fixture) })
+            );
+            await waitForStable(fixture);
+            expect(field.touched()).toBe(false);
+
+            await leaveField(fixture);
+            expect(field.touched()).toBe(true);
+        });
+
+        it("applies disabled to the input in the same change detection pass", async () => {
+            await TestBed.configureTestingModule({
+                imports: [ComboBoxComponent]
+            }).compileComponents();
+            const fixture = TestBed.createComponent(ComboBoxComponent);
+            fixture.detectChanges();
+
+            fixture.componentRef.setInput("disabled", true);
+            fixture.detectChanges();
+
+            expect(getInput(fixture).disabled).toBe(true);
+        });
+
+        it("writes the reverted text back to the input", async () => {
+            const fixture = await createObjectModeFixture();
+
+            await typeText(fixture, "Zzz");
+            await leaveField(fixture);
+
+            expect(getInput(fixture).value).toBe("Banana");
+        });
+
+        it("accepts bare boolean attributes and moves the state to the input", async () => {
+            const fixture = await createObjectFixture(AttributeComboBoxHostComponent);
+            const input = getInput(fixture);
+
+            expect(input.disabled).toBe(true);
+            expect(input.readOnly).toBe(true);
+            expect(input.required).toBe(true);
+            expect(getHost(fixture).getAttribute("data-disabled")).toBe("true");
+        });
+
+        it("labels the input through inputId and keeps the host free of ARIA", async () => {
+            const fixture = await createObjectFixture(AttributeComboBoxHostComponent);
+            const input = getInput(fixture);
+            const host = getHost(fixture);
+
+            expect(input.id).toBe("food-input");
+            expect(input.labels?.[0]?.textContent).toBe("Food");
+            expect(input.getAttribute("aria-describedby")).toBe("food-help");
+            expect(input.getAttribute("aria-label")).toBe("Favourite food");
+            expect(Array.from(host.attributes).filter(a => a.name.startsWith("aria-"))).toEqual([]);
+        });
+
+        it("renders no live region inside the field", async () => {
+            const fixture = await createObjectModeFixture();
+
+            expect(getHost(fixture).querySelector("[aria-live]")).toBeNull();
+        });
+
+        it("has no AXE violations when labelled with <label for> and required", async () => {
+            const fixture = await createObjectFixture(LabelledComboBoxHostComponent);
+
+            const results = await axe.run(fixture.nativeElement as HTMLElement, {
+                rules: { "color-contrast": { enabled: false } }
+            });
+
+            expect(results.violations).toEqual([]);
         });
     });
 

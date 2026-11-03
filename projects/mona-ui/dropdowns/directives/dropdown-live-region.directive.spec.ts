@@ -1,79 +1,101 @@
+import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { Component, inject } from "@angular/core";
-import { TestBed } from "@angular/core/testing";
+import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { ListService } from "@nanahoshi/mona-ui/internal/list";
 import { type PopupRef } from "@nanahoshi/mona-ui/popup";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DropdownService } from "../services/dropdown.service";
 import { DropdownLiveRegionDirective } from "./dropdown-live-region.directive";
 
 @Component({
-    template: `<span monaDropdownLiveRegion></span>`,
+    template: `<div monaDropdownLiveRegion></div>`,
     imports: [DropdownLiveRegionDirective],
     providers: [DropdownService, ListService]
 })
 class TestHostComponent {
     public readonly dropdownService = inject(DropdownService);
-    public readonly listService = inject(ListService);
+    public readonly listService = inject(ListService<string>);
 }
 
 describe("DropdownLiveRegionDirective", () => {
-    it("announces default English no results found when list is empty", async () => {
-        await TestBed.configureTestingModule({
-            imports: [TestHostComponent]
-        }).compileComponents();
+    let announce: ReturnType<typeof vi.fn>;
+    let fixture: ComponentFixture<TestHostComponent>;
 
-        const fixture = TestBed.createComponent(TestHostComponent);
-        fixture.detectChanges();
-
-        const span = fixture.nativeElement.querySelector("span");
-        expect(span.getAttribute("aria-label")).toBe("No results found");
-        expect(span.textContent).toBe("No results found");
-    });
-
-    it("announces result counts in default English", async () => {
-        await TestBed.configureTestingModule({
-            imports: [TestHostComponent]
-        }).compileComponents();
-
-        const fixture = TestBed.createComponent(TestHostComponent);
-        fixture.componentInstance.listService.setData(["Apple"]);
-        fixture.detectChanges();
-
-        const span = fixture.nativeElement.querySelector("span");
-        expect(span.textContent).toBe("1 result available");
-
-        fixture.componentInstance.listService.setData(["Apple", "Banana", "Cherry"]);
-        fixture.detectChanges();
-        expect(span.textContent).toBe("3 results available");
-    });
-
-    it("announces active item position when expanded", async () => {
-        await TestBed.configureTestingModule({
-            imports: [TestHostComponent]
-        }).compileComponents();
-
-        const fixture = TestBed.createComponent(TestHostComponent);
-        fixture.componentInstance.listService.setData(["Apple", "Banana", "Cherry"]);
+    const openPopup = (): void => {
         fixture.componentInstance.dropdownService.popupRef.set({} as PopupRef);
         fixture.detectChanges();
+    };
 
-        const firstItem = fixture.componentInstance.listService.viewItems().first();
-        fixture.componentInstance.listService.highlightedItem.set(firstItem);
+    beforeEach(async () => {
+        announce = vi.fn(() => Promise.resolve());
+        await TestBed.configureTestingModule({
+            imports: [TestHostComponent],
+            providers: [{ provide: LiveAnnouncer, useValue: { announce } }]
+        }).compileComponents();
+        fixture = TestBed.createComponent(TestHostComponent);
+        fixture.componentInstance.listService.setData(["Apple", "Apricot", "Banana"]);
         fixture.detectChanges();
-
-        const span = fixture.nativeElement.querySelector("span");
-        expect(span.textContent).toBe("Apple, 1 of 3");
     });
 
-    it("updates announcements dynamically when locale changes", async () => {
-        await TestBed.configureTestingModule({
-            imports: [TestHostComponent]
-        }).compileComponents();
+    it("renders nothing inside the element it sits on", () => {
+        const host = fixture.nativeElement.querySelector("div") as HTMLElement;
+        expect(host.textContent).toBe("");
+        expect(host.getAttribute("aria-live")).toBeNull();
+        expect(host.getAttribute("aria-label")).toBeNull();
+    });
 
-        const fixture = TestBed.createComponent(TestHostComponent);
-        const i18n = TestBed.inject(MonaI18nService);
-        i18n.use({
+    it("stays quiet while the popup is closed", () => {
+        fixture.componentInstance.listService.setFilter("ap");
+        fixture.componentInstance.listService.setData(["Apple"]);
+        fixture.detectChanges();
+        expect(announce).not.toHaveBeenCalled();
+    });
+
+    it("stays quiet when the popup opens on an unfiltered list", () => {
+        openPopup();
+        expect(announce).not.toHaveBeenCalled();
+    });
+
+    it("doesn't announce the highlighted option", () => {
+        openPopup();
+        const listService = fixture.componentInstance.listService;
+        listService.highlightedItem.set(listService.viewItems().first());
+        fixture.detectChanges();
+        expect(announce).not.toHaveBeenCalled();
+    });
+
+    it("announces the result count after filtering", () => {
+        openPopup();
+        fixture.componentInstance.listService.setFilter("b");
+        fixture.detectChanges();
+        expect(announce).toHaveBeenLastCalledWith("1 result available", "polite");
+
+        fixture.componentInstance.listService.setFilter("z");
+        fixture.detectChanges();
+        expect(announce).toHaveBeenLastCalledWith("No results found", "polite");
+
+        fixture.componentInstance.listService.clearFilter();
+        fixture.detectChanges();
+        expect(announce).toHaveBeenLastCalledWith("3 results available", "polite");
+        expect(announce).toHaveBeenCalledTimes(3);
+    });
+
+    it("announces when the text that opened the popup already filtered the list", () => {
+        fixture.componentInstance.listService.setFilter("ap");
+        openPopup();
+        expect(announce).toHaveBeenCalledExactlyOnceWith("2 results available", "polite");
+    });
+
+    it("announces when the items change while the popup is open, as with server-side filtering", () => {
+        openPopup();
+        fixture.componentInstance.listService.setData(["Apple", "Banana"]);
+        fixture.detectChanges();
+        expect(announce).toHaveBeenCalledExactlyOnceWith("2 results available", "polite");
+    });
+
+    it("uses the active locale's messages", () => {
+        TestBed.inject(MonaI18nService).use({
             direction: "ltr",
             id: "tr-TR",
             messages: {
@@ -84,19 +106,9 @@ describe("DropdownLiveRegionDirective", () => {
                 }
             }
         });
+        openPopup();
+        fixture.componentInstance.listService.setFilter("ap");
         fixture.detectChanges();
-
-        const span = fixture.nativeElement.querySelector("span");
-        expect(span.textContent).toBe("Sonuç bulunamadı");
-
-        fixture.componentInstance.listService.setData(["Elma", "Armut"]);
-        fixture.detectChanges();
-        expect(span.textContent).toBe("2 sonuç mevcut");
-
-        fixture.componentInstance.dropdownService.popupRef.set({} as PopupRef);
-        const firstItem = fixture.componentInstance.listService.viewItems().first();
-        fixture.componentInstance.listService.highlightedItem.set(firstItem);
-        fixture.detectChanges();
-        expect(span.textContent).toBe("Elma, 2 içinden 1");
+        expect(announce).toHaveBeenLastCalledWith("2 sonuç mevcut", "polite");
     });
 });

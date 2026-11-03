@@ -1,6 +1,7 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
+    booleanAttribute,
     Component,
     computed,
     contentChild,
@@ -19,7 +20,7 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
 import { none } from "@mirei/ts-collections";
-import { ChipComponent } from "@nanahoshi/mona-ui/chip";
+import { CHIP_DEFAULT_MESSAGES, ChipComponent } from "@nanahoshi/mona-ui/chip";
 import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import {
     DropdownDataHandlerDirective,
@@ -97,20 +98,20 @@ import {
         ListFooterTemplateDirective,
         ListHeaderTemplateDirective,
         ListNoDataTemplateDirective,
-        DropdownLiveRegionDirective,
         IndicatorIconComponent
     ],
-    hostDirectives: [DropdownDataHandlerDirective, DropdownListPopupHandlerDirective],
+    hostDirectives: [DropdownDataHandlerDirective, DropdownListPopupHandlerDirective, DropdownLiveRegionDirective],
     host: {
         "[attr.aria-activedescendant]": "activeDescendant()",
         "[attr.aria-busy]": "loading() ? 'true' : undefined",
         "[attr.aria-controls]": "listId",
+        "[attr.aria-describedby]": "ariaDescribedBy() || null",
         "[attr.aria-disabled]": "disabled() ? true : undefined",
         "[attr.aria-expanded]": "expanded()",
         "[attr.aria-haspopup]": "'listbox'",
         "[attr.aria-invalid]": "invalidState() ? true : undefined",
-        "[attr.aria-label]": "ariaLabel()",
-        "[attr.aria-labelledby]": "ariaLabelledBy()",
+        "[attr.aria-label]": "effectiveAriaLabel() || null",
+        "[attr.aria-labelledby]": "ariaLabelledBy() || null",
         "[attr.aria-readonly]": "readonly() ? true : undefined",
         "[attr.aria-required]": "required() ? true : undefined",
         "[attr.data-disabled]": "disabled() || null",
@@ -119,7 +120,7 @@ import {
         "[attr.role]": "'combobox'",
         "[attr.tabindex]": "disabled() ? null : 0",
         "[class]": "baseClass()",
-        "(blur)": "onBlur()"
+        "(focusout)": "onFocusOut($event)"
     }
 })
 export class MultiSelectComponent<TData = unknown, TValue = TData>
@@ -155,6 +156,7 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
+    protected readonly chipMessages = this.#i18n.componentMessages("chip", CHIP_DEFAULT_MESSAGES);
     protected readonly clearButtonVisible = computed(
         () =>
             this.showClearButton() &&
@@ -162,6 +164,9 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
             !this.loading() &&
             !this.disabled() &&
             !this.readonly()
+    );
+    protected readonly effectiveAriaLabel = computed(
+        () => this.ariaLabel() || (this.ariaLabelledBy() ? "" : this.placeholder())
     );
     protected readonly expanded = computed(() => this.#dropdownService.popupRef() !== null);
     protected readonly footerTemplate = contentChild(DropdownFooterTemplateDirective, { read: TemplateRef });
@@ -223,7 +228,14 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
     });
 
     /**
-     * @description Sets the aria-label attribute of the multi select component.
+     * @description ID of an element that describes the multi select, such as help text or an error message.
+     * @default ""
+     */
+    public readonly ariaDescribedBy = input("", { alias: "aria-describedby" });
+
+    /**
+     * @description Accessible name for the multi select. Describe what it represents.
+     * Falls back to {@link placeholder} when neither this nor {@link ariaLabelledBy} is set.
      * @default ""
      */
     public readonly ariaLabel = input("", { alias: "aria-label" });
@@ -238,13 +250,13 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
      * @description Closes the popup automatically after an item is selected or deselected.
      * @default false
      */
-    public readonly autoClose = input(false);
+    public readonly autoClose = input(false, { transform: booleanAttribute });
 
     /**
      * @description Renders a checkbox next to each item in the popup list to indicate its selected state.
      * @default false
      */
-    public readonly checkboxes = input(false);
+    public readonly checkboxes = input(false, { transform: booleanAttribute });
 
     /**
      * @description Emits when the popup is about to close. This event is preventable.
@@ -266,14 +278,14 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
      * @description Disables the component, preventing the popup from opening and blocking tag removal.
      * @default false
      */
-    public readonly disabled = model(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
      * @description Marks the multi select as invalid. When bound to a signal form field via `[formField]`,
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly invalid = input(false);
+    public readonly invalid = input(false, { transform: booleanAttribute });
 
     /**
      * @description A predicate function or the name of the field that determines whether an item is disabled.
@@ -284,7 +296,7 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
      * @description Sets the loading state of the multi select component.
      * @default false
      */
-    public readonly loading = input(false);
+    public readonly loading = input(false, { transform: booleanAttribute });
 
     /**
      * @description Emits when the popup is about to open. This event is preventable.
@@ -295,6 +307,13 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
      * @description Emits after the popup is opened.
      */
     public readonly opened = output();
+
+    /**
+     * @description Text shown when nothing is selected. It also names the multi select when neither {@link ariaLabel}
+     * nor {@link ariaLabelledBy} is set.
+     * @default ""
+     */
+    public readonly placeholder = input("");
 
     /**
      * @description Sets the class of the popup element.
@@ -318,13 +337,13 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
      * @description Sets the readonly state of the multi select component.
      * @default false
      */
-    public readonly readonly = input(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
 
     /**
      * @description Sets the required state of the multi select component.
      * @default false
      */
-    public readonly required = input(false);
+    public readonly required = input(false, { transform: booleanAttribute });
 
     /**
      * @description Sets the border radius of the multi select component.
@@ -336,7 +355,7 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
      * @description Renders a button that clears all selected items when at least one item is selected.
      * @default false
      */
-    public readonly showClearButton = input(false);
+    public readonly showClearButton = input(false, { transform: booleanAttribute });
 
     /**
      * @description The size of the multi select component.
@@ -353,8 +372,8 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
     public readonly textField = input<DropdownFieldSelectorType<TData, string>>();
 
     /**
-     * @description Emitted when the multi select is interacted with on blur, selection, remove, or clear.
-     * The `FormField` directive listens to this to mark the field as touched.
+     * @description Emitted when focus leaves the multi select. Moving between it, its chips, its clear button and its
+     * popup doesn't count. The `FormField` directive listens to this to mark the field as touched.
      */
     public readonly touch = output<void>();
 
@@ -363,7 +382,7 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
 
     /**
      * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
@@ -400,7 +419,7 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
      *
      * @default false
      */
-    public readonly valuePrimitive = input(false);
+    public readonly valuePrimitive = input(false, { transform: booleanAttribute });
 
     public constructor() {
         afterNextRender({
@@ -433,10 +452,17 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
         this.#hostElementRef.nativeElement.focus();
     }
 
-    protected onBlur(event?: FocusEvent): void {
-        const popupElement = this.#dropdownService.popupRef()?.overlayRef.overlayElement;
-        if (popupElement && event?.relatedTarget instanceof Node && popupElement.contains(event.relatedTarget)) {
+    protected onFocusOut(event: FocusEvent): void {
+        // Removing a focused dropdown from the page fires focusout after it is destroyed.
+        if (this.#destroyRef.destroyed) {
             return;
+        }
+        const nextTarget = event.relatedTarget;
+        if (nextTarget instanceof Node) {
+            const popupElement = this.#dropdownService.popupRef()?.overlayRef.overlayElement;
+            if (this.#hostElementRef.nativeElement.contains(nextTarget) || popupElement?.contains(nextTarget)) {
+                return;
+            }
         }
         this.touch.emit();
     }
@@ -509,20 +535,7 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
             this.#dropdownService.triggerPopupOpen$.next({});
             return;
         }
-        const highlightedItem = this.#listService.highlightedItem();
-        if (!highlightedItem) {
-            return;
-        }
-        const selected = this.#listService.isSelected(highlightedItem);
-        if (selected) {
-            this.#listService.deselectItems([highlightedItem]);
-        } else {
-            this.#listService.selectItem(highlightedItem);
-        }
-        this.updateValue(this.getSelectedControlValues());
-        if (this.autoClose()) {
-            this.#popupRef()?.close();
-        }
+        this.toggleHighlightedItem();
     }
 
     private handlePopupPositionUpdate(): void {
@@ -572,9 +585,35 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
             .subscribe(() => this.handlePopupPositionUpdate());
     }
 
+    private setPopupCloseSubscription(): void {
+        this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
+            if (!this.#dropdownService.focusCanReturn() && !this.#destroyRef.destroyed) {
+                // Focus left from inside the popup (its filter box), so the host never saw a focusout.
+                this.touch.emit();
+            }
+        });
+    }
+
+    private setSpaceKeySubscription(): void {
+        // While the popup is open, Space toggles the highlighted option, as Enter does. While it is closed, the shared
+        // handler opens the popup.
+        this.#dropdownService.beforeKeydown$
+            .pipe(
+                takeUntilDestroyed(this.#destroyRef),
+                filter(e => e.originalEvent?.key === " " && this.#popupRef() != null)
+            )
+            .subscribe(event => {
+                event.preventDefault();
+                event.originalEvent?.preventDefault();
+                this.toggleHighlightedItem();
+            });
+    }
+
     private setSubscriptions(): void {
         this.setBackspaceKeySubscription();
         this.setEnterKeySubscription();
+        this.setPopupCloseSubscription();
+        this.setSpaceKeySubscription();
     }
 
     private synchronizeSelection(value: Iterable<TValue>): void {
@@ -585,10 +624,24 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
         }
     }
 
-    private updateValue(value: Iterable<TValue>, notify: boolean = true): void {
-        this.value.set(value);
-        if (notify) {
-            this.touch.emit();
+    private toggleHighlightedItem(): void {
+        const highlightedItem = this.#listService.highlightedItem();
+        if (!highlightedItem) {
+            return;
         }
+        const selected = this.#listService.isSelected(highlightedItem);
+        if (selected) {
+            this.#listService.deselectItems([highlightedItem]);
+        } else {
+            this.#listService.selectItem(highlightedItem);
+        }
+        this.updateValue(this.getSelectedControlValues());
+        if (this.autoClose()) {
+            this.#popupRef()?.close();
+        }
+    }
+
+    private updateValue(value: Iterable<TValue>): void {
+        this.value.set(value);
     }
 }

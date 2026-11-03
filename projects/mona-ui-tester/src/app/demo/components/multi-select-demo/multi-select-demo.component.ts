@@ -1,5 +1,5 @@
 import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
+import { booleanAttribute, ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideBox, LucideSearch } from "@lucide/angular";
 import { range } from "@mirei/ts-collections";
@@ -342,26 +342,26 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
 
     public readonly ariaLabel = input<ReturnType<MultiSelectComponent["ariaLabel"]>>("");
     public readonly ariaLabelledBy = input<ReturnType<MultiSelectComponent["ariaLabelledBy"]>>("");
-    public readonly autoClose = input<ReturnType<MultiSelectComponent["autoClose"]>>(false);
-    public readonly checkboxes = input<ReturnType<MultiSelectComponent["checkboxes"]>>(false);
+    public readonly autoClose = input(false, { transform: booleanAttribute });
+    public readonly checkboxes = input(false, { transform: booleanAttribute });
     public readonly data = input<ReturnType<MultiSelectComponent["data"]>>([]);
-    public readonly disabled = model<ReturnType<MultiSelectComponent["disabled"]>>(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly itemDisabled = input<ReturnType<MultiSelectComponent["itemDisabled"]>>(() => false);
-    public readonly loading = input<ReturnType<MultiSelectComponent["loading"]>>(false);
+    public readonly loading = input(false, { transform: booleanAttribute });
     public readonly popupClass = input<ReturnType<MultiSelectComponent["popupClass"]>>("");
     public readonly popupHeight = input<ReturnType<MultiSelectComponent["popupHeight"]>>(null);
     public readonly popupWidth = input<ReturnType<MultiSelectComponent["popupWidth"]>>(null);
-    public readonly readonly = input<ReturnType<MultiSelectComponent["readonly"]>>(false);
-    public readonly required = input<ReturnType<MultiSelectComponent["required"]>>(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<MultiSelectComponent["rounded"]>>("medium");
-    public readonly showClearButton = input<ReturnType<MultiSelectComponent["showClearButton"]>>(true);
+    public readonly showClearButton = input(true, { transform: booleanAttribute });
     public readonly size = input<ReturnType<MultiSelectComponent["size"]>>("medium");
     public readonly summaryTagTemplate = input<ReturnType<MultiSelectComponent["summaryTagTemplate"]>>(null);
     public readonly tagCount = input<ReturnType<MultiSelectComponent["tagCount"]>>(-1);
     public readonly textField = input<ReturnType<MultiSelectComponent["textField"]>>("text");
     public readonly userClass = input<ReturnType<MultiSelectComponent["userClass"]>>("w-60");
     public readonly valueField = input<ReturnType<MultiSelectComponent["valueField"]>>("value");
-    public readonly valuePrimitive = input<ReturnType<MultiSelectComponent["valuePrimitive"]>>(false);
+    public readonly valuePrimitive = input(false, { transform: booleanAttribute });
 
     protected onPopupClose(event: PreventableEvent) {
         const preventClose = this.features()["preventClose"].active;

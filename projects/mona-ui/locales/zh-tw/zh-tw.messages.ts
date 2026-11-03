@@ -267,7 +267,8 @@ export const ZH_TW_MESSAGES = {
     },
     multiSelect: {
         clear: "清除",
-        itemsCount: (count: number) => `+ ${localizeNumber(count)} 項`
+        itemsCount: (count: number) => `+ ${localizeNumber(count)} 項`,
+        removeMoreItems: (count: number) => `移除其餘 ${localizeNumber(count)} 項`
     },
     notification: {
         close: "關閉",

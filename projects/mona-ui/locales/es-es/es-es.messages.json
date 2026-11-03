@@ -251,7 +251,8 @@
     },
     "multiSelect": {
         "clear": "Limpiar",
-        "itemsCount": "{count, plural, =1 {+ # elemento} other {+ # elementos}}"
+        "itemsCount": "{count, plural, =1 {+ # elemento} other {+ # elementos}}",
+        "removeMoreItems": "{count, plural, =1 {Quitar # elemento más} other {Quitar # elementos más}}"
     },
     "notification": {
         "close": "Cerrar",
