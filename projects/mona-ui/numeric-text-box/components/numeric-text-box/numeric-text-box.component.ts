@@ -40,6 +40,7 @@ import {
 import { twMerge } from "tailwind-merge";
 import {
     formatNumber,
+    getNumberSymbols,
     MonaI18nService,
     validateLocalizedNumber,
     validateLocalizedNumberEdit
@@ -477,6 +478,29 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
         this.#pendingPaste = true;
     }
 
+    /**
+     * The numpad decimal key types "." or "," depending on the keyboard layout, not the locale. Insert the
+     * locale's decimal separator instead, so a de-DE layout used with an en-US locale still types a decimal.
+     */
+    private insertLocaleDecimal(event: KeyboardEvent): void {
+        const localeId = this.#i18n.localeId();
+        const decimal = getNumberSymbols(localeId).decimal;
+        if (event.key.length !== 1 || event.key === decimal || event.ctrlKey || event.altKey || event.metaKey) {
+            return;
+        }
+        event.preventDefault();
+        const inputElement = this.valueTextBoxRef().nativeElement;
+        const { value, selectionStart, selectionEnd } = inputElement;
+        const start = selectionStart ?? value.length;
+        const end = selectionEnd ?? value.length;
+        const proposedValue = value.slice(0, start) + decimal + value.slice(end);
+        if (!validateLocalizedNumberEdit(proposedValue, localeId, { decimals: this.decimals() }).valid) {
+            return;
+        }
+        inputElement.setRangeText(decimal, start, end, "end");
+        inputElement.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+
     private parseValue(value: string | null | undefined): number | null {
         const raw = value == null ? "" : value;
         this.rawInputValue.set(raw);
@@ -592,6 +616,11 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
                 if (event.key === "ArrowDown") {
                     event.preventDefault();
                     this.decrease();
+                    return;
+                }
+
+                if (event.code === "NumpadDecimal") {
+                    this.insertLocaleDecimal(event);
                 }
             });
     }

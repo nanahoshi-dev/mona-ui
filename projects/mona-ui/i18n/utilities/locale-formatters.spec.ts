@@ -213,7 +213,9 @@ describe("locale-formatters", () => {
             expect(parseLocalizedNumber("12.345,5", "it-IT")).toBe(12345.5);
             expect(parseLocalizedNumber("1.234.567,89", "it-IT")).toBe(1234567.89);
             expect(parseLocalizedNumber("-12.345,5", "it-IT")).toBe(-12345.5);
-            expect(parseLocalizedNumber("12.5", "it-IT", { mode: "edit" })).toBe(12.5);
+            expect(parseLocalizedNumber("12,5", "it-IT", { mode: "edit" })).toBe(12.5);
+            // "." is the group separator, so it is not accepted as a decimal while editing
+            expect(parseLocalizedNumber("12.5", "it-IT", { mode: "edit" })).toBeNull();
         });
 
         it("parses comma-decimal numbers in tr-TR", () => {
@@ -222,7 +224,9 @@ describe("locale-formatters", () => {
             expect(parseLocalizedNumber("1.234.567,89", "tr-TR")).toBe(1234567.89);
             expect(parseLocalizedNumber("-1.234,5", "tr-TR")).toBe(-1234.5);
             expect(parseLocalizedNumber("1.000", "tr-TR")).toBe(1000);
-            expect(parseLocalizedNumber("12.5", "tr-TR", { mode: "edit" })).toBe(12.5);
+            expect(parseLocalizedNumber("12,5", "tr-TR", { mode: "edit" })).toBe(12.5);
+            // "." is the group separator, so it is not accepted as a decimal while editing
+            expect(parseLocalizedNumber("12.5", "tr-TR", { mode: "edit" })).toBeNull();
         });
 
         it("parses comma-decimal numbers in id-ID", () => {
@@ -231,7 +235,9 @@ describe("locale-formatters", () => {
             expect(parseLocalizedNumber("1.234.567,89", "id-ID")).toBe(1234567.89);
             expect(parseLocalizedNumber("-1.234,5", "id-ID")).toBe(-1234.5);
             expect(parseLocalizedNumber("1.000", "id-ID")).toBe(1000);
-            expect(parseLocalizedNumber("12.5", "id-ID", { mode: "edit" })).toBe(12.5);
+            expect(parseLocalizedNumber("12,5", "id-ID", { mode: "edit" })).toBe(12.5);
+            // "." is the group separator, so it is not accepted as a decimal while editing
+            expect(parseLocalizedNumber("12.5", "id-ID", { mode: "edit" })).toBeNull();
         });
 
         it("parses comma-decimal and NBSP-grouped numbers in ru-RU", () => {
@@ -241,6 +247,7 @@ describe("locale-formatters", () => {
             expect(parseLocalizedNumber("1\u00A0234\u00A0567,89", "ru-RU")).toBe(1234567.89);
             expect(parseLocalizedNumber("-1\u00A0234,5", "ru-RU")).toBe(-1234.5);
             expect(parseLocalizedNumber("1\u00A0000", "ru-RU")).toBe(1000);
+            // ru-RU groups with a space, so "." stays available as an alternate decimal
             expect(parseLocalizedNumber("12.5", "ru-RU", { mode: "edit" })).toBe(12.5);
         });
 
@@ -252,22 +259,23 @@ describe("locale-formatters", () => {
             expect(parseLocalizedNumber("12.5", "de-DE", { mode: "locale" })).toBeNull();
             expect(parseLocalizedNumber("1.23", "de-DE", { mode: "locale" })).toBeNull();
 
-            // de-DE edit mode (interactive typing)
-            expect(parseLocalizedNumber("1.234", "de-DE", { mode: "edit" })).toBe(1.234);
-            expect(parseLocalizedNumber("12.5", "de-DE", { mode: "edit" })).toBe(12.5);
-            expect(parseLocalizedNumber("1.23", "de-DE", { mode: "edit" })).toBe(1.23);
+            // de-DE edit mode (interactive typing): "." is the group separator, never a decimal
+            expect(parseLocalizedNumber("12,5", "de-DE", { mode: "edit" })).toBe(12.5);
+            expect(parseLocalizedNumber("1.234", "de-DE", { mode: "edit" })).toBeNull();
+            expect(parseLocalizedNumber("12.5", "de-DE", { mode: "edit" })).toBeNull();
+            expect(parseLocalizedNumber("1.23", "de-DE", { mode: "edit" })).toBeNull();
 
             // tr-TR equivalent matrix
             expect(parseLocalizedNumber("1.234", "tr-TR", { mode: "locale" })).toBe(1234);
             expect(parseLocalizedNumber("12,5", "tr-TR", { mode: "locale" })).toBe(12.5);
             expect(parseLocalizedNumber("12.5", "tr-TR", { mode: "locale" })).toBeNull();
-            expect(parseLocalizedNumber("12.5", "tr-TR", { mode: "edit" })).toBe(12.5);
+            expect(parseLocalizedNumber("12.5", "tr-TR", { mode: "edit" })).toBeNull();
 
             // id-ID equivalent matrix
             expect(parseLocalizedNumber("1.000", "id-ID", { mode: "locale" })).toBe(1000);
             expect(parseLocalizedNumber("12,5", "id-ID", { mode: "locale" })).toBe(12.5);
             expect(parseLocalizedNumber("12.5", "id-ID", { mode: "locale" })).toBeNull();
-            expect(parseLocalizedNumber("12.5", "id-ID", { mode: "edit" })).toBe(12.5);
+            expect(parseLocalizedNumber("12.5", "id-ID", { mode: "edit" })).toBeNull();
 
             // ru-RU equivalent matrix
             expect(parseLocalizedNumber("1\u00A0000", "ru-RU", { mode: "locale" })).toBe(1000);
@@ -287,12 +295,15 @@ describe("locale-formatters", () => {
             expect(parseLocalizedNumber("12,5", "en-US", { mode: "locale" })).toBeNull();
             expect(parseLocalizedNumber("1,23", "en-US", { mode: "locale" })).toBeNull();
 
-            // en-US edit mode (interactive typing)
-            expect(parseLocalizedNumber("1,234", "en-US", { mode: "edit" })).toBe(1.234);
-            expect(parseLocalizedNumber("12,5", "en-US", { mode: "edit" })).toBe(12.5);
-            expect(parseLocalizedNumber("1,23", "en-US", { mode: "edit" })).toBe(1.23);
-            expect(parseLocalizedNumber("0,123", "en-US", { mode: "edit" })).toBe(0.123);
+            // en-US edit mode (interactive typing): "," is the group separator, never a decimal
             expect(parseLocalizedNumber("1.5", "en-US", { mode: "edit" })).toBe(1.5);
+            expect(parseLocalizedNumber("1,234", "en-US", { mode: "edit" })).toBeNull();
+            expect(parseLocalizedNumber("12,5", "en-US", { mode: "edit" })).toBeNull();
+            expect(parseLocalizedNumber("1,23", "en-US", { mode: "edit" })).toBeNull();
+            expect(parseLocalizedNumber("0,123", "en-US", { mode: "edit" })).toBeNull();
+
+            // de-CH groups with an apostrophe, so "," stays available as an alternate decimal
+            expect(parseLocalizedNumber("12,5", "de-CH", { mode: "edit" })).toBe(12.5);
             // Grouped inputs are handled by mode: 'locale', not rescued by edit mode
             expect(parseLocalizedNumber("1,234.5", "en-US", { mode: "edit" })).toBeNull();
             expect(parseLocalizedNumber("1,234,567", "en-US", { mode: "edit" })).toBeNull();
@@ -448,8 +459,11 @@ describe("locale-formatters", () => {
             const v2 = validateLocalizedNumber("12.5", "de-DE", { mode: "locale", decimals: 3 });
             expect(v2).toEqual({ value: null, valid: false, fractionDigits: 0 });
 
-            const v3 = validateLocalizedNumber("12.5", "de-DE", { mode: "edit", decimals: 3 });
+            const v3 = validateLocalizedNumber("12,5", "de-DE", { mode: "edit", decimals: 3 });
             expect(v3).toEqual({ value: 12.5, valid: true, fractionDigits: 1 });
+
+            const v3Group = validateLocalizedNumber("12.5", "de-DE", { mode: "edit", decimals: 3 });
+            expect(v3Group).toEqual({ value: null, valid: false, fractionDigits: 0 });
 
             const v4 = validateLocalizedNumber("1.234,567", "de-DE", { mode: "locale", decimals: 3 });
             expect(v4).toEqual({ value: 1234.567, valid: true, fractionDigits: 3 });
@@ -515,28 +529,39 @@ describe("locale-formatters", () => {
                 value: 12
             });
             expect(validateLocalizedNumberEdit("12,", "en-US", { decimals: 2 })).toEqual({
-                valid: true,
+                valid: false,
                 complete: false,
-                value: 12
+                value: null
             });
             expect(validateLocalizedNumberEdit(".5", "en-US", { decimals: 2 })).toEqual({
                 valid: true,
                 complete: true,
                 value: 0.5
             });
+            // "," is the en-US group separator, so it is never read as a decimal
             expect(validateLocalizedNumberEdit(",5", "en-US", { decimals: 2 })).toEqual({
-                valid: true,
-                complete: true,
-                value: 0.5
+                valid: false,
+                complete: false,
+                value: null
+            });
+            expect(validateLocalizedNumberEdit("12,5", "en-US", { decimals: 2 })).toEqual({
+                valid: false,
+                complete: false,
+                value: null
+            });
+            expect(validateLocalizedNumberEdit("1,234", "en-US", { decimals: 3 })).toEqual({
+                valid: false,
+                complete: false,
+                value: null
             });
 
-            // Complete states with alternate comma
-            expect(validateLocalizedNumberEdit("12,5", "en-US", { decimals: 2 })).toEqual({
+            // Complete states with alternate comma where "," is not the group separator (de-CH)
+            expect(validateLocalizedNumberEdit("12,5", "de-CH", { decimals: 2 })).toEqual({
                 valid: true,
                 complete: true,
                 value: 12.5
             });
-            expect(validateLocalizedNumberEdit("12,50", "en-US", { decimals: 2 })).toEqual({
+            expect(validateLocalizedNumberEdit("12,50", "de-CH", { decimals: 2 })).toEqual({
                 valid: true,
                 complete: true,
                 value: 12.5
@@ -630,12 +655,24 @@ describe("locale-formatters", () => {
                 complete: false,
                 value: 12
             });
-            expect(validateLocalizedNumberEdit("12.", "de-DE", { decimals: 3 })).toEqual({
+            expect(validateLocalizedNumberEdit("1,234", "de-DE", { decimals: 3 })).toEqual({
                 valid: true,
+                complete: true,
+                value: 1.234
+            });
+            // "." is the de-DE group separator, so typing it is rejected instead of becoming a decimal
+            expect(validateLocalizedNumberEdit("12.", "de-DE", { decimals: 3 })).toEqual({
+                valid: false,
                 complete: false,
-                value: 12
+                value: null
             });
             expect(validateLocalizedNumberEdit("1.234", "de-DE", { decimals: 3 })).toEqual({
+                valid: false,
+                complete: false,
+                value: null
+            });
+            // fr-FR groups with a space, so "." remains an alternate decimal
+            expect(validateLocalizedNumberEdit("1.234", "fr-FR", { decimals: 3 })).toEqual({
                 valid: true,
                 complete: true,
                 value: 1.234

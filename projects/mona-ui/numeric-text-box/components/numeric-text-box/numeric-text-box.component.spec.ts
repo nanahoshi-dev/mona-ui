@@ -559,7 +559,7 @@ describe("NumericTextBoxComponent", () => {
                 expect(hostFixture.componentInstance.value()).toBe(12);
             });
 
-            it("accepts valid en-US alternate comma decimal separator on direct input", async () => {
+            it("does not read the en-US group separator as a decimal on direct input", async () => {
                 const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
                 hostFixture.componentInstance.decimals.set(2);
                 hostFixture.componentInstance.value.set(12);
@@ -567,14 +567,14 @@ describe("NumericTextBoxComponent", () => {
 
                 updateInputValue(hostFixture, "12,5");
                 await waitForStable(hostFixture);
-                expect(hostFixture.componentInstance.value()).toBe(12.5);
+                expect(hostFixture.componentInstance.value()).toBe(12);
 
-                updateInputValue(hostFixture, "1,5");
+                updateInputValue(hostFixture, "1,234");
                 await waitForStable(hostFixture);
-                expect(hostFixture.componentInstance.value()).toBe(1.5);
+                expect(hostFixture.componentInstance.value()).toBe(1234);
             });
 
-            it("accepts valid de-DE alternate dot decimal separator on direct input", async () => {
+            it("does not read the de-DE group separator as a decimal on direct input", async () => {
                 const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
                 const i18nService = TestBed.inject(MonaI18nService);
                 i18nService.use({ id: "de-DE", direction: "ltr", messages: {} });
@@ -585,7 +585,10 @@ describe("NumericTextBoxComponent", () => {
 
                 updateInputValue(hostFixture, "12.5");
                 await waitForStable(hostFixture);
+                expect(hostFixture.componentInstance.value()).toBe(12);
 
+                updateInputValue(hostFixture, "12,5");
+                await waitForStable(hostFixture);
                 expect(hostFixture.componentInstance.value()).toBe(12.5);
             });
 

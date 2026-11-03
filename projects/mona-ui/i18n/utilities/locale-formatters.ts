@@ -224,6 +224,22 @@ export function normalizeLocalizedInput(text: string, localeId: string): string 
     return cleaned;
 }
 
+/**
+ * Decimal separators accepted while editing: the locale's own, plus "." and "," so a separator typed on a
+ * keyboard layout that does not match the locale still works. An alternate is dropped when it is the locale's
+ * group separator; otherwise "1,234" typed in en-US (or "1.234" in de-DE) would be read as 1.234.
+ */
+export function getEditDecimalSeparators(symbols: NumberSymbols): ReadonlySet<string> {
+    const primary = symbols.decimal || ".";
+    const separators = new Set<string>([primary]);
+    for (const alternate of [".", ","]) {
+        if (alternate !== symbols.group) {
+            separators.add(alternate);
+        }
+    }
+    return separators;
+}
+
 export type LocalizedNumberParseMode = "edit" | "locale";
 
 export interface ParseLocalizedNumberOptions {
@@ -232,7 +248,7 @@ export interface ParseLocalizedNumberOptions {
      * Only the locale's canonical decimal separator is treated as decimal, and only
      * canonical grouping separators are treated as grouping.
      * When "edit", allows alternate decimal separators (such as '.' in comma-decimal locales)
-     * during interactive input entry.
+     * during interactive input entry, unless the alternate is the locale's group separator.
      */
     mode?: LocalizedNumberParseMode;
     /**
@@ -418,25 +434,7 @@ export function parseLocalizedNumber(
             return null;
         }
 
-        const primaryDec = symbols.decimal || ".";
-        const candidateSeparators = new Set<string>();
-        candidateSeparators.add(primaryDec);
-        if (primaryDec === ".") {
-            candidateSeparators.add(",");
-        } else if (primaryDec === ",") {
-            candidateSeparators.add(".");
-        } else {
-            candidateSeparators.add(".");
-            candidateSeparators.add(",");
-        }
-        if (primaryDec === "\u066B") {
-            candidateSeparators.add(".");
-            candidateSeparators.add(",");
-        }
-        if (primaryDec === "/") {
-            candidateSeparators.add(".");
-            candidateSeparators.add(",");
-        }
+        const candidateSeparators = getEditDecimalSeparators(symbols);
 
         let foundSep: string | null = null;
         let sepIndex = -1;
@@ -629,23 +627,7 @@ export function validateLocalizedNumberEdit(
         return { valid: true, complete: false, value: null };
     }
 
-    // Identify allowed decimal separators
-    const primaryDec = symbols.decimal || ".";
-    // Candidate separators: primary decimal, plus alternate '.' or ','
-    const candidateSeparators = new Set<string>();
-    candidateSeparators.add(primaryDec);
-    if (primaryDec === ".") {
-        candidateSeparators.add(",");
-    } else if (primaryDec === ",") {
-        candidateSeparators.add(".");
-    } else {
-        candidateSeparators.add(".");
-        candidateSeparators.add(",");
-    }
-    if (primaryDec === "\u066B") {
-        candidateSeparators.add(".");
-        candidateSeparators.add(",");
-    }
+    const candidateSeparators = getEditDecimalSeparators(symbols);
 
     // Count how many separators from the candidate set appear
     let foundSep: string | null = null;
