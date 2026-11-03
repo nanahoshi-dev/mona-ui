@@ -39,6 +39,8 @@ export function verifyThirdPartyNotices(
 
 export interface ExpectedLocaleExport {
     readonly direction?: "ltr" | "rtl";
+    /** Locale folder when the locale is also its own entry point, `@nanahoshi/mona-ui/locales/<folder>`. */
+    readonly folder?: string;
     readonly id: string;
     readonly symbol: string;
 }
@@ -48,6 +50,13 @@ export interface ConsumerSmokeTestOptions {
     expectedLocales: readonly ExpectedLocaleExport[];
     repoRoot?: string;
     tscPath?: string;
+    /** Also smoke-tests `@nanahoshi/mona-ui/i18n/icu`. */
+    verifyIcu?: boolean;
+    /**
+     * Also checks that the JSON (ICU) catalogs are exported, and, with `verifyIcu`, that each compiles to the same
+     * messages as the locale's TypeScript catalog.
+     */
+    verifyJsonCatalogs?: boolean;
 }
 
 export function resolveTypeScriptCompilerPath(repoRoot: string = process.cwd()): string {
@@ -125,6 +134,54 @@ import {
     getLocaleDateTimeInputFormat,
     getLocaleFirstDayOfWeek
 } from "@nanahoshi/mona-ui/i18n";
+if (${JSON.stringify(options.verifyIcu === true)}) {
+const { compileMonaLocale, validateMonaLocaleData } = await import("@nanahoshi/mona-ui/i18n/icu");
+const icuLocale = compileMonaLocale({
+    direction: "ltr",
+    id: "de-DE",
+    messages: { pager: { pageStatus: "Seite {page, number} von {totalPages, plural, one {# Seite} other {# Seiten}}" } }
+});
+const icuStatus = icuLocale.messages.pager.pageStatus(1200, 2);
+if (icuStatus !== "Seite 1.200 von 2 Seiten") {
+    console.error("Invalid compileMonaLocale output: " + icuStatus);
+    process.exit(1);
+}
+if (validateMonaLocaleData({ direction: "ltr", id: "de-DE", messages: { pager: { nope: "x" } } }).length !== 1) {
+    console.error("validateMonaLocaleData did not report an unknown key");
+    process.exit(1);
+}
+}
+
+if (${JSON.stringify(options.verifyJsonCatalogs === true)}) {
+    const loadJson = async specifier => (await import(specifier, { with: { type: "json" } })).default;
+    const english = await loadJson("@nanahoshi/mona-ui/i18n/catalogs/en-US.messages.json");
+    if (typeof english.pager?.nextPageLabel !== "string") {
+        console.error("Invalid JSON catalog @nanahoshi/mona-ui/i18n/catalogs/en-US.messages.json");
+        process.exit(1);
+    }
+    const icu = ${JSON.stringify(options.verifyIcu === true)} ? await import("@nanahoshi/mona-ui/i18n/icu") : null;
+    for (const expected of ${JSON.stringify(options.expectedLocales.filter(l => l.folder))}) {
+        const specifier =\`@nanahoshi/mona-ui/locales/\${expected.folder}/\${expected.folder}.messages.json\`;
+        const messages = await loadJson(specifier);
+        if (typeof messages.pager?.nextPageLabel !== "string") {
+            console.error("Invalid JSON catalog " + specifier);
+            process.exit(1);
+        }
+        if (icu != null) {
+            const compiled = icu.compileMonaLocale({ direction: "ltr", id: expected.id, messages }, { strict: true });
+            const official = locales[expected.symbol].messages;
+            const pairs = [
+                [compiled.messages.pager.nextPageLabel, official.pager.nextPageLabel],
+                [compiled.messages.pager.pageStatus(3, 1200), official.pager.pageStatus(3, 1200)],
+                [compiled.messages.pager.jumpForwardLabel(2), official.pager.jumpForwardLabel(2)]
+            ];
+            if (pairs.some(([a, b]) => a !== b)) {
+                console.error(\`\${specifier} does not compile to the messages of \${expected.symbol}\`);
+                process.exit(1);
+            }
+        }
+    }
+}
 
 const expectedLocales = ${JSON.stringify(options.expectedLocales)};
 for (const expected of expectedLocales) {
@@ -153,6 +210,28 @@ for (const expected of expectedLocales) {
     } else {
         if (loc.direction !== "ltr" && loc.direction !== "rtl") {
             console.error(\`Invalid locale direction for export \${expected.symbol}: received "\${loc.direction}", expected "ltr" or "rtl"\`);
+            process.exit(1);
+        }
+    }
+}
+
+for (const expected of expectedLocales.filter(l => l.folder)) {
+    const entry = await import("@nanahoshi/mona-ui/locales/" + expected.folder);
+    if (entry[expected.symbol] !== locales[expected.symbol]) {
+        console.error(\`Entry point @nanahoshi/mona-ui/locales/\${expected.folder} does not export the same \${expected.symbol} as the barrel\`);
+        process.exit(1);
+    }
+}
+
+if (expectedLocales.some(l => l.folder)) {
+    if (typeof locales.loadMonaLocale !== "function") {
+        console.error("Missing export loadMonaLocale in @nanahoshi/mona-ui/locales");
+        process.exit(1);
+    }
+    for (const expected of expectedLocales.filter(l => l.folder)) {
+        const loaded = await locales.loadMonaLocale(expected.id);
+        if (loaded !== locales[expected.symbol]) {
+            console.error(\`loadMonaLocale("\${expected.id}") did not resolve to \${expected.symbol}\`);
             process.exit(1);
         }
     }
@@ -609,7 +688,8 @@ export function verifyBuiltPackage(options: PackageVerificationOptions = {}): vo
         return {
             symbol: l.localeExport,
             id: l.canonicalId,
-            direction: l.direction
+            direction: l.direction,
+            folder: l.entryPoint ? l.folder : undefined
         };
     });
 
@@ -617,13 +697,60 @@ export function verifyBuiltPackage(options: PackageVerificationOptions = {}): vo
         throw new Error(`No official locale symbols discovered in ${sourceLocalesDir}`);
     }
     console.log(`✓ Discovered official locale symbols: ${expectedLocales.map(l => l.symbol).join(", ")}`);
+
+    for (const locale of expectedLocales.filter(l => l.folder)) {
+        const subpath = `./locales/${locale.folder}`;
+        const targets = resolveExportTargets(pkgJsonPath, subpath);
+        for (const target of [targets.runtimeRelPath, targets.typesRelPath]) {
+            if (!existsSync(resolve(distDir, target))) {
+                throw new Error(`exports["${subpath}"] target not found at: ${resolve(distDir, target)}`);
+            }
+        }
+    }
+    if (expectedLocales.some(l => l.folder)) {
+        console.log("✓ Found exports and targets for every locale entry point (./locales/<folder>)");
+    }
     console.log(`✓ Resolved hermetic TypeScript compiler at: ${tscPath}`);
+
+    // The ICU entry point is required once the source has it.
+    const verifyIcu = existsSync(resolve(sourceLocalesDir, "../i18n/icu/ng-package.json"));
+    if (verifyIcu) {
+        const icuTargets = resolveExportTargets(pkgJsonPath, "./i18n/icu");
+        for (const target of [icuTargets.runtimeRelPath, icuTargets.typesRelPath]) {
+            if (!existsSync(resolve(distDir, target))) {
+                throw new Error(`exports["./i18n/icu"] target not found at: ${resolve(distDir, target)}`);
+            }
+        }
+        console.log('✓ Found exports["./i18n/icu"] and its targets in dist/mona-ui/package.json');
+    }
+
+    // The JSON catalogs are shipped once the source has them.
+    const verifyJsonCatalogs = existsSync(resolve(sourceLocalesDir, "../i18n/catalogs/en-US.messages.json"));
+    if (verifyJsonCatalogs) {
+        const files = [
+            "i18n/catalogs/en-US.messages.json",
+            ...expectedLocales.filter(l => l.folder).map(l => `locales/${l.folder}/${l.folder}.messages.json`)
+        ];
+        for (const file of files) {
+            const builtFile = resolve(distDir, file);
+            const sourceFile = resolve(sourceLocalesDir, "..", file);
+            if (!existsSync(builtFile)) {
+                throw new Error(`JSON catalog not found in the package at: ${builtFile}`);
+            }
+            if (readFileSync(builtFile, "utf-8").replace(/\r\n/g, "\n") !== readFileSync(sourceFile, "utf-8").replace(/\r\n/g, "\n")) {
+                throw new Error(`JSON catalog in the package differs from its source: ${file}`);
+            }
+        }
+        console.log(`✓ Found ${files.length} JSON catalogs in the package, identical to their sources`);
+    }
 
     runConsumerSmokeTest({
         distDir,
         expectedLocales,
         tscPath,
-        repoRoot
+        repoRoot,
+        verifyIcu,
+        verifyJsonCatalogs
     });
 
     console.log("\nPackage verification SUCCESS: All packaging criteria satisfied.");

@@ -395,7 +395,8 @@ describe("MONA_AR_SA_LOCALE", () => {
                 expect(result).toBe(`${text}، زر تقسيم`);
             }
             expect(m.splitButton.splitButton("")).toBe("زر تقسيم");
-            expect(m.splitButton.splitButton(undefined)).toBe("زر تقسيم");
+            // The message type takes a string; a JavaScript caller may still pass undefined.
+            expect(m.splitButton.splitButton(undefined as unknown as string)).toBe("زر تقسيم");
         });
 
         it("chart rangeDescription is parameter-neutral for diverse titles", () => {

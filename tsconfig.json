@@ -4,6 +4,7 @@
     "compilerOptions": {
         "declaration": false,
         "esModuleInterop": true,
+        "resolveJsonModule": true,
         "experimentalDecorators": true,
         "forceConsistentCasingInFileNames": true,
         "importHelpers": true,
@@ -47,6 +48,7 @@
             "@nanahoshi/mona-ui/expansion-panel": ["./projects/mona-ui/expansion-panel/public-api.ts"],
             "@nanahoshi/mona-ui/fieldset": ["./projects/mona-ui/fieldset/public-api.ts"],
             "@nanahoshi/mona-ui/i18n": ["./projects/mona-ui/i18n/public-api.ts"],
+            "@nanahoshi/mona-ui/i18n/icu": ["./projects/mona-ui/i18n/icu/public-api.ts"],
             "@nanahoshi/mona-ui/internal": ["./projects/mona-ui/internal/public-api.ts"],
             "@nanahoshi/mona-ui/internal/filter-input": ["./projects/mona-ui/internal/filter-input/public-api.ts"],
             "@nanahoshi/mona-ui/internal/indicator-icon": ["./projects/mona-ui/internal/indicator-icon/public-api.ts"],
@@ -59,6 +61,7 @@
             "@nanahoshi/mona-ui/list-box": ["./projects/mona-ui/list-box/public-api.ts"],
             "@nanahoshi/mona-ui/list-view": ["./projects/mona-ui/list-view/public-api.ts"],
             "@nanahoshi/mona-ui/locales": ["./projects/mona-ui/locales/public-api.ts"],
+            "@nanahoshi/mona-ui/locales/*": ["./projects/mona-ui/locales/*/public-api.ts"],
             "@nanahoshi/mona-ui/menubar": ["./projects/mona-ui/menubar/public-api.ts"],
             "@nanahoshi/mona-ui/multi-select": ["./projects/mona-ui/multi-select/public-api.ts"],
             "@nanahoshi/mona-ui/notification": ["./projects/mona-ui/notification/public-api.ts"],

@@ -26,6 +26,16 @@
             "glob": "**/*.scss",
             "output": "styles"
         },
+        {
+            "input": "i18n/catalogs",
+            "glob": "*.messages.json",
+            "output": "i18n/catalogs"
+        },
+        {
+            "input": "locales",
+            "glob": "*/*.messages.json",
+            "output": "locales"
+        },
         "THIRD_PARTY_NOTICES.md"
     ]
 }

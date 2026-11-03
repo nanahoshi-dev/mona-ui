@@ -1,11 +1,10 @@
+// Generated from es-es.messages.json by scripts/generate-locale-catalogs.ts. Do not edit.
+// Edit the JSON file and run `npm run generate:locale-catalogs`.
+
 import { formatNumber, type MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
 
-function localizeNumber(value: number): string {
-    return formatNumber(value, "es-ES");
-}
-
-function localizeYear(year: number): string {
-    return formatNumber(year, "es-ES", { useGrouping: false });
+function localizeNumber(value: number, options?: Intl.NumberFormatOptions): string {
+    return formatNumber(value, "es-ES", options);
 }
 
 export const ES_ES_MESSAGES = {
@@ -20,9 +19,10 @@ export const ES_ES_MESSAGES = {
     },
     calendar: {
         calendarLabel: (formattedMonthAndYear: string) => `Calendario, ${formattedMonthAndYear}`,
-        decadeRange: (start: number, end: number) => `${localizeYear(start)} a ${localizeYear(end)}`,
+        decadeRange: (start: number, end: number) =>
+            `${localizeNumber(start, { useGrouping: false })} a ${localizeNumber(end, { useGrouping: false })}`,
         decadeViewLabel: (start: number, end: number) =>
-            `Vista de década, ${localizeYear(start)} - ${localizeYear(end)}`,
+            `Vista de década, ${localizeNumber(start, { useGrouping: false })} - ${localizeNumber(end, { useGrouping: false })}`,
         goToToday: (formattedDate: string) => `Ir a hoy, ${formattedDate}`,
         nextDecade: "Década siguiente",
         nextMonth: "Mes siguiente",
@@ -33,7 +33,7 @@ export const ES_ES_MESSAGES = {
         switchToDecadeView: (currentYear: string) => `Cambiar a vista de década, actualmente ${currentYear}`,
         switchToYearView: (currentMonthAndYear: string) => `Cambiar a vista anual, actualmente ${currentMonthAndYear}`,
         today: "Hoy",
-        yearCellLabel: (year: number) => `Año ${localizeYear(year)}`,
+        yearCellLabel: (year: number) => `Año ${localizeNumber(year, { useGrouping: false })}`,
         yearViewLabel: (year: string) => `Vista anual, ${year}`
     },
     card: {
@@ -270,7 +270,8 @@ export const ES_ES_MESSAGES = {
     },
     multiSelect: {
         clear: "Limpiar",
-        itemsCount: (count: number) => `+ ${localizeNumber(count)} ${count === 1 ? "elemento" : "elementos"}`
+        itemsCount: (count: number) =>
+            count === 1 ? `+ ${localizeNumber(count)} elemento` : `+ ${localizeNumber(count)} elementos`
     },
     notification: {
         close: "Cerrar",
@@ -302,7 +303,9 @@ export const ES_ES_MESSAGES = {
         pageText: "Página",
         previousPageLabel: "Página anterior",
         rangeStatus: (start: number, end: number, total: number) =>
-            `${localizeNumber(start)} - ${localizeNumber(end)} de ${localizeNumber(total)} ${total === 1 ? "elemento" : "elementos"}`
+            total === 1
+                ? `${localizeNumber(start)} - ${localizeNumber(end)} de ${localizeNumber(total)} elemento`
+                : `${localizeNumber(start)} - ${localizeNumber(end)} de ${localizeNumber(total)} elementos`
     },
     rating: {
         notRated: "Sin valoración",

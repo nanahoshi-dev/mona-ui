@@ -497,6 +497,75 @@ describe("NumericTextBoxComponent", () => {
             expect(hostFixture.componentInstance.value()).toBe(1.5);
         });
 
+        describe("precision", () => {
+            function typeAtEnd(
+                input: HTMLInputElement,
+                text: string,
+                data: string,
+                inputType = "insertText"
+            ): InputEvent {
+                input.value = text;
+                input.selectionStart = text.length;
+                input.selectionEnd = text.length;
+                const event = new InputEvent("beforeinput", { bubbles: true, cancelable: true, data, inputType });
+                input.dispatchEvent(event);
+                return event;
+            }
+
+            async function createUnboundedHost(): Promise<ComponentFixture<ValueBindingNumericTextBoxHostComponent>> {
+                const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
+                hostFixture.componentInstance.minValue.set(null);
+                hostFixture.componentInstance.maxValue.set(null);
+                await waitForStable(hostFixture);
+                return hostFixture;
+            }
+
+            it("blocks the digit that would take an integer past Number.MAX_SAFE_INTEGER", async () => {
+                const input = getInput(await createUnboundedHost());
+
+                expect(typeAtEnd(input, "900719925474099", "1").defaultPrevented).toBe(false);
+                expect(typeAtEnd(input, "9007199254740991", "0").defaultPrevented).toBe(true);
+                expect(typeAtEnd(input, "9007199254740992", "3").defaultPrevented).toBe(true);
+                // Leading zeros are not significant.
+                expect(typeAtEnd(input, "000000000000000000", "1").defaultPrevented).toBe(false);
+            });
+
+            it("blocks the fraction digit past 15 significant digits", async () => {
+                const hostFixture = await createUnboundedHost();
+                hostFixture.componentInstance.decimals.set(5);
+                await waitForStable(hostFixture);
+                const input = getInput(hostFixture);
+
+                expect(typeAtEnd(input, "1234567890123.4", "5").defaultPrevented).toBe(false);
+                expect(typeAtEnd(input, "1234567890123.45", "6").defaultPrevented).toBe(true);
+            });
+
+            it("refuses a paste that a number cannot hold exactly", async () => {
+                const input = getInput(await createUnboundedHost());
+
+                expect(typeAtEnd(input, "", "9,007,199,254,740,993", "insertFromPaste").defaultPrevented).toBe(true);
+                expect(typeAtEnd(input, "", "9,007,199,254,740,991", "insertFromPaste").defaultPrevented).toBe(false);
+            });
+
+            it("stops stepping at the safe integer range", async () => {
+                const hostFixture = await createUnboundedHost();
+                const numericComponent = hostFixture.debugElement.query(By.directive(NumericTextBoxComponent))
+                    .componentInstance as NumericTextBoxComponent;
+
+                hostFixture.componentInstance.value.set(Number.MAX_SAFE_INTEGER);
+                await waitForStable(hostFixture);
+                numericComponent.increase();
+                await waitForStable(hostFixture);
+                expect(hostFixture.componentInstance.value()).toBe(Number.MAX_SAFE_INTEGER);
+
+                hostFixture.componentInstance.value.set(Number.MIN_SAFE_INTEGER);
+                await waitForStable(hostFixture);
+                numericComponent.decrease();
+                await waitForStable(hostFixture);
+                expect(hostFixture.componentInstance.value()).toBe(Number.MIN_SAFE_INTEGER);
+            });
+        });
+
         describe("direct input and edit validation without beforeinput", () => {
             it("rejects malformed repeated comma direct input and preserves prior model value", async () => {
                 const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);

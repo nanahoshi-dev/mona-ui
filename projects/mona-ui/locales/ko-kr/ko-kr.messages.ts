@@ -1,11 +1,10 @@
+// Generated from ko-kr.messages.json by scripts/generate-locale-catalogs.ts. Do not edit.
+// Edit the JSON file and run `npm run generate:locale-catalogs`.
+
 import { formatNumber, type MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
 
-function localizeNumber(value: number): string {
-    return formatNumber(value, "ko-KR");
-}
-
-function localizeYear(year: number): string {
-    return formatNumber(year, "ko-KR", { useGrouping: false });
+function localizeNumber(value: number, options?: Intl.NumberFormatOptions): string {
+    return formatNumber(value, "ko-KR", options);
 }
 
 export const KO_KR_MESSAGES = {
@@ -20,8 +19,10 @@ export const KO_KR_MESSAGES = {
     },
     calendar: {
         calendarLabel: (formattedMonthAndYear: string) => `${formattedMonthAndYear} 달력`,
-        decadeRange: (start: number, end: number) => `${localizeYear(start)}년~${localizeYear(end)}년`,
-        decadeViewLabel: (start: number, end: number) => `10년 보기, ${localizeYear(start)}년~${localizeYear(end)}년`,
+        decadeRange: (start: number, end: number) =>
+            `${localizeNumber(start, { useGrouping: false })}년~${localizeNumber(end, { useGrouping: false })}년`,
+        decadeViewLabel: (start: number, end: number) =>
+            `10년 보기, ${localizeNumber(start, { useGrouping: false })}년~${localizeNumber(end, { useGrouping: false })}년`,
         goToToday: (formattedDate: string) => `오늘로 이동 (${formattedDate})`,
         nextDecade: "다음 10년",
         nextMonth: "다음 달",
@@ -32,7 +33,7 @@ export const KO_KR_MESSAGES = {
         switchToDecadeView: (currentYear: string) => `10년 보기로 전환. 현재 ${currentYear}`,
         switchToYearView: (currentMonthAndYear: string) => `연도 보기로 전환. 현재 ${currentMonthAndYear}`,
         today: "오늘",
-        yearCellLabel: (year: number) => `${localizeYear(year)}년`,
+        yearCellLabel: (year: number) => `${localizeNumber(year, { useGrouping: false })}년`,
         yearViewLabel: (year: string) => `연도 보기, ${year}`
     },
     card: {

@@ -1,30 +1,19 @@
+// Generated from ar-sa.messages.json by scripts/generate-locale-catalogs.ts. Do not edit.
+// Edit the JSON file and run `npm run generate:locale-catalogs`.
+
 import { formatNumber, type MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
 
-function localizeNumber(value: number): string {
-    return formatNumber(value, "ar-SA");
+function localizeNumber(value: number, options?: Intl.NumberFormatOptions): string {
+    return formatNumber(value, "ar-SA", options);
 }
 
-function localizeYear(year: number): string {
-    return formatNumber(year, "ar-SA", { useGrouping: false });
-}
+const PLURAL_RULES = new Intl.PluralRules("ar-SA");
 
-const AR_SA_PLURAL_RULES = new Intl.PluralRules("ar-SA");
-
-function formatPageCount(pages: number): string {
-    const category = AR_SA_PLURAL_RULES.select(pages);
-    switch (category) {
-        case "zero":
-            return `${localizeNumber(pages)} صفحات`;
-        case "one":
-            return "صفحة واحدة";
-        case "two":
-            return "صفحتان";
-        case "few":
-            return `${localizeNumber(pages)} صفحات`;
-        case "many":
-        case "other":
-            return `${localizeNumber(pages)} صفحة`;
-    }
+function plural(
+    category: Intl.LDMLPluralRule,
+    forms: Partial<Record<Intl.LDMLPluralRule, () => string>> & { readonly other: () => string }
+): string {
+    return (forms[category] ?? forms.other)();
 }
 
 export const AR_SA_MESSAGES = {
@@ -39,9 +28,10 @@ export const AR_SA_MESSAGES = {
     },
     calendar: {
         calendarLabel: (formattedMonthAndYear: string) => `تقويم ${formattedMonthAndYear}`,
-        decadeRange: (start: number, end: number) => `من ${localizeYear(start)} إلى ${localizeYear(end)}`,
+        decadeRange: (start: number, end: number) =>
+            `من ${localizeNumber(start, { useGrouping: false })} إلى ${localizeNumber(end, { useGrouping: false })}`,
         decadeViewLabel: (start: number, end: number) =>
-            `عرض العقد، من ${localizeYear(start)} إلى ${localizeYear(end)}`,
+            `عرض العقد، من ${localizeNumber(start, { useGrouping: false })} إلى ${localizeNumber(end, { useGrouping: false })}`,
         goToToday: (formattedDate: string) => `الانتقال إلى اليوم (${formattedDate})`,
         nextDecade: "العقد التالي",
         nextMonth: "الشهر التالي",
@@ -52,7 +42,7 @@ export const AR_SA_MESSAGES = {
         switchToDecadeView: (currentYear: string) => `التبديل إلى عرض العقد. السنة الحالية ${currentYear}`,
         switchToYearView: (currentMonthAndYear: string) => `التبديل إلى عرض السنة. الحالي ${currentMonthAndYear}`,
         today: "اليوم",
-        yearCellLabel: (year: number) => `السنة ${localizeYear(year)}`,
+        yearCellLabel: (year: number) => `السنة ${localizeNumber(year, { useGrouping: false })}`,
         yearViewLabel: (year: string) => `عرض السنة، ${year}`
     },
     card: {
@@ -304,8 +294,10 @@ export const AR_SA_MESSAGES = {
     },
     pager: {
         firstPageLabel: "الصفحة الأولى",
-        jumpBackwardLabel: (pages: number) => `للخلف: ${formatPageCount(pages)}`,
-        jumpForwardLabel: (pages: number) => `للأمام: ${formatPageCount(pages)}`,
+        jumpBackwardLabel: (pages: number) =>
+            `للخلف: ${plural(PLURAL_RULES.select(pages), { zero: () => `${localizeNumber(pages)} صفحات`, one: () => "صفحة واحدة", two: () => "صفحتان", few: () => `${localizeNumber(pages)} صفحات`, many: () => `${localizeNumber(pages)} صفحة`, other: () => `${localizeNumber(pages)} صفحة` })}`,
+        jumpForwardLabel: (pages: number) =>
+            `للأمام: ${plural(PLURAL_RULES.select(pages), { zero: () => `${localizeNumber(pages)} صفحات`, one: () => "صفحة واحدة", two: () => "صفحتان", few: () => `${localizeNumber(pages)} صفحات`, many: () => `${localizeNumber(pages)} صفحة`, other: () => `${localizeNumber(pages)} صفحة` })}`,
         lastPageLabel: "الصفحة الأخيرة",
         nextPageLabel: "الصفحة التالية",
         ofText: "من",
@@ -346,7 +338,7 @@ export const AR_SA_MESSAGES = {
     },
     splitButton: {
         menuButtonAriaLabel: "عرض خيارات القائمة",
-        splitButton: (text?: string) => (text ? `${text}، زر تقسيم` : "زر تقسيم")
+        splitButton: (text: string) => (text ? `${text}، زر تقسيم` : "زر تقسيم")
     },
     splitter: {
         collapseDown: "طي الجزء السفلي",

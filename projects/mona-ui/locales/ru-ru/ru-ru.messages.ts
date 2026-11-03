@@ -1,72 +1,37 @@
+// Generated from ru-ru.messages.json by scripts/generate-locale-catalogs.ts. Do not edit.
+// Edit the JSON file and run `npm run generate:locale-catalogs`.
+
 import { formatNumber, type MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
 
-function localizeNumber(value: number): string {
-    return formatNumber(value, "ru-RU");
+function localizeNumber(value: number, options?: Intl.NumberFormatOptions): string {
+    return formatNumber(value, "ru-RU", options);
 }
 
-function localizeYear(year: number): string {
-    return formatNumber(year, "ru-RU", { useGrouping: false });
-}
+const PLURAL_RULES = new Intl.PluralRules("ru-RU");
 
-const RU_RU_PLURAL_RULES = new Intl.PluralRules("ru-RU");
-
-function russianPlural(
-    count: number,
-    forms: {
-        one: string;
-        few: string;
-        many: string;
-        other?: string;
-    }
+function plural(
+    category: Intl.LDMLPluralRule,
+    forms: Partial<Record<Intl.LDMLPluralRule, () => string>> & { readonly other: () => string }
 ): string {
-    const category = RU_RU_PLURAL_RULES.select(count);
-    switch (category) {
-        case "one":
-            return forms.one;
-        case "few":
-            return forms.few;
-        case "many":
-            return forms.many;
-        case "other":
-        default:
-            return forms.other ?? forms.few;
-    }
-}
-
-function formatPageCount(count: number): string {
-    return `${localizeNumber(count)} ${russianPlural(count, {
-        one: "страницу",
-        few: "страницы",
-        many: "страниц"
-    })}`;
-}
-
-function formatItemCount(count: number): string {
-    return `${localizeNumber(count)} ${russianPlural(count, {
-        one: "элемент",
-        few: "элемента",
-        many: "элементов"
-    })}`;
+    return (forms[category] ?? forms.other)();
 }
 
 export const RU_RU_MESSAGES = {
     autoComplete: {
         clear: "Очистить"
     },
-
     breadcrumb: {
         breadcrumb: "Навигационная цепочка"
     },
-
     buttonGroup: {
         buttonGroup: "Группа кнопок"
     },
-
     calendar: {
         calendarLabel: (formattedMonthAndYear: string) => `Календарь, ${formattedMonthAndYear}`,
-        decadeRange: (start: number, end: number) => `${localizeYear(start)}–${localizeYear(end)}`,
+        decadeRange: (start: number, end: number) =>
+            `${localizeNumber(start, { useGrouping: false })}–${localizeNumber(end, { useGrouping: false })}`,
         decadeViewLabel: (start: number, end: number) =>
-            `Просмотр десятилетия, ${localizeYear(start)}–${localizeYear(end)}`,
+            `Просмотр десятилетия, ${localizeNumber(start, { useGrouping: false })}–${localizeNumber(end, { useGrouping: false })}`,
         goToToday: (formattedDate: string) => `Перейти к сегодняшней дате, ${formattedDate}`,
         nextDecade: "Следующее десятилетие",
         nextMonth: "Следующий месяц",
@@ -78,14 +43,12 @@ export const RU_RU_MESSAGES = {
         switchToYearView: (currentMonthAndYear: string) =>
             `Перейти к просмотру года, текущий месяц: ${currentMonthAndYear}`,
         today: "Сегодня",
-        yearCellLabel: (year: number) => `Год ${localizeYear(year)}`,
+        yearCellLabel: (year: number) => `Год ${localizeNumber(year, { useGrouping: false })}`,
         yearViewLabel: (year: string) => `Просмотр года, ${year}`
     },
-
     card: {
         actionsLabel: "Действия карточки"
     },
-
     chart: {
         change: "Изменение",
         chart: "Диаграмма",
@@ -116,11 +79,9 @@ export const RU_RU_MESSAGES = {
         value: "Значение",
         visualIndicatorClamped: "Визуальный индикатор ограничен"
     },
-
     chip: {
         removeLabel: (label?: string) => (label ? `Удалить ${label}` : "Удалить элемент")
     },
-
     colorGradient: {
         apply: "Применить",
         cancel: "Отмена",
@@ -135,28 +96,23 @@ export const RU_RU_MESSAGES = {
             `Насыщенность ${localizeNumber(saturation)}%, значение ${localizeNumber(value)}%`,
         switchColorMode: "Переключить цветовой режим"
     },
-
     colorPalette: {
         color: (color: string) => `Цвет: ${color}`,
         colorPalette: "Цветовая палитра"
     },
-
     colorPicker: {
         clearColor: "Очистить цвет",
         colorGradientPicker: "Выбор градиента цвета",
         colorPalettePicker: "Выбор цвета из палитры",
         colorPicker: "Выбор цвета"
     },
-
     comboBox: {
         clear: "Очистить"
     },
-
     datePicker: {
         datePicker: "Выбор даты",
         openCalendar: "Открыть календарь"
     },
-
     dateTimePicker: {
         calendar: "Календарь",
         cancel: "Отмена",
@@ -167,24 +123,20 @@ export const RU_RU_MESSAGES = {
         time: "Время",
         timePicker: "Выбор времени"
     },
-
     dialog: {
         cancel: "Отмена",
         closeDialog: "Закрыть диалоговое окно",
-        ok: "\u041E\u041A"
+        ok: "ОК"
     },
-
     dropdownList: {
         clear: "Очистить"
     },
-
     dropdowns: {
         itemPosition: (text: string, position: number, total: number) =>
             `${text}, ${localizeNumber(position)} из ${localizeNumber(total)}`,
         noResultsFound: "Результаты не найдены",
         resultsAvailable: (count: number) => `Доступно результатов: ${localizeNumber(count)}`
     },
-
     editor: {
         addColumnAfter: "Добавить столбец после",
         addColumnBefore: "Добавить столбец перед",
@@ -236,7 +188,6 @@ export const RU_RU_MESSAGES = {
         undo: "Отменить",
         widthPx: "Ширина (px)"
     },
-
     filter: {
         and: "И",
         apply: "Применить",
@@ -265,7 +216,6 @@ export const RU_RU_MESSAGES = {
         or: "ИЛИ",
         startsWith: "Начинается с"
     },
-
     grid: {
         all: "(Все)",
         apply: "Применить",
@@ -311,12 +261,10 @@ export const RU_RU_MESSAGES = {
         selectAllRows: "Выбрать все строки",
         selectRow: (rowNumber: number) => `Выбрать строку ${localizeNumber(rowNumber)}`
     },
-
     list: {
         filterList: "Фильтр списка",
         noData: "Нет данных"
     },
-
     listBox: {
         clearSelection: "Очистить выбор",
         moveDown: "Переместить вниз",
@@ -327,12 +275,11 @@ export const RU_RU_MESSAGES = {
         transferFrom: "Перенести из другого списка",
         transferTo: "Перенести в другой список"
     },
-
     multiSelect: {
         clear: "Очистить",
-        itemsCount: (count: number) => `+ ${formatItemCount(count)}`
+        itemsCount: (count: number) =>
+            `+ ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} элемент`, few: () => `${localizeNumber(count)} элемента`, many: () => `${localizeNumber(count)} элементов`, other: () => `${localizeNumber(count)} элемента` })}`
     },
-
     notification: {
         close: "Закрыть",
         error: "Ошибка",
@@ -340,20 +287,19 @@ export const RU_RU_MESSAGES = {
         success: "Успешно",
         warning: "Предупреждение"
     },
-
     numericTextBox: {
         decrease: "Уменьшить значение",
         increase: "Увеличить значение"
     },
-
     otpInput: {
         verificationCode: "Код подтверждения"
     },
-
     pager: {
         firstPageLabel: "Первая страница",
-        jumpBackwardLabel: (pages: number) => `Назад на ${formatPageCount(pages)}`,
-        jumpForwardLabel: (pages: number) => `Вперёд на ${formatPageCount(pages)}`,
+        jumpBackwardLabel: (pages: number) =>
+            `Назад на ${plural(PLURAL_RULES.select(pages), { one: () => `${localizeNumber(pages)} страницу`, few: () => `${localizeNumber(pages)} страницы`, many: () => `${localizeNumber(pages)} страниц`, other: () => `${localizeNumber(pages)} страницы` })}`,
+        jumpForwardLabel: (pages: number) =>
+            `Вперёд на ${plural(PLURAL_RULES.select(pages), { one: () => `${localizeNumber(pages)} страницу`, few: () => `${localizeNumber(pages)} страницы`, many: () => `${localizeNumber(pages)} страниц`, other: () => `${localizeNumber(pages)} страницы` })}`,
         lastPageLabel: "Последняя страница",
         nextPageLabel: "Следующая страница",
         ofText: "из",
@@ -366,12 +312,10 @@ export const RU_RU_MESSAGES = {
         rangeStatus: (start: number, end: number, total: number) =>
             `${localizeNumber(start)}–${localizeNumber(end)} из ${localizeNumber(total)}`
     },
-
     rating: {
         notRated: "Без оценки",
         valueText: (value: number, max: number) => `${localizeNumber(value)} из ${localizeNumber(max)}`
     },
-
     scrollView: {
         carousel: "карусель",
         nextPage: "Следующая страница",
@@ -382,27 +326,22 @@ export const RU_RU_MESSAGES = {
         scrollPagerPrevious: "Прокрутить список страниц назад",
         slide: "слайд"
     },
-
     sheet: {
         closeSheet: "Закрыть панель"
     },
-
     slider: {
         maximumValue: "Максимальное значение",
         minimumValue: "Минимальное значение",
         sliderValue: "Значение ползунка"
     },
-
     spinner: {
         cancel: "Отмена",
         loading: "Загрузка"
     },
-
     splitButton: {
         menuButtonAriaLabel: "Показать параметры меню",
         splitButton: (text: string) => (text ? `${text}, разделённая кнопка` : "Разделённая кнопка")
     },
-
     splitter: {
         collapseDown: "Свернуть нижнюю панель",
         collapseNext: "Свернуть следующую панель",
@@ -410,27 +349,22 @@ export const RU_RU_MESSAGES = {
         collapseUp: "Свернуть верхнюю панель",
         resizer: "Разделитель панелей"
     },
-
     stepper: {
         stepProgress: "Ход выполнения шагов",
         stepper: "Шаги"
     },
-
     tabs: {
         closeTab: "Закрыть вкладку",
         scrollNext: "Прокрутить вкладки вперёд",
         scrollPrevious: "Прокрутить вкладки назад"
     },
-
     textBox: {
         clear: "Очистить"
     },
-
     timePicker: {
         openTimePicker: "Открыть выбор времени",
         timePicker: "Выбор времени"
     },
-
     timeSelector: {
         am: "AM",
         amPm: "AM/PM",
@@ -445,14 +379,12 @@ export const RU_RU_MESSAGES = {
         set: "Установить",
         timeSelector: "Выбор времени"
     },
-
     treeView: {
         collapse: "Свернуть",
         expand: "Развернуть",
         filter: "Фильтр",
         filterTree: "Фильтр дерева"
     },
-
     window: {
         close: "Закрыть",
         closeWindow: "Закрыть окно",

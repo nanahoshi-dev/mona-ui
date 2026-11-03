@@ -1,11 +1,10 @@
+// Generated from zh-cn.messages.json by scripts/generate-locale-catalogs.ts. Do not edit.
+// Edit the JSON file and run `npm run generate:locale-catalogs`.
+
 import { formatNumber, type MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
 
-function localizeNumber(value: number): string {
-    return formatNumber(value, "zh-CN");
-}
-
-function localizeYear(year: number): string {
-    return formatNumber(year, "zh-CN", { useGrouping: false });
+function localizeNumber(value: number, options?: Intl.NumberFormatOptions): string {
+    return formatNumber(value, "zh-CN", options);
 }
 
 export const ZH_CN_MESSAGES = {
@@ -20,8 +19,10 @@ export const ZH_CN_MESSAGES = {
     },
     calendar: {
         calendarLabel: (formattedMonthAndYear: string) => `${formattedMonthAndYear}日历`,
-        decadeRange: (start: number, end: number) => `${localizeYear(start)}年至${localizeYear(end)}年`,
-        decadeViewLabel: (start: number, end: number) => `十年视图，${localizeYear(start)}年至${localizeYear(end)}年`,
+        decadeRange: (start: number, end: number) =>
+            `${localizeNumber(start, { useGrouping: false })}年至${localizeNumber(end, { useGrouping: false })}年`,
+        decadeViewLabel: (start: number, end: number) =>
+            `十年视图，${localizeNumber(start, { useGrouping: false })}年至${localizeNumber(end, { useGrouping: false })}年`,
         goToToday: (formattedDate: string) => `转到今天（${formattedDate}）`,
         nextDecade: "下一个十年",
         nextMonth: "下个月",
@@ -32,7 +33,7 @@ export const ZH_CN_MESSAGES = {
         switchToDecadeView: (currentYear: string) => `切换到十年视图，当前为${currentYear}`,
         switchToYearView: (currentMonthAndYear: string) => `切换到年视图，当前为${currentMonthAndYear}`,
         today: "今天",
-        yearCellLabel: (year: number) => `${localizeYear(year)}年`,
+        yearCellLabel: (year: number) => `${localizeNumber(year, { useGrouping: false })}年`,
         yearViewLabel: (year: string) => `年视图，${year}`
     },
     card: {

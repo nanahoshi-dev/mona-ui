@@ -102,6 +102,10 @@ Use the `FormField` directive when you want the form schema to write `value`, `t
 
 The spinner buttons and arrow keys use the configured `step` value.
 
+### Precision
+
+A JavaScript `number` holds integers exactly only up to `9007199254740991` (`Number.MAX_SAFE_INTEGER`), and decimals only up to 15 significant digits. Rather than round a value silently, the control refuses the keystroke or paste that would go past that limit, and the spinner buttons stop at `±Number.MAX_SAFE_INTEGER`. For amounts that need more digits, such as money stored as a decimal type, use [`DecimalTextBoxComponent`](/decimal-textbox), whose value is a decimal string with no precision limit.
+
 ## Accessibility Notes
 
 `NumericTextBoxComponent` renders `role="spinbutton"` on the inner input element and keeps the following ARIA attributes in sync with state:

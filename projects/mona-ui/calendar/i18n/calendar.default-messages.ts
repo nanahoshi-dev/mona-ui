@@ -1,23 +1,28 @@
+// Generated from i18n/catalogs/en-US.messages.json by scripts/generate-locale-catalogs.ts. Do not edit.
+// Edit the JSON file and run `npm run generate:locale-catalogs`.
+
 import { formatNumber, type MonaCalendarMessages } from "@nanahoshi/mona-ui/i18n";
 
-function localizeYear(year: number): string {
-    return formatNumber(year, "en-US", { useGrouping: false });
+function localizeNumber(value: number, options?: Intl.NumberFormatOptions): string {
+    return formatNumber(value, "en-US", options);
 }
 
 export const CALENDAR_DEFAULT_MESSAGES: MonaCalendarMessages = {
     calendarLabel: (formattedMonthAndYear: string) => `Calendar, ${formattedMonthAndYear}`,
-    yearViewLabel: (year: string) => `Year view, ${year}`,
-    decadeViewLabel: (start: number, end: number) => `Decade view, ${localizeYear(start)} - ${localizeYear(end)}`,
+    decadeRange: (start: number, end: number) =>
+        `${localizeNumber(start, { useGrouping: false })} to ${localizeNumber(end, { useGrouping: false })}`,
+    decadeViewLabel: (start: number, end: number) =>
+        `Decade view, ${localizeNumber(start, { useGrouping: false })} - ${localizeNumber(end, { useGrouping: false })}`,
+    goToToday: (formattedDate: string) => `Go to today, ${formattedDate}`,
+    nextDecade: "Next decade",
     nextMonth: "Next month",
     nextYear: "Next year",
-    nextDecade: "Next decade",
+    previousDecade: "Previous decade",
     previousMonth: "Previous month",
     previousYear: "Previous year",
-    previousDecade: "Previous decade",
-    today: "Today",
-    goToToday: (formattedDate: string) => `Go to today, ${formattedDate}`,
-    switchToYearView: (currentMonthAndYear: string) => `Switch to year view, currently ${currentMonthAndYear}`,
     switchToDecadeView: (currentYear: string) => `Switch to decade view, currently ${currentYear}`,
-    decadeRange: (start: number, end: number) => `${localizeYear(start)} to ${localizeYear(end)}`,
-    yearCellLabel: (year: number) => `Year ${localizeYear(year)}`
+    switchToYearView: (currentMonthAndYear: string) => `Switch to year view, currently ${currentMonthAndYear}`,
+    today: "Today",
+    yearCellLabel: (year: number) => `Year ${localizeNumber(year, { useGrouping: false })}`,
+    yearViewLabel: (year: string) => `Year view, ${year}`
 };

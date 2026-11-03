@@ -1,11 +1,10 @@
+// Generated from ja-jp.messages.json by scripts/generate-locale-catalogs.ts. Do not edit.
+// Edit the JSON file and run `npm run generate:locale-catalogs`.
+
 import { formatNumber, type MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
 
-function localizeNumber(value: number): string {
-    return formatNumber(value, "ja-JP");
-}
-
-function localizeYear(year: number): string {
-    return formatNumber(year, "ja-JP", { useGrouping: false });
+function localizeNumber(value: number, options?: Intl.NumberFormatOptions): string {
+    return formatNumber(value, "ja-JP", options);
 }
 
 export const JA_JP_MESSAGES = {
@@ -20,9 +19,10 @@ export const JA_JP_MESSAGES = {
     },
     calendar: {
         calendarLabel: (formattedMonthAndYear: string) => `${formattedMonthAndYear}のカレンダー`,
-        decadeRange: (start: number, end: number) => `${localizeYear(start)}年～${localizeYear(end)}年`,
+        decadeRange: (start: number, end: number) =>
+            `${localizeNumber(start, { useGrouping: false })}年～${localizeNumber(end, { useGrouping: false })}年`,
         decadeViewLabel: (start: number, end: number) =>
-            `${localizeYear(start)}年から${localizeYear(end)}年までの10年表示`,
+            `${localizeNumber(start, { useGrouping: false })}年から${localizeNumber(end, { useGrouping: false })}年までの10年表示`,
         goToToday: (formattedDate: string) => `今日（${formattedDate}）に移動`,
         nextDecade: "次の10年間",
         nextMonth: "次の月",
@@ -33,7 +33,7 @@ export const JA_JP_MESSAGES = {
         switchToDecadeView: (currentYear: string) => `10年表示に切り替える。現在は${currentYear}`,
         switchToYearView: (currentMonthAndYear: string) => `年表示に切り替える。現在は${currentMonthAndYear}`,
         today: "今日",
-        yearCellLabel: (year: number) => `${localizeYear(year)}年`,
+        yearCellLabel: (year: number) => `${localizeNumber(year, { useGrouping: false })}年`,
         yearViewLabel: (year: string) => `年表示、${year}`
     },
     card: {

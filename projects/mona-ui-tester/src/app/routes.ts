@@ -155,6 +155,13 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "decimal-textbox",
+                loadComponent: () =>
+                    import("./docs/components/decimal-textbox-doc/decimal-textbox-doc.component").then(
+                        m => m.DecimalTextboxDocComponent
+                    )
+            },
+            {
                 path: "dialog",
                 loadComponent: () =>
                     import("./docs/components/dialog-doc/dialog-doc.component").then(m => m.DialogDocComponent)

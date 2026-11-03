@@ -31,6 +31,8 @@ export interface OfficialLocaleDescriptor {
     readonly messagesExport: string;
     readonly localeExport: string;
     readonly direction?: "ltr" | "rtl";
+    /** Whether the folder is its own entry point (`@nanahoshi/mona-ui/locales/<folder>`). */
+    readonly entryPoint?: boolean;
 }
 
 export interface LocaleDiscoveryResult {
@@ -617,7 +619,7 @@ export function discoverOfficialLocales(
         const messagesFiles = files.filter(f => f.endsWith(".messages.ts"));
         const localeFiles = files.filter(f => f.endsWith(".locale.ts"));
         const otherTsFiles = files.filter(
-            f => f.endsWith(".ts") && !f.endsWith(".messages.ts") && !f.endsWith(".locale.ts")
+            f => f.endsWith(".ts") && !f.endsWith(".messages.ts") && !f.endsWith(".locale.ts") && f !== "public-api.ts"
         );
 
         for (const other of otherTsFiles) {
@@ -757,6 +759,10 @@ export function discoverOfficialLocales(
             });
         }
 
+        const entryPoint = localeExport
+            ? checkLocaleEntryPoint(folder, folderPath, localeFile, localeExport, project, violations)
+            : false;
+
         if (messagesExport && localeExport) {
             locales.push({
                 folder,
@@ -766,10 +772,13 @@ export function discoverOfficialLocales(
                 localeFile,
                 messagesExport,
                 localeExport,
-                direction
+                direction,
+                entryPoint
             });
         }
     }
+
+    checkLocaleLoader(localesDir, locales, violations);
 
     // Global validations across discovered locales
     const seenIds = new Map<string, string>();
@@ -904,15 +913,24 @@ export function discoverOfficialLocales(
                     continue;
                 }
 
+                // A locale with its own entry point is re-exported from it, so the barrel shares its module
+                // instead of bundling a second copy.
+                const entryPointSpecifier = `${LOCALE_ENTRY_POINT_PREFIX}${loc.folder}`;
+                const expectedSpecifier = loc.entryPoint
+                    ? entryPointSpecifier
+                    : `./${loc.folder}/${basename(loc.localeFile).replace(/\.ts$/, "")}`;
                 const resolvedExportTarget = resolve(localesDir, directExport.moduleSpecifier)
                     .replace(/\.ts$/, "")
                     .replace(/\\/g, "/");
                 const expectedTarget = resolve(loc.localeFile).replace(/\.ts$/, "").replace(/\\/g, "/");
+                const matchesExpected = loc.entryPoint
+                    ? directExport.moduleSpecifier === entryPointSpecifier
+                    : resolvedExportTarget === expectedTarget;
 
-                if (resolvedExportTarget !== expectedTarget) {
+                if (!matchesExpected) {
                     violations.push({
                         category: "invalid-metadata",
-                        detail: `Official locale export "${loc.localeExport}" in public-api.ts is exported from "${directExport.moduleSpecifier}", but expected module "./${loc.folder}/${basename(loc.localeFile).replace(/\.ts$/, "")}"`,
+                        detail: `Official locale export "${loc.localeExport}" in public-api.ts is exported from "${directExport.moduleSpecifier}", but expected module "${expectedSpecifier}"`,
                         file: publicApiPath,
                         line: directExport.line
                     });
@@ -929,6 +947,130 @@ export function discoverOfficialLocales(
     }
 
     return { locales, violations };
+}
+
+const LOCALE_ENTRY_POINT_PREFIX = "@nanahoshi/mona-ui/locales/";
+
+/**
+ * Checks a locale folder's entry point, if it has one: `ng-package.json` with `public-api.ts` as its entry file,
+ * and a `public-api.ts` that re-exports only the locale constant from its locale file.
+ */
+function checkLocaleEntryPoint(
+    folder: string,
+    folderPath: string,
+    localeFile: string,
+    localeExport: string,
+    project: Project,
+    violations: LocaleAuditViolation[]
+): boolean {
+    const publicApiPath = join(folderPath, "public-api.ts");
+    const ngPackagePath = join(folderPath, "ng-package.json");
+    const hasPublicApi = existsSync(publicApiPath);
+    const hasNgPackage = existsSync(ngPackagePath);
+    if (!hasPublicApi && !hasNgPackage) {
+        return false;
+    }
+    if (!hasPublicApi || !hasNgPackage) {
+        violations.push({
+            category: "invalid-metadata",
+            detail: `Locale entry point "${folder}" needs both ng-package.json and public-api.ts`,
+            file: hasPublicApi ? publicApiPath : ngPackagePath,
+            line: 1
+        });
+        return false;
+    }
+
+    try {
+        const ngPackage = JSON.parse(readFileSync(ngPackagePath, "utf-8")) as { lib?: { entryFile?: string } };
+        if (ngPackage.lib?.entryFile !== "public-api.ts") {
+            violations.push({
+                category: "invalid-metadata",
+                detail: `ng-package.json in locale folder "${folder}" must set lib.entryFile to "public-api.ts"`,
+                file: ngPackagePath,
+                line: 1
+            });
+        }
+    } catch (err: unknown) {
+        violations.push({
+            category: "invalid-metadata",
+            detail: `Failed to parse ng-package.json in locale folder "${folder}": ${(err as Error).message}`,
+            file: ngPackagePath,
+            line: 1
+        });
+    }
+
+    const expectedSpecifier = `./${basename(localeFile).replace(/\.ts$/, "")}`;
+    const sf = project.createSourceFile(
+        `disc-entry-${Date.now()}-${Math.random()}.ts`,
+        readFileSync(publicApiPath, "utf-8"),
+        { overwrite: true }
+    );
+    const exportDecls = sf.getExportDeclarations();
+    const named = exportDecls.flatMap(d => d.getNamedExports());
+    const valid =
+        exportDecls.length === 1 &&
+        exportDecls[0].getModuleSpecifierValue() === expectedSpecifier &&
+        named.length === 1 &&
+        named[0].getName() === localeExport &&
+        named[0].getAliasNode() == null &&
+        sf.getStatements().length === 1;
+    if (!valid) {
+        violations.push({
+            category: "invalid-metadata",
+            detail: `public-api.ts in locale folder "${folder}" must contain only: export { ${localeExport} } from "${expectedSpecifier}";`,
+            file: publicApiPath,
+            line: 1
+        });
+    }
+    return true;
+}
+
+/**
+ * When the locales package has `load-mona-locale.ts`, every official locale must be its own entry point, and the
+ * loader must import each one lazily under its canonical id.
+ */
+function checkLocaleLoader(
+    localesDir: string,
+    locales: readonly OfficialLocaleDescriptor[],
+    violations: LocaleAuditViolation[]
+): void {
+    const loaderPath = join(localesDir, "load-mona-locale.ts");
+    if (!existsSync(loaderPath)) {
+        return;
+    }
+    const loader = readFileSync(loaderPath, "utf-8");
+    const loaderEntries = [...loader.matchAll(/^\s*"([^"]+)": \(\) => import\("([^"]+)"\)\.then\(m => m\.(\w+)\)/gm)];
+    for (const loc of locales) {
+        if (!loc.entryPoint) {
+            violations.push({
+                category: "invalid-metadata",
+                detail: `Locale folder "${loc.folder}" must be an entry point (ng-package.json and public-api.ts) so load-mona-locale.ts can load it lazily`,
+                file: loc.folderPath,
+                line: 1
+            });
+            continue;
+        }
+        const specifier = `${LOCALE_ENTRY_POINT_PREFIX}${loc.folder}`;
+        const entry = loaderEntries.find(m => m[1] === loc.canonicalId);
+        if (entry == null || entry[2] !== specifier || entry[3] !== loc.localeExport) {
+            violations.push({
+                category: "invalid-metadata",
+                detail: `load-mona-locale.ts must load "${loc.canonicalId}" with: "${loc.canonicalId}": () => import("${specifier}").then(m => m.${loc.localeExport})`,
+                file: loaderPath,
+                line: 1
+            });
+        }
+    }
+    for (const entry of loaderEntries) {
+        if (!locales.some(loc => loc.canonicalId === entry[1])) {
+            violations.push({
+                category: "invalid-metadata",
+                detail: `load-mona-locale.ts loads "${entry[1]}", which is not an official locale folder`,
+                file: loaderPath,
+                line: 1
+            });
+        }
+    }
 }
 
 function checkCopiedEnglish(

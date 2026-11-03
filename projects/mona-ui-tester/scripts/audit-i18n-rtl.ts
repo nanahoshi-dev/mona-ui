@@ -595,9 +595,9 @@ export const ALLOWLIST: AllowlistEntry[] = [
     },
     {
         category: "rtl-manual-review",
-        filePattern: "projects/mona-ui/numeric-text-box/components/numeric-text-box/numeric-text-box.component.ts",
+        filePattern: "projects/mona-ui/numeric-text-box/components/numeric-text-box-base/numeric-text-box-base.component.ts",
         lineSnippet: "scrollLeft",
-        reason: "NumericTextBox scrolls input to end on focus"
+        reason: "Numeric and decimal text boxes scroll the input to the end on focus"
     },
     {
         category: "rtl-manual-review",

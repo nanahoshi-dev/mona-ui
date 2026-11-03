@@ -51,6 +51,12 @@ jobs:
       - name: Check generated CLDR week data
         run: npm run check:cldr-week-data
 
+      - name: Check generated locale catalogs
+        run: npm run check:locale-catalogs
+
+      - name: Check generated message parameters
+        run: npm run check:message-parameters
+
       - name: Build Library
         run: npm run build:prod
 

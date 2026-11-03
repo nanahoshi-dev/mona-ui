@@ -10693,6 +10693,41 @@
     "selector": "\"mona-numeric-text-box\"",
     "inputs": [
       {
+        "description": "Formats the value to be displayed in the input when the input is not focused.",
+        "kind": "input",
+        "name": "formatter",
+        "type": "Action<number | null, string> | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Maximum value that can be entered.",
+        "kind": "input",
+        "name": "maxValue",
+        "type": "number | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Minimum value that can be entered.",
+        "kind": "input",
+        "name": "minValue",
+        "type": "number | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Step value to increment or decrement the value.",
+        "kind": "input",
+        "name": "step",
+        "type": "number",
+        "defaultValue": "1"
+      },
+      {
+        "description": "Two-way bindable current value of the numeric text box.",
+        "kind": "model",
+        "name": "value",
+        "type": "number | null",
+        "defaultValue": "null"
+      },
+      {
         "description": "ARIA label for the input.",
         "kind": "input",
         "name": "ariaLabel",
@@ -10714,13 +10749,6 @@
         "defaultValue": "false"
       },
       {
-        "description": "Formats the value to be displayed in the input when the input is not focused.",
-        "kind": "input",
-        "name": "formatter",
-        "type": "Action<number | null, string> | null",
-        "defaultValue": "null"
-      },
-      {
         "description": "Emits when the inner input element is blurred.",
         "kind": "output",
         "name": "inputBlur",
@@ -10739,25 +10767,11 @@
         "type": "FocusEvent"
       },
       {
-        "description": "Marks the numeric text box as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Marks the text box as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
         "defaultValue": "false"
-      },
-      {
-        "description": "Maximum value that can be entered.",
-        "kind": "input",
-        "name": "maxValue",
-        "type": "number | null",
-        "defaultValue": "null"
-      },
-      {
-        "description": "Minimum value that can be entered.",
-        "kind": "input",
-        "name": "minValue",
-        "type": "number | null",
-        "defaultValue": "null"
       },
       {
         "description": "Sets whether the input can be empty.",
@@ -10802,13 +10816,6 @@
         "defaultValue": "true"
       },
       {
-        "description": "Step value to increment or decrement the value.",
-        "kind": "input",
-        "name": "step",
-        "type": "number",
-        "defaultValue": "1"
-      },
-      {
         "description": "Tab index of the input.",
         "kind": "input",
         "name": "tabindex",
@@ -10816,13 +10823,13 @@
         "defaultValue": "0"
       },
       {
-        "description": "Emitted when the numeric text box is interacted with on blur, value change, or spinner update.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when the text box is interacted with on blur, value change, or spinner update.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
       },
       {
-        "description": "Sets the touched state of the numeric text box. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the text box. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "touched",
         "type": "boolean",
@@ -10834,13 +10841,283 @@
         "name": "userClass",
         "type": "string",
         "defaultValue": "\"\""
+      }
+    ]
+  },
+  "DecimalTextBoxComponent": {
+    "name": "DecimalTextBoxComponent",
+    "selector": "\"mona-decimal-text-box\"",
+    "inputs": [
+      {
+        "description": "Formats the value to be displayed in the input when the input is not focused.",
+        "kind": "input",
+        "name": "formatter",
+        "type": "Action<string | null, string> | null",
+        "defaultValue": "null"
       },
       {
-        "description": "Two-way bindable current value of the numeric text box.",
+        "description": "Maximum value that can be entered, as a decimal string or a number.",
+        "kind": "input",
+        "name": "maxValue",
+        "type": "string | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Minimum value that can be entered, as a decimal string or a number.",
+        "kind": "input",
+        "name": "minValue",
+        "type": "string | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Step value to increment or decrement the value, as a decimal string or a number.",
+        "kind": "input",
+        "name": "step",
+        "type": "string",
+        "defaultValue": "\"1\""
+      },
+      {
+        "description": "Two-way bindable current value, as a canonical decimal string such as `\"-1234.5\"`.",
         "kind": "model",
         "name": "value",
-        "type": "number | null",
+        "type": "string | null",
         "defaultValue": "null"
+      },
+      {
+        "description": "ARIA label for the input.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Number of fractional decimal places to display and accept. Values are truncated to an integer\nand clamped to the range 0–20. Non-finite and negative values normalize to 0.",
+        "kind": "input",
+        "name": "decimals",
+        "type": "number",
+        "defaultValue": "0"
+      },
+      {
+        "description": "Sets whether the input is disabled.",
+        "kind": "input",
+        "name": "disabled",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Emits when the inner input element is blurred.",
+        "kind": "output",
+        "name": "inputBlur",
+        "type": "FocusEvent"
+      },
+      {
+        "description": "Emits when the inner input element is focused.",
+        "kind": "output",
+        "name": "inputFocus",
+        "type": "FocusEvent"
+      },
+      {
+        "description": "Emits when the inner input element loses focus.",
+        "kind": "output",
+        "name": "inputFocusOut",
+        "type": "FocusEvent"
+      },
+      {
+        "description": "Marks the text box as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "invalid",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Sets whether the input can be empty.",
+        "kind": "input",
+        "name": "nullable",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Sets whether the input is readonly.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Sets whether the input is required.",
+        "kind": "input",
+        "name": "required",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Sets the border radius of the input.",
+        "kind": "input",
+        "name": "rounded",
+        "type": "NumericTextboxVariantProps[\"rounded\"]",
+        "defaultValue": "`medium`"
+      },
+      {
+        "description": "Sets the size of the input.",
+        "kind": "input",
+        "name": "size",
+        "type": "NumericTextboxVariantProps[\"size\"]",
+        "defaultValue": "`medium`"
+      },
+      {
+        "description": "Sets whether the spin buttons are visible.",
+        "kind": "input",
+        "name": "spinners",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Tab index of the input.",
+        "kind": "input",
+        "name": "tabindex",
+        "type": "number",
+        "defaultValue": "0"
+      },
+      {
+        "description": "Emitted when the text box is interacted with on blur, value change, or spinner update.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "kind": "output",
+        "name": "touch",
+        "type": "void"
+      },
+      {
+        "description": "Sets the touched state of the text box. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "touched",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "defaultValue": "\"\""
+      }
+    ]
+  },
+  "NumericTextBoxBaseComponent": {
+    "name": "NumericTextBoxBaseComponent",
+    "selector": "",
+    "inputs": [
+      {
+        "description": "ARIA label for the input.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Number of fractional decimal places to display and accept. Values are truncated to an integer\nand clamped to the range 0–20. Non-finite and negative values normalize to 0.",
+        "kind": "input",
+        "name": "decimals",
+        "type": "number",
+        "defaultValue": "0"
+      },
+      {
+        "description": "Sets whether the input is disabled.",
+        "kind": "input",
+        "name": "disabled",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Emits when the inner input element is blurred.",
+        "kind": "output",
+        "name": "inputBlur",
+        "type": "FocusEvent"
+      },
+      {
+        "description": "Emits when the inner input element is focused.",
+        "kind": "output",
+        "name": "inputFocus",
+        "type": "FocusEvent"
+      },
+      {
+        "description": "Emits when the inner input element loses focus.",
+        "kind": "output",
+        "name": "inputFocusOut",
+        "type": "FocusEvent"
+      },
+      {
+        "description": "Marks the text box as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "invalid",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Sets whether the input can be empty.",
+        "kind": "input",
+        "name": "nullable",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Sets whether the input is readonly.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Sets whether the input is required.",
+        "kind": "input",
+        "name": "required",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Sets the border radius of the input.",
+        "kind": "input",
+        "name": "rounded",
+        "type": "NumericTextboxVariantProps[\"rounded\"]",
+        "defaultValue": "`medium`"
+      },
+      {
+        "description": "Sets the size of the input.",
+        "kind": "input",
+        "name": "size",
+        "type": "NumericTextboxVariantProps[\"size\"]",
+        "defaultValue": "`medium`"
+      },
+      {
+        "description": "Sets whether the spin buttons are visible.",
+        "kind": "input",
+        "name": "spinners",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Tab index of the input.",
+        "kind": "input",
+        "name": "tabindex",
+        "type": "number",
+        "defaultValue": "0"
+      },
+      {
+        "description": "Emitted when the text box is interacted with on blur, value change, or spinner update.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "kind": "output",
+        "name": "touch",
+        "type": "void"
+      },
+      {
+        "description": "Sets the touched state of the text box. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "touched",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "defaultValue": "\"\""
       }
     ]
   },

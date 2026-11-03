@@ -12,13 +12,22 @@ import { mergeMessages, mergeTwo } from "../utilities/merge-messages";
 })
 export class MonaI18nService {
     readonly #config = inject(MONA_I18N_CONFIG);
+    readonly #loadError = signal<unknown>(null);
+    readonly #loadedLocales = new Map<string, Promise<MonaLocale>>();
+    readonly #loadingLocaleId = signal<string | null>(null);
     readonly #locale = signal<MonaLocale>(this.#config.locale ?? MONA_DEFAULT_LOCALE);
     readonly #localeOverrides = signal<ReadonlyMap<string, DeepPartial<MonaLocaleMessages>>>(
         createLocaleOverrides(this.#config.localeMessages)
     );
     readonly #overrides = signal<DeepPartial<MonaLocaleMessages>>(this.#config.messages ?? {});
+    /** Incremented by every `load()` and `use()`, so only the latest request changes the locale. */
+    #localeRequest = 0;
 
     public readonly direction = computed(() => this.#locale().direction);
+    /** The error of the latest `load()` when it failed, otherwise `null`. */
+    public readonly loadError = this.#loadError.asReadonly();
+    /** Whether a `load()` is in progress and has not been superseded. */
+    public readonly loading = computed(() => this.#loadingLocaleId() != null);
     public readonly locale = this.#locale.asReadonly();
     /**
      * Canonical BCP 47 id of the active locale. POSIX ids such as `en_US` are converted to `en-US`,
@@ -62,6 +71,54 @@ export class MonaI18nService {
     }
 
     /**
+     * Loads a locale with the `loadLocale` function configured in `provideMonaI18n` and switches to it.
+     *
+     * - Ids are canonicalized, and each locale is loaded once: later calls reuse it, and concurrent calls for the
+     *   same id share one request.
+     * - The latest `load()` or `use()` wins. When a newer one starts before this one finishes, this one resolves
+     *   without switching.
+     * - When loading fails, the current locale stays, `loadError` is set and the promise rejects. The failed
+     *   locale is not cached, so a later call retries it.
+     */
+    public async load(localeId: string): Promise<void> {
+        const loadLocale = this.#config.loadLocale;
+        if (loadLocale == null) {
+            throw new Error(
+                "[mona-ui] MonaI18nService.load() needs a loader: provideMonaI18n({ loadLocale: loadMonaLocale })."
+            );
+        }
+        const canonicalId = canonicalizeLocaleId(localeId);
+        const request = ++this.#localeRequest;
+        this.#loadingLocaleId.set(canonicalId);
+        this.#loadError.set(null);
+
+        let pending = this.#loadedLocales.get(canonicalId);
+        if (pending == null) {
+            pending = Promise.resolve().then(() => loadLocale(canonicalId));
+            this.#loadedLocales.set(canonicalId, pending);
+        }
+
+        try {
+            const locale = await pending;
+            if (request === this.#localeRequest) {
+                this.#applyLocale(locale);
+            }
+        } catch (error) {
+            if (this.#loadedLocales.get(canonicalId) === pending) {
+                this.#loadedLocales.delete(canonicalId);
+            }
+            if (request === this.#localeRequest) {
+                this.#loadError.set(error);
+            }
+            throw error;
+        } finally {
+            if (request === this.#localeRequest) {
+                this.#loadingLocaleId.set(null);
+            }
+        }
+    }
+
+    /**
      * Merges overrides into the existing ones. With `options.locale`, they apply only while that locale is
      * active, so overrides patched for German do not show after switching to English.
      */
@@ -88,7 +145,15 @@ export class MonaI18nService {
         this.#localeOverrides.update(current => new Map(current).set(localeId, messages));
     }
 
+    /** Switches to a locale that is already loaded. It supersedes a `load()` still in progress. */
     public use(locale: MonaLocale): void {
+        this.#localeRequest++;
+        this.#loadingLocaleId.set(null);
+        this.#loadError.set(null);
+        this.#applyLocale(locale);
+    }
+
+    #applyLocale(locale: MonaLocale): void {
         warnOnInvalidLocaleId(locale.id);
         this.#locale.set(locale);
     }

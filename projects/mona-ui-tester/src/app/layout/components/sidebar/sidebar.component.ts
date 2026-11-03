@@ -46,6 +46,7 @@ export class SidebarComponent {
                 { text: "Context Menu", path: "/contextmenu" },
                 { text: "Date Picker", path: "/date-picker" },
                 { text: "Date Time Picker", path: "/datetime-picker" },
+                { text: "Decimal Text Box", path: "/decimal-textbox" },
                 { text: "Dialog", path: "/dialog" },
                 { text: "Dropdown Button", path: "/dropdown-button" },
                 { text: "Dropdown List", path: "/dropdown-list" },
