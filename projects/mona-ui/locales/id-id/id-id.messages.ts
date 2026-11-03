@@ -1,4 +1,12 @@
-import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+import { formatNumber, type MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+
+function localizeNumber(value: number): string {
+    return formatNumber(value, "id-ID");
+}
+
+function localizeYear(year: number): string {
+    return formatNumber(year, "id-ID", { useGrouping: false });
+}
 
 export const ID_ID_MESSAGES = {
     autoComplete: {
@@ -16,9 +24,10 @@ export const ID_ID_MESSAGES = {
     calendar: {
         calendarLabel: (formattedMonthAndYear: string) => `Kalender, ${formattedMonthAndYear}`,
 
-        decadeRange: (start: number, end: number) => `${start} - ${end}`,
+        decadeRange: (start: number, end: number) => `${localizeYear(start)} - ${localizeYear(end)}`,
 
-        decadeViewLabel: (start: number, end: number) => `Tampilan dekade, ${start} - ${end}`,
+        decadeViewLabel: (start: number, end: number) =>
+            `Tampilan dekade, ${localizeYear(start)} - ${localizeYear(end)}`,
 
         goToToday: (formattedDate: string) => `Ke hari ini, ${formattedDate}`,
 
@@ -36,7 +45,7 @@ export const ID_ID_MESSAGES = {
 
         today: "Hari ini",
 
-        yearCellLabel: (year: number) => `Tahun ${year}`,
+        yearCellLabel: (year: number) => `Tahun ${localizeYear(year)}`,
 
         yearViewLabel: (year: string) => `Tampilan tahun, ${year}`
     },
@@ -95,7 +104,8 @@ export const ID_ID_MESSAGES = {
         previousColor: "Warna sebelumnya",
         saturationAndValue: "Saturasi dan nilai warna",
 
-        saturationAndValueText: (saturation: number, value: number) => `Saturasi ${saturation}%, nilai ${value}%`,
+        saturationAndValueText: (saturation: number, value: number) =>
+            `Saturasi ${localizeNumber(saturation)}%, nilai ${localizeNumber(value)}%`,
 
         switchColorMode: "Ganti mode warna"
     },
@@ -143,11 +153,12 @@ export const ID_ID_MESSAGES = {
     },
 
     dropdowns: {
-        itemPosition: (text: string, position: number, total: number) => `${text}, ${position} dari ${total}`,
+        itemPosition: (text: string, position: number, total: number) =>
+            `${text}, ${localizeNumber(position)} dari ${localizeNumber(total)}`,
 
         noResultsFound: "Tidak ada hasil",
 
-        resultsAvailable: (count: number) => `${count} hasil tersedia`
+        resultsAvailable: (count: number) => `${localizeNumber(count)} hasil tersedia`
     },
 
     editor: {
@@ -172,7 +183,7 @@ export const ID_ID_MESSAGES = {
         fontSize: "Ukuran font",
         format: "Pemformatan",
 
-        heading: (level: number) => `Judul ${level}`,
+        heading: (level: number) => `Judul ${localizeNumber(level)}`,
 
         heightPx: "Tinggi (px)",
         imageUrl: "URL gambar",
@@ -240,7 +251,7 @@ export const ID_ID_MESSAGES = {
         cancelRowEdit: "Batalkan pengeditan baris",
         columns: "Kolom",
 
-        columnsSelected: (count: number) => `${count} kolom dipilih`,
+        columnsSelected: (count: number) => `${localizeNumber(count)} kolom dipilih`,
 
         delete: "Hapus",
         deleteRowConfirmation: "Anda yakin ingin menghapus item ini?",
@@ -261,7 +272,7 @@ export const ID_ID_MESSAGES = {
         remove: "Hapus",
         removeRow: "Hapus baris",
 
-        reorderRow: (rowNumber: number) => `Susun ulang baris ${rowNumber}`,
+        reorderRow: (rowNumber: number) => `Susun ulang baris ${localizeNumber(rowNumber)}`,
 
         resizeColumn: "Ubah ukuran kolom",
         rowReorder: "Susun ulang baris",
@@ -280,14 +291,14 @@ export const ID_ID_MESSAGES = {
         rowReorderKeyboardHint: "Gunakan Alt + Panah Atas atau Alt + Panah Bawah untuk memindahkan baris.",
 
         rowReorderMoved: (fromRowNumber: number, toPosition: number) =>
-            `Baris ${fromRowNumber} dipindahkan ke posisi ${toPosition}.`,
+            `Baris ${localizeNumber(fromRowNumber)} dipindahkan ke posisi ${localizeNumber(toPosition)}.`,
 
         rowValidationError: "Baris ini memiliki kesalahan validasi.",
         save: "Simpan",
         saveRow: "Simpan baris",
         selectAllRows: "Pilih semua baris",
 
-        selectRow: (rowNumber: number) => `Pilih baris ${rowNumber}`
+        selectRow: (rowNumber: number) => `Pilih baris ${localizeNumber(rowNumber)}`
     },
 
     list: {
@@ -309,7 +320,7 @@ export const ID_ID_MESSAGES = {
     multiSelect: {
         clear: "Bersihkan",
 
-        itemsCount: (count: number) => `+ ${count} item`
+        itemsCount: (count: number) => `+ ${localizeNumber(count)} item`
     },
 
     notification: {
@@ -332,39 +343,41 @@ export const ID_ID_MESSAGES = {
     pager: {
         firstPageLabel: "Halaman pertama",
 
-        jumpBackwardLabel: (pages: number) => `Mundur ${pages} halaman`,
+        jumpBackwardLabel: (pages: number) => `Mundur ${localizeNumber(pages)} halaman`,
 
-        jumpForwardLabel: (pages: number) => `Maju ${pages} halaman`,
+        jumpForwardLabel: (pages: number) => `Maju ${localizeNumber(pages)} halaman`,
 
         lastPageLabel: "Halaman terakhir",
         nextPageLabel: "Halaman berikutnya",
         ofText: "/",
 
-        pageLabel: (page: number) => `Halaman ${page}`,
+        pageLabel: (page: number) => `Halaman ${localizeNumber(page)}`,
 
-        pageSizeLabel: (pageSize: number) => `${pageSize} per halaman`,
+        pageSizeLabel: (pageSize: number) => `${localizeNumber(pageSize)} per halaman`,
 
-        pageStatus: (page: number, totalPages: number) => `Halaman ${page} dari ${totalPages}`,
+        pageStatus: (page: number, totalPages: number) =>
+            `Halaman ${localizeNumber(page)} dari ${localizeNumber(totalPages)}`,
 
         pageText: "Halaman",
         previousPageLabel: "Halaman sebelumnya",
 
-        rangeStatus: (start: number, end: number, total: number) => `${start} - ${end} dari ${total} item`
+        rangeStatus: (start: number, end: number, total: number) =>
+            `${localizeNumber(start)} - ${localizeNumber(end)} dari ${localizeNumber(total)} item`
     },
 
     rating: {
         notRated: "Belum dinilai",
 
-        valueText: (value: number, max: number) => `${value} dari ${max}`
+        valueText: (value: number, max: number) => `${localizeNumber(value)} dari ${localizeNumber(max)}`
     },
 
     scrollView: {
         carousel: "karusel",
         nextPage: "Halaman berikutnya",
 
-        page: (current: number) => `Halaman ${current}`,
+        page: (current: number) => `Halaman ${localizeNumber(current)}`,
 
-        pageOf: (current: number, total: number) => `Halaman ${current} dari ${total}`,
+        pageOf: (current: number, total: number) => `Halaman ${localizeNumber(current)} dari ${localizeNumber(total)}`,
 
         previousPage: "Halaman sebelumnya",
         scrollPagerNext: "Gulir opsi halaman ke depan",

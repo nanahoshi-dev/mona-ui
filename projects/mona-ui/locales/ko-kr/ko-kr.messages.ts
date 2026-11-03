@@ -1,4 +1,12 @@
-import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+import { formatNumber, type MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+
+function localizeNumber(value: number): string {
+    return formatNumber(value, "ko-KR");
+}
+
+function localizeYear(year: number): string {
+    return formatNumber(year, "ko-KR", { useGrouping: false });
+}
 
 export const KO_KR_MESSAGES = {
     autoComplete: {
@@ -12,8 +20,8 @@ export const KO_KR_MESSAGES = {
     },
     calendar: {
         calendarLabel: (formattedMonthAndYear: string) => `${formattedMonthAndYear} 달력`,
-        decadeRange: (start: number, end: number) => `${start}년~${end}년`,
-        decadeViewLabel: (start: number, end: number) => `10년 보기, ${start}년~${end}년`,
+        decadeRange: (start: number, end: number) => `${localizeYear(start)}년~${localizeYear(end)}년`,
+        decadeViewLabel: (start: number, end: number) => `10년 보기, ${localizeYear(start)}년~${localizeYear(end)}년`,
         goToToday: (formattedDate: string) => `오늘로 이동 (${formattedDate})`,
         nextDecade: "다음 10년",
         nextMonth: "다음 달",
@@ -24,7 +32,7 @@ export const KO_KR_MESSAGES = {
         switchToDecadeView: (currentYear: string) => `10년 보기로 전환. 현재 ${currentYear}`,
         switchToYearView: (currentMonthAndYear: string) => `연도 보기로 전환. 현재 ${currentMonthAndYear}`,
         today: "오늘",
-        yearCellLabel: (year: number) => `${year}년`,
+        yearCellLabel: (year: number) => `${localizeYear(year)}년`,
         yearViewLabel: (year: string) => `연도 보기, ${year}`
     },
     card: {
@@ -73,7 +81,8 @@ export const KO_KR_MESSAGES = {
         currentColor: "현재 색상",
         previousColor: "이전 색상",
         saturationAndValue: "채도 및 명도",
-        saturationAndValueText: (saturation: number, value: number) => `채도 ${saturation}%, 명도 ${value}%`,
+        saturationAndValueText: (saturation: number, value: number) =>
+            `채도 ${localizeNumber(saturation)}%, 명도 ${localizeNumber(value)}%`,
         switchColorMode: "색상 모드 전환"
     },
     colorPalette: {
@@ -112,9 +121,10 @@ export const KO_KR_MESSAGES = {
         clear: "지우기"
     },
     dropdowns: {
-        itemPosition: (text: string, position: number, total: number) => `${text}, ${total}개 중 ${position}번째`,
+        itemPosition: (text: string, position: number, total: number) =>
+            `${text}, ${localizeNumber(total)}개 중 ${localizeNumber(position)}번째`,
         noResultsFound: "결과를 찾을 수 없습니다",
-        resultsAvailable: (count: number) => `사용 가능한 결과 ${count}개`
+        resultsAvailable: (count: number) => `사용 가능한 결과 ${localizeNumber(count)}개`
     },
     editor: {
         addColumnAfter: "뒤에 열 삽입",
@@ -137,7 +147,7 @@ export const KO_KR_MESSAGES = {
         enterUrl: "URL 입력",
         fontSize: "글꼴 크기",
         format: "서식",
-        heading: (level: number) => `제목 ${level}`,
+        heading: (level: number) => `제목 ${localizeNumber(level)}`,
         heightPx: "높이 (px)",
         imageUrl: "이미지 URL",
         indent: "들여쓰기",
@@ -201,7 +211,7 @@ export const KO_KR_MESSAGES = {
         cancel: "취소",
         cancelRowEdit: "행 편집 취소",
         columns: "열",
-        columnsSelected: (count: number) => `선택한 열: ${count}개`,
+        columnsSelected: (count: number) => `선택한 열: ${localizeNumber(count)}개`,
         delete: "삭제",
         deleteRowConfirmation: "이 항목을 삭제하시겠습니까?",
         deleteRowTitle: "행 삭제?",
@@ -218,7 +228,7 @@ export const KO_KR_MESSAGES = {
         noData: "데이터 없음",
         remove: "제거",
         removeRow: "행 제거",
-        reorderRow: (rowNumber: number) => `${rowNumber}행 순서 변경`,
+        reorderRow: (rowNumber: number) => `${localizeNumber(rowNumber)}행 순서 변경`,
         resizeColumn: "열 너비 조정",
         rowReorder: "행 순서 변경",
         rowReorderDisabled: "행 순서 변경을 사용할 수 없습니다.",
@@ -233,12 +243,12 @@ export const KO_KR_MESSAGES = {
             `${rowLabel}. ${keyboardHint}${disabledReason ? ` ${disabledReason}` : ""}`,
         rowReorderKeyboardHint: "Alt + 위쪽 화살표 또는 Alt + 아래쪽 화살표로 이동합니다.",
         rowReorderMoved: (fromRowNumber: number, toPosition: number) =>
-            `${fromRowNumber}행을 ${toPosition}번째 위치로 이동했습니다.`,
+            `${localizeNumber(fromRowNumber)}행을 ${localizeNumber(toPosition)}번째 위치로 이동했습니다.`,
         rowValidationError: "이 행에 유효성 검사 오류가 있습니다.",
         save: "저장",
         saveRow: "행 저장",
         selectAllRows: "모든 행 선택",
-        selectRow: (rowNumber: number) => `${rowNumber}행 선택`
+        selectRow: (rowNumber: number) => `${localizeNumber(rowNumber)}행 선택`
     },
     list: {
         filterList: "목록 필터",
@@ -256,7 +266,7 @@ export const KO_KR_MESSAGES = {
     },
     multiSelect: {
         clear: "지우기",
-        itemsCount: (count: number) => `+ ${count}개`
+        itemsCount: (count: number) => `+ ${localizeNumber(count)}개`
     },
     notification: {
         close: "닫기",
@@ -274,27 +284,30 @@ export const KO_KR_MESSAGES = {
     },
     pager: {
         firstPageLabel: "첫 페이지",
-        jumpBackwardLabel: (pages: number) => `${pages}페이지 뒤로`,
-        jumpForwardLabel: (pages: number) => `${pages}페이지 앞으로`,
+        jumpBackwardLabel: (pages: number) => `${localizeNumber(pages)}페이지 뒤로`,
+        jumpForwardLabel: (pages: number) => `${localizeNumber(pages)}페이지 앞으로`,
         lastPageLabel: "마지막 페이지",
         nextPageLabel: "다음 페이지",
         ofText: "/",
-        pageLabel: (page: number) => `${page}페이지`,
-        pageSizeLabel: (pageSize: number) => `페이지당 ${pageSize}개`,
-        pageStatus: (page: number, totalPages: number) => `전체 ${totalPages}페이지 중 ${page}페이지`,
+        pageLabel: (page: number) => `${localizeNumber(page)}페이지`,
+        pageSizeLabel: (pageSize: number) => `페이지당 ${localizeNumber(pageSize)}개`,
+        pageStatus: (page: number, totalPages: number) =>
+            `전체 ${localizeNumber(totalPages)}페이지 중 ${localizeNumber(page)}페이지`,
         pageText: "페이지",
         previousPageLabel: "이전 페이지",
-        rangeStatus: (start: number, end: number, total: number) => `전체 ${total}개 중 ${start}~${end}`
+        rangeStatus: (start: number, end: number, total: number) =>
+            `전체 ${localizeNumber(total)}개 중 ${localizeNumber(start)}~${localizeNumber(end)}`
     },
     rating: {
         notRated: "평가되지 않음",
-        valueText: (value: number, max: number) => `${max}점 만점에 ${value}점`
+        valueText: (value: number, max: number) => `${localizeNumber(max)}점 만점에 ${localizeNumber(value)}점`
     },
     scrollView: {
         carousel: "캐러셀",
         nextPage: "다음 페이지",
-        page: (current: number) => `${current}페이지`,
-        pageOf: (current: number, total: number) => `전체 ${total}페이지 중 ${current}페이지`,
+        page: (current: number) => `${localizeNumber(current)}페이지`,
+        pageOf: (current: number, total: number) =>
+            `전체 ${localizeNumber(total)}페이지 중 ${localizeNumber(current)}페이지`,
         previousPage: "이전 페이지",
         scrollPagerNext: "페이지 표시기 다음으로 스크롤",
         scrollPagerPrevious: "페이지 표시기 이전으로 스크롤",

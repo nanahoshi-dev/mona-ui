@@ -1,4 +1,8 @@
-import { MonaColorGradientMessages } from "@nanahoshi/mona-ui/i18n";
+import { formatNumber, MonaColorGradientMessages } from "@nanahoshi/mona-ui/i18n";
+
+function localizeNumber(value: number): string {
+    return formatNumber(value, "en-US");
+}
 
 export const COLOR_GRADIENT_DEFAULT_MESSAGES: MonaColorGradientMessages = {
     apply: "Apply",
@@ -11,7 +15,6 @@ export const COLOR_GRADIENT_DEFAULT_MESSAGES: MonaColorGradientMessages = {
     previousColor: "Previous color",
     saturationAndValue: "Color saturation and value",
     saturationAndValueText: (saturation: number, value: number) =>
-        `Saturation ${saturation}%, Value ${value}%`,
+        `Saturation ${localizeNumber(saturation)}%, Value ${localizeNumber(value)}%`,
     switchColorMode: "Switch color mode"
 };
-

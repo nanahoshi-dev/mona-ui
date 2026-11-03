@@ -116,6 +116,23 @@ describe("NotificationService", () => {
         expect(hiddenB).toBe(true);
     });
 
+    it("should cancel the delayed container teardown when the application is destroyed", async () => {
+        service.show({ content: "hello", id: "teardown" });
+        await flush();
+        service.hideAll();
+
+        const warnSpy = vi.spyOn(console, "warn");
+        try {
+            TestBed.resetTestingModule();
+            await new Promise<void>(resolve => setTimeout(resolve, 350));
+
+            // NG0406: a teardown firing late would detach the container from the destroyed ApplicationRef.
+            expect(warnSpy).not.toHaveBeenCalled();
+        } finally {
+            warnSpy.mockRestore();
+        }
+    });
+
     it("should append the notification container to a scoped ViewContainerRef when appendTo is provided", async () => {
         @Component({
             template: `<div #container></div>`

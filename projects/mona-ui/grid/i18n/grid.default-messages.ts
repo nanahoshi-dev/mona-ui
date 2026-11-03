@@ -1,4 +1,8 @@
-import type { MonaGridMessages } from "@nanahoshi/mona-ui/i18n";
+import { formatNumber, type MonaGridMessages } from "@nanahoshi/mona-ui/i18n";
+
+function localizeNumber(value: number): string {
+    return formatNumber(value, "en-US");
+}
 
 export const GRID_DEFAULT_MESSAGES = {
     all: "(All)",
@@ -6,7 +10,7 @@ export const GRID_DEFAULT_MESSAGES = {
     cancel: "Cancel",
     cancelRowEdit: "Cancel row edit",
     columns: "Columns",
-    columnsSelected: (count: number) => `${count} selected columns`,
+    columnsSelected: (count: number) => `${localizeNumber(count)} selected columns`,
     delete: "Delete",
     deleteRowConfirmation: "Are you sure you want to delete this item?",
     deleteRowTitle: "Delete row?",
@@ -23,7 +27,7 @@ export const GRID_DEFAULT_MESSAGES = {
     noData: "No data",
     remove: "Remove",
     removeRow: "Remove row",
-    reorderRow: (rowNumber: number) => `Reorder row ${rowNumber}`,
+    reorderRow: (rowNumber: number) => `Reorder row ${localizeNumber(rowNumber)}`,
     resizeColumn: "Resize column",
     rowReorder: "Row reorder",
     rowReorderDisabled: "Row reordering is disabled.",
@@ -38,10 +42,10 @@ export const GRID_DEFAULT_MESSAGES = {
         `${rowLabel}. ${keyboardHint}${disabledReason ? ` ${disabledReason}` : ""}`,
     rowReorderKeyboardHint: "Use Alt plus Up Arrow or Alt plus Down Arrow to move.",
     rowReorderMoved: (fromRowNumber: number, toPosition: number) =>
-        `Moved row ${fromRowNumber} to position ${toPosition}.`,
+        `Moved row ${localizeNumber(fromRowNumber)} to position ${localizeNumber(toPosition)}.`,
     rowValidationError: "This row has validation errors.",
     save: "Save",
     saveRow: "Save row",
     selectAllRows: "Select all rows",
-    selectRow: (rowNumber: number) => `Select row ${rowNumber}`
+    selectRow: (rowNumber: number) => `Select row ${localizeNumber(rowNumber)}`
 } satisfies MonaGridMessages;

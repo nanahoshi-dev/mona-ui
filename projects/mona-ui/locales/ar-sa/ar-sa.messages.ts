@@ -1,12 +1,11 @@
-import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+import { formatNumber, type MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
 
-const AR_SA_INTEGER_FORMATTER = new Intl.NumberFormat("ar-SA", {
-    maximumFractionDigits: 0,
-    useGrouping: false
-});
+function localizeNumber(value: number): string {
+    return formatNumber(value, "ar-SA");
+}
 
-function formatInteger(value: number): string {
-    return AR_SA_INTEGER_FORMATTER.format(value);
+function localizeYear(year: number): string {
+    return formatNumber(year, "ar-SA", { useGrouping: false });
 }
 
 const AR_SA_PLURAL_RULES = new Intl.PluralRules("ar-SA");
@@ -15,16 +14,16 @@ function formatPageCount(pages: number): string {
     const category = AR_SA_PLURAL_RULES.select(pages);
     switch (category) {
         case "zero":
-            return `${formatInteger(pages)} صفحات`;
+            return `${localizeNumber(pages)} صفحات`;
         case "one":
             return "صفحة واحدة";
         case "two":
             return "صفحتان";
         case "few":
-            return `${formatInteger(pages)} صفحات`;
+            return `${localizeNumber(pages)} صفحات`;
         case "many":
         case "other":
-            return `${formatInteger(pages)} صفحة`;
+            return `${localizeNumber(pages)} صفحة`;
     }
 }
 
@@ -40,9 +39,9 @@ export const AR_SA_MESSAGES = {
     },
     calendar: {
         calendarLabel: (formattedMonthAndYear: string) => `تقويم ${formattedMonthAndYear}`,
-        decadeRange: (start: number, end: number) => `من ${formatInteger(start)} إلى ${formatInteger(end)}`,
+        decadeRange: (start: number, end: number) => `من ${localizeYear(start)} إلى ${localizeYear(end)}`,
         decadeViewLabel: (start: number, end: number) =>
-            `عرض العقد، من ${formatInteger(start)} إلى ${formatInteger(end)}`,
+            `عرض العقد، من ${localizeYear(start)} إلى ${localizeYear(end)}`,
         goToToday: (formattedDate: string) => `الانتقال إلى اليوم (${formattedDate})`,
         nextDecade: "العقد التالي",
         nextMonth: "الشهر التالي",
@@ -53,7 +52,7 @@ export const AR_SA_MESSAGES = {
         switchToDecadeView: (currentYear: string) => `التبديل إلى عرض العقد. السنة الحالية ${currentYear}`,
         switchToYearView: (currentMonthAndYear: string) => `التبديل إلى عرض السنة. الحالي ${currentMonthAndYear}`,
         today: "اليوم",
-        yearCellLabel: (year: number) => `السنة ${formatInteger(year)}`,
+        yearCellLabel: (year: number) => `السنة ${localizeYear(year)}`,
         yearViewLabel: (year: string) => `عرض السنة، ${year}`
     },
     card: {
@@ -103,7 +102,7 @@ export const AR_SA_MESSAGES = {
         previousColor: "اللون السابق",
         saturationAndValue: "التشبع والقيمة",
         saturationAndValueText: (saturation: number, value: number) =>
-            `التشبع ${formatInteger(saturation)}٪، القيمة ${formatInteger(value)}٪`,
+            `التشبع ${localizeNumber(saturation)}٪، القيمة ${localizeNumber(value)}٪`,
         switchColorMode: "تبديل وضع اللون"
     },
     colorPalette: {
@@ -143,9 +142,9 @@ export const AR_SA_MESSAGES = {
     },
     dropdowns: {
         itemPosition: (text: string, position: number, total: number) =>
-            `${text}، العنصر ${formatInteger(position)} من ${formatInteger(total)}`,
+            `${text}، العنصر ${localizeNumber(position)} من ${localizeNumber(total)}`,
         noResultsFound: "لم يتم العثور على نتائج",
-        resultsAvailable: (count: number) => `عدد النتائج المتاحة: ${formatInteger(count)}`
+        resultsAvailable: (count: number) => `عدد النتائج المتاحة: ${localizeNumber(count)}`
     },
     editor: {
         addColumnAfter: "إدراج عمود بعد",
@@ -168,7 +167,7 @@ export const AR_SA_MESSAGES = {
         enterUrl: "إدخال عنوان URL",
         fontSize: "حجم الخط",
         format: "تنسيق",
-        heading: (level: number) => `العنوان ${formatInteger(level)}`,
+        heading: (level: number) => `العنوان ${localizeNumber(level)}`,
         heightPx: "الارتفاع (px)",
         imageUrl: "عنوان URL للصورة",
         indent: "زيادة المسافة البادئة",
@@ -232,7 +231,7 @@ export const AR_SA_MESSAGES = {
         cancel: "إلغاء",
         cancelRowEdit: "إلغاء تحرير الصف",
         columns: "الأعمدة",
-        columnsSelected: (count: number) => `عدد الأعمدة المحددة: ${formatInteger(count)}`,
+        columnsSelected: (count: number) => `عدد الأعمدة المحددة: ${localizeNumber(count)}`,
         delete: "حذف",
         deleteRowConfirmation: "هل تريد حذف هذا العنصر؟",
         deleteRowTitle: "حذف الصف؟",
@@ -249,7 +248,7 @@ export const AR_SA_MESSAGES = {
         noData: "لا توجد بيانات",
         remove: "إزالة",
         removeRow: "إزالة الصف",
-        reorderRow: (rowNumber: number) => `إعادة ترتيب الصف ${formatInteger(rowNumber)}`,
+        reorderRow: (rowNumber: number) => `إعادة ترتيب الصف ${localizeNumber(rowNumber)}`,
         resizeColumn: "تغيير عرض العمود",
         rowReorder: "إعادة ترتيب الصفوف",
         rowReorderDisabled: "إعادة ترتيب الصفوف غير متاح.",
@@ -264,12 +263,12 @@ export const AR_SA_MESSAGES = {
             `${rowLabel}. ${keyboardHint}${disabledReason ? ` ${disabledReason}` : ""}`,
         rowReorderKeyboardHint: "استخدم Alt + سهم لأعلى أو Alt + سهم لأسفل للتحريك.",
         rowReorderMoved: (fromRowNumber: number, toPosition: number) =>
-            `تم نقل الصف ${formatInteger(fromRowNumber)} إلى الموضع ${formatInteger(toPosition)}.`,
+            `تم نقل الصف ${localizeNumber(fromRowNumber)} إلى الموضع ${localizeNumber(toPosition)}.`,
         rowValidationError: "توجد أخطاء تحقق في هذا الصف.",
         save: "حفظ",
         saveRow: "حفظ الصف",
         selectAllRows: "تحديد كل الصفوف",
-        selectRow: (rowNumber: number) => `تحديد الصف ${formatInteger(rowNumber)}`
+        selectRow: (rowNumber: number) => `تحديد الصف ${localizeNumber(rowNumber)}`
     },
     list: {
         filterList: "تصفية القائمة",
@@ -287,7 +286,7 @@ export const AR_SA_MESSAGES = {
     },
     multiSelect: {
         clear: "مسح",
-        itemsCount: (count: number) => `+ ${formatInteger(count)}`
+        itemsCount: (count: number) => `+ ${localizeNumber(count)}`
     },
     notification: {
         close: "إغلاق",
@@ -310,24 +309,24 @@ export const AR_SA_MESSAGES = {
         lastPageLabel: "الصفحة الأخيرة",
         nextPageLabel: "الصفحة التالية",
         ofText: "من",
-        pageLabel: (page: number) => `الصفحة ${formatInteger(page)}`,
-        pageSizeLabel: (pageSize: number) => `عدد العناصر في الصفحة: ${formatInteger(pageSize)}`,
+        pageLabel: (page: number) => `الصفحة ${localizeNumber(page)}`,
+        pageSizeLabel: (pageSize: number) => `عدد العناصر في الصفحة: ${localizeNumber(pageSize)}`,
         pageStatus: (page: number, totalPages: number) =>
-            `الصفحة ${formatInteger(page)} من ${formatInteger(totalPages)}`,
+            `الصفحة ${localizeNumber(page)} من ${localizeNumber(totalPages)}`,
         pageText: "الصفحة",
         previousPageLabel: "الصفحة السابقة",
         rangeStatus: (start: number, end: number, total: number) =>
-            `${formatInteger(start)}–${formatInteger(end)} من ${formatInteger(total)}`
+            `${localizeNumber(start)}–${localizeNumber(end)} من ${localizeNumber(total)}`
     },
     rating: {
         notRated: "غير مقيّم",
-        valueText: (value: number, max: number) => `${formatInteger(value)} من ${formatInteger(max)}`
+        valueText: (value: number, max: number) => `${localizeNumber(value)} من ${localizeNumber(max)}`
     },
     scrollView: {
         carousel: "دوّار",
         nextPage: "الصفحة التالية",
-        page: (current: number) => `الصفحة ${formatInteger(current)}`,
-        pageOf: (current: number, total: number) => `الصفحة ${formatInteger(current)} من ${formatInteger(total)}`,
+        page: (current: number) => `الصفحة ${localizeNumber(current)}`,
+        pageOf: (current: number, total: number) => `الصفحة ${localizeNumber(current)} من ${localizeNumber(total)}`,
         previousPage: "الصفحة السابقة",
         scrollPagerNext: "تمرير مؤشر الصفحات إلى التالي",
         scrollPagerPrevious: "تمرير مؤشر الصفحات إلى السابق",

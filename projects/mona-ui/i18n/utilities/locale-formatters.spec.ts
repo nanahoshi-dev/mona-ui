@@ -316,26 +316,45 @@ describe("locale-formatters", () => {
             expect(parseLocalizedNumber("1.2.3", "fr-FR", { mode: "edit" })).toBeNull();
         });
 
-        it("enforces canonical grouping threshold in strict mode (es-ES, pl-PL, lv-LV, pt-PT)", () => {
-            // es-ES: 4-digit numbers are un-grouped (1000), grouping begins at 10000 (10.000)
-            expect(parseLocalizedNumber("1.000", "es-ES", { mode: "locale" })).toBeNull();
+        it("accepts every apostrophe variant as the de-CH group separator in strict mode", () => {
+            // Node ICU groups de-CH with "'" and Chrome with "\u2019"; keyboards type "'"
+            for (const apostrophe of ["'", "\u2019", "\u02BC"]) {
+                expect(parseLocalizedNumber(`1${apostrophe}234.5`, "de-CH", { mode: "locale" })).toBe(1234.5);
+                expect(parseLocalizedNumber(`12${apostrophe}345${apostrophe}678`, "de-CH", { mode: "locale" })).toBe(
+                    12345678
+                );
+            }
+            expect(parseLocalizedNumber("1'23.5", "de-CH", { mode: "locale" })).toBeNull();
+            // Locales that do not group with an apostrophe still reject it
+            expect(parseLocalizedNumber("1'234", "en-US", { mode: "locale" })).toBeNull();
+            expect(parseLocalizedNumber("1\u2019234", "de-DE", { mode: "locale" })).toBeNull();
+        });
+
+        it("accepts grouping below the locale's formatting threshold in strict mode (es-ES, pl-PL, lv-LV, pt-PT)", () => {
+            // es-ES formats 1000 un-grouped and groups from 10000 (10.000), but a typed or pasted 1.000 is
+            // unambiguous because "." is the group separator, so it is accepted
+            expect(parseLocalizedNumber("1.000", "es-ES", { mode: "locale" })).toBe(1000);
+            expect(parseLocalizedNumber("1.234,5", "es-ES", { mode: "locale" })).toBe(1234.5);
             expect(parseLocalizedNumber("1000", "es-ES", { mode: "locale" })).toBe(1000);
             expect(parseLocalizedNumber("10.000", "es-ES", { mode: "locale" })).toBe(10000);
+            // Group sizes are still checked
+            expect(parseLocalizedNumber("1.23", "es-ES", { mode: "locale" })).toBeNull();
+            expect(parseLocalizedNumber("1.0000", "es-ES", { mode: "locale" })).toBeNull();
 
-            // pl-PL: 4-digit numbers are un-grouped, grouping begins at 10000
-            expect(parseLocalizedNumber("1 000", "pl-PL", { mode: "locale" })).toBeNull();
+            // pl-PL: 4-digit numbers are un-grouped when formatted, grouping begins at 10000
+            expect(parseLocalizedNumber("1 000", "pl-PL", { mode: "locale" })).toBe(1000);
             expect(parseLocalizedNumber("1000", "pl-PL", { mode: "locale" })).toBe(1000);
             expect(parseLocalizedNumber("10 000", "pl-PL", { mode: "locale" })).toBe(10000);
             expect(parseLocalizedNumber("10\u00A0000", "pl-PL", { mode: "locale" })).toBe(10000);
 
             // lv-LV and pt-PT
-            expect(parseLocalizedNumber("1 000", "lv-LV", { mode: "locale" })).toBeNull();
+            expect(parseLocalizedNumber("1 000", "lv-LV", { mode: "locale" })).toBe(1000);
             expect(parseLocalizedNumber("10 000", "lv-LV", { mode: "locale" })).toBe(10000);
-            expect(parseLocalizedNumber("1 000", "pt-PT", { mode: "locale" })).toBeNull();
+            expect(parseLocalizedNumber("1 000", "pt-PT", { mode: "locale" })).toBe(1000);
             expect(parseLocalizedNumber("10 000", "pt-PT", { mode: "locale" })).toBe(10000);
 
-            // it-IT: 4-digit numbers are un-grouped, grouping begins at 10000
-            expect(parseLocalizedNumber("1.000", "it-IT", { mode: "locale" })).toBeNull();
+            // it-IT: 4-digit numbers are un-grouped when formatted, grouping begins at 10000
+            expect(parseLocalizedNumber("1.000", "it-IT", { mode: "locale" })).toBe(1000);
             expect(parseLocalizedNumber("1000", "it-IT", { mode: "locale" })).toBe(1000);
             expect(parseLocalizedNumber("10.000", "it-IT", { mode: "locale" })).toBe(10000);
 

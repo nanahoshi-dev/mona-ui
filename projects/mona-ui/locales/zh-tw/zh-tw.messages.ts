@@ -1,4 +1,12 @@
-import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+import { formatNumber, type MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+
+function localizeNumber(value: number): string {
+    return formatNumber(value, "zh-TW");
+}
+
+function localizeYear(year: number): string {
+    return formatNumber(year, "zh-TW", { useGrouping: false });
+}
 
 export const ZH_TW_MESSAGES = {
     autoComplete: {
@@ -12,8 +20,8 @@ export const ZH_TW_MESSAGES = {
     },
     calendar: {
         calendarLabel: (formattedMonthAndYear: string) => `${formattedMonthAndYear}行事曆`,
-        decadeRange: (start: number, end: number) => `${start}年至${end}年`,
-        decadeViewLabel: (start: number, end: number) => `${start}年至${end}年十年檢視`,
+        decadeRange: (start: number, end: number) => `${localizeYear(start)}年至${localizeYear(end)}年`,
+        decadeViewLabel: (start: number, end: number) => `${localizeYear(start)}年至${localizeYear(end)}年十年檢視`,
         goToToday: (formattedDate: string) => `移至今天（${formattedDate}）`,
         nextDecade: "下個十年",
         nextMonth: "下個月",
@@ -24,7 +32,7 @@ export const ZH_TW_MESSAGES = {
         switchToDecadeView: (currentYear: string) => `切換至十年檢視，目前為${currentYear}`,
         switchToYearView: (currentMonthAndYear: string) => `切換至年份檢視，目前為${currentMonthAndYear}`,
         today: "今天",
-        yearCellLabel: (year: number) => `${year}年`,
+        yearCellLabel: (year: number) => `${localizeYear(year)}年`,
         yearViewLabel: (year: string) => `年份檢視，${year}`
     },
     card: {
@@ -73,7 +81,8 @@ export const ZH_TW_MESSAGES = {
         currentColor: "目前顏色",
         previousColor: "先前顏色",
         saturationAndValue: "飽和度與明度",
-        saturationAndValueText: (saturation: number, value: number) => `飽和度${saturation}%，明度${value}%`,
+        saturationAndValueText: (saturation: number, value: number) =>
+            `飽和度${localizeNumber(saturation)}%，明度${localizeNumber(value)}%`,
         switchColorMode: "切換色彩模式"
     },
     colorPalette: {
@@ -112,9 +121,10 @@ export const ZH_TW_MESSAGES = {
         clear: "清除"
     },
     dropdowns: {
-        itemPosition: (text: string, position: number, total: number) => `${text}，第 ${position} 項（共 ${total} 項）`,
+        itemPosition: (text: string, position: number, total: number) =>
+            `${text}，第 ${localizeNumber(position)} 項（共 ${localizeNumber(total)} 項）`,
         noResultsFound: "找不到結果",
-        resultsAvailable: (count: number) => `有 ${count} 個可用結果`
+        resultsAvailable: (count: number) => `有 ${localizeNumber(count)} 個可用結果`
     },
     editor: {
         addColumnAfter: "在後方插入欄",
@@ -137,7 +147,7 @@ export const ZH_TW_MESSAGES = {
         enterUrl: "輸入 URL",
         fontSize: "字型大小",
         format: "格式",
-        heading: (level: number) => `標題 ${level}`,
+        heading: (level: number) => `標題 ${localizeNumber(level)}`,
         heightPx: "高度 (px)",
         imageUrl: "圖片 URL",
         indent: "增加縮排",
@@ -201,7 +211,7 @@ export const ZH_TW_MESSAGES = {
         cancel: "取消",
         cancelRowEdit: "取消編輯資料列",
         columns: "欄",
-        columnsSelected: (count: number) => `已選取 ${count} 欄`,
+        columnsSelected: (count: number) => `已選取 ${localizeNumber(count)} 欄`,
         delete: "刪除",
         deleteRowConfirmation: "確定要刪除此項目嗎？",
         deleteRowTitle: "刪除資料列？",
@@ -218,7 +228,7 @@ export const ZH_TW_MESSAGES = {
         noData: "沒有資料",
         remove: "移除",
         removeRow: "移除資料列",
-        reorderRow: (rowNumber: number) => `重新排列第 ${rowNumber} 個資料列`,
+        reorderRow: (rowNumber: number) => `重新排列第 ${localizeNumber(rowNumber)} 個資料列`,
         resizeColumn: "調整欄寬",
         rowReorder: "資料列重新排序",
         rowReorderDisabled: "資料列重新排序已停用。",
@@ -233,12 +243,12 @@ export const ZH_TW_MESSAGES = {
             `${rowLabel}。${keyboardHint}${disabledReason ? ` ${disabledReason}` : ""}`,
         rowReorderKeyboardHint: "使用 Alt + 向上鍵或 Alt + 向下鍵移動。",
         rowReorderMoved: (fromRowNumber: number, toPosition: number) =>
-            `已將第 ${fromRowNumber} 個資料列移至位置 ${toPosition}。`,
+            `已將第 ${localizeNumber(fromRowNumber)} 個資料列移至位置 ${localizeNumber(toPosition)}。`,
         rowValidationError: "此資料列存在驗證錯誤。",
         save: "儲存",
         saveRow: "儲存資料列",
         selectAllRows: "選取所有資料列",
-        selectRow: (rowNumber: number) => `選取第 ${rowNumber} 個資料列`
+        selectRow: (rowNumber: number) => `選取第 ${localizeNumber(rowNumber)} 個資料列`
     },
     list: {
         filterList: "篩選清單",
@@ -256,7 +266,7 @@ export const ZH_TW_MESSAGES = {
     },
     multiSelect: {
         clear: "清除",
-        itemsCount: (count: number) => `+ ${count} 項`
+        itemsCount: (count: number) => `+ ${localizeNumber(count)} 項`
     },
     notification: {
         close: "關閉",
@@ -274,27 +284,29 @@ export const ZH_TW_MESSAGES = {
     },
     pager: {
         firstPageLabel: "第一頁",
-        jumpBackwardLabel: (pages: number) => `後退 ${pages} 頁`,
-        jumpForwardLabel: (pages: number) => `前進 ${pages} 頁`,
+        jumpBackwardLabel: (pages: number) => `後退 ${localizeNumber(pages)} 頁`,
+        jumpForwardLabel: (pages: number) => `前進 ${localizeNumber(pages)} 頁`,
         lastPageLabel: "最後一頁",
         nextPageLabel: "下一頁",
         ofText: "/",
-        pageLabel: (page: number) => `第 ${page} 頁`,
-        pageSizeLabel: (pageSize: number) => `每頁 ${pageSize} 筆`,
-        pageStatus: (page: number, totalPages: number) => `第 ${page} 頁，共 ${totalPages} 頁`,
+        pageLabel: (page: number) => `第 ${localizeNumber(page)} 頁`,
+        pageSizeLabel: (pageSize: number) => `每頁 ${localizeNumber(pageSize)} 筆`,
+        pageStatus: (page: number, totalPages: number) =>
+            `第 ${localizeNumber(page)} 頁，共 ${localizeNumber(totalPages)} 頁`,
         pageText: "頁",
         previousPageLabel: "上一頁",
-        rangeStatus: (start: number, end: number, total: number) => `第 ${start} - ${end} 項，共 ${total} 項`
+        rangeStatus: (start: number, end: number, total: number) =>
+            `第 ${localizeNumber(start)} - ${localizeNumber(end)} 項，共 ${localizeNumber(total)} 項`
     },
     rating: {
         notRated: "未評分",
-        valueText: (value: number, max: number) => `第 ${value} 級，共 ${max} 級`
+        valueText: (value: number, max: number) => `第 ${localizeNumber(value)} 級，共 ${localizeNumber(max)} 級`
     },
     scrollView: {
         carousel: "輪播",
         nextPage: "下一頁",
-        page: (current: number) => `第 ${current} 頁`,
-        pageOf: (current: number, total: number) => `第 ${current} 頁，共 ${total} 頁`,
+        page: (current: number) => `第 ${localizeNumber(current)} 頁`,
+        pageOf: (current: number, total: number) => `第 ${localizeNumber(current)} 頁，共 ${localizeNumber(total)} 頁`,
         previousPage: "上一頁",
         scrollPagerNext: "向後捲動分頁器",
         scrollPagerPrevious: "向前捲動分頁器",

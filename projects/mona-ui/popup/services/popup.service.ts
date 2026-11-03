@@ -138,7 +138,7 @@ export class PopupService {
                   ? settings.anchor
                   : null;
         const direction = resolveComponentDirection(anchorElement, this.#directionality);
-        return this.#overlay.create(
+        const overlayRef = this.#overlay.create(
             new OverlayConfig({
                 positionStrategy,
                 hasBackdrop: settings.hasBackdrop ?? false,
@@ -154,6 +154,11 @@ export class PopupService {
                 scrollStrategy: settings.blockScroll ? this.#overlay.scrollStrategies.block() : undefined
             })
         );
+        const lang = resolvePopupLanguage(anchorElement, this.#i18n?.localeId());
+        if (lang) {
+            overlayRef.overlayElement.setAttribute("lang", lang);
+        }
+        return overlayRef;
     }
 
     private createPositionStrategy(settings: PopupSettings): PositionStrategy {
@@ -659,4 +664,14 @@ export class PopupService {
         const isRelevantEventType = this.#outsideEventsToClose.includes(event.type);
         return isAnchorClick || !isRelevantEventType;
     }
+}
+
+/**
+ * Language of the popup content. The overlay container sits outside the app root, so a `lang` set on the root
+ * (or near the anchor) would not reach the popup and screen readers could read it with the wrong voice
+ * (WCAG 3.1.2). The nearest `lang` above the anchor wins; without one, the active Mona locale is used.
+ */
+function resolvePopupLanguage(anchorElement: HTMLElement | null, localeId: string | undefined): string | null {
+    const inherited = anchorElement?.closest("[lang]")?.getAttribute("lang")?.trim();
+    return inherited || localeId || null;
 }

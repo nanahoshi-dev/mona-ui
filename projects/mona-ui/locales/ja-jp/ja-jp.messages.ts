@@ -1,4 +1,12 @@
-import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+import { formatNumber, type MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
+
+function localizeNumber(value: number): string {
+    return formatNumber(value, "ja-JP");
+}
+
+function localizeYear(year: number): string {
+    return formatNumber(year, "ja-JP", { useGrouping: false });
+}
 
 export const JA_JP_MESSAGES = {
     autoComplete: {
@@ -12,8 +20,9 @@ export const JA_JP_MESSAGES = {
     },
     calendar: {
         calendarLabel: (formattedMonthAndYear: string) => `${formattedMonthAndYear}のカレンダー`,
-        decadeRange: (start: number, end: number) => `${start}年～${end}年`,
-        decadeViewLabel: (start: number, end: number) => `${start}年から${end}年までの10年表示`,
+        decadeRange: (start: number, end: number) => `${localizeYear(start)}年～${localizeYear(end)}年`,
+        decadeViewLabel: (start: number, end: number) =>
+            `${localizeYear(start)}年から${localizeYear(end)}年までの10年表示`,
         goToToday: (formattedDate: string) => `今日（${formattedDate}）に移動`,
         nextDecade: "次の10年間",
         nextMonth: "次の月",
@@ -24,7 +33,7 @@ export const JA_JP_MESSAGES = {
         switchToDecadeView: (currentYear: string) => `10年表示に切り替える。現在は${currentYear}`,
         switchToYearView: (currentMonthAndYear: string) => `年表示に切り替える。現在は${currentMonthAndYear}`,
         today: "今日",
-        yearCellLabel: (year: number) => `${year}年`,
+        yearCellLabel: (year: number) => `${localizeYear(year)}年`,
         yearViewLabel: (year: string) => `年表示、${year}`
     },
     card: {
@@ -73,7 +82,8 @@ export const JA_JP_MESSAGES = {
         currentColor: "現在の色",
         previousColor: "前の色",
         saturationAndValue: "彩度と明度",
-        saturationAndValueText: (saturation: number, value: number) => `彩度${saturation}%、明度${value}%`,
+        saturationAndValueText: (saturation: number, value: number) =>
+            `彩度${localizeNumber(saturation)}%、明度${localizeNumber(value)}%`,
         switchColorMode: "カラーモードを切り替え"
     },
     colorPalette: {
@@ -112,9 +122,10 @@ export const JA_JP_MESSAGES = {
         clear: "クリア"
     },
     dropdowns: {
-        itemPosition: (text: string, position: number, total: number) => `${text}、${total}件中${position}件目`,
+        itemPosition: (text: string, position: number, total: number) =>
+            `${text}、${localizeNumber(total)}件中${localizeNumber(position)}件目`,
         noResultsFound: "結果が見つかりません",
-        resultsAvailable: (count: number) => `${count}件の結果があります`
+        resultsAvailable: (count: number) => `${localizeNumber(count)}件の結果があります`
     },
     editor: {
         addColumnAfter: "後に列を挿入",
@@ -137,7 +148,7 @@ export const JA_JP_MESSAGES = {
         enterUrl: "URLを入力",
         fontSize: "フォントサイズ",
         format: "書式",
-        heading: (level: number) => `見出し${level}`,
+        heading: (level: number) => `見出し${localizeNumber(level)}`,
         heightPx: "高さ (px)",
         imageUrl: "画像URL",
         indent: "インデントを増やす",
@@ -201,7 +212,7 @@ export const JA_JP_MESSAGES = {
         cancel: "キャンセル",
         cancelRowEdit: "行の編集をキャンセル",
         columns: "列",
-        columnsSelected: (count: number) => `${count}列を選択中`,
+        columnsSelected: (count: number) => `${localizeNumber(count)}列を選択中`,
         delete: "削除",
         deleteRowConfirmation: "この行を削除しますか？",
         deleteRowTitle: "行を削除",
@@ -218,7 +229,7 @@ export const JA_JP_MESSAGES = {
         noData: "データがありません",
         remove: "削除",
         removeRow: "行を削除",
-        reorderRow: (rowNumber: number) => `${rowNumber}行目を並べ替え`,
+        reorderRow: (rowNumber: number) => `${localizeNumber(rowNumber)}行目を並べ替え`,
         resizeColumn: "列のサイズを変更",
         rowReorder: "行の並べ替え",
         rowReorderDisabled: "行の並べ替えは無効です。",
@@ -233,12 +244,12 @@ export const JA_JP_MESSAGES = {
             `${rowLabel}。${keyboardHint}${disabledReason ?? ""}`,
         rowReorderKeyboardHint: "Alt + 上矢印または Alt + 下矢印で行を移動します。",
         rowReorderMoved: (fromRowNumber: number, toPosition: number) =>
-            `${fromRowNumber}行目を${toPosition}番目の位置に移動しました。`,
+            `${localizeNumber(fromRowNumber)}行目を${localizeNumber(toPosition)}番目の位置に移動しました。`,
         rowValidationError: "この行には入力エラーがあります。",
         save: "保存",
         saveRow: "行を保存",
         selectAllRows: "すべての行を選択",
-        selectRow: (rowNumber: number) => `${rowNumber}行目を選択`
+        selectRow: (rowNumber: number) => `${localizeNumber(rowNumber)}行目を選択`
     },
     list: {
         filterList: "リストをフィルター",
@@ -256,7 +267,7 @@ export const JA_JP_MESSAGES = {
     },
     multiSelect: {
         clear: "クリア",
-        itemsCount: (count: number) => `+ ${count}件`
+        itemsCount: (count: number) => `+ ${localizeNumber(count)}件`
     },
     notification: {
         close: "閉じる",
@@ -274,27 +285,29 @@ export const JA_JP_MESSAGES = {
     },
     pager: {
         firstPageLabel: "最初のページ",
-        jumpBackwardLabel: (pages: number) => `${pages}ページ戻る`,
-        jumpForwardLabel: (pages: number) => `${pages}ページ進む`,
+        jumpBackwardLabel: (pages: number) => `${localizeNumber(pages)}ページ戻る`,
+        jumpForwardLabel: (pages: number) => `${localizeNumber(pages)}ページ進む`,
         lastPageLabel: "最後のページ",
         nextPageLabel: "次のページ",
         ofText: "/",
-        pageLabel: (page: number) => `${page}ページ`,
-        pageSizeLabel: (pageSize: number) => `1ページあたり${pageSize}件`,
-        pageStatus: (page: number, totalPages: number) => `${totalPages}ページ中${page}ページ`,
+        pageLabel: (page: number) => `${localizeNumber(page)}ページ`,
+        pageSizeLabel: (pageSize: number) => `1ページあたり${localizeNumber(pageSize)}件`,
+        pageStatus: (page: number, totalPages: number) =>
+            `${localizeNumber(totalPages)}ページ中${localizeNumber(page)}ページ`,
         pageText: "ページ",
         previousPageLabel: "前のページ",
-        rangeStatus: (start: number, end: number, total: number) => `全${total}件中${start}～${end}件`
+        rangeStatus: (start: number, end: number, total: number) =>
+            `全${localizeNumber(total)}件中${localizeNumber(start)}～${localizeNumber(end)}件`
     },
     rating: {
         notRated: "未評価",
-        valueText: (value: number, max: number) => `${max}段階中${value}`
+        valueText: (value: number, max: number) => `${localizeNumber(max)}段階中${localizeNumber(value)}`
     },
     scrollView: {
         carousel: "カルーセル",
         nextPage: "次のページ",
-        page: (current: number) => `${current}ページ`,
-        pageOf: (current: number, total: number) => `${total}ページ中${current}ページ`,
+        page: (current: number) => `${localizeNumber(current)}ページ`,
+        pageOf: (current: number, total: number) => `${localizeNumber(total)}ページ中${localizeNumber(current)}ページ`,
         previousPage: "前のページ",
         scrollPagerNext: "ページャーを次へスクロール",
         scrollPagerPrevious: "ページャーを前へスクロール",
