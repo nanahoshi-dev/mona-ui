@@ -792,6 +792,121 @@ describe("audit-locales", () => {
         });
     });
 
+    describe("locale entry points", () => {
+        const ES_ENTRY = `export { MONA_ES_ES_LOCALE } from "./es-es.locale";\n`;
+        const ES_NG_PACKAGE = JSON.stringify({ lib: { entryFile: "public-api.ts" } });
+        const ES_LOADER = `const L = {\n    "es-ES": () => import("@nanahoshi/mona-ui/locales/es-es").then(m => m.MONA_ES_ES_LOCALE)\n};\n`;
+
+        function withEsLocale(
+            files: { barrel: string; entry?: string; loader?: string; ngPackage?: string },
+            check: (details: string[]) => void
+        ): void {
+            const tempDir = mkdtempSync(join(tmpdir(), "mona-locale-entry-"));
+            try {
+                const esFolder = join(tempDir, "es-es");
+                mkdirSync(esFolder, { recursive: true });
+                writeFileSync(join(tempDir, "public-api.ts"), files.barrel);
+                writeFileSync(
+                    join(esFolder, "es-es.messages.ts"),
+                    `import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";\nexport const ES_ES_MESSAGES = {} satisfies MonaLocaleMessages;\n`
+                );
+                writeFileSync(
+                    join(esFolder, "es-es.locale.ts"),
+                    `import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";\nimport { ES_ES_MESSAGES } from "./es-es.messages";\nexport const MONA_ES_ES_LOCALE = { direction: "ltr", id: "es-ES", messages: ES_ES_MESSAGES } satisfies MonaLocale;\n`
+                );
+                if (files.entry != null) {
+                    writeFileSync(join(esFolder, "public-api.ts"), files.entry);
+                }
+                if (files.ngPackage != null) {
+                    writeFileSync(join(esFolder, "ng-package.json"), files.ngPackage);
+                }
+                if (files.loader != null) {
+                    writeFileSync(join(tempDir, "load-mona-locale.ts"), files.loader);
+                }
+                check(discoverOfficialLocales(tempDir).violations.map(v => v.detail));
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        }
+
+        it("accepts an entry point re-exported by the barrel and loaded by the loader", () => {
+            withEsLocale(
+                {
+                    barrel: `export { MONA_ES_ES_LOCALE } from "@nanahoshi/mona-ui/locales/es-es";\n`,
+                    entry: ES_ENTRY,
+                    loader: ES_LOADER,
+                    ngPackage: ES_NG_PACKAGE
+                },
+                details => expect(details).toEqual([])
+            );
+        });
+
+        it("requires the barrel to re-export an entry point by its package specifier", () => {
+            withEsLocale(
+                {
+                    barrel: `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`,
+                    entry: ES_ENTRY,
+                    ngPackage: ES_NG_PACKAGE
+                },
+                details =>
+                    expect(details.some(d => d.includes('expected module "@nanahoshi/mona-ui/locales/es-es"'))).toBe(
+                        true
+                    )
+            );
+        });
+
+        it("rejects an entry point without ng-package.json", () => {
+            withEsLocale(
+                { barrel: `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`, entry: ES_ENTRY },
+                details => expect(details.some(d => d.includes("needs both ng-package.json and public-api.ts"))).toBe(true)
+            );
+        });
+
+        it("rejects an entry point that exports more than the locale", () => {
+            withEsLocale(
+                {
+                    barrel: `export { MONA_ES_ES_LOCALE } from "@nanahoshi/mona-ui/locales/es-es";\n`,
+                    entry: `${ES_ENTRY}export { ES_ES_MESSAGES } from "./es-es.messages";\n`,
+                    ngPackage: ES_NG_PACKAGE
+                },
+                details => expect(details.some(d => d.includes("must contain only"))).toBe(true)
+            );
+        });
+
+        it("rejects an ng-package.json with another entry file", () => {
+            withEsLocale(
+                {
+                    barrel: `export { MONA_ES_ES_LOCALE } from "@nanahoshi/mona-ui/locales/es-es";\n`,
+                    entry: ES_ENTRY,
+                    ngPackage: JSON.stringify({ lib: { entryFile: "index.ts" } })
+                },
+                details => expect(details.some(d => d.includes("lib.entryFile"))).toBe(true)
+            );
+        });
+
+        it("requires every locale to be an entry point once the loader exists", () => {
+            withEsLocale(
+                { barrel: `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`, loader: ES_LOADER },
+                details => expect(details.some(d => d.includes("must be an entry point"))).toBe(true)
+            );
+        });
+
+        it("rejects a loader that misses a locale or loads an unknown one", () => {
+            withEsLocale(
+                {
+                    barrel: `export { MONA_ES_ES_LOCALE } from "@nanahoshi/mona-ui/locales/es-es";\n`,
+                    entry: ES_ENTRY,
+                    loader: `const L = {\n    "nl-NL": () => import("@nanahoshi/mona-ui/locales/nl-nl").then(m => m.MONA_NL_NL_LOCALE)\n};\n`,
+                    ngPackage: ES_NG_PACKAGE
+                },
+                details => {
+                    expect(details.some(d => d.includes('must load "es-ES"'))).toBe(true);
+                    expect(details.some(d => d.includes('loads "nl-NL"'))).toBe(true);
+                }
+            );
+        });
+    });
+
     describe("auditAllLocales", () => {
         it("fails closed when locale directory does not exist", () => {
             const violations = auditAllLocales("/non/existent/locale/path");

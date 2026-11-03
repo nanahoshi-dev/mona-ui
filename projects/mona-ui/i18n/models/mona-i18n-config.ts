@@ -3,6 +3,18 @@ import type { MonaLocale } from "./mona-locale";
 import type { MonaLocaleMessages } from "./mona-locale-messages";
 
 export interface MonaI18nConfig {
+    /**
+     * Locale id loaded with {@link MonaI18nConfig.loadLocale} before the application starts, so the first render
+     * is already localized. When loading fails, the application starts with {@link MonaI18nConfig.locale} (or
+     * English) and the error is logged.
+     */
+    readonly initialLocale?: string;
+    /**
+     * Loads a locale by id for `MonaI18nService.load()` and {@link MonaI18nConfig.initialLocale}. Use
+     * `loadMonaLocale` from `@nanahoshi/mona-ui/locales` for the official locales, or any function that resolves
+     * to a `MonaLocale`, such as one that fetches a catalog over HTTP.
+     */
+    readonly loadLocale?: (localeId: string) => Promise<MonaLocale>;
     readonly locale?: MonaLocale;
     /**
      * Overrides applied only while the locale with that id is active, keyed by locale id such as "de-DE".

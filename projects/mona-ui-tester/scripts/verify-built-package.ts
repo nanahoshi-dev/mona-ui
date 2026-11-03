@@ -39,6 +39,8 @@ export function verifyThirdPartyNotices(
 
 export interface ExpectedLocaleExport {
     readonly direction?: "ltr" | "rtl";
+    /** Locale folder when the locale is also its own entry point, `@nanahoshi/mona-ui/locales/<folder>`. */
+    readonly folder?: string;
     readonly id: string;
     readonly symbol: string;
 }
@@ -153,6 +155,28 @@ for (const expected of expectedLocales) {
     } else {
         if (loc.direction !== "ltr" && loc.direction !== "rtl") {
             console.error(\`Invalid locale direction for export \${expected.symbol}: received "\${loc.direction}", expected "ltr" or "rtl"\`);
+            process.exit(1);
+        }
+    }
+}
+
+for (const expected of expectedLocales.filter(l => l.folder)) {
+    const entry = await import("@nanahoshi/mona-ui/locales/" + expected.folder);
+    if (entry[expected.symbol] !== locales[expected.symbol]) {
+        console.error(\`Entry point @nanahoshi/mona-ui/locales/\${expected.folder} does not export the same \${expected.symbol} as the barrel\`);
+        process.exit(1);
+    }
+}
+
+if (expectedLocales.some(l => l.folder)) {
+    if (typeof locales.loadMonaLocale !== "function") {
+        console.error("Missing export loadMonaLocale in @nanahoshi/mona-ui/locales");
+        process.exit(1);
+    }
+    for (const expected of expectedLocales.filter(l => l.folder)) {
+        const loaded = await locales.loadMonaLocale(expected.id);
+        if (loaded !== locales[expected.symbol]) {
+            console.error(\`loadMonaLocale("\${expected.id}") did not resolve to \${expected.symbol}\`);
             process.exit(1);
         }
     }
@@ -609,7 +633,8 @@ export function verifyBuiltPackage(options: PackageVerificationOptions = {}): vo
         return {
             symbol: l.localeExport,
             id: l.canonicalId,
-            direction: l.direction
+            direction: l.direction,
+            folder: l.entryPoint ? l.folder : undefined
         };
     });
 
@@ -617,6 +642,19 @@ export function verifyBuiltPackage(options: PackageVerificationOptions = {}): vo
         throw new Error(`No official locale symbols discovered in ${sourceLocalesDir}`);
     }
     console.log(`✓ Discovered official locale symbols: ${expectedLocales.map(l => l.symbol).join(", ")}`);
+
+    for (const locale of expectedLocales.filter(l => l.folder)) {
+        const subpath = `./locales/${locale.folder}`;
+        const targets = resolveExportTargets(pkgJsonPath, subpath);
+        for (const target of [targets.runtimeRelPath, targets.typesRelPath]) {
+            if (!existsSync(resolve(distDir, target))) {
+                throw new Error(`exports["${subpath}"] target not found at: ${resolve(distDir, target)}`);
+            }
+        }
+    }
+    if (expectedLocales.some(l => l.folder)) {
+        console.log("✓ Found exports and targets for every locale entry point (./locales/<folder>)");
+    }
     console.log(`✓ Resolved hermetic TypeScript compiler at: ${tscPath}`);
 
     runConsumerSmokeTest({

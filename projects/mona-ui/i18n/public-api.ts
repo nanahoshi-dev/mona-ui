@@ -56,6 +56,7 @@ export * from "./providers/provide-mona-i18n";
 
 export * from "./utilities/merge-messages";
 export * from "./utilities/locale-formatters";
+export { canonicalizeLocaleId, MONA_FALLBACK_LOCALE_ID, tryCanonicalizeLocaleId } from "./utilities/locale-id";
 export * from "./utilities/gregorian-date";
 export * from "./utilities/locale-date-formats";
 export * from "./utilities/pseudo-locale";
