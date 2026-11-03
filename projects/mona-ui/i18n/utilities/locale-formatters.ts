@@ -11,6 +11,10 @@ export interface NumberGroupingPattern {
     readonly primaryGroupSize: number;
     readonly secondaryGroupSize: number;
     readonly groupSeparator: string;
+    /**
+     * Fewest integer digits the locale groups when formatting (5 in es-ES, which formats 1000 but 10.000).
+     * Parsing does not enforce it: "1.000" is still read as 1000 in es-ES.
+     */
     readonly minimumGroupedIntegerDigits: number;
 }
 
@@ -19,6 +23,9 @@ const FULLWIDTH_ASCII_START = 0xff01;
 const FULLWIDTH_ASCII_END = 0xff5e;
 const FULLWIDTH_ASCII_OFFSET = 0xfee0;
 const DECIMAL_DIGIT_REGEX = /^\p{Nd}$/u;
+/** Apostrophe, right single quotation mark and modifier letter apostrophe. */
+const APOSTROPHE_REGEX = /^['\u2019\u02BC]$/;
+const APOSTROPHE_REGEX_GLOBAL = /['\u2019\u02BC]/g;
 
 const asciiDigitCache = new Map<string, string | null>();
 const numberSymbolsCache = new Map<string, NumberSymbols>();
@@ -307,6 +314,12 @@ export function parseLocalizedNumber(
         const isSpaceGroup = /[ \u00A0\u202F]/.test(groupSep);
         const decimalSep = symbols.decimal;
 
+        // Engines disagree on the apostrophe a locale groups with (de-CH: Node ICU "'", Chrome "’"),
+        // and keyboards type "'", so every apostrophe variant counts as that locale's group separator.
+        if (APOSTROPHE_REGEX.test(groupSep)) {
+            cleaned = cleaned.replace(APOSTROPHE_REGEX_GLOBAL, groupSep);
+        }
+
         // Reject non-accepted control or whitespace characters (tabs, newlines, formfeeds)
         if (/[^\S\u0020\u00A0\u202F]/.test(cleaned)) {
             return null;
@@ -385,11 +398,8 @@ export function parseLocalizedNumber(
                     return null;
                 }
 
-                // Canonical strict check: must meet locale's minimum grouping threshold
-                const totalGroupedDigits = intGroups.join("").length;
-                if (totalGroupedDigits < grouping.minimumGroupedIntegerDigits) {
-                    return null;
-                }
+                // Grouping below the locale's minimum (es-ES formats 1000, not 1.000) is still accepted:
+                // users type and paste it, and it is unambiguous because the group sizes are checked below.
 
                 // Last (rightmost) group: must match primaryGroupSize digits
                 const lastGroup = intGroups[intGroups.length - 1];
