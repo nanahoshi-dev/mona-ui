@@ -264,17 +264,59 @@ export interface ParseLocalizedNumberOptions {
     alternateDecimal?: boolean;
 }
 
+/**
+ * Why a value was refused:
+ * - `"syntax"`: the text is not a number in the locale.
+ * - `"decimals"`: it has more fraction digits than allowed.
+ * - `"precision"`: a JavaScript `number` cannot hold it exactly (an integer beyond
+ *   `Number.MAX_SAFE_INTEGER`, or more than 15 significant digits), so accepting it would silently change it.
+ */
+export type LocalizedNumberInvalidReason = "decimals" | "precision" | "syntax";
+
 export interface LocalizedNumberValidationResult {
-    value: number | null;
-    valid: boolean;
     fractionDigits: number;
+    /** Set when `valid` is false. */
+    reason?: LocalizedNumberInvalidReason;
+    valid: boolean;
+    value: number | null;
 }
 
+const MAX_SAFE_INTEGER_DIGITS = String(Number.MAX_SAFE_INTEGER);
+
+/** The most significant digits a double reproduces exactly when converted from decimal text and back. */
+const MAX_EXACT_SIGNIFICANT_DIGITS = 15;
+
+/** Whether ASCII integer and fraction digits survive conversion to a `number` unchanged. */
+function isRepresentableAsNumber(intDigits: string, fracDigits: string): boolean {
+    const integer = intDigits.replace(/^0+/, "");
+    const fraction = fracDigits.replace(/0+$/, "");
+    if (fraction === "") {
+        return (
+            integer.length < MAX_SAFE_INTEGER_DIGITS.length ||
+            (integer.length === MAX_SAFE_INTEGER_DIGITS.length && integer <= MAX_SAFE_INTEGER_DIGITS)
+        );
+    }
+    return (integer + fraction).replace(/^0+/, "").length <= MAX_EXACT_SIGNIFICANT_DIGITS;
+}
+
+/**
+ * Parses localized text to a number. Returns `null` when the text is not a number in the locale, or when a
+ * `number` cannot hold it exactly (see {@link LocalizedNumberInvalidReason}); it never rounds silently.
+ */
 export function parseLocalizedNumber(
     text: string | null | undefined,
     localeId: string,
     options?: ParseLocalizedNumberOptions
 ): number | null {
+    const outcome = parseLocalizedNumberOutcome(text, localeId, options);
+    return outcome === "precision" ? null : outcome;
+}
+
+function parseLocalizedNumberOutcome(
+    text: string | null | undefined,
+    localeId: string,
+    options?: ParseLocalizedNumberOptions
+): number | "precision" | null {
     if (text == null) {
         return null;
     }
@@ -434,6 +476,9 @@ export function parseLocalizedNumber(
             }
         }
 
+        if (!isRepresentableAsNumber(intPart, fracPart ?? "")) {
+            return "precision";
+        }
         const normalizedStr = sign + intPart + (fracPart && fracPart.length > 0 ? "." + fracPart : "");
         const num = Number(normalizedStr);
         return Number.isFinite(num) ? num : null;
@@ -496,6 +541,9 @@ export function parseLocalizedNumber(
             fracPart = "";
         }
 
+        if (!isRepresentableAsNumber(intPart, fracPart)) {
+            return "precision";
+        }
         const normalizedStr =
             sign +
             (intPart.length > 0 ? intPart : "0") +
@@ -522,9 +570,12 @@ export function validateLocalizedNumber(
     }
 
     const mode: LocalizedNumberParseMode = options?.mode ?? "locale";
-    const parsed = parseLocalizedNumber(trimmed, localeId, { mode });
+    const parsed = parseLocalizedNumberOutcome(trimmed, localeId, { mode });
+    if (parsed === "precision") {
+        return { value: null, valid: false, fractionDigits: 0, reason: "precision" };
+    }
     if (parsed === null || !Number.isFinite(parsed)) {
-        return { value: null, valid: false, fractionDigits: 0 };
+        return { value: null, valid: false, fractionDigits: 0, reason: "syntax" };
     }
 
     // Determine the number of fraction digits from the source string
@@ -578,17 +629,26 @@ export function validateLocalizedNumber(
     }
 
     if (options?.decimals !== undefined && fractionDigits > options.decimals) {
-        return { value: parsed, valid: false, fractionDigits };
+        return { value: parsed, valid: false, fractionDigits, reason: "decimals" };
     }
 
     return { value: parsed, valid: true, fractionDigits };
 }
 
 export interface LocalizedNumberEditValidationResult {
-    readonly valid: boolean;
     readonly complete: boolean;
+    /** Set when `valid` is false. */
+    readonly reason?: LocalizedNumberInvalidReason;
+    readonly valid: boolean;
     readonly value: number | null;
 }
+
+const EDIT_SYNTAX_ERROR: LocalizedNumberEditValidationResult = {
+    valid: false,
+    complete: false,
+    value: null,
+    reason: "syntax"
+};
 
 export interface ValidateLocalizedNumberEditOptions {
     readonly decimals?: number;
@@ -610,7 +670,7 @@ export function validateLocalizedNumberEdit(
 
     // Reject control or whitespace characters in interactive typing
     if (/[\s\u00A0\u202F]/.test(raw)) {
-        return { valid: false, complete: false, value: null };
+        return EDIT_SYNTAX_ERROR;
     }
 
     const symbols = getNumberSymbols(localeId);
@@ -624,12 +684,12 @@ export function validateLocalizedNumberEdit(
     const allowSign = options?.allowSign ?? true;
     if (normalized.startsWith("-") || normalized.startsWith("+")) {
         if (!allowSign) {
-            return { valid: false, complete: false, value: null };
+            return EDIT_SYNTAX_ERROR;
         }
         normalized = normalized.slice(1);
     }
     if (normalized.includes("-") || normalized.includes("+")) {
-        return { valid: false, complete: false, value: null };
+        return EDIT_SYNTAX_ERROR;
     }
 
     // If input was just "-" or "+"
@@ -648,7 +708,7 @@ export function validateLocalizedNumberEdit(
             if (normalized.startsWith(sep, i)) {
                 if (foundSep !== null) {
                     // More than one separator is rejected in edit mode
-                    return { valid: false, complete: false, value: null };
+                    return EDIT_SYNTAX_ERROR;
                 }
                 foundSep = sep;
                 sepIndex = i;
@@ -663,7 +723,7 @@ export function validateLocalizedNumberEdit(
     if (foundSep !== null) {
         if (decimals === 0) {
             // No decimal point permitted when decimals === 0
-            return { valid: false, complete: false, value: null };
+            return { valid: false, complete: false, value: null, reason: "decimals" };
         }
 
         const intPart = normalized.slice(0, sepIndex);
@@ -671,17 +731,22 @@ export function validateLocalizedNumberEdit(
 
         // Integer part before separator must consist purely of ASCII digits (or empty, e.g. ".5")
         if (intPart.length > 0 && !/^\d+$/.test(intPart)) {
-            return { valid: false, complete: false, value: null };
+            return EDIT_SYNTAX_ERROR;
         }
 
         // Fractional part after separator must consist purely of ASCII digits (or empty, e.g. "12.")
         if (fracPart.length > 0 && !/^\d+$/.test(fracPart)) {
-            return { valid: false, complete: false, value: null };
+            return EDIT_SYNTAX_ERROR;
         }
 
         // Count fraction digits using normalized ASCII characters (safe against UTF-16 astral splitting)
         if (fracPart.length > decimals) {
-            return { valid: false, complete: false, value: null };
+            return { valid: false, complete: false, value: null, reason: "decimals" };
+        }
+
+        // Refuse the keystroke that would make the value too precise for a number, instead of rounding it.
+        if (!isRepresentableAsNumber(intPart, fracPart)) {
+            return { valid: false, complete: false, value: null, reason: "precision" };
         }
 
         const parsed = parseLocalizedNumber(raw, localeId, { mode: "edit" });
@@ -696,7 +761,11 @@ export function validateLocalizedNumberEdit(
 
     // No separator found: must be purely ASCII digits
     if (!/^\d+$/.test(normalized)) {
-        return { valid: false, complete: false, value: null };
+        return EDIT_SYNTAX_ERROR;
+    }
+
+    if (!isRepresentableAsNumber(normalized, "")) {
+        return { valid: false, complete: false, value: null, reason: "precision" };
     }
 
     const parsed = parseLocalizedNumber(raw, localeId, { mode: "edit" });

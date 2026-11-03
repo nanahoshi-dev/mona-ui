@@ -325,7 +325,8 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
             }
             this.commitNumericValue(initial);
         } else {
-            let result = NumericTextBoxComponent.calculate(value, this.step(), "-");
+            // Past the safe range a number can no longer hold every step exactly.
+            let result = Math.max(NumericTextBoxComponent.calculate(value, this.step(), "-"), Number.MIN_SAFE_INTEGER);
             const min = this.minValue();
             if (min != null && result < min) {
                 result = min;
@@ -356,7 +357,8 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
             }
             this.commitNumericValue(initial);
         } else {
-            let result = NumericTextBoxComponent.calculate(value, this.step(), "+");
+            // Past the safe range a number can no longer hold every step exactly.
+            let result = Math.min(NumericTextBoxComponent.calculate(value, this.step(), "+"), Number.MAX_SAFE_INTEGER);
             const max = this.maxValue();
             if (max != null && result > max) {
                 result = max;

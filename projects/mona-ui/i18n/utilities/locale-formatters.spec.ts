@@ -476,19 +476,19 @@ describe("locale-formatters", () => {
             expect(v1).toEqual({ value: 1234, valid: true, fractionDigits: 0 });
 
             const v2 = validateLocalizedNumber("12.5", "de-DE", { mode: "locale", decimals: 3 });
-            expect(v2).toEqual({ value: null, valid: false, fractionDigits: 0 });
+            expect(v2).toEqual({ value: null, valid: false, fractionDigits: 0, reason: "syntax" });
 
             const v3 = validateLocalizedNumber("12,5", "de-DE", { mode: "edit", decimals: 3 });
             expect(v3).toEqual({ value: 12.5, valid: true, fractionDigits: 1 });
 
             const v3Group = validateLocalizedNumber("12.5", "de-DE", { mode: "edit", decimals: 3 });
-            expect(v3Group).toEqual({ value: null, valid: false, fractionDigits: 0 });
+            expect(v3Group).toEqual({ value: null, valid: false, fractionDigits: 0, reason: "syntax" });
 
             const v4 = validateLocalizedNumber("1.234,567", "de-DE", { mode: "locale", decimals: 3 });
             expect(v4).toEqual({ value: 1234.567, valid: true, fractionDigits: 3 });
 
             const v5 = validateLocalizedNumber("1.234,5678", "de-DE", { mode: "locale", decimals: 3 });
-            expect(v5).toEqual({ value: 1234.5678, valid: false, fractionDigits: 4 });
+            expect(v5).toEqual({ value: 1234.5678, valid: false, fractionDigits: 4, reason: "decimals" });
         });
 
         it("validates precision and grouping in en-US", () => {
@@ -496,10 +496,10 @@ describe("locale-formatters", () => {
             expect(v1).toEqual({ value: 1234.56, valid: true, fractionDigits: 2 });
 
             const v2 = validateLocalizedNumber("1,234.567", "en-US", { mode: "locale", decimals: 2 });
-            expect(v2).toEqual({ value: 1234.567, valid: false, fractionDigits: 3 });
+            expect(v2).toEqual({ value: 1234.567, valid: false, fractionDigits: 3, reason: "decimals" });
 
             const v3 = validateLocalizedNumber("12,5", "en-US", { mode: "locale", decimals: 2 });
-            expect(v3).toEqual({ value: null, valid: false, fractionDigits: 0 });
+            expect(v3).toEqual({ value: null, valid: false, fractionDigits: 0, reason: "syntax" });
         });
 
         it("validates Unicode scripts precision uniformly", () => {
@@ -512,7 +512,8 @@ describe("locale-formatters", () => {
             expect(validateLocalizedNumber("১২.৩৪৫", "bn-BD", { mode: "locale", decimals: 2 })).toEqual({
                 value: 12.345,
                 valid: false,
-                fractionDigits: 3
+                fractionDigits: 3,
+                reason: "decimals"
             });
 
             // Devanagari digits
@@ -524,8 +525,79 @@ describe("locale-formatters", () => {
             expect(validateLocalizedNumber("१२.३४५", "mr-IN", { mode: "locale", decimals: 2 })).toEqual({
                 value: 12.345,
                 valid: false,
-                fractionDigits: 3
+                fractionDigits: 3,
+                reason: "decimals"
             });
+        });
+    });
+
+    describe("precision", () => {
+        it("parses integers up to Number.MAX_SAFE_INTEGER and refuses larger ones", () => {
+            expect(parseLocalizedNumber("9007199254740991", "en-US")).toBe(Number.MAX_SAFE_INTEGER);
+            expect(parseLocalizedNumber("-9007199254740991", "en-US")).toBe(Number.MIN_SAFE_INTEGER);
+            expect(parseLocalizedNumber("9007199254740992", "en-US")).toBeNull();
+            expect(parseLocalizedNumber("9,007,199,254,740,993", "en-US")).toBeNull();
+            expect(parseLocalizedNumber("9.007.199.254.740.993", "de-DE")).toBeNull();
+            expect(parseLocalizedNumber("12345678901234567890", "en-US", { mode: "edit" })).toBeNull();
+        });
+
+        it("parses up to 15 significant digits with a fraction and refuses more", () => {
+            expect(parseLocalizedNumber("12345678901234.5", "en-US")).toBe(12345678901234.5);
+            expect(parseLocalizedNumber("0.123456789012345", "en-US")).toBe(0.123456789012345);
+            expect(parseLocalizedNumber("1234567890123.456", "en-US")).toBeNull();
+            expect(parseLocalizedNumber("0.1234567890123456", "en-US")).toBeNull();
+            expect(parseLocalizedNumber("9007199254740991.5", "en-US")).toBeNull();
+            expect(parseLocalizedNumber("1234567890123,456", "de-DE", { mode: "edit" })).toBeNull();
+        });
+
+        it("does not count leading or trailing zeros as significant", () => {
+            expect(parseLocalizedNumber("0000000000000000000001", "en-US")).toBe(1);
+            expect(parseLocalizedNumber("1.50000000000000000000", "en-US")).toBe(1.5);
+            expect(parseLocalizedNumber("0.000000000000000000012", "en-US")).toBe(1.2e-20);
+        });
+
+        it("checks precision after localized digits are normalized", () => {
+            expect(
+                parseLocalizedNumber(
+                    "\u0669\u0660\u0660\u0667\u0661\u0669\u0669\u0662\u0665\u0664\u0667\u0664\u0660\u0669\u0669\u0663",
+                    "ar-SA"
+                )
+            ).toBeNull();
+            expect(
+                parseLocalizedNumber(
+                    "\uFF19\uFF10\uFF10\uFF17\uFF11\uFF19\uFF19\uFF12\uFF15\uFF14\uFF17\uFF14\uFF10\uFF19\uFF19\uFF11",
+                    "ja-JP"
+                )
+            ).toBe(Number.MAX_SAFE_INTEGER);
+        });
+
+        it("reports why validateLocalizedNumber refused a value", () => {
+            expect(validateLocalizedNumber("9007199254740993", "en-US")).toEqual({
+                fractionDigits: 0,
+                reason: "precision",
+                valid: false,
+                value: null
+            });
+            expect(validateLocalizedNumber("12a", "en-US").reason).toBe("syntax");
+            expect(validateLocalizedNumber("1.234", "en-US", { decimals: 2 }).reason).toBe("decimals");
+            expect(validateLocalizedNumber("1.23", "en-US", { decimals: 2 }).reason).toBeUndefined();
+        });
+
+        it("reports why validateLocalizedNumberEdit refused a keystroke", () => {
+            expect(validateLocalizedNumberEdit("9007199254740991", "en-US")).toEqual({
+                complete: true,
+                valid: true,
+                value: Number.MAX_SAFE_INTEGER
+            });
+            expect(validateLocalizedNumberEdit("90071992547409910", "en-US")).toEqual({
+                complete: false,
+                reason: "precision",
+                valid: false,
+                value: null
+            });
+            expect(validateLocalizedNumberEdit("1234567890123.456", "en-US", { decimals: 3 }).reason).toBe("precision");
+            expect(validateLocalizedNumberEdit("1.2345", "en-US", { decimals: 3 }).reason).toBe("decimals");
+            expect(validateLocalizedNumberEdit("1a", "en-US").reason).toBe("syntax");
         });
     });
 
@@ -550,7 +622,8 @@ describe("locale-formatters", () => {
             expect(validateLocalizedNumberEdit("12,", "en-US", { decimals: 2 })).toEqual({
                 valid: false,
                 complete: false,
-                value: null
+                value: null,
+                reason: "syntax"
             });
             expect(validateLocalizedNumberEdit(".5", "en-US", { decimals: 2 })).toEqual({
                 valid: true,
@@ -561,17 +634,20 @@ describe("locale-formatters", () => {
             expect(validateLocalizedNumberEdit(",5", "en-US", { decimals: 2 })).toEqual({
                 valid: false,
                 complete: false,
-                value: null
+                value: null,
+                reason: "syntax"
             });
             expect(validateLocalizedNumberEdit("12,5", "en-US", { decimals: 2 })).toEqual({
                 valid: false,
                 complete: false,
-                value: null
+                value: null,
+                reason: "syntax"
             });
             expect(validateLocalizedNumberEdit("1,234", "en-US", { decimals: 3 })).toEqual({
                 valid: false,
                 complete: false,
-                value: null
+                value: null,
+                reason: "syntax"
             });
 
             // Complete states with alternate comma where "," is not the group separator (de-CH)
@@ -586,16 +662,18 @@ describe("locale-formatters", () => {
                 value: 12.5
             });
 
-            // Precision rejection (exceeding decimals limit)
+            // "," is the en-US group separator (syntax); "." with too many fraction digits exceeds the decimals limit
             expect(validateLocalizedNumberEdit("12,500", "en-US", { decimals: 2 })).toEqual({
                 valid: false,
                 complete: false,
-                value: null
+                value: null,
+                reason: "syntax"
             });
             expect(validateLocalizedNumberEdit("12.500", "en-US", { decimals: 2 })).toEqual({
                 valid: false,
                 complete: false,
-                value: null
+                value: null,
+                reason: "decimals"
             });
 
             // Decimals === 0 rejects separator
@@ -607,34 +685,40 @@ describe("locale-formatters", () => {
             expect(validateLocalizedNumberEdit("12.", "en-US", { decimals: 0 })).toEqual({
                 valid: false,
                 complete: false,
-                value: null
+                value: null,
+                reason: "decimals"
             });
             expect(validateLocalizedNumberEdit("12,", "en-US", { decimals: 0 })).toEqual({
                 valid: false,
                 complete: false,
-                value: null
+                value: null,
+                reason: "syntax"
             });
 
             // Rejects invalid characters and multiple separators
             expect(validateLocalizedNumberEdit("12.3.4", "en-US", { decimals: 2 })).toEqual({
                 valid: false,
                 complete: false,
-                value: null
+                value: null,
+                reason: "syntax"
             });
             expect(validateLocalizedNumberEdit("12,3,4", "en-US", { decimals: 2 })).toEqual({
                 valid: false,
                 complete: false,
-                value: null
+                value: null,
+                reason: "syntax"
             });
             expect(validateLocalizedNumberEdit("12a", "en-US", { decimals: 2 })).toEqual({
                 valid: false,
                 complete: false,
-                value: null
+                value: null,
+                reason: "syntax"
             });
             expect(validateLocalizedNumberEdit("1 2", "en-US", { decimals: 2 })).toEqual({
                 valid: false,
                 complete: false,
-                value: null
+                value: null,
+                reason: "syntax"
             });
         });
 
@@ -663,7 +747,8 @@ describe("locale-formatters", () => {
                 ).toEqual({
                     valid: false,
                     complete: false,
-                    value: null
+                    value: null,
+                    reason: "syntax"
                 });
             }
         });
@@ -683,12 +768,14 @@ describe("locale-formatters", () => {
             expect(validateLocalizedNumberEdit("12.", "de-DE", { decimals: 3 })).toEqual({
                 valid: false,
                 complete: false,
-                value: null
+                value: null,
+                reason: "syntax"
             });
             expect(validateLocalizedNumberEdit("1.234", "de-DE", { decimals: 3 })).toEqual({
                 valid: false,
                 complete: false,
-                value: null
+                value: null,
+                reason: "syntax"
             });
             // fr-FR groups with a space, so "." remains an alternate decimal
             expect(validateLocalizedNumberEdit("1.234", "fr-FR", { decimals: 3 })).toEqual({
@@ -699,7 +786,8 @@ describe("locale-formatters", () => {
             expect(validateLocalizedNumberEdit("1.2345", "de-DE", { decimals: 3 })).toEqual({
                 valid: false,
                 complete: false,
-                value: null
+                value: null,
+                reason: "syntax"
             });
         });
     });
