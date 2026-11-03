@@ -1,6 +1,7 @@
 import { Overlay, OverlayContainer } from "@angular/cdk/overlay";
 import { ApplicationRef, Component, ElementRef } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { PopupRef } from "../models/PopupRef";
 
 import { PopupService } from "./popup.service";
@@ -31,6 +32,38 @@ describe("PopupService", () => {
 
     it("should be created", () => {
         expect(service).toBeTruthy();
+    });
+
+    describe("lang", () => {
+        it("gives the overlay pane the nearest lang above the anchor", () => {
+            const container = document.createElement("div");
+            container.setAttribute("lang", "de-CH");
+            const anchor = createAnchor();
+            container.appendChild(anchor);
+            document.body.appendChild(container);
+            testElements.push(container);
+
+            popupRef = service.create({ anchor, animation: false, content: PopupTestContentComponent });
+
+            expect(popupRef.overlayRef.overlayElement.getAttribute("lang")).toBe("de-CH");
+        });
+
+        it("falls back to the active Mona locale when nothing above the anchor sets lang", () => {
+            const documentLang = document.documentElement.getAttribute("lang");
+            document.documentElement.removeAttribute("lang");
+            try {
+                TestBed.inject(MonaI18nService).use({ direction: "ltr", id: "ja_JP", messages: {} });
+                const anchor = createAnchor();
+
+                popupRef = service.create({ anchor, animation: false, content: PopupTestContentComponent });
+
+                expect(popupRef.overlayRef.overlayElement.getAttribute("lang")).toBe("ja-JP");
+            } finally {
+                if (documentLang != null) {
+                    document.documentElement.setAttribute("lang", documentLang);
+                }
+            }
+        });
     });
 
     it("uses the CDK block scroll strategy when requested", () => {
