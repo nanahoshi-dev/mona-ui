@@ -111,9 +111,9 @@ describe("Numeric locale infrastructure", () => {
             expect(parseLocalizedNumber("1.234,5", "de-DE")).toBe(1234.5);
             expect(parseLocalizedNumber("12,5", "de-DE")).toBe(12.5);
             expect(parseLocalizedNumber("12,5", "de-DE")).not.toBe(125);
-            // In strict locale mode, "12.5" is rejected as non-canonical paste; in edit mode it is accepted
+            // "." is the de-DE group separator, so "12.5" is not a decimal in either mode
             expect(parseLocalizedNumber("12.5", "de-DE", { mode: "locale" })).toBeNull();
-            expect(parseLocalizedNumber("12.5", "de-DE", { mode: "edit" })).toBe(12.5);
+            expect(parseLocalizedNumber("12.5", "de-DE", { mode: "edit" })).toBeNull();
         });
 
         it("parses tr-TR decimal comma numbers accurately", () => {
@@ -121,7 +121,7 @@ describe("Numeric locale infrastructure", () => {
             expect(parseLocalizedNumber("1.234,5", "tr-TR")).toBe(1234.5);
             expect(parseLocalizedNumber("\u221212,5", "tr-TR")).toBe(-12.5);
             expect(parseLocalizedNumber("12.5", "tr-TR", { mode: "locale" })).toBeNull();
-            expect(parseLocalizedNumber("12.5", "tr-TR", { mode: "edit" })).toBe(12.5);
+            expect(parseLocalizedNumber("12.5", "tr-TR", { mode: "edit" })).toBeNull();
         });
 
         it("parses fr-FR numbers with space/narrow-space grouping", () => {
@@ -277,7 +277,7 @@ describe("NumericTextBoxComponent i18n integration", () => {
         expect(input.getAttribute("inputmode")).toBe("numeric");
     });
 
-    it("supports sequential typing with alternate dot in comma-decimal locales without corrupting semantic value", async () => {
+    it("accepts an alternate dot only in comma-decimal locales where it is not the group separator", async () => {
         await TestBed.configureTestingModule({
             imports: [NumericTextBoxI18nTestHostComponent]
         }).compileComponents();
@@ -311,22 +311,19 @@ describe("NumericTextBoxComponent i18n integration", () => {
             }
         }
 
-        // Type 1 . 2 3 4 in de-DE
+        // Type 1 . 2 3 4 in de-DE: "." is the group separator, so the keystroke is rejected and the
+        // digits read as 1234 (what a user typing a thousands separator means), never 1.234
         await typeChar("1");
-        expect(host.value()).toBe(1);
         await typeChar(".");
-        expect(host.value()).toBe(1);
+        expect(input.value).toBe("1");
         await typeChar("2");
-        expect(host.value()).toBe(1.2);
         await typeChar("3");
-        expect(host.value()).toBe(1.23);
         await typeChar("4");
-        // Must be 1.234 and NEVER silently become 1234
-        expect(host.value()).toBe(1.234);
-        expect(host.value()).not.toBe(1234);
+        expect(host.value()).toBe(1234);
+        expect(host.value()).not.toBe(1.234);
 
-        // Test tr-TR with 0 . 1 2 3
-        i18n.use(TR_LOCALE);
+        // fr-FR groups with a space, so "." is accepted as an alternate decimal: 0 . 1 2 3
+        i18n.use(FR_LOCALE);
         host.value.set(null);
         await waitForStable(fixture);
         focusInput(input);
@@ -341,7 +338,6 @@ describe("NumericTextBoxComponent i18n integration", () => {
         await typeChar("2");
         expect(host.value()).toBe(0.12);
         await typeChar("3");
-        // Must be 0.123 and NEVER 123
         expect(host.value()).toBe(0.123);
         expect(host.value()).not.toBe(123);
 
@@ -360,7 +356,7 @@ describe("NumericTextBoxComponent i18n integration", () => {
         expect(host.value()).toBe(1.234);
     });
 
-    it("supports sequential typing with alternate comma in dot-decimal locales (en-US) without corrupting semantic value", async () => {
+    it("rejects the en-US group separator while typing and accepts an alternate comma where it is not a group separator", async () => {
         await TestBed.configureTestingModule({
             imports: [NumericTextBoxI18nTestHostComponent]
         }).compileComponents();
@@ -396,25 +392,25 @@ describe("NumericTextBoxComponent i18n integration", () => {
             return false;
         }
 
-        // Type 1 , 2 3 4 in en-US
+        // Type 1 , 2 3 4 in en-US: the thousands separator is rejected, so the value is 1234, never 1.234
         expect(await typeChar("1")).toBe(true);
-        expect(host.value()).toBe(1);
-        expect(await typeChar(",")).toBe(true);
-        expect(host.value()).toBe(1);
+        expect(await typeChar(",")).toBe(false);
         expect(await typeChar("2")).toBe(true);
-        expect(host.value()).toBe(1.2);
         expect(await typeChar("3")).toBe(true);
-        expect(host.value()).toBe(1.23);
         expect(await typeChar("4")).toBe(true);
-        // Must be 1.234 and NEVER silently become 1234
-        expect(host.value()).toBe(1.234);
-        expect(host.value()).not.toBe(1234);
+        expect(host.value()).toBe(1234);
+        expect(host.value()).not.toBe(1.234);
 
-        // Test precision rejection at decimals = 3 (typing 5th decimal digit rejected)
-        expect(await typeChar("5")).toBe(false);
-        expect(host.value()).toBe(1.234);
+        // Precision is still enforced after the locale decimal (decimals = 3)
+        expect(await typeChar(".")).toBe(true);
+        expect(await typeChar("5")).toBe(true);
+        expect(await typeChar("6")).toBe(true);
+        expect(await typeChar("7")).toBe(true);
+        expect(await typeChar("8")).toBe(false);
+        expect(host.value()).toBe(1234.567);
 
-        // Test decimals = 2 precision with comma in en-US
+        // de-CH groups with an apostrophe, so "," is accepted as an alternate decimal (decimals = 2)
+        i18n.use({ id: "de-CH", direction: "ltr", messages: {} });
         host.decimals.set(2);
         host.value.set(null);
         input.value = "";
@@ -608,7 +604,7 @@ describe("NumericTextBoxComponent i18n integration", () => {
         expect(paste("12,5")).toBe(true);
         expect(host.value()).toBe(12.5);
 
-        // Sequential typing of 1.234 in de-DE with decimals=3 interprets '.' as alternate decimal
+        // Typing the de-DE group separator "." is rejected, so typing 1.234 yields 1234, the same value as pasting it
         function typeChar(char: string): boolean {
             const start = input.selectionStart ?? input.value.length;
             const end = input.selectionEnd ?? input.value.length;
@@ -632,11 +628,11 @@ describe("NumericTextBoxComponent i18n integration", () => {
         input.value = "";
         input.selectionStart = input.selectionEnd = 0;
         expect(typeChar("1")).toBe(true);
-        expect(typeChar(".")).toBe(true);
+        expect(typeChar(".")).toBe(false);
         expect(typeChar("2")).toBe(true);
         expect(typeChar("3")).toBe(true);
         expect(typeChar("4")).toBe(true);
-        expect(host.value()).toBe(1.234);
+        expect(host.value()).toBe(1234);
 
         // Unicode paste precision validation
         host.decimals.set(2);
@@ -779,7 +775,7 @@ describe("NumericTextBoxComponent i18n integration", () => {
         expect(nonPasteEvent.defaultPrevented).toBe(false);
     });
 
-    it("clears paste transaction state on rejected paste and allows immediate alternate decimal typing", async () => {
+    it("clears paste transaction state on rejected paste and allows immediate decimal typing", async () => {
         await TestBed.configureTestingModule({
             imports: [NumericTextBoxI18nTestHostComponent]
         }).compileComponents();
@@ -860,8 +856,8 @@ describe("NumericTextBoxComponent i18n integration", () => {
         expect(input.value).toBe("12");
         expect(host.value()).toBe(12);
 
-        // 3. Immediately type "." (alternate decimal separator in edit mode)
-        expect(await typeChar(".")).toBe(true);
+        // 3. Immediately type "," (the de-DE decimal separator)
+        expect(await typeChar(",")).toBe(true);
 
         // 4. Continue typing "5"
         expect(await typeChar("5")).toBe(true);
@@ -885,17 +881,18 @@ describe("NumericTextBoxComponent i18n integration", () => {
     });
 
     describe("parseLocalizedNumber ambiguity contract", () => {
-        it("documents generic locale parser interpretation of 1.234 in de-DE vs edit mode", () => {
-            // In public generic parser, 1.234 without edit mode treats single dot with 3 digits as grouping
+        it("never reads the locale's group separator as a decimal, so 1.234 in de-DE is 1234 or nothing", () => {
+            // The locale parser treats a single dot with 3 digits as grouping
             expect(parseLocalizedNumber("1.234", "de-DE")).toBe(1234);
 
-            // In edit mode with alternateDecimal enabled, 1.234 is treated as decimal 1.234
-            expect(parseLocalizedNumber("1.234", "de-DE", { alternateDecimal: true })).toBe(1.234);
-            expect(parseLocalizedNumber("0.123", "tr-TR", { alternateDecimal: true })).toBe(0.123);
+            // Edit mode only adds alternates that are not the group separator, so it rejects instead of guessing
+            expect(parseLocalizedNumber("1.234", "de-DE", { alternateDecimal: true })).toBeNull();
+            expect(parseLocalizedNumber("0.123", "tr-TR", { alternateDecimal: true })).toBeNull();
+            expect(parseLocalizedNumber("0.123", "fr-FR", { alternateDecimal: true })).toBe(0.123);
         });
     });
 
-    describe("Single separator typing vs paste ambiguity contract at decimals >= 3", () => {
+    describe("Typing and pasting a grouped number give the same value at decimals >= 3", () => {
         let fixture: ComponentFixture<NumericTextBoxI18nTestHostComponent>;
         let host: NumericTextBoxI18nTestHostComponent;
         let input: HTMLInputElement;
@@ -964,7 +961,7 @@ describe("NumericTextBoxComponent i18n integration", () => {
             return true;
         }
 
-        it("treats en-US direct typing of 1,234 as decimal 1.234 and formats as 1.234 on blur", async () => {
+        it("rejects the en-US group separator while typing 1,234, so the value is 1234 and formats as 1234.000 on blur", async () => {
             const i18n = TestBed.inject(MonaI18nService);
             i18n.use({ direction: "ltr", id: "en-US", messages: {} });
             await waitForStable(fixture);
@@ -972,13 +969,14 @@ describe("NumericTextBoxComponent i18n integration", () => {
             focusInput(input);
             await waitForStable(fixture);
 
-            const typed = await typeString("1,234");
-            expect(typed).toBe(true);
-            expect(host.value()).toBe(1.234);
+            expect(await typeString("1,")).toBe(false);
+            expect(input.value).toBe("1");
+            expect(await typeString("234")).toBe(true);
+            expect(host.value()).toBe(1234);
 
             blurInput(input);
             await waitForStable(fixture);
-            expect(input.value).toBe("1.234");
+            expect(input.value).toBe("1234.000");
         });
 
         it("treats en-US paste of 1,234 as grouping separator (1234) and formats as 1234.000 on blur", async () => {
@@ -998,7 +996,7 @@ describe("NumericTextBoxComponent i18n integration", () => {
             expect(input.value).toBe("1234.000");
         });
 
-        it("treats de-DE direct typing of 1.234 as decimal 1.234 and formats as 1,234 on blur", async () => {
+        it("rejects the de-DE group separator while typing 1.234, so the value is 1234 and formats as 1234,000 on blur", async () => {
             const i18n = TestBed.inject(MonaI18nService);
             i18n.use(DE_LOCALE);
             await waitForStable(fixture);
@@ -1006,13 +1004,14 @@ describe("NumericTextBoxComponent i18n integration", () => {
             focusInput(input);
             await waitForStable(fixture);
 
-            const typed = await typeString("1.234");
-            expect(typed).toBe(true);
-            expect(host.value()).toBe(1.234);
+            expect(await typeString("1.")).toBe(false);
+            expect(input.value).toBe("1");
+            expect(await typeString("234")).toBe(true);
+            expect(host.value()).toBe(1234);
 
             blurInput(input);
             await waitForStable(fixture);
-            expect(input.value).toBe("1,234");
+            expect(input.value).toBe("1234,000");
         });
 
         it("treats de-DE paste of 1.234 as grouping separator (1234) and formats as 1234,000 on blur", async () => {
@@ -1035,8 +1034,19 @@ describe("NumericTextBoxComponent i18n integration", () => {
         it("rejects repeated separators when typing in both en-US and de-DE", async () => {
             const i18n = TestBed.inject(MonaI18nService);
 
-            // en-US: typing 1,,234 or 1..234
+            // en-US: typing 1..234 or 1.,234
             i18n.use({ direction: "ltr", id: "en-US", messages: {} });
+            await waitForStable(fixture);
+            focusInput(input);
+            await waitForStable(fixture);
+
+            expect(await typeString("1.")).toBe(true);
+            expect(await typeString(".")).toBe(false); // second dot rejected
+            expect(await typeString(",")).toBe(false); // comma after dot rejected
+
+            // de-DE: typing 1,,234 or 1,.234
+            input.value = "";
+            i18n.use(DE_LOCALE);
             await waitForStable(fixture);
             focusInput(input);
             await waitForStable(fixture);
@@ -1045,16 +1055,90 @@ describe("NumericTextBoxComponent i18n integration", () => {
             expect(await typeString(",")).toBe(false); // second comma rejected
             expect(await typeString(".")).toBe(false); // dot after comma rejected
 
-            // de-DE: typing 1..234 or 1,,234
+            // fr-FR: the alternate dot still counts as the one decimal separator
             input.value = "";
-            i18n.use(DE_LOCALE);
+            i18n.use(FR_LOCALE);
             await waitForStable(fixture);
             focusInput(input);
             await waitForStable(fixture);
 
             expect(await typeString("1.")).toBe(true);
-            expect(await typeString(".")).toBe(false); // second dot rejected
-            expect(await typeString(",")).toBe(false); // comma after dot rejected
+            expect(await typeString(",")).toBe(false); // comma after alternate dot rejected
+        });
+    });
+
+    describe("numpad decimal key", () => {
+        async function setup(locale: MonaLocale, decimals: number) {
+            await TestBed.configureTestingModule({
+                imports: [NumericTextBoxI18nTestHostComponent]
+            }).compileComponents();
+            const fixture = TestBed.createComponent(NumericTextBoxI18nTestHostComponent);
+            fixture.componentInstance.decimals.set(decimals);
+            TestBed.inject(MonaI18nService).use(locale);
+            await waitForStable(fixture);
+            const input = getInput(fixture);
+            focusInput(input);
+            input.value = "12";
+            input.selectionStart = input.selectionEnd = 2;
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            await waitForStable(fixture);
+            return { fixture, host: fixture.componentInstance, input };
+        }
+
+        function pressNumpadDecimal(input: HTMLInputElement, key: string): KeyboardEvent {
+            const event = new KeyboardEvent("keydown", { bubbles: true, cancelable: true, code: "NumpadDecimal", key });
+            input.dispatchEvent(event);
+            return event;
+        }
+
+        it("inserts the locale decimal when the keyboard layout types the group separator", async () => {
+            const { fixture, host, input } = await setup({ direction: "ltr", id: "en-US", messages: {} }, 2);
+
+            // A de-DE keyboard layout types "," on the numpad, which is the en-US group separator
+            const event = pressNumpadDecimal(input, ",");
+            await waitForStable(fixture);
+            expect(event.defaultPrevented).toBe(true);
+            expect(input.value).toBe("12.");
+
+            input.value = "12.5";
+            input.selectionStart = input.selectionEnd = 4;
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            await waitForStable(fixture);
+            expect(host.value()).toBe(12.5);
+        });
+
+        it("inserts the de-DE decimal comma for a numpad dot", async () => {
+            const { fixture, input } = await setup(DE_LOCALE, 2);
+
+            pressNumpadDecimal(input, ".");
+            await waitForStable(fixture);
+            expect(input.value).toBe("12,");
+        });
+
+        it("leaves the key alone when it already types the locale decimal or NumLock is off", async () => {
+            const { fixture, input } = await setup(DE_LOCALE, 2);
+
+            expect(pressNumpadDecimal(input, ",").defaultPrevented).toBe(false);
+            expect(pressNumpadDecimal(input, "Delete").defaultPrevented).toBe(false);
+            await waitForStable(fixture);
+            expect(input.value).toBe("12");
+        });
+
+        it("does not insert a decimal when decimals is 0 or one is already present", async () => {
+            const { fixture, input } = await setup({ direction: "ltr", id: "en-US", messages: {} }, 0);
+
+            expect(pressNumpadDecimal(input, ",").defaultPrevented).toBe(true);
+            await waitForStable(fixture);
+            expect(input.value).toBe("12");
+
+            fixture.componentInstance.decimals.set(2);
+            input.value = "1.5";
+            input.selectionStart = input.selectionEnd = 3;
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            await waitForStable(fixture);
+            pressNumpadDecimal(input, ",");
+            await waitForStable(fixture);
+            expect(input.value).toBe("1.5");
         });
     });
 });

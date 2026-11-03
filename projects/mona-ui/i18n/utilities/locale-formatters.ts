@@ -1,3 +1,5 @@
+import { canonicalizeLocaleId } from "./locale-id";
+
 export interface NumberSymbols {
     readonly decimal: string;
     readonly group: string;
@@ -12,6 +14,13 @@ export interface NumberGroupingPattern {
     readonly minimumGroupedIntegerDigits: number;
 }
 
+/** Full-width forms of printable ASCII ("！" to "～"), offset from ASCII by U+FEE0. */
+const FULLWIDTH_ASCII_START = 0xff01;
+const FULLWIDTH_ASCII_END = 0xff5e;
+const FULLWIDTH_ASCII_OFFSET = 0xfee0;
+const DECIMAL_DIGIT_REGEX = /^\p{Nd}$/u;
+
+const asciiDigitCache = new Map<string, string | null>();
 const numberSymbolsCache = new Map<string, NumberSymbols>();
 const numberFormatterCache = new Map<string, Intl.NumberFormat>();
 const numberGroupingCache = new Map<string, NumberGroupingPattern>();
@@ -24,7 +33,8 @@ function serializeOptions(options?: Intl.NumberFormatOptions): string {
     return keys.map(k => `${k}:${String((options as Record<string, unknown>)[k])}`).join(";");
 }
 
-export function getNumberGroupingPattern(localeId: string): NumberGroupingPattern {
+export function getNumberGroupingPattern(locale: string): NumberGroupingPattern {
+    const localeId = canonicalizeLocaleId(locale);
     let pattern = numberGroupingCache.get(localeId);
     if (!pattern) {
         try {
@@ -87,7 +97,8 @@ export function getNumberGroupingPattern(localeId: string): NumberGroupingPatter
     return pattern;
 }
 
-export function getNumberSymbols(localeId: string): NumberSymbols {
+export function getNumberSymbols(locale: string): NumberSymbols {
+    const localeId = canonicalizeLocaleId(locale);
     let symbols = numberSymbolsCache.get(localeId);
     if (!symbols) {
         const digitMap = new Map<string, string>();
@@ -133,7 +144,7 @@ export function getNumberSymbols(localeId: string): NumberSymbols {
 }
 
 export function getNumberFormatter(locale: string, options?: Intl.NumberFormatOptions): Intl.NumberFormat {
-    const cleanLocale = (locale ?? "").trim() || "en-US";
+    const cleanLocale = canonicalizeLocaleId(locale);
     const key = `${cleanLocale}:${serializeOptions(options)}`;
     let formatter = numberFormatterCache.get(key);
     if (!formatter) {
@@ -151,6 +162,31 @@ export function formatNumber(value: number, locale: string, options?: Intl.Numbe
     return getNumberFormatter(locale, options).format(value);
 }
 
+/**
+ * ASCII value of a Unicode decimal digit (\p{Nd}), or null for any other character. Unicode encodes every
+ * decimal digit set as a contiguous 0-9 run, so the value is the distance from the start of the run.
+ */
+function toAsciiDigit(char: string): string | null {
+    let digit = asciiDigitCache.get(char);
+    if (digit === undefined) {
+        digit = null;
+        if (DECIMAL_DIGIT_REGEX.test(char)) {
+            const code = char.codePointAt(0)!;
+            let runStart = code;
+            while (DECIMAL_DIGIT_REGEX.test(String.fromCodePoint(runStart - 1))) {
+                runStart--;
+            }
+            digit = String((code - runStart) % 10);
+        }
+        asciiDigitCache.set(char, digit);
+    }
+    return digit;
+}
+
+/**
+ * Converts digits of any script to ASCII digits. Full-width forms typed by CJK input methods
+ * ("１２．５", "－３", "１，０００") are folded to ASCII first.
+ */
 export function normalizeLocalizedDigits(text: string, localeId?: string): string {
     if (!text) {
         return text;
@@ -158,22 +194,12 @@ export function normalizeLocalizedDigits(text: string, localeId?: string): strin
     const symbols = localeId ? getNumberSymbols(localeId) : null;
     let result = "";
     for (const char of text) {
-        if (symbols?.digits.has(char)) {
-            result += symbols.digits.get(char)!;
-        } else {
-            const code = char.charCodeAt(0);
-            if (code >= 0x0660 && code <= 0x0669) {
-                result += String(code - 0x0660);
-            } else if (code >= 0x06f0 && code <= 0x06f9) {
-                result += String(code - 0x06f0);
-            } else if (code >= 0x09e6 && code <= 0x09ef) {
-                result += String(code - 0x09e6);
-            } else if (code >= 0x0966 && code <= 0x096f) {
-                result += String(code - 0x0966);
-            } else {
-                result += char;
-            }
-        }
+        const code = char.codePointAt(0)!;
+        const folded =
+            code >= FULLWIDTH_ASCII_START && code <= FULLWIDTH_ASCII_END
+                ? String.fromCharCode(code - FULLWIDTH_ASCII_OFFSET)
+                : char;
+        result += symbols?.digits.get(folded) ?? toAsciiDigit(folded) ?? folded;
     }
     return result;
 }
@@ -198,6 +224,22 @@ export function normalizeLocalizedInput(text: string, localeId: string): string 
     return cleaned;
 }
 
+/**
+ * Decimal separators accepted while editing: the locale's own, plus "." and "," so a separator typed on a
+ * keyboard layout that does not match the locale still works. An alternate is dropped when it is the locale's
+ * group separator; otherwise "1,234" typed in en-US (or "1.234" in de-DE) would be read as 1.234.
+ */
+export function getEditDecimalSeparators(symbols: NumberSymbols): ReadonlySet<string> {
+    const primary = symbols.decimal || ".";
+    const separators = new Set<string>([primary]);
+    for (const alternate of [".", ","]) {
+        if (alternate !== symbols.group) {
+            separators.add(alternate);
+        }
+    }
+    return separators;
+}
+
 export type LocalizedNumberParseMode = "edit" | "locale";
 
 export interface ParseLocalizedNumberOptions {
@@ -206,7 +248,7 @@ export interface ParseLocalizedNumberOptions {
      * Only the locale's canonical decimal separator is treated as decimal, and only
      * canonical grouping separators are treated as grouping.
      * When "edit", allows alternate decimal separators (such as '.' in comma-decimal locales)
-     * during interactive input entry.
+     * during interactive input entry, unless the alternate is the locale's group separator.
      */
     mode?: LocalizedNumberParseMode;
     /**
@@ -392,25 +434,7 @@ export function parseLocalizedNumber(
             return null;
         }
 
-        const primaryDec = symbols.decimal || ".";
-        const candidateSeparators = new Set<string>();
-        candidateSeparators.add(primaryDec);
-        if (primaryDec === ".") {
-            candidateSeparators.add(",");
-        } else if (primaryDec === ",") {
-            candidateSeparators.add(".");
-        } else {
-            candidateSeparators.add(".");
-            candidateSeparators.add(",");
-        }
-        if (primaryDec === "\u066B") {
-            candidateSeparators.add(".");
-            candidateSeparators.add(",");
-        }
-        if (primaryDec === "/") {
-            candidateSeparators.add(".");
-            candidateSeparators.add(",");
-        }
+        const candidateSeparators = getEditDecimalSeparators(symbols);
 
         let foundSep: string | null = null;
         let sepIndex = -1;
@@ -603,23 +627,7 @@ export function validateLocalizedNumberEdit(
         return { valid: true, complete: false, value: null };
     }
 
-    // Identify allowed decimal separators
-    const primaryDec = symbols.decimal || ".";
-    // Candidate separators: primary decimal, plus alternate '.' or ','
-    const candidateSeparators = new Set<string>();
-    candidateSeparators.add(primaryDec);
-    if (primaryDec === ".") {
-        candidateSeparators.add(",");
-    } else if (primaryDec === ",") {
-        candidateSeparators.add(".");
-    } else {
-        candidateSeparators.add(".");
-        candidateSeparators.add(",");
-    }
-    if (primaryDec === "\u066B") {
-        candidateSeparators.add(".");
-        candidateSeparators.add(",");
-    }
+    const candidateSeparators = getEditDecimalSeparators(symbols);
 
     // Count how many separators from the candidate set appear
     let foundSep: string | null = null;

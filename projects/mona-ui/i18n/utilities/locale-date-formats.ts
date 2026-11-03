@@ -1,4 +1,5 @@
 import { normalizeGregorianLocale, sanitizeDateText } from "./gregorian-date";
+import { canonicalizeLocaleId } from "./locale-id";
 import { type LocaleFirstDayOfWeek, resolveLocaleFirstDayOfWeek } from "./locale-week-data";
 
 export type { LocaleFirstDayOfWeek };
@@ -14,8 +15,15 @@ const timeFormatCache = new Map<string, string>();
 const dateTimeFormatCache = new Map<string, string>();
 const firstDayCache = new Map<string, LocaleFirstDayOfWeek>();
 
+/**
+ * Turns an Intl literal part into Luxon format text. ASCII letters would otherwise be read as format tokens
+ * (the "h" in fr-CA "21 h 30", the "klo" in fi-FI "15.09.2026 klo 21.30"), so letter runs are quoted and
+ * apostrophes are doubled.
+ */
 function normalizeEditableLiteral(value: string): string {
-    return sanitizeDateText(value);
+    return sanitizeDateText(value)
+        .replace(/'/g, "''")
+        .replace(/[A-Za-z]+/g, run => `'${run}'`);
 }
 
 /**
@@ -162,7 +170,7 @@ export function getLocaleDateTimeInputFormat(localeId: string, options?: LocaleT
  * Intl.Locale.getWeekInfo(), or CLDR fallbacks.
  */
 export function getLocaleFirstDayOfWeek(localeId: string): LocaleFirstDayOfWeek {
-    const normalizedLocaleId = (localeId ?? "").trim();
+    const normalizedLocaleId = canonicalizeLocaleId(localeId);
     let firstDay = firstDayCache.get(normalizedLocaleId);
     if (!firstDay) {
         firstDay = resolveLocaleFirstDayOfWeek(normalizedLocaleId);

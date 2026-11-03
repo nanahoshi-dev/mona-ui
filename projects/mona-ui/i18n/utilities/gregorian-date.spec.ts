@@ -42,8 +42,8 @@ describe("gregorian-date utilities", () => {
     });
 
     describe("normalizeGregorianLocale", () => {
-        it("returns empty or nullish locale unchanged", () => {
-            expect(normalizeGregorianLocale("")).toBe("");
+        it("resolves an empty locale to the Gregorian en-US fallback", () => {
+            expect(normalizeGregorianLocale("")).toBe("en-US-u-ca-gregory");
         });
 
         it("normalizes standard locales to Gregorian calendar without error", () => {
@@ -88,8 +88,23 @@ describe("gregorian-date utilities", () => {
             expect(normalized).toContain("nu-arab");
         });
 
-        it("does not rewrite malformed locale strings", () => {
-            expect(normalizeGregorianLocale("invalid---locale")).toBe("invalid---locale");
+        it("resolves malformed locale strings to the Gregorian en-US fallback", () => {
+            expect(normalizeGregorianLocale("invalid---locale")).toBe("en-US-u-ca-gregory");
+        });
+
+        it("converts POSIX style ids instead of passing them through", () => {
+            expect(normalizeGregorianLocale("en_US")).toBe("en-US-u-ca-gregory");
+            expect(normalizeGregorianLocale("de_DE.UTF-8")).toBe("de-DE-u-ca-gregory");
+        });
+
+        it("formats and parses without throwing for POSIX style and malformed ids", () => {
+            const date = new Date(2026, 8, 10);
+            for (const id of ["en_US", "de_DE", "invalid---locale", ""]) {
+                expect(() => formatGregorianDateToLocaleString(date, id, { dateStyle: "short" }), id).not.toThrow();
+                expect(() => gregorianDateTime(date, id).toFormat("dd.MM.yyyy"), id).not.toThrow();
+                expect(parseGregorianDate("10.09.2026", "dd.MM.yyyy", id).isValid, id).toBe(true);
+            }
+            expect(formatGregorianDateToLocaleString(date, "en_US", { dateStyle: "short" })).toBe("9/10/26");
         });
     });
 
@@ -224,4 +239,3 @@ describe("gregorian-date utilities", () => {
         });
     });
 });
-
