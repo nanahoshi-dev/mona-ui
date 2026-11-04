@@ -23,6 +23,7 @@ import {
     gridRowDragPreviewThemeVariants,
     GridListVariantInput
 } from "../../styles/grid.styles";
+import { ContextMenuComponent } from "@nanahoshi/mona-ui/contextmenu";
 import { GridAddRowComponent } from "../grid-add-row/grid-add-row.component";
 import { GridColgroupComponent } from "../grid-colgroup/grid-colgroup.component";
 import { GridDetailRowComponent } from "../grid-detail-row/grid-detail-row.component";
@@ -50,6 +51,7 @@ const ROW_MOVE_SNAPSHOT_LIFETIME = 1000;
     selector: "mona-grid-list",
     templateUrl: "./grid-list.component.html",
     imports: [
+        ContextMenuComponent,
         LucideGripVertical,
         GridAddRowComponent,
         GridColgroupComponent,
@@ -75,6 +77,7 @@ export class GridListComponent implements GridListVariantInput {
     private readonly bodyTableElementRef = viewChild.required<ElementRef<HTMLTableElement>>("bodyTable");
     protected readonly baseClass = gridListBaseThemeVariants({ virtual: false });
     protected readonly bodyRows = computed(() => this.gridService.createBodyRows(this.data()));
+    protected readonly dropListData = computed(() => this.data().toArray());
     protected readonly gridService = inject(GridService);
     protected readonly rowDragPreviewClass = gridRowDragPreviewThemeVariants();
     protected readonly tableClass = gridListTableThemeVariants();

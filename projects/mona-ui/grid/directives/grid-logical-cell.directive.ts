@@ -1,7 +1,6 @@
 import { Clipboard } from "@angular/cdk/clipboard";
 import {
     afterNextRender,
-    afterEveryRender,
     afterRenderEffect,
     computed,
     DestroyRef,
@@ -14,7 +13,8 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { filter, fromEvent } from "rxjs";
+import { fromEvent } from "rxjs";
+import { GRID_CELL_FOCUSABLE_SELECTOR } from "../services/grid-cell-tab-stops";
 import {
     GridCellKind,
     GridNavigationSection,
@@ -23,7 +23,7 @@ import {
 } from "../services/grid-navigation.service";
 import { GridService } from "../services/grid.service";
 
-const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [tabindex]";
+const FOCUSABLE_TARGET_SELECTOR = GRID_CELL_FOCUSABLE_SELECTOR;
 
 @Directive({
     selector: "td[monaGridLogicalCell], th[monaGridLogicalCell]",
@@ -122,14 +122,8 @@ export class GridLogicalCellDirective {
                 });
             }
         });
-        afterEveryRender({
-            mixedReadWrite: () => this.#syncInnerFocusableTabIndexes()
-        });
         afterNextRender({
-            read: () => {
-                this.#setCellCopySubscription();
-                this.#setKeyboardNavigation();
-            }
+            read: () => this.#setKeyboardNavigation()
         });
         this.#destroyRef.onDestroy(() => {
             const cellKey = this.#cellKey();
@@ -338,19 +332,17 @@ export class GridLogicalCellDirective {
         }
     }
 
-    #setCellCopySubscription(): void {
-        fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
-            .pipe(
-                takeUntilDestroyed(this.#destroyRef),
-                filter(e => (e.ctrlKey || e.metaKey) && e.key === "c"),
-                filter(() => this.rowIndex() >= 0 && !this.#gridService.isInEditMode())
-            )
-            .subscribe(() => {
-                const text = this.#hostElementRef.nativeElement.innerText?.trim() ?? "";
-                if (text) {
-                    this.#clipboard.copy(text);
-                }
-            });
+    #copyCellText(event: KeyboardEvent): void {
+        if (!(event.ctrlKey || event.metaKey) || event.key !== "c") {
+            return;
+        }
+        if (this.rowIndex() < 0 || this.#gridService.isInEditMode()) {
+            return;
+        }
+        const text = this.#hostElementRef.nativeElement.innerText?.trim() ?? "";
+        if (text) {
+            this.#clipboard.copy(text);
+        }
     }
 
     #setKeyboardNavigation(): void {
@@ -363,17 +355,13 @@ export class GridLogicalCellDirective {
                 }
             });
 
+        // One keydown listener per cell handles copying and navigation.
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
             .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(e => this.#onHostKeydown(e));
-    }
-
-    #syncInnerFocusableTabIndexes(): void {
-        for (const target of this.#getInnerFocusableTargets()) {
-            if (target.getAttribute("tabindex") !== "-1") {
-                target.setAttribute("tabindex", "-1");
-            }
-        }
+            .subscribe(e => {
+                this.#copyCellText(e);
+                this.#onHostKeydown(e);
+            });
     }
 
     /**

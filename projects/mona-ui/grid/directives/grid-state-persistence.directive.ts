@@ -52,7 +52,13 @@ export class GridStatePersistenceDirective {
         });
 
         effect(() => {
-            if (!this.#initialized() || this.#loadingState || !this.#isEnabled()) {
+            // A column drag reports its width once, when it ends.
+            if (
+                !this.#initialized() ||
+                this.#loadingState ||
+                !this.#isEnabled() ||
+                this.#gridService.columnResizeActive()
+            ) {
                 return;
             }
             const state = this.#gridService.captureState(this.#resolveOptions());

@@ -1,4 +1,3 @@
-import { A11yModule } from "@angular/cdk/a11y";
 import { formatDate, NgTemplateOutlet } from "@angular/common";
 import { afterNextRender, Component, computed, ElementRef, inject, Injector, input, LOCALE_ID } from "@angular/core";
 import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
@@ -20,7 +19,7 @@ const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [ta
 @Component({
     selector: "mona-grid-cell",
     templateUrl: "./grid-cell.component.html",
-    imports: [A11yModule, GridCommandCellComponent, GridEditorComponent, NgTemplateOutlet],
+    imports: [GridCommandCellComponent, GridEditorComponent, NgTemplateOutlet],
     host: {
         "[class]": "baseClass()"
     }
@@ -69,14 +68,13 @@ export class GridCellComponent {
     });
     protected readonly gridService = inject(GridService);
     protected readonly isCellPristine = computed(() => {
-        const rowUid = this.row().uid;
-        const field = this.column().field;
-        const originalRowData = this.gridService.editBaseDict().get(rowUid);
-        const editedRowData = this.gridService.editViewDict().get(rowUid);
-        if (!originalRowData || !editedRowData) {
+        const row = this.row();
+        const editedRowData = this.gridService.editViewDict().get(row.uid);
+        if (!editedRowData) {
             return true;
         }
-        return originalRowData[field] === editedRowData[field];
+        const field = this.column().field;
+        return row.data[field] === editedRowData[field];
     });
     protected readonly isEditing = computed(() => {
         const context = this.gridService.editContext();

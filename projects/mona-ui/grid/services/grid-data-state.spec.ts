@@ -279,7 +279,9 @@ describe("GridService data state", () => {
             service.setRows([item, item]);
             const [first, second] = service.rows().toArray();
             expect(first.uid).not.toBe(second.uid);
-            expect(() => service.editBaseDict()).not.toThrow();
+            service.setEditableOptions({ mode: "row" });
+            expect(service.startRowEdit(second)).toBe(true);
+            expect(service.editViewDict().get(second.uid)).toEqual(expect.objectContaining({ id: 1 }));
         });
 
         it("warns about a repeated rowKey and keeps rendering", () => {

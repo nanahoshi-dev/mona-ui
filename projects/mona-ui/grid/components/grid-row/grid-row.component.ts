@@ -1,5 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from "@angular/core";
-import { ContextMenuComponent } from "@nanahoshi/mona-ui/contextmenu";
+import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
 import { twMerge } from "tailwind-merge";
 import { GridCellDirective } from "../../directives/grid-cell.directive";
 import { GridLockedCellDirective } from "../../directives/grid-locked-cell.directive";
@@ -21,7 +20,6 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
     templateUrl: "./grid-row.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
-        ContextMenuComponent,
         GridCellComponent,
         GridCellDirective,
         GridLockedCellDirective,
@@ -60,7 +58,6 @@ export class GridRowComponent {
             : "flex min-h-9 w-full items-center justify-center"
     );
     protected readonly gridService = inject(GridService);
-    protected readonly hostElement = inject<ElementRef<HTMLTableRowElement>>(ElementRef).nativeElement;
     protected readonly selectable = computed(() => this.gridService.selectableOptions().enabled);
 
     public readonly expanded = computed(() => this.gridService.isRowExpanded(this.row()));

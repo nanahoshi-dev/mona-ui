@@ -476,6 +476,8 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
         <mona-grid
             [data]="effectiveGridData"
             [(pageSize)]="pageSize"
+            [(skip)]="skip"
+            [(expandedKeys)]="expandedKeys"
             [pageSizeValues]="pageSizeValues()"
             [resizeMethod]="resizeMethod()"
             [responsivePager]="responsivePager()"
@@ -872,11 +874,13 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         return virtualization;
     });
     public readonly data = input<ReturnType<GridComponent<unknown>["data"]>>([]);
+    public readonly expandedKeys = model<unknown[]>([]);
     public readonly pageSize = model<number | undefined>(10);
     public readonly pageSizeValues = input<ReturnType<GridComponent<unknown>["pageSizeValues"]>>([10, 20, 30, 40, 50]);
     public readonly resizeMethod = input<ReturnType<GridComponent<unknown>["resizeMethod"]>>("fitView");
     public readonly rounded = input<ReturnType<GridComponent<unknown>["rounded"]>>("medium");
     public readonly responsivePager = input<ReturnType<GridComponent<unknown>["responsivePager"]>>(false);
+    public readonly skip = model(0);
     public readonly userClass = input<ReturnType<GridComponent<unknown>["userClass"]>>("w-full h-112");
 
     public constructor() {

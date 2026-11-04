@@ -3,9 +3,10 @@
     <tbody
         role="rowgroup"
         tabindex="0"
+        #bodyElement
         (focus)="onBodyFocus()"
         cdkDropList
-        [cdkDropListData]="data().toArray()"
+        [cdkDropListData]="dropListData()"
         [cdkDropListDisabled]="!gridService.rowReorderInteractionEnabled()"
         (cdkDropListDropped)="onRowDrop($event)">
         @if (gridService.addRowVisible()) {
@@ -16,6 +17,11 @@
                 <tr monaGridGroupRow [group]="bodyRow" [rowIndex]="rowIndex"></tr>
             } @else if (bodyRow.type === "groupFooter") {
                 <tr monaGridFooterRow [groupKey]="bodyRow.groupAggregate.groupKey"></tr>
+            } @else if (!gridService.rowReorderColumnVisible()) {
+                <tr monaGridRow [row]="bodyRow.row" [index]="rowIndex"></tr>
+                @if (gridService.isRowExpanded(bodyRow.row)) {
+                    <tr monaGridDetailRow [row]="bodyRow.row"></tr>
+                }
             } @else {
                 <tr
                     monaGridRow
@@ -46,3 +52,6 @@
         }
     </tbody>
 </table>
+@if (gridService.contextMenuItems().length !== 0) {
+    <mona-contextmenu [target]="bodyElement" [items]="gridService.contextMenuItems()" />
+}

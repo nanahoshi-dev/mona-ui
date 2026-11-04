@@ -32,7 +32,11 @@ export class GridColumnResizeHandlerDirective {
         });
     }
 
-    #applyDelta(initialWidth: number, deltaX: number): number | null {
+    /**
+     * The width for a drag distance, or `null` outside the column's limits. The table widths follow the
+     * column widths through their bindings, so nothing is measured here.
+     */
+    #widthFor(initialWidth: number, deltaX: number): number | null {
         const column = this.column();
         const minWidth = column.minWidth ?? 0;
         const maxWidth = column.maxWidth ?? this.#document.defaultView?.innerWidth ?? Infinity;
@@ -40,23 +44,7 @@ export class GridColumnResizeHandlerDirective {
         if (initialWidth + deltaX < minWidth || initialWidth + deltaX > maxWidth) {
             return null;
         }
-
-        const headerTableElement = this.#gridService.headerTableElement();
-        const bodyTableElement = this.#gridService.bodyTableElement();
-        const oldWidth = this.#gridService.getColumnWidth(this.column());
-        const calculatedWidth = this.#gridService.normalizeRenderedWidth(initialWidth + deltaX);
-        this.#gridService.setCalculatedWidth(column.id, calculatedWidth);
-        if (headerTableElement) {
-            headerTableElement.style.width = `${
-                headerTableElement.getBoundingClientRect().width + (calculatedWidth - oldWidth)
-            }px`;
-        }
-        if (bodyTableElement) {
-            bodyTableElement.style.width = `${
-                bodyTableElement.getBoundingClientRect().width + (calculatedWidth - oldWidth)
-            }px`;
-        }
-        return calculatedWidth;
+        return this.#gridService.normalizeRenderedWidth(initialWidth + deltaX);
     }
 
     #onPointerDown(event: PointerEvent): void {
@@ -70,17 +58,44 @@ export class GridColumnResizeHandlerDirective {
         this.resizeStart.emit();
 
         let newWidth: number = -1;
+        let pendingWidth: number | null = null;
+        let frame: number | null = null;
+        const view = this.#document.defaultView;
+        const columnId = this.column().id;
+        // At most one width update per frame: pointermove can fire several times between paints.
+        const commit = (): void => {
+            frame = null;
+            if (pendingWidth != null) {
+                this.#gridService.setCalculatedWidth(columnId, pendingWidth);
+                pendingWidth = null;
+            }
+        };
+        this.#gridService.columnResizeActive.set(true);
 
         const onPointerMove = (event: PointerEvent) => {
             const physicalDelta = event.clientX - initialX;
             const logicalDelta = this.#direction() === "rtl" ? -physicalDelta : physicalDelta;
-            const appliedWidth = this.#applyDelta(initialWidth, logicalDelta);
-            if (appliedWidth != null) {
-                newWidth = appliedWidth;
+            const width = this.#widthFor(initialWidth, logicalDelta);
+            if (width == null) {
+                return;
+            }
+            newWidth = width;
+            pendingWidth = width;
+            if (frame == null) {
+                if (view?.requestAnimationFrame) {
+                    frame = view.requestAnimationFrame(commit);
+                } else {
+                    commit();
+                }
             }
         };
 
         const onPointerUp = () => {
+            if (frame != null) {
+                view?.cancelAnimationFrame(frame);
+            }
+            commit();
+            this.#gridService.columnResizeActive.set(false);
             element.removeEventListener("pointermove", onPointerMove);
             element.removeEventListener("pointerup", onPointerUp);
             element.removeEventListener("pointercancel", onPointerUp);

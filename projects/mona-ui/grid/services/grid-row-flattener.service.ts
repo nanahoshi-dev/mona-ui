@@ -7,6 +7,11 @@ import type { GridViewDataRow, GridViewGroupFooterRow, GridViewGroupRow, GridVie
 import type { Row } from "../models/Row";
 import { buildGroupKey, groupRowsByField } from "./grid-group-key";
 
+/** Looks up a group's aggregates by group key (a `Dictionary` or an `ImmutableDictionary`). */
+export interface GridGroupAggregateLookup {
+    get(groupKey: string): GridGroupAggregate | null | undefined;
+}
+
 /**
  * A stateless service that groups and flattens rows into a linear `GridViewRow[]`
  * suitable for rendering by both paginated and virtual-scrolled grid list components.
@@ -41,7 +46,7 @@ export class GridRowFlattenerService {
         groupColumns: Iterable<Column>,
         collapsedKeys: ReadonlySet<string>,
         showFooter: boolean,
-        groupAggregates: Dictionary<string, GridGroupAggregate> = new Dictionary<string, GridGroupAggregate>(),
+        groupAggregates: GridGroupAggregateLookup = new Dictionary<string, GridGroupAggregate>(),
         orderGroups = true,
         options: QueryOptions = {}
     ): GridViewRow[] {
@@ -78,7 +83,7 @@ export class GridRowFlattenerService {
     #flattenRecursive(
         rows: Row[],
         groupColumns: Column[],
-        groupAggregates: Dictionary<string, GridGroupAggregate>,
+        groupAggregates: GridGroupAggregateLookup,
         depth: number,
         parentKey: string | null,
         collapsedKeys: ReadonlySet<string>,

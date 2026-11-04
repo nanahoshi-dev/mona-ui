@@ -69,6 +69,7 @@ import type { GridRowClass } from "../../models/GridRowClass";
 import type { GridToolbarContext, GridToolbarTemplateContext } from "../../models/GridToolbarTemplateContext";
 import { ResizeMethod } from "../../models/ResizeMethod";
 import { ColumnAriaSortPipe } from "../../pipes/column-aria-sort.pipe";
+import { observeGridCellTabStops } from "../../services/grid-cell-tab-stops";
 import { GridNavigationService } from "../../services/grid-navigation.service";
 import { GridService } from "../../services/grid.service";
 import {
@@ -418,6 +419,8 @@ export class GridComponent<T> implements GridVariantInput {
                 this.#fitViewInitialScrollbarGutterWidth.set(this.gridService.scrollbarGutterWidth());
                 this.gridWidthSet.set(true);
                 this.setResizeObserver();
+                const stopObservingTabStops = observeGridCellTabStops(this.#hostElementRef.nativeElement);
+                this.#destroyRef.onDestroy(stopObservingTabStops);
             }
         });
         this.#destroyRef.onDestroy(() => this.#resizeObserver?.disconnect());
@@ -708,6 +711,15 @@ export class GridComponent<T> implements GridVariantInput {
         return element.closest("[hidden]") != null || element.getAttribute("aria-hidden") === "true";
     }
 
+    private reportPage(): void {
+        const { page, skip, take } = this.gridService.paginationState();
+        this.skip.set(skip);
+        if (this.pageSize() !== take) {
+            this.pageSize.set(take);
+        }
+        this.pageChange.emit({ page, skip, take });
+    }
+
     private setDataEffect(): void {
         effect(() => {
             const data = this.data();
@@ -796,15 +808,6 @@ export class GridComponent<T> implements GridVariantInput {
             const detailTemplate = this.gridDetailTemplate() ?? null;
             untracked(() => this.gridService.masterDetailTemplate.set(detailTemplate));
         });
-    }
-
-    private reportPage(): void {
-        const { page, skip, take } = this.gridService.paginationState();
-        this.skip.set(skip);
-        if (this.pageSize() !== take) {
-            this.pageSize.set(take);
-        }
-        this.pageChange.emit({ page, skip, take });
     }
 
     private setInitialCalculatedWidthOfColumns(): void {

@@ -19,7 +19,7 @@
     [maxBufferPx]="gridService.virtualGridMaxBuffer()">
     <table role="presentation" #bodyTable [class]="tableClass()" [style.width.px]="gridService.tableWidth()">
         <colgroup monaGridColgroup></colgroup>
-        <tbody role="rowgroup" tabindex="0" (focus)="onViewportFocus()">
+        <tbody role="rowgroup" tabindex="0" #bodyElement (focus)="onViewportFocus()">
             <ng-container *cdkVirtualFor="let bodyRow of bodyRows(); let rowIndex = index; trackBy: trackBodyRow">
                 @if (bodyRow.type === "group") {
                     <tr monaGridGroupRow [group]="bodyRow" [rowIndex]="rowIndex"></tr>
@@ -35,6 +35,9 @@
         </tbody>
     </table>
 </cdk-virtual-scroll-viewport>
+@if (gridService.contextMenuItems().length !== 0) {
+    <mona-contextmenu [target]="bodyElement" [items]="gridService.contextMenuItems()" />
+}
 
 @if (gridService.hasFooter()) {
     <div [class]="footerClass()" [style.margin-inline-end.px]="gridService.scrollbarGutterWidth()" #footerScrollElement>

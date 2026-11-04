@@ -98,6 +98,27 @@ interface GridEditSessionOptions extends GridEditFormContext {
 }
 
 const GRID_STATE_VERSION = 1;
+const TEXT_MEASURE_CACHE_LIMIT = 1000;
+/** What the aggregates read from a column. */
+const AGGREGATE_COLUMN_KEYS = ["aggregate", "field", "id"] as const;
+/** What grouping and the group rows read from a column. */
+const GROUP_COLUMN_KEYS = ["dataType", "field", "groupFooterTemplate", "groupSortDirection", "id", "title"] as const;
+
+/** Whether two column lists match on the given keys, so a computed can keep its previous value. */
+function sameColumns(
+    left: ImmutableList<Column>,
+    right: ImmutableList<Column>,
+    keys: readonly (keyof Column)[]
+): boolean {
+    if (left.length !== right.length) {
+        return false;
+    }
+    const leftColumns = left.toArray();
+    const rightColumns = right.toArray();
+    return leftColumns.every(
+        (column, index) => column === rightColumns[index] || keys.every(key => column[key] === rightColumns[index][key])
+    );
+}
 
 /** Min and max consider numbers, bigints, strings, booleans and valid dates; other values are skipped. */
 function isAggregateComparable(value: unknown): boolean {
@@ -153,11 +174,6 @@ export class GridService {
     readonly #document = inject(DOCUMENT);
     readonly #editContext = signal<GridEditContext | null>(null);
     readonly #editSession = signal<GridEditSession | null>(null);
-    readonly #editSource = computed(() =>
-        this.rows()
-            .select<RowEditDataItem>(r => ({ $rowId: r.uid, ...r.data }))
-            .toImmutableList()
-    );
     readonly #externalFilters = signal<readonly CompositeFilterDescriptor[]>([]);
     readonly #filterableOptions = signal<FilterableOptions>({ enabled: false, type: "menu" });
     readonly #groupColumnIds = signal<ImmutableList<string>>(ImmutableList.create());
@@ -189,11 +205,13 @@ export class GridService {
         return session?.operation === "create" ? session.model() : null;
     });
     public readonly addRowVisible = computed(() => this.addRowData() != null);
-    public readonly aggregateColumns = computed(() => {
-        return this.visibleColumns()
-            .where(column => column.kind === "data" && column.aggregate != null)
-            .toImmutableList();
-    });
+    public readonly aggregateColumns = computed(
+        () =>
+            this.visibleColumns()
+                .where(column => column.kind === "data" && column.aggregate != null)
+                .toImmutableList(),
+        { equal: (left, right) => sameColumns(left, right, AGGREGATE_COLUMN_KEYS) }
+    );
     public readonly aggregateMap = computed(() => {
         const aggregateColumns = this.aggregateColumns();
         if (!aggregateColumns.any()) {
@@ -226,6 +244,8 @@ export class GridService {
     public readonly collapsedGroupKeys = signal(ImmutableSet.create<string>());
     public readonly columnReorder$ = new Subject<ColumnReorderEvent>();
     public readonly columnResize$ = new Subject<ColumnResizeEvent>();
+    /** True while the user drags a column edge; state persistence waits for the drag to end. */
+    public readonly columnResizeActive = signal(false);
     public readonly columnSort$ = new Subject<ColumnSortEvent>();
     public readonly columns = signal<ImmutableList<Column>>(ImmutableList.create());
     public readonly contextMenuItems = signal(ImmutableSet.create<PopupMenuItem>());
@@ -233,10 +253,6 @@ export class GridService {
     public readonly detailColumnWidth = 36;
     public readonly draggingRowUid = signal<string | null>(null);
     public readonly edit$ = new Subject<GridEditEvent>();
-    public readonly editBaseDict = computed(() => {
-        const pairs = this.#editSource().select(item => new KeyValuePair(item.$rowId, item));
-        return ImmutableDictionary.create(pairs);
-    });
     public readonly editContext = this.#editContext.asReadonly();
     public readonly editSession = this.#editSession.asReadonly();
     public readonly editViewDict = computed(() => {
@@ -281,13 +297,17 @@ export class GridService {
     /** Emits the group descriptors after the user changes grouping, and after a state is applied. */
     public readonly groupChange$ = new Subject<GroupDescriptor[]>();
     public readonly groupColumnWidth = 36;
-    public readonly groupColumns = computed(() => {
-        const columnsById = new Map(this.columns().select(column => [column.id, column] as const));
-        return this.#groupColumnIds()
-            .select(id => columnsById.get(id))
-            .where(column => column != null)
-            .toImmutableList();
-    });
+    /** The grouped columns; a width or visibility change elsewhere doesn't produce a new list. */
+    public readonly groupColumns = computed(
+        () => {
+            const columnsById = new Map(this.columns().select(column => [column.id, column] as const));
+            return this.#groupColumnIds()
+                .select(id => columnsById.get(id))
+                .where(column => column != null)
+                .toImmutableList();
+        },
+        { equal: (left, right) => sameColumns(left, right, GROUP_COLUMN_KEYS) }
+    );
     public readonly groupStructuralWidth = computed(() => this.groupColumns().length * this.groupColumnWidth);
     public readonly groupableOptions = signal<GroupableOptions>({ enabled: false, showFooter: false });
     public readonly hasFooter = computed(() => this.aggregateColumns().any());
@@ -765,16 +785,12 @@ export class GridService {
         if (groupColumns.length === 0) {
             return this.#rowFlattener.toDataRows(rows);
         }
-        const groupAggregates = this.groupAggregateMap().toDictionary(
-            e => e.key,
-            e => e.value
-        );
         return this.#rowFlattener.flatten(
             rows,
             groupColumns,
             new Set(this.collapsedGroupKeys()),
             this.groupableOptions().showFooter,
-            groupAggregates,
+            this.groupAggregateMap(),
             this.serverBindingEnabled(),
             { locale: this.#i18n.localeId() }
         );
@@ -820,6 +836,9 @@ export class GridService {
         }
         context.font = fontKey;
         const measured = context.measureText(longestValue).width;
+        if (this.#textMeasureCache.size >= TEXT_MEASURE_CACHE_LIMIT) {
+            this.#textMeasureCache.clear();
+        }
         this.#textMeasureCache.set(cacheKey, measured);
         return this.normalizeRenderedWidth(measured + totalAdditionalWidth);
     }
@@ -943,7 +962,11 @@ export class GridService {
      * dropped.
      */
     public loadFilters(filters: Iterable<CompositeFilterDescriptor> | null | undefined): void {
-        const { byField, external } = partitionFilters(filters);
+        const requested = [...(filters ?? [])];
+        if (deepEquals(requested, this.getFilterDescriptors())) {
+            return;
+        }
+        const { byField, external } = partitionFilters(requested);
         const newAppliedFilters = new Dictionary<string, ColumnFilterState>();
         for (const [field, filter] of byField) {
             newAppliedFilters.put(field, { filter, filterMenuValue: toFilterMenuValue(filter) });
@@ -1016,8 +1039,12 @@ export class GridService {
      * later shows its sort; a repeated field keeps its last descriptor.
      */
     public loadSorts(sorts: Iterable<SortDescriptor> | null | undefined): void {
+        const requested = [...(sorts ?? [])];
+        if (deepEquals(requested, this.#sortDescriptors())) {
+            return;
+        }
         const byField = new Map<string, SortDescriptor>();
-        for (const sort of sorts ?? []) {
+        for (const sort of requested) {
             if (sort == null || typeof sort.field !== "string" || sort.field === "") {
                 continue;
             }
@@ -1599,11 +1626,17 @@ export class GridService {
     }
 
     public updateColumn(columnId: string, patch: Partial<Omit<Column, "id">>): void {
-        this.updateColumns(column => (column.id === columnId ? { ...column, ...patch } : column));
+        this.updateColumns(column => {
+            if (column.id !== columnId) {
+                return column;
+            }
+            const changed = (Object.keys(patch) as Array<keyof typeof patch>).some(key => column[key] !== patch[key]);
+            return changed ? { ...column, ...patch } : column;
+        });
     }
 
     private applyColumnIndexes(columns: readonly Column[]): Column[] {
-        return columns.map((column, index) => ({ ...column, index }));
+        return this.withColumnIndices(columns);
     }
 
     private buildGroupAggregates(
@@ -2112,9 +2145,15 @@ export class GridService {
     }
 
     private updateColumns(updater: (column: Column) => Column): void {
-        this.columns.update(columns =>
-            ImmutableList.create(this.applyColumnIndexes(columns.select(updater).toArray()))
-        );
+        this.columns.update(columns => {
+            const current = columns.toArray();
+            const next = current.map(updater);
+            // Unchanged columns keep their identity, and an update that changes nothing keeps the list.
+            if (next.every((column, index) => column === current[index])) {
+                return columns;
+            }
+            return ImmutableList.create(this.applyColumnIndexes(next));
+        });
     }
 
     private validateServerInteger(value: number, name: string): void {
@@ -2138,7 +2177,7 @@ export class GridService {
     }
 
     private withColumnIndices(columns: readonly Column[]): Column[] {
-        return columns.map((column, index) => ({ ...column, index }));
+        return columns.map((column, index) => (column.index === index ? column : { ...column, index }));
     }
 }
 

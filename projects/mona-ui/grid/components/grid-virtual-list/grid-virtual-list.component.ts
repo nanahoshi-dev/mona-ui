@@ -28,6 +28,7 @@ import {
     gridListBaseThemeVariants,
     gridListTableThemeVariants
 } from "../../styles/grid.styles";
+import { ContextMenuComponent } from "@nanahoshi/mona-ui/contextmenu";
 import { GridAddRowComponent } from "../grid-add-row/grid-add-row.component";
 import { GridColgroupComponent } from "../grid-colgroup/grid-colgroup.component";
 import { GridDetailRowComponent } from "../grid-detail-row/grid-detail-row.component";
@@ -38,6 +39,7 @@ import { GridRowComponent } from "../grid-row/grid-row.component";
 @Component({
     selector: "mona-grid-virtual-list",
     imports: [
+        ContextMenuComponent,
         CdkVirtualScrollViewport,
         CdkFixedSizeVirtualScroll,
         CdkVirtualForOf,
