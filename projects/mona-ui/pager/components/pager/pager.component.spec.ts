@@ -179,7 +179,7 @@ describe("PagerComponent", () => {
             const events: PageChangeEvent[] = [];
             const sizes: PageSizeChangeEvent[] = [];
             fixture.componentInstance.pageChange.subscribe(event => events.push(event));
-            fixture.componentInstance.pageSizeChange.subscribe(event => sizes.push(event));
+            fixture.componentInstance.pageSizeSelect.subscribe(event => sizes.push(event));
             for (const label of ["First page", "Previous page", "Next page", "Last page"]) {
                 clickButton(label);
             }
@@ -333,10 +333,10 @@ describe("PagerComponent", () => {
             expect(getActivePageButton().getAttribute("aria-label")).toBe("Page 3");
         });
 
-        it("should emit pageSizeChange with the old and new page size", () => {
+        it("should emit pageSizeSelect with the old and new page size", () => {
             setup(100, 10, 0);
             const emitted: PageSizeChangeEvent[] = [];
-            fixture.componentInstance.pageSizeChange.subscribe(event => emitted.push(event));
+            fixture.componentInstance.pageSizeSelect.subscribe(event => emitted.push(event));
 
             triggerPageSizeChange(25);
 
@@ -347,7 +347,7 @@ describe("PagerComponent", () => {
         it("should keep the previous page size when the consumer calls preventDefault", () => {
             setup(100, 10, 0);
             const emitted: PageChangeEvent[] = [];
-            fixture.componentInstance.pageSizeChange.subscribe(event => event.preventDefault());
+            fixture.componentInstance.pageSizeSelect.subscribe(event => event.preventDefault());
             fixture.componentInstance.pageChange.subscribe(event => emitted.push(event));
 
             triggerPageSizeChange(25);
@@ -356,10 +356,10 @@ describe("PagerComponent", () => {
             expect(emitted[emitted.length - 1]).toEqual({ page: 2, skip: 10, take: 10 });
         });
 
-        it("should not emit pageSizeChange when the selected value equals the current page size", () => {
+        it("should not emit pageSizeSelect when the selected value equals the current page size", () => {
             setup(100, 10, 0);
             const emitted: PageSizeChangeEvent[] = [];
-            fixture.componentInstance.pageSizeChange.subscribe(event => emitted.push(event));
+            fixture.componentInstance.pageSizeSelect.subscribe(event => emitted.push(event));
 
             triggerPageSizeChange(10);
 

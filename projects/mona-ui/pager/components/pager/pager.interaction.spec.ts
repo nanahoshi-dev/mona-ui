@@ -7,6 +7,7 @@ import { PagerNavigationButtonsTemplateDirective } from "../../directives/pager-
 import { PagerNumericButtonsTemplateDirective } from "../../directives/pager-numeric-buttons-template.directive";
 import { PagerPageSizeTemplateDirective } from "../../directives/pager-page-size-template.directive";
 import type { PageChangeEvent } from "../../models/PageChangeEvent";
+import type { PageSizeChangeEvent } from "../../models/PageSizeChangeEvent";
 import { PagerComponent } from "./pager.component";
 
 class MockResizeObserver implements ResizeObserver {
@@ -32,6 +33,31 @@ class MockResizeObserver implements ResizeObserver {
 class TwoWayHostComponent {
     public readonly skip = signal(0);
     public readonly total = signal(100);
+}
+
+@Component({
+    imports: [PagerComponent],
+    template: `
+        <mona-pager
+            [total]="100"
+            [responsive]="false"
+            [(pageSize)]="pageSize"
+            [(skip)]="skip"
+            (pageSizeChange)="sizes.push($event)"
+            (pageSizeSelect)="onSelect($event)"></mona-pager>
+    `
+})
+class TwoWayPageSizeHostComponent {
+    public readonly pageSize = signal(10);
+    public readonly sizes: number[] = [];
+    public readonly skip = signal(40);
+    public cancel = false;
+
+    public onSelect(event: PageSizeChangeEvent): void {
+        if (this.cancel) {
+            event.preventDefault();
+        }
+    }
 }
 
 @Component({
@@ -249,6 +275,34 @@ describe("PagerComponent interactions", () => {
             hostFixture.detectChanges();
             const active = (hostFixture.nativeElement as HTMLElement).querySelector("button[aria-current='page']");
             expect(active?.getAttribute("aria-label")).toBe("Page 1");
+        });
+
+        it("supports two-way binding of pageSize, after pageSizeSelect allows it", () => {
+            TestBed.resetTestingModule();
+            TestBed.configureTestingModule({ imports: [TwoWayPageSizeHostComponent] });
+            const hostFixture = TestBed.createComponent(TwoWayPageSizeHostComponent);
+            hostFixture.detectChanges();
+            const { sizes } = hostFixture.componentInstance;
+            const pager = hostFixture.debugElement.query(By.directive(PagerComponent));
+            const dropdown = pager.query(By.directive(DropdownListComponent));
+
+            hostFixture.componentInstance.cancel = true;
+            dropdown.triggerEventHandler("valueChange", 50);
+            hostFixture.detectChanges();
+            expect(sizes).toEqual([]);
+            expect(hostFixture.componentInstance.pageSize()).toBe(10);
+
+            hostFixture.componentInstance.cancel = false;
+            dropdown.triggerEventHandler("valueChange", 20);
+            hostFixture.detectChanges();
+            expect(sizes).toEqual([20]);
+            expect(hostFixture.componentInstance.pageSize()).toBe(20);
+            expect(hostFixture.componentInstance.skip()).toBe(40);
+
+            hostFixture.componentInstance.pageSize.set(10);
+            hostFixture.detectChanges();
+            const active = (hostFixture.nativeElement as HTMLElement).querySelector("button[aria-current='page']");
+            expect(active?.getAttribute("aria-label")).toBe("Page 5");
         });
     });
 

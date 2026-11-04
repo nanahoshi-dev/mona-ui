@@ -17,7 +17,7 @@ export interface PagerContext {
     /** The page sizes offered by the page-size dropdown. */
     readonly pageSizes: readonly number[];
 
-    /** Changes the page size through the cancelable `pageSizeChange` event, as the page-size dropdown does. `null` and values below 1 are ignored. */
+    /** Changes the page size through the cancelable `pageSizeSelect` event, as the page-size dropdown does. `null` and values below 1 are ignored. */
     setPageSize(pageSize: number | null): void;
 
     /** The number of items before the current page. */

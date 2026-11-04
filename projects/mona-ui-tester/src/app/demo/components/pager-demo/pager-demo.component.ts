@@ -289,7 +289,7 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
                 [firstLast]="firstLast()"
                 [navigable]="navigable()"
                 [pageInput]="pageInput()"
-                [pageSize]="pageSizeValue()"
+                [(pageSize)]="pageSizeValue"
                 [pageSizeValues]="pageSizeValues()"
                 [previousNext]="previousNext()"
                 [responsive]="responsive()"
@@ -447,7 +447,7 @@ class PagerWrapperComponent implements ComponentInputsAsSignal<PagerComponent> {
     public readonly firstLast = input(true, { transform: booleanAttribute });
     public readonly navigable = input(true, { transform: booleanAttribute });
     public readonly pageInput = input(false, { transform: booleanAttribute });
-    public readonly pageSize = input<ReturnType<PagerComponent["pageSize"]>>(5);
+    public readonly pageSize = model(5);
     public readonly pageSizeValues = input<ReturnType<PagerComponent["pageSizeValues"]>>([5, 10, 20, 50, 100]);
     public readonly previousNext = input(true, { transform: booleanAttribute });
     public readonly responsive = input(true, { transform: booleanAttribute });
@@ -462,6 +462,5 @@ class PagerWrapperComponent implements ComponentInputsAsSignal<PagerComponent> {
 
     protected onPageChange(event: PageChangeEvent) {
         this.page.set(event.page);
-        this.pageSizeValue.set(event.take);
     }
 }

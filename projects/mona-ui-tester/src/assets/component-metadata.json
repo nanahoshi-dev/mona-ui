@@ -235,81 +235,81 @@
     "selector": "\"button[monaButton]\"",
     "inputs": [
       {
-        "description": "Value forwarded to the `aria-haspopup` attribute. Set when this button triggers a popup, menu,\nlistbox, tree, grid, or dialog. Omit or leave as `\"false\"` for plain action buttons.",
+        "description": "Value forwarded to the `aria-haspopup` attribute. Set when this button triggers a popup, menu,\r\nlistbox, tree, grid, or dialog. Omit or leave as `\"false\"` for plain action buttons.",
         "kind": "input",
         "name": "ariaHasPopup",
         "type": "ButtonAriaHasPopup",
         "defaultValue": "\"false\""
       },
       {
-        "description": "Renders the component with reduced visual emphasis and removes pointer interaction.\nAccepts the bare attribute form (`<button monaButton disabled>`).\nWhen inside a `ButtonGroup`, the button is disabled when either it or the group is disabled.",
+        "description": "Renders the component with reduced visual emphasis and removes pointer interaction.\r\nAccepts the bare attribute form (`<button monaButton disabled>`).\r\nWhen inside a `ButtonGroup`, the button is disabled when either it or the group is disabled.",
         "kind": "input",
         "name": "disabled",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Removes horizontal padding and fixes a square aspect ratio sized to match `size`.\nProvide `aria-label` on the host when using icon-only buttons; in dev mode, an icon-only button without an\naccessible name logs a warning.",
+        "description": "Removes horizontal padding and fixes a square aspect ratio sized to match `size`.\r\nProvide `aria-label` on the host when using icon-only buttons; in dev mode, an icon-only button without an\r\naccessible name logs a warning.",
         "kind": "input",
         "name": "iconOnly",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Displays a loading indicator and prevents interaction while an operation is in progress.\nSets `aria-busy=\"true\"` and `aria-disabled=\"true\"` on the host. The button stays focusable, so keyboard focus\nisn't lost when loading starts, and clicks (including form submission) are blocked until it ends.",
+        "description": "Displays a loading indicator and prevents interaction while an operation is in progress.\r\nSets `aria-busy=\"true\"` and `aria-disabled=\"true\"` on the host. The button stays focusable, so keyboard focus\r\nisn't lost when loading starts, and clicks (including form submission) are blocked until it ends.",
         "kind": "input",
         "name": "loading",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Visual style variant of the button. When inside a `ButtonGroup`, the group's look takes precedence.\n`\"outline\"` looks the same as `\"default\"`. `\"clear\"` shows no selected state, so use another look for\ntoggle buttons.",
+        "description": "Visual style variant of the button. When inside a `ButtonGroup`, the group's look takes precedence.\r\n`\"outline\"` looks the same as `\"default\"`. `\"clear\"` shows no selected state, so use another look for\r\ntoggle buttons.",
         "kind": "model",
         "name": "look",
         "type": "ButtonVariantProps[\"look\"]",
         "defaultValue": "\"default\""
       },
       {
-        "description": "Border-radius preset applied to the component.\nWhen inside a `ButtonGroup`, the group's value takes precedence.",
+        "description": "Border-radius preset applied to the component.\r\nWhen inside a `ButtonGroup`, the group's value takes precedence.",
         "kind": "input",
         "name": "rounded",
         "type": "ButtonVariantProps[\"rounded\"]",
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Whether the button is in the selected/pressed state. Drives `aria-pressed` when the button is toggleable.\nManaged by `toggleable` click handling or by `ButtonGroup` selection policy.",
+        "description": "Whether the button is in the selected/pressed state. Drives `aria-pressed` when the button is toggleable.\r\nManaged by `toggleable` click handling or by `ButtonGroup` selection policy.",
         "kind": "model",
         "name": "selected",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Size preset controlling the button's height and horizontal padding.\nWhen inside a `ButtonGroup`, the group's value takes precedence.",
+        "description": "Size preset controlling the button's height and horizontal padding.\r\nWhen inside a `ButtonGroup`, the group's value takes precedence.",
         "kind": "input",
         "name": "size",
         "type": "ButtonVariantProps[\"size\"]",
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Tab index of the host element. Automatically overridden to `-1` when the button is disabled.\nAccepts a numeric string and converts it to a number; a value that is not a number falls back to `0`.",
+        "description": "Tab index of the host element. Automatically overridden to `-1` when the button is disabled.\r\nAccepts a numeric string and converts it to a number; a value that is not a number falls back to `0`.",
         "kind": "input",
         "name": "tabindex",
         "type": "number",
         "defaultValue": "0"
       },
       {
-        "description": "Native `type` attribute of the button. Defaults to `\"button\"` to prevent accidental\nform submission; set to `\"submit\"` or `\"reset\"` explicitly when that behavior is intended.",
+        "description": "Enables toggle behavior — each click flips the `selected` state and `aria-pressed` is managed.\r\nAccepts the bare attribute form. Buttons in a `ButtonGroup` are toggleable unless this is set to `false`.",
+        "kind": "input",
+        "name": "toggleable",
+        "type": "boolean | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Native `type` attribute of the button. Defaults to `\"button\"` to prevent accidental\r\nform submission; set to `\"submit\"` or `\"reset\"` explicitly when that behavior is intended.",
         "kind": "input",
         "name": "type",
         "type": "\"button\" | \"reset\" | \"submit\"",
         "defaultValue": "\"button\""
-      },
-      {
-        "description": "Enables toggle behavior \u2014 each click flips the `selected` state and `aria-pressed` is managed.\nAccepts the bare attribute form. Buttons in a `ButtonGroup` are toggleable unless this is set to `false`.",
-        "kind": "input",
-        "name": "toggleable",
-        "type": "boolean",
-        "defaultValue": "undefined"
       },
       {
         "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
@@ -732,13 +732,6 @@
       {
         "description": "",
         "kind": "input",
-        "name": "dataCell",
-        "type": "boolean",
-        "defaultValue": "false"
-      },
-      {
-        "description": "",
-        "kind": "input",
         "name": "groupHeader",
         "type": "boolean",
         "defaultValue": "false"
@@ -746,21 +739,7 @@
       {
         "description": "",
         "kind": "input",
-        "name": "groupToggle",
-        "type": "boolean",
-        "defaultValue": "false"
-      },
-      {
-        "description": "",
-        "kind": "input",
-        "name": "grouped",
-        "type": "boolean",
-        "defaultValue": "false"
-      },
-      {
-        "description": "",
-        "kind": "input",
-        "name": "indentCell",
+        "name": "groupIndent",
         "type": "boolean",
         "defaultValue": "false"
       },
@@ -770,34 +749,6 @@
         "name": "lastInRow",
         "type": "boolean",
         "defaultValue": "false"
-      },
-      {
-        "description": "",
-        "kind": "input",
-        "name": "masterDetailContent",
-        "type": "boolean",
-        "defaultValue": "false"
-      },
-      {
-        "description": "",
-        "kind": "input",
-        "name": "masterDetailToggle",
-        "type": "boolean",
-        "defaultValue": "false"
-      },
-      {
-        "description": "",
-        "kind": "input",
-        "name": "nextRowType",
-        "type": "GridRowNeighborType",
-        "defaultValue": "null"
-      },
-      {
-        "description": "",
-        "kind": "input",
-        "name": "prevRowType",
-        "type": "GridRowNeighborType",
-        "defaultValue": "null"
       }
     ]
   },
@@ -848,32 +799,6 @@
         "kind": "input",
         "name": "row",
         "type": "Row | null",
-        "defaultValue": "null"
-      }
-    ]
-  },
-  "GridDetailContentCellDirective": {
-    "name": "GridDetailContentCellDirective",
-    "selector": "\"td[monaGridDetailContentCell]\"",
-    "inputs": [
-      {
-        "description": "",
-        "kind": "input",
-        "name": "nextRowType",
-        "type": "GridRowNeighborType",
-        "defaultValue": "null"
-      }
-    ]
-  },
-  "GridDetailIndentCellDirective": {
-    "name": "GridDetailIndentCellDirective",
-    "selector": "\"td[monaGridDetailIndentCell]\"",
-    "inputs": [
-      {
-        "description": "",
-        "kind": "input",
-        "name": "nextRowType",
-        "type": "GridRowNeighborType",
         "defaultValue": "null"
       }
     ]
@@ -1018,14 +943,8 @@
       {
         "description": "",
         "kind": "input",
-        "name": "column",
-        "type": "Column"
-      },
-      {
-        "description": "",
-        "kind": "input",
-        "name": "groupPrefixWidth",
-        "type": "number | null",
+        "name": "layoutKey",
+        "type": "string | null",
         "defaultValue": "null"
       },
       {
@@ -1034,20 +953,6 @@
         "name": "lockedCellHeader",
         "type": "boolean",
         "defaultValue": "false"
-      },
-      {
-        "description": "",
-        "kind": "input",
-        "name": "lockedStructuralOffset",
-        "type": "number | null",
-        "defaultValue": "null"
-      },
-      {
-        "description": "",
-        "kind": "input",
-        "name": "structuralColumn",
-        "type": "StructuralColumnKind | null",
-        "defaultValue": "null"
       }
     ]
   },
@@ -1197,26 +1102,6 @@
         "kind": "output",
         "name": "rowReorder",
         "type": "RowReorderEvent"
-      }
-    ]
-  },
-  "GridRowDirective": {
-    "name": "GridRowDirective",
-    "selector": "\"tr[monaGridRow]\"",
-    "inputs": [
-      {
-        "description": "",
-        "kind": "input",
-        "name": "index",
-        "type": "number",
-        "required": true
-      },
-      {
-        "description": "",
-        "kind": "input",
-        "name": "row",
-        "type": "Row",
-        "required": true
       }
     ]
   },
@@ -2353,7 +2238,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Background color of the host element.\r\nIgnored in image mode \u2014 the background is set to transparent automatically.",
+        "description": "Background color of the host element.\r\nIgnored in image mode — the background is set to transparent automatically.",
         "kind": "input",
         "name": "backgroundColor",
         "type": "string",
@@ -2496,14 +2381,14 @@
     "selector": "\"mona-button-group\"",
     "inputs": [
       {
-        "description": "When `false` and `selection` is `\"single\"`, at least one button must remain selected;\nthe active button cannot be deselected. Has no effect in `\"multiple\"` mode.",
+        "description": "When `false` and `selection` is `\"single\"`, at least one button must remain selected;\r\nthe active button cannot be deselected. Has no effect in `\"multiple\"` mode.",
         "kind": "input",
         "name": "allowEmpty",
         "type": "boolean",
         "defaultValue": "true"
       },
       {
-        "description": "Accessible name for the host element. Override when multiple button groups appear on the same page\nso screen reader users can distinguish them.",
+        "description": "Accessible name for the host element. Override when multiple button groups appear on the same page\r\nso screen reader users can distinguish them.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | undefined"
@@ -2516,7 +2401,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Visual style variant propagated to all child buttons.\nAlso controls container-level divider and border behavior.",
+        "description": "Visual style variant propagated to all child buttons.\r\nAlso controls container-level divider and border behavior.",
         "kind": "input",
         "name": "look",
         "type": "ButtonGroupVariantProps[\"look\"]",
@@ -2530,7 +2415,7 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Two-way bindable. Controls whether child buttons behave as a radio group (`\"single\"`)\nor toggle independently (`\"multiple\"`).",
+        "description": "Two-way bindable. Controls whether child buttons behave as a radio group (`\"single\"`)\r\nor toggle independently (`\"multiple\"`).",
         "kind": "model",
         "name": "selection",
         "type": "SelectionMode",
@@ -2564,7 +2449,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Sets the disabled dates of the calendar.\nAccepts either an iterable of Date objects or a predicate function.",
+        "description": "Sets the disabled dates of the calendar.\r\nAccepts either an iterable of Date objects or a predicate function.",
         "kind": "input",
         "name": "disabledDates",
         "type": "DateDisabledType"
@@ -2577,14 +2462,14 @@
         "defaultValue": "null"
       },
       {
-        "description": "Moves focus to the active day when the calendar first renders. An inline calendar on a page\nshould leave focus where it is; a calendar that opens in a popup sets this so focus moves into it.",
+        "description": "Moves focus to the active day when the calendar first renders. An inline calendar on a page\r\nshould leave focus where it is; a calendar that opens in a popup sets this so focus moves into it.",
         "kind": "input",
         "name": "focusOnMount",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Marks the calendar as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Marks the calendar as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
@@ -2610,7 +2495,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Sets whether the calendar is required. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Sets whether the calendar is required. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "required",
         "type": "boolean",
@@ -2631,13 +2516,13 @@
         "defaultValue": "\"single\""
       },
       {
-        "description": "Emitted when focus leaves the calendar, as a native input is touched on blur. Moving between\nits buttons and days doesn't count. The `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when focus leaves the calendar, as a native input is touched on blur. Moving between\r\nits buttons and days doesn't count. The `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
       },
       {
-        "description": "Sets the touched state of the calendar. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the calendar. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "touched",
         "type": "boolean",
@@ -2651,7 +2536,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "The current value of the calendar: a `Date` in single selection, the selected dates in multiple\nselection, and `[start, end]` in range selection. A range is written once both ends are picked.",
+        "description": "The current value of the calendar: a `Date` in single selection, the selected dates in multiple\r\nselection, and `[start, end]` in range selection. A range is written once both ends are picked.",
         "kind": "model",
         "name": "value",
         "type": "Date | Date[] | null",
@@ -5912,7 +5797,7 @@
     "selector": "\"mona-polar-series\"",
     "inputs": [
       {
-        "description": "Property key or accessor function extracting the degree angle (0\u00b0 to 360\u00b0) for each data item.",
+        "description": "Property key or accessor function extracting the degree angle (0° to 360°) for each data item.",
         "kind": "input",
         "name": "angleField",
         "type": "ChartField",
@@ -7502,14 +7387,14 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Human-readable override for the `aria-valuenow` announcement.\r\nUseful in indeterminate mode \u2014 set to a localized string such as `\"Loading\"`\r\nso screen readers announce state rather than silence.\r\nWhen empty, assistive technology falls back to the numeric value.",
+        "description": "Human-readable override for the `aria-valuenow` announcement.\r\nUseful in indeterminate mode — set to a localized string such as `\"Loading\"`\r\nso screen readers announce state rather than silence.\r\nWhen empty, assistive technology falls back to the numeric value.",
         "kind": "input",
         "name": "ariaValueText",
         "type": "string",
         "defaultValue": "\"\""
       },
       {
-        "description": "Accent color. Pass a CSS color string, or a function receiving the current percentage (0\u2013100) and\r\nreturning a string. When empty, falls back to the primary theme color.",
+        "description": "Accent color. Pass a CSS color string, or a function receiving the current percentage (0–100) and\r\nreturning a string. When empty, falls back to the primary theme color.",
         "kind": "input",
         "name": "color",
         "type": "string | Action<number, string>",
@@ -7707,7 +7592,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "The palette to display \u2014 one of the built-in `\"flat\"`, `\"material\"`, or `\"websafe\"` schemes, or a\ncustom iterable of color strings. An empty custom palette falls back to the flat scheme.",
+        "description": "The palette to display — one of the built-in `\"flat\"`, `\"material\"`, or `\"websafe\"` schemes, or a\ncustom iterable of color strings. An empty custom palette falls back to the flat scheme.",
         "kind": "input",
         "name": "palette",
         "type": "PaletteType | Iterable<string>",
@@ -7775,14 +7660,14 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Whether to close the color picker when a color is selected.\r\nOnly applies when the view is set to \"palette\".",
+        "description": "Whether to close the color picker when a color is selected.\nOnly applies when the view is set to \"palette\".",
         "kind": "input",
         "name": "closeOnSelect",
         "type": "boolean",
         "defaultValue": "true"
       },
       {
-        "description": "The number of columns to display in the color palette.\r\nOnly applies when the view is set to \"palette\" and the palette is a custom array of colors.",
+        "description": "The number of columns to display in the color palette.\nOnly applies when the view is set to \"palette\" and the palette is a custom array of colors.",
         "kind": "input",
         "name": "columns",
         "type": "number",
@@ -7796,35 +7681,35 @@
         "defaultValue": "false"
       },
       {
-        "description": "Marks the color picker as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Marks the color picker as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Whether to display the opacity slider.\r\nOnly applies when the view is set to \"gradient\".",
+        "description": "Whether to display the opacity slider.\nOnly applies when the view is set to \"gradient\".",
         "kind": "input",
         "name": "opacity",
         "type": "boolean",
         "defaultValue": "true"
       },
       {
-        "description": "The type of color palette to use.\r\nThis can be a predefined palette type like \"flat\", \"material\", or \"websafe\",\r\nor a custom iterable of colors.",
+        "description": "The type of color palette to use.\nThis can be a predefined palette type like \"flat\", \"material\", or \"websafe\",\nor a custom iterable of colors.",
         "kind": "input",
         "name": "palette",
         "type": "Iterable<string> | PaletteType",
         "defaultValue": "\"flat\""
       },
       {
-        "description": "Prevents value changes while preserving the component's visual state. When bound to a signal\r\nform field via `[formField]`, this is written by the `FormField` directive.",
+        "description": "Prevents value changes while preserving the component's visual state. When bound to a signal\nform field via `[formField]`, this is written by the `FormField` directive.",
         "kind": "input",
         "name": "readonly",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Sets whether the color picker is required. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Sets whether the color picker is required. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "required",
         "type": "boolean",
@@ -7838,7 +7723,7 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Whether to show the clear button to reset the color.\r\nThis is only applicable when the view is set to \"palette\".",
+        "description": "Whether to show the clear button to reset the color.\nThis is only applicable when the view is set to \"palette\".",
         "kind": "input",
         "name": "showClearButton",
         "type": "boolean",
@@ -7852,13 +7737,13 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Emitted when the color picker is interacted with on blur or color selection.\r\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when the color picker is interacted with on blur or color selection.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
       },
       {
-        "description": "Sets the touched state of the color picker. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the color picker. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "touched",
         "type": "boolean",
@@ -7872,7 +7757,7 @@
         "defaultValue": "null"
       },
       {
-        "description": "The view mode of the color picker.\r\nThis can be either \"palette\" or \"gradient\".",
+        "description": "The view mode of the color picker.\nThis can be either \"palette\" or \"gradient\".",
         "kind": "input",
         "name": "view",
         "type": "ColorPickerView",
@@ -9569,6 +9454,13 @@
         "defaultValue": "\"medium\""
       },
       {
+        "description": "Returns extra CSS classes for the data row that shows an item, merged onto the row's own\nclasses via `tailwind-merge`. It runs again whenever the item's row is rebound.\nGroup, group footer and detail rows are not affected.\n\nTo dim a row, prefer a text style such as `text-muted-foreground` over `opacity`: locked cells stay\nopaque so scrolled cells pass beneath them, and opacity on the row or its cells would let those show through.",
+        "kind": "input",
+        "name": "rowClass",
+        "type": "GridRowClass<T> | null",
+        "defaultValue": "null"
+      },
+      {
         "description": "Field name or selector used to derive a stable identity for each row.\nThe resolved value must be unique within the grid data.",
         "kind": "input",
         "name": "rowKey",
@@ -9581,18 +9473,6 @@
         "name": "userClass",
         "type": "string",
         "defaultValue": "\"\""
-      }
-    ]
-  },
-  "GridAddRowComponent": {
-    "name": "GridAddRowComponent",
-    "selector": "\"tr[monaGridAddRow]\"",
-    "inputs": [
-      {
-        "description": "",
-        "kind": "input",
-        "name": "columns",
-        "type": "ImmutableList<Column>"
       }
     ]
   },
@@ -9839,6 +9719,19 @@
       }
     ]
   },
+  "GridDetailRowComponent": {
+    "name": "GridDetailRowComponent",
+    "selector": "\"tr[monaGridDetailRow]\"",
+    "inputs": [
+      {
+        "description": "",
+        "kind": "input",
+        "name": "row",
+        "type": "Row",
+        "required": true
+      }
+    ]
+  },
   "GridEditorComponent": {
     "name": "GridEditorComponent",
     "selector": "\"mona-grid-editor\"",
@@ -9970,6 +9863,39 @@
       }
     ]
   },
+  "GridFooterRowComponent": {
+    "name": "GridFooterRowComponent",
+    "selector": "\"tr[monaGridFooterRow]\"",
+    "inputs": [
+      {
+        "description": "",
+        "kind": "input",
+        "name": "groupKey",
+        "type": "string | null",
+        "defaultValue": "null"
+      }
+    ]
+  },
+  "GridGroupRowComponent": {
+    "name": "GridGroupRowComponent",
+    "selector": "\"tr[monaGridGroupRow]\"",
+    "inputs": [
+      {
+        "description": "",
+        "kind": "input",
+        "name": "group",
+        "type": "GridViewGroupRow",
+        "required": true
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "rowIndex",
+        "type": "number",
+        "required": true
+      }
+    ]
+  },
   "GridListComponent": {
     "name": "GridListComponent",
     "selector": "\"mona-grid-list\"",
@@ -9977,14 +9903,28 @@
       {
         "description": "",
         "kind": "input",
-        "name": "columns",
-        "type": "ImmutableList<Column>"
+        "name": "data",
+        "type": "ImmutableList<Row>"
+      }
+    ]
+  },
+  "GridRowComponent": {
+    "name": "GridRowComponent",
+    "selector": "\"tr[monaGridRow]\"",
+    "inputs": [
+      {
+        "description": "",
+        "kind": "input",
+        "name": "index",
+        "type": "number",
+        "required": true
       },
       {
         "description": "",
         "kind": "input",
-        "name": "data",
-        "type": "ImmutableList<Row>"
+        "name": "row",
+        "type": "Row",
+        "required": true
       }
     ]
   },
@@ -10059,12 +9999,6 @@
     "name": "GridVirtualListComponent",
     "selector": "\"mona-grid-virtual-list\"",
     "inputs": [
-      {
-        "description": "",
-        "kind": "input",
-        "name": "columns",
-        "type": "ImmutableList<Column>"
-      },
       {
         "description": "",
         "kind": "input",
@@ -10786,43 +10720,43 @@
       }
     ]
   },
-  "NumericTextBoxComponent": {
-    "name": "NumericTextBoxComponent",
-    "selector": "\"mona-numeric-text-box\"",
+  "DecimalTextBoxComponent": {
+    "name": "DecimalTextBoxComponent",
+    "selector": "\"mona-decimal-text-box\"",
     "inputs": [
       {
         "description": "Formats the value to be displayed in the input when the input is not focused.",
         "kind": "input",
         "name": "formatter",
-        "type": "Action<number | null, string> | null",
+        "type": "Action<string | null, string> | null",
         "defaultValue": "null"
       },
       {
-        "description": "Maximum value that can be entered.",
+        "description": "Maximum value that can be entered, as a decimal string or a number.",
         "kind": "input",
         "name": "maxValue",
-        "type": "number | null",
+        "type": "string | null",
         "defaultValue": "null"
       },
       {
-        "description": "Minimum value that can be entered.",
+        "description": "Minimum value that can be entered, as a decimal string or a number.",
         "kind": "input",
         "name": "minValue",
-        "type": "number | null",
+        "type": "string | null",
         "defaultValue": "null"
       },
       {
-        "description": "Step value to increment or decrement the value.",
+        "description": "Step value to increment or decrement the value, as a decimal string or a number.",
         "kind": "input",
         "name": "step",
-        "type": "number",
-        "defaultValue": "1"
+        "type": "string",
+        "defaultValue": "\"1\""
       },
       {
-        "description": "Two-way bindable current value of the numeric text box.",
+        "description": "Two-way bindable current value, as a canonical decimal string such as `\"-1234.5\"`.",
         "kind": "model",
         "name": "value",
-        "type": "number | null",
+        "type": "string | null",
         "defaultValue": "null"
       },
       {
@@ -10847,7 +10781,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Number of fractional decimal places to display and accept. Values are truncated to an integer\r\nand clamped to the range 0\u201320. Non-finite and negative values normalize to 0.",
+        "description": "Number of fractional decimal places to display and accept. Values are truncated to an integer\r\nand clamped to the range 0–20. Non-finite and negative values normalize to 0.",
         "kind": "input",
         "name": "decimals",
         "type": "number",
@@ -10970,43 +10904,43 @@
       }
     ]
   },
-  "DecimalTextBoxComponent": {
-    "name": "DecimalTextBoxComponent",
-    "selector": "\"mona-decimal-text-box\"",
+  "NumericTextBoxComponent": {
+    "name": "NumericTextBoxComponent",
+    "selector": "\"mona-numeric-text-box\"",
     "inputs": [
       {
         "description": "Formats the value to be displayed in the input when the input is not focused.",
         "kind": "input",
         "name": "formatter",
-        "type": "Action<string | null, string> | null",
+        "type": "Action<number | null, string> | null",
         "defaultValue": "null"
       },
       {
-        "description": "Maximum value that can be entered, as a decimal string or a number.",
+        "description": "Maximum value that can be entered.",
         "kind": "input",
         "name": "maxValue",
-        "type": "string | null",
+        "type": "number | null",
         "defaultValue": "null"
       },
       {
-        "description": "Minimum value that can be entered, as a decimal string or a number.",
+        "description": "Minimum value that can be entered.",
         "kind": "input",
         "name": "minValue",
-        "type": "string | null",
+        "type": "number | null",
         "defaultValue": "null"
       },
       {
-        "description": "Step value to increment or decrement the value, as a decimal string or a number.",
+        "description": "Step value to increment or decrement the value.",
         "kind": "input",
         "name": "step",
-        "type": "string",
-        "defaultValue": "\"1\""
+        "type": "number",
+        "defaultValue": "1"
       },
       {
-        "description": "Two-way bindable current value, as a canonical decimal string such as `\"-1234.5\"`.",
+        "description": "Two-way bindable current value of the numeric text box.",
         "kind": "model",
         "name": "value",
-        "type": "string | null",
+        "type": "number | null",
         "defaultValue": "null"
       },
       {
@@ -11031,7 +10965,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Number of fractional decimal places to display and accept. Values are truncated to an integer\r\nand clamped to the range 0\u201320. Non-finite and negative values normalize to 0.",
+        "description": "Number of fractional decimal places to display and accept. Values are truncated to an integer\r\nand clamped to the range 0–20. Non-finite and negative values normalize to 0.",
         "kind": "input",
         "name": "decimals",
         "type": "number",
@@ -11180,7 +11114,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Number of fractional decimal places to display and accept. Values are truncated to an integer\r\nand clamped to the range 0\u201320. Non-finite and negative values normalize to 0.",
+        "description": "Number of fractional decimal places to display and accept. Values are truncated to an integer\r\nand clamped to the range 0–20. Non-finite and negative values normalize to 0.",
         "kind": "input",
         "name": "decimals",
         "type": "number",
@@ -11438,7 +11372,7 @@
         "defaultValue": "true"
       },
       {
-        "description": "Emitted when the OTP input is interacted with \u2014 on blur or user value change.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when the OTP input is interacted with — on blur or user value change.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
@@ -11478,6 +11412,20 @@
     "selector": "\"mona-pager\"",
     "inputs": [
       {
+        "description": "Accessible name of the pager's navigation landmark. Defaults to the localized \"Pagination\";\r\nname each pager when a page has several.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Id of the element that names the pager. Takes precedence over {@link ariaLabel}.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Shows the first and last page navigation buttons.",
         "kind": "input",
         "name": "firstLast",
@@ -11485,14 +11433,14 @@
         "defaultValue": "true"
       },
       {
-        "description": "Enables keyboard navigation on the pager wrapper and its inner controls.",
+        "description": "Enables page shortcuts while a pager button has focus: Page Up and Page Down go to the\r\nprevious and next page, Home and End to the first and last, and the left and right arrows to the previous\r\nand next page (mirrored right to left). The buttons themselves are always ordinary tab stops.",
         "kind": "input",
         "name": "navigable",
         "type": "boolean",
         "defaultValue": "true"
       },
       {
-        "description": "Emitted when the current page changes.",
+        "description": "Emitted when the user changes the page or the page size, or when the pager corrects a `skip`\r\nthat is past the last page or not on a page boundary. Setting `skip` or `pageSize` from code to a valid\r\nvalue doesn't emit it.",
         "kind": "output",
         "name": "pageChange",
         "type": "PageChangeEvent"
@@ -11505,23 +11453,23 @@
         "defaultValue": "false"
       },
       {
-        "description": "Number of items displayed per page.",
-        "kind": "input",
+        "description": "Number of items displayed per page; values below 1 count as 1. Supports two-way binding\r\n(`[(pageSize)]`): `pageSizeChange` emits the new size after the user changes it, and `pageChange` reports it\r\nas `take`.",
+        "kind": "model",
         "name": "pageSize",
         "type": "number",
         "defaultValue": "5"
       },
       {
-        "description": "Emitted when the page size changes. Cancelable via `preventDefault()` on the event.",
+        "description": "Emitted when the user picks a page size, before it is applied. Call `preventDefault()` on the\r\nevent to keep the current size.",
         "kind": "output",
-        "name": "pageSizeChange",
+        "name": "pageSizeSelect",
         "type": "PageSizeChangeEvent"
       },
       {
-        "description": "Page-size options shown in the page-size dropdown. Set to `false` or an empty array to hide the dropdown.",
+        "description": "Page-size options shown in the page-size dropdown. `true` shows the default options; `false`\r\nor an empty array hides the dropdown.",
         "kind": "input",
         "name": "pageSizeValues",
-        "type": "number[] | boolean",
+        "type": "readonly number[] | boolean",
         "defaultValue": "[5, 10, 20, 50, 100]"
       },
       {
@@ -11532,7 +11480,7 @@
         "defaultValue": "true"
       },
       {
-        "description": "Collapses sections of the pager as the host element narrows.",
+        "description": "Replaces the page buttons with a page dropdown when the pager is narrower than 480px.\r\nOther sections wrap onto a new line instead of being hidden.",
         "kind": "input",
         "name": "responsive",
         "type": "boolean",
@@ -11560,8 +11508,8 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Number of items to skip before the current page. Determines the current page together with `pageSize`.",
-        "kind": "input",
+        "description": "Number of items before the current page. Supports two-way binding. A value past the last page,\r\nor between page boundaries, is corrected to the start of the page that holds it, and `pageChange` reports it.",
+        "kind": "model",
         "name": "skip",
         "type": "number",
         "defaultValue": "0"
@@ -11588,7 +11536,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Number of numeric page buttons shown at once before collapsing into jump controls.",
+        "description": "Number of page buttons shown between the first and last page before the rest collapse into\r\njump buttons. At least 1.",
         "kind": "input",
         "name": "visiblePages",
         "type": "number",
@@ -11727,14 +11675,14 @@
         "type": "void"
       },
       {
-        "description": "Whether to close the popup when clicking on the backdrop.\r\nOnly applies when the popup has a backdrop.",
+        "description": "Whether to close the popup when clicking on the backdrop.\nOnly applies when the popup has a backdrop.",
         "kind": "input",
         "name": "closeOnBackdropClick",
         "type": "boolean",
         "defaultValue": "true"
       },
       {
-        "description": "Whether to close the popup when the escape key is pressed.\r\nEscape only reaches the topmost open popup.",
+        "description": "Whether to close the popup when the escape key is pressed.\nEscape only reaches the topmost open popup.",
         "kind": "input",
         "name": "closeOnEscape",
         "type": "boolean",
@@ -11753,6 +11701,13 @@
         "name": "closeOnOutsideClick",
         "type": "boolean",
         "defaultValue": "true"
+      },
+      {
+        "description": "Whether to close the popup when the user scrolls the page or a scrollable container around the anchor.",
+        "kind": "input",
+        "name": "closeOnScroll",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Arbitrary data to pass to the popup.",
@@ -11831,20 +11786,20 @@
         "defaultValue": "[]"
       },
       {
-        "description": "The strategy for positioning the popup.\r\n`global` means the popup will be positioned relative to the viewport,\r\n`connected` means the popup will be positioned relative to the anchor element.",
+        "description": "The strategy for positioning the popup.\n`global` means the popup will be positioned relative to the viewport,\n`connected` means the popup will be positioned relative to the anchor element.",
         "kind": "input",
         "name": "positionStrategy",
         "type": "\"global\" | \"connected\"",
         "defaultValue": "\"connected\""
       },
       {
-        "description": "The positions to use for the popup.\r\nThe popup will try to position itself in the first position that fits.\r\nThis is only used when the `positionStrategy` is set to `connected`.",
+        "description": "The positions to use for the popup.\nThe popup will try to position itself in the first position that fits.\nThis is only used when the `positionStrategy` is set to `connected`.",
         "kind": "input",
         "name": "positions",
         "type": "Array<ConnectedPosition | ConnectionPositionPair>"
       },
       {
-        "description": "Called when the popup is requested to close.\r\nThis can be used to prevent the popup from closing.",
+        "description": "Called when the popup is requested to close.\nThis can be used to prevent the popup from closing.",
         "kind": "input",
         "name": "preventClose",
         "type": "Action<PopupCloseEvent, boolean>"
@@ -11855,6 +11810,13 @@
         "name": "providers",
         "type": "StaticProvider[]",
         "defaultValue": "[]"
+      },
+      {
+        "description": "Controls focus restoration when the popup closes.\n- `true`: always restore focus to the anchor element.\n- `false`: never restore focus (recommended for tooltips).\n- `\"auto\"`: restore focus only if the anchor, or an element inside it, was focused when the popup opened.\n\nFocus is left alone if the user moved it outside the popup and the anchor before it closed.",
+        "kind": "input",
+        "name": "restoreFocus",
+        "type": "boolean | \"auto\"",
+        "defaultValue": "\"auto\""
       },
       {
         "description": "The trigger event for opening the popup.",
@@ -11875,20 +11837,6 @@
         "name": "withPush",
         "type": "boolean",
         "defaultValue": "true"
-      },
-      {
-        "description": "Whether to close the popup when the user scrolls the page or a scrollable container around the anchor.",
-        "kind": "input",
-        "name": "closeOnScroll",
-        "type": "boolean",
-        "defaultValue": "false"
-      },
-      {
-        "description": "Controls focus restoration when the popup closes.\r\n- `true`: always restore focus to the anchor element.\r\n- `false`: never restore focus (recommended for tooltips).\r\n- `\"auto\"`: restore focus only if the anchor, or an element inside it, was focused when the popup opened.\r\n\r\nFocus is left alone if the user moved it outside the popup and the anchor before it closed.",
-        "kind": "input",
-        "name": "restoreFocus",
-        "type": "boolean | \"auto\"",
-        "defaultValue": "\"auto\""
       },
       {
         "description": "Whether the popup should track scroll events and reposition itself.",
@@ -12169,14 +12117,14 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Overrides the numeric aria-valuenow announcement for assistive technology.\nParticularly useful in indeterminate mode \u2014 set to a localized string such as \"Loading\"\nso screen readers announce state rather than silence.\nWhen empty, assistive technology falls back to the numeric value.",
+        "description": "Overrides the numeric aria-valuenow announcement for assistive technology.\nParticularly useful in indeterminate mode — set to a localized string such as \"Loading\"\nso screen readers announce state rather than silence.\nWhen empty, assistive technology falls back to the numeric value.",
         "kind": "input",
         "name": "ariaValueText",
         "type": "string",
         "defaultValue": "\"\""
       },
       {
-        "description": "Fill color of the progress track.\nPass a CSS color string, or a function that receives the current percentage (0\u2013100) and returns a color string.\nWhen empty, falls back to the primary theme color.",
+        "description": "Fill color of the progress track.\nPass a CSS color string, or a function that receives the current percentage (0–100) and returns a color string.\nWhen empty, falls back to the primary theme color.",
         "kind": "input",
         "name": "color",
         "type": "string | Action<number, string>",
@@ -12211,7 +12159,7 @@
         "defaultValue": "{}"
       },
       {
-        "description": "Controls label visibility in determinate mode.\nHas no effect in indeterminate mode \u2014 the label is always hidden there.",
+        "description": "Controls label visibility in determinate mode.\nHas no effect in indeterminate mode — the label is always hidden there.",
         "kind": "input",
         "name": "labelVisible",
         "type": "boolean",
@@ -12291,7 +12239,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Text label displayed alongside the radio button.\nWhen provided, takes precedence over projected content.\nWhen empty, projected content inside `<mona-radio-button>` is used.\nWhen both are absent, the radio button has no accessible name \u2014 always provide one.",
+        "description": "Text label displayed alongside the radio button.\nWhen provided, takes precedence over projected content.\nWhen empty, projected content inside `<mona-radio-button>` is used.\nWhen both are absent, the radio button has no accessible name — always provide one.",
         "kind": "input",
         "name": "label",
         "type": "string",
@@ -12834,7 +12782,7 @@
         "defaultValue": "\"18rem\""
       },
       {
-        "description": "Remembers whether this sidebar was left open, under this key. Unset means nothing is\nstored \u2014 no key, no storage written.\n\nOnly the docked state is kept. A drawer is never restored open: on the viewport that makes one,\nit would cover the page on load. A stored value wins over `expanded`, and is pushed back out\nthrough that binding, so do not set a key on a sidebar whose state is already restored elsewhere.\n\nWhere it is kept is `SIDEBAR_STORAGE`, which defaults to `localStorage`. A server-rendered\napplication cannot read that until hydration and so flashes the default first; supply storage the\nserver can read through `provideSidebarStorage()`.",
+        "description": "Remembers whether this sidebar was left open, under this key. Unset means nothing is\nstored — no key, no storage written.\n\nOnly the docked state is kept. A drawer is never restored open: on the viewport that makes one,\nit would cover the page on load. A stored value wins over `expanded`, and is pushed back out\nthrough that binding, so do not set a key on a sidebar whose state is already restored elsewhere.\n\nWhere it is kept is `SIDEBAR_STORAGE`, which defaults to `localStorage`. A server-rendered\napplication cannot read that until hydration and so flashes the default first; supply storage the\nserver can read through `provideSidebarStorage()`.",
         "kind": "input",
         "name": "persistKey",
         "type": "string",
@@ -12970,7 +12918,7 @@
         "defaultValue": "null"
       },
       {
-        "description": "Selected range as `[minimum, maximum]`.\r\nValues outside `[minValue, maxValue]` are clamped; the tuple is always sorted, so index 0 \u2264 index 1.",
+        "description": "Selected range as `[minimum, maximum]`.\r\nValues outside `[minValue, maxValue]` are clamped; the tuple is always sorted, so index 0 ≤ index 1.",
         "kind": "model",
         "name": "value",
         "type": "[number, number]",
@@ -13019,14 +12967,14 @@
         "defaultValue": "\"after\""
       },
       {
-        "description": "Controls which tick labels are shown \u2014 only every n<sup>th</sup> label is rendered.",
+        "description": "Controls which tick labels are shown — only every n<sup>th</sup> label is rendered.",
         "kind": "input",
         "name": "labelStep",
         "type": "number",
         "defaultValue": "1"
       },
       {
-        "description": "Controls which ticks render at large size \u2014 only every n<sup>th</sup> tick is enlarged. Pass `null` to disable large ticks.",
+        "description": "Controls which ticks render at large size — only every n<sup>th</sup> tick is enlarged. Pass `null` to disable large ticks.",
         "kind": "input",
         "name": "largeTickStep",
         "type": "number | null",
@@ -13089,7 +13037,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Controls how many ticks are visible \u2014 only every n<sup>th</sup> tick is rendered.",
+        "description": "Controls how many ticks are visible — only every n<sup>th</sup> tick is rendered.",
         "kind": "input",
         "name": "smallTickStep",
         "type": "number",
@@ -13192,14 +13140,14 @@
         "defaultValue": "\"after\""
       },
       {
-        "description": "Controls which tick labels are shown \u2014 only every n<sup>th</sup> label is rendered.",
+        "description": "Controls which tick labels are shown — only every n<sup>th</sup> label is rendered.",
         "kind": "input",
         "name": "labelStep",
         "type": "number",
         "defaultValue": "1"
       },
       {
-        "description": "Controls which ticks render at large size \u2014 only every n<sup>th</sup> tick is enlarged. Pass `null` to disable large ticks.",
+        "description": "Controls which ticks render at large size — only every n<sup>th</sup> tick is enlarged. Pass `null` to disable large ticks.",
         "kind": "input",
         "name": "largeTickStep",
         "type": "number | null",
@@ -13262,7 +13210,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Controls how many ticks are visible \u2014 only every n<sup>th</sup> tick is rendered.",
+        "description": "Controls how many ticks are visible — only every n<sup>th</sup> tick is rendered.",
         "kind": "input",
         "name": "smallTickStep",
         "type": "number",
@@ -13344,14 +13292,14 @@
         "defaultValue": "\"after\""
       },
       {
-        "description": "Controls which tick labels are shown \u2014 only every n<sup>th</sup> label is rendered.",
+        "description": "Controls which tick labels are shown — only every n<sup>th</sup> label is rendered.",
         "kind": "input",
         "name": "labelStep",
         "type": "number",
         "defaultValue": "1"
       },
       {
-        "description": "Controls which ticks render at large size \u2014 only every n<sup>th</sup> tick is enlarged. Pass `null` to disable large ticks.",
+        "description": "Controls which ticks render at large size — only every n<sup>th</sup> tick is enlarged. Pass `null` to disable large ticks.",
         "kind": "input",
         "name": "largeTickStep",
         "type": "number | null",
@@ -13414,7 +13362,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Controls how many ticks are visible \u2014 only every n<sup>th</sup> tick is rendered.",
+        "description": "Controls how many ticks are visible — only every n<sup>th</sup> tick is rendered.",
         "kind": "input",
         "name": "smallTickStep",
         "type": "number",
@@ -14229,7 +14177,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Accessible name of the inner input. Prefer a visible label, linked through {@link inputId} or\n{@link ariaLabelledBy}; the placeholder is not a label.",
+        "description": "Accessible name of the inner input. Prefer a visible label, linked through {@link inputId} or\r\n{@link ariaLabelledBy}; the placeholder is not a label.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
@@ -14243,7 +14191,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Displays a clear button that resets the value to empty.\nThe button is hidden while the value is empty or the text box is disabled or read-only.",
+        "description": "Displays a clear button that resets the value to empty.\r\nThe button is hidden while the value is empty or the text box is disabled or read-only.",
         "kind": "input",
         "name": "clearButton",
         "type": "boolean",
@@ -14264,7 +14212,7 @@
         "defaultValue": "{}"
       },
       {
-        "description": "Emitted when the inner input loses focus, including when focus moves to the clear button or to\ncontent in the prefix or suffix templates.",
+        "description": "Emitted when the inner input loses focus, including when focus moves to the clear button or to\r\ncontent in the prefix or suffix templates.",
         "kind": "output",
         "name": "inputBlur",
         "type": "FocusEvent"
@@ -14283,42 +14231,42 @@
         "type": "FocusEvent"
       },
       {
-        "description": "Id of the inner `<input>` element. Point a `<label for>` or `<mona-label for>` at it to label the\ntext box. A unique id is generated when it isn't set.",
+        "description": "Id of the inner `<input>` element. Point a `<label for>` or `<mona-label for>` at it to label the\r\ntext box. A unique id is generated when it isn't set.",
         "kind": "input",
         "name": "inputId",
         "type": "string",
         "defaultValue": "generated"
       },
       {
-        "description": "Inline styles applied to the inner `<input>` element.\nAccepts a style string or a `CSSStyleDeclaration` partial.",
+        "description": "Inline styles applied to the inner `<input>` element.\r\nAccepts a style string or a `CSSStyleDeclaration` partial.",
         "kind": "input",
         "name": "inputStyle",
         "type": "string | Partial<CSSStyleDeclaration> | null",
         "defaultValue": "null"
       },
       {
-        "description": "Marks the text box as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Marks the text box as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Maximum number of characters, set as `maxlength` on the inner input. When bound to a signal form\nfield via `[formField]`, this is written from the field's `maxLength` rule.",
+        "description": "Maximum number of characters, set as `maxlength` on the inner input. When bound to a signal form\r\nfield via `[formField]`, this is written from the field's `maxLength` rule.",
         "kind": "input",
         "name": "maxLength",
         "type": "number | undefined",
         "defaultValue": "undefined"
       },
       {
-        "description": "Minimum number of characters, set as `minlength` on the inner input. When bound to a signal form\nfield via `[formField]`, this is written from the field's `minLength` rule.",
+        "description": "Minimum number of characters, set as `minlength` on the inner input. When bound to a signal form\r\nfield via `[formField]`, this is written from the field's `minLength` rule.",
         "kind": "input",
         "name": "minLength",
         "type": "number | undefined",
         "defaultValue": "undefined"
       },
       {
-        "description": "Name of the inner input, used by browsers and password managers for autofill. When bound to a\nsignal form field via `[formField]`, this is written by the `FormField` directive.",
+        "description": "Name of the inner input, used by browsers and password managers for autofill. When bound to a\r\nsignal form field via `[formField]`, this is written by the `FormField` directive.",
         "kind": "input",
         "name": "name",
         "type": "string",
@@ -14339,7 +14287,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Marks the text box as required.\nTriggers the invalid state when the value is empty and the field has been touched.",
+        "description": "Marks the text box as required.\r\nTriggers the invalid state when the value is empty and the field has been touched.",
         "kind": "input",
         "name": "required",
         "type": "boolean",
@@ -14360,13 +14308,13 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Emitted when focus leaves the text box, including its clear button and prefix and suffix content.\nForm directives (`[formField]`, `ngModel`, `formControl`) listen to this to mark the field as touched.",
+        "description": "Emitted when focus leaves the text box, including its clear button and prefix and suffix content.\r\nForm directives (`[formField]`, `ngModel`, `formControl`) listen to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
       },
       {
-        "description": "Sets the touched state of the text box. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the text box. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "touched",
         "type": "boolean",
@@ -14407,7 +14355,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Accessible name of the input. Prefer a visible label, linked through {@link inputId} or\n{@link ariaLabelledBy}; the placeholder is not a label.",
+        "description": "Accessible name of the input. Prefer a visible label, linked through {@link inputId} or\r\n{@link ariaLabelledBy}; the placeholder is not a label.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
@@ -14440,14 +14388,14 @@
         "defaultValue": "false"
       },
       {
-        "description": "Sets the format of the time picker. If not specified, derives from the active locale, hourFormat,\nand showSeconds. Typed text is also accepted with one-digit hours, minutes and seconds.",
+        "description": "Sets the format of the time picker. If not specified, derives from the active locale, hourFormat,\r\nand showSeconds. Typed text is also accepted with one-digit hours, minutes and seconds.",
         "kind": "input",
         "name": "format",
         "type": "string | null",
         "defaultValue": "null"
       },
       {
-        "description": "Sets the hour format of the time picker. When null, the active locale's clock is used: 12-hour for\nen-US, 24-hour for de-DE.",
+        "description": "Sets the hour format of the time picker. When null, the active locale's clock is used: 12-hour for\r\nen-US, 24-hour for de-DE.",
         "kind": "input",
         "name": "hourFormat",
         "type": "HourFormat | null",
@@ -14461,28 +14409,28 @@
         "defaultValue": "1"
       },
       {
-        "description": "Id of the inner `<input>` element. Point a `<label for>` or `<mona-label for>` at it to label the\ntime picker. A unique id is generated when it isn't set.",
+        "description": "Id of the inner `<input>` element. Point a `<label for>` or `<mona-label for>` at it to label the\r\ntime picker. A unique id is generated when it isn't set.",
         "kind": "input",
         "name": "inputId",
         "type": "string",
         "defaultValue": "generated"
       },
       {
-        "description": "Marks the time picker as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Marks the time picker as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Sets the latest time of the time picker. Only the time of day is compared; a later typed time is\nreported as a `maxDate` error.",
+        "description": "Sets the latest time of the time picker. Only the time of day is compared; a later typed time is\r\nreported as a `maxDate` error.",
         "kind": "input",
         "name": "max",
         "type": "Date | undefined",
         "defaultValue": "undefined"
       },
       {
-        "description": "Sets the earliest time of the time picker. Only the time of day is compared; an earlier typed time\nis reported as a `minDate` error.",
+        "description": "Sets the earliest time of the time picker. Only the time of day is compared; an earlier typed time\r\nis reported as a `minDate` error.",
         "kind": "input",
         "name": "min",
         "type": "Date | undefined",
@@ -14550,7 +14498,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Sets the required state of the time picker.\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "description": "Sets the required state of the time picker.\r\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
         "kind": "input",
         "name": "required",
         "type": "boolean",
@@ -14592,13 +14540,13 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Emitted when focus leaves the time picker and its popup.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when focus leaves the time picker and its popup.\r\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
       },
       {
-        "description": "Sets the touched state of the time picker. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the time picker. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "touched",
         "type": "boolean",
@@ -14612,7 +14560,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Two-way bindable current time value. Typed text is written on Enter and when the input loses\nfocus, on the current value's day (today when empty); text that isn't a valid time keeps the previous value\nand marks the field invalid.",
+        "description": "Two-way bindable current time value. Typed text is written on Enter and when the input loses\r\nfocus, on the current value's day (today when empty); text that isn't a valid time keeps the previous value\r\nand marks the field invalid.",
         "kind": "model",
         "name": "value",
         "type": "Date | null",
@@ -14639,21 +14587,21 @@
         "defaultValue": "false"
       },
       {
-        "description": "Moves focus to the hour list when the selector first renders. The pickers set it for their popups;\nan inline selector leaves focus where it is, so the page doesn't jump to it on load.",
+        "description": "Moves focus to the hour list when the selector first renders. The pickers set it for their popups;\r\nan inline selector leaves focus where it is, so the page doesn't jump to it on load.",
         "kind": "input",
         "name": "focusOnMount",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Shows the Set button. Without it, every change of hour, minute, second or AM/PM made by the user\nis written to the value at once.",
+        "description": "Shows the Set button. Without it, every change of hour, minute, second or AM/PM made by the user\r\nis written to the value at once.",
         "kind": "input",
         "name": "footer",
         "type": "boolean",
         "defaultValue": "true"
       },
       {
-        "description": "The clock to show: \"12\" with an AM/PM list, or \"24\". When not set, the active locale's own clock\nis used (12-hour for en-US, 24-hour for de-DE).",
+        "description": "The clock to show: \"12\" with an AM/PM list, or \"24\". When not set, the active locale's own clock\r\nis used (12-hour for en-US, 24-hour for de-DE).",
         "kind": "input",
         "name": "hourFormat",
         "type": "HourFormat | null",
@@ -14667,7 +14615,7 @@
         "defaultValue": "1"
       },
       {
-        "description": "Marks the time selector as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Marks the time selector as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
@@ -14700,7 +14648,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Sets whether the time selector is required. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Sets whether the time selector is required. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "required",
         "type": "boolean",
@@ -14735,20 +14683,20 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Emitted when focus leaves the time selector, as a native input is touched on blur. Moving between\nits lists and buttons doesn't count. The `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when focus leaves the time selector, as a native input is touched on blur. Moving between\r\nits lists and buttons doesn't count. The `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
       },
       {
-        "description": "Sets the touched state of the time selector. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the time selector. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "touched",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Two-way bindable current time value. It is written by the Set button and Enter, or, without a\nfooter, by each change the user makes; never on its own.",
+        "description": "Two-way bindable current time value. It is written by the Set button and Enter, or, without a\r\nfooter, by each change the user makes; never on its own.",
         "kind": "model",
         "name": "value",
         "type": "Date | null",
@@ -15067,6 +15015,27 @@
     "selector": "\"mona-filter-input\"",
     "inputs": [
       {
+        "description": "Id of the highlighted option in the controlled list, exposed as `aria-activedescendant`.",
+        "kind": "input",
+        "name": "activeDescendant",
+        "type": "string | null",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Accessible name of the input. The placeholder is not a reliable label, so set this whenever possible.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Id of the list this input filters. When set, the input is exposed as a combobox controlling it.",
+        "kind": "input",
+        "name": "controls",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "",
         "kind": "input",
         "name": "debounce",
@@ -15276,12 +15245,6 @@
     "name": "ListItemComponent",
     "selector": "\"mona-list-item\"",
     "inputs": [
-      {
-        "description": "",
-        "kind": "output",
-        "name": "checked",
-        "type": "boolean"
-      },
       {
         "description": "",
         "kind": "input",

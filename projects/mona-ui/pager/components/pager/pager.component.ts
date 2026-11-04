@@ -110,7 +110,6 @@ export class PagerComponent implements PagerVariantInputs {
     readonly #i18n = inject(MonaI18nService);
     readonly #id = createElementControlId();
     readonly #injector = inject(Injector);
-    readonly #pageSize = linkedSignal<number>(() => this.pageSize());
     #widthObserver: ResizeObserver | null = null;
     private readonly navigationButtonsTemplateList = contentChildren(PagerNavigationButtonsTemplateDirective);
     protected readonly baseClasses = computed(() =>
@@ -191,7 +190,7 @@ export class PagerComponent implements PagerVariantInputs {
     protected readonly pageSizeTemplate = contentChild(PagerPageSizeTemplateDirective, { read: TemplateRef });
 
     /** The page size in use: `pageSize`, or the size the user picked since, as a whole number of at least 1. */
-    protected readonly pageSizeValue = computed(() => toCount(this.#pageSize(), DEFAULT_PAGE_SIZE, 1));
+    protected readonly pageSizeValue = computed(() => toCount(this.pageSize(), DEFAULT_PAGE_SIZE, 1));
     protected readonly pagerContext = computed<PagerContext>(() => ({
         currentPage: this.page(),
         end: this.end(),
@@ -254,16 +253,18 @@ export class PagerComponent implements PagerVariantInputs {
     public readonly pageInput = input(false, { transform: booleanAttribute });
 
     /**
-     * @description Number of items displayed per page; values below 1 count as 1. A size the user picks is kept
-     * until this input changes, and `pageChange` reports it (`take`).
+     * @description Number of items displayed per page; values below 1 count as 1. Supports two-way binding
+     * (`[(pageSize)]`): `pageSizeChange` emits the new size after the user changes it, and `pageChange` reports it
+     * as `take`.
      * @default 5
      */
-    public readonly pageSize = input(DEFAULT_PAGE_SIZE);
+    public readonly pageSize = model(DEFAULT_PAGE_SIZE);
 
     /**
-     * @description Emitted before the user changes the page size. Cancelable via `preventDefault()` on the event.
+     * @description Emitted when the user picks a page size, before it is applied. Call `preventDefault()` on the
+     * event to keep the current size.
      */
-    public readonly pageSizeChange = output<PageSizeChangeEvent>();
+    public readonly pageSizeSelect = output<PageSizeChangeEvent>();
 
     /**
      * @description Page-size options shown in the page-size dropdown. `true` shows the default options; `false`
@@ -372,14 +373,14 @@ export class PagerComponent implements PagerVariantInputs {
             return;
         }
         const event = new PageSizeChangeEvent(value, previous);
-        this.pageSizeChange.emit(event);
+        this.pageSizeSelect.emit(event);
         if (event.isDefaultPrevented()) {
             this.pageSizeDropdownList()?.setValue(previous);
             return;
         }
         const firstItemSkip = (this.page() - 1) * previous;
         const focused = this.focusedInside();
-        this.#pageSize.set(value);
+        this.pageSize.set(value);
         this.skip.set(Math.floor(firstItemSkip / value) * value);
         this.emitPageChange();
         this.afterUserChange(focused);
