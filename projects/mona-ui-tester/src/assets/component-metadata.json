@@ -1345,6 +1345,19 @@
         "name": "page",
         "type": "number",
         "defaultValue": "1"
+      },
+      {
+        "description": "Items per page. Supports two-way binding via `[(pageSize)]`: it updates when the user picks a size\r\nin the pager. While unset, the options' `pageSize` applies. A new size keeps the first item of the current\r\npage in view.",
+        "kind": "model",
+        "name": "pageSize",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Emitted when the user picks a page size, before it is applied. Call `preventDefault()` on the\r\nevent to keep the current size.",
+        "kind": "output",
+        "name": "pageSizeSelect",
+        "type": "PageSizeChangeEvent"
       }
     ]
   },
@@ -10321,11 +10334,24 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Sets the height of the list view.",
+        "description": "Property name or predicate that marks an item as disabled. Disabled items can't be selected,\r\nactivated or reached by typeahead.",
+        "kind": "input",
+        "name": "disabledBy",
+        "type": "string | Predicate<T> | null | undefined",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Sets the height of the list view. With virtual scrolling, the viewport takes this height, so a\r\npercentage needs a parent with a height; `\"\"` sizes the viewport to its items instead.",
         "kind": "input",
         "name": "height",
         "type": "string | number",
         "defaultValue": "100%"
+      },
+      {
+        "description": "Emitted with the data item when the user activates an enabled item by clicking it or pressing\r\nEnter on it. Fires whether or not the list view is selectable.",
+        "kind": "output",
+        "name": "itemActivate",
+        "type": "T"
       },
       {
         "description": "Collection of items to render.",
@@ -10384,7 +10410,7 @@
         "defaultValue": "medium"
       },
       {
-        "description": "Emitted when the list is scrolled to the bottom.",
+        "description": "Emitted once each time the list is scrolled to its end, when the list view isn't paged. Scrolling\r\naway and back emits again, as does reaching the new end after more items are added.",
         "kind": "output",
         "name": "scrollBottom",
         "type": "Event"
@@ -15300,6 +15326,12 @@
         "kind": "input",
         "name": "height",
         "type": "ListSizeInputType"
+      },
+      {
+        "description": "Emitted when the user activates an enabled item by clicking it or pressing Enter on it, whether or\r\nnot the list is selectable.",
+        "kind": "output",
+        "name": "itemActivate",
+        "type": "ListItem<TData>"
       },
       {
         "description": "",

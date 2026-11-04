@@ -1,6 +1,5 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
-    afterRenderEffect,
     Component,
     computed,
     contentChild,
@@ -9,44 +8,50 @@ import {
     ElementRef,
     inject,
     input,
-    Optional,
     output,
-    SkipSelf,
     TemplateRef,
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { ImmutableList, type Predicate } from "@mirei/ts-collections";
 import {
+    LIST_VIEW_HOST_LIST_SERVICE,
     ListComponent,
     ListFooterTemplateDirective,
     ListGroupHeaderTemplateDirective,
     ListHeaderTemplateDirective,
+    type ListItem,
     ListItemTemplateDirective,
-    ListKeySelector,
+    type ListKeySelector,
     ListNoDataTemplateDirective,
     ListService
 } from "@nanahoshi/mona-ui/internal/list";
-import { type PageChangeEvent, PagerComponent } from "@nanahoshi/mona-ui/pager";
-import { ImmutableSet } from "@mirei/ts-collections";
-import { filter, fromEvent, Subscription } from "rxjs";
+import { type PageChangeEvent, PagerComponent, type PageSizeChangeEvent } from "@nanahoshi/mona-ui/pager";
+import { filter, fromEvent, Subject } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ListViewFooterTemplateDirective } from "../../directives/list-view-footer-template.directive";
 import { ListViewGroupHeaderTemplateDirective } from "../../directives/list-view-group-header-template.directive";
 import { ListViewHeaderTemplateDirective } from "../../directives/list-view-header-template.directive";
 import { ListViewItemTemplateDirective } from "../../directives/list-view-item-template.directive";
 import { ListViewNoDataTemplateDirective } from "../../directives/list-view-no-data-template.directive";
-import { listViewBaseThemeVariants, ListViewVariantInputs, ListViewVariantProps } from "../../styles/list-view.styles";
+import {
+    listViewBaseThemeVariants,
+    type ListViewVariantInputs,
+    type ListViewVariantProps
+} from "../../styles/list-view.styles";
+
+/** How close to the end (in pixels) counts as scrolled to the bottom. */
+const SCROLL_BOTTOM_THRESHOLD = 3;
 
 @Component({
     selector: "mona-list-view",
     templateUrl: "./list-view.component.html",
     providers: [
         {
+            // Each list view has its own service, unless the component whose template it is in shares one on purpose.
             provide: ListService,
-            useFactory: (parentListService: ListService<unknown>): ListService<unknown> => {
-                return parentListService ?? new ListService<unknown>();
-            },
-            deps: [[new Optional(), new SkipSelf(), ListService]]
+            useFactory: (): ListService<unknown> =>
+                inject(LIST_VIEW_HOST_LIST_SERVICE, { optional: true, skipSelf: true }) ?? new ListService<unknown>()
         }
     ],
     imports: [
@@ -66,12 +71,8 @@ import { listViewBaseThemeVariants, ListViewVariantInputs, ListViewVariantProps 
 })
 export class ListViewComponent<T = unknown> implements ListViewVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
-    readonly #hostElementRef = inject(ElementRef<HTMLDivElement>);
-    readonly #scrollBottomEnabled = computed(() => {
-        const pageableOptions = this.listService.pageableOptions();
-        return !pageableOptions.enabled;
-    });
-    #scrollSubscription: Subscription | null = null;
+    readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+    #atBottom = false;
     protected readonly baseClasses = computed(() => {
         const rounded = this.rounded();
         const size = this.size();
@@ -82,16 +83,14 @@ export class ListViewComponent<T = unknown> implements ListViewVariantInputs {
     protected readonly footerTemplate = contentChild(ListViewFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderTemplate = contentChild(ListViewGroupHeaderTemplateDirective, { read: TemplateRef });
     protected readonly headerTemplate = contentChild(ListViewHeaderTemplateDirective, { read: TemplateRef });
-    protected readonly itemCount = computed(() => this.listItems().size());
+    protected readonly itemCount = computed(() => this.listItems().length);
     protected readonly itemTemplate = contentChild(ListViewItemTemplateDirective, { read: TemplateRef });
     protected readonly listHeight = computed(() => {
         const height = this.height();
         return typeof height === "number" ? `${height}px` : height;
     });
-    protected readonly listItems = computed(() => {
-        const items = this.items();
-        return ImmutableSet.create(items);
-    });
+    /** The items as given: a list, so equal items (two `"a"` strings) are both shown. */
+    protected readonly listItems = computed(() => ImmutableList.create(this.items()));
     protected readonly listMaxHeight = computed(() => {
         const maxHeight = this.maxHeight();
         return typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight;
@@ -106,7 +105,6 @@ export class ListViewComponent<T = unknown> implements ListViewVariantInputs {
         return typeof width === "number" ? `${width}px` : width;
     });
     protected readonly noDataTemplate = contentChild(ListViewNoDataTemplateDirective, { read: TemplateRef });
-    protected readonly viewItems = computed(() => this.listItems());
 
     /**
      * @description Accessible name for the list view's `listbox` element. Describe what the list represents.
@@ -115,10 +113,24 @@ export class ListViewComponent<T = unknown> implements ListViewVariantInputs {
     public readonly ariaLabel = input<string>("", { alias: "aria-label" });
 
     /**
-     * @description Sets the height of the list view.
+     * @description Property name or predicate that marks an item as disabled. Disabled items can't be selected,
+     * activated or reached by typeahead.
+     * @default ""
+     */
+    public readonly disabledBy = input<string | Predicate<T> | null | undefined>("");
+
+    /**
+     * @description Sets the height of the list view. With virtual scrolling, the viewport takes this height, so a
+     * percentage needs a parent with a height; `""` sizes the viewport to its items instead.
      * @default 100%
      */
     public readonly height = input<string | number>("100%");
+
+    /**
+     * @description Emitted with the data item when the user activates an enabled item by clicking it or pressing
+     * Enter on it. Fires whether or not the list view is selectable.
+     */
+    public readonly itemActivate = output<T>();
 
     /**
      * @description Collection of items to render.
@@ -163,13 +175,20 @@ export class ListViewComponent<T = unknown> implements ListViewVariantInputs {
     public readonly maxWidth = input<string | number>("");
 
     /**
+     * Page-size picks from the pager, forwarded to `ListViewPageableDirective`.
+     * @internal
+     */
+    public readonly pageSizeSelect$ = new Subject<PageSizeChangeEvent>();
+
+    /**
      * @description Border-radius preset applied to the component.
      * @default medium
      */
     public readonly rounded = input<ListViewVariantProps["rounded"]>("medium");
 
     /**
-     * @description Emitted when the list is scrolled to the bottom.
+     * @description Emitted once each time the list is scrolled to its end, when the list view isn't paged. Scrolling
+     * away and back emits again, as does reaching the new end after more items are added.
      */
     public readonly scrollBottom = output<Event>();
 
@@ -202,36 +221,53 @@ export class ListViewComponent<T = unknown> implements ListViewVariantInputs {
             const textField = this.textField();
             untracked(() => this.listService.setTextField(textField ?? ""));
         });
-        afterRenderEffect({
-            read: () => this.setScrollBottomEvent()
+        effect(() => {
+            const disabledBy = this.disabledBy();
+            untracked(() => this.listService.setDisabledBy(disabledBy ?? ""));
         });
+        this.setScrollBottomEvent();
+    }
+
+    protected onItemActivate(item: ListItem<T>): void {
+        this.itemActivate.emit(item.data);
     }
 
     protected onPageChange(event: PageChangeEvent): void {
         this.listService.pageState.update(s => ({ ...s, page: event.page, skip: event.skip, take: event.take }));
     }
 
+    protected onPageSizeSelect(event: PageSizeChangeEvent): void {
+        this.pageSizeSelect$.next(event);
+    }
+
+    /** Whether the scrolled element is this list view's own list or viewport, not a nested list view or template. */
+    private isListScroll(target: EventTarget | null): boolean {
+        if (
+            !(target instanceof HTMLElement) ||
+            target.closest("mona-list-view") !== this.#hostElementRef.nativeElement
+        ) {
+            return false;
+        }
+        return target.matches("cdk-virtual-scroll-viewport") || target.matches("mona-list > ul[role='listbox']");
+    }
+
+    /**
+     * Scroll events don't bubble, so the host listens in the capture phase. That covers the list and the virtual
+     * viewport whenever they are rendered, including ones created after the first render.
+     */
     private setScrollBottomEvent(): void {
-        let element: HTMLElement | null;
-        const virtualScrollEnabled = this.listService.virtualScrollOptions().enabled;
-        if (virtualScrollEnabled) {
-            element = this.#hostElementRef.nativeElement.querySelector(".cdk-virtual-scroll-viewport");
-        } else {
-            element = this.#hostElementRef.nativeElement.querySelector("mona-list > ul");
-        }
-        this.#scrollSubscription?.unsubscribe();
-        if (!element) {
-            return;
-        }
-        this.#scrollSubscription = fromEvent<Event>(element, "scroll")
+        const host = this.#hostElementRef.nativeElement;
+        fromEvent<Event>(host, "scroll", { capture: true })
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
+                filter(event => this.isListScroll(event.target)),
                 filter(event => {
-                    if (!this.#scrollBottomEnabled()) {
-                        return false;
-                    }
                     const target = event.target as HTMLElement;
-                    return Math.abs(target.scrollHeight - target.scrollTop - target.clientHeight) < 3.0;
+                    const atBottom =
+                        target.scrollHeight - target.scrollTop - target.clientHeight < SCROLL_BOTTOM_THRESHOLD;
+                    const arrived = atBottom && !this.#atBottom;
+                    this.#atBottom = atBottom;
+                    return arrived && !this.listService.pageableOptions().enabled;
                 })
             )
             .subscribe(event => this.scrollBottom.emit(event));

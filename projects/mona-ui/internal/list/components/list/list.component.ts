@@ -170,6 +170,12 @@ export class ListComponent<TData> implements OnInit {
     public readonly data = input<Iterable<TData> | null | undefined>(null);
     public readonly focusOnMount = input(true);
     public readonly height = input<ListSizeInputType>(undefined);
+
+    /**
+     * @description Emitted when the user activates an enabled item by clicking it or pressing Enter on it, whether or
+     * not the list is selectable.
+     */
+    public readonly itemActivate = output<ListItem<TData>>();
     public readonly itemSelect = output<SelectionChangeEvent<TData>>();
     public readonly listClass = input<string>("");
     public readonly listId = input<string>("");
@@ -217,6 +223,9 @@ export class ListComponent<TData> implements OnInit {
 
     protected onListItemClick(item: ListItem<TData>): void {
         this.toggleItem(item);
+        if (!item.isHeader && !this.listService.isDisabled(item)) {
+            this.itemActivate.emit(item);
+        }
     }
 
     protected trackByUid(_: number, item: ListItem<TData>): string {
@@ -405,12 +414,13 @@ export class ListComponent<TData> implements OnInit {
                 const highlightedItem = this.listService.highlightedItem();
                 const selectedItem = this.listService.selectedListItems().firstOrDefault();
                 const source: SelectionSource = { via: "keyboard", key: event.key };
-                if (highlightedItem) {
-                    this.selectItem(highlightedItem);
-                    this.itemSelect.emit({ item: highlightedItem, source });
-                } else if (selectedItem) {
-                    this.selectItem(selectedItem);
-                    this.itemSelect.emit({ item: selectedItem, source });
+                const item = highlightedItem ?? selectedItem;
+                if (item) {
+                    this.selectItem(item);
+                    this.itemSelect.emit({ item, source });
+                    if (!item.isHeader && !this.listService.isDisabled(item)) {
+                        this.itemActivate.emit(item);
+                    }
                 }
             });
     }

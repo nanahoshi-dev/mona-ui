@@ -28,7 +28,12 @@ import {
 } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ContainsPipe, SelectionMode } from "@nanahoshi/mona-ui/common";
-import { ListKeySelector, ListService, SelectableOptions } from "@nanahoshi/mona-ui/internal/list";
+import {
+    LIST_VIEW_HOST_LIST_SERVICE,
+    ListKeySelector,
+    ListService,
+    SelectableOptions
+} from "@nanahoshi/mona-ui/internal/list";
 import {
     ListViewComponent,
     ListViewFooterTemplateDirective,
@@ -64,6 +69,8 @@ import {
     selector: "mona-list-box",
     templateUrl: "./list-box.component.html",
     providers: [ListService],
+    // Shared with the list view in this template only, which renders and navigates the items this component moves.
+    viewProviders: [{ provide: LIST_VIEW_HOST_LIST_SERVICE, useExisting: ListService }],
     imports: [
         ListViewComponent,
         ListViewSelectableDirective,

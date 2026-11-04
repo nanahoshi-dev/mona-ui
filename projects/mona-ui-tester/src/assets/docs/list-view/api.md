@@ -97,7 +97,7 @@ Each structural directive below is an `ng-template` placed as projected content 
 </mona-list-view>
 ```
 
-`groupBy` selects the field (or a function) used to bucket items; each distinct value renders as a group header row. `orderBy`/`orderByDirection` sort items within each group; `headerOrder` sorts the groups themselves by their key. If `groupBy` is omitted while grouping is enabled, every item falls into a single, unlabeled group — always provide `groupBy` together with `monaListViewGroupable`.
+`groupBy` selects the field (or a function) used to bucket items; each distinct value renders as a group header row. `orderBy`/`orderByDirection` sort items within each group; `headerOrder` sorts the groups themselves by their key. Dates group by their time, so two `Date` objects for the same moment share a group and date groups sort chronologically. Headers show dates in the locale's medium date format and numbers in the locale's digits; set `headerText` to format them yourself. The group header template receives the group's value (a `Date` stays a `Date`). If `groupBy` is omitted while grouping is enabled, every item falls into a single, unlabeled group — always provide `groupBy` together with `monaListViewGroupable`.
 
 ### Pagination
 
@@ -114,7 +114,7 @@ Adds a pager below the list. Pagination and virtualization are mutually exclusiv
 </mona-list-view>
 ```
 
-Renders only the items currently scrolled into view, for large collections. `height` on the options object is the fixed row height, in pixels, used to measure the virtual scroll viewport — every item must render at that height for scrolling to stay accurate.
+Renders only the items currently scrolled into view, for large collections. `height` on the options object is the fixed row height, in pixels, used to measure the virtual scroll viewport — every item must render at that height for scrolling to stay accurate. The viewport takes the list view's `height`: the default `"100%"` needs a parent with a height, so in an unsized container pass a fixed `height`, or `""` to size the viewport to its items.
 
 ### Infinite scroll
 
@@ -129,7 +129,7 @@ protected onScrollBottom(): void {
 </mona-list-view>
 ```
 
-`scrollBottom` emits once each time the list is scrolled within roughly 3px of its bottom edge, whichever of the plain list or the virtual scroll viewport is active. Combine it with slicing a larger source collection to implement infinite loading — see [`scrollBottom` and `monaListViewPageable`](#scrollbottom-and-monalistviewpageable).
+`scrollBottom` emits once each time the list arrives within roughly 3px of its bottom edge (scrolling away and back emits again, as does reaching the new end after more items load), whichever of the plain list or the virtual scroll viewport is active. Combine it with slicing a larger source collection to implement infinite loading — see [`scrollBottom` and `monaListViewPageable`](#scrollbottom-and-monalistviewpageable).
 
 ## Technical & Behavior Notes
 
@@ -141,10 +141,13 @@ When `monaListViewVirtualScroll` reports `enabled: true`, the pager rendered by 
 
 `scrollBottom` only fires while pagination is disabled. If `monaListViewPageable` is enabled, scrolling to the bottom of the current page does not emit `scrollBottom` — pagination and infinite scroll are alternative strategies for large collections, not composable ones.
 
-### `SelectableOptions` is not exported
+### Option types
 
-`monaListViewSelectable`'s options object is typed as `SelectableOptions` internally, but that type is not re-exported from `@nanahoshi/mona-ui`. Inline object literals (as in the examples above) still type-check structurally; only a standalone typed variable would require an import.
-`TODO(owner-review): confirm whether SelectableOptions should be added to the public barrel export.`
+`GroupableOptions`, `NavigableOptions`, `PagerSettings`, `SelectableOptions` and `VirtualScrollOptions` are exported from `@nanahoshi/mona-ui/list-view` as types.
+
+### Each list view has its own state
+
+A list view keeps its items, selection and paging to itself, so a list view inside another one's templates, or inside a dropdown or list box, never shares or overwrites their state. Equal items (two `"a"` strings, or the same object twice) are each shown.
 
 ### Grouping key type defaults to the item type
 
@@ -198,8 +201,10 @@ Form integration is not applicable — List View is a display/selection widget, 
 
 | Name            | Type                                       | Default    | Description                                                                 |
 |-----------------|--------------------------------------------|------------|-----------------------------------------------------------------------------|
+| `aria-label`    | `string`                                   | `""`       | Accessible name for the list's `listbox` element.                           |
 | `class`         | `string`                                   | `""`       | Additional CSS classes merged onto the host element via `tailwind-merge`.   |
-| `height`        | `string \| number`                         | `"100%"`   | Sets the height of the list view.                                           |
+| `disabledBy`    | `string \| ((item: T) => boolean) \| null` | `""`       | Property name or predicate that marks an item as disabled.                  |
+| `height`        | `string \| number`                         | `"100%"`   | Sets the height of the list view. See [Virtual scrolling](#virtual-scrolling). |
 | `items`         | `Iterable<T>`                              | `[]`       | Collection of items to render.                                              |
 | `listClass`     | `string`                                   | `""`       | Sets the classes of the inner `<ul>` element.                               |
 | `listItemClass` | `string`                                   | `""`       | Sets the classes of the list items.                                         |
@@ -216,7 +221,8 @@ Form integration is not applicable — List View is a display/selection widget, 
 
 | Name           | Type    | Description                                                                                                                                                                                       |
 |----------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `scrollBottom` | `Event` | Emitted when the list is scrolled to the bottom. Does not fire while `monaListViewPageable` is enabled — see [`scrollBottom` and `monaListViewPageable`](#scrollbottom-and-monalistviewpageable). |
+| `itemActivate` | `T`     | Emitted with the data item when the user clicks an enabled item or presses Enter on it, whether or not the list view is selectable. |
+| `scrollBottom` | `Event` | Emitted once each time the list is scrolled to its bottom. Does not fire while `monaListViewPageable` is enabled — see [`scrollBottom` and `monaListViewPageable`](#scrollbottom-and-monalistviewpageable). |
 
 ---
 
@@ -261,7 +267,7 @@ Form integration is not applicable — List View is a display/selection widget, 
 | Name                    | Type                                 | Default | Description                                                                                                                                             |
 |-------------------------|--------------------------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `groupBy`               | `string \| ((item: T) => K) \| null` | `""`    | Property name or accessor used to derive the group key from a data item.                                                                                |
-| `monaListViewGroupable` | `GroupableOptions<T, K> \| ""`       | `""`    | Enables grouping. An empty string enables grouping with default settings; pass an object to configure `headerOrder`, `orderBy`, and `orderByDirection`. |
+| `monaListViewGroupable` | `GroupableOptions<T, K> \| ""`       | `""`    | Enables grouping. An empty string enables grouping with default settings; pass an object to configure `headerOrder`, `headerText`, `orderBy`, and `orderByDirection`. |
 
 ---
 
@@ -275,12 +281,15 @@ Form integration is not applicable — List View is a display/selection widget, 
 |------------------------|--------------------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `monaListViewPageable` | `Partial<PagerSettings> \| ""` | `""`    | Enables pagination. An empty string enables pagination with default settings (`type: "numeric"`, `previousNext: true`, `pageSize: 10`, `pageSizeValues: [5, 10, 20, 25, 50, 100]`, `visiblePages: 5`); pass an object to override any field. Has no visible effect while `monaListViewVirtualScroll` is enabled — see [Pagination and virtualization don't combine](#pagination-and-virtualization-dont-combine). |
 | `page`                 | `number`                       | `1`     | The current page. A `model()` input — supports two-way binding via `[(page)]`; also settable one-way via `[page]` and readable via `(pageChange)` to react to pager navigation.                                                                                                                                                                                                                 |
+| `pageSize`             | `number \| undefined`          | `undefined` | Items per page. A `model()` input — supports `[(pageSize)]` and updates when the user picks a size. While unset, the options' `pageSize` applies. A new size keeps the first item of the current page in view. |
 
 #### Outputs
 
 | Name         | Type               | Description                                                                                        |
 |--------------|--------------------|-----------------------------------------------------------------------------------------------------|
-| `pageChange` | `EventEmitter<number>` | Emitted whenever the current page changes, whether from user navigation or a `[page]`/`[(page)]` update. |
+| `pageChange`     | `number`              | Emitted when the user moves to another page (not when `[page]` is set from code).                     |
+| `pageSizeChange` | `number`              | Emitted when the user picks another page size.                                                         |
+| `pageSizeSelect` | `PageSizeChangeEvent` | Emitted when the user picks a page size, before it applies. Call `preventDefault()` to keep the size. |
 
 ---
 
@@ -304,6 +313,7 @@ Form integration is not applicable — List View is a display/selection widget, 
 |--------------------|-------------------------------------------|-------------------------------------------------------------------------|
 | `enabled`          | `boolean \| undefined`                    | Whether grouping is active.                                             |
 | `headerOrder`      | `"asc" \| "desc" \| undefined`            | Sort direction applied to group headers by their key.                   |
+| `headerText`       | `((value: unknown) => string) \| undefined` | Text of a group's header, from its value. Defaults to locale-formatted dates and numbers, `String(value)` otherwise. |
 | `orderBy`          | `string \| ((item: T) => R) \| undefined` | Property name or accessor used to sort items within each group.         |
 | `orderByDirection` | `"asc" \| "desc" \| undefined`            | Sort direction applied by `orderBy`. Ignored when `orderBy` is not set. |
 

@@ -1,12 +1,12 @@
 import { NgComponentOutlet, SlicePipe } from "@angular/common";
 import { Component, computed, effect, inject, input, linkedSignal, signal } from "@angular/core";
-import type { VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
 import type {
     GroupableOptions,
     NavigableOptions,
     PagerSettings,
-    SelectableOptions
-} from "@nanahoshi/mona-ui/internal/list";
+    SelectableOptions,
+    VirtualScrollOptions
+} from "@nanahoshi/mona-ui/list-view";
 import {
     ListViewComponent,
     ListViewFooterTemplateDirective,

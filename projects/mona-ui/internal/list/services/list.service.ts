@@ -1,4 +1,4 @@
-import { computed, Injectable, linkedSignal, signal } from "@angular/core";
+import { computed, inject, Injectable, linkedSignal, signal } from "@angular/core";
 import {
     from,
     IEnumerable,
@@ -9,6 +9,7 @@ import {
     toImmutableSet
 } from "@mirei/ts-collections";
 import { FilterableOptions, FilterChangeEvent, VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { ReplaySubject, Subject } from "rxjs";
 import { GroupableOptions } from "../models/GroupableOptions";
 import { ListItem } from "../models/ListItem";
@@ -20,6 +21,7 @@ import { PagerSettings } from "../models/PagerSettings";
 import { PageState } from "../models/PageState";
 import { SelectableOptions } from "../models/SelectableOptions";
 import { cycleThroughMatchedItems } from "../utils/cycleThroughMatchedItems";
+import { formatGroupHeader, toGroupKey } from "../utils/groupKey";
 
 @Injectable()
 export class ListService<TData> {
@@ -41,7 +43,8 @@ export class ListService<TData> {
                 enumerable = enumerable.orderBy(item => this.getOrderKey(item));
             }
         }
-        let groupedEnumerable = enumerable.groupBy(item => this.getGroupField(item));
+        // Dates group by their time, so equal dates share a group and header order is chronological.
+        let groupedEnumerable = enumerable.groupBy(item => toGroupKey(this.getGroupField(item)));
         if (groupableOptions.headerOrder) {
             if (groupableOptions.headerOrder === "desc") {
                 groupedEnumerable = groupedEnumerable.orderByDescending(g => g.key);
@@ -49,13 +52,25 @@ export class ListService<TData> {
                 groupedEnumerable = groupedEnumerable.orderBy(g => g.key);
             }
         }
+        const localeId = this.#i18n.localeId();
+        const formatters = {
+            date: new Intl.DateTimeFormat(localeId, { dateStyle: "medium" }),
+            number: new Intl.NumberFormat(localeId, { useGrouping: false })
+        };
         const previousHeaders = this.#groupHeaders;
         const headers = new Map<unknown, ListItem<TData>>();
         const items = groupedEnumerable
             .selectMany(g => {
+                // The header carries the first item's group value (a Date stays a Date for the header template).
+                const value = this.getGroupField(g.source.first());
+                const text = groupableOptions.headerText
+                    ? groupableOptions.headerText(value)
+                    : formatGroupHeader(value, formatters);
+                const previous = previousHeaders.get(g.key);
                 const header =
-                    previousHeaders.get(g.key) ??
-                    new ListItem<TData>({ data: g.key, header: String(g.key ?? ""), isHeader: true });
+                    previous && previous.header === text && previous.data === value
+                        ? previous
+                        : new ListItem<TData>({ data: value, header: text, isHeader: true, uid: previous?.uid });
                 headers.set(g.key, header);
                 return g.source.prepend(header);
             })
@@ -64,6 +79,7 @@ export class ListService<TData> {
         return items;
     });
     readonly #data = signal(ImmutableList.create<TData>());
+    readonly #i18n = inject(MonaI18nService);
     /**
      * First list item for each selection key, so key lookups are O(1) instead of a scan per key.
      */

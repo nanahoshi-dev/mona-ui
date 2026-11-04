@@ -6,7 +6,6 @@ import { ListViewGroupableDirective } from "./list-view-groupable.directive";
 
 @Component({
     imports: [ListViewGroupableDirective, ListViewComponent],
-    providers: [ListService],
     template: `
         <mona-list-view
             [items]="data"

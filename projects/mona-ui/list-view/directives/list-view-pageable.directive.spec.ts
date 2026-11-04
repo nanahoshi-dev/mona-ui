@@ -7,7 +7,6 @@ import { ListViewPageableDirective } from "./list-view-pageable.directive";
 
 @Component({
     imports: [ListViewPageableDirective, ListViewComponent],
-    providers: [ListService],
     template: ` <mona-list-view [items]="data" textField="name" monaListViewPageable></mona-list-view> `
 })
 class TestComponent {
@@ -28,8 +27,7 @@ describe("ListViewPageableDirective", () => {
     let component: TestComponent;
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [TestComponent],
-            providers: [ListService]
+            imports: [TestComponent]
         }).compileComponents();
         fixture = TestBed.createComponent(TestComponent);
         component = fixture.componentInstance;
@@ -48,7 +46,6 @@ describe("ListViewPageableDirective", () => {
 
 @Component({
     imports: [ListViewPageableDirective, ListViewComponent],
-    providers: [ListService],
     template: ` <mona-list-view [items]="data" textField="name" [monaListViewPageable]="{ pageSize: 25 }"></mona-list-view> `
 })
 class CustomPageSizeTestComponent {
@@ -69,7 +66,6 @@ describe("ListViewPageableDirective with custom pageSize", () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [CustomPageSizeTestComponent],
-            providers: [ListService]
         }).compileComponents();
         fixture = TestBed.createComponent(CustomPageSizeTestComponent);
         fixture.detectChanges();
@@ -84,7 +80,6 @@ describe("ListViewPageableDirective with custom pageSize", () => {
 
 @Component({
     imports: [ListViewPageableDirective, ListViewComponent],
-    providers: [ListService],
     template: ` <mona-list-view
         [items]="data"
         textField="name"
@@ -106,7 +101,6 @@ describe("ListViewPageableDirective page binding", () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [PageBindingTestComponent],
-            providers: [ListService]
         }).compileComponents();
         fixture = TestBed.createComponent(PageBindingTestComponent);
         component = fixture.componentInstance;

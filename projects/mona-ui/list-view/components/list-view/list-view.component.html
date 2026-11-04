@@ -1,6 +1,6 @@
 <mona-list
     [ariaLabel]="ariaLabel()"
-    [data]="viewItems()"
+    [data]="listItems()"
     [height]="listHeight()"
     [focusOnMount]="false"
     [width]="listWidth()"
@@ -9,7 +9,8 @@
     [listItemClass]="listItemClass()"
     [listItemStyle]="listItemStyle()"
     [listClass]="listClass()"
-    [listStyle]="listStyle()">
+    [listStyle]="listStyle()"
+    (itemActivate)="onItemActivate($event)">
     @if (footerTemplate()) {
         <ng-template monaListFooterTemplate>
             <ng-container [ngTemplateOutlet]="footerTemplate() ?? null"></ng-container>
@@ -42,7 +43,7 @@
 </mona-list>
 
 @let pageableOptions = listService.pageableOptions();
-@if (pageableOptions.enabled && !listService.virtualScrollOptions().enabled && viewItems().length > 0) {
+@if (pageableOptions.enabled && !listService.virtualScrollOptions().enabled && itemCount() > 0) {
     @let pageState = listService.pageState();
     <mona-pager
         [firstLast]="pageableOptions.firstLast"
@@ -55,7 +56,9 @@
         [pageSize]="pageState.take"
         [previousNext]="pageableOptions.previousNext"
         [showInfo]="pageableOptions.showInfo"
+        [type]="pageableOptions.type"
         [size]="size()"
         (pageChange)="onPageChange($event)"
+        (pageSizeSelect)="onPageSizeSelect($event)"
         class="border-b-0 border-x-0 rounded-t-none"></mona-pager>
 }

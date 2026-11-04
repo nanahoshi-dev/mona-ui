@@ -18,5 +18,6 @@ export * from "./models/NavigationDirection";
 export * from "./models/PagerSettings";
 export * from "./models/SelectableOptions";
 export { SelectionChangeEvent } from "./models/SelectionChangeEvent";
+export * from "./services/list-view-host";
 export * from "./services/list.service";
 export * from "./i18n/list.default-messages";
