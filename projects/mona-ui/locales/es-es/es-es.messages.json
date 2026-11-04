@@ -257,17 +257,29 @@
     },
     "list": {
         "filterList": "Filtrar lista",
-        "noData": "No hay datos"
+        "loading": "Cargando",
+        "noData": "No hay datos",
+        "pagerLabel": "Paginación de {list}"
     },
     "listBox": {
         "clearSelection": "Limpiar selección",
+        "itemsMoved": "Movido a la posición {position} de {total}",
+        "itemsRemoved": "{count, plural, =1 {# elemento quitado} other {# elementos quitados}}",
+        "itemsTransferred": "{count, plural, =1 {# elemento transferido a {list}} other {# elementos transferidos a {list}}}",
+        "itemsTransferredToOtherList": "{count, plural, =1 {# elemento transferido a la otra lista} other {# elementos transferidos a la otra lista}}",
         "moveDown": "Bajar",
         "moveUp": "Subir",
         "remove": "Quitar",
+        "selectionCleared": "Selección borrada",
+        "toolbarLabel": "Acciones de {list}",
         "transferAllFrom": "Transferir todo desde la otra lista",
+        "transferAllFromList": "Transferir todo desde {list}",
         "transferAllTo": "Transferir todo a la otra lista",
+        "transferAllToList": "Transferir todo a {list}",
         "transferFrom": "Transferir desde la otra lista",
-        "transferTo": "Transferir a la otra lista"
+        "transferFromList": "Transferir desde {list}",
+        "transferTo": "Transferir a la otra lista",
+        "transferToList": "Transferir a {list}"
     },
     "multiSelect": {
         "clear": "Limpiar",
@@ -378,7 +390,17 @@
         "collapse": "Contraer",
         "expand": "Expandir",
         "filter": "Filtrar",
-        "filterTree": "Filtrar árbol"
+        "filterLabel": "Filtrar {tree}",
+        "filterTree": "Filtrar árbol",
+        "loadError": "No se pudieron cargar los elementos de {node}",
+        "loadingNode": "Cargando {node}",
+        "movedAfter": "{node} se movió después de {target}",
+        "movedBefore": "{node} se movió antes de {target}",
+        "movedInto": "{node} se movió dentro de {target}",
+        "noData": "No hay datos",
+        "noMatches": "No hay elementos coincidentes",
+        "results": "{count, plural, =1 {# resultado} other {# resultados}}",
+        "retryLoading": "Reintentar cargar {node}"
     },
     "window": {
         "close": "Cerrar",

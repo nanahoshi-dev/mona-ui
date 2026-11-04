@@ -94,12 +94,20 @@ describe("TreeViewComponent", () => {
     describe("i18n & messages", () => {
         it("provides default messages", () => {
             const internals = component as unknown as TreeViewComponentInternals;
-            expect(internals.messages()).toEqual({
+            const messages = internals.messages();
+            expect(messages).toMatchObject({
                 collapse: "Collapse",
                 expand: "Expand",
-                filter: "Filter",
-                filterTree: "Filter tree"
+                filterTree: "Filter tree",
+                noData: "No data",
+                noMatches: "No matching items"
             });
+            expect(messages.filterLabel("Files")).toBe("Filter Files");
+            expect(messages.loadError("Fruits")).toBe("Couldn't load the items in Fruits");
+            expect(messages.loadingNode("Fruits")).toBe("Loading Fruits");
+            expect(messages.results(1)).toBe("1 result");
+            expect(messages.results(3)).toBe("3 results");
+            expect(messages.retryLoading("Fruits")).toBe("Retry loading Fruits");
         });
 
         it("derives filterAriaLabel from ariaLabel and messages", () => {
@@ -123,6 +131,7 @@ describe("TreeViewComponent", () => {
                         collapse: "طي",
                         expand: "توسيع",
                         filter: "تصفية",
+                        filterLabel: (tree: string) => `تصفية ${tree}`,
                         filterTree: "تصفية الشجرة"
                     }
                 }

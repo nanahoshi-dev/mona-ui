@@ -160,7 +160,6 @@ describe("ListViewComponent no-data template", () => {
 
 @Component({
     imports: [ListViewComponent],
-    providers: [ListService],
     template: ` <mona-list-view [items]="items" textField="name" [height]="'100px'"></mona-list-view> `
 })
 class ScrollBottomTestComponent {
@@ -221,7 +220,6 @@ describe("ListViewComponent scrollBottom", () => {
 
 @Component({
     imports: [ListViewComponent, ListViewNavigableDirective],
-    providers: [ListService],
     template: `
         <mona-list-view
             [items]="data"

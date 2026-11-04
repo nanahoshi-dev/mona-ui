@@ -4,10 +4,14 @@ import { TreeService } from "../../services/tree.service";
 
 import { TreeNodeComponent } from "./tree-node.component";
 
+interface TestItem {
+    readonly id: string;
+}
+
 describe("TreeNodeComponent", () => {
-    let component: TreeNodeComponent<any>;
-    let fixture: ComponentFixture<TreeNodeComponent<any>>;
-    let treeService: TreeService<any>;
+    let component: TreeNodeComponent<TestItem>;
+    let fixture: ComponentFixture<TreeNodeComponent<TestItem>>;
+    let treeService: TreeService<TestItem>;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -15,7 +19,7 @@ describe("TreeNodeComponent", () => {
             providers: [TreeService]
         }).compileComponents();
 
-        fixture = TestBed.createComponent(TreeNodeComponent);
+        fixture = TestBed.createComponent(TreeNodeComponent<TestItem>);
         component = fixture.componentInstance;
         treeService = fixture.debugElement.injector.get(TreeService);
         fixture.detectChanges();
@@ -35,7 +39,8 @@ describe("TreeNodeComponent", () => {
         const row = fixture.nativeElement.querySelector("div") as HTMLElement;
         expect(row.classList.contains("bg-active")).toBe(true);
         expect(row.classList.contains("text-foreground")).toBe(true);
-        expect(row.classList.contains("inset-ring-focus-indicator/35")).toBe(true);
+        expect(row.classList.contains("inset-ring-2")).toBe(true);
+        expect(row.classList.contains("inset-ring-focus-indicator")).toBe(true);
         expect(row.classList.contains("bg-primary")).toBe(false);
     });
 

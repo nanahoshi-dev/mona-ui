@@ -284,17 +284,48 @@ export const RU_RU_MESSAGES = {
     },
     list: {
         filterList: "Фильтр списка",
-        noData: "Нет данных"
+        loading: "Загрузка",
+        noData: "Нет данных",
+        pagerLabel: (list: string) => `Навигация по страницам: ${list}`
     },
     listBox: {
         clearSelection: "Очистить выбор",
+        itemsMoved: (position: number, total: number) =>
+            `Перемещено на позицию ${localizeNumber(position)} из ${localizeNumber(total)}`,
+        itemsRemoved: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `Удалён ${localizeNumber(count)} элемент`,
+                few: () => `Удалено ${localizeNumber(count)} элемента`,
+                many: () => `Удалено ${localizeNumber(count)} элементов`,
+                other: () => `Удалено ${localizeNumber(count)} элемента`
+            }),
+        itemsTransferred: (count: number, list: string) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} элемент перенесён в список «${list}»`,
+                few: () => `${localizeNumber(count)} элемента перенесено в список «${list}»`,
+                many: () => `${localizeNumber(count)} элементов перенесено в список «${list}»`,
+                other: () => `${localizeNumber(count)} элемента перенесено в список «${list}»`
+            }),
+        itemsTransferredToOtherList: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} элемент перенесён в другой список`,
+                few: () => `${localizeNumber(count)} элемента перенесено в другой список`,
+                many: () => `${localizeNumber(count)} элементов перенесено в другой список`,
+                other: () => `${localizeNumber(count)} элемента перенесено в другой список`
+            }),
         moveDown: "Переместить вниз",
         moveUp: "Переместить вверх",
         remove: "Удалить",
+        selectionCleared: "Выбор очищен",
+        toolbarLabel: (list: string) => `Действия: ${list}`,
         transferAllFrom: "Перенести всё из другого списка",
+        transferAllFromList: (list: string) => `Перенести всё из списка «${list}»`,
         transferAllTo: "Перенести всё в другой список",
+        transferAllToList: (list: string) => `Перенести всё в список «${list}»`,
         transferFrom: "Перенести из другого списка",
-        transferTo: "Перенести в другой список"
+        transferFromList: (list: string) => `Перенести из списка «${list}»`,
+        transferTo: "Перенести в другой список",
+        transferToList: (list: string) => `Перенести в список «${list}»`
     },
     multiSelect: {
         clear: "Очистить",
@@ -411,7 +442,23 @@ export const RU_RU_MESSAGES = {
         collapse: "Свернуть",
         expand: "Развернуть",
         filter: "Фильтр",
-        filterTree: "Фильтр дерева"
+        filterLabel: (tree: string) => `Фильтр: ${tree}`,
+        filterTree: "Фильтр дерева",
+        loadError: (node: string) => `Не удалось загрузить элементы «${node}»`,
+        loadingNode: (node: string) => `Загрузка «${node}»`,
+        movedAfter: (node: string, target: string) => `Элемент ${node} перемещён после ${target}`,
+        movedBefore: (node: string, target: string) => `Элемент ${node} перемещён перед ${target}`,
+        movedInto: (node: string, target: string) => `Элемент ${node} перемещён в ${target}`,
+        noData: "Нет данных",
+        noMatches: "Нет подходящих элементов",
+        results: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} результат`,
+                few: () => `${localizeNumber(count)} результата`,
+                many: () => `${localizeNumber(count)} результатов`,
+                other: () => `${localizeNumber(count)} результата`
+            }),
+        retryLoading: (node: string) => `Повторить загрузку «${node}»`
     },
     window: {
         close: "Закрыть",

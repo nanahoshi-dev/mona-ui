@@ -257,17 +257,29 @@
     },
     "list": {
         "filterList": "リストをフィルター",
-        "noData": "データがありません"
+        "loading": "読み込み中",
+        "noData": "データがありません",
+        "pagerLabel": "{list}のページ送り"
     },
     "listBox": {
         "clearSelection": "選択をクリア",
+        "itemsMoved": "{total}件中{position}番目に移動しました",
+        "itemsRemoved": "{count}件を削除しました",
+        "itemsTransferred": "{count}件を{list}へ移動しました",
+        "itemsTransferredToOtherList": "{count}件をもう一方のリストへ移動しました",
         "moveDown": "下へ移動",
         "moveUp": "上へ移動",
         "remove": "削除",
+        "selectionCleared": "選択をクリアしました",
+        "toolbarLabel": "{list}の操作",
         "transferAllFrom": "すべてをもう一方のリストから移動",
+        "transferAllFromList": "すべてを{list}から移動",
         "transferAllTo": "すべてをもう一方のリストへ移動",
+        "transferAllToList": "すべてを{list}へ移動",
         "transferFrom": "もう一方のリストから移動",
-        "transferTo": "もう一方のリストへ移動"
+        "transferFromList": "{list}から移動",
+        "transferTo": "もう一方のリストへ移動",
+        "transferToList": "{list}へ移動"
     },
     "multiSelect": {
         "clear": "クリア",
@@ -378,7 +390,17 @@
         "collapse": "折りたたむ",
         "expand": "展開",
         "filter": "フィルター",
-        "filterTree": "ツリーをフィルター"
+        "filterLabel": "{tree}をフィルター",
+        "filterTree": "ツリーをフィルター",
+        "loadError": "{node}の項目を読み込めませんでした",
+        "loadingNode": "{node}を読み込み中",
+        "movedAfter": "{node} を {target} の後に移動しました",
+        "movedBefore": "{node} を {target} の前に移動しました",
+        "movedInto": "{node} を {target} の中に移動しました",
+        "noData": "データがありません",
+        "noMatches": "一致する項目はありません",
+        "results": "{count}件の結果",
+        "retryLoading": "{node}の読み込みを再試行"
     },
     "window": {
         "close": "閉じる",

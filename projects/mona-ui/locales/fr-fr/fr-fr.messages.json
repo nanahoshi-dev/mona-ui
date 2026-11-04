@@ -257,17 +257,29 @@
     },
     "list": {
         "filterList": "Filtrer la liste",
-        "noData": "Aucune donnée"
+        "loading": "Chargement",
+        "noData": "Aucune donnée",
+        "pagerLabel": "Pagination de {list}"
     },
     "listBox": {
         "clearSelection": "Effacer la sélection",
+        "itemsMoved": "Déplacé en position {position} sur {total}",
+        "itemsRemoved": "{count, plural, =1 {# élément retiré} other {# éléments retirés}}",
+        "itemsTransferred": "{count, plural, =1 {# élément transféré vers {list}} other {# éléments transférés vers {list}}}",
+        "itemsTransferredToOtherList": "{count, plural, =1 {# élément transféré vers l’autre liste} other {# éléments transférés vers l’autre liste}}",
         "moveDown": "Déplacer vers le bas",
         "moveUp": "Déplacer vers le haut",
         "remove": "Retirer",
+        "selectionCleared": "Sélection effacée",
+        "toolbarLabel": "Actions de {list}",
         "transferAllFrom": "Tout transférer depuis l’autre liste",
+        "transferAllFromList": "Tout transférer depuis {list}",
         "transferAllTo": "Tout transférer vers l’autre liste",
+        "transferAllToList": "Tout transférer vers {list}",
         "transferFrom": "Transférer depuis l’autre liste",
-        "transferTo": "Transférer vers l’autre liste"
+        "transferFromList": "Transférer depuis {list}",
+        "transferTo": "Transférer vers l’autre liste",
+        "transferToList": "Transférer vers {list}"
     },
     "multiSelect": {
         "clear": "Effacer",
@@ -378,7 +390,17 @@
         "collapse": "Réduire",
         "expand": "Développer",
         "filter": "Filtrer",
-        "filterTree": "Filtrer l’arborescence"
+        "filterLabel": "Filtrer {tree}",
+        "filterTree": "Filtrer l’arborescence",
+        "loadError": "Impossible de charger les éléments de {node}",
+        "loadingNode": "Chargement de {node}",
+        "movedAfter": "{node} déplacé après {target}",
+        "movedBefore": "{node} déplacé avant {target}",
+        "movedInto": "{node} déplacé dans {target}",
+        "noData": "Aucune donnée",
+        "noMatches": "Aucun élément correspondant",
+        "results": "{count, plural, one {# résultat} other {# résultats}}",
+        "retryLoading": "Réessayer de charger {node}"
     },
     "window": {
         "close": "Fermer",

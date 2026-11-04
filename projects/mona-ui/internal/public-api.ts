@@ -17,6 +17,7 @@ export * from "./utils/core/Action";
 export * from "./utils/core/createElementControlId";
 export * from "./utils/core/focusCanReturn";
 export * from "./utils/core/focusElement";
+export * from "./utils/core/injectLabelledByText";
 export * from "./utils/core/rxFromResize";
 export * from "./utils/core/rxTimeout";
 export * from "./utils/core/VariantInputs";

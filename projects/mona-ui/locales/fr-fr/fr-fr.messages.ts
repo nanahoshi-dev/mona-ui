@@ -7,6 +7,15 @@ function localizeNumber(value: number, options?: Intl.NumberFormatOptions): stri
     return formatNumber(value, "fr-FR", options);
 }
 
+const PLURAL_RULES = new Intl.PluralRules("fr-FR");
+
+function plural(
+    category: Intl.LDMLPluralRule,
+    forms: Partial<Record<Intl.LDMLPluralRule, () => string>> & { readonly other: () => string }
+): string {
+    return (forms[category] ?? forms.other)();
+}
+
 export const FR_FR_MESSAGES = {
     autoComplete: {
         clear: "Effacer"
@@ -279,17 +288,37 @@ export const FR_FR_MESSAGES = {
     },
     list: {
         filterList: "Filtrer la liste",
-        noData: "Aucune donnée"
+        loading: "Chargement",
+        noData: "Aucune donnée",
+        pagerLabel: (list: string) => `Pagination de ${list}`
     },
     listBox: {
         clearSelection: "Effacer la sélection",
+        itemsMoved: (position: number, total: number) =>
+            `Déplacé en position ${localizeNumber(position)} sur ${localizeNumber(total)}`,
+        itemsRemoved: (count: number) =>
+            count === 1 ? `${localizeNumber(count)} élément retiré` : `${localizeNumber(count)} éléments retirés`,
+        itemsTransferred: (count: number, list: string) =>
+            count === 1
+                ? `${localizeNumber(count)} élément transféré vers ${list}`
+                : `${localizeNumber(count)} éléments transférés vers ${list}`,
+        itemsTransferredToOtherList: (count: number) =>
+            count === 1
+                ? `${localizeNumber(count)} élément transféré vers l’autre liste`
+                : `${localizeNumber(count)} éléments transférés vers l’autre liste`,
         moveDown: "Déplacer vers le bas",
         moveUp: "Déplacer vers le haut",
         remove: "Retirer",
+        selectionCleared: "Sélection effacée",
+        toolbarLabel: (list: string) => `Actions de ${list}`,
         transferAllFrom: "Tout transférer depuis l’autre liste",
+        transferAllFromList: (list: string) => `Tout transférer depuis ${list}`,
         transferAllTo: "Tout transférer vers l’autre liste",
+        transferAllToList: (list: string) => `Tout transférer vers ${list}`,
         transferFrom: "Transférer depuis l’autre liste",
-        transferTo: "Transférer vers l’autre liste"
+        transferFromList: (list: string) => `Transférer depuis ${list}`,
+        transferTo: "Transférer vers l’autre liste",
+        transferToList: (list: string) => `Transférer vers ${list}`
     },
     multiSelect: {
         clear: "Effacer",
@@ -410,7 +439,21 @@ export const FR_FR_MESSAGES = {
         collapse: "Réduire",
         expand: "Développer",
         filter: "Filtrer",
-        filterTree: "Filtrer l’arborescence"
+        filterLabel: (tree: string) => `Filtrer ${tree}`,
+        filterTree: "Filtrer l’arborescence",
+        loadError: (node: string) => `Impossible de charger les éléments de ${node}`,
+        loadingNode: (node: string) => `Chargement de ${node}`,
+        movedAfter: (node: string, target: string) => `${node} déplacé après ${target}`,
+        movedBefore: (node: string, target: string) => `${node} déplacé avant ${target}`,
+        movedInto: (node: string, target: string) => `${node} déplacé dans ${target}`,
+        noData: "Aucune donnée",
+        noMatches: "Aucun élément correspondant",
+        results: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} résultat`,
+                other: () => `${localizeNumber(count)} résultats`
+            }),
+        retryLoading: (node: string) => `Réessayer de charger ${node}`
     },
     window: {
         close: "Fermer",

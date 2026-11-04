@@ -1,7 +1,7 @@
-import { afterNextRender, DestroyRef, Directive, effect, inject, input, output, untracked } from "@angular/core";
+import { Directive, effect, inject, input, output, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import {
-    DraggableOptions,
+    type DraggableOptions,
     NodeDragEndEvent,
     NodeDragEvent,
     NodeDragStartEvent,
@@ -18,7 +18,6 @@ export class TreeViewDragAndDropDirective<T> {
     readonly #defaultOptions: DraggableOptions = {
         enabled: true
     };
-    readonly #destroyRef = inject(DestroyRef);
     readonly #treeService: TreeService<T> = inject(TreeService);
     readonly #treeView = inject(TreeViewComponent<T>);
 
@@ -28,7 +27,7 @@ export class TreeViewDragAndDropDirective<T> {
     public readonly nodeDrag = output<NodeDragEvent<T>>();
 
     /**
-     * @description Emitted when a node drag ends.
+     * @description Emitted when a node drag ends, dropped or not. Not cancelable: the drag is over either way.
      */
     public readonly nodeDragEnd = output<NodeDragEndEvent<T>>();
 
@@ -38,7 +37,9 @@ export class TreeViewDragAndDropDirective<T> {
     public readonly nodeDragStart = output<NodeDragStartEvent<T>>();
 
     /**
-     * @description Emitted when a node is dropped.
+     * @description Emitted when a node is dropped on another node, or moved with Ctrl+Shift+Arrow (Cmd+Shift+Arrow on
+     * macOS). The tree doesn't move the node: the handler applies the move (with `moveTreeNode`,
+     * `moveFlatTreeNode` or `event.treeView.moveNode`). Call `preventDefault()` when the move isn't applied.
      */
     public readonly nodeDrop = output<NodeDropEvent<T>>();
 
@@ -64,23 +65,16 @@ export class TreeViewDragAndDropDirective<T> {
                 }
             });
         });
-
-        afterNextRender({
-            read: () => this.setSubscriptions()
-        });
-    }
-
-    public setSubscriptions(): void {
-        this.#treeService.nodeDrag$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(e => {
+        this.#treeService.nodeDrag$.pipe(takeUntilDestroyed()).subscribe(e => {
             this.nodeDrag.emit(e.dragEvent);
         });
-        this.#treeService.nodeDragEnd$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(e => {
+        this.#treeService.nodeDragEnd$.pipe(takeUntilDestroyed()).subscribe(e => {
             this.nodeDragEnd.emit(e);
         });
-        this.#treeService.nodeDragStart$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(e => {
+        this.#treeService.nodeDragStart$.pipe(takeUntilDestroyed()).subscribe(e => {
             this.nodeDragStart.emit(e);
         });
-        this.#treeService.nodeDrop$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(e => {
+        this.#treeService.nodeDrop$.pipe(takeUntilDestroyed()).subscribe(e => {
             const event = new NodeDropEvent({
                 event: e.event,
                 position: e.position,
@@ -89,6 +83,9 @@ export class TreeViewDragAndDropDirective<T> {
                 treeView: this.#treeView
             });
             this.nodeDrop.emit(event);
+            if (event.isDefaultPrevented()) {
+                e.preventDefault();
+            }
         });
     }
 }

@@ -1,14 +1,15 @@
-import { FocusMonitor } from "@angular/cdk/a11y";
+import { FocusMonitor, LiveAnnouncer } from "@angular/cdk/a11y";
 import {
     afterNextRender,
-    ChangeDetectionStrategy,
     Component,
     computed,
     contentChild,
     DestroyRef,
+    DOCUMENT,
     effect,
     ElementRef,
     inject,
+    Injector,
     input,
     NgZone,
     TemplateRef,
@@ -17,48 +18,81 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { isTypeaheadKey, setupTypeahead } from "@nanahoshi/mona-ui/internal";
-import { asapScheduler, filter, fromEvent, Subject, switchMap, takeWhile } from "rxjs";
+import { asapScheduler, filter, fromEvent, merge, Subject, switchMap, takeWhile } from "rxjs";
 import { TreeNodeTemplateDirective } from "../../directives/tree-node-template.directive";
+import { TREE_DEFAULT_MESSAGES } from "../../i18n/tree.default-messages";
 import { NodeCheckEvent } from "../../models/NodeCheckEvent";
+import { NodeDropEventSansTree } from "../../models/NodeDropEvent";
 import { NodeSelectEvent } from "../../models/NodeSelectEvent";
+import type { TreeKeyboardMove, TreeKeyboardMoveDirection } from "../../models/TreeKeyboardMove";
 import { TreeNode } from "../../models/TreeNode";
 import { TreeService } from "../../services/tree.service";
 import { treeBaseThemeVariants } from "../../styles/tree.styles";
 import { SubTreeComponent } from "../sub-tree/sub-tree.component";
 import { TreeDropHintComponent } from "../tree-drop-hint/tree-drop-hint.component";
 
+/** Where a node sits: its parent (by identity, so a data refresh doesn't count as a move) and its index there. */
+interface NodeLocation {
+    readonly index: number;
+    readonly parent: unknown;
+}
+
+/** The keyboard equivalents of dragging, listed on the tree while dragging is on. */
+const MOVE_KEY_SHORTCUTS =
+    "Control+Shift+ArrowUp Control+Shift+ArrowDown Control+Shift+ArrowLeft Control+Shift+ArrowRight";
+
 @Component({
     selector: "mona-tree",
     imports: [SubTreeComponent, TreeDropHintComponent],
     templateUrl: "./tree.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         "[class]": "baseClass()",
         "[attr.role]": "'tree'",
         "[attr.tabindex]": "0",
         "[attr.aria-label]": "ariaLabel() || null",
-        "[attr.aria-multiselectable]": "treeService.selectableOptions().mode === 'multiple' || null",
-        "[attr.aria-activedescendant]": "activeDescendantId()"
+        "[attr.aria-labelledby]": "ariaLabelledBy() || null",
+        "[attr.aria-describedby]": "ariaDescribedBy() || null",
+        "[attr.aria-multiselectable]": "multiselectable()",
+        "[attr.aria-activedescendant]": "activeDescendantId()",
+        "[attr.aria-keyshortcuts]": "keyShortcuts()"
     }
 })
 export class TreeComponent<T> {
+    readonly #announcer = inject(LiveAnnouncer);
     readonly #destroyRef = inject(DestroyRef);
     readonly #direction = injectComponentDirection();
+    readonly #document = inject(DOCUMENT);
     readonly #focusMonitor = inject(FocusMonitor);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
+    readonly #injector = inject(Injector);
     readonly #typeaheadKey$ = new Subject<string>();
     readonly #zone: NgZone = inject(NgZone);
     #lastNavigatedNode: TreeNode<T> | null = null;
-    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly activeDescendantId = computed<string | null>(() => {
         const node = this.treeService.navigatedNode();
         return node === null ? null : this.treeService.getNodeElementId(node.uid);
     });
     protected readonly baseClass = computed(() => {
-        return treeBaseThemeVariants();
+        return treeBaseThemeVariants({ empty: this.treeService.viewNodeSet().isEmpty() });
     });
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
+    protected readonly keyShortcuts = computed(() =>
+        this.treeService.draggableOptions().enabled ? MOVE_KEY_SHORTCUTS : null
+    );
+    protected readonly messages = this.#i18n.componentMessages("treeView", TREE_DEFAULT_MESSAGES);
+    /**
+     * With checkboxes, nodes report `aria-checked` and not `aria-selected`, so the tree isn't multiselectable in the
+     * `aria-selected` sense.
+     */
+    protected readonly multiselectable = computed(() => {
+        const selectable = this.treeService.selectableOptions();
+        const checkable = this.treeService.checkableOptions().enabled;
+        return (!checkable && selectable.enabled && selectable.mode === "multiple") || null;
+    });
+    public readonly ariaDescribedBy = input<string>("");
     public readonly ariaLabel = input<string>("");
+    public readonly ariaLabelledBy = input<string>("");
     public readonly data = input<Iterable<T>>();
     public readonly nodeTemplate = contentChild(TreeNodeTemplateDirective, { read: TemplateRef });
     public readonly treeService: TreeService<T> = inject(TreeService);
@@ -91,16 +125,74 @@ export class TreeComponent<T> {
         });
     }
 
-    private handleMouseMoveWhileDragging(event: MouseEvent): void {
-        if (this.isMouseOutsideTree(event)) {
+    /**
+     * Once the tree has rendered after a keyboard move, finds out whether the `nodeDrop` handler applied it (through
+     * `data` or `moveNode`). A move that was applied keeps the node active, opens the node it went into, and is
+     * announced.
+     */
+    private afterKeyboardMove(node: TreeNode<T>, move: TreeKeyboardMove<T>, before: NodeLocation): void {
+        const movedNode = this.treeService.findCounterpart(node);
+        if (!movedNode) {
+            return;
+        }
+        const after = this.locationOf(movedNode);
+        if (after.parent === before.parent && after.index === before.index) {
+            return;
+        }
+        const targetNode = this.treeService.findCounterpart(move.targetNode);
+        if (move.position === "inside" && targetNode) {
+            this.treeService.toggleNodeExpand(targetNode, true);
+        }
+        this.treeService.navigatedNode.set(movedNode);
+        const messages = this.messages();
+        const text = this.treeService.getNodeText(movedNode);
+        const target = targetNode ? this.treeService.getNodeText(targetNode) : "";
+        const announcement =
+            move.position === "inside"
+                ? messages.movedInto(text, target)
+                : move.position === "before"
+                  ? messages.movedBefore(text, target)
+                  : messages.movedAfter(text, target);
+        this.#announcer.announce(announcement, "polite");
+    }
+
+    /** Ctrl+Shift+Arrow (Cmd+Shift+Arrow on macOS) moves the active node while dragging is on. */
+    private handleMoveKey(event: KeyboardEvent): boolean {
+        if (!this.treeService.draggableOptions().enabled) {
+            return false;
+        }
+        if (!(event.ctrlKey || event.metaKey) || !event.shiftKey || event.altKey) {
+            return false;
+        }
+        const direction = this.moveDirection(event.key);
+        if (direction === null) {
+            return false;
+        }
+        event.preventDefault();
+        const node = this.treeService.navigatedNode();
+        const move = node ? this.treeService.getKeyboardMove(node, direction) : null;
+        if (node && move) {
+            this.moveWithKeyboard(event, node, move);
+        }
+        return true;
+    }
+
+    private handlePointerMoveWhileDragging(event: MouseEvent | TouchEvent): void {
+        const point = "touches" in event ? (event.touches[0] ?? event.changedTouches[0]) : event;
+        if (!point) {
+            return;
+        }
+        if (this.isPointerOutsideTree(point.clientY)) {
             this.treeService.dropPositionChange$.next({
                 targetNode: null,
                 position: "outside"
             });
             return;
         }
-        const element = event.target as HTMLElement;
-        const closest = element.closest("li");
+        // A touch keeps targeting the element it started on, so the element under the finger is looked up.
+        const element =
+            "touches" in event ? this.#document.elementFromPoint(point.clientX, point.clientY) : event.target;
+        const closest = element instanceof Element ? element.closest("li") : null;
         if (!closest) {
             return;
         }
@@ -116,27 +208,84 @@ export class TreeComponent<T> {
         if (!nodeElement) {
             return;
         }
-        this.notifyDropPositionChange(event, nodeElement, node);
+        this.notifyDropPositionChange(point.clientY, nodeElement, node);
     }
 
-    private isMouseOutsideTree(event: MouseEvent): boolean {
+    private isPointerOutsideTree(clientY: number): boolean {
         const rect = this.#hostElementRef.nativeElement.getBoundingClientRect();
-        return event.clientY < rect.top || event.clientY > rect.bottom;
+        return clientY < rect.top || clientY > rect.bottom;
     }
 
-    private notifyDropPositionChange(event: MouseEvent, nodeElement: Element, node: TreeNode<T>): void {
+    /**
+     * Whether a key event is meant for the tree: from the tree itself or one of its nodes. Keys pressed in controls
+     * of a node template (or in a tree nested in one) are left to those controls.
+     */
+    private isTreeKeyTarget(event: KeyboardEvent): boolean {
+        const host = this.#hostElementRef.nativeElement;
+        const target = event.target;
+        if (!(target instanceof HTMLElement) || target === host) {
+            return true;
+        }
+        const nodeContent = target.closest("mona-tree-node");
+        return nodeContent === null && target.closest("mona-tree") === host;
+    }
+
+    private locationOf(node: TreeNode<T>): NodeLocation {
+        const siblings = node.parent ? node.parent.children() : this.treeService.nodeSet();
+        return {
+            index: siblings.toArray().indexOf(node),
+            parent: node.parent ? this.treeService.getNodeIdentity(node.parent) : null
+        };
+    }
+
+    private moveDirection(key: string): TreeKeyboardMoveDirection | null {
+        const isRtl = this.isRtl();
+        switch (key) {
+            case "ArrowUp":
+                return "up";
+            case "ArrowDown":
+                return "down";
+            case "ArrowRight":
+                return isRtl ? "out" : "in";
+            case "ArrowLeft":
+                return isRtl ? "in" : "out";
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Asks for a keyboard move the way a drop does: `nodeDrop` is emitted, and its handler applies the move. The
+     * keyboard event is the drop event's original event.
+     */
+    private moveWithKeyboard(event: KeyboardEvent, node: TreeNode<T>, move: TreeKeyboardMove<T>): void {
+        const before = this.locationOf(node);
+        const dropEvent = new NodeDropEventSansTree({
+            event,
+            position: move.position,
+            sourceNode: node,
+            targetNode: move.targetNode
+        });
+        this.treeService.nodeDrop$.next(dropEvent);
+        if (dropEvent.isDefaultPrevented()) {
+            return;
+        }
+        afterNextRender(() => this.afterKeyboardMove(node, move, before), { injector: this.#injector });
+    }
+
+    private notifyDropPositionChange(clientY: number, nodeElement: Element, node: TreeNode<T>): void {
         const rect = nodeElement.getBoundingClientRect();
-        if (event.clientY > rect.top && event.clientY - rect.top <= 8) {
+        if (clientY > rect.top && clientY - rect.top <= 8) {
             this.treeService.dropPositionChange$.next({
                 targetNode: node,
                 position: "before"
             });
-        } else if (event.clientY < rect.bottom && rect.bottom - event.clientY <= 8) {
+        } else if (clientY < rect.bottom && rect.bottom - clientY <= 8) {
             this.treeService.dropPositionChange$.next({
                 targetNode: node,
                 position: "after"
             });
-        } else if (event.clientY < rect.top || event.clientY > rect.bottom) {
+        } else if (clientY < rect.top || clientY > rect.bottom) {
             this.treeService.dropPositionChange$.next({
                 targetNode: null,
                 position: "outside"
@@ -158,8 +307,11 @@ export class TreeComponent<T> {
                     asapScheduler.schedule(() => {
                         if (this.treeService.navigatedNode() === null) {
                             if (this.#lastNavigatedNode !== null) {
-                                this.treeService.navigatedNode.set(this.#lastNavigatedNode);
-                            } else {
+                                this.treeService.navigatedNode.set(
+                                    this.treeService.findCounterpart(this.#lastNavigatedNode)
+                                );
+                            }
+                            if (this.treeService.navigatedNode() === null) {
                                 this.treeService.navigate("next");
                             }
                         }
@@ -186,8 +338,18 @@ export class TreeComponent<T> {
 
     private setKeydownSubscription(): void {
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .pipe(
+                filter(event => !event.isComposing && this.isTreeKeyTarget(event)),
+                takeUntilDestroyed(this.#destroyRef)
+            )
             .subscribe(event => {
+                if (this.handleMoveKey(event)) {
+                    return;
+                }
+                // Keys with Ctrl, Alt or Meta are shortcuts, left to the page and the browser.
+                if (event.ctrlKey || event.metaKey || event.altKey) {
+                    return;
+                }
                 const navigatedNode = this.treeService.navigatedNode();
                 const isRtl = this.isRtl();
                 const collapseKey = isRtl ? "ArrowRight" : "ArrowLeft";
@@ -199,17 +361,16 @@ export class TreeComponent<T> {
                     event.preventDefault();
                     this.treeService.navigate("next");
                 } else if (event.key === collapseKey) {
-                    // WAI-ARIA tree: collapse an open node, otherwise move to the parent.
+                    // WAI-ARIA tree: collapse an open node, otherwise (closed, an end node, a node that can't be
+                    // collapsed) move to the parent.
                     event.preventDefault();
                     if (!navigatedNode) {
                         return;
                     }
-                    const collapsible =
-                        this.treeService.hasChildren(navigatedNode) && this.treeService.isExpanded(navigatedNode);
-                    if (collapsible && this.treeService.toggleNodeExpand(navigatedNode, false)) {
+                    if (this.treeService.toggleNodeExpand(navigatedNode, false)) {
                         return;
                     }
-                    if (!collapsible && navigatedNode.parent) {
+                    if (navigatedNode.parent) {
                         this.treeService.navigatedNode.set(navigatedNode.parent);
                     }
                 } else if (event.key === expandKey) {
@@ -267,14 +428,18 @@ export class TreeComponent<T> {
                     if (selectableOptions.childrenOnly && this.treeService.hasChildren(navigatedNode)) {
                         return;
                     }
+                    if (!this.treeService.selectionWouldChange(navigatedNode)) {
+                        return;
+                    }
                     const nodeSelectEvent = new NodeSelectEvent(navigatedNode, event);
                     this.treeService.nodeSelect$.next(nodeSelectEvent);
-                    if (!nodeSelectEvent.isDefaultPrevented()) {
-                        const newSelected = !this.treeService.isSelected(navigatedNode);
-                        this.treeService.setNodeSelect(navigatedNode, newSelected);
+                    if (nodeSelectEvent.isDefaultPrevented()) {
+                        return;
+                    }
+                    if (this.treeService.setNodeSelect(navigatedNode, !this.treeService.isSelected(navigatedNode))) {
                         this.treeService.nodeSelectChange$.next({
                             node: navigatedNode,
-                            selected: newSelected
+                            selected: this.treeService.isSelected(navigatedNode)
                         });
                         this.treeService.notifySelectionChange(navigatedNode);
                     }
@@ -289,13 +454,14 @@ export class TreeComponent<T> {
                     takeUntilDestroyed(this.#destroyRef),
                     switchMap(dragging =>
                         dragging
-                            ? fromEvent<MouseEvent>(document, "mousemove").pipe(
-                                  takeWhile(() => this.treeService.dragging())
-                              )
+                            ? merge(
+                                  fromEvent<MouseEvent>(this.#document, "mousemove"),
+                                  fromEvent<TouchEvent>(this.#document, "touchmove", { passive: true })
+                              ).pipe(takeWhile(() => this.treeService.dragging()))
                             : []
                     )
                 )
-                .subscribe(event => this.handleMouseMoveWhileDragging(event));
+                .subscribe(event => this.handlePointerMoveWhileDragging(event));
         });
     }
 

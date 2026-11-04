@@ -1,8 +1,8 @@
-import { afterRenderEffect, Component, computed, ElementRef, inject, Signal } from "@angular/core";
+import { afterRenderEffect, Component, computed, ElementRef, inject, type Signal } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { LucideChevronRight } from "@lucide/angular";
 import { injectComponentDirection } from "@nanahoshi/mona-ui/i18n";
-import { DropPositionChangeEvent } from "../../models/DropPositionChangeEvent";
+import type { DropPositionChangeEvent } from "../../models/DropPositionChangeEvent";
 import { TreeService } from "../../services/tree.service";
 import { treeDropHintBaseThemeVariants, treeDropHintIconThemeVariants } from "../../styles/tree.styles";
 

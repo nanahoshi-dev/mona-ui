@@ -1,10 +1,10 @@
 import { PreventableEvent } from "@nanahoshi/mona-ui/common";
-import { NodeItem } from "./NodeItem";
+import type { NodeItem } from "./NodeItem";
 import { TreeNode } from "./TreeNode";
 
-export abstract class NodeEvent<T> extends PreventableEvent<MouseEvent | TouchEvent> {
+export abstract class NodeEvent<T, E extends Event = MouseEvent | TouchEvent> extends PreventableEvent<E> {
     readonly #node: TreeNode<T>;
-    protected constructor(type: string, node: TreeNode<T>, event: MouseEvent | TouchEvent) {
+    protected constructor(type: string, node: TreeNode<T>, event: E) {
         super(type, event);
         this.#node = node;
     }

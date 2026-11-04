@@ -5,8 +5,8 @@ import { ListService } from "../../services/list.service";
 import { ListItemComponent } from "./list-item.component";
 
 describe("ListItemComponent", () => {
-    let component: ListItemComponent<any>;
-    let fixture: ComponentFixture<ListItemComponent<any>>;
+    let component: ListItemComponent<string>;
+    let fixture: ComponentFixture<ListItemComponent<string>>;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -14,11 +14,11 @@ describe("ListItemComponent", () => {
             providers: [ListService]
         }).compileComponents();
 
-        fixture = TestBed.createComponent(ListItemComponent);
+        fixture = TestBed.createComponent(ListItemComponent<string>);
         component = fixture.componentInstance;
         fixture.componentRef.setInput(
             "item",
-            new ListItem<any>({
+            new ListItem<string>({
                 data: "test",
                 header: "test"
             })

@@ -11,6 +11,7 @@ export * from "./directives/list-box-no-data-template.directive";
 
 export * from "./models/ListBoxActionClickEvent";
 export * from "./models/ListBoxClearEvent";
+export type * from "./models/ListBoxItemTemplateContext";
 export * from "./models/ListBoxMoveEvent";
 export * from "./models/ListBoxRemoveEvent";
 export * from "./models/ListBoxSelectionEvent";

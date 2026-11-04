@@ -282,17 +282,31 @@ export const AR_SA_MESSAGES = {
     },
     list: {
         filterList: "تصفية القائمة",
-        noData: "لا توجد بيانات"
+        loading: "جارٍ التحميل",
+        noData: "لا توجد بيانات",
+        pagerLabel: (list: string) => `ترقيم صفحات ${list}`
     },
     listBox: {
         clearSelection: "إلغاء التحديد",
+        itemsMoved: (position: number, total: number) =>
+            `تم النقل إلى الموضع ${localizeNumber(position)} من ${localizeNumber(total)}`,
+        itemsRemoved: (count: number) => `عدد العناصر التي تمت إزالتها: ${localizeNumber(count)}`,
+        itemsTransferred: (count: number, list: string) => `عدد العناصر المنقولة إلى ${list}: ${localizeNumber(count)}`,
+        itemsTransferredToOtherList: (count: number) =>
+            `عدد العناصر المنقولة إلى القائمة الأخرى: ${localizeNumber(count)}`,
         moveDown: "تحريك لأسفل",
         moveUp: "تحريك لأعلى",
         remove: "إزالة",
+        selectionCleared: "تم إلغاء التحديد",
+        toolbarLabel: (list: string) => `إجراءات ${list}`,
         transferAllFrom: "نقل الكل من القائمة الأخرى",
+        transferAllFromList: (list: string) => `نقل الكل من ${list}`,
         transferAllTo: "نقل الكل إلى القائمة الأخرى",
+        transferAllToList: (list: string) => `نقل الكل إلى ${list}`,
         transferFrom: "نقل من القائمة الأخرى",
-        transferTo: "نقل إلى القائمة الأخرى"
+        transferFromList: (list: string) => `نقل من ${list}`,
+        transferTo: "نقل إلى القائمة الأخرى",
+        transferToList: (list: string) => `نقل إلى ${list}`
     },
     multiSelect: {
         clear: "مسح",
@@ -407,7 +421,17 @@ export const AR_SA_MESSAGES = {
         collapse: "طي",
         expand: "توسيع",
         filter: "تصفية:",
-        filterTree: "تصفية طريقة عرض الشجرة"
+        filterLabel: (tree: string) => `تصفية: ${tree}`,
+        filterTree: "تصفية طريقة عرض الشجرة",
+        loadError: (node: string) => `تعذّر تحميل عناصر ${node}`,
+        loadingNode: (node: string) => `جارٍ تحميل ${node}`,
+        movedAfter: (node: string, target: string) => `تم نقل ${node} بعد ${target}`,
+        movedBefore: (node: string, target: string) => `تم نقل ${node} قبل ${target}`,
+        movedInto: (node: string, target: string) => `تم نقل ${node} إلى داخل ${target}`,
+        noData: "لا توجد بيانات",
+        noMatches: "لا توجد عناصر مطابقة",
+        results: (count: number) => `عدد النتائج: ${localizeNumber(count)}`,
+        retryLoading: (node: string) => `إعادة محاولة تحميل ${node}`
     },
     window: {
         close: "إغلاق",

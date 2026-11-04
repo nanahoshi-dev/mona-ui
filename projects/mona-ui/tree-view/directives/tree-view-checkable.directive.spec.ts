@@ -27,7 +27,7 @@ class HostComponent {
 }
 
 describe("TreeViewCheckableDirective", () => {
-    let directive: TreeViewCheckableDirective<any>;
+    let directive: TreeViewCheckableDirective<TestItem>;
     beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [TreeService]

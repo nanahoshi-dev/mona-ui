@@ -6,7 +6,6 @@ import { ListViewNavigableDirective } from "./list-view-navigable.directive";
 
 @Component({
     imports: [ListViewNavigableDirective, ListViewComponent],
-    providers: [ListService],
     template: `
         <mona-list-view
             [items]="data"

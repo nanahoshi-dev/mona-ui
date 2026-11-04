@@ -5,9 +5,9 @@ import { ListService } from "./list.service";
 
 interface Product {
     readonly id: number;
+    readonly inStock?: boolean;
     readonly name: string;
     readonly price?: number | null;
-    readonly inStock?: boolean;
 }
 
 const PRODUCTS: readonly Product[] = [
@@ -201,6 +201,15 @@ describe("ListService", () => {
             expect(service.cycleThroughMatchedItems("m")?.data.name).toBe("Mouse");
             service.highlightedItem.set(service.cycleThroughMatchedItems("m"));
             expect(service.cycleThroughMatchedItems("m")?.data.name).toBe("Mouse");
+        });
+
+        it("keeps the active item while a longer buffer still matches it", () => {
+            service.highlightedItem.set(service.cycleThroughMatchedItems("m"));
+            expect(service.highlightedItem()?.data.name).toBe("Mouse");
+            expect(service.cycleThroughMatchedItems("mo")?.data.name).toBe("Mouse");
+            expect(service.cycleThroughMatchedItems("mon")?.data.name).toBe("Monitor");
+            // A single character still moves on to the next match.
+            expect(service.cycleThroughMatchedItems("m")?.data.name).toBe("Monitor");
         });
 
         it("never matches group headers", () => {

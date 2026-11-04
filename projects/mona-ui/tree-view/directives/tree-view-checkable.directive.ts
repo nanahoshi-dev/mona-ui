@@ -1,21 +1,25 @@
-import { DestroyRef, Directive, effect, inject, input, OnInit, output, untracked } from "@angular/core";
+import { Directive, effect, inject, input, output, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { CheckableOptions, NodeCheckEvent, NodeKeySelector, TreeService } from "@nanahoshi/mona-ui/internal/tree";
-import { sequenceEqual } from "@mirei/ts-collections";
-import { pairwise } from "rxjs";
+import {
+    type CheckableOptions,
+    type NodeCheckEvent,
+    type NodeKeySelector,
+    TreeService
+} from "@nanahoshi/mona-ui/internal/tree";
 
 @Directive({
     selector: "mona-tree-view[monaTreeViewCheckable]",
     exportAs: "monaTreeViewCheckable"
 })
-export class TreeViewCheckableDirective<T, K = T> implements OnInit {
+export class TreeViewCheckableDirective<T, K = T> {
     readonly #defaultOptions: CheckableOptions = {
         checkChildren: true,
+        checkDisabledChildren: false,
         checkParents: true,
+        childrenOnly: false,
         enabled: true,
         mode: "multiple"
     };
-    readonly #destroyRef = inject(DestroyRef);
     readonly #treeService: TreeService<T> = inject(TreeService);
 
     /**
@@ -31,7 +35,10 @@ export class TreeViewCheckableDirective<T, K = T> implements OnInit {
     public readonly checkedKeys = input<Iterable<K>>([]);
 
     /**
-     * @description Emitted when the checked keys change.
+     * @description Emitted with the checked keys when the user checks or unchecks a node, including the children and
+     * parents that check follows (`checkChildren`, `checkParents`). Not emitted for keys set through `checkedKeys`,
+     * nor for keys the tree derives on its own: checked parents of checked children set from code, lazily loaded
+     * children of a checked node, and ancestors after a drop. Those are reported with the next user change.
      */
     public readonly checkedKeysChange = output<Array<K>>();
 
@@ -47,7 +54,7 @@ export class TreeViewCheckableDirective<T, K = T> implements OnInit {
     public readonly nodeCheck = output<NodeCheckEvent<T>>();
 
     /**
-     * @description Configures check mode and whether checking a node also checks its children or parents. Merged over `{ checkChildren: true, checkParents: true, enabled: true, mode: "multiple" }` when applied bare.
+     * @description Configures check mode and whether checking a node also checks its children or parents. Merged over `{ checkChildren: true, checkDisabledChildren: false, checkParents: true, childrenOnly: false, enabled: true, mode: "multiple" }` when applied bare.
      * @default ""
      */
     public readonly options = input<Partial<CheckableOptions> | "">("", {
@@ -86,25 +93,9 @@ export class TreeViewCheckableDirective<T, K = T> implements OnInit {
                 this.#treeService.setHasCheckboxPredicate(hasCheckbox);
             });
         });
-    }
-
-    public ngOnInit(): void {
-        this.setNodeCheckSubscription();
-    }
-
-    private setNodeCheckSubscription(): void {
-        this.#treeService.checkedKeys$
-            .pipe(pairwise(), takeUntilDestroyed(this.#destroyRef))
-            .subscribe(([oldKeys, keys]) => {
-                const orderedOldKeys = oldKeys.orderBy(k => k);
-                const orderedKeys = keys.orderBy(k => k);
-                if (sequenceEqual(orderedOldKeys, orderedKeys)) {
-                    return;
-                }
-                this.checkedKeysChange.emit(keys.toArray());
-            });
-        this.#treeService.nodeCheck$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
-            this.nodeCheck.emit(event);
-        });
+        this.#treeService.checkedKeysChange$
+            .pipe(takeUntilDestroyed())
+            .subscribe(keys => this.checkedKeysChange.emit(keys.toArray() as K[]));
+        this.#treeService.nodeCheck$.pipe(takeUntilDestroyed()).subscribe(event => this.nodeCheck.emit(event));
     }
 }

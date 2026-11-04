@@ -27,7 +27,7 @@ class HostComponent {
 }
 
 describe("TreeViewDragAndDropDirective", () => {
-    let directive: TreeViewDragAndDropDirective<any>;
+    let directive: TreeViewDragAndDropDirective<TestItem>;
     beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [TreeService, { provide: TreeViewComponent, useValue: {} }]

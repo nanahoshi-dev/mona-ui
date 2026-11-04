@@ -37,7 +37,7 @@ export class FilterInputComponent implements OnInit {
         const controls = this.controls();
         const ariaLabel = this.ariaLabel() || null;
         if (!controls) {
-            return { "aria-label": ariaLabel };
+            return { "aria-label": ariaLabel, "aria-controls": this.ariaControls() || null };
         }
         return {
             role: "combobox",
@@ -56,10 +56,24 @@ export class FilterInputComponent implements OnInit {
     public readonly activeDescendant = input<string | null>("");
 
     /**
+     * @description Id of the element this input filters, exposed as `aria-controls`. Unlike `controls`, the input
+     * stays a text box: focus moves to the filtered element to navigate it.
+     * @default ""
+     */
+    public readonly ariaControls = input("");
+
+    /**
      * @description Accessible name of the input. The placeholder is not a reliable label, so set this whenever possible.
      * @default ""
      */
     public readonly ariaLabel = input("");
+
+    /**
+     * @description Focuses the input when it renders, as a popup's filter does. Turn it off for an input that is part
+     * of the page, so it doesn't take focus on load.
+     * @default true
+     */
+    public readonly autoFocus = input(true);
 
     /**
      * @description Id of the list this input filters. When set, the input is exposed as a combobox controlling it.
@@ -83,7 +97,9 @@ export class FilterInputComponent implements OnInit {
         afterNextRender({
             read: () => {
                 const input = this.#hostElementRef.nativeElement.querySelector("input") as HTMLInputElement;
-                input.focus();
+                if (this.autoFocus()) {
+                    input.focus();
+                }
                 fromEvent<KeyboardEvent>(input, "keydown")
                     .pipe(takeUntilDestroyed(this.#destroyRef))
                     .subscribe((event: KeyboardEvent) => {

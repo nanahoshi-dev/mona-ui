@@ -274,17 +274,30 @@ export const KO_KR_MESSAGES = {
     },
     list: {
         filterList: "목록 필터",
-        noData: "데이터 없음"
+        loading: "로드 중",
+        noData: "데이터 없음",
+        pagerLabel: (list: string) => `${list} 페이지 탐색`
     },
     listBox: {
         clearSelection: "선택 해제",
+        itemsMoved: (position: number, total: number) =>
+            `${localizeNumber(total)}개 중 ${localizeNumber(position)}번째 위치로 이동됨`,
+        itemsRemoved: (count: number) => `${localizeNumber(count)}개 항목 제거됨`,
+        itemsTransferred: (count: number, list: string) => `${localizeNumber(count)}개 항목을 ${list}(으)로 이동함`,
+        itemsTransferredToOtherList: (count: number) => `${localizeNumber(count)}개 항목을 다른 목록으로 이동함`,
         moveDown: "아래로 이동",
         moveUp: "위로 이동",
         remove: "제거",
+        selectionCleared: "선택 해제됨",
+        toolbarLabel: (list: string) => `${list} 작업`,
         transferAllFrom: "다른 목록에서 모두 가져오기",
+        transferAllFromList: (list: string) => `${list}에서 모두 가져오기`,
         transferAllTo: "모두 다른 목록으로 이동",
+        transferAllToList: (list: string) => `모두 ${list}(으)로 이동`,
         transferFrom: "다른 목록에서 가져오기",
-        transferTo: "다른 목록으로 이동"
+        transferFromList: (list: string) => `${list}에서 가져오기`,
+        transferTo: "다른 목록으로 이동",
+        transferToList: (list: string) => `${list}(으)로 이동`
     },
     multiSelect: {
         clear: "지우기",
@@ -398,7 +411,17 @@ export const KO_KR_MESSAGES = {
         collapse: "축소",
         expand: "확장",
         filter: "필터:",
-        filterTree: "트리 뷰 필터"
+        filterLabel: (tree: string) => `필터: ${tree}`,
+        filterTree: "트리 뷰 필터",
+        loadError: (node: string) => `${node}의 항목을 불러올 수 없습니다`,
+        loadingNode: (node: string) => `${node} 불러오는 중`,
+        movedAfter: (node: string, target: string) => `${node}을(를) ${target} 뒤로 이동했습니다`,
+        movedBefore: (node: string, target: string) => `${node}을(를) ${target} 앞으로 이동했습니다`,
+        movedInto: (node: string, target: string) => `${node}을(를) ${target} 안으로 이동했습니다`,
+        noData: "데이터 없음",
+        noMatches: "일치하는 항목 없음",
+        results: (count: number) => `결과 ${localizeNumber(count)}개`,
+        retryLoading: (node: string) => `${node} 다시 불러오기`
     },
     window: {
         close: "닫기",

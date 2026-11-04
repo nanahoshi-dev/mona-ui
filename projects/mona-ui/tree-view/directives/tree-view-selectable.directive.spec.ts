@@ -27,7 +27,7 @@ class HostComponent {
 }
 
 describe("TreeViewSelectableDirective", () => {
-    let directive: TreeViewSelectableDirective<any>;
+    let directive: TreeViewSelectableDirective<TestItem>;
     beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [TreeService]

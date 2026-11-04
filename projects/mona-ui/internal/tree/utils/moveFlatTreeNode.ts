@@ -10,7 +10,7 @@ import { NodeDropEvent } from "../models/NodeDropEvent";
  * The array is returned unchanged when the position is "outside" or the target is the dragged node or one of its
  * descendants, which would otherwise create a parent cycle.
  */
-export function moveFlatTreeNode<T extends Record<string, any>>(
+export function moveFlatTreeNode<T extends object>(
     treeData: Iterable<T>,
     event: NodeDropEvent<T>,
     idKey: keyof T,

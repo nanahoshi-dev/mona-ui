@@ -273,17 +273,30 @@ export const ZH_CN_MESSAGES = {
     },
     list: {
         filterList: "筛选列表",
-        noData: "没有数据"
+        loading: "正在加载",
+        noData: "没有数据",
+        pagerLabel: (list: string) => `${list}分页`
     },
     listBox: {
         clearSelection: "清除选择",
+        itemsMoved: (position: number, total: number) =>
+            `已移至第 ${localizeNumber(position)} 位，共 ${localizeNumber(total)} 位`,
+        itemsRemoved: (count: number) => `已移除 ${localizeNumber(count)} 项`,
+        itemsTransferred: (count: number, list: string) => `已将 ${localizeNumber(count)} 项移至${list}`,
+        itemsTransferredToOtherList: (count: number) => `已将 ${localizeNumber(count)} 项移至另一列表`,
         moveDown: "向下移动",
         moveUp: "向上移动",
         remove: "移除",
+        selectionCleared: "已清除选择",
+        toolbarLabel: (list: string) => `${list}操作`,
         transferAllFrom: "从另一列表全部移入",
+        transferAllFromList: (list: string) => `从${list}全部移入`,
         transferAllTo: "全部移至另一列表",
+        transferAllToList: (list: string) => `全部移至${list}`,
         transferFrom: "从另一列表移入",
-        transferTo: "移至另一列表"
+        transferFromList: (list: string) => `从${list}移入`,
+        transferTo: "移至另一列表",
+        transferToList: (list: string) => `移至${list}`
     },
     multiSelect: {
         clear: "清除",
@@ -396,7 +409,17 @@ export const ZH_CN_MESSAGES = {
         collapse: "折叠",
         expand: "展开",
         filter: "筛选",
-        filterTree: "筛选树"
+        filterLabel: (tree: string) => `筛选${tree}`,
+        filterTree: "筛选树",
+        loadError: (node: string) => `无法加载${node}中的项目`,
+        loadingNode: (node: string) => `正在加载${node}`,
+        movedAfter: (node: string, target: string) => `已将 ${node} 移到 ${target} 之后`,
+        movedBefore: (node: string, target: string) => `已将 ${node} 移到 ${target} 之前`,
+        movedInto: (node: string, target: string) => `已将 ${node} 移入 ${target}`,
+        noData: "没有数据",
+        noMatches: "没有匹配的项目",
+        results: (count: number) => `${localizeNumber(count)} 个结果`,
+        retryLoading: (node: string) => `重试加载${node}`
     },
     window: {
         close: "关闭",

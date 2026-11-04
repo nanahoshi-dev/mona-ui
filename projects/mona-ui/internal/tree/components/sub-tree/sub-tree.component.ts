@@ -1,10 +1,10 @@
 import {
     CdkDrag,
-    CdkDragDrop,
-    CdkDragEnd,
-    CdkDragMove,
+    type CdkDragDrop,
+    type CdkDragEnd,
+    type CdkDragMove,
     CdkDragPreview,
-    CdkDragStart,
+    type CdkDragStart,
     CdkDropList
 } from "@angular/cdk/drag-drop";
 import {
@@ -13,10 +13,11 @@ import {
     LucideBan,
     LucideChevronDown,
     LucideChevronRight,
+    LucideCircleAlert,
     LucideLoaderCircle,
     LucidePlus
 } from "@lucide/angular";
-import { ChangeDetectionStrategy, Component, computed, DOCUMENT, inject, input, NgZone } from "@angular/core";
+import { Component, computed, DOCUMENT, inject, input, NgZone } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ImmutableSet } from "@mirei/ts-collections";
 import { CheckBoxComponent } from "@nanahoshi/mona-ui/check-box";
@@ -41,13 +42,13 @@ import { TreeNodeComponent } from "../tree-node/tree-node.component";
 
 @Component({
     selector: "mona-sub-tree",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         LucideArrowDown,
         LucideArrowUp,
         LucideBan,
         LucideChevronDown,
         LucideChevronRight,
+        LucideCircleAlert,
         LucideLoaderCircle,
         LucidePlus,
         TreeNodeComponent,
@@ -128,6 +129,13 @@ export class SubTreeComponent<T> {
     protected readonly nodeExpanderClass = computed(() => {
         return treeNodeExpanderThemeVariants();
     });
+    /**
+     * With checkboxes, a node reports whether it is checked (`aria-checked`); reporting selection as well would give
+     * it two conflicting states, so selection is then shown but not reported.
+     */
+    protected readonly selectionReported = computed(
+        () => this.treeService.selectableOptions().enabled && !this.treeService.checkableOptions().enabled
+    );
     protected readonly treeService = inject(TreeService);
     protected readonly visibleNodes = computed(() => {
         return this.nodes()
@@ -144,14 +152,11 @@ export class SubTreeComponent<T> {
         this.treeService.toggleNodeExpand(node, !this.treeService.isExpanded(node));
     }
 
+    /** The drag is over whatever a `nodeDragEnd` handler does, so it can't be kept going with `preventDefault()`. */
     public onNodeDragEnd(event: CdkDragEnd<TreeNode<T>>): void {
-        const nodeDragEndEvent = new NodeDragEndEvent(event.source.data, event.event);
-        this.treeService.nodeDragEnd$.next(nodeDragEndEvent);
-        if (nodeDragEndEvent.isDefaultPrevented()) {
-            return;
-        }
         this.treeService.dropAllowed.set(false);
         this.treeService.dragging.set(false);
+        this.treeService.nodeDragEnd$.next(new NodeDragEndEvent(event.source.data, event.event));
     }
 
     public onNodeDragMove(event: CdkDragMove<TreeNode<T>>, node: TreeNode<T>): void {
@@ -218,6 +223,17 @@ export class SubTreeComponent<T> {
                 asapScheduler.schedule(() => this.treeService.animationTemporarilyDisabled.set(false))
             );
         });
+    }
+
+    protected expanderLabel(node: TreeNode<T>, expanded: boolean, text: string): string {
+        const messages = this.messages();
+        if (node.loading()) {
+            return messages.loadingNode(text);
+        }
+        if (node.loadFailed()) {
+            return messages.retryLoading(text);
+        }
+        return `${expanded ? messages.collapse : messages.expand} ${text}`;
     }
 
     protected nodeAnimationDisabled(): boolean {

@@ -6,7 +6,6 @@ import { ListViewVirtualScrollDirective } from "./list-view-virtual-scroll.direc
 
 @Component({
     imports: [ListViewVirtualScrollDirective, ListViewComponent],
-    providers: [ListService],
     template: `
         <mona-list-view
             [items]="data"

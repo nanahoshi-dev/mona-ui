@@ -26,6 +26,9 @@ A modern, high-performance, accessible UI component library built for Angular an
 - [Dates and Times](docs/dates.md)
 - [Grid](docs/grid.md)
 - [Pager](docs/pager.md)
+- [Tree View](docs/tree-view.md)
+- [List View](docs/list-view.md)
+- [List Box](docs/list-box.md)
 - [Patch Stores & Merge Utilities](docs/patch-store.md)
 - [Component Migration Inventory](docs/internal/i18n-rtl-migration-inventory.md)
 

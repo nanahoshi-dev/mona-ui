@@ -1,5 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import {
+    booleanAttribute,
     ChangeDetectionStrategy,
     Component,
     computed,
@@ -246,6 +247,10 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
     });
     protected readonly config = computed<ComponentConfig<TreeViewComponent<TreeNodeDataItem>>>(() => ({
         inputs: deriveInputConfig<TreeViewComponent<TreeNodeDataItem>>(this.metadata(), {
+            ariaLabel: {
+                type: "string",
+                value: "Project files"
+            },
             children: {
                 type: "customDropdown",
                 value: childSelectors,
@@ -299,6 +304,7 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
             <mona-tree-view
                 [animate]="animate()"
                 [ariaLabel]="ariaLabel()"
+                [ariaLabelledBy]="ariaLabelledBy()"
                 [children]="children()"
                 [data]="$any(treeData())"
                 [hasChildren]="hasChildren()"
@@ -308,8 +314,7 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
                 [textField]="textField()"
                 [monaTreeViewCheckable]="checkable()"
                 [checkBy]="'id'"
-                [checkedKeys]="checkedKeys()"
-                (checkedKeysChange)="checkedKeys.set($event)"
+                [(checkedKeys)]="checkedKeys"
                 [hasCheckbox]="hasCheckbox()"
                 [monaTreeViewDisable]="disable()"
                 [disableBy]="'id'"
@@ -318,13 +323,11 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
                 (nodeDrop)="onNodeDrop($event)"
                 [monaTreeViewExpandable]="expandable()"
                 [expandBy]="'id'"
-                [expandedKeys]="expandedKeys()"
-                (expandedKeysChange)="expandedKeys.set($event)"
+                [(expandedKeys)]="expandedKeys"
                 [monaTreeViewFilterable]="filterable()"
                 [monaTreeViewSelectable]="selectable()"
                 [selectBy]="'id'"
-                [selectedKeys]="selectedKeys()"
-                (selectedKeysChange)="selectedKeys.set($event)"
+                [(selectedKeys)]="selectedKeys"
                 (selectionChange)="onSelectionChange($event)"
                 #checkableDir="monaTreeViewCheckable"
                 #dragDropDir="monaTreeViewDragAndDrop"
@@ -441,8 +444,9 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
         return treeData;
     });
     protected readonly treeVisible = signal(true);
-    public readonly animate = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["animate"]>>(true);
-    public readonly ariaLabel = input("");
+    public readonly animate = input(true, { transform: booleanAttribute });
+    public readonly ariaLabel = input("Project files");
+    public readonly ariaLabelledBy = input("");
     public readonly children = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["children"]>>(x => x.items);
     public readonly data = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["data"]>>([]);
     public readonly hasChildren = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["hasChildren"]>>(null);

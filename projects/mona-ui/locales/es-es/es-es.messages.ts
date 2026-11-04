@@ -278,17 +278,37 @@ export const ES_ES_MESSAGES = {
     },
     list: {
         filterList: "Filtrar lista",
-        noData: "No hay datos"
+        loading: "Cargando",
+        noData: "No hay datos",
+        pagerLabel: (list: string) => `Paginación de ${list}`
     },
     listBox: {
         clearSelection: "Limpiar selección",
+        itemsMoved: (position: number, total: number) =>
+            `Movido a la posición ${localizeNumber(position)} de ${localizeNumber(total)}`,
+        itemsRemoved: (count: number) =>
+            count === 1 ? `${localizeNumber(count)} elemento quitado` : `${localizeNumber(count)} elementos quitados`,
+        itemsTransferred: (count: number, list: string) =>
+            count === 1
+                ? `${localizeNumber(count)} elemento transferido a ${list}`
+                : `${localizeNumber(count)} elementos transferidos a ${list}`,
+        itemsTransferredToOtherList: (count: number) =>
+            count === 1
+                ? `${localizeNumber(count)} elemento transferido a la otra lista`
+                : `${localizeNumber(count)} elementos transferidos a la otra lista`,
         moveDown: "Bajar",
         moveUp: "Subir",
         remove: "Quitar",
+        selectionCleared: "Selección borrada",
+        toolbarLabel: (list: string) => `Acciones de ${list}`,
         transferAllFrom: "Transferir todo desde la otra lista",
+        transferAllFromList: (list: string) => `Transferir todo desde ${list}`,
         transferAllTo: "Transferir todo a la otra lista",
+        transferAllToList: (list: string) => `Transferir todo a ${list}`,
         transferFrom: "Transferir desde la otra lista",
-        transferTo: "Transferir a la otra lista"
+        transferFromList: (list: string) => `Transferir desde ${list}`,
+        transferTo: "Transferir a la otra lista",
+        transferToList: (list: string) => `Transferir a ${list}`
     },
     multiSelect: {
         clear: "Limpiar",
@@ -409,7 +429,18 @@ export const ES_ES_MESSAGES = {
         collapse: "Contraer",
         expand: "Expandir",
         filter: "Filtrar",
-        filterTree: "Filtrar árbol"
+        filterLabel: (tree: string) => `Filtrar ${tree}`,
+        filterTree: "Filtrar árbol",
+        loadError: (node: string) => `No se pudieron cargar los elementos de ${node}`,
+        loadingNode: (node: string) => `Cargando ${node}`,
+        movedAfter: (node: string, target: string) => `${node} se movió después de ${target}`,
+        movedBefore: (node: string, target: string) => `${node} se movió antes de ${target}`,
+        movedInto: (node: string, target: string) => `${node} se movió dentro de ${target}`,
+        noData: "No hay datos",
+        noMatches: "No hay elementos coincidentes",
+        results: (count: number) =>
+            count === 1 ? `${localizeNumber(count)} resultado` : `${localizeNumber(count)} resultados`,
+        retryLoading: (node: string) => `Reintentar cargar ${node}`
     },
     window: {
         close: "Cerrar",

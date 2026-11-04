@@ -257,17 +257,29 @@
     },
     "list": {
         "filterList": "Liste filtern",
-        "noData": "Keine Daten"
+        "loading": "Wird geladen",
+        "noData": "Keine Daten",
+        "pagerLabel": "Seitennavigation für {list}"
     },
     "listBox": {
         "clearSelection": "Auswahl aufheben",
+        "itemsMoved": "An Position {position} von {total} verschoben",
+        "itemsRemoved": "{count, plural, =1 {# Element entfernt} other {# Elemente entfernt}}",
+        "itemsTransferred": "{count, plural, =1 {# Element in {list} übertragen} other {# Elemente in {list} übertragen}}",
+        "itemsTransferredToOtherList": "{count, plural, =1 {# Element in die andere Liste übertragen} other {# Elemente in die andere Liste übertragen}}",
         "moveDown": "Nach unten verschieben",
         "moveUp": "Nach oben verschieben",
         "remove": "Entfernen",
+        "selectionCleared": "Auswahl aufgehoben",
+        "toolbarLabel": "Aktionen für {list}",
         "transferAllFrom": "Alle aus der anderen Liste übertragen",
+        "transferAllFromList": "Alle aus {list} übertragen",
         "transferAllTo": "Alle in die andere Liste übertragen",
+        "transferAllToList": "Alle in {list} übertragen",
         "transferFrom": "Aus der anderen Liste übertragen",
-        "transferTo": "In die andere Liste übertragen"
+        "transferFromList": "Aus {list} übertragen",
+        "transferTo": "In die andere Liste übertragen",
+        "transferToList": "In {list} übertragen"
     },
     "multiSelect": {
         "clear": "Leeren",
@@ -378,7 +390,17 @@
         "collapse": "Einklappen",
         "expand": "Erweitern",
         "filter": "Filtern",
-        "filterTree": "Baum filtern"
+        "filterLabel": "{tree} filtern",
+        "filterTree": "Baum filtern",
+        "loadError": "Die Elemente in {node} konnten nicht geladen werden",
+        "loadingNode": "{node} wird geladen",
+        "movedAfter": "{node} nach {target} verschoben",
+        "movedBefore": "{node} vor {target} verschoben",
+        "movedInto": "{node} in {target} verschoben",
+        "noData": "Keine Daten",
+        "noMatches": "Keine passenden Elemente",
+        "results": "{count, plural, =1 {# Ergebnis} other {# Ergebnisse}}",
+        "retryLoading": "{node} erneut laden"
     },
     "window": {
         "close": "Schließen",

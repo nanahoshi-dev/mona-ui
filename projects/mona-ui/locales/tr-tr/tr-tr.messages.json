@@ -257,17 +257,29 @@
     },
     "list": {
         "filterList": "Listeyi filtrele",
-        "noData": "Veri yok"
+        "loading": "Yükleniyor",
+        "noData": "Veri yok",
+        "pagerLabel": "{list} sayfalandırması"
     },
     "listBox": {
         "clearSelection": "Tüm seçimleri kaldır",
+        "itemsMoved": "{total} içinde {position}. konuma taşındı",
+        "itemsRemoved": "{count} öğe kaldırıldı",
+        "itemsTransferred": "{count} öğe {list} listesine taşındı",
+        "itemsTransferredToOtherList": "{count} öğe diğer listeye taşındı",
         "moveDown": "Aşağı taşı",
         "moveUp": "Yukarı taşı",
         "remove": "Kaldır",
+        "selectionCleared": "Seçim kaldırıldı",
+        "toolbarLabel": "{list} işlemleri",
         "transferAllFrom": "Tümünü diğer listeden taşı",
+        "transferAllFromList": "Tümünü {list} listesinden taşı",
         "transferAllTo": "Tümünü diğer listeye taşı",
+        "transferAllToList": "Tümünü {list} listesine taşı",
         "transferFrom": "Diğer listeden taşı",
-        "transferTo": "Diğer listeye taşı"
+        "transferFromList": "{list} listesinden taşı",
+        "transferTo": "Diğer listeye taşı",
+        "transferToList": "{list} listesine taşı"
     },
     "multiSelect": {
         "clear": "Temizle",
@@ -378,7 +390,17 @@
         "collapse": "Daralt",
         "expand": "Genişlet",
         "filter": "Filtrele",
-        "filterTree": "Ağacı filtrele"
+        "filterLabel": "{tree} filtrele",
+        "filterTree": "Ağacı filtrele",
+        "loadError": "{node} içindeki öğeler yüklenemedi",
+        "loadingNode": "{node} yükleniyor",
+        "movedAfter": "{node}, {target} öğesinden sonraya taşındı",
+        "movedBefore": "{node}, {target} öğesinden önceye taşındı",
+        "movedInto": "{node}, {target} içine taşındı",
+        "noData": "Veri yok",
+        "noMatches": "Eşleşen öğe yok",
+        "results": "{count} sonuç",
+        "retryLoading": "{node} öğesini yeniden yüklemeyi dene"
     },
     "window": {
         "close": "Kapat",

@@ -257,17 +257,29 @@
     },
     "list": {
         "filterList": "篩選清單",
-        "noData": "沒有資料"
+        "loading": "載入中",
+        "noData": "沒有資料",
+        "pagerLabel": "{list}分頁"
     },
     "listBox": {
         "clearSelection": "清除選取",
+        "itemsMoved": "已移至第 {position} 位，共 {total} 位",
+        "itemsRemoved": "已移除 {count} 項",
+        "itemsTransferred": "已將 {count} 項移至{list}",
+        "itemsTransferredToOtherList": "已將 {count} 項移至另一清單",
         "moveDown": "向下移動",
         "moveUp": "向上移動",
         "remove": "移除",
+        "selectionCleared": "已清除選取",
+        "toolbarLabel": "{list}操作",
         "transferAllFrom": "從另一清單全部移入",
+        "transferAllFromList": "從{list}全部移入",
         "transferAllTo": "全部移至另一清單",
+        "transferAllToList": "全部移至{list}",
         "transferFrom": "從另一清單移入",
-        "transferTo": "移至另一清單"
+        "transferFromList": "從{list}移入",
+        "transferTo": "移至另一清單",
+        "transferToList": "移至{list}"
     },
     "multiSelect": {
         "clear": "清除",
@@ -378,7 +390,17 @@
         "collapse": "摺疊",
         "expand": "展開",
         "filter": "篩選",
-        "filterTree": "篩選樹狀檢視"
+        "filterLabel": "篩選{tree}",
+        "filterTree": "篩選樹狀檢視",
+        "loadError": "無法載入{node}中的項目",
+        "loadingNode": "正在載入{node}",
+        "movedAfter": "已將 {node} 移到 {target} 之後",
+        "movedBefore": "已將 {node} 移到 {target} 之前",
+        "movedInto": "已將 {node} 移入 {target}",
+        "noData": "沒有資料",
+        "noMatches": "沒有符合的項目",
+        "results": "{count} 個結果",
+        "retryLoading": "重試載入{node}"
     },
     "window": {
         "close": "關閉",

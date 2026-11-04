@@ -1,25 +1,27 @@
-import { computed, Injectable, linkedSignal, signal } from "@angular/core";
+import { computed, inject, Injectable, linkedSignal, signal } from "@angular/core";
 import {
     from,
-    IEnumerable,
+    type IEnumerable,
     ImmutableList,
     ImmutableSet,
-    Predicate,
-    Selector,
+    type Predicate,
+    type Selector,
     toImmutableSet
 } from "@mirei/ts-collections";
-import { FilterableOptions, FilterChangeEvent, VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
+import { type FilterableOptions, FilterChangeEvent, type VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { ReplaySubject, Subject } from "rxjs";
-import { GroupableOptions } from "../models/GroupableOptions";
+import type { GroupableOptions } from "../models/GroupableOptions";
 import { ListItem } from "../models/ListItem";
-import { ListKeySelector } from "../models/ListSelectors";
-import { NavigableOptions } from "../models/NavigableOptions";
-import { NavigationDirection } from "../models/NavigationDirection";
-import { NavigationMode } from "../models/NavigationMode";
-import { PagerSettings } from "../models/PagerSettings";
-import { PageState } from "../models/PageState";
-import { SelectableOptions } from "../models/SelectableOptions";
+import type { ListKeySelector } from "../models/ListSelectors";
+import type { NavigableOptions } from "../models/NavigableOptions";
+import type { NavigationDirection } from "../models/NavigationDirection";
+import type { NavigationMode } from "../models/NavigationMode";
+import type { PagerSettings } from "../models/PagerSettings";
+import type { PageState } from "../models/PageState";
+import type { SelectableOptions } from "../models/SelectableOptions";
 import { cycleThroughMatchedItems } from "../utils/cycleThroughMatchedItems";
+import { formatGroupHeader, toGroupKey } from "../utils/groupKey";
 
 @Injectable()
 export class ListService<TData> {
@@ -41,7 +43,8 @@ export class ListService<TData> {
                 enumerable = enumerable.orderBy(item => this.getOrderKey(item));
             }
         }
-        let groupedEnumerable = enumerable.groupBy(item => this.getGroupField(item));
+        // Dates group by their time, so equal dates share a group and header order is chronological.
+        let groupedEnumerable = enumerable.groupBy(item => toGroupKey(this.getGroupField(item)));
         if (groupableOptions.headerOrder) {
             if (groupableOptions.headerOrder === "desc") {
                 groupedEnumerable = groupedEnumerable.orderByDescending(g => g.key);
@@ -49,13 +52,31 @@ export class ListService<TData> {
                 groupedEnumerable = groupedEnumerable.orderBy(g => g.key);
             }
         }
+        const localeId = this.#i18n.localeId();
+        const formatters = {
+            date: new Intl.DateTimeFormat(localeId, { dateStyle: "medium" }),
+            number: new Intl.NumberFormat(localeId, { useGrouping: false })
+        };
         const previousHeaders = this.#groupHeaders;
         const headers = new Map<unknown, ListItem<TData>>();
         const items = groupedEnumerable
             .selectMany(g => {
+                // The header carries the first item's group value (a Date stays a Date for the header template).
+                const value = this.getGroupField(g.source.first());
+                const text = groupableOptions.headerText
+                    ? groupableOptions.headerText(value)
+                    : formatGroupHeader(value, formatters);
+                const previous = previousHeaders.get(g.key);
                 const header =
-                    previousHeaders.get(g.key) ??
-                    new ListItem<TData>({ data: g.key, header: String(g.key ?? ""), isHeader: true });
+                    previous && previous.header === text && previous.data === value
+                        ? previous
+                        : // A header carries its group's value in place of a data item.
+                          new ListItem<TData>({
+                              data: value as TData,
+                              header: text,
+                              isHeader: true,
+                              uid: previous?.uid
+                          });
                 headers.set(g.key, header);
                 return g.source.prepend(header);
             })
@@ -64,6 +85,7 @@ export class ListService<TData> {
         return items;
     });
     readonly #data = signal(ImmutableList.create<TData>());
+    readonly #i18n = inject(MonaI18nService);
     /**
      * First list item for each selection key, so key lookups are O(1) instead of a scan per key.
      */
@@ -140,16 +162,21 @@ export class ListService<TData> {
         operator: "contains"
     });
     public readonly focus$ = new Subject<void>();
+    /**
+     * The option that holds the list's Tab stop: the highlighted one, else the last selected one, else the first
+     * enabled one. Only shown items count, so a selection on another page doesn't take the Tab stop away.
+     */
     public readonly focusableItem = computed(() => {
+        const viewItems = this.viewItems();
         const highlighted = this.highlightedItem();
-        if (highlighted) {
+        if (highlighted && viewItems.contains(highlighted)) {
             return highlighted;
         }
-        const selected = this.selectedListItems().lastOrDefault();
+        const selected = this.selectedListItems().lastOrDefault(item => viewItems.contains(item));
         if (selected) {
             return selected;
         }
-        return this.viewItems().firstOrDefault(i => !i.isHeader && !this.isDisabled(i));
+        return viewItems.firstOrDefault(i => !i.isHeader && !this.isDisabled(i));
     });
     public readonly groupBy = signal<ListKeySelector<TData>>(null);
     /**
@@ -167,7 +194,7 @@ export class ListService<TData> {
         }
         return headerUids;
     });
-    public readonly groupableOptions = signal<GroupableOptions<TData, any>>({
+    public readonly groupableOptions = signal<GroupableOptions<TData, unknown>>({
         enabled: false,
         headerOrder: "asc"
     });
@@ -217,6 +244,11 @@ export class ListService<TData> {
         type: "numeric",
         visiblePages: 5
     });
+    /**
+     * `"listbox"` for options to choose from; `"list"` for items that are only shown, as `listitem`s without
+     * selection state.
+     */
+    public readonly role = signal<"list" | "listbox">("listbox");
     public readonly scrollToItem$ = new ReplaySubject<{
         item: ListItem<TData>;
         focus: boolean;
@@ -227,8 +259,8 @@ export class ListService<TData> {
         mode: "single",
         toggleable: false
     });
-    public readonly selectedKeys = signal(ImmutableSet.create<any>());
-    public readonly selectedKeysChange$ = new Subject<Array<any>>();
+    public readonly selectedKeys = signal(ImmutableSet.create<unknown>());
+    public readonly selectedKeysChange$ = new Subject<unknown[]>();
     public readonly selectedListItems = computed(() => {
         const selectedKeys = this.selectedKeys();
         const itemsByKey = this.#itemsByKey();
@@ -271,18 +303,24 @@ export class ListService<TData> {
     }
 
     /**
-     * Finds the next item whose text starts with the typeahead buffer, starting after the active item.
+     * Finds the next item whose text starts with the typeahead buffer, starting after the active item; once the
+     * buffer holds more than one character, an active item that still matches stays.
      * Group headers and disabled items are never matched.
      */
     public cycleThroughMatchedItems(buffer: string): ListItem<TData> | null {
         const activeItem = this.highlightedItem() || this.selectedListItems().lastOrDefault();
         const prefix = buffer.toLowerCase();
-        return cycleThroughMatchedItems(this.viewItems(), activeItem ?? null, item => {
-            if (item.isHeader || this.isDisabled(item)) {
-                return false;
-            }
-            return this.getItemText(item).toLowerCase().startsWith(prefix);
-        });
+        return cycleThroughMatchedItems(
+            this.viewItems(),
+            activeItem ?? null,
+            item => {
+                if (item.isHeader || this.isDisabled(item)) {
+                    return false;
+                }
+                return this.getItemText(item).toLowerCase().startsWith(prefix);
+            },
+            prefix.length > 1
+        );
     }
 
     public deselectItems(item: Iterable<ListItem<TData>>): void {
@@ -320,13 +358,13 @@ export class ListService<TData> {
         return filterableOptions.enabled ? filterableOptions.debounce : 0;
     }
 
-    public getGroupField(item: ListItem<TData>): any {
+    public getGroupField(item: ListItem<TData>): unknown {
         const groupSelector = this.groupBy();
         if (groupSelector == null) {
             return "";
         }
         if (typeof groupSelector === "string") {
-            return (item.data as any)?.[groupSelector] ?? "";
+            return (item.data as Record<string, unknown> | null | undefined)?.[groupSelector] ?? "";
         }
         return groupSelector(item.data);
     }
@@ -377,15 +415,19 @@ export class ListService<TData> {
         return candidates.firstOrDefault(i => this.filterItem(i, text));
     }
 
-    public isDisabled(item: ListItem<TData>): boolean {
-        if (item.isHeader) {
-            return false;
-        }
+    /**
+     * Whether a data item is disabled by `disabledBy`, whether or not it is in the list.
+     */
+    public isDataItemDisabled(dataItem: TData): boolean {
         const disabledBy = this.disabledBy();
         if (typeof disabledBy === "string") {
-            return (item.data as any)?.[disabledBy] ?? false;
+            return disabledBy !== "" && Boolean((dataItem as Record<string, unknown> | null)?.[disabledBy]);
         }
-        return disabledBy(item.data);
+        return disabledBy(dataItem);
+    }
+
+    public isDisabled(item: ListItem<TData>): boolean {
+        return !item.isHeader && this.isDataItemDisabled(item.data);
     }
 
     public isFilteringEnabled(): boolean {
@@ -520,7 +562,7 @@ export class ListService<TData> {
         this.groupBy.set(groupSelector);
     }
 
-    public setGroupableOptions(options: GroupableOptions<TData, any>): void {
+    public setGroupableOptions(options: GroupableOptions<TData, unknown>): void {
         this.groupableOptions.update(o => ({ ...o, ...options }));
     }
 
@@ -597,11 +639,11 @@ export class ListService<TData> {
         return item != null && viewItems.contains(item) ? item : null;
     }
 
-    private getOrderKey(item: ListItem<TData>): any {
+    private getOrderKey(item: ListItem<TData>): unknown {
         const orderBy = this.groupableOptions().orderBy;
         if (orderBy) {
             if (typeof orderBy === "string") {
-                return (item.data as any)[orderBy];
+                return (item.data as Record<string, unknown>)[orderBy];
             } else {
                 return orderBy(item.data);
             }
@@ -625,7 +667,7 @@ export class ListService<TData> {
         return prevItem;
     }
 
-    private getSelectionKey(item: ListItem<TData>): any {
+    private getSelectionKey(item: ListItem<TData>): unknown {
         return this.getDataItemValue(item.data);
     }
 

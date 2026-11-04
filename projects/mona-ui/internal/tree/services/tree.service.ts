@@ -4,61 +4,59 @@ import {
     EnumerableSet,
     forEach,
     from,
-    IEnumerable,
+    type IEnumerable,
     ImmutableDictionary,
     ImmutableSet,
     List,
-    Predicate,
-    Selector,
+    type Predicate,
+    type Selector,
     sequenceEqual
 } from "@mirei/ts-collections";
-import { FilterableOptions, FilterChangeEvent } from "@nanahoshi/mona-ui/common";
-import {
-    BehaviorSubject,
-    debounceTime,
-    distinctUntilChanged,
-    Observable,
-    ReplaySubject,
-    Subject,
-    Subscription,
-    switchMap,
-    take
-} from "rxjs";
-import { CheckableOptions } from "../models/CheckableOptions";
-import { DataStructure } from "../models/DataStructure";
-import { DisableOptions } from "../models/DisableOptions";
-import { DraggableOptions } from "../models/DraggableOptions";
-import { DropPosition, DropPositionChangeEvent } from "../models/DropPositionChangeEvent";
-import { ExpandableOptions } from "../models/ExpandableOptions";
+import { type FilterableOptions, FilterChangeEvent } from "@nanahoshi/mona-ui/common";
+import { BehaviorSubject, distinctUntilChanged, Observable, ReplaySubject, Subject, Subscription, take } from "rxjs";
+import type { CheckableOptions } from "../models/CheckableOptions";
+import type { DataStructure } from "../models/DataStructure";
+import type { DisableOptions } from "../models/DisableOptions";
+import type { DraggableOptions } from "../models/DraggableOptions";
+import type { DropPosition, DropPositionChangeEvent } from "../models/DropPositionChangeEvent";
+import type { ExpandableOptions } from "../models/ExpandableOptions";
 import { NodeCheckEvent } from "../models/NodeCheckEvent";
 import { NodeClickEvent } from "../models/NodeClickEvent";
 import { NodeDragEndEvent } from "../models/NodeDragEndEvent";
 import { InternalNodeDragEvent } from "../models/NodeDragEvent";
 import { NodeDragStartEvent } from "../models/NodeDragStartEvent";
 import { NodeDropEventSansTree } from "../models/NodeDropEvent";
-import { NodeItem } from "../models/NodeItem";
+import type { NodeItem } from "../models/NodeItem";
 import { NodeSelectEvent } from "../models/NodeSelectEvent";
-import { SelectableOptions } from "../models/SelectableOptions";
+import type { SelectableOptions } from "../models/SelectableOptions";
 import { TreeNode } from "../models/TreeNode";
-import { TreeNodeCheckEvent } from "../models/TreeNodeCheckEvent";
-import { TreeNodeExpandEvent } from "../models/TreeNodeExpandEvent";
-import { TreeNodeSelectEvent } from "../models/TreeNodeSelectEvent";
-import { ChildrenSelector, NodeKeySelector } from "../models/TreeSelectors";
+import type { TreeNodeCheckEvent } from "../models/TreeNodeCheckEvent";
+import type { TreeNodeExpandEvent } from "../models/TreeNodeExpandEvent";
+import type { TreeKeyboardMove, TreeKeyboardMoveDirection } from "../models/TreeKeyboardMove";
+import type { TreeNodeSelectEvent } from "../models/TreeNodeSelectEvent";
+import type { ChildrenSelector, NodeKeySelector } from "../models/TreeSelectors";
 import { getTreeNodeElementId } from "../utils/getTreeNodeElementId";
 
 @Injectable()
 export class TreeService<T> {
-    readonly #checkedKeys = signal(ImmutableSet.create<any>());
+    readonly #checkedKeys = signal(ImmutableSet.create<unknown>());
     /**
      * Pending asynchronous child loads by node uid, so a new load for a node cancels the previous one.
      */
     readonly #childLoads = new Map<string, Subscription>();
     readonly #data = signal(ImmutableSet.create<T>());
-    readonly #filteredExpandedKeys = signal(ImmutableSet.create<any>());
+    /** Private so that `filterText`, declared before the public `filterableOptions`, can read it. */
+    readonly #filterableOptions = signal<FilterableOptions>({
+        enabled: false,
+        debounce: 0,
+        caseSensitive: false,
+        operator: "contains"
+    });
+    readonly #filteredExpandedKeys = signal(ImmutableSet.create<unknown>());
     readonly #flatIdField = signal("");
     readonly #flatParentIdField = signal("");
     readonly #hasCheckboxPredicate = signal<((data: T, uid: string) => boolean) | null>(null);
-    readonly #hasChildrenPredicate = signal<Predicate<any> | null>(null);
+    readonly #hasChildrenPredicate = signal<Predicate<T> | null>(null);
     readonly #navigableNodes = computed(() => {
         const visibleUids = this.#visibleUids();
         const allFlatNodes = TreeService.flatten(this.nodeSet());
@@ -75,7 +73,7 @@ export class TreeService<T> {
         return this.createNodeDictionary(nodes);
     });
     readonly #structure = signal<DataStructure>("hierarchical");
-    readonly #unfilteredExpandedKeys = signal(ImmutableSet.create<any>());
+    readonly #unfilteredExpandedKeys = signal(ImmutableSet.create<unknown>());
     readonly #visibleUids = computed<Set<string> | null>(() => {
         const filterText = this.filterText();
         if (!filterText) {
@@ -84,8 +82,8 @@ export class TreeService<T> {
         // Tracked on purpose: moves, lazily loaded children and filter option changes re-run the filter.
         return this.computeVisibleUids(this.nodeSet(), filterText);
     });
-    public readonly animationTemporarilyDisabled = signal(false);
     public readonly animationEnabled = signal(true);
+    public readonly animationTemporarilyDisabled = signal(false);
     public readonly blur$ = new Subject<FocusEvent>();
     public readonly checkBy = signal<NodeKeySelector<T>>(null);
     public readonly checkableOptions = signal<CheckableOptions>({
@@ -96,14 +94,26 @@ export class TreeService<T> {
         enabled: false,
         mode: "multiple"
     });
-    public readonly checkedKeys$ = toObservable(this.#checkedKeys);
+    /**
+     * The checked keys after the user checks or unchecks a node. Keys set from code, and keys the tree derives on its
+     * own (parents with `checkParents`, lazily loaded children of a checked node, ancestors after a move), aren't
+     * reported here.
+     */
+    public readonly checkedKeysChange$ = new Subject<ImmutableSet<unknown>>();
     public readonly children = signal<ChildrenSelector<T>>("");
+    /**
+     * A node's children failed to load from an asynchronous children selector. The node is collapsed again (not
+     * reported through `expandedKeysChange$`), and expanding it retries the load.
+     */
+    public readonly childrenLoadError$ = new Subject<{ readonly error: unknown; readonly node: TreeNode<T> }>();
+    /** A node started loading its children from an asynchronous children selector. */
+    public readonly childrenLoadStart$ = new Subject<TreeNode<T>>();
     public readonly disableBy = signal<NodeKeySelector<T>>(null);
     public readonly disableOptions = signal<DisableOptions>({
         disableChildren: true,
         enabled: false
     });
-    public readonly disabledKeys = signal(ImmutableSet.create<any>());
+    public readonly disabledKeys = signal(ImmutableSet.create<unknown>());
     public readonly draggableOptions = signal<DraggableOptions>({ enabled: false });
     public readonly dragging = signal(false);
     public readonly dragging$ = toObservable(this.dragging);
@@ -119,23 +129,26 @@ export class TreeService<T> {
         }
         return this.#unfilteredExpandedKeys();
     });
-    public readonly expandedKeys$ = toObservable(this.expandedKeys);
-    public readonly filterableOptions = signal<FilterableOptions>({
-        enabled: false,
-        debounce: 0,
-        caseSensitive: false,
-        operator: "contains"
-    });
+    /**
+     * The expanded keys after the user expands or collapses a node outside filtering. The expansion a filter applies,
+     * and the user's changes to it while filtering, are view state and aren't reported.
+     */
+    public readonly expandedKeysChange$ = new Subject<ImmutableSet<unknown>>();
     public readonly filter$ = new ReplaySubject<string>(1);
     public readonly filterChange$ = new Subject<FilterChangeEvent>();
     public readonly filterPlaceholder = signal("");
-    public readonly filterText = toSignal(
-        toObservable(this.filterableOptions).pipe(
-            switchMap(opts => this.filter$.pipe(debounceTime(opts.debounce), distinctUntilChanged()))
-        ),
-        { initialValue: "" }
-    );
+    /** The applied filter. Typing is debounced by the filter input; a filter set from code applies at once. */
+    public readonly filterText = toSignal(this.filter$.pipe(distinctUntilChanged()), { initialValue: "" });
+    public readonly filterableOptions = this.#filterableOptions.asReadonly();
     public readonly focus$ = new Subject<FocusEvent>();
+    /** The number of nodes whose text matches the filter (their ancestors, shown for context, aren't counted). */
+    public readonly matchCount = computed(() => {
+        const filterText = this.filterText();
+        if (!filterText) {
+            return 0;
+        }
+        return TreeService.flatten(this.nodeSet()).count(node => this.isFiltered(this.getNodeText(node), filterText));
+    });
     public readonly navigatedNode = signal<TreeNode<T> | null>(null);
     public readonly nodeCheck$ = new Subject<NodeCheckEvent<T>>();
     public readonly nodeCheckChange$ = new Subject<TreeNodeCheckEvent<T>>();
@@ -148,7 +161,7 @@ export class TreeService<T> {
     public readonly nodeSelect$ = new Subject<NodeSelectEvent<T>>();
     public readonly nodeSelectChange$ = new Subject<TreeNodeSelectEvent<T>>();
     public readonly nodeSet = signal(ImmutableSet.create<TreeNode<T>>());
-    public readonly nodeTemplate = signal<TemplateRef<any> | null>(null);
+    public readonly nodeTemplate = signal<TemplateRef<unknown> | null>(null);
     public readonly selectBy = signal<NodeKeySelector<T>>(null);
     public readonly selectableOptions = signal<SelectableOptions>({
         childrenOnly: false,
@@ -156,8 +169,9 @@ export class TreeService<T> {
         mode: "single",
         toggleable: false
     });
-    public readonly selectedKeys = signal(ImmutableSet.create<any>());
-    public readonly selectedKeys$ = toObservable(this.selectedKeys);
+    public readonly selectedKeys = signal(ImmutableSet.create<unknown>());
+    /** The selected keys after the user selects or deselects a node. Keys set from code aren't reported. */
+    public readonly selectedKeysChange$ = new Subject<ImmutableSet<unknown>>();
     public readonly selectedNodes = computed(() => {
         const selectedKeys = this.selectedKeys();
         const nodeDictionary = this.#nodeDictionary();
@@ -202,6 +216,35 @@ export class TreeService<T> {
                 this.#filteredExpandedKeys.set(expandedKeys);
             });
         });
+        effect(() => {
+            const navigableNodes = this.#navigableNodes();
+            const navigatedNode = this.navigatedNode();
+            untracked(() => this.keepNavigatedNodeVisible(navigableNodes, navigatedNode));
+        });
+        // An expanded node whose children come from an observable loads them, including nodes expanded from the
+        // start through `expandedKeys`, and not just nodes the user expands.
+        effect(() => {
+            const expandedKeys = this.#unfilteredExpandedKeys();
+            const nodes = this.nodeSet();
+            const enabled = this.expandableOptions().enabled;
+            const children = this.children();
+            this.expandBy();
+            untracked(() => {
+                if (enabled && typeof children === "function") {
+                    this.loadExpandedNodes(nodes, expandedKeys);
+                }
+            });
+        });
+    }
+
+    /** Whether two key sets hold the same keys, in any order. */
+    /** Reads a field of a data item by name (for the string forms of the key, id and children selectors). */
+    private static readField(item: unknown, field: string): unknown {
+        return item == null ? undefined : (item as Record<string, unknown>)[field];
+    }
+
+    private static sameKeys(a: ImmutableSet<unknown>, b: ImmutableSet<unknown>): boolean {
+        return a.size() === b.size() && a.all(key => b.contains(key));
     }
 
     public static flatten<T>(nodes: Iterable<TreeNode<T>>): List<TreeNode<T>> {
@@ -245,21 +288,90 @@ export class TreeService<T> {
     }
 
     /**
-     * Finds the next visible node, after the navigated node and wrapping around, whose text starts with `prefix`
-     * (case-insensitive). Used for typeahead.
+     * The node of the current nodes that stands for `node`: the node itself, or after a data refresh rebuilt the
+     * nodes, the node of the same data item (or, for flat data, of the same id).
+     */
+    public findCounterpart(node: TreeNode<T>): TreeNode<T> | null {
+        const sameNode = this.getNodeByUid(node.uid);
+        if (sameNode) {
+            return sameNode;
+        }
+        const identity = this.getNodeIdentity(node);
+        return (
+            TreeService.flatten(this.nodeSet()).firstOrDefault(
+                candidate => candidate.data === node.data || this.getNodeIdentity(candidate) === identity
+            ) ?? null
+        );
+    }
+
+    /**
+     * Finds the next visible node whose text starts with `prefix` (case-insensitive), wrapping around. Used for
+     * typeahead: a first character searches after the navigated node, and each further character keeps the
+     * navigated node while it still matches.
      */
     public findNodeByText(prefix: string): TreeNode<T> | null {
         const normalizedPrefix = prefix.toLowerCase();
         const nodes = this.#navigableNodes().toArray();
         const navigatedNode = this.navigatedNode();
         const start = navigatedNode ? nodes.indexOf(navigatedNode) : -1;
-        for (let offset = 1; offset <= nodes.length; offset++) {
+        const first = normalizedPrefix.length > 1 && start !== -1 ? 0 : 1;
+        for (let offset = first; offset <= nodes.length; offset++) {
             const node = nodes[(start + offset) % nodes.length];
             if (this.getNodeText(node).toLowerCase().startsWith(normalizedPrefix)) {
                 return node;
             }
         }
         return null;
+    }
+
+    public getCheckKey(node: TreeNode<T>): unknown {
+        const checkBy = this.checkBy();
+        if (!checkBy) {
+            return node.data;
+        }
+        if (typeof checkBy === "string") {
+            return TreeService.readField(node.data, checkBy);
+        }
+        return checkBy(node.data);
+    }
+
+    public getDisableKey(node: TreeNode<T>): unknown {
+        const disableBy = this.disableBy();
+        if (!disableBy) {
+            return node.data;
+        }
+        if (typeof disableBy === "string") {
+            return TreeService.readField(node.data, disableBy);
+        }
+        return disableBy(node.data);
+    }
+
+    /**
+     * Where a keyboard move takes a node: before its previous or after its next visible sibling (`"up"`, `"down"`),
+     * inside its previous visible sibling as the last child (`"in"`), or after its parent (`"out"`). `null` when the
+     * node can't move that way or is disabled.
+     */
+    public getKeyboardMove(node: TreeNode<T>, direction: TreeKeyboardMoveDirection): TreeKeyboardMove<T> | null {
+        if (this.isDisabled(node)) {
+            return null;
+        }
+        if (direction === "out") {
+            return node.parent ? { position: "after", targetNode: node.parent } : null;
+        }
+        const siblings = (node.parent ? node.parent.children() : this.nodeSet())
+            .where(sibling => this.isVisible(sibling))
+            .toArray();
+        const index = siblings.indexOf(node);
+        const previous = index > 0 ? siblings[index - 1] : null;
+        const next = index !== -1 && index < siblings.length - 1 ? siblings[index + 1] : null;
+        switch (direction) {
+            case "up":
+                return previous ? { position: "before", targetNode: previous } : null;
+            case "down":
+                return next ? { position: "after", targetNode: next } : null;
+            case "in":
+                return previous && !this.isDisabled(previous) ? { position: "inside", targetNode: previous } : null;
+        }
     }
 
     public getNodeByUid(uid: string): TreeNode<T> | null {
@@ -269,6 +381,12 @@ export class TreeService<T> {
 
     public getNodeElementId(uid: string): string {
         return getTreeNodeElementId(uid);
+    }
+
+    /** What identifies a node's data item across data refreshes: its id for flat data, else the item itself. */
+    public getNodeIdentity(node: TreeNode<T>): unknown {
+        const idField = this.#flatIdField();
+        return this.#structure() === "flat" && idField ? TreeService.readField(node.data, idField) : node.data;
     }
 
     public getNodeText(node: TreeNode<T>): string {
@@ -361,7 +479,8 @@ export class TreeService<T> {
         if (!expandableOptions.enabled) {
             return true;
         }
-        if (node.children().isEmpty()) {
+        // A node whose children are still loading is open, so it reads as expanded (and busy) until they arrive.
+        if (node.children().isEmpty() && !node.loading()) {
             return false;
         }
         const key = this.getExpandKey(node);
@@ -430,7 +549,9 @@ export class TreeService<T> {
             return;
         }
         this.#childLoads.get(node.uid)?.unsubscribe();
+        node.loadFailed.set(false);
         node.loading.set(true);
+        this.childrenLoadStart$.next(node);
         const subscription = children.pipe(take(1)).subscribe({
             next: c => {
                 const childNodes = new List<TreeNode<T>>();
@@ -447,9 +568,15 @@ export class TreeService<T> {
                 this.#childLoads.delete(node.uid);
                 this.restoreExpandedChildren(childNodes);
             },
-            error: () => {
+            error: (error: unknown) => {
                 node.loading.set(false);
+                node.loadFailed.set(true);
                 this.#childLoads.delete(node.uid);
+                // Collapsed again, so expanding the node retries the load.
+                const key = this.getExpandKey(node);
+                const expandedKeys = this.isTreeFiltered() ? this.#filteredExpandedKeys : this.#unfilteredExpandedKeys;
+                expandedKeys.update(keys => keys.remove(key));
+                this.childrenLoadError$.next({ error, node });
             },
             complete: () => {
                 if (node.loading()) {
@@ -465,11 +592,16 @@ export class TreeService<T> {
 
     /**
      * Moves a node relative to a target node. Moving a node onto itself or into its own subtree is ignored,
-     * because it would detach the subtree and create a parent cycle.
+     * because it would detach the subtree and create a parent cycle, and so is moving it inside its own parent or
+     * a disabled node, or `"outside"`.
+     * @returns whether the node moved.
      */
-    public moveNode(sourceNode: TreeNode<T>, targetNode: TreeNode<T>, position: DropPosition): void {
-        if (sourceNode === targetNode || targetNode.isDescendantOf(sourceNode)) {
-            return;
+    public moveNode(sourceNode: TreeNode<T>, targetNode: TreeNode<T>, position: DropPosition): boolean {
+        if (sourceNode === targetNode || targetNode.isDescendantOf(sourceNode) || position === "outside") {
+            return false;
+        }
+        if (position === "inside" && (sourceNode.parent === targetNode || this.isDisabled(targetNode))) {
+            return false;
         }
         const oldParent = sourceNode.parent;
         switch (position) {
@@ -485,6 +617,7 @@ export class TreeService<T> {
         }
         this.updateNodeIndices();
         this.recalculateCheckedAncestors(oldParent, sourceNode.parent);
+        return true;
     }
 
     public navigate(direction: "next" | "previous" | "first" | "last"): TreeNode<T> | null {
@@ -521,17 +654,17 @@ export class TreeService<T> {
         this.selectionChange$.next(node.nodeItem);
     }
 
-    public setAnimationEnabled(enabled: boolean): void {
-        this.animationEnabled.set(enabled);
+    /**
+     * Whether selecting `node` the way the user does (a click, or Enter) changes the selection. It doesn't for the
+     * selected node of a single selection that can't be toggled off.
+     */
+    public selectionWouldChange(node: TreeNode<T>): boolean {
+        const options = this.selectableOptions();
+        return !(options.mode === "single" && !options.toggleable && this.isSelected(node));
     }
 
-    public setChildrenSelector(selector: string | Selector<T, Iterable<T> | Observable<Iterable<T>>>): void {
-        if (this.children() === selector) {
-            return;
-        }
-        this.children.set(selector);
-        this.nodeSet.set(this.createNodes(this.#data()));
-        this.updateNodeIndices();
+    public setAnimationEnabled(enabled: boolean): void {
+        this.animationEnabled.set(enabled);
     }
 
     public setCheckBy(selector: NodeKeySelector<T>): void {
@@ -542,7 +675,7 @@ export class TreeService<T> {
         this.checkableOptions.update(o => ({ ...o, ...options }));
     }
 
-    public setCheckedKeys(keys: Iterable<any>): void {
+    public setCheckedKeys(keys: Iterable<unknown>): void {
         const checkedKeys = this.#checkedKeys().orderBy(k => k);
         const orderedKeys = from(keys).orderBy(k => k);
         if (sequenceEqual(checkedKeys, orderedKeys)) {
@@ -557,6 +690,15 @@ export class TreeService<T> {
         this.applyCheckedKeysToNodes();
     }
 
+    public setChildrenSelector(selector: string | Selector<T, Iterable<T> | Observable<Iterable<T>>>): void {
+        if (this.children() === selector) {
+            return;
+        }
+        this.children.set(selector);
+        this.nodeSet.set(this.createNodes(this.#data()));
+        this.updateNodeIndices();
+    }
+
     public setData(data: Iterable<T>): void {
         this.#data.set(ImmutableSet.create(data));
         this.nodeSet.set(this.createNodes(data));
@@ -564,8 +706,9 @@ export class TreeService<T> {
         this.applyCheckedKeysToNodes();
         const navigatedNode = this.navigatedNode();
         if (navigatedNode && this.#nodeDictionary().get(navigatedNode.uid) == null) {
-            // The node was removed: drop it so aria-activedescendant never points at a missing element.
-            this.navigatedNode.set(null);
+            // Rebuilt nodes (flat data always is) keep the active node; a removed node is dropped, so
+            // aria-activedescendant never points at a missing element.
+            this.navigatedNode.set(this.findCounterpart(navigatedNode));
         }
     }
 
@@ -581,7 +724,7 @@ export class TreeService<T> {
         this.disableOptions.update(o => ({ ...o, ...options }));
     }
 
-    public setDisabledKeys(keys: Iterable<any>): void {
+    public setDisabledKeys(keys: Iterable<unknown>): void {
         const disabledKeys = this.disabledKeys().orderBy(k => k);
         const orderedKeys = from(keys).orderBy(k => k);
         if (sequenceEqual(disabledKeys, orderedKeys)) {
@@ -602,7 +745,7 @@ export class TreeService<T> {
         this.expandableOptions.update(o => ({ ...o, ...options }));
     }
 
-    public setExpandedKeys(keys: Iterable<any>): void {
+    public setExpandedKeys(keys: Iterable<unknown>): void {
         const unfilteredKeys = this.#unfilteredExpandedKeys().orderBy(k => k);
         const orderedKeys = from(keys).orderBy(k => k);
         if (sequenceEqual(unfilteredKeys, orderedKeys)) {
@@ -612,7 +755,7 @@ export class TreeService<T> {
     }
 
     public setFilterableOptions(options: Partial<FilterableOptions>): void {
-        this.filterableOptions.update(o => ({ ...o, ...options }));
+        this.#filterableOptions.update(o => ({ ...o, ...options }));
     }
 
     public setFlatIdField(field: string): void {
@@ -627,7 +770,7 @@ export class TreeService<T> {
         this.#hasCheckboxPredicate.set(fn);
     }
 
-    public setHasChildrenPredicate(predicate: Predicate<any> | null): void {
+    public setHasChildrenPredicate(predicate: Predicate<T> | null): void {
         this.#hasChildrenPredicate.set(predicate);
     }
 
@@ -696,7 +839,12 @@ export class TreeService<T> {
                 n.checked.set(allChecked);
             });
         }
-        this.#checkedKeys.set(checkedKeys.toImmutableSet());
+        const previousKeys = this.#checkedKeys();
+        const nextKeys = checkedKeys.toImmutableSet();
+        this.#checkedKeys.set(nextKeys);
+        if (!TreeService.sameKeys(previousKeys, nextKeys)) {
+            this.checkedKeysChange$.next(nextKeys);
+        }
     }
 
     public setNodeExpand(node: TreeNode<T>, expanded: boolean): void {
@@ -711,17 +859,19 @@ export class TreeService<T> {
         this.navigatedNode.set(node);
     }
 
-    public setNodeSelect(node: TreeNode<T>, selected: boolean): void {
+    /** @returns whether the selection changed. */
+    public setNodeSelect(node: TreeNode<T>, selected: boolean): boolean {
         const selectableOptions = this.selectableOptions();
         if (!selectableOptions.enabled) {
-            return;
+            return false;
         }
         const childrenOnly = selectableOptions.childrenOnly;
         if (childrenOnly && this.hasChildren(node)) {
-            return;
+            return false;
         }
         const key = this.getSelectKey(node);
         const mode = selectableOptions.mode;
+        const previousKeys = this.selectedKeys();
         this.selectedKeys.update(keys => {
             if (mode === "single") {
                 const toggleable = selectableOptions.toggleable;
@@ -737,6 +887,12 @@ export class TreeService<T> {
             return keys.remove(key);
         });
         this.navigatedNode.set(node);
+        const nextKeys = this.selectedKeys();
+        if (TreeService.sameKeys(previousKeys, nextKeys)) {
+            return false;
+        }
+        this.selectedKeysChange$.next(nextKeys);
+        return true;
     }
 
     public setSelectBy(selector: NodeKeySelector<T>): void {
@@ -757,7 +913,7 @@ export class TreeService<T> {
         }
     }
 
-    public setSelectedKeys(keys: Iterable<any>): void {
+    public setSelectedKeys(keys: Iterable<unknown>): void {
         const selectedKeys = this.selectedKeys().orderBy(k => k);
         const orderedKeys = from(keys).orderBy(k => k);
         if (sequenceEqual(selectedKeys, orderedKeys)) {
@@ -772,11 +928,12 @@ export class TreeService<T> {
 
     /**
      * Expands or collapses a node the way user interaction does: disabled nodes are left alone, children of an
-     * asynchronous children selector are loaded on first expand, and `nodeExpand$` is notified.
+     * asynchronous children selector are loaded on first expand, and `nodeExpand$` is notified. Without expanding
+     * (every node is then open), nothing changes.
      * @returns whether the expand state changed.
      */
     public toggleNodeExpand(node: TreeNode<T>, expanded: boolean): boolean {
-        if (this.isDisabled(node) || this.isExpanded(node) === expanded) {
+        if (!this.expandableOptions().enabled || this.isDisabled(node) || this.isExpanded(node) === expanded) {
             return false;
         }
         if (expanded) {
@@ -784,29 +941,10 @@ export class TreeService<T> {
         }
         this.setNodeExpand(node, expanded);
         this.nodeExpand$.next({ node, expanded });
+        if (!this.isTreeFiltered()) {
+            this.expandedKeysChange$.next(this.#unfilteredExpandedKeys());
+        }
         return true;
-    }
-
-    public getCheckKey(node: TreeNode<T>): any {
-        const checkBy = this.checkBy();
-        if (!checkBy) {
-            return node.data;
-        }
-        if (typeof checkBy === "string") {
-            return (node.data as any)[checkBy];
-        }
-        return checkBy(node.data);
-    }
-
-    public getDisableKey(node: TreeNode<T>): any {
-        const disableBy = this.disableBy();
-        if (!disableBy) {
-            return node.data;
-        }
-        if (typeof disableBy === "string") {
-            return (node.data as any)[disableBy];
-        }
-        return disableBy(node.data);
     }
 
     private applyCheckedKeysToNodes(): void {
@@ -860,8 +998,7 @@ export class TreeService<T> {
         const childrenByParentId = new Map<string | null, T[]>();
 
         for (const item of data) {
-            const dataItem = item as any;
-            const pid = dataItem[flatParentIdField] ?? null;
+            const pid = (TreeService.readField(item, flatParentIdField) as string | null | undefined) ?? null;
             if (!childrenByParentId.has(pid)) {
                 childrenByParentId.set(pid, []);
             }
@@ -872,10 +1009,9 @@ export class TreeService<T> {
             const items = childrenByParentId.get(pid) ?? [];
             const nodes = new List<TreeNode<T>>();
             for (const item of items) {
-                const dataItem = item as any;
                 const node = new TreeNode(item);
                 node.parent = parent;
-                node.children.set(buildNodes(dataItem[flatIdField], node));
+                node.children.set(buildNodes(TreeService.readField(item, flatIdField) as string | null, node));
                 nodes.add(node);
             }
             return nodes.toImmutableSet();
@@ -907,7 +1043,7 @@ export class TreeService<T> {
             usedNodes.add(node);
 
             if (typeof children === "string") {
-                const subNodes = (dataItem as any)[children];
+                const subNodes = TreeService.readField(dataItem, children) as Iterable<T> | null | undefined;
                 if (subNodes) {
                     const childNodes = this.createHierarchicalNodes(subNodes, node, existingNodes, usedNodes);
                     node.children.update(list => list.clear().addAll(childNodes ?? []));
@@ -971,31 +1107,31 @@ export class TreeService<T> {
             );
     }
 
-    private getExpandKey(node: TreeNode<T>): any {
-        const expandBy = this.expandBy();
-        if (!expandBy) {
-            return node.data;
-        }
-        if (typeof expandBy === "string") {
-            return (node.data as any)[expandBy];
-        }
-        return expandBy(node.data);
-    }
-
     private getChildNodes(node: TreeNode<T>): ImmutableSet<TreeNode<T>> {
         const nodes = TreeService.flatten([node]);
         return nodes.where(n => n !== node).toImmutableSet();
     }
 
-    private getDataItemSelectKey(dataItem: T): any {
+    private getDataItemSelectKey(dataItem: T): unknown {
         const selectBy = this.selectBy();
         if (!selectBy) {
             return dataItem;
         }
         if (typeof selectBy === "string") {
-            return (dataItem as any)[selectBy] ?? dataItem;
+            return TreeService.readField(dataItem, selectBy) ?? dataItem;
         }
         return selectBy(dataItem);
+    }
+
+    private getExpandKey(node: TreeNode<T>): unknown {
+        const expandBy = this.expandBy();
+        if (!expandBy) {
+            return node.data;
+        }
+        if (typeof expandBy === "string") {
+            return TreeService.readField(node.data, expandBy);
+        }
+        return expandBy(node.data);
     }
 
     private getParentNodes(node: TreeNode<T>): ImmutableSet<TreeNode<T>> {
@@ -1008,13 +1144,13 @@ export class TreeService<T> {
         return nodes.toImmutableSet();
     }
 
-    private getSelectKey(node: TreeNode<T>): any {
+    private getSelectKey(node: TreeNode<T>): unknown {
         const selectBy = this.selectBy();
         if (!selectBy) {
             return node.data;
         }
         if (typeof selectBy === "string") {
-            return (node.data as any)[selectBy];
+            return TreeService.readField(node.data, selectBy);
         }
         return selectBy(node.data);
     }
@@ -1045,6 +1181,32 @@ export class TreeService<T> {
         return text.indexOf(filter) >= 0;
     }
 
+    /**
+     * Keeps `aria-activedescendant` on a rendered node: when the active node is hidden by a collapse or a filter, the
+     * nearest visible ancestor takes over (else the first visible node); a node re-created by new data with the same
+     * uid is swapped in.
+     */
+    private keepNavigatedNodeVisible(
+        navigableNodes: ImmutableSet<TreeNode<T>>,
+        navigatedNode: TreeNode<T> | null
+    ): void {
+        // A node that isn't in the tree is left to setData, which drops removed nodes.
+        if (navigatedNode === null || this.#nodeDictionary().get(navigatedNode.uid) == null) {
+            return;
+        }
+        const byUid = new Map<string, TreeNode<T>>();
+        navigableNodes.forEach(node => byUid.set(node.uid, node));
+        let candidate: TreeNode<T> | null = navigatedNode;
+        while (candidate !== null && !byUid.has(candidate.uid)) {
+            candidate = candidate.parent;
+        }
+        const next =
+            candidate === null ? (navigableNodes.firstOrDefault() ?? null) : (byUid.get(candidate.uid) ?? null);
+        if (next !== navigatedNode) {
+            this.navigatedNode.set(next);
+        }
+    }
+
     private loadCheckedKeysForChildren(node: TreeNode<T>, childNodes: Iterable<TreeNode<T>>): void {
         const checkedKeys = this.#checkedKeys();
         if (node.checked() && this.checkableOptions().checkChildren) {
@@ -1065,6 +1227,22 @@ export class TreeService<T> {
                     n.checked.set(true);
                 }
             });
+        }
+    }
+
+    /** Loads the children of the expanded, shown nodes whose children come from an observable and aren't loaded. */
+    private loadExpandedNodes(nodes: Iterable<TreeNode<T>>, expandedKeys: ImmutableSet<unknown>): void {
+        for (const node of TreeService.flatten(nodes)) {
+            if (node.childrenLoaded || node.loading() || node.loadFailed() || !node.children().isEmpty()) {
+                continue;
+            }
+            if (
+                expandedKeys.contains(this.getExpandKey(node)) &&
+                this.hasChildren(node) &&
+                !this.isAnyParentCollapsed(node)
+            ) {
+                this.loadNodeChildren(node);
+            }
         }
     }
 

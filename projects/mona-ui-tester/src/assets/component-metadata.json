@@ -8,6 +8,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -15,6 +16,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -22,6 +24,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -185,6 +188,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -226,6 +230,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -239,6 +244,7 @@
         "kind": "input",
         "name": "ariaHasPopup",
         "type": "ButtonAriaHasPopup",
+        "alias": "aria-haspopup",
         "defaultValue": "\"false\""
       },
       {
@@ -316,6 +322,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -512,6 +519,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -525,6 +533,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -621,6 +630,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -688,6 +698,7 @@
         "kind": "input",
         "name": "options",
         "type": "Partial<FilterableOptions> | \"\"",
+        "alias": "monaDropDownFilterable",
         "defaultValue": "\"\""
       }
     ]
@@ -708,6 +719,7 @@
         "kind": "input",
         "name": "options",
         "type": "GroupableOptions<TData, unknown> | \"\"",
+        "alias": "monaDropDownGroupable",
         "defaultValue": "\"\""
       }
     ]
@@ -721,6 +733,7 @@
         "kind": "input",
         "name": "options",
         "type": "Partial<VirtualScrollOptions> | \"\"",
+        "alias": "monaDropDownVirtualScroll",
         "defaultValue": "\"\""
       }
     ]
@@ -786,6 +799,7 @@
         "kind": "input",
         "name": "row",
         "type": "Row | null",
+        "alias": "monaGridEditCommand",
         "defaultValue": "null"
       }
     ]
@@ -799,6 +813,7 @@
         "kind": "input",
         "name": "row",
         "type": "Row | null",
+        "alias": "monaGridRemoveCommand",
         "defaultValue": "null"
       }
     ]
@@ -842,6 +857,7 @@
         "kind": "input",
         "name": "options",
         "type": "EditableOptions | \"\"",
+        "alias": "monaGridEditable",
         "defaultValue": "\"\""
       },
       {
@@ -880,6 +896,7 @@
         "kind": "input",
         "name": "options",
         "type": "Partial<FilterableOptions> | \"\"",
+        "alias": "monaGridFilterable",
         "defaultValue": "\"\""
       }
     ]
@@ -926,7 +943,8 @@
         "description": "Enables column grouping on the grid. Pass a `GroupableOptions` object to configure group footer display. Grouping is on unless the object sets `enabled: false`.",
         "kind": "input",
         "name": "options",
-        "type": "Partial<GroupableOptions> | \"\" | undefined"
+        "type": "Partial<GroupableOptions> | \"\" | undefined",
+        "alias": "monaGridGroupable"
       }
     ]
   },
@@ -939,6 +957,7 @@
         "kind": "input",
         "name": "layoutKey",
         "type": "string | null",
+        "alias": "monaGridLockedCell",
         "defaultValue": "null"
       },
       {
@@ -1084,6 +1103,7 @@
         "kind": "input",
         "name": "options",
         "type": "ReorderableOptions | \"\"",
+        "alias": "monaGridReorderable",
         "defaultValue": "\"\""
       }
     ]
@@ -1103,6 +1123,7 @@
         "kind": "input",
         "name": "options",
         "type": "ResizableOptions | \"\"",
+        "alias": "monaGridResizable",
         "defaultValue": "\"\""
       }
     ]
@@ -1116,6 +1137,7 @@
         "kind": "input",
         "name": "options",
         "type": "RowReorderableOptions | \"\"",
+        "alias": "monaGridRowReorderable",
         "defaultValue": "\"\""
       },
       {
@@ -1135,6 +1157,7 @@
         "kind": "input",
         "name": "options",
         "type": "SelectableOptions | \"\"",
+        "alias": "monaGridSelectable",
         "defaultValue": "\"\""
       },
       {
@@ -1207,6 +1230,7 @@
         "kind": "input",
         "name": "options",
         "type": "SortableOptions | \"\"",
+        "alias": "monaGridSortable",
         "defaultValue": "\"\""
       },
       {
@@ -1227,6 +1251,7 @@
         "kind": "input",
         "name": "options",
         "type": "GridStatePersistenceOptions | \"\"",
+        "alias": "monaGridStatePersistence",
         "defaultValue": "\"\""
       },
       {
@@ -1246,7 +1271,8 @@
         "description": "Enables row virtualization on the grid. Pass a `VirtualScrollOptions` object to configure the fixed row height.",
         "kind": "input",
         "name": "options",
-        "type": "Partial<VirtualScrollOptions> | \"\" | undefined"
+        "type": "Partial<VirtualScrollOptions> | \"\" | undefined",
+        "alias": "monaGridVirtualScroll"
       },
       {
         "description": "Emitted when the scroll position reaches the configured threshold from the bottom of the virtualized list.",
@@ -1271,7 +1297,8 @@
         "description": "",
         "kind": "input",
         "name": "attributes",
-        "type": "AttributeConfig"
+        "type": "AttributeConfig",
+        "alias": "monaAttributeBinder"
       }
     ]
   },
@@ -1291,7 +1318,21 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
+      }
+    ]
+  },
+  "ListBoxItemTemplateDirective": {
+    "name": "ListBoxItemTemplateDirective",
+    "selector": "\"ng-template[monaListBoxItemTemplate]\"",
+    "inputs": [
+      {
+        "description": "The list box's items, used only to type the template's item. Optional.",
+        "kind": "input",
+        "name": "monaListBoxItemTemplateOf",
+        "type": "Iterable<T> | null | undefined",
+        "defaultValue": "null"
       }
     ]
   },
@@ -1311,7 +1352,21 @@
         "kind": "input",
         "name": "options",
         "type": "GroupableOptions<T, K> | \"\"",
+        "alias": "monaListViewGroupable",
         "defaultValue": "\"\""
+      }
+    ]
+  },
+  "ListViewItemTemplateDirective": {
+    "name": "ListViewItemTemplateDirective",
+    "selector": "\"ng-template[monaListViewItemTemplate]\"",
+    "inputs": [
+      {
+        "description": "The list view's items, used only to type the template's item. Optional.",
+        "kind": "input",
+        "name": "monaListViewItemTemplateOf",
+        "type": "Iterable<T> | null | undefined",
+        "defaultValue": "null"
       }
     ]
   },
@@ -1324,6 +1379,7 @@
         "kind": "input",
         "name": "options",
         "type": "Partial<NavigableOptions> | \"\"",
+        "alias": "monaListViewNavigable",
         "defaultValue": "\"\""
       }
     ]
@@ -1337,6 +1393,7 @@
         "kind": "input",
         "name": "options",
         "type": "Partial<PagerSettings> | \"\"",
+        "alias": "monaListViewPageable",
         "defaultValue": "\"\""
       },
       {
@@ -1345,6 +1402,19 @@
         "name": "page",
         "type": "number",
         "defaultValue": "1"
+      },
+      {
+        "description": "Items per page. Supports two-way binding via `[(pageSize)]`: it updates when the user picks a size\r\nin the pager. While unset, the options' `pageSize` applies. A new size keeps the first item of the current\r\npage in view.",
+        "kind": "model",
+        "name": "pageSize",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Emitted when the user picks a page size, before it is applied. Call `preventDefault()` on the\r\nevent to keep the current size.",
+        "kind": "output",
+        "name": "pageSizeSelect",
+        "type": "PageSizeChangeEvent"
       }
     ]
   },
@@ -1354,15 +1424,10 @@
     "inputs": [
       {
         "description": "",
-        "kind": "output",
-        "name": "selectedKeysChange",
-        "type": "Array<K>"
-      },
-      {
-        "description": "",
         "kind": "input",
         "name": "options",
         "type": "Partial<SelectableOptions> | \"\"",
+        "alias": "monaListViewSelectable",
         "defaultValue": "\"\""
       },
       {
@@ -1378,6 +1443,12 @@
         "name": "selectedKeys",
         "type": "Iterable<K>",
         "defaultValue": "[]"
+      },
+      {
+        "description": "",
+        "kind": "output",
+        "name": "selectedKeysChange",
+        "type": "Array<K>"
       }
     ]
   },
@@ -1390,6 +1461,7 @@
         "kind": "input",
         "name": "options",
         "type": "VirtualScrollOptions",
+        "alias": "monaListViewVirtualScroll",
         "required": true
       }
     ]
@@ -1403,6 +1475,7 @@
         "kind": "input",
         "name": "tagCount",
         "type": "number",
+        "alias": "monaMultiSelectSummaryTag",
         "defaultValue": "-1"
       }
     ]
@@ -1476,6 +1549,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -1489,6 +1563,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -1502,6 +1577,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -1515,6 +1591,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -1556,6 +1633,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -1576,6 +1654,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -1589,6 +1668,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -1602,6 +1682,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -1615,6 +1696,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -1743,6 +1825,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -1784,6 +1867,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -1886,6 +1970,7 @@
         "kind": "input",
         "name": "rounded",
         "type": "TooltipVariantProps[\"rounded\"]",
+        "alias": "tooltipRounded",
         "defaultValue": "\"medium\""
       },
       {
@@ -1962,7 +2047,7 @@
         "defaultValue": "[]"
       },
       {
-        "description": "Emitted when the checked keys change.",
+        "description": "Emitted with the checked keys when the user checks or unchecks a node, including the children and\nparents that check follows (`checkChildren`, `checkParents`). Not emitted for keys set through `checkedKeys`,\nnor for keys the tree derives on its own: checked parents of checked children set from code, lazily loaded\nchildren of a checked node, and ancestors after a drop. Those are reported with the next user change.",
         "kind": "output",
         "name": "checkedKeysChange",
         "type": "Array<K>"
@@ -1981,10 +2066,11 @@
         "type": "NodeCheckEvent<T>"
       },
       {
-        "description": "Configures check mode and whether checking a node also checks its children or parents. Merged over `{ checkChildren: true, checkParents: true, enabled: true, mode: \"multiple\" }` when applied bare.",
+        "description": "Configures check mode and whether checking a node also checks its children or parents. Merged over `{ checkChildren: true, checkDisabledChildren: false, checkParents: true, childrenOnly: false, enabled: true, mode: \"multiple\" }` when applied bare.",
         "kind": "input",
         "name": "options",
         "type": "Partial<CheckableOptions> | \"\"",
+        "alias": "monaTreeViewCheckable",
         "defaultValue": "\"\""
       }
     ]
@@ -2012,6 +2098,7 @@
         "kind": "input",
         "name": "options",
         "type": "Partial<DisableOptions> | \"\"",
+        "alias": "monaTreeViewDisable",
         "defaultValue": "\"\""
       }
     ]
@@ -2027,7 +2114,7 @@
         "type": "NodeDragEvent<T>"
       },
       {
-        "description": "Emitted when a node drag ends.",
+        "description": "Emitted when a node drag ends, dropped or not. Not cancelable: the drag is over either way.",
         "kind": "output",
         "name": "nodeDragEnd",
         "type": "NodeDragEndEvent<T>"
@@ -2039,7 +2126,7 @@
         "type": "NodeDragStartEvent<T>"
       },
       {
-        "description": "Emitted when a node is dropped.",
+        "description": "Emitted when a node is dropped on another node, or moved with Ctrl+Shift+Arrow (Cmd+Shift+Arrow on\nmacOS). The tree doesn't move the node: the handler applies the move (with `moveTreeNode`,\n`moveFlatTreeNode` or `event.treeView.moveNode`). Call `preventDefault()` when the move isn't applied.",
         "kind": "output",
         "name": "nodeDrop",
         "type": "NodeDropEvent<T>"
@@ -2049,6 +2136,7 @@
         "kind": "input",
         "name": "options",
         "type": "Partial<DraggableOptions> | \"\"",
+        "alias": "monaTreeViewDragAndDrop",
         "defaultValue": "\"\""
       }
     ]
@@ -2084,7 +2172,7 @@
         "defaultValue": "[]"
       },
       {
-        "description": "Emitted when the expanded keys change.",
+        "description": "Emitted with the expanded keys when the user expands or collapses a node. Not emitted for keys set\nthrough `expandedKeys`, nor for the expansion a filter applies (which is undone when the filter is cleared).",
         "kind": "output",
         "name": "expandedKeysChange",
         "type": "Array<K>"
@@ -2094,6 +2182,7 @@
         "kind": "input",
         "name": "options",
         "type": "Partial<ExpandableOptions> | \"\"",
+        "alias": "monaTreeViewExpandable",
         "defaultValue": "\"\""
       }
     ]
@@ -2103,16 +2192,16 @@
     "selector": "\"mona-tree-view[monaTreeViewFilterable]\"",
     "inputs": [
       {
-        "description": "Current filter text used to narrow the visible nodes.",
-        "kind": "input",
+        "description": "Current filter text used to narrow the visible nodes. Two-way bindable (`[(filter)]`); the user's\ntyping updates it, so setting it from code (including back to `\"\"`) always applies.",
+        "kind": "model",
         "name": "filter",
         "type": "string",
         "defaultValue": "\"\""
       },
       {
-        "description": "Emitted when the filter value changes.",
+        "description": "Emitted when the user types in the filter input, before the filter applies. Call\n`preventDefault()` to keep the current filter; otherwise `filterChange` reports the new text.",
         "kind": "output",
-        "name": "filterChange",
+        "name": "filterInput",
         "type": "FilterChangeEvent"
       },
       {
@@ -2127,7 +2216,21 @@
         "kind": "input",
         "name": "options",
         "type": "Partial<FilterableOptions> | \"\"",
+        "alias": "monaTreeViewFilterable",
         "defaultValue": "\"\""
+      }
+    ]
+  },
+  "TreeViewNodeTemplateDirective": {
+    "name": "TreeViewNodeTemplateDirective",
+    "selector": "\"ng-template[monaTreeViewNodeTemplate]\"",
+    "inputs": [
+      {
+        "description": "The tree view's data, used only to type the template's data item. Optional.",
+        "kind": "input",
+        "name": "monaTreeViewNodeTemplateOf",
+        "type": "Iterable<T> | null | undefined",
+        "defaultValue": "null"
       }
     ]
   },
@@ -2136,10 +2239,18 @@
     "selector": "\"mona-tree-view[monaTreeViewSelectable]\"",
     "inputs": [
       {
-        "description": "Emitted when a node is selected or deselected.",
+        "description": "Emitted before the user selects or deselects a node, by click or Enter. Call `preventDefault()`\nto keep the selection as it is; `selectionChange` follows when it isn't prevented.",
         "kind": "output",
         "name": "nodeSelect",
         "type": "NodeSelectEvent<T>"
+      },
+      {
+        "description": "Configures selection mode, toggleability, and whether only child nodes are selectable. Merged over `{ childrenOnly: false, enabled: true, mode: \"single\", toggleable: false }` when applied bare.",
+        "kind": "input",
+        "name": "options",
+        "type": "Partial<SelectableOptions> | \"\"",
+        "alias": "monaTreeViewSelectable",
+        "defaultValue": "\"\""
       },
       {
         "description": "Property name or accessor used to derive a node's selection key from its data. Falls back to the node's data when unset.",
@@ -2156,23 +2267,16 @@
         "defaultValue": "[]"
       },
       {
-        "description": "Emitted when the selected keys change.",
+        "description": "Emitted with the selected keys when the user selects or deselects a node. Not emitted for keys set\nthrough `selectedKeys`.",
         "kind": "output",
         "name": "selectedKeysChange",
         "type": "Array<K>"
       },
       {
-        "description": "Emitted when the selection changes.",
+        "description": "Emitted with the node after the user selects or deselects it (after a `nodeSelect` that wasn't\nprevented).",
         "kind": "output",
         "name": "selectionChange",
         "type": "NodeItem<T>"
-      },
-      {
-        "description": "Configures selection mode, toggleability, and whether only child nodes are selectable. Merged over `{ childrenOnly: false, enabled: true, mode: \"single\", toggleable: false }` when applied bare.",
-        "kind": "input",
-        "name": "options",
-        "type": "Partial<SelectableOptions> | \"\"",
-        "defaultValue": "\"\""
       }
     ]
   },
@@ -2256,6 +2360,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -2347,6 +2452,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -2360,6 +2466,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -2374,6 +2481,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -2412,7 +2520,8 @@
         "description": "Accessible name for the host element. Override when multiple button groups appear on the same page\r\nso screen reader users can distinguish them.",
         "kind": "input",
         "name": "ariaLabel",
-        "type": "string | undefined"
+        "type": "string | undefined",
+        "alias": "aria-label"
       },
       {
         "description": "Renders all child buttons with reduced visual emphasis and removes pointer interaction.",
@@ -2454,6 +2563,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -2554,6 +2664,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -2588,6 +2699,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -2601,6 +2713,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "ClassInputType",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -2614,6 +2727,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "ClassInputType",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -2753,6 +2867,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -2892,6 +3007,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -3045,6 +3161,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -3212,6 +3329,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -3281,6 +3399,7 @@
         "kind": "input",
         "name": "ariaDescription",
         "type": "string",
+        "alias": "aria-description",
         "defaultValue": "\"\""
       },
       {
@@ -3288,6 +3407,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -3376,6 +3496,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -3458,6 +3579,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -3560,6 +3682,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -3788,6 +3911,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -3834,6 +3958,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -3924,6 +4049,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -4030,6 +4156,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -4117,6 +4244,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -4253,6 +4381,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -4753,6 +4882,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -4919,6 +5049,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -5107,6 +5238,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -5253,6 +5385,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -5406,6 +5539,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -5580,6 +5714,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -5795,6 +5930,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -5913,6 +6049,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -6031,6 +6168,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -6232,6 +6370,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -6364,6 +6503,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -6496,6 +6636,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -6683,6 +6824,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -6794,6 +6936,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -7030,6 +7173,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -7211,6 +7355,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -7245,6 +7390,7 @@
         "kind": "input",
         "name": "labelId",
         "type": "string",
+        "alias": "monaChartDataLabelMeasure",
         "required": true
       }
     ]
@@ -7258,6 +7404,7 @@
         "kind": "input",
         "name": "sliceId",
         "type": "string",
+        "alias": "monaChartLabelMeasure",
         "required": true
       }
     ]
@@ -7271,6 +7418,7 @@
         "kind": "input",
         "name": "labelId",
         "type": "string",
+        "alias": "monaChartOverlayLabelMeasure",
         "required": true
       }
     ]
@@ -7284,6 +7432,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -7291,6 +7440,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -7399,6 +7549,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -7419,6 +7570,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -7426,6 +7578,7 @@
         "kind": "input",
         "name": "ariaValueText",
         "type": "string",
+        "alias": "aria-valuetext",
         "defaultValue": "\"\""
       },
       {
@@ -7482,6 +7635,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -7603,6 +7757,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -7692,6 +7847,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -7816,6 +7972,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -7823,6 +7980,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -7830,6 +7988,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -7986,6 +8145,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -8215,6 +8375,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -8222,6 +8383,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -8229,6 +8391,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -8396,6 +8559,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -8423,6 +8587,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -8430,6 +8595,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -8437,6 +8603,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -8639,6 +8806,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -8817,6 +8985,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -8824,6 +8993,7 @@
         "kind": "input",
         "name": "ariaLabelledby",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -8886,6 +9056,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -9029,6 +9200,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -9036,6 +9208,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -9043,6 +9216,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -9192,6 +9366,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -9268,6 +9443,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -9380,6 +9556,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -9542,6 +9719,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -10190,6 +10368,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -10202,13 +10381,22 @@
         "description": "Emitted when a toolbar action button is clicked, carrying the action's details.",
         "kind": "output",
         "name": "actionClick",
-        "type": "ListBoxActionEvent"
+        "type": "ListBoxActionEvent<T>"
       },
       {
-        "description": "Accessible name for the list box's `listbox` element. Describe what the list represents,\nwhich matters in particular when connecting two list boxes.",
+        "description": "Accessible name for the list box's `listbox` element. Describe what the list represents,\nwhich matters in particular when connecting two list boxes: the toolbar's name and the transfer buttons'\nlabels are built from it.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Id of the element that names the list box, as an alternative to `aria-label`. Without an\n`aria-label`, the toolbar's name and the transfer buttons' labels are built from that element's text.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -10217,6 +10405,13 @@
         "name": "connectedList",
         "type": "ListBoxComponent<T, K> | null",
         "defaultValue": "null"
+      },
+      {
+        "description": "Property name or predicate that marks items as disabled. Disabled items can't be selected, and no\naction (including the \"All\" transfers) carries them.",
+        "kind": "input",
+        "name": "disabledBy",
+        "type": "string | Predicate<T> | null | undefined",
+        "defaultValue": "\"\""
       },
       {
         "description": "Sets the height of the component.",
@@ -10254,16 +10449,16 @@
         "defaultValue": "[]"
       },
       {
-        "description": "Emitted with the updated keys whenever the selection changes.",
+        "description": "Emitted with the updated keys whenever the user changes the selection, including when an\naction (transfer, clear, remove) or a selection in the connected list box changes it.",
         "kind": "output",
         "name": "selectedKeysChange",
         "type": "K[]"
       },
       {
-        "description": "Emitted with the selected and deselected items whenever the selection changes.",
+        "description": "Emitted with the selected and deselected items whenever the user changes the selection, including\nwhen an action (transfer, clear, remove) or a selection in the connected list box changes it.",
         "kind": "output",
         "name": "selectionChange",
-        "type": "ListBoxSelectionEvent"
+        "type": "ListBoxSelectionEvent<T>"
       },
       {
         "description": "Allows multiple items to be selected simultaneously when set to `\"multiple\"`.",
@@ -10273,7 +10468,7 @@
         "defaultValue": "single"
       },
       {
-        "description": "Allows an already-selected item to be deselected by clicking it again while `selectionMode`\nis `\"single\"`. Has no effect when `selectionMode` is `\"multiple\"`.",
+        "description": "Allows an already-selected item to be deselected by clicking it again while `selectionMode`\nis `\"single\"`. Has no effect when `selectionMode` is `\"multiple\"`. Accepts the bare attribute form.",
         "kind": "input",
         "name": "singleSelectionToggleable",
         "type": "boolean",
@@ -10294,11 +10489,18 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Shows the action toolbar. Pass `false` to hide it entirely, or an options object to customize\nwhich actions are shown and where the toolbar is positioned.",
+        "description": "Shows the action toolbar. Pass `false` to hide it entirely, or an options object to customize\nwhich actions are shown and where the toolbar is positioned. The transfer actions appear only with a\n`connectedList`; the move, clear and remove actions work on a list box of its own. Accepts the bare attribute\nform.",
         "kind": "input",
         "name": "toolbar",
         "type": "boolean | Partial<ToolbarOptions>",
         "defaultValue": "true"
+      },
+      {
+        "description": "Accessible name for the toolbar. By default it is built from the list box's name\n(\"Available foods actions\").",
+        "kind": "input",
+        "name": "toolbarAriaLabel",
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Sets the width of the component.",
@@ -10318,14 +10520,36 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
-        "description": "Sets the height of the list view.",
+        "description": "Id of the element that names the list view's list, as an alternative to `aria-label`.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Property name or predicate that marks an item as disabled. Disabled items can't be selected,\r\nactivated or reached by typeahead.",
+        "kind": "input",
+        "name": "disabledBy",
+        "type": "string | Predicate<T> | null | undefined",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Sets the height of the list view. With virtual scrolling, the viewport takes this height, so a\r\npercentage needs a parent with a height; `\"\"` sizes the viewport to its items instead.",
         "kind": "input",
         "name": "height",
         "type": "string | number",
         "defaultValue": "100%"
+      },
+      {
+        "description": "Emitted with the data item when the user activates an enabled item by clicking it or pressing\r\nEnter on it. Fires whether or not the list view is selectable.",
+        "kind": "output",
+        "name": "itemActivate",
+        "type": "T"
       },
       {
         "description": "Collection of items to render.",
@@ -10363,6 +10587,13 @@
         "defaultValue": "{}"
       },
       {
+        "description": "Marks the list as loading: it gets `aria-busy` and a polite \"Loading\" status.",
+        "kind": "input",
+        "name": "loading",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
         "description": "Sets the maximum height of the list.",
         "kind": "input",
         "name": "maxHeight",
@@ -10377,6 +10608,13 @@
         "defaultValue": "\"\""
       },
       {
+        "description": "Accessible name of the pager. Defaults to \"{name} pagination\" from the list view's `aria-label`,\r\nso two paged list views on a page have different landmarks.",
+        "kind": "input",
+        "name": "pagerAriaLabel",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Border-radius preset applied to the component.",
         "kind": "input",
         "name": "rounded",
@@ -10384,7 +10622,7 @@
         "defaultValue": "medium"
       },
       {
-        "description": "Emitted when the list is scrolled to the bottom.",
+        "description": "Emitted once each time the list is scrolled to its end, when the list view isn't paged. Scrolling\r\naway and back emits again, as does reaching the new end after more items are added.",
         "kind": "output",
         "name": "scrollBottom",
         "type": "Event"
@@ -10408,6 +10646,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -10626,6 +10865,7 @@
         "kind": "input",
         "name": "userClasses",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -10639,6 +10879,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -10646,6 +10887,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -10653,6 +10895,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -10815,6 +11058,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -10897,6 +11141,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -10904,6 +11149,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
+        "alias": "aria-label",
         "defaultValue": "null"
       },
       {
@@ -10911,6 +11157,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -11033,6 +11280,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -11081,6 +11329,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -11088,6 +11337,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
+        "alias": "aria-label",
         "defaultValue": "null"
       },
       {
@@ -11095,6 +11345,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -11217,6 +11468,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -11230,6 +11482,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -11237,6 +11490,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
+        "alias": "aria-label",
         "defaultValue": "null"
       },
       {
@@ -11244,6 +11498,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -11366,6 +11621,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -11529,6 +11785,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -11549,6 +11806,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
+        "alias": "aria-label",
         "defaultValue": "null"
       },
       {
@@ -11556,6 +11814,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -11666,6 +11925,7 @@
         "kind": "input",
         "name": "userClasses",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -11693,6 +11953,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -12020,6 +12281,7 @@
         "kind": "input",
         "name": "menuId",
         "type": "string",
+        "alias": "id",
         "defaultValue": "\"\""
       },
       {
@@ -12097,7 +12359,8 @@
         "description": "",
         "kind": "input",
         "name": "userClass",
-        "type": "string"
+        "type": "string",
+        "alias": "class"
       }
     ]
   },
@@ -12247,6 +12510,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -12254,6 +12518,7 @@
         "kind": "input",
         "name": "ariaValueText",
         "type": "string",
+        "alias": "aria-valuetext",
         "defaultValue": "\"\""
       },
       {
@@ -12324,6 +12589,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -12431,6 +12697,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -12451,6 +12718,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string | null",
+        "alias": "aria-describedby",
         "defaultValue": "null"
       },
       {
@@ -12458,6 +12726,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
+        "alias": "aria-label",
         "defaultValue": "null"
       },
       {
@@ -12465,6 +12734,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string | null",
+        "alias": "aria-labelledby",
         "defaultValue": "null"
       },
       {
@@ -12576,6 +12846,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -12673,6 +12944,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -12707,6 +12979,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
+        "alias": "aria-label",
         "defaultValue": "null"
       },
       {
@@ -12714,6 +12987,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string | null",
+        "alias": "aria-labelledby",
         "defaultValue": "null"
       },
       {
@@ -12769,6 +13043,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -12858,7 +13133,8 @@
         "description": "",
         "kind": "input",
         "name": "userClass",
-        "type": "string"
+        "type": "string",
+        "alias": "class"
       },
       {
         "description": "Explicit sheet width. Numbers are interpreted as pixels.",
@@ -12877,6 +13153,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -12940,6 +13217,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -12974,6 +13252,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -13021,6 +13300,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -13041,6 +13321,7 @@
         "kind": "input",
         "name": "ariaLabelEnd",
         "type": "string | null",
+        "alias": "aria-label-end",
         "defaultValue": "null"
       },
       {
@@ -13048,6 +13329,7 @@
         "kind": "input",
         "name": "ariaLabelStart",
         "type": "string | null",
+        "alias": "aria-label-start",
         "defaultValue": "null"
       },
       {
@@ -13214,6 +13496,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
+        "alias": "aria-label",
         "defaultValue": "null"
       },
       {
@@ -13221,6 +13504,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string | null",
+        "alias": "aria-labelledby",
         "defaultValue": "null"
       },
       {
@@ -13546,6 +13830,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | undefined",
+        "alias": "aria-label",
         "defaultValue": "undefined"
       },
       {
@@ -13567,6 +13852,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -13641,6 +13927,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -13648,6 +13935,7 @@
         "kind": "input",
         "name": "ariaLabelledby",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -13716,6 +14004,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -13920,6 +14209,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -14000,6 +14290,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -14055,6 +14346,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
+        "alias": "aria-label",
         "defaultValue": "null"
       },
       {
@@ -14062,6 +14354,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string | null",
+        "alias": "aria-labelledby",
         "defaultValue": "null"
       },
       {
@@ -14138,6 +14431,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -14294,6 +14588,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -14307,6 +14602,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -14314,6 +14610,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -14321,6 +14618,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -14465,6 +14763,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -14485,6 +14784,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -14492,6 +14792,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -14499,6 +14800,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -14690,6 +14992,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -14710,6 +15013,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -14902,16 +15206,23 @@
     "selector": "\"mona-tree-view\"",
     "inputs": [
       {
-        "description": "Enables CSS transitions when nodes expand or collapse.",
+        "description": "Enables CSS transitions when nodes expand or collapse. Accepts the attribute form\n(`animate=\"false\"`).",
         "kind": "input",
         "name": "animate",
         "type": "boolean",
         "defaultValue": "true"
       },
       {
-        "description": "Accessible name for the tree. Describe what the tree represents. When empty, assistive technology announces the role without a label.",
+        "description": "Accessible name of the tree. Describe what the tree represents; it also names the filter input\n(\"Filter {name}\"). Set this or `ariaLabelledBy`: an unnamed tree logs a warning in development. A plain\n`aria-label` attribute on `mona-tree-view` doesn't name the tree.",
         "kind": "input",
         "name": "ariaLabel",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Id of the element that names the tree, as an alternative to `ariaLabel`.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
         "type": "string",
         "defaultValue": "\"\""
       },
@@ -14927,6 +15238,12 @@
         "name": "children",
         "type": "ChildrenSelector<T>",
         "defaultValue": "\"\""
+      },
+      {
+        "description": "Emitted when the children observable of a node errors. The node is collapsed again and marked\nas failed (its expander reads \"Retry loading {node}\"), the failure is announced, and expanding the node\nretries the load.",
+        "kind": "output",
+        "name": "childrenLoadError",
+        "type": "ChildrenLoadErrorEvent<T>"
       },
       {
         "description": "Collection of items to render.",
@@ -15155,11 +15472,25 @@
         "defaultValue": "\"\""
       },
       {
+        "description": "Id of the element this input filters, exposed as `aria-controls`. Unlike `controls`, the input\nstays a text box: focus moves to the filtered element to navigate it.",
+        "kind": "input",
+        "name": "ariaControls",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Accessible name of the input. The placeholder is not a reliable label, so set this whenever possible.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
         "defaultValue": "\"\""
+      },
+      {
+        "description": "Focuses the input when it renders, as a popup's filter does. Turn it off for an input that is part\nof the page, so it doesn't take focus on load.",
+        "kind": "input",
+        "name": "autoFocus",
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "Id of the list this input filters. When set, the input is exposed as a combobox controlling it.",
@@ -15266,6 +15597,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -15280,6 +15612,20 @@
         "name": "ariaLabel",
         "type": "string",
         "defaultValue": "\"\""
+      },
+      {
+        "description": "Id of the element that names the list, as an alternative to `ariaLabel`.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Marks the list as loading (`aria-busy`).",
+        "kind": "input",
+        "name": "busy",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "",
@@ -15300,6 +15646,12 @@
         "kind": "input",
         "name": "height",
         "type": "ListSizeInputType"
+      },
+      {
+        "description": "Emitted when the user activates an enabled item by clicking it or pressing Enter on it, whether or\r\nnot the list is selectable.",
+        "kind": "output",
+        "name": "itemActivate",
+        "type": "ListItem<TData>"
       },
       {
         "description": "",
@@ -15333,6 +15685,13 @@
         "kind": "input",
         "name": "listItemStyle",
         "type": "Partial<CSSStyleDeclaration>"
+      },
+      {
+        "description": "`\"listbox\"` for options to choose from, `\"list\"` for items that are only shown.",
+        "kind": "input",
+        "name": "listRole",
+        "type": "\"list\" | \"listbox\"",
+        "defaultValue": "\"listbox\""
       },
       {
         "description": "",
@@ -15427,7 +15786,21 @@
       {
         "description": "",
         "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "",
+        "kind": "input",
         "name": "ariaLabel",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "ariaLabelledBy",
         "type": "string",
         "defaultValue": "\"\""
       },

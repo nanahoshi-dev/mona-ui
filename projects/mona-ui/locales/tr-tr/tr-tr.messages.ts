@@ -275,17 +275,30 @@ export const TR_TR_MESSAGES = {
     },
     list: {
         filterList: "Listeyi filtrele",
-        noData: "Veri yok"
+        loading: "Yükleniyor",
+        noData: "Veri yok",
+        pagerLabel: (list: string) => `${list} sayfalandırması`
     },
     listBox: {
         clearSelection: "Tüm seçimleri kaldır",
+        itemsMoved: (position: number, total: number) =>
+            `${localizeNumber(total)} içinde ${localizeNumber(position)}. konuma taşındı`,
+        itemsRemoved: (count: number) => `${localizeNumber(count)} öğe kaldırıldı`,
+        itemsTransferred: (count: number, list: string) => `${localizeNumber(count)} öğe ${list} listesine taşındı`,
+        itemsTransferredToOtherList: (count: number) => `${localizeNumber(count)} öğe diğer listeye taşındı`,
         moveDown: "Aşağı taşı",
         moveUp: "Yukarı taşı",
         remove: "Kaldır",
+        selectionCleared: "Seçim kaldırıldı",
+        toolbarLabel: (list: string) => `${list} işlemleri`,
         transferAllFrom: "Tümünü diğer listeden taşı",
+        transferAllFromList: (list: string) => `Tümünü ${list} listesinden taşı`,
         transferAllTo: "Tümünü diğer listeye taşı",
+        transferAllToList: (list: string) => `Tümünü ${list} listesine taşı`,
         transferFrom: "Diğer listeden taşı",
-        transferTo: "Diğer listeye taşı"
+        transferFromList: (list: string) => `${list} listesinden taşı`,
+        transferTo: "Diğer listeye taşı",
+        transferToList: (list: string) => `${list} listesine taşı`
     },
     multiSelect: {
         clear: "Temizle",
@@ -398,7 +411,17 @@ export const TR_TR_MESSAGES = {
         collapse: "Daralt",
         expand: "Genişlet",
         filter: "Filtrele",
-        filterTree: "Ağacı filtrele"
+        filterLabel: (tree: string) => `${tree} filtrele`,
+        filterTree: "Ağacı filtrele",
+        loadError: (node: string) => `${node} içindeki öğeler yüklenemedi`,
+        loadingNode: (node: string) => `${node} yükleniyor`,
+        movedAfter: (node: string, target: string) => `${node}, ${target} öğesinden sonraya taşındı`,
+        movedBefore: (node: string, target: string) => `${node}, ${target} öğesinden önceye taşındı`,
+        movedInto: (node: string, target: string) => `${node}, ${target} içine taşındı`,
+        noData: "Veri yok",
+        noMatches: "Eşleşen öğe yok",
+        results: (count: number) => `${localizeNumber(count)} sonuç`,
+        retryLoading: (node: string) => `${node} öğesini yeniden yüklemeyi dene`
     },
     window: {
         close: "Kapat",

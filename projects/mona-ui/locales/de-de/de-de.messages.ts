@@ -278,17 +278,37 @@ export const DE_DE_MESSAGES = {
     },
     list: {
         filterList: "Liste filtern",
-        noData: "Keine Daten"
+        loading: "Wird geladen",
+        noData: "Keine Daten",
+        pagerLabel: (list: string) => `Seitennavigation für ${list}`
     },
     listBox: {
         clearSelection: "Auswahl aufheben",
+        itemsMoved: (position: number, total: number) =>
+            `An Position ${localizeNumber(position)} von ${localizeNumber(total)} verschoben`,
+        itemsRemoved: (count: number) =>
+            count === 1 ? `${localizeNumber(count)} Element entfernt` : `${localizeNumber(count)} Elemente entfernt`,
+        itemsTransferred: (count: number, list: string) =>
+            count === 1
+                ? `${localizeNumber(count)} Element in ${list} übertragen`
+                : `${localizeNumber(count)} Elemente in ${list} übertragen`,
+        itemsTransferredToOtherList: (count: number) =>
+            count === 1
+                ? `${localizeNumber(count)} Element in die andere Liste übertragen`
+                : `${localizeNumber(count)} Elemente in die andere Liste übertragen`,
         moveDown: "Nach unten verschieben",
         moveUp: "Nach oben verschieben",
         remove: "Entfernen",
+        selectionCleared: "Auswahl aufgehoben",
+        toolbarLabel: (list: string) => `Aktionen für ${list}`,
         transferAllFrom: "Alle aus der anderen Liste übertragen",
+        transferAllFromList: (list: string) => `Alle aus ${list} übertragen`,
         transferAllTo: "Alle in die andere Liste übertragen",
+        transferAllToList: (list: string) => `Alle in ${list} übertragen`,
         transferFrom: "Aus der anderen Liste übertragen",
-        transferTo: "In die andere Liste übertragen"
+        transferFromList: (list: string) => `Aus ${list} übertragen`,
+        transferTo: "In die andere Liste übertragen",
+        transferToList: (list: string) => `In ${list} übertragen`
     },
     multiSelect: {
         clear: "Leeren",
@@ -409,7 +429,18 @@ export const DE_DE_MESSAGES = {
         collapse: "Einklappen",
         expand: "Erweitern",
         filter: "Filtern",
-        filterTree: "Baum filtern"
+        filterLabel: (tree: string) => `${tree} filtern`,
+        filterTree: "Baum filtern",
+        loadError: (node: string) => `Die Elemente in ${node} konnten nicht geladen werden`,
+        loadingNode: (node: string) => `${node} wird geladen`,
+        movedAfter: (node: string, target: string) => `${node} nach ${target} verschoben`,
+        movedBefore: (node: string, target: string) => `${node} vor ${target} verschoben`,
+        movedInto: (node: string, target: string) => `${node} in ${target} verschoben`,
+        noData: "Keine Daten",
+        noMatches: "Keine passenden Elemente",
+        results: (count: number) =>
+            count === 1 ? `${localizeNumber(count)} Ergebnis` : `${localizeNumber(count)} Ergebnisse`,
+        retryLoading: (node: string) => `${node} erneut laden`
     },
     window: {
         close: "Schließen",

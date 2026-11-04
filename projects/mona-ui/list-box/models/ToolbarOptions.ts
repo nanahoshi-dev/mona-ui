@@ -1,4 +1,4 @@
-import { Position } from "@nanahoshi/mona-ui/common";
+import type { Position } from "@nanahoshi/mona-ui/common";
 
 export interface ToolbarOptions {
     actions: ToolbarAction[];

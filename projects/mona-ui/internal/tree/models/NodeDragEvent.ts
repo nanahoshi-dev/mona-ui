@@ -1,4 +1,4 @@
-import { NodeItem } from "./NodeItem";
+import type { NodeItem } from "./NodeItem";
 import { TreeNode } from "./TreeNode";
 
 export class NodeDragEvent<T> {

@@ -1,7 +1,6 @@
-import { afterNextRender, DestroyRef, Directive, effect, inject, input, output, untracked } from "@angular/core";
+import { Directive, effect, inject, input, model, output, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { FilterableOptions } from "@nanahoshi/mona-ui/common";
-import { FilterChangeEvent } from "@nanahoshi/mona-ui/common";
+import type { FilterableOptions, FilterChangeEvent } from "@nanahoshi/mona-ui/common";
 import { TreeService } from "@nanahoshi/mona-ui/internal/tree";
 
 @Directive({
@@ -15,19 +14,20 @@ export class TreeViewFilterableDirective<T> {
         caseSensitive: false,
         debounce: 0
     };
-    readonly #destroyRef = inject(DestroyRef);
     readonly #treeService: TreeService<T> = inject(TreeService);
 
     /**
-     * @description Current filter text used to narrow the visible nodes.
+     * @description Current filter text used to narrow the visible nodes. Two-way bindable (`[(filter)]`); the user's
+     * typing updates it, so setting it from code (including back to `""`) always applies.
      * @default ""
      */
-    public readonly filter = input<string>("");
+    public readonly filter = model<string>("");
 
     /**
-     * @description Emitted when the filter value changes.
+     * @description Emitted when the user types in the filter input, before the filter applies. Call
+     * `preventDefault()` to keep the current filter; otherwise `filterChange` reports the new text.
      */
-    public readonly filterChange = output<FilterChangeEvent>();
+    public readonly filterInput = output<FilterChangeEvent>();
 
     /**
      * @description Placeholder text shown in the filter input.
@@ -65,14 +65,11 @@ export class TreeViewFilterableDirective<T> {
                 }
             });
         });
-        afterNextRender({
-            read: () => this.setSubscription()
-        });
-    }
-
-    private setSubscription(): void {
-        this.#treeService.filterChange$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
-            this.filterChange.emit(event);
+        this.#treeService.filterChange$.pipe(takeUntilDestroyed()).subscribe(event => {
+            this.filterInput.emit(event);
+            if (!event.isDefaultPrevented()) {
+                this.filter.set(event.filter);
+            }
         });
     }
 }

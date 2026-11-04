@@ -1,6 +1,6 @@
-import { DropPosition } from "./DropPositionChangeEvent";
-import { NodeItem } from "./NodeItem";
-import { NodeMoveSnapshot } from "./NodeMoveSnapshot";
+import type { DropPosition } from "./DropPositionChangeEvent";
+import type { NodeItem } from "./NodeItem";
+import type { NodeMoveSnapshot } from "./NodeMoveSnapshot";
 
 export interface ITreeView<T> {
     moveNode(source: NodeItem<T>, target: NodeItem<T>, position: DropPosition): NodeMoveSnapshot | null;

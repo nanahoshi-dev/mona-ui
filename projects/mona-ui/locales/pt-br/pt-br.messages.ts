@@ -279,17 +279,37 @@ export const PT_BR_MESSAGES = {
     },
     list: {
         filterList: "Filtrar lista",
-        noData: "Nenhum dado disponível"
+        loading: "Carregando",
+        noData: "Nenhum dado disponível",
+        pagerLabel: (list: string) => `Paginação de ${list}`
     },
     listBox: {
         clearSelection: "Limpar seleção",
+        itemsMoved: (position: number, total: number) =>
+            `Movido para a posição ${localizeNumber(position)} de ${localizeNumber(total)}`,
+        itemsRemoved: (count: number) =>
+            count === 1 ? `${localizeNumber(count)} item removido` : `${localizeNumber(count)} itens removidos`,
+        itemsTransferred: (count: number, list: string) =>
+            count === 1
+                ? `${localizeNumber(count)} item movido para ${list}`
+                : `${localizeNumber(count)} itens movidos para ${list}`,
+        itemsTransferredToOtherList: (count: number) =>
+            count === 1
+                ? `${localizeNumber(count)} item movido para a outra lista`
+                : `${localizeNumber(count)} itens movidos para a outra lista`,
         moveDown: "Mover para baixo",
         moveUp: "Mover para cima",
         remove: "Remover",
+        selectionCleared: "Seleção limpa",
+        toolbarLabel: (list: string) => `Ações de ${list}`,
         transferAllFrom: "Mover todos da outra lista",
+        transferAllFromList: (list: string) => `Mover todos de ${list}`,
         transferAllTo: "Mover todos para a outra lista",
+        transferAllToList: (list: string) => `Mover todos para ${list}`,
         transferFrom: "Mover da outra lista",
-        transferTo: "Mover para a outra lista"
+        transferFromList: (list: string) => `Mover de ${list}`,
+        transferTo: "Mover para a outra lista",
+        transferToList: (list: string) => `Mover para ${list}`
     },
     multiSelect: {
         clear: "Limpar",
@@ -407,7 +427,18 @@ export const PT_BR_MESSAGES = {
         collapse: "Recolher",
         expand: "Expandir",
         filter: "Filtrar",
-        filterTree: "Filtrar árvore"
+        filterLabel: (tree: string) => `Filtrar ${tree}`,
+        filterTree: "Filtrar árvore",
+        loadError: (node: string) => `Não foi possível carregar os itens de ${node}`,
+        loadingNode: (node: string) => `Carregando ${node}`,
+        movedAfter: (node: string, target: string) => `${node} movido para depois de ${target}`,
+        movedBefore: (node: string, target: string) => `${node} movido para antes de ${target}`,
+        movedInto: (node: string, target: string) => `${node} movido para dentro de ${target}`,
+        noData: "Nenhum dado disponível",
+        noMatches: "Nenhum item correspondente",
+        results: (count: number) =>
+            count === 1 ? `${localizeNumber(count)} resultado` : `${localizeNumber(count)} resultados`,
+        retryLoading: (node: string) => `Tentar carregar ${node} novamente`
     },
     window: {
         close: "Fechar",

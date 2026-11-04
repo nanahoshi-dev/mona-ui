@@ -6,8 +6,8 @@ import { ListService } from "../../services/list.service";
 import { ListComponent } from "./list.component";
 
 describe("ListComponent", () => {
-    let component: ListComponent<any>;
-    let fixture: ComponentFixture<ListComponent<any>>;
+    let component: ListComponent<unknown>;
+    let fixture: ComponentFixture<ListComponent<unknown>>;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -26,7 +26,7 @@ describe("ListComponent", () => {
 });
 
 @Component({
-    selector: "app-shift-tab-test",
+    selector: "mona-shift-tab-test",
     imports: [ListComponent],
     providers: [ListService],
     template: `<mona-list [data]="data" textField="name"></mona-list>`
@@ -65,7 +65,7 @@ describe("ListComponent focus handling", () => {
 });
 
 @Component({
-    selector: "app-empty-list-test",
+    selector: "mona-empty-list-test",
     imports: [ListComponent],
     providers: [ListService],
     template: `<mona-list [data]="data" textField="name"></mona-list>`
@@ -75,7 +75,7 @@ class EmptyListTestComponent {
 }
 
 describe("ListComponent focus handling with no focusable items", () => {
-    it("should fall back to making the list host itself the single Tab stop", async () => {
+    it("makes the empty list element, described by its No data text, the single Tab stop", async () => {
         await TestBed.configureTestingModule({
             imports: [EmptyListTestComponent]
         }).compileComponents();
@@ -83,12 +83,31 @@ describe("ListComponent focus handling with no focusable items", () => {
         fixture.detectChanges();
 
         const hostElement: HTMLElement = fixture.nativeElement.querySelector("mona-list");
-        expect(hostElement.getAttribute("tabindex")).toBe("0");
+        const list = hostElement.querySelector("ul") as HTMLElement;
+        expect(hostElement.getAttribute("tabindex")).toBe("-1");
+        expect(list.getAttribute("tabindex")).toBe("0");
+        expect(list.getAttribute("role")).toBe("listbox");
+        const noData = hostElement.querySelector(`#${list.getAttribute("aria-describedby")}`);
+        expect(noData?.textContent?.trim()).toBe("No data");
+    });
+
+    it("moves focus from the host to the empty list element", async () => {
+        await TestBed.configureTestingModule({
+            imports: [EmptyListTestComponent]
+        }).compileComponents();
+        const fixture = TestBed.createComponent(EmptyListTestComponent);
+        document.body.appendChild(fixture.nativeElement as HTMLElement);
+        fixture.detectChanges();
+
+        const hostElement: HTMLElement = fixture.nativeElement.querySelector("mona-list");
+        hostElement.focus();
+        expect(document.activeElement).toBe(hostElement.querySelector("ul"));
+        (fixture.nativeElement as HTMLElement).remove();
     });
 });
 
 @Component({
-    selector: "app-navigable-keydown-test",
+    selector: "mona-navigable-keydown-test",
     imports: [ListComponent],
     providers: [ListService],
     template: `<mona-list [data]="data" textField="name"></mona-list>`

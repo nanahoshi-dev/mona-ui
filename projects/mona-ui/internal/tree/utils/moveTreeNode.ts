@@ -11,7 +11,7 @@ import { NodeDropEvent } from "../models/NodeDropEvent";
  * The move is skipped, returning the tree unchanged, when the position is "outside", the target is missing,
  * or the target is the dragged node or one of its descendants, so a node is never lost or made its own ancestor.
  */
-export function moveTreeNode<T extends Record<string, any>>(
+export function moveTreeNode<T extends object>(
     treeData: Iterable<T>,
     event: NodeDropEvent<T>,
     idKey: keyof T,

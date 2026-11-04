@@ -1,16 +1,18 @@
 <mona-list-view
-    [ariaLabel]="ariaLabel()"
+    [aria-label]="ariaLabel()"
+    [aria-labelledby]="ariaLabelledBy()"
     [items]="listBoxItems()"
     [height]="'100%'"
     [rounded]="rounded()"
     [size]="size()"
     [textField]="textField()"
     [width]="'100%'"
+    [disabledBy]="disabledBy()"
     [monaListViewNavigable]="{ enabled: true, mode: 'select' }"
     [monaListViewSelectable]="selectableOptions()"
     [selectBy]="selectBy()"
     [selectedKeys]="selectedKeys()"
-    (selectedKeysChange)="onSelectedKeysChange($event)">
+    (selectedKeysChange)="onSelectedKeysChange()">
     @if (footerTemplate()) {
         <ng-template monaListViewFooterTemplate>
             <ng-container [ngTemplateOutlet]="footerTemplate()"></ng-container>
@@ -35,115 +37,55 @@
     }
 </mona-list-view>
 
-@let options = toolbarOptions() ?? null;
-@let connectedListBox = connectedList();
-@let hasSelectedItems = selectedItems().length > 0;
-@let connectedListHasSelectedItems = connectedListBox && connectedListBox.selectedItems().length > 0;
-@let connectedListItems = connectedListBox?.listBoxItems() ?? [];
-@if (options !== null && connectedListBox !== null) {
-    <div [class]="toolbarClasses()">
-        @if (options.actions | monaContains: "moveUp") {
+@let buttons = toolbarButtons();
+@if (buttons.length > 0) {
+    @let tabStop = toolbarTabStop();
+    <div
+        role="toolbar"
+        [attr.aria-label]="toolbarLabel()"
+        [attr.aria-orientation]="toolbarOrientation()"
+        [class]="toolbarClasses()"
+        (focusin)="onToolbarFocusIn($event)"
+        (keydown)="onToolbarKeydown($event)">
+        @for (button of buttons; track button.action) {
             <button
                 monaButton
-                (click)="onMoveClick('moveUp', $event)"
+                type="button"
+                [attr.data-action]="button.action"
+                (click)="onActionClick(button.action, $event)"
                 [iconOnly]="true"
                 [rounded]="rounded()"
                 [size]="size()"
-                [title]="messages().moveUp"
-                [attr.aria-label]="messages().moveUp"
-                [disabled]="!hasSelectedItems && !connectedListHasSelectedItems">
-                <svg lucideChevronUp [size]="16"></svg>
-            </button>
-        }
-        @if (options.actions | monaContains: "moveDown") {
-            <button
-                monaButton
-                (click)="onMoveClick('moveDown', $event)"
-                [iconOnly]="true"
-                [rounded]="rounded()"
-                [size]="size()"
-                [title]="messages().moveDown"
-                [attr.aria-label]="messages().moveDown"
-                [disabled]="!hasSelectedItems && !connectedListHasSelectedItems">
-                <svg lucideChevronDown [size]="16"></svg>
-            </button>
-        }
-        @if (options.actions | monaContains: "transferFrom") {
-            <button
-                monaButton
-                (click)="onTransferClick('transferFrom', $event)"
-                [iconOnly]="true"
-                [rounded]="rounded()"
-                [size]="size()"
-                [title]="messages().transferFrom"
-                [attr.aria-label]="messages().transferFrom"
-                [disabled]="!connectedListHasSelectedItems">
-                <svg lucideChevronLeft [size]="16" class="rtl:rotate-180"></svg>
-            </button>
-        }
-        @if (options.actions | monaContains: "transferTo") {
-            <button
-                monaButton
-                (click)="onTransferClick('transferTo', $event)"
-                [iconOnly]="true"
-                [rounded]="rounded()"
-                [size]="size()"
-                [title]="messages().transferTo"
-                [attr.aria-label]="messages().transferTo"
-                [disabled]="!hasSelectedItems">
-                <svg lucideChevronRight [size]="16" class="rtl:rotate-180"></svg>
-            </button>
-        }
-        @if (options.actions | monaContains: "transferAllFrom") {
-            <button
-                monaButton
-                (click)="onTransferClick('transferAllFrom', $event)"
-                [iconOnly]="true"
-                [rounded]="rounded()"
-                [size]="size()"
-                [title]="messages().transferAllFrom"
-                [attr.aria-label]="messages().transferAllFrom"
-                [disabled]="!connectedListBox || connectedListItems.length === 0">
-                <svg lucideChevronsLeft [size]="16" class="rtl:rotate-180"></svg>
-            </button>
-        }
-        @if (options.actions | monaContains: "transferAllTo") {
-            <button
-                monaButton
-                (click)="onTransferClick('transferAllTo', $event)"
-                [iconOnly]="true"
-                [rounded]="rounded()"
-                [size]="size()"
-                [title]="messages().transferAllTo"
-                [attr.aria-label]="messages().transferAllTo"
-                [disabled]="listBoxItems().length === 0">
-                <svg lucideChevronsRight [size]="16" class="rtl:rotate-180"></svg>
-            </button>
-        }
-        @if (options.actions | monaContains: "clear") {
-            <button
-                monaButton
-                (click)="onClearClick($event)"
-                [iconOnly]="true"
-                [rounded]="rounded()"
-                [size]="size()"
-                [title]="messages().clearSelection"
-                [attr.aria-label]="messages().clearSelection"
-                [disabled]="!hasSelectedItems && !connectedListHasSelectedItems">
-                <svg lucideX [size]="16"></svg>
-            </button>
-        }
-        @if (options.actions | monaContains: "remove") {
-            <button
-                monaButton
-                (click)="onRemoveClick($event)"
-                [iconOnly]="true"
-                [rounded]="rounded()"
-                [size]="size()"
-                [title]="messages().remove"
-                [attr.aria-label]="messages().remove"
-                [disabled]="!hasSelectedItems && !connectedListHasSelectedItems">
-                <svg lucideTrash2 [size]="14"></svg>
+                [title]="button.label"
+                [attr.aria-label]="button.label"
+                [disabled]="!button.enabled"
+                [tabindex]="tabStop === button.action ? 0 : -1">
+                @switch (button.action) {
+                    @case ("moveUp") {
+                        <svg lucideChevronUp [size]="16"></svg>
+                    }
+                    @case ("moveDown") {
+                        <svg lucideChevronDown [size]="16"></svg>
+                    }
+                    @case ("transferFrom") {
+                        <svg lucideChevronLeft [size]="16" class="rtl:rotate-180"></svg>
+                    }
+                    @case ("transferTo") {
+                        <svg lucideChevronRight [size]="16" class="rtl:rotate-180"></svg>
+                    }
+                    @case ("transferAllFrom") {
+                        <svg lucideChevronsLeft [size]="16" class="rtl:rotate-180"></svg>
+                    }
+                    @case ("transferAllTo") {
+                        <svg lucideChevronsRight [size]="16" class="rtl:rotate-180"></svg>
+                    }
+                    @case ("clear") {
+                        <svg lucideX [size]="16"></svg>
+                    }
+                    @case ("remove") {
+                        <svg lucideTrash2 [size]="14"></svg>
+                    }
+                }
             </button>
         }
     </div>

@@ -1,5 +1,5 @@
 import { Directive, effect, inject, input, untracked } from "@angular/core";
-import { VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
+import type { VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
 import { ListService } from "@nanahoshi/mona-ui/internal/list";
 
 @Directive({
@@ -7,7 +7,7 @@ import { ListService } from "@nanahoshi/mona-ui/internal/list";
 })
 export class ListViewVirtualScrollDirective<T> {
     readonly #listService = inject(ListService<T>);
-    public options = input.required<VirtualScrollOptions>({
+    public readonly options = input.required<VirtualScrollOptions>({
         alias: "monaListViewVirtualScroll"
     });
 

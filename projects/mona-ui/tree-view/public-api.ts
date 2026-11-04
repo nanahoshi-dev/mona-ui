@@ -12,15 +12,9 @@ export * from "./directives/tree-view-filterable.directive";
 export * from "./directives/tree-view-node-template.directive";
 export * from "./directives/tree-view-selectable.directive";
 export { TREE_VIEW_DEFAULT_MESSAGES } from "./i18n/tree-view.default-messages";
+export type * from "./models/TreeViewNodeTemplateContext";
 
 export {
-    CheckableOptions,
-    ChildrenSelector,
-    DataStructure,
-    DisableOptions,
-    DraggableOptions,
-    DropPositionChangeEvent,
-    ExpandableOptions,
     moveFlatTreeNode,
     moveTreeNode,
     NodeCheckEvent,
@@ -29,8 +23,22 @@ export {
     NodeDragEvent,
     NodeDragStartEvent,
     NodeDropEvent,
+    NodeSelectEvent
+} from "@nanahoshi/mona-ui/internal/tree";
+export type {
+    CheckableOptions,
+    ChildrenLoadErrorEvent,
+    ChildrenSelector,
+    DataStructure,
+    DisableOptions,
+    DraggableOptions,
+    DropPosition,
+    DropPositionChangeEvent,
+    ExpandableOptions,
+    ITreeView,
     NodeItem,
     NodeKeySelector,
+    NodeDropOriginalEvent,
     NodeMoveSnapshot,
     SelectableOptions
 } from "@nanahoshi/mona-ui/internal/tree";

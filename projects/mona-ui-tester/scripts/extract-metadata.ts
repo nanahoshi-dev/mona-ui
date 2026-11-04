@@ -3,6 +3,8 @@ import * as path from "path";
 import { CallExpression, JSDocTag, Node, Project, SyntaxKind } from "ts-morph";
 
 interface ComponentInputMetadata {
+    /** The name consumers bind, when the input or output is aliased (`input("", { alias: "aria-label" })`). */
+    alias?: string;
     defaultValue?: string;
     description: string;
     kind: "input" | "model" | "output";
@@ -120,6 +122,26 @@ function extractLiteralDefaultText(argument: Node | undefined): string | undefin
  * @param visitedClasses Set to track visited classes and avoid infinite recursion
  * @returns Array of component input metadata from the class and its base classes
  */
+/**
+ * Reads `alias` from the options object of `input()`, `input.required()`, `model()` or `output()`: the second
+ * argument of `input(default, options)` and `model(default, options)`, the first of the `.required` forms and of
+ * `output(options)`.
+ */
+function extractAlias(callExpression: CallExpression, isRequired: boolean): string | undefined {
+    const functionName = callExpression.getExpression().getText();
+    const args = callExpression.getArguments();
+    const options = isRequired || functionName === "output" ? args[0] : args[1];
+    if (!options || !Node.isObjectLiteralExpression(options)) {
+        return undefined;
+    }
+    const aliasProperty = options.getProperty("alias");
+    if (!aliasProperty || !Node.isPropertyAssignment(aliasProperty)) {
+        return undefined;
+    }
+    const value = aliasProperty.getInitializer();
+    return value && Node.isStringLiteral(value) ? value.getLiteralValue() : undefined;
+}
+
 function extractInputsFromInheritanceChain(
     classDeclaration: any,
     visitedClasses = new Set<string>()
@@ -198,6 +220,10 @@ function extractInputsFromInheritanceChain(
                     name: inputName,
                     type: inputType
                 };
+                const alias = extractAlias(callExpression, isRequired);
+                if (alias) {
+                    item.alias = alias;
+                }
                 if (isRequired) {
                     item.required = true;
                 }

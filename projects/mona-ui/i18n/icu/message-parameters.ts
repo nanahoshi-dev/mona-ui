@@ -303,17 +303,35 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
     },
     list: {
         filterList: null,
-        noData: null
+        loading: null,
+        noData: null,
+        pagerLabel: [{ name: "list", type: "string" }]
     },
     listBox: {
         clearSelection: null,
+        itemsMoved: [
+            { name: "position", type: "number" },
+            { name: "total", type: "number" }
+        ],
+        itemsRemoved: [{ name: "count", type: "number" }],
+        itemsTransferred: [
+            { name: "count", type: "number" },
+            { name: "list", type: "string" }
+        ],
+        itemsTransferredToOtherList: [{ name: "count", type: "number" }],
         moveDown: null,
         moveUp: null,
         remove: null,
+        selectionCleared: null,
+        toolbarLabel: [{ name: "list", type: "string" }],
         transferAllFrom: null,
+        transferAllFromList: [{ name: "list", type: "string" }],
         transferAllTo: null,
+        transferAllToList: [{ name: "list", type: "string" }],
         transferFrom: null,
-        transferTo: null
+        transferFromList: [{ name: "list", type: "string" }],
+        transferTo: null,
+        transferToList: [{ name: "list", type: "string" }]
     },
     multiSelect: {
         clear: null,
@@ -437,7 +455,26 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         collapse: null,
         expand: null,
         filter: null,
-        filterTree: null
+        filterLabel: [{ name: "tree", type: "string" }],
+        filterTree: null,
+        loadError: [{ name: "node", type: "string" }],
+        loadingNode: [{ name: "node", type: "string" }],
+        movedAfter: [
+            { name: "node", type: "string" },
+            { name: "target", type: "string" }
+        ],
+        movedBefore: [
+            { name: "node", type: "string" },
+            { name: "target", type: "string" }
+        ],
+        movedInto: [
+            { name: "node", type: "string" },
+            { name: "target", type: "string" }
+        ],
+        noData: null,
+        noMatches: null,
+        results: [{ name: "count", type: "number" }],
+        retryLoading: [{ name: "node", type: "string" }]
     },
     window: {
         close: null,

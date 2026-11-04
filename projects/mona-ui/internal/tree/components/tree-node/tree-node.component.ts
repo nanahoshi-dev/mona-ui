@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input } from "@angular/core";
+import { Component, computed, DestroyRef, inject, input } from "@angular/core";
 import { takeUntilDestroyed, toSignal } from "@angular/core/rxjs-interop";
 import { filter, map, Subject, tap } from "rxjs";
 import { NodeCheckEvent } from "../../models/NodeCheckEvent";
@@ -11,14 +11,12 @@ import { treeNodeBaseThemeVariants } from "../../styles/tree.styles";
 
 @Component({
     selector: "mona-tree-node",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [NgTemplateOutlet],
     templateUrl: "./tree-node.component.html"
 })
 export class TreeNodeComponent<T> {
     readonly #destroyRef = inject(DestroyRef);
-    protected readonly treeService = inject(TreeService<T>);
-    readonly #dragging = toSignal(this.treeService.dragging$, {
+    readonly #dragging = toSignal(inject(TreeService<T>).dragging$, {
         initialValue: false
     });
     protected readonly baseClass = computed(() => {
@@ -27,6 +25,7 @@ export class TreeNodeComponent<T> {
         const selected = this.selected();
         return treeNodeBaseThemeVariants({ disabled, highlighted, selected });
     });
+    protected readonly treeService = inject(TreeService<T>);
     public readonly checkable = computed(() => {
         const node = this.node();
         if (node === null) {
@@ -44,6 +43,7 @@ export class TreeNodeComponent<T> {
         }
         return this.treeService.isChecked(node);
     });
+    public readonly depth = input(0);
     public readonly disabled = computed(() => {
         const node = this.node();
         if (node === null) {
@@ -89,6 +89,7 @@ export class TreeNodeComponent<T> {
         }
         return this.treeService.isNavigated(node);
     });
+    public readonly node = input<TreeNode<T> | null>(null);
     public readonly nodeText = computed(() => {
         const node = this.node();
         if (node === null) {
@@ -103,9 +104,6 @@ export class TreeNodeComponent<T> {
         }
         return this.treeService.isSelected(node);
     });
-
-    public depth = input(0);
-    public node = input<TreeNode<T> | null>(null);
 
     public constructor() {
         this.setCheckboxClickSubscription();
@@ -135,18 +133,21 @@ export class TreeNodeComponent<T> {
         if (selectableOptions.childrenOnly && this.treeService.hasChildren(node)) {
             return;
         }
+        if (!this.treeService.selectionWouldChange(node)) {
+            return;
+        }
         const nodeSelectEvent = new NodeSelectEvent(node, event);
         this.treeService.nodeSelect$.next(nodeSelectEvent);
         if (nodeSelectEvent.isDefaultPrevented()) {
             return;
         }
-        const newSelected = !this.selected();
-        this.treeService.setNodeSelect(node, newSelected);
-        this.treeService.nodeSelectChange$.next({ node, selected: newSelected });
-        this.treeService.notifySelectionChange(node);
+        if (this.treeService.setNodeSelect(node, !this.selected())) {
+            this.treeService.nodeSelectChange$.next({ node, selected: this.treeService.isSelected(node) });
+            this.treeService.notifySelectionChange(node);
+        }
     }
 
-    public onNodeContextMenu(event: MouseEvent): void {
+    public onNodeContextMenu(): void {
         const node = this.node();
         if (node === null) {
             return;

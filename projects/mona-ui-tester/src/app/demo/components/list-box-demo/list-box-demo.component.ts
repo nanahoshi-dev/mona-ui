@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal, viewChild } from "@angular/core";
+import {
+    booleanAttribute,
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    inject,
+    input,
+    signal,
+    viewChild
+} from "@angular/core";
 import { LucideBox } from "@lucide/angular";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
@@ -174,7 +183,7 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
             ariaLabel: {
                 alias: "aria-label",
                 type: "string",
-                value: ""
+                value: "Available foods"
             },
             connectedList: {
                 type: "object"
@@ -252,6 +261,8 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
             [size]="size()"
             [textField]="textField()"
             [toolbar]="toolbarCustomizations()"
+            [aria-labelledby]="ariaLabelledBy()"
+            [toolbarAriaLabel]="toolbarAriaLabel()"
             [width]="width()">
             @if (featureData["headerTemplate"].active) {
                 <ng-template monaListBoxHeaderTemplate>
@@ -267,7 +278,7 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
             }
 
             @if (featureData["itemTemplate"].active) {
-                <ng-template monaListBoxItemTemplate let-item>
+                <ng-template monaListBoxItemTemplate [monaListBoxItemTemplateOf]="viewItems()" let-item>
                     <div class="flex flex-row w-full">
                         @let color = item.price > 7 ? "text-amber-600" : item.price < 3 ? "text-emerald-700" : "";
                         <span class="flex-1 flex items-center {{ color }}">{{ item.text }}</span>
@@ -289,6 +300,7 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
 
         @if (connectedListsVisible()) {
             <mona-list-box
+                aria-label="Chosen foods"
                 (actionClick)="onActionClick($event, 'second')"
                 [selectBy]="selectBy()"
                 [selectionMode]="selectionMode()"
@@ -300,7 +312,7 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
                 [rounded]="rounded()"
                 [size]="size()"
                 [textField]="textField()"
-                [toolbar]="true"
+                [toolbar]="false"
                 [width]="width()"
                 #secondList></mona-list-box>
         }
@@ -358,16 +370,21 @@ class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponen
         return { actions, position } as ToolbarOptions;
     });
     protected readonly viewItems = computed(() => this.#listData());
-    public readonly ariaLabel = input("");
+    public readonly ariaLabel = input("Available foods");
+    public readonly ariaLabelledBy = input("");
     public readonly connectedList = input<ReturnType<ListBoxComponent["connectedList"]>>(null);
     public readonly height = input<ReturnType<ListBoxComponent["height"]>>("100%");
     public readonly rounded = input<ReturnType<ListBoxComponent["rounded"]>>("medium");
     public readonly selectBy = input<ReturnType<ListBoxComponent["selectBy"]>>("value");
     public readonly selectionMode = input<ReturnType<ListBoxComponent["selectionMode"]>>("single");
-    public readonly singleSelectionToggleable = input(true);
+    public readonly singleSelectionToggleable = input(true, { transform: booleanAttribute });
     public readonly size = input<ReturnType<ListBoxComponent["size"]>>("medium");
     public readonly textField = input<ReturnType<ListBoxComponent["textField"]>>("");
-    public readonly toolbar = input<ReturnType<ListBoxComponent["toolbar"]>>(true);
+    public readonly toolbar = input<
+        ReturnType<ListBoxComponent["toolbar"]>,
+        ReturnType<ListBoxComponent["toolbar"]> | string | null | undefined
+    >(true, { transform: value => (typeof value === "string" || value == null ? value !== "false" : value) });
+    public readonly toolbarAriaLabel = input("");
     public readonly width = input<ReturnType<ListBoxComponent["width"]>>("100%");
 
     protected onActionClick(
@@ -382,30 +399,14 @@ class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponen
                     moveIndices(newData, event.selectedIndices, event.action === "moveDown" ? 1 : -1)
                 );
             });
-        } else if (event.action === "transferTo") {
-            if (listBox === "first") {
-                this.secondListBoxItems.update(set => set.addAll(event.selectedItems));
-                this.#listData.update(set => set.removeAll(event.selectedItems));
-            } else {
-                this.secondListBoxItems.update(set => set.removeAll(event.selectedItems));
-            }
-        } else if (event.action === "transferFrom") {
-            if (listBox === "second") {
-                this.#listData.update(set => set.addAll(event.selectedItems));
-                this.secondListBoxItems.update(set => set.removeAll(event.selectedItems));
-            }
-        } else if (event.action === "transferAllTo") {
-            if (listBox === "first") {
-                this.secondListBoxItems.update(set => set.addAll(this.#listData()));
-                this.#listData.update(set => set.clear());
-            } else {
-                this.secondListBoxItems.update(set => set.clear());
-            }
-        } else if (event.action === "transferAllFrom") {
-            if (listBox === "second") {
-                this.#listData.update(set => set.addAll(this.secondListBoxItems()));
-                this.secondListBoxItems.update(set => set.clear());
-            }
+        } else if (event.action === "transferTo" || event.action === "transferAllTo") {
+            // "To" actions fire on the first list box and carry the items to move to the second.
+            this.secondListBoxItems.update(set => set.addAll(event.selectedItems));
+            this.#listData.update(set => set.removeAll(event.selectedItems));
+        } else if (event.action === "transferFrom" || event.action === "transferAllFrom") {
+            // "From" actions fire on the second list box and carry the items to move back to the first.
+            this.#listData.update(set => set.addAll(event.selectedItems));
+            this.secondListBoxItems.update(set => set.removeAll(event.selectedItems));
         } else if (event.action === "remove") {
             if (listBox === "first") {
                 this.#listData.update(set => set.removeAll(event.selectedItems));

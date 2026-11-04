@@ -16,7 +16,7 @@ type ClassifiedType =
  * curated value list for it.
  *
  * `overrides` is shallow-merged on top: any key present in `overrides` fully replaces the derived
- * entry for that key (never deep-merged) - this is how authors add numeric slider ranges, curated
+ * entry for that key (never deep-merged), except that it keeps the metadata's `alias` unless it sets its own - this is how authors add numeric slider ranges, curated
  * dropdown option lists, notes, aliases, or reintroduce an unclassifiable input by hand.
  */
 export function deriveInputConfig<T>(
@@ -33,10 +33,18 @@ export function deriveInputConfig<T>(
         if (!classified) {
             continue;
         }
-        derived[property.name] = buildEntry(classified, property.defaultValue);
+        const entry = buildEntry(classified, property.defaultValue) as Record<string, unknown>;
+        derived[property.name] = property.alias ? { ...entry, alias: property.alias } : entry;
     }
 
-    return { ...derived, ...overrides } as unknown as ComponentConfigInputType<T>;
+    // An override keeps the metadata's alias unless it names one, so samples show the name consumers bind.
+    const aliased: Record<string, unknown> = {};
+    for (const [key, override] of Object.entries(overrides as Record<string, Record<string, unknown> | undefined>)) {
+        const alias = metadata.inputs?.find(property => property.name === key)?.alias;
+        aliased[key] = override && alias && override["alias"] === undefined ? { ...override, alias } : override;
+    }
+
+    return { ...derived, ...aliased } as unknown as ComponentConfigInputType<T>;
 }
 
 function classifyType(typeString: string): ClassifiedType | undefined {

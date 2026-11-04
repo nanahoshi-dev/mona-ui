@@ -279,17 +279,37 @@ export const IT_IT_MESSAGES = {
     },
     list: {
         filterList: "Filtra elenco",
-        noData: "Nessun dato disponibile"
+        loading: "Caricamento",
+        noData: "Nessun dato disponibile",
+        pagerLabel: (list: string) => `Paginazione di ${list}`
     },
     listBox: {
         clearSelection: "Deseleziona tutto",
+        itemsMoved: (position: number, total: number) =>
+            `Spostato in posizione ${localizeNumber(position)} di ${localizeNumber(total)}`,
+        itemsRemoved: (count: number) =>
+            count === 1 ? `${localizeNumber(count)} elemento rimosso` : `${localizeNumber(count)} elementi rimossi`,
+        itemsTransferred: (count: number, list: string) =>
+            count === 1
+                ? `${localizeNumber(count)} elemento spostato in ${list}`
+                : `${localizeNumber(count)} elementi spostati in ${list}`,
+        itemsTransferredToOtherList: (count: number) =>
+            count === 1
+                ? `${localizeNumber(count)} elemento spostato nell'altro elenco`
+                : `${localizeNumber(count)} elementi spostati nell'altro elenco`,
         moveDown: "Sposta giù",
         moveUp: "Sposta su",
         remove: "Rimuovi",
+        selectionCleared: "Selezione annullata",
+        toolbarLabel: (list: string) => `Azioni per ${list}`,
         transferAllFrom: "Sposta tutto dall'altro elenco",
+        transferAllFromList: (list: string) => `Sposta tutto da ${list}`,
         transferAllTo: "Sposta tutto nell'altro elenco",
+        transferAllToList: (list: string) => `Sposta tutto in ${list}`,
         transferFrom: "Sposta dall'altro elenco",
-        transferTo: "Sposta nell'altro elenco"
+        transferFromList: (list: string) => `Sposta da ${list}`,
+        transferTo: "Sposta nell'altro elenco",
+        transferToList: (list: string) => `Sposta in ${list}`
     },
     multiSelect: {
         clear: "Cancella",
@@ -407,7 +427,18 @@ export const IT_IT_MESSAGES = {
         collapse: "Comprimi",
         expand: "Espandi",
         filter: "Filtra",
-        filterTree: "Filtra albero"
+        filterLabel: (tree: string) => `Filtra ${tree}`,
+        filterTree: "Filtra albero",
+        loadError: (node: string) => `Impossibile caricare gli elementi di ${node}`,
+        loadingNode: (node: string) => `Caricamento di ${node}`,
+        movedAfter: (node: string, target: string) => `${node} spostato dopo ${target}`,
+        movedBefore: (node: string, target: string) => `${node} spostato prima di ${target}`,
+        movedInto: (node: string, target: string) => `${node} spostato in ${target}`,
+        noData: "Nessun dato disponibile",
+        noMatches: "Nessun elemento corrispondente",
+        results: (count: number) =>
+            count === 1 ? `${localizeNumber(count)} risultato` : `${localizeNumber(count)} risultati`,
+        retryLoading: (node: string) => `Riprova a caricare ${node}`
     },
     window: {
         close: "Chiudi",

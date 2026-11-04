@@ -257,17 +257,29 @@
     },
     "list": {
         "filterList": "筛选列表",
-        "noData": "没有数据"
+        "loading": "正在加载",
+        "noData": "没有数据",
+        "pagerLabel": "{list}分页"
     },
     "listBox": {
         "clearSelection": "清除选择",
+        "itemsMoved": "已移至第 {position} 位，共 {total} 位",
+        "itemsRemoved": "已移除 {count} 项",
+        "itemsTransferred": "已将 {count} 项移至{list}",
+        "itemsTransferredToOtherList": "已将 {count} 项移至另一列表",
         "moveDown": "向下移动",
         "moveUp": "向上移动",
         "remove": "移除",
+        "selectionCleared": "已清除选择",
+        "toolbarLabel": "{list}操作",
         "transferAllFrom": "从另一列表全部移入",
+        "transferAllFromList": "从{list}全部移入",
         "transferAllTo": "全部移至另一列表",
+        "transferAllToList": "全部移至{list}",
         "transferFrom": "从另一列表移入",
-        "transferTo": "移至另一列表"
+        "transferFromList": "从{list}移入",
+        "transferTo": "移至另一列表",
+        "transferToList": "移至{list}"
     },
     "multiSelect": {
         "clear": "清除",
@@ -378,7 +390,17 @@
         "collapse": "折叠",
         "expand": "展开",
         "filter": "筛选",
-        "filterTree": "筛选树"
+        "filterLabel": "筛选{tree}",
+        "filterTree": "筛选树",
+        "loadError": "无法加载{node}中的项目",
+        "loadingNode": "正在加载{node}",
+        "movedAfter": "已将 {node} 移到 {target} 之后",
+        "movedBefore": "已将 {node} 移到 {target} 之前",
+        "movedInto": "已将 {node} 移入 {target}",
+        "noData": "没有数据",
+        "noMatches": "没有匹配的项目",
+        "results": "{count} 个结果",
+        "retryLoading": "重试加载{node}"
     },
     "window": {
         "close": "关闭",

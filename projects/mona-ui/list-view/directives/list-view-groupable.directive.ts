@@ -1,5 +1,5 @@
 import { Directive, effect, inject, input, untracked } from "@angular/core";
-import { GroupableOptions, ListKeySelector, ListService } from "@nanahoshi/mona-ui/internal/list";
+import { type GroupableOptions, type ListKeySelector, ListService } from "@nanahoshi/mona-ui/internal/list";
 
 @Directive({
     selector: "mona-list-view[monaListViewGroupable]"
@@ -10,8 +10,8 @@ export class ListViewGroupableDirective<T, K = T> {
     };
     readonly #listService = inject(ListService<T>);
 
-    public groupBy = input<ListKeySelector<T, K> | undefined>("");
-    public options = input<GroupableOptions<T, K> | "">("", {
+    public readonly groupBy = input<ListKeySelector<T, K> | undefined>("");
+    public readonly options = input<GroupableOptions<T, K> | "">("", {
         alias: "monaListViewGroupable"
     });
 

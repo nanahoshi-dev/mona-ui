@@ -6,7 +6,6 @@ import { ListViewSelectableDirective } from "./list-view-selectable.directive";
 
 @Component({
     imports: [ListViewSelectableDirective, ListViewComponent],
-    providers: [ListService],
     template: `
         <mona-list-view
             [items]="data"

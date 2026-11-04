@@ -257,17 +257,29 @@
     },
     "list": {
         "filterList": "Фильтр списка",
-        "noData": "Нет данных"
+        "loading": "Загрузка",
+        "noData": "Нет данных",
+        "pagerLabel": "Навигация по страницам: {list}"
     },
     "listBox": {
         "clearSelection": "Очистить выбор",
+        "itemsMoved": "Перемещено на позицию {position} из {total}",
+        "itemsRemoved": "{count, plural, one {Удалён # элемент} few {Удалено # элемента} many {Удалено # элементов} other {Удалено # элемента}}",
+        "itemsTransferred": "{count, plural, one {# элемент перенесён в список «{list}»} few {# элемента перенесено в список «{list}»} many {# элементов перенесено в список «{list}»} other {# элемента перенесено в список «{list}»}}",
+        "itemsTransferredToOtherList": "{count, plural, one {# элемент перенесён в другой список} few {# элемента перенесено в другой список} many {# элементов перенесено в другой список} other {# элемента перенесено в другой список}}",
         "moveDown": "Переместить вниз",
         "moveUp": "Переместить вверх",
         "remove": "Удалить",
+        "selectionCleared": "Выбор очищен",
+        "toolbarLabel": "Действия: {list}",
         "transferAllFrom": "Перенести всё из другого списка",
+        "transferAllFromList": "Перенести всё из списка «{list}»",
         "transferAllTo": "Перенести всё в другой список",
+        "transferAllToList": "Перенести всё в список «{list}»",
         "transferFrom": "Перенести из другого списка",
-        "transferTo": "Перенести в другой список"
+        "transferFromList": "Перенести из списка «{list}»",
+        "transferTo": "Перенести в другой список",
+        "transferToList": "Перенести в список «{list}»"
     },
     "multiSelect": {
         "clear": "Очистить",
@@ -378,7 +390,17 @@
         "collapse": "Свернуть",
         "expand": "Развернуть",
         "filter": "Фильтр",
-        "filterTree": "Фильтр дерева"
+        "filterLabel": "Фильтр: {tree}",
+        "filterTree": "Фильтр дерева",
+        "loadError": "Не удалось загрузить элементы «{node}»",
+        "loadingNode": "Загрузка «{node}»",
+        "movedAfter": "Элемент {node} перемещён после {target}",
+        "movedBefore": "Элемент {node} перемещён перед {target}",
+        "movedInto": "Элемент {node} перемещён в {target}",
+        "noData": "Нет данных",
+        "noMatches": "Нет подходящих элементов",
+        "results": "{count, plural, one {# результат} few {# результата} many {# результатов} other {# результата}}",
+        "retryLoading": "Повторить загрузку «{node}»"
     },
     "window": {
         "close": "Закрыть",

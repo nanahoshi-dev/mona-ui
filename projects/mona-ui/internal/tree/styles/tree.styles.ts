@@ -18,7 +18,16 @@ export const treeBaseThemeVariants = cva(
     `
         relative outline-none select-none
         text-base
-    `
+    `,
+    {
+        variants: {
+            // An empty tree has no active node to draw the ring on, so the tree draws it.
+            empty: {
+                true: "block min-h-full focus-visible:inset-ring-2 focus-visible:inset-ring-focus-indicator",
+                false: ""
+            }
+        }
+    }
 );
 
 export const treeDropHintBaseThemeVariants = cva(
@@ -47,7 +56,7 @@ export const treeNodeBaseThemeVariants = cva(
                 false: ""
             },
             highlighted: {
-                true: "inset-ring-1 inset-ring-focus-indicator/35",
+                true: "inset-ring-2 inset-ring-focus-indicator",
                 false: ""
             },
             selected: {
