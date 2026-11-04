@@ -1,6 +1,7 @@
+import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
-import { themeControlSurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { VariantProps } from "class-variance-authority";
+import type { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeControlSurfaceClasses } from "@nanahoshi/mona-ui/internal";
 
 export const numericTextboxThemeVariants = cva(
     `
@@ -8,10 +9,9 @@ export const numericTextboxThemeVariants = cva(
         overflow-hidden p-0
         ${themeControlSurfaceClasses} text-foreground
         border border-input-border shadow-(--shadow-control)
-        outline-none
+        outline-hidden
         selection:bg-primary selection:text-primary-foreground
         transition-[color,box-shadow,border] duration-300 ease-in-out
-        placeholder:text-muted-foreground
 
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed
@@ -53,7 +53,7 @@ export const numericTextboxInputThemeVariants = cva(
         bg-transparent
         border-0 shadow-none
         rounded-none
-        outline-none ring-0
+        outline-hidden ring-0
         focus-visible:border-transparent focus-visible:ring-0
     `,
     {

@@ -1,18 +1,17 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { Component, effect, input, model } from "@angular/core";
-import { FormsModule } from "@angular/forms";
 import type { FormValueControl } from "@angular/forms/signals";
 import { LucideChevronDown, LucideChevronUp } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { validateLocalizedDecimal, validateLocalizedDecimalEdit } from "@nanahoshi/mona-ui/i18n";
-import { Action } from "@nanahoshi/mona-ui/internal";
+import type { Action } from "@nanahoshi/mona-ui/internal";
 import { TextBoxDirective } from "@nanahoshi/mona-ui/text-box";
 import { addDecimals, compareDecimals, subtractDecimals, toDecimalString } from "../../utils/decimalArithmetic";
-import {
-    NumericTextBoxBaseComponent,
+import type {
     NumericTextBoxStepDirection,
     NumericTextBoxTextResult
 } from "../numeric-text-box-base/numeric-text-box-base.component";
+import { NumericTextBoxBaseComponent } from "../numeric-text-box-base/numeric-text-box-base.component";
 
 function warnInvalidDecimal(name: string, value: unknown): void {
     if (typeof ngDevMode !== "undefined" && ngDevMode) {
@@ -40,7 +39,7 @@ function decimalInput(name: string): (value: string | number | null | undefined)
     selector: "mona-decimal-text-box",
     // The markup is identical to the number text box; only the value type differs.
     templateUrl: "../numeric-text-box/numeric-text-box.component.html",
-    imports: [NgTemplateOutlet, TextBoxDirective, FormsModule, ButtonDirective, LucideChevronUp, LucideChevronDown]
+    imports: [NgTemplateOutlet, TextBoxDirective, ButtonDirective, LucideChevronUp, LucideChevronDown]
 })
 export class DecimalTextBoxComponent
     extends NumericTextBoxBaseComponent<string>

@@ -65,7 +65,8 @@ function focusInput(input: HTMLInputElement): void {
 }
 
 function blurInput(input: HTMLInputElement): void {
-    input.dispatchEvent(new FocusEvent("blur", { bubbles: true }));
+    input.dispatchEvent(new FocusEvent("blur"));
+    input.dispatchEvent(new FocusEvent("focusout", { bubbles: true }));
 }
 
 function updateInputValue(fixture: ComponentFixture<unknown>, value: string): void {
