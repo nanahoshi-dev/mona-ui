@@ -1,5 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import {
+    booleanAttribute,
     ChangeDetectionStrategy,
     Component,
     computed,
@@ -441,7 +442,7 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
         return treeData;
     });
     protected readonly treeVisible = signal(true);
-    public readonly animate = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["animate"]>>(true);
+    public readonly animate = input(true, { transform: booleanAttribute });
     public readonly ariaLabel = input("");
     public readonly children = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["children"]>>(x => x.items);
     public readonly data = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["data"]>>([]);

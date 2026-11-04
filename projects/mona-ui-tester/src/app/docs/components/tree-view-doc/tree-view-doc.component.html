@@ -107,10 +107,12 @@
 
         <app-section id="filtering" [header]="'Filtering'" headerType="H3">
             <p>
-                Apply <code>monaTreeViewFilterable</code> to narrow the visible nodes by text. The tree itself does not
-                render a filter input; wire <code>filter</code> to a consumer-provided control, or place
-                <code>monaTreeViewFilterable</code> without further configuration to enable the tree's own filter
-                region.
+                Apply <code>monaTreeViewFilterable</code> to show a filter input above the tree that narrows the visible
+                nodes by text, expanding the ancestors of every match. Bind <code>[(filter)]</code> to read the text or
+                set it from code (setting it back to <code>""</code> clears the filter, even after the user typed).
+                <code>filterInput</code> fires first with a cancelable <code>FilterChangeEvent</code>. The expansion a
+                filter applies is view state: it isn't reported through <code>expandedKeysChange</code> and is undone
+                when the filter is cleared.
             </p>
             <app-code-viewer [code]="filterableCode" language="html"></app-code-viewer>
         </app-section>
@@ -142,7 +144,7 @@
         <ul class="list-disc pl-5">
             <li>
                 <code>nodeSelect</code>, <code>nodeCheck</code>, <code>nodeClick</code>, <code>nodeDragStart</code>,
-                <code>nodeDragEnd</code>, <code>nodeDrop</code>, and <code>filterChange</code> emit an event object with
+                <code>nodeDragEnd</code>, <code>nodeDrop</code>, and <code>filterInput</code> emit an event object with
                 <code>preventDefault()</code> and <code>isDefaultPrevented()</code>. Calling
                 <code>preventDefault()</code> in a handler stops the corresponding state change (selection, check, drag,
                 drop, or filter) from being applied.
@@ -326,7 +328,10 @@
                         <td class="py-2 pr-4"><code>animate</code></td>
                         <td class="py-2 pr-4"><code>boolean</code></td>
                         <td class="py-2 pr-4"><code>true</code></td>
-                        <td class="py-2">Enables CSS transitions when nodes expand or collapse.</td>
+                        <td class="py-2">
+                            Enables CSS transitions when nodes expand or collapse. Accepts the attribute form
+                            (<code>animate="false"</code>).
+                        </td>
                     </tr>
                     <tr class="border-b border-border">
                         <td class="py-2 pr-4"><code>ariaLabel</code></td>
@@ -504,17 +509,23 @@
                     <tr class="border-b border-border">
                         <td class="py-2 pr-4"><code>nodeSelect</code></td>
                         <td class="py-2 pr-4"><code>NodeSelectEvent&lt;T&gt;</code></td>
-                        <td class="py-2">Emitted before a node's selected state changes. Cancelable.</td>
+                        <td class="py-2">
+                            Emitted before the user selects or deselects a node, by click or Enter. Cancelable;
+                            <code>selectionChange</code> follows when it isn't prevented.
+                        </td>
                     </tr>
                     <tr class="border-b border-border">
                         <td class="py-2 pr-4"><code>selectedKeysChange</code></td>
                         <td class="py-2 pr-4"><code>Array&lt;K&gt;</code></td>
-                        <td class="py-2">Emitted when the selected keys change.</td>
+                        <td class="py-2">
+                            Emitted with the selected keys when the user selects or deselects a node. Not emitted for
+                            keys set through <code>selectedKeys</code>.
+                        </td>
                     </tr>
                     <tr class="border-b border-border">
                         <td class="py-2 pr-4"><code>selectionChange</code></td>
                         <td class="py-2 pr-4"><code>NodeItem&lt;T&gt;</code></td>
-                        <td class="py-2">Emitted after a node's selected state changes.</td>
+                        <td class="py-2">Emitted with the node after the user selects or deselects it.</td>
                     </tr>
                 </tbody>
             </table>
@@ -565,8 +576,8 @@
                         <td class="py-2">
                             Check mode and whether checking a node also checks its children or parents. Merged over
                             <code
-                                >{{ "{" }} checkChildren: true, checkParents: true, enabled: true, mode: "multiple"
-                                {{ "}" }}</code
+                                >{{ "{" }} checkChildren: true, checkDisabledChildren: false, checkParents: true,
+                                childrenOnly: false, enabled: true, mode: "multiple" {{ "}" }}</code
                             >
                             when applied bare.
                         </td>
@@ -585,7 +596,13 @@
                     <tr class="border-b border-border">
                         <td class="py-2 pr-4"><code>checkedKeysChange</code></td>
                         <td class="py-2 pr-4"><code>Array&lt;K&gt;</code></td>
-                        <td class="py-2">Emitted when the checked keys change.</td>
+                        <td class="py-2">
+                            Emitted with the checked keys when the user checks or unchecks a node, including the
+                            children and parents the check follows. Not emitted for keys set through
+                            <code>checkedKeys</code>, nor for keys the tree derives on its own (checked parents of
+                            checked children set from code, lazily loaded children of a checked node, ancestors after a
+                            drop); those are included in the next user change.
+                        </td>
                     </tr>
                     <tr class="border-b border-border">
                         <td class="py-2 pr-4"><code>nodeCheck</code></td>
@@ -699,7 +716,11 @@
                     <tr class="border-b border-border">
                         <td class="py-2 pr-4"><code>expandedKeysChange</code></td>
                         <td class="py-2 pr-4"><code>Array&lt;K&gt;</code></td>
-                        <td class="py-2">Emitted when the expanded keys change.</td>
+                        <td class="py-2">
+                            Emitted with the expanded keys when the user expands or collapses a node. Not emitted for
+                            keys set through <code>expandedKeys</code>, nor while a filter is applied: the filter's
+                            expansion is view state.
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -719,9 +740,12 @@
                 <tbody>
                     <tr class="border-b border-border">
                         <td class="py-2 pr-4"><code>filter</code></td>
-                        <td class="py-2 pr-4"><code>string</code></td>
+                        <td class="py-2 pr-4"><code>string</code> (model)</td>
                         <td class="py-2 pr-4"><code>""</code></td>
-                        <td class="py-2">Current filter text used to narrow the visible nodes.</td>
+                        <td class="py-2">
+                            Current filter text used to narrow the visible nodes. Two-way bindable with
+                            <code>[(filter)]</code>; the user's typing updates it.
+                        </td>
                     </tr>
                     <tr class="border-b border-border">
                         <td class="py-2 pr-4"><code>filterPlaceholder</code></td>
@@ -755,8 +779,18 @@
                 <tbody>
                     <tr class="border-b border-border">
                         <td class="py-2 pr-4"><code>filterChange</code></td>
+                        <td class="py-2 pr-4"><code>string</code></td>
+                        <td class="py-2">
+                            Emitted with the new filter text when the user's typing applies (the model's output).
+                        </td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>filterInput</code></td>
                         <td class="py-2 pr-4"><code>FilterChangeEvent</code></td>
-                        <td class="py-2">Emitted when the filter value changes. Cancelable.</td>
+                        <td class="py-2">
+                            Emitted when the user types in the filter input, before the filter applies. Cancelable:
+                            <code>preventDefault()</code> keeps the current filter.
+                        </td>
                     </tr>
                 </tbody>
             </table>

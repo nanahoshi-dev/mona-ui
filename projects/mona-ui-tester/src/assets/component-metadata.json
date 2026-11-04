@@ -1988,7 +1988,7 @@
         "defaultValue": "[]"
       },
       {
-        "description": "Emitted when the checked keys change.",
+        "description": "Emitted with the checked keys when the user checks or unchecks a node, including the children and\nparents that check follows (`checkChildren`, `checkParents`). Not emitted for keys set through `checkedKeys`,\nnor for keys the tree derives on its own: checked parents of checked children set from code, lazily loaded\nchildren of a checked node, and ancestors after a drop. Those are reported with the next user change.",
         "kind": "output",
         "name": "checkedKeysChange",
         "type": "Array<K>"
@@ -2007,7 +2007,7 @@
         "type": "NodeCheckEvent<T>"
       },
       {
-        "description": "Configures check mode and whether checking a node also checks its children or parents. Merged over `{ checkChildren: true, checkParents: true, enabled: true, mode: \"multiple\" }` when applied bare.",
+        "description": "Configures check mode and whether checking a node also checks its children or parents. Merged over `{ checkChildren: true, checkDisabledChildren: false, checkParents: true, childrenOnly: false, enabled: true, mode: \"multiple\" }` when applied bare.",
         "kind": "input",
         "name": "options",
         "type": "Partial<CheckableOptions> | \"\"",
@@ -2110,7 +2110,7 @@
         "defaultValue": "[]"
       },
       {
-        "description": "Emitted when the expanded keys change.",
+        "description": "Emitted with the expanded keys when the user expands or collapses a node. Not emitted for keys set\nthrough `expandedKeys`, nor for the expansion a filter applies (which is undone when the filter is cleared).",
         "kind": "output",
         "name": "expandedKeysChange",
         "type": "Array<K>"
@@ -2129,16 +2129,16 @@
     "selector": "\"mona-tree-view[monaTreeViewFilterable]\"",
     "inputs": [
       {
-        "description": "Current filter text used to narrow the visible nodes.",
-        "kind": "input",
+        "description": "Current filter text used to narrow the visible nodes. Two-way bindable (`[(filter)]`); the user's\ntyping updates it, so setting it from code (including back to `\"\"`) always applies.",
+        "kind": "model",
         "name": "filter",
         "type": "string",
         "defaultValue": "\"\""
       },
       {
-        "description": "Emitted when the filter value changes.",
+        "description": "Emitted when the user types in the filter input, before the filter applies. Call\n`preventDefault()` to keep the current filter; otherwise `filterChange` reports the new text.",
         "kind": "output",
-        "name": "filterChange",
+        "name": "filterInput",
         "type": "FilterChangeEvent"
       },
       {
@@ -2162,10 +2162,17 @@
     "selector": "\"mona-tree-view[monaTreeViewSelectable]\"",
     "inputs": [
       {
-        "description": "Emitted when a node is selected or deselected.",
+        "description": "Emitted before the user selects or deselects a node, by click or Enter. Call `preventDefault()`\nto keep the selection as it is; `selectionChange` follows when it isn't prevented.",
         "kind": "output",
         "name": "nodeSelect",
         "type": "NodeSelectEvent<T>"
+      },
+      {
+        "description": "Configures selection mode, toggleability, and whether only child nodes are selectable. Merged over `{ childrenOnly: false, enabled: true, mode: \"single\", toggleable: false }` when applied bare.",
+        "kind": "input",
+        "name": "options",
+        "type": "Partial<SelectableOptions> | \"\"",
+        "defaultValue": "\"\""
       },
       {
         "description": "Property name or accessor used to derive a node's selection key from its data. Falls back to the node's data when unset.",
@@ -2182,23 +2189,16 @@
         "defaultValue": "[]"
       },
       {
-        "description": "Emitted when the selected keys change.",
+        "description": "Emitted with the selected keys when the user selects or deselects a node. Not emitted for keys set\nthrough `selectedKeys`.",
         "kind": "output",
         "name": "selectedKeysChange",
         "type": "Array<K>"
       },
       {
-        "description": "Emitted when the selection changes.",
+        "description": "Emitted with the node after the user selects or deselects it (after a `nodeSelect` that wasn't\nprevented).",
         "kind": "output",
         "name": "selectionChange",
         "type": "NodeItem<T>"
-      },
-      {
-        "description": "Configures selection mode, toggleability, and whether only child nodes are selectable. Merged over `{ childrenOnly: false, enabled: true, mode: \"single\", toggleable: false }` when applied bare.",
-        "kind": "input",
-        "name": "options",
-        "type": "Partial<SelectableOptions> | \"\"",
-        "defaultValue": "\"\""
       }
     ]
   },
@@ -14976,7 +14976,7 @@
     "selector": "\"mona-tree-view\"",
     "inputs": [
       {
-        "description": "Enables CSS transitions when nodes expand or collapse.",
+        "description": "Enables CSS transitions when nodes expand or collapse. Accepts the attribute form\n(`animate=\"false\"`).",
         "kind": "input",
         "name": "animate",
         "type": "boolean",

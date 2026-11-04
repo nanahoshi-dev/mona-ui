@@ -1,8 +1,11 @@
-import { afterNextRender, DestroyRef, Directive, effect, inject, input, output, untracked } from "@angular/core";
+import { Directive, effect, inject, input, output, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ExpandableOptions, NodeItem, NodeKeySelector, TreeService } from "@nanahoshi/mona-ui/internal/tree";
-import { sequenceEqual } from "@mirei/ts-collections";
-import { pairwise } from "rxjs";
+import {
+    type ExpandableOptions,
+    type NodeItem,
+    type NodeKeySelector,
+    TreeService
+} from "@nanahoshi/mona-ui/internal/tree";
 
 @Directive({
     selector: "mona-tree-view[monaTreeViewExpandable]",
@@ -12,8 +15,8 @@ export class TreeViewExpandableDirective<T, K = T> {
     readonly #defaultOptions: ExpandableOptions = {
         enabled: true
     };
-    readonly #destroyRef = inject(DestroyRef);
     readonly #treeService: TreeService<T> = inject(TreeService);
+
     /**
      * @description Emitted when a node is collapsed.
      */
@@ -37,7 +40,8 @@ export class TreeViewExpandableDirective<T, K = T> {
     public readonly expandedKeys = input<Iterable<K>>([]);
 
     /**
-     * @description Emitted when the expanded keys change.
+     * @description Emitted with the expanded keys when the user expands or collapses a node. Not emitted for keys set
+     * through `expandedKeys`, nor for the expansion a filter applies (which is undone when the filter is cleared).
      */
     public readonly expandedKeysChange = output<Array<K>>();
 
@@ -75,23 +79,10 @@ export class TreeViewExpandableDirective<T, K = T> {
                 }
             });
         });
-        afterNextRender({
-            read: () => this.setSubscriptions()
-        });
-    }
-
-    public setSubscriptions(): void {
-        this.#treeService.expandedKeys$
-            .pipe(pairwise(), takeUntilDestroyed(this.#destroyRef))
-            .subscribe(([oldKeys, keys]) => {
-                const orderedOldKeys = oldKeys.orderBy(k => k);
-                const orderedKeys = keys.orderBy(k => k);
-                if (sequenceEqual(orderedOldKeys, orderedKeys)) {
-                    return;
-                }
-                this.expandedKeysChange.emit(keys.toArray());
-            });
-        this.#treeService.nodeExpand$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
+        this.#treeService.expandedKeysChange$
+            .pipe(takeUntilDestroyed())
+            .subscribe(keys => this.expandedKeysChange.emit(keys.toArray() as K[]));
+        this.#treeService.nodeExpand$.pipe(takeUntilDestroyed()).subscribe(event => {
             if (event.expanded) {
                 this.expand.emit(event.node.nodeItem);
             } else {

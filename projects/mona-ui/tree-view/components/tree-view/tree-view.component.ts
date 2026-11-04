@@ -1,10 +1,9 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
-    afterNextRender,
+    booleanAttribute,
     Component,
     computed,
     contentChild,
-    DestroyRef,
     effect,
     inject,
     input,
@@ -40,7 +39,6 @@ import { TreeViewNodeTemplateContext } from "../../models/TreeViewNodeTemplateCo
     providers: [TreeService]
 })
 export class TreeViewComponent<T> implements ITreeView<T> {
-    readonly #destroyRef = inject(DestroyRef);
     readonly #i18n = inject(MonaI18nService);
 
     protected readonly filterAriaLabel = computed<string>(() => {
@@ -55,10 +53,11 @@ export class TreeViewComponent<T> implements ITreeView<T> {
     protected readonly treeService = inject(TreeService<T>);
 
     /**
-     * @description Enables CSS transitions when nodes expand or collapse.
+     * @description Enables CSS transitions when nodes expand or collapse. Accepts the attribute form
+     * (`animate="false"`).
      * @default true
      */
-    public readonly animate = input<boolean>(true);
+    public readonly animate = input(true, { transform: booleanAttribute });
 
     /**
      * @description Accessible name for the tree. Describe what the tree represents. When empty, assistive technology announces the role without a label.
@@ -126,6 +125,12 @@ export class TreeViewComponent<T> implements ITreeView<T> {
     public readonly textField = input<string | Selector<T, string>>("");
 
     public constructor() {
+        // The text is read when nodes render, so changing it doesn't rebuild the nodes (which would undo moves).
+        effect(() => {
+            const textField = this.textField();
+            untracked(() => this.treeService.setTextField(textField));
+        });
+        // Only the data and its structure rebuild the nodes.
         effect(() => {
             const mode = this.mode();
             if (mode === "flat") {
@@ -133,7 +138,11 @@ export class TreeViewComponent<T> implements ITreeView<T> {
             } else if (mode === "hierarchical") {
                 this.#setHierarchicalDataStructureFields();
             }
-            this.#setGenericDataStructureFields(mode);
+            const data = this.data();
+            untracked(() => {
+                this.treeService.setDataStructure(mode);
+                this.treeService.setData(data);
+            });
         });
         effect(() => {
             const animate = this.animate();
@@ -141,9 +150,9 @@ export class TreeViewComponent<T> implements ITreeView<T> {
                 this.treeService.setAnimationEnabled(animate);
             });
         });
-        afterNextRender({
-            read: () => this.#setSubscriptions()
-        });
+        this.treeService.nodeClick$.pipe(takeUntilDestroyed()).subscribe(event => this.nodeClick.emit(event));
+        this.treeService.focus$.pipe(takeUntilDestroyed()).subscribe(event => this.focus.emit(event));
+        this.treeService.blur$.pipe(takeUntilDestroyed()).subscribe(event => this.blur.emit(event));
     }
 
     public moveNode(source: NodeItem<T>, target: NodeItem<T>, position: DropPosition): NodeMoveSnapshot | null {
@@ -197,16 +206,6 @@ export class TreeViewComponent<T> implements ITreeView<T> {
         });
     }
 
-    #setGenericDataStructureFields(mode: DataStructure): void {
-        const textField = this.textField();
-        const data = this.data();
-        untracked(() => {
-            this.treeService.setTextField(textField);
-            this.treeService.setDataStructure(mode);
-            this.treeService.setData(data);
-        });
-    }
-
     #setHierarchicalDataStructureFields(): void {
         const childrenSelector = this.children();
         const hasChildren = this.hasChildren();
@@ -214,13 +213,5 @@ export class TreeViewComponent<T> implements ITreeView<T> {
             this.treeService.setChildrenSelector(childrenSelector);
             this.treeService.setHasChildrenPredicate(hasChildren);
         });
-    }
-
-    #setSubscriptions(): void {
-        this.treeService.nodeClick$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
-            this.nodeClick.emit(event);
-        });
-        this.treeService.focus$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(e => this.focus.emit(e));
-        this.treeService.blur$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(e => this.blur.emit(e));
     }
 }

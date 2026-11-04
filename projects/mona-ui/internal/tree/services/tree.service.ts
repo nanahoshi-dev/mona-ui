@@ -96,7 +96,12 @@ export class TreeService<T> {
         enabled: false,
         mode: "multiple"
     });
-    public readonly checkedKeys$ = toObservable(this.#checkedKeys);
+    /**
+     * The checked keys after the user checks or unchecks a node. Keys set from code, and keys the tree derives on its
+     * own (parents with `checkParents`, lazily loaded children of a checked node, ancestors after a move), aren't
+     * reported here.
+     */
+    public readonly checkedKeysChange$ = new Subject<ImmutableSet<unknown>>();
     public readonly children = signal<ChildrenSelector<T>>("");
     public readonly disableBy = signal<NodeKeySelector<T>>(null);
     public readonly disableOptions = signal<DisableOptions>({
@@ -119,7 +124,11 @@ export class TreeService<T> {
         }
         return this.#unfilteredExpandedKeys();
     });
-    public readonly expandedKeys$ = toObservable(this.expandedKeys);
+    /**
+     * The expanded keys after the user expands or collapses a node outside filtering. The expansion a filter applies,
+     * and the user's changes to it while filtering, are view state and aren't reported.
+     */
+    public readonly expandedKeysChange$ = new Subject<ImmutableSet<unknown>>();
     public readonly filterableOptions = signal<FilterableOptions>({
         enabled: false,
         debounce: 0,
@@ -157,7 +166,8 @@ export class TreeService<T> {
         toggleable: false
     });
     public readonly selectedKeys = signal(ImmutableSet.create<any>());
-    public readonly selectedKeys$ = toObservable(this.selectedKeys);
+    /** The selected keys after the user selects or deselects a node. Keys set from code aren't reported. */
+    public readonly selectedKeysChange$ = new Subject<ImmutableSet<unknown>>();
     public readonly selectedNodes = computed(() => {
         const selectedKeys = this.selectedKeys();
         const nodeDictionary = this.#nodeDictionary();
@@ -202,6 +212,16 @@ export class TreeService<T> {
                 this.#filteredExpandedKeys.set(expandedKeys);
             });
         });
+        effect(() => {
+            const navigableNodes = this.#navigableNodes();
+            const navigatedNode = this.navigatedNode();
+            untracked(() => this.keepNavigatedNodeVisible(navigableNodes, navigatedNode));
+        });
+    }
+
+    /** Whether two key sets hold the same keys, in any order. */
+    private static sameKeys(a: ImmutableSet<unknown>, b: ImmutableSet<unknown>): boolean {
+        return a.size() === b.size() && a.all(key => b.contains(key));
     }
 
     public static flatten<T>(nodes: Iterable<TreeNode<T>>): List<TreeNode<T>> {
@@ -696,7 +716,12 @@ export class TreeService<T> {
                 n.checked.set(allChecked);
             });
         }
-        this.#checkedKeys.set(checkedKeys.toImmutableSet());
+        const previousKeys = this.#checkedKeys();
+        const nextKeys = checkedKeys.toImmutableSet();
+        this.#checkedKeys.set(nextKeys);
+        if (!TreeService.sameKeys(previousKeys, nextKeys)) {
+            this.checkedKeysChange$.next(nextKeys);
+        }
     }
 
     public setNodeExpand(node: TreeNode<T>, expanded: boolean): void {
@@ -722,6 +747,7 @@ export class TreeService<T> {
         }
         const key = this.getSelectKey(node);
         const mode = selectableOptions.mode;
+        const previousKeys = this.selectedKeys();
         this.selectedKeys.update(keys => {
             if (mode === "single") {
                 const toggleable = selectableOptions.toggleable;
@@ -737,6 +763,10 @@ export class TreeService<T> {
             return keys.remove(key);
         });
         this.navigatedNode.set(node);
+        const nextKeys = this.selectedKeys();
+        if (!TreeService.sameKeys(previousKeys, nextKeys)) {
+            this.selectedKeysChange$.next(nextKeys);
+        }
     }
 
     public setSelectBy(selector: NodeKeySelector<T>): void {
@@ -784,6 +814,9 @@ export class TreeService<T> {
         }
         this.setNodeExpand(node, expanded);
         this.nodeExpand$.next({ node, expanded });
+        if (!this.isTreeFiltered()) {
+            this.expandedKeysChange$.next(this.#unfilteredExpandedKeys());
+        }
         return true;
     }
 
@@ -1043,6 +1076,32 @@ export class TreeService<T> {
             return text.startsWith(filter);
         }
         return text.indexOf(filter) >= 0;
+    }
+
+    /**
+     * Keeps `aria-activedescendant` on a rendered node: when the active node is hidden by a collapse or a filter, the
+     * nearest visible ancestor takes over (else the first visible node); a node re-created by new data with the same
+     * uid is swapped in.
+     */
+    private keepNavigatedNodeVisible(
+        navigableNodes: ImmutableSet<TreeNode<T>>,
+        navigatedNode: TreeNode<T> | null
+    ): void {
+        // A node that isn't in the tree is left to setData, which drops removed nodes.
+        if (navigatedNode === null || this.#nodeDictionary().get(navigatedNode.uid) == null) {
+            return;
+        }
+        const byUid = new Map<string, TreeNode<T>>();
+        navigableNodes.forEach(node => byUid.set(node.uid, node));
+        let candidate: TreeNode<T> | null = navigatedNode;
+        while (candidate !== null && !byUid.has(candidate.uid)) {
+            candidate = candidate.parent;
+        }
+        const next =
+            candidate === null ? (navigableNodes.firstOrDefault() ?? null) : (byUid.get(candidate.uid) ?? null);
+        if (next !== navigatedNode) {
+            this.navigatedNode.set(next);
+        }
     }
 
     private loadCheckedKeysForChildren(node: TreeNode<T>, childNodes: Iterable<TreeNode<T>>): void {

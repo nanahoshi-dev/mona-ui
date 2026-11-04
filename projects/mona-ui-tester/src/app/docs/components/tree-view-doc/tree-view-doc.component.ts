@@ -100,8 +100,7 @@ export class TreeViewDocComponent {
             children="items"
             textField="text"
             monaTreeViewFilterable
-            [filter]="filter()"
-            (filterChange)="filter.set($event.filter)"></mona-tree-view>
+            [(filter)]="filter"></mona-tree-view>
     `;
 
     protected readonly dragAndDropCode = `

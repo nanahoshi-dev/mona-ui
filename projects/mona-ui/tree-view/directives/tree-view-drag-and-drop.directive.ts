@@ -1,4 +1,4 @@
-import { afterNextRender, DestroyRef, Directive, effect, inject, input, output, untracked } from "@angular/core";
+import { Directive, effect, inject, input, output, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import {
     DraggableOptions,
@@ -18,7 +18,6 @@ export class TreeViewDragAndDropDirective<T> {
     readonly #defaultOptions: DraggableOptions = {
         enabled: true
     };
-    readonly #destroyRef = inject(DestroyRef);
     readonly #treeService: TreeService<T> = inject(TreeService);
     readonly #treeView = inject(TreeViewComponent<T>);
 
@@ -64,23 +63,16 @@ export class TreeViewDragAndDropDirective<T> {
                 }
             });
         });
-
-        afterNextRender({
-            read: () => this.setSubscriptions()
-        });
-    }
-
-    public setSubscriptions(): void {
-        this.#treeService.nodeDrag$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(e => {
+        this.#treeService.nodeDrag$.pipe(takeUntilDestroyed()).subscribe(e => {
             this.nodeDrag.emit(e.dragEvent);
         });
-        this.#treeService.nodeDragEnd$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(e => {
+        this.#treeService.nodeDragEnd$.pipe(takeUntilDestroyed()).subscribe(e => {
             this.nodeDragEnd.emit(e);
         });
-        this.#treeService.nodeDragStart$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(e => {
+        this.#treeService.nodeDragStart$.pipe(takeUntilDestroyed()).subscribe(e => {
             this.nodeDragStart.emit(e);
         });
-        this.#treeService.nodeDrop$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(e => {
+        this.#treeService.nodeDrop$.pipe(takeUntilDestroyed()).subscribe(e => {
             const event = new NodeDropEvent({
                 event: e.event,
                 position: e.position,
