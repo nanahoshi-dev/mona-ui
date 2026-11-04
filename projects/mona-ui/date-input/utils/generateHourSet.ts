@@ -1,7 +1,7 @@
 import { ImmutableSet, select, sequence } from "@mirei/ts-collections";
-import { HourFormat } from "../models/HourFormat";
-import { Meridiem } from "../models/Meridiem";
-import { TimeUnit } from "../models/TimeUnit";
+import type { HourFormat } from "../models/HourFormat";
+import type { Meridiem } from "../models/Meridiem";
+import type { TimeUnit } from "../models/TimeUnit";
 
 export const generateHourSet = (
     hourFormat: HourFormat,

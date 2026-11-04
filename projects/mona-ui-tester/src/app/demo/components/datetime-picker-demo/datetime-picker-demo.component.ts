@@ -10,6 +10,7 @@ import {
 import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import { DateInputPrefixTemplateDirective } from "@nanahoshi/mona-ui/date-input";
 import { DateTimePickerComponent } from "@nanahoshi/mona-ui/datetime-picker";
+import { LabelComponent } from "@nanahoshi/mona-ui/label";
 import { DateTime } from "luxon";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
@@ -76,6 +77,11 @@ export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimeP
     protected readonly DateTimePickerWrapperComponent = DateTimePickerWrapperComponent;
     protected readonly config = computed<ComponentConfig<DateTimePickerComponent>>(() => ({
         inputs: deriveInputConfig<DateTimePickerComponent>(this.metadata(), {
+            // The demo labels the field with a visible <mona-label> pointed at a fixed inputId.
+            ariaDescribedBy: undefined,
+            ariaLabel: undefined,
+            ariaLabelledBy: undefined,
+            inputId: undefined,
             disabledDates: {
                 type: "iterable",
                 value: []
@@ -174,13 +180,16 @@ export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimeP
         CalendarYearCellTemplateDirective,
         DateInputPrefixTemplateDirective,
         LucideDynamicIcon,
-        FormField
+        FormField,
+        LabelComponent
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         <span>Selected Date: {{ formValueText() }}</span>
+        <mona-label for="datetime-picker-demo-input" text="Meeting start"></mona-label>
         <mona-datetime-picker
+            inputId="datetime-picker-demo-input"
             [disabledDates]="disabledDates()"
             [firstDay]="firstDay()"
             [formField]="form.value"

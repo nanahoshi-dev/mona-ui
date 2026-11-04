@@ -1,5 +1,5 @@
 import { Directive, inject, TemplateRef } from "@angular/core";
-import { MonthCellTemplateContext } from "../models/CalendarTemplateContext";
+import type { MonthCellTemplateContext } from "../models/CalendarTemplateContext";
 
 @Directive({
     selector: "ng-template[monaCalendarMonthCellTemplate]"

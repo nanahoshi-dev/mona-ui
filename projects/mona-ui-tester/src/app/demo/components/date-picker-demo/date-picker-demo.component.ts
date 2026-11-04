@@ -10,6 +10,7 @@ import {
 import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import { DateInputPrefixTemplateDirective } from "@nanahoshi/mona-ui/date-input";
 import { DatePickerComponent } from "@nanahoshi/mona-ui/date-picker";
+import { LabelComponent } from "@nanahoshi/mona-ui/label";
 import { DateTime } from "luxon";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
@@ -76,6 +77,11 @@ export class DatePickerDemoComponent extends AbstractDemoComponent<DatePickerCom
     });
     protected readonly config = computed<ComponentConfig<DatePickerComponent>>(() => ({
         inputs: deriveInputConfig<DatePickerComponent>(this.metadata(), {
+            // The demo labels the field with a visible <mona-label> pointed at a fixed inputId.
+            ariaDescribedBy: undefined,
+            ariaLabel: undefined,
+            ariaLabelledBy: undefined,
+            inputId: undefined,
             disabledDates: {
                 type: "iterable",
                 value: []
@@ -147,12 +153,15 @@ export class DatePickerDemoComponent extends AbstractDemoComponent<DatePickerCom
         CalendarYearCellTemplateDirective,
         DateInputPrefixTemplateDirective,
         LucideDynamicIcon,
-        FormField
+        FormField,
+        LabelComponent
     ],
     template: `
         @let featureData = features();
         <span>Selected Date: {{ formValueText() }}</span>
+        <mona-label for="date-picker-demo-input" text="Appointment date"></mona-label>
         <mona-date-picker
+            inputId="date-picker-demo-input"
             [disabledDates]="disabledDates()"
             [firstDay]="firstDay()"
             [formField]="form.value"

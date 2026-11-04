@@ -3,6 +3,7 @@ import { booleanAttribute, ChangeDetectionStrategy, Component, computed, inject,
 import { disabled, form, FormField, maxDate, minDate, readonly, required } from "@angular/forms/signals";
 import { TimePickerComponent } from "@nanahoshi/mona-ui/time-picker";
 import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
+import { LabelComponent } from "@nanahoshi/mona-ui/label";
 import { DateTime } from "luxon";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
@@ -33,6 +34,11 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
     protected readonly TimePickerWrapperComponent = TimePickerWrapperComponent;
     protected readonly config = computed<ComponentConfig<TimePickerComponent>>(() => ({
         inputs: deriveInputConfig<TimePickerComponent>(this.metadata(), {
+            // The demo labels the field with a visible <mona-label> pointed at a fixed inputId.
+            ariaDescribedBy: undefined,
+            ariaLabel: undefined,
+            ariaLabelledBy: undefined,
+            inputId: undefined,
             hourFormat: {
                 type: "dropdown",
                 value: ["12", "24"],
@@ -88,11 +94,13 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
 }
 
 @Component({
-    imports: [TimePickerComponent, FormField],
+    imports: [TimePickerComponent, FormField, LabelComponent],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <span>Selected Time: {{ formValueText() }}</span>
+        <mona-label for="time-picker-demo-input" text="Reminder time"></mona-label>
         <mona-time-picker
+            inputId="time-picker-demo-input"
             [formField]="form.value"
             [format]="format()"
             [hourFormat]="hourFormat()"

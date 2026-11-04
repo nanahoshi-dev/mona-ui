@@ -23,6 +23,7 @@ A modern, high-performance, accessible UI component library built for Angular an
 - [Text Boxes](docs/text-box.md)
 - [Dropdowns](docs/dropdowns.md)
 - [Numeric Text Boxes](docs/numeric-text-box.md)
+- [Dates and Times](docs/dates.md)
 - [Patch Stores & Merge Utilities](docs/patch-store.md)
 - [Component Migration Inventory](docs/internal/i18n-rtl-migration-inventory.md)
 

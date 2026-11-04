@@ -2,8 +2,8 @@ import { computed, DestroyRef, Directive, effect, ElementRef, inject, input, sig
 import { rxTimeout } from "@nanahoshi/mona-ui/internal";
 import {
     timeSelectorListItemThemeVariants,
-    TimeSelectorListItemVariantInput,
-    TimeSelectorListItemVariantProps
+    type TimeSelectorListItemVariantInput,
+    type TimeSelectorListItemVariantProps
 } from "../styles/time-selector.styles";
 
 @Directive({

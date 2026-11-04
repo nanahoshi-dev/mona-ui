@@ -1,8 +1,8 @@
 import { computed, Directive, input } from "@angular/core";
 import {
     timeSelectorListThemeVariants,
-    TimeSelectorListVariantInput,
-    TimeSelectorListVariantProps
+    type TimeSelectorListVariantInput,
+    type TimeSelectorListVariantProps
 } from "../styles/time-selector.styles";
 
 @Directive({
