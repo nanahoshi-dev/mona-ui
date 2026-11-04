@@ -8,6 +8,7 @@ import {
     inject,
     input,
     linkedSignal,
+    model,
     signal
 } from "@angular/core";
 import { FormField, type SchemaPathTree, validate } from "@angular/forms/signals";
@@ -474,7 +475,7 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
 
         <mona-grid
             [data]="effectiveGridData"
-            [pageSize]="pageSize()"
+            [(pageSize)]="pageSize"
             [pageSizeValues]="pageSizeValues()"
             [resizeMethod]="resizeMethod()"
             [responsivePager]="responsivePager()"
@@ -871,7 +872,7 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         return virtualization;
     });
     public readonly data = input<ReturnType<GridComponent<unknown>["data"]>>([]);
-    public readonly pageSize = input<ReturnType<GridComponent<unknown>["pageSize"]>>(10);
+    public readonly pageSize = model<number | undefined>(10);
     public readonly pageSizeValues = input<ReturnType<GridComponent<unknown>["pageSizeValues"]>>([10, 20, 30, 40, 50]);
     public readonly resizeMethod = input<ReturnType<GridComponent<unknown>["resizeMethod"]>>("fitView");
     public readonly rounded = input<ReturnType<GridComponent<unknown>["rounded"]>>("medium");

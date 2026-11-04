@@ -364,7 +364,7 @@
     }
 </div>
 @if (!gridService.virtualScrollOptions().enabled) {
-    @if (gridService.serverBindingEnabled() || gridService.viewPageRows().length !== 0 || gridService.addRowVisible()) {
+    @if (gridService.serverBindingEnabled() || gridService.pagerTotal() !== 0 || gridService.addRowVisible()) {
         <mona-pager
             class="border-0 border-t border-t-border rounded-ss-none rounded-se-none"
             [skip]="gridService.paginationState().skip"

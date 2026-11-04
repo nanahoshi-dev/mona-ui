@@ -5,6 +5,7 @@ import type { Column } from "../models/Column";
 import type { GridGroupAggregate } from "../models/GridAggregate";
 import type { GridViewDataRow, GridViewGroupFooterRow, GridViewGroupRow, GridViewRow } from "../models/GridGroup";
 import type { Row } from "../models/Row";
+import { buildGroupKey, groupRowsByField } from "./grid-group-key";
 
 /**
  * A stateless service that groups and flattens rows into a linear `GridViewRow[]`
@@ -13,15 +14,15 @@ import type { Row } from "../models/Row";
 @Injectable({ providedIn: "root" })
 export class GridRowFlattenerService {
     /**
-     * Builds a deterministic, hierarchical group key.
+     * Builds a deterministic, hierarchical group key. Values are typed, so `1` and `"1"` get different keys,
+     * while `null`, `undefined` and `""` share the empty group.
      *
      * @example
-     * buildGroupKey(null, "Country", "USA") // => "Country:USA"
-     * buildGroupKey("Country:USA", "City", "NYC") // => "Country:USA/City:NYC"
+     * buildGroupKey(null, "Country", "USA") // => "Country:s:USA"
+     * buildGroupKey("Country:s:USA", "City", "NYC") // => "Country:s:USA/City:s:NYC"
      */
     public buildGroupKey(parentKey: string | null, field: string, value: unknown): string {
-        const segment = `${field}:${String(value ?? "")}`;
-        return parentKey != null ? `${parentKey}/${segment}` : segment;
+        return buildGroupKey(parentKey, field, value);
     }
 
     /**
@@ -90,34 +91,17 @@ export class GridRowFlattenerService {
             return;
         }
         const field = column.field;
-        const isDate = column.dataType === "date";
-
-        const groupMap = new Map<unknown, Row[]>();
-        const keyOrder: unknown[] = [];
-
-        for (const row of rows) {
-            const rawValue = row.data[field];
-            const mapKey = isDate && rawValue instanceof Date ? rawValue.toISOString() : rawValue;
-            if (!groupMap.has(mapKey)) {
-                groupMap.set(mapKey, []);
-                keyOrder.push(mapKey);
-            }
-            groupMap.get(mapKey)!.push(row);
-        }
-
-        const entries = keyOrder.map((mapKey, index) => ({ mapKey, index, rows: groupMap.get(mapKey)! }));
+        const entries = groupRowsByField(rows, field).map((group, index) => ({ ...group, index }));
         const direction = column.groupSortDirection;
         if (groupOrder != null && direction != null) {
             entries.sort((left, right) => {
-                const comparison = compareValues(left.rows[0].data[field], right.rows[0].data[field], groupOrder);
+                const comparison = compareValues(left.value, right.value, groupOrder);
                 return (direction === "asc" ? comparison : -comparison) || left.index - right.index;
             });
         }
 
-        for (const { mapKey } of entries) {
-            const groupRows = groupMap.get(mapKey)!;
-            const groupValue = groupRows[0].data[field];
-            const groupKey = this.buildGroupKey(parentKey, field, groupValue);
+        for (const { rows: groupRows, value: groupValue } of entries) {
+            const groupKey = buildGroupKey(parentKey, field, groupValue);
 
             const groupRow: GridViewGroupRow = {
                 count: groupRows.length,

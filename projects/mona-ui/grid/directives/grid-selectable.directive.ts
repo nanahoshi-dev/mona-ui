@@ -2,7 +2,8 @@ import { afterNextRender, DestroyRef, Directive, effect, inject, input, output, 
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ImmutableSet } from "@mirei/ts-collections";
 import { pairwise, startWith } from "rxjs";
-import { SelectableOptions } from "../models/SelectableOptions";
+import type { GridKeySelector } from "../models/GridKeySelector";
+import type { SelectableOptions } from "../models/SelectableOptions";
 import { GridService } from "../services/grid.service";
 
 @Directive({
@@ -12,7 +13,7 @@ export class GridSelectableDirective {
     readonly #destroyRef = inject(DestroyRef);
     readonly #gridService = inject(GridService);
     /**
-     * @description Enables row selection on the grid. Pass a `GridSelectableOptions` object to configure single or multiple selection mode.
+     * @description Enables row selection on the grid. Pass a `GridSelectableOptions` object to configure single or multiple selection mode. Selection is on unless the object sets `enabled: false`.
      * @default ""
      */
     public readonly options = input<SelectableOptions | "">("", {
@@ -20,10 +21,11 @@ export class GridSelectableDirective {
     });
 
     /**
-     * @description Field name or selector used to derive a row's selection key.
+     * @description Field name or function that gives a row's selection key. Without it, rows are selected by the
+     * grid's `rowKey` value, or by the data item when there's no `rowKey`.
      * @default ""
      */
-    public readonly selectBy = input<string>("");
+    public readonly selectBy = input<GridKeySelector<unknown>>("");
 
     /**
      * @description Currently selected row keys.
@@ -32,20 +34,14 @@ export class GridSelectableDirective {
     public readonly selectedKeys = input<Iterable<unknown>>([]);
 
     /**
-     * @description Emitted when the set of selected row keys changes.
+     * @description Emitted when the user changes the selection. Not emitted for a `selectedKeys` value set from code.
      */
     public readonly selectedKeysChange = output<unknown[]>();
 
     public constructor() {
         effect(() => {
             const options = this.options();
-            untracked(() => {
-                if (options) {
-                    this.#gridService.setSelectableOptions(options);
-                } else if (options === "") {
-                    this.#gridService.setSelectableOptions({ enabled: true });
-                }
-            });
+            untracked(() => this.#gridService.setSelectableOptions(options === "" ? {} : options));
         });
         effect(() => {
             const selectionKey = this.selectBy();
@@ -72,7 +68,7 @@ export class GridSelectableDirective {
         this.#gridService.selectedKeysChange$
             .pipe(startWith(this.#gridService.selectedKeys()), pairwise(), takeUntilDestroyed(this.#destroyRef))
             .subscribe(([oldKeys, newKeys]) => {
-                if (setsEqual(oldKeys, newKeys)) {
+                if (setsEqual(oldKeys, newKeys) || this.#gridService.isLoadedSelection(newKeys)) {
                     return;
                 }
                 this.selectedKeysChange.emit(newKeys.toArray());

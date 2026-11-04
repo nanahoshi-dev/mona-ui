@@ -14,13 +14,21 @@ export type { GridEditTemplateContext } from "./models/GridEditTemplateContext";
 export { GridRemoveEvent } from "./models/GridRemoveEvent";
 export { GridSaveEvent, type GridSaveOperation } from "./models/GridSaveEvent";
 export type { AggregateFunction } from "./models/AggregateFunction";
-export type { Column, ColumnConfig, ColumnFormat, ColumnKind } from "./models/Column";
+export type {
+    Column,
+    ColumnConfig,
+    ColumnFormat,
+    ColumnFormatFunction,
+    ColumnKind,
+    ColumnSortComparator
+} from "./models/Column";
 export { SelectableOptions } from "./models/SelectableOptions";
 export * from "./models/GroupDescriptor";
 export { GroupableOptions } from "./models/GroupableOptions";
 export { FilterableOptions } from "./models/FilterableOptions";
 export type { GridColumnLockedPosition } from "./models/GridColumnLockedPosition";
 export type { GridRowClass, GridRowClassValue } from "./models/GridRowClass";
+export type { GridToolbarContext, GridToolbarTemplateContext } from "./models/GridToolbarTemplateContext";
 export * from "./models/SortableOptions";
 export * from "./directives/grid-cell-template.directive";
 export * from "./directives/grid-command.directive";

@@ -360,16 +360,17 @@ describe("GridService", () => {
                 ],
                 "id"
             );
+            service.rowKey.set("id");
         });
 
-        it("keys expansion state by row uid instead of the selection key", () => {
+        it("keys expansion state by the rowKey value instead of the selection key", () => {
             const [first] = service.rows().toArray();
             service.selectBy.set("name");
             service.setRowExpanded(first, true);
 
             expect(service.isRowExpanded(first)).toBe(true);
             expect(service.expandedKeys().contains("Jane")).toBe(false);
-            expect(service.expandedKeys().contains(first.uid)).toBe(true);
+            expect(service.expandedKeys().toArray()).toEqual([1]);
         });
 
         it("keeps expansion state when the selection configuration changes", () => {
@@ -421,10 +422,10 @@ describe("GridService", () => {
             ]);
         });
 
-        it("applies a single sort and reflects it in appliedSorts and viewRows", () => {
+        it("applies a single sort and reflects it in the sort descriptors and viewRows", () => {
             service.loadSorts([{ field: "name", dir: "asc" }]);
 
-            expect(service.appliedSorts().containsKey("name")).toBe(true);
+            expect(service.getSortDescriptors()).toEqual([{ field: "name", dir: "asc" }]);
             const names = service
                 .viewRows()
                 .select(r => r.data["name"])
@@ -457,7 +458,7 @@ describe("GridService", () => {
             service.loadSorts([{ field: "name", dir: "asc" }]);
             service.loadSorts([]);
 
-            expect(service.appliedSorts().isEmpty()).toBe(true);
+            expect(service.getSortDescriptors()).toEqual([]);
             const column = service.columns().firstOrDefault(c => c.field === "name");
             expect(column?.columnSortDirection).toBeNull();
         });

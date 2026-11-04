@@ -6,7 +6,6 @@ import { MONA_DE_DE_LOCALE, MONA_FR_FR_LOCALE, MONA_JA_JP_LOCALE } from "@nanaho
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Column } from "../../models/Column";
 import type { ColumnFilterState } from "../../models/ColumnFilterState";
-import type { ColumnSortState } from "../../models/ColumnSortState";
 import { GridService } from "../../services/grid.service";
 import { GridRowReorderHandleComponent } from "./grid-row-reorder-handle.component";
 
@@ -157,12 +156,7 @@ describe("GridRowReorderHandleComponent", () => {
         });
 
         it("includes sorted reason when a sort is active", () => {
-            const sortState: ColumnSortState = { sort: { field: "id", dir: "asc" } };
-            gridService.appliedSorts.set(
-                ImmutableDictionary.create<string, ColumnSortState>([
-                    new KeyValuePair("id", sortState)
-                ])
-            );
+            gridService.loadSorts([{ field: "id", dir: "asc" }]);
             fixture.detectChanges();
 
             const button = getButton();
@@ -292,12 +286,7 @@ describe("GridRowReorderHandleComponent", () => {
         });
 
         it("translates sorted reason to German", () => {
-            const sortState: ColumnSortState = { sort: { field: "id", dir: "asc" } };
-            gridService.appliedSorts.set(
-                ImmutableDictionary.create<string, ColumnSortState>([
-                    new KeyValuePair("id", sortState)
-                ])
-            );
+            gridService.loadSorts([{ field: "id", dir: "asc" }]);
             fixture.detectChanges();
 
             const button = getButton();
@@ -414,12 +403,7 @@ describe("GridRowReorderHandleComponent", () => {
         });
 
         it("translates sorted reason to French", () => {
-            const sortState: ColumnSortState = { sort: { field: "id", dir: "asc" } };
-            gridService.appliedSorts.set(
-                ImmutableDictionary.create<string, ColumnSortState>([
-                    new KeyValuePair("id", sortState)
-                ])
-            );
+            gridService.loadSorts([{ field: "id", dir: "asc" }]);
             fixture.detectChanges();
 
             const button = getButton();
@@ -546,12 +530,7 @@ describe("GridRowReorderHandleComponent", () => {
         });
 
         it("translates sorted reason to Japanese", () => {
-            const sortState: ColumnSortState = { sort: { field: "id", dir: "asc" } };
-            gridService.appliedSorts.set(
-                ImmutableDictionary.create<string, ColumnSortState>([
-                    new KeyValuePair("id", sortState)
-                ])
-            );
+            gridService.loadSorts([{ field: "id", dir: "asc" }]);
             fixture.detectChanges();
 
             const button = getButton();

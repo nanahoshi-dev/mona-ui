@@ -44,7 +44,12 @@ export interface GridStatePersistenceOptions {
     schemaVersion?: number | string;
 }
 
-export type GridStateLoadStatus = "applied" | "empty" | "rejected-schema" | "rejected-version";
+/**
+ * The outcome of loading a state. `rejected-invalid`: the state isn't a well-formed `GridState` (a missing
+ * array, a duplicate column id, an unknown filter operator, a page size or width that isn't a positive
+ * number), and nothing was changed.
+ */
+export type GridStateLoadStatus = "applied" | "empty" | "rejected-invalid" | "rejected-schema" | "rejected-version";
 
 export interface GridStateLoadResult {
     ignoredColumns: readonly string[];

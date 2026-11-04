@@ -5,7 +5,17 @@ import type { AggregateFunction } from "./AggregateFunction";
 import type { GridColumnLockedPosition } from "./GridColumnLockedPosition";
 
 export type ColumnKind = "command" | "data";
-export type ColumnFormat = string | ((column: Column) => string);
+/**
+ * Formats a cell's value for display. Written in method form so a formatter typed for the column's own
+ * value (`(value: number) => string`) is accepted.
+ */
+export type ColumnFormatFunction = {
+    format(value: unknown, row: Record<PropertyKey, unknown>, column: Column): string;
+}["format"];
+/** A date format string (date, datetime and time columns), or a formatter function. */
+export type ColumnFormat = string | ColumnFormatFunction;
+/** Compares two cell values for sorting: negative, zero or positive, as for `Array.prototype.sort`. */
+export type ColumnSortComparator = { compare(left: unknown, right: unknown): number }["compare"];
 
 export interface ColumnConfig {
     readonly aggregate: AggregateFunction | null;
@@ -28,6 +38,8 @@ export interface ColumnConfig {
     readonly maxWidth: number | null;
     readonly minWidth: number | null;
     readonly removeConfirmation: boolean;
+    /** Compares values when the user sorts this column; without it values sort by type, strings by locale. */
+    readonly sortComparator?: ColumnSortComparator | null;
     readonly sortable: boolean;
     readonly stateKey: string | null;
     readonly title: string;

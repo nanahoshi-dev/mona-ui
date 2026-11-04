@@ -16,7 +16,7 @@ import { GridFooterTemplateDirective } from "../../directives/grid-footer-templa
 import { GridGroupFooterTemplateDirective } from "../../directives/grid-group-footer-template.directive";
 import { GridHeaderTemplateDirective } from "../../directives/grid-header-template.directive";
 import type { AggregateFunction } from "../../models/AggregateFunction";
-import { Column, type ColumnFormat } from "../../models/Column";
+import type { Column, ColumnFormat, ColumnSortComparator } from "../../models/Column";
 import { GRID_COLUMN_DEFINITION, GridColumnDefinition } from "../../models/GridColumnDefinition";
 import type { GridColumnLockedPosition } from "../../models/GridColumnLockedPosition";
 
@@ -55,6 +55,7 @@ export class GridColumnComponent implements GridColumnDefinition {
         minWidth: this.minWidth(),
         removeConfirmation: false,
         sortable: this.sortable(),
+        sortComparator: this.sortComparator(),
         sortIndex: null,
         stateKey: this.stateKey(),
         title: this.title(),
@@ -117,6 +118,12 @@ export class GridColumnComponent implements GridColumnDefinition {
      * @description The minimum width of this column in pixels.
      */
     public readonly minWidth = input<number>(40);
+
+    /**
+     * @description Compares two values of this column when the user sorts it, returning a negative number, zero
+     * or a positive number. Without it, values sort by type (empty values first) and strings by the locale.
+     */
+    public readonly sortComparator = input<ColumnSortComparator | null>(null);
 
     /**
      * @description Whether this column can be sorted through its header when grid sorting is enabled. Has no effect if sorting is disabled on the grid.

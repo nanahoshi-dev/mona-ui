@@ -44,7 +44,7 @@ export class GridCellComponent {
     protected readonly cellTextClass = computed(() => {
         return gridCellTextThemeVariants();
     });
-    protected readonly cellUid = computed(() => `${this.row().uid}_${this.column().field}`);
+    protected readonly cellUid = computed(() => `${this.row().uid}_${this.column().id}`);
     protected readonly displayValue = computed(() => {
         const editedRowData = this.gridService.editViewDict().get(this.row().uid);
         const rowData = this.row().data;
@@ -60,7 +60,7 @@ export class GridCellComponent {
             return value;
         }
         if (typeof format === "function") {
-            return format(column);
+            return format(value, this.row().data, column);
         }
         if (column.dataType === "date") {
             return this.formatDateValue(value, format);

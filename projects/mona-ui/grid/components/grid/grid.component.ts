@@ -29,12 +29,15 @@ import {
     inject,
     Injector,
     input,
+    model,
+    output,
     PLATFORM_ID,
     signal,
     TemplateRef,
     untracked,
     viewChild
 } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ChipComponent } from "@nanahoshi/mona-ui/chip";
 import { FilterService } from "@nanahoshi/mona-ui/filter";
@@ -63,6 +66,7 @@ import { ColumnSortEvent } from "../../models/ColumnSortEvent";
 import { GRID_COLUMN_DEFINITION, type GridColumnDefinition } from "../../models/GridColumnDefinition";
 import type { GridKeySelector } from "../../models/GridKeySelector";
 import type { GridRowClass } from "../../models/GridRowClass";
+import type { GridToolbarContext, GridToolbarTemplateContext } from "../../models/GridToolbarTemplateContext";
 import { ResizeMethod } from "../../models/ResizeMethod";
 import { ColumnAriaSortPipe } from "../../pipes/column-aria-sort.pipe";
 import { GridNavigationService } from "../../services/grid-navigation.service";
@@ -284,15 +288,20 @@ export class GridComponent<T> implements GridVariantInput {
 
     protected readonly resizing = signal(false);
 
-    protected readonly toolbarContext = computed(() => ({
-        $implicit: this.gridService,
-        addRowData: this.gridService.addRowData(),
-        addRowVisible: this.gridService.addRowVisible(),
-        cancelAdd: (): boolean => this.gridService.cancelAddRow(),
-        editSession: this.gridService.editSession(),
-        saveAdd: (): boolean => this.gridService.saveAddRow(),
-        startAdd: (): boolean => this.gridService.startAddRow()
-    }));
+    protected readonly toolbarContext = computed<GridToolbarTemplateContext>(() => {
+        const context: GridToolbarContext = {
+            addRowData: this.gridService.addRowData(),
+            addRowVisible: this.gridService.addRowVisible(),
+            cancelAdd: (): boolean => this.gridService.cancelAddRow(),
+            cancelEdit: (): boolean => this.gridService.cancelEdit(),
+            dataState: this.gridService.getDataState(),
+            editSession: this.gridService.editSession(),
+            saveAdd: (): boolean => this.gridService.saveAddRow(),
+            selectedKeys: this.gridService.selectedKeys().toArray(),
+            startAdd: (): boolean => this.gridService.startAddRow()
+        };
+        return { $implicit: context, ...context };
+    });
 
     protected readonly toolbarElement = viewChild<ElementRef<HTMLDivElement>>("toolbarElement");
 
@@ -306,9 +315,23 @@ export class GridComponent<T> implements GridVariantInput {
     public readonly data = input<Iterable<T>>([]);
 
     /**
-     * @description The number of items to be displayed on a page.
+     * @description Keys of the rows whose detail row is open: `rowKey` values, or the data items when the grid
+     * has no `rowKey`. Supports two-way binding; `expandedKeysChange` emits when the user opens or closes one.
+     * @default []
      */
-    public readonly pageSize = input<number>();
+    public readonly expandedKeys = model<unknown[]>([]);
+
+    /**
+     * @description Emitted when the user changes the page or the page size, and when the grid moves back to the
+     * last page because the data shrank. Not emitted for `skip` or `pageSize` values set from code.
+     */
+    public readonly pageChange = output<PageChangeEvent>();
+
+    /**
+     * @description The number of items to be displayed on a page. Values that aren't positive integers are
+     * ignored. A new size keeps the first row of the current page in view. Supports two-way binding.
+     */
+    public readonly pageSize = model<number>();
 
     /**
      * @description The page sizes that the user can select from.
@@ -363,6 +386,13 @@ export class GridComponent<T> implements GridVariantInput {
      * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
      * @default ""
      */
+    /**
+     * @description The number of rows before the current page, in client paging. Supports two-way binding. With
+     * `monaGridServerBinding`, the directive's `skip` sets the page and this model reports user changes.
+     * @default 0
+     */
+    public readonly skip = model(0);
+
     public readonly userClass = input<string>("", { alias: "class" });
 
     public constructor() {
@@ -372,6 +402,7 @@ export class GridComponent<T> implements GridVariantInput {
         });
         effect(() => this.gridService.rowClass.set(this.rowClass() as GridRowClass<unknown> | null));
         this.setPageSizeEffect();
+        this.setPagingEffects();
         this.setGridDetailEffect();
         this.setDataEffect();
         this.setFooterScrollElementEffect();
@@ -489,16 +520,7 @@ export class GridComponent<T> implements GridVariantInput {
             this.gridService.appliedFilters.update(dict => dict.remove(column.field));
             this.gridService.setColumnFiltered(column.id, false);
         }
-        if (!this.gridService.serverBindingEnabled()) {
-            this.adjustPageAfterFilter();
-        }
-        const allFilters = this.gridService
-            .appliedFilters()
-            .values()
-            .select(p => p.filter)
-            .where(f => f != null)
-            .toArray();
-        this.gridService.filterChange$.next(allFilters);
+        this.gridService.filterChange$.next(this.gridService.getFilterDescriptors());
         this.gridService.requestDataStateChange({ resetPage: true });
     }
 
@@ -549,10 +571,7 @@ export class GridComponent<T> implements GridVariantInput {
         } else if (column.groupSortDirection === "desc") {
             nextGroupSortDirection = "asc";
         }
-        this.gridService.setColumnGroupSortDirection(column.id, nextGroupSortDirection);
-        this.gridService.appliedGroupSorts.update(dict =>
-            dict.remove(column.field).put(column.field, { sort: { field: column.field, dir: nextGroupSortDirection } })
-        );
+        this.gridService.setGroupSortDirection(column, nextGroupSortDirection);
     }
 
     protected onPageChange(event: PageChangeEvent): void {
@@ -560,6 +579,7 @@ export class GridComponent<T> implements GridVariantInput {
         this.gridService.setPageState({ page: event.page, skip: event.skip, take: event.take });
         if (previous.skip !== event.skip || previous.take !== event.take) {
             this.gridService.requestDataStateChange();
+            this.reportPage();
         }
 
         if (isPlatformBrowser(this.#platformId)) {
@@ -586,18 +606,6 @@ export class GridComponent<T> implements GridVariantInput {
         this.#toolbarActiveIndex.set(nextIndex);
         targets[nextIndex].focus();
         this.syncToolbarFocusTargets();
-    }
-
-    private adjustPageAfterFilter(): void {
-        const rowCount = this.gridService.viewRowCount();
-        if (rowCount === 0) {
-            return;
-        }
-        const { skip, take } = this.gridService.paginationState();
-        if (skip >= rowCount) {
-            const lastPage = Math.ceil(rowCount / take);
-            this.gridService.setPageState({ skip: (lastPage - 1) * take, page: lastPage });
-        }
     }
 
     private clampCalculatedWidth(column: Column, width: number): number {
@@ -790,6 +798,15 @@ export class GridComponent<T> implements GridVariantInput {
         });
     }
 
+    private reportPage(): void {
+        const { page, skip, take } = this.gridService.paginationState();
+        this.skip.set(skip);
+        if (this.pageSize() !== take) {
+            this.pageSize.set(take);
+        }
+        this.pageChange.emit({ page, skip, take });
+    }
+
     private setInitialCalculatedWidthOfColumns(): void {
         if (this.gridService.gridHeaderElement()) {
             const headerElement = this.gridService.gridHeaderElement() as HTMLElement;
@@ -843,9 +860,54 @@ export class GridComponent<T> implements GridVariantInput {
     private setPageSizeEffect(): void {
         effect(() => {
             const pageSize = this.pageSize();
-            if (pageSize != null) {
-                untracked(() => this.gridService.setPageState({ take: pageSize }));
+            if (pageSize == null || !Number.isSafeInteger(pageSize) || pageSize < 1) {
+                return;
             }
+            untracked(() => {
+                const { skip, take } = this.gridService.paginationState();
+                if (take !== pageSize) {
+                    // Keep the first row of the current page in view instead of showing a page between boundaries.
+                    this.gridService.setPageState({ take: pageSize, skip: Math.floor(skip / pageSize) * pageSize });
+                }
+            });
+        });
+    }
+
+    private setPagingEffects(): void {
+        effect(() => {
+            const skip = this.skip();
+            untracked(() => {
+                if (!this.gridService.serverBindingEnabled()) {
+                    this.gridService.setPageState({ skip });
+                }
+            });
+        });
+        effect(() => {
+            const keys = this.expandedKeys();
+            untracked(() => this.gridService.loadExpandedKeys(keys));
+        });
+        this.gridService.expandedKeysChange$
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(keys => this.expandedKeys.set(keys));
+        // Client paging: when the rows shrink below the current page (new data, a removed row, a filter), move
+        // back to the last page instead of showing an empty page without a pager.
+        effect(() => {
+            const count = this.gridService.viewRowCount();
+            if (
+                count === 0 ||
+                this.gridService.serverBindingEnabled() ||
+                this.gridService.virtualScrollOptions().enabled
+            ) {
+                return;
+            }
+            untracked(() => {
+                const { skip, take } = this.gridService.paginationState();
+                const lastPageSkip = Math.floor((count - 1) / take) * take;
+                if (skip > lastPageSkip) {
+                    this.gridService.setPageState({ skip: lastPageSkip });
+                    this.reportPage();
+                }
+            });
         });
     }
 

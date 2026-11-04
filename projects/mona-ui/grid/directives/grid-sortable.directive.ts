@@ -1,6 +1,7 @@
-import { afterNextRender, DestroyRef, Directive, effect, inject, input, model, output, untracked } from "@angular/core";
+import { DestroyRef, Directive, effect, inject, input, model, output, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { type SortDescriptor, SortDirection } from "@nanahoshi/mona-ui/query";
+import { deepEquals } from "@nanahoshi/mona-ui/common";
+import type { SortDescriptor, SortDirection } from "@nanahoshi/mona-ui/query";
 import type { Column } from "../models/Column";
 import type { ColumnSortEvent } from "../models/ColumnSortEvent";
 import type { SortableOptions } from "../models/SortableOptions";
@@ -19,7 +20,7 @@ export class GridSortableDirective {
     public readonly columnSort = output<ColumnSortEvent>();
 
     /**
-     * @description Enables column sorting on the grid. Pass a `SortableOptions` object to configure sort mode, unsort behavior, or sort-index display.
+     * @description Enables column sorting on the grid. Pass a `SortableOptions` object to configure sort mode, unsort behavior, or sort-index display. Sorting is on unless the object sets `enabled: false`.
      * @default ""
      */
     public readonly options = input<SortableOptions | "">("", {
@@ -27,7 +28,9 @@ export class GridSortableDirective {
     });
 
     /**
-     * @description Current sort descriptors applied to the grid.
+     * @description Current sort descriptors applied to the grid. Descriptors are kept even when no column shows
+     * the field, and a repeated field keeps its last descriptor. Supports two-way binding; a restored grid
+     * state updates it too.
      * @default []
      */
     public readonly sort = model<SortDescriptor[]>([]);
@@ -35,44 +38,17 @@ export class GridSortableDirective {
     public constructor() {
         effect(() => {
             const options = this.options();
-            untracked(() => {
-                if (options) {
-                    this.#gridService.setSortableOptions(options);
-                } else if (options === "") {
-                    this.#gridService.setSortableOptions({ enabled: true });
-                }
-            });
+            untracked(() => this.#gridService.setSortableOptions(options === "" ? {} : options));
         });
         effect(() => {
             const sort = this.sort();
             untracked(() => this.#gridService.loadSorts(sort));
         });
-        afterNextRender({
-            read: () => this.#setSubscriptions()
-        });
-    }
-
-    private applyColumnSort(column: Column, sortDirection: SortDirection | null): void {
-        const sorts =
-            this.#gridService.sortableOptions().mode === "single" ? [] : this.#gridService.getSortDescriptors();
-        const index = sorts.findIndex(sort => sort.field === column.field);
-        if (sortDirection != null) {
-            const sortDescriptor: SortDescriptor = {
-                field: column.field,
-                dir: sortDirection
-            };
-            if (index < 0) {
-                sorts.push(sortDescriptor);
-            } else {
-                sorts[index] = sortDescriptor;
+        this.#gridService.sortChange$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(sorts => {
+            if (!deepEquals(sorts, this.sort())) {
+                this.sort.set(sorts);
             }
-        } else if (index >= 0) {
-            sorts.splice(index, 1);
-        }
-        this.#gridService.loadSorts(sorts);
-    }
-
-    #setSubscriptions(): void {
+        });
         this.#gridService.columnSort$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
             if (!this.#gridService.sortableOptions().enabled || !event.column.sortable) {
                 return;
@@ -93,9 +69,30 @@ export class GridSortableDirective {
                 nextSortDirection = "asc";
             }
             this.applyColumnSort(column, nextSortDirection);
-            const sortDescriptors = this.#gridService.getSortDescriptors();
-            this.sort.set(sortDescriptors);
+            this.sort.set(this.#gridService.getSortDescriptors());
             this.#gridService.requestDataStateChange({ resetPage: true });
         });
+    }
+
+    private applyColumnSort(column: Column, sortDirection: SortDirection | null): void {
+        const current = this.#gridService.getSortDescriptors();
+        const existing = current.find(sort => sort.field === column.field);
+        const sorts = this.#gridService.sortableOptions().mode === "single" ? [] : current;
+        const index = sorts.findIndex(sort => sort.field === column.field);
+        if (sortDirection != null) {
+            // Keep a comparator the consumer supplied, through the descriptor or the column.
+            const comparator = column.sortComparator ?? existing?.sort;
+            const sortDescriptor: SortDescriptor = comparator
+                ? { field: column.field, dir: sortDirection, sort: comparator }
+                : { field: column.field, dir: sortDirection };
+            if (index < 0) {
+                sorts.push(sortDescriptor);
+            } else {
+                sorts[index] = sortDescriptor;
+            }
+        } else if (index >= 0) {
+            sorts.splice(index, 1);
+        }
+        this.#gridService.loadSorts(sorts);
     }
 }

@@ -7,6 +7,7 @@ import {
     inject,
     Injectable,
     Injector,
+    isDevMode,
     PLATFORM_ID,
     signal,
     TemplateRef
@@ -41,7 +42,6 @@ import { ColumnFilterState } from "../models/ColumnFilterState";
 import type { ColumnReorderEvent } from "../models/ColumnReorderEvent";
 import type { ColumnResizeEvent } from "../models/ColumnResizeEvent";
 import type { ColumnSortEvent } from "../models/ColumnSortEvent";
-import { ColumnSortState } from "../models/ColumnSortState";
 import { EditableOptions } from "../models/EditableOptions";
 import type { FilterableOptions } from "../models/FilterableOptions";
 import { GridAddEvent } from "../models/GridAddEvent";
@@ -81,7 +81,10 @@ import { SelectableOptions } from "../models/SelectableOptions";
 import { SortableOptions } from "../models/SortableOptions";
 import type { StructuralColumnDescriptor } from "../models/StructuralColumn";
 import { GRID_DEFAULT_MESSAGES } from "../i18n/grid.default-messages";
+import { partitionFilters, toFilterMenuValue } from "./grid-filter-state";
+import { buildGroupKey, groupKeyHasField, groupRowsByField } from "./grid-group-key";
 import { GridRowFlattenerService } from "./grid-row-flattener.service";
+import { isWellFormedGridState } from "./grid-state-validation";
 
 // Flat projection of a Row used as the IterablePatchStore item type.
 // $rowId is injected to carry the row identity without modifying Row.data.
@@ -108,6 +111,18 @@ function isAggregateComparable(value: unknown): boolean {
         default:
             return value instanceof Date && !Number.isNaN(value.getTime());
     }
+}
+
+/** A finite number, or a numeric string such as `"12.5"`, as a number; anything else is `null`. */
+function toAggregateNumber(value: unknown): number | null {
+    if (typeof value === "number") {
+        return Number.isFinite(value) ? value : null;
+    }
+    if (typeof value === "string" && value.trim() !== "") {
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? parsed : null;
+    }
+    return null;
 }
 
 @Injectable()
@@ -143,6 +158,7 @@ export class GridService {
             .select<RowEditDataItem>(r => ({ $rowId: r.uid, ...r.data }))
             .toImmutableList()
     );
+    readonly #externalFilters = signal<readonly CompositeFilterDescriptor[]>([]);
     readonly #filterableOptions = signal<FilterableOptions>({ enabled: false, type: "menu" });
     readonly #groupColumnIds = signal<ImmutableList<string>>(ImmutableList.create());
     readonly #horizontalScrollLeft = signal(0);
@@ -160,8 +176,13 @@ export class GridService {
     readonly #serverBindingEnabled = signal(false);
     readonly #serverLoading = signal(false);
     readonly #serverTotal = signal(0);
+    readonly #sortDescriptors = signal<readonly SortDescriptor[]>([]);
     readonly #textMeasureCache = new Map<string, number>();
     #dataStateEmissionPending = false;
+    /** The group descriptors last requested, including fields that have no column yet. */
+    #groupRequest: readonly GroupDescriptor[] = [];
+    /** The selection last loaded from the `selectedKeys` input, so its echo isn't reported as a user change. */
+    #loadedSelectedKeys: ImmutableSet<unknown> | null = null;
     public readonly add$ = new Subject<GridAddEvent>();
     public readonly addRowData = computed(() => {
         const session = this.#editSession();
@@ -190,8 +211,6 @@ export class GridService {
         return scopeSize > 0 && this.#bulkSelectionSelectedCount() === scopeSize;
     });
     public readonly appliedFilters = signal(ImmutableDictionary.create<string, ColumnFilterState>());
-    public readonly appliedGroupSorts = signal(ImmutableDictionary.create<string, ColumnSortState>());
-    public readonly appliedSorts = signal(ImmutableDictionary.create<string, ColumnSortState>());
     public readonly bodyScrollElement = signal<HTMLElement | null>(null);
     public readonly bodyTableElement = signal<HTMLTableElement | null>(null);
     public readonly bulkSelectionRows = computed(() => {
@@ -231,7 +250,10 @@ export class GridService {
     });
     public readonly editableOptions = signal<EditableOptions>({ enabled: false, mode: "cell" });
     public readonly editingRowUid = computed(() => this.#editContext()?.rowUid ?? null);
-    public readonly expandedKeys = signal(ImmutableSet.create<string>());
+    /** Keys of the rows whose detail row is open: the `rowKey` value, or the data item without one. */
+    public readonly expandedKeys = signal(ImmutableSet.create<unknown>());
+    /** Emits the expanded keys after the user opens or closes a detail row. */
+    public readonly expandedKeysChange$ = new Subject<unknown[]>();
     public readonly filterChange$ = new Subject<CompositeFilterDescriptor[]>();
     public readonly filterableOptions = this.#filterableOptions.asReadonly();
     public readonly footerScrollElement = signal<HTMLElement | null>(null);
@@ -256,6 +278,8 @@ export class GridService {
             e => e.value
         );
     });
+    /** Emits the group descriptors after the user changes grouping, and after a state is applied. */
+    public readonly groupChange$ = new Subject<GroupDescriptor[]>();
     public readonly groupColumnWidth = 36;
     public readonly groupColumns = computed(() => {
         const columnsById = new Map(this.columns().select(column => [column.id, column] as const));
@@ -394,7 +418,7 @@ export class GridService {
         if (this.groupColumns().any()) {
             return "grouped";
         }
-        if (!this.appliedSorts().isEmpty()) {
+        if (this.#sortDescriptors().length > 0) {
             return "sorted";
         }
         if (!this.appliedFilters().isEmpty()) {
@@ -448,6 +472,8 @@ export class GridService {
         const count = this.#bulkSelectionSelectedCount();
         return count > 0 && count < scopeSize;
     });
+    /** Emits the sort descriptors after a state is applied, for the `sort` model. */
+    public readonly sortChange$ = new Subject<SortDescriptor[]>();
     public readonly sortableOptions = signal<SortableOptions>({
         enabled: false,
         mode: "single",
@@ -489,33 +515,20 @@ export class GridService {
         if (this.serverBindingEnabled()) {
             return rows;
         }
-        const appliedFilters = this.appliedFilters();
-        const appliedSorts = this.appliedSorts();
-        const groupColumns = this.groupColumns();
-
         let queryEnumerable = Query.from(rows, { locale: this.#i18n.localeId() });
-        for (const filter of appliedFilters) {
-            if (filter.value.filter) {
-                queryEnumerable = queryEnumerable.filter(filter.value.filter, r => r.data);
-            }
+        for (const filter of this.getFilterDescriptors()) {
+            queryEnumerable = queryEnumerable.filter(filter, r => r.data);
         }
 
-        if (groupColumns.any()) {
-            const groupDescriptors = this.getGroupDescriptors(groupColumns);
-            const sortStates = groupDescriptors.map<SortDescriptor>(d => ({ field: d.field, dir: d.dir ?? "asc" }));
-            queryEnumerable = queryEnumerable.sort(sortStates, r => r.data);
-        }
-
-        const appliedNonGroupSorts = appliedSorts
-            .values()
-            .where(state => !groupColumns.any(c => c.field === state.sort.field));
-
-        if (appliedNonGroupSorts.any()) {
-            const sortState = appliedNonGroupSorts.select(d => d.sort).toArray();
-            queryEnumerable = queryEnumerable.sort(sortState, r => r.data);
-        }
-        const result = queryEnumerable.run();
-        return ImmutableList.create(result);
+        // One sort: the group fields first, then the column sorts, so the groups keep their order.
+        const groupSorts = this.getGroupDescriptors(this.groupColumns()).map<SortDescriptor>(d => ({
+            field: d.field,
+            dir: d.dir ?? "asc"
+        }));
+        const groupFields = new Set(groupSorts.map(sort => sort.field));
+        const columnSorts = this.#sortDescriptors().filter(sort => !groupFields.has(sort.field));
+        queryEnumerable = queryEnumerable.sort([...groupSorts, ...columnSorts], r => r.data);
+        return ImmutableList.create(queryEnumerable.run());
     });
     public readonly virtualGridMaxBuffer = computed(() => this.virtualGridMinBuffer() * 1.42857);
     public readonly virtualGridMinBuffer = signal(0);
@@ -542,7 +555,7 @@ export class GridService {
         }
         this.#groupColumnIds.update(ids => ids.add(column.id));
         this.setColumnGroupSortDirection(column.id, "asc");
-        this.appliedGroupSorts.update(dict => dict.put(column.field, { sort: { field: column.field, dir: "asc" } }));
+        this.emitGroupChange();
     }
 
     public applyState(state: GridState | null, options: GridStatePersistenceOptions = {}): GridStateLoadResult {
@@ -554,6 +567,9 @@ export class GridService {
         }
         if (options.schemaVersion != null && state.schemaVersion !== options.schemaVersion) {
             return { ignoredColumns: [], missingColumns: [], status: "rejected-schema" };
+        }
+        if (!isWellFormedGridState(state)) {
+            return { ignoredColumns: [], missingColumns: [], status: "rejected-invalid" };
         }
 
         const previousDataState = this.getDataState();
@@ -603,13 +619,9 @@ export class GridService {
         this.loadSorts(state.sort.map(sort => ({ dir: sort.dir, field: sort.field })));
         this.loadGroupColumns(state.group);
         this.loadFilters(this.deserializeFilters(state.filter));
-        this.filterChange$.next(
-            this.appliedFilters()
-                .values()
-                .select(filter => filter.filter)
-                .where(filter => filter != null)
-                .toArray()
-        );
+        this.sortChange$.next(this.getSortDescriptors());
+        this.groupChange$.next(this.getGroupDescriptors(this.groupColumns()));
+        this.filterChange$.next(this.getFilterDescriptors());
 
         if (options.persistPageSize !== false && state.pageSize != null) {
             this.setPageState({ page: 1, skip: 0, take: state.pageSize });
@@ -684,11 +696,9 @@ export class GridService {
                           };
                 })
                 .filter(column => column != null),
-            filter: this.appliedFilters()
-                .values()
-                .select(state => this.serializeFilter(state.filter))
-                .where(filter => filter != null)
-                .toArray(),
+            filter: this.getFilterDescriptors()
+                .map(filter => this.serializeFilter(filter))
+                .filter(filter => filter != null),
             group: this.getGroupDescriptors(this.groupColumns()),
             sort: this.getSortDescriptors().map<GridStateSortDescriptor>(sort => ({
                 dir: sort.dir,
@@ -716,8 +726,8 @@ export class GridService {
     public clearColumnGrouping(column: Column): void {
         this.#groupColumnIds.update(ids => ids.remove(column.id));
         this.setColumnGroupSortDirection(column.id, null);
-        this.appliedGroupSorts.update(dict => dict.remove(column.field));
-        this.clearCollapsedGroups(key => key.includes(column.field));
+        this.clearCollapsedGroups(key => groupKeyHasField(key, column.field));
+        this.emitGroupChange();
     }
 
     public commitRowEdit(originalEvent?: Event): boolean {
@@ -828,13 +838,18 @@ export class GridService {
             skip,
             take,
             sort: this.getSortDescriptors(),
-            filter: this.appliedFilters()
-                .values()
-                .select(state => state.filter)
-                .where(filter => filter != null)
-                .select(filter => this.cloneFilter(filter))
-                .toArray()
+            filter: this.getFilterDescriptors().map(filter => this.cloneFilter(filter))
         };
+    }
+
+    /** Every applied filter: the column filters, then the filters across columns. */
+    public getFilterDescriptors(): CompositeFilterDescriptor[] {
+        const columnFilters = this.appliedFilters()
+            .values()
+            .select(state => state.filter)
+            .where((filter): filter is CompositeFilterDescriptor => filter != null)
+            .toArray();
+        return [...columnFilters, ...this.#externalFilters()];
     }
 
     public getGroupDescriptors(columns: Iterable<Column>): GroupDescriptor[] {
@@ -852,16 +867,7 @@ export class GridService {
 
     /** Sort order shared by models, persistence, and server requests. */
     public getSortDescriptors(): SortDescriptor[] {
-        const columns = this.columns().toArray();
-        return this.appliedSorts()
-            .values()
-            .toArray()
-            .sort(
-                (left, right) =>
-                    (columns.find(c => c.field === left.sort.field)?.sortIndex ?? Number.MAX_SAFE_INTEGER) -
-                    (columns.find(c => c.field === right.sort.field)?.sortIndex ?? Number.MAX_SAFE_INTEGER)
-            )
-            .map(state => ({ ...state.sort }));
+        return this.#sortDescriptors().map(sort => ({ ...sort }));
     }
 
     public handleMultipleSelection(event: MouseEvent, row: Row): void {
@@ -908,50 +914,70 @@ export class GridService {
         return this.collapsedGroupKeys().contains(groupKey);
     }
 
+    /** Whether a selection value came from the `selectedKeys` input rather than from the user. */
+    public isLoadedSelection(keys: ImmutableSet<unknown>): boolean {
+        return keys === this.#loadedSelectedKeys;
+    }
+
     public isRowExpanded(row: Row): boolean {
-        return this.expandedKeys().contains(row.uid);
+        return this.expandedKeys().contains(this.getRowIdentityKey(row));
     }
 
     public isRowSelected(row: Row): boolean {
         return this.selectedKeys().contains(this.getRowSelectionKey(row));
     }
 
-    public loadFilters(filters: CompositeFilterDescriptor[]): void {
-        const newAppliedFilters = new Dictionary<string, ColumnFilterState>();
-        for (const filter of filters) {
-            const filter1 = filter.filters[0] as FilterDescriptor;
-            const filter2 = filter.filters[1] as FilterDescriptor;
-            if (filter1 == null || !("field" in filter1)) {
-                continue;
-            }
-            const column = this.columns().firstOrDefault(c => c.field === filter1.field);
-            if (column != null) {
-                newAppliedFilters.add(column.field, {
-                    filter: filter,
-                    filterMenuValue: {
-                        value1: filter1 && "value" in filter1 ? filter1.value : undefined,
-                        value2: filter2 && "value" in filter2 ? filter2.value : undefined,
-                        operator1: filter1 ? filter1.operator : undefined,
-                        operator2: filter2 ? filter2.operator : undefined,
-                        logic: filter.logic || "and"
-                    }
-                });
-            }
+    /** Sets the expanded detail rows from the `expandedKeys` input. */
+    public loadExpandedKeys(keys: Iterable<unknown> | null | undefined): void {
+        const next = ImmutableSet.create(keys ?? []);
+        const current = this.expandedKeys();
+        if (next.size() !== current.size() || !next.all(key => current.contains(key))) {
+            this.expandedKeys.set(next);
         }
-        this.updateColumns(column => ({ ...column, filtered: newAppliedFilters.containsKey(column.field) }));
+    }
+
+    /**
+     * Applies filters from code. Conditions on one field become that column's filter (repeated fields are
+     * combined with `and`); filters across fields stay whole and are still applied and reported. Filters on
+     * a field with no column are kept for when the column appears. Conditions with an unknown operator are
+     * dropped.
+     */
+    public loadFilters(filters: Iterable<CompositeFilterDescriptor> | null | undefined): void {
+        const { byField, external } = partitionFilters(filters);
+        const newAppliedFilters = new Dictionary<string, ColumnFilterState>();
+        for (const [field, filter] of byField) {
+            newAppliedFilters.put(field, { filter, filterMenuValue: toFilterMenuValue(filter) });
+        }
         this.appliedFilters.set(
             newAppliedFilters.toImmutableDictionary(
                 p => p.key,
                 p => p.value
             )
         );
+        this.#externalFilters.set(external);
+        this.syncColumnFilterState();
     }
 
-    public loadGroupColumns(descriptors: Iterable<GroupDescriptor>): void {
+    /**
+     * Applies group descriptors from code. A repeated field keeps its last descriptor; fields without a
+     * column are remembered and grouped once their column appears.
+     */
+    public loadGroupColumns(descriptors: Iterable<GroupDescriptor> | null | undefined): void {
         const columns = this.columns();
-        const descriptorList = [...descriptors];
+        const byField = new Map<string, GroupDescriptor>();
+        for (const descriptor of descriptors ?? []) {
+            if (descriptor == null || typeof descriptor.field !== "string" || descriptor.field === "") {
+                continue;
+            }
+            byField.delete(descriptor.field);
+            byField.set(descriptor.field, { field: descriptor.field, dir: descriptor.dir === "desc" ? "desc" : "asc" });
+        }
+        this.#groupRequest = [...byField.values()];
+        const descriptorList = this.#groupRequest.filter(descriptor =>
+            columns.any(column => column.field === descriptor.field && column.kind !== "command")
+        );
         const groupColumns = descriptorList
-            .map(descriptor => columns.firstOrDefault(c => c.field === descriptor.field))
+            .map(descriptor => columns.firstOrDefault(c => c.field === descriptor.field && c.kind !== "command"))
             .filter((column): column is Column => column != null);
         const currentGroupColumns = this.groupColumns();
         const currentDescriptors = this.getGroupDescriptors(currentGroupColumns);
@@ -968,63 +994,45 @@ export class GridService {
         if (currentMatches) {
             return;
         }
-        const newAppliedGroupSorts = new Dictionary<string, ColumnSortState>();
         const groupSortDirections = new Map<string, SortDirection>();
-        for (const descriptor of descriptorList) {
-            const column = columns.firstOrDefault(c => c.field === descriptor.field);
-            if (column != null) {
-                const dir = descriptor.dir ?? "asc";
-                groupSortDirections.set(column.id, dir);
-                newAppliedGroupSorts.add(column.field, { sort: { field: descriptor.field, dir } });
-            }
+        for (const [index, column] of groupColumns.entries()) {
+            groupSortDirections.set(column.id, descriptorList[index].dir ?? "asc");
         }
         this.updateColumns(column => ({
             ...column,
             groupSortDirection: groupSortDirections.get(column.id) ?? null
         }));
-        this.appliedGroupSorts.set(
-            newAppliedGroupSorts.toImmutableDictionary(
-                p => p.key,
-                p => p.value
-            )
-        );
         this.#groupColumnIds.set(ImmutableList.create(groupColumns.map(column => column.id)));
     }
 
     public loadSelectedKeys(selectedKeys: Iterable<unknown>): void {
         this.selectedKeys.update(set => set.clear().addAll(selectedKeys));
+        this.#loadedSelectedKeys = this.selectedKeys();
         this.selectedKeysLoad$.next(this.selectedKeys());
     }
 
-    public loadSorts(sorts: SortDescriptor[]): void {
-        const newAppliedSorts = new Dictionary<string, ColumnSortState>();
-        const sortStates = new Map<string, { readonly dir: SortDirection; readonly index: number }>();
-        for (const [index, sort] of sorts.entries()) {
-            const column = this.columns().firstOrDefault(c => c.field === sort.field);
-            if (column != null) {
-                newAppliedSorts.add(column.field, {
-                    sort: sort
-                });
-                sortStates.set(column.id, { dir: sort.dir, index: index + 1 });
+    /**
+     * Applies sort descriptors. They are kept whether or not a column shows the field, so a column added
+     * later shows its sort; a repeated field keeps its last descriptor.
+     */
+    public loadSorts(sorts: Iterable<SortDescriptor> | null | undefined): void {
+        const byField = new Map<string, SortDescriptor>();
+        for (const sort of sorts ?? []) {
+            if (sort == null || typeof sort.field !== "string" || sort.field === "") {
+                continue;
             }
+            if (sort.dir !== "asc" && sort.dir !== "desc") {
+                continue;
+            }
+            byField.delete(sort.field);
+            byField.set(sort.field, { ...sort });
         }
-        this.updateColumns(column => {
-            const state = sortStates.get(column.id);
-            return {
-                ...column,
-                columnSortDirection: state?.dir ?? null,
-                sortIndex: state?.index ?? null
-            };
-        });
-        this.appliedSorts.set(
-            newAppliedSorts.toImmutableDictionary(
-                p => p.key,
-                p => p.value
-            )
-        );
+        this.#sortDescriptors.set([...byField.values()]);
+        this.syncColumnSortState();
     }
 
     public moveGroupColumn(column: Column, moveAs: "prev" | "next"): void {
+        const previous = this.#groupColumnIds();
         this.#groupColumnIds.update(ids => {
             const list = ids.toArray();
             const index = list.indexOf(column.id);
@@ -1036,6 +1044,9 @@ export class GridService {
             list.splice(newIndex, 0, movedId);
             return ImmutableList.create(list);
         });
+        if (this.#groupColumnIds() !== previous) {
+            this.emitGroupChange();
+        }
     }
 
     public normalizeRenderedWidth(width: number): number {
@@ -1226,6 +1237,17 @@ export class GridService {
         const nextColumnIds = new Set(nextColumns.map(column => column.id));
         this.columns.set(ImmutableList.create(nextColumns));
         this.#groupColumnIds.update(ids => ids.where(id => nextColumnIds.has(id)).toImmutableList());
+        this.syncColumnSortState();
+        this.syncColumnFilterState();
+        const groupedFields = new Set(this.groupColumns().select(column => column.field));
+        const groupable = this.#groupRequest.some(
+            descriptor =>
+                !groupedFields.has(descriptor.field) &&
+                nextColumns.some(column => column.field === descriptor.field && column.kind !== "command")
+        );
+        if (groupable) {
+            this.loadGroupColumns(this.#groupRequest);
+        }
     }
 
     public setColumnFiltered(columnId: string, value: boolean): void {
@@ -1266,16 +1288,25 @@ export class GridService {
         this.updateColumns(column => ({ ...column, hidden: !visibleFields.contains(column.field) }));
     }
 
-    public setEditableOptions(options: EditableOptions): void {
-        this.editableOptions.update(v => ({ ...v, ...options }));
+    /** Replaces the editing options; the feature is on unless `enabled` is `false`. */
+    public setEditableOptions(options: Partial<EditableOptions>): void {
+        this.editableOptions.set({ mode: "cell", ...options, enabled: options.enabled !== false });
     }
 
+    /** Replaces the filtering options; the feature is on unless `enabled` is `false`. */
     public setFilterableOptions(options: Partial<FilterableOptions>): void {
-        this.#filterableOptions.update(v => ({ ...v, ...options }));
+        this.#filterableOptions.set({ type: "menu", ...options, enabled: options.enabled !== false });
     }
 
+    /** Changes a group's direction from the group panel and reports it. */
+    public setGroupSortDirection(column: Column, dir: SortDirection): void {
+        this.setColumnGroupSortDirection(column.id, dir);
+        this.emitGroupChange();
+    }
+
+    /** Replaces the grouping options; the feature is on unless `enabled` is `false`. */
     public setGroupableOptions(options: Partial<GroupableOptions>): void {
-        this.groupableOptions.update(v => ({ ...v, ...options }));
+        this.groupableOptions.set({ showFooter: false, ...options, enabled: options.enabled !== false });
     }
 
     public setNewRowFactory(factory: () => Record<PropertyKey, unknown>): void {
@@ -1284,13 +1315,17 @@ export class GridService {
 
     public setPageState(state: Partial<PaginationState>): void {
         const current = this.paginationState();
-        const take = state.take ?? current.take;
-        const skip = state.skip ?? (state.page != null ? (state.page - 1) * take : current.skip);
+        let take = state.take ?? current.take;
+        let skip = state.skip ?? (state.page != null ? (state.page - 1) * take : current.skip);
         if (this.serverBindingEnabled()) {
             this.validateServerInteger(skip, "skip");
             if (!Number.isSafeInteger(take) || take <= 0) {
                 throw new Error("monaGridServerBinding: pageSize must be a finite positive integer.");
             }
+        } else {
+            // Client paging ignores sizes and offsets it can't page with instead of showing page NaN.
+            take = Number.isSafeInteger(take) && take > 0 ? take : current.take;
+            skip = Number.isFinite(skip) && skip > 0 ? Math.floor(skip) : 0;
         }
         const page = Math.floor(skip / take) + 1;
         if (current.skip !== skip || current.take !== take || current.page !== page) {
@@ -1298,16 +1333,24 @@ export class GridService {
         }
     }
 
+    /** Replaces the column reorder options; the feature is on unless `enabled` is `false`. */
     public setReorderableOptions(options: Partial<ReorderableOptions>): void {
-        this.#reorderableOptions.update(v => ({ ...v, ...options }));
+        this.#reorderableOptions.set({ ...options, enabled: options.enabled !== false });
     }
 
+    /** Replaces the column resize options; the feature is on unless `enabled` is `false`. */
     public setResizableOptions(options: Partial<ResizableOptions>): void {
-        this.#resizableOptions.update(v => ({ ...v, ...options }));
+        this.#resizableOptions.set({ ...options, enabled: options.enabled !== false });
     }
 
     public setRowExpanded(row: Row, expanded: boolean): void {
-        this.expandedKeys.update(keys => (expanded ? keys.add(row.uid) : keys.remove(row.uid)));
+        const key = this.getRowIdentityKey(row);
+        const keys = this.expandedKeys();
+        if (keys.contains(key) === expanded) {
+            return;
+        }
+        this.expandedKeys.set(expanded ? keys.add(key) : keys.remove(key));
+        this.expandedKeysChange$.next(this.expandedKeys().toArray());
     }
 
     public setRowReorderableOptions(options: RowReorderableOptions): void {
@@ -1334,15 +1377,43 @@ export class GridService {
         value: Iterable<Record<PropertyKey, unknown>>,
         rowKey: GridKeySelector<unknown> | null = null
     ): void {
-        this.rows.set(ImmutableList.create(select(value, r => new Row(r, this.getRowUid(r, rowKey)))));
+        const occurrences = new Map<string, number>();
+        let duplicateKey = false;
+        const rows: Row[] = [];
+        for (const data of value) {
+            const uid = this.getRowUid(data, rowKey);
+            const occurrence = (occurrences.get(uid) ?? 0) + 1;
+            occurrences.set(uid, occurrence);
+            if (occurrence > 1 && rowKey) {
+                duplicateKey = true;
+            }
+            // A repeated item or key still gets its own row identity, so rendering and editing never collide.
+            rows.push(new Row(data, occurrence === 1 ? uid : `${uid}#${occurrence}`));
+        }
+        if (duplicateKey && isDevMode()) {
+            console.warn(
+                "mona-grid: several rows have the same rowKey value. Selection, editing and detail rows " +
+                    "follow the key, so give every row a unique key."
+            );
+        }
+        this.rows.set(ImmutableList.create(rows));
     }
 
     public setScrollEndThreshold(threshold: number): void {
         this.scrollEndThreshold.set(threshold);
     }
 
-    public setSelectableOptions(options: SelectableOptions): void {
-        this.selectableOptions.update(v => ({ ...v, ...options }));
+    /** Replaces the selection options; the feature is on unless `enabled` is `false`. */
+    public setSelectableOptions(options: Partial<SelectableOptions>): void {
+        this.selectableOptions.set({
+            mode: "single",
+            selectAllScope: "page",
+            selectOnRowClick: false,
+            showCheckboxes: false,
+            showSelectAll: true,
+            ...options,
+            enabled: options.enabled !== false
+        });
     }
 
     public setServerBindingEnabled(enabled: boolean): void {
@@ -1366,8 +1437,15 @@ export class GridService {
         this.#serverTotal.set(total);
     }
 
+    /** Replaces the sorting options; the feature is on unless `enabled` is `false`. */
     public setSortableOptions(options: Partial<SortableOptions>): void {
-        this.sortableOptions.update(v => ({ ...v, ...options }));
+        this.sortableOptions.set({
+            mode: "single",
+            allowUnsort: true,
+            showIndices: true,
+            ...options,
+            enabled: options.enabled !== false
+        });
     }
 
     public setVirtualScrollOptions(options: VirtualScrollOptions): void {
@@ -1540,9 +1618,8 @@ export class GridService {
         if (column == null) {
             return;
         }
-        const groupedRows = this.groupRowsByColumn(rows, column);
-        for (const [groupValue, groupRows] of groupedRows) {
-            const groupKey = this.buildGroupKey(parentKey, column.field, groupValue);
+        for (const { rows: groupRows, value: groupValue } of groupRowsByField(rows, column.field)) {
+            const groupKey = buildGroupKey(parentKey, column.field, groupValue);
             if (depth < groupColumns.length - 1) {
                 this.buildGroupAggregates(groupRows, groupColumns, aggregateColumns, depth + 1, groupKey, aggregates);
             }
@@ -1555,11 +1632,6 @@ export class GridService {
                 rows: groupRows.map(row => row.data)
             });
         }
-    }
-
-    private buildGroupKey(parentKey: string | null, field: string, value: unknown): string {
-        const segment = `${field}:${String(value ?? "")}`;
-        return parentKey != null ? `${parentKey}/${segment}` : segment;
     }
 
     private clearEditSession(): void {
@@ -1606,15 +1678,15 @@ export class GridService {
         let sumValue = 0;
 
         for (const row of rows) {
-            count += 1;
             const value = row.data[field];
-            if (typeof value === "number" && Number.isFinite(value)) {
-                sumValue += value;
-                numericCount += 1;
-            }
-
             if (value == null) {
                 continue;
+            }
+            count += 1;
+            const numeric = toAggregateNumber(value);
+            if (numeric != null) {
+                sumValue += numeric;
+                numericCount += 1;
             }
 
             if (!isAggregateComparable(value)) {
@@ -1631,7 +1703,7 @@ export class GridService {
         }
 
         const avg = numericCount > 0 ? sumValue / numericCount : undefined;
-        const sum = numericCount > 0 ? sumValue : undefined;
+        const sum = sumValue;
 
         return { avg, count, field, max, min, sum };
     }
@@ -1721,6 +1793,12 @@ export class GridService {
             .filter((filter): filter is CompositeFilterDescriptor => filter != null);
     }
 
+    private emitGroupChange(): void {
+        const groups = this.getGroupDescriptors(this.groupColumns());
+        this.#groupRequest = groups;
+        this.groupChange$.next(groups);
+    }
+
     private findLongestCellContentOfColumn(column: Column): string {
         let maxLength = 0;
         let longestValue = "";
@@ -1747,12 +1825,17 @@ export class GridService {
     private getRowDataItemSelectionKey(data: Record<PropertyKey, unknown>): unknown {
         const selectBy = this.selectBy();
         if (!selectBy) {
-            return data;
+            return this.getRowUidKey(data, this.rowKey()) ?? data;
         }
         if (typeof selectBy === "string") {
             return data[selectBy];
         }
         return selectBy(data);
+    }
+
+    /** The key a row is tracked by across data refreshes: its `rowKey` value, or the data item. */
+    private getRowIdentityKey(row: Row): unknown {
+        return this.getRowUidKey(row.data, this.rowKey()) ?? row.data;
     }
 
     private getRowSelectionKey(row: Row): unknown {
@@ -1792,29 +1875,6 @@ export class GridService {
             return data[rowKey];
         }
         return rowKey(data);
-    }
-
-    private groupRowsByColumn(rows: readonly Row[], column: Column): Array<[unknown, Row[]]> {
-        const field = column.field;
-        const isDate = column.dataType === "date";
-        const groupMap = new Map<unknown, Row[]>();
-        const keyOrder: unknown[] = [];
-
-        for (const row of rows) {
-            const rawValue = row.data[field];
-            const mapKey = isDate && rawValue instanceof Date ? rawValue.toISOString() : rawValue;
-            if (!groupMap.has(mapKey)) {
-                groupMap.set(mapKey, []);
-                keyOrder.push(mapKey);
-            }
-            groupMap.get(mapKey)?.push(row);
-        }
-
-        return keyOrder.map(mapKey => {
-            const groupRows = groupMap.get(mapKey) ?? [];
-            const groupValue = groupRows[0]?.data[field];
-            return [groupValue, groupRows];
-        });
     }
 
     private measureElementScrollbarGutter(element: HTMLElement): number {
@@ -2028,6 +2088,26 @@ export class GridService {
             const resizeObserver = new ResizeObserver(() => updateScrollbarGutter());
             resizeObserver.observe(bodyElement);
             onCleanup(() => resizeObserver.disconnect());
+        });
+    }
+
+    private syncColumnFilterState(): void {
+        const filters = this.appliedFilters();
+        this.updateColumns(column => {
+            const filtered = filters.containsKey(column.field);
+            return column.filtered === filtered ? column : { ...column, filtered };
+        });
+    }
+
+    private syncColumnSortState(): void {
+        const sorts = this.#sortDescriptors();
+        this.updateColumns(column => {
+            const index = sorts.findIndex(sort => sort.field === column.field);
+            const columnSortDirection = index < 0 ? null : sorts[index].dir;
+            const sortIndex = index < 0 ? null : index + 1;
+            return column.columnSortDirection === columnSortDirection && column.sortIndex === sortIndex
+                ? column
+                : { ...column, columnSortDirection, sortIndex };
         });
     }
 
