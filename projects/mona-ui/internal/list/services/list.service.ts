@@ -403,15 +403,19 @@ export class ListService<TData> {
         return candidates.firstOrDefault(i => this.filterItem(i, text));
     }
 
-    public isDisabled(item: ListItem<TData>): boolean {
-        if (item.isHeader) {
-            return false;
-        }
+    /**
+     * Whether a data item is disabled by `disabledBy`, whether or not it is in the list.
+     */
+    public isDataItemDisabled(dataItem: TData): boolean {
         const disabledBy = this.disabledBy();
         if (typeof disabledBy === "string") {
-            return (item.data as any)?.[disabledBy] ?? false;
+            return disabledBy !== "" && Boolean((dataItem as Record<string, unknown> | null)?.[disabledBy]);
         }
-        return disabledBy(item.data);
+        return disabledBy(dataItem);
+    }
+
+    public isDisabled(item: ListItem<TData>): boolean {
+        return !item.isHeader && this.isDataItemDisabled(item.data);
     }
 
     public isFilteringEnabled(): boolean {

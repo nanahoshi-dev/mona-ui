@@ -290,13 +290,42 @@ export const RU_RU_MESSAGES = {
     },
     listBox: {
         clearSelection: "Очистить выбор",
+        itemsMoved: (position: number, total: number) =>
+            `Перемещено на позицию ${localizeNumber(position)} из ${localizeNumber(total)}`,
+        itemsRemoved: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `Удалён ${localizeNumber(count)} элемент`,
+                few: () => `Удалено ${localizeNumber(count)} элемента`,
+                many: () => `Удалено ${localizeNumber(count)} элементов`,
+                other: () => `Удалено ${localizeNumber(count)} элемента`
+            }),
+        itemsTransferred: (count: number, list: string) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} элемент перенесён в список «${list}»`,
+                few: () => `${localizeNumber(count)} элемента перенесено в список «${list}»`,
+                many: () => `${localizeNumber(count)} элементов перенесено в список «${list}»`,
+                other: () => `${localizeNumber(count)} элемента перенесено в список «${list}»`
+            }),
+        itemsTransferredToOtherList: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} элемент перенесён в другой список`,
+                few: () => `${localizeNumber(count)} элемента перенесено в другой список`,
+                many: () => `${localizeNumber(count)} элементов перенесено в другой список`,
+                other: () => `${localizeNumber(count)} элемента перенесено в другой список`
+            }),
         moveDown: "Переместить вниз",
         moveUp: "Переместить вверх",
         remove: "Удалить",
+        selectionCleared: "Выбор очищен",
+        toolbarLabel: (list: string) => `Действия: ${list}`,
         transferAllFrom: "Перенести всё из другого списка",
+        transferAllFromList: (list: string) => `Перенести всё из списка «${list}»`,
         transferAllTo: "Перенести всё в другой список",
+        transferAllToList: (list: string) => `Перенести всё в список «${list}»`,
         transferFrom: "Перенести из другого списка",
-        transferTo: "Перенести в другой список"
+        transferFromList: (list: string) => `Перенести из списка «${list}»`,
+        transferTo: "Перенести в другой список",
+        transferToList: (list: string) => `Перенести в список «${list}»`
     },
     multiSelect: {
         clear: "Очистить",

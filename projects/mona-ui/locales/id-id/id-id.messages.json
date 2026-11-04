@@ -263,13 +263,23 @@
     },
     "listBox": {
         "clearSelection": "Hapus semua pilihan",
+        "itemsMoved": "Dipindahkan ke posisi {position} dari {total}",
+        "itemsRemoved": "{count} item dihapus",
+        "itemsTransferred": "{count} item dipindahkan ke {list}",
+        "itemsTransferredToOtherList": "{count} item dipindahkan ke daftar lain",
         "moveDown": "Pindahkan ke bawah",
         "moveUp": "Pindahkan ke atas",
         "remove": "Hapus",
+        "selectionCleared": "Pilihan dihapus",
+        "toolbarLabel": "Tindakan {list}",
         "transferAllFrom": "Pindahkan semua dari daftar lain",
+        "transferAllFromList": "Pindahkan semua dari {list}",
         "transferAllTo": "Pindahkan semua ke daftar lain",
+        "transferAllToList": "Pindahkan semua ke {list}",
         "transferFrom": "Pindahkan dari daftar lain",
-        "transferTo": "Pindahkan ke daftar lain"
+        "transferFromList": "Pindahkan dari {list}",
+        "transferTo": "Pindahkan ke daftar lain",
+        "transferToList": "Pindahkan ke {list}"
     },
     "multiSelect": {
         "clear": "Bersihkan",

@@ -191,7 +191,7 @@ describe("ListBoxComponent behavior", () => {
         harness["firstSelectedKeys"].set([1]);
         await settle(fixture);
 
-        clickToolbarButton(hostElement, "Transfer To");
+        clickToolbarButton(hostElement, "Transfer to the other list");
         await settle(fixture);
 
         expect(harness.actionEvents.length).toBe(1);
@@ -208,7 +208,7 @@ describe("ListBoxComponent behavior", () => {
         const first = harness["first"]();
         first.actionClick.subscribe(event => event.preventDefault());
 
-        clickToolbarButton(hostElement, "Transfer To");
+        clickToolbarButton(hostElement, "Transfer to the other list");
         await settle(fixture);
 
         expect(first.selectedItems().any()).toBe(true);
@@ -236,7 +236,7 @@ describe("ListBoxComponent behavior", () => {
         harness["toolbar"].set(false);
         await settle(fixture);
 
-        expect(hostElement.querySelector("button[aria-label='Clear Selection']")).toBeNull();
+        expect(firstListBoxHost().querySelector("[role='toolbar']")).toBeNull();
     });
 
     it("renders no toolbar buttons when actions is an empty array", async () => {
@@ -290,10 +290,10 @@ describe("ListBoxComponent behavior", () => {
         expect(labels).toEqual([
             "Move Up",
             "Move Down",
-            "Transfer From",
-            "Transfer To",
-            "Transfer All From",
-            "Transfer All To",
+            "Transfer from the other list",
+            "Transfer to the other list",
+            "Transfer all from the other list",
+            "Transfer all to the other list",
             "Clear Selection",
             "Remove"
         ]);
@@ -302,10 +302,10 @@ describe("ListBoxComponent behavior", () => {
         expect(titles).toEqual([
             "Move Up",
             "Move Down",
-            "Transfer From",
-            "Transfer To",
-            "Transfer All From",
-            "Transfer All To",
+            "Transfer from the other list",
+            "Transfer to the other list",
+            "Transfer all from the other list",
+            "Transfer all to the other list",
             "Clear Selection",
             "Remove"
         ]);
@@ -348,10 +348,10 @@ describe("ListBoxComponent behavior", () => {
 
     it("includes rtl:rotate-180 class on directional transfer buttons", async () => {
         const firstHost = hostElement.querySelectorAll("mona-list-box")[0] as HTMLElement;
-        const transferFromBtn = firstHost.querySelector("button[aria-label='Transfer From'] svg");
-        const transferToBtn = firstHost.querySelector("button[aria-label='Transfer To'] svg");
-        const transferAllFromBtn = firstHost.querySelector("button[aria-label='Transfer All From'] svg");
-        const transferAllToBtn = firstHost.querySelector("button[aria-label='Transfer All To'] svg");
+        const transferFromBtn = firstHost.querySelector("button[aria-label='Transfer from the other list'] svg");
+        const transferToBtn = firstHost.querySelector("button[aria-label='Transfer to the other list'] svg");
+        const transferAllFromBtn = firstHost.querySelector("button[aria-label='Transfer all from the other list'] svg");
+        const transferAllToBtn = firstHost.querySelector("button[aria-label='Transfer all to the other list'] svg");
 
         expect(transferFromBtn?.classList.contains("rtl:rotate-180")).toBe(true);
         expect(transferToBtn?.classList.contains("rtl:rotate-180")).toBe(true);

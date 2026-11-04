@@ -50,12 +50,8 @@
                 </ng-container>
             </ul>
         </cdk-virtual-scroll-viewport>
-    } @else if (noDataTemplate()) {
-        <ng-container [ngTemplateOutlet]="noDataTemplate()"></ng-container>
     } @else {
-        <mona-placeholder
-            [text]="messages().noData"
-            class="w-full h-full flex items-center justify-center"></mona-placeholder>
+        <ng-container [ngTemplateOutlet]="emptyListTemplate"></ng-container>
     }
 } @else {
     @if (listService.viewItems().length !== 0) {
@@ -113,17 +109,40 @@
                 }
             }
         </ul>
-    } @else if (noDataTemplate()) {
-        <ng-container [ngTemplateOutlet]="noDataTemplate()"></ng-container>
     } @else {
-        <mona-placeholder
-            [text]="messages().noData"
-            class="w-full h-full flex items-center justify-center"></mona-placeholder>
+        <ng-container [ngTemplateOutlet]="emptyListTemplate"></ng-container>
     }
 }
 @if (footerTemplate()) {
     <ng-container [ngTemplateOutlet]="footerTemplate()"></ng-container>
 }
+
+<!-- An empty list keeps its named list element, so it stays in the accessibility tree, described by "No data". -->
+<ng-template #emptyListTemplate>
+    <!-- The empty list element lies over the "No data" content, so that content keeps its place and the ring frames it. -->
+    <div class="relative w-full h-full">
+        @if (noDataTemplate()) {
+            <div [id]="noDataId" class="contents">
+                <ng-container [ngTemplateOutlet]="noDataTemplate()"></ng-container>
+            </div>
+        } @else {
+            <mona-placeholder
+                [id]="noDataId"
+                [text]="messages().noData"
+                class="w-full h-full flex items-center justify-center"></mona-placeholder>
+        }
+        <ul
+            [class]="emptyListClasses()"
+            [style]="listStyle()"
+            [tabIndex]="0"
+            [id]="effectiveListId()"
+            [attr.role]="listService.role()"
+            [attr.aria-label]="ariaLabel() || null"
+            [attr.aria-labelledby]="ariaLabelledBy() || null"
+            [attr.aria-busy]="busy() || null"
+            [attr.aria-describedby]="noDataId"></ul>
+    </div>
+</ng-template>
 
 <ng-template #listItemTemplate let-item>
     <li

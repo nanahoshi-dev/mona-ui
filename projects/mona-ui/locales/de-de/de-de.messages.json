@@ -263,13 +263,23 @@
     },
     "listBox": {
         "clearSelection": "Auswahl aufheben",
+        "itemsMoved": "An Position {position} von {total} verschoben",
+        "itemsRemoved": "{count, plural, =1 {# Element entfernt} other {# Elemente entfernt}}",
+        "itemsTransferred": "{count, plural, =1 {# Element in {list} übertragen} other {# Elemente in {list} übertragen}}",
+        "itemsTransferredToOtherList": "{count, plural, =1 {# Element in die andere Liste übertragen} other {# Elemente in die andere Liste übertragen}}",
         "moveDown": "Nach unten verschieben",
         "moveUp": "Nach oben verschieben",
         "remove": "Entfernen",
+        "selectionCleared": "Auswahl aufgehoben",
+        "toolbarLabel": "Aktionen für {list}",
         "transferAllFrom": "Alle aus der anderen Liste übertragen",
+        "transferAllFromList": "Alle aus {list} übertragen",
         "transferAllTo": "Alle in die andere Liste übertragen",
+        "transferAllToList": "Alle in {list} übertragen",
         "transferFrom": "Aus der anderen Liste übertragen",
-        "transferTo": "In die andere Liste übertragen"
+        "transferFromList": "Aus {list} übertragen",
+        "transferTo": "In die andere Liste übertragen",
+        "transferToList": "In {list} übertragen"
     },
     "multiSelect": {
         "clear": "Leeren",

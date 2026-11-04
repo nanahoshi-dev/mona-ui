@@ -280,13 +280,24 @@ export const KO_KR_MESSAGES = {
     },
     listBox: {
         clearSelection: "선택 해제",
+        itemsMoved: (position: number, total: number) =>
+            `${localizeNumber(total)}개 중 ${localizeNumber(position)}번째 위치로 이동됨`,
+        itemsRemoved: (count: number) => `${localizeNumber(count)}개 항목 제거됨`,
+        itemsTransferred: (count: number, list: string) => `${localizeNumber(count)}개 항목을 ${list}(으)로 이동함`,
+        itemsTransferredToOtherList: (count: number) => `${localizeNumber(count)}개 항목을 다른 목록으로 이동함`,
         moveDown: "아래로 이동",
         moveUp: "위로 이동",
         remove: "제거",
+        selectionCleared: "선택 해제됨",
+        toolbarLabel: (list: string) => `${list} 작업`,
         transferAllFrom: "다른 목록에서 모두 가져오기",
+        transferAllFromList: (list: string) => `${list}에서 모두 가져오기`,
         transferAllTo: "모두 다른 목록으로 이동",
+        transferAllToList: (list: string) => `모두 ${list}(으)로 이동`,
         transferFrom: "다른 목록에서 가져오기",
-        transferTo: "다른 목록으로 이동"
+        transferFromList: (list: string) => `${list}에서 가져오기`,
+        transferTo: "다른 목록으로 이동",
+        transferToList: (list: string) => `${list}(으)로 이동`
     },
     multiSelect: {
         clear: "지우기",

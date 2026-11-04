@@ -280,13 +280,24 @@ export const ID_ID_MESSAGES = {
     },
     listBox: {
         clearSelection: "Hapus semua pilihan",
+        itemsMoved: (position: number, total: number) =>
+            `Dipindahkan ke posisi ${localizeNumber(position)} dari ${localizeNumber(total)}`,
+        itemsRemoved: (count: number) => `${localizeNumber(count)} item dihapus`,
+        itemsTransferred: (count: number, list: string) => `${localizeNumber(count)} item dipindahkan ke ${list}`,
+        itemsTransferredToOtherList: (count: number) => `${localizeNumber(count)} item dipindahkan ke daftar lain`,
         moveDown: "Pindahkan ke bawah",
         moveUp: "Pindahkan ke atas",
         remove: "Hapus",
+        selectionCleared: "Pilihan dihapus",
+        toolbarLabel: (list: string) => `Tindakan ${list}`,
         transferAllFrom: "Pindahkan semua dari daftar lain",
+        transferAllFromList: (list: string) => `Pindahkan semua dari ${list}`,
         transferAllTo: "Pindahkan semua ke daftar lain",
+        transferAllToList: (list: string) => `Pindahkan semua ke ${list}`,
         transferFrom: "Pindahkan dari daftar lain",
-        transferTo: "Pindahkan ke daftar lain"
+        transferFromList: (list: string) => `Pindahkan dari ${list}`,
+        transferTo: "Pindahkan ke daftar lain",
+        transferToList: (list: string) => `Pindahkan ke ${list}`
     },
     multiSelect: {
         clear: "Bersihkan",

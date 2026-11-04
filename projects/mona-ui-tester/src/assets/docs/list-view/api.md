@@ -168,13 +168,13 @@ Keyboard navigation is on by default; `monaListViewNavigable` changes its mode a
 | `PageDown`                                      | Scroll the list forward by roughly one viewport.                                                            |
 | `PageUp`                                        | Scroll the list back by roughly one viewport.                                                               |
 | `Enter`                                         | Select the highlighted or currently selected item, and emit `itemActivate`.                                 |
-| Any letter, digit, space, hyphen, or underscore | Typeahead: jumps to the next item whose text starts with the typed characters (resets after a short pause). |
+| Any letter, digit, space, hyphen, or underscore | Typeahead: jumps to the next item whose text starts with the typed characters (resets after a short pause). In multiple selection it moves focus only. |
 
-Disabled items (`disabledBy`) are skipped. Keys pressed in controls inside header, footer or item templates are left to those controls: an input in a header template takes typing and arrows, and Enter presses a button in an item.
+Disabled items (`disabledBy`) are skipped, and can't be selected by click, Enter or typeahead. Arrow keys with Alt are left to the page (the list box uses them to move items). Keys pressed in controls inside header, footer or item templates are left to those controls: an input in a header template takes typing and arrows, and Enter presses a button in an item.
 
 ### Focus
 
-The list is a single Tab stop. Tabbing in focuses the item last moved to, else the last selected item shown, else the first enabled item; a selection on another page or scrolled out of a virtual list doesn't take the Tab stop away. Tab/Shift+Tab then leave the list. When the focused item is removed from `items`, focus moves to the item now at its position (or the last one). The focused item has a solid 2px ring.
+The list is a single Tab stop. Tabbing in focuses the item last moved to, else the last selected item shown, else the first enabled item; a selection on another page or scrolled out of a virtual list doesn't take the Tab stop away. Tab/Shift+Tab then leave the list. When the focused item is removed from `items`, focus moves to the item now at its position (or the last one). An empty list keeps its named list element as the Tab stop, described by the "No data" text, so it stays in the accessibility tree. The focused item has a solid 2px ring.
 
 ### ARIA
 
@@ -182,7 +182,8 @@ A list view you can select from (`monaListViewSelectable`) is a `listbox` of `op
 
 | Attribute                        | Where                                     | Value                                                                  |
 |----------------------------------|-------------------------------------------|------------------------------------------------------------------------|
-| `role`                           | The inner list element                    | `"listbox"` when selectable, else `"list"`                             |
+| `role`                           | The inner list element (also when empty)  | `"listbox"` when selectable, else `"list"`                             |
+| `aria-describedby`               | The inner list element, when empty        | The "No data" text, or the no-data template                            |
 | `role`                           | Each item                                 | `"option"` when selectable, else `"listitem"`                          |
 | `aria-label` / `aria-labelledby` | The inner list element                    | From the `aria-label` / `aria-labelledby` inputs (not left on the host) |
 | `aria-multiselectable`           | The listbox, in multiple selection        | `true`                                                                 |

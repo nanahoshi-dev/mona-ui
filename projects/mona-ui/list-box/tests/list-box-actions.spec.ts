@@ -112,22 +112,28 @@ describe("list box actions", () => {
     });
 
     describe("transfers", () => {
-        it("moves the selection to the connected list box and reports the cleared selection", async () => {
+        it("moves the selection to the connected list box, where it stays selected", async () => {
             await select("Available", "Bread");
             host.keyEvents.length = 0;
             host.selectionEvents.length = 0;
 
-            await press("Transfer To");
+            await press("Transfer to Chosen");
 
             expect(host.actions).toEqual([["first", "transferTo", ["Bread"]]]);
             expect(names("Chosen")).toEqual(["Xigua", "Bread"]);
-            expect(host.keyEvents).toEqual([["first", []]]);
-            expect(host.selectionEvents).toEqual([["first", { deselectedItems: [FOODS[1]], selectedItems: [] }]]);
+            expect(host.keyEvents).toEqual([
+                ["first", []],
+                ["second", [2]]
+            ]);
+            expect(host.selectionEvents).toEqual([
+                ["first", { deselectedItems: [FOODS[1]], selectedItems: [] }],
+                ["second", { deselectedItems: [], selectedItems: [FOODS[1]] }]
+            ]);
         });
 
         it("transfers every item of this list box for Transfer All To, wherever the selection is", async () => {
             await select("Chosen", "Xigua");
-            await press("Transfer All To");
+            await press("Transfer all to Chosen");
 
             expect(host.actions).toEqual([["first", "transferAllTo", ["Apple", "Bread", "Cheese", "Dates"]]]);
             expect(names("Available")).toEqual([]);
@@ -136,7 +142,7 @@ describe("list box actions", () => {
 
         it("transfers every item of the connected list box for Transfer All From, on that list box", async () => {
             await select("Available", "Apple");
-            await press("Transfer All From");
+            await press("Transfer all from Chosen");
 
             expect(host.actions).toEqual([["second", "transferAllFrom", ["Xigua"]]]);
             expect(names("Chosen")).toEqual([]);
@@ -144,7 +150,7 @@ describe("list box actions", () => {
 
         it("transfers the connected list box's selection for Transfer From", async () => {
             await select("Chosen", "Xigua");
-            await press("Transfer From");
+            await press("Transfer from Chosen");
 
             expect(host.actions).toEqual([["second", "transferFrom", ["Xigua"]]]);
             expect(names("Available")).toContain("Xigua");

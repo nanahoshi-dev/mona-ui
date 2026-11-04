@@ -281,13 +281,24 @@ export const TR_TR_MESSAGES = {
     },
     listBox: {
         clearSelection: "Tüm seçimleri kaldır",
+        itemsMoved: (position: number, total: number) =>
+            `${localizeNumber(total)} içinde ${localizeNumber(position)}. konuma taşındı`,
+        itemsRemoved: (count: number) => `${localizeNumber(count)} öğe kaldırıldı`,
+        itemsTransferred: (count: number, list: string) => `${localizeNumber(count)} öğe ${list} listesine taşındı`,
+        itemsTransferredToOtherList: (count: number) => `${localizeNumber(count)} öğe diğer listeye taşındı`,
         moveDown: "Aşağı taşı",
         moveUp: "Yukarı taşı",
         remove: "Kaldır",
+        selectionCleared: "Seçim kaldırıldı",
+        toolbarLabel: (list: string) => `${list} işlemleri`,
         transferAllFrom: "Tümünü diğer listeden taşı",
+        transferAllFromList: (list: string) => `Tümünü ${list} listesinden taşı`,
         transferAllTo: "Tümünü diğer listeye taşı",
+        transferAllToList: (list: string) => `Tümünü ${list} listesine taşı`,
         transferFrom: "Diğer listeden taşı",
-        transferTo: "Diğer listeye taşı"
+        transferFromList: (list: string) => `${list} listesinden taşı`,
+        transferTo: "Diğer listeye taşı",
+        transferToList: (list: string) => `${list} listesine taşı`
     },
     multiSelect: {
         clear: "Temizle",

@@ -1295,6 +1295,19 @@
       }
     ]
   },
+  "ListBoxItemTemplateDirective": {
+    "name": "ListBoxItemTemplateDirective",
+    "selector": "\"ng-template[monaListBoxItemTemplate]\"",
+    "inputs": [
+      {
+        "description": "The list box's items, used only to type the template's item. Optional.",
+        "kind": "input",
+        "name": "monaListBoxItemTemplateOf",
+        "type": "Iterable<T> | null | undefined",
+        "defaultValue": "null"
+      }
+    ]
+  },
   "ListViewGroupableDirective": {
     "name": "ListViewGroupableDirective",
     "selector": "\"mona-list-view[monaListViewGroupable]\"",
@@ -10218,7 +10231,7 @@
         "type": "ListBoxActionEvent<T>"
       },
       {
-        "description": "Accessible name for the list box's `listbox` element. Describe what the list represents,\nwhich matters in particular when connecting two list boxes.",
+        "description": "Accessible name for the list box's `listbox` element. Describe what the list represents,\nwhich matters in particular when connecting two list boxes: the toolbar's name and the transfer buttons'\nlabels are built from it.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
@@ -10230,6 +10243,13 @@
         "name": "connectedList",
         "type": "ListBoxComponent<T, K> | null",
         "defaultValue": "null"
+      },
+      {
+        "description": "Property name or predicate that marks items as disabled. Disabled items can't be selected, and no\naction (including the \"All\" transfers) carries them.",
+        "kind": "input",
+        "name": "disabledBy",
+        "type": "string | Predicate<T> | null | undefined",
+        "defaultValue": "\"\""
       },
       {
         "description": "Sets the height of the component.",
@@ -10267,13 +10287,13 @@
         "defaultValue": "[]"
       },
       {
-        "description": "Emitted with the updated keys whenever the user changes the selection, including when an\r\naction (transfer, clear, remove) or a selection in the connected list box clears it.",
+        "description": "Emitted with the updated keys whenever the user changes the selection, including when an\naction (transfer, clear, remove) or a selection in the connected list box changes it.",
         "kind": "output",
         "name": "selectedKeysChange",
         "type": "K[]"
       },
       {
-        "description": "Emitted with the selected and deselected items whenever the user changes the selection, including\r\nwhen an action (transfer, clear, remove) or a selection in the connected list box clears it.",
+        "description": "Emitted with the selected and deselected items whenever the user changes the selection, including\nwhen an action (transfer, clear, remove) or a selection in the connected list box changes it.",
         "kind": "output",
         "name": "selectionChange",
         "type": "ListBoxSelectionEvent<T>"
@@ -10286,7 +10306,7 @@
         "defaultValue": "single"
       },
       {
-        "description": "Allows an already-selected item to be deselected by clicking it again while `selectionMode`\nis `\"single\"`. Has no effect when `selectionMode` is `\"multiple\"`.",
+        "description": "Allows an already-selected item to be deselected by clicking it again while `selectionMode`\nis `\"single\"`. Has no effect when `selectionMode` is `\"multiple\"`. Accepts the bare attribute form.",
         "kind": "input",
         "name": "singleSelectionToggleable",
         "type": "boolean",
@@ -10307,11 +10327,18 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Shows the action toolbar. Pass `false` to hide it entirely, or an options object to customize\nwhich actions are shown and where the toolbar is positioned.",
+        "description": "Shows the action toolbar. Pass `false` to hide it entirely, or an options object to customize\nwhich actions are shown and where the toolbar is positioned. The transfer actions appear only with a\n`connectedList`; the move, clear and remove actions work on a list box of its own. Accepts the bare attribute\nform.",
         "kind": "input",
         "name": "toolbar",
         "type": "boolean | Partial<ToolbarOptions>",
         "defaultValue": "true"
+      },
+      {
+        "description": "Accessible name for the toolbar. By default it is built from the list box's `aria-label`\n(\"Available foods actions\").",
+        "kind": "input",
+        "name": "toolbarAriaLabel",
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Sets the width of the component.",

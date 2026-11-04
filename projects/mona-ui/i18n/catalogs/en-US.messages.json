@@ -263,13 +263,23 @@
     },
     "listBox": {
         "clearSelection": "Clear Selection",
+        "itemsMoved": "Moved to position {position} of {total}",
+        "itemsRemoved": "{count, plural, =1 {# item removed} other {# items removed}}",
+        "itemsTransferred": "{count, plural, =1 {# item moved to {list}} other {# items moved to {list}}}",
+        "itemsTransferredToOtherList": "{count, plural, =1 {# item moved to the other list} other {# items moved to the other list}}",
         "moveDown": "Move Down",
         "moveUp": "Move Up",
         "remove": "Remove",
-        "transferAllFrom": "Transfer All From",
-        "transferAllTo": "Transfer All To",
-        "transferFrom": "Transfer From",
-        "transferTo": "Transfer To"
+        "selectionCleared": "Selection cleared",
+        "toolbarLabel": "{list} actions",
+        "transferAllFrom": "Transfer all from the other list",
+        "transferAllFromList": "Transfer all from {list}",
+        "transferAllTo": "Transfer all to the other list",
+        "transferAllToList": "Transfer all to {list}",
+        "transferFrom": "Transfer from the other list",
+        "transferFromList": "Transfer from {list}",
+        "transferTo": "Transfer to the other list",
+        "transferToList": "Transfer to {list}"
     },
     "multiSelect": {
         "clear": "Clear",

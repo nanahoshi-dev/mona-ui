@@ -285,13 +285,31 @@ export const IT_IT_MESSAGES = {
     },
     listBox: {
         clearSelection: "Deseleziona tutto",
+        itemsMoved: (position: number, total: number) =>
+            `Spostato in posizione ${localizeNumber(position)} di ${localizeNumber(total)}`,
+        itemsRemoved: (count: number) =>
+            count === 1 ? `${localizeNumber(count)} elemento rimosso` : `${localizeNumber(count)} elementi rimossi`,
+        itemsTransferred: (count: number, list: string) =>
+            count === 1
+                ? `${localizeNumber(count)} elemento spostato in ${list}`
+                : `${localizeNumber(count)} elementi spostati in ${list}`,
+        itemsTransferredToOtherList: (count: number) =>
+            count === 1
+                ? `${localizeNumber(count)} elemento spostato nell'altro elenco`
+                : `${localizeNumber(count)} elementi spostati nell'altro elenco`,
         moveDown: "Sposta giù",
         moveUp: "Sposta su",
         remove: "Rimuovi",
+        selectionCleared: "Selezione annullata",
+        toolbarLabel: (list: string) => `Azioni per ${list}`,
         transferAllFrom: "Sposta tutto dall'altro elenco",
+        transferAllFromList: (list: string) => `Sposta tutto da ${list}`,
         transferAllTo: "Sposta tutto nell'altro elenco",
+        transferAllToList: (list: string) => `Sposta tutto in ${list}`,
         transferFrom: "Sposta dall'altro elenco",
-        transferTo: "Sposta nell'altro elenco"
+        transferFromList: (list: string) => `Sposta da ${list}`,
+        transferTo: "Sposta nell'altro elenco",
+        transferToList: (list: string) => `Sposta in ${list}`
     },
     multiSelect: {
         clear: "Cancella",

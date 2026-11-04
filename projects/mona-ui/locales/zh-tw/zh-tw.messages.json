@@ -263,13 +263,23 @@
     },
     "listBox": {
         "clearSelection": "清除選取",
+        "itemsMoved": "已移至第 {position} 位，共 {total} 位",
+        "itemsRemoved": "已移除 {count} 項",
+        "itemsTransferred": "已將 {count} 項移至{list}",
+        "itemsTransferredToOtherList": "已將 {count} 項移至另一清單",
         "moveDown": "向下移動",
         "moveUp": "向上移動",
         "remove": "移除",
+        "selectionCleared": "已清除選取",
+        "toolbarLabel": "{list}操作",
         "transferAllFrom": "從另一清單全部移入",
+        "transferAllFromList": "從{list}全部移入",
         "transferAllTo": "全部移至另一清單",
+        "transferAllToList": "全部移至{list}",
         "transferFrom": "從另一清單移入",
-        "transferTo": "移至另一清單"
+        "transferFromList": "從{list}移入",
+        "transferTo": "移至另一清單",
+        "transferToList": "移至{list}"
     },
     "multiSelect": {
         "clear": "清除",

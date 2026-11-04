@@ -309,13 +309,29 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
     },
     listBox: {
         clearSelection: null,
+        itemsMoved: [
+            { name: "position", type: "number" },
+            { name: "total", type: "number" }
+        ],
+        itemsRemoved: [{ name: "count", type: "number" }],
+        itemsTransferred: [
+            { name: "count", type: "number" },
+            { name: "list", type: "string" }
+        ],
+        itemsTransferredToOtherList: [{ name: "count", type: "number" }],
         moveDown: null,
         moveUp: null,
         remove: null,
+        selectionCleared: null,
+        toolbarLabel: [{ name: "list", type: "string" }],
         transferAllFrom: null,
+        transferAllFromList: [{ name: "list", type: "string" }],
         transferAllTo: null,
+        transferAllToList: [{ name: "list", type: "string" }],
         transferFrom: null,
-        transferTo: null
+        transferFromList: [{ name: "list", type: "string" }],
+        transferTo: null,
+        transferToList: [{ name: "list", type: "string" }]
     },
     multiSelect: {
         clear: null,

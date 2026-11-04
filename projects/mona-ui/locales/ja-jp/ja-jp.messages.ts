@@ -280,13 +280,24 @@ export const JA_JP_MESSAGES = {
     },
     listBox: {
         clearSelection: "選択をクリア",
+        itemsMoved: (position: number, total: number) =>
+            `${localizeNumber(total)}件中${localizeNumber(position)}番目に移動しました`,
+        itemsRemoved: (count: number) => `${localizeNumber(count)}件を削除しました`,
+        itemsTransferred: (count: number, list: string) => `${localizeNumber(count)}件を${list}へ移動しました`,
+        itemsTransferredToOtherList: (count: number) => `${localizeNumber(count)}件をもう一方のリストへ移動しました`,
         moveDown: "下へ移動",
         moveUp: "上へ移動",
         remove: "削除",
+        selectionCleared: "選択をクリアしました",
+        toolbarLabel: (list: string) => `${list}の操作`,
         transferAllFrom: "すべてをもう一方のリストから移動",
+        transferAllFromList: (list: string) => `すべてを${list}から移動`,
         transferAllTo: "すべてをもう一方のリストへ移動",
+        transferAllToList: (list: string) => `すべてを${list}へ移動`,
         transferFrom: "もう一方のリストから移動",
-        transferTo: "もう一方のリストへ移動"
+        transferFromList: (list: string) => `${list}から移動`,
+        transferTo: "もう一方のリストへ移動",
+        transferToList: (list: string) => `${list}へ移動`
     },
     multiSelect: {
         clear: "クリア",

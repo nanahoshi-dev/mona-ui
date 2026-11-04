@@ -279,13 +279,24 @@ export const ZH_CN_MESSAGES = {
     },
     listBox: {
         clearSelection: "清除选择",
+        itemsMoved: (position: number, total: number) =>
+            `已移至第 ${localizeNumber(position)} 位，共 ${localizeNumber(total)} 位`,
+        itemsRemoved: (count: number) => `已移除 ${localizeNumber(count)} 项`,
+        itemsTransferred: (count: number, list: string) => `已将 ${localizeNumber(count)} 项移至${list}`,
+        itemsTransferredToOtherList: (count: number) => `已将 ${localizeNumber(count)} 项移至另一列表`,
         moveDown: "向下移动",
         moveUp: "向上移动",
         remove: "移除",
+        selectionCleared: "已清除选择",
+        toolbarLabel: (list: string) => `${list}操作`,
         transferAllFrom: "从另一列表全部移入",
+        transferAllFromList: (list: string) => `从${list}全部移入`,
         transferAllTo: "全部移至另一列表",
+        transferAllToList: (list: string) => `全部移至${list}`,
         transferFrom: "从另一列表移入",
-        transferTo: "移至另一列表"
+        transferFromList: (list: string) => `从${list}移入`,
+        transferTo: "移至另一列表",
+        transferToList: (list: string) => `移至${list}`
     },
     multiSelect: {
         clear: "清除",

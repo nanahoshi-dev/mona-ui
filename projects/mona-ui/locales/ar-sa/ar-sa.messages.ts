@@ -288,13 +288,25 @@ export const AR_SA_MESSAGES = {
     },
     listBox: {
         clearSelection: "إلغاء التحديد",
+        itemsMoved: (position: number, total: number) =>
+            `تم النقل إلى الموضع ${localizeNumber(position)} من ${localizeNumber(total)}`,
+        itemsRemoved: (count: number) => `عدد العناصر التي تمت إزالتها: ${localizeNumber(count)}`,
+        itemsTransferred: (count: number, list: string) => `عدد العناصر المنقولة إلى ${list}: ${localizeNumber(count)}`,
+        itemsTransferredToOtherList: (count: number) =>
+            `عدد العناصر المنقولة إلى القائمة الأخرى: ${localizeNumber(count)}`,
         moveDown: "تحريك لأسفل",
         moveUp: "تحريك لأعلى",
         remove: "إزالة",
+        selectionCleared: "تم إلغاء التحديد",
+        toolbarLabel: (list: string) => `إجراءات ${list}`,
         transferAllFrom: "نقل الكل من القائمة الأخرى",
+        transferAllFromList: (list: string) => `نقل الكل من ${list}`,
         transferAllTo: "نقل الكل إلى القائمة الأخرى",
+        transferAllToList: (list: string) => `نقل الكل إلى ${list}`,
         transferFrom: "نقل من القائمة الأخرى",
-        transferTo: "نقل إلى القائمة الأخرى"
+        transferFromList: (list: string) => `نقل من ${list}`,
+        transferTo: "نقل إلى القائمة الأخرى",
+        transferToList: (list: string) => `نقل إلى ${list}`
     },
     multiSelect: {
         clear: "مسح",

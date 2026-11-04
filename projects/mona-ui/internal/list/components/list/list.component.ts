@@ -95,6 +95,13 @@ export class ListComponent<TData> implements OnInit {
      * The `listId` input, or a generated id so the listbox can always be referenced by `aria-controls`.
      */
     protected readonly effectiveListId = computed(() => this.listId() || this.#generatedListId);
+    /** The empty list element covers the "No data" content and shows the focus ring when it has focus. */
+    protected readonly emptyListClasses = computed(() =>
+        twMerge(
+            this.innerListClasses(),
+            "absolute inset-0 focus-visible:inset-ring-2 focus-visible:inset-ring-focus-indicator"
+        )
+    );
     protected readonly footerTemplate = contentChild(ListFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderClasses = computed(() => {
         const listItemClass = this.listItemClass();
@@ -105,13 +112,14 @@ export class ListComponent<TData> implements OnInit {
     protected readonly groupHeaderTemplate = contentChild(ListGroupHeaderTemplateDirective, { read: TemplateRef });
     protected readonly headerTemplate = contentChild(ListHeaderTemplateDirective, { read: TemplateRef });
     /**
-     * The host takes the Tab stop when no option can: an empty list, or a virtual list whose focusable option is
-     * scrolled out of the drawn rows. Focusing the host then moves focus to that option.
+     * The host takes the Tab stop when no option can: every option is disabled, or a virtual list's focusable option
+     * is scrolled out of the drawn rows. Focusing the host then moves focus to that option.
      */
     protected readonly hostTabIndex = computed(() => {
         const item = this.listService.focusableItem();
         if (!item) {
-            return 0;
+            // An empty list element is its own Tab stop.
+            return this.listService.viewItems().isEmpty() ? -1 : 0;
         }
         if (!this.listService.virtualScrollOptions().enabled) {
             return -1;
@@ -168,6 +176,8 @@ export class ListComponent<TData> implements OnInit {
         return width;
     });
     protected readonly messages = this.#i18n.componentMessages("list", LIST_DEFAULT_MESSAGES);
+    /** Id of the "No data" content, which describes an empty list. */
+    protected readonly noDataId = `${this.#generatedListId}-no-data`;
     protected readonly noDataTemplate = contentChild(ListNoDataTemplateDirective, { read: TemplateRef });
     /**
      * The shown items split at group headers: a section without a header holds ungrouped items.
@@ -314,13 +324,24 @@ export class ListComponent<TData> implements OnInit {
         const nextItem = this.listService.cycleThroughMatchedItems(buffer);
         if (nextItem) {
             const navigationMode = this.listService.navigableOptions().mode;
+            const selectableOptions = this.listService.selectableOptions();
             this.listService.highlightedItem.set(nextItem);
-            if (navigationMode === "select" && this.listService.selectableOptions().enabled) {
+            // In multiple mode typeahead only moves focus, as the arrow keys do: selecting would toggle the match.
+            if (navigationMode === "select" && selectableOptions.enabled && selectableOptions.mode !== "multiple") {
                 this.selectItem(nextItem);
                 this.itemSelect.emit({ item: nextItem, source: { via: "keyboard", key: buffer } });
             }
             this.scrollToItem(nextItem, true, "instant");
         }
+    }
+
+    /** Focuses the list element of an empty list, which names the list and is described by "No data". */
+    private focusEmptyList(): void {
+        const id = this.effectiveListId();
+        const list = Array.from(this.#hostElementRef.nativeElement.querySelectorAll("ul")).find(
+            element => element.id === id
+        );
+        list?.focus({ preventScroll: true });
     }
 
     private focusToItem(item: ListItem<TData>): void {
@@ -527,7 +548,8 @@ export class ListComponent<TData> implements OnInit {
         const selectedItems = this.listService.selectedListItems();
         const options = this.listService.selectableOptions();
 
-        if (!options.enabled) {
+        // A disabled item can't be selected, whether it is clicked, typed to or activated with Enter.
+        if (!options.enabled || this.listService.isDisabled(item)) {
             return;
         }
 
@@ -599,7 +621,8 @@ export class ListComponent<TData> implements OnInit {
                     this.#typeaheadKey$.next(event.key);
                     return;
                 }
-                if (getListNavigationDirection(event.key) == null) {
+                // Alt+Arrow is left to the page and to components built on the list (the list box moves items with it).
+                if (getListNavigationDirection(event.key) == null || event.altKey) {
                     return;
                 }
                 event.preventDefault();
@@ -624,6 +647,10 @@ export class ListComponent<TData> implements OnInit {
             .subscribe(event => {
                 const previous = event.relatedTarget as HTMLElement | null;
                 if (previous && this.#hostElementRef.nativeElement.contains(previous)) {
+                    return;
+                }
+                if (this.listService.viewItems().isEmpty()) {
+                    this.focusEmptyList();
                     return;
                 }
                 if (this.focusOnMount()) {

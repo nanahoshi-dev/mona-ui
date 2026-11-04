@@ -75,7 +75,7 @@ class EmptyListTestComponent {
 }
 
 describe("ListComponent focus handling with no focusable items", () => {
-    it("should fall back to making the list host itself the single Tab stop", async () => {
+    it("makes the empty list element, described by its No data text, the single Tab stop", async () => {
         await TestBed.configureTestingModule({
             imports: [EmptyListTestComponent]
         }).compileComponents();
@@ -83,7 +83,26 @@ describe("ListComponent focus handling with no focusable items", () => {
         fixture.detectChanges();
 
         const hostElement: HTMLElement = fixture.nativeElement.querySelector("mona-list");
-        expect(hostElement.getAttribute("tabindex")).toBe("0");
+        const list = hostElement.querySelector("ul") as HTMLElement;
+        expect(hostElement.getAttribute("tabindex")).toBe("-1");
+        expect(list.getAttribute("tabindex")).toBe("0");
+        expect(list.getAttribute("role")).toBe("listbox");
+        const noData = hostElement.querySelector(`#${list.getAttribute("aria-describedby")}`);
+        expect(noData?.textContent?.trim()).toBe("No data");
+    });
+
+    it("moves focus from the host to the empty list element", async () => {
+        await TestBed.configureTestingModule({
+            imports: [EmptyListTestComponent]
+        }).compileComponents();
+        const fixture = TestBed.createComponent(EmptyListTestComponent);
+        document.body.appendChild(fixture.nativeElement as HTMLElement);
+        fixture.detectChanges();
+
+        const hostElement: HTMLElement = fixture.nativeElement.querySelector("mona-list");
+        hostElement.focus();
+        expect(document.activeElement).toBe(hostElement.querySelector("ul"));
+        (fixture.nativeElement as HTMLElement).remove();
     });
 });
 

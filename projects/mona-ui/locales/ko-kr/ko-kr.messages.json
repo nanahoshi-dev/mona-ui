@@ -263,13 +263,23 @@
     },
     "listBox": {
         "clearSelection": "선택 해제",
+        "itemsMoved": "{total}개 중 {position}번째 위치로 이동됨",
+        "itemsRemoved": "{count}개 항목 제거됨",
+        "itemsTransferred": "{count}개 항목을 {list}(으)로 이동함",
+        "itemsTransferredToOtherList": "{count}개 항목을 다른 목록으로 이동함",
         "moveDown": "아래로 이동",
         "moveUp": "위로 이동",
         "remove": "제거",
+        "selectionCleared": "선택 해제됨",
+        "toolbarLabel": "{list} 작업",
         "transferAllFrom": "다른 목록에서 모두 가져오기",
+        "transferAllFromList": "{list}에서 모두 가져오기",
         "transferAllTo": "모두 다른 목록으로 이동",
+        "transferAllToList": "모두 {list}(으)로 이동",
         "transferFrom": "다른 목록에서 가져오기",
-        "transferTo": "다른 목록으로 이동"
+        "transferFromList": "{list}에서 가져오기",
+        "transferTo": "다른 목록으로 이동",
+        "transferToList": "{list}(으)로 이동"
     },
     "multiSelect": {
         "clear": "지우기",

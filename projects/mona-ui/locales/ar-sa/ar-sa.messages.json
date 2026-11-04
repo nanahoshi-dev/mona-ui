@@ -263,13 +263,23 @@
     },
     "listBox": {
         "clearSelection": "إلغاء التحديد",
+        "itemsMoved": "تم النقل إلى الموضع {position} من {total}",
+        "itemsRemoved": "عدد العناصر التي تمت إزالتها: {count}",
+        "itemsTransferred": "عدد العناصر المنقولة إلى {list}: {count}",
+        "itemsTransferredToOtherList": "عدد العناصر المنقولة إلى القائمة الأخرى: {count}",
         "moveDown": "تحريك لأسفل",
         "moveUp": "تحريك لأعلى",
         "remove": "إزالة",
+        "selectionCleared": "تم إلغاء التحديد",
+        "toolbarLabel": "إجراءات {list}",
         "transferAllFrom": "نقل الكل من القائمة الأخرى",
+        "transferAllFromList": "نقل الكل من {list}",
         "transferAllTo": "نقل الكل إلى القائمة الأخرى",
+        "transferAllToList": "نقل الكل إلى {list}",
         "transferFrom": "نقل من القائمة الأخرى",
-        "transferTo": "نقل إلى القائمة الأخرى"
+        "transferFromList": "نقل من {list}",
+        "transferTo": "نقل إلى القائمة الأخرى",
+        "transferToList": "نقل إلى {list}"
     },
     "multiSelect": {
         "clear": "مسح",

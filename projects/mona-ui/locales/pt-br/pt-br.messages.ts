@@ -285,13 +285,31 @@ export const PT_BR_MESSAGES = {
     },
     listBox: {
         clearSelection: "Limpar seleção",
+        itemsMoved: (position: number, total: number) =>
+            `Movido para a posição ${localizeNumber(position)} de ${localizeNumber(total)}`,
+        itemsRemoved: (count: number) =>
+            count === 1 ? `${localizeNumber(count)} item removido` : `${localizeNumber(count)} itens removidos`,
+        itemsTransferred: (count: number, list: string) =>
+            count === 1
+                ? `${localizeNumber(count)} item movido para ${list}`
+                : `${localizeNumber(count)} itens movidos para ${list}`,
+        itemsTransferredToOtherList: (count: number) =>
+            count === 1
+                ? `${localizeNumber(count)} item movido para a outra lista`
+                : `${localizeNumber(count)} itens movidos para a outra lista`,
         moveDown: "Mover para baixo",
         moveUp: "Mover para cima",
         remove: "Remover",
+        selectionCleared: "Seleção limpa",
+        toolbarLabel: (list: string) => `Ações de ${list}`,
         transferAllFrom: "Mover todos da outra lista",
+        transferAllFromList: (list: string) => `Mover todos de ${list}`,
         transferAllTo: "Mover todos para a outra lista",
+        transferAllToList: (list: string) => `Mover todos para ${list}`,
         transferFrom: "Mover da outra lista",
-        transferTo: "Mover para a outra lista"
+        transferFromList: (list: string) => `Mover de ${list}`,
+        transferTo: "Mover para a outra lista",
+        transferToList: (list: string) => `Mover para ${list}`
     },
     multiSelect: {
         clear: "Limpar",

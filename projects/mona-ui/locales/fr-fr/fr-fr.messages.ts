@@ -285,13 +285,31 @@ export const FR_FR_MESSAGES = {
     },
     listBox: {
         clearSelection: "Effacer la sélection",
+        itemsMoved: (position: number, total: number) =>
+            `Déplacé en position ${localizeNumber(position)} sur ${localizeNumber(total)}`,
+        itemsRemoved: (count: number) =>
+            count === 1 ? `${localizeNumber(count)} élément retiré` : `${localizeNumber(count)} éléments retirés`,
+        itemsTransferred: (count: number, list: string) =>
+            count === 1
+                ? `${localizeNumber(count)} élément transféré vers ${list}`
+                : `${localizeNumber(count)} éléments transférés vers ${list}`,
+        itemsTransferredToOtherList: (count: number) =>
+            count === 1
+                ? `${localizeNumber(count)} élément transféré vers l’autre liste`
+                : `${localizeNumber(count)} éléments transférés vers l’autre liste`,
         moveDown: "Déplacer vers le bas",
         moveUp: "Déplacer vers le haut",
         remove: "Retirer",
+        selectionCleared: "Sélection effacée",
+        toolbarLabel: (list: string) => `Actions de ${list}`,
         transferAllFrom: "Tout transférer depuis l’autre liste",
+        transferAllFromList: (list: string) => `Tout transférer depuis ${list}`,
         transferAllTo: "Tout transférer vers l’autre liste",
+        transferAllToList: (list: string) => `Tout transférer vers ${list}`,
         transferFrom: "Transférer depuis l’autre liste",
-        transferTo: "Transférer vers l’autre liste"
+        transferFromList: (list: string) => `Transférer depuis ${list}`,
+        transferTo: "Transférer vers l’autre liste",
+        transferToList: (list: string) => `Transférer vers ${list}`
     },
     multiSelect: {
         clear: "Effacer",
