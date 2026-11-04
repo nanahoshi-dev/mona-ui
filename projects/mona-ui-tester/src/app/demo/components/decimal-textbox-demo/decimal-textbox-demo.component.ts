@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { Component, computed, effect, inject, input, model, signal } from "@angular/core";
+import { booleanAttribute, Component, computed, effect, inject, input, model, signal } from "@angular/core";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideHash } from "@lucide/angular";
 import { DecimalTextBoxComponent, NumericTextBoxPrefixTemplateDirective } from "@nanahoshi/mona-ui/numeric-text-box";
@@ -132,16 +132,16 @@ export class DecimalTextboxWrapperComponent implements ComponentInputsAsSignal<D
             : null;
     });
     public readonly decimals = input(0);
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly formatter = input<ReturnType<DecimalTextBoxComponent["formatter"]>>(this.formatterFn());
     public readonly maxValue = input<string | null, string | number | null>(null, { transform: toOptionalString });
     public readonly minValue = input<string | null, string | number | null>(null, { transform: toOptionalString });
-    public readonly nullable = input(false);
-    public readonly readonly = input(false);
-    public readonly required = input(false);
+    public readonly nullable = input(false, { transform: booleanAttribute });
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<DecimalTextBoxComponent["rounded"]>>(`medium`);
     public readonly size = input<ReturnType<DecimalTextBoxComponent["size"]>>("medium");
-    public readonly spinners = input(true);
+    public readonly spinners = input(true, { transform: booleanAttribute });
     public readonly step = input<string, string | number>("1", { transform: String });
     public readonly tabindex = input(0);
     public readonly userClass = input("w-72");

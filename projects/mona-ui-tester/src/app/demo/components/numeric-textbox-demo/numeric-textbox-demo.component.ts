@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { Component, computed, effect, inject, input, model, signal } from "@angular/core";
+import { booleanAttribute, Component, computed, effect, inject, input, model, signal } from "@angular/core";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideHash } from "@lucide/angular";
 import { NumericTextBoxComponent, NumericTextBoxPrefixTemplateDirective } from "@nanahoshi/mona-ui/numeric-text-box";
@@ -129,16 +129,16 @@ export class NumericTextboxWrapperComponent implements ComponentInputsAsSignal<N
         required(schema.amount, { when: () => this.required() });
     });
     public readonly decimals = input(0);
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly formatter = input<ReturnType<NumericTextBoxComponent["formatter"]>>(this.formatterFn());
     public readonly maxValue = input<number | null>(null);
     public readonly minValue = input<number | null>(null);
-    public readonly nullable = input(false);
-    public readonly readonly = input(false);
-    public readonly required = input(false);
+    public readonly nullable = input(false, { transform: booleanAttribute });
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<NumericTextBoxComponent["rounded"]>>(`medium`);
     public readonly size = input<ReturnType<NumericTextBoxComponent["size"]>>("medium");
-    public readonly spinners = input(true);
+    public readonly spinners = input(true, { transform: booleanAttribute });
     public readonly step = input(1);
     public readonly tabindex = input(0);
     public readonly userClass = input("w-40");
