@@ -2,7 +2,8 @@ export interface MonaGridMessages {
     readonly all: string;
     readonly apply: string;
     readonly cancel: string;
-    readonly cancelRowEdit: string;
+    readonly cancelNewRow: string;
+    cancelRowEdit(rowNumber: number): string;
     /** The name of the button that closes a row's detail row. */
     collapseDetail(rowNumber: number): string;
     /** Announced when the keyboard groups the grid by a column. */
@@ -12,13 +13,13 @@ export interface MonaGridMessages {
     readonly columns: string;
     columnsSelected(count: number): string;
     readonly delete: string;
-    readonly deleteRowConfirmation: string;
+    deleteRowConfirmation(rowNumber: number): string;
     readonly deleteRowTitle: string;
     /** The name of the detail-toggle column's header. */
     readonly details: string;
     readonly dragColumnHeaderToGroup: string;
     readonly edit: string;
-    readonly editRow: string;
+    editRow(rowNumber: number): string;
     /** The name of the button that opens a row's detail row. */
     expandDetail(rowNumber: number): string;
     readonly fieldValidationError?: string;
@@ -34,7 +35,7 @@ export interface MonaGridMessages {
     readonly moveRow: string;
     readonly noData: string;
     readonly remove: string;
-    readonly removeRow: string;
+    removeRow(rowNumber: number): string;
     reorderRow(rowNumber: number): string;
     resizeColumn(column: string): string;
     readonly rowReorder: string;
@@ -51,7 +52,8 @@ export interface MonaGridMessages {
     rowReorderMoved(fromRowNumber: number, toPosition: number): string;
     readonly rowValidationError: string;
     readonly save: string;
-    readonly saveRow: string;
+    readonly saveNewRow: string;
+    saveRow(rowNumber: number): string;
     readonly selectAllRows: string;
     selectRow(rowNumber: number): string;
     /** Describes a header's place in a multi-column sort, from 1. */

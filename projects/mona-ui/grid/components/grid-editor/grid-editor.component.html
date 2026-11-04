@@ -1,62 +1,71 @@
-@if (column().editTemplate) {
-    <ng-container
-        [ngTemplateOutlet]="column().editTemplate"
-        [ngTemplateOutletContext]="{ $implicit: editTemplateContext() }"></ng-container>
+@if (formField(); as field) {
+    @if (column().editTemplate) {
+        <ng-container
+            [ngTemplateOutlet]="column().editTemplate"
+            [ngTemplateOutletContext]="{ $implicit: editTemplateContext() }"></ng-container>
+    } @else {
+        <div class="relative flex items-center w-full min-h-8">
+            @switch (column().dataType) {
+                @case ("string") {
+                    <mona-text-box
+                        [class]="editorInputClass()"
+                        [inputAttributes]="{ autocomplete: 'off' }"
+                        [rounded]="'none'"
+                        [formField]="$any(field)"
+                        [aria-label]="editorLabel()"
+                        [aria-describedby]="errorDescribedBy()"
+                        (keydown)="onEditorKeydown($event)"
+                        (inputBlur)="commit.emit('blur')"
+                        [size]="'small'"></mona-text-box>
+                }
+                @case ("number") {
+                    <mona-numeric-text-box
+                        [class]="editorInputClass()"
+                        [rounded]="'none'"
+                        [formField]="$any(field)"
+                        [aria-label]="editorLabel()"
+                        [aria-describedby]="errorDescribedBy()"
+                        (keydown)="onEditorKeydown($event)"
+                        (inputBlur)="commit.emit('blur')"
+                        [size]="'small'"></mona-numeric-text-box>
+                }
+                @case ("boolean") {
+                    <mona-check-box
+                        class="{{ editorInputClass() }} ms-2"
+                        [rounded]="'none'"
+                        [formField]="$any(field)"
+                        [aria-label]="editorLabel()"
+                        [aria-describedby]="errorDescribedBy()"
+                        (click)="onBooleanEditorClick()"
+                        (focusout)="onBooleanEditorFocusOut($event)"
+                        (pointerdown)="onBooleanEditorPointerDown()"
+                        (keydown)="onEditorKeydown($event)"></mona-check-box>
+                }
+                @case ("date") {
+                    <mona-date-picker
+                        [class]="editorInputClass()"
+                        [rounded]="'none'"
+                        [formField]="$any(field)"
+                        [aria-label]="editorLabel()"
+                        [aria-describedby]="errorDescribedBy()"
+                        (keydown)="onEditorKeydown($event)"
+                        (touch)="commit.emit('blur')"
+                        (opened)="onDatePickerOpen()"
+                        (closed)="onDatePickerClose()"
+                        size="small"></mona-date-picker>
+                }
+            }
+            @if (hasFieldError()) {
+                <span class="shrink-0 px-1 text-error" aria-hidden="true" #fieldErrorIcon>
+                    <svg lucideOctagonAlert [size]="12"></svg>
+                </span>
+                <mona-tooltip [target]="fieldErrorIcon">
+                    <span class="p-1">{{ fieldErrorMessage() }}</span>
+                </mona-tooltip>
+                <span class="sr-only" [id]="errorId">{{ fieldErrorMessage() }}</span>
+            }
+        </div>
+    }
 } @else {
-    <div class="relative flex items-center w-full min-h-8">
-        @switch (column().dataType) {
-            @case ("string") {
-                <mona-text-box
-                    [class]="editorInputClass()"
-                    [inputAttributes]="{ autocomplete: 'off' }"
-                    [rounded]="'none'"
-                    [formField]="$any(formField())"
-                    (keydown.enter)="commit.emit()"
-                    (keydown.escape)="onEditCancel()"
-                    (inputBlur)="commit.emit()"
-                    [size]="'small'"></mona-text-box>
-            }
-            @case ("number") {
-                <mona-numeric-text-box
-                    [class]="editorInputClass()"
-                    [rounded]="'none'"
-                    [formField]="$any(formField())"
-                    (keydown.enter)="commit.emit()"
-                    (keydown.escape)="onEditCancel()"
-                    (inputBlur)="commit.emit()"
-                    [size]="'small'"></mona-numeric-text-box>
-            }
-            @case ("boolean") {
-                <mona-check-box
-                    class="{{ editorInputClass() }} ms-2"
-                    [rounded]="'none'"
-                    [formField]="$any(formField())"
-                    (click)="onBooleanEditorClick()"
-                    (focusout)="onBooleanEditorFocusOut($event)"
-                    (pointerdown)="onBooleanEditorPointerDown()"
-                    (keydown.escape)="onEditCancel()"
-                    (keydown.enter)="commit.emit()"></mona-check-box>
-            }
-            @case ("date") {
-                <mona-date-picker
-                    [class]="editorInputClass()"
-                    [rounded]="'none'"
-                    [formField]="$any(formField())"
-                    (keydown.enter)="onDatePickerEnter($event)"
-                    (keydown.escape)="onEditCancel()"
-                    (focusout)="onDatePickerFocusOut($event)"
-                    (opened)="onDatePickerOpen()"
-                    (closed)="onDatePickerClose()"
-                    size="small"></mona-date-picker>
-            }
-        }
-        @if (hasFieldError()) {
-            <span class="shrink-0 px-1 text-error" #fieldErrorIcon>
-                <svg lucideOctagonAlert [size]="12"></svg>
-            </span>
-            <mona-tooltip [target]="fieldErrorIcon">
-                <span class="p-1">{{ fieldErrorMessage() }}</span>
-            </mona-tooltip>
-        }
-    </div>
+    <span class="block truncate px-2">{{ readOnlyValue() }}</span>
 }

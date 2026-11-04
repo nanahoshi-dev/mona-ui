@@ -6,19 +6,21 @@
     <div class="flex min-h-9 items-center gap-1 px-1">
         @if (isEditing()) {
             @if (hasRowError()) {
-                <span class="shrink-0 px-1 text-error" #rowErrorIcon>
+                <span class="shrink-0 px-1 text-error" aria-hidden="true" #rowErrorIcon>
                     <svg lucideOctagonAlert [size]="14"></svg>
                 </span>
                 <mona-tooltip [target]="rowErrorIcon">
                     <span class="p-1 whitespace-pre-line">{{ rowErrorTooltip() }}</span>
                 </mona-tooltip>
+                <span class="sr-only" [id]="rowErrorId">{{ rowErrorTooltip() }}</span>
             }
             <button
                 monaButton
                 look="ghost"
                 size="small"
                 [iconOnly]="true"
-                [attr.aria-label]="messages().saveRow"
+                [attr.aria-label]="labels().save"
+                [attr.aria-describedby]="hasRowError() ? rowErrorId : null"
                 [attr.title]="messages().save"
                 class="w-6 h-6"
                 [tabindex]="-1"
@@ -30,7 +32,7 @@
                 look="ghost"
                 size="small"
                 [iconOnly]="true"
-                [attr.aria-label]="messages().cancelRowEdit"
+                [attr.aria-label]="labels().cancel"
                 [attr.title]="messages().cancel"
                 class="w-6 h-6"
                 [tabindex]="-1"
@@ -44,7 +46,7 @@
                     look="ghost"
                     size="small"
                     [iconOnly]="true"
-                    [attr.aria-label]="messages().editRow"
+                    [attr.aria-label]="labels().edit"
                     [attr.title]="messages().edit"
                     class="w-6 h-6"
                     [tabindex]="-1"
@@ -57,7 +59,7 @@
                 look="ghost"
                 size="small"
                 [iconOnly]="true"
-                [attr.aria-label]="messages().removeRow"
+                [attr.aria-label]="labels().remove"
                 [attr.title]="messages().remove"
                 class="w-6 h-6"
                 [tabindex]="-1"

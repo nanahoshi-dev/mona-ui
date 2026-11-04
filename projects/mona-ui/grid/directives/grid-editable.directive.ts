@@ -23,12 +23,14 @@ export class GridEditableDirective {
     public readonly add = output<GridAddEvent>();
 
     /**
-     * @description Emitted before an edit operation is canceled.
+     * @description Emitted before an edit operation is canceled; `reason` says why. Prevent it to keep editing,
+     * except for `"removed"`, when the edited row left the data or the view.
      */
     public readonly cancel = output<GridCancelEvent>();
 
     /**
-     * @description Emitted when a cell is edited.
+     * @description Emitted before a changed cell is saved in cell mode; not when the value didn't change.
+     * `rowData` is the row as it was; persist from `save`, whose `rowData` holds the edited values.
      */
     public readonly cellEdit = output<CellEditEvent>();
 
@@ -47,16 +49,18 @@ export class GridEditableDirective {
     });
 
     /**
-     * @description Emitted when a row remove command is triggered.
+     * @description Emitted when a row remove command is triggered, with the row's `key` and `index`.
      */
     public readonly remove = output<GridRemoveEvent>();
 
     /**
-     * @description Emitted when a row edit is committed (row mode only).
+     * @description Emitted after a changed row is saved (row mode only).
      */
     public readonly rowEdit = output<RowEditEvent>();
     /**
-     * @description Emitted before an edited or new row is saved.
+     * @description Emitted before an edited or new row is saved; not when an edit changed nothing. `rowData`
+     * holds the edited values and `originalRowData` the row as it was. Prevent it to keep the editor open,
+     * for example while saving on the server, then call `endEdit()`.
      */
     public readonly save = output<GridSaveEvent>();
 
@@ -78,6 +82,14 @@ export class GridEditableDirective {
         afterNextRender({
             read: () => this.#setSubscriptions()
         });
+    }
+
+    /**
+     * Closes the current edit without reporting it, such as after a `save` that was prevented to save on the
+     * server has finished.
+     */
+    public endEdit(): void {
+        this.#gridService.endEdit();
     }
 
     #setSubscriptions(): void {

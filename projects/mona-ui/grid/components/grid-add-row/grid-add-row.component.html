@@ -22,7 +22,7 @@
                         [autoFocus]="column === firstEditableColumn()"
                         [isNew]="true"
                         [session]="session"
-                        (commit)="onCommit()"
+                        (commit)="onCommit($event)"
                         (cancelEdit)="onCancel()"></mona-grid-editor>
                 } @else {
                     <span class="block truncate px-2">{{ rowData[column.field] }}</span>

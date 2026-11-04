@@ -1,4 +1,5 @@
 import { GRID_DEFAULT_VIRTUAL_ROW_HEIGHT } from "../constants/grid-virtual-scroll.constants";
+import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { isPlatformBrowser } from "@angular/common";
 import {
     computed,
@@ -42,11 +43,11 @@ import { ColumnFilterState } from "../models/ColumnFilterState";
 import { ColumnReorderEvent } from "../models/ColumnReorderEvent";
 import type { ColumnResizeEvent } from "../models/ColumnResizeEvent";
 import type { ColumnSortEvent } from "../models/ColumnSortEvent";
-import { EditableOptions } from "../models/EditableOptions";
+import type { EditableOptions, GridRowCommand } from "../models/EditableOptions";
 import type { FilterableOptions } from "../models/FilterableOptions";
 import { GridAddEvent } from "../models/GridAddEvent";
 import type { GridAggregateBucket, GridGroupAggregate } from "../models/GridAggregate";
-import { GridCancelEvent } from "../models/GridCancelEvent";
+import { GridCancelEvent, type GridCancelReason } from "../models/GridCancelEvent";
 import type { GridDataState } from "../models/GridDataState";
 import type { GridEditContext } from "../models/GridEditContext";
 import { GridEditEvent } from "../models/GridEditEvent";
@@ -103,6 +104,25 @@ const TEXT_MEASURE_CACHE_LIMIT = 1000;
 const AGGREGATE_COLUMN_KEYS = ["aggregate", "field", "id"] as const;
 /** What grouping and the group rows read from a column. */
 const GROUP_COLUMN_KEYS = ["dataType", "field", "groupFooterTemplate", "groupSortDirection", "id", "title"] as const;
+
+/** Whether two cell values are the same; dates compare by time. */
+function sameCellValue(left: unknown, right: unknown): boolean {
+    if (left instanceof Date && right instanceof Date) {
+        return left.getTime() === right.getTime() || (Number.isNaN(left.getTime()) && Number.isNaN(right.getTime()));
+    }
+    return Object.is(left, right);
+}
+
+/** Whether an edit changed any field of the row. */
+function hasChangedFields(original: Record<PropertyKey, unknown>, edited: Record<PropertyKey, unknown>): boolean {
+    const keys = new Set<PropertyKey>([...Reflect.ownKeys(original), ...Reflect.ownKeys(edited)]);
+    for (const key of keys) {
+        if (!sameCellValue(original[key], edited[key])) {
+            return true;
+        }
+    }
+    return false;
+}
 
 /** Whether two column lists match on the given keys, so a computed can keep its previous value. */
 function sameColumns(
@@ -180,6 +200,7 @@ export class GridService {
     readonly #horizontalScrollLeft = signal(0);
     readonly #i18n = inject(MonaI18nService);
     readonly #injector = inject(Injector);
+    readonly #liveAnnouncer = inject(LiveAnnouncer);
     readonly #platformId = inject(PLATFORM_ID);
     readonly #reorderableOptions = signal<ReorderableOptions>({ enabled: false });
     readonly #resizableOptions = signal<ResizableOptions>({ enabled: false });
@@ -189,11 +210,25 @@ export class GridService {
     readonly #rowUidByKeyObject = new WeakMap<object, string>();
     readonly #scrollbarGutterMeasurementSource = signal<"body" | "fallback">("fallback");
     readonly #scrollbarGutterWidth = signal(0);
+    /**
+     * Fields an edit session filled with `null` because the row had no value for an editable column, keyed by
+     * the session's model. The value says whether the row had the key (with `undefined`) or not at all.
+     */
+    readonly #seededFields = new WeakMap<object, ReadonlyMap<string, boolean>>();
     readonly #serverBindingEnabled = signal(false);
     readonly #serverLoading = signal(false);
     readonly #serverTotal = signal(0);
     readonly #sortDescriptors = signal<readonly SortDescriptor[]>([]);
     readonly #textMeasureCache = new Map<string, number>();
+    /** Each row's position in the filtered and sorted rows, by uid. */
+    readonly #viewRowIndexByUid = computed(() => {
+        const indices = new Map<string, number>();
+        let index = 0;
+        for (const row of this.viewRows()) {
+            indices.set(row.uid, index++);
+        }
+        return indices;
+    });
     #dataStateEmissionPending = false;
     /** The group descriptors last requested, including fields that have no column yet. */
     #groupRequest: readonly GroupDescriptor[] = [];
@@ -270,7 +305,7 @@ export class GridService {
         if (session == null || session.operation !== "update" || session.rowUid == null) {
             return ImmutableDictionary.create<string, RowEditDataItem>();
         }
-        const item: RowEditDataItem = { $rowId: session.rowUid, ...session.model() };
+        const item: RowEditDataItem = { $rowId: session.rowUid, ...this.sessionRowData(session) };
         const pairs = [new KeyValuePair(item.$rowId, item)];
         return ImmutableDictionary.create(pairs);
     });
@@ -699,13 +734,13 @@ export class GridService {
         return predicate?.(row.data) !== false;
     }
 
-    public cancelAddRow(originalEvent?: Event): boolean {
+    public cancelAddRow(originalEvent?: Event, reason: GridCancelReason = "command"): boolean {
         const session = this.#editSession();
         if (session == null || session.operation !== "create") {
             return true;
         }
         const rowData = this.resolveSessionRowData(session);
-        const event = new GridCancelEvent({ operation: "create", originalEvent, rowData, session });
+        const event = new GridCancelEvent({ operation: "create", originalEvent, reason, rowData, session });
         this.cancel$.next(event);
         if (event.isDefaultPrevented()) {
             return false;
@@ -714,7 +749,7 @@ export class GridService {
         return true;
     }
 
-    public cancelEdit(originalEvent?: Event): boolean {
+    public cancelEdit(originalEvent?: Event, reason: GridCancelReason = "command"): boolean {
         const context = this.#editContext();
         const session = this.#editSession();
         if (context == null || session == null || session.operation !== "update") {
@@ -723,6 +758,7 @@ export class GridService {
         const event = new GridCancelEvent({
             operation: "update",
             originalEvent,
+            reason,
             rowData: this.resolveEditedRowData(context.rowUid, context.row.data),
             session
         });
@@ -794,6 +830,11 @@ export class GridService {
             return false;
         }
         const rowData = this.resolveEditedRowData(context.rowUid, context.row.data);
+        // Nothing changed: close the editor without reporting a save.
+        if (!hasChangedFields(context.row.data, rowData)) {
+            this.clearEditSession();
+            return true;
+        }
         const saveEvent = new GridSaveEvent({
             operation: "update",
             originalEvent,
@@ -836,6 +877,14 @@ export class GridService {
 
     public deselectRow(row: Row): void {
         this.setRowSelected(row, false);
+    }
+
+    /**
+     * Ends the current edit without reporting it: after the consumer prevented `save` to save asynchronously,
+     * or to drop an edit from code. Does nothing when no edit is open.
+     */
+    public endEdit(): void {
+        this.clearEditSession();
     }
 
     public findTextWidthOfColumn(column: Column, element: HTMLTableCellElement): number {
@@ -929,6 +978,35 @@ export class GridService {
             field: c.field,
             dir: c.groupSortDirection ?? undefined
         })).toArray();
+    }
+
+    /** The accessible name of a row command button; `row` is null for the add row. */
+    public getRowCommandAriaLabel(command: GridRowCommand, row: Row | null): string {
+        const messages = this.messages();
+        if (row == null) {
+            return command === "cancel" ? messages.cancelNewRow : messages.saveNewRow;
+        }
+        const rowNumber = this.getRowNumber(row);
+        const label = this.editableOptions().commandAriaLabel?.(command, row.data, rowNumber - 1);
+        if (label) {
+            return label;
+        }
+        switch (command) {
+            case "cancel":
+                return messages.cancelRowEdit(rowNumber);
+            case "edit":
+                return messages.editRow(rowNumber);
+            case "remove":
+                return messages.removeRow(rowNumber);
+            case "save":
+                return messages.saveRow(rowNumber);
+        }
+    }
+
+    /** The row's 1-based position in the filtered and sorted rows, counting earlier server pages. */
+    public getRowNumber(row: Row): number {
+        const index = this.#viewRowIndexByUid().get(row.uid) ?? 0;
+        return index + 1 + (this.serverBindingEnabled() ? this.paginationState().skip : 0);
     }
 
     public getRowReorderAriaLabel(row: Row, absoluteIndex: number): string {
@@ -1153,8 +1231,36 @@ export class GridService {
         this.patchSessionField(session, field, value);
     }
 
+    /** Ends an update whose row left the data or the view; the cancel can't be prevented. */
+    public reconcileEditSession(): void {
+        const context = this.#editContext();
+        const session = this.#editSession();
+        if (context == null || session == null || session.operation !== "update") {
+            return;
+        }
+        const row = this.rows().firstOrDefault(candidate => candidate.uid === context.rowUid);
+        const shownRows = this.virtualScrollOptions().enabled ? this.viewRows() : this.viewPageRows();
+        if (row == null || !shownRows.any(candidate => candidate.uid === context.rowUid)) {
+            const rowData = this.sessionRowData(session);
+            this.cancel$.next(new GridCancelEvent({ operation: "update", reason: "removed", rowData, session }));
+            this.clearEditSession();
+            return;
+        }
+        if (row === context.row) {
+            return;
+        }
+        // New data for the same row: keep the user's edits, and compare and report against the new data.
+        const rebased: GridEditSession = { ...session, originalRowData: row.data, row };
+        this.#editSession.set(rebased);
+        this.#editContext.set({ ...context, row, session: rebased });
+    }
+
     public removeRow(row: Row, originalEvent?: Event): boolean {
-        const event = new GridRemoveEvent({ originalEvent, rowData: row.data });
+        const index = this.rows()
+            .toArray()
+            .findIndex(candidate => candidate.uid === row.uid);
+        const key = this.getRowUidKey(row.data, this.rowKey()) ?? row.data;
+        const event = new GridRemoveEvent({ index, key, originalEvent, rowData: row.data });
         this.remove$.next(event);
         return !event.isDefaultPrevented();
     }
@@ -1496,6 +1602,18 @@ export class GridService {
         this.expandedKeysChange$.next(this.expandedKeys().toArray());
     }
 
+    /** Sets the row key; columns left to the default become read-only when they hold the key. */
+    public setRowKey(rowKey: GridKeySelector<unknown> | null): void {
+        if (this.rowKey() === rowKey) {
+            return;
+        }
+        this.rowKey.set(rowKey);
+        this.updateColumns(column => {
+            const editable = this.resolveEditable(column);
+            return editable === column.editable ? column : { ...column, editable };
+        });
+    }
+
     public setRowReorderableOptions(options: RowReorderableOptions): void {
         this.#rowReorderableOptions.set(options);
     }
@@ -1607,7 +1725,7 @@ export class GridService {
         if (activeSession?.operation === "create") {
             return true;
         }
-        if (activeSession?.operation === "update" && !this.cancelEdit(originalEvent)) {
+        if (activeSession?.operation === "update" && !this.cancelEdit(originalEvent, "switch")) {
             return false;
         }
         const rowData = this.newRowFactory()();
@@ -1636,10 +1754,10 @@ export class GridService {
             return false;
         }
         const activeSession = this.#editSession();
-        if (activeSession?.operation === "create" && !this.cancelAddRow(originalEvent)) {
+        if (activeSession?.operation === "create" && !this.cancelAddRow(originalEvent, "switch")) {
             return false;
         }
-        if (activeSession?.operation === "update" && !this.cancelEdit(originalEvent)) {
+        if (activeSession?.operation === "update" && !this.cancelEdit(originalEvent, "switch")) {
             return false;
         }
         const session = this.createEditSession({
@@ -1663,15 +1781,15 @@ export class GridService {
         return true;
     }
 
-    public startRowEdit(row: Row, originalEvent?: Event): boolean {
+    public startRowEdit(row: Row, originalEvent?: Event, focusColumnId: string | null = null): boolean {
         if (this.editableOptions().mode !== "row") {
             return false;
         }
         const activeSession = this.#editSession();
-        if (activeSession?.operation === "create" && !this.cancelAddRow(originalEvent)) {
+        if (activeSession?.operation === "create" && !this.cancelAddRow(originalEvent, "switch")) {
             return false;
         }
-        if (activeSession?.operation === "update" && !this.cancelEdit(originalEvent)) {
+        if (activeSession?.operation === "update" && !this.cancelEdit(originalEvent, "switch")) {
             return false;
         }
         const session = this.createEditSession({
@@ -1691,7 +1809,7 @@ export class GridService {
             return false;
         }
         this.#editSession.set(session);
-        this.#editContext.set({ mode: "row", row, rowUid: row.uid, session });
+        this.#editContext.set({ focusColumnId, mode: "row", row, rowUid: row.uid, session });
         return true;
     }
 
@@ -1711,6 +1829,11 @@ export class GridService {
         const rowData = this.resolveEditedRowData(context.rowUid, context.row.data);
         const oldValue = context.row.data[column.field];
         const resolvedValue = rowData[column.field];
+        // Nothing changed: close the editor without reporting an edit or a save.
+        if (sameCellValue(oldValue, resolvedValue)) {
+            this.clearEditSession();
+            return true;
+        }
         const event = new CellEditEvent({
             field: column.field,
             newValue: resolvedValue,
@@ -1749,6 +1872,20 @@ export class GridService {
             const changed = (Object.keys(patch) as Array<keyof typeof patch>).some(key => column[key] !== patch[key]);
             return changed ? { ...column, ...patch } : column;
         });
+    }
+
+    /** Tells assistive technology why a commit didn't go through. */
+    private announceInvalid(session: GridEditSession): void {
+        const messages = this.messages();
+        const field = session.mode === "cell" && session.field != null ? session.form[session.field] : null;
+        const errors =
+            field != null ? [...field().errors(), ...session.form().errors()] : session.form().errorSummary();
+        const message =
+            errors.find(error => !!error.message)?.message ||
+            (field != null ? messages.fieldValidationError : messages.rowValidationError);
+        if (message) {
+            void this.#liveAnnouncer.announce(message, "polite");
+        }
     }
 
     private applyColumnIndexes(columns: readonly Column[]): Column[] {
@@ -1872,7 +2009,25 @@ export class GridService {
     }
 
     private createEditSession(options: GridEditSessionOptions): GridEditSession {
-        const model = signal<Record<PropertyKey, unknown>>({ ...options.rowData });
+        // Signal forms have no field for a missing or undefined value, so editable columns start at null.
+        const seeded = new Map<string, boolean>();
+        const values: Record<PropertyKey, unknown> = { ...options.rowData };
+        for (const column of this.columns()) {
+            if (
+                column.kind !== "data" ||
+                !column.editable ||
+                column.field === "" ||
+                values[column.field] !== undefined
+            ) {
+                continue;
+            }
+            seeded.set(column.field, column.field in values);
+            values[column.field] = null;
+        }
+        const model = signal<Record<PropertyKey, unknown>>(values);
+        if (seeded.size > 0) {
+            this.#seededFields.set(model, seeded);
+        }
         const context: GridEditFormContext = {
             column: options.column,
             field: options.field,
@@ -2072,9 +2227,22 @@ export class GridService {
             groupSortDirection: previous?.groupSortDirection ?? null,
             hidden,
             index: previous?.index ?? 0,
+            editable: this.resolveEditable(config),
             minWidth: config.minWidth,
             sortIndex: previous?.sortIndex ?? null
         };
+    }
+
+    /** The column's `editable`, with the default (every column but the `rowKey` field) resolved. */
+    private resolveEditable(column: ColumnConfig): boolean {
+        if (column.configuredEditable === undefined) {
+            return column.editable;
+        }
+        if (column.configuredEditable !== null) {
+            return column.configuredEditable;
+        }
+        const rowKey = this.rowKey();
+        return !(typeof rowKey === "string" && rowKey === column.field);
     }
 
     private resolveEditedRowData(
@@ -2090,7 +2258,7 @@ export class GridService {
     }
 
     private resolveSessionRowData(session: GridEditSession): Record<PropertyKey, unknown> {
-        return { ...session.form().value() };
+        return this.sessionRowData(session);
     }
 
     // Range selection is scoped to bulkSelectionRows() (current page, or full view when virtualized/
@@ -2164,6 +2332,26 @@ export class GridService {
             return value;
         }
         return undefined;
+    }
+
+    /** The session's values, with the fields it filled in for the editors put back as the row had them. */
+    private sessionRowData(session: GridEditSession): Record<PropertyKey, unknown> {
+        const rowData = { ...session.model() };
+        const seeded = this.#seededFields.get(session.model);
+        if (seeded == null) {
+            return rowData;
+        }
+        for (const [field, hadKey] of seeded) {
+            if (rowData[field] !== null) {
+                continue;
+            }
+            if (hadKey) {
+                rowData[field] = undefined;
+            } else {
+                delete rowData[field];
+            }
+        }
+        return rowData;
     }
 
     private setElementScrollLeft(element: HTMLElement | null, scrollLeft: number): void {
@@ -2283,13 +2471,21 @@ export class GridService {
         const editedField = session.mode === "cell" && session.field != null ? session.form[session.field] : null;
         if (editedField == null) {
             rootField.markAsTouched();
-            return !rootField.invalid() && !rootField.pending();
+            const valid = !rootField.invalid() && !rootField.pending();
+            if (!valid && !rootField.pending()) {
+                this.announceInvalid(session);
+            }
+            return valid;
         }
         // A cell edit can only fix its own field. Row-level errors still block the save, but an invalid
         // sibling field must not trap the user in a cell whose own value is valid.
         const field = editedField();
         field.markAsTouched();
-        return !field.invalid() && !field.pending() && rootField.errors().length === 0;
+        const valid = !field.invalid() && !field.pending() && rootField.errors().length === 0;
+        if (!valid && !field.pending()) {
+            this.announceInvalid(session);
+        }
+        return valid;
     }
 
     private withColumnIndices(columns: readonly Column[]): Column[] {

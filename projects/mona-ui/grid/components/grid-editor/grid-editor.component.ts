@@ -7,6 +7,7 @@ import {
     ElementRef,
     inject,
     input,
+    isDevMode,
     output,
     signal,
     untracked,
@@ -16,9 +17,12 @@ import { type FieldTree, FormField } from "@angular/forms/signals";
 import { LucideOctagonAlert } from "@lucide/angular";
 import { CheckBoxComponent } from "@nanahoshi/mona-ui/check-box";
 import { DatePickerComponent } from "@nanahoshi/mona-ui/date-picker";
+import { MonaI18nService, parseLocalizedNumber } from "@nanahoshi/mona-ui/i18n";
 import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
 import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
 import { TooltipComponent } from "@nanahoshi/mona-ui/tooltip";
+import { v4 } from "uuid";
+import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
 import { Column } from "../../models/Column";
 import type { GridEditSession } from "../../models/GridEditSession";
 import type { GridEditTemplateContext } from "../../models/GridEditTemplateContext";
@@ -26,6 +30,13 @@ import { GridService } from "../../services/grid.service";
 import { gridCellEditorBaseThemeVariants, gridCellEditorInputThemeVariants } from "../../styles/grid.styles";
 
 const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [tabindex]";
+/** The controls Tab moves between in an edited row: each editor's first control and the row's command buttons. */
+const ROW_EDITOR_SELECTOR = "mona-grid-editor, mona-grid-command-cell";
+/** A number written the way JavaScript writes it, such as data from a server: `1234.5`, `-2e3`. */
+const MACHINE_NUMBER_PATTERN = /^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?$/i;
+
+/** What ended an edit: Enter (or `commit()` in a template) or focus leaving the editor. */
+export type GridEditorCommitTrigger = "blur" | "enter";
 
 @Component({
     selector: "mona-grid-editor",
@@ -49,48 +60,62 @@ export class GridEditorComponent {
     readonly #datePopupOpen = signal(false);
     readonly #elementRef = inject(ElementRef<HTMLElement>);
     readonly #gridService = inject(GridService, { optional: true });
+    readonly #i18n = inject(MonaI18nService, { optional: true });
+    readonly #logicalCell = inject(GridLogicalCellDirective, { optional: true });
+    /** Tab and Enter work on the whole row: in row edit mode and in the add row. */
+    readonly #rowEditing = computed(() => this.isNew() || this.#gridService?.editContext()?.mode === "row");
     #ignoreNextBooleanFocusOut = false;
+    /** The date before the last change, whose time of day a picked day keeps. */
+    #lastDateValue: Date | null = null;
     private readonly numericTextBoxRef = viewChild(NumericTextBoxComponent);
     private readonly textBoxRef = viewChild(TextBoxComponent);
     protected readonly baseClass = computed(() => {
         return gridCellEditorBaseThemeVariants({ virtual: this.#gridService?.virtualScrollOptions().enabled ?? false });
     });
-    protected readonly editTemplateContext = computed<GridEditTemplateContext>(() => ({
-        cancel: (): void => this.cancelEdit.emit(),
-        column: this.column().field,
-        commit: (): void => this.commit.emit(),
-        dataField: this.column().field,
-        dataItem: this.session().model(),
-        errors: this.formField()().errors(),
-        field: this.formField(),
-        form: this.session().form,
-        invalid: this.formField()().invalid(),
-        isNew: this.isNew(),
-        session: this.session(),
-        setValue: (value: unknown): void => this.#setFieldValue(value),
-        touched: this.formField()().touched(),
-        value: this.formField()().value()
-    }));
+    protected readonly editTemplateContext = computed<GridEditTemplateContext | null>(() => {
+        const field = this.formField();
+        if (field == null) {
+            return null;
+        }
+        return {
+            cancel: (): void => this.cancelEdit.emit(),
+            column: this.column().field,
+            commit: (): void => this.commit.emit("enter"),
+            dataField: this.column().field,
+            dataItem: this.session().model(),
+            errors: field().errors(),
+            field,
+            form: this.session().form,
+            invalid: field().invalid(),
+            isNew: this.isNew(),
+            session: this.session(),
+            setValue: (value: unknown): void => field().value.set(value),
+            touched: field().touched(),
+            value: field().value()
+        };
+    });
     protected readonly editorInputClass = computed(() => {
         return gridCellEditorInputThemeVariants({
             virtual: this.#gridService?.virtualScrollOptions().enabled ?? false
         });
     });
+    /** The editor's accessible name: the column title, as the header that would name it is in another table. */
+    protected readonly editorLabel = computed(() => this.column().title || this.column().field);
+    protected readonly errorDescribedBy = computed(() => (this.hasFieldError() ? this.errorId : ""));
+    protected readonly errorId = `mona-grid-editor-error-${v4()}`;
     protected readonly fieldErrorMessage = computed(() => {
-        const [firstError] = this.formField()().errors();
+        const [firstError] = this.formField()?.().errors() ?? [];
         return firstError?.message ?? this.#gridService?.messages().fieldValidationError ?? "";
     });
-    protected readonly formField = computed<FieldTree<unknown>>(() => {
-        const field = this.session().form[this.column().field];
-        if (field == null) {
-            throw new Error(`No signal form field was found for grid column '${this.column().field}'.`);
-        }
-        return field as FieldTree<unknown>;
-    });
+    /** The column's form field; null when the session has none, as for a value a signal form can't hold. */
+    protected readonly formField = computed<FieldTree<unknown> | null>(
+        () => (this.session().form[this.column().field] as FieldTree<unknown> | undefined) ?? null
+    );
     protected readonly hasFieldError = computed(() => {
-        const field = this.formField()();
-        return field.invalid() && field.touched();
+        const field = this.formField()?.();
+        return field != null && field.invalid() && field.touched();
     });
+    protected readonly readOnlyValue = computed(() => this.session().model()[this.column().field]);
 
     /**
      * @description Controls whether the editor focuses its input after it renders.
@@ -98,7 +123,7 @@ export class GridEditorComponent {
     public readonly autoFocus = input(true);
     public readonly cancelEdit = output<void>();
     public readonly column = input.required<Column>();
-    public readonly commit = output<void>();
+    public readonly commit = output<GridEditorCommitTrigger>();
     public readonly isNew = input(false);
     public readonly session = input.required<GridEditSession>();
 
@@ -111,17 +136,38 @@ export class GridEditorComponent {
 
     public constructor() {
         effect(() => {
-            const column = this.column();
-            if (column.dataType !== "number") {
+            if (this.formField() == null && isDevMode()) {
+                console.warn(
+                    `mona-grid: column '${this.column().field}' has no form field in the edit session, so it is ` +
+                        "shown read-only. Give the row a value for the field, or set the column's editable to false."
+                );
+            }
+        });
+        effect(() => {
+            if (this.column().dataType !== "number") {
                 return;
             }
             const field = this.formField();
+            if (field == null) {
+                return;
+            }
             const value = field().value();
             const coercedValue = this.#coerceNumberValue(value);
             if (Object.is(value, coercedValue)) {
                 return;
             }
             untracked(() => field().value.set(coercedValue));
+        });
+        effect(() => {
+            if (this.column().dataType !== "date") {
+                return;
+            }
+            const field = this.formField();
+            if (field == null) {
+                return;
+            }
+            const value = field().value();
+            untracked(() => this.#keepTimeOfDay(field, value));
         });
         afterNextRender({
             read: () => this.#focusEditor()
@@ -141,7 +187,7 @@ export class GridEditorComponent {
         if (this.#ignoreNextBooleanFocusOut) {
             return;
         }
-        this.commit.emit();
+        this.commit.emit("blur");
     }
 
     protected onBooleanEditorPointerDown(): void {
@@ -155,42 +201,43 @@ export class GridEditorComponent {
         this.#datePopupOpen.set(false);
     }
 
-    protected onDatePickerEnter(event: Event): void {
-        if (this.#datePopupOpen()) {
-            return;
-        }
-        (event.target as HTMLElement).blur();
-    }
-
-    protected onDatePickerFocusOut(event: FocusEvent): void {
-        const relatedTarget = event.relatedTarget as HTMLElement | null;
-        if (relatedTarget?.closest(".cdk-overlay-container")) {
-            return;
-        }
-        const pickerHost = event.currentTarget as HTMLElement;
-        if (pickerHost.contains(relatedTarget)) {
-            return;
-        }
-        this.commit.emit();
-    }
-
     protected onDatePickerOpen(): void {
         this.#datePopupOpen.set(true);
     }
 
-    protected onEditCancel(): void {
-        if (!this.#datePopupOpen()) {
+    /** Enter commits and Escape cancels, except while an IME composes or the date popup is open. */
+    protected onEditorKeydown(event: KeyboardEvent): void {
+        if (event.isComposing || event.keyCode === 229 || this.#datePopupOpen()) {
+            return;
+        }
+        if (event.key === "Enter") {
+            event.preventDefault();
+            this.commit.emit("enter");
+        } else if (event.key === "Escape" && !event.defaultPrevented) {
+            event.preventDefault();
             this.cancelEdit.emit();
         }
     }
 
     protected onHostKeydown(event: KeyboardEvent): void {
-        if (event.key !== "Tab" || !this.tabNavigationEnabled() || event.defaultPrevented) {
+        if (event.key !== "Tab" || event.defaultPrevented || event.isComposing) {
             return;
         }
+        if (this.tabNavigationEnabled()) {
+            event.preventDefault();
+            event.stopPropagation();
+            this.tabNavigate.emit(event.shiftKey ? "previous" : "next");
+            return;
+        }
+        if (!this.#rowEditing()) {
+            return;
+        }
+        // Tab moves between the row's editors and commands; past either end it leaves the grid.
         event.preventDefault();
         event.stopPropagation();
-        this.tabNavigate.emit(event.shiftKey ? "previous" : "next");
+        if (!this.#focusSiblingControl(event.shiftKey)) {
+            this.#logicalCell?.leaveGrid(event.shiftKey);
+        }
     }
 
     #coerceNumberValue(value: unknown): number | null {
@@ -200,12 +247,16 @@ export class GridEditorComponent {
         if (typeof value !== "string") {
             return null;
         }
-        const normalizedValue = value.trim().replace(/,/g, "");
-        if (normalizedValue === "") {
+        const text = value.trim();
+        if (text === "") {
             return null;
         }
-        const numberValue = Number(normalizedValue);
-        return Number.isFinite(numberValue) ? numberValue : null;
+        if (MACHINE_NUMBER_PATTERN.test(text)) {
+            const numberValue = Number(text);
+            return Number.isFinite(numberValue) ? numberValue : null;
+        }
+        // Text as a person writes it in the grid's locale: "1.234,5" in de-DE.
+        return parseLocalizedNumber(text, this.#i18n?.localeId() ?? "en-US");
     }
 
     #focusBooleanInput(): void {
@@ -235,17 +286,70 @@ export class GridEditorComponent {
         }
     }
 
-    #focusTemplateTarget(): void {
-        const targets = Array.from(
-            this.#elementRef.nativeElement.querySelectorAll(FOCUSABLE_TARGET_SELECTOR)
-        ) as HTMLElement[];
-        const target = targets.find(
-            candidate => !candidate.hasAttribute("disabled") && candidate.getAttribute("aria-hidden") !== "true"
-        );
-        target?.focus();
+    /** Focuses the next or previous editor or command button in the row; false at either end. */
+    #focusSiblingControl(backwards: boolean): boolean {
+        const host = this.#elementRef.nativeElement as HTMLElement;
+        const row = host.closest("tr");
+        if (row == null) {
+            return false;
+        }
+        const controls: HTMLElement[] = [];
+        let current = -1;
+        for (const container of Array.from(row.querySelectorAll<HTMLElement>(ROW_EDITOR_SELECTOR))) {
+            const targets = this.#focusTargets(container);
+            if (container === host) {
+                current = controls.length;
+            }
+            // An editor is one stop; the command cell's buttons are one each.
+            controls.push(...(container.localName === "mona-grid-editor" ? targets.slice(0, 1) : targets));
+        }
+        if (current < 0) {
+            return false;
+        }
+        const target = controls[backwards ? current - 1 : current + 1];
+        if (target == null) {
+            return false;
+        }
+        target.focus();
+        return true;
     }
 
-    #setFieldValue(value: unknown): void {
-        this.formField()().value.set(value);
+    #focusTargets(container: HTMLElement): HTMLElement[] {
+        return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_TARGET_SELECTOR)).filter(
+            candidate =>
+                !candidate.hasAttribute("disabled") &&
+                candidate.getAttribute("aria-hidden") !== "true" &&
+                candidate.closest("[aria-hidden='true'], [hidden], [inert]") == null
+        );
+    }
+
+    #focusTemplateTarget(): void {
+        this.#focusTargets(this.#elementRef.nativeElement)[0]?.focus();
+    }
+
+    /**
+     * Keeps the time of day when a new day is picked: the date picker gives midnight, which would drop the time a
+     * value had.
+     */
+    #keepTimeOfDay(field: FieldTree<unknown>, value: unknown): void {
+        const previous = this.#lastDateValue;
+        this.#lastDateValue = value instanceof Date ? value : null;
+        if (!(value instanceof Date) || previous == null || value === previous || Number.isNaN(value.getTime())) {
+            return;
+        }
+        const midnight = (date: Date): boolean =>
+            date.getHours() === 0 && date.getMinutes() === 0 && date.getSeconds() === 0 && date.getMilliseconds() === 0;
+        if (!midnight(value) || midnight(previous)) {
+            return;
+        }
+        const withTime = new Date(value);
+        withTime.setHours(
+            previous.getHours(),
+            previous.getMinutes(),
+            previous.getSeconds(),
+            previous.getMilliseconds()
+        );
+        this.#lastDateValue = withTime;
+        field().value.set(withTime);
     }
 }

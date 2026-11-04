@@ -100,20 +100,20 @@ describe("MONA_ZH_CN_LOCALE", () => {
             expect(m.grid.all).toBe("(全部)");
             expect(m.grid.apply).toBe("应用");
             expect(m.grid.cancel).toBe("取消");
-            expect(m.grid.cancelRowEdit).toBe("取消编辑行");
+            expect(m.grid.cancelRowEdit(3)).toBe("取消编辑第 3 行");
             expect(m.grid.columns).toBe("列");
             expect(m.grid.delete).toBe("删除");
-            expect(m.grid.deleteRowConfirmation).toBe("确定要删除此项吗？");
+            expect(m.grid.deleteRowConfirmation(3)).toBe("确定要删除第 3 行吗？");
             expect(m.grid.deleteRowTitle).toBe("删除行？");
             expect(m.grid.edit).toBe("编辑");
-            expect(m.grid.editRow).toBe("编辑行");
+            expect(m.grid.editRow(3)).toBe("编辑第 3 行");
             expect(m.grid.filterPlaceholder).toBe("筛选…");
             expect(m.grid.noData).toBe("没有数据");
             expect(m.grid.remove).toBe("移除");
-            expect(m.grid.removeRow).toBe("移除行");
+            expect(m.grid.removeRow(3)).toBe("移除第 3 行");
             expect(m.grid.rowReorder).toBe("行重新排序");
             expect(m.grid.save).toBe("保存");
-            expect(m.grid.saveRow).toBe("保存行");
+            expect(m.grid.saveRow(3)).toBe("保存第 3 行");
             expect(m.grid.selectAllRows).toBe("选择所有行");
             expect(m.grid.rowReorderDisabled).toBe("行重新排序已禁用。");
             expect(m.grid.rowReorderKeyboardHint).toBe("使用 Alt + 向上键或 Alt + 向下键移动。");
@@ -316,8 +316,8 @@ describe("MONA_ZH_CN_LOCALE", () => {
             expect(cn.grid.columnsSelected(3)).toBe("已选择 3 列");
             expect(tw.grid.columnsSelected(3)).toBe("已選取 3 欄");
 
-            expect(cn.grid.cancelRowEdit).toBe("取消编辑行");
-            expect(tw.grid.cancelRowEdit).toBe("取消編輯資料列");
+            expect(cn.grid.cancelRowEdit(3)).toBe("取消编辑第 3 行");
+            expect(tw.grid.cancelRowEdit(3)).toBe("取消編輯第 3 個資料列");
 
             expect(cn.grid.noData).toBe("没有数据");
             expect(tw.grid.noData).toBe("沒有資料");

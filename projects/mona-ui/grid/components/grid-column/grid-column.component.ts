@@ -36,7 +36,8 @@ export class GridColumnComponent implements GridColumnDefinition {
         configuredHidden: this.hidden(),
         dataType: this.type(),
         editTemplate: this.editTemplate() ?? null,
-        editable: this.editable(),
+        configuredEditable: this.editable(),
+        editable: this.editable() ?? true,
         field: this.field(),
         filterable: this.filterable(),
         filtered: false,
@@ -75,9 +76,11 @@ export class GridColumnComponent implements GridColumnDefinition {
     public readonly aggregate = input<AggregateFunction | null>(null);
 
     /**
-     * @description Whether this column is editable when the grid is in edit mode.
+     * @description Whether this column is editable when the grid is in edit mode. Left unset, every column is
+     * editable except the one whose `field` is the grid's `rowKey`.
+     * @default null
      */
-    public readonly editable = input<boolean>(true);
+    public readonly editable = input<boolean | null>(null);
 
     /**
      * @description The field name of the data property to display in this column.

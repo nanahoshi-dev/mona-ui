@@ -3,12 +3,13 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { MONA_DEFAULT_LOCALE, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import type { Column } from "../../models/Column";
 import { Row } from "../../models/Row";
+import { GridNavigationService } from "../../services/grid-navigation.service";
 import { GridService } from "../../services/grid.service";
 import { GridCommandCellComponent } from "./grid-command-cell.component";
 
 @Component({
     imports: [GridCommandCellComponent],
-    providers: [GridService],
+    providers: [GridService, GridNavigationService],
     template: `<mona-grid-command-cell [column]="column()" [row]="row()"></mona-grid-command-cell>`
 })
 class TestHostComponent {
@@ -63,12 +64,12 @@ describe("GridCommandCellComponent", () => {
         fixture.detectChanges();
     });
 
-    it("renders default english accessible labels for command buttons", () => {
+    it("names command buttons after their row (GE9)", () => {
         gridService.setEditableOptions({ enabled: true, mode: "row" });
         fixture.detectChanges();
 
-        const editButton = fixture.nativeElement.querySelector("button[aria-label='Edit row']") as HTMLButtonElement;
-        const removeButton = fixture.nativeElement.querySelector("button[aria-label='Remove row']") as HTMLButtonElement;
+        const editButton = fixture.nativeElement.querySelector("button[aria-label='Edit row 1']") as HTMLButtonElement;
+        const removeButton = fixture.nativeElement.querySelector("button[aria-label='Remove row 1']") as HTMLButtonElement;
 
         expect(editButton).not.toBeNull();
         expect(editButton.getAttribute("title")).toBe("Edit");
@@ -86,16 +87,16 @@ describe("GridCommandCellComponent", () => {
             messages: {
                 grid: {
                     edit: "Düzenle",
-                    editRow: "Satırı düzenle",
+                    editRow: (rowNumber: number) => `${rowNumber}. satırı düzenle`,
                     remove: "Sil",
-                    removeRow: "Satırı sil"
+                    removeRow: (rowNumber: number) => `${rowNumber}. satırı sil`
                 }
             }
         });
         fixture.detectChanges();
 
-        const editButton = fixture.nativeElement.querySelector("button[aria-label='Satırı düzenle']") as HTMLButtonElement;
-        const removeButton = fixture.nativeElement.querySelector("button[aria-label='Satırı sil']") as HTMLButtonElement;
+        const editButton = fixture.nativeElement.querySelector("button[aria-label='1. satırı düzenle']") as HTMLButtonElement;
+        const removeButton = fixture.nativeElement.querySelector("button[aria-label='1. satırı sil']") as HTMLButtonElement;
 
         expect(editButton).not.toBeNull();
         expect(editButton.getAttribute("title")).toBe("Düzenle");
@@ -103,5 +104,16 @@ describe("GridCommandCellComponent", () => {
         expect(removeButton.getAttribute("title")).toBe("Sil");
 
         i18n.use(MONA_DEFAULT_LOCALE);
+    });
+
+    it("takes button names from commandAriaLabel (GE9)", () => {
+        gridService.setEditableOptions({
+            mode: "row",
+            commandAriaLabel: (command, rowData) => `${command} ${String(rowData["name"])}`
+        });
+        fixture.detectChanges();
+
+        expect(fixture.nativeElement.querySelector("button[aria-label='edit Item 1']")).not.toBeNull();
+        expect(fixture.nativeElement.querySelector("button[aria-label='remove Item 1']")).not.toBeNull();
     });
 });

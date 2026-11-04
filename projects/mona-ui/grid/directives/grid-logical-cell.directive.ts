@@ -360,7 +360,7 @@ export class GridLogicalCellDirective {
         if (this.#enterCell()) {
             return;
         }
-        if (this.resolvedCellKind() === "data" && this.#gridService.editableOptions().mode !== "row") {
+        if (this.resolvedCellKind() === "data") {
             this.edit.emit();
         }
     }

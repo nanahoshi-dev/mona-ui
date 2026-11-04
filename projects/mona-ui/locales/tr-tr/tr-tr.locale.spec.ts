@@ -54,7 +54,7 @@ describe("MONA_TR_TR_LOCALE", () => {
         it("translates Grid messages correctly with Turkish terminology", () => {
             expect(m.grid?.all).toBe("(Tümü)");
             expect(m.grid?.delete).toBe("Sil");
-            expect(m.grid?.deleteRowConfirmation).toBe("Bu öğeyi silmek istediğinizden emin misiniz?");
+            expect(m.grid?.deleteRowConfirmation(3)).toBe("3. satırı silmek istediğinizden emin misiniz?");
             expect(m.grid?.deleteRowTitle).toBe("Satır silinsin mi?");
             expect(m.grid?.edit).toBe("Düzenle");
             expect(m.grid?.filterPlaceholder).toBe("Filtrele...");

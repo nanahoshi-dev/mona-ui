@@ -497,6 +497,7 @@ export class GridComponent<T> implements GridVariantInput {
         this.setPagingEffects();
         this.setGridDetailEffect();
         this.setDataEffect();
+        this.setEditSessionEffect();
         this.setFooterScrollElementEffect();
         this.setFitViewScrollbarSyncEffect();
         // Every render: controls the toolbar template adds later join the roving Tab stop.
@@ -981,7 +982,7 @@ export class GridComponent<T> implements GridVariantInput {
             );
             untracked(() => {
                 this.gridService.setRows(data as Iterable<Record<PropertyKey, unknown>>, rowKey);
-                this.gridService.rowKey.set(rowKey);
+                this.gridService.setRowKey(rowKey);
             });
             if (shouldRestoreGridFocus) {
                 afterNextRender(
@@ -1002,6 +1003,18 @@ export class GridComponent<T> implements GridVariantInput {
                     { injector: this.#injector }
                 );
             }
+        });
+    }
+
+    /** An edit whose row was replaced follows the new data; one whose row left the data or the view ends. */
+    private setEditSessionEffect(): void {
+        effect(() => {
+            if (this.gridService.editSession()?.operation !== "update") {
+                return;
+            }
+            this.gridService.rows();
+            this.gridService.viewPageRows();
+            untracked(() => this.gridService.reconcileEditSession());
         });
     }
 

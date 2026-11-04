@@ -89,7 +89,7 @@ describe("MONA_JA_JP_LOCALE", () => {
         it("translates Grid messages correctly", () => {
             expect(m.grid?.all).toBe("(すべて)");
             expect(m.grid?.delete).toBe("削除");
-            expect(m.grid?.deleteRowConfirmation).toBe("この行を削除しますか？");
+            expect(m.grid?.deleteRowConfirmation(3)).toBe("3行目を削除しますか？");
             expect(m.grid?.deleteRowTitle).toBe("行を削除");
             expect(m.grid?.edit).toBe("編集");
             expect(m.grid?.filterPlaceholder).toBe("フィルター...");

@@ -5,7 +5,7 @@
 export { CellEditEvent } from "./models/CellEditEvent";
 export { RowEditEvent } from "./models/RowEditEvent";
 export { GridAddEvent } from "./models/GridAddEvent";
-export { GridCancelEvent } from "./models/GridCancelEvent";
+export { GridCancelEvent, type GridCancelReason } from "./models/GridCancelEvent";
 export type { GridEditFormContext, GridEditSchemaFactory } from "./models/GridEditFormContext";
 export { GridEditEvent } from "./models/GridEditEvent";
 export type { GridEditOperation } from "./models/GridEditOperation";
@@ -57,7 +57,7 @@ export * from "./directives/grid-virtual-scroll.directive";
 export * from "./components/grid-command-column/grid-command-column.component";
 export * from "./components/grid-column/grid-column.component";
 export * from "./components/grid/grid.component";
-export type { EditableOptions } from "./models/EditableOptions";
+export type { EditableOptions, GridRowCommand } from "./models/EditableOptions";
 export type { ReorderableOptions } from "./models/ReorderableOptions";
 export type { ResizableOptions } from "./models/ResizableOptions";
 export type { RowReorderableOptions } from "./models/RowReorderableOptions";

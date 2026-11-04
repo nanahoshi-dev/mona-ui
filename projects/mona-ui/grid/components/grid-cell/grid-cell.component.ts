@@ -12,7 +12,7 @@ import {
     gridCellTextThemeVariants
 } from "../../styles/grid.styles";
 import { GridCommandCellComponent } from "../grid-command-cell/grid-command-cell.component";
-import { GridEditorComponent } from "../grid-editor/grid-editor.component";
+import { GridEditorComponent, type GridEditorCommitTrigger } from "../grid-editor/grid-editor.component";
 
 const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [tabindex]";
 
@@ -94,6 +94,9 @@ export class GridCellComponent {
         if (context?.mode !== "row" || context.rowUid !== this.row().uid) {
             return false;
         }
+        if (context.focusColumnId != null) {
+            return context.focusColumnId === this.column().id;
+        }
         return (
             this.gridService.visibleColumns().firstOrDefault(column => column.kind === "data" && column.editable) ===
             this.column()
@@ -102,12 +105,12 @@ export class GridCellComponent {
     public readonly column = input.required<Column>();
     public readonly row = input.required<Row>();
 
+    /** Enter or F2: edits the cell in cell mode; in row mode, edits the row from this cell's editor. */
     public handleLogicalCellEnter(originalEvent?: Event): void {
-        if (!this.gridService.editableOptions().enabled || !this.column().editable || this.column().kind !== "data") {
+        const editableOptions = this.gridService.editableOptions();
+        if (!editableOptions.enabled || this.column().kind !== "data") {
             return;
         }
-
-        const editableOptions = this.gridService.editableOptions();
         if (editableOptions.mode === "cell") {
             this.startEdit(originalEvent);
             return;
@@ -118,7 +121,8 @@ export class GridCellComponent {
             this.focusInnerEditor();
             return;
         }
-        this.gridService.startRowEdit(this.row(), originalEvent);
+        const column = this.column();
+        this.gridService.startRowEdit(this.row(), originalEvent, column.editable ? column.id : null);
     }
 
     protected onCellDoubleClick(event: MouseEvent): void {
@@ -131,23 +135,23 @@ export class GridCellComponent {
         this.gridService.patchCellEdit(this.row().uid, this.column().field, value);
     }
 
+    /** Escape: cancels the cell or row edit. Focus stays in the editor when the cancel is prevented. */
     protected onEditCancel(): void {
-        const context = this.gridService.editContext();
-        if (context?.mode === "cell") {
-            this.gridService.cancelEdit();
+        if (this.gridService.editContext() != null && this.gridService.cancelEdit(undefined, "escape")) {
+            this.focusHostCell();
         }
-        this.focusHostCell();
     }
 
-    protected onEditCommit(): void {
+    /** Ends a cell edit on Enter or blur; a row edit only on Enter, as focus moves between its editors. */
+    protected onEditCommit(trigger: GridEditorCommitTrigger): void {
         const context = this.gridService.editContext();
-        if (context && context.mode === "cell") {
+        if (context?.mode === "cell") {
             if (this.gridService.stopCellEdit()) {
                 this.focusHostCell();
             }
             return;
         }
-        if (this.#elementRef.nativeElement.contains(this.#elementRef.nativeElement.ownerDocument.activeElement)) {
+        if (context?.mode === "row" && trigger === "enter" && this.gridService.commitRowEdit()) {
             this.focusHostCell();
         }
     }

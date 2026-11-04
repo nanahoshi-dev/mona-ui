@@ -4,10 +4,11 @@ import { GridLockedCellDirective } from "../../directives/grid-locked-cell.direc
 import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
 import type { Column } from "../../models/Column";
 import type { StructuralColumnKind } from "../../models/StructuralColumn";
+import { GridNavigationService } from "../../services/grid-navigation.service";
 import { GridService } from "../../services/grid.service";
 import { gridListTableRowThemeVariants } from "../../styles/grid.styles";
 import { GridCommandCellComponent } from "../grid-command-cell/grid-command-cell.component";
-import { GridEditorComponent } from "../grid-editor/grid-editor.component";
+import { GridEditorComponent, type GridEditorCommitTrigger } from "../grid-editor/grid-editor.component";
 
 @Component({
     // Table rows cannot use element selectors.
@@ -30,6 +31,7 @@ import { GridEditorComponent } from "../grid-editor/grid-editor.component";
     }
 })
 export class GridAddRowComponent {
+    readonly #gridNavigationService = inject(GridNavigationService);
     protected readonly baseClass = computed(() => {
         return gridListTableRowThemeVariants({ selected: false });
     });
@@ -43,12 +45,18 @@ export class GridAddRowComponent {
         selection: "$selection"
     };
 
+    /** Escape discards the new row; focus goes to the nearest cell once the row is gone. */
     protected onCancel(): void {
-        this.gridService.cancelAddRow();
+        if (this.gridService.cancelAddRow(undefined, "escape")) {
+            this.#gridNavigationService.refocusAfterRender();
+        }
     }
 
-    protected onCommit(): void {
-        // Add rows are committed by the command column or toolbar save command.
+    /** Enter saves the new row (validated); leaving an editor keeps the row open. */
+    protected onCommit(trigger: GridEditorCommitTrigger): void {
+        if (trigger === "enter" && this.gridService.saveAddRow()) {
+            this.#gridNavigationService.refocusAfterRender();
+        }
     }
 
     protected onValueChange(column: Column, value: unknown): void {

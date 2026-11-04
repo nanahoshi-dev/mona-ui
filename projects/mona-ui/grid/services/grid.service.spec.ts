@@ -1345,10 +1345,10 @@ describe("GridService", () => {
 
     describe("i18n messages", () => {
         it("returns default english messages", () => {
-            expect(service.messages().saveRow).toBe("Save row");
-            expect(service.messages().cancelRowEdit).toBe("Cancel row edit");
-            expect(service.messages().editRow).toBe("Edit row");
-            expect(service.messages().removeRow).toBe("Remove row");
+            expect(service.messages().saveRow(2)).toBe("Save row 2");
+            expect(service.messages().cancelRowEdit(2)).toBe("Cancel editing row 2");
+            expect(service.messages().editRow(2)).toBe("Edit row 2");
+            expect(service.messages().removeRow(2)).toBe("Remove row 2");
             expect(service.messages().rowReorder).toBe("Row reorder");
             expect(service.messages().noData).toBe("No data");
             expect(service.messages().reorderRow(1)).toBe("Reorder row 1");
@@ -1369,7 +1369,7 @@ describe("GridService", () => {
 
             expect(service.messages().noData).toBe("Veri yok");
             expect(service.messages().rowReorder).toBe("Satır yeniden sıralama");
-            expect(service.messages().saveRow).toBe("Save row");
+            expect(service.messages().saveRow(2)).toBe("Save row 2");
 
             i18n.use(MONA_DEFAULT_LOCALE);
         });

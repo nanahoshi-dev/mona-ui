@@ -323,7 +323,15 @@ Selection state always lives in `selectedKeys`. Row clicks and checkbox clicks m
 </mona-grid>
 ```
 
-Each column's `type` (`"string"`, `"number"`, `"date"`, or `"boolean"`) selects the built-in editor rendered for that cell — a text box, numeric text box, date picker, or checkbox, respectively — unless the column provides its own `monaGridEditTemplate`. Set `editable="false"` on a `mona-grid-column` to exclude it from editing.
+Each column's `type` (`"string"`, `"number"`, `"date"`, or `"boolean"`) selects the built-in editor rendered for that cell — a text box, numeric text box, date picker, or checkbox, respectively — unless the column provides its own `monaGridEditTemplate`. Every column is editable except the one whose `field` is the `rowKey`; set `[editable]` on a `mona-grid-column` to change that, for example `[editable]="true"` to type the key of a new row.
+
+Each editor is named after its column title. Number text is read in the grid's locale (`1.234,5` in de-DE); a date picked in the calendar keeps the time of day the value had. A row without a value for an editable column starts that editor at `null`, and the field is left out of the saved row again if it stays empty.
+
+**Keys.** In cell mode, `Enter` or `F2` starts editing, `Enter` or leaving the editor saves, `Escape` cancels and `Tab` moves to the next editable cell. In row mode, `Enter` or `F2` on any cell edits the row from that cell's editor; `Tab` and `Shift+Tab` move between the row's editors and its Save and Cancel buttons, `Enter` saves the row (after validation) and `Escape` cancels it. The add row works the same way. `Enter` and `Escape` are left to an input method while it composes text. After Save, Cancel or Remove, focus moves to the row's cell, or to the nearest cell when the row is gone.
+
+**Events.** `save` is the one to persist from: its `rowData` holds the edited values and `originalRowData` the row as it was. `cellEdit` comes first in cell mode, with the field's old and new value; its `rowData` is the row as it was. Neither fires when nothing changed. To save on a server, prevent `save` to keep the editor open, then call `endEdit()` on the `GridEditableDirective` (from `viewChild(GridEditableDirective)`) when the request succeeds. `cancel` carries a `reason`: `"command"`, `"escape"`, `"switch"` (another edit or the add row started) or `"removed"` (the row left the data or the view, which can't be prevented). When `data` is replaced during an edit, the edit moves to the new item with the same `rowKey` and keeps what was typed. `remove` carries the row's `key` and its `index` in `data`.
+
+**Validation.** An invalid field is linked to its editor with `aria-describedby`, and a commit that fails validation is announced through a polite live region. The command buttons are named after their row (`Edit row 3`); `commandAriaLabel` in the options names them after something else, such as an order number.
 
 Custom edit templates receive a `GridEditTemplateContext` bound to the row's Signal Forms field:
 
@@ -586,7 +594,7 @@ Feature events come from the companion directives — see [`GridComponent` event
 | Name             | Type                        | Default     | Description                                                                                                                            |
 | ---------------- | --------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | `aggregate`      | `AggregateFunction \| null` | `null`      | The aggregate shown in the grid footer for this column.                                                                                |
-| `editable`       | `boolean`                   | `true`      | Whether this column is editable when the grid is in edit mode.                                                                         |
+| `editable`       | `boolean \| null`           | `null`      | Whether this column is editable when the grid is in edit mode. Unset, every column is editable except the `rowKey` field.              |
 | `field`          | `string`                    | `""`        | The field name of the data property to display in this column.                                                                         |
 | `format`         | `ColumnFormat \| null`      | `undefined` | Formats the displayed cell value. String formats apply to date, datetime, and time columns; a formatter function receives `(value, row, column)` and its result replaces the cell text. |
 | `hidden`         | `boolean`                   | `false`     | Whether this column is hidden from the rendered grid.                                                                                  |
@@ -710,17 +718,23 @@ No outputs.
 | `monaGridEditable` | `EditableOptions \| ""`              | `""`         | Enables inline editing. An empty string enables cell-mode editing with default settings; pass an object to choose `"cell"` or `"row"` mode and an optional validation `schema`. |
 | `newRowFactory`    | `() => Record<PropertyKey, unknown>` | `() => ({})` | Creates the initial data object used by the add-row editor.                                                                                                                     |
 
+#### Methods
+
+| Name        | Description                                                                                                   |
+| ----------- | ------------------------------------------------------------------------------------------------------------- |
+| `endEdit()` | Closes the current edit without reporting it, such as after a prevented `save` has been saved on the server. |
+
 #### Outputs
 
 | Name       | Type              | Description                                                       |
 | ---------- | ----------------- | ----------------------------------------------------------------- |
 | `add`      | `GridAddEvent`    | Emitted before the grid displays the new-row editor. Cancelable.  |
-| `cancel`   | `GridCancelEvent` | Emitted before an edit operation is canceled. Cancelable.         |
-| `cellEdit` | `CellEditEvent`   | Emitted when a cell is edited. Cancelable.                        |
+| `cancel`   | `GridCancelEvent` | Emitted before an edit operation is canceled, with a `reason`. Cancelable, except for `"removed"`. |
+| `cellEdit` | `CellEditEvent`   | Emitted before a changed cell is saved in cell mode. Cancelable.  |
 | `edit`     | `GridEditEvent`   | Emitted before a row enters edit mode. Cancelable.                |
-| `remove`   | `GridRemoveEvent` | Emitted when a row remove command is triggered. Cancelable.       |
-| `rowEdit`  | `RowEditEvent`    | Emitted when a row edit is committed (row mode only). Cancelable. |
-| `save`     | `GridSaveEvent`   | Emitted before an edited or new row is saved. Cancelable.         |
+| `remove`   | `GridRemoveEvent` | Emitted when a row remove command is triggered, with the row's `key` and `index`. Cancelable. |
+| `rowEdit`  | `RowEditEvent`    | Emitted after a changed row is saved (row mode only).             |
+| `save`     | `GridSaveEvent`   | Emitted before a changed or new row is saved. Cancelable: the editor stays open. |
 
 ---
 
@@ -880,7 +894,7 @@ No inputs, no outputs.
 | -------------------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------- |
 | `aggregate`                                  | `AggregateFunction \| null` | The aggregate function applied to this column's footer value.                                       |
 | `dataType`                                   | `DataType`                  | The column's declared data type.                                                                    |
-| `editable`                                   | `boolean`                   | Whether the column can be edited.                                                                   |
+| `editable`                                   | `boolean`                   | Whether the column can be edited, with the `rowKey` default resolved.                               |
 | `field`                                      | `string`                    | The bound data field name.                                                                          |
 | `format`                                     | `ColumnFormat \| null`      | The format string or formatter function applied to cell values.                                     |
 | `hidden`                                     | `boolean`                   | Whether the column is hidden.                                                                       |
@@ -901,6 +915,7 @@ No inputs, no outputs.
 
 | Field     | Type                                 | Description                                                       |
 | --------- | ------------------------------------ | ----------------------------------------------------------------- |
+| `commandAriaLabel` | `((command: GridRowCommand, rowData, absoluteIndex: number) => string) \| undefined` | Names a row's Edit, Remove, Save or Cancel button; by default they are named by position (`Edit row 3`). |
 | `enabled` | `boolean \| undefined`               | Whether editing is active. On unless set to `false`; options replace earlier ones.                                        |
 | `mode`    | `"cell" \| "row"`                    | Whether editing commits per cell or per row.                      |
 | `schema`  | `GridEditSchemaFactory \| undefined` | Builds a Signal Forms validation schema for the row being edited. |
@@ -995,7 +1010,7 @@ No inputs, no outputs.
 
 #### Event classes
 
-`ColumnSortEvent`, `ColumnReorderEvent`, `CellEditEvent`, `RowEditEvent`, `GridAddEvent`, `GridRemoveEvent`, `GridSaveEvent`, `GridCancelEvent`, and `GridEditEvent` all extend `PreventableEvent` (`preventDefault()`/`isDefaultPrevented()`) and expose a `.column`, `.rowData`, and/or `.session` getter matching the corresponding output above. `ColumnResizeEvent` is a plain `{ column, newWidth, oldWidth }` object, not a class.
+`ColumnSortEvent`, `ColumnReorderEvent`, `CellEditEvent`, `RowEditEvent`, `GridAddEvent`, `GridRemoveEvent`, `GridSaveEvent`, `GridCancelEvent`, and `GridEditEvent` all extend `PreventableEvent` (`preventDefault()`/`isDefaultPrevented()`) and expose a `.column`, `.rowData`, and/or `.session` getter matching the corresponding output above. `ColumnResizeEvent` is a plain `{ column, newWidth, oldWidth }` object, not a class. `GridCancelEvent.reason` is a `GridCancelReason`; `GridRemoveEvent` also has `key` and `index`.
 
 #### `ResizeMethod`
 

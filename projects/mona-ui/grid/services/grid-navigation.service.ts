@@ -1,5 +1,5 @@
 import { DOCUMENT } from "@angular/common";
-import { inject, Injectable, signal } from "@angular/core";
+import { afterNextRender, inject, Injectable, Injector, signal } from "@angular/core";
 import type { IEnumerable, KeyValuePair } from "@mirei/ts-collections";
 import { ImmutableDictionary } from "@mirei/ts-collections";
 import { v4 } from "uuid";
@@ -11,6 +11,7 @@ const FALLBACK_PAGE_ROWS = 10;
 export class GridNavigationService {
     readonly #cellElementDict = signal(ImmutableDictionary.create<string, NavigationData>());
     readonly #document = inject(DOCUMENT);
+    readonly #injector = inject(Injector);
     readonly #lastFocusedCellKey = signal<string | null>(null);
     readonly #lastFocusedCellSnapshot = signal<NavigationCellSnapshot | null>(null);
     readonly #lastNonGroupCellKey = signal<string | null>(null);
@@ -123,6 +124,23 @@ export class GridNavigationService {
     /** Records that focus left the cell itself, for a control inside it or outside the grid. */
     public notifyCellBlur(): void {
         this.#cellHasFocus = false;
+    }
+
+    /**
+     * After the next render, focuses the active cell, or the nearest one when the active cell's row is gone,
+     * if focus was lost with it: after the add row closes or a row is removed.
+     */
+    public refocusAfterRender(): void {
+        afterNextRender(
+            {
+                write: () => {
+                    if (this.#focusIsLost(null)) {
+                        this.focusActiveCellOrFirstHeader();
+                    }
+                }
+            },
+            { injector: this.#injector }
+        );
     }
 
     public registerCell(data: NavigationData): string {

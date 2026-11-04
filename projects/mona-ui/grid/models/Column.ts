@@ -21,8 +21,14 @@ export interface ColumnConfig {
     readonly aggregate: AggregateFunction | null;
     readonly cellTemplate: TemplateRef<unknown> | null;
     readonly commandTemplate: TemplateRef<unknown> | null;
+    /**
+     * The `editable` input as the consumer set it; `null` leaves it to the default, which is every column but
+     * the `rowKey` field. Left out, `editable` is used as given.
+     */
+    readonly configuredEditable?: boolean | null;
     readonly dataType: DataType;
     readonly editTemplate: TemplateRef<unknown> | null;
+    /** Whether the column can be edited. The grid resolves it from {@link configuredEditable} when that is set. */
     readonly editable: boolean;
     readonly field: string;
     readonly filterable: boolean;

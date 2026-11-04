@@ -285,8 +285,8 @@ describe("GridComponent keyboard navigation", () => {
     it("hides the built-in row edit command in cell edit mode", () => {
         const root = fixture.nativeElement as ParentNode;
 
-        expect(root.querySelector('tbody button[aria-label="Edit row"]')).toBeNull();
-        expect(getRequiredButton(root, 'tbody button[aria-label="Remove row"]').getAttribute("tabindex")).toBe("-1");
+        expect(root.querySelector('tbody button[aria-label="Edit row 1"]')).toBeNull();
+        expect(getRequiredButton(root, 'tbody button[aria-label="Remove row 1"]').getAttribute("tabindex")).toBe("-1");
     });
 
     it("removes built-in command buttons from the natural Tab order in row edit mode", async () => {
@@ -294,8 +294,8 @@ describe("GridComponent keyboard navigation", () => {
         await settleFixture(fixture);
 
         const root = fixture.nativeElement as ParentNode;
-        const editButton = getRequiredButton(root, 'tbody button[aria-label="Edit row"]');
-        const removeButton = getRequiredButton(root, 'tbody button[aria-label="Remove row"]');
+        const editButton = getRequiredButton(root, 'tbody button[aria-label="Edit row 1"]');
+        const removeButton = getRequiredButton(root, 'tbody button[aria-label="Remove row 1"]');
 
         expect(editButton.getAttribute("tabindex")).toBe("-1");
         expect(removeButton.getAttribute("tabindex")).toBe("-1");
@@ -307,7 +307,7 @@ describe("GridComponent keyboard navigation", () => {
 
         const root = fixture.nativeElement as ParentNode;
         const commandCell = getRequiredTableCell(root, "tbody tr[role='row'] td[monaGridLogicalCell]:last-child");
-        const editButton = getRequiredButton(commandCell, 'button[aria-label="Edit row"]');
+        const editButton = getRequiredButton(commandCell, 'button[aria-label="Edit row 1"]');
 
         commandCell.focus();
         dispatchKeydown(commandCell, "Enter");
@@ -665,13 +665,13 @@ describe("GridComponent keyboard navigation", () => {
             expect(document.activeElement).toBe(getRequiredButton(nameCell, ".custom-name-editor"));
         });
 
-        it("does not move between cells on Tab in row edit mode", async () => {
+        it("moves between the row's editors on Tab in row edit mode (GE6)", async () => {
             fixture.componentInstance.editableOptions.set({ enabled: true, mode: "row" });
             await settleFixture(fixture);
 
             const root = fixture.nativeElement as ParentNode;
             const commandCell = getRequiredTableCell(root, "tbody tr[role='row'] td[monaGridLogicalCell]:last-child");
-            const editButton = getRequiredButton(commandCell, 'button[aria-label="Edit row"]');
+            const editButton = getRequiredButton(commandCell, 'button[aria-label="Edit row 1"]');
             editButton.click();
             await settleFixture(fixture);
 
@@ -679,7 +679,8 @@ describe("GridComponent keyboard navigation", () => {
             const event = dispatchEditorKeydown(nameCell, "Tab");
             await settleFixture(fixture);
 
-            expect(event.defaultPrevented).toBe(false);
+            expect(event.defaultPrevented).toBe(true);
+            expect(document.activeElement).toBe(getRequiredInput(getRequiredDataCell(root, "active"), "input"));
             expect(isEditing("name")).toBe(true);
             expect(isEditing("amount")).toBe(true);
             expect(isEditing("name", 1)).toBe(false);

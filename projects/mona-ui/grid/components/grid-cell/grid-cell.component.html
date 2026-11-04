@@ -17,7 +17,7 @@
                 [autoFocus]="shouldAutoFocusEditor()"
                 [session]="session"
                 [tabNavigationEnabled]="editContextIsCellMode()"
-                (commit)="onEditCommit()"
+                (commit)="onEditCommit($event)"
                 (cancelEdit)="onEditCancel()"
                 (tabNavigate)="onEditTabNavigate($event)"></mona-grid-editor>
         } @else if (column().cellTemplate) {

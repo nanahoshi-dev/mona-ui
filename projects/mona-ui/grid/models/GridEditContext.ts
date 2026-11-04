@@ -11,6 +11,8 @@ export interface CellEditContext {
 }
 
 export interface RowEditContext {
+    /** The column whose editor takes focus; the first editable column when null. */
+    readonly focusColumnId: string | null;
     readonly mode: "row";
     readonly row: Row;
     readonly rowUid: string;
