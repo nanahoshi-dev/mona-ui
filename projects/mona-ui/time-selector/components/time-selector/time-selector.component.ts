@@ -155,10 +155,11 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
     public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
-     * @description Moves focus to the hour list when the selector first renders.
-     * @default true
+     * @description Moves focus to the hour list when the selector first renders. The pickers set it for their popups;
+     * an inline selector leaves focus where it is, so the page doesn't jump to it on load.
+     * @default false
      */
-    public readonly focusOnMount = input(true, { transform: booleanAttribute });
+    public readonly focusOnMount = input(false, { transform: booleanAttribute });
 
     /**
      * @description Shows the Set button. Without it, every change of hour, minute, second or AM/PM made by the user

@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { Component, computed, inject, input, signal } from "@angular/core";
+import { booleanAttribute, Component, computed, inject, input, signal } from "@angular/core";
 import { disabled, form, FormField, maxDate, minDate, readonly, required } from "@angular/forms/signals";
 import { LucideBadgeQuestionMark, LucideBriefcaseBusiness, LucideDynamicIcon, LucideTentTree } from "@lucide/angular";
 import {
@@ -222,7 +222,7 @@ class DatePickerWrapperComponent implements ComponentInputsAsSignal<DatePickerCo
         const isWeekend = DateTime.fromJSDate(value).weekday === 6 || DateTime.fromJSDate(value).weekday === 7;
         return isWeekend ? LucideTentTree : LucideBriefcaseBusiness;
     });
-    public readonly disabled = input<ReturnType<DatePickerComponent["disabled"]>>(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly disabledDates = input<ReturnType<DatePickerComponent["disabledDates"]>>([]);
     public readonly firstDay = input<ReturnType<DatePickerComponent["firstDay"]>>("monday");
     public readonly format = input<ReturnType<DatePickerComponent["format"]>>("dd/MM/yyyy");
@@ -236,14 +236,14 @@ class DatePickerWrapperComponent implements ComponentInputsAsSignal<DatePickerCo
     public readonly popupClass = input<ReturnType<DatePickerComponent["popupClass"]>>("");
     public readonly popupHeight = input<ReturnType<DatePickerComponent["popupHeight"]>>(null);
     public readonly popupWidth = input<ReturnType<DatePickerComponent["popupWidth"]>>(null);
-    public readonly readonly = input<ReturnType<DatePickerComponent["readonly"]>>(false);
-    public readonly readonlyInput = input<ReturnType<DatePickerComponent["readonlyInput"]>>(false);
-    public readonly required = input<ReturnType<DatePickerComponent["required"]>>(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly readonlyInput = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<DatePickerComponent["rounded"]>>("none");
-    public readonly showClearButton = input<ReturnType<DatePickerComponent["showClearButton"]>>(false);
+    public readonly showClearButton = input(false, { transform: booleanAttribute });
     public readonly size = input<ReturnType<DatePickerComponent["size"]>>("medium");
     public readonly userClass = input<ReturnType<DatePickerComponent["userClass"]>>("");
-    public readonly weekNumber = input<ReturnType<DatePickerComponent["weekNumber"]>>(false);
+    public readonly weekNumber = input(false, { transform: booleanAttribute });
 
     protected onPopupClose(event: PreventableEvent) {
         const preventClose = this.features()["preventClose"].active;

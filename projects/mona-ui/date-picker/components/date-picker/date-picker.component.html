@@ -1,17 +1,21 @@
 <mona-text-box
-    (inputBlur)="onDateInputBlur()"
-    (valueChange)="onDateStringEdit($event)"
+    (inputBlur)="onInputBlur()"
+    (valueChange)="typedInput.edit($event)"
+    [aria-describedby]="ariaDescribedBy()"
+    [aria-label]="ariaLabel()"
+    [aria-labelledby]="ariaLabelledBy()"
     [disabled]="disabled()"
-    [value]="currentDateString()"
+    [inputId]="inputId()"
+    [value]="typedInput.text()"
     [placeholder]="placeholder()"
     [readonly]="readonly()"
     [inputAttributes]="inputAttributes()"
-    [invalid]="invalid()"
+    [invalid]="invalidState()"
     [required]="required()"
     [clearButton]="showClearButton()"
     [rounded]="rounded()"
     [size]="size()"
-    [touched]="touched()">
+    [touched]="invalidState() || touched()">
     @if (prefixTemplate()) {
         <ng-template monaTextBoxPrefixTemplate>
             <ng-container [ngTemplateOutlet]="prefixTemplate()"></ng-container>

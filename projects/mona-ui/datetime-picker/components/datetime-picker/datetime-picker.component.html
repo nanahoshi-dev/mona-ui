@@ -1,17 +1,21 @@
 <mona-text-box
-    (inputBlur)="onDateInputBlur()"
-    (valueChange)="onDateStringEdit($event)"
+    (inputBlur)="onInputBlur()"
+    (valueChange)="typedInput.edit($event)"
+    [aria-describedby]="ariaDescribedBy()"
+    [aria-label]="ariaLabel()"
+    [aria-labelledby]="ariaLabelledBy()"
     [clearButton]="showClearButton()"
     [disabled]="disabled()"
     [inputAttributes]="inputAttributes()"
-    [invalid]="invalid()"
+    [inputId]="inputId()"
+    [invalid]="invalidState()"
     [placeholder]="placeholder()"
     [readonly]="readonly()"
     [required]="required()"
     [rounded]="rounded()"
     [size]="size()"
-    [touched]="touched()"
-    [value]="currentDateString()">
+    [touched]="invalidState() || touched()"
+    [value]="typedInput.text()">
     @if (prefixTemplate()) {
         <ng-template monaTextBoxPrefixTemplate>
             <ng-container [ngTemplateOutlet]="prefixTemplate()"></ng-container>
@@ -46,27 +50,50 @@
         [attr.aria-label]="messages().dateTimePicker"
         cdkTrapFocus>
         <div [class]="headerClass()">
-            <mona-button-group
-                selection="single"
-                [allowEmpty]="false"
-                class="w-full"
-                [disabled]="disabled()"
-                [size]="size()"
-                [rounded]="rounded()"
-                role="tablist">
-                <button monaButton [selected]="activeView() === 'date'" (click)="activeView.set('date')" role="tab">
+            <div class="flex w-full gap-1" role="tablist" (keydown)="onTabKeydown($event)">
+                <button
+                    monaButton
+                    type="button"
+                    role="tab"
+                    class="flex-1"
+                    [id]="dateTabId"
+                    [attr.aria-controls]="panelId"
+                    [attr.aria-selected]="activeView() === 'date'"
+                    [disabled]="disabled()"
+                    [rounded]="rounded()"
+                    [selected]="activeView() === 'date'"
+                    [size]="size()"
+                    [tabindex]="activeView() === 'date' ? 0 : -1"
+                    (click)="selectTab('date')">
                     {{ messages().date }}
                 </button>
-                <button monaButton [selected]="activeView() === 'time'" (click)="activeView.set('time')" role="tab">
+                <button
+                    monaButton
+                    type="button"
+                    role="tab"
+                    class="flex-1"
+                    [id]="timeTabId"
+                    [attr.aria-controls]="panelId"
+                    [attr.aria-selected]="activeView() === 'time'"
+                    [disabled]="disabled()"
+                    [rounded]="rounded()"
+                    [selected]="activeView() === 'time'"
+                    [size]="size()"
+                    [tabindex]="activeView() === 'time' ? 0 : -1"
+                    (click)="selectTab('time')">
                     {{ messages().time }}
                 </button>
-            </mona-button-group>
+            </div>
         </div>
-        <div class="overflow-hidden">
+        <div
+            class="overflow-hidden"
+            role="tabpanel"
+            [id]="panelId"
+            [attr.aria-labelledby]="activeView() === 'date' ? dateTabId : timeTabId">
             @if (activeView() === "date") {
-                <div class="flex h-full items-center justify-center" [attr.aria-label]="messages().calendar">
+                <div class="flex h-full items-center justify-center">
                     <mona-calendar
-                        focusOnMount
+                        [focusOnMount]="focusViewOnMount()"
                         [disabledDates]="disabledDates()"
                         [minDate]="min()"
                         [maxDate]="max()"
@@ -103,8 +130,9 @@
                 </div>
             }
             @if (activeView() === "time") {
-                <div class="flex h-full max-h-64 items-center justify-center" [attr.aria-label]="messages().timePicker">
+                <div class="flex h-full max-h-64 items-center justify-center">
                     <mona-time-selector
+                        [focusOnMount]="focusViewOnMount()"
                         [value]="navigatedDate()"
                         (valueChange)="onTimeSelectorValueChange($event)"
                         [disabled]="disabled()"
@@ -117,7 +145,7 @@
                         [hourStep]="hourStep()"
                         [minuteStep]="minuteStep()"
                         [secondStep]="secondStep()"
-                        [hourFormat]="hourFormat()"
+                        [hourFormat]="effectiveHourFormat()"
                         [showSeconds]="showSeconds()"></mona-time-selector>
                 </div>
             }

@@ -1,17 +1,21 @@
 <mona-text-box
+    [aria-describedby]="ariaDescribedBy()"
+    [aria-label]="ariaLabel()"
+    [aria-labelledby]="ariaLabelledBy()"
     [disabled]="disabled()"
+    [inputId]="inputId()"
     [readonly]="readonly()"
     [required]="required()"
-    [value]="currentDateString()"
+    [value]="typedInput.text()"
     [inputAttributes]="inputAttributes()"
-    [invalid]="invalid()"
+    [invalid]="invalidState()"
     [placeholder]="placeholder()"
     [rounded]="rounded()"
     [size]="size()"
-    [touched]="touched()"
+    [touched]="invalidState() || touched()"
     [clearButton]="showClearButton()"
-    (valueChange)="onDateStringEdit($event)"
-    (inputBlur)="onTimeInputBlur()">
+    (valueChange)="typedInput.edit($event)"
+    (inputBlur)="onInputBlur()">
     <ng-template monaTextBoxSuffixTemplate>
         <button
             monaButton
@@ -40,13 +44,14 @@
         [attr.aria-label]="messages().timePicker"
         cdkTrapFocus>
         <mona-time-selector
+            focusOnMount
             [value]="value()"
             (valueChange)="onTimeSelectorValueChange($event)"
             [max]="max()"
             [min]="min()"
             [disabled]="disabled()"
             [readonly]="readonly()"
-            [hourFormat]="hourFormat()"
+            [hourFormat]="effectiveHourFormat()"
             [hourStep]="hourStep()"
             [minuteStep]="minuteStep()"
             [secondStep]="secondStep()"
