@@ -157,6 +157,7 @@ describe("audit-locales", () => {
         it("allows only the established Indonesian copied-English exceptions", () => {
             expect(isAllowedLocaleCopyException("id-ID", "dialog.ok", "OK")).toBe(true);
             expect(isAllowedLocaleCopyException("id-ID", "multiSelect.itemsCount", "item")).toBe(true);
+            expect(isAllowedLocaleCopyException("id-ID", "pager.rangeStatus", "item")).toBe(true);
             expect(isAllowedLocaleCopyException("id-ID", "scrollView.slide", "slide")).toBe(true);
             expect(isAllowedLocaleCopyException("id-ID", "timeSelector.am", "AM")).toBe(true);
             expect(isAllowedLocaleCopyException("id-ID", "timeSelector.amPm", "AM/PM")).toBe(true);
@@ -165,7 +166,7 @@ describe("audit-locales", () => {
             // Wrong paths / unrelated English must remain rejected.
             expect(isAllowedLocaleCopyException("id-ID", "dialog.cancel", "Cancel")).toBe(false);
             expect(isAllowedLocaleCopyException("id-ID", "editor.bold", "Bold")).toBe(false);
-            expect(isAllowedLocaleCopyException("id-ID", "pager.rangeStatus", "item")).toBe(false);
+            expect(isAllowedLocaleCopyException("id-ID", "pager.pageLabel", "item")).toBe(false);
             expect(isAllowedLocaleCopyException("id-ID", "scrollView.carousel", "carousel")).toBe(false);
 
             // Wrong values for otherwise valid paths must remain rejected.

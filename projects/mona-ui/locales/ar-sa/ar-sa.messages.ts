@@ -295,6 +295,7 @@ export const AR_SA_MESSAGES = {
     },
     pager: {
         firstPageLabel: "الصفحة الأولى",
+        itemsPerPageLabel: "عدد العناصر في الصفحة",
         jumpBackwardLabel: (pages: number) =>
             `للخلف: ${plural(PLURAL_RULES.select(pages), { zero: () => `${localizeNumber(pages)} صفحات`, one: () => "صفحة واحدة", two: () => "صفحتان", few: () => `${localizeNumber(pages)} صفحات`, many: () => `${localizeNumber(pages)} صفحة`, other: () => `${localizeNumber(pages)} صفحة` })}`,
         jumpForwardLabel: (pages: number) =>
@@ -302,11 +303,15 @@ export const AR_SA_MESSAGES = {
         lastPageLabel: "الصفحة الأخيرة",
         nextPageLabel: "الصفحة التالية",
         ofText: "من",
+        pageInputPrefix: (_totalPages: number) => "الصفحة",
+        pageInputSuffix: (totalPages: number) => `من ${localizeNumber(totalPages)}`,
         pageLabel: (page: number) => `الصفحة ${localizeNumber(page)}`,
+        pageSelectLabel: "الصفحة",
         pageSizeLabel: (pageSize: number) => `عدد العناصر في الصفحة: ${localizeNumber(pageSize)}`,
         pageStatus: (page: number, totalPages: number) =>
             `الصفحة ${localizeNumber(page)} من ${localizeNumber(totalPages)}`,
         pageText: "الصفحة",
+        pagerLabel: "ترقيم الصفحات",
         previousPageLabel: "الصفحة السابقة",
         rangeStatus: (start: number, end: number, total: number) =>
             `${localizeNumber(start)}–${localizeNumber(end)} من ${localizeNumber(total)}`

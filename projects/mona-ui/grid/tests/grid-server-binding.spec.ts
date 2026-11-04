@@ -183,12 +183,12 @@ describe("server-bound grid interactions", () => {
         expect(host.events).toEqual([{ skip: 0, take: 10, sort: [], filter: [filter] }]);
     });
 
-    it("requests one final first-page state after page-size selection", async () => {
+    it("requests one state that keeps the first item in view after page-size selection", async () => {
         const pager = fixture.debugElement.query(By.directive(PagerComponent));
         const dropdown = pager.query(By.directive(DropdownListComponent));
-        dropdown.triggerEventHandler("ngModelChange", 20);
+        dropdown.triggerEventHandler("valueChange", 20);
         await settle();
-        expect(host.events).toEqual([{ skip: 0, take: 20, sort: [], filter: [] }]);
+        expect(host.events).toEqual([{ skip: 40, take: 20, sort: [], filter: [] }]);
     });
 
     it("sorts the UI and requests data without changing the loaded page order", async () => {

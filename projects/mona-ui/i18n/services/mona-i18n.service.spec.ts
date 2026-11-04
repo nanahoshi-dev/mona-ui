@@ -9,15 +9,20 @@ import { MonaI18nService } from "./mona-i18n.service";
 
 const SAMPLE_PAGER_FALLBACK: MonaPagerMessages = {
     firstPageLabel: "First page",
+    itemsPerPageLabel: "Items per page",
     jumpBackwardLabel: pages => `Jump back ${pages} pages`,
     jumpForwardLabel: pages => `Jump forward ${pages} pages`,
     lastPageLabel: "Last page",
     nextPageLabel: "Next page",
     ofText: "of",
+    pageInputPrefix: () => "Page",
+    pageInputSuffix: totalPages => `of ${totalPages}`,
     pageLabel: page => `Page ${page}`,
+    pageSelectLabel: "Page",
     pageSizeLabel: pageSize => `${pageSize} / page`,
     pageStatus: (page, totalPages) => `Page ${page} of ${totalPages}`,
     pageText: "Page",
+    pagerLabel: "Pagination",
     previousPageLabel: "Previous page",
     rangeStatus: (start, end, total) => `${start} - ${end} of ${total} items`
 };

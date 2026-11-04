@@ -264,7 +264,7 @@ describe("GridComponent keyboard navigation", () => {
         fixture.detectChanges();
 
         expect(event.defaultPrevented).toBe(true);
-        expect(document.activeElement).toBe(pager);
+        expect(document.activeElement).toBe(pager.querySelector("button[aria-current='page']"));
     });
 
     it("keeps the last navigated body cell as the roving Tab stop", () => {
@@ -440,7 +440,7 @@ describe("GridComponent keyboard navigation", () => {
             fixture.detectChanges();
 
             expect(event.defaultPrevented).toBe(true);
-            expect(document.activeElement).toBe(pager);
+            expect(document.activeElement).toBe(pager.querySelector("button[aria-current='page']"));
             expect(nameCell.querySelector("mona-grid-editor")).toBeNull();
         });
 

@@ -310,18 +310,23 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
     },
     pager: {
         firstPageLabel: null,
+        itemsPerPageLabel: null,
         jumpBackwardLabel: [{ name: "pages", type: "number" }],
         jumpForwardLabel: [{ name: "pages", type: "number" }],
         lastPageLabel: null,
         nextPageLabel: null,
         ofText: null,
+        pageInputPrefix: [{ name: "totalPages", type: "number" }],
+        pageInputSuffix: [{ name: "totalPages", type: "number" }],
         pageLabel: [{ name: "page", type: "number" }],
+        pageSelectLabel: null,
         pageSizeLabel: [{ name: "pageSize", type: "number" }],
         pageStatus: [
             { name: "page", type: "number" },
             { name: "totalPages", type: "number" }
         ],
         pageText: null,
+        pagerLabel: null,
         previousPageLabel: null,
         rangeStatus: [
             { name: "start", type: "number" },

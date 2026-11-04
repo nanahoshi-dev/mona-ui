@@ -286,16 +286,21 @@ export const ID_ID_MESSAGES = {
     },
     pager: {
         firstPageLabel: "Halaman pertama",
+        itemsPerPageLabel: "Item per halaman",
         jumpBackwardLabel: (pages: number) => `Mundur ${localizeNumber(pages)} halaman`,
         jumpForwardLabel: (pages: number) => `Maju ${localizeNumber(pages)} halaman`,
         lastPageLabel: "Halaman terakhir",
         nextPageLabel: "Halaman berikutnya",
         ofText: "/",
+        pageInputPrefix: (_totalPages: number) => "Halaman",
+        pageInputSuffix: (totalPages: number) => `dari ${localizeNumber(totalPages)}`,
         pageLabel: (page: number) => `Halaman ${localizeNumber(page)}`,
+        pageSelectLabel: "Halaman",
         pageSizeLabel: (pageSize: number) => `${localizeNumber(pageSize)} per halaman`,
         pageStatus: (page: number, totalPages: number) =>
             `Halaman ${localizeNumber(page)} dari ${localizeNumber(totalPages)}`,
         pageText: "Halaman",
+        pagerLabel: "Penomoran halaman",
         previousPageLabel: "Halaman sebelumnya",
         rangeStatus: (start: number, end: number, total: number) =>
             `${localizeNumber(start)} - ${localizeNumber(end)} dari ${localizeNumber(total)} item`

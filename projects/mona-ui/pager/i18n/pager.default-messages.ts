@@ -7,18 +7,34 @@ function localizeNumber(value: number, options?: Intl.NumberFormatOptions): stri
     return formatNumber(value, "en-US", options);
 }
 
+const PLURAL_RULES = new Intl.PluralRules("en-US");
+
+function plural(
+    category: Intl.LDMLPluralRule,
+    forms: Partial<Record<Intl.LDMLPluralRule, () => string>> & { readonly other: () => string }
+): string {
+    return (forms[category] ?? forms.other)();
+}
+
 export const PAGER_DEFAULT_MESSAGES = {
     firstPageLabel: "First page",
-    jumpBackwardLabel: (pages: number) => `Jump back ${localizeNumber(pages)} pages`,
-    jumpForwardLabel: (pages: number) => `Jump forward ${localizeNumber(pages)} pages`,
+    itemsPerPageLabel: "Items per page",
+    jumpBackwardLabel: (pages: number) =>
+        `Jump back ${plural(PLURAL_RULES.select(pages), { one: () => `${localizeNumber(pages)} page`, other: () => `${localizeNumber(pages)} pages` })}`,
+    jumpForwardLabel: (pages: number) =>
+        `Jump forward ${plural(PLURAL_RULES.select(pages), { one: () => `${localizeNumber(pages)} page`, other: () => `${localizeNumber(pages)} pages` })}`,
     lastPageLabel: "Last page",
     nextPageLabel: "Next page",
     ofText: "of",
+    pageInputPrefix: (_totalPages: number) => "Page",
+    pageInputSuffix: (totalPages: number) => `of ${localizeNumber(totalPages)}`,
     pageLabel: (page: number) => `Page ${localizeNumber(page)}`,
+    pageSelectLabel: "Page",
     pageSizeLabel: (pageSize: number) => `${localizeNumber(pageSize)} / page`,
     pageStatus: (page: number, totalPages: number) => `Page ${localizeNumber(page)} of ${localizeNumber(totalPages)}`,
     pageText: "Page",
+    pagerLabel: "Pagination",
     previousPageLabel: "Previous page",
     rangeStatus: (start: number, end: number, total: number) =>
-        `${localizeNumber(start)} - ${localizeNumber(end)} of ${localizeNumber(total)} items`
+        `${localizeNumber(start)} - ${localizeNumber(end)} of ${plural(PLURAL_RULES.select(total), { one: () => `${localizeNumber(total)} item`, other: () => `${localizeNumber(total)} items` })}`
 } satisfies MonaPagerMessages;

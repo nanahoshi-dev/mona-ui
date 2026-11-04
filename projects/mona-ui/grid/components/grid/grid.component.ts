@@ -38,7 +38,7 @@ import {
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ChipComponent } from "@nanahoshi/mona-ui/chip";
 import { FilterService } from "@nanahoshi/mona-ui/filter";
-import { type PageChangeEvent, PagerComponent, PageSizeChangeEvent } from "@nanahoshi/mona-ui/pager";
+import { type PageChangeEvent, PagerComponent } from "@nanahoshi/mona-ui/pager";
 import { PlaceholderComponent } from "@nanahoshi/mona-ui/placeholder";
 import { PopupComponent } from "@nanahoshi/mona-ui/popup";
 import {
@@ -569,14 +569,6 @@ export class GridComponent<T> implements GridVariantInput {
             if (scrollableElement) {
                 scrollableElement.scrollTop = 0;
             }
-        }
-    }
-
-    protected onPageSizeChange(data: PageSizeChangeEvent): void {
-        const previous = this.gridService.paginationState();
-        this.gridService.setPageState({ skip: 0, take: data.newPageSize });
-        if (previous.skip !== 0 || previous.take !== data.newPageSize) {
-            this.gridService.requestDataStateChange();
         }
     }
 

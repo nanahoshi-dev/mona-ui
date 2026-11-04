@@ -295,6 +295,7 @@ export const FR_FR_MESSAGES = {
     },
     pager: {
         firstPageLabel: "Première page",
+        itemsPerPageLabel: "Éléments par page",
         jumpBackwardLabel: (pages: number) =>
             pages === 1 ? "Reculer de 1 page" : `Reculer de ${localizeNumber(pages)} pages`,
         jumpForwardLabel: (pages: number) =>
@@ -302,11 +303,15 @@ export const FR_FR_MESSAGES = {
         lastPageLabel: "Dernière page",
         nextPageLabel: "Page suivante",
         ofText: "sur",
+        pageInputPrefix: (_totalPages: number) => "Page",
+        pageInputSuffix: (totalPages: number) => `sur ${localizeNumber(totalPages)}`,
         pageLabel: (page: number) => `Page ${localizeNumber(page)}`,
+        pageSelectLabel: "Page",
         pageSizeLabel: (pageSize: number) => `${localizeNumber(pageSize)} par page`,
         pageStatus: (page: number, totalPages: number) =>
             `Page ${localizeNumber(page)} sur ${localizeNumber(totalPages)}`,
         pageText: "Page",
+        pagerLabel: "Pagination",
         previousPageLabel: "Page précédente",
         rangeStatus: (start: number, end: number, total: number) =>
             total === 1

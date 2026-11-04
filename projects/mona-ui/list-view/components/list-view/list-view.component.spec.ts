@@ -1,6 +1,5 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { PageSizeChangeEvent } from "../../../pager/models/PageSizeChangeEvent";
 import { ListService } from "@nanahoshi/mona-ui/internal/list";
 import { PagerComponent } from "../../../pager/components/pager/pager.component";
 import { ListViewFooterTemplateDirective } from "../../directives/list-view-footer-template.directive";
@@ -16,7 +15,6 @@ interface ListViewComponentInternals {
     itemTemplate: () => unknown;
     listService: ListService<unknown>;
     onPageChange: (event: { page: number; skip: number; take: number }) => void;
-    onPageSizeChange: (event: PageSizeChangeEvent) => void;
 }
 
 describe("ListViewComponent", () => {
@@ -50,10 +48,10 @@ describe("ListViewComponent", () => {
         expect(internals.listService.pageState()).toEqual(expect.objectContaining({ page: 3, skip: 20 }));
     });
 
-    it("should reset the page and skip and apply the new page size on page size change", () => {
+    it("should apply the new page size from the page change", () => {
         const internals = component as unknown as ListViewComponentInternals;
         internals.listService.pageState.set({ page: 3, skip: 20, take: 10 });
-        internals.onPageSizeChange(new PageSizeChangeEvent(25, 10));
+        internals.onPageChange({ page: 1, skip: 0, take: 25 });
         expect(internals.listService.pageState()).toEqual({ page: 1, skip: 0, take: 25 });
     });
 

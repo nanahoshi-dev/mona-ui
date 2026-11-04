@@ -294,6 +294,7 @@ export const DE_DE_MESSAGES = {
     },
     pager: {
         firstPageLabel: "Erste Seite",
+        itemsPerPageLabel: "Einträge pro Seite",
         jumpBackwardLabel: (pages: number) =>
             pages === 1 ? "Um 1 Seite zurückspringen" : `Um ${localizeNumber(pages)} Seiten zurückspringen`,
         jumpForwardLabel: (pages: number) =>
@@ -301,11 +302,15 @@ export const DE_DE_MESSAGES = {
         lastPageLabel: "Letzte Seite",
         nextPageLabel: "Nächste Seite",
         ofText: "von",
+        pageInputPrefix: (_totalPages: number) => "Seite",
+        pageInputSuffix: (totalPages: number) => `von ${localizeNumber(totalPages)}`,
         pageLabel: (page: number) => `Seite ${localizeNumber(page)}`,
+        pageSelectLabel: "Seite",
         pageSizeLabel: (pageSize: number) => `${localizeNumber(pageSize)} pro Seite`,
         pageStatus: (page: number, totalPages: number) =>
             `Seite ${localizeNumber(page)} von ${localizeNumber(totalPages)}`,
         pageText: "Seite",
+        pagerLabel: "Seitennavigation",
         previousPageLabel: "Vorherige Seite",
         rangeStatus: (start: number, end: number, total: number) =>
             total === 1

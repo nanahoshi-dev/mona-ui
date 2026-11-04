@@ -286,16 +286,21 @@ export const JA_JP_MESSAGES = {
     },
     pager: {
         firstPageLabel: "最初のページ",
+        itemsPerPageLabel: "1ページあたりの件数",
         jumpBackwardLabel: (pages: number) => `${localizeNumber(pages)}ページ戻る`,
         jumpForwardLabel: (pages: number) => `${localizeNumber(pages)}ページ進む`,
         lastPageLabel: "最後のページ",
         nextPageLabel: "次のページ",
         ofText: "/",
+        pageInputPrefix: (totalPages: number) => `${localizeNumber(totalPages)}ページ中`,
+        pageInputSuffix: (_totalPages: number) => "ページ",
         pageLabel: (page: number) => `${localizeNumber(page)}ページ`,
+        pageSelectLabel: "ページ",
         pageSizeLabel: (pageSize: number) => `1ページあたり${localizeNumber(pageSize)}件`,
         pageStatus: (page: number, totalPages: number) =>
             `${localizeNumber(totalPages)}ページ中${localizeNumber(page)}ページ`,
         pageText: "ページ",
+        pagerLabel: "ページ送り",
         previousPageLabel: "前のページ",
         rangeStatus: (start: number, end: number, total: number) =>
             `全${localizeNumber(total)}件中${localizeNumber(start)}～${localizeNumber(end)}件`

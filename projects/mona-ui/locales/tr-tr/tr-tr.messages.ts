@@ -287,16 +287,21 @@ export const TR_TR_MESSAGES = {
     },
     pager: {
         firstPageLabel: "İlk sayfa",
+        itemsPerPageLabel: "Sayfa başına öğe",
         jumpBackwardLabel: (pages: number) => `${localizeNumber(pages)} sayfa geri git`,
         jumpForwardLabel: (pages: number) => `${localizeNumber(pages)} sayfa ileri git`,
         lastPageLabel: "Son sayfa",
         nextPageLabel: "Sonraki sayfa",
         ofText: "/",
+        pageInputPrefix: (_totalPages: number) => "Sayfa",
+        pageInputSuffix: (totalPages: number) => `/ ${localizeNumber(totalPages)}`,
         pageLabel: (page: number) => `${localizeNumber(page)}. sayfa`,
+        pageSelectLabel: "Sayfa",
         pageSizeLabel: (pageSize: number) => `Sayfa başına ${localizeNumber(pageSize)}`,
         pageStatus: (page: number, totalPages: number) =>
             `Sayfa ${localizeNumber(page)} / ${localizeNumber(totalPages)}`,
         pageText: "Sayfa",
+        pagerLabel: "Sayfalandırma",
         previousPageLabel: "Önceki sayfa",
         rangeStatus: (start: number, end: number, total: number) =>
             `${localizeNumber(start)} - ${localizeNumber(end)} / ${localizeNumber(total)} öğe`

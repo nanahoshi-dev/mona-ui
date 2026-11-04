@@ -270,17 +270,22 @@
     },
     "pager": {
         "firstPageLabel": "First page",
-        "jumpBackwardLabel": "Jump back {pages} pages",
-        "jumpForwardLabel": "Jump forward {pages} pages",
+        "itemsPerPageLabel": "Items per page",
+        "jumpBackwardLabel": "Jump back {pages, plural, one {# page} other {# pages}}",
+        "jumpForwardLabel": "Jump forward {pages, plural, one {# page} other {# pages}}",
         "lastPageLabel": "Last page",
         "nextPageLabel": "Next page",
         "ofText": "of",
+        "pageInputPrefix": "Page",
+        "pageInputSuffix": "of {totalPages}",
         "pageLabel": "Page {page}",
+        "pageSelectLabel": "Page",
         "pageSizeLabel": "{pageSize} / page",
         "pageStatus": "Page {page} of {totalPages}",
         "pageText": "Page",
+        "pagerLabel": "Pagination",
         "previousPageLabel": "Previous page",
-        "rangeStatus": "{start} - {end} of {total} items"
+        "rangeStatus": "{start} - {end} of {total, plural, one {# item} other {# items}}"
     },
     "rating": {
         "notRated": "Not rated",

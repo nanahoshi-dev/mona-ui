@@ -286,16 +286,21 @@ export const KO_KR_MESSAGES = {
     },
     pager: {
         firstPageLabel: "첫 페이지",
+        itemsPerPageLabel: "페이지당 항목 수",
         jumpBackwardLabel: (pages: number) => `${localizeNumber(pages)}페이지 뒤로`,
         jumpForwardLabel: (pages: number) => `${localizeNumber(pages)}페이지 앞으로`,
         lastPageLabel: "마지막 페이지",
         nextPageLabel: "다음 페이지",
         ofText: "/",
+        pageInputPrefix: (totalPages: number) => `전체 ${localizeNumber(totalPages)}페이지 중`,
+        pageInputSuffix: (_totalPages: number) => "페이지",
         pageLabel: (page: number) => `${localizeNumber(page)}페이지`,
+        pageSelectLabel: "페이지",
         pageSizeLabel: (pageSize: number) => `페이지당 ${localizeNumber(pageSize)}개`,
         pageStatus: (page: number, totalPages: number) =>
             `전체 ${localizeNumber(totalPages)}페이지 중 ${localizeNumber(page)}페이지`,
         pageText: "페이지",
+        pagerLabel: "페이지 탐색",
         previousPageLabel: "이전 페이지",
         rangeStatus: (start: number, end: number, total: number) =>
             `전체 ${localizeNumber(total)}개 중 ${localizeNumber(start)}~${localizeNumber(end)}`

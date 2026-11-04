@@ -298,6 +298,7 @@ export const RU_RU_MESSAGES = {
     },
     pager: {
         firstPageLabel: "Первая страница",
+        itemsPerPageLabel: "Элементов на странице",
         jumpBackwardLabel: (pages: number) =>
             `Назад на ${plural(PLURAL_RULES.select(pages), { one: () => `${localizeNumber(pages)} страницу`, few: () => `${localizeNumber(pages)} страницы`, many: () => `${localizeNumber(pages)} страниц`, other: () => `${localizeNumber(pages)} страницы` })}`,
         jumpForwardLabel: (pages: number) =>
@@ -305,11 +306,15 @@ export const RU_RU_MESSAGES = {
         lastPageLabel: "Последняя страница",
         nextPageLabel: "Следующая страница",
         ofText: "из",
+        pageInputPrefix: (_totalPages: number) => "Страница",
+        pageInputSuffix: (totalPages: number) => `из ${localizeNumber(totalPages)}`,
         pageLabel: (page: number) => `Страница ${localizeNumber(page)}`,
+        pageSelectLabel: "Страница",
         pageSizeLabel: (pageSize: number) => `${localizeNumber(pageSize)} на странице`,
         pageStatus: (page: number, totalPages: number) =>
             `Страница ${localizeNumber(page)} из ${localizeNumber(totalPages)}`,
         pageText: "Страница",
+        pagerLabel: "Навигация по страницам",
         previousPageLabel: "Предыдущая страница",
         rangeStatus: (start: number, end: number, total: number) =>
             `${localizeNumber(start)}–${localizeNumber(end)} из ${localizeNumber(total)}`

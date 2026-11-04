@@ -26,7 +26,7 @@ import {
     ListNoDataTemplateDirective,
     ListService
 } from "@nanahoshi/mona-ui/internal/list";
-import { PageChangeEvent, PagerComponent, PageSizeChangeEvent } from "@nanahoshi/mona-ui/pager";
+import { type PageChangeEvent, PagerComponent } from "@nanahoshi/mona-ui/pager";
 import { ImmutableSet } from "@mirei/ts-collections";
 import { filter, fromEvent, Subscription } from "rxjs";
 import { twMerge } from "tailwind-merge";
@@ -208,11 +208,7 @@ export class ListViewComponent<T = unknown> implements ListViewVariantInputs {
     }
 
     protected onPageChange(event: PageChangeEvent): void {
-        this.listService.pageState.update(s => ({ ...s, page: event.page, skip: event.skip }));
-    }
-
-    protected onPageSizeChange(event: PageSizeChangeEvent): void {
-        this.listService.pageState.update(s => ({ ...s, page: 1, skip: 0, take: event.newPageSize }));
+        this.listService.pageState.update(s => ({ ...s, page: event.page, skip: event.skip, take: event.take }));
     }
 
     private setScrollBottomEvent(): void {

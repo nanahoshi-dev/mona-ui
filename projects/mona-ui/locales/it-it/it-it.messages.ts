@@ -291,6 +291,7 @@ export const IT_IT_MESSAGES = {
     },
     pager: {
         firstPageLabel: "Prima pagina",
+        itemsPerPageLabel: "Elementi per pagina",
         jumpBackwardLabel: (pages: number) =>
             pages === 1 ? "Torna indietro di 1 pagina" : `Torna indietro di ${localizeNumber(pages)} pagine`,
         jumpForwardLabel: (pages: number) =>
@@ -298,11 +299,15 @@ export const IT_IT_MESSAGES = {
         lastPageLabel: "Ultima pagina",
         nextPageLabel: "Pagina successiva",
         ofText: "di",
+        pageInputPrefix: (_totalPages: number) => "Pagina",
+        pageInputSuffix: (totalPages: number) => `di ${localizeNumber(totalPages)}`,
         pageLabel: (page: number) => `Pagina ${localizeNumber(page)}`,
+        pageSelectLabel: "Pagina",
         pageSizeLabel: (pageSize: number) => `${localizeNumber(pageSize)} per pagina`,
         pageStatus: (page: number, totalPages: number) =>
             `Pagina ${localizeNumber(page)} di ${localizeNumber(totalPages)}`,
         pageText: "Pagina",
+        pagerLabel: "Paginazione",
         previousPageLabel: "Pagina precedente",
         rangeStatus: (start: number, end: number, total: number) =>
             total === 1

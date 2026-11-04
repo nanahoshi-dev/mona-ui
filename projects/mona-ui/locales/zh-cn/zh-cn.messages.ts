@@ -286,16 +286,21 @@ export const ZH_CN_MESSAGES = {
     },
     pager: {
         firstPageLabel: "第一页",
+        itemsPerPageLabel: "每页条数",
         jumpBackwardLabel: (pages: number) => `后退 ${localizeNumber(pages)} 页`,
         jumpForwardLabel: (pages: number) => `前进 ${localizeNumber(pages)} 页`,
         lastPageLabel: "最后一页",
         nextPageLabel: "下一页",
         ofText: "/",
+        pageInputPrefix: (_totalPages: number) => "第",
+        pageInputSuffix: (totalPages: number) => `页，共 ${localizeNumber(totalPages)} 页`,
         pageLabel: (page: number) => `第 ${localizeNumber(page)} 页`,
+        pageSelectLabel: "页",
         pageSizeLabel: (pageSize: number) => `每页 ${localizeNumber(pageSize)} 条`,
         pageStatus: (page: number, totalPages: number) =>
             `第 ${localizeNumber(page)} 页，共 ${localizeNumber(totalPages)} 页`,
         pageText: "页",
+        pagerLabel: "分页",
         previousPageLabel: "上一页",
         rangeStatus: (start: number, end: number, total: number) =>
             `第 ${localizeNumber(start)} - ${localizeNumber(end)} 项，共 ${localizeNumber(total)} 项`
