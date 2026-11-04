@@ -40,7 +40,8 @@ function focusInput(input: HTMLInputElement): void {
 }
 
 function blurInput(input: HTMLInputElement): void {
-    input.dispatchEvent(new FocusEvent("blur", { bubbles: true }));
+    input.dispatchEvent(new FocusEvent("blur"));
+    input.dispatchEvent(new FocusEvent("focusout", { bubbles: true }));
 }
 
 function updateInputValue(fixture: ComponentFixture<unknown>, value: string): void {
@@ -438,7 +439,7 @@ describe("NumericTextBoxComponent i18n integration", () => {
 
         const comp = fixture.debugElement.query(By.directive(NumericTextBoxComponent)).componentInstance as NumericTextBoxComponent;
 
-        host.decimals.set(Infinity as any);
+        host.decimals.set(Infinity);
         await waitForStable(fixture);
         expect(comp.decimals()).toBe(0);
 
@@ -673,7 +674,7 @@ describe("NumericTextBoxComponent i18n integration", () => {
         // 2. beforeinput event with data: null and inputType: "insertFromPaste"
         // 3. input change event
         function simulateBrowserPaste(clipboardText: string): boolean {
-            const pasteEvent = new Event("paste", { bubbles: true, cancelable: true }) as any;
+            const pasteEvent = new Event("paste", { bubbles: true, cancelable: true }) as Event & { clipboardData?: unknown };
             pasteEvent.clipboardData = {
                 getData: (format: string) => (format === "text/plain" ? clipboardText : "")
             };
@@ -792,7 +793,7 @@ describe("NumericTextBoxComponent i18n integration", () => {
         await waitForStable(fixture);
 
         function simulateBrowserPaste(clipboardText: string | null): boolean {
-            const pasteEvent = new Event("paste", { bubbles: true, cancelable: true }) as any;
+            const pasteEvent = new Event("paste", { bubbles: true, cancelable: true }) as Event & { clipboardData?: unknown };
             if (clipboardText !== null) {
                 pasteEvent.clipboardData = {
                     getData: (format: string) => (format === "text/plain" ? clipboardText : "")

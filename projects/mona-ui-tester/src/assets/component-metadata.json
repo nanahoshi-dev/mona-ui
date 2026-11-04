@@ -305,7 +305,7 @@
         "defaultValue": "\"button\""
       },
       {
-        "description": "Enables toggle behavior — each click flips the `selected` state and `aria-pressed` is managed.\nAccepts the bare attribute form. Buttons in a `ButtonGroup` are toggleable unless this is set to `false`.",
+        "description": "Enables toggle behavior \u2014 each click flips the `selected` state and `aria-pressed` is managed.\nAccepts the bare attribute form. Buttons in a `ButtonGroup` are toggleable unless this is set to `false`.",
         "kind": "input",
         "name": "toggleable",
         "type": "boolean",
@@ -324,6 +324,13 @@
     "name": "DecadeYearDirective",
     "selector": "\"[monaDecadeYear]\"",
     "inputs": [
+      {
+        "description": "",
+        "kind": "input",
+        "name": "disabled",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
       {
         "description": "",
         "kind": "input",
@@ -380,13 +387,6 @@
       {
         "description": "",
         "kind": "input",
-        "name": "disabledDates",
-        "type": "DateDisabledType",
-        "required": true
-      },
-      {
-        "description": "",
-        "kind": "input",
         "name": "entry",
         "type": "KeyValuePair<Date, number>",
         "required": true
@@ -394,15 +394,8 @@
       {
         "description": "",
         "kind": "input",
-        "name": "max",
-        "type": "Date | null | undefined",
-        "required": true
-      },
-      {
-        "description": "",
-        "kind": "input",
-        "name": "min",
-        "type": "Date | null | undefined",
+        "name": "isDayUnavailable",
+        "type": "(date: Date) => boolean",
         "required": true
       },
       {
@@ -422,8 +415,8 @@
       {
         "description": "",
         "kind": "input",
-        "name": "rangePreview",
-        "type": "Date[]",
+        "name": "rangePreviewKeys",
+        "type": "ReadonlySet<string>",
         "required": true
       },
       {
@@ -436,8 +429,15 @@
       {
         "description": "",
         "kind": "input",
-        "name": "value",
-        "type": "Date | Date[] | null",
+        "name": "selectedKeys",
+        "type": "ReadonlySet<string>",
+        "required": true
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "today",
+        "type": "Date",
         "required": true
       }
     ]
@@ -449,15 +449,15 @@
       {
         "description": "",
         "kind": "input",
-        "name": "month",
-        "type": "number",
-        "required": true
+        "name": "disabled",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "",
         "kind": "input",
-        "name": "monthName",
-        "type": "string",
+        "name": "month",
+        "type": "number",
         "required": true
       },
       {
@@ -2353,7 +2353,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Background color of the host element.\r\nIgnored in image mode — the background is set to transparent automatically.",
+        "description": "Background color of the host element.\r\nIgnored in image mode \u2014 the background is set to transparent automatically.",
         "kind": "input",
         "name": "backgroundColor",
         "type": "string",
@@ -2558,7 +2558,7 @@
     "inputs": [
       {
         "description": "Sets the disabled state of the calendar.",
-        "kind": "model",
+        "kind": "input",
         "name": "disabled",
         "type": "boolean",
         "defaultValue": "false"
@@ -2575,6 +2575,13 @@
         "name": "firstDay",
         "type": "FirstDayOfWeek | null",
         "defaultValue": "null"
+      },
+      {
+        "description": "Moves focus to the active day when the calendar first renders. An inline calendar on a page\nshould leave focus where it is; a calendar that opens in a popup sets this so focus moves into it.",
+        "kind": "input",
+        "name": "focusOnMount",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Marks the calendar as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
@@ -2624,7 +2631,7 @@
         "defaultValue": "\"single\""
       },
       {
-        "description": "Emitted when the calendar value is changed by user interaction.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when focus leaves the calendar, as a native input is touched on blur. Moving between\nits buttons and days doesn't count. The `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
@@ -2644,7 +2651,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "The current value of the calendar.",
+        "description": "The current value of the calendar: a `Date` in single selection, the selected dates in multiple\nselection, and `[start, end]` in range selection. A range is written once both ends are picked.",
         "kind": "model",
         "name": "value",
         "type": "Date | Date[] | null",
@@ -5905,7 +5912,7 @@
     "selector": "\"mona-polar-series\"",
     "inputs": [
       {
-        "description": "Property key or accessor function extracting the degree angle (0° to 360°) for each data item.",
+        "description": "Property key or accessor function extracting the degree angle (0\u00b0 to 360\u00b0) for each data item.",
         "kind": "input",
         "name": "angleField",
         "type": "ChartField",
@@ -7495,14 +7502,14 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Human-readable override for the `aria-valuenow` announcement.\r\nUseful in indeterminate mode — set to a localized string such as `\"Loading\"`\r\nso screen readers announce state rather than silence.\r\nWhen empty, assistive technology falls back to the numeric value.",
+        "description": "Human-readable override for the `aria-valuenow` announcement.\r\nUseful in indeterminate mode \u2014 set to a localized string such as `\"Loading\"`\r\nso screen readers announce state rather than silence.\r\nWhen empty, assistive technology falls back to the numeric value.",
         "kind": "input",
         "name": "ariaValueText",
         "type": "string",
         "defaultValue": "\"\""
       },
       {
-        "description": "Accent color. Pass a CSS color string, or a function receiving the current percentage (0–100) and\r\nreturning a string. When empty, falls back to the primary theme color.",
+        "description": "Accent color. Pass a CSS color string, or a function receiving the current percentage (0\u2013100) and\r\nreturning a string. When empty, falls back to the primary theme color.",
         "kind": "input",
         "name": "color",
         "type": "string | Action<number, string>",
@@ -7700,7 +7707,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "The palette to display — one of the built-in `\"flat\"`, `\"material\"`, or `\"websafe\"` schemes, or a\ncustom iterable of color strings. An empty custom palette falls back to the flat scheme.",
+        "description": "The palette to display \u2014 one of the built-in `\"flat\"`, `\"material\"`, or `\"websafe\"` schemes, or a\ncustom iterable of color strings. An empty custom palette falls back to the flat scheme.",
         "kind": "input",
         "name": "palette",
         "type": "PaletteType | Iterable<string>",
@@ -8284,6 +8291,27 @@
     "selector": "\"mona-date-picker\"",
     "inputs": [
       {
+        "description": "Id of an element that describes the input, such as a hint or an error message.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Accessible name of the input. Prefer a visible label, linked through {@link inputId} or\r\n{@link ariaLabelledBy}; the placeholder is not a label.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Id of the element that labels the input.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Emits when the popup is about to close. This event is preventable.",
         "kind": "output",
         "name": "close",
@@ -8303,7 +8331,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Sets the disabled dates of the date picker.\nAccepts either an iterable of Date objects or a predicate function.",
+        "description": "Sets the disabled dates of the date picker.\r\nAccepts either an iterable of Date objects or a predicate function. Typing a disabled date is reported as a\r\n`disabledDate` error instead of setting the value.",
         "kind": "input",
         "name": "disabledDates",
         "type": "DateDisabledType"
@@ -8316,27 +8344,34 @@
         "defaultValue": "null"
       },
       {
-        "description": "Sets the date format of the date picker. If not specified, derives from the active locale.",
+        "description": "Sets the date format of the date picker. If not specified, derives from the active locale.\r\nTyped text is also accepted with one-digit days and months and a two-digit year.",
         "kind": "input",
         "name": "format",
         "type": "string | null",
         "defaultValue": "null"
       },
       {
-        "description": "Marks the date picker as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Id of the inner `<input>` element. Point a `<label for>` or `<mona-label for>` at it to label the\r\ndate picker. A unique id is generated when it isn't set.",
+        "kind": "input",
+        "name": "inputId",
+        "type": "string",
+        "defaultValue": "generated"
+      },
+      {
+        "description": "Marks the date picker as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Sets the maximum date of the date picker.",
+        "description": "Sets the maximum date of the date picker. A later typed date is reported as a `maxDate` error.",
         "kind": "input",
         "name": "max",
         "type": "Date | undefined"
       },
       {
-        "description": "Sets the minimum date of the date picker.",
+        "description": "Sets the minimum date of the date picker. An earlier typed date is reported as a `minDate` error.",
         "kind": "input",
         "name": "min",
         "type": "Date | undefined"
@@ -8368,18 +8403,18 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Sets the height of the popup element.",
+        "description": "Sets the height of the popup element. When empty, the popup fits the calendar.",
         "kind": "input",
         "name": "popupHeight",
         "type": "ListSizeInputType",
-        "defaultValue": "200"
+        "defaultValue": "\"\""
       },
       {
-        "description": "Sets the width of the popup element.",
+        "description": "Sets the width of the popup element. When empty, the popup fits the calendar.",
         "kind": "input",
         "name": "popupWidth",
         "type": "ListSizeInputType",
-        "defaultValue": "null"
+        "defaultValue": "\"\""
       },
       {
         "description": "Sets the readonly state of the date picker.",
@@ -8396,7 +8431,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Sets the required state of the date picker.\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "description": "Sets the required state of the date picker.\r\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
         "kind": "input",
         "name": "required",
         "type": "boolean",
@@ -8410,7 +8445,7 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Sets the visibility of the clear button.",
+        "description": "Sets the visibility of the clear button. Clearing empties the value at once.",
         "kind": "input",
         "name": "showClearButton",
         "type": "boolean",
@@ -8424,13 +8459,13 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Emitted when the date picker is interacted with via blur, selection, or clear.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when focus leaves the date picker and its popup.\r\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
       },
       {
-        "description": "Sets the touched state of the date picker. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the date picker. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "touched",
         "type": "boolean",
@@ -8444,7 +8479,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Two-way bindable current date value.",
+        "description": "Two-way bindable current date value. Typed text is written on Enter and when the input loses\r\nfocus; text that isn't a valid date keeps the previous value and marks the field invalid.",
         "kind": "model",
         "name": "value",
         "type": "Date | null",
@@ -8463,6 +8498,27 @@
     "name": "DateTimePickerComponent",
     "selector": "\"mona-datetime-picker\"",
     "inputs": [
+      {
+        "description": "Id of an element that describes the input, such as a hint or an error message.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Accessible name of the input. Prefer a visible label, linked through {@link inputId} or\r\n{@link ariaLabelledBy}; the placeholder is not a label.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Id of the element that labels the input.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
       {
         "description": "Emits when the popup is about to close. This event is preventable.",
         "kind": "output",
@@ -8483,7 +8539,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Sets the disabled dates of the date time picker.\nAccepts either an iterable of Date objects or a predicate function.",
+        "description": "Sets the disabled dates of the date time picker.\r\nAccepts either an iterable of Date objects or a predicate function. Typing a disabled date is reported as a\r\n`disabledDate` error instead of setting the value.",
         "kind": "input",
         "name": "disabledDates",
         "type": "DateDisabledType"
@@ -8496,18 +8552,18 @@
         "defaultValue": "null"
       },
       {
-        "description": "Sets the date format of the date time picker. If not specified, derives from the active locale, hourFormat, and showSeconds.",
+        "description": "Sets the date format of the date time picker. If not specified, derives from the active locale,\r\nhourFormat, and showSeconds. Typed text is also accepted with one-digit parts and a two-digit year.",
         "kind": "input",
         "name": "format",
         "type": "string | null",
         "defaultValue": "null"
       },
       {
-        "description": "Sets the hour format of the time picker.",
+        "description": "Sets the hour format of the date time picker. When null, the active locale's clock is used: 12-hour\r\nfor en-US, 24-hour for de-DE.",
         "kind": "input",
         "name": "hourFormat",
-        "type": "HourFormat",
-        "defaultValue": "24"
+        "type": "HourFormat | null",
+        "defaultValue": "null"
       },
       {
         "description": "Sets the hour step of the time picker.",
@@ -8517,20 +8573,27 @@
         "defaultValue": "1"
       },
       {
-        "description": "Marks the date time picker as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Id of the inner `<input>` element. Point a `<label for>` or `<mona-label for>` at it to label the\r\ndate time picker. A unique id is generated when it isn't set.",
+        "kind": "input",
+        "name": "inputId",
+        "type": "string",
+        "defaultValue": "generated"
+      },
+      {
+        "description": "Marks the date time picker as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Sets the maximum date of the date time picker.",
+        "description": "Sets the maximum date of the date time picker. A later typed date is reported as a `maxDate` error.",
         "kind": "input",
         "name": "max",
         "type": "Date | undefined"
       },
       {
-        "description": "Sets the minimum date of the date time picker.",
+        "description": "Sets the minimum date of the date time picker. An earlier typed date is reported as a `minDate`\r\nerror.",
         "kind": "input",
         "name": "min",
         "type": "Date | undefined"
@@ -8569,18 +8632,18 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Sets the height of the popup element.",
+        "description": "Sets the height of the popup element. When not set, the popup fits its content.",
         "kind": "input",
         "name": "popupHeight",
         "type": "ListSizeInputType",
-        "defaultValue": "200"
+        "defaultValue": "undefined"
       },
       {
-        "description": "Sets the width of the popup element.",
+        "description": "Sets the width of the popup element. When not set, the popup is at least as wide as the input.",
         "kind": "input",
         "name": "popupWidth",
         "type": "ListSizeInputType",
-        "defaultValue": "null"
+        "defaultValue": "undefined"
       },
       {
         "description": "Sets the readonly state of the date time picker.",
@@ -8597,7 +8660,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Sets the required state of the date time picker.\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "description": "Sets the required state of the date time picker.\r\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
         "kind": "input",
         "name": "required",
         "type": "boolean",
@@ -8618,7 +8681,7 @@
         "defaultValue": "1"
       },
       {
-        "description": "Sets the visibility of the clear button.",
+        "description": "Sets the visibility of the clear button. Clearing empties the value at once.",
         "kind": "input",
         "name": "showClearButton",
         "type": "boolean",
@@ -8639,13 +8702,13 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Emitted when the date time picker is interacted with via blur, selection, or clear.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when focus leaves the date time picker and its popup.\r\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
       },
       {
-        "description": "Sets the touched state of the date time picker. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the date time picker. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "touched",
         "type": "boolean",
@@ -8659,7 +8722,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Two-way bindable current date time value.",
+        "description": "Two-way bindable current date time value. Typed text is written on Enter and when the input loses\r\nfocus; text that isn't a valid date and time keeps the previous value and marks the field invalid.",
         "kind": "model",
         "name": "value",
         "type": "Date | null",
@@ -10763,14 +10826,28 @@
         "defaultValue": "null"
       },
       {
-        "description": "ARIA label for the input.",
+        "description": "ID of an element that provides an extended description for the input, such as a hint or an\r\nerror message.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Accessible name for the input. Prefer a visible label, linked through {@link inputId} or\r\n{@link ariaLabelledBy}.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
         "defaultValue": "null"
       },
       {
-        "description": "Number of fractional decimal places to display and accept. Values are truncated to an integer\nand clamped to the range 0–20. Non-finite and negative values normalize to 0.",
+        "description": "ID of an external element that provides the accessible name for the input.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Number of fractional decimal places to display and accept. Values are truncated to an integer\r\nand clamped to the range 0\u201320. Non-finite and negative values normalize to 0.",
         "kind": "input",
         "name": "decimals",
         "type": "number",
@@ -10784,7 +10861,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Emits when the inner input element is blurred.",
+        "description": "Emits when focus leaves the component, after the value has been clamped to the bounds. Moving\r\nfocus between the input and elements inside the component (such as a prefix template) doesn't count.",
         "kind": "output",
         "name": "inputBlur",
         "type": "FocusEvent"
@@ -10802,21 +10879,35 @@
         "type": "FocusEvent"
       },
       {
-        "description": "Marks the text box as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "ID of the inner input, so a `<label for>` or `<mona-label for>` can point at it.",
+        "kind": "input",
+        "name": "inputId",
+        "type": "string",
+        "defaultValue": "a generated ID"
+      },
+      {
+        "description": "Marks the text box as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Sets whether the input can be empty.",
+        "description": "Sets whether the input can be empty. When `false`, leaving an empty field sets it to the\r\nminimum, or to zero when there is no minimum (clamped to the maximum).",
         "kind": "input",
         "name": "nullable",
         "type": "boolean",
         "defaultValue": "true"
       },
       {
-        "description": "Sets whether the input is readonly.",
+        "description": "Text shown in the input while it is empty. It isn't a label: it disappears once there is a\r\nvalue.",
+        "kind": "input",
+        "name": "placeholder",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Sets whether the input is readonly. The spin buttons are hidden while it is.",
         "kind": "input",
         "name": "readonly",
         "type": "boolean",
@@ -10858,13 +10949,13 @@
         "defaultValue": "0"
       },
       {
-        "description": "Emitted when the text box is interacted with on blur, value change, or spinner update.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when focus leaves the component, as a native input is touched on blur. Typing and\r\nspinning don't count. The `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
       },
       {
-        "description": "Sets the touched state of the text box. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the text box. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "touched",
         "type": "boolean",
@@ -10919,14 +11010,28 @@
         "defaultValue": "null"
       },
       {
-        "description": "ARIA label for the input.",
+        "description": "ID of an element that provides an extended description for the input, such as a hint or an\r\nerror message.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Accessible name for the input. Prefer a visible label, linked through {@link inputId} or\r\n{@link ariaLabelledBy}.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
         "defaultValue": "null"
       },
       {
-        "description": "Number of fractional decimal places to display and accept. Values are truncated to an integer\nand clamped to the range 0–20. Non-finite and negative values normalize to 0.",
+        "description": "ID of an external element that provides the accessible name for the input.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Number of fractional decimal places to display and accept. Values are truncated to an integer\r\nand clamped to the range 0\u201320. Non-finite and negative values normalize to 0.",
         "kind": "input",
         "name": "decimals",
         "type": "number",
@@ -10940,7 +11045,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Emits when the inner input element is blurred.",
+        "description": "Emits when focus leaves the component, after the value has been clamped to the bounds. Moving\r\nfocus between the input and elements inside the component (such as a prefix template) doesn't count.",
         "kind": "output",
         "name": "inputBlur",
         "type": "FocusEvent"
@@ -10958,21 +11063,35 @@
         "type": "FocusEvent"
       },
       {
-        "description": "Marks the text box as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "ID of the inner input, so a `<label for>` or `<mona-label for>` can point at it.",
+        "kind": "input",
+        "name": "inputId",
+        "type": "string",
+        "defaultValue": "a generated ID"
+      },
+      {
+        "description": "Marks the text box as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Sets whether the input can be empty.",
+        "description": "Sets whether the input can be empty. When `false`, leaving an empty field sets it to the\r\nminimum, or to zero when there is no minimum (clamped to the maximum).",
         "kind": "input",
         "name": "nullable",
         "type": "boolean",
         "defaultValue": "true"
       },
       {
-        "description": "Sets whether the input is readonly.",
+        "description": "Text shown in the input while it is empty. It isn't a label: it disappears once there is a\r\nvalue.",
+        "kind": "input",
+        "name": "placeholder",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Sets whether the input is readonly. The spin buttons are hidden while it is.",
         "kind": "input",
         "name": "readonly",
         "type": "boolean",
@@ -11014,13 +11133,13 @@
         "defaultValue": "0"
       },
       {
-        "description": "Emitted when the text box is interacted with on blur, value change, or spinner update.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when focus leaves the component, as a native input is touched on blur. Typing and\r\nspinning don't count. The `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
       },
       {
-        "description": "Sets the touched state of the text box. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the text box. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "touched",
         "type": "boolean",
@@ -11040,14 +11159,28 @@
     "selector": "",
     "inputs": [
       {
-        "description": "ARIA label for the input.",
+        "description": "ID of an element that provides an extended description for the input, such as a hint or an\r\nerror message.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Accessible name for the input. Prefer a visible label, linked through {@link inputId} or\r\n{@link ariaLabelledBy}.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
         "defaultValue": "null"
       },
       {
-        "description": "Number of fractional decimal places to display and accept. Values are truncated to an integer\nand clamped to the range 0–20. Non-finite and negative values normalize to 0.",
+        "description": "ID of an external element that provides the accessible name for the input.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Number of fractional decimal places to display and accept. Values are truncated to an integer\r\nand clamped to the range 0\u201320. Non-finite and negative values normalize to 0.",
         "kind": "input",
         "name": "decimals",
         "type": "number",
@@ -11061,7 +11194,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Emits when the inner input element is blurred.",
+        "description": "Emits when focus leaves the component, after the value has been clamped to the bounds. Moving\r\nfocus between the input and elements inside the component (such as a prefix template) doesn't count.",
         "kind": "output",
         "name": "inputBlur",
         "type": "FocusEvent"
@@ -11079,21 +11212,35 @@
         "type": "FocusEvent"
       },
       {
-        "description": "Marks the text box as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "ID of the inner input, so a `<label for>` or `<mona-label for>` can point at it.",
+        "kind": "input",
+        "name": "inputId",
+        "type": "string",
+        "defaultValue": "a generated ID"
+      },
+      {
+        "description": "Marks the text box as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Sets whether the input can be empty.",
+        "description": "Sets whether the input can be empty. When `false`, leaving an empty field sets it to the\r\nminimum, or to zero when there is no minimum (clamped to the maximum).",
         "kind": "input",
         "name": "nullable",
         "type": "boolean",
         "defaultValue": "true"
       },
       {
-        "description": "Sets whether the input is readonly.",
+        "description": "Text shown in the input while it is empty. It isn't a label: it disappears once there is a\r\nvalue.",
+        "kind": "input",
+        "name": "placeholder",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Sets whether the input is readonly. The spin buttons are hidden while it is.",
         "kind": "input",
         "name": "readonly",
         "type": "boolean",
@@ -11135,13 +11282,13 @@
         "defaultValue": "0"
       },
       {
-        "description": "Emitted when the text box is interacted with on blur, value change, or spinner update.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when focus leaves the component, as a native input is touched on blur. Typing and\r\nspinning don't count. The `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
       },
       {
-        "description": "Sets the touched state of the text box. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the text box. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "touched",
         "type": "boolean",
@@ -11291,7 +11438,7 @@
         "defaultValue": "true"
       },
       {
-        "description": "Emitted when the OTP input is interacted with — on blur or user value change.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when the OTP input is interacted with \u2014 on blur or user value change.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
@@ -12022,14 +12169,14 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Overrides the numeric aria-valuenow announcement for assistive technology.\nParticularly useful in indeterminate mode — set to a localized string such as \"Loading\"\nso screen readers announce state rather than silence.\nWhen empty, assistive technology falls back to the numeric value.",
+        "description": "Overrides the numeric aria-valuenow announcement for assistive technology.\nParticularly useful in indeterminate mode \u2014 set to a localized string such as \"Loading\"\nso screen readers announce state rather than silence.\nWhen empty, assistive technology falls back to the numeric value.",
         "kind": "input",
         "name": "ariaValueText",
         "type": "string",
         "defaultValue": "\"\""
       },
       {
-        "description": "Fill color of the progress track.\nPass a CSS color string, or a function that receives the current percentage (0–100) and returns a color string.\nWhen empty, falls back to the primary theme color.",
+        "description": "Fill color of the progress track.\nPass a CSS color string, or a function that receives the current percentage (0\u2013100) and returns a color string.\nWhen empty, falls back to the primary theme color.",
         "kind": "input",
         "name": "color",
         "type": "string | Action<number, string>",
@@ -12064,7 +12211,7 @@
         "defaultValue": "{}"
       },
       {
-        "description": "Controls label visibility in determinate mode.\nHas no effect in indeterminate mode — the label is always hidden there.",
+        "description": "Controls label visibility in determinate mode.\nHas no effect in indeterminate mode \u2014 the label is always hidden there.",
         "kind": "input",
         "name": "labelVisible",
         "type": "boolean",
@@ -12144,7 +12291,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Text label displayed alongside the radio button.\nWhen provided, takes precedence over projected content.\nWhen empty, projected content inside `<mona-radio-button>` is used.\nWhen both are absent, the radio button has no accessible name — always provide one.",
+        "description": "Text label displayed alongside the radio button.\nWhen provided, takes precedence over projected content.\nWhen empty, projected content inside `<mona-radio-button>` is used.\nWhen both are absent, the radio button has no accessible name \u2014 always provide one.",
         "kind": "input",
         "name": "label",
         "type": "string",
@@ -12687,7 +12834,7 @@
         "defaultValue": "\"18rem\""
       },
       {
-        "description": "Remembers whether this sidebar was left open, under this key. Unset means nothing is\nstored — no key, no storage written.\n\nOnly the docked state is kept. A drawer is never restored open: on the viewport that makes one,\nit would cover the page on load. A stored value wins over `expanded`, and is pushed back out\nthrough that binding, so do not set a key on a sidebar whose state is already restored elsewhere.\n\nWhere it is kept is `SIDEBAR_STORAGE`, which defaults to `localStorage`. A server-rendered\napplication cannot read that until hydration and so flashes the default first; supply storage the\nserver can read through `provideSidebarStorage()`.",
+        "description": "Remembers whether this sidebar was left open, under this key. Unset means nothing is\nstored \u2014 no key, no storage written.\n\nOnly the docked state is kept. A drawer is never restored open: on the viewport that makes one,\nit would cover the page on load. A stored value wins over `expanded`, and is pushed back out\nthrough that binding, so do not set a key on a sidebar whose state is already restored elsewhere.\n\nWhere it is kept is `SIDEBAR_STORAGE`, which defaults to `localStorage`. A server-rendered\napplication cannot read that until hydration and so flashes the default first; supply storage the\nserver can read through `provideSidebarStorage()`.",
         "kind": "input",
         "name": "persistKey",
         "type": "string",
@@ -12823,7 +12970,7 @@
         "defaultValue": "null"
       },
       {
-        "description": "Selected range as `[minimum, maximum]`.\r\nValues outside `[minValue, maxValue]` are clamped; the tuple is always sorted, so index 0 ≤ index 1.",
+        "description": "Selected range as `[minimum, maximum]`.\r\nValues outside `[minValue, maxValue]` are clamped; the tuple is always sorted, so index 0 \u2264 index 1.",
         "kind": "model",
         "name": "value",
         "type": "[number, number]",
@@ -12872,14 +13019,14 @@
         "defaultValue": "\"after\""
       },
       {
-        "description": "Controls which tick labels are shown — only every n<sup>th</sup> label is rendered.",
+        "description": "Controls which tick labels are shown \u2014 only every n<sup>th</sup> label is rendered.",
         "kind": "input",
         "name": "labelStep",
         "type": "number",
         "defaultValue": "1"
       },
       {
-        "description": "Controls which ticks render at large size — only every n<sup>th</sup> tick is enlarged. Pass `null` to disable large ticks.",
+        "description": "Controls which ticks render at large size \u2014 only every n<sup>th</sup> tick is enlarged. Pass `null` to disable large ticks.",
         "kind": "input",
         "name": "largeTickStep",
         "type": "number | null",
@@ -12942,7 +13089,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Controls how many ticks are visible — only every n<sup>th</sup> tick is rendered.",
+        "description": "Controls how many ticks are visible \u2014 only every n<sup>th</sup> tick is rendered.",
         "kind": "input",
         "name": "smallTickStep",
         "type": "number",
@@ -13045,14 +13192,14 @@
         "defaultValue": "\"after\""
       },
       {
-        "description": "Controls which tick labels are shown — only every n<sup>th</sup> label is rendered.",
+        "description": "Controls which tick labels are shown \u2014 only every n<sup>th</sup> label is rendered.",
         "kind": "input",
         "name": "labelStep",
         "type": "number",
         "defaultValue": "1"
       },
       {
-        "description": "Controls which ticks render at large size — only every n<sup>th</sup> tick is enlarged. Pass `null` to disable large ticks.",
+        "description": "Controls which ticks render at large size \u2014 only every n<sup>th</sup> tick is enlarged. Pass `null` to disable large ticks.",
         "kind": "input",
         "name": "largeTickStep",
         "type": "number | null",
@@ -13115,7 +13262,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Controls how many ticks are visible — only every n<sup>th</sup> tick is rendered.",
+        "description": "Controls how many ticks are visible \u2014 only every n<sup>th</sup> tick is rendered.",
         "kind": "input",
         "name": "smallTickStep",
         "type": "number",
@@ -13197,14 +13344,14 @@
         "defaultValue": "\"after\""
       },
       {
-        "description": "Controls which tick labels are shown — only every n<sup>th</sup> label is rendered.",
+        "description": "Controls which tick labels are shown \u2014 only every n<sup>th</sup> label is rendered.",
         "kind": "input",
         "name": "labelStep",
         "type": "number",
         "defaultValue": "1"
       },
       {
-        "description": "Controls which ticks render at large size — only every n<sup>th</sup> tick is enlarged. Pass `null` to disable large ticks.",
+        "description": "Controls which ticks render at large size \u2014 only every n<sup>th</sup> tick is enlarged. Pass `null` to disable large ticks.",
         "kind": "input",
         "name": "largeTickStep",
         "type": "number | null",
@@ -13267,7 +13414,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Controls how many ticks are visible — only every n<sup>th</sup> tick is rendered.",
+        "description": "Controls how many ticks are visible \u2014 only every n<sup>th</sup> tick is rendered.",
         "kind": "input",
         "name": "smallTickStep",
         "type": "number",
@@ -14253,6 +14400,27 @@
     "selector": "\"mona-time-picker\"",
     "inputs": [
       {
+        "description": "Id of an element that describes the input, such as a hint or an error message.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Accessible name of the input. Prefer a visible label, linked through {@link inputId} or\n{@link ariaLabelledBy}; the placeholder is not a label.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Id of the element that labels the input.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Emits when the popup is about to close. This event is preventable.",
         "kind": "output",
         "name": "close",
@@ -14272,18 +14440,18 @@
         "defaultValue": "false"
       },
       {
-        "description": "Sets the format of the time picker. If not specified, derives from the active locale, hourFormat, and showSeconds.",
+        "description": "Sets the format of the time picker. If not specified, derives from the active locale, hourFormat,\nand showSeconds. Typed text is also accepted with one-digit hours, minutes and seconds.",
         "kind": "input",
         "name": "format",
         "type": "string | null",
         "defaultValue": "null"
       },
       {
-        "description": "Sets the hour format of the time picker.",
+        "description": "Sets the hour format of the time picker. When null, the active locale's clock is used: 12-hour for\nen-US, 24-hour for de-DE.",
         "kind": "input",
         "name": "hourFormat",
-        "type": "HourFormat",
-        "defaultValue": "24"
+        "type": "HourFormat | null",
+        "defaultValue": "null"
       },
       {
         "description": "Sets the hour step of the time picker.",
@@ -14293,6 +14461,13 @@
         "defaultValue": "1"
       },
       {
+        "description": "Id of the inner `<input>` element. Point a `<label for>` or `<mona-label for>` at it to label the\ntime picker. A unique id is generated when it isn't set.",
+        "kind": "input",
+        "name": "inputId",
+        "type": "string",
+        "defaultValue": "generated"
+      },
+      {
         "description": "Marks the time picker as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "invalid",
@@ -14300,18 +14475,18 @@
         "defaultValue": "false"
       },
       {
-        "description": "Sets the maximum date of the time picker.",
+        "description": "Sets the latest time of the time picker. Only the time of day is compared; a later typed time is\nreported as a `maxDate` error.",
         "kind": "input",
         "name": "max",
         "type": "Date | undefined",
-        "defaultValue": "null"
+        "defaultValue": "undefined"
       },
       {
-        "description": "Sets the minimum date of the time picker.",
+        "description": "Sets the earliest time of the time picker. Only the time of day is compared; an earlier typed time\nis reported as a `minDate` error.",
         "kind": "input",
         "name": "min",
         "type": "Date | undefined",
-        "defaultValue": "null"
+        "defaultValue": "undefined"
       },
       {
         "description": "Sets the minute step of the time picker.",
@@ -14347,18 +14522,18 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Sets the height of the popup element.",
+        "description": "Sets the height of the popup element. When not set, the popup fits the time selector.",
         "kind": "input",
         "name": "popupHeight",
         "type": "ListSizeInputType",
-        "defaultValue": "200"
+        "defaultValue": "undefined"
       },
       {
-        "description": "Sets the width of the popup element.",
+        "description": "Sets the width of the popup element. When not set, the popup fits the time selector.",
         "kind": "input",
         "name": "popupWidth",
         "type": "ListSizeInputType",
-        "defaultValue": "null"
+        "defaultValue": "undefined"
       },
       {
         "description": "Sets the readonly state of the time picker.",
@@ -14396,7 +14571,7 @@
         "defaultValue": "1"
       },
       {
-        "description": "Sets the visibility of the clear button.",
+        "description": "Sets the visibility of the clear button. Clearing empties the value at once.",
         "kind": "input",
         "name": "showClearButton",
         "type": "boolean",
@@ -14417,7 +14592,7 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Emitted when the time picker is interacted with via blur, selection, or clear.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when focus leaves the time picker and its popup.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
@@ -14437,7 +14612,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Two-way bindable current time value.",
+        "description": "Two-way bindable current time value. Typed text is written on Enter and when the input loses\nfocus, on the current value's day (today when empty); text that isn't a valid time keeps the previous value\nand marks the field invalid.",
         "kind": "model",
         "name": "value",
         "type": "Date | null",
@@ -14464,25 +14639,25 @@
         "defaultValue": "false"
       },
       {
-        "description": "",
+        "description": "Moves focus to the hour list when the selector first renders. The pickers set it for their popups;\nan inline selector leaves focus where it is, so the page doesn't jump to it on load.",
         "kind": "input",
         "name": "focusOnMount",
         "type": "boolean",
-        "defaultValue": "true"
+        "defaultValue": "false"
       },
       {
-        "description": "",
+        "description": "Shows the Set button. Without it, every change of hour, minute, second or AM/PM made by the user\nis written to the value at once.",
         "kind": "input",
         "name": "footer",
         "type": "boolean",
         "defaultValue": "true"
       },
       {
-        "description": "",
+        "description": "The clock to show: \"12\" with an AM/PM list, or \"24\". When not set, the active locale's own clock\nis used (12-hour for en-US, 24-hour for de-DE).",
         "kind": "input",
         "name": "hourFormat",
-        "type": "HourFormat",
-        "defaultValue": "\"24\""
+        "type": "HourFormat | null",
+        "defaultValue": "null"
       },
       {
         "description": "",
@@ -14560,7 +14735,7 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Emitted when the time selector is interacted with via blur or value selection.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when focus leaves the time selector, as a native input is touched on blur. Moving between\nits lists and buttons doesn't count. The `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
@@ -14573,7 +14748,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Two-way bindable current time value.",
+        "description": "Two-way bindable current time value. It is written by the Set button and Enter, or, without a\nfooter, by each change the user makes; never on its own.",
         "kind": "model",
         "name": "value",
         "type": "Date | null",

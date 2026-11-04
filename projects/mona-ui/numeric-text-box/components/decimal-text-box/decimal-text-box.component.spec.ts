@@ -158,7 +158,8 @@ describe("DecimalTextBoxComponent", () => {
             host.value.set("100000000000000000000");
             await waitForStable(fixture);
 
-            getInput(fixture).dispatchEvent(new FocusEvent("blur", { bubbles: true }));
+            getInput(fixture).dispatchEvent(new FocusEvent("blur"));
+            getInput(fixture).dispatchEvent(new FocusEvent("focusout", { bubbles: true }));
             await waitForStable(fixture);
 
             expect(host.value()).toBe("99999999999999999999");

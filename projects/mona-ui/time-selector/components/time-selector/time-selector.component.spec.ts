@@ -62,7 +62,9 @@ describe("TimeSelectorComponent", () => {
         fixture.detectChanges();
 
         expect(fixture.componentInstance.form.time().value()?.getMinutes()).toBe(30);
-        expect(getHost().getAttribute("aria-readonly")).toBe("true");
+        // The listboxes carry the state: aria-readonly isn't allowed on the group.
+        expect(getHost().hasAttribute("aria-readonly")).toBe(false);
+        expect(getHost().querySelector("ol[aria-label='Minutes']")?.getAttribute("aria-readonly")).toBe("true");
     });
 
     it("renders default english accessible labels and messages", () => {
@@ -133,7 +135,7 @@ describe("TimeSelectorComponent", () => {
         expect(getHost().getAttribute("aria-label")).toBe("Meeting start time");
     });
 
-    it("inverts horizontal arrow navigation in RTL mode", () => {
+    it("inverts horizontal arrow navigation in RTL mode", async () => {
         const i18n = TestBed.inject(MonaI18nService);
         const host = getHost();
         const hourList = host.querySelector("ol[aria-label='Hours']") as HTMLElement;
@@ -148,6 +150,10 @@ describe("TimeSelectorComponent", () => {
             ...MONA_DEFAULT_LOCALE,
             direction: "rtl"
         });
+        // The direction is read from the DOM (as the calendar specs do it); the observer reports it asynchronously.
+        host.setAttribute("dir", "rtl");
+        fixture.detectChanges();
+        await fixture.whenStable();
         fixture.detectChanges();
 
         host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));

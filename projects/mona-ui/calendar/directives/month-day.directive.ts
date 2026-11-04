@@ -1,24 +1,40 @@
 import { computed, Directive, inject, input, output } from "@angular/core";
-import { any, exactly, KeyValuePair } from "@mirei/ts-collections";
-import { DateDisabledType } from "@nanahoshi/mona-ui/date-input";
-import { calendarMonthViewDayThemeVariants, CalendarVariantProps } from "../styles/calendar.styles";
-import { compareDates } from "../utils/compareDates";
+import type { KeyValuePair } from "@mirei/ts-collections";
+import { formatGregorianDateToLocaleString, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import type { CalendarVariantProps } from "../styles/calendar.styles";
+import { calendarMonthViewDayThemeVariants } from "../styles/calendar.styles";
+import { compareDates, toDayKey } from "../utils/compareDates";
 
+/**
+ * One day of the month view: a grid cell named by its full date ("Tuesday, November 4, 2026"). The calendar passes
+ * the selection and the range preview as sets of day keys, so each cell answers in constant time.
+ */
 @Directive({
     selector: "[monaMonthDay]",
     host: {
-        "[attr.tabindex]": "focused() ? 0 : -1",
-        "[attr.aria-pressed]": "selected() ? 'true' : 'false'",
+        "[attr.tabindex]": "focused() && !disabled() ? 0 : -1",
         "[attr.aria-current]": "isToday() ? 'date' : null",
         "[attr.aria-disabled]": "dayDisabled() ? 'true' : null",
+        "[attr.aria-label]": "ariaLabel()",
+        "[attr.aria-selected]": "selected() ? 'true' : null",
         "[attr.data-range-preview]": "rangePreviewed() ? 'true' : null",
         "[class]": "baseClass()",
         "(click)": "onClick($event)",
         "(pointerenter)": "onPointerEnter()",
-        role: "button"
+        role: "gridcell"
     }
 })
 export class MonthDayDirective {
+    readonly #i18n = inject(MonaI18nService);
+    readonly #key = computed(() => toDayKey(this.entry().key));
+    protected readonly ariaLabel = computed(() =>
+        formatGregorianDateToLocaleString(this.entry().key, this.#i18n.localeId(), {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        })
+    );
     protected readonly baseClass = computed(() => {
         const disabled = this.dayDisabled();
         const focused = this.focused();
@@ -37,62 +53,30 @@ export class MonthDayDirective {
             today
         });
     });
-    protected readonly dayDisabled = computed(() => {
-        const disabled = this.disabled();
-        const entry = this.entry();
-        const disabledDates = this.disabledDates();
-        const max = this.max();
-        const min = this.min();
-
-        let isDisabledByInput = false;
-        if (typeof disabledDates === "function") {
-            isDisabledByInput = disabledDates(entry.key);
-        } else if (disabledDates) {
-            isDisabledByInput = any(disabledDates, d => compareDates(entry.key, d, "=="));
-        }
-
-        return disabled || isDisabledByInput || compareDates(entry.key, max, ">") || compareDates(entry.key, min, "<");
-    });
-    protected readonly focused = computed(() => {
-        const entry = this.entry();
-        const navigatedDate = this.navigatedDate();
-        return compareDates(entry.key, navigatedDate, "==");
-    });
-    protected readonly isToday = computed(() => {
-        const entry = this.entry();
-        const today = new Date();
-        return compareDates(entry.key, today, "==");
-    });
+    protected readonly dayDisabled = computed(() => this.disabled() || this.isDayUnavailable()(this.entry().key));
+    protected readonly focused = computed(() => compareDates(this.entry().key, this.navigatedDate(), "=="));
+    protected readonly isToday = computed(() => compareDates(this.entry().key, this.today(), "=="));
     protected readonly outside = computed(() => {
         const entry = this.entry();
         const monthStart = this.monthBounds()[0];
         const monthEnd = this.monthBounds()[1];
         return compareDates(entry.key, monthStart, "<") || compareDates(entry.key, monthEnd, ">");
     });
-    protected readonly rangePreviewed = computed(() => {
-        const entry = this.entry();
-        return !this.selected() && exactly(this.rangePreview(), 1, d => compareDates(entry.key, d, "=="));
-    });
-    protected readonly selected = computed(() => {
-        const entry = this.entry();
-        const value = this.value();
-        if (Array.isArray(value)) {
-            return exactly(value, 1, d => compareDates(entry.key, d, "=="));
-        }
-        return compareDates(entry.key, value, "==");
-    });
+    protected readonly rangePreviewed = computed(() => !this.selected() && this.rangePreviewKeys().has(this.#key()));
+    protected readonly selected = computed(() => this.selectedKeys().has(this.#key()));
     public readonly dayPointerEnter = output<Date>();
     public readonly daySelect = output<{ date: Date; event: MouseEvent }>();
+    /** Whether the whole calendar is disabled. */
     public readonly disabled = input.required<boolean>();
-    public readonly disabledDates = input.required<DateDisabledType>();
     public readonly entry = input.required<KeyValuePair<Date, number>>();
-    public readonly max = input.required<Date | null | undefined>();
-    public readonly min = input.required<Date | null | undefined>();
+    /** Whether a day can't be picked: out of range or in `disabledDates`. */
+    public readonly isDayUnavailable = input.required<(date: Date) => boolean>();
     public readonly monthBounds = input.required<[Date, Date]>();
     public readonly navigatedDate = input.required<Date>();
-    public readonly rangePreview = input.required<Date[]>();
+    public readonly rangePreviewKeys = input.required<ReadonlySet<string>>();
     public readonly rounded = input.required<CalendarVariantProps["rounded"]>();
-    public readonly value = input.required<Date | Date[] | null>();
+    public readonly selectedKeys = input.required<ReadonlySet<string>>();
+    public readonly today = input.required<Date>();
 
     protected onClick(event: MouseEvent) {
         if (this.dayDisabled()) {

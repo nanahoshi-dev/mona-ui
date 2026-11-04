@@ -83,7 +83,8 @@ describe("DatePickerComponent", () => {
         fixture.detectChanges();
 
         const input = getInput();
-        input.dispatchEvent(new Event("blur", { bubbles: true }));
+        // The field is touched when focus leaves the picker.
+        input.dispatchEvent(new FocusEvent("focusout", { bubbles: true, relatedTarget: null }));
         fixture.detectChanges();
         await fixture.whenStable();
 

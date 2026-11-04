@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
+import { booleanAttribute, ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
 import { disabled, form, FormField, maxDate, minDate, readonly, required } from "@angular/forms/signals";
 import { LucideBadgeQuestionMark, LucideBriefcaseBusiness, LucideDynamicIcon, LucideTentTree } from "@lucide/angular";
 import {
@@ -10,6 +10,7 @@ import {
 import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import { DateInputPrefixTemplateDirective } from "@nanahoshi/mona-ui/date-input";
 import { DateTimePickerComponent } from "@nanahoshi/mona-ui/datetime-picker";
+import { LabelComponent } from "@nanahoshi/mona-ui/label";
 import { DateTime } from "luxon";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
@@ -76,6 +77,11 @@ export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimeP
     protected readonly DateTimePickerWrapperComponent = DateTimePickerWrapperComponent;
     protected readonly config = computed<ComponentConfig<DateTimePickerComponent>>(() => ({
         inputs: deriveInputConfig<DateTimePickerComponent>(this.metadata(), {
+            // The demo labels the field with a visible <mona-label> pointed at a fixed inputId.
+            ariaDescribedBy: undefined,
+            ariaLabel: undefined,
+            ariaLabelledBy: undefined,
+            inputId: undefined,
             disabledDates: {
                 type: "iterable",
                 value: []
@@ -174,13 +180,16 @@ export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimeP
         CalendarYearCellTemplateDirective,
         DateInputPrefixTemplateDirective,
         LucideDynamicIcon,
-        FormField
+        FormField,
+        LabelComponent
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         <span>Selected Date: {{ formValueText() }}</span>
+        <mona-label for="datetime-picker-demo-input" text="Meeting start"></mona-label>
         <mona-datetime-picker
+            inputId="datetime-picker-demo-input"
             [disabledDates]="disabledDates()"
             [firstDay]="firstDay()"
             [formField]="form.value"
@@ -256,7 +265,7 @@ class DateTimePickerWrapperComponent implements ComponentInputsAsSignal<DateTime
         const isWeekend = DateTime.fromJSDate(value).weekday === 6 || DateTime.fromJSDate(value).weekday === 7;
         return isWeekend ? LucideTentTree : LucideBriefcaseBusiness;
     });
-    public readonly disabled = input<ReturnType<DateTimePickerComponent["disabled"]>>(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly disabledDates = input<ReturnType<DateTimePickerComponent["disabledDates"]>>([]);
     public readonly firstDay = input<ReturnType<DateTimePickerComponent["firstDay"]>>("monday");
     public readonly format = input<ReturnType<DateTimePickerComponent["format"]>>("dd/MM/yyyy");
@@ -273,16 +282,16 @@ class DateTimePickerWrapperComponent implements ComponentInputsAsSignal<DateTime
     public readonly popupClass = input<ReturnType<DateTimePickerComponent["popupClass"]>>("");
     public readonly popupHeight = input<ReturnType<DateTimePickerComponent["popupHeight"]>>(null);
     public readonly popupWidth = input<ReturnType<DateTimePickerComponent["popupWidth"]>>(null);
-    public readonly readonly = input<ReturnType<DateTimePickerComponent["readonly"]>>(false);
-    public readonly readonlyInput = input<ReturnType<DateTimePickerComponent["readonlyInput"]>>(false);
-    public readonly required = input<ReturnType<DateTimePickerComponent["required"]>>(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly readonlyInput = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<DateTimePickerComponent["rounded"]>>("medium");
     public readonly secondStep = input<ReturnType<DateTimePickerComponent["secondStep"]>>(1);
-    public readonly showClearButton = input<ReturnType<DateTimePickerComponent["showClearButton"]>>(false);
-    public readonly showSeconds = input<ReturnType<DateTimePickerComponent["showSeconds"]>>(false);
+    public readonly showClearButton = input(false, { transform: booleanAttribute });
+    public readonly showSeconds = input(false, { transform: booleanAttribute });
     public readonly size = input<ReturnType<DateTimePickerComponent["size"]>>("medium");
     public readonly userClass = input<ReturnType<DateTimePickerComponent["userClass"]>>("");
-    public readonly weekNumber = input<ReturnType<DateTimePickerComponent["weekNumber"]>>(false);
+    public readonly weekNumber = input(false, { transform: booleanAttribute });
 
     protected onPopupClose(event: PreventableEvent) {
         const preventClose = this.features()["preventClose"].active;

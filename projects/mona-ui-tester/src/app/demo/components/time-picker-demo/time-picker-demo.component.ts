@@ -1,8 +1,9 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
+import { booleanAttribute, ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
 import { disabled, form, FormField, maxDate, minDate, readonly, required } from "@angular/forms/signals";
 import { TimePickerComponent } from "@nanahoshi/mona-ui/time-picker";
 import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
+import { LabelComponent } from "@nanahoshi/mona-ui/label";
 import { DateTime } from "luxon";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
@@ -33,6 +34,11 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
     protected readonly TimePickerWrapperComponent = TimePickerWrapperComponent;
     protected readonly config = computed<ComponentConfig<TimePickerComponent>>(() => ({
         inputs: deriveInputConfig<TimePickerComponent>(this.metadata(), {
+            // The demo labels the field with a visible <mona-label> pointed at a fixed inputId.
+            ariaDescribedBy: undefined,
+            ariaLabel: undefined,
+            ariaLabelledBy: undefined,
+            inputId: undefined,
             hourFormat: {
                 type: "dropdown",
                 value: ["12", "24"],
@@ -88,11 +94,13 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
 }
 
 @Component({
-    imports: [TimePickerComponent, FormField],
+    imports: [TimePickerComponent, FormField, LabelComponent],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <span>Selected Time: {{ formValueText() }}</span>
+        <mona-label for="time-picker-demo-input" text="Reminder time"></mona-label>
         <mona-time-picker
+            inputId="time-picker-demo-input"
             [formField]="form.value"
             [format]="format()"
             [hourFormat]="hourFormat()"
@@ -137,7 +145,7 @@ class TimePickerWrapperComponent implements ComponentInputsAsSignal<TimePickerCo
         }
         return dt.toFormat(format);
     });
-    public readonly disabled = input<ReturnType<TimePickerComponent["disabled"]>>(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly format = input<ReturnType<TimePickerComponent["format"]>>("HH:mm");
     public readonly hourFormat = input<ReturnType<TimePickerComponent["hourFormat"]>>("24");
     public readonly hourStep = input<ReturnType<TimePickerComponent["hourStep"]>>(1);
@@ -152,13 +160,13 @@ class TimePickerWrapperComponent implements ComponentInputsAsSignal<TimePickerCo
     public readonly popupClass = input<ReturnType<TimePickerComponent["popupClass"]>>("");
     public readonly popupHeight = input<ReturnType<TimePickerComponent["popupHeight"]>>(null);
     public readonly popupWidth = input<ReturnType<TimePickerComponent["popupWidth"]>>(null);
-    public readonly readonly = input<ReturnType<TimePickerComponent["readonly"]>>(false);
-    public readonly readonlyInput = input<ReturnType<TimePickerComponent["readonlyInput"]>>(false);
-    public readonly required = input<ReturnType<TimePickerComponent["required"]>>(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly readonlyInput = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<TimePickerComponent["rounded"]>>("medium");
     public readonly secondStep = input<ReturnType<TimePickerComponent["secondStep"]>>(1);
-    public readonly showClearButton = input<ReturnType<TimePickerComponent["showClearButton"]>>(false);
-    public readonly showSeconds = input<ReturnType<TimePickerComponent["showSeconds"]>>(false);
+    public readonly showClearButton = input(false, { transform: booleanAttribute });
+    public readonly showSeconds = input(false, { transform: booleanAttribute });
     public readonly size = input<ReturnType<TimePickerComponent["size"]>>("medium");
     public readonly userClass = input<ReturnType<TimePickerComponent["userClass"]>>("");
 

@@ -1,6 +1,9 @@
-import { FocusMonitor, FocusOrigin } from "@angular/cdk/a11y";
+import type { FocusOrigin } from "@angular/cdk/a11y";
+import { FocusMonitor } from "@angular/cdk/a11y";
+import type { ModelSignal, Signal } from "@angular/core";
 import {
     afterNextRender,
+    booleanAttribute,
     computed,
     contentChildren,
     DestroyRef,
@@ -9,40 +12,29 @@ import {
     ElementRef,
     inject,
     input,
-    ModelSignal,
     output,
-    Signal,
     signal,
     TemplateRef,
     untracked,
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { Action, rxTimeout } from "@nanahoshi/mona-ui/internal";
+import type { Action } from "@nanahoshi/mona-ui/internal";
+import { createElementControlId, rxTimeout } from "@nanahoshi/mona-ui/internal";
 import { formatNumber, getNumberSymbols, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import {
-    concatMap,
-    delay,
-    distinctUntilChanged,
-    filter,
-    map,
-    of,
-    Subject,
-    switchMap,
-    takeUntil,
-    tap,
-    timer
-} from "rxjs";
+import { concatMap, delay, filter, map, of, Subject, switchMap, takeUntil, tap, timer } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { NumericTextBoxPrefixTemplateDirective } from "../../directives/numeric-text-box-prefix-template.directive";
 import { NUMERIC_TEXT_BOX_DEFAULT_MESSAGES } from "../../i18n/numeric-text-box.default-messages";
+import type { NumericTextboxVariantInputs, NumericTextboxVariantProps } from "../../styles/numeric-textbox.styles";
 import {
     numericTextboxButtonThemeVariants,
     numericTextboxInputThemeVariants,
-    numericTextboxThemeVariants,
-    NumericTextboxVariantInputs,
-    NumericTextboxVariantProps
+    numericTextboxThemeVariants
 } from "../../styles/numeric-textbox.styles";
+
+/** PageUp and PageDown move by this many steps. */
+const PAGE_STEP_COUNT = 10;
 
 export type NumericTextBoxStepDirection = "-" | "+";
 
@@ -58,11 +50,17 @@ export interface NumericTextBoxTextResult<TValue> {
  */
 @Directive({
     host: {
+        // The host has no role: the inner input is the spinbutton and carries the name, description and state. A
+        // static aria-* attribute written on the host element would otherwise stay on the host as well.
+        "[attr.aria-describedby]": "null",
+        "[attr.aria-label]": "null",
+        "[attr.aria-labelledby]": "null",
         "[class]": "classes()",
         "[attr.data-disabled]": "disabled() || null",
         "[attr.data-invalid]": "invalidInput() || null",
         "[attr.data-readonly]": "readonly() || null",
-        "[attr.data-required]": "required() || null"
+        "[attr.data-required]": "required() || null",
+        "(focusout)": "onBlur($event)"
     }
 })
 export abstract class NumericTextBoxBaseComponent<
@@ -72,6 +70,8 @@ export abstract class NumericTextBoxBaseComponent<
     readonly #focusMonitor = inject(FocusMonitor);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #i18n = inject(MonaI18nService);
+    /** The value this component last wrote, so a value set from outside can be told apart. */
+    #ownValue: TValue | null | undefined = undefined;
     #pendingPaste = false;
 
     protected readonly beforeInput$ = new Subject<InputEvent>();
@@ -92,7 +92,7 @@ export abstract class NumericTextBoxBaseComponent<
     protected readonly inputClasses = computed(() => {
         const hasPrefixTemplate = this.prefixTemplateList().length > 0;
         const startRounded = hasPrefixTemplate ? "none" : this.rounded();
-        const endRounded = this.spinners() ? "none" : this.rounded();
+        const endRounded = this.showSpinners() ? "none" : this.rounded();
         const inputVariants = numericTextboxInputThemeVariants({ endRounded, startRounded });
         return twMerge(inputVariants);
     });
@@ -105,6 +105,8 @@ export abstract class NumericTextBoxBaseComponent<
         read: TemplateRef
     });
     protected readonly rawInputValue = signal("");
+    /** Spin buttons on a read-only field would look usable but do nothing, so they are hidden there. */
+    protected readonly showSpinners = computed(() => this.spinners() && !this.readonly());
     protected readonly spin$ = new Subject<NumericTextBoxStepDirection>();
     protected readonly spinButtonClasses = computed(() => {
         const size = this.size();
@@ -120,9 +122,23 @@ export abstract class NumericTextBoxBaseComponent<
     protected readonly wheel$ = new Subject<WheelEvent>();
 
     /**
-     * @description ARIA label for the input.
+     * @description ID of an element that provides an extended description for the input, such as a hint or an
+     * error message.
+     * @default ""
+     */
+    public readonly ariaDescribedBy = input("", { alias: "aria-describedby" });
+
+    /**
+     * @description Accessible name for the input. Prefer a visible label, linked through {@link inputId} or
+     * {@link ariaLabelledBy}.
      */
     public readonly ariaLabel = input<string | null>(null, { alias: "aria-label" });
+
+    /**
+     * @description ID of an external element that provides the accessible name for the input.
+     * @default ""
+     */
+    public readonly ariaLabelledBy = input("", { alias: "aria-labelledby" });
 
     /**
      * @description Number of fractional decimal places to display and accept. Values are truncated to an integer
@@ -142,10 +158,11 @@ export abstract class NumericTextBoxBaseComponent<
     /**
      * @description Sets whether the input is disabled.
      */
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
-     * @description Emits when the inner input element is blurred.
+     * @description Emits when focus leaves the component, after the value has been clamped to the bounds. Moving
+     * focus between the input and elements inside the component (such as a prefix template) doesn't count.
      */
     public readonly inputBlur = output<FocusEvent>();
 
@@ -160,26 +177,40 @@ export abstract class NumericTextBoxBaseComponent<
     public readonly inputFocusOut = output<FocusEvent>();
 
     /**
+     * @description ID of the inner input, so a `<label for>` or `<mona-label for>` can point at it.
+     * @default a generated ID
+     */
+    public readonly inputId = input(createElementControlId());
+
+    /**
      * @description Marks the text box as invalid. When bound to a signal form field via `[formField]`,
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly invalid = input(false);
+    public readonly invalid = input(false, { transform: booleanAttribute });
 
     /**
-     * @description Sets whether the input can be empty.
+     * @description Sets whether the input can be empty. When `false`, leaving an empty field sets it to the
+     * minimum, or to zero when there is no minimum (clamped to the maximum).
      */
-    public readonly nullable = input(true);
+    public readonly nullable = input(true, { transform: booleanAttribute });
 
     /**
-     * @description Sets whether the input is readonly.
+     * @description Text shown in the input while it is empty. It isn't a label: it disappears once there is a
+     * value.
+     * @default ""
      */
-    public readonly readonly = input(false);
+    public readonly placeholder = input("");
+
+    /**
+     * @description Sets whether the input is readonly. The spin buttons are hidden while it is.
+     */
+    public readonly readonly = input(false, { transform: booleanAttribute });
 
     /**
      * @description Sets whether the input is required.
      */
-    public readonly required = input(false);
+    public readonly required = input(false, { transform: booleanAttribute });
 
     /**
      * @description Sets the border radius of the input.
@@ -194,7 +225,7 @@ export abstract class NumericTextBoxBaseComponent<
     /**
      * @description Sets whether the spin buttons are visible.
      */
-    public readonly spinners = input(true);
+    public readonly spinners = input(true, { transform: booleanAttribute });
 
     /**
      * @description Tab index of the input.
@@ -202,8 +233,8 @@ export abstract class NumericTextBoxBaseComponent<
     public readonly tabindex = input(0);
 
     /**
-     * @description Emitted when the text box is interacted with on blur, value change, or spinner update.
-     * The `FormField` directive listens to this to mark the field as touched.
+     * @description Emitted when focus leaves the component, as a native input is touched on blur. Typing and
+     * spinning don't count. The `FormField` directive listens to this to mark the field as touched.
      */
     public readonly touch = output();
 
@@ -212,7 +243,7 @@ export abstract class NumericTextBoxBaseComponent<
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
 
     /**
      * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
@@ -231,6 +262,19 @@ export abstract class NumericTextBoxBaseComponent<
     public abstract readonly value: ModelSignal<TValue | null>;
 
     public constructor() {
+        effect(() => {
+            const value = this.value();
+            untracked(() => {
+                if (value === this.#ownValue) {
+                    return;
+                }
+                // Set from outside (a form patch, a binding): show it, even while the user is in the field.
+                this.#ownValue = value;
+                if (this.focused() && !this.readonly()) {
+                    this.rawInputValue.set(this.formatEditValue(value));
+                }
+            });
+        });
         effect(() => {
             this.#i18n.localeId();
             untracked(() => {
@@ -260,32 +304,43 @@ export abstract class NumericTextBoxBaseComponent<
         this.#destroyRef.onDestroy(() => this.#focusMonitor.stopMonitoring(this.#hostElementRef.nativeElement));
     }
 
+    /** Steps the value down by `step` and moves focus to the input. */
     public decrease(): void {
         this.spinValue("-");
+        this.focus();
     }
 
-    public focus(): void {
-        this.#focusMonitor.focusVia(this.valueTextBoxRef(), "keyboard");
+    /**
+     * Moves focus to the input, with the caret at the end.
+     * @param options passed to the native `focus()` call, for example `{ preventScroll: true }`.
+     */
+    public focus(options?: FocusOptions): void {
+        this.#focusMonitor.focusVia(this.valueTextBoxRef(), "keyboard", options);
         rxTimeout(this.#destroyRef, () => {
             this.valueTextBoxRef().nativeElement.scrollLeft = this.valueTextBoxRef().nativeElement.scrollWidth;
         });
     }
 
+    /** Steps the value up by `step` and moves focus to the input. */
     public increase(): void {
         this.spinValue("+");
+        this.focus();
     }
 
+    /** Runs when focus leaves an element inside the component: clamps the value and marks the field touched. */
     public onBlur(event: FocusEvent): void {
-        this.#pendingPaste = false;
-        const relatedTarget = event.relatedTarget as Node | null;
-        if (relatedTarget && this.#hostElementRef.nativeElement.contains(relatedTarget)) {
+        // Removing a focused text box from the page fires focusout after it is destroyed.
+        if (this.#destroyRef.destroyed) {
             return;
         }
-        const corrected = this.correctValue();
-        if (!corrected) {
-            this.touch.emit();
+        this.#pendingPaste = false;
+        const relatedTarget = event.relatedTarget;
+        if (relatedTarget instanceof Node && this.#hostElementRef.nativeElement.contains(relatedTarget)) {
+            return;
         }
+        this.correctValue();
         this.rawInputValue.set(this.formatValueForDisplay(this.value()));
+        this.touch.emit();
         this.inputBlur.emit(event);
     }
 
@@ -318,42 +373,50 @@ export abstract class NumericTextBoxBaseComponent<
         this.#pendingPaste = true;
     }
 
+    protected onSpinPointerDown(event: PointerEvent, direction: NumericTextBoxStepDirection): void {
+        // Only the primary button spins: a right-click opens the context menu and would never see a pointerup.
+        if (event.button !== 0) {
+            return;
+        }
+        this.spin$.next(direction);
+    }
+
+    /** Limits a value to the min and max bounds. */
+    private clampValue(value: TValue): TValue {
+        const min = this.minValue();
+        const max = this.maxValue();
+        if (min != null && this.compareValues(value, min) < 0) {
+            return min;
+        }
+        if (max != null && this.compareValues(value, max) > 0) {
+            return max;
+        }
+        return value;
+    }
+
     private commitValue(value: TValue | null): void {
-        this.value.set(value);
+        this.setOwnValue(value);
         this.rawInputValue.set(
             this.focused() && !this.readonly() ? this.formatEditValue(value) : this.formatValueForDisplay(value)
         );
-        this.touch.emit();
     }
 
-    private correctValue(): boolean {
+    private correctValue(): void {
         const value = this.value();
-        const min = this.minValue();
-        const max = this.maxValue();
-
         if (value == null) {
             if (this.nullable()) {
                 if (this.rawInputValue() !== "") {
                     this.rawInputValue.set("");
                 }
-                return false;
-            } else if (min != null) {
-                this.commitValue(min);
-                return true;
-            } else {
-                this.commitValue(this.zeroValue);
-                return true;
+                return;
             }
+            this.commitValue(this.clampValue(this.minValue() ?? this.zeroValue));
+            return;
         }
-        if (min != null && this.compareValues(value, min) < 0) {
-            this.commitValue(min);
-            return true;
+        const clamped = this.clampValue(value);
+        if (this.compareValues(clamped, value) !== 0) {
+            this.commitValue(clamped);
         }
-        if (max != null && this.compareValues(value, max) > 0) {
-            this.commitValue(max);
-            return true;
-        }
-        return false;
     }
 
     private formatEditValue(value: TValue | null): string {
@@ -484,33 +547,50 @@ export abstract class NumericTextBoxBaseComponent<
         });
     }
 
-    private setInputFocusSubscription(): void {
-        this.inputFocus.subscribe(() => this.#hostElementRef.nativeElement.focus());
-    }
-
     private setKeydownSubscription(): void {
         this.keydown$
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
+                // Keys pressed while an IME is composing belong to the IME (Safari reports them as keyCode 229).
+                filter(event => !event.isComposing && event.keyCode !== 229),
                 filter(() => !this.readonly() && !this.disabled())
             )
             .subscribe((event: KeyboardEvent) => {
-                if (event.key === "ArrowUp") {
-                    event.preventDefault();
-                    this.increase();
-                    return;
-                }
-
-                if (event.key === "ArrowDown") {
-                    event.preventDefault();
-                    this.decrease();
-                    return;
+                switch (event.key) {
+                    case "ArrowUp":
+                        event.preventDefault();
+                        this.increase();
+                        return;
+                    case "ArrowDown":
+                        event.preventDefault();
+                        this.decrease();
+                        return;
+                    case "PageUp":
+                        event.preventDefault();
+                        this.spinValue("+", PAGE_STEP_COUNT);
+                        return;
+                    case "PageDown":
+                        event.preventDefault();
+                        this.spinValue("-", PAGE_STEP_COUNT);
+                        return;
+                    case "Home":
+                        // Without a minimum, Home keeps moving the caret.
+                        this.spinToBound(event, this.minValue());
+                        return;
+                    case "End":
+                        this.spinToBound(event, this.maxValue());
+                        return;
                 }
 
                 if (event.code === "NumpadDecimal") {
                     this.insertLocaleDecimal(event);
                 }
             });
+    }
+
+    private setOwnValue(value: TValue | null): void {
+        this.#ownValue = value;
+        this.value.set(value);
     }
 
     private setSpinSubscription(): void {
@@ -540,7 +620,6 @@ export abstract class NumericTextBoxBaseComponent<
         this.setKeydownSubscription();
         this.setSpinSubscription();
         this.setWheelSubscription();
-        this.setInputFocusSubscription();
         this.setBeforeInputSubscription();
     }
 
@@ -548,55 +627,46 @@ export abstract class NumericTextBoxBaseComponent<
         this.valueChange$
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                distinctUntilChanged(),
                 map(v => this.parseValue(v))
             )
-            .subscribe(value => {
-                this.value.set(value);
-                this.touch.emit();
-            });
+            .subscribe(value => this.setOwnValue(value));
     }
 
     private setWheelSubscription(): void {
         this.wheel$
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
+                // The wheel spins only the field being edited: scrolling the page over an unfocused field, a
+                // horizontal scroll and Ctrl+wheel (zoom) are left to the browser.
+                filter(event => this.focused() && event.deltaY !== 0 && !event.ctrlKey),
                 filter(() => !this.readonly() && !this.disabled())
             )
             .subscribe((event: WheelEvent) => {
                 event.preventDefault();
-                if (event.deltaY < 0) {
-                    this.increase();
-                } else {
-                    this.decrease();
-                }
+                this.spinValue(event.deltaY < 0 ? "+" : "-");
             });
     }
 
-    private spinValue(direction: NumericTextBoxStepDirection): void {
-        const value = this.value();
-        const min = this.minValue();
-        const max = this.maxValue();
-        if (value == null) {
-            let initial = this.zeroValue;
-            if (min != null && this.compareValues(initial, min) < 0) {
-                initial = min;
-            }
-            if (max != null && this.compareValues(initial, max) > 0) {
-                initial = max;
-            }
-            this.commitValue(initial);
-        } else {
-            let result = this.stepValue(value, direction);
-            if (direction === "-" && min != null && this.compareValues(result, min) < 0) {
-                result = min;
-            }
-            if (direction === "+" && max != null && this.compareValues(result, max) > 0) {
-                result = max;
-            }
-            this.commitValue(result);
+    private spinToBound(event: KeyboardEvent, bound: TValue | null): void {
+        if (bound == null) {
+            return;
         }
-        this.focus();
+        event.preventDefault();
+        this.commitValue(bound);
+    }
+
+    private spinValue(direction: NumericTextBoxStepDirection, steps = 1): void {
+        const value = this.value();
+        if (value == null) {
+            this.commitValue(this.clampValue(this.zeroValue));
+            return;
+        }
+        let result = value;
+        for (let index = 0; index < steps; index++) {
+            result = this.stepValue(result, direction);
+        }
+        // A value outside the bounds (set from outside) comes back inside them in the direction of the step.
+        this.commitValue(this.clampValue(result));
     }
 
     /** Negative when `a < b`, zero when equal, positive when `a > b`. */

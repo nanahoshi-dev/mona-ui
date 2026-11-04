@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
-import { themeOverlaySurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { VariantProps } from "class-variance-authority";
+import { themeOverlaySurfaceClasses, type VariantInputs } from "@nanahoshi/mona-ui/internal";
+import type { VariantProps } from "class-variance-authority";
 
 export const datePopupThemeVariants = cva(
     `

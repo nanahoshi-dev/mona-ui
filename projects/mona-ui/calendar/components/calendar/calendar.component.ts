@@ -1,6 +1,7 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
+    booleanAttribute,
     Component,
     computed,
     contentChild,
@@ -18,12 +19,14 @@ import {
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
 import { LucideChevronLeft, LucideChevronRight } from "@lucide/angular";
-import { any, Dictionary, index, lastOrDefault, range, select } from "@mirei/ts-collections";
+import { Dictionary, index, lastOrDefault, range, select } from "@mirei/ts-collections";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { PreventableEvent, TakeFirstPipe } from "@nanahoshi/mona-ui/common";
-import { CalendarService, CalendarView, DateDisabledType } from "@nanahoshi/mona-ui/date-input";
+import type { CalendarView, DateDisabledType } from "@nanahoshi/mona-ui/date-input";
+import { CalendarService } from "@nanahoshi/mona-ui/date-input";
 import { createElementControlId, rxTimeout } from "@nanahoshi/mona-ui/internal";
-import { DateTime, DurationObjectUnits } from "luxon";
+import type { DurationObjectUnits } from "luxon";
+import { DateTime } from "luxon";
 import { fromEvent, skip } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import {
@@ -42,19 +45,28 @@ import { CalendarYearCellTemplateDirective } from "../../directives/calendar-yea
 import { DecadeYearDirective } from "../../directives/decade-year.directive";
 import { MonthDayDirective } from "../../directives/month-day.directive";
 import { YearMonthDirective } from "../../directives/year-month.directive";
-import { CalendarSelection } from "../../models/CalendarSelection";
-import { FirstDayOfWeek } from "../../models/FirstDayOfWeek";
+import type { CalendarSelection } from "../../models/CalendarSelection";
+import type { FirstDayOfWeek } from "../../models/FirstDayOfWeek";
+import type { CalendarVariantInput, CalendarVariantProps } from "../../styles/calendar.styles";
 import {
     calendarBaseThemeVariants,
     calendarDecadeViewGridThemeVariants,
     calendarHeaderThemeVariants,
     calendarMonthViewGridHeaderThemeVariants,
     calendarMonthViewGridThemeVariants,
-    CalendarVariantInput,
-    CalendarVariantProps,
     calendarYearViewGridThemeVariants
 } from "../../styles/calendar.styles";
-import { compareDates } from "../../utils/compareDates";
+import { compareDates, toDayKey } from "../../utils/compareDates";
+
+/** Midnight at the start of the local day `date` falls on. */
+function startOfDay(date: Date): Date {
+    return DateTime.fromJSDate(date).startOf("day").toJSDate();
+}
+
+/** Whole calendar days from `start` to `end`, whatever their times and across DST changes. */
+function calendarDaysBetween(start: DateTime, end: DateTime): number {
+    return Math.round(end.startOf("day").diff(start.startOf("day"), "days").days);
+}
 
 const FIRST_DAY_OF_WEEK_TO_ISO: Record<FirstDayOfWeek, number> = {
     monday: 1,
@@ -80,13 +92,15 @@ const FIRST_DAY_OF_WEEK_TO_ISO: Record<FirstDayOfWeek, number> = {
         LucideChevronRight
     ],
     host: {
-        role: "application",
-        "[attr.aria-label]": "ariaLabel()",
-        "[attr.aria-invalid]": "invalidState() ? 'true' : null",
+        // The host is a plain container: the grid inside it is the widget, and focus moves through its cells. A
+        // static aria-label written on <mona-calendar> would otherwise stay on the role-less host.
+        "[attr.aria-label]": "null",
+        "[attr.data-disabled]": "disabled() || null",
         "[attr.data-invalid]": "invalidState() || null",
         "[attr.data-required]": "required() || null",
-        "[attr.tabindex]": "disabled() ? -1 : 0",
-        "[class]": "baseClass()"
+        "[class]": "baseClass()",
+        "(focusin)": "refreshToday()",
+        "(focusout)": "onFocusOut($event)"
     }
 })
 export class CalendarComponent implements CalendarVariantInput, FormValueControl<Date | Date[] | null> {
@@ -206,6 +220,24 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     protected readonly invalidState = computed(
         () => this.touched() && (this.invalid() || (this.required() && this.isEmptyValue()))
     );
+    /**
+     * Whether a day can't be picked: outside `minDate`/`maxDate` or in `disabledDates`. An iterable of disabled
+     * dates is turned into a set of day keys once, so each of the 42 cells answers in constant time.
+     */
+    protected readonly isDayUnavailable = computed<(date: Date) => boolean>(() => {
+        const disabledDates = this.disabledDates();
+        const min = this.minDate();
+        const max = this.maxDate();
+        const isOutOfRange = (date: Date) => compareDates(date, max, ">") || compareDates(date, min, "<");
+        if (typeof disabledDates === "function") {
+            return date => isOutOfRange(date) || disabledDates(date);
+        }
+        const keys = new Set<string>();
+        for (const disabledDate of disabledDates ?? []) {
+            keys.add(toDayKey(disabledDate));
+        }
+        return date => isOutOfRange(date) || keys.has(toDayKey(date));
+    });
     protected readonly messages = this.#i18n.componentMessages("calendar", CALENDAR_DEFAULT_MESSAGES);
     protected readonly monthBounds = computed(() => {
         const navigatedDate = this.navigatedDate();
@@ -242,7 +274,8 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
             .select(e => e.select(m => [m[0] + 1, m[1]] as const).toImmutableSet())
             .toImmutableSet();
     });
-    protected readonly navigatedDate = signal(new Date());
+    // Midnight, so a date picked with the keyboard before any value exists carries no clock time.
+    protected readonly navigatedDate = signal(startOfDay(new Date()));
     protected readonly nextButtonLabel = computed(() => {
         const view = this.calendarView();
         const messages = this.messages();
@@ -279,6 +312,9 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         }
         return this.getInclusiveDateRange(pendingRangeStart, this.rangePreviewDate() ?? this.navigatedDate());
     });
+    protected readonly rangePreviewKeys = computed<ReadonlySet<string>>(
+        () => new Set(this.rangePreviewDates().map(toDayKey))
+    );
     protected readonly selectedDates = linkedSignal<Date[]>(() => {
         const v = this.value();
         const selection = this.selection();
@@ -290,23 +326,26 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
             const date2 = DateTime.fromJSDate(v[v.length - 1]);
             const startDate = date1 <= date2 ? date1 : date2;
             const endDate = date1 <= date2 ? date2 : date1;
-            const totalDays = endDate.diff(startDate, "days").days + 1;
+            const totalDays = calendarDaysBetween(startDate, endDate) + 1;
             return range(0, totalDays)
                 .select(i => startDate.plus({ days: i }).toJSDate())
                 .toArray();
         }
         return Array.isArray(v) ? v : [v];
     });
-    protected readonly timezone = DateTime.local().zoneName ?? undefined;
+    protected readonly selectedKeys = computed<ReadonlySet<string>>(() => new Set(this.selectedDates().map(toDayKey)));
+    /** Today at midnight. Refreshed when focus enters the calendar, so a page left open overnight moves on. */
+    protected readonly today = signal(startOfDay(new Date()));
     protected readonly todayButtonLabel = computed(() => {
         const locale = this.#i18n.localeId();
-        const todayStr = formatGregorianDateToLocaleString(new Date(), locale, {
+        const todayStr = formatGregorianDateToLocaleString(this.today(), locale, {
             year: "numeric",
             month: "long",
             day: "numeric"
         });
         return this.messages().goToToday(todayStr);
     });
+    protected readonly todayUnavailable = computed(() => this.isDayUnavailable()(this.today()));
     protected readonly viewSwitchButtonLabel = computed(() => {
         const view = this.calendarView();
         const locale = this.#i18n.localeId();
@@ -355,7 +394,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     /**
      * @description Sets the disabled state of the calendar.
      */
-    public readonly disabled = model(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
      * @description Sets the disabled dates of the calendar.
@@ -370,11 +409,18 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     public readonly firstDay = input<FirstDayOfWeek | null>(null);
 
     /**
+     * @description Moves focus to the active day when the calendar first renders. An inline calendar on a page
+     * should leave focus where it is; a calendar that opens in a popup sets this so focus moves into it.
+     * @default false
+     */
+    public readonly focusOnMount = input(false, { transform: booleanAttribute });
+
+    /**
      * @description Marks the calendar as invalid. When bound to a signal form field via `[formField]`,
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly invalid = input(false);
+    public readonly invalid = input(false, { transform: booleanAttribute });
 
     /**
      * @description Sets the maximum date that can be selected.
@@ -390,14 +436,14 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
      * @description Sets the readonly state of the calendar.
      * @default false
      */
-    public readonly readonly = input(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
 
     /**
      * @description Sets whether the calendar is required. When bound to a signal form field via `[formField]`,
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly required = input(false);
+    public readonly required = input(false, { transform: booleanAttribute });
 
     /**
      * @description Sets the border radius of the calendar.
@@ -412,8 +458,8 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     public readonly selection = input<CalendarSelection>("single");
 
     /**
-     * @description Emitted when the calendar value is changed by user interaction.
-     * The `FormField` directive listens to this to mark the field as touched.
+     * @description Emitted when focus leaves the calendar, as a native input is touched on blur. Moving between
+     * its buttons and days doesn't count. The `FormField` directive listens to this to mark the field as touched.
      */
     public readonly touch = output<void>();
 
@@ -422,7 +468,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
 
     /**
      * @description Adds custom CSS classes to the calendar host element.
@@ -430,7 +476,8 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     public readonly userClass = input<string>("", { alias: "class" });
 
     /**
-     * @description The current value of the calendar.
+     * @description The current value of the calendar: a `Date` in single selection, the selected dates in multiple
+     * selection, and `[start, end]` in range selection. A range is written once both ends are picked.
      * @default null
      */
     public readonly value = model<Date | Date[] | null>(null);
@@ -439,34 +486,37 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
      * @description Enables the display of week numbers in the calendar.
      * @default false
      */
-    public readonly weekNumber = input<boolean>(false);
+    public readonly weekNumber = input(false, { transform: booleanAttribute });
 
     public constructor() {
         afterNextRender({
             read: () => {
                 this.setupKeyboardNavigation();
-                this.focusActiveCell();
+                if (this.focusOnMount()) {
+                    this.focusActiveCell();
+                }
             }
         });
         effect(() => {
             const min = this.minDate();
             const max = this.maxDate();
-            this.disabledDates();
             untracked(() => {
+                // Keep the active day within the range. A day disabled through disabledDates can stay active: it is
+                // focusable and announced as unavailable, so the keyboard can move past it.
                 const navigationDate = this.navigatedDate();
-                if (this.isDateDisabled(navigationDate)) {
-                    const newDate = min ?? max;
-                    if (newDate) {
-                        this.navigatedDate.set(newDate);
-                    }
+                if (compareDates(navigationDate, min, "<") && min) {
+                    this.navigatedDate.set(min);
+                } else if (compareDates(navigationDate, max, ">") && max) {
+                    this.navigatedDate.set(max);
                 }
             });
         });
         effect(() => {
             const v = this.value();
             untracked(() => {
-                if (v != null) {
-                    const lastDate = Array.isArray(v) ? (lastOrDefault(v) ?? DateTime.now().toJSDate()) : v;
+                // Show the last selected date. Clearing the selection leaves the view where it is.
+                const lastDate = Array.isArray(v) ? lastOrDefault(v) : v;
+                if (lastDate) {
                     this.navigatedDate.set(lastDate);
                 }
             });
@@ -522,6 +572,18 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         this.rangePreviewDate.set(date);
     }
 
+    protected onFocusOut(event: FocusEvent): void {
+        // Removing a focused calendar from the page fires focusout after it is destroyed.
+        if (this.#destroyRef.destroyed) {
+            return;
+        }
+        const nextTarget = event.relatedTarget;
+        if (nextTarget instanceof Node && this.#hostElementRef.nativeElement.contains(nextTarget)) {
+            return;
+        }
+        this.touch.emit();
+    }
+
     protected onMonthClick(month: number): void {
         this.navigatedDate.set(DateTime.fromJSDate(this.navigatedDate()).set({ month }).toJSDate());
         this.calendarView.set("month");
@@ -550,18 +612,18 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     }
 
     protected onTodayButtonClick(): void {
-        if (this.disabled() || this.readonly()) {
+        this.refreshToday();
+        if (this.disabled() || this.readonly() || this.todayUnavailable()) {
             return;
         }
-        const currentDate = DateTime.now();
-        const navigatedDate = DateTime.fromJSDate(this.navigatedDate()).set({
-            year: currentDate.year,
-            month: currentDate.month,
-            day: currentDate.day
-        });
-        this.clearPendingRange();
-        this.navigatedDate.set(navigatedDate.toJSDate());
-        this.setCurrentDate(navigatedDate.toJSDate());
+        // Today is picked as a click on its day would pick it, so the same rules apply.
+        const today = this.today();
+        if (this.selection() === "range") {
+            this.handleRangeSelection(today);
+            this.navigatedDate.set(today);
+        } else {
+            this.handleSingleSelection(today);
+        }
         this.calendarView.set("month");
         this.commitUserSelection();
     }
@@ -575,14 +637,24 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         this.calendarView.set("year");
     }
 
+    protected refreshToday(): void {
+        const today = startOfDay(new Date());
+        if (!compareDates(today, this.today(), "==")) {
+            this.today.set(today);
+        }
+    }
+
     private clearPendingRange(): void {
         this.pendingRangeStart.set(null);
         this.rangePreviewDate.set(null);
     }
 
     private commitUserSelection(): void {
+        // A range is written once both ends are picked; the first click only starts it.
+        if (this.selection() === "range" && this.pendingRangeStart() != null) {
+            return;
+        }
         this.value.set(this.#outputValue());
-        this.touch.emit();
     }
 
     private extendSelection(offset: number): void {
@@ -627,7 +699,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         const lastSelectedDate = lastOrDefault(this.selectedDates()) ?? this.navigatedDate();
         const startDate = lastSelectedDate < date ? lastSelectedDate : date;
         const endDate = this.navigatedDate() > date ? this.navigatedDate() : date;
-        const totalDays = DateTime.fromJSDate(endDate).diff(DateTime.fromJSDate(startDate), "days").days + 1;
+        const totalDays = calendarDaysBetween(DateTime.fromJSDate(startDate), DateTime.fromJSDate(endDate)) + 1;
         return range(0, totalDays)
             .select(i => DateTime.fromJSDate(startDate).plus({ days: i }).toJSDate())
             .toArray();
@@ -638,7 +710,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         const dateTime2 = DateTime.fromJSDate(date2);
         const startDate = dateTime1 <= dateTime2 ? dateTime1 : dateTime2;
         const endDate = dateTime1 <= dateTime2 ? dateTime2 : dateTime1;
-        const totalDays = endDate.diff(startDate, "days").days + 1;
+        const totalDays = calendarDaysBetween(startDate, endDate) + 1;
         return range(0, totalDays)
             .select(i => startDate.plus({ days: i }).toJSDate())
             .toArray();
@@ -653,6 +725,11 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         this.#calendarService?.keydown$.next(preventableEvent);
 
         if (preventableEvent.isDefaultPrevented()) {
+            return;
+        }
+
+        // Keys pressed on the header buttons belong to the buttons: the arrows don't move the active day.
+        if ((event.target as HTMLElement).closest("button")) {
             return;
         }
 
@@ -709,10 +786,6 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
                 break;
             case "Enter":
             case " ": {
-                const target = event.target as HTMLElement;
-                if (target.tagName === "BUTTON" || target.closest("button")) {
-                    return;
-                }
                 event.preventDefault();
                 const previousView = this.calendarView();
                 if (this.readonly() && previousView === "month") {
@@ -744,12 +817,13 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
                 break;
             case "PageUp":
                 event.preventDefault();
-                this.navigateByPeriod(-1, view);
+                // Shift+PageUp moves a year in the month view, as in the WAI-ARIA date picker pattern.
+                this.navigateByPeriod(isShift && view === "month" ? -12 : -1, view);
                 shouldFocusCell = true;
                 break;
             case "PageDown":
                 event.preventDefault();
-                this.navigateByPeriod(1, view);
+                this.navigateByPeriod(isShift && view === "month" ? 12 : 1, view);
                 shouldFocusCell = true;
                 break;
             case "t":
@@ -782,10 +856,11 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
             const date1 = DateTime.fromJSDate(date);
             const valueList = this.getDateArray(value);
             const selectedDates = select(valueList, e => DateTime.fromJSDate(e));
-            const alreadySelected = selectedDates.any(e => e.equals(date1));
+            // Compare by day: a selected value carries a time, the clicked day is midnight.
+            const alreadySelected = selectedDates.any(e => e.hasSame(date1, "day"));
             if (alreadySelected) {
                 const newDates = selectedDates
-                    .where(e => !e.equals(date1))
+                    .where(e => !e.hasSame(date1, "day"))
                     .select(e => e.toJSDate())
                     .toArray();
                 this.setCurrentDate(newDates);
@@ -874,23 +949,16 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     }
 
     private isDateDisabled(date: Date): boolean {
-        const disabledDates = this.disabledDates();
-        const max = this.maxDate();
-        const min = this.minDate();
-
-        let isDisabledByInput = false;
-        if (typeof disabledDates === "function") {
-            isDisabledByInput = disabledDates(date);
-        } else if (disabledDates) {
-            isDisabledByInput = any(disabledDates, d => compareDates(date, d, "=="));
-        }
-
-        return isDisabledByInput || compareDates(date, max, ">") || compareDates(date, min, "<");
+        return this.isDayUnavailable()(date);
     }
 
     private isEmptyValue(): boolean {
         const value = this.value();
         return value == null || (Array.isArray(value) && value.length === 0);
+    }
+
+    private isOutOfRange(date: Date): boolean {
+        return compareDates(date, this.maxDate(), ">") || compareDates(date, this.minDate(), "<");
     }
 
     private navigateByDaysOrCells(offset: number, view: CalendarView): void {
@@ -910,7 +978,8 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
                 break;
         }
 
-        if (view === "month" && this.isDateDisabled(newDate)) {
+        // A disabled day can be focused (it is announced as unavailable); only the range bounds stop the arrows.
+        if (view === "month" && this.isOutOfRange(newDate)) {
             return;
         }
         this.rangePreviewDate.set(null);
@@ -968,7 +1037,8 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
                 break;
         }
 
-        if (view === "month" && this.isDateDisabled(newDate)) {
+        // A disabled day can be focused (it is announced as unavailable); only the range bounds stop the arrows.
+        if (view === "month" && this.isOutOfRange(newDate)) {
             return;
         }
         this.rangePreviewDate.set(null);
@@ -1052,7 +1122,8 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     }
 
     private navigateToToday(): void {
-        const today = DateTime.now().toJSDate();
+        this.refreshToday();
+        const today = this.today();
         if (this.isDateDisabled(today)) {
             return;
         }

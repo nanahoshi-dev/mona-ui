@@ -9,3 +9,5 @@ export * from "./styles/date-popup.styles";
 export * from "./services/calendar.service";
 export * from "./services/time-selector.service";
 export * from "./utils/generateHourSet";
+export * from "./utils/getLocaleHourFormat";
+export * from "./utils/typedDateInput";

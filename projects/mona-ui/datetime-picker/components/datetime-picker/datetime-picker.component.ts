@@ -2,6 +2,7 @@ import { CdkTrapFocus } from "@angular/cdk/a11y";
 import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
+    booleanAttribute,
     Component,
     computed,
     contentChild,
@@ -21,42 +22,37 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
-import { any } from "@mirei/ts-collections";
 import { LucideCalendar } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
-import { ButtonGroupComponent } from "@nanahoshi/mona-ui/button-group";
 import {
     CalendarComponent,
     CalendarDecadeCellTemplateDirective,
     CalendarMonthCellTemplateDirective,
     CalendarYearCellTemplateDirective,
-    FirstDayOfWeek
+    type FirstDayOfWeek
 } from "@nanahoshi/mona-ui/calendar";
-import { PreventableEvent } from "@nanahoshi/mona-ui/common";
+import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import {
     CalendarService,
-    DateDisabledType,
+    createTypedDateInput,
+    type DateDisabledType,
     DateInputPrefixTemplateDirective,
     datePopupThemeVariants,
-    HourFormat,
-    TimeSelectorService
+    getLocaleHourFormat,
+    type HourFormat,
+    TimeSelectorService,
+    type TypedDateInput
 } from "@nanahoshi/mona-ui/date-input";
 import {
     DropdownPopupHandlerDirective,
-    DropdownPopupInput,
+    type DropdownPopupInput,
     DROPDOWN_POPUP_INPUT_TOKEN,
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
-import {
-    getLocaleDateTimeInputFormat,
-    gregorianDateTime,
-    injectComponentDirection,
-    MonaI18nService,
-    parseGregorianDate
-} from "@nanahoshi/mona-ui/i18n";
+import { getLocaleDateTimeInputFormat, injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { type AttributeConfig, createElementControlId } from "@nanahoshi/mona-ui/internal";
-import { ListSizeInputType } from "@nanahoshi/mona-ui/internal/list";
-import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
+import type { ListSizeInputType } from "@nanahoshi/mona-ui/internal/list";
+import type { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import {
     TextBoxComponent,
     TextBoxPrefixTemplateDirective,
@@ -64,15 +60,15 @@ import {
 } from "@nanahoshi/mona-ui/text-box";
 import { TimeSelectorComponent } from "@nanahoshi/mona-ui/time-selector";
 import { DateTime } from "luxon";
-import { fromEvent, mergeWith } from "rxjs";
+import { mergeWith } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { DATETIME_PICKER_DEFAULT_MESSAGES } from "../../i18n/datetime-picker.default-messages";
-import { ActiveView } from "../../models/ActiveView";
+import type { ActiveView } from "../../models/ActiveView";
 import {
     dateTimePickerBaseThemeVariants,
     dateTimePickerFooterThemeVariants,
     dateTimePickerHeaderThemeVariants,
-    DateTimePickerVariantProps
+    type DateTimePickerVariantProps
 } from "../../styles/datetime-picker.styles";
 
 @Component({
@@ -95,7 +91,6 @@ import {
         TimeSelectorComponent,
         TextBoxComponent,
         TextBoxSuffixTemplateDirective,
-        ButtonGroupComponent,
         CdkTrapFocus,
         CalendarDecadeCellTemplateDirective,
         CalendarMonthCellTemplateDirective,
@@ -105,6 +100,10 @@ import {
     ],
     hostDirectives: [DropdownPopupHandlerDirective],
     host: {
+        // The ARIA inputs below are applied to the inner input, so the host must not keep the static attributes.
+        "[attr.aria-describedby]": "null",
+        "[attr.aria-label]": "null",
+        "[attr.aria-labelledby]": "null",
         "[attr.tabindex]": "disabled() ? null : -1",
         "[attr.aria-invalid]": "invalidState() ? 'true' : null",
         "[attr.data-disabled]": "disabled() || null",
@@ -112,7 +111,9 @@ import {
         "[attr.data-invalid]": "invalidState() || null",
         "[attr.data-readonly]": "readonly() || null",
         "[class]": "baseClass()",
-        "(blur)": "onDateInputBlur()"
+        "(focusin)": "onFocusIn($event)",
+        "(focusout)": "onFocusOut($event)",
+        "(keydown)": "onKeydown($event)"
     }
 })
 export class DateTimePickerComponent implements FormValueControl<Date | null>, DropdownPopupInput {
@@ -122,7 +123,6 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
-    readonly #id = createElementControlId();
     readonly #timeSelectorService = inject(TimeSelectorService);
 
     protected readonly activeView = signal<ActiveView>("date");
@@ -134,26 +134,23 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
-    protected readonly currentDateString = linkedSignal(() => {
-        const value = this.value();
-        const format = this.effectiveFormat();
-        const locale = this.#i18n.localeId();
-        if (!value) {
-            return "";
-        }
-        return gregorianDateTime(value, locale).toFormat(format);
-    });
+    protected readonly dateTabId = createElementControlId();
     protected readonly decadeCellTemplate = contentChild(CalendarDecadeCellTemplateDirective);
     protected readonly effectiveFormat = computed(() => {
         return (
             this.format() ??
             getLocaleDateTimeInputFormat(this.#i18n.localeId(), {
-                hourFormat: this.hourFormat(),
+                hourFormat: this.effectiveHourFormat(),
                 showSeconds: this.showSeconds()
             })
         );
     });
+    protected readonly effectiveHourFormat = computed(
+        () => this.hourFormat() ?? getLocaleHourFormat(this.#i18n.localeId())
+    );
     protected readonly expanded = computed(() => this.#dropdownService.popupRef() !== null);
+    /** Whether the view shown next takes focus: yes after picking a day, no when a tab is chosen. */
+    protected readonly focusViewOnMount = signal(true);
     protected readonly footerClass = computed(() => {
         return dateTimePickerFooterThemeVariants();
     });
@@ -161,29 +158,27 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
         return dateTimePickerHeaderThemeVariants();
     });
     protected readonly inputAttributes = computed<AttributeConfig>(() => {
-        const controls = this.popupId;
-        const expanded = this.#dropdownService.popupRef() != null;
-        const hasPopup = "dialog";
-        const invalid = this.invalidState();
         return {
             "aria-autocomplete": "none",
-            "aria-controls": controls,
-            "aria-expanded": expanded,
-            "aria-haspopup": hasPopup,
-            "aria-invalid": invalid,
-            id: this.#id,
+            "aria-controls": this.popupId,
+            // The binder drops `false`, and a combobox must always say whether it's expanded.
+            "aria-expanded": this.expanded() ? "true" : "false",
+            "aria-haspopup": "dialog",
             // The text box hides its clear button when read-only, so typing is blocked here instead.
             readonly: this.readonly() || this.readonlyInput(),
-            role: "group"
+            role: "combobox"
         };
     });
     protected readonly invalidState = computed(
-        () => this.touched() && (this.invalid() || (this.required() && !this.value()))
+        () =>
+            this.typedInput.errors().length > 0 ||
+            (this.touched() && (this.invalid() || (this.required() && !this.value())))
     );
     protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly messages = this.#i18n.componentMessages("dateTimePicker", DATETIME_PICKER_DEFAULT_MESSAGES);
     protected readonly monthCellTemplate = contentChild(CalendarMonthCellTemplateDirective);
     protected readonly navigatedDate = linkedSignal(() => this.value() ?? new Date());
+    protected readonly panelId = createElementControlId();
     protected readonly pickerPopupClass = computed(() => {
         const rounded = this.rounded();
         const size = this.size();
@@ -220,7 +215,29 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
         }
         return null;
     });
+    protected readonly timeTabId = createElementControlId();
+    /** Set in the constructor, which runs after the `value` model it writes to exists. */
+    protected readonly typedInput: TypedDateInput;
     protected readonly yearCellTemplate = contentChild(CalendarYearCellTemplateDirective);
+
+    /**
+     * @description Id of an element that describes the input, such as a hint or an error message.
+     * @default ""
+     */
+    public readonly ariaDescribedBy = input("", { alias: "aria-describedby" });
+
+    /**
+     * @description Accessible name of the input. Prefer a visible label, linked through {@link inputId} or
+     * {@link ariaLabelledBy}; the placeholder is not a label.
+     * @default ""
+     */
+    public readonly ariaLabel = input("", { alias: "aria-label" });
+
+    /**
+     * @description Id of the element that labels the input.
+     * @default ""
+     */
+    public readonly ariaLabelledBy = input("", { alias: "aria-labelledby" });
 
     /**
      * @description Emits when the popup is about to close. This event is preventable.
@@ -235,12 +252,14 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
 
     /**
      * @description Sets the disabled state of the date time picker.
+     * @default false
      */
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
      * @description Sets the disabled dates of the date time picker.
-     * Accepts either an iterable of Date objects or a predicate function.
+     * Accepts either an iterable of Date objects or a predicate function. Typing a disabled date is reported as a
+     * `disabledDate` error instead of setting the value.
      */
     public readonly disabledDates = input<DateDisabledType>();
 
@@ -251,16 +270,18 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
     public readonly firstDay = input<FirstDayOfWeek | null>(null);
 
     /**
-     * @description Sets the date format of the date time picker. If not specified, derives from the active locale, hourFormat, and showSeconds.
+     * @description Sets the date format of the date time picker. If not specified, derives from the active locale,
+     * hourFormat, and showSeconds. Typed text is also accepted with one-digit parts and a two-digit year.
      * @default null
      */
     public readonly format = input<string | null>(null);
 
     /**
-     * @description Sets the hour format of the time picker.
-     * @default 24
+     * @description Sets the hour format of the date time picker. When null, the active locale's clock is used: 12-hour
+     * for en-US, 24-hour for de-DE.
+     * @default null
      */
-    public readonly hourFormat = input<HourFormat>("24");
+    public readonly hourFormat = input<HourFormat | null>(null);
 
     /**
      * @description Sets the hour step of the time picker.
@@ -269,21 +290,29 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
     public readonly hourStep = input(1);
 
     /**
+     * @description Id of the inner `<input>` element. Point a `<label for>` or `<mona-label for>` at it to label the
+     * date time picker. A unique id is generated when it isn't set.
+     * @default generated
+     */
+    public readonly inputId = input(createElementControlId());
+
+    /**
      * @description Marks the date time picker as invalid. When bound to a signal form field via `[formField]`,
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly invalid = input(false);
+    public readonly invalid = input(false, { transform: booleanAttribute });
 
     /**
-     * @description Sets the maximum date of the date time picker.
+     * @description Sets the maximum date of the date time picker. A later typed date is reported as a `maxDate` error.
      */
     public readonly max = input<Date | undefined, unknown>(undefined, {
         transform: value => (value instanceof Date ? value : undefined)
     });
 
     /**
-     * @description Sets the minimum date of the date time picker.
+     * @description Sets the minimum date of the date time picker. An earlier typed date is reported as a `minDate`
+     * error.
      */
     public readonly min = input<Date | undefined, unknown>(undefined, {
         transform: value => (value instanceof Date ? value : undefined)
@@ -317,34 +346,35 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
     public readonly popupClass = input("");
 
     /**
-     * @description Sets the height of the popup element.
-     * @default 200
+     * @description Sets the height of the popup element. When not set, the popup fits its content.
+     * @default undefined
      */
     public readonly popupHeight = input<ListSizeInputType>();
 
     /**
-     * @description Sets the width of the popup element.
-     * @default null
+     * @description Sets the width of the popup element. When not set, the popup is at least as wide as the input.
+     * @default undefined
      */
     public readonly popupWidth = input<ListSizeInputType>();
 
     /**
      * @description Sets the readonly state of the date time picker.
+     * @default false
      */
-    public readonly readonly = input(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
 
     /**
      * @description When true, the input is readonly but the popup button remains enabled.
      * @default false
      */
-    public readonly readonlyInput = input(false);
+    public readonly readonlyInput = input(false, { transform: booleanAttribute });
 
     /**
      * @description Sets the required state of the date time picker.
      * When bound to a signal form field via `[formField]`, this is written by the `FormField` directive.
      * @default false
      */
-    public readonly required = input(false);
+    public readonly required = input(false, { transform: booleanAttribute });
 
     /**
      * @description Sets the border radius of the date time picker.
@@ -358,21 +388,24 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
     public readonly secondStep = input(1);
 
     /**
-     * @description Sets the visibility of the clear button.
+     * @description Sets the visibility of the clear button. Clearing empties the value at once.
+     * @default false
      */
-    public readonly showClearButton = input(false);
+    public readonly showClearButton = input(false, { transform: booleanAttribute });
 
     /**
      * @description Sets the visibility of the second selector.
+     * @default false
      */
-    public readonly showSeconds = input(false);
+    public readonly showSeconds = input(false, { transform: booleanAttribute });
+
     /**
      * @description Sets the size of the date time picker.
      */
     public readonly size = input<DateTimePickerVariantProps["size"]>("medium");
 
     /**
-     * @description Emitted when the date time picker is interacted with via blur, selection, or clear.
+     * @description Emitted when focus leaves the date time picker and its popup.
      * The `FormField` directive listens to this to mark the field as touched.
      */
     public readonly touch = output<void>();
@@ -382,12 +415,13 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
 
     public readonly userClass = input("", { alias: "class" });
 
     /**
-     * @description Two-way bindable current date time value.
+     * @description Two-way bindable current date time value. Typed text is written on Enter and when the input loses
+     * focus; text that isn't a valid date and time keeps the previous value and marks the field invalid.
      * @default null
      */
     public readonly value = model<Date | null>(null);
@@ -396,25 +430,40 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
      * @description Enables the display of week numbers in the calendar.
      * @default false
      */
-    public readonly weekNumber = input<boolean>(false);
+    public readonly weekNumber = input(false, { transform: booleanAttribute });
 
     public constructor() {
+        this.typedInput = createTypedDateInput({
+            constraints: () => ({
+                disabledDates: this.disabledDates(),
+                max: this.max(),
+                min: this.min(),
+                unit: "datetime"
+            }),
+            format: () => this.effectiveFormat(),
+            localeId: () => this.#i18n.localeId(),
+            value: this.value
+        });
         effect(() => {
             const popupTemplate = this.popupTemplate();
             untracked(() => this.#dropdownService.popupTemplate.set(popupTemplate));
         });
         afterNextRender({
             read: () => {
-                this.setSubscriptions();
-                this.setPopupCloseSubscriptions();
+                this.setPopupKeyboardSubscription();
+                this.setPopupCloseSubscription();
             }
         });
     }
 
-    public focus(): void {
+    /**
+     * Focuses the input and places the caret after the text. Read-only pickers take focus too.
+     * @param options Options passed to the native `focus()` call, such as `preventScroll`.
+     */
+    public focus(options?: FocusOptions): void {
         const input = this.#hostElementRef.nativeElement.querySelector("input");
-        if (input && !this.readonly()) {
-            input.focus();
+        if (input) {
+            input.focus(options);
             input.setSelectionRange(input.value.length, input.value.length);
         }
     }
@@ -422,47 +471,19 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
     protected onCalendarValueChange(date: Date | Date[] | null): void {
         const singleDate = Array.isArray(date) ? null : date;
         if (singleDate) {
-            const inRangeDate = this.updateDateIfNotInRange(singleDate);
-            this.navigatedDate.set(inRangeDate);
+            // The calendar gives midnight; keep the time already chosen.
+            const current = this.navigatedDate();
+            const withTime = new Date(singleDate);
+            withTime.setHours(current.getHours(), current.getMinutes(), current.getSeconds(), 0);
+            this.navigatedDate.set(this.updateDateIfNotInRange(withTime));
         }
+        this.focusViewOnMount.set(true);
         this.activeView.set("time");
     }
 
     protected onCancelClick(): void {
         this.navigatedDate.set(this.value() ?? new Date());
-        this.#dropdownService.popupRef()?.close();
-        this.touch.emit();
-    }
-
-    protected onDateInputBlur(): void {
-        if (this.#dropdownService.popupRef()) {
-            this.touch.emit();
-            return;
-        }
-        if (!this.currentDateString() && this.value()) {
-            this.setCurrentDate(null);
-            this.touch.emit();
-            return;
-        }
-
-        const locale = this.#i18n.localeId();
-        const dateTime = parseGregorianDate(this.currentDateString(), this.effectiveFormat(), locale);
-        if (this.dateStringEquals(this.value(), dateTime.toJSDate())) {
-            this.touch.emit();
-            return;
-        }
-        if (dateTime.isValid) {
-            const value = this.value();
-            if (value && gregorianDateTime(value, locale).equals(dateTime)) {
-                this.touch.emit();
-                return;
-            }
-            this.setCurrentDate(dateTime.toJSDate());
-        } else {
-            this.setCurrentDate(null);
-            this.currentDateString.set("");
-        }
-        this.touch.emit();
+        this.closePopup();
     }
 
     protected onDateInputButtonClick(): void {
@@ -476,14 +497,90 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
         }
     }
 
-    protected onDateStringEdit(dateString: string): void {
-        this.currentDateString.set(dateString);
+    protected onFocusIn(event: FocusEvent): void {
+        // The host is focusable only to pass focus on; focus inside it, such as a click in the text, stays put.
+        if (event.target === this.#hostElementRef.nativeElement) {
+            this.focus();
+        }
+    }
+
+    protected onFocusOut(event: FocusEvent): void {
+        // Removing a focused picker from the page fires focusout after it is destroyed.
+        if (this.#destroyRef.destroyed) {
+            return;
+        }
+        const nextTarget = event.relatedTarget;
+        if (nextTarget instanceof Node) {
+            const popupElement = this.#dropdownService.popupRef()?.overlayRef.overlayElement;
+            if (this.#hostElementRef.nativeElement.contains(nextTarget) || popupElement?.contains(nextTarget)) {
+                return;
+            }
+        }
+        this.touch.emit();
+    }
+
+    protected onInputBlur(): void {
+        this.typedInput.commit();
+    }
+
+    protected onKeydown(event: KeyboardEvent): void {
+        if (this.disabled() || this.readonly()) {
+            return;
+        }
+        const popupOpen = this.expanded();
+        if (event.altKey && event.key === "ArrowDown") {
+            event.preventDefault();
+            this.openPopup();
+        } else if (event.altKey && event.key === "ArrowUp") {
+            if (popupOpen) {
+                event.preventDefault();
+                this.closePopup();
+            }
+        } else if (event.key === "Escape") {
+            if (popupOpen) {
+                event.preventDefault();
+                this.onCancelClick();
+            }
+        } else if (event.altKey && (event.key === "ArrowRight" || event.key === "ArrowLeft")) {
+            if (popupOpen) {
+                event.preventDefault();
+                const towardsTime = (event.key === "ArrowRight") !== this.isRtl();
+                this.activeView.set(towardsTime ? "time" : "date");
+            }
+        } else if (event.key === "Enter" && event.target instanceof HTMLInputElement) {
+            // Committed before a surrounding form submits; an IME uses Enter to confirm its text.
+            if (!event.isComposing && event.keyCode !== 229) {
+                this.typedInput.commit();
+            }
+        }
     }
 
     protected onSetDateClick(): void {
         this.value.set(this.navigatedDate());
-        this.#dropdownService.popupRef()?.close();
-        this.touch.emit();
+        this.closePopup();
+    }
+
+    /** Arrow keys, Home and End move between the Date and Time tabs, as in the APG tabs pattern. */
+    protected onTabKeydown(event: KeyboardEvent): void {
+        if (event.altKey) {
+            return;
+        }
+        const forward = this.isRtl() ? "ArrowLeft" : "ArrowRight";
+        const backward = this.isRtl() ? "ArrowRight" : "ArrowLeft";
+        let view: ActiveView | null = null;
+        if (event.key === "Home" || event.key === backward) {
+            view = "date";
+        } else if (event.key === "End" || event.key === forward) {
+            view = "time";
+        }
+        if (!view) {
+            return;
+        }
+        event.preventDefault();
+        this.selectTab(view);
+        const tabId = view === "date" ? this.dateTabId : this.timeTabId;
+        const tablist = event.currentTarget as HTMLElement;
+        tablist.querySelector<HTMLElement>(`[id="${tabId}"]`)?.focus();
     }
 
     protected onTimeSelectorValueChange(date: Date | null): void {
@@ -493,84 +590,14 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
         }
     }
 
+    /** Shows a view from its tab; focus stays on the tab, as in the APG tabs pattern. */
+    protected selectTab(view: ActiveView): void {
+        this.focusViewOnMount.set(false);
+        this.activeView.set(view);
+    }
+
     private closePopup(): void {
         this.#dropdownService.popupRef()?.close();
-    }
-
-    private compareDatesEqual(date1: Date, date2: Date): boolean {
-        return (
-            date1.getFullYear() === date2.getFullYear() &&
-            date1.getMonth() === date2.getMonth() &&
-            date1.getDate() === date2.getDate()
-        );
-    }
-
-    private dateStringEquals(date1: Date | null, date2: Date | null): boolean {
-        if (date1 && date2) {
-            const locale = this.#i18n.localeId();
-            return (
-                gregorianDateTime(date1, locale).toFormat(this.effectiveFormat()) ===
-                gregorianDateTime(date2, locale).toFormat(this.effectiveFormat())
-            );
-        }
-        return date1 === date2;
-    }
-
-    private handleKeydown(event: KeyboardEvent): void {
-        if (this.disabled() || this.readonly()) {
-            return;
-        }
-
-        const popupOpen = this.#dropdownService.popupRef() !== null;
-
-        if (event.altKey && event.key === "ArrowDown") {
-            event.preventDefault();
-            this.openPopup();
-            return;
-        }
-        if (event.altKey && event.key === "ArrowUp") {
-            event.preventDefault();
-            console.warn("ArrowUp is not supported yet");
-            this.closePopup();
-            return;
-        }
-        if (event.key === "Escape" && popupOpen) {
-            event.preventDefault();
-            this.onCancelClick();
-            return;
-        }
-        if (event.altKey && event.key === "ArrowRight" && popupOpen) {
-            event.preventDefault();
-            this.activeView.set(this.isRtl() ? "date" : "time");
-            return;
-        }
-        if (event.altKey && event.key === "ArrowLeft" && popupOpen) {
-            event.preventDefault();
-            this.activeView.set(this.isRtl() ? "time" : "date");
-            return;
-        }
-        if (event.key === "Enter" && popupOpen) {
-            const target = event.target as HTMLElement;
-            if (target.tagName === "BUTTON" || target.closest("button")) {
-                return;
-            }
-            event.preventDefault();
-            if (this.activeView() === "date") {
-                this.activeView.set("time");
-            } else {
-                this.onSetDateClick();
-            }
-            return;
-        }
-    }
-
-    private isDateDisabledByInput(date: Date, disabledDates: DateDisabledType): boolean {
-        if (typeof disabledDates === "function") {
-            return disabledDates(date);
-        } else if (disabledDates) {
-            return any(disabledDates, d => this.compareDatesEqual(date, d));
-        }
-        return false;
     }
 
     private openPopup(): void {
@@ -585,17 +612,21 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
         }
     }
 
-    private setCurrentDate(date: Date | null): void {
-        this.value.set(date);
-        this.updateCurrentDateString(date, this.effectiveFormat());
-        this.touch.emit();
+    private setPopupCloseSubscription(): void {
+        this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
+            if (this.#dropdownService.focusCanReturn()) {
+                this.focus();
+            } else if (!this.#destroyRef.destroyed) {
+                // Focus left from inside the popup, which the host's focusout doesn't see.
+                this.touch.emit();
+            }
+            this.activeView.set("date");
+            this.focusViewOnMount.set(true);
+            this.navigatedDate.set(this.value() ?? new Date());
+        });
     }
 
-    private setKeyboardSubscriptions(): void {
-        fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(event => this.handleKeydown(event));
-
+    private setPopupKeyboardSubscription(): void {
         this.#calendarService.keydown$
             .pipe(mergeWith(this.#timeSelectorService.keydown$), takeUntilDestroyed(this.#destroyRef))
             .subscribe(e => {
@@ -624,32 +655,6 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
                     this.onSetDateClick();
                 }
             });
-    }
-
-    private setPopupCloseSubscriptions(): void {
-        this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
-            if (this.#dropdownService.focusCanReturn()) {
-                this.focus();
-            }
-            this.activeView.set("date");
-            this.navigatedDate.set(this.value() ?? new Date());
-        });
-    }
-
-    private setSubscriptions(): void {
-        fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focusin")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(() => this.focus());
-        this.setKeyboardSubscriptions();
-    }
-
-    private updateCurrentDateString(date: Date | null | undefined, format: string): void {
-        if (!date) {
-            this.currentDateString.set("");
-            return;
-        }
-        const dateString = gregorianDateTime(date, this.#i18n.localeId()).toFormat(format);
-        this.currentDateString.set(dateString);
     }
 
     private updateDateIfNotInRange(date: Date): Date {

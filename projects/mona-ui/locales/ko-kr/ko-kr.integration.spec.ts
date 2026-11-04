@@ -464,8 +464,9 @@ describe("MONA_KO_KR_LOCALE Integration with MonaI18nService", () => {
 
         expect(liveRegion.textContent).toContain("10년 보기, 2020년~2029년");
 
-        const decadeViewButton = hostEl.querySelector('button[aria-label*="2020년~2029년"]') as HTMLButtonElement;
-        expect(decadeViewButton).not.toBeNull();
+        // The decade view's heading names its grid with the locale's wording of the range.
+        const decadeHeading = hostEl.querySelector("[id$='-heading']") as HTMLElement;
+        expect(decadeHeading.textContent).toContain("2020년~2029년");
     });
 
     it("verifies explicit firstDay override precedence and restoration across locale switches", () => {

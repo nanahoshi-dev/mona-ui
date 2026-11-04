@@ -84,7 +84,7 @@ describe("DateTimePickerComponent", () => {
         expect(tabButtons[0]?.textContent?.trim()).toBe("Date");
         expect(tabButtons[1]?.textContent?.trim()).toBe("Time");
 
-        const calendarContainer = popup.querySelector("div[aria-label='Calendar']");
+        const calendarContainer = popup.querySelector("[role='tabpanel'] mona-calendar");
         expect(calendarContainer).not.toBeNull();
 
         const footerButtons = popup.querySelectorAll("div.border-t button");
@@ -124,7 +124,7 @@ describe("DateTimePickerComponent", () => {
         expect(tabButtons[0]?.textContent?.trim()).toBe("Tarih");
         expect(tabButtons[1]?.textContent?.trim()).toBe("Saat");
 
-        const calendarContainer = popup.querySelector("div[aria-label='Takvim']");
+        const calendarContainer = popup.querySelector("[role='tabpanel'] mona-calendar");
         expect(calendarContainer).not.toBeNull();
 
         const footerButtons = popup.querySelectorAll("div.border-t button");
@@ -146,7 +146,7 @@ describe("DateTimePickerComponent", () => {
         host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", altKey: true, bubbles: true }));
         fixture.detectChanges();
         let popup = document.querySelector("div[role='dialog']") as HTMLElement;
-        expect(popup.querySelector("div[aria-label='Time picker']")).not.toBeNull();
+        expect(popup.querySelector("[role='tabpanel'] mona-time-selector")).not.toBeNull();
 
         // Switch to RTL locale and DOM
         i18n.use({
@@ -161,13 +161,13 @@ describe("DateTimePickerComponent", () => {
         host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", altKey: true, bubbles: true }));
         fixture.detectChanges();
         popup = document.querySelector("div[role='dialog']") as HTMLElement;
-        expect(popup.querySelector("div[aria-label='Calendar']")).not.toBeNull();
+        expect(popup.querySelector("[role='tabpanel'] mona-calendar")).not.toBeNull();
 
         // In RTL: Alt+ArrowLeft moves to time
         host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", altKey: true, bubbles: true }));
         fixture.detectChanges();
         popup = document.querySelector("div[role='dialog']") as HTMLElement;
-        expect(popup.querySelector("div[aria-label='Time picker']")).not.toBeNull();
+        expect(popup.querySelector("[role='tabpanel'] mona-time-selector")).not.toBeNull();
 
         i18n.use(MONA_DEFAULT_LOCALE);
     });

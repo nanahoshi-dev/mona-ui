@@ -1,7 +1,7 @@
-import { Pipe, PipeTransform } from "@angular/core";
+import { Pipe, type PipeTransform } from "@angular/core";
 import { ImmutableSet, toImmutableSet, where } from "@mirei/ts-collections";
 import { DateTime } from "luxon";
-import { TimeUnit } from "../models/TimeUnit";
+import type { TimeUnit } from "../models/TimeUnit";
 
 @Pipe({
     name: "timeLimiter"

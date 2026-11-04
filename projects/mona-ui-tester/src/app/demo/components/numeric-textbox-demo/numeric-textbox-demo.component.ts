@@ -1,7 +1,8 @@
 import { NgComponentOutlet } from "@angular/common";
-import { Component, computed, effect, inject, input, model, signal } from "@angular/core";
+import { booleanAttribute, Component, computed, effect, inject, input, model, signal } from "@angular/core";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideHash } from "@lucide/angular";
+import { LabelComponent } from "@nanahoshi/mona-ui/label";
 import { NumericTextBoxComponent, NumericTextBoxPrefixTemplateDirective } from "@nanahoshi/mona-ui/numeric-text-box";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
@@ -37,6 +38,11 @@ export class NumericTextboxDemoComponent extends AbstractDemoComponent<NumericTe
     });
     protected readonly config = computed<ComponentConfig<NumericTextBoxComponent>>(() => ({
         inputs: deriveInputConfig<NumericTextBoxComponent>(this.metadata(), {
+            // The demo labels the field with a visible <mona-label> pointed at a fixed inputId.
+            ariaDescribedBy: undefined,
+            ariaLabel: undefined,
+            ariaLabelledBy: undefined,
+            inputId: undefined,
             decimals: {
                 type: "number",
                 value: 2
@@ -87,12 +93,14 @@ export class NumericTextboxDemoComponent extends AbstractDemoComponent<NumericTe
 }
 
 @Component({
-    imports: [NumericTextBoxComponent, NumericTextBoxPrefixTemplateDirective, LucideHash, FormField],
+    imports: [NumericTextBoxComponent, NumericTextBoxPrefixTemplateDirective, LucideHash, FormField, LabelComponent],
     template: `
         @let featureData = features();
         <div class="flex flex-col gap-2">
             <span>Value: {{ form.amount().value() }}</span>
+            <mona-label for="numeric-text-box-demo-input" text="Amount"></mona-label>
             <mona-numeric-text-box
+                inputId="numeric-text-box-demo-input"
                 [decimals]="decimals()"
                 [formatter]="formatterFn()"
                 [maxValue]="maxValue()"
@@ -129,16 +137,16 @@ export class NumericTextboxWrapperComponent implements ComponentInputsAsSignal<N
         required(schema.amount, { when: () => this.required() });
     });
     public readonly decimals = input(0);
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly formatter = input<ReturnType<NumericTextBoxComponent["formatter"]>>(this.formatterFn());
     public readonly maxValue = input<number | null>(null);
     public readonly minValue = input<number | null>(null);
-    public readonly nullable = input(false);
-    public readonly readonly = input(false);
-    public readonly required = input(false);
+    public readonly nullable = input(false, { transform: booleanAttribute });
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<NumericTextBoxComponent["rounded"]>>(`medium`);
     public readonly size = input<ReturnType<NumericTextBoxComponent["size"]>>("medium");
-    public readonly spinners = input(true);
+    public readonly spinners = input(true, { transform: booleanAttribute });
     public readonly step = input(1);
     public readonly tabindex = input(0);
     public readonly userClass = input("w-40");

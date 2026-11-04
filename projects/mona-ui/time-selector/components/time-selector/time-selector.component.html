@@ -13,9 +13,7 @@
         look="ghost"
         [rounded]="rounded()"
         [size]="'small'"
-        (click)="onNowClick($event)"
-        (keydown.enter)="onNowClick($event)"
-        (keydown.space)="onNowClick($event)">
+        (click)="onNowClick()">
         {{ messages().now }}
     </button>
 </div>
@@ -25,12 +23,14 @@
         #hourList
         monaTimeSelectorList
         [attr.aria-label]="messages().hours"
-        [attr.aria-activedescendant]="`${hourListId}${navigatedDate().hour}`"
+        [attr.aria-activedescendant]="activeOptionId(hourListId, hourOptions(), navigatedDate().hour)"
+        [attr.aria-readonly]="readonly() || null"
+        [attr.aria-required]="required() || null"
         [active]="focusedList() === 'hours'"
         [id]="hourListId"
         [popupHeight]="computedPopupHeight()"
         [size]="size()">
-        @for (h of viewHours() | timeLimiter: "h" : navigatedDate() : minDate() : maxDate(); track h) {
+        @for (h of hourOptions(); track h.value) {
             <li
                 monaTimeSelectorItem
                 [size]="size()"
@@ -46,12 +46,14 @@
         #minuteList
         monaTimeSelectorList
         [attr.aria-label]="messages().minutes"
-        [attr.aria-activedescendant]="`${minuteListId}${navigatedDate().minute}`"
+        [attr.aria-activedescendant]="activeOptionId(minuteListId, minuteOptions(), minute())"
+        [attr.aria-readonly]="readonly() || null"
+        [attr.aria-required]="required() || null"
         [active]="focusedList() === 'minutes'"
         [id]="minuteListId"
         [popupHeight]="computedPopupHeight()"
         [size]="size()">
-        @for (m of minutes() | timeLimiter: "m" : navigatedDate() : minDate() : maxDate(); track m) {
+        @for (m of minuteOptions(); track m.value) {
             <li
                 monaTimeSelectorItem
                 [size]="size()"
@@ -68,12 +70,14 @@
             #secondList
             monaTimeSelectorList
             [attr.aria-label]="messages().seconds"
-            [attr.aria-activedescendant]="`${secondListId}${navigatedDate().second}`"
+            [attr.aria-activedescendant]="activeOptionId(secondListId, secondOptions(), second())"
+            [attr.aria-readonly]="readonly() || null"
+            [attr.aria-required]="required() || null"
             [active]="focusedList() === 'seconds'"
             [id]="secondListId"
             [popupHeight]="computedPopupHeight()"
             [size]="size()">
-            @for (s of seconds() | timeLimiter: "s" : navigatedDate() : minDate() : maxDate(); track s) {
+            @for (s of secondOptions(); track s.value) {
                 <li
                     monaTimeSelectorItem
                     [size]="size()"
@@ -86,12 +90,14 @@
             }
         </ol>
     }
-    @if (hourFormat() === "12") {
+    @if (effectiveHourFormat() === "12") {
         <ol
             #meridiemList
             monaTimeSelectorList
             [attr.aria-label]="messages().amPm"
             [attr.aria-activedescendant]="`${meridiemListId}${meridiem()}`"
+            [attr.aria-readonly]="readonly() || null"
+            [attr.aria-required]="required() || null"
             [active]="focusedList() === 'meridiem'"
             [id]="meridiemListId"
             [popupHeight]="computedPopupHeight()"

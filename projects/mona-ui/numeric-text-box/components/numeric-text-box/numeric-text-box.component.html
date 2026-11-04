@@ -5,18 +5,19 @@
 }
 <input
     monaTextBox
+    [id]="inputId()"
     [disabled]="disabled()"
     [required]="required()"
     [type]="'text'"
     [attr.inputmode]="decimals() > 0 ? 'decimal' : 'numeric'"
     [readonly]="readonly()"
     [tabIndex]="tabindex()"
-    [ngModel]="formattedValue()"
-    (ngModelChange)="applyRawValue($event)"
+    [placeholder]="placeholder()"
+    [value]="formattedValue()"
+    (input)="applyRawValue(valueTextBox.value)"
     (keydown)="keydown$.next($event)"
     (focus)="inputFocus.emit($event)"
     (focusout)="inputFocusOut.emit($event)"
-    (blur)="onBlur($event)"
     (beforeinput)="beforeInput$.next($event)"
     (paste)="onPaste($event)"
     (wheel)="wheel$.next($event)"
@@ -24,18 +25,17 @@
     [class]="inputClasses()"
     autocomplete="off"
     role="spinbutton"
-    [attr.aria-disabled]="disabled()"
+    [attr.aria-describedby]="ariaDescribedBy() || null"
     [attr.aria-invalid]="invalidInput() || null"
-    [attr.aria-readonly]="readonly()"
-    [attr.aria-required]="required()"
-    [attr.aria-label]="ariaLabel()"
+    [attr.aria-label]="ariaLabel() || null"
+    [attr.aria-labelledby]="ariaLabelledBy() || null"
     [attr.aria-valuenow]="value()"
     [attr.aria-valuemin]="minValue()"
     [attr.aria-valuemax]="maxValue()"
-    [attr.aria-valuetext]="formattedValue()"
-    [attr.data-spinners]="spinners()"
+    [attr.aria-valuetext]="formattedValue() || null"
+    [attr.data-spinners]="showSpinners()"
     #valueTextBox />
-@if (spinners()) {
+@if (showSpinners()) {
     <div [class]="spinButtonClasses()">
         <button
             monaButton
@@ -44,7 +44,7 @@
             look="ghost"
             [size]="size()"
             (mousedown)="$event.preventDefault()"
-            (pointerdown)="spin$.next('+')"
+            (pointerdown)="onSpinPointerDown($event, '+')"
             (pointerup)="spinStop$.next()"
             (pointerleave)="spinStop$.next()"
             [attr.aria-label]="messages().increase">
@@ -57,7 +57,7 @@
             look="ghost"
             [size]="size()"
             (mousedown)="$event.preventDefault()"
-            (pointerdown)="spin$.next('-')"
+            (pointerdown)="onSpinPointerDown($event, '-')"
             (pointerup)="spinStop$.next()"
             (pointerleave)="spinStop$.next()"
             [attr.aria-label]="messages().decrease">

@@ -461,8 +461,9 @@ describe("MONA_ZH_CN_LOCALE Integration with MonaI18nService", () => {
 
         expect(liveRegion.textContent).toContain("十年视图，2020年至2029年");
 
-        const decadeViewButton = hostEl.querySelector('button[aria-label*="2020年至2029年"]') as HTMLButtonElement;
-        expect(decadeViewButton).not.toBeNull();
+        // The decade view's heading names its grid with the locale's wording of the range.
+        const decadeHeading = hostEl.querySelector("[id$='-heading']") as HTMLElement;
+        expect(decadeHeading.textContent).toContain("2020年至2029年");
     });
 
     it("renders SplitButton component with Chinese accessible name", () => {

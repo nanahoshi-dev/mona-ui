@@ -38,3 +38,6 @@ export const compareDates = (
     }
     return operator === "==";
 };
+
+/** A key that is equal for two dates on the same local calendar day, whatever their time. */
+export const toDayKey = (date: Date): string => `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;

@@ -754,7 +754,7 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
         expect(liveRegion.textContent).toContain("عرض العقد، من ٢٠٢٠ إلى ٢٠٢٩");
         expect(root.querySelector("button[aria-label='العقد السابق']")).not.toBeNull();
         expect(root.querySelector("button[aria-label='العقد التالي']")).not.toBeNull();
-        expect(root.querySelector("button span[id$='-heading']")?.textContent?.trim()).toBe("٢٠٢٠ - ٢٠٢٩");
+        expect(root.querySelector("[id$='-heading'] [aria-hidden='true']")?.textContent?.trim()).toBe("٢٠٢٠ - ٢٠٢٩");
 
         const decadeCells = Array.from(root.querySelectorAll("[monaDecadeYear] span")).map(el => el.textContent?.trim());
         expect(decadeCells).toContain("٢٠٢٠");
