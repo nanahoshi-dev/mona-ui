@@ -559,6 +559,48 @@ export const ALLOWLIST: AllowlistEntry[] = [
     },
     {
         category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/grid/services/grid-navigation.service.ts",
+        lineSnippet: "scrollElement.clientLeft",
+        reason: "Revealing a cell past pinned columns measures the viewport in screen x; the insets swap sides in RTL"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/grid/services/grid-navigation.service.ts",
+        lineSnippet: "cell.left",
+        reason: "Revealing a cell past pinned columns compares screen x edges; the insets swap sides in RTL"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/grid/services/grid-navigation.service.ts",
+        lineSnippet: "cell.right",
+        reason: "Revealing a cell past pinned columns compares screen x edges; the insets swap sides in RTL"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/grid/components/grid/grid.component.ts",
+        lineSnippet: "rect.left",
+        reason: "Column drag hit-tests the pointer's screen x; before/after is flipped in RTL"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/grid/components/grid/grid.component.html",
+        lineSnippet: '<span class="sr-only">{{',
+        reason: "Structural column header picks between the localized details and group messages by column kind"
+    },
+    {
+        category: "i18n-text",
+        filePattern: "projects/mona-ui/pager/components/pager/pager.component.ts",
+        lineSnippet: "pageInputLabelledBy",
+        reason: "Element id suffixes for aria-labelledby, not user-facing text"
+    },
+    {
+        category: "i18n-aria",
+        filePattern: "projects/mona-ui/pager/components/pager/pager.component.html",
+        lineSnippet: "item.direction === 'backward'",
+        reason: "Picks between the localized jump-back and jump-forward labels by direction"
+    },
+    {
+        category: "rtl-manual-review",
         filePattern: "projects/mona-ui/chart/internal/export/chart-export-raster-island-renderer.ts",
         lineSnippet: "scrollLeft",
         reason: "Chart export scrollLeft snapshot restoration"
