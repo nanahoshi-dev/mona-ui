@@ -10,14 +10,14 @@ import { listItemContentThemeVariants } from "../styles/list.styles";
     selector: "li[monaListItem]",
     host: {
         "[attr.aria-describedby]": "groupHeaderUid()",
-        "[attr.aria-disabled]": "disabled()",
+        "[attr.aria-disabled]": "isOption() ? disabled() : null",
         "[attr.aria-posinset]": "position()",
-        "[attr.aria-selected]": "selected()",
+        "[attr.aria-selected]": "isOption() ? selected() : null",
         "[attr.aria-setsize]": "setSize()",
         "[attr.data-disabled]": "disabled()",
         "[attr.data-highlighted]": "highlighted()",
         "[attr.data-selected]": "selected()",
-        "[attr.role]": "'option'",
+        "[attr.role]": "isOption() ? 'option' : 'listitem'",
         "[attr.tabindex]": "rovingTabIndex()",
         "[class]": "textClasses()"
     }
@@ -25,8 +25,15 @@ import { listItemContentThemeVariants } from "../styles/list.styles";
 export class ListItemDirective<TData> {
     readonly #listService = inject(ListService<TData>);
     protected readonly disabled = computed(() => this.#listService.isDisabled(this.item()));
-    protected readonly groupHeaderUid = computed(() => this.#listService.getGroupHeaderUid(this.item()));
+    /**
+     * Without virtual scrolling, items sit inside a group labelled by its header. A virtual list stays flat, so each
+     * item points at its header instead.
+     */
+    protected readonly groupHeaderUid = computed(() =>
+        this.#listService.virtualScrollOptions().enabled ? this.#listService.getGroupHeaderUid(this.item()) : null
+    );
     protected readonly highlighted = computed(() => this.#listService.isHighlighted(this.item()));
+    protected readonly isOption = computed(() => this.#listService.role() === "listbox");
     protected readonly position = computed(() => {
         const positionInfo = this.#listService.getItemPosition(this.item());
         return positionInfo?.position ?? null;

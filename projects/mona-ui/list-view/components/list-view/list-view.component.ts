@@ -1,5 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
+    booleanAttribute,
     Component,
     computed,
     contentChild,
@@ -14,7 +15,9 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ImmutableList, type Predicate } from "@mirei/ts-collections";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import {
+    LIST_DEFAULT_MESSAGES,
     LIST_VIEW_HOST_LIST_SERVICE,
     ListComponent,
     ListFooterTemplateDirective,
@@ -66,7 +69,10 @@ const SCROLL_BOTTOM_THRESHOLD = 3;
     ],
     host: {
         "[class]": "baseClasses()",
-        "[attr.tabindex]": "-1"
+        "[attr.tabindex]": "-1",
+        // The name belongs to the list inside; the host has no role to carry it.
+        "[attr.aria-label]": "null",
+        "[attr.aria-labelledby]": "null"
     }
 })
 export class ListViewComponent<T = unknown> implements ListViewVariantInputs {
@@ -99,18 +105,47 @@ export class ListViewComponent<T = unknown> implements ListViewVariantInputs {
         const maxWidth = this.maxWidth();
         return typeof maxWidth === "number" ? `${maxWidth}px` : maxWidth;
     });
+    /**
+     * A list you can select from is a `listbox`; one that only shows items is a `list`.
+     */
+    protected readonly listRole = computed(() =>
+        this.listService.selectableOptions().enabled ? ("listbox" as const) : ("list" as const)
+    );
     protected readonly listService = inject<ListService<T>>(ListService);
     protected readonly listWidth = computed(() => {
         const width = this.width();
         return typeof width === "number" ? `${width}px` : width;
     });
+    protected readonly messages = inject(MonaI18nService).componentMessages("list", LIST_DEFAULT_MESSAGES);
     protected readonly noDataTemplate = contentChild(ListViewNoDataTemplateDirective, { read: TemplateRef });
+    /** The pager's name: the given one, else one built from the list's name, else the pager's own default. */
+    protected readonly pagerLabel = computed(() => {
+        const pagerAriaLabel = this.pagerAriaLabel();
+        if (pagerAriaLabel) {
+            return pagerAriaLabel;
+        }
+        const ariaLabel = this.ariaLabel();
+        return ariaLabel ? this.messages().pagerLabel(ariaLabel) : null;
+    });
+    /** Polite status text: loading, or the empty state. */
+    protected readonly statusText = computed(() => {
+        if (this.loading()) {
+            return this.messages().loading;
+        }
+        return this.itemCount() === 0 ? this.messages().noData : "";
+    });
 
     /**
      * @description Accessible name for the list view's `listbox` element. Describe what the list represents.
      * @default ""
      */
     public readonly ariaLabel = input<string>("", { alias: "aria-label" });
+
+    /**
+     * @description Id of the element that names the list view's list, as an alternative to `aria-label`.
+     * @default ""
+     */
+    public readonly ariaLabelledBy = input<string>("", { alias: "aria-labelledby" });
 
     /**
      * @description Property name or predicate that marks an item as disabled. Disabled items can't be selected,
@@ -163,6 +198,12 @@ export class ListViewComponent<T = unknown> implements ListViewVariantInputs {
     public readonly listStyle = input<Partial<CSSStyleDeclaration>>({});
 
     /**
+     * @description Marks the list as loading: it gets `aria-busy` and a polite "Loading" status.
+     * @default false
+     */
+    public readonly loading = input(false, { transform: booleanAttribute });
+
+    /**
      * @description Sets the maximum height of the list.
      * @default ""
      */
@@ -179,6 +220,13 @@ export class ListViewComponent<T = unknown> implements ListViewVariantInputs {
      * @internal
      */
     public readonly pageSizeSelect$ = new Subject<PageSizeChangeEvent>();
+
+    /**
+     * @description Accessible name of the pager. Defaults to "{name} pagination" from the list view's `aria-label`,
+     * so two paged list views on a page have different landmarks.
+     * @default ""
+     */
+    public readonly pagerAriaLabel = input<string>("");
 
     /**
      * @description Border-radius preset applied to the component.
@@ -217,6 +265,9 @@ export class ListViewComponent<T = unknown> implements ListViewVariantInputs {
     public readonly width = input<string | number>("100%");
 
     public constructor() {
+        // Arrow keys, Home/End and typeahead work without the navigable directive, which can still change or turn
+        // them off. Without them only one item could be reached from the keyboard.
+        this.listService.setNavigableOptions({ enabled: true, mode: "select", wrap: false });
         effect(() => {
             const textField = this.textField();
             untracked(() => this.listService.setTextField(textField ?? ""));
@@ -248,7 +299,7 @@ export class ListViewComponent<T = unknown> implements ListViewVariantInputs {
         ) {
             return false;
         }
-        return target.matches("cdk-virtual-scroll-viewport") || target.matches("mona-list > ul[role='listbox']");
+        return target.matches("cdk-virtual-scroll-viewport") || target.matches("mona-list > ul");
     }
 
     /**

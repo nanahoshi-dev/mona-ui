@@ -1,7 +1,10 @@
 import { CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport } from "@angular/cdk/scrolling";
 import { NgTemplateOutlet } from "@angular/common";
+import type { ListRange } from "@angular/cdk/collections";
 import {
     afterNextRender,
+    afterRenderEffect,
+    booleanAttribute,
     Component,
     computed,
     contentChild,
@@ -13,6 +16,7 @@ import {
     OnInit,
     output,
     Signal,
+    signal,
     TemplateRef,
     untracked,
     viewChild
@@ -69,8 +73,13 @@ export class ListComponent<TData> implements OnInit {
     readonly #generatedListId = createElementControlId();
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
+    /** The rows a virtual list has drawn, so the Tab stop never lands on an option that isn't in the DOM. */
+    readonly #renderedRange = signal<ListRange | null>(null);
     readonly #typeaheadKey$ = new Subject<string>();
+    /** The option that had focus, kept so focus can move to a neighbour when that option is removed. */
+    #focusedOption: { readonly index: number; readonly uid: string } | null = null;
     private readonly filterInput = viewChild(FilterInputComponent);
+    private readonly filterInputElement = viewChild(FilterInputComponent, { read: ElementRef });
     /**
      * Id of the highlighted option, used as `aria-activedescendant` by the filter input.
      */
@@ -95,7 +104,22 @@ export class ListComponent<TData> implements OnInit {
     });
     protected readonly groupHeaderTemplate = contentChild(ListGroupHeaderTemplateDirective, { read: TemplateRef });
     protected readonly headerTemplate = contentChild(ListHeaderTemplateDirective, { read: TemplateRef });
-    protected readonly hostTabIndex = computed(() => (this.listService.focusableItem() ? -1 : 0));
+    /**
+     * The host takes the Tab stop when no option can: an empty list, or a virtual list whose focusable option is
+     * scrolled out of the drawn rows. Focusing the host then moves focus to that option.
+     */
+    protected readonly hostTabIndex = computed(() => {
+        const item = this.listService.focusableItem();
+        if (!item) {
+            return 0;
+        }
+        if (!this.listService.virtualScrollOptions().enabled) {
+            return -1;
+        }
+        const range = this.#renderedRange();
+        const index = this.listService.viewItems().toArray().indexOf(item);
+        return range && index >= range.start && index < range.end ? -1 : 0;
+    });
     protected readonly innerListClasses = computed(() => {
         const classes = listInnerListThemeVariants();
         const listClass = this.listClass();
@@ -145,6 +169,23 @@ export class ListComponent<TData> implements OnInit {
     });
     protected readonly messages = this.#i18n.componentMessages("list", LIST_DEFAULT_MESSAGES);
     protected readonly noDataTemplate = contentChild(ListNoDataTemplateDirective, { read: TemplateRef });
+    /**
+     * The shown items split at group headers: a section without a header holds ungrouped items.
+     */
+    protected readonly viewSections = computed(() => {
+        const sections: Array<{ header: ListItem<TData> | null; items: Array<ListItem<TData>>; key: string }> = [];
+        for (const item of this.listService.viewItems()) {
+            if (item.isHeader) {
+                sections.push({ header: item, items: [], key: item.uid });
+                continue;
+            }
+            if (sections.length === 0) {
+                sections.push({ header: null, items: [], key: "" });
+            }
+            sections[sections.length - 1].items.push(item);
+        }
+        return sections;
+    });
     protected readonly viewportHeight: Signal<ListSizeType> = computed(() => {
         const listHeight = this.listHeight();
         if (listHeight) {
@@ -167,6 +208,18 @@ export class ListComponent<TData> implements OnInit {
      */
     public readonly ariaLabel = input<string>("");
 
+    /**
+     * @description Id of the element that names the list, as an alternative to `ariaLabel`.
+     * @default ""
+     */
+    public readonly ariaLabelledBy = input<string>("");
+
+    /**
+     * @description Marks the list as loading (`aria-busy`).
+     * @default false
+     */
+    public readonly busy = input(false, { transform: booleanAttribute });
+
     public readonly data = input<Iterable<TData> | null | undefined>(null);
     public readonly focusOnMount = input(true);
     public readonly height = input<ListSizeInputType>(undefined);
@@ -181,6 +234,12 @@ export class ListComponent<TData> implements OnInit {
     public readonly listId = input<string>("");
     public readonly listItemClass = input("");
     public readonly listItemStyle = input<Partial<CSSStyleDeclaration>>({});
+
+    /**
+     * @description `"listbox"` for options to choose from, `"list"` for items that are only shown.
+     * @default "listbox"
+     */
+    public readonly listRole = input<"list" | "listbox">("listbox");
     public readonly listStyle = input<Partial<CSSStyleDeclaration>>({});
     public readonly maxHeight = input<ListSizeInputType>();
     public readonly maxWidth = input<ListSizeInputType>();
@@ -204,6 +263,25 @@ export class ListComponent<TData> implements OnInit {
                     this.listService.setData(data);
                 }
             });
+        });
+        effect(() => {
+            const listRole = this.listRole();
+            untracked(() => this.listService.role.set(listRole));
+        });
+        effect(onCleanup => {
+            const viewport = this.virtualScrollViewport();
+            if (!viewport) {
+                this.#renderedRange.set(null);
+                return;
+            }
+            const subscription = viewport.renderedRangeStream.subscribe(range => this.#renderedRange.set(range));
+            onCleanup(() => subscription.unsubscribe());
+        });
+        afterRenderEffect({
+            write: () => {
+                this.listService.viewItems();
+                untracked(() => this.restoreFocusAfterRemoval());
+            }
         });
         afterNextRender({
             read: () => this.setInitialSelectionOrFocus()
@@ -340,6 +418,86 @@ export class ListComponent<TData> implements OnInit {
         }
     }
 
+    /**
+     * Whether a key event is meant for the list: from the host, the list element, one of this list's own options or
+     * its filter input. Keys typed into controls in header, footer or item templates (or in a nested list) are left
+     * to those controls.
+     */
+    private isListKeyTarget(event: KeyboardEvent): boolean {
+        const host = this.#hostElementRef.nativeElement;
+        const target = event.target;
+        if (!(target instanceof HTMLElement) || target === host) {
+            return true;
+        }
+        if (this.filterInputElement()?.nativeElement.contains(target)) {
+            return true;
+        }
+        const ownElement = target.closest("mona-list") === host;
+        return ownElement && (target.hasAttribute("data-uid") || target.id === this.effectiveListId());
+    }
+
+    private rememberFocusedOption(target: EventTarget | null): void {
+        if (!(target instanceof HTMLElement) || target.closest("mona-list") !== this.#hostElementRef.nativeElement) {
+            return;
+        }
+        const uid = target.getAttribute("data-uid");
+        if (uid == null) {
+            return;
+        }
+        const options = this.listService
+            .viewItems()
+            .where(i => !i.isHeader)
+            .toArray();
+        const index = options.findIndex(i => i.uid === uid);
+        this.#focusedOption = index < 0 ? null : { index, uid };
+        // The focused option is where arrow keys continue from, whether it got focus by Tab, click or script.
+        if (
+            index >= 0 &&
+            this.listService.navigableOptions().enabled &&
+            this.listService.highlightedItem() !== options[index]
+        ) {
+            this.listService.highlightedItem.set(options[index]);
+        }
+    }
+
+    /**
+     * When the option that had focus is removed from the data, focus would fall to the page. Move it to the option
+     * now at the same position, or the last one.
+     */
+    private restoreFocusAfterRemoval(): void {
+        const focused = this.#focusedOption;
+        if (!focused) {
+            return;
+        }
+        const options = this.listService
+            .viewItems()
+            .where(i => !i.isHeader)
+            .toArray();
+        if (options.some(i => i.uid === focused.uid)) {
+            return;
+        }
+        const activeElement = document.activeElement;
+        if (
+            activeElement &&
+            activeElement !== document.body &&
+            this.#hostElementRef.nativeElement.contains(activeElement)
+        ) {
+            return;
+        }
+        if (activeElement && activeElement !== document.body) {
+            this.#focusedOption = null;
+            return;
+        }
+        const enabled = options.filter(i => !this.listService.isDisabled(i));
+        const next = enabled[Math.min(focused.index, enabled.length - 1)];
+        if (!next) {
+            this.#focusedOption = null;
+            this.#hostElementRef.nativeElement.focus();
+            return;
+        }
+        this.focusToItem(next);
+    }
+
     private scrollToItem(item: ListItem<TData>, focus: boolean, behavior: ScrollBehavior = "auto"): void {
         const element = this.#hostElementRef.nativeElement.querySelector(`[data-uid="${item.uid}"]`) as HTMLElement;
         if (element) {
@@ -407,7 +565,7 @@ export class ListComponent<TData> implements OnInit {
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                filter(event => event.key === "Enter"),
+                filter(event => event.key === "Enter" && !event.isComposing && this.isListKeyTarget(event)),
                 tap(event => event.preventDefault())
             )
             .subscribe((event: KeyboardEvent) => {
@@ -429,7 +587,7 @@ export class ListComponent<TData> implements OnInit {
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                filter(() => this.listService.navigableOptions().enabled)
+                filter(event => this.listService.navigableOptions().enabled && this.isListKeyTarget(event))
             )
             .subscribe(event => {
                 if (this.handleMultipleSelectionKeys(event)) {
@@ -468,8 +626,19 @@ export class ListComponent<TData> implements OnInit {
                 if (previous && this.#hostElementRef.nativeElement.contains(previous)) {
                     return;
                 }
-                this.setInitialSelectionOrFocus();
+                if (this.focusOnMount()) {
+                    this.setInitialSelectionOrFocus();
+                    return;
+                }
+                // The host only holds the Tab stop while its option isn't drawn; hand focus on to that option.
+                const item = this.listService.focusableItem();
+                if (item) {
+                    this.focusToItem(item);
+                }
             });
+        fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focusin")
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(event => this.rememberFocusedOption(event.target));
         fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focusout")
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(event => {
@@ -477,6 +646,7 @@ export class ListComponent<TData> implements OnInit {
                 if (next && this.#hostElementRef.nativeElement.contains(next)) {
                     return;
                 }
+                this.#focusedOption = null;
                 this.listService.highlightedItem.set(null);
             });
     }

@@ -278,7 +278,9 @@ export const ES_ES_MESSAGES = {
     },
     list: {
         filterList: "Filtrar lista",
-        noData: "No hay datos"
+        loading: "Cargando",
+        noData: "No hay datos",
+        pagerLabel: (list: string) => `Paginación de ${list}`
     },
     listBox: {
         clearSelection: "Limpiar selección",

@@ -23,14 +23,15 @@ export const listGroupHeaderTextThemeVariants = cva(`select-none text-muted-fore
 
 export const listItemBaseThemeVariants = cva(`flex h-full w-full items-center gap-2`);
 
+// Focus and the active option share the grid's ring: solid 2px, inset, at full strength.
 export const listItemContentThemeVariants = cva(
-    `relative flex cursor-default select-none items-center px-3 py-1 text-foreground outline-none`,
+    `relative flex cursor-default select-none items-center px-3 py-1 text-foreground outline-none focus-visible:inset-ring-2 focus-visible:inset-ring-focus-indicator`,
     {
         variants: {
             checkboxes: { true: "gap-2", false: "" },
             selectable: { true: "hover:bg-hover focus:bg-hover", false: "" },
             highlighted: {
-                true: "bg-hover text-foreground inset-ring-1 inset-ring-focus-indicator/35",
+                true: "bg-hover text-foreground inset-ring-2 inset-ring-focus-indicator",
                 false: ""
             },
             selected: { true: "bg-(--color-selected) text-(--color-selected-foreground)", false: "" },
@@ -54,7 +55,7 @@ export const listItemContentThemeVariants = cva(
                 highlighted: true,
                 selected: true,
                 checkboxes: false,
-                class: "bg-(--color-selected) text-(--color-selected-foreground) inset-ring-1 inset-ring-focus-indicator/35 hover:bg-(--color-selected-hover) hover:text-(--color-selected-hover-foreground) focus:bg-(--color-selected-focus) focus:text-(--color-selected-focus-foreground)"
+                class: "bg-(--color-selected) text-(--color-selected-foreground) inset-ring-2 inset-ring-focus-indicator hover:bg-(--color-selected-hover) hover:text-(--color-selected-hover-foreground) focus:bg-(--color-selected-focus) focus:text-(--color-selected-focus-foreground)"
             },
             { selected: true, checkboxes: true, class: "bg-transparent text-foreground" }
         ]

@@ -274,7 +274,9 @@ export const JA_JP_MESSAGES = {
     },
     list: {
         filterList: "リストをフィルター",
-        noData: "データがありません"
+        loading: "読み込み中",
+        noData: "データがありません",
+        pagerLabel: (list: string) => `${list}のページ送り`
     },
     listBox: {
         clearSelection: "選択をクリア",

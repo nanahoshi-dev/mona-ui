@@ -257,7 +257,9 @@
     },
     "list": {
         "filterList": "Listeyi filtrele",
-        "noData": "Veri yok"
+        "loading": "Yükleniyor",
+        "noData": "Veri yok",
+        "pagerLabel": "{list} sayfalandırması"
     },
     "listBox": {
         "clearSelection": "Tüm seçimleri kaldır",

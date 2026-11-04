@@ -257,7 +257,9 @@
     },
     "list": {
         "filterList": "تصفية القائمة",
-        "noData": "لا توجد بيانات"
+        "loading": "جارٍ التحميل",
+        "noData": "لا توجد بيانات",
+        "pagerLabel": "ترقيم صفحات {list}"
     },
     "listBox": {
         "clearSelection": "إلغاء التحديد",

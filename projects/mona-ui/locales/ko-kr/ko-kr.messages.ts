@@ -274,7 +274,9 @@ export const KO_KR_MESSAGES = {
     },
     list: {
         filterList: "목록 필터",
-        noData: "데이터 없음"
+        loading: "로드 중",
+        noData: "데이터 없음",
+        pagerLabel: (list: string) => `${list} 페이지 탐색`
     },
     listBox: {
         clearSelection: "선택 해제",

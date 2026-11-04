@@ -157,7 +157,7 @@ A list view keeps its items, selection and paging to itself, so a list view insi
 
 ### Keyboard
 
-Keyboard navigation requires `monaListViewNavigable`.
+Keyboard navigation is on by default; `monaListViewNavigable` changes its mode and wrapping, or turns it off with `{ enabled: false }`.
 
 | Key                                             | Action                                                                                                      |
 |-------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
@@ -167,27 +167,32 @@ Keyboard navigation requires `monaListViewNavigable`.
 | `End`                                           | Move to the last enabled item.                                                                              |
 | `PageDown`                                      | Scroll the list forward by roughly one viewport.                                                            |
 | `PageUp`                                        | Scroll the list back by roughly one viewport.                                                               |
-| `Enter`                                         | Select the highlighted or currently selected item.                                                          |
+| `Enter`                                         | Select the highlighted or currently selected item, and emit `itemActivate`.                                 |
 | Any letter, digit, space, hyphen, or underscore | Typeahead: jumps to the next item whose text starts with the typed characters (resets after a short pause). |
 
-Disabled items (set through the underlying list's `disabledBy`, not currently exposed as a `ListViewComponent` input — `TODO(owner-review): confirm whether list-view should expose a disabledBy input`) are skipped during navigation.
+Disabled items (`disabledBy`) are skipped. Keys pressed in controls inside header, footer or item templates are left to those controls: an input in a header template takes typing and arrows, and Enter presses a button in an item.
 
 ### Focus
 
-The list is a single Tab stop. Tabbing into `<mona-list-view>` focuses its first selectable item (or the currently selected item, if any); Tab/Shift+Tab then moves focus to the next element outside the list, not between items — use the keyboard map above to move within the list.
+The list is a single Tab stop. Tabbing in focuses the item last moved to, else the last selected item shown, else the first enabled item; a selection on another page or scrolled out of a virtual list doesn't take the Tab stop away. Tab/Shift+Tab then leave the list. When the focused item is removed from `items`, focus moves to the item now at its position (or the last one). The focused item has a solid 2px ring.
 
 ### ARIA
 
-| Attribute                        | When present                      | Value                                                                  |
-|----------------------------------|-----------------------------------|------------------------------------------------------------------------|
-| `role`                           | Always, on the inner list element | `"listbox"`                                                            |
-| `role`                           | Always, on each item              | `"option"`                                                             |
-| `aria-selected`                  | Always, on each item              | Reflects whether the item is selected                                  |
-| `aria-disabled`                  | Always, on each item              | Reflects whether the item is disabled                                  |
-| `aria-current`                   | Always, on each item              | Reflects whether the item is the currently highlighted item            |
-| `aria-posinset` / `aria-setsize` | Always, on each item              | The item's 1-based position and the total count among non-header items |
+A list view you can select from (`monaListViewSelectable`) is a `listbox` of `option`s. Without selection it is a `list` of `listitem`s, so item templates may hold buttons and links.
 
-`ListViewComponent` does not accept an `aria-label`/`aria-labelledby` input; provide an accessible name for the list via a `monaListViewHeaderTemplate` heading or a wrapping landmark, as needed.
+| Attribute                        | Where                                     | Value                                                                  |
+|----------------------------------|-------------------------------------------|------------------------------------------------------------------------|
+| `role`                           | The inner list element                    | `"listbox"` when selectable, else `"list"`                             |
+| `role`                           | Each item                                 | `"option"` when selectable, else `"listitem"`                          |
+| `aria-label` / `aria-labelledby` | The inner list element                    | From the `aria-label` / `aria-labelledby` inputs (not left on the host) |
+| `aria-multiselectable`           | The listbox, in multiple selection        | `true`                                                                 |
+| `aria-busy`                      | The inner list element, while `loading`   | `true`                                                                 |
+| `aria-selected` / `aria-disabled`| Each option                               | Whether the item is selected / disabled                                |
+| `aria-posinset` / `aria-setsize` | Each item                                 | The item's 1-based position and the total count among non-header items |
+| `role="group"`                   | Each group of options, when grouped       | Named by its header (`aria-labelledby`); a plain list nests a `list` instead. With virtual scrolling the list stays flat and each option points at its header with `aria-describedby`. |
+| `role="status"`                  | A visually hidden element after the list  | "Loading" while `loading`, "No data" when there are no items           |
+
+Give every list view a name with `aria-label` or `aria-labelledby`. A paged list view names its pager "{name} pagination" (the `list.pagerLabel` message), or `pagerAriaLabel`, so several paged lists on a page have different landmarks.
 
 Form integration is not applicable — List View is a display/selection widget, not a form control.
 
@@ -203,15 +208,18 @@ Form integration is not applicable — List View is a display/selection widget, 
 |-----------------|--------------------------------------------|------------|-----------------------------------------------------------------------------|
 | `aria-label`    | `string`                                   | `""`       | Accessible name for the list's `listbox` element.                           |
 | `class`         | `string`                                   | `""`       | Additional CSS classes merged onto the host element via `tailwind-merge`.   |
+| `aria-labelledby` | `string`                                 | `""`       | Id of the element that names the list, instead of `aria-label`.             |
 | `disabledBy`    | `string \| ((item: T) => boolean) \| null` | `""`       | Property name or predicate that marks an item as disabled.                  |
 | `height`        | `string \| number`                         | `"100%"`   | Sets the height of the list view. See [Virtual scrolling](#virtual-scrolling). |
 | `items`         | `Iterable<T>`                              | `[]`       | Collection of items to render.                                              |
 | `listClass`     | `string`                                   | `""`       | Sets the classes of the inner `<ul>` element.                               |
 | `listItemClass` | `string`                                   | `""`       | Sets the classes of the list items.                                         |
 | `listItemStyle` | `Partial<CSSStyleDeclaration>`             | `{}`       | Sets the style of the list items.                                           |
+| `loading`       | `boolean`                                  | `false`    | Marks the list as loading: `aria-busy` and a polite "Loading" status.       |
 | `listStyle`     | `Partial<CSSStyleDeclaration>`             | `{}`       | Sets the style of the list.                                                 |
 | `maxHeight`     | `string \| number`                         | `""`       | Sets the maximum height of the list.                                        |
 | `maxWidth`      | `string \| number`                         | `""`       | Sets the maximum width of the list.                                         |
+| `pagerAriaLabel` | `string`                                  | `""`       | Name of the pager. Defaults to "{name} pagination" from `aria-label`.       |
 | `rounded`       | `"none" \| "small" \| "medium" \| "large"` | `"medium"` | Border-radius preset applied to the component.                              |
 | `size`          | `"small" \| "medium" \| "large"`           | `"medium"` | Size preset controlling the component's dimensions.                         |
 | `textField`     | `string \| ((item: T) => string) \| null`  | `""`       | Property name or accessor used to derive the display text from a data item. |

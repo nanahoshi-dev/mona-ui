@@ -159,8 +159,8 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
         },
         navigation: {
             code: ``,
-            active: false,
-            description: "Enables keyboard navigation for the list view",
+            active: true,
+            description: "Keyboard navigation (on by default; turn it off to see the list without arrow keys)",
             name: "Navigation",
             subFeatures: {
                 mode: {
@@ -333,7 +333,7 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
             ariaLabel: {
                 alias: "aria-label",
                 type: "string",
-                value: ""
+                value: "Foods"
             },
             height: {
                 type: "string",
@@ -623,7 +623,7 @@ class ListViewWrapperComponent implements ComponentInputsAsSignal<ListViewCompon
         };
         return options;
     });
-    public readonly ariaLabel = input("");
+    public readonly ariaLabel = input("Foods");
     public readonly height = input<ReturnType<ListViewComponent["height"]>>("100%");
     public readonly listClass = input<ReturnType<ListViewComponent["listClass"]>>("");
     public readonly listItemClass = input<ReturnType<ListViewComponent["listItemClass"]>>("");

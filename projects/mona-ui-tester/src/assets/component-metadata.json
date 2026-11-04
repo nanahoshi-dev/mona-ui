@@ -10334,6 +10334,13 @@
         "defaultValue": "\"\""
       },
       {
+        "description": "Id of the element that names the list view's list, as an alternative to `aria-label`.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Property name or predicate that marks an item as disabled. Disabled items can't be selected,\r\nactivated or reached by typeahead.",
         "kind": "input",
         "name": "disabledBy",
@@ -10389,6 +10396,13 @@
         "defaultValue": "{}"
       },
       {
+        "description": "Marks the list as loading: it gets `aria-busy` and a polite \"Loading\" status.",
+        "kind": "input",
+        "name": "loading",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
         "description": "Sets the maximum height of the list.",
         "kind": "input",
         "name": "maxHeight",
@@ -10400,6 +10414,13 @@
         "kind": "input",
         "name": "maxWidth",
         "type": "string | number",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Accessible name of the pager. Defaults to \"{name} pagination\" from the list view's `aria-label`,\r\nso two paged list views on a page have different landmarks.",
+        "kind": "input",
+        "name": "pagerAriaLabel",
+        "type": "string",
         "defaultValue": "\"\""
       },
       {
@@ -15308,6 +15329,20 @@
         "defaultValue": "\"\""
       },
       {
+        "description": "Id of the element that names the list, as an alternative to `ariaLabel`.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Marks the list as loading (`aria-busy`).",
+        "kind": "input",
+        "name": "busy",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
         "description": "",
         "kind": "input",
         "name": "data",
@@ -15365,6 +15400,13 @@
         "kind": "input",
         "name": "listItemStyle",
         "type": "Partial<CSSStyleDeclaration>"
+      },
+      {
+        "description": "`\"listbox\"` for options to choose from, `\"list\"` for items that are only shown.",
+        "kind": "input",
+        "name": "listRole",
+        "type": "\"list\" | \"listbox\"",
+        "defaultValue": "\"listbox\""
       },
       {
         "description": "",

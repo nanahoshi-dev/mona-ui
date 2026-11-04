@@ -275,7 +275,9 @@ export const TR_TR_MESSAGES = {
     },
     list: {
         filterList: "Listeyi filtrele",
-        noData: "Veri yok"
+        loading: "Yükleniyor",
+        noData: "Veri yok",
+        pagerLabel: (list: string) => `${list} sayfalandırması`
     },
     listBox: {
         clearSelection: "Tüm seçimleri kaldır",

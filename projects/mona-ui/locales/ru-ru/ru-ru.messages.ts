@@ -284,7 +284,9 @@ export const RU_RU_MESSAGES = {
     },
     list: {
         filterList: "Фильтр списка",
-        noData: "Нет данных"
+        loading: "Загрузка",
+        noData: "Нет данных",
+        pagerLabel: (list: string) => `Навигация по страницам: ${list}`
     },
     listBox: {
         clearSelection: "Очистить выбор",

@@ -274,7 +274,9 @@ export const ID_ID_MESSAGES = {
     },
     list: {
         filterList: "Saring daftar",
-        noData: "Tidak ada data"
+        loading: "Memuat",
+        noData: "Tidak ada data",
+        pagerLabel: (list: string) => `Penomoran halaman ${list}`
     },
     listBox: {
         clearSelection: "Hapus semua pilihan",

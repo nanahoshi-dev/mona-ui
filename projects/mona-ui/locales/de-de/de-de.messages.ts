@@ -278,7 +278,9 @@ export const DE_DE_MESSAGES = {
     },
     list: {
         filterList: "Liste filtern",
-        noData: "Keine Daten"
+        loading: "Wird geladen",
+        noData: "Keine Daten",
+        pagerLabel: (list: string) => `Seitennavigation für ${list}`
     },
     listBox: {
         clearSelection: "Auswahl aufheben",

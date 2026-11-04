@@ -257,7 +257,9 @@
     },
     "list": {
         "filterList": "Filtrar lista",
-        "noData": "No hay datos"
+        "loading": "Cargando",
+        "noData": "No hay datos",
+        "pagerLabel": "Paginación de {list}"
     },
     "listBox": {
         "clearSelection": "Limpiar selección",

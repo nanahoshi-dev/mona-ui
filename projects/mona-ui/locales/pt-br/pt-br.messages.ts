@@ -279,7 +279,9 @@ export const PT_BR_MESSAGES = {
     },
     list: {
         filterList: "Filtrar lista",
-        noData: "Nenhum dado disponível"
+        loading: "Carregando",
+        noData: "Nenhum dado disponível",
+        pagerLabel: (list: string) => `Paginação de ${list}`
     },
     listBox: {
         clearSelection: "Limpar seleção",

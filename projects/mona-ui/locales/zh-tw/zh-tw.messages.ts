@@ -273,7 +273,9 @@ export const ZH_TW_MESSAGES = {
     },
     list: {
         filterList: "篩選清單",
-        noData: "沒有資料"
+        loading: "載入中",
+        noData: "沒有資料",
+        pagerLabel: (list: string) => `${list}分頁`
     },
     listBox: {
         clearSelection: "清除選取",

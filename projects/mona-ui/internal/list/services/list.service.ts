@@ -156,16 +156,21 @@ export class ListService<TData> {
         operator: "contains"
     });
     public readonly focus$ = new Subject<void>();
+    /**
+     * The option that holds the list's Tab stop: the highlighted one, else the last selected one, else the first
+     * enabled one. Only shown items count, so a selection on another page doesn't take the Tab stop away.
+     */
     public readonly focusableItem = computed(() => {
+        const viewItems = this.viewItems();
         const highlighted = this.highlightedItem();
-        if (highlighted) {
+        if (highlighted && viewItems.contains(highlighted)) {
             return highlighted;
         }
-        const selected = this.selectedListItems().lastOrDefault();
+        const selected = this.selectedListItems().lastOrDefault(item => viewItems.contains(item));
         if (selected) {
             return selected;
         }
-        return this.viewItems().firstOrDefault(i => !i.isHeader && !this.isDisabled(i));
+        return viewItems.firstOrDefault(i => !i.isHeader && !this.isDisabled(i));
     });
     public readonly groupBy = signal<ListKeySelector<TData>>(null);
     /**
@@ -233,6 +238,11 @@ export class ListService<TData> {
         type: "numeric",
         visiblePages: 5
     });
+    /**
+     * `"listbox"` for options to choose from; `"list"` for items that are only shown, as `listitem`s without
+     * selection state.
+     */
+    public readonly role = signal<"list" | "listbox">("listbox");
     public readonly scrollToItem$ = new ReplaySubject<{
         item: ListItem<TData>;
         focus: boolean;

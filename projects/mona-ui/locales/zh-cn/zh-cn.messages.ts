@@ -273,7 +273,9 @@ export const ZH_CN_MESSAGES = {
     },
     list: {
         filterList: "筛选列表",
-        noData: "没有数据"
+        loading: "正在加载",
+        noData: "没有数据",
+        pagerLabel: (list: string) => `${list}分页`
     },
     listBox: {
         clearSelection: "清除选择",

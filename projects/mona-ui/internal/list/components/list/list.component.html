@@ -14,6 +14,8 @@
             (filterChange)="onFilterChange($event)"></mona-filter-input>
     </div>
 }
+@let listRole = listService.role();
+@let isListbox = listRole === "listbox";
 @if (listService.virtualScrollOptions().enabled) {
     @if (listService.viewItems().length !== 0) {
         <cdk-virtual-scroll-viewport
@@ -24,13 +26,27 @@
                 [style]="listStyle()"
                 [tabIndex]="-1"
                 [id]="effectiveListId()"
-                role="listbox"
+                [attr.role]="listRole"
                 [attr.aria-label]="ariaLabel() || null"
-                [attr.aria-multiselectable]="listService.selectableOptions().mode === 'multiple' || null">
+                [attr.aria-labelledby]="ariaLabelledBy() || null"
+                [attr.aria-busy]="busy() || null"
+                [attr.aria-multiselectable]="
+                    (isListbox && listService.selectableOptions().mode === 'multiple') || null
+                ">
                 <ng-container *cdkVirtualFor="let item of listService.viewItems(); trackBy: trackByUid">
-                    <ng-container
-                        [ngTemplateOutlet]="listItemTemplate"
-                        [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+                    @if (item.isHeader) {
+                        <li
+                            [class]="groupHeaderClasses()"
+                            [style]="listItemStyle()"
+                            [id]="item.uid"
+                            role="presentation">
+                            <mona-list-item [item]="item" [template]="groupHeaderTemplate()"></mona-list-item>
+                        </li>
+                    } @else {
+                        <ng-container
+                            [ngTemplateOutlet]="listItemTemplate"
+                            [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+                    }
                 </ng-container>
             </ul>
         </cdk-virtual-scroll-viewport>
@@ -48,13 +64,53 @@
             [style]="listStyle()"
             [tabIndex]="-1"
             [id]="effectiveListId()"
-            role="listbox"
+            [attr.role]="listRole"
             [attr.aria-label]="ariaLabel() || null"
-            [attr.aria-multiselectable]="listService.selectableOptions().mode === 'multiple' || null">
-            @for (item of listService.viewItems(); track item.uid) {
-                <ng-container
-                    [ngTemplateOutlet]="listItemTemplate"
-                    [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+            [attr.aria-labelledby]="ariaLabelledBy() || null"
+            [attr.aria-busy]="busy() || null"
+            [attr.aria-multiselectable]="(isListbox && listService.selectableOptions().mode === 'multiple') || null">
+            @for (section of viewSections(); track section.key) {
+                @if (section.header; as header) {
+                    @if (isListbox) {
+                        <!-- A group of options, named by its header. -->
+                        <li role="none" class="m-0 list-none p-0">
+                            <ul role="group" [attr.aria-labelledby]="header.uid" class="m-0 list-none p-0">
+                                <li
+                                    [class]="groupHeaderClasses()"
+                                    [style]="listItemStyle()"
+                                    [id]="header.uid"
+                                    role="presentation">
+                                    <mona-list-item [item]="header" [template]="groupHeaderTemplate()"></mona-list-item>
+                                </li>
+                                @for (item of section.items; track item.uid) {
+                                    <ng-container
+                                        [ngTemplateOutlet]="listItemTemplate"
+                                        [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+                                }
+                            </ul>
+                        </li>
+                    } @else {
+                        <!-- A nested list, named by its header. -->
+                        <li class="m-0 list-none p-0">
+                            <div [class]="groupHeaderClasses()" [style]="listItemStyle()" [id]="header.uid">
+                                <mona-list-item [item]="header" [template]="groupHeaderTemplate()"></mona-list-item>
+                            </div>
+                            <ul role="list" [attr.aria-labelledby]="header.uid" class="m-0 list-none p-0">
+                                @for (item of section.items; track item.uid) {
+                                    <ng-container
+                                        [ngTemplateOutlet]="listItemTemplate"
+                                        [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+                                }
+                            </ul>
+                        </li>
+                    }
+                } @else {
+                    @for (item of section.items; track item.uid) {
+                        <ng-container
+                            [ngTemplateOutlet]="listItemTemplate"
+                            [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+                    }
+                }
             }
         </ul>
     } @else if (noDataTemplate()) {
@@ -70,21 +126,15 @@
 }
 
 <ng-template #listItemTemplate let-item>
-    @if (item.isHeader) {
-        <li [class]="groupHeaderClasses()" [style]="listItemStyle()" [id]="item.uid" role="presentation">
-            <mona-list-item [item]="item" [template]="groupHeaderTemplate()"></mona-list-item>
-        </li>
-    } @else {
-        <li
-            [class]="listItemClass()"
-            [class.px-0.5]="true"
-            [style]="listItemStyle()"
-            [id]="item.uid"
-            [attr.data-uid]="item.uid"
-            (click)="onListItemClick(item)"
-            monaListItem
-            [item]="item">
-            <mona-list-item [item]="item" [template]="itemTemplate()"></mona-list-item>
-        </li>
-    }
+    <li
+        [class]="listItemClass()"
+        [class.px-0.5]="true"
+        [style]="listItemStyle()"
+        [id]="item.uid"
+        [attr.data-uid]="item.uid"
+        (click)="onListItemClick(item)"
+        monaListItem
+        [item]="item">
+        <mona-list-item [item]="item" [template]="itemTemplate()"></mona-list-item>
+    </li>
 </ng-template>

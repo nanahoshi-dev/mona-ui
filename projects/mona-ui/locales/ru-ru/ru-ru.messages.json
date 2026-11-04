@@ -257,7 +257,9 @@
     },
     "list": {
         "filterList": "Фильтр списка",
-        "noData": "Нет данных"
+        "loading": "Загрузка",
+        "noData": "Нет данных",
+        "pagerLabel": "Навигация по страницам: {list}"
     },
     "listBox": {
         "clearSelection": "Очистить выбор",

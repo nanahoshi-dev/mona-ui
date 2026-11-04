@@ -1,5 +1,8 @@
 <mona-list
     [ariaLabel]="ariaLabel()"
+    [ariaLabelledBy]="ariaLabelledBy()"
+    [busy]="loading()"
+    [listRole]="listRole()"
     [data]="listItems()"
     [height]="listHeight()"
     [focusOnMount]="false"
@@ -58,7 +61,9 @@
         [showInfo]="pageableOptions.showInfo"
         [type]="pageableOptions.type"
         [size]="size()"
+        [aria-label]="pagerLabel()"
         (pageChange)="onPageChange($event)"
         (pageSizeSelect)="onPageSizeSelect($event)"
         class="border-b-0 border-x-0 rounded-t-none"></mona-pager>
 }
+<div role="status" class="sr-only">{{ statusText() }}</div>

@@ -107,10 +107,19 @@ async function settle(fixture: ComponentFixture<unknown>): Promise<void> {
     fixture.detectChanges();
 }
 
+/** Texts of a list's own items (not those of a list nested in its templates). */
 function optionTexts(root: HTMLElement, label: string): string[] {
-    const list = root.querySelector(`ul[role='listbox'][aria-label='${label}']`);
-    return Array.from(list?.querySelectorAll(":scope > li[role='option']") ?? []).map(
-        option => option.textContent?.trim() ?? ""
+    const list = root.querySelector(`mona-list ul[aria-label='${label}']`);
+    const owner = list?.closest("mona-list");
+    return Array.from(list?.querySelectorAll<HTMLElement>("li[data-uid]") ?? [])
+        .filter(item => item.closest("mona-list") === owner)
+        .map(item => item.textContent?.trim() ?? "");
+}
+
+/** Texts of the group headers, read through each group's `aria-labelledby`. */
+function groupHeaders(root: HTMLElement): string[] {
+    return Array.from(root.querySelectorAll("mona-list ul[aria-labelledby]")).map(
+        group => document.getElementById(group.getAttribute("aria-labelledby") ?? "")?.textContent?.trim() ?? ""
     );
 }
 
@@ -155,10 +164,10 @@ describe("list view data", () => {
                 { name: "Bob", since: new Date(), team: "a", unavailable: true }
             ]);
             await settle(fixture);
-            const options = (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>("li[role='option']");
+            const options = (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>("li[data-uid]");
 
-            expect(options[0].getAttribute("aria-disabled")).toBe("false");
-            expect(options[1].getAttribute("aria-disabled")).toBe("true");
+            expect(options[0].getAttribute("data-disabled")).toBe("false");
+            expect(options[1].getAttribute("data-disabled")).toBe("true");
 
             options[1].click();
             options[0].click();
@@ -171,7 +180,7 @@ describe("list view data", () => {
                 Array.from({ length: 5 }, (_, index) => ({ name: `P${index}`, since: new Date(), team: "a" }))
             );
             await settle(fixture);
-            const list = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>("ul[role='listbox']");
+            const list = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>("mona-list > ul");
             expect(list).not.toBeNull();
             if (!list) {
                 return;
@@ -199,9 +208,7 @@ describe("list view data", () => {
         it("puts equal dates in one group with a localized header", async () => {
             const fixture = TestBed.createComponent(GroupedHostComponent);
             await settle(fixture);
-            const headers = Array.from(
-                (fixture.nativeElement as HTMLElement).querySelectorAll("li[role='presentation']")
-            ).map(header => header.textContent?.trim());
+            const headers = groupHeaders(fixture.nativeElement as HTMLElement);
             const format = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
             expect(headers).toEqual([format.format(new Date(2024, 0, 1)), format.format(new Date(2024, 0, 2))]);
@@ -215,9 +222,7 @@ describe("list view data", () => {
                 headerText: value => `Since ${(value as Date).getDate()}`
             });
             await settle(fixture);
-            const headers = Array.from(
-                (fixture.nativeElement as HTMLElement).querySelectorAll("li[role='presentation']")
-            ).map(header => header.textContent?.trim());
+            const headers = groupHeaders(fixture.nativeElement as HTMLElement);
 
             expect(headers).toEqual(["Since 2", "Since 1"]);
         });

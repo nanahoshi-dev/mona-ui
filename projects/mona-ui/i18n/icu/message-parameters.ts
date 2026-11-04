@@ -303,7 +303,9 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
     },
     list: {
         filterList: null,
-        noData: null
+        loading: null,
+        noData: null,
+        pagerLabel: [{ name: "list", type: "string" }]
     },
     listBox: {
         clearSelection: null,

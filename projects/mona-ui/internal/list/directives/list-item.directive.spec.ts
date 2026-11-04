@@ -50,7 +50,9 @@ describe("ListItemDirective", () => {
 
         expect(classes).toContain("bg-(--color-selected)");
         expect(classes).toContain("text-(--color-selected-foreground)");
-        expect(classes).toContain("inset-ring-focus-indicator/35");
+        expect(classes).toContain("inset-ring-2");
+        expect(classes).toContain("inset-ring-focus-indicator");
+        expect(classes).not.toContain("inset-ring-focus-indicator/35");
         expect(classes).not.toContain("bg-primary");
         expect(classes).not.toContain("bg-accent-hover");
     });

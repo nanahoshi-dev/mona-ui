@@ -282,7 +282,9 @@ export const AR_SA_MESSAGES = {
     },
     list: {
         filterList: "تصفية القائمة",
-        noData: "لا توجد بيانات"
+        loading: "جارٍ التحميل",
+        noData: "لا توجد بيانات",
+        pagerLabel: (list: string) => `ترقيم صفحات ${list}`
     },
     listBox: {
         clearSelection: "إلغاء التحديد",
