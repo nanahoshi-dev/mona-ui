@@ -56,9 +56,9 @@
         </ul>
         <app-code-viewer [code]="nodeTemplateCode" language="html"></app-code-viewer>
         <p>
-            TODO(owner-review): the template context type <code>TreeViewNodeTemplateContext&lt;T&gt;</code> is not
-            exported from <code>mona-ui</code>, so consumers cannot explicitly annotate a
-            <code>TemplateRef&lt;TreeViewNodeTemplateContext&lt;T&gt;&gt;</code> variable.
+            Bind the tree's data to <code>[monaTreeViewNodeTemplateOf]</code> to type <code>$implicit</code> in the
+            template; without it, the data item is <code>any</code>. The context type,
+            <code>TreeViewNodeTemplateContext&lt;T&gt;</code>, is exported for annotating a <code>TemplateRef</code>.
         </p>
     </app-section>
 
@@ -135,6 +135,14 @@
                 on first expand instead of upfront. Provide <code>hasChildren</code> so unexpanded nodes can render an
                 expand affordance before their children are fetched.
             </p>
+            <p>
+                While children load, the node is expanded and <code>aria-busy</code>, its expander reads "Loading
+                {{ "{" }}node{{ "}" }}", and a load that takes more than a moment is announced. If the observable
+                errors, <code>childrenLoadError</code> emits with the node and the error, the failure is announced, and
+                the node is collapsed again and described as failed; its expander reads "Retry loading {{ "{" }}node{{
+                    "}"
+                }}", and expanding it loads again.
+            </p>
             <app-code-viewer [code]="lazyLoadingHtmlCode" language="html"></app-code-viewer>
             <app-code-viewer [code]="lazyLoadingCode" language="typescript"></app-code-viewer>
         </app-section>
@@ -158,9 +166,8 @@
                 <code>TreeViewComponent</code> exposes <code>moveNode(source, target, position)</code> and
                 <code>undoMoveNode(snapshot)</code> for moving nodes in the tree's internal structure directly, without
                 going through <code>data</code>. The <code>nodeDrop</code> event's <code>treeView</code> property refers
-                to the emitting <code>TreeViewComponent</code> instance. TODO(owner-review): the interface type behind
-                <code>treeView</code> is not exported from <code>mona-ui</code>, so consumers cannot explicitly type a
-                variable holding it.
+                to the emitting <code>TreeViewComponent</code> instance, typed as the exported
+                <code>ITreeView&lt;T&gt;</code>.
             </li>
         </ul>
     </app-section>
@@ -236,8 +243,20 @@
                     </tr>
                     <tr class="border-b border-border">
                         <td class="py-2 pr-4">Tree host</td>
+                        <td class="py-2 pr-4"><code>aria-labelledby</code></td>
+                        <td class="py-2 pr-4">When the <code>ariaLabelledBy</code> input is set</td>
+                        <td class="py-2">The <code>ariaLabelledBy</code> value</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4">Tree host</td>
+                        <td class="py-2 pr-4"><code>aria-describedby</code></td>
+                        <td class="py-2 pr-4">When no node is shown</td>
+                        <td class="py-2">The "No data" or "No matching items" text</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4">Tree host</td>
                         <td class="py-2 pr-4"><code>aria-multiselectable</code></td>
-                        <td class="py-2 pr-4">When selectable with <code>mode: "multiple"</code></td>
+                        <td class="py-2 pr-4">When selectable with <code>mode: "multiple"</code> and not checkable</td>
                         <td class="py-2"><code>true</code></td>
                     </tr>
                     <tr class="border-b border-border">
@@ -262,14 +281,39 @@
                     </tr>
                     <tr class="border-b border-border">
                         <td class="py-2 pr-4">Node</td>
+                        <td class="py-2 pr-4"><code>aria-labelledby</code></td>
+                        <td class="py-2 pr-4">Always</td>
+                        <td class="py-2">
+                            The node's content, so the expander and nested nodes aren't part of its name
+                        </td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4">Node</td>
                         <td class="py-2 pr-4"><code>aria-expanded</code></td>
                         <td class="py-2 pr-4">When the node has children and is expandable</td>
-                        <td class="py-2"><code>true</code> / <code>false</code></td>
+                        <td class="py-2">
+                            <code>true</code> / <code>false</code>; <code>true</code> while its children load
+                        </td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4">Node</td>
+                        <td class="py-2 pr-4"><code>aria-busy</code></td>
+                        <td class="py-2 pr-4">While its children load</td>
+                        <td class="py-2"><code>true</code></td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4">Node</td>
+                        <td class="py-2 pr-4"><code>aria-describedby</code></td>
+                        <td class="py-2 pr-4">When its children failed to load</td>
+                        <td class="py-2">"Couldn't load the items in {{ "{" }}node{{ "}" }}"</td>
                     </tr>
                     <tr class="border-b border-border">
                         <td class="py-2 pr-4">Node</td>
                         <td class="py-2 pr-4"><code>aria-selected</code></td>
-                        <td class="py-2 pr-4">When selectable is enabled</td>
+                        <td class="py-2 pr-4">
+                            When selectable is enabled and not checkable (a node reports one state; with checkboxes,
+                            selection is shown but not reported)
+                        </td>
                         <td class="py-2"><code>true</code> / <code>false</code></td>
                     </tr>
                     <tr class="border-b border-border">
@@ -284,9 +328,20 @@
                         <td class="py-2 pr-4">When the node is checkable</td>
                         <td class="py-2"><code>true</code> / <code>false</code> / <code>mixed</code></td>
                     </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4">Filter input</td>
+                        <td class="py-2 pr-4"><code>aria-label</code>, <code>aria-controls</code></td>
+                        <td class="py-2 pr-4">When filterable</td>
+                        <td class="py-2">"Filter {{ "{" }}name{{ "}" }}" (or "Filter tree"), and the tree's id</td>
+                    </tr>
                 </tbody>
             </table>
-            <p>Provide <code>ariaLabel</code> when surrounding content does not already identify the tree's purpose.</p>
+            <p>
+                Name every tree with <code>ariaLabel</code> or <code>ariaLabelledBy</code>; in development, an unnamed
+                tree logs a warning. A plain <code>aria-label</code> attribute on <code>mona-tree-view</code> doesn't
+                name the tree. After the user types in the filter, the number of matching nodes is announced ("3
+                results", or "No matching items"); a filter set from code isn't announced.
+            </p>
         </app-section>
 
         <app-section id="focusBehavior" [header]="'Focus Behavior'" headerType="H3">
@@ -295,7 +350,9 @@
                 navigation moves an internal active node pointer, reflected through
                 <code>aria-activedescendant</code> on the tree host, instead of moving DOM focus between nodes. When the
                 tree regains focus, it restores the previously active node, or activates the first node if none was
-                active yet.
+                active yet. The active node has a solid 2px ring; an empty tree stays a tab stop and draws the ring
+                around its "No data" or "No matching items" text. The filter input doesn't take focus when the tree
+                renders.
             </p>
         </app-section>
 
@@ -337,7 +394,18 @@
                         <td class="py-2 pr-4"><code>ariaLabel</code></td>
                         <td class="py-2 pr-4"><code>string</code></td>
                         <td class="py-2 pr-4"><code>""</code></td>
-                        <td class="py-2">Accessible name for the tree.</td>
+                        <td class="py-2">
+                            Accessible name for the tree. Also names the filter input ("Filter
+                            {{ "{" }}name{{ "}" }}").
+                        </td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>ariaLabelledBy</code></td>
+                        <td class="py-2 pr-4"><code>string</code></td>
+                        <td class="py-2 pr-4"><code>""</code></td>
+                        <td class="py-2">
+                            Id of the element that names the tree, as an alternative to <code>ariaLabel</code>.
+                        </td>
                     </tr>
                     <tr class="border-b border-border">
                         <td class="py-2 pr-4"><code>children</code></td>
@@ -408,6 +476,14 @@
                         <td class="py-2 pr-4"><code>blur</code></td>
                         <td class="py-2 pr-4"><code>FocusEvent</code></td>
                         <td class="py-2">Emitted when the tree loses focus.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>childrenLoadError</code></td>
+                        <td class="py-2 pr-4"><code>ChildrenLoadErrorEvent&lt;T&gt;</code></td>
+                        <td class="py-2">
+                            Emitted with the node and the error when lazily loaded children fail to load. The node is
+                            collapsed again; expanding it retries.
+                        </td>
                     </tr>
                     <tr class="border-b border-border">
                         <td class="py-2 pr-4"><code>focus</code></td>
@@ -864,9 +940,10 @@
                 <code>FilterChangeEvent</code> are exported from <code>mona-ui</code>.
             </p>
             <p>
-                TODO(owner-review): <code>DataStructure</code> (the <code>mode</code> input's type) and the interface
-                behind <code>NodeDropEvent.treeView</code> are used in public signatures but are not exported from
-                <code>mona-ui</code>.
+                <code>DataStructure</code> (the <code>mode</code> input's type), <code>ITreeView&lt;T&gt;</code> (the
+                type of <code>NodeDropEvent.treeView</code>), <code>ChildrenLoadErrorEvent&lt;T&gt;</code> and
+                <code>TreeViewNodeTemplateContext&lt;T&gt;</code> are exported from
+                <code>@nanahoshi/mona-ui/tree-view</code> as well.
             </p>
         </app-section>
     </app-section>
@@ -878,6 +955,5 @@
         - [ ] Keyboard map and ARIA table verified against tree.component.ts / sub-tree.component.html
         - [ ] Form integration claim verified (no CVA, no signal forms interfaces implemented)
         - [ ] No implementation-only details exposed as public contract
-        - [ ] Unclear behavior marked with TODO(owner-review): DataStructure export, NodeDropEvent.treeView type export, TreeViewNodeTemplateContext export
     -->
 </app-section>

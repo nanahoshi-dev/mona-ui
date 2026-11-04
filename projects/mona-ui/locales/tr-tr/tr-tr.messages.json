@@ -390,7 +390,14 @@
         "collapse": "Daralt",
         "expand": "Genişlet",
         "filter": "Filtrele",
-        "filterTree": "Ağacı filtrele"
+        "filterLabel": "{tree} filtrele",
+        "filterTree": "Ağacı filtrele",
+        "loadError": "{node} içindeki öğeler yüklenemedi",
+        "loadingNode": "{node} yükleniyor",
+        "noData": "Veri yok",
+        "noMatches": "Eşleşen öğe yok",
+        "results": "{count} sonuç",
+        "retryLoading": "{node} öğesini yeniden yüklemeyi dene"
     },
     "window": {
         "close": "Kapat",

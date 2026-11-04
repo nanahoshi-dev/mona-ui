@@ -4,11 +4,27 @@
             [filter]="treeService.filterText()"
             [debounce]="treeService.filterableOptions().debounce"
             [placeholder]="treeService.filterPlaceholder()"
+            [ariaLabel]="filterAriaLabel()"
+            [ariaControls]="treeId"
+            [autoFocus]="false"
             (filterChange)="onFilterChange($event)"></mona-filter-input>
     </div>
 }
-<div class="flex-1 overflow-auto">
-    <mona-tree [ariaLabel]="ariaLabel()">
+<!-- An empty tree stays a named Tab stop, lying over the "No data" or "No matching items" text that describes it. -->
+<div class="relative flex-1 overflow-auto">
+    @if (empty()) {
+        <mona-placeholder
+            [id]="statusId"
+            [text]="emptyText()"
+            class="flex h-full w-full items-center justify-center"></mona-placeholder>
+    }
+    <mona-tree
+        [id]="treeId"
+        [class.absolute]="empty()"
+        [class.inset-0]="empty()"
+        [ariaLabel]="ariaLabel()"
+        [ariaLabelledBy]="ariaLabelledBy()"
+        [ariaDescribedBy]="empty() ? statusId : ''">
         @if (nodeTemplate()) {
             <ng-template monaTreeNodeTemplate let-dataItem let-element="element">
                 <ng-container

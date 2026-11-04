@@ -455,7 +455,14 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         collapse: null,
         expand: null,
         filter: null,
-        filterTree: null
+        filterLabel: [{ name: "tree", type: "string" }],
+        filterTree: null,
+        loadError: [{ name: "node", type: "string" }],
+        loadingNode: [{ name: "node", type: "string" }],
+        noData: null,
+        noMatches: null,
+        results: [{ name: "count", type: "number" }],
+        retryLoading: [{ name: "node", type: "string" }]
     },
     window: {
         close: null,

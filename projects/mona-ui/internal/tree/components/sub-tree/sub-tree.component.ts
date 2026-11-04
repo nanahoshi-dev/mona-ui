@@ -13,6 +13,7 @@ import {
     LucideBan,
     LucideChevronDown,
     LucideChevronRight,
+    LucideCircleAlert,
     LucideLoaderCircle,
     LucidePlus
 } from "@lucide/angular";
@@ -48,6 +49,7 @@ import { TreeNodeComponent } from "../tree-node/tree-node.component";
         LucideBan,
         LucideChevronDown,
         LucideChevronRight,
+        LucideCircleAlert,
         LucideLoaderCircle,
         LucidePlus,
         TreeNodeComponent,
@@ -128,6 +130,13 @@ export class SubTreeComponent<T> {
     protected readonly nodeExpanderClass = computed(() => {
         return treeNodeExpanderThemeVariants();
     });
+    /**
+     * With checkboxes, a node reports whether it is checked (`aria-checked`); reporting selection as well would give
+     * it two conflicting states, so selection is then shown but not reported.
+     */
+    protected readonly selectionReported = computed(
+        () => this.treeService.selectableOptions().enabled && !this.treeService.checkableOptions().enabled
+    );
     protected readonly treeService = inject(TreeService);
     protected readonly visibleNodes = computed(() => {
         return this.nodes()
@@ -218,6 +227,17 @@ export class SubTreeComponent<T> {
                 asapScheduler.schedule(() => this.treeService.animationTemporarilyDisabled.set(false))
             );
         });
+    }
+
+    protected expanderLabel(node: TreeNode<T>, expanded: boolean, text: string): string {
+        const messages = this.messages();
+        if (node.loading()) {
+            return messages.loadingNode(text);
+        }
+        if (node.loadFailed()) {
+            return messages.retryLoading(text);
+        }
+        return `${expanded ? messages.collapse : messages.expand} ${text}`;
     }
 
     protected nodeAnimationDisabled(): boolean {

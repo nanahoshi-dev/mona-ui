@@ -409,7 +409,14 @@ export const ZH_TW_MESSAGES = {
         collapse: "摺疊",
         expand: "展開",
         filter: "篩選",
-        filterTree: "篩選樹狀檢視"
+        filterLabel: (tree: string) => `篩選${tree}`,
+        filterTree: "篩選樹狀檢視",
+        loadError: (node: string) => `無法載入${node}中的項目`,
+        loadingNode: (node: string) => `正在載入${node}`,
+        noData: "沒有資料",
+        noMatches: "沒有符合的項目",
+        results: (count: number) => `${localizeNumber(count)} 個結果`,
+        retryLoading: (node: string) => `重試載入${node}`
     },
     window: {
         close: "關閉",

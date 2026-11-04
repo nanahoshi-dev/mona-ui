@@ -427,7 +427,15 @@ export const IT_IT_MESSAGES = {
         collapse: "Comprimi",
         expand: "Espandi",
         filter: "Filtra",
-        filterTree: "Filtra albero"
+        filterLabel: (tree: string) => `Filtra ${tree}`,
+        filterTree: "Filtra albero",
+        loadError: (node: string) => `Impossibile caricare gli elementi di ${node}`,
+        loadingNode: (node: string) => `Caricamento di ${node}`,
+        noData: "Nessun dato disponibile",
+        noMatches: "Nessun elemento corrispondente",
+        results: (count: number) =>
+            count === 1 ? `${localizeNumber(count)} risultato` : `${localizeNumber(count)} risultati`,
+        retryLoading: (node: string) => `Riprova a caricare ${node}`
     },
     window: {
         close: "Chiudi",

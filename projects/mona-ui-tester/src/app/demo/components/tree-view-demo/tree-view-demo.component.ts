@@ -247,6 +247,10 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
     });
     protected readonly config = computed<ComponentConfig<TreeViewComponent<TreeNodeDataItem>>>(() => ({
         inputs: deriveInputConfig<TreeViewComponent<TreeNodeDataItem>>(this.metadata(), {
+            ariaLabel: {
+                type: "string",
+                value: "Project files"
+            },
             children: {
                 type: "customDropdown",
                 value: childSelectors,
@@ -300,6 +304,7 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
             <mona-tree-view
                 [animate]="animate()"
                 [ariaLabel]="ariaLabel()"
+                [ariaLabelledBy]="ariaLabelledBy()"
                 [children]="children()"
                 [data]="$any(treeData())"
                 [hasChildren]="hasChildren()"
@@ -443,7 +448,8 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
     });
     protected readonly treeVisible = signal(true);
     public readonly animate = input(true, { transform: booleanAttribute });
-    public readonly ariaLabel = input("");
+    public readonly ariaLabel = input("Project files");
+    public readonly ariaLabelledBy = input("");
     public readonly children = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["children"]>>(x => x.items);
     public readonly data = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["data"]>>([]);
     public readonly hasChildren = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["hasChildren"]>>(null);

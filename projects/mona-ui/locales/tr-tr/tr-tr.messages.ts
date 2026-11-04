@@ -411,7 +411,14 @@ export const TR_TR_MESSAGES = {
         collapse: "Daralt",
         expand: "Genişlet",
         filter: "Filtrele",
-        filterTree: "Ağacı filtrele"
+        filterLabel: (tree: string) => `${tree} filtrele`,
+        filterTree: "Ağacı filtrele",
+        loadError: (node: string) => `${node} içindeki öğeler yüklenemedi`,
+        loadingNode: (node: string) => `${node} yükleniyor`,
+        noData: "Veri yok",
+        noMatches: "Eşleşen öğe yok",
+        results: (count: number) => `${localizeNumber(count)} sonuç`,
+        retryLoading: (node: string) => `${node} öğesini yeniden yüklemeyi dene`
     },
     window: {
         close: "Kapat",

@@ -169,7 +169,13 @@ describe("tree view state", () => {
 
             expect(host.log).toEqual([]);
             expect(row("Fruits").getAttribute("aria-checked")).toBe("true");
-            expect(row("Vegetables").getAttribute("aria-selected")).toBe("true");
+            // With checkboxes, selection is shown but not reported as aria-selected.
+            expect(
+                treeService
+                    .selectedNodes()
+                    .select(node => node.data.id)
+                    .toArray()
+            ).toEqual(["B"]);
         });
 
         it("are followed by the user's checks, with the parents they derive", async () => {

@@ -1014,14 +1014,14 @@ describe("MONA_ZH_CN_LOCALE Integration with MonaI18nService", () => {
         fixture.detectChanges();
         await fixture.whenStable();
 
-        expect(searchRegion?.getAttribute("aria-label")).toBe("筛选 项目");
+        expect(searchRegion?.getAttribute("aria-label")).toBe("筛选项目");
 
         // Compound and alphanumeric label composition
         fixture.componentInstance.ariaLabel.set("项目 2026");
         fixture.detectChanges();
         await fixture.whenStable();
 
-        expect(searchRegion?.getAttribute("aria-label")).toBe("筛选 项目 2026");
+        expect(searchRegion?.getAttribute("aria-label")).toBe("筛选项目 2026");
 
         // Reactive runtime switching
         const service = TestBed.inject(MonaI18nService);

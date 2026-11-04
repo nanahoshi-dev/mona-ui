@@ -12,6 +12,7 @@ export * from "./directives/tree-view-filterable.directive";
 export * from "./directives/tree-view-node-template.directive";
 export * from "./directives/tree-view-selectable.directive";
 export { TREE_VIEW_DEFAULT_MESSAGES } from "./i18n/tree-view.default-messages";
+export type * from "./models/TreeViewNodeTemplateContext";
 
 export {
     CheckableOptions,
@@ -32,5 +33,7 @@ export {
     NodeItem,
     NodeKeySelector,
     NodeMoveSnapshot,
+    NodeSelectEvent,
     SelectableOptions
 } from "@nanahoshi/mona-ui/internal/tree";
+export type { ChildrenLoadErrorEvent, ITreeView } from "@nanahoshi/mona-ui/internal/tree";

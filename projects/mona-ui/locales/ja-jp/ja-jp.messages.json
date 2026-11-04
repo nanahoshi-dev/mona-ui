@@ -390,7 +390,14 @@
         "collapse": "折りたたむ",
         "expand": "展開",
         "filter": "フィルター",
-        "filterTree": "ツリーをフィルター"
+        "filterLabel": "{tree}をフィルター",
+        "filterTree": "ツリーをフィルター",
+        "loadError": "{node}の項目を読み込めませんでした",
+        "loadingNode": "{node}を読み込み中",
+        "noData": "データがありません",
+        "noMatches": "一致する項目はありません",
+        "results": "{count}件の結果",
+        "retryLoading": "{node}の読み込みを再試行"
     },
     "window": {
         "close": "閉じる",

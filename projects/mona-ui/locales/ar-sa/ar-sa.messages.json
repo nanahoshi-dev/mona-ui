@@ -390,7 +390,14 @@
         "collapse": "طي",
         "expand": "توسيع",
         "filter": "تصفية:",
-        "filterTree": "تصفية طريقة عرض الشجرة"
+        "filterLabel": "تصفية: {tree}",
+        "filterTree": "تصفية طريقة عرض الشجرة",
+        "loadError": "تعذّر تحميل عناصر {node}",
+        "loadingNode": "جارٍ تحميل {node}",
+        "noData": "لا توجد بيانات",
+        "noMatches": "لا توجد عناصر مطابقة",
+        "results": "عدد النتائج: {count}",
+        "retryLoading": "إعادة محاولة تحميل {node}"
     },
     "window": {
         "close": "إغلاق",

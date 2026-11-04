@@ -7,6 +7,8 @@ export class TreeNode<T> {
     public readonly checked = signal(false);
     public readonly children = signal(ImmutableSet.create<TreeNode<T>>());
     public readonly data: T;
+    /** Whether the last load of this node's children from an asynchronous children selector failed. */
+    public readonly loadFailed = signal(false);
     public readonly loading = signal(false);
     public readonly uid = v4();
     /**

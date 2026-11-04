@@ -103,6 +103,13 @@ export class TreeService<T> {
      */
     public readonly checkedKeysChange$ = new Subject<ImmutableSet<unknown>>();
     public readonly children = signal<ChildrenSelector<T>>("");
+    /**
+     * A node's children failed to load from an asynchronous children selector. The node is collapsed again (not
+     * reported through `expandedKeysChange$`), and expanding it retries the load.
+     */
+    public readonly childrenLoadError$ = new Subject<{ readonly error: unknown; readonly node: TreeNode<T> }>();
+    /** A node started loading its children from an asynchronous children selector. */
+    public readonly childrenLoadStart$ = new Subject<TreeNode<T>>();
     public readonly disableBy = signal<NodeKeySelector<T>>(null);
     public readonly disableOptions = signal<DisableOptions>({
         disableChildren: true,
@@ -145,6 +152,14 @@ export class TreeService<T> {
         { initialValue: "" }
     );
     public readonly focus$ = new Subject<FocusEvent>();
+    /** The number of nodes whose text matches the filter (their ancestors, shown for context, aren't counted). */
+    public readonly matchCount = computed(() => {
+        const filterText = this.filterText();
+        if (!filterText) {
+            return 0;
+        }
+        return TreeService.flatten(this.nodeSet()).count(node => this.isFiltered(this.getNodeText(node), filterText));
+    });
     public readonly navigatedNode = signal<TreeNode<T> | null>(null);
     public readonly nodeCheck$ = new Subject<NodeCheckEvent<T>>();
     public readonly nodeCheckChange$ = new Subject<TreeNodeCheckEvent<T>>();
@@ -381,7 +396,8 @@ export class TreeService<T> {
         if (!expandableOptions.enabled) {
             return true;
         }
-        if (node.children().isEmpty()) {
+        // A node whose children are still loading is open, so it reads as expanded (and busy) until they arrive.
+        if (node.children().isEmpty() && !node.loading()) {
             return false;
         }
         const key = this.getExpandKey(node);
@@ -450,7 +466,9 @@ export class TreeService<T> {
             return;
         }
         this.#childLoads.get(node.uid)?.unsubscribe();
+        node.loadFailed.set(false);
         node.loading.set(true);
+        this.childrenLoadStart$.next(node);
         const subscription = children.pipe(take(1)).subscribe({
             next: c => {
                 const childNodes = new List<TreeNode<T>>();
@@ -467,9 +485,15 @@ export class TreeService<T> {
                 this.#childLoads.delete(node.uid);
                 this.restoreExpandedChildren(childNodes);
             },
-            error: () => {
+            error: (error: unknown) => {
                 node.loading.set(false);
+                node.loadFailed.set(true);
                 this.#childLoads.delete(node.uid);
+                // Collapsed again, so expanding the node retries the load.
+                const key = this.getExpandKey(node);
+                const expandedKeys = this.isTreeFiltered() ? this.#filteredExpandedKeys : this.#unfilteredExpandedKeys;
+                expandedKeys.update(keys => keys.remove(key));
+                this.childrenLoadError$.next({ error, node });
             },
             complete: () => {
                 if (node.loading()) {

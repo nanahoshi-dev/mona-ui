@@ -6,6 +6,7 @@ export * from "./components/tree/tree.component";
 export * from "./directives/tree-node-template.directive";
 export * from "./i18n/tree.default-messages";
 export * from "./models/CheckableOptions";
+export type * from "./models/ChildrenLoadErrorEvent";
 export * from "./models/DataStructure";
 export * from "./models/DisableOptions";
 export * from "./models/DraggableOptions";

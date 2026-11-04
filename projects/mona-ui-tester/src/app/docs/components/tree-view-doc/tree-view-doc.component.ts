@@ -26,11 +26,11 @@ export class TreeViewDocComponent {
     `;
 
     protected readonly quickStartHtmlCode = `
-        <mona-tree-view [data]="data" children="items" textField="text"></mona-tree-view>
+        <mona-tree-view ariaLabel="Documents" [data]="data" children="items" textField="text"></mona-tree-view>
     `;
 
     protected readonly nodeTemplateCode = `
-        <mona-tree-view [data]="data" children="items" textField="text">
+        <mona-tree-view ariaLabel="Documents" [data]="data" children="items" textField="text">
             <ng-template monaTreeViewNodeTemplate let-dataItem let-element="element">
                 <span>{{ dataItem.text }}</span>
             </ng-template>
@@ -47,6 +47,7 @@ export class TreeViewDocComponent {
 
     protected readonly flatDataHtmlCode = `
         <mona-tree-view
+            ariaLabel="Documents"
             [data]="data"
             mode="flat"
             idField="id"
@@ -56,6 +57,7 @@ export class TreeViewDocComponent {
 
     protected readonly selectableCode = `
         <mona-tree-view
+            ariaLabel="Documents"
             [data]="data"
             children="items"
             textField="text"
@@ -67,6 +69,7 @@ export class TreeViewDocComponent {
 
     protected readonly checkableCode = `
         <mona-tree-view
+            ariaLabel="Documents"
             [data]="data"
             children="items"
             textField="text"
@@ -77,6 +80,7 @@ export class TreeViewDocComponent {
 
     protected readonly disableCode = `
         <mona-tree-view
+            ariaLabel="Documents"
             [data]="data"
             children="items"
             textField="text"
@@ -86,6 +90,7 @@ export class TreeViewDocComponent {
 
     protected readonly expandableCode = `
         <mona-tree-view
+            ariaLabel="Documents"
             [data]="data"
             children="items"
             textField="text"
@@ -96,6 +101,7 @@ export class TreeViewDocComponent {
 
     protected readonly filterableCode = `
         <mona-tree-view
+            ariaLabel="Documents"
             [data]="data"
             children="items"
             textField="text"
@@ -113,6 +119,7 @@ export class TreeViewDocComponent {
 
     protected readonly dragAndDropHtmlCode = `
         <mona-tree-view
+            ariaLabel="Documents"
             [data]="data()"
             children="items"
             textField="text"
@@ -128,13 +135,20 @@ export class TreeViewDocComponent {
         protected loadChildren(item: MyItem) {
             return this.api.getChildren(item.id); // Observable<MyItem[]>
         }
+
+        protected onLoadError(event: ChildrenLoadErrorEvent<MyItem>) {
+            // The node is collapsed again and expanding it retries; log or report the error here.
+            console.error(event.error);
+        }
     `;
 
     protected readonly lazyLoadingHtmlCode = `
         <mona-tree-view
+            ariaLabel="Documents"
             [data]="data"
             [children]="loadChildren"
             [hasChildren]="hasChildren"
-            textField="text"></mona-tree-view>
+            textField="text"
+            (childrenLoadError)="onLoadError($event)"></mona-tree-view>
     `;
 }

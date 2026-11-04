@@ -421,7 +421,14 @@ export const AR_SA_MESSAGES = {
         collapse: "طي",
         expand: "توسيع",
         filter: "تصفية:",
-        filterTree: "تصفية طريقة عرض الشجرة"
+        filterLabel: (tree: string) => `تصفية: ${tree}`,
+        filterTree: "تصفية طريقة عرض الشجرة",
+        loadError: (node: string) => `تعذّر تحميل عناصر ${node}`,
+        loadingNode: (node: string) => `جارٍ تحميل ${node}`,
+        noData: "لا توجد بيانات",
+        noMatches: "لا توجد عناصر مطابقة",
+        results: (count: number) => `عدد النتائج: ${localizeNumber(count)}`,
+        retryLoading: (node: string) => `إعادة محاولة تحميل ${node}`
     },
     window: {
         close: "إغلاق",

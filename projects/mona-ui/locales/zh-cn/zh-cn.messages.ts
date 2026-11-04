@@ -409,7 +409,14 @@ export const ZH_CN_MESSAGES = {
         collapse: "折叠",
         expand: "展开",
         filter: "筛选",
-        filterTree: "筛选树"
+        filterLabel: (tree: string) => `筛选${tree}`,
+        filterTree: "筛选树",
+        loadError: (node: string) => `无法加载${node}中的项目`,
+        loadingNode: (node: string) => `正在加载${node}`,
+        noData: "没有数据",
+        noMatches: "没有匹配的项目",
+        results: (count: number) => `${localizeNumber(count)} 个结果`,
+        retryLoading: (node: string) => `重试加载${node}`
     },
     window: {
         close: "关闭",

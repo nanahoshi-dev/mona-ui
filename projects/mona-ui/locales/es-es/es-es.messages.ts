@@ -429,7 +429,15 @@ export const ES_ES_MESSAGES = {
         collapse: "Contraer",
         expand: "Expandir",
         filter: "Filtrar",
-        filterTree: "Filtrar árbol"
+        filterLabel: (tree: string) => `Filtrar ${tree}`,
+        filterTree: "Filtrar árbol",
+        loadError: (node: string) => `No se pudieron cargar los elementos de ${node}`,
+        loadingNode: (node: string) => `Cargando ${node}`,
+        noData: "No hay datos",
+        noMatches: "No hay elementos coincidentes",
+        results: (count: number) =>
+            count === 1 ? `${localizeNumber(count)} resultado` : `${localizeNumber(count)} resultados`,
+        retryLoading: (node: string) => `Reintentar cargar ${node}`
     },
     window: {
         close: "Cerrar",

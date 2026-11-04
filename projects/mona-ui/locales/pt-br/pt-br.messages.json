@@ -390,7 +390,14 @@
         "collapse": "Recolher",
         "expand": "Expandir",
         "filter": "Filtrar",
-        "filterTree": "Filtrar árvore"
+        "filterLabel": "Filtrar {tree}",
+        "filterTree": "Filtrar árvore",
+        "loadError": "Não foi possível carregar os itens de {node}",
+        "loadingNode": "Carregando {node}",
+        "noData": "Nenhum dado disponível",
+        "noMatches": "Nenhum item correspondente",
+        "results": "{count, plural, =1 {# resultado} other {# resultados}}",
+        "retryLoading": "Tentar carregar {node} novamente"
     },
     "window": {
         "close": "Fechar",

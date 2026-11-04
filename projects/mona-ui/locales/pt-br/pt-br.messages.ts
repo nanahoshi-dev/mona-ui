@@ -427,7 +427,15 @@ export const PT_BR_MESSAGES = {
         collapse: "Recolher",
         expand: "Expandir",
         filter: "Filtrar",
-        filterTree: "Filtrar árvore"
+        filterLabel: (tree: string) => `Filtrar ${tree}`,
+        filterTree: "Filtrar árvore",
+        loadError: (node: string) => `Não foi possível carregar os itens de ${node}`,
+        loadingNode: (node: string) => `Carregando ${node}`,
+        noData: "Nenhum dado disponível",
+        noMatches: "Nenhum item correspondente",
+        results: (count: number) =>
+            count === 1 ? `${localizeNumber(count)} resultado` : `${localizeNumber(count)} resultados`,
+        retryLoading: (node: string) => `Tentar carregar ${node} novamente`
     },
     window: {
         close: "Fechar",

@@ -390,7 +390,14 @@
         "collapse": "Свернуть",
         "expand": "Развернуть",
         "filter": "Фильтр",
-        "filterTree": "Фильтр дерева"
+        "filterLabel": "Фильтр: {tree}",
+        "filterTree": "Фильтр дерева",
+        "loadError": "Не удалось загрузить элементы «{node}»",
+        "loadingNode": "Загрузка «{node}»",
+        "noData": "Нет данных",
+        "noMatches": "Нет подходящих элементов",
+        "results": "{count, plural, one {# результат} few {# результата} many {# результатов} other {# результата}}",
+        "retryLoading": "Повторить загрузку «{node}»"
     },
     "window": {
         "close": "Закрыть",

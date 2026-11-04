@@ -410,7 +410,14 @@ export const JA_JP_MESSAGES = {
         collapse: "折りたたむ",
         expand: "展開",
         filter: "フィルター",
-        filterTree: "ツリーをフィルター"
+        filterLabel: (tree: string) => `${tree}をフィルター`,
+        filterTree: "ツリーをフィルター",
+        loadError: (node: string) => `${node}の項目を読み込めませんでした`,
+        loadingNode: (node: string) => `${node}を読み込み中`,
+        noData: "データがありません",
+        noMatches: "一致する項目はありません",
+        results: (count: number) => `${localizeNumber(count)}件の結果`,
+        retryLoading: (node: string) => `${node}の読み込みを再試行`
     },
     window: {
         close: "閉じる",

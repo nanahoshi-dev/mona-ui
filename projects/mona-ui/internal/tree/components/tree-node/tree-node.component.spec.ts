@@ -35,7 +35,8 @@ describe("TreeNodeComponent", () => {
         const row = fixture.nativeElement.querySelector("div") as HTMLElement;
         expect(row.classList.contains("bg-active")).toBe(true);
         expect(row.classList.contains("text-foreground")).toBe(true);
-        expect(row.classList.contains("inset-ring-focus-indicator/35")).toBe(true);
+        expect(row.classList.contains("inset-ring-2")).toBe(true);
+        expect(row.classList.contains("inset-ring-focus-indicator")).toBe(true);
         expect(row.classList.contains("bg-primary")).toBe(false);
     });
 

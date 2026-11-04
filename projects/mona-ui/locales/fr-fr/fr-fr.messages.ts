@@ -7,6 +7,15 @@ function localizeNumber(value: number, options?: Intl.NumberFormatOptions): stri
     return formatNumber(value, "fr-FR", options);
 }
 
+const PLURAL_RULES = new Intl.PluralRules("fr-FR");
+
+function plural(
+    category: Intl.LDMLPluralRule,
+    forms: Partial<Record<Intl.LDMLPluralRule, () => string>> & { readonly other: () => string }
+): string {
+    return (forms[category] ?? forms.other)();
+}
+
 export const FR_FR_MESSAGES = {
     autoComplete: {
         clear: "Effacer"
@@ -430,7 +439,18 @@ export const FR_FR_MESSAGES = {
         collapse: "Réduire",
         expand: "Développer",
         filter: "Filtrer",
-        filterTree: "Filtrer l’arborescence"
+        filterLabel: (tree: string) => `Filtrer ${tree}`,
+        filterTree: "Filtrer l’arborescence",
+        loadError: (node: string) => `Impossible de charger les éléments de ${node}`,
+        loadingNode: (node: string) => `Chargement de ${node}`,
+        noData: "Aucune donnée",
+        noMatches: "Aucun élément correspondant",
+        results: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} résultat`,
+                other: () => `${localizeNumber(count)} résultats`
+            }),
+        retryLoading: (node: string) => `Réessayer de charger ${node}`
     },
     window: {
         close: "Fermer",

@@ -411,7 +411,14 @@ export const KO_KR_MESSAGES = {
         collapse: "축소",
         expand: "확장",
         filter: "필터:",
-        filterTree: "트리 뷰 필터"
+        filterLabel: (tree: string) => `필터: ${tree}`,
+        filterTree: "트리 뷰 필터",
+        loadError: (node: string) => `${node}의 항목을 불러올 수 없습니다`,
+        loadingNode: (node: string) => `${node} 불러오는 중`,
+        noData: "데이터 없음",
+        noMatches: "일치하는 항목 없음",
+        results: (count: number) => `결과 ${localizeNumber(count)}개`,
+        retryLoading: (node: string) => `${node} 다시 불러오기`
     },
     window: {
         close: "닫기",

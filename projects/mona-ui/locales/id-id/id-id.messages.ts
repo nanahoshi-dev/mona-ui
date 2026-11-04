@@ -410,7 +410,14 @@ export const ID_ID_MESSAGES = {
         collapse: "Ciutkan",
         expand: "Perluas",
         filter: "Saring",
-        filterTree: "Saring pohon"
+        filterLabel: (tree: string) => `Saring ${tree}`,
+        filterTree: "Saring pohon",
+        loadError: (node: string) => `Tidak dapat memuat item di ${node}`,
+        loadingNode: (node: string) => `Memuat ${node}`,
+        noData: "Tidak ada data",
+        noMatches: "Tidak ada item yang cocok",
+        results: (count: number) => `${localizeNumber(count)} hasil`,
+        retryLoading: (node: string) => `Coba muat ulang ${node}`
     },
     window: {
         close: "Tutup",

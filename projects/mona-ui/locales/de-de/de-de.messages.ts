@@ -429,7 +429,15 @@ export const DE_DE_MESSAGES = {
         collapse: "Einklappen",
         expand: "Erweitern",
         filter: "Filtern",
-        filterTree: "Baum filtern"
+        filterLabel: (tree: string) => `${tree} filtern`,
+        filterTree: "Baum filtern",
+        loadError: (node: string) => `Die Elemente in ${node} konnten nicht geladen werden`,
+        loadingNode: (node: string) => `${node} wird geladen`,
+        noData: "Keine Daten",
+        noMatches: "Keine passenden Elemente",
+        results: (count: number) =>
+            count === 1 ? `${localizeNumber(count)} Ergebnis` : `${localizeNumber(count)} Ergebnisse`,
+        retryLoading: (node: string) => `${node} erneut laden`
     },
     window: {
         close: "Schließen",

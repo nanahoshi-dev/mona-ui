@@ -390,7 +390,14 @@
         "collapse": "Einklappen",
         "expand": "Erweitern",
         "filter": "Filtern",
-        "filterTree": "Baum filtern"
+        "filterLabel": "{tree} filtern",
+        "filterTree": "Baum filtern",
+        "loadError": "Die Elemente in {node} konnten nicht geladen werden",
+        "loadingNode": "{node} wird geladen",
+        "noData": "Keine Daten",
+        "noMatches": "Keine passenden Elemente",
+        "results": "{count, plural, =1 {# Ergebnis} other {# Ergebnisse}}",
+        "retryLoading": "{node} erneut laden"
     },
     "window": {
         "close": "Schließen",

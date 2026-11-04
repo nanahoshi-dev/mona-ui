@@ -442,7 +442,20 @@ export const RU_RU_MESSAGES = {
         collapse: "Свернуть",
         expand: "Развернуть",
         filter: "Фильтр",
-        filterTree: "Фильтр дерева"
+        filterLabel: (tree: string) => `Фильтр: ${tree}`,
+        filterTree: "Фильтр дерева",
+        loadError: (node: string) => `Не удалось загрузить элементы «${node}»`,
+        loadingNode: (node: string) => `Загрузка «${node}»`,
+        noData: "Нет данных",
+        noMatches: "Нет подходящих элементов",
+        results: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} результат`,
+                few: () => `${localizeNumber(count)} результата`,
+                many: () => `${localizeNumber(count)} результатов`,
+                other: () => `${localizeNumber(count)} результата`
+            }),
+        retryLoading: (node: string) => `Повторить загрузку «${node}»`
     },
     window: {
         close: "Закрыть",

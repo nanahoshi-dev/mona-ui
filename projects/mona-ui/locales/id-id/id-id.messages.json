@@ -390,7 +390,14 @@
         "collapse": "Ciutkan",
         "expand": "Perluas",
         "filter": "Saring",
-        "filterTree": "Saring pohon"
+        "filterLabel": "Saring {tree}",
+        "filterTree": "Saring pohon",
+        "loadError": "Tidak dapat memuat item di {node}",
+        "loadingNode": "Memuat {node}",
+        "noData": "Tidak ada data",
+        "noMatches": "Tidak ada item yang cocok",
+        "results": "{count} hasil",
+        "retryLoading": "Coba muat ulang {node}"
     },
     "window": {
         "close": "Tutup",

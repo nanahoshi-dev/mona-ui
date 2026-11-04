@@ -37,7 +37,9 @@ import { TreeDropHintComponent } from "../tree-drop-hint/tree-drop-hint.componen
         "[attr.role]": "'tree'",
         "[attr.tabindex]": "0",
         "[attr.aria-label]": "ariaLabel() || null",
-        "[attr.aria-multiselectable]": "treeService.selectableOptions().mode === 'multiple' || null",
+        "[attr.aria-labelledby]": "ariaLabelledBy() || null",
+        "[attr.aria-describedby]": "ariaDescribedBy() || null",
+        "[attr.aria-multiselectable]": "multiselectable()",
         "[attr.aria-activedescendant]": "activeDescendantId()"
     }
 })
@@ -56,9 +58,20 @@ export class TreeComponent<T> {
         return node === null ? null : this.treeService.getNodeElementId(node.uid);
     });
     protected readonly baseClass = computed(() => {
-        return treeBaseThemeVariants();
+        return treeBaseThemeVariants({ empty: this.treeService.viewNodeSet().isEmpty() });
     });
+    /**
+     * With checkboxes, nodes report `aria-checked` and not `aria-selected`, so the tree isn't multiselectable in the
+     * `aria-selected` sense.
+     */
+    protected readonly multiselectable = computed(() => {
+        const selectable = this.treeService.selectableOptions();
+        const checkable = this.treeService.checkableOptions().enabled;
+        return (!checkable && selectable.enabled && selectable.mode === "multiple") || null;
+    });
+    public readonly ariaDescribedBy = input<string>("");
     public readonly ariaLabel = input<string>("");
+    public readonly ariaLabelledBy = input<string>("");
     public readonly data = input<Iterable<T>>();
     public readonly nodeTemplate = contentChild(TreeNodeTemplateDirective, { read: TemplateRef });
     public readonly treeService: TreeService<T> = inject(TreeService);

@@ -390,7 +390,14 @@
         "collapse": "Collapse",
         "expand": "Expand",
         "filter": "Filter",
-        "filterTree": "Filter tree"
+        "filterLabel": "Filter {tree}",
+        "filterTree": "Filter tree",
+        "loadError": "Couldn't load the items in {node}",
+        "loadingNode": "Loading {node}",
+        "noData": "No data",
+        "noMatches": "No matching items",
+        "results": "{count, plural, =1 {# result} other {# results}}",
+        "retryLoading": "Retry loading {node}"
     },
     "window": {
         "close": "Close",

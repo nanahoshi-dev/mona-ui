@@ -2157,6 +2157,19 @@
       }
     ]
   },
+  "TreeViewNodeTemplateDirective": {
+    "name": "TreeViewNodeTemplateDirective",
+    "selector": "\"ng-template[monaTreeViewNodeTemplate]\"",
+    "inputs": [
+      {
+        "description": "The tree view's data, used only to type the template's data item. Optional.",
+        "kind": "input",
+        "name": "monaTreeViewNodeTemplateOf",
+        "type": "Iterable<T> | null | undefined",
+        "defaultValue": "null"
+      }
+    ]
+  },
   "TreeViewSelectableDirective": {
     "name": "TreeViewSelectableDirective",
     "selector": "\"mona-tree-view[monaTreeViewSelectable]\"",
@@ -14983,9 +14996,16 @@
         "defaultValue": "true"
       },
       {
-        "description": "Accessible name for the tree. Describe what the tree represents. When empty, assistive technology announces the role without a label.",
+        "description": "Accessible name of the tree. Describe what the tree represents; it also names the filter input\n(\"Filter {name}\"). Set this or `ariaLabelledBy`: an unnamed tree logs a warning in development. A plain\n`aria-label` attribute on `mona-tree-view` doesn't name the tree.",
         "kind": "input",
         "name": "ariaLabel",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Id of the element that names the tree, as an alternative to `ariaLabel`.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
         "type": "string",
         "defaultValue": "\"\""
       },
@@ -15001,6 +15021,12 @@
         "name": "children",
         "type": "ChildrenSelector<T>",
         "defaultValue": "\"\""
+      },
+      {
+        "description": "Emitted when the children observable of a node errors. The node is collapsed again and marked\nas failed (its expander reads \"Retry loading {node}\"), the failure is announced, and expanding the node\nretries the load.",
+        "kind": "output",
+        "name": "childrenLoadError",
+        "type": "ChildrenLoadErrorEvent<T>"
       },
       {
         "description": "Collection of items to render.",
@@ -15229,11 +15255,25 @@
         "defaultValue": "\"\""
       },
       {
+        "description": "Id of the element this input filters, exposed as `aria-controls`. Unlike `controls`, the input\nstays a text box: focus moves to the filtered element to navigate it.",
+        "kind": "input",
+        "name": "ariaControls",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Accessible name of the input. The placeholder is not a reliable label, so set this whenever possible.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
         "defaultValue": "\"\""
+      },
+      {
+        "description": "Focuses the input when it renders, as a popup's filter does. Turn it off for an input that is part\nof the page, so it doesn't take focus on load.",
+        "kind": "input",
+        "name": "autoFocus",
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "Id of the list this input filters. When set, the input is exposed as a combobox controlling it.",
@@ -15528,7 +15568,21 @@
       {
         "description": "",
         "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "",
+        "kind": "input",
         "name": "ariaLabel",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "ariaLabelledBy",
         "type": "string",
         "defaultValue": "\"\""
       },

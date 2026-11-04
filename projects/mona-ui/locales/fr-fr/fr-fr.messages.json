@@ -390,7 +390,14 @@
         "collapse": "Réduire",
         "expand": "Développer",
         "filter": "Filtrer",
-        "filterTree": "Filtrer l’arborescence"
+        "filterLabel": "Filtrer {tree}",
+        "filterTree": "Filtrer l’arborescence",
+        "loadError": "Impossible de charger les éléments de {node}",
+        "loadingNode": "Chargement de {node}",
+        "noData": "Aucune donnée",
+        "noMatches": "Aucun élément correspondant",
+        "results": "{count, plural, one {# résultat} other {# résultats}}",
+        "retryLoading": "Réessayer de charger {node}"
     },
     "window": {
         "close": "Fermer",
