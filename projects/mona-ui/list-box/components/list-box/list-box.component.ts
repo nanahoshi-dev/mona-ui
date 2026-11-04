@@ -4,18 +4,17 @@ import {
     Component,
     computed,
     contentChild,
-    DestroyRef,
     effect,
     ElementRef,
     inject,
+    Injector,
     input,
     output,
-    Signal,
-    signal,
+    type Signal,
     TemplateRef,
     untracked
 } from "@angular/core";
-import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
+import { toObservable } from "@angular/core/rxjs-interop";
 import {
     LucideChevronDown,
     LucideChevronLeft,
@@ -43,8 +42,7 @@ import {
     ListViewNoDataTemplateDirective,
     ListViewSelectableDirective
 } from "@nanahoshi/mona-ui/list-view";
-import { ImmutableList, ImmutableSet } from "@mirei/ts-collections";
-import { delay, filter, Observable, ReplaySubject, sample, scan, startWith, Subject, switchMap, tap } from "rxjs";
+import { ImmutableList } from "@mirei/ts-collections";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { ListBoxFooterTemplateDirective } from "../../directives/list-box-footer-template.directive";
 import { ListBoxHeaderTemplateDirective } from "../../directives/list-box-header-template.directive";
@@ -58,6 +56,19 @@ import { ListBoxRemoveEvent } from "../../models/ListBoxRemoveEvent";
 import { ListBoxSelectionEvent } from "../../models/ListBoxSelectionEvent";
 import { ListBoxTransferEvent } from "../../models/ListBoxTransferEvent";
 import { ToolbarAction, ToolbarOptions } from "../../models/ToolbarOptions";
+
+type TransferAction = Extract<ToolbarAction, "transferAllFrom" | "transferAllTo" | "transferFrom" | "transferTo">;
+
+const DEFAULT_ACTIONS: readonly ToolbarAction[] = [
+    "clear",
+    "moveDown",
+    "moveUp",
+    "remove",
+    "transferAllFrom",
+    "transferAllTo",
+    "transferFrom",
+    "transferTo"
+];
 import {
     listBoxBaseThemeVariants,
     listBoxToolbarThemeVariants,
@@ -98,28 +109,22 @@ import {
     }
 })
 export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVariantInputs {
-    readonly #dataStateChange$ = new Subject<void>();
-    readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
-    readonly #listService = inject<ListService<T>>(ListService);
-    readonly #notifySelectionChange$ = new ReplaySubject<boolean>(1);
-    /**
-     * The list box (`this` or the connected list box) that currently holds the selection; falling back to `this`
-     * when neither side has a selection. Used by actions that make sense to run on `this` even with no selection
-     * (e.g., "transfer all"). For actions that require a real selection to proceed, use {@link getSelectedListBox} instead.
-     */
-    protected readonly activeListBox: Signal<ListBoxComponent<T, K>> = computed(() => {
-        const selectedItems = this.selectedItems();
-        if (selectedItems.any()) {
-            return this;
-        }
-        const connectedList = this.connectedList();
-        if (connectedList?.selectedItems().any()) {
-            return connectedList;
-        }
-        return this;
+    readonly #injector = inject(Injector);
+    /** The first index of each item, so positions are looked up once per action instead of with `indexOf`. */
+    readonly #itemIndexes = computed(() => {
+        const indexes = new Map<T, number>();
+        this.listBoxItems().forEach((item, index) => {
+            if (!indexes.has(item)) {
+                indexes.set(item, index);
+            }
+        });
+        return indexes;
     });
+    readonly #listService = inject<ListService<T>>(ListService);
+    /** The selection keys last reported through `selectionChange`, with their items. */
+    #reported = new Map<unknown, T | undefined>();
     protected readonly baseClasses = computed(() => {
         const rounded = this.rounded();
         const size = this.size();
@@ -128,6 +133,17 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
         const direction = position === "left" || position === "right" ? "horizontal" : "vertical";
         const reversed = position === "left" || position === "top";
         return listBoxBaseThemeVariants({ direction, reversed, rounded, size });
+    });
+    /** Whether the selection (in this list box or the connected one) can move down: it doesn't touch the end. */
+    protected readonly canMoveDown = computed(() => {
+        const source = this.selectionHolder();
+        const indices = source?.selectedIndices() ?? [];
+        return source != null && indices.length > 0 && indices[indices.length - 1] < source.listBoxItems().length - 1;
+    });
+    /** Whether the selection (in this list box or the connected one) can move up: it doesn't touch the start. */
+    protected readonly canMoveUp = computed(() => {
+        const indices = this.selectionHolder()?.selectedIndices() ?? [];
+        return indices.length > 0 && indices[0] > 0;
     });
     protected readonly footerTemplate = contentChild(ListBoxFooterTemplateDirective, { read: TemplateRef });
     protected readonly headerTemplate = contentChild(ListBoxHeaderTemplateDirective, { read: TemplateRef });
@@ -142,6 +158,15 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
     });
     protected readonly messages = this.#i18n.componentMessages("listBox", LIST_BOX_DEFAULT_MESSAGES);
     protected readonly noDataTemplate = contentChild(ListBoxNoDataTemplateDirective, { read: TemplateRef });
+    /** The selected items in list order (not the order they were selected in), with their indices. */
+    protected readonly orderedSelection = computed(() => {
+        const indexes = this.#itemIndexes();
+        return this.selectedItems()
+            .toArray()
+            .map(item => ({ index: indexes.get(item) ?? -1, item }))
+            .filter(entry => entry.index >= 0)
+            .sort((a, b) => a.index - b.index);
+    });
     protected readonly selectableOptions = computed<SelectableOptions>(() => {
         const enabled = true;
         const mode = this.selectionMode();
@@ -150,24 +175,37 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
         }
         return { enabled, mode, toggleable: this.singleSelectionToggleable() };
     });
+    /** Indices of the selected items, in list order. */
+    protected readonly selectedIndices = computed(() => this.orderedSelection().map(entry => entry.index));
+    /** The list box that holds the selection: this one, else the connected one, else none. */
+    protected readonly selectionHolder: Signal<ListBoxComponent<T, K> | null> = computed(() => {
+        if (this.selectedItems().any()) {
+            return this;
+        }
+        const connectedList = this.connectedList();
+        return connectedList?.selectedItems().any() ? connectedList : null;
+    });
     protected readonly toolbarClasses = computed(() => {
         const toolbarOptions = this.toolbarOptions();
         const position = toolbarOptions?.position ?? "right";
         const direction = position === "left" || position === "right" ? "vertical" : "horizontal";
         return listBoxToolbarThemeVariants({ direction });
     });
-    protected readonly toolbarOptions = computed(() => {
+    protected readonly toolbarOptions = computed<ToolbarOptions | null>(() => {
         const toolbar = this.toolbar();
         if (typeof toolbar === "boolean") {
-            return toolbar ? this.getDefaultToolbarOptions() : null;
+            return toolbar ? { actions: [...DEFAULT_ACTIONS], position: "right" } : null;
         }
-        return this.updateToolbarOptions(toolbar);
+        return {
+            actions: toolbar.actions ? [...toolbar.actions] : [...DEFAULT_ACTIONS],
+            position: toolbar.position ?? "right"
+        };
     });
 
     /**
      * @description Emitted when a toolbar action button is clicked, carrying the action's details.
      */
-    public readonly actionClick = output<ListBoxActionEvent>();
+    public readonly actionClick = output<ListBoxActionEvent<T>>();
 
     /**
      * @description Accessible name for the list box's `listbox` element. Describe what the list represents,
@@ -193,7 +231,9 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
      * @default []
      */
     public readonly items = input<Iterable<T>>([]);
-    public readonly listBoxItems = signal(ImmutableList.create<T>());
+
+    /** The items, as rendered. Read-only: change `items` to change them. */
+    public readonly listBoxItems = computed(() => ImmutableList.create(this.items()));
 
     /**
      * @description Border-radius preset applied to the component.
@@ -207,10 +247,13 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
      */
     public readonly selectBy = input<ListKeySelector<T, K>>("");
 
+    /** The selected items, read-only. */
     public readonly selectedItems = computed(() => {
         const listItems = this.#listService.selectedListItems();
         return listItems.select(item => item.data).toImmutableSet();
     });
+
+    /** @deprecated Use the `selectedItems` signal or the `selectionChange` output. */
     public readonly selectedItems$ = toObservable(this.selectedItems);
 
     /**
@@ -220,14 +263,16 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
     public readonly selectedKeys = input<Iterable<K>>([]);
 
     /**
-     * @description Emitted with the updated keys whenever the selection changes.
+     * @description Emitted with the updated keys whenever the user changes the selection, including when an
+     * action (transfer, clear, remove) or a selection in the connected list box clears it.
      */
     public readonly selectedKeysChange = output<K[]>();
 
     /**
-     * @description Emitted with the selected and deselected items whenever the selection changes.
+     * @description Emitted with the selected and deselected items whenever the user changes the selection, including
+     * when an action (transfer, clear, remove) or a selection in the connected list box clears it.
      */
-    public readonly selectionChange = output<ListBoxSelectionEvent>();
+    public readonly selectionChange = output<ListBoxSelectionEvent<T>>();
 
     /**
      * @description Allows multiple items to be selected simultaneously when set to `"multiple"`.
@@ -269,247 +314,178 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
 
     public constructor() {
         effect(() => {
-            const items = this.items();
-            untracked(() => this.listBoxItems.set(ImmutableList.create(items)));
+            const selectBy = this.selectBy();
+            const keys = this.selectedKeys();
+            untracked(() => {
+                // Keys set from code are the new baseline; they aren't reported back as a user change.
+                this.#listService.setValueField(selectBy ?? "");
+                this.#listService.setSelectedKeys(keys ?? []);
+                this.#reported = new Map(Array.from(keys ?? [], key => [key, undefined]));
+            });
         });
         effect(onCleanup => {
             const connectedList = this.connectedList();
             if (!connectedList) {
                 return;
             }
-            const subscription = connectedList.selectionChange.subscribe(() => {
-                untracked(() => this.clearSelections());
+            // Selecting in the connected list box clears this one, as only one side holds a selection.
+            const subscription = connectedList.selectionChange.subscribe(event => {
+                if (event.selectedItems.length > 0) {
+                    untracked(() => this.clearSelections());
+                }
             });
             onCleanup(() => subscription.unsubscribe());
         });
-        afterNextRender({
-            read: () => this.setSubscriptions()
-        });
     }
 
     /**
-     * @description Clears the current selection without emitting `selectionChange`. Call {@link notifySelectionChange}
-     * afterward if the resulting selection change should be emitted.
+     * @description Clears the selection and reports the change through `selectionChange` and `selectedKeysChange`.
      */
     public clearSelections(): void {
         this.#listService.clearSelections();
+        this.reportSelection();
     }
 
     /**
-     * @description Emits `selectionChange` for any selection changes made since the last notification
-     * (e.g., after programmatically calling {@link clearSelections}).
+     * @deprecated `clearSelections()` and the actions report selection changes themselves.
      */
     public notifySelectionChange(): void {
-        this.#notifySelectionChange$.next(true);
+        this.reportSelection();
     }
 
     protected onClearClick(event: MouseEvent): void {
-        const listBox = this.activeListBox();
-        if (!listBox) {
+        const holder = this.selectionHolder();
+        if (!holder) {
             return;
         }
-        const selectedItems = listBox.selectedItems();
-        if (selectedItems.none()) {
-            return;
-        }
-        const clearEvent = new ListBoxClearEvent(selectedItems, event);
-        listBox.actionClick.emit(clearEvent);
+        const clearEvent = new ListBoxClearEvent(
+            holder.orderedSelection().map(entry => entry.item),
+            event
+        );
+        holder.actionClick.emit(clearEvent);
         if (!clearEvent.isDefaultPrevented()) {
-            listBox.clearSelections();
-            listBox.notifySelectionChange();
+            this.clearSelections();
             this.connectedList()?.clearSelections();
-            this.connectedList()?.notifySelectionChange();
         }
     }
 
     protected onMoveClick(direction: Extract<ToolbarAction, "moveDown" | "moveUp">, event: MouseEvent): void {
-        const activeListBox = this.getSelectedListBox();
-        if (!activeListBox) {
+        const holder = this.selectionHolder();
+        if (!holder || (direction === "moveUp" ? !this.canMoveUp() : !this.canMoveDown())) {
             return;
         }
-
-        const selectedItems = activeListBox.selectedItems();
-        if (selectedItems.none()) {
-            const moveEvent = new ListBoxMoveEvent(direction, [], [], -1, -1, event);
-            activeListBox.actionClick.emit(moveEvent);
-            return;
-        }
-
-        const listBoxItems = activeListBox.listBoxItems();
-        const startIndex = listBoxItems.indexOf(selectedItems.elementAt(0));
-        const endIndex = listBoxItems.indexOf(selectedItems.elementAt(selectedItems.length - 1));
-
-        let newMoveIndex: number;
-        if (direction === "moveDown") {
-            if (endIndex >= listBoxItems.length - 1) {
-                return;
-            }
-            newMoveIndex = endIndex + 1;
-        } else {
-            if (startIndex <= 0) {
-                return;
-            }
-            newMoveIndex = startIndex - 1;
-        }
-
-        const selectedIndices = selectedItems.select(item => listBoxItems.indexOf(item)).toArray();
+        const selection = holder.orderedSelection();
+        const indices = selection.map(entry => entry.index);
+        const startIndex = indices[0];
+        const newIndex = direction === "moveDown" ? indices[indices.length - 1] + 1 : startIndex - 1;
         const moveEvent = new ListBoxMoveEvent(
             direction,
-            selectedItems,
-            selectedIndices,
+            selection.map(entry => entry.item),
+            indices,
             startIndex,
-            newMoveIndex,
+            newIndex,
             event
         );
-
-        activeListBox.actionClick.emit(moveEvent);
-
+        holder.actionClick.emit(moveEvent);
         if (!moveEvent.isDefaultPrevented()) {
-            activeListBox.scrollToSelectedItem();
+            holder.scrollToSelectedItemAfterRender();
         }
     }
 
     protected onRemoveClick(event: MouseEvent): void {
-        const listBox = this.activeListBox();
-        if (!listBox) {
+        const holder = this.selectionHolder();
+        if (!holder) {
             return;
         }
-        const selectedItems = listBox.selectedItems();
-        if (selectedItems.none()) {
-            return;
-        }
-        const removeEvent = new ListBoxRemoveEvent(selectedItems, event);
-        listBox.actionClick.emit(removeEvent);
+        const removeEvent = new ListBoxRemoveEvent(
+            holder.orderedSelection().map(entry => entry.item),
+            event
+        );
+        holder.actionClick.emit(removeEvent);
         if (!removeEvent.isDefaultPrevented()) {
-            listBox.scrollToSelectedItem();
-            this.#dataStateChange$.next();
+            holder.clearSelections();
         }
     }
 
-    protected onSelectedKeysChange(keys: K[]): void {
-        this.selectedKeysChange.emit(keys);
-        this.connectedList()?.clearSelections();
-        this.#notifySelectionChange$.next(true);
+    protected onSelectedKeysChange(): void {
+        this.reportSelection();
     }
 
-    protected onTransferClick(
-        action: Extract<ToolbarAction, "transferAllFrom" | "transferAllTo" | "transferFrom" | "transferTo">,
-        event: MouseEvent
-    ): void {
+    /**
+     * "To" actions move items from this list box to the connected one, "From" actions from the connected one to
+     * this one. The event fires on the source list box and carries the items to move: the selection, or every item
+     * for the "All" actions.
+     */
+    protected onTransferClick(action: TransferAction, event: MouseEvent): void {
         const connectedList = this.connectedList();
         if (!connectedList) {
             return;
         }
-        const sourceList = this.activeListBox();
-        const targetList = this.activeListBox() === connectedList ? this : connectedList;
-        if (!sourceList || !targetList) {
+        const toConnected = action === "transferTo" || action === "transferAllTo";
+        const source = toConnected ? this : connectedList;
+        const target = toConnected ? connectedList : this;
+        const all = action === "transferAllTo" || action === "transferAllFrom";
+        const items = all ? source.listBoxItems().toArray() : source.orderedSelection().map(entry => entry.item);
+        if (items.length === 0) {
             return;
         }
-        const selectedItems = sourceList.selectedItems();
-        const transferEvent = new ListBoxTransferEvent(action, selectedItems, event);
-        if (action === "transferFrom" || action === "transferAllFrom") {
-            connectedList.actionClick.emit(transferEvent);
-        } else {
-            sourceList.actionClick.emit(transferEvent);
-        }
+        const transferEvent = new ListBoxTransferEvent(action, items, event);
+        source.actionClick.emit(transferEvent);
         if (!transferEvent.isDefaultPrevented()) {
-            sourceList.clearSelections();
-            targetList.clearSelections();
-            targetList.scrollToSelectedItem();
-            this.#dataStateChange$.next();
+            source.clearSelections();
+            target.clearSelections();
+            target.scrollToSelectedItemAfterRender();
         }
     }
 
-    private createSelectedChangeNotifier(): Observable<ImmutableSet<T>> {
-        return this.selectedItems$.pipe(
-            sample(
-                this.#notifySelectionChange$.pipe(
-                    delay(0),
-                    filter(e => e),
-                    tap(() => this.#notifySelectionChange$.next(false))
-                )
-            ),
-            scan((previous, current) => {
-                const selectedItems = current.where(i => !previous.contains(i)).toArray();
-                const deselectedItems = previous.where(i => !current.contains(i)).toArray();
-                if (selectedItems.length > 0 || deselectedItems.length > 0) {
-                    this.activeListBox()?.selectionChange.emit({ selectedItems, deselectedItems });
-                }
-                return current;
-            }, this.selectedItems())
+    private findItemByKey(key: unknown): T | undefined {
+        return (
+            this.listBoxItems().firstOrDefault(item => this.#listService.getDataItemValue(item) === key) ?? undefined
         );
     }
 
     /**
-     * The list box (`this` or the connected list box, recursively) that currently has a real selection
-     * or `null` if neither side has one. Unlike {@link activeListBox}, this does not fall back to `this`,
-     * since move actions need to know an actual selected index to operate on.
+     * Emits `selectionChange` and `selectedKeysChange` when the selected keys differ from the ones last reported.
      */
-    private getDefaultToolbarOptions(): ToolbarOptions {
-        return {
-            actions: [
-                "clear",
-                "moveDown",
-                "moveUp",
-                "remove",
-                "transferAllFrom",
-                "transferAllTo",
-                "transferFrom",
-                "transferTo"
-            ],
-            position: "right"
-        };
+    private reportSelection(): void {
+        const keys = this.#listService.selectedKeys().toArray();
+        const current = new Map<unknown, T | undefined>();
+        for (const listItem of this.#listService.selectedListItems()) {
+            current.set(this.#listService.getDataItemValue(listItem.data), listItem.data);
+        }
+        for (const key of keys) {
+            if (!current.has(key)) {
+                current.set(key, undefined);
+            }
+        }
+        const previous = this.#reported;
+        const selectedItems = [...current]
+            .filter(([key]) => !previous.has(key))
+            .map(([, item]) => item)
+            .filter((item): item is T => item !== undefined);
+        const deselectedItems = [...previous]
+            .filter(([key]) => !current.has(key))
+            .map(([key, item]) => item ?? this.findItemByKey(key))
+            .filter((item): item is T => item !== undefined);
+        const changed = keys.length !== previous.size || keys.some(key => !previous.has(key));
+        this.#reported = current;
+        if (!changed) {
+            return;
+        }
+        this.selectionChange.emit({ deselectedItems, selectedItems });
+        this.selectedKeysChange.emit(keys as K[]);
     }
 
-    private getSelectedListBox(): ListBoxComponent<T, K> | null {
-        if (this.selectedItems().any()) {
-            return this;
-        }
-        if (this.connectedList() != null) {
-            return this.connectedList()!.getSelectedListBox();
-        }
-        return null;
-    }
-
-    private scrollToSelectedItem(): void {
-        const selectedItemElement = this.#hostElementRef.nativeElement.querySelector("[data-selected='true']");
-        if (selectedItemElement) {
-            selectedItemElement.scrollIntoView({ behavior: "auto", block: "center" });
-        }
-    }
-
-    private setSubscriptions(): void {
-        this.#dataStateChange$
-            .pipe(
-                takeUntilDestroyed(this.#destroyRef),
-                startWith(null),
-                switchMap(() => this.createSelectedChangeNotifier())
-            )
-            .subscribe();
-    }
-
-    private updateToolbarOptions(options: boolean | Partial<ToolbarOptions>): ToolbarOptions | null {
-        if (typeof options === "boolean") {
-            return options ? this.getDefaultToolbarOptions() : null;
-        }
-        const position = options.position ?? "right";
-        let actions: ToolbarAction[];
-        if (options.actions && options.actions.length > 0) {
-            actions = options.actions;
-        } else if (options.actions && options.actions.length === 0) {
-            actions = [];
-        } else {
-            actions = [
-                "clear",
-                "moveDown",
-                "moveUp",
-                "remove",
-                "transferAllFrom",
-                "transferAllTo",
-                "transferFrom",
-                "transferTo"
-            ];
-        }
-        return { actions, position };
+    /** Scrolls the selection into view once the consumer's data change has rendered. */
+    private scrollToSelectedItemAfterRender(): void {
+        afterNextRender(
+            {
+                read: () => {
+                    const selected = this.#hostElementRef.nativeElement.querySelector("[data-selected='true']");
+                    selected?.scrollIntoView({ behavior: "auto", block: "nearest" });
+                }
+            },
+            { injector: this.#injector }
+        );
     }
 }

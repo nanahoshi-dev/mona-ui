@@ -10215,7 +10215,7 @@
         "description": "Emitted when a toolbar action button is clicked, carrying the action's details.",
         "kind": "output",
         "name": "actionClick",
-        "type": "ListBoxActionEvent"
+        "type": "ListBoxActionEvent<T>"
       },
       {
         "description": "Accessible name for the list box's `listbox` element. Describe what the list represents,\nwhich matters in particular when connecting two list boxes.",
@@ -10267,16 +10267,16 @@
         "defaultValue": "[]"
       },
       {
-        "description": "Emitted with the updated keys whenever the selection changes.",
+        "description": "Emitted with the updated keys whenever the user changes the selection, including when an\r\naction (transfer, clear, remove) or a selection in the connected list box clears it.",
         "kind": "output",
         "name": "selectedKeysChange",
         "type": "K[]"
       },
       {
-        "description": "Emitted with the selected and deselected items whenever the selection changes.",
+        "description": "Emitted with the selected and deselected items whenever the user changes the selection, including\r\nwhen an action (transfer, clear, remove) or a selection in the connected list box clears it.",
         "kind": "output",
         "name": "selectionChange",
-        "type": "ListBoxSelectionEvent"
+        "type": "ListBoxSelectionEvent<T>"
       },
       {
         "description": "Allows multiple items to be selected simultaneously when set to `\"multiple\"`.",

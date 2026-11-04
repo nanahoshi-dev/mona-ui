@@ -89,20 +89,31 @@ With the default `selectionMode` (`"single"`) and `singleSelectionToggleable` (`
     [connectedList]="selected()"
     (actionClick)="onActionClick($event)">
 </mona-list-box>
-<mona-list-box #selected [items]="selectedItems()" textField="name" selectBy="id"></mona-list-box>
+<mona-list-box
+    #selected
+    [items]="selectedItems()"
+    textField="name"
+    selectBy="id"
+    (actionClick)="onSelectedActionClick($event)">
+</mona-list-box>
 ```
 
 ```typescript
 protected onActionClick(event: ListBoxActionEvent<Food>): void {
-    if (event.action === "transferTo") {
+    // "To" actions fire on `available` and carry the items to move to `selected`
+    // (its selection, or every item for "transferAllTo").
+    if (event.action === "transferTo" || event.action === "transferAllTo") {
         this.selectedItems.update(items => [...items, ...event.selectedItems]);
         this.availableItems.update(items => items.filter(i => !event.selectedItems.includes(i)));
-    } else if (event.action === "transferFrom") {
+    }
+}
+
+protected onSelectedActionClick(event: ListBoxActionEvent<Food>): void {
+    // "From" actions fire on `selected` (the connected list box) and carry the items to move back.
+    if (event.action === "transferFrom" || event.action === "transferAllFrom") {
         this.availableItems.update(items => [...items, ...event.selectedItems]);
         this.selectedItems.update(items => items.filter(i => !event.selectedItems.includes(i)));
     }
-    // "transferAllTo"/"transferAllFrom"/"moveUp"/"moveDown"/"clear"/"remove" follow the same pattern —
-    // see "The component does not mutate `items` itself" below.
 }
 ```
 
@@ -133,9 +144,15 @@ List Box never adds, removes, or reorders the collection passed to `items`. Ever
 | Action                            | Fires on                                                                                          |
 |-----------------------------------|---------------------------------------------------------------------------------------------------|
 | `clear`, `remove`                 | Whichever list box (`this` or `connectedList`) currently holds the selection.                     |
-| `moveUp`, `moveDown`              | Whichever list box currently holds the selection. Not emitted at all if neither list box has one. |
-| `transferTo`, `transferAllTo`     | The list box the toolbar is attached to.                                                          |
-| `transferFrom`, `transferAllFrom` | The `connectedList`.                                                                              |
+| `moveUp`, `moveDown`              | Whichever list box currently holds the selection. The buttons are disabled when there is none, or when the selection already touches the start (Move Up) or end (Move Down). |
+| `transferTo`, `transferAllTo`     | The list box the toolbar is attached to (the source). `selectedItems` is its selection, or all of its items for `transferAllTo`. |
+| `transferFrom`, `transferAllFrom` | The `connectedList` (the source). `selectedItems` is its selection, or all of its items for `transferAllFrom`. |
+
+Every event lists items in list order, not the order they were selected in. After a transfer, clear or remove that isn't prevented, the selections involved are cleared and reported through `selectionChange` and `selectedKeysChange`.
+
+### Selection events
+
+`selectionChange` and `selectedKeysChange` fire for every change the user makes: clicking or keying a selection, Clear Selection, a transfer or Remove that clears it, and a selection in the connected list box (which clears this one). Keys set through `[selectedKeys]` are not echoed back.
 
 ### Arrow-key navigation moves the selection
 
@@ -210,15 +227,17 @@ Form integration is not applicable — List Box is a display/selection widget, n
 | Name                 | Type                       | Description                                                                                                                                                                                                                                                     |
 |----------------------|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `actionClick`        | `ListBoxActionEvent<T>`    | Emitted when a toolbar action button is clicked, carrying the action's details. See [Which list box's `actionClick` fires](#which-list-boxs-actionclick-fires) and [The component does not mutate `items` itself](#the-component-does-not-mutate-items-itself). |
-| `selectedKeysChange` | `K[]`                      | Emitted with the updated keys whenever the selection changes.                                                                                                                                                                                                   |
-| `selectionChange`    | `ListBoxSelectionEvent<T>` | Emitted with the selected and deselected items whenever the selection changes.                                                                                                                                                                                  |
+| `selectedKeysChange` | `K[]`                      | Emitted with the updated keys whenever the user changes the selection, including through actions. See [Selection events](#selection-events).                                                                                                                 |
+| `selectionChange`    | `ListBoxSelectionEvent<T>` | Emitted with the selected and deselected items whenever the user changes the selection, including through actions.                                                                                                                                             |
 
 #### Public methods
 
 | Name                            | Description                                                                                                                                          |
 |---------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `clearSelections(): void`       | Clears the current selection without emitting `selectionChange`. Call `notifySelectionChange()` afterward if the resulting change should be emitted. |
-| `notifySelectionChange(): void` | Emits `selectionChange` for any selection changes made since the last notification (e.g. after calling `clearSelections()` directly).                |
+| `clearSelections(): void`       | Clears the selection and reports it through `selectionChange` and `selectedKeysChange`.                                                              |
+| `notifySelectionChange(): void` | Deprecated: `clearSelections()` and the actions report selection changes themselves.                                                                 |
+
+`listBoxItems` and `selectedItems` are read-only signals of the rendered items and the selected items; `selectedItems$` is deprecated.
 
 ---
 
@@ -238,9 +257,9 @@ Form integration is not applicable — List Box is a display/selection widget, n
 | Property          | Type                     | Description                                               |
 |-------------------|--------------------------|-----------------------------------------------------------|
 | `action`          | `"moveDown" \| "moveUp"` | Discriminant matching the `ListBoxActionEvent` union.     |
-| `newIndex`        | `number`                 | The index the selection would move to.                    |
-| `oldIndex`        | `number`                 | The index of the first selected item before the move.     |
-| `selectedIndices` | `number[]`               | Indices of all selected items before the move.            |
+| `newIndex`        | `number`                 | For Move Up, the index above the first selected item; for Move Down, the index below the last one. |
+| `oldIndex`        | `number`                 | The index of the first selected item (in list order) before the move. |
+| `selectedIndices` | `number[]`               | Indices of all selected items before the move, ascending. |
 | `selectedItems`   | `T[]`                    | The items that were selected when the move was requested. |
 
 #### `ListBoxRemoveEvent<T = unknown>`
@@ -255,7 +274,7 @@ Form integration is not applicable — List Box is a display/selection widget, n
 | Property        | Type                                                                     | Description                                                                                                                                                                          |
 |-----------------|--------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `action`        | `"transferAllFrom" \| "transferAllTo" \| "transferFrom" \| "transferTo"` | Discriminant matching the `ListBoxActionEvent` union.                                                                                                                                |
-| `selectedItems` | `T[]`                                                                    | The items that were selected when the transfer was requested. Not populated for the "all" variants — see [Which list box's `actionClick` fires](#which-list-boxs-actionclick-fires). |
+| `selectedItems` | `T[]`                                                                    | The items to transfer, in list order: the source's selection, or all of the source's items for the "All" variants. See [Which list box's `actionClick` fires](#which-list-boxs-actionclick-fires). |
 
 ---
 

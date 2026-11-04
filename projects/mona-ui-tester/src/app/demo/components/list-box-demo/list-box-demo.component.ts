@@ -174,7 +174,7 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
             ariaLabel: {
                 alias: "aria-label",
                 type: "string",
-                value: ""
+                value: "Available foods"
             },
             connectedList: {
                 type: "object"
@@ -289,6 +289,7 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
 
         @if (connectedListsVisible()) {
             <mona-list-box
+                aria-label="Chosen foods"
                 (actionClick)="onActionClick($event, 'second')"
                 [selectBy]="selectBy()"
                 [selectionMode]="selectionMode()"
@@ -358,7 +359,7 @@ class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponen
         return { actions, position } as ToolbarOptions;
     });
     protected readonly viewItems = computed(() => this.#listData());
-    public readonly ariaLabel = input("");
+    public readonly ariaLabel = input("Available foods");
     public readonly connectedList = input<ReturnType<ListBoxComponent["connectedList"]>>(null);
     public readonly height = input<ReturnType<ListBoxComponent["height"]>>("100%");
     public readonly rounded = input<ReturnType<ListBoxComponent["rounded"]>>("medium");
@@ -382,30 +383,14 @@ class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponen
                     moveIndices(newData, event.selectedIndices, event.action === "moveDown" ? 1 : -1)
                 );
             });
-        } else if (event.action === "transferTo") {
-            if (listBox === "first") {
-                this.secondListBoxItems.update(set => set.addAll(event.selectedItems));
-                this.#listData.update(set => set.removeAll(event.selectedItems));
-            } else {
-                this.secondListBoxItems.update(set => set.removeAll(event.selectedItems));
-            }
-        } else if (event.action === "transferFrom") {
-            if (listBox === "second") {
-                this.#listData.update(set => set.addAll(event.selectedItems));
-                this.secondListBoxItems.update(set => set.removeAll(event.selectedItems));
-            }
-        } else if (event.action === "transferAllTo") {
-            if (listBox === "first") {
-                this.secondListBoxItems.update(set => set.addAll(this.#listData()));
-                this.#listData.update(set => set.clear());
-            } else {
-                this.secondListBoxItems.update(set => set.clear());
-            }
-        } else if (event.action === "transferAllFrom") {
-            if (listBox === "second") {
-                this.#listData.update(set => set.addAll(this.secondListBoxItems()));
-                this.secondListBoxItems.update(set => set.clear());
-            }
+        } else if (event.action === "transferTo" || event.action === "transferAllTo") {
+            // "To" actions fire on the first list box and carry the items to move to the second.
+            this.secondListBoxItems.update(set => set.addAll(event.selectedItems));
+            this.#listData.update(set => set.removeAll(event.selectedItems));
+        } else if (event.action === "transferFrom" || event.action === "transferAllFrom") {
+            // "From" actions fire on the second list box and carry the items to move back to the first.
+            this.#listData.update(set => set.addAll(event.selectedItems));
+            this.secondListBoxItems.update(set => set.removeAll(event.selectedItems));
         } else if (event.action === "remove") {
             if (listBox === "first") {
                 this.#listData.update(set => set.removeAll(event.selectedItems));
