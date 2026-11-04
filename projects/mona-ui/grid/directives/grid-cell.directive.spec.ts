@@ -17,7 +17,11 @@ describe("GridCellDirective", () => {
         expect(cellContentClasses).not.toContain("border-b");
         expect(tableCellClasses).toContain("border-b-border-subtle");
         expect(tableCellClasses).toContain("border-e-border-subtle");
-        expect(tableCellClasses).toContain("focus:after:ring-focus-indicator/35");
+        // A solid 2px ring for keyboard focus (WCAG 1.4.11, 2.4.13), not a faint 1px one.
+        expect(tableCellClasses).toContain(
+            "focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-focus-indicator"
+        );
+        expect(tableCellClasses).not.toContain("ring-focus-indicator/");
         expect(tableCellClasses).not.toContain("ring-primary");
     });
 });

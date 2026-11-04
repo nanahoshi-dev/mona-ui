@@ -1,6 +1,7 @@
 import {
     CdkDrag,
     CdkDragDrop,
+    CdkDragEnd,
     CdkDragEnter,
     CdkDragPlaceholder,
     CdkDragPreview,
@@ -14,10 +15,10 @@ import {
     LucideArrowUp,
     LucideEllipsisVertical
 } from "@lucide/angular";
-import { isPlatformBrowser, NgTemplateOutlet } from "@angular/common";
+import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
-    afterRenderEffect,
+    afterEveryRender,
     ChangeDetectionStrategy,
     Component,
     computed,
@@ -31,11 +32,11 @@ import {
     input,
     model,
     output,
-    PLATFORM_ID,
     signal,
     TemplateRef,
     untracked,
-    viewChild
+    viewChild,
+    viewChildren
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
@@ -69,7 +70,7 @@ import type { GridRowClass } from "../../models/GridRowClass";
 import type { GridToolbarContext, GridToolbarTemplateContext } from "../../models/GridToolbarTemplateContext";
 import { ResizeMethod } from "../../models/ResizeMethod";
 import { ColumnAriaSortPipe } from "../../pipes/column-aria-sort.pipe";
-import { observeGridCellTabStops } from "../../services/grid-cell-tab-stops";
+import { isKeyboardEntryElement, observeGridCellTabStops } from "../../services/grid-cell-tab-stops";
 import { GridNavigationService } from "../../services/grid-navigation.service";
 import { GridService } from "../../services/grid.service";
 import {
@@ -78,6 +79,7 @@ import {
     gridColumnDragPreviewThemeVariants,
     gridColumnDropHintThemeVariants,
     gridColumnResizerThemeVariants,
+    gridFilterRowHeaderCellThemeVariants,
     gridFooterTableThemeVariants,
     gridFooterThemeVariants,
     gridGroupPanelPlaceholderThemeVariants,
@@ -102,7 +104,12 @@ import { GridSelectAllCheckboxComponent } from "../grid-select-all-checkbox/grid
 import { GridVirtualListComponent } from "../grid-virtual-list/grid-virtual-list.component";
 import { SpinnerComponent } from "@nanahoshi/mona-ui/spinner";
 
-const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [tabindex]";
+/**
+ * Controls in the toolbar. Ones the consumer took out of the Tab order stay out; the ones the toolbar manages
+ * carry `data-grid-toolbar-item`, so they're still found once the roving Tab stop has set them to -1.
+ */
+const TOOLBAR_ITEM_SELECTOR =
+    ":is(button, input, select, textarea, a[href], [tabindex]):not([tabindex='-1']), [data-grid-toolbar-item]";
 
 @Component({
     selector: "mona-grid",
@@ -164,15 +171,19 @@ export class GridComponent<T> implements GridVariantInput {
 
     readonly #manuallyResized = signal(false);
 
-    readonly #platformId = inject(PLATFORM_ID);
-
     readonly #registeredFooterScrollElement = signal<HTMLDivElement | null>(null);
-
-    readonly #toolbarActiveIndex = signal(0);
 
     #resizeObserver: ResizeObserver | null = null;
 
+    /** The toolbar control that holds its Tab stop; kept by element, so controls added before it don't take it. */
+    #toolbarActiveItem: HTMLElement | null = null;
+
+    /** Where the active control was, for when it's removed. */
+    #toolbarActiveItemIndex = 0;
+
     private readonly columnDefinitions = contentChildren<GridColumnDefinition>(GRID_COLUMN_DEFINITION);
+
+    private readonly filterMenus = viewChildren(GridFilterMenuComponent);
 
     private readonly footerScrollElement = viewChild<ElementRef<HTMLDivElement>>("footerScrollElement");
 
@@ -209,6 +220,8 @@ export class GridComponent<T> implements GridVariantInput {
         const opts = this.gridService.filterableOptions();
         return opts.enabled && (opts.type === "menu" || opts.type === "menu, row");
     });
+
+    protected readonly filterRowCellClass = computed(() => gridFilterRowHeaderCellThemeVariants());
 
     protected readonly filterRowEnabled = computed(() => {
         const opts = this.gridService.filterableOptions();
@@ -408,8 +421,13 @@ export class GridComponent<T> implements GridVariantInput {
         this.setDataEffect();
         this.setFooterScrollElementEffect();
         this.setFitViewScrollbarSyncEffect();
-        afterRenderEffect({
-            read: () => this.syncToolbarFocusTargets()
+        // Every render: controls the toolbar template adds later join the roving Tab stop.
+        afterEveryRender({
+            write: () => this.syncToolbarFocusTargets()
+        });
+        this.#gridNavigationService.setViewport({
+            scrollElement: () => this.gridService.bodyScrollElement(),
+            stickyInset: () => this.gridService.stickyInset()
         });
         afterNextRender({
             read: () => {
@@ -428,6 +446,23 @@ export class GridComponent<T> implements GridVariantInput {
 
     protected isColumnDragDisabled(column: Column): boolean {
         return column.locked || (!this.gridService.reorderableOptions().enabled && !this.groupable());
+    }
+
+    /** A dragged header leaves the page during the drag; give focus back to it once it's dropped. */
+    protected onColumnDragEnd(event: CdkDragEnd<Column>): void {
+        const columnId = event.source.data.id;
+        afterNextRender(
+            {
+                write: () => {
+                    const document = this.#hostElementRef.nativeElement.ownerDocument;
+                    const activeElement = document.activeElement;
+                    if (activeElement == null || activeElement === document.body) {
+                        this.#gridNavigationService.focusHeaderCell(columnId);
+                    }
+                }
+            },
+            { injector: this.#injector }
+        );
     }
 
     protected onColumnDragEnter(event: CdkDragEnter<void, Column>): void {
@@ -585,30 +620,71 @@ export class GridComponent<T> implements GridVariantInput {
             this.reportPage();
         }
 
-        if (isPlatformBrowser(this.#platformId)) {
-            const scrollableElement = this.#hostElementRef.nativeElement.querySelector(
-                "div.mona-grid-list"
-            ) as HTMLElement;
-            if (scrollableElement) {
-                scrollableElement.scrollTop = 0;
-            }
+        // The pager changed the page: show the new page from its first row.
+        const scrollElement = this.gridService.bodyScrollElement();
+        if (scrollElement != null) {
+            scrollElement.scrollTop = 0;
         }
     }
 
+    /** The toolbar's roving Tab stop follows focus, also when a control is clicked. */
+    protected onToolbarFocusIn(event: FocusEvent): void {
+        const target = event.target as HTMLElement;
+        const item = this.getToolbarFocusTargets().find(
+            candidate => candidate === target || candidate.contains(target)
+        );
+        if (item != null && item !== this.#toolbarActiveItem) {
+            this.#toolbarActiveItem = item;
+            this.syncToolbarFocusTargets();
+        }
+    }
+
+    /** ArrowLeft/Right move between the toolbar's controls (mirrored in RTL), Home and End to its ends. */
     protected onToolbarKeydown(event: KeyboardEvent): void {
+        const key = event.key;
+        if (key !== "ArrowLeft" && key !== "ArrowRight" && key !== "Home" && key !== "End") {
+            return;
+        }
+        const target = event.target as HTMLElement;
+        // A text field keeps its caret keys, a select or slider its arrows, and text being composed its keys.
+        if (
+            event.defaultPrevented ||
+            event.isComposing ||
+            event.altKey ||
+            event.ctrlKey ||
+            event.metaKey ||
+            isKeyboardEntryElement(target)
+        ) {
+            return;
+        }
         const targets = this.getToolbarFocusTargets();
-        if (targets.length === 0 || (event.key !== "ArrowLeft" && event.key !== "ArrowRight")) {
+        if (targets.length === 0) {
             return;
         }
 
         event.preventDefault();
-        const activeElement = event.target as HTMLElement;
-        const currentIndex = targets.findIndex(target => target === activeElement || target.contains(activeElement));
-        const direction = event.key === "ArrowLeft" ? -1 : 1;
-        const nextIndex = (Math.max(currentIndex, 0) + direction + targets.length) % targets.length;
-        this.#toolbarActiveIndex.set(nextIndex);
-        targets[nextIndex].focus();
+        const currentIndex = targets.findIndex(item => item === target || item.contains(target));
+        let nextIndex: number;
+        if (key === "Home") {
+            nextIndex = 0;
+        } else if (key === "End") {
+            nextIndex = targets.length - 1;
+        } else {
+            const toolbarElement = this.toolbarElement()?.nativeElement;
+            const rtl = toolbarElement?.ownerDocument.defaultView?.getComputedStyle(toolbarElement).direction === "rtl";
+            const direction = (key === "ArrowRight") !== rtl ? 1 : -1;
+            nextIndex = (Math.max(currentIndex, 0) + direction + targets.length) % targets.length;
+        }
+        this.#toolbarActiveItem = targets[nextIndex];
         this.syncToolbarFocusTargets();
+        targets[nextIndex].focus();
+    }
+
+    /** Alt+ArrowDown on a header: opens the column's filter menu. */
+    protected openColumnFilterMenu(column: Column): void {
+        this.filterMenus()
+            .find(menu => menu.column().id === column.id)
+            ?.open();
     }
 
     private clampCalculatedWidth(column: Column, width: number): number {
@@ -689,7 +765,7 @@ export class GridComponent<T> implements GridVariantInput {
         if (toolbarElement == null) {
             return [];
         }
-        const targets = Array.from(toolbarElement.querySelectorAll<HTMLElement>(FOCUSABLE_TARGET_SELECTOR));
+        const targets = Array.from(toolbarElement.querySelectorAll<HTMLElement>(TOOLBAR_ITEM_SELECTOR));
         return targets.filter(target => !this.isElementDisabled(target) && !this.isElementHidden(target));
     }
 
@@ -930,12 +1006,16 @@ export class GridComponent<T> implements GridVariantInput {
         if (targets.length === 0) {
             return;
         }
-        const activeIndex = Math.min(this.#toolbarActiveIndex(), targets.length - 1);
-        if (activeIndex !== this.#toolbarActiveIndex()) {
-            this.#toolbarActiveIndex.set(activeIndex);
-        }
+        const itemIndex = this.#toolbarActiveItem == null ? -1 : targets.indexOf(this.#toolbarActiveItem);
+        const activeIndex = itemIndex !== -1 ? itemIndex : Math.min(this.#toolbarActiveItemIndex, targets.length - 1);
+        this.#toolbarActiveItem = targets[activeIndex];
+        this.#toolbarActiveItemIndex = activeIndex;
         for (const [index, target] of targets.entries()) {
-            target.setAttribute("tabindex", index === activeIndex ? "0" : "-1");
+            const tabIndex = index === activeIndex ? "0" : "-1";
+            if (target.getAttribute("tabindex") !== tabIndex) {
+                target.setAttribute("tabindex", tabIndex);
+            }
+            target.setAttribute("data-grid-toolbar-item", "");
         }
     }
 }

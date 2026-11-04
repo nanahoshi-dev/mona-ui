@@ -258,7 +258,8 @@ export const AR_SA_MESSAGES = {
         save: "حفظ",
         saveRow: "حفظ الصف",
         selectAllRows: "تحديد كل الصفوف",
-        selectRow: (rowNumber: number) => `تحديد الصف ${localizeNumber(rowNumber)}`
+        selectRow: (rowNumber: number) => `تحديد الصف ${localizeNumber(rowNumber)}`,
+        toolbar: "شريط أدوات الجدول"
     },
     list: {
         filterList: "تصفية القائمة",

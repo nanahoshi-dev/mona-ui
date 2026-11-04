@@ -259,7 +259,8 @@ export const RU_RU_MESSAGES = {
         save: "Сохранить",
         saveRow: "Сохранить строку",
         selectAllRows: "Выбрать все строки",
-        selectRow: (rowNumber: number) => `Выбрать строку ${localizeNumber(rowNumber)}`
+        selectRow: (rowNumber: number) => `Выбрать строку ${localizeNumber(rowNumber)}`,
+        toolbar: "Панель инструментов таблицы"
     },
     list: {
         filterList: "Фильтр списка",

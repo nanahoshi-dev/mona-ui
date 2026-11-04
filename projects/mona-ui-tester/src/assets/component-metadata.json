@@ -1015,6 +1015,12 @@
         "required": true
       },
       {
+        "description": "Emits on Alt+ArrowDown in a header cell, to open the column's filter menu.",
+        "kind": "output",
+        "name": "menuOpen",
+        "type": "void"
+      },
+      {
         "description": "",
         "kind": "input",
         "name": "rowIndex",
@@ -9584,18 +9590,18 @@
         "defaultValue": "40"
       },
       {
-        "description": "Whether this column can be sorted through its header when grid sorting is enabled. Has no effect if sorting is disabled on the grid.",
-        "kind": "input",
-        "name": "sortable",
-        "type": "boolean",
-        "defaultValue": "true"
-      },
-      {
         "description": "Compares two values of this column when the user sorts it, returning a negative number, zero\nor a positive number. Without it, values sort by type (empty values first) and strings by the locale.",
         "kind": "input",
         "name": "sortComparator",
         "type": "ColumnSortComparator | null",
         "defaultValue": "null"
+      },
+      {
+        "description": "Whether this column can be sorted through its header when grid sorting is enabled. Has no effect if sorting is disabled on the grid.",
+        "kind": "input",
+        "name": "sortable",
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "A stable key used to persist state for columns whose field is empty or unstable.",

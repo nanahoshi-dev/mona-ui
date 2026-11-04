@@ -228,7 +228,17 @@ export const gridHeaderTableCellThemeVariants = cva(
         text-start overflow-visible
         outline-none border-e border-e-border-subtle
         after:absolute after:inset-0 after:pointer-events-none
-        focus:after:ring-1 focus:after:ring-inset focus:after:ring-focus-indicator/35
+        focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-focus-indicator
+    `
+);
+
+/** A `th` of the filter row: the grid's keys reach it, and Enter or F2 moves into its filter. */
+export const gridFilterRowHeaderCellThemeVariants = cva(
+    `
+        relative overflow-hidden
+        outline-none border-e border-border
+        after:absolute after:inset-0 after:pointer-events-none
+        focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-focus-indicator
     `
 );
 
@@ -299,7 +309,7 @@ export const gridListTableCellThemeVariants = cva(
         border-b border-b-border-subtle
         after:content-[''] after:block
         after:absolute after:inset-0 after:pointer-events-none
-        focus:after:ring-1 focus:after:ring-inset focus:after:ring-focus-indicator/35
+        focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-focus-indicator
     `,
     {
         variants: {

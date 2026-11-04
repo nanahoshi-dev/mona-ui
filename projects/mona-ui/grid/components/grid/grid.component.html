@@ -1,7 +1,10 @@
 @if (toolbarTemplate()) {
     <div
         class="flex min-h-10 items-center gap-2 border-b border-border p-2"
+        role="toolbar"
+        [attr.aria-label]="messages().toolbar"
         #toolbarElement
+        (focusin)="onToolbarFocusIn($event)"
         (keydown)="onToolbarKeydown($event)">
         <ng-container
             [ngTemplateOutlet]="toolbarTemplate() ?? null"
@@ -111,12 +114,19 @@
                                     [firstInRow]="layoutColumn.firstInRow"
                                     [lastInRow]="layoutColumn.lastInRow"
                                     (toggleExpand)="onColumnSort(column)"
+                                    (menuOpen)="openColumnFilterMenu(column)"
+                                    [attr.aria-keyshortcuts]="
+                                        filterMenuEnabled() && column.kind === 'data' && column.filterable
+                                            ? 'Alt+ArrowDown'
+                                            : null
+                                    "
                                     [cdkDragData]="column"
                                     [cdkDragDisabled]="isColumnDragDisabled(column)"
                                     [class]="headerTableCellClass()"
                                     (mouseenter)="onColumnMouseEnter(column)"
                                     (cdkDragEntered)="onColumnDragEnter($event)"
                                     (cdkDragStarted)="onColumnDragStart($event)"
+                                    (cdkDragEnded)="onColumnDragEnd($event)"
                                     [style.min-width.px]="column.minWidth"
                                     [style.width.px]="column.calculatedWidth"
                                     [attr.aria-sort]="
@@ -137,6 +147,7 @@
                                         } @else {
                                             <span
                                                 [class]="headerTableColumnTitleClass()"
+                                                data-column-title
                                                 (click)="onColumnSort(column)"
                                                 [title]="column.title"
                                                 >{{ column.title }}</span
@@ -291,8 +302,16 @@
                                     <th
                                         [monaGridLockedCell]="layoutColumn.key"
                                         [lockedCellHeader]="true"
+                                        monaGridLogicalCell
+                                        [cellKind]="'filter'"
+                                        [columnId]="column.id"
+                                        [rowIndex]="-1"
+                                        [colIndex]="layoutColumn.logicalIndex"
+                                        [section]="'filter'"
+                                        [firstInRow]="layoutColumn.firstInRow"
+                                        [lastInRow]="layoutColumn.lastInRow"
                                         scope="col"
-                                        class="border-e border-border overflow-hidden"
+                                        [class]="filterRowCellClass()"
                                         [style.width.px]="layoutColumn.width"
                                         [attr.aria-label]="messages().filterByColumn(column.title)">
                                         @if (column.kind === "data" && column.field && column.filterable) {

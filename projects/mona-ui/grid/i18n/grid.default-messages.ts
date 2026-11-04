@@ -50,5 +50,6 @@ export const GRID_DEFAULT_MESSAGES = {
     save: "Save",
     saveRow: "Save row",
     selectAllRows: "Select all rows",
-    selectRow: (rowNumber: number) => `Select row ${localizeNumber(rowNumber)}`
+    selectRow: (rowNumber: number) => `Select row ${localizeNumber(rowNumber)}`,
+    toolbar: "Grid toolbar"
 } satisfies MonaGridMessages;

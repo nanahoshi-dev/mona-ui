@@ -233,7 +233,8 @@
         "save": "Save",
         "saveRow": "Save row",
         "selectAllRows": "Select all rows",
-        "selectRow": "Select row {rowNumber}"
+        "selectRow": "Select row {rowNumber}",
+        "toolbar": "Grid toolbar"
     },
     "list": {
         "filterList": "Filter list",

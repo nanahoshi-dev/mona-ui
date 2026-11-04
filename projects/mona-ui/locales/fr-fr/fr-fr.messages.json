@@ -233,7 +233,8 @@
         "save": "Enregistrer",
         "saveRow": "Enregistrer la ligne",
         "selectAllRows": "Sélectionner toutes les lignes",
-        "selectRow": "Sélectionner la ligne {rowNumber}"
+        "selectRow": "Sélectionner la ligne {rowNumber}",
+        "toolbar": "Barre d’outils du tableau"
     },
     "list": {
         "filterList": "Filtrer la liste",

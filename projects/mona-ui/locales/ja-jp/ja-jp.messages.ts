@@ -249,7 +249,8 @@ export const JA_JP_MESSAGES = {
         save: "保存",
         saveRow: "行を保存",
         selectAllRows: "すべての行を選択",
-        selectRow: (rowNumber: number) => `${localizeNumber(rowNumber)}行目を選択`
+        selectRow: (rowNumber: number) => `${localizeNumber(rowNumber)}行目を選択`,
+        toolbar: "表のツールバー"
     },
     list: {
         filterList: "リストをフィルター",

@@ -233,7 +233,8 @@
         "save": "Speichern",
         "saveRow": "Zeile speichern",
         "selectAllRows": "Alle Zeilen auswählen",
-        "selectRow": "Zeile {rowNumber} auswählen"
+        "selectRow": "Zeile {rowNumber} auswählen",
+        "toolbar": "Tabellen-Symbolleiste"
     },
     "list": {
         "filterList": "Liste filtern",

@@ -252,7 +252,8 @@ export const ES_ES_MESSAGES = {
         save: "Guardar",
         saveRow: "Guardar fila",
         selectAllRows: "Seleccionar todas las filas",
-        selectRow: (rowNumber: number) => `Seleccionar fila ${localizeNumber(rowNumber)}`
+        selectRow: (rowNumber: number) => `Seleccionar fila ${localizeNumber(rowNumber)}`,
+        toolbar: "Barra de herramientas de la tabla"
     },
     list: {
         filterList: "Filtrar lista",

@@ -249,7 +249,8 @@ export const ID_ID_MESSAGES = {
         save: "Simpan",
         saveRow: "Simpan baris",
         selectAllRows: "Pilih semua baris",
-        selectRow: (rowNumber: number) => `Pilih baris ${localizeNumber(rowNumber)}`
+        selectRow: (rowNumber: number) => `Pilih baris ${localizeNumber(rowNumber)}`,
+        toolbar: "Bilah alat tabel"
     },
     list: {
         filterList: "Saring daftar",

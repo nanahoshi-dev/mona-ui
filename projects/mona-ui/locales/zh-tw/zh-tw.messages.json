@@ -233,7 +233,8 @@
         "save": "儲存",
         "saveRow": "儲存資料列",
         "selectAllRows": "選取所有資料列",
-        "selectRow": "選取第 {rowNumber} 個資料列"
+        "selectRow": "選取第 {rowNumber} 個資料列",
+        "toolbar": "表格工具列"
     },
     "list": {
         "filterList": "篩選清單",

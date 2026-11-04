@@ -13,9 +13,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ImmutableList } from "@mirei/ts-collections";
-import { fromEvent } from "rxjs";
 import { Row } from "../../models/Row";
-import { GridNavigationService } from "../../services/grid-navigation.service";
 import { GridService } from "../../services/grid.service";
 import {
     gridListBaseThemeVariants,
@@ -69,7 +67,6 @@ const ROW_MOVE_SNAPSHOT_LIFETIME = 1000;
 })
 export class GridListComponent implements GridListVariantInput {
     readonly #destroyRef = inject(DestroyRef);
-    readonly #gridNavigationService = inject(GridNavigationService);
     readonly #hostElementRef = inject(ElementRef<HTMLDivElement>);
     readonly #rowMoveAnimations = new Map<HTMLTableRowElement, Animation>();
     #dropping = false;
@@ -131,10 +128,6 @@ export class GridListComponent implements GridListVariantInput {
         }
     }
 
-    protected onBodyFocus(): void {
-        this.#gridNavigationService.focusActiveCellOrFirstHeader();
-    }
-
     #canAnimateRowMoves(): boolean {
         const view = this.#hostElementRef.nativeElement.ownerDocument.defaultView;
         if (view == null || typeof this.#hostElementRef.nativeElement.animate !== "function") {
@@ -194,11 +187,6 @@ export class GridListComponent implements GridListVariantInput {
     }
 
     private setSubscriptions(): void {
-        fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focus")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(() => {
-                this.#gridNavigationService.focusActiveCellOrFirstHeader();
-            });
         this.gridService.rowReorder$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             if (this.#dropping || !this.#canAnimateRowMoves()) {
                 return;

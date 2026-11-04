@@ -17,7 +17,6 @@ import {
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { ImmutableList } from "@mirei/ts-collections";
 import { rxTimeout } from "@nanahoshi/mona-ui/internal";
-import { fromEvent } from "rxjs";
 import type { GridViewRow } from "../../models/GridGroup";
 import { Row } from "../../models/Row";
 import { GridNavigationService } from "../../services/grid-navigation.service";
@@ -105,7 +104,7 @@ export class GridVirtualListComponent {
                 ) as HTMLElement | null;
                 this.gridService.bodyTableElement.set(bodyTableElement);
                 this.gridService.bodyScrollElement.set(bodyScrollElement);
-                this.setFocusSubscription();
+                this.setRowScroller();
                 this.setScrollEndSubscription();
                 this.#destroyRef.onDestroy(() => {
                     if (this.gridService.bodyTableElement() === bodyTableElement) {
@@ -124,10 +123,6 @@ export class GridVirtualListComponent {
         this.setSelectedKeysLoadSubscription();
     }
 
-    protected onViewportFocus(): void {
-        this.#gridNavigationService.focusActiveCellOrFirstHeader();
-    }
-
     protected trackBodyRow(_: number, bodyRow: GridViewRow): string {
         return bodyRow.key;
     }
@@ -136,14 +131,6 @@ export class GridVirtualListComponent {
         if (element != null && element.scrollLeft !== scrollLeft) {
             element.scrollLeft = scrollLeft;
         }
-    }
-
-    private setFocusSubscription(): void {
-        fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focus")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(() => {
-                this.#gridNavigationService.focusActiveCellOrFirstHeader();
-            });
     }
 
     private setGroupSubscriptions(): void {
@@ -161,6 +148,25 @@ export class GridVirtualListComponent {
                 { injector: this.#injector }
             );
         });
+    }
+
+    /**
+     * Lets keyboard navigation reach rows that aren't drawn: PageDown, Ctrl+End and the arrows scroll to the
+     * row, which takes focus once it is drawn. Scrolling the focused row out and back returns focus to it.
+     */
+    private setRowScroller(): void {
+        const viewport = this.viewport();
+        this.#gridNavigationService.setRowScroller({
+            isNavigableRow: index => this.bodyRows()[index]?.type !== "groupFooter",
+            rowCount: () => this.bodyRows().length,
+            scrollToRow: index => viewport.scrollToIndex(index)
+        });
+        viewport.renderedRangeStream
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(() =>
+                afterNextRender(() => this.#gridNavigationService.restoreLostFocus(), { injector: this.#injector })
+            );
+        this.#destroyRef.onDestroy(() => this.#gridNavigationService.setRowScroller(null));
     }
 
     private setScrollEndSubscription(): void {

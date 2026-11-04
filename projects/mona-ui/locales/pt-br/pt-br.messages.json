@@ -233,7 +233,8 @@
         "save": "Salvar",
         "saveRow": "Salvar linha",
         "selectAllRows": "Selecionar todas as linhas",
-        "selectRow": "Selecionar linha {rowNumber}"
+        "selectRow": "Selecionar linha {rowNumber}",
+        "toolbar": "Barra de ferramentas da tabela"
     },
     "list": {
         "filterList": "Filtrar lista",

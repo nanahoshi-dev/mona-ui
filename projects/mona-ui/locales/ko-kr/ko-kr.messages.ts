@@ -249,7 +249,8 @@ export const KO_KR_MESSAGES = {
         save: "저장",
         saveRow: "행 저장",
         selectAllRows: "모든 행 선택",
-        selectRow: (rowNumber: number) => `${localizeNumber(rowNumber)}행 선택`
+        selectRow: (rowNumber: number) => `${localizeNumber(rowNumber)}행 선택`,
+        toolbar: "표 도구 모음"
     },
     list: {
         filterList: "목록 필터",

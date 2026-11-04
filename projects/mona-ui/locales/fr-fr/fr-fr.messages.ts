@@ -254,7 +254,8 @@ export const FR_FR_MESSAGES = {
         save: "Enregistrer",
         saveRow: "Enregistrer la ligne",
         selectAllRows: "Sélectionner toutes les lignes",
-        selectRow: (rowNumber: number) => `Sélectionner la ligne ${localizeNumber(rowNumber)}`
+        selectRow: (rowNumber: number) => `Sélectionner la ligne ${localizeNumber(rowNumber)}`,
+        toolbar: "Barre d’outils du tableau"
     },
     list: {
         filterList: "Filtrer la liste",

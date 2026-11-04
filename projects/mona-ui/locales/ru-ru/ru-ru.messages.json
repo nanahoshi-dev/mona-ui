@@ -233,7 +233,8 @@
         "save": "Сохранить",
         "saveRow": "Сохранить строку",
         "selectAllRows": "Выбрать все строки",
-        "selectRow": "Выбрать строку {rowNumber}"
+        "selectRow": "Выбрать строку {rowNumber}",
+        "toolbar": "Панель инструментов таблицы"
     },
     "list": {
         "filterList": "Фильтр списка",

@@ -500,6 +500,22 @@ export class GridService {
         allowUnsort: true,
         showIndices: true
     });
+    /** The widths of the columns pinned to the start and to the end, which cover part of the body. */
+    public readonly stickyInset = computed(
+        () => {
+            let start = 0;
+            let end = 0;
+            for (const layoutColumn of this.layout()) {
+                if (layoutColumn.sticky?.side === "start") {
+                    start += layoutColumn.width ?? 0;
+                } else if (layoutColumn.sticky?.side === "end") {
+                    end += layoutColumn.width ?? 0;
+                }
+            }
+            return { end, start };
+        },
+        { equal: (left, right) => left.start === right.start && left.end === right.end }
+    );
     // The fixed order of the structural columns; GridService.layout places them after the group indents.
     public readonly structuralColumns = computed<readonly StructuralColumnDescriptor[]>(() => [
         { kind: "reorder", visible: this.rowReorderColumnVisible(), width: this.rowReorderColumnWidth },
@@ -815,7 +831,7 @@ export class GridService {
         const documentBodyStyle = window.getComputedStyle(this.#document.body);
         const fontFamily = documentBodyStyle.getPropertyValue("font-family");
         const fontSize = documentBodyStyle.getPropertyValue("font-size");
-        const titleElement = element.querySelector(".mona-grid-column-title");
+        const titleElement = element.querySelector("[data-column-title]");
         const actionsElement = element.querySelector("[data-column-actions]");
         const actionsWidth = actionsElement ? actionsElement.clientWidth : 0;
         const leftRightPadding = titleElement
@@ -889,7 +905,7 @@ export class GridService {
         return this.#sortDescriptors().map(sort => ({ ...sort }));
     }
 
-    public handleMultipleSelection(event: MouseEvent, row: Row): void {
+    public handleMultipleSelection(event: GridSelectionModifiers, row: Row): void {
         if (event.shiftKey) {
             this.selectRowRange(row);
             return;
@@ -908,7 +924,7 @@ export class GridService {
         this.#anchorRowKey.set(this.getRowSelectionKey(row));
     }
 
-    public handleRowClick(event: MouseEvent, row: Row): void {
+    public handleRowClick(event: GridSelectionModifiers, row: Row): void {
         const options = this.selectableOptions();
         if (!options.enabled || options.selectOnRowClick === false) {
             return;
@@ -920,7 +936,7 @@ export class GridService {
         }
     }
 
-    public handleSingleSelection(event: MouseEvent, row: Row): void {
+    public handleSingleSelection(event: GridSelectionModifiers, row: Row): void {
         if (this.isRowSelected(row) && (event.ctrlKey || event.metaKey)) {
             this.deselectAllRows();
             return;
@@ -1210,8 +1226,39 @@ export class GridService {
         return true;
     }
 
+    /** Ctrl+A or Cmd+A in the body: selects every row in the select-all scope. */
+    public selectAllRowsFromKeyboard(): boolean {
+        const options = this.selectableOptions();
+        if (!options.enabled || options.mode !== "multiple") {
+            return false;
+        }
+        this.setBulkSelection(true);
+        return true;
+    }
+
     public selectRow(row: Row): void {
         this.setRowSelected(row, true);
+    }
+
+    /**
+     * Space on a row toggles its selection; with Shift (Shift+Space, Shift+ArrowUp/Down) it selects the rows
+     * from the anchor row to this one. Returns false when rows can't be selected.
+     */
+    public selectRowFromKeyboard(rowUid: string, extend: boolean): boolean {
+        const options = this.selectableOptions();
+        if (!options.enabled) {
+            return false;
+        }
+        const row = this.viewRows().firstOrDefault(viewRow => viewRow.uid === rowUid);
+        if (row == null) {
+            return false;
+        }
+        if (options.mode === "single") {
+            this.handleSingleSelection({ ctrlKey: true, metaKey: false, shiftKey: false }, row);
+        } else {
+            this.handleMultipleSelection({ ctrlKey: !extend, metaKey: false, shiftKey: extend }, row);
+        }
+        return true;
     }
 
     public setBulkSelection(selected: boolean): void {
@@ -2180,6 +2227,9 @@ export class GridService {
         return columns.map((column, index) => (column.index === index ? column : { ...column, index }));
     }
 }
+
+/** The modifier keys of a click or key press that selects rows. */
+export type GridSelectionModifiers = Pick<MouseEvent, "ctrlKey" | "metaKey" | "shiftKey">;
 
 export type RowReorderDisabledReason =
     | "disabled"

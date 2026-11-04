@@ -233,7 +233,8 @@
         "save": "Simpan",
         "saveRow": "Simpan baris",
         "selectAllRows": "Pilih semua baris",
-        "selectRow": "Pilih baris {rowNumber}"
+        "selectRow": "Pilih baris {rowNumber}",
+        "toolbar": "Bilah alat tabel"
     },
     "list": {
         "filterList": "Saring daftar",

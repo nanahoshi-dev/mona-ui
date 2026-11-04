@@ -169,7 +169,10 @@ export class GridCellComponent {
                     if (this.#gridNavigationService.focusAdjacentEditableCell(rowUid, columnId, direction)) {
                         return;
                     }
-                    this.#logicalCell?.focusNextPageTabTarget(direction === "previous");
+                    // The last editable cell: Tab leaves the grid, or stays on the cell when nothing follows it.
+                    if (!this.#logicalCell?.leaveGrid(direction === "previous")) {
+                        this.focusHostCell();
+                    }
                 }
             },
             { injector: this.#injector }

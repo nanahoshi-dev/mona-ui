@@ -249,7 +249,8 @@ export const ZH_CN_MESSAGES = {
         save: "保存",
         saveRow: "保存行",
         selectAllRows: "选择所有行",
-        selectRow: (rowNumber: number) => `选择第 ${localizeNumber(rowNumber)} 行`
+        selectRow: (rowNumber: number) => `选择第 ${localizeNumber(rowNumber)} 行`,
+        toolbar: "表格工具栏"
     },
     list: {
         filterList: "筛选列表",

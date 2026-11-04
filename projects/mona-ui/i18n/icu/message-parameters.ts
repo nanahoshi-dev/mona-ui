@@ -273,7 +273,8 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         save: null,
         saveRow: null,
         selectAllRows: null,
-        selectRow: [{ name: "rowNumber", type: "number" }]
+        selectRow: [{ name: "rowNumber", type: "number" }],
+        toolbar: null
     },
     list: {
         filterList: null,

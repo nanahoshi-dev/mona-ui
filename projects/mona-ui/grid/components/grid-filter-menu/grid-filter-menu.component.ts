@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, ComponentRef, ElementRef, inject, input, output } from "@angular/core";
+import {
+    ChangeDetectionStrategy,
+    Component,
+    ComponentRef,
+    ElementRef,
+    inject,
+    input,
+    output,
+    viewChild
+} from "@angular/core";
 import { LucideFunnel } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { DataType } from "@nanahoshi/mona-ui/common";
@@ -21,10 +30,20 @@ export class GridFilterMenuComponent {
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #popupService = inject(PopupService);
     #popupRef?: PopupRef;
+    private readonly button = viewChild.required<ElementRef<HTMLButtonElement>>("button");
     protected readonly messages = this.#gridService.messages;
     public readonly apply = output<ColumnFilterState>();
     public readonly column = input.required<Column>();
     public readonly type = input<DataType>("string");
+
+    /**
+     * Opens the menu from the keyboard (Alt+ArrowDown on the header). The button takes focus first, so focus
+     * returns to it when the menu closes; Escape then goes back to the header cell.
+     */
+    public open(): void {
+        this.button().nativeElement.focus();
+        this.openPopup();
+    }
 
     protected openPopup(): void {
         this.#popupRef = this.#popupService.create({

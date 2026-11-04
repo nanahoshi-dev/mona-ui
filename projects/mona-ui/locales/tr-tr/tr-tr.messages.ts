@@ -250,7 +250,8 @@ export const TR_TR_MESSAGES = {
         save: "Kaydet",
         saveRow: "Satırı kaydet",
         selectAllRows: "Tüm satırları seç",
-        selectRow: (rowNumber: number) => `${localizeNumber(rowNumber)}. satırı seç`
+        selectRow: (rowNumber: number) => `${localizeNumber(rowNumber)}. satırı seç`,
+        toolbar: "Tablo araç çubuğu"
     },
     list: {
         filterList: "Listeyi filtrele",

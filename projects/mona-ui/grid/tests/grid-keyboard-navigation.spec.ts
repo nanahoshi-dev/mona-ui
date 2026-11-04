@@ -251,20 +251,21 @@ describe("GridComponent keyboard navigation", () => {
         expect(firstHeader.getAttribute("tabindex")).toBe("0");
     });
 
-    it("moves page Tab focus from a header cell to the pager", async () => {
+    it("leaves Tab on a header cell to the browser, with one Tab stop in the tables (GK1, GK2)", async () => {
         fixture.componentInstance.showToolbar.set(false);
         await settleFixture(fixture);
 
         const root = fixture.nativeElement as ParentNode;
         const firstHeader = getRequiredTableCell(root, "thead tr:first-child th[role='columnheader']");
-        const pager = getRequiredElement(root, "mona-pager");
 
         firstHeader.focus();
         const event = dispatchKeydown(firstHeader, "Tab");
         fixture.detectChanges();
 
-        expect(event.defaultPrevented).toBe(true);
-        expect(document.activeElement).toBe(pager.querySelector("button[aria-current='page']"));
+        // Native Tab moves on from the only Tab stop, so it leaves the grid.
+        expect(event.defaultPrevented).toBe(false);
+        expect(Array.from(root.querySelectorAll("table [tabindex='0']"))).toEqual([firstHeader]);
+        expect(root.querySelector("tbody[tabindex]")).toBeNull();
     });
 
     it("keeps the last navigated body cell as the roving Tab stop", () => {
@@ -439,8 +440,9 @@ describe("GridComponent keyboard navigation", () => {
             const event = dispatchKeydown(nameCell, "Tab");
             fixture.detectChanges();
 
-            expect(event.defaultPrevented).toBe(true);
-            expect(document.activeElement).toBe(pager.querySelector("button[aria-current='page']"));
+            expect(event.defaultPrevented).toBe(false);
+            expect(Array.from(root.querySelectorAll("table [tabindex='0']"))).toEqual([nameCell]);
+            expect(pager.querySelector("button[aria-current='page']")?.getAttribute("tabindex")).not.toBe("-1");
             expect(nameCell.querySelector("mona-grid-editor")).toBeNull();
         });
 

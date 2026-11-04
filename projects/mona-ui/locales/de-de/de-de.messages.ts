@@ -253,7 +253,8 @@ export const DE_DE_MESSAGES = {
         save: "Speichern",
         saveRow: "Zeile speichern",
         selectAllRows: "Alle Zeilen auswählen",
-        selectRow: (rowNumber: number) => `Zeile ${localizeNumber(rowNumber)} auswählen`
+        selectRow: (rowNumber: number) => `Zeile ${localizeNumber(rowNumber)} auswählen`,
+        toolbar: "Tabellen-Symbolleiste"
     },
     list: {
         filterList: "Liste filtern",

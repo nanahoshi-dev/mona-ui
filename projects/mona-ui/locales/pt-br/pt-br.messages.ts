@@ -253,7 +253,8 @@ export const PT_BR_MESSAGES = {
         save: "Salvar",
         saveRow: "Salvar linha",
         selectAllRows: "Selecionar todas as linhas",
-        selectRow: (rowNumber: number) => `Selecionar linha ${localizeNumber(rowNumber)}`
+        selectRow: (rowNumber: number) => `Selecionar linha ${localizeNumber(rowNumber)}`,
+        toolbar: "Barra de ferramentas da tabela"
     },
     list: {
         filterList: "Filtrar lista",

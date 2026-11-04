@@ -3,6 +3,30 @@ export const GRID_CELL_FOCUSABLE_SELECTOR = "button, input, select, textarea, a[
 
 const LOGICAL_CELL_SELECTOR = "[monaGridLogicalCell], [monagridlogicalcell]";
 
+/** Input types whose arrow keys don't do anything, so the grid or the toolbar can use them. */
+const BUTTON_LIKE_INPUT_TYPES = new Set(["button", "checkbox", "color", "file", "image", "reset", "submit"]);
+
+/** Roles of widgets that use the arrow keys themselves. */
+const KEYBOARD_ENTRY_ROLES = new Set(["combobox", "listbox", "radiogroup", "slider", "spinbutton", "textbox"]);
+
+/**
+ * Whether an element uses the arrow keys itself, like a text field (moving the caret), a select, a radio
+ * button or a slider. Arrow-key navigation leaves these alone.
+ */
+export function isKeyboardEntryElement(element: Element): boolean {
+    if (element instanceof HTMLInputElement) {
+        return !BUTTON_LIKE_INPUT_TYPES.has(element.type);
+    }
+    if (element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement) {
+        return true;
+    }
+    if (element instanceof HTMLElement && element.isContentEditable) {
+        return true;
+    }
+    const role = element.getAttribute("role");
+    return role != null && KEYBOARD_ENTRY_ROLES.has(role);
+}
+
 /**
  * Keeps controls inside grid cells out of the page Tab order: each cell is one Tab stop and its contents are
  * reached with the grid's keys. Takes them out once, then only looks at the nodes that change, so a large

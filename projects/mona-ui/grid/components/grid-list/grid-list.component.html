@@ -2,9 +2,7 @@
     <colgroup monaGridColgroup></colgroup>
     <tbody
         role="rowgroup"
-        tabindex="0"
         #bodyElement
-        (focus)="onBodyFocus()"
         cdkDropList
         [cdkDropListData]="dropListData()"
         [cdkDropListDisabled]="!gridService.rowReorderInteractionEnabled()"

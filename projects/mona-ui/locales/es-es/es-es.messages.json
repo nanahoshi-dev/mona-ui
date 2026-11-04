@@ -233,7 +233,8 @@
         "save": "Guardar",
         "saveRow": "Guardar fila",
         "selectAllRows": "Seleccionar todas las filas",
-        "selectRow": "Seleccionar fila {rowNumber}"
+        "selectRow": "Seleccionar fila {rowNumber}",
+        "toolbar": "Barra de herramientas de la tabla"
     },
     "list": {
         "filterList": "Filtrar lista",

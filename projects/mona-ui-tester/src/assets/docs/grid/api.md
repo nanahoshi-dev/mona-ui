@@ -470,24 +470,31 @@ The grid renders a built-in "Columns" toolbar button backed by an internal `Grid
 
 ### Keyboard
 
-| Key                        | Action                                                                                                                                                                                      |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ArrowDown` / `ArrowUp`    | Move focus to the same column in the next/previous row.                                                                                                                                     |
-| `Alt+ArrowDown`            | Toggle expand/collapse of a group row or master-detail row, instead of moving focus.                                                                                                        |
-| `ArrowLeft` / `ArrowRight` | Move focus to the previous/next cell in the row.                                                                                                                                            |
-| `Home` / `End`             | Move focus to the first/last cell in the current row.                                                                                                                                       |
-| `Ctrl+Home` / `Ctrl+End`   | Move focus to the first/last cell in the grid.                                                                                                                                              |
-| `Enter`                    | On a group header or header cell, toggles expand/collapse. On a command cell, focuses its first inner button. Otherwise starts cell editing (no-op while the grid is in row-edit mode).     |
-| `F2`                       | Same as `Enter`, except it never toggles a group/header row.                                                                                                                                |
-| `Tab` / `Shift+Tab`        | Outside a command cell, moves focus to the next/previous focusable element outside the grid (toolbar, pager, or beyond). Inside a command cell, cycles focus among that cell's own buttons. |
-| `Escape`                   | While focus is inside a command cell's inner button, returns focus to the cell.                                                                                                             |
-| `Ctrl+C` / `Cmd+C`         | Copies the focused cell's text to the clipboard (data rows only, and not while the grid is in edit mode).                                                                                   |
+The grid is one Tab stop: `Tab` moves into the grid at the cell that last had focus, and the next `Tab` leaves it. Inside, the keys below move between cells; the header, the filter row, the add row and the body rows are one column of rows.
 
-Toolbar controls (for example a custom `monaGridToolbarTemplate` button) support `ArrowLeft`/`ArrowRight` roving-tabindex navigation among the toolbar's own focusable elements.
+| Key                                  | Action                                                                                                                                                                      |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ArrowDown` / `ArrowUp`              | Move to the same column in the next/previous row, across the header, the filter row, the add row and the body.                                                              |
+| `ArrowLeft` / `ArrowRight`           | Move to the previous/next cell in the row (mirrored in right-to-left layouts).                                                                                              |
+| `Home` / `End`                       | Move to the first/last cell in the row.                                                                                                                                     |
+| `Ctrl+Home` / `Ctrl+End` (`Cmd` too) | Move to the first/last cell in the grid. With virtual scrolling, the grid scrolls to the last row first.                                                                    |
+| `PageUp` / `PageDown`                | Move up/down by the number of rows that fit in the body.                                                                                                                    |
+| `Enter`                              | On a header, sorts the column. On a group row or the detail toggle, expands or collapses it. On an editable cell, starts editing. On any other cell, moves into its controls. |
+| `F2`                                 | Starts editing an editable cell; on any other cell, including a header or a filter-row cell, moves into its controls (links, buttons, the filter button, the filter input).  |
+| `Alt+ArrowDown`                      | On a filterable header, opens its filter menu (`aria-keyshortcuts`). On a group or detail row, expands or collapses it.                                                     |
+| `Space` / `Shift+Space`              | With selection on, toggles the row's selection / selects the rows from the last selected row to this one.                                                                   |
+| `Shift+ArrowDown` / `Shift+ArrowUp`  | Moves to the next/previous row and extends the selection to it.                                                                                                             |
+| `Ctrl+A` / `Cmd+A`                   | With multiple selection, selects every row in the select-all scope.                                                                                                         |
+| `Ctrl+C` / `Cmd+C`                   | Copies the focused cell's text (body rows, not while editing, and not when text is selected).                                                                               |
+| `Tab` / `Shift+Tab`                  | Leaves the grid. While editing a cell, commits it and edits the next/previous editable cell.                                                                                |
+
+Inside a cell's controls, `Tab`, `Shift+Tab` and the arrows move between them (text fields keep their arrow keys), `Tab` past the last control moves on to the next cell, and `Escape` returns to the cell.
+
+The toolbar is a `role="toolbar"` named by the `toolbar` message. `ArrowLeft`/`ArrowRight` (mirrored in right-to-left layouts), `Home` and `End` move between its controls, except in text fields and other controls that use those keys; only one control is in the Tab order, including controls the toolbar template adds later.
 
 ### Focus
 
-Grid cells use a roving `tabindex`: the currently focused cell has `tabindex="0"`, every other cell has `tabindex="-1"`. Editors inside an actively-edited cell are excluded from the natural tab order until the consumer moves focus with the keys above.
+Grid cells use a roving `tabindex`: the cell that last had focus has `tabindex="0"`, every other cell and every control inside a cell has `tabindex="-1"`. Keyboard focus shows a solid 2px ring inside the cell. Cells moved to with the keys scroll clear of pinned columns. Focus returns to a header after it's dragged, and to a cell of a virtual grid when its row scrolls back into view. Changing the page from the pager scrolls the body to the first row.
 
 ### ARIA
 

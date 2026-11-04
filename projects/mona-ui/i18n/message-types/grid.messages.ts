@@ -40,4 +40,6 @@ export interface MonaGridMessages {
     readonly saveRow: string;
     readonly selectAllRows: string;
     selectRow(rowNumber: number): string;
+    /** The accessible name of the toolbar above the grid. */
+    readonly toolbar: string;
 }

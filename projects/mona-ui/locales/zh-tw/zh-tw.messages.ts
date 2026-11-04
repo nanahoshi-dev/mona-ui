@@ -249,7 +249,8 @@ export const ZH_TW_MESSAGES = {
         save: "儲存",
         saveRow: "儲存資料列",
         selectAllRows: "選取所有資料列",
-        selectRow: (rowNumber: number) => `選取第 ${localizeNumber(rowNumber)} 個資料列`
+        selectRow: (rowNumber: number) => `選取第 ${localizeNumber(rowNumber)} 個資料列`,
+        toolbar: "表格工具列"
     },
     list: {
         filterList: "篩選清單",

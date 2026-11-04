@@ -253,7 +253,8 @@ export const IT_IT_MESSAGES = {
         save: "Salva",
         saveRow: "Salva riga",
         selectAllRows: "Seleziona tutte le righe",
-        selectRow: (rowNumber: number) => `Seleziona riga ${localizeNumber(rowNumber)}`
+        selectRow: (rowNumber: number) => `Seleziona riga ${localizeNumber(rowNumber)}`,
+        toolbar: "Barra degli strumenti della tabella"
     },
     list: {
         filterList: "Filtra elenco",
