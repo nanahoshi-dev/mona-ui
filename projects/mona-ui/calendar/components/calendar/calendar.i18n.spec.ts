@@ -459,8 +459,11 @@ describe("CalendarComponent i18n", () => {
         await fixture.whenStable();
 
         const getWeekNumberTexts = () => {
-            const grid = fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")[1] as HTMLElement;
-            return Array.from(grid.children)
+            const rows = Array.from(fixture.nativeElement.querySelectorAll("div[style*='grid-template-columns']")).slice(
+                1
+            ) as HTMLElement[];
+            return rows
+                .flatMap(row => Array.from(row.children))
                 .filter(el => !el.hasAttribute("monaMonthDay"))
                 .map(el => el.textContent?.trim());
         };
@@ -871,7 +874,7 @@ describe("CalendarComponent i18n", () => {
             await fixture.whenStable();
 
             // Decade heading: ٢٠٢٠ - ٢٠٢٩
-            const heading = calendarEl.querySelector("button span.text-primary");
+            const heading = calendarEl.querySelector("[id$='-heading'] [aria-hidden='true']");
             expect(heading?.textContent?.trim()).toBe("٢٠٢٠ - ٢٠٢٩");
 
             // Decade cells: ٢٠٢٠ ... ٢٠٢٩

@@ -406,9 +406,10 @@ describe("MONA_JA_JP_LOCALE Integration with MonaI18nService", () => {
         expect(liveRegion.textContent).toContain("2029年");
         expect(liveRegion.textContent).not.toContain("年年");
 
-        const decadeViewButton = hostEl.querySelector('button[aria-label*="2020年～2029年"]') as HTMLButtonElement;
-        expect(decadeViewButton).not.toBeNull();
-        expect(decadeViewButton.getAttribute("aria-label")).not.toContain("年年");
+        // The decade view's heading names its grid with the locale's wording of the range.
+        const decadeHeading = hostEl.querySelector("[id$='-heading']") as HTMLElement;
+        expect(decadeHeading.textContent).toContain("2020年～2029年");
+        expect(decadeHeading.textContent).not.toContain("年年");
     });
 
     it("renders SplitButton component with Japanese accessible name", () => {

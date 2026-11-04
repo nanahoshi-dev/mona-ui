@@ -444,8 +444,9 @@ describe("MONA_IT_IT_LOCALE Integration with MonaI18nService", () => {
 
         expect(liveRegion.textContent).toContain("Vista del decennio, 2020 - 2029");
 
-        const decadeViewButton = hostEl.querySelector('button[aria-label*="2020 - 2029"]') as HTMLButtonElement;
-        expect(decadeViewButton).not.toBeNull();
+        // The decade view's heading names its grid with the locale's wording of the range.
+        const decadeHeading = hostEl.querySelector("[id$='-heading']") as HTMLElement;
+        expect(decadeHeading.textContent).toContain("2020 - 2029");
     });
 
     it("renders SplitButton component with Italian accessible name", () => {

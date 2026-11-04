@@ -50,6 +50,8 @@ describe("CalendarComponent signal forms", () => {
         await waitForStable(fixture);
 
         expect(valueDate(component)).toEqualCalendarDate("2023-09-17");
+        expect(component.form.date().touched()).toBe(false);
+        leaveCalendar(fixture);
         expect(component.form.date().touched()).toBe(true);
     });
 
@@ -62,6 +64,8 @@ describe("CalendarComponent signal forms", () => {
 
         const selected = DateTime.fromJSDate(valueDate(component));
         expect(selected.hasSame(DateTime.now(), "day")).toBe(true);
+        expect(component.form.date().touched()).toBe(false);
+        leaveCalendar(fixture);
         expect(component.form.date().touched()).toBe(true);
     });
 
@@ -74,6 +78,8 @@ describe("CalendarComponent signal forms", () => {
         await waitForStable(fixture);
 
         expect(valueDate(component)).toEqualCalendarDate("2023-09-17");
+        expect(component.form.date().touched()).toBe(false);
+        leaveCalendar(fixture);
         expect(component.form.date().touched()).toBe(true);
     });
 
@@ -89,6 +95,8 @@ describe("CalendarComponent signal forms", () => {
         await waitForStable(fixture);
 
         expect(valueDates(component)).toEqualCalendarDates(["2023-09-16", "2023-09-17"]);
+        expect(component.form.date().touched()).toBe(false);
+        leaveCalendar(fixture);
         expect(component.form.date().touched()).toBe(true);
     });
 
@@ -104,6 +112,8 @@ describe("CalendarComponent signal forms", () => {
         await waitForStable(fixture);
 
         expect(valueDates(component)).toEqualCalendarDates(["2023-09-16", "2023-09-17"]);
+        expect(component.form.date().touched()).toBe(false);
+        leaveCalendar(fixture);
         expect(component.form.date().touched()).toBe(true);
     });
 
@@ -118,6 +128,8 @@ describe("CalendarComponent signal forms", () => {
         await waitForStable(fixture);
 
         expect(valueDates(component)).toEqualCalendarDates(["2023-09-16", "2023-09-17"]);
+        expect(component.form.date().touched()).toBe(false);
+        leaveCalendar(fixture);
         expect(component.form.date().touched()).toBe(true);
     });
 
@@ -132,10 +144,10 @@ describe("CalendarComponent signal forms", () => {
         dispatchDayPointerEnter(fixture, 18);
         await waitForStable(fixture);
 
-        expect(valueDates(component)).toEqualCalendarDates(["2023-09-16", "2023-09-16"]);
+        expect(component.form.date().value()).toBeNull();
         expectRangePreview(fixture, 16, false);
         expectRangePreview(fixture, 17, true);
-        expect(getDay(fixture, 17).getAttribute("aria-pressed")).toBe("false");
+        expect(getDay(fixture, 17).getAttribute("aria-selected")).toBeNull();
     });
 
     it("previews a backward range from the pending start date to the hovered day", async () => {
@@ -150,7 +162,7 @@ describe("CalendarComponent signal forms", () => {
         await waitForStable(fixture);
 
         expectRangePreview(fixture, 17, true);
-        expect(getDay(fixture, 17).getAttribute("aria-pressed")).toBe("false");
+        expect(getDay(fixture, 17).getAttribute("aria-selected")).toBeNull();
     });
 
     it("commits the final range selection and clears the hover preview", async () => {
@@ -166,7 +178,7 @@ describe("CalendarComponent signal forms", () => {
         await waitForStable(fixture);
 
         expect(valueDates(component)).toEqualCalendarDates(["2023-09-16", "2023-09-18"]);
-        expect(getDay(fixture, 17).getAttribute("aria-pressed")).toBe("true");
+        expect(getDay(fixture, 17).getAttribute("aria-selected")).toBe("true");
         expectRangePreview(fixture, 17, false);
     });
 
@@ -208,10 +220,11 @@ describe("CalendarComponent signal forms", () => {
 
         expect(valueDate(component)).toEqualCalendarDate("2023-09-16");
         expect(component.form.date().touched()).toBe(false);
-        expect(getCalendar(fixture).getAttribute("tabindex")).toBe("-1");
+        expect(getCalendar(fixture).hasAttribute("tabindex")).toBe(false);
+        expect(getDays(fixture).every(day => day.getAttribute("tabindex") === "-1")).toBe(true);
     });
 
-    it("reflects required invalid state on the host", async () => {
+    it("reflects required invalid state on the grid and the host", async () => {
         const fixture = await createFixture();
         const component = fixture.componentInstance;
         component.requiredState.set(true);
@@ -221,7 +234,7 @@ describe("CalendarComponent signal forms", () => {
 
         const calendar = getCalendar(fixture);
         expect(component.form.date().invalid()).toBe(true);
-        expect(calendar.getAttribute("aria-invalid")).toBe("true");
+        expect(calendar.querySelector("[role='grid']")?.getAttribute("aria-invalid")).toBe("true");
         expect(calendar.getAttribute("data-invalid")).toBe("true");
         expect(calendar.getAttribute("data-required")).toBe("true");
         expect(calendar.className).toContain("data-[invalid='true']:border-error");
@@ -329,6 +342,11 @@ describe("Calendar visual contract", () => {
         expect(selectedClasses).toContain("text-primary-foreground");
     });
 });
+
+/** Moves focus out of the calendar, as the browser does: a bubbling focusout with nothing inside to go to. */
+function leaveCalendar(fixture: ComponentFixture<unknown>): void {
+    getCalendar(fixture).dispatchEvent(new FocusEvent("focusout", { bubbles: true, relatedTarget: null }));
+}
 
 function getCalendar(fixture: ComponentFixture<unknown>): HTMLElement {
     return fixture.nativeElement.querySelector("mona-calendar") as HTMLElement;

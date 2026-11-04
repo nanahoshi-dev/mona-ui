@@ -493,8 +493,9 @@ describe("MONA_RU_RU_LOCALE Integration with MonaI18nService", () => {
 
         expect(liveRegion.textContent).toContain("Просмотр десятилетия, 2020–2029");
 
-        const decadeViewButton = hostEl.querySelector('button[aria-label*="2020–2029"]') as HTMLButtonElement;
-        expect(decadeViewButton).not.toBeNull();
+        // The decade view's heading names its grid with the locale's wording of the range.
+        const decadeHeading = hostEl.querySelector("[id$='-heading']") as HTMLElement;
+        expect(decadeHeading.textContent).toContain("2020–2029");
     });
 
     it("renders Breadcrumb component with Russian navigation landmark and supports explicit aria-label override", () => {

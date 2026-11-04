@@ -1,12 +1,16 @@
 import { computed, Directive, inject, input } from "@angular/core";
+import { formatGregorianDateToLocaleString, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { DateTime } from "luxon";
-import { CalendarVariantProps, calendarYearViewCellThemeVariants } from "../styles/calendar.styles";
+import type { CalendarVariantProps } from "../styles/calendar.styles";
+import { calendarYearViewCellThemeVariants } from "../styles/calendar.styles";
 
+/** One month of the year view: a grid cell named by the long month and the year ("November 2026"). */
 @Directive({
     selector: "[monaYearMonth]",
     host: {
-        "[attr.tabindex]": "focused() ? 0 : -1",
+        "[attr.tabindex]": "focused() && !disabled() ? 0 : -1",
         "[attr.aria-current]": "isCurrent() ? 'date' : null",
+        "[attr.aria-disabled]": "disabled() ? 'true' : null",
         "[attr.aria-label]": "ariaLabel()",
         "[attr.aria-selected]": "selected() ? 'true' : null",
         "[class]": "baseClass()",
@@ -14,9 +18,10 @@ import { CalendarVariantProps, calendarYearViewCellThemeVariants } from "../styl
     }
 })
 export class YearMonthDirective {
+    readonly #i18n = inject(MonaI18nService);
     protected readonly ariaLabel = computed(() => {
-        const monthName = this.monthName();
-        return `${monthName} ${this.navigatedDate().getFullYear()}`;
+        const date = new Date(this.navigatedDate().getFullYear(), this.month() - 1, 1);
+        return formatGregorianDateToLocaleString(date, this.#i18n.localeId(), { year: "numeric", month: "long" });
     });
     protected readonly baseClass = computed(() => {
         const focused = this.focused();
@@ -41,8 +46,9 @@ export class YearMonthDirective {
         const selDate = DateTime.fromJSDate(selectedDate);
         return this.month() === selDate.month && navDate.year === selDate.year;
     });
+    /** Whether the whole calendar is disabled. */
+    public readonly disabled = input(false);
     public readonly month = input.required<number>();
-    public readonly monthName = input.required<string>();
     public readonly navigatedDate = input.required<Date>();
     public readonly rounded = input.required<CalendarVariantProps["rounded"]>();
     public readonly selectedDate = input<Date | null>();

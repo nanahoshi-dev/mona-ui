@@ -66,6 +66,7 @@
             @if (activeView() === "date") {
                 <div class="flex h-full items-center justify-center" [attr.aria-label]="messages().calendar">
                     <mona-calendar
+                        focusOnMount
                         [disabledDates]="disabledDates()"
                         [minDate]="min()"
                         [maxDate]="max()"

@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
+import { booleanAttribute, ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { DateTime } from "luxon";
 import {
@@ -160,17 +160,17 @@ export class CalendarWrapperComponent implements ComponentInputsAsSignal<Calenda
             .map(v => DateTime.fromJSDate(v).toFormat("yyyy-MM-dd HH:mm:ss"))
             .join(", ");
     });
-    public readonly disabled = model<ReturnType<CalendarComponent["disabled"]>>(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly disabledDates = input<ReturnType<CalendarComponent["disabledDates"]>>([]);
     public readonly firstDay = input<ReturnType<CalendarComponent["firstDay"]>>("monday");
     public readonly maxDate = input<ReturnType<CalendarComponent["maxDate"]>>(null);
     public readonly minDate = input<ReturnType<CalendarComponent["minDate"]>>(null);
-    public readonly readonly = input<ReturnType<CalendarComponent["readonly"]>>(false);
-    public readonly required = input<ReturnType<CalendarComponent["required"]>>(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<CalendarComponent["rounded"]>>("none");
     public readonly selection = input<ReturnType<CalendarComponent["selection"]>>("single");
     public readonly userClass = input<ReturnType<CalendarComponent["userClass"]>>("");
-    public readonly weekNumber = input<ReturnType<CalendarComponent["weekNumber"]>>(false);
+    public readonly weekNumber = input(false, { transform: booleanAttribute });
 }
 
 interface CalendarFormModel {
