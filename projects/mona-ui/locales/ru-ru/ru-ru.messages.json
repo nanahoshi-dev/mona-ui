@@ -189,8 +189,13 @@
         "isNull": "Значение отсутствует",
         "isNullOrEmpty": "Значение отсутствует или пусто",
         "isTrue": "Истина",
+        "logic": "Объединение условий",
+        "operator": "Оператор",
         "or": "ИЛИ",
-        "startsWith": "Начинается с"
+        "secondOperator": "Второй оператор",
+        "secondValue": "Второе значение",
+        "startsWith": "Начинается с",
+        "value": "Значение"
     },
     "grid": {
         "all": "(Все)",
@@ -198,6 +203,7 @@
         "cancel": "Отмена",
         "cancelNewRow": "Отменить новую строку",
         "cancelRowEdit": "Отменить редактирование строки {rowNumber}",
+        "clearFilter": "Очистить фильтр столбца {column}",
         "collapseDetail": "Свернуть сведения строки {rowNumber}",
         "columnGrouped": "Сгруппировано по {column}",
         "columnMoved": "Столбец {column} перемещён на позицию {position}",
@@ -213,6 +219,8 @@
         "expandDetail": "Развернуть сведения строки {rowNumber}",
         "fieldValidationError": "Недопустимое значение.",
         "filterByColumn": "Фильтр по столбцу {column}",
+        "filterByColumnFiltered": "Фильтр по столбцу {column}, применён",
+        "filterOperator": "Оператор фильтра столбца {column}: {operator}",
         "filterPlaceholder": "Фильтр…",
         "group": "Группа",
         "loading": "Загрузка",

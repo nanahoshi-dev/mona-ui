@@ -212,8 +212,13 @@ export const AR_SA_MESSAGES = {
         isNull: "القيمة خالية",
         isNullOrEmpty: "القيمة خالية أو فارغة",
         isTrue: "صحيح",
+        logic: "دمج الشروط",
+        operator: "عامل التصفية",
         or: "أو",
-        startsWith: "يبدأ بـ"
+        secondOperator: "عامل التصفية الثاني",
+        secondValue: "القيمة الثانية",
+        startsWith: "يبدأ بـ",
+        value: "القيمة"
     },
     grid: {
         all: "(الكل)",
@@ -221,6 +226,7 @@ export const AR_SA_MESSAGES = {
         cancel: "إلغاء",
         cancelNewRow: "إلغاء الصف الجديد",
         cancelRowEdit: (rowNumber: number) => `إلغاء تحرير الصف ${localizeNumber(rowNumber)}`,
+        clearFilter: (column: string) => `مسح تصفية ${column}`,
         collapseDetail: (rowNumber: number) => `طي تفاصيل الصف ${localizeNumber(rowNumber)}`,
         columnGrouped: (column: string) => `تم التجميع حسب ${column}`,
         columnMoved: (column: string, position: number) => `تم نقل ${column} إلى الموضع ${localizeNumber(position)}`,
@@ -236,6 +242,8 @@ export const AR_SA_MESSAGES = {
         expandDetail: (rowNumber: number) => `توسيع تفاصيل الصف ${localizeNumber(rowNumber)}`,
         fieldValidationError: "قيمة غير صالحة.",
         filterByColumn: (column: string) => `التصفية حسب: ${column}`,
+        filterByColumnFiltered: (column: string) => `التصفية حسب: ${column}، مُصفّى`,
+        filterOperator: (column: string, operator: string) => `عامل تصفية ${column}: ${operator}`,
         filterPlaceholder: "تصفية…",
         group: "مجموعة",
         loading: "جارٍ التحميل",

@@ -203,8 +203,13 @@ export const ZH_CN_MESSAGES = {
         isNull: "为 Null",
         isNullOrEmpty: "为 Null 或为空",
         isTrue: "为真",
+        logic: "组合条件",
+        operator: "运算符",
         or: "或",
-        startsWith: "开头为"
+        secondOperator: "第二个运算符",
+        secondValue: "第二个值",
+        startsWith: "开头为",
+        value: "值"
     },
     grid: {
         all: "(全部)",
@@ -212,6 +217,7 @@ export const ZH_CN_MESSAGES = {
         cancel: "取消",
         cancelNewRow: "取消新行",
         cancelRowEdit: (rowNumber: number) => `取消编辑第 ${localizeNumber(rowNumber)} 行`,
+        clearFilter: (column: string) => `清除 ${column} 的筛选`,
         collapseDetail: (rowNumber: number) => `收起第 ${localizeNumber(rowNumber)} 行的详细信息`,
         columnGrouped: (column: string) => `已按 ${column} 分组`,
         columnMoved: (column: string, position: number) => `${column} 已移至第 ${localizeNumber(position)} 位`,
@@ -227,6 +233,8 @@ export const ZH_CN_MESSAGES = {
         expandDetail: (rowNumber: number) => `展开第 ${localizeNumber(rowNumber)} 行的详细信息`,
         fieldValidationError: "无效值。",
         filterByColumn: (column: string) => `按 ${column} 筛选`,
+        filterByColumnFiltered: (column: string) => `按 ${column} 筛选（已筛选）`,
+        filterOperator: (column: string, operator: string) => `${column} 的筛选运算符：${operator}`,
         filterPlaceholder: "筛选…",
         group: "分组",
         loading: "正在加载",

@@ -189,8 +189,13 @@
         "isNull": "Null",
         "isNullOrEmpty": "Null atau kosong",
         "isTrue": "Benar",
+        "logic": "Gabungkan kondisi",
+        "operator": "Operator",
         "or": "Atau",
-        "startsWith": "Diawali dengan"
+        "secondOperator": "Operator kedua",
+        "secondValue": "Nilai kedua",
+        "startsWith": "Diawali dengan",
+        "value": "Nilai"
     },
     "grid": {
         "all": "(Semua)",
@@ -198,6 +203,7 @@
         "cancel": "Batal",
         "cancelNewRow": "Batalkan baris baru",
         "cancelRowEdit": "Batalkan pengeditan baris {rowNumber}",
+        "clearFilter": "Bersihkan saringan kolom {column}",
         "collapseDetail": "Sembunyikan detail baris {rowNumber}",
         "columnGrouped": "Dikelompokkan menurut {column}",
         "columnMoved": "{column} dipindahkan ke posisi {position}",
@@ -213,6 +219,8 @@
         "expandDetail": "Tampilkan detail baris {rowNumber}",
         "fieldValidationError": "Nilai tidak valid.",
         "filterByColumn": "Saring berdasarkan kolom {column}",
+        "filterByColumnFiltered": "Saring berdasarkan kolom {column}, tersaring",
+        "filterOperator": "Operator saringan kolom {column}: {operator}",
         "filterPlaceholder": "Saring...",
         "group": "Grup",
         "loading": "Memuat",

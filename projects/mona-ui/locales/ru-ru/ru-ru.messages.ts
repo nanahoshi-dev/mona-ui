@@ -213,8 +213,13 @@ export const RU_RU_MESSAGES = {
         isNull: "Значение отсутствует",
         isNullOrEmpty: "Значение отсутствует или пусто",
         isTrue: "Истина",
+        logic: "Объединение условий",
+        operator: "Оператор",
         or: "ИЛИ",
-        startsWith: "Начинается с"
+        secondOperator: "Второй оператор",
+        secondValue: "Второе значение",
+        startsWith: "Начинается с",
+        value: "Значение"
     },
     grid: {
         all: "(Все)",
@@ -222,6 +227,7 @@ export const RU_RU_MESSAGES = {
         cancel: "Отмена",
         cancelNewRow: "Отменить новую строку",
         cancelRowEdit: (rowNumber: number) => `Отменить редактирование строки ${localizeNumber(rowNumber)}`,
+        clearFilter: (column: string) => `Очистить фильтр столбца ${column}`,
         collapseDetail: (rowNumber: number) => `Свернуть сведения строки ${localizeNumber(rowNumber)}`,
         columnGrouped: (column: string) => `Сгруппировано по ${column}`,
         columnMoved: (column: string, position: number) =>
@@ -238,6 +244,8 @@ export const RU_RU_MESSAGES = {
         expandDetail: (rowNumber: number) => `Развернуть сведения строки ${localizeNumber(rowNumber)}`,
         fieldValidationError: "Недопустимое значение.",
         filterByColumn: (column: string) => `Фильтр по столбцу ${column}`,
+        filterByColumnFiltered: (column: string) => `Фильтр по столбцу ${column}, применён`,
+        filterOperator: (column: string, operator: string) => `Оператор фильтра столбца ${column}: ${operator}`,
         filterPlaceholder: "Фильтр…",
         group: "Группа",
         loading: "Загрузка",

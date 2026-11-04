@@ -189,8 +189,13 @@
         "isNull": "القيمة خالية",
         "isNullOrEmpty": "القيمة خالية أو فارغة",
         "isTrue": "صحيح",
+        "logic": "دمج الشروط",
+        "operator": "عامل التصفية",
         "or": "أو",
-        "startsWith": "يبدأ بـ"
+        "secondOperator": "عامل التصفية الثاني",
+        "secondValue": "القيمة الثانية",
+        "startsWith": "يبدأ بـ",
+        "value": "القيمة"
     },
     "grid": {
         "all": "(الكل)",
@@ -198,6 +203,7 @@
         "cancel": "إلغاء",
         "cancelNewRow": "إلغاء الصف الجديد",
         "cancelRowEdit": "إلغاء تحرير الصف {rowNumber}",
+        "clearFilter": "مسح تصفية {column}",
         "collapseDetail": "طي تفاصيل الصف {rowNumber}",
         "columnGrouped": "تم التجميع حسب {column}",
         "columnMoved": "تم نقل {column} إلى الموضع {position}",
@@ -213,6 +219,8 @@
         "expandDetail": "توسيع تفاصيل الصف {rowNumber}",
         "fieldValidationError": "قيمة غير صالحة.",
         "filterByColumn": "التصفية حسب: {column}",
+        "filterByColumnFiltered": "التصفية حسب: {column}، مُصفّى",
+        "filterOperator": "عامل تصفية {column}: {operator}",
         "filterPlaceholder": "تصفية…",
         "group": "مجموعة",
         "loading": "جارٍ التحميل",

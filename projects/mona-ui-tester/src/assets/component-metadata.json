@@ -9395,21 +9395,22 @@
         "type": "CompositeFilterDescriptor"
       },
       {
-        "description": "",
+        "description": "Options of the date input. Without a `format`, the date picker uses the locale's date format.",
         "kind": "input",
         "name": "dateOptions",
-        "type": "FilterMenuDateOptions"
+        "type": "FilterMenuDateOptions",
+        "defaultValue": "{}"
       },
       {
-        "description": "",
-        "kind": "model",
+        "description": "The field the filter applies to.",
+        "kind": "input",
         "name": "field",
         "type": "string",
         "defaultValue": "\"\""
       },
       {
-        "description": "",
-        "kind": "model",
+        "description": "The operators offered, in this order; all of the type's operators when empty.",
+        "kind": "input",
         "name": "operators",
         "type": "Iterable<FilterOperators>",
         "defaultValue": "[]"
@@ -9429,14 +9430,14 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "",
-        "kind": "model",
+        "description": "The data type of the field, which picks the operators and the value input.",
+        "kind": "input",
         "name": "type",
         "type": "DataType",
         "defaultValue": "\"string\""
       },
       {
-        "description": "",
+        "description": "The conditions shown in the menu. Setting it to `undefined` clears the menu.",
         "kind": "model",
         "name": "value",
         "type": "FilterMenuValue"

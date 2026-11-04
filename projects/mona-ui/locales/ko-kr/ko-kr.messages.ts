@@ -203,8 +203,13 @@ export const KO_KR_MESSAGES = {
         isNull: "null",
         isNullOrEmpty: "null 또는 비어 있음",
         isTrue: "참",
+        logic: "조건 결합",
+        operator: "연산자",
         or: "또는",
-        startsWith: "다음으로 시작"
+        secondOperator: "두 번째 연산자",
+        secondValue: "두 번째 값",
+        startsWith: "다음으로 시작",
+        value: "값"
     },
     grid: {
         all: "(모두)",
@@ -212,6 +217,7 @@ export const KO_KR_MESSAGES = {
         cancel: "취소",
         cancelNewRow: "새 행 취소",
         cancelRowEdit: (rowNumber: number) => `${localizeNumber(rowNumber)}행 편집 취소`,
+        clearFilter: (column: string) => `${column} 필터 지우기`,
         collapseDetail: (rowNumber: number) => `${localizeNumber(rowNumber)}행 세부 정보 접기`,
         columnGrouped: (column: string) => `${column}(으)로 그룹화했습니다`,
         columnMoved: (column: string, position: number) =>
@@ -228,6 +234,8 @@ export const KO_KR_MESSAGES = {
         expandDetail: (rowNumber: number) => `${localizeNumber(rowNumber)}행 세부 정보 펼치기`,
         fieldValidationError: "유효하지 않은 값입니다.",
         filterByColumn: (column: string) => `필터 기준: ${column}`,
+        filterByColumnFiltered: (column: string) => `필터 기준: ${column}, 필터 적용됨`,
+        filterOperator: (column: string, operator: string) => `${column} 필터 연산자: ${operator}`,
         filterPlaceholder: "필터…",
         group: "그룹",
         loading: "로드 중",

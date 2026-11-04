@@ -189,8 +189,13 @@
         "isNull": "null である",
         "isNullOrEmpty": "null または空である",
         "isTrue": "true である",
+        "logic": "条件の結合",
+        "operator": "演算子",
         "or": "または",
-        "startsWith": "で始まる"
+        "secondOperator": "2番目の演算子",
+        "secondValue": "2番目の値",
+        "startsWith": "で始まる",
+        "value": "値"
     },
     "grid": {
         "all": "(すべて)",
@@ -198,6 +203,7 @@
         "cancel": "キャンセル",
         "cancelNewRow": "新しい行を破棄",
         "cancelRowEdit": "{rowNumber}行目の編集をキャンセル",
+        "clearFilter": "{column}のフィルターをクリア",
         "collapseDetail": "{rowNumber}行目の詳細を折りたたむ",
         "columnGrouped": "{column} でグループ化しました",
         "columnMoved": "{column} を {position} 番目に移動しました",
@@ -213,6 +219,8 @@
         "expandDetail": "{rowNumber}行目の詳細を展開",
         "fieldValidationError": "値が無効です。",
         "filterByColumn": "{column}でフィルター",
+        "filterByColumnFiltered": "{column}でフィルター（適用中）",
+        "filterOperator": "{column}のフィルター演算子: {operator}",
         "filterPlaceholder": "フィルター...",
         "group": "グループ",
         "loading": "読み込み中",

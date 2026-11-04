@@ -203,8 +203,13 @@ export const ID_ID_MESSAGES = {
         isNull: "Null",
         isNullOrEmpty: "Null atau kosong",
         isTrue: "Benar",
+        logic: "Gabungkan kondisi",
+        operator: "Operator",
         or: "Atau",
-        startsWith: "Diawali dengan"
+        secondOperator: "Operator kedua",
+        secondValue: "Nilai kedua",
+        startsWith: "Diawali dengan",
+        value: "Nilai"
     },
     grid: {
         all: "(Semua)",
@@ -212,6 +217,7 @@ export const ID_ID_MESSAGES = {
         cancel: "Batal",
         cancelNewRow: "Batalkan baris baru",
         cancelRowEdit: (rowNumber: number) => `Batalkan pengeditan baris ${localizeNumber(rowNumber)}`,
+        clearFilter: (column: string) => `Bersihkan saringan kolom ${column}`,
         collapseDetail: (rowNumber: number) => `Sembunyikan detail baris ${localizeNumber(rowNumber)}`,
         columnGrouped: (column: string) => `Dikelompokkan menurut ${column}`,
         columnMoved: (column: string, position: number) =>
@@ -228,6 +234,8 @@ export const ID_ID_MESSAGES = {
         expandDetail: (rowNumber: number) => `Tampilkan detail baris ${localizeNumber(rowNumber)}`,
         fieldValidationError: "Nilai tidak valid.",
         filterByColumn: (column: string) => `Saring berdasarkan kolom ${column}`,
+        filterByColumnFiltered: (column: string) => `Saring berdasarkan kolom ${column}, tersaring`,
+        filterOperator: (column: string, operator: string) => `Operator saringan kolom ${column}: ${operator}`,
         filterPlaceholder: "Saring...",
         group: "Grup",
         loading: "Memuat",

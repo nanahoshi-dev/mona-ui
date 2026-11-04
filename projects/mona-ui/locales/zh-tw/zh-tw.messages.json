@@ -189,8 +189,13 @@
         "isNull": "為 Null",
         "isNullOrEmpty": "為 Null 或為空",
         "isTrue": "為真",
+        "logic": "組合條件",
+        "operator": "運算子",
         "or": "或",
-        "startsWith": "開頭為"
+        "secondOperator": "第二個運算子",
+        "secondValue": "第二個值",
+        "startsWith": "開頭為",
+        "value": "值"
     },
     "grid": {
         "all": "(全部)",
@@ -198,6 +203,7 @@
         "cancel": "取消",
         "cancelNewRow": "取消新資料列",
         "cancelRowEdit": "取消編輯第 {rowNumber} 個資料列",
+        "clearFilter": "清除 {column} 的篩選",
         "collapseDetail": "收合第 {rowNumber} 列的詳細資料",
         "columnGrouped": "已依 {column} 分組",
         "columnMoved": "{column} 已移至第 {position} 位",
@@ -213,6 +219,8 @@
         "expandDetail": "展開第 {rowNumber} 列的詳細資料",
         "fieldValidationError": "無效值。",
         "filterByColumn": "依 {column} 篩選",
+        "filterByColumnFiltered": "依 {column} 篩選（已篩選）",
+        "filterOperator": "{column} 的篩選運算子：{operator}",
         "filterPlaceholder": "篩選…",
         "group": "群組",
         "loading": "載入中",

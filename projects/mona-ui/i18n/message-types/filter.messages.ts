@@ -23,8 +23,13 @@ export interface MonaFilterMessages {
     readonly isNull: string;
     readonly isNullOrEmpty: string;
     readonly isTrue: string;
+    readonly logic: string;
+    readonly operator: string;
     readonly or: string;
+    readonly secondOperator: string;
+    readonly secondValue: string;
     readonly startsWith: string;
+    readonly value: string;
 }
 
 export type FilterMessages = MonaFilterMessages;

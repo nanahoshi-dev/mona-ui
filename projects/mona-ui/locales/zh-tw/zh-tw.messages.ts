@@ -203,8 +203,13 @@ export const ZH_TW_MESSAGES = {
         isNull: "為 Null",
         isNullOrEmpty: "為 Null 或為空",
         isTrue: "為真",
+        logic: "組合條件",
+        operator: "運算子",
         or: "或",
-        startsWith: "開頭為"
+        secondOperator: "第二個運算子",
+        secondValue: "第二個值",
+        startsWith: "開頭為",
+        value: "值"
     },
     grid: {
         all: "(全部)",
@@ -212,6 +217,7 @@ export const ZH_TW_MESSAGES = {
         cancel: "取消",
         cancelNewRow: "取消新資料列",
         cancelRowEdit: (rowNumber: number) => `取消編輯第 ${localizeNumber(rowNumber)} 個資料列`,
+        clearFilter: (column: string) => `清除 ${column} 的篩選`,
         collapseDetail: (rowNumber: number) => `收合第 ${localizeNumber(rowNumber)} 列的詳細資料`,
         columnGrouped: (column: string) => `已依 ${column} 分組`,
         columnMoved: (column: string, position: number) => `${column} 已移至第 ${localizeNumber(position)} 位`,
@@ -227,6 +233,8 @@ export const ZH_TW_MESSAGES = {
         expandDetail: (rowNumber: number) => `展開第 ${localizeNumber(rowNumber)} 列的詳細資料`,
         fieldValidationError: "無效值。",
         filterByColumn: (column: string) => `依 ${column} 篩選`,
+        filterByColumnFiltered: (column: string) => `依 ${column} 篩選（已篩選）`,
+        filterOperator: (column: string, operator: string) => `${column} 的篩選運算子：${operator}`,
         filterPlaceholder: "篩選…",
         group: "群組",
         loading: "載入中",

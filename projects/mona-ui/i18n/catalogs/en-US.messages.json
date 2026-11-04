@@ -189,8 +189,13 @@
         "isNull": "Is null",
         "isNullOrEmpty": "Is null or empty",
         "isTrue": "Is true",
+        "logic": "Combine conditions",
+        "operator": "Operator",
         "or": "OR",
-        "startsWith": "Starts with"
+        "secondOperator": "Second operator",
+        "secondValue": "Second value",
+        "startsWith": "Starts with",
+        "value": "Value"
     },
     "grid": {
         "all": "(All)",
@@ -198,6 +203,7 @@
         "cancel": "Cancel",
         "cancelNewRow": "Cancel new row",
         "cancelRowEdit": "Cancel editing row {rowNumber}",
+        "clearFilter": "Clear filter for {column}",
         "collapseDetail": "Collapse details of row {rowNumber}",
         "columnGrouped": "Grouped by {column}",
         "columnMoved": "{column} moved to position {position}",
@@ -213,6 +219,8 @@
         "expandDetail": "Expand details of row {rowNumber}",
         "fieldValidationError": "Invalid value.",
         "filterByColumn": "Filter by {column}",
+        "filterByColumnFiltered": "Filter by {column}, filtered",
+        "filterOperator": "Filter operator for {column}: {operator}",
         "filterPlaceholder": "Filter...",
         "group": "Group",
         "loading": "Loading",

@@ -205,8 +205,13 @@ export const IT_IT_MESSAGES = {
         isNull: "È nullo",
         isNullOrEmpty: "È nullo o vuoto",
         isTrue: "È vero",
+        logic: "Combina condizioni",
+        operator: "Operatore",
         or: "O",
-        startsWith: "Inizia con"
+        secondOperator: "Secondo operatore",
+        secondValue: "Secondo valore",
+        startsWith: "Inizia con",
+        value: "Valore"
     },
     grid: {
         all: "(Tutti)",
@@ -214,6 +219,7 @@ export const IT_IT_MESSAGES = {
         cancel: "Annulla",
         cancelNewRow: "Annulla nuova riga",
         cancelRowEdit: (rowNumber: number) => `Annulla modifica della riga ${localizeNumber(rowNumber)}`,
+        clearFilter: (column: string) => `Cancella filtro di ${column}`,
         collapseDetail: (rowNumber: number) => `Nascondi i dettagli della riga ${localizeNumber(rowNumber)}`,
         columnGrouped: (column: string) => `Raggruppato per ${column}`,
         columnMoved: (column: string, position: number) =>
@@ -232,6 +238,8 @@ export const IT_IT_MESSAGES = {
         expandDetail: (rowNumber: number) => `Mostra i dettagli della riga ${localizeNumber(rowNumber)}`,
         fieldValidationError: "Valore non valido.",
         filterByColumn: (column: string) => `Filtra per ${column}`,
+        filterByColumnFiltered: (column: string) => `Filtra per ${column}, filtrato`,
+        filterOperator: (column: string, operator: string) => `Operatore di filtro di ${column}: ${operator}`,
         filterPlaceholder: "Filtra...",
         group: "Gruppo",
         loading: "Caricamento",

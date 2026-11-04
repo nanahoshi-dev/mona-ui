@@ -189,8 +189,13 @@
         "isNull": "Est nul",
         "isNullOrEmpty": "Est nul ou vide",
         "isTrue": "Est vrai",
+        "logic": "Combiner les conditions",
+        "operator": "Opérateur",
         "or": "Ou",
-        "startsWith": "Commence par"
+        "secondOperator": "Deuxième opérateur",
+        "secondValue": "Deuxième valeur",
+        "startsWith": "Commence par",
+        "value": "Valeur"
     },
     "grid": {
         "all": "(Tout)",
@@ -198,6 +203,7 @@
         "cancel": "Annuler",
         "cancelNewRow": "Annuler la nouvelle ligne",
         "cancelRowEdit": "Annuler la modification de la ligne {rowNumber}",
+        "clearFilter": "Effacer le filtre de {column}",
         "collapseDetail": "Masquer les détails de la ligne {rowNumber}",
         "columnGrouped": "Groupé par {column}",
         "columnMoved": "Colonne {column} déplacée en position {position}",
@@ -213,6 +219,8 @@
         "expandDetail": "Afficher les détails de la ligne {rowNumber}",
         "fieldValidationError": "Valeur non valide.",
         "filterByColumn": "Filtrer par {column}",
+        "filterByColumnFiltered": "Filtrer par {column}, filtré",
+        "filterOperator": "Opérateur de filtre de {column} : {operator}",
         "filterPlaceholder": "Filtrer...",
         "group": "Groupe",
         "loading": "Chargement",

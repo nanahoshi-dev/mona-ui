@@ -189,8 +189,13 @@
         "isNull": "Null'dır",
         "isNullOrEmpty": "Null veya boştur",
         "isTrue": "Doğrudur",
+        "logic": "Koşulları birleştir",
+        "operator": "İşleç",
         "or": "Veya",
-        "startsWith": "İle başlar"
+        "secondOperator": "İkinci işleç",
+        "secondValue": "İkinci değer",
+        "startsWith": "İle başlar",
+        "value": "Değer"
     },
     "grid": {
         "all": "(Tümü)",
@@ -198,6 +203,7 @@
         "cancel": "İptal",
         "cancelNewRow": "Yeni satırı iptal et",
         "cancelRowEdit": "{rowNumber}. satırın düzenlenmesini iptal et",
+        "clearFilter": "{column} sütununun filtresini temizle",
         "collapseDetail": "{rowNumber}. satırın ayrıntılarını daralt",
         "columnGrouped": "{column} ölçütüne göre gruplandı",
         "columnMoved": "{column} {position}. konuma taşındı",
@@ -213,6 +219,8 @@
         "expandDetail": "{rowNumber}. satırın ayrıntılarını genişlet",
         "fieldValidationError": "Geçersiz değer.",
         "filterByColumn": "{column} sütununa göre filtrele",
+        "filterByColumnFiltered": "{column} sütununa göre filtrele, filtrelendi",
+        "filterOperator": "{column} sütunu filtre işleci: {operator}",
         "filterPlaceholder": "Filtrele...",
         "group": "Grup",
         "loading": "Yükleniyor",

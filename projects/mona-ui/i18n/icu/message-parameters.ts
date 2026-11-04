@@ -222,8 +222,13 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         isNull: null,
         isNullOrEmpty: null,
         isTrue: null,
+        logic: null,
+        operator: null,
         or: null,
-        startsWith: null
+        secondOperator: null,
+        secondValue: null,
+        startsWith: null,
+        value: null
     },
     grid: {
         all: null,
@@ -231,6 +236,7 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         cancel: null,
         cancelNewRow: null,
         cancelRowEdit: [{ name: "rowNumber", type: "number" }],
+        clearFilter: [{ name: "column", type: "string" }],
         collapseDetail: [{ name: "rowNumber", type: "number" }],
         columnGrouped: [{ name: "column", type: "string" }],
         columnMoved: [
@@ -249,6 +255,11 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         expandDetail: [{ name: "rowNumber", type: "number" }],
         fieldValidationError: null,
         filterByColumn: [{ name: "column", type: "string" }],
+        filterByColumnFiltered: [{ name: "column", type: "string" }],
+        filterOperator: [
+            { name: "column", type: "string" },
+            { name: "operator", type: "string" }
+        ],
         filterPlaceholder: null,
         group: null,
         loading: null,

@@ -204,8 +204,13 @@ export const TR_TR_MESSAGES = {
         isNull: "Null'dır",
         isNullOrEmpty: "Null veya boştur",
         isTrue: "Doğrudur",
+        logic: "Koşulları birleştir",
+        operator: "İşleç",
         or: "Veya",
-        startsWith: "İle başlar"
+        secondOperator: "İkinci işleç",
+        secondValue: "İkinci değer",
+        startsWith: "İle başlar",
+        value: "Değer"
     },
     grid: {
         all: "(Tümü)",
@@ -213,6 +218,7 @@ export const TR_TR_MESSAGES = {
         cancel: "İptal",
         cancelNewRow: "Yeni satırı iptal et",
         cancelRowEdit: (rowNumber: number) => `${localizeNumber(rowNumber)}. satırın düzenlenmesini iptal et`,
+        clearFilter: (column: string) => `${column} sütununun filtresini temizle`,
         collapseDetail: (rowNumber: number) => `${localizeNumber(rowNumber)}. satırın ayrıntılarını daralt`,
         columnGrouped: (column: string) => `${column} ölçütüne göre gruplandı`,
         columnMoved: (column: string, position: number) => `${column} ${localizeNumber(position)}. konuma taşındı`,
@@ -229,6 +235,8 @@ export const TR_TR_MESSAGES = {
         expandDetail: (rowNumber: number) => `${localizeNumber(rowNumber)}. satırın ayrıntılarını genişlet`,
         fieldValidationError: "Geçersiz değer.",
         filterByColumn: (column: string) => `${column} sütununa göre filtrele`,
+        filterByColumnFiltered: (column: string) => `${column} sütununa göre filtrele, filtrelendi`,
+        filterOperator: (column: string, operator: string) => `${column} sütunu filtre işleci: ${operator}`,
         filterPlaceholder: "Filtrele...",
         group: "Grup",
         loading: "Yükleniyor",

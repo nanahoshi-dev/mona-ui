@@ -28,6 +28,11 @@ export const FILTER_DEFAULT_MESSAGES: MonaFilterMessages = {
     isNull: "Is null",
     isNullOrEmpty: "Is null or empty",
     isTrue: "Is true",
+    logic: "Combine conditions",
+    operator: "Operator",
     or: "OR",
-    startsWith: "Starts with"
+    secondOperator: "Second operator",
+    secondValue: "Second value",
+    startsWith: "Starts with",
+    value: "Value"
 };

@@ -1,72 +1,55 @@
 <div [class]="filterMenuItemClass()">
-    @if (type() === "string") {
-        <mona-dropdown-list
-            [data]="stringFilterMenuDataItems() | operatorFilter: operators()"
-            textField="text"
-            valueField="value"
-            [size]="size()"
-            [rounded]="rounded()"
-            [ngModel]="selectedFilterMenuDataItemList()[0]"
-            (ngModelChange)="onFilterOperatorChange(0, $event)"></mona-dropdown-list>
-        <mona-text-box
-            [ngModel]="stringFilterValues()[0]"
-            (ngModelChange)="stringFilterValues.set([$event, stringFilterValues()[1]])"
-            [size]="size()"
-            [disabled]="selectedFilterMenuDataItemList()[0]?.value | valuelessOperator"></mona-text-box>
-    }
-
-    @if (type() === "number") {
-        <mona-dropdown-list
-            [data]="numericFilterMenuDataItems() | operatorFilter: operators()"
-            textField="text"
-            valueField="value"
-            [size]="size()"
-            [rounded]="rounded()"
-            [ngModel]="selectedFilterMenuDataItemList()[0]"
-            (ngModelChange)="onFilterOperatorChange(0, $event)"></mona-dropdown-list>
-        <mona-numeric-text-box
-            [ngModel]="numberFilterValues()[0]"
-            (ngModelChange)="numberFilterValues.set([$event, numberFilterValues()[1]])"
-            [size]="size()"
-            [rounded]="rounded()"
-            [disabled]="selectedFilterMenuDataItemList()[0]?.value | valuelessOperator"></mona-numeric-text-box>
-    }
-
-    @if (type() === "date") {
-        <mona-dropdown-list
-            [data]="dateFilterMenuDataItems() | operatorFilter: operators()"
-            textField="text"
-            valueField="value"
-            [size]="size()"
-            [rounded]="rounded()"
-            [ngModel]="selectedFilterMenuDataItemList()[0]"
-            (ngModelChange)="onFilterOperatorChange(0, $event)"></mona-dropdown-list>
-
-        @if (type() === "date") {
+    <mona-dropdown-list
+        [data]="operatorItems()"
+        textField="text"
+        valueField="value"
+        [size]="size()"
+        [rounded]="rounded()"
+        [aria-label]="messages().operator"
+        [ngModel]="selectedFilterMenuDataItemList()[0]"
+        (ngModelChange)="onFilterOperatorChange(0, $event)"></mona-dropdown-list>
+    @switch (type()) {
+        @case ("string") {
+            <mona-text-box
+                [ngModel]="stringFilterValues()[0]"
+                (ngModelChange)="stringFilterValues.set([$event, stringFilterValues()[1]])"
+                [size]="size()"
+                [rounded]="rounded()"
+                [aria-label]="messages().value"
+                (keydown)="onValueKeydown($event)"
+                [disabled]="selectedFilterMenuDataItemList()[0]?.value | valuelessOperator"></mona-text-box>
+        }
+        @case ("number") {
+            <mona-numeric-text-box
+                [ngModel]="numberFilterValues()[0]"
+                (ngModelChange)="numberFilterValues.set([$event, numberFilterValues()[1]])"
+                [size]="size()"
+                [rounded]="rounded()"
+                [aria-label]="messages().value"
+                (keydown)="onValueKeydown($event)"
+                [disabled]="selectedFilterMenuDataItemList()[0]?.value | valuelessOperator"></mona-numeric-text-box>
+        }
+        @case ("date") {
             <mona-date-picker
                 [ngModel]="dateFilterValues()[0]"
                 (ngModelChange)="dateFilterValues.set([$event, dateFilterValues()[1]])"
-                [format]="effectiveDateOptions().format"
+                [format]="dateOptions().format ?? null"
                 [size]="size()"
                 [rounded]="rounded()"
+                [aria-label]="messages().value"
+                (keydown)="onValueKeydown($event)"
                 [disabled]="selectedFilterMenuDataItemList()[0]?.value | valuelessOperator"></mona-date-picker>
         }
-    }
-
-    @if (type() === "boolean") {
-        <mona-dropdown-list
-            [data]="booleanFilterMenuDataItems() | operatorFilter: operators()"
-            textField="text"
-            valueField="value"
-            [ngModel]="selectedFilterMenuDataItemList()[0]"
-            [size]="size()"
-            [rounded]="rounded()"
-            (ngModelChange)="onFilterOperatorChange(0, $event)"></mona-dropdown-list>
     }
 </div>
 @if (firstFilterValid()) {
     <div [class]="filterMenuItemClass()">
-        <mona-button-group selection="single" [size]="size()" [rounded]="rounded()" [disabled]="!firstFilterValid()">
+        <mona-button-group
+            selection="single"
+            [size]="size()"
+            [rounded]="rounded()"
+            [aria-label]="messages().logic"
+            [disabled]="!firstFilterValid()">
             @for (item of connectorDataItems(); track item.value) {
                 <button
                     monaButton
@@ -80,69 +63,47 @@
 }
 @if (!!selectedConnectorItem()) {
     <div [class]="filterMenuItemClass()">
-        @if (type() === "string") {
-            <mona-dropdown-list
-                [data]="stringFilterMenuDataItems() | operatorFilter: operators()"
-                textField="text"
-                valueField="value"
-                [size]="size()"
-                [rounded]="rounded()"
-                [ngModel]="selectedFilterMenuDataItemList()[1]"
-                (ngModelChange)="onFilterOperatorChange(1, $event)"></mona-dropdown-list>
-            <mona-text-box
-                [ngModel]="stringFilterValues()[1]"
-                (ngModelChange)="stringFilterValues.set([stringFilterValues()[0], $event])"
-                [disabled]="selectedFilterMenuDataItemList()[1]?.value | valuelessOperator"></mona-text-box>
-        }
-
-        @if (type() === "number") {
-            <mona-dropdown-list
-                [data]="numericFilterMenuDataItems() | operatorFilter: operators()"
-                textField="text"
-                valueField="value"
-                [size]="size()"
-                [rounded]="rounded()"
-                [ngModel]="selectedFilterMenuDataItemList()[1]"
-                (ngModelChange)="onFilterOperatorChange(1, $event)"></mona-dropdown-list>
-
-            <mona-numeric-text-box
-                [size]="size()"
-                [rounded]="rounded()"
-                [ngModel]="numberFilterValues()[1]"
-                (ngModelChange)="numberFilterValues.set([numberFilterValues()[0], $event])"
-                [disabled]="selectedFilterMenuDataItemList()[1]?.value | valuelessOperator"></mona-numeric-text-box>
-        }
-
-        @if (type() === "date") {
-            <mona-dropdown-list
-                [data]="dateFilterMenuDataItems() | operatorFilter: operators()"
-                textField="text"
-                valueField="value"
-                [size]="size()"
-                [rounded]="rounded()"
-                [ngModel]="selectedFilterMenuDataItemList()[1]"
-                (ngModelChange)="onFilterOperatorChange(1, $event)"></mona-dropdown-list>
-
-            @if (type() === "date") {
+        <mona-dropdown-list
+            [data]="operatorItems()"
+            textField="text"
+            valueField="value"
+            [size]="size()"
+            [rounded]="rounded()"
+            [aria-label]="messages().secondOperator"
+            [ngModel]="selectedFilterMenuDataItemList()[1]"
+            (ngModelChange)="onFilterOperatorChange(1, $event)"></mona-dropdown-list>
+        @switch (type()) {
+            @case ("string") {
+                <mona-text-box
+                    [ngModel]="stringFilterValues()[1]"
+                    (ngModelChange)="stringFilterValues.set([stringFilterValues()[0], $event])"
+                    [size]="size()"
+                    [rounded]="rounded()"
+                    [aria-label]="messages().secondValue"
+                    (keydown)="onValueKeydown($event)"
+                    [disabled]="selectedFilterMenuDataItemList()[1]?.value | valuelessOperator"></mona-text-box>
+            }
+            @case ("number") {
+                <mona-numeric-text-box
+                    [ngModel]="numberFilterValues()[1]"
+                    (ngModelChange)="numberFilterValues.set([numberFilterValues()[0], $event])"
+                    [size]="size()"
+                    [rounded]="rounded()"
+                    [aria-label]="messages().secondValue"
+                    (keydown)="onValueKeydown($event)"
+                    [disabled]="selectedFilterMenuDataItemList()[1]?.value | valuelessOperator"></mona-numeric-text-box>
+            }
+            @case ("date") {
                 <mona-date-picker
                     [ngModel]="dateFilterValues()[1]"
                     (ngModelChange)="dateFilterValues.set([dateFilterValues()[0], $event])"
-                    [format]="effectiveDateOptions().format"
+                    [format]="dateOptions().format ?? null"
                     [size]="size()"
                     [rounded]="rounded()"
+                    [aria-label]="messages().secondValue"
+                    (keydown)="onValueKeydown($event)"
                     [disabled]="selectedFilterMenuDataItemList()[1]?.value | valuelessOperator"></mona-date-picker>
             }
-        }
-
-        @if (type() === "boolean") {
-            <mona-dropdown-list
-                [data]="booleanFilterMenuDataItems() | operatorFilter: operators()"
-                textField="text"
-                valueField="value"
-                [size]="size()"
-                [rounded]="rounded()"
-                [ngModel]="selectedFilterMenuDataItemList()[1]"
-                (ngModelChange)="onFilterOperatorChange(1, $event)"></mona-dropdown-list>
         }
     </div>
 }
@@ -156,5 +117,7 @@
         [disabled]="applyDisabled()">
         {{ messages().apply }}
     </button>
-    <button monaButton (click)="onFilterClear()" [look]="'default'" [size]="size()" [rounded]="rounded()">{{ messages().clear }}</button>
+    <button monaButton (click)="onFilterClear()" [look]="'default'" [size]="size()" [rounded]="rounded()">
+        {{ messages().clear }}
+    </button>
 </div>

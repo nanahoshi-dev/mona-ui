@@ -4,6 +4,7 @@ export interface MonaGridMessages {
     readonly cancel: string;
     readonly cancelNewRow: string;
     cancelRowEdit(rowNumber: number): string;
+    clearFilter(column: string): string;
     /** The name of the button that closes a row's detail row. */
     collapseDetail(rowNumber: number): string;
     /** Announced when the keyboard groups the grid by a column. */
@@ -24,6 +25,8 @@ export interface MonaGridMessages {
     expandDetail(rowNumber: number): string;
     readonly fieldValidationError?: string;
     filterByColumn(column: string): string;
+    filterByColumnFiltered(column: string): string;
+    filterOperator(column: string, operator: string): string;
     readonly filterPlaceholder: string;
     /** The name of a group indent column's header. */
     readonly group: string;

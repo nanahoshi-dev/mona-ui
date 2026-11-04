@@ -205,8 +205,13 @@ export const DE_DE_MESSAGES = {
         isNull: "Ist null",
         isNullOrEmpty: "Ist null oder leer",
         isTrue: "Ist wahr",
+        logic: "Bedingungen verknüpfen",
+        operator: "Operator",
         or: "Oder",
-        startsWith: "Beginnt mit"
+        secondOperator: "Zweiter Operator",
+        secondValue: "Zweiter Wert",
+        startsWith: "Beginnt mit",
+        value: "Wert"
     },
     grid: {
         all: "(Alle)",
@@ -214,6 +219,7 @@ export const DE_DE_MESSAGES = {
         cancel: "Abbrechen",
         cancelNewRow: "Neue Zeile verwerfen",
         cancelRowEdit: (rowNumber: number) => `Bearbeitung von Zeile ${localizeNumber(rowNumber)} abbrechen`,
+        clearFilter: (column: string) => `Filter für ${column} leeren`,
         collapseDetail: (rowNumber: number) => `Details von Zeile ${localizeNumber(rowNumber)} ausblenden`,
         columnGrouped: (column: string) => `Nach ${column} gruppiert`,
         columnMoved: (column: string, position: number) =>
@@ -231,6 +237,8 @@ export const DE_DE_MESSAGES = {
         expandDetail: (rowNumber: number) => `Details von Zeile ${localizeNumber(rowNumber)} einblenden`,
         fieldValidationError: "Ungültiger Wert.",
         filterByColumn: (column: string) => `Nach ${column} filtern`,
+        filterByColumnFiltered: (column: string) => `Nach ${column} filtern, gefiltert`,
+        filterOperator: (column: string, operator: string) => `Filteroperator für ${column}: ${operator}`,
         filterPlaceholder: "Filtern...",
         group: "Gruppe",
         loading: "Wird geladen",

@@ -1,7 +1,9 @@
+import { FocusTrapFactory } from "@angular/cdk/a11y";
 import {
     ChangeDetectionStrategy,
     Component,
     ComponentRef,
+    computed,
     ElementRef,
     inject,
     input,
@@ -11,13 +13,18 @@ import {
 import { LucideFunnel } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { DataType } from "@nanahoshi/mona-ui/common";
-import type { FilterMenuDateOptions, FilterMenuDateType } from "@nanahoshi/mona-ui/filter";
-import { FilterMenuComponent, FilterService } from "@nanahoshi/mona-ui/filter";
+import type { FilterMenuDateOptions } from "@nanahoshi/mona-ui/filter";
+import { FilterMenuComponent } from "@nanahoshi/mona-ui/filter";
 import { PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
+import { take } from "rxjs";
 import { Column } from "../../models/Column";
 import { ColumnFilterState } from "../../models/ColumnFilterState";
 import { GridService } from "../../services/grid.service";
 
+/**
+ * The funnel button of a filterable column and the filter menu it opens: a dialog named after the column that
+ * keeps focus inside until it closes, then returns it to the button.
+ */
 @Component({
     selector: "mona-grid-filter-menu",
     templateUrl: "./grid-filter-menu.component.html",
@@ -25,12 +32,19 @@ import { GridService } from "../../services/grid.service";
     imports: [ButtonDirective, LucideFunnel]
 })
 export class GridFilterMenuComponent {
-    readonly #filterService = inject(FilterService);
+    readonly #focusTrapFactory = inject(FocusTrapFactory);
     readonly #gridService = inject(GridService);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #popupService = inject(PopupService);
     #popupRef?: PopupRef;
     private readonly button = viewChild.required<ElementRef<HTMLButtonElement>>("button");
+    /** The button's name, which says when the column is filtered. */
+    protected readonly buttonLabel = computed(() => {
+        const column = this.column();
+        return column.filtered
+            ? this.messages().filterByColumnFiltered(column.title)
+            : this.messages().filterByColumn(column.title);
+    });
     protected readonly messages = this.#gridService.messages;
     public readonly apply = output<ColumnFilterState>();
     public readonly column = input.required<Column>();
@@ -41,12 +55,13 @@ export class GridFilterMenuComponent {
      * returns to it when the menu closes; Escape then goes back to the header cell.
      */
     public open(): void {
-        this.button().nativeElement.focus();
         this.openPopup();
     }
 
     protected openPopup(): void {
-        this.#popupRef = this.#popupService.create({
+        // Focus returns to the focused element inside the anchor; a click does not focus a button everywhere.
+        this.button().nativeElement.focus();
+        const popupRef = this.#popupService.create({
             anchor: this.#hostElementRef.nativeElement,
             content: FilterMenuComponent,
             hasBackdrop: true,
@@ -58,23 +73,31 @@ export class GridFilterMenuComponent {
                     }
                 }
                 return false;
-            },
-            providers: [{ provide: FilterService, useValue: this.#filterService }]
+            }
         });
+        this.#popupRef = popupRef;
 
-        const filterState = this.#gridService.appliedFilters().get(this.column().field);
-        const componentRef = this.#popupRef.component as ComponentRef<FilterMenuComponent>;
-        componentRef.instance.type.set(this.type());
-        componentRef.instance.field.set(this.column().field);
+        const column = this.column();
+        const filterState = this.#gridService.appliedFilters().get(column.field);
+        const componentRef = popupRef.component as ComponentRef<FilterMenuComponent>;
+        const menuElement = componentRef.location.nativeElement as HTMLElement;
+        menuElement.setAttribute("role", "dialog");
+        menuElement.setAttribute("aria-label", this.messages().filterByColumn(column.title));
+        componentRef.setInput("type", this.type());
+        componentRef.setInput("field", column.field);
         componentRef.setInput("size", "small");
-        const dateOptions = this.#createDateOptions();
-        if (dateOptions != null) {
-            componentRef.setInput("dateOptions", dateOptions);
+        if (this.type() === "date") {
+            componentRef.setInput("dateOptions", this.#createDateOptions());
         }
         if (filterState?.filterMenuValue) {
             componentRef.instance.value.set(filterState.filterMenuValue);
         }
         componentRef.changeDetectorRef.detectChanges();
+
+        const focusTrap = this.#focusTrapFactory.create(menuElement);
+        void focusTrap.focusInitialElementWhenReady();
+        popupRef.closed.pipe(take(1)).subscribe(() => focusTrap.destroy());
+
         componentRef.instance.apply.subscribe(filter => {
             const filterState: ColumnFilterState = {
                 filter,
@@ -85,28 +108,9 @@ export class GridFilterMenuComponent {
         });
     }
 
-    #createDateOptions(): FilterMenuDateOptions | null {
-        const type = this.type();
-        if (type !== "date") {
-            return null;
-        }
+    /** The column's string `format`, or none, so the date picker uses the locale's date format. */
+    #createDateOptions(): FilterMenuDateOptions {
         const format = this.column().format;
-        return {
-            format: typeof format === "string" ? format : this.#getDefaultDateFormat(type),
-            type
-        };
-    }
-
-    #getDefaultDateFormat(type: FilterMenuDateType): string {
-        switch (type) {
-            case "datetime":
-                return "dd/MM/yyyy HH:mm";
-            case "time":
-                return "HH:mm";
-            case "date":
-                return "dd/MM/yyyy";
-            default:
-                return "dd/MM/yyyy";
-        }
+        return typeof format === "string" ? { format } : {};
     }
 }

@@ -237,6 +237,10 @@ protected readonly filter = signal<CompositeFilterDescriptor[]>([]);
 </mona-grid>
 ```
 
+The header menu is a dialog named after its column (`filterByColumn`). It opens at the column type's first operator, keeps focus inside until it closes, and returns focus to its funnel button. `Enter` in a value applies the filter, and text that is only spaces is no value; text is trimmed before it is applied. A date column's menu and filter row use the column's string `format`, or the locale's date format without one. While a column is filtered, its funnel shows a dot as well as a colour, and its name says so (`filterByColumnFiltered`).
+
+In the filter row, typing filters after a 300 ms pause; choosing an operator, picking a date or a Boolean value, and `Clear` filter at once and drop typing that has not filtered yet. An operator chosen without a value stays chosen until there is one. A cell follows only its own column's filter, and its own filter coming back does not overwrite newer typing. Its inputs are named `"Filter by {column}"`, its operator button `"Filter operator for {column}: {operator}"` (`filterOperator`), and its clear button `"Clear filter for {column}"` (`clearFilter`).
+
 ### Grouping
 
 `monaGridGroupable` lets the consumer drag a column header into the group panel rendered above the grid. `group` is a two-way bindable model of the group descriptors: `groupChange` emits once for each user change (grouping, ungrouping, reordering or re-sorting groups) and after a state is restored, never for a value set from code. `null`, `undefined` and empty text form one group; `1` and `"1"` are different groups; dates group by their time.
@@ -530,6 +534,8 @@ Grid cells use a roving `tabindex`: the cell that last had focus has `tabindex="
 | `aria-sort`        | On a header cell, only while `monaGridSortable` is enabled | `"ascending"`, `"descending"`, or `"none"`; only on the first sort |
 | `aria-describedby` | On a header cell sorted after another                      | Its place in the sort order (`sortOrder` message)                  |
 | `aria-keyshortcuts` | On a header cell with keyboard shortcuts                   | The keys that open its filter menu, move it or group by it         |
+| `role`             | On an open filter menu                                     | `"dialog"`, with `aria-label` `"Filter by {column}"`               |
+| `aria-haspopup`    | On a filter menu button / a filter row operator button     | `"dialog"` / `"menu"`; the operator button also has `aria-expanded` |
 | `aria-selected`    | On a row, only while `monaGridSelectable` is enabled       | Reflects whether the row is selected                               |
 | `aria-busy`        | On the tabular content region in server mode               | `"true"` while `loading` is true                                   |
 | `aria-rowindex`    | On every row                                               | 1-based position, counting header, filter and add rows and earlier pages |

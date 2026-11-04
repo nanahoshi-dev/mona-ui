@@ -1,125 +1,104 @@
 @let dataType = column().dataType;
+@let inputLabel = messages().filterByColumn(column().title);
 
 @switch (dataType) {
     @case ("string") {
         <div class="flex gap-0.5 w-full">
             <mona-text-box
                 size="small"
-                [inputAttributes]="{ 'aria-label': messages().filterByColumn(column().title) }"
+                [aria-label]="inputLabel"
                 [ngModel]="stringValue()"
                 (ngModelChange)="onStringChange($event)"
                 [placeholder]="messages().filterPlaceholder" />
-            <button
-                monaButton
-                look="ghost"
-                [iconOnly]="true"
-                [size]="'small'"
-                #filterButton
-                [attr.aria-label]="messages().filterByColumn(column().title)">
-                <svg lucideFunnel [size]="14" [class.text-info]="isFilterActive()"></svg>
-            </button>
-            <ng-container
-                *ngTemplateOutlet="clearFilterButtonTemplate; context: { $implicit: isFilterActive() }"></ng-container>
+            <ng-container *ngTemplateOutlet="operatorButtonTemplate"></ng-container>
+            <ng-container *ngTemplateOutlet="clearFilterButtonTemplate"></ng-container>
         </div>
-        <mona-popup-menu [target]="filterButton" [size]="'small'">
-            @for (item of stringFilterMenuItems; track item) {
-                <mona-popup-menu-checkbox-item
-                    size="small"
-                    [label]="item.text"
-                    (menuClick)="onOperatorChange(item.value)"
-                    [checked]="selectedOperator() === item.value"></mona-popup-menu-checkbox-item>
-            }
-        </mona-popup-menu>
     }
     @case ("number") {
         <div class="flex gap-0.5 w-full">
             <mona-numeric-text-box
                 size="small"
-                [aria-label]="messages().filterByColumn(column().title)"
+                [aria-label]="inputLabel"
                 [ngModel]="numberValue()"
                 (ngModelChange)="onNumberChange($event)"
                 [style.width.%]="100" />
-
-            <button
-                monaButton
-                look="ghost"
-                [iconOnly]="true"
-                [size]="'small'"
-                #filterButton
-                [attr.aria-label]="messages().filterByColumn(column().title)">
-                <svg lucideFunnel [size]="14" [class.text-info]="isFilterActive()"></svg>
-            </button>
-            <mona-popup-menu [target]="filterButton" [size]="'small'">
-                @for (item of numericFilterMenuItems; track item) {
-                    <mona-popup-menu-checkbox-item
-                        size="small"
-                        [label]="item.text"
-                        (menuClick)="onOperatorChange(item.value)"
-                        [checked]="selectedOperator() === item.value"></mona-popup-menu-checkbox-item>
-                }
-            </mona-popup-menu>
-            <ng-container
-                *ngTemplateOutlet="clearFilterButtonTemplate; context: { $implicit: isFilterActive() }"></ng-container>
+            <ng-container *ngTemplateOutlet="operatorButtonTemplate"></ng-container>
+            <ng-container *ngTemplateOutlet="clearFilterButtonTemplate"></ng-container>
         </div>
     }
     @case ("date") {
         <div class="flex gap-0.5 w-full">
-            @if (dataType === "date") {
-                <mona-date-picker
-                    size="small"
-                    [ngModel]="dateValue()"
-                    (ngModelChange)="onDateChange($event)"
-                    [style.width.%]="100" />
-            }
-            <button
-                monaButton
-                look="ghost"
-                [iconOnly]="true"
-                [size]="'small'"
-                #filterButton
-                [attr.aria-label]="messages().filterByColumn(column().title)">
-                <svg lucideFunnel [size]="14" [class.text-info]="isFilterActive()"></svg>
-            </button>
-            <ng-container
-                *ngTemplateOutlet="clearFilterButtonTemplate; context: { $implicit: isFilterActive() }"></ng-container>
+            <mona-date-picker
+                size="small"
+                [aria-label]="inputLabel"
+                [format]="dateFormat()"
+                [ngModel]="dateValue()"
+                (ngModelChange)="onDateChange($event)"
+                [style.width.%]="100" />
+            <ng-container *ngTemplateOutlet="operatorButtonTemplate"></ng-container>
+            <ng-container *ngTemplateOutlet="clearFilterButtonTemplate"></ng-container>
         </div>
-        <mona-popup-menu [target]="filterButton" [size]="'small'">
-            @for (item of dateFilterMenuItems; track item) {
-                <mona-popup-menu-checkbox-item
-                    size="small"
-                    [label]="item.text"
-                    (menuClick)="onOperatorChange(item.value)"
-                    [checked]="selectedOperator() === item.value"></mona-popup-menu-checkbox-item>
-            }
-        </mona-popup-menu>
     }
     @case ("boolean") {
         <div class="flex gap-0.5 w-full">
             <mona-dropdown-list
                 size="small"
-                [data]="booleanFilterMenuItems"
+                [data]="booleanFilterMenuItems()"
                 textField="text"
                 valueField="value"
                 [placeholder]="messages().all"
-                [aria-label]="messages().filterByColumn(column().title)"
+                [aria-label]="inputLabel"
                 [ngModel]="booleanValue()"
                 (ngModelChange)="onBooleanChange($event)"
                 [style.width.%]="100" />
-            <ng-container
-                *ngTemplateOutlet="clearFilterButtonTemplate; context: { $implicit: isFilterActive() }"></ng-container>
+            <ng-container *ngTemplateOutlet="clearFilterButtonTemplate"></ng-container>
         </div>
     }
 }
 
-<ng-template #clearFilterButtonTemplate let-hasValue>
-    @if (selectedOperator() != null && hasValue) {
+<ng-template #operatorButtonTemplate>
+    <button
+        monaButton
+        look="ghost"
+        class="relative"
+        [iconOnly]="true"
+        [size]="'small'"
+        #filterButton
+        aria-haspopup="menu"
+        [attr.aria-expanded]="operatorMenuOpen()"
+        [attr.aria-label]="operatorLabel()">
+        <svg lucideFunnel [size]="14" [class.text-info]="isFilterActive()"></svg>
+        @if (isFilterActive()) {
+            <!-- Active is shown by more than colour: a dot on the funnel. -->
+            <span
+                class="absolute top-0.5 end-0.5 w-1.5 h-1.5 rounded-full bg-current text-info"
+                aria-hidden="true"></span>
+        }
+    </button>
+    <mona-popup-menu
+        [target]="filterButton"
+        [size]="'small'"
+        (open)="operatorMenuOpen.set(true)"
+        (close)="operatorMenuOpen.set(false)">
+        @for (item of operatorItems(); track item.value) {
+            <mona-popup-menu-checkbox-item
+                size="small"
+                [label]="item.text"
+                (menuClick)="onOperatorChange(item.value)"
+                [checked]="selectedOperator() === item.value"></mona-popup-menu-checkbox-item>
+        }
+    </mona-popup-menu>
+</ng-template>
+
+<ng-template #clearFilterButtonTemplate>
+    @if (isFilterActive()) {
         <button
             monaButton
             look="ghost"
             [iconOnly]="true"
             [size]="'small'"
             (click)="onClear()"
-            [attr.aria-label]="filterMessages().clear">
+            [attr.aria-label]="messages().clearFilter(column().title)">
             <svg lucideFunnelX [size]="14" class="text-error"></svg>
         </button>
     }

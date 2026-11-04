@@ -205,8 +205,13 @@ export const FR_FR_MESSAGES = {
         isNull: "Est nul",
         isNullOrEmpty: "Est nul ou vide",
         isTrue: "Est vrai",
+        logic: "Combiner les conditions",
+        operator: "Opérateur",
         or: "Ou",
-        startsWith: "Commence par"
+        secondOperator: "Deuxième opérateur",
+        secondValue: "Deuxième valeur",
+        startsWith: "Commence par",
+        value: "Valeur"
     },
     grid: {
         all: "(Tout)",
@@ -214,6 +219,7 @@ export const FR_FR_MESSAGES = {
         cancel: "Annuler",
         cancelNewRow: "Annuler la nouvelle ligne",
         cancelRowEdit: (rowNumber: number) => `Annuler la modification de la ligne ${localizeNumber(rowNumber)}`,
+        clearFilter: (column: string) => `Effacer le filtre de ${column}`,
         collapseDetail: (rowNumber: number) => `Masquer les détails de la ligne ${localizeNumber(rowNumber)}`,
         columnGrouped: (column: string) => `Groupé par ${column}`,
         columnMoved: (column: string, position: number) =>
@@ -231,6 +237,8 @@ export const FR_FR_MESSAGES = {
         expandDetail: (rowNumber: number) => `Afficher les détails de la ligne ${localizeNumber(rowNumber)}`,
         fieldValidationError: "Valeur non valide.",
         filterByColumn: (column: string) => `Filtrer par ${column}`,
+        filterByColumnFiltered: (column: string) => `Filtrer par ${column}, filtré`,
+        filterOperator: (column: string, operator: string) => `Opérateur de filtre de ${column} : ${operator}`,
         filterPlaceholder: "Filtrer...",
         group: "Groupe",
         loading: "Chargement",

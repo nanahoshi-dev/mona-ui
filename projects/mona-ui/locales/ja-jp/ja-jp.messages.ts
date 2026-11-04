@@ -203,8 +203,13 @@ export const JA_JP_MESSAGES = {
         isNull: "null である",
         isNullOrEmpty: "null または空である",
         isTrue: "true である",
+        logic: "条件の結合",
+        operator: "演算子",
         or: "または",
-        startsWith: "で始まる"
+        secondOperator: "2番目の演算子",
+        secondValue: "2番目の値",
+        startsWith: "で始まる",
+        value: "値"
     },
     grid: {
         all: "(すべて)",
@@ -212,6 +217,7 @@ export const JA_JP_MESSAGES = {
         cancel: "キャンセル",
         cancelNewRow: "新しい行を破棄",
         cancelRowEdit: (rowNumber: number) => `${localizeNumber(rowNumber)}行目の編集をキャンセル`,
+        clearFilter: (column: string) => `${column}のフィルターをクリア`,
         collapseDetail: (rowNumber: number) => `${localizeNumber(rowNumber)}行目の詳細を折りたたむ`,
         columnGrouped: (column: string) => `${column} でグループ化しました`,
         columnMoved: (column: string, position: number) =>
@@ -228,6 +234,8 @@ export const JA_JP_MESSAGES = {
         expandDetail: (rowNumber: number) => `${localizeNumber(rowNumber)}行目の詳細を展開`,
         fieldValidationError: "値が無効です。",
         filterByColumn: (column: string) => `${column}でフィルター`,
+        filterByColumnFiltered: (column: string) => `${column}でフィルター（適用中）`,
+        filterOperator: (column: string, operator: string) => `${column}のフィルター演算子: ${operator}`,
         filterPlaceholder: "フィルター...",
         group: "グループ",
         loading: "読み込み中",
