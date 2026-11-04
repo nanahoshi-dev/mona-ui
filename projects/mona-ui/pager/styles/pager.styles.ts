@@ -1,10 +1,10 @@
 import { cva } from "class-variance-authority";
-import { themeRaisedBackdropClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeRaisedBackdropClasses, type VariantInputs } from "@nanahoshi/mona-ui/internal";
 import type { VariantProps } from "class-variance-authority";
 
 export const pagerBaseThemeVariants = cva(
     `
-        flex px-2 py-1
+        flex flex-wrap items-center gap-y-1 px-2 py-1
         text-sm
         bg-(--mona-pager-background) ${themeRaisedBackdropClasses} text-foreground
         border border-border-subtle

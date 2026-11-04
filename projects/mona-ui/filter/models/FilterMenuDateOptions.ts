@@ -1,6 +1,4 @@
 export interface FilterMenuDateOptions {
-    format: string;
-    type: FilterMenuDateType;
+    /** The date input format. Without it, the date picker uses the locale's date format. */
+    readonly format?: string;
 }
-
-export type FilterMenuDateType = "date" | "datetime" | "time";

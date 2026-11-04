@@ -1,13 +1,19 @@
 <button
+    #button
     monaButton
     look="ghost"
     [rounded]="'none'"
     [iconOnly]="true"
     (click)="openPopup()"
-    class="overflow-hidden w-5 h-5"
+    class="relative overflow-hidden w-5 h-5"
     size="small"
     [tabindex]="-1"
-    [attr.aria-label]="messages().filterByColumn(column().title)"
+    aria-haspopup="dialog"
+    [attr.aria-label]="buttonLabel()"
     [class.text-info]="column().filtered">
     <svg lucideFunnel [size]="12"></svg>
+    @if (column().filtered) {
+        <!-- Filtered is shown by more than colour: a dot on the funnel. -->
+        <span class="absolute top-0.5 end-0.5 w-1.5 h-1.5 rounded-full bg-current" aria-hidden="true"></span>
+    }
 </button>

@@ -2,7 +2,6 @@ import { GRID_DEFAULT_VIRTUAL_ROW_HEIGHT } from "../../constants/grid-virtual-sc
 import { CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport } from "@angular/cdk/scrolling";
 import {
     afterNextRender,
-    ChangeDetectionStrategy,
     Component,
     computed,
     DestroyRef,
@@ -17,7 +16,6 @@ import {
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { ImmutableList } from "@mirei/ts-collections";
 import { rxTimeout } from "@nanahoshi/mona-ui/internal";
-import { fromEvent } from "rxjs";
 import type { GridViewRow } from "../../models/GridGroup";
 import { Row } from "../../models/Row";
 import { GridNavigationService } from "../../services/grid-navigation.service";
@@ -28,9 +26,9 @@ import {
     gridListBaseThemeVariants,
     gridListTableThemeVariants
 } from "../../styles/grid.styles";
+import { ContextMenuComponent } from "@nanahoshi/mona-ui/contextmenu";
 import { GridAddRowComponent } from "../grid-add-row/grid-add-row.component";
 import { GridColgroupComponent } from "../grid-colgroup/grid-colgroup.component";
-import { GridDetailRowComponent } from "../grid-detail-row/grid-detail-row.component";
 import { GridFooterRowComponent } from "../grid-footer-row/grid-footer-row.component";
 import { GridGroupRowComponent } from "../grid-group-row/grid-group-row.component";
 import { GridRowComponent } from "../grid-row/grid-row.component";
@@ -38,18 +36,17 @@ import { GridRowComponent } from "../grid-row/grid-row.component";
 @Component({
     selector: "mona-grid-virtual-list",
     imports: [
+        ContextMenuComponent,
         CdkVirtualScrollViewport,
         CdkFixedSizeVirtualScroll,
         CdkVirtualForOf,
         GridAddRowComponent,
         GridColgroupComponent,
-        GridDetailRowComponent,
         GridFooterRowComponent,
         GridGroupRowComponent,
         GridRowComponent
     ],
     templateUrl: "./grid-virtual-list.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         "[class]": "baseClass()",
         "[style.--mona-grid-row-height]": "gridService.virtualScrollOptions().height + 'px'"
@@ -78,6 +75,10 @@ export class GridVirtualListComponent {
     protected readonly footerTableClass = computed(() => {
         return gridFooterTableThemeVariants();
     });
+    /** The grid footer is the last row of the grid: after the header rows, the add row and every body row. */
+    protected readonly gridAriaRowCount = computed(
+        () => this.gridService.bodyAriaRowStart() + this.bodyRows().length + 1
+    );
     protected readonly gridService = inject(GridService);
     protected readonly tableClass = computed(() => {
         return gridListTableThemeVariants();
@@ -103,7 +104,7 @@ export class GridVirtualListComponent {
                 ) as HTMLElement | null;
                 this.gridService.bodyTableElement.set(bodyTableElement);
                 this.gridService.bodyScrollElement.set(bodyScrollElement);
-                this.setFocusSubscription();
+                this.setRowScroller();
                 this.setScrollEndSubscription();
                 this.#destroyRef.onDestroy(() => {
                     if (this.gridService.bodyTableElement() === bodyTableElement) {
@@ -118,12 +119,12 @@ export class GridVirtualListComponent {
                 });
             }
         });
+        effect(() => {
+            const count = this.bodyRows().length;
+            untracked(() => this.gridService.renderedBodyRowCount.set(count));
+        });
         this.setGroupSubscriptions();
         this.setSelectedKeysLoadSubscription();
-    }
-
-    protected onViewportFocus(): void {
-        this.#gridNavigationService.focusActiveCellOrFirstHeader();
     }
 
     protected trackBodyRow(_: number, bodyRow: GridViewRow): string {
@@ -134,14 +135,6 @@ export class GridVirtualListComponent {
         if (element != null && element.scrollLeft !== scrollLeft) {
             element.scrollLeft = scrollLeft;
         }
-    }
-
-    private setFocusSubscription(): void {
-        fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focus")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(() => {
-                this.#gridNavigationService.focusActiveCellOrFirstHeader();
-            });
     }
 
     private setGroupSubscriptions(): void {
@@ -159,6 +152,25 @@ export class GridVirtualListComponent {
                 { injector: this.#injector }
             );
         });
+    }
+
+    /**
+     * Lets keyboard navigation reach rows that aren't drawn: PageDown, Ctrl+End and the arrows scroll to the
+     * row, which takes focus once it is drawn. Scrolling the focused row out and back returns focus to it.
+     */
+    private setRowScroller(): void {
+        const viewport = this.viewport();
+        this.#gridNavigationService.setRowScroller({
+            isNavigableRow: index => this.bodyRows()[index] != null,
+            rowCount: () => this.bodyRows().length,
+            scrollToRow: index => viewport.scrollToIndex(index)
+        });
+        viewport.renderedRangeStream
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(() =>
+                afterNextRender(() => this.#gridNavigationService.restoreLostFocus(), { injector: this.#injector })
+            );
+        this.#destroyRef.onDestroy(() => this.#gridNavigationService.setRowScroller(null));
     }
 
     private setScrollEndSubscription(): void {

@@ -93,14 +93,14 @@ describe("MONA_AR_SA_LOCALE", () => {
             expect(m.grid.all).toBe("(الكل)");
             expect(m.grid.apply).toBe("تطبيق");
             expect(m.grid.cancel).toBe("إلغاء");
-            expect(m.grid.cancelRowEdit).toBe("إلغاء تحرير الصف");
+            expect(m.grid.cancelRowEdit(3)).toBe("إلغاء تحرير الصف ٣");
             expect(m.grid.columns).toBe("الأعمدة");
             expect(m.grid.delete).toBe("حذف");
-            expect(m.grid.deleteRowConfirmation).toBe("هل تريد حذف هذا العنصر؟");
+            expect(m.grid.deleteRowConfirmation(3)).toBe("هل تريد حذف الصف ٣؟");
             expect(m.grid.deleteRowTitle).toBe("حذف الصف؟");
             expect(m.grid.dragColumnHeaderToGroup).toBe("اسحب رأس العمود إلى هنا للتجميع");
             expect(m.grid.edit).toBe("تحرير");
-            expect(m.grid.editRow).toBe("تحرير الصف");
+            expect(m.grid.editRow(3)).toBe("تحرير الصف ٣");
             expect(m.grid.fieldValidationError).toBe("قيمة غير صالحة.");
             expect(m.grid.filterPlaceholder).toBe("تصفية…");
             expect(m.grid.modified).toBe("تم التعديل");
@@ -109,8 +109,8 @@ describe("MONA_AR_SA_LOCALE", () => {
             expect(m.grid.moveRow).toBe("نقل الصف");
             expect(m.grid.noData).toBe("لا توجد بيانات");
             expect(m.grid.remove).toBe("إزالة");
-            expect(m.grid.removeRow).toBe("إزالة الصف");
-            expect(m.grid.resizeColumn).toBe("تغيير عرض العمود");
+            expect(m.grid.removeRow(3)).toBe("إزالة الصف ٣");
+            expect(m.grid.resizeColumn("الاسم")).toBe("تغيير عرض العمود الاسم");
             expect(m.grid.rowReorder).toBe("إعادة ترتيب الصفوف");
             expect(m.grid.rowReorderDisabled).toBe("إعادة ترتيب الصفوف غير متاح.");
             expect(m.grid.rowReorderDisabledEditing).toBe("أكمل التحرير قبل إعادة ترتيب الصفوف.");
@@ -122,7 +122,7 @@ describe("MONA_AR_SA_LOCALE", () => {
             expect(m.grid.rowReorderKeyboardHint).toBe("استخدم Alt + سهم لأعلى أو Alt + سهم لأسفل للتحريك.");
             expect(m.grid.rowValidationError).toBe("توجد أخطاء تحقق في هذا الصف.");
             expect(m.grid.save).toBe("حفظ");
-            expect(m.grid.saveRow).toBe("حفظ الصف");
+            expect(m.grid.saveRow(3)).toBe("حفظ الصف ٣");
             expect(m.grid.selectAllRows).toBe("تحديد كل الصفوف");
         });
 

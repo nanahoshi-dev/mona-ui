@@ -90,17 +90,17 @@ describe("GridCellComponent", () => {
         expect(getCellText()).toBe("42");
     });
 
-    it("uses formatter function output for the cell text", () => {
+    it("passes the value, the row and the column to a formatter function", () => {
         setCellInputs(
             {
                 ...createColumn(),
-                format: column => `formatted ${column.field}`
+                format: (value, row, column) => `${column.field}=${String(value)} (${String(row["other"])})`
             },
-            new Row({ test: "test" })
+            new Row({ other: 7, test: "abc" })
         );
         fixture.detectChanges();
 
-        expect(getCellText()).toBe("formatted test");
+        expect(getCellText()).toBe("test=abc (7)");
     });
 
     function getCellText(): string {

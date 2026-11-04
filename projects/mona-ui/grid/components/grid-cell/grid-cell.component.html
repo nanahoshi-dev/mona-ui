@@ -6,7 +6,6 @@
 } @else {
     <div
         [class]="cellContainerClass()"
-        cdkMonitorSubtreeFocus
         [attr.data-uid]="cellUid()"
         [attr.data-ruid]="row().uid"
         [attr.data-field]="dataKey"
@@ -18,7 +17,7 @@
                 [autoFocus]="shouldAutoFocusEditor()"
                 [session]="session"
                 [tabNavigationEnabled]="editContextIsCellMode()"
-                (commit)="onEditCommit()"
+                (commit)="onEditCommit($event)"
                 (cancelEdit)="onEditCancel()"
                 (tabNavigate)="onEditTabNavigate($event)"></mona-grid-editor>
         } @else if (column().cellTemplate) {
@@ -29,7 +28,10 @@
             <span [class]="cellTextClass()">{{ formattedDisplayValue() }}</span>
         }
         @if (!isCellPristine()) {
-            <span aria-hidden="true" [class]="cellDirtyIndicatorClass()" [title]="gridService.messages().modified"></span>
+            <span
+                aria-hidden="true"
+                [class]="cellDirtyIndicatorClass()"
+                [title]="gridService.messages().modified"></span>
         }
     </div>
 }

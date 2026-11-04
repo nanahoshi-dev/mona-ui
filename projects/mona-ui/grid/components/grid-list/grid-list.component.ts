@@ -6,16 +6,16 @@ import {
     Component,
     computed,
     DestroyRef,
+    effect,
     ElementRef,
     inject,
     input,
+    untracked,
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ImmutableList } from "@mirei/ts-collections";
-import { fromEvent } from "rxjs";
 import { Row } from "../../models/Row";
-import { GridNavigationService } from "../../services/grid-navigation.service";
 import { GridService } from "../../services/grid.service";
 import {
     gridListBaseThemeVariants,
@@ -23,6 +23,7 @@ import {
     gridRowDragPreviewThemeVariants,
     GridListVariantInput
 } from "../../styles/grid.styles";
+import { ContextMenuComponent } from "@nanahoshi/mona-ui/contextmenu";
 import { GridAddRowComponent } from "../grid-add-row/grid-add-row.component";
 import { GridColgroupComponent } from "../grid-colgroup/grid-colgroup.component";
 import { GridDetailRowComponent } from "../grid-detail-row/grid-detail-row.component";
@@ -50,6 +51,7 @@ const ROW_MOVE_SNAPSHOT_LIFETIME = 1000;
     selector: "mona-grid-list",
     templateUrl: "./grid-list.component.html",
     imports: [
+        ContextMenuComponent,
         LucideGripVertical,
         GridAddRowComponent,
         GridColgroupComponent,
@@ -67,14 +69,15 @@ const ROW_MOVE_SNAPSHOT_LIFETIME = 1000;
 })
 export class GridListComponent implements GridListVariantInput {
     readonly #destroyRef = inject(DestroyRef);
-    readonly #gridNavigationService = inject(GridNavigationService);
     readonly #hostElementRef = inject(ElementRef<HTMLDivElement>);
     readonly #rowMoveAnimations = new Map<HTMLTableRowElement, Animation>();
     #dropping = false;
     #rowPositionsBeforeMove: { readonly positions: ReadonlyMap<string, number>; readonly time: number } | null = null;
     private readonly bodyTableElementRef = viewChild.required<ElementRef<HTMLTableElement>>("bodyTable");
+    protected readonly ariaRows = computed(() => this.gridService.getBodyAriaRowIndices(this.bodyRows()));
     protected readonly baseClass = gridListBaseThemeVariants({ virtual: false });
     protected readonly bodyRows = computed(() => this.gridService.createBodyRows(this.data()));
+    protected readonly dropListData = computed(() => this.data().toArray());
     protected readonly gridService = inject(GridService);
     protected readonly rowDragPreviewClass = gridRowDragPreviewThemeVariants();
     protected readonly tableClass = gridListTableThemeVariants();
@@ -82,6 +85,10 @@ export class GridListComponent implements GridListVariantInput {
     public readonly data = input<ImmutableList<Row>>(ImmutableList.create());
 
     public constructor() {
+        effect(() => {
+            const count = this.ariaRows().count;
+            untracked(() => this.gridService.renderedBodyRowCount.set(count));
+        });
         afterNextRender({
             read: () => {
                 const bodyTableElement = this.bodyTableElementRef().nativeElement;
@@ -126,10 +133,6 @@ export class GridListComponent implements GridListVariantInput {
         } finally {
             this.#dropping = false;
         }
-    }
-
-    protected onBodyFocus(): void {
-        this.#gridNavigationService.focusActiveCellOrFirstHeader();
     }
 
     #canAnimateRowMoves(): boolean {
@@ -191,11 +194,6 @@ export class GridListComponent implements GridListVariantInput {
     }
 
     private setSubscriptions(): void {
-        fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focus")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(() => {
-                this.#gridNavigationService.focusActiveCellOrFirstHeader();
-            });
         this.gridService.rowReorder$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             if (this.#dropping || !this.#canAnimateRowMoves()) {
                 return;

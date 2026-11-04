@@ -2,6 +2,7 @@
  * Public API Surface of @nanahoshi/mona-ui/filter
  */
 
+export * from "./models/FilterDescriptorBuildArgs";
 export * from "./models/FilterMenuDataItem";
 export * from "./models/FilterMenuValue";
 export * from "./models/FilterMenuDateOptions";

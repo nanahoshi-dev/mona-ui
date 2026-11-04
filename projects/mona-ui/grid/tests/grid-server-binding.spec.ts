@@ -106,7 +106,7 @@ describe("server-bound grid interactions", () => {
 
     it("renders the current server page and its global row indices without an initial request", () => {
         expect(names()).toEqual(["Zoe", "Ada"]);
-        expect(element("tr[data-row-view-index='0']").getAttribute("aria-rowindex")).toBe("42");
+        expect(element("tr[data-row-view-index='0']").getAttribute("aria-rowindex")).toBe("43");
         expect(element("mona-pager").textContent).toContain("137");
         expect(host.events).toEqual([]);
     });
@@ -154,7 +154,7 @@ describe("server-bound grid interactions", () => {
         host.skip.set(0);
         host.loading.set(loading);
         await settle();
-        expect(element("mona-grid").getAttribute("aria-busy")).toBe(loading ? "true" : null);
+        expect(element("[role='grid']").getAttribute("aria-busy")).toBe(loading ? "true" : null);
         expect(fixture.nativeElement.querySelector("[data-grid-loading]") != null).toBe(loading);
         expect(fixture.nativeElement.textContent.includes("No data")).toBe(!loading);
         expect(element("mona-pager").textContent).toContain("0 - 0 of 0 items");
@@ -183,12 +183,12 @@ describe("server-bound grid interactions", () => {
         expect(host.events).toEqual([{ skip: 0, take: 10, sort: [], filter: [filter] }]);
     });
 
-    it("requests one final first-page state after page-size selection", async () => {
+    it("requests one state that keeps the first item in view after page-size selection", async () => {
         const pager = fixture.debugElement.query(By.directive(PagerComponent));
         const dropdown = pager.query(By.directive(DropdownListComponent));
-        dropdown.triggerEventHandler("ngModelChange", 20);
+        dropdown.triggerEventHandler("valueChange", 20);
         await settle();
-        expect(host.events).toEqual([{ skip: 0, take: 20, sort: [], filter: [] }]);
+        expect(host.events).toEqual([{ skip: 40, take: 20, sort: [], filter: [] }]);
     });
 
     it("sorts the UI and requests data without changing the loaded page order", async () => {
@@ -222,7 +222,7 @@ describe("server-bound grid interactions", () => {
         await settle();
         expect(host.events).toEqual([]);
         expect(host.sort()).toEqual([]);
-        expect(element("tr[data-row-view-index='0']").getAttribute("aria-rowindex")).toBe("42");
+        expect(element("tr[data-row-view-index='0']").getAttribute("aria-rowindex")).toBe("43");
     });
 
     it("synchronizes parent state without feedback requests", async () => {
@@ -235,13 +235,13 @@ describe("server-bound grid interactions", () => {
         await settle();
         expect(host.events).toEqual([]);
         expect(names()).toEqual(["Zoe", "Ada"]);
-        expect(element("tr[data-row-view-index='0']").getAttribute("aria-rowindex")).toBe("62");
+        expect(element("tr[data-row-view-index='0']").getAttribute("aria-rowindex")).toBe("63");
     });
 
     it("preserves rows during loading and suppresses the empty state for an empty loading page", async () => {
         host.loading.set(true);
         await settle();
-        expect(element("mona-grid").getAttribute("aria-busy")).toBe("true");
+        expect(element("[role='grid']").getAttribute("aria-busy")).toBe("true");
         expect(element("[data-grid-loading] mona-spinner").getAttribute("aria-label")).toBe("Loading");
         expect(names()).toEqual(["Zoe", "Ada"]);
         host.data.set([]);
@@ -251,7 +251,7 @@ describe("server-bound grid interactions", () => {
         host.loading.set(false);
         host.total.set(0);
         await settle();
-        expect(element("mona-grid").hasAttribute("aria-busy")).toBe(false);
+        expect(element("[role='grid']").hasAttribute("aria-busy")).toBe(false);
         expect(fixture.nativeElement.textContent).toContain("No data");
     });
 

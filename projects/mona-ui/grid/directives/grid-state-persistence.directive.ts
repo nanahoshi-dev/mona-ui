@@ -26,8 +26,9 @@ export class GridStatePersistenceDirective {
     public readonly state = model<GridState | null>(null);
 
     public constructor() {
+        // Applies the bound state once the columns exist; it reads no layout.
         afterNextRender({
-            read: () => {
+            write: () => {
                 if (this.#isEnabled()) {
                     const result = this.loadState(this.state());
                     if (result.status === "applied") {
@@ -52,7 +53,13 @@ export class GridStatePersistenceDirective {
         });
 
         effect(() => {
-            if (!this.#initialized() || this.#loadingState || !this.#isEnabled()) {
+            // A column drag reports its width once, when it ends.
+            if (
+                !this.#initialized() ||
+                this.#loadingState ||
+                !this.#isEnabled() ||
+                this.#gridService.columnResizeActive()
+            ) {
                 return;
             }
             const state = this.#gridService.captureState(this.#resolveOptions());

@@ -18,9 +18,9 @@ import { MONA_DEFAULT_LOCALE, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { GridService } from "../services/grid.service";
 
 interface ReorderRow extends Record<PropertyKey, unknown> {
+    amount: number;
     id: number;
     name: string;
-    amount: number;
 }
 
 function createRows(count: number): ReorderRow[] {
@@ -79,12 +79,16 @@ class RowReorderHostComponent {
     public readonly editable = signal<{ enabled: boolean; mode: "cell" }>({ enabled: false, mode: "cell" });
     public readonly groupable = signal({ enabled: false, showFooter: false });
     public readonly pageSize = signal(3);
+    public readonly reorderEvents: RowReorderEvent[] = [];
     public readonly rows = signal(createRows(5));
     public readonly selectedKeys = signal<unknown[]>([]);
     public readonly selection = signal<SelectableOptions>({ enabled: false, mode: "multiple", showCheckboxes: false });
     public readonly sortable = signal<{ enabled: boolean }>({ enabled: false });
-    public readonly reorderEvents: RowReorderEvent[] = [];
     public onRowReorderOverride: ((event: RowReorderEvent) => void) | null = null;
+
+    public onGridEditStart(_event: GridEditEvent): void {
+        // no-op; editing is only toggled through the service in tests
+    }
 
     public onRowReorder(event: RowReorderEvent): void {
         this.reorderEvents.push(event);
@@ -92,10 +96,6 @@ class RowReorderHostComponent {
         if (!event.isDefaultPrevented()) {
             this.rows.set([...(event.reorderedData as ReorderRow[])]);
         }
-    }
-
-    public onGridEditStart(_event: GridEditEvent): void {
-        // no-op; editing is only toggled through the service in tests
     }
 }
 
@@ -464,7 +464,7 @@ describe("grid row reordering integration", () => {
     describe("drop handling", () => {
         it("moves a row down through the drop handler and applies the pagination skip", async () => {
             const list = gridListOf(fixture);
-            const [first, , third] = gridService.rows().toArray();
+            const [first] = gridService.rows().toArray();
             host.pageSize.set(5);
             await settleFixture(fixture);
 

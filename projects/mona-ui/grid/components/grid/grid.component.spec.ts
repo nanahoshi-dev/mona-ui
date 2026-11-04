@@ -137,7 +137,10 @@ describe("GridComponent", () => {
         expect(gridClasses).toContain("bg-surface");
         expect(gridClasses).toContain("border-border");
         expect(headerCellClasses).toContain("border-e-border-subtle");
-        expect(headerCellClasses).toContain("focus:after:ring-focus-indicator/35");
+        expect(headerCellClasses).toContain(
+            "focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-focus-indicator"
+        );
+        expect(headerCellClasses).not.toContain("ring-focus-indicator/");
         expect(headerCellClasses).not.toContain("ring-primary");
     });
 
@@ -222,7 +225,7 @@ describe("GridComponent", () => {
             gridService.setReorderableOptions({ enabled: true });
 
             component["onColumnDragStart"](createDragStart(colA));
-            component["onColumnMouseEnter"](colC);
+            component["dropColumn"].set(colC);
             component["onColumnDrop"]();
 
             const fields = gridService
@@ -237,7 +240,7 @@ describe("GridComponent", () => {
             gridService.setReorderableOptions({ enabled: false });
 
             component["onColumnDragStart"](createDragStart(colA));
-            component["onColumnMouseEnter"](colC);
+            component["dropColumn"].set(colC);
             component["onColumnDrop"]();
 
             const fields = gridService
@@ -253,7 +256,7 @@ describe("GridComponent", () => {
             gridService.columnReorder$.subscribe((event: ColumnReorderEvent) => event.preventDefault());
 
             component["onColumnDragStart"](createDragStart(colA));
-            component["onColumnMouseEnter"](colC);
+            component["dropColumn"].set(colC);
             component["onColumnDrop"]();
 
             const fields = gridService

@@ -100,23 +100,43 @@ describe("GridColumnResizeHandlerDirective", () => {
             expect(gridService.getColumnWidth(gridService.columns().firstOrDefault()!)).toBe(130);
         });
 
-        it("does not apply a resize past minWidth", () => {
+        it("stops a drag past minWidth at minWidth (GV4)", () => {
             element.dispatchEvent(new PointerEvent("pointerdown", { clientX: 0, pointerId: 1, bubbles: true }));
             element.dispatchEvent(new PointerEvent("pointermove", { clientX: -100, pointerId: 1, bubbles: true }));
             element.dispatchEvent(new PointerEvent("pointerup", { clientX: -100, pointerId: 1, bubbles: true }));
 
             const event = fixture.componentInstance.onResizeEnd.mock.calls[0][0] as ColumnResizeEvent;
-            expect(event.newWidth).toBe(100);
-            expect(gridService.getColumnWidth(gridService.columns().firstOrDefault()!)).toBe(100);
+            expect(event.newWidth).toBe(50);
+            expect(gridService.getColumnWidth(gridService.columns().firstOrDefault()!)).toBe(50);
         });
 
-        it("does not apply a resize past maxWidth", () => {
+        it("stops a drag past maxWidth at maxWidth (GV4)", () => {
             element.dispatchEvent(new PointerEvent("pointerdown", { clientX: 0, pointerId: 1, bubbles: true }));
             element.dispatchEvent(new PointerEvent("pointermove", { clientX: 500, pointerId: 1, bubbles: true }));
             element.dispatchEvent(new PointerEvent("pointerup", { clientX: 500, pointerId: 1, bubbles: true }));
 
             const event = fixture.componentInstance.onResizeEnd.mock.calls[0][0] as ColumnResizeEvent;
+            expect(event.newWidth).toBe(200);
+        });
+
+        it("puts the width back when Escape is pressed during a drag (GV4)", () => {
+            element.dispatchEvent(new PointerEvent("pointerdown", { clientX: 0, pointerId: 1, bubbles: true }));
+            element.dispatchEvent(new PointerEvent("pointermove", { clientX: 40, pointerId: 1, bubbles: true }));
+            document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+
+            const event = fixture.componentInstance.onResizeEnd.mock.calls[0][0] as ColumnResizeEvent;
             expect(event.newWidth).toBe(100);
+            expect(gridService.getColumnWidth(gridService.columns().firstOrDefault()!)).toBe(100);
+            expect(gridService.columnResizeActive()).toBe(false);
+        });
+
+        it("doesn't change document.onselectstart (GV4)", () => {
+            const handler = (): boolean => true;
+            document.onselectstart = handler;
+            element.dispatchEvent(new PointerEvent("pointerdown", { clientX: 0, pointerId: 1, bubbles: true }));
+            expect(document.onselectstart).toBe(handler);
+            element.dispatchEvent(new PointerEvent("pointerup", { clientX: 0, pointerId: 1, bubbles: true }));
+            document.onselectstart = null;
         });
 
         it("decreases column width when dragged to the left in LTR", () => {
@@ -160,7 +180,7 @@ describe("GridColumnResizeHandlerDirective", () => {
             expect(gridService.getColumnWidth(gridService.columns().firstOrDefault()!)).toBe(80);
         });
 
-        it("does not apply a resize past minWidth in RTL", async () => {
+        it("stops a drag past minWidth at minWidth in RTL", async () => {
             element.setAttribute("dir", "rtl");
             fixture.detectChanges();
             await fixture.whenStable();
@@ -170,11 +190,11 @@ describe("GridColumnResizeHandlerDirective", () => {
             element.dispatchEvent(new PointerEvent("pointerup", { clientX: 100, pointerId: 1, bubbles: true }));
 
             const event = fixture.componentInstance.onResizeEnd.mock.calls[0][0] as ColumnResizeEvent;
-            expect(event.newWidth).toBe(100);
-            expect(gridService.getColumnWidth(gridService.columns().firstOrDefault()!)).toBe(100);
+            expect(event.newWidth).toBe(50);
+            expect(gridService.getColumnWidth(gridService.columns().firstOrDefault()!)).toBe(50);
         });
 
-        it("does not apply a resize past maxWidth in RTL", async () => {
+        it("stops a drag past maxWidth at maxWidth in RTL", async () => {
             element.setAttribute("dir", "rtl");
             fixture.detectChanges();
             await fixture.whenStable();
@@ -184,7 +204,52 @@ describe("GridColumnResizeHandlerDirective", () => {
             element.dispatchEvent(new PointerEvent("pointerup", { clientX: -500, pointerId: 1, bubbles: true }));
 
             const event = fixture.componentInstance.onResizeEnd.mock.calls[0][0] as ColumnResizeEvent;
-            expect(event.newWidth).toBe(100);
+            expect(event.newWidth).toBe(200);
+        });
+    });
+
+    describe("keyboard (GV3)", () => {
+        function press(key: string): KeyboardEvent {
+            const event = new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true });
+            element.dispatchEvent(event);
+            fixture.detectChanges();
+            return event;
+        }
+
+        function width(): number {
+            return gridService.getColumnWidth(gridService.columns().firstOrDefault()!);
+        }
+
+        it("is a focusable separator named after its column, with its width as the value", () => {
+            expect(element.getAttribute("role")).toBe("separator");
+            expect(element.getAttribute("tabindex")).toBe("-1");
+            expect(element.getAttribute("aria-orientation")).toBe("vertical");
+            expect(element.getAttribute("aria-label")).toBe("Resize name");
+            expect(element.getAttribute("aria-valuenow")).toBe("100");
+            expect(element.getAttribute("aria-valuemin")).toBe("50");
+            expect(element.getAttribute("aria-valuemax")).toBe("200");
+        });
+
+        it("resizes by 10px with the arrows and to the limits with Home and End", () => {
+            expect(press("ArrowRight").defaultPrevented).toBe(true);
+            expect(width()).toBe(110);
+            press("ArrowLeft");
+            press("ArrowLeft");
+            expect(width()).toBe(90);
+            press("Home");
+            expect(width()).toBe(50);
+            press("End");
+            expect(width()).toBe(200);
+            const events = fixture.componentInstance.onResizeEnd.mock.calls.map(call => call[0] as ColumnResizeEvent);
+            expect(events.at(-1)).toEqual(expect.objectContaining({ oldWidth: 50, newWidth: 200 }));
+        });
+
+        it("widens with ArrowLeft in RTL", async () => {
+            element.setAttribute("dir", "rtl");
+            fixture.detectChanges();
+            await fixture.whenStable();
+            press("ArrowLeft");
+            expect(width()).toBe(110);
         });
     });
 });

@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input, TemplateRef } from "@angular/core";
+import { Component, computed, inject, input, TemplateRef } from "@angular/core";
 import { ImmutableDictionary } from "@mirei/ts-collections";
 import { Column } from "../../models/Column";
 import type { GridAggregateBucket } from "../../models/GridAggregate";
@@ -26,11 +26,10 @@ interface GridGroupFooterTemplateContext extends GridFooterTemplateContext {
     template: `
         @if (templateRef(); as templateRef) {
             <ng-container [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="templateContext()"></ng-container>
-        } @else if (displayValue() != null) {
+        } @else if (displayValue() !== null && displayValue() !== undefined) {
             <span class="block truncate font-medium">{{ displayValue() }}</span>
         }
     `,
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [NgTemplateOutlet],
     host: {
         class: "flex items-center h-full"

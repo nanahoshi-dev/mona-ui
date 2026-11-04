@@ -20,6 +20,8 @@
     [firstInRow]="true"
     [lastInRow]="gridService.visibleColumns().length === 0"
     [groupKey]="group().groupKey"
+    [expanded]="!collapsed()"
+    [ariaColIndex]="titleColIndex()"
     [attr.colspan]="titleColspan()"
     (toggleExpand)="toggle()">
     <p [class]="titleClass()">

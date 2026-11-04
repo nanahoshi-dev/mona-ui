@@ -10,8 +10,8 @@ import { GridService } from "../services/grid.service";
 
 interface SelectionRow {
     id: number;
-    team: string;
     name: string;
+    team: string;
 }
 
 function createRows(count: number): SelectionRow[] {

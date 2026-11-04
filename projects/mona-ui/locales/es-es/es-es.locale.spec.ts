@@ -83,7 +83,7 @@ describe("MONA_ES_ES_LOCALE", () => {
         it("translates Grid messages correctly", () => {
             expect(m.grid?.all).toBe("(Todos)");
             expect(m.grid?.delete).toBe("Eliminar");
-            expect(m.grid?.deleteRowConfirmation).toBe("¿Seguro que deseas eliminar esta fila?");
+            expect(m.grid?.deleteRowConfirmation(3)).toBe("¿Seguro que deseas eliminar la fila 3?");
             expect(m.grid?.deleteRowTitle).toBe("¿Eliminar fila?");
             expect(m.grid?.edit).toBe("Editar");
             expect(m.grid?.filterPlaceholder).toBe("Filtrar...");

@@ -9,13 +9,18 @@ export class GridExportService {
     readonly #gridService = inject(GridService);
     readonly #platformId = inject(PLATFORM_ID);
 
+    /**
+     * Downloads the grid's rows as CSV: every row of the current view (filtered and sorted, all pages) in
+     * client mode, only the loaded page with server binding. Hidden and command columns are left out.
+     * Text that a spreadsheet would run as a formula is prefixed with `'`.
+     */
     public exportCsv(filename?: string): void {
         if (!isPlatformBrowser(this.#platformId)) {
             return;
         }
         const columns = this.#gridService
             .columns()
-            .where(c => !!c.field)
+            .where(c => !!c.field && !c.hidden && c.kind !== "command")
             .toArray();
         if (columns.length === 0) {
             return;
@@ -40,10 +45,12 @@ export class GridExportService {
     }
 
     #escapeCsvValue(value: string): string {
-        if (/[,"\r\n]/.test(value)) {
-            return '"' + value.replace(/"/g, '""') + '"';
+        // OWASP CSV injection: a leading =, +, -, @, tab or carriage return makes spreadsheets run the cell.
+        const text = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+        if (/[,"\r\n]/.test(text)) {
+            return '"' + text.replace(/"/g, '""') + '"';
         }
-        return value;
+        return text;
     }
 
     #formatValue(value: unknown, dataType: DataType): string {
@@ -52,7 +59,7 @@ export class GridExportService {
         }
         switch (dataType) {
             case "date":
-                return value instanceof Date ? value.toISOString().split("T")[0] : this.#escapeCsvValue(String(value));
+                return value instanceof Date ? formatLocalDate(value) : this.#escapeCsvValue(String(value));
             case "boolean":
             case "number":
                 return String(value);
@@ -60,4 +67,13 @@ export class GridExportService {
                 return this.#escapeCsvValue(String(value));
         }
     }
+}
+
+/** The calendar date as the user sees it (local time), as `YYYY-MM-DD`; empty for an invalid date. */
+function formatLocalDate(value: Date): string {
+    if (Number.isNaN(value.getTime())) {
+        return "";
+    }
+    const pad = (part: number): string => String(part).padStart(2, "0");
+    return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}`;
 }

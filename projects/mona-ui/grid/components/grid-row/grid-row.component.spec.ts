@@ -9,7 +9,7 @@ import { GridRowComponent } from "./grid-row.component";
 @Component({
     template: `<table>
         <tbody>
-            <tr monaGridRow [row]="row()" [index]="0"></tr>
+            <tr monaGridRow [row]="row()" [index]="0" [ariaRowIndex]="2"></tr>
         </tbody>
     </table>`,
     imports: [GridRowComponent],

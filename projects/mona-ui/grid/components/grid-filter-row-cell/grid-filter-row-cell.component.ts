@@ -1,6 +1,5 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
-    ChangeDetectionStrategy,
     Component,
     computed,
     DestroyRef,
@@ -16,15 +15,10 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormsModule } from "@angular/forms";
 import { LucideFunnel, LucideFunnelX } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { deepEquals } from "@nanahoshi/mona-ui/common";
 import { DatePickerComponent } from "@nanahoshi/mona-ui/date-picker";
 import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
-import {
-    FILTER_DEFAULT_MESSAGES,
-    type FilterMenuDataItem,
-    type FilterMenuValue,
-    FilterService
-} from "@nanahoshi/mona-ui/filter";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { type FilterMenuDataItem, type FilterMenuValue, FilterService } from "@nanahoshi/mona-ui/filter";
 import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
 import { PopupMenuCheckboxItemComponent, PopupMenuComponent } from "@nanahoshi/mona-ui/popup-menu";
 import type {
@@ -36,7 +30,7 @@ import type {
     StringFilterOperators
 } from "@nanahoshi/mona-ui/query";
 import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
-import { debounceTime, Subject } from "rxjs";
+import { map, of, Subject, switchMap, timer } from "rxjs";
 import { Column } from "../../models/Column";
 import type { ColumnFilterState } from "../../models/ColumnFilterState";
 import { GridService } from "../../services/grid.service";
@@ -45,10 +39,30 @@ import { gridFilterRowCellThemeVariants } from "../../styles/grid.styles";
 type RowFilterOperator = Exclude<FilterOperators, "function">;
 type RowFilterValue = string | number | Date | boolean | null | undefined;
 
+/** How long typing waits before it filters. */
+const INPUT_DEBOUNCE = 300;
+
+interface PendingFilter {
+    readonly delay: number;
+    readonly state: ColumnFilterState;
+}
+
+const VALUELESS_OPERATORS: ReadonlySet<FilterOperators> = new Set<FilterOperators>([
+    "isempty",
+    "isnotempty",
+    "isnotnull",
+    "isnotnullorempty",
+    "isnull",
+    "isnullorempty"
+]);
+
+/**
+ * One column's cell in the filter row: a value input, an operator menu and a Clear button. Typing filters after a
+ * short pause; anything else, Clear included, filters at once and drops typing that has not filtered yet.
+ */
 @Component({
     selector: "mona-grid-filter-row-cell",
     templateUrl: "./grid-filter-row-cell.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         FormsModule,
         TextBoxComponent,
@@ -67,33 +81,38 @@ type RowFilterValue = string | number | Date | boolean | null | undefined;
     }
 })
 export class GridFilterRowCellComponent {
+    /** This column's applied filter; other columns' changes don't reach it. */
+    readonly #appliedValue = computed<FilterMenuValue | null>(
+        () => this.#gridService.appliedFilters().get(this.column().field)?.filterMenuValue ?? null,
+        { equal: deepEquals }
+    );
+    /** The column's data type; marking the column filtered replaces its object, but not its type. */
+    readonly #dataType = computed(() => this.column().dataType);
     readonly #destroyRef = inject(DestroyRef);
     readonly #filterService = inject(FilterService);
     readonly #gridService = inject(GridService);
-    readonly #numberInput$ = new Subject<number | null>();
-    readonly #stringInput$ = new Subject<string>();
+    readonly #pending$ = new Subject<PendingFilter>();
+    /** What this cell last asked for, so its own filter coming back does not overwrite newer typing. */
+    #emittedValue: FilterMenuValue | null = null;
     protected readonly baseClass = computed(() => {
         return gridFilterRowCellThemeVariants();
     });
-    protected readonly booleanFilterMenuItems = this.#filterService.booleanFilterMenuItems;
+    protected readonly booleanFilterMenuItems = computed(() => this.#filterService.booleanFilterMenuItems);
     protected readonly booleanValue = signal<FilterMenuDataItem | null>(null);
-    protected readonly dateFilterMenuItems = this.#filterService.dateFilterMenuItems;
+    /** The column's format string; without one, the date picker uses the locale's date format. */
+    protected readonly dateFormat = computed(() => {
+        const format = this.column().format;
+        return typeof format === "string" ? format : null;
+    });
     protected readonly dateValue = signal<Date | null>(null);
-    protected readonly filterMessages = inject(MonaI18nService).componentMessages("filter", FILTER_DEFAULT_MESSAGES);
     protected readonly isFilterActive = computed(() => {
         const op = this.selectedOperator();
-        if (op === "isnull" || op === "isnotnull") {
+        if (VALUELESS_OPERATORS.has(op)) {
             return true;
         }
-        switch (this.column().dataType) {
+        switch (this.#dataType()) {
             case "string":
-                return (
-                    this.stringValue().trim().length > 0 ||
-                    op === "isempty" ||
-                    op === "isnotempty" ||
-                    op === "isnullorempty" ||
-                    op === "isnotnullorempty"
-                );
+                return this.stringValue().trim().length > 0;
             case "number":
                 return this.numberValue() !== null;
             case "date":
@@ -106,9 +125,28 @@ export class GridFilterRowCellComponent {
     });
     protected readonly messages = this.#gridService.messages;
     protected readonly numberValue = signal<number | null>(null);
-    protected readonly numericFilterMenuItems = this.#filterService.numericFilterMenuItems;
+    /** The operators of the column's type, with labels that follow the locale. */
+    protected readonly operatorItems = computed<FilterMenuDataItem[]>(() => {
+        switch (this.#dataType()) {
+            case "string":
+                return this.#filterService.stringFilterMenuItems;
+            case "number":
+                return this.#filterService.numericFilterMenuItems;
+            case "date":
+                return this.#filterService.dateFilterMenuItems;
+            default:
+                return [];
+        }
+    });
+    /** The operator button's name: the column and its current operator. */
+    protected readonly operatorLabel = computed(() => {
+        const operator = this.selectedOperator();
+        const text = this.operatorItems().find(item => item.value === operator)?.text ?? "";
+        return this.messages().filterOperator(this.column().title, text);
+    });
+    protected readonly operatorMenuOpen = signal(false);
+    /** Resets to the type's default only when the column's type changes. */
     protected readonly selectedOperator = linkedSignal<RowFilterOperator>(() => this.#getDefaultOperator());
-    protected readonly stringFilterMenuItems = this.#filterService.stringFilterMenuItems;
     protected readonly stringValue = signal<string>("");
 
     public readonly apply = output<ColumnFilterState>();
@@ -116,16 +154,38 @@ export class GridFilterRowCellComponent {
 
     public constructor() {
         effect(() => {
-            const filterState = this.#gridService.appliedFilters().get(this.column().field) ?? null;
-            untracked(() => this.#syncFromFilterState(filterState));
+            const value = this.#appliedValue();
+            untracked(() => {
+                if (!deepEquals(value, this.#emittedValue)) {
+                    this.#emittedValue = value;
+                    this.#syncFromFilterValue(value);
+                }
+            });
         });
-        this.#setValueChangeSubscriptions();
+        this.#pending$
+            .pipe(
+                switchMap(pending =>
+                    pending.delay > 0 ? timer(pending.delay).pipe(map(() => pending.state)) : of(pending.state)
+                ),
+                takeUntilDestroyed(this.#destroyRef)
+            )
+            .subscribe(state => {
+                // Nothing to clear: the pending filter is dropped and no filter change is reported.
+                if (state.filterMenuValue == null && this.#appliedValue() == null) {
+                    return;
+                }
+                this.apply.emit(state);
+            });
     }
 
-    protected onBooleanChange(value: FilterMenuDataItem): void {
+    protected onBooleanChange(value: FilterMenuDataItem | null): void {
         this.booleanValue.set(value);
+        if (value == null) {
+            this.#queueClear();
+            return;
+        }
         this.selectedOperator.set(value.value as RowFilterOperator);
-        this.#emitFilter(this.#getBooleanValue(value));
+        this.#queueFilter(this.#getBooleanValue(value));
     }
 
     protected onClear(): void {
@@ -134,50 +194,54 @@ export class GridFilterRowCellComponent {
         this.dateValue.set(null);
         this.booleanValue.set(null);
         this.selectedOperator.set(this.#getDefaultOperator());
-        this.#emitClearFilter();
+        this.#queueClear();
     }
 
     protected onDateChange(value: Date | null): void {
         this.dateValue.set(value);
         if (value) {
-            this.#emitFilter(value);
+            this.#queueFilter(value);
         } else {
-            this.#emitClearFilter();
+            this.#queueClear();
         }
     }
 
     protected onNumberChange(value: number | null): void {
         this.numberValue.set(value);
-        this.#numberInput$.next(value);
+        if (value != null) {
+            this.#queueFilter(value, INPUT_DEBOUNCE);
+        } else {
+            this.#queueClear(INPUT_DEBOUNCE);
+        }
     }
 
+    /** A valueless operator filters at once; any other waits for a value, and keeps the cell's choice. */
     protected onOperatorChange(operator: FilterOperators): void {
         this.selectedOperator.set(operator as RowFilterOperator);
-        const isValueless =
-            operator === "isnull" ||
-            operator === "isnotnull" ||
-            operator === "isempty" ||
-            operator === "isnotempty" ||
-            operator === "isnullorempty" ||
-            operator === "isnotnullorempty";
-        if (isValueless) {
-            this.#emitFilter(null);
+        if (VALUELESS_OPERATORS.has(operator)) {
+            this.#queueFilter(null);
             return;
         }
-        switch (this.column().dataType) {
+        switch (this.#dataType()) {
             case "string":
                 if (this.stringValue().trim()) {
-                    this.#emitFilter(this.stringValue());
+                    this.#queueFilter(this.stringValue().trim());
+                } else {
+                    this.#queueClear();
                 }
                 break;
             case "number":
                 if (this.numberValue() !== null) {
-                    this.#emitFilter(this.numberValue());
+                    this.#queueFilter(this.numberValue());
+                } else {
+                    this.#queueClear();
                 }
                 break;
             case "date":
                 if (this.dateValue()) {
-                    this.#emitFilter(this.dateValue());
+                    this.#queueFilter(this.dateValue());
+                } else {
+                    this.#queueClear();
                 }
                 break;
         }
@@ -185,54 +249,47 @@ export class GridFilterRowCellComponent {
 
     protected onStringChange(value: string): void {
         this.stringValue.set(value);
-        this.#stringInput$.next(value);
+        const trimmed = value.trim();
+        if (trimmed) {
+            this.#queueFilter(trimmed, INPUT_DEBOUNCE);
+        } else {
+            this.#queueClear(INPUT_DEBOUNCE);
+        }
     }
 
-    #emitClearFilter(): void {
-        this.apply.emit({ filter: { logic: "and", filters: [] } });
-    }
-
-    #emitFilter(value: RowFilterValue): void {
+    #buildFilter(value: RowFilterValue): CompositeFilterDescriptor {
         const operator = this.selectedOperator();
         const field = this.column().field;
-        let filter: CompositeFilterDescriptor;
-        const filterOperator = operator;
-        switch (this.column().dataType) {
-            case "string":
-                filter = this.#filterService.buildStringFilterDescriptor({
-                    field,
-                    logic: null,
-                    operator1: operator as StringFilterOperators,
-                    value1: value as string
-                });
-                break;
+        switch (this.#dataType()) {
             case "number":
-                filter = this.#filterService.buildNumberFilterDescriptor({
+                return this.#filterService.buildNumberFilterDescriptor({
                     field,
                     logic: null,
                     operator1: operator as NumericFilterOperators,
                     value1: value as number
                 });
-                break;
             case "date":
-                filter = this.#filterService.buildDateFilterDescriptor({
+                return this.#filterService.buildDateFilterDescriptor({
                     field,
                     logic: null,
                     operator1: operator as DateFilterOperators,
                     value1: value as Date
                 });
-                break;
             case "boolean":
-                filter = this.#filterService.buildBooleanFilterDescriptor({
+                return this.#filterService.buildBooleanFilterDescriptor({
                     field,
                     logic: null,
                     operator1: operator as BooleanFilterOperators,
                     value1: value != null ? (value as boolean) : null
                 });
-                break;
+            default:
+                return this.#filterService.buildStringFilterDescriptor({
+                    field,
+                    logic: null,
+                    operator1: operator as StringFilterOperators,
+                    value1: value as string
+                });
         }
-        const filterMenuValue: FilterMenuValue = { operator1: filterOperator, value1: value };
-        this.apply.emit({ filter, filterMenuValue });
     }
 
     #getBooleanValue(item: FilterMenuDataItem): boolean | null {
@@ -246,59 +303,46 @@ export class GridFilterRowCellComponent {
     }
 
     #getDefaultOperator(): RowFilterOperator {
-        const dataType = this.column().dataType;
-        return dataType === "string" ? "contains" : "eq";
+        return this.#dataType() === "string" ? "contains" : "eq";
     }
 
-    #syncFromFilterState(filterState: ColumnFilterState | null): void {
-        const column = this.column();
-        const dataType = column.dataType;
-        if (!filterState?.filterMenuValue) {
-            this.stringValue.set("");
-            this.numberValue.set(null);
-            this.dateValue.set(null);
-            this.booleanValue.set(null);
+    #queue(state: ColumnFilterState, delay: number): void {
+        this.#emittedValue = state.filterMenuValue ?? null;
+        this.#pending$.next({ delay, state });
+    }
+
+    #queueClear(delay = 0): void {
+        this.#queue({ filter: { logic: "and", filters: [] } }, delay);
+    }
+
+    #queueFilter(value: RowFilterValue, delay = 0): void {
+        const filterMenuValue: FilterMenuValue = { operator1: this.selectedOperator(), value1: value };
+        this.#queue({ filter: this.#buildFilter(value), filterMenuValue }, delay);
+    }
+
+    #syncFromFilterValue(value: FilterMenuValue | null): void {
+        this.stringValue.set("");
+        this.numberValue.set(null);
+        this.dateValue.set(null);
+        this.booleanValue.set(null);
+        if (value == null) {
             this.selectedOperator.set(this.#getDefaultOperator());
             return;
         }
-        const v = filterState.filterMenuValue;
-        switch (dataType) {
+        this.selectedOperator.set((value.operator1 as RowFilterOperator | undefined) ?? this.#getDefaultOperator());
+        switch (this.#dataType()) {
             case "string":
-                this.selectedOperator.set(v.operator1 as RowFilterOperator);
-                this.stringValue.set((v.value1 as string) ?? "");
+                this.stringValue.set((value.value1 as string | null) ?? "");
                 break;
             case "number":
-                this.selectedOperator.set(v.operator1 as RowFilterOperator);
-                this.numberValue.set((v.value1 as number) ?? null);
+                this.numberValue.set((value.value1 as number | null) ?? null);
                 break;
             case "date":
-                this.selectedOperator.set(v.operator1 as RowFilterOperator);
-                this.dateValue.set((v.value1 as Date) ?? null);
+                this.dateValue.set((value.value1 as Date | null) ?? null);
                 break;
-            case "boolean": {
-                this.selectedOperator.set(v.operator1 as RowFilterOperator);
-                const item = this.booleanFilterMenuItems.find(i => i.value === v.operator1) ?? null;
-                this.booleanValue.set(item);
+            case "boolean":
+                this.booleanValue.set(this.booleanFilterMenuItems().find(i => i.value === value.operator1) ?? null);
                 break;
-            }
         }
-    }
-
-    #setValueChangeSubscriptions(): void {
-        this.#stringInput$.pipe(debounceTime(300), takeUntilDestroyed(this.#destroyRef)).subscribe(value => {
-            if (value.trim()) {
-                this.#emitFilter(value);
-            } else {
-                this.#emitClearFilter();
-            }
-        });
-
-        this.#numberInput$.pipe(debounceTime(300), takeUntilDestroyed(this.#destroyRef)).subscribe(value => {
-            if (value !== null && value !== undefined) {
-                this.#emitFilter(value);
-            } else {
-                this.#emitClearFilter();
-            }
-        });
     }
 }

@@ -42,6 +42,18 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
     );
 
     /**
+     * @description Id of an element that describes the check box, such as an error message.
+     * @default ""
+     */
+    public readonly ariaDescribedBy = input("", { alias: "aria-describedby" });
+
+    /**
+     * @description Accessible name of the check box when it has no visible label.
+     * @default ""
+     */
+    public readonly ariaLabel = input("", { alias: "aria-label" });
+
+    /**
      * @description Whether the control is checked.
      * @default false
      */

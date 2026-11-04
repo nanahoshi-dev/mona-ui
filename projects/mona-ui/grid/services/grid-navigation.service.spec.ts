@@ -2,10 +2,15 @@ import { TestBed } from "@angular/core/testing";
 
 import { GridNavigationService, NavigationData } from "./grid-navigation.service";
 
+const connectedElements: HTMLElement[] = [];
+
+/** Cells are looked up only while they are in the document, as a virtual list keeps detached ones registered. */
 function createElement(): HTMLTableCellElement {
     const element = document.createElement("td");
     element.focus = vi.fn();
     element.scrollIntoView = vi.fn();
+    document.body.appendChild(element);
+    connectedElements.push(element);
     return element;
 }
 
@@ -32,6 +37,12 @@ describe("GridNavigationService", () => {
             providers: [GridNavigationService]
         });
         service = TestBed.inject(GridNavigationService);
+    });
+
+    afterEach(() => {
+        for (const element of connectedElements.splice(0)) {
+            element.remove();
+        }
     });
 
     it("should be created", () => {
@@ -470,5 +481,122 @@ describe("GridNavigationService", () => {
         const key = service.registerCell(first);
 
         expect(service.navigate(key, "Escape")).toBe(false);
+    });
+
+    describe("sections (GK7)", () => {
+        it("moves down through the header, the filter row, the add row and the body, and back up", () => {
+            const header = createData({ rowIndex: -1, colIndex: 0, columnId: "name", section: "header" });
+            const filter = createData({ rowIndex: -1, colIndex: 0, columnId: "name", section: "filter" });
+            const add = createData({ rowIndex: -1, colIndex: 0, columnId: "name", section: "add" });
+            const body = createData({ rowIndex: 0, colIndex: 0, columnId: "name", rowUid: "row-1" });
+            const [headerKey, filterKey, addKey, bodyKey] = [header, filter, add, body].map(cell =>
+                service.registerCell(cell)
+            );
+
+            expect(service.navigate(headerKey, "ArrowDown")).toBe(true);
+            expect(service.isFocused(filterKey)).toBe(true);
+            expect(service.navigate(filterKey, "ArrowDown")).toBe(true);
+            expect(service.isFocused(addKey)).toBe(true);
+            expect(service.navigate(addKey, "ArrowDown")).toBe(true);
+            expect(service.isFocused(bodyKey)).toBe(true);
+            expect(service.navigate(bodyKey, "ArrowUp")).toBe(true);
+            expect(service.isFocused(addKey)).toBe(true);
+            expect(service.navigate(addKey, "ArrowUp")).toBe(true);
+            expect(service.isFocused(filterKey)).toBe(true);
+        });
+    });
+
+    describe("detached cells (GK6)", () => {
+        it("skips cells that a virtual list has detached", () => {
+            const first = createData({ rowIndex: 0, colIndex: 0, rowUid: "row-1", columnId: "name" });
+            const detached = createData({ rowIndex: 1, colIndex: 0, rowUid: "row-2", columnId: "name" });
+            const third = createData({ rowIndex: 2, colIndex: 0, rowUid: "row-3", columnId: "name" });
+            const firstKey = service.registerCell(first);
+            service.registerCell(detached);
+            const thirdKey = service.registerCell(third);
+            detached.element.remove();
+
+            expect(service.navigate(firstKey, "ArrowDown")).toBe(true);
+            expect(service.isFocused(thirdKey)).toBe(true);
+            expect(detached.element.focus).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("page navigation (GK6)", () => {
+        function registerRows(count: number): string[] {
+            return Array.from({ length: count }, (_, rowIndex) =>
+                service.registerCell(createData({ rowIndex, colIndex: 0, rowUid: `row-${rowIndex}`, columnId: "name" }))
+            );
+        }
+
+        it("moves by a page of rows, and stops at the first and last rows", () => {
+            const keys = registerRows(25);
+
+            // Cells without a measured height move by ten rows.
+            expect(service.navigate(keys[0], "PageDown")).toBe(true);
+            expect(service.isFocused(keys[10])).toBe(true);
+            expect(service.navigate(keys[20], "PageDown")).toBe(true);
+            expect(service.isFocused(keys[24])).toBe(true);
+            expect(service.navigate(keys[24], "PageDown")).toBe(false);
+            expect(service.navigate(keys[5], "PageUp")).toBe(true);
+            expect(service.isFocused(keys[0])).toBe(true);
+        });
+
+        it("doesn't page from the header", () => {
+            registerRows(3);
+            const header = service.registerCell(
+                createData({ rowIndex: -1, colIndex: 0, columnId: "name", section: "header" })
+            );
+            expect(service.navigate(header, "PageDown")).toBe(false);
+        });
+    });
+
+    describe("virtual rows (GK6)", () => {
+        it("scrolls to a row that isn't drawn and focuses it once it registers", async () => {
+            const scrollToRow = vi.fn();
+            service.setRowScroller({ isNavigableRow: () => true, rowCount: () => 1000, scrollToRow });
+            const first = service.registerCell(
+                createData({ rowIndex: 0, colIndex: 0, rowUid: "row-0", columnId: "name", firstInRow: true })
+            );
+
+            expect(service.navigate(first, "CtrlEnd")).toBe(true);
+            expect(scrollToRow).toHaveBeenCalledWith(999);
+
+            const last = createData({ rowIndex: 999, colIndex: 1, rowUid: "row-999", columnId: "name" });
+            const lastKey = service.registerCell(last);
+            await Promise.resolve();
+            expect(last.element.focus).toHaveBeenCalled();
+            expect(service.isFocused(lastKey)).toBe(true);
+        });
+
+        it("moves by index past rows that aren't drawn, skipping rows that can't take focus", () => {
+            const scrollToRow = vi.fn();
+            service.setRowScroller({ isNavigableRow: index => index !== 1, rowCount: () => 10, scrollToRow });
+            const first = service.registerCell(createData({ rowIndex: 0, colIndex: 0, rowUid: "row-0" }));
+
+            expect(service.navigate(first, "ArrowDown")).toBe(true);
+            expect(scrollToRow).toHaveBeenCalledWith(2);
+        });
+
+        it("brings focus back to a cell whose row was scrolled out and drawn again", async () => {
+            const original = createData({ rowIndex: 40, colIndex: 0, rowUid: "row-40", columnId: "name" });
+            original.element.focus = HTMLElement.prototype.focus;
+            original.element.tabIndex = 0;
+            const key = service.registerCell(original);
+            original.element.focus();
+            service.setLastFocusedCellKey(key);
+
+            // The list detaches the row's view: focus falls to the body.
+            original.element.remove();
+            service.restoreLostFocus();
+            expect(document.activeElement).toBe(document.body);
+
+            const redrawn = createData({ rowIndex: 40, colIndex: 0, rowUid: "row-40", columnId: "name" });
+            redrawn.element.focus = HTMLElement.prototype.focus;
+            redrawn.element.tabIndex = -1;
+            service.registerCell(redrawn);
+            await Promise.resolve();
+            expect(document.activeElement).toBe(redrawn.element);
+        });
     });
 });

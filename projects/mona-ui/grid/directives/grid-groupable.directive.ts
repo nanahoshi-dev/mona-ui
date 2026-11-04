@@ -1,105 +1,46 @@
-import { DestroyRef, Directive, effect, inject, input, OnInit, output, untracked } from "@angular/core";
-import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
-import { any, orderBy, sequenceEqual } from "@mirei/ts-collections";
-import { filter, map, pairwise, skip, startWith } from "rxjs";
-import { GroupableOptions } from "../models/GroupableOptions";
-import { GroupDescriptor } from "../models/GroupDescriptor";
+import { DestroyRef, Directive, effect, inject, input, model, untracked } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { deepEquals } from "@nanahoshi/mona-ui/common";
+import type { GroupableOptions } from "../models/GroupableOptions";
+import type { GroupDescriptor } from "../models/GroupDescriptor";
 import { GridService } from "../services/grid.service";
 
 @Directive({
     selector: "mona-grid[monaGridGroupable]"
 })
-export class GridGroupableDirective implements OnInit {
+export class GridGroupableDirective {
     readonly #destroyRef = inject(DestroyRef);
     readonly #gridService = inject(GridService);
-    readonly #groupColumnsChange$ = toObservable(this.#gridService.groupColumns).pipe(
-        takeUntilDestroyed(this.#destroyRef),
-        startWith(this.#gridService.groupColumns()),
-        pairwise(),
-        filter(([prev, curr]) => {
-            return !sequenceEqual(
-                prev,
-                curr,
-                (p, n) => p.field === n.field && p.groupSortDirection === n.groupSortDirection
-            );
-        }),
-        map(([_, curr]) => {
-            return this.#gridService.getGroupDescriptors(curr);
-        })
-    );
-    readonly #groupSortChange$ = toObservable(this.#gridService.appliedGroupSorts).pipe(
-        takeUntilDestroyed(this.#destroyRef),
-        startWith(this.#gridService.appliedGroupSorts()),
-        pairwise(),
-        filter(([prev, curr]) => {
-            if (prev.length !== curr.length) {
-                return false; // Different number of sorts, not handled by this subscription
-            }
-            return (
-                !sequenceEqual(
-                    orderBy(prev, p => p.value.sort.field),
-                    orderBy(curr, p => p.value.sort.field)
-                ) ||
-                !sequenceEqual(
-                    orderBy(prev, p => p.value.sort.dir),
-                    orderBy(curr, p => p.value.sort.dir)
-                )
-            );
-        }),
-        map(() => {
-            const groupColumns = this.#gridService.groupColumns();
-            return this.#gridService.getGroupDescriptors(groupColumns);
-        })
-    );
-    /**
-     * @description Emitted when the applied group descriptors change, whether from dragging a column into the group panel or from a group sort change.
-     */
-    public readonly groupChange = output<GroupDescriptor[]>();
 
     /**
-     * @description Current group descriptors applied to the grid.
+     * @description Current group descriptors applied to the grid. A repeated field keeps its last descriptor;
+     * a field without a column is grouped once its column appears. Supports two-way binding: `groupChange`
+     * emits after the user groups, ungroups, reorders or re-sorts groups, and after a grid state is restored,
+     * never for a value set here.
      * @default []
      */
-    public group = input<Iterable<GroupDescriptor>>([]);
+    public readonly group = model<GroupDescriptor[]>([]);
 
     /**
-     * @description Enables column grouping on the grid. Pass a `GroupableOptions` object to configure group footer display.
+     * @description Enables column grouping on the grid. Pass a `GroupableOptions` object to configure group footer display. Grouping is on unless the object sets `enabled: false`.
      */
-    public options = input<GroupableOptions | "" | undefined>(undefined, {
+    public readonly options = input<Partial<GroupableOptions> | "" | undefined>(undefined, {
         alias: "monaGridGroupable"
     });
 
     public constructor() {
         effect(() => {
             const options = this.options();
-            untracked(() => {
-                if (options) {
-                    this.#gridService.setGroupableOptions(options);
-                } else if (options === "") {
-                    this.#gridService.setGroupableOptions({ enabled: true });
-                }
-            });
+            untracked(() => this.#gridService.setGroupableOptions(options || {}));
         });
         effect(() => {
             const group = this.group();
-            untracked(() => {
-                this.#gridService.loadGroupColumns(group);
-            });
+            untracked(() => this.#gridService.loadGroupColumns(group));
         });
-    }
-
-    public ngOnInit(): void {
-        this.setSubscriptions();
-    }
-
-    private setSubscriptions(): void {
-        this.#groupColumnsChange$
-            .pipe(skip(any(this.group()) ? 1 : 0), takeUntilDestroyed(this.#destroyRef))
-            .subscribe(groupDescriptors => {
-                this.groupChange.emit(groupDescriptors);
-            });
-        this.#groupSortChange$.subscribe(groupDescriptors => {
-            this.groupChange.emit(groupDescriptors);
+        this.#gridService.groupChange$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(groups => {
+            if (!deepEquals(groups, this.group())) {
+                this.group.set(groups);
+            }
         });
     }
 }

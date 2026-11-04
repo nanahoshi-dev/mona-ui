@@ -89,7 +89,7 @@ describe("MONA_KO_KR_LOCALE", () => {
         it("translates Grid messages correctly", () => {
             expect(m.grid.all).toBe("(모두)");
             expect(m.grid.delete).toBe("삭제");
-            expect(m.grid.deleteRowConfirmation).toBe("이 항목을 삭제하시겠습니까?");
+            expect(m.grid.deleteRowConfirmation(3)).toBe("3행을 삭제하시겠습니까?");
             expect(m.grid.deleteRowTitle).toBe("행 삭제?");
             expect(m.grid.edit).toBe("편집");
             expect(m.grid.filterPlaceholder).toBe("필터…");
@@ -99,7 +99,7 @@ describe("MONA_KO_KR_LOCALE", () => {
             expect(m.grid.remove).toBe("제거");
             expect(m.grid.save).toBe("저장");
             expect(m.grid.columns).toBe("열");
-            expect(m.grid.cancelRowEdit).toBe("행 편집 취소");
+            expect(m.grid.cancelRowEdit(3)).toBe("3행 편집 취소");
             expect(m.grid.dragColumnHeaderToGroup).toBe("열 머리글을 여기에 끌어놓아 그룹화하세요");
             expect(m.grid.rowReorder).toBe("행 순서 변경");
             expect(m.grid.selectAllRows).toBe("모든 행 선택");

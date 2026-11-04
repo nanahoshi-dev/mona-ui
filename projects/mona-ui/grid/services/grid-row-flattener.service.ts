@@ -1,10 +1,16 @@
 import { Injectable } from "@angular/core";
 import { Dictionary } from "@mirei/ts-collections";
+import { compareValues, type QueryOptions } from "@nanahoshi/mona-ui/query";
 import type { Column } from "../models/Column";
 import type { GridGroupAggregate } from "../models/GridAggregate";
 import type { GridViewDataRow, GridViewGroupFooterRow, GridViewGroupRow, GridViewRow } from "../models/GridGroup";
 import type { Row } from "../models/Row";
-import { compareGridComparableValues, toGridComparableValue } from "../utils/grid-comparable-value";
+import { buildGroupKey, groupRowsByField } from "./grid-group-key";
+
+/** Looks up a group's aggregates by group key (a `Dictionary` or an `ImmutableDictionary`). */
+export interface GridGroupAggregateLookup {
+    get(groupKey: string): GridGroupAggregate | null | undefined;
+}
 
 /**
  * A stateless service that groups and flattens rows into a linear `GridViewRow[]`
@@ -13,15 +19,15 @@ import { compareGridComparableValues, toGridComparableValue } from "../utils/gri
 @Injectable({ providedIn: "root" })
 export class GridRowFlattenerService {
     /**
-     * Builds a deterministic, hierarchical group key.
+     * Builds a deterministic, hierarchical group key. Values are typed, so `1` and `"1"` get different keys,
+     * while `null`, `undefined` and `""` share the empty group.
      *
      * @example
-     * buildGroupKey(null, "Country", "USA") // => "Country:USA"
-     * buildGroupKey("Country:USA", "City", "NYC") // => "Country:USA/City:NYC"
+     * buildGroupKey(null, "Country", "USA") // => "Country:s:USA"
+     * buildGroupKey("Country:s:USA", "City", "NYC") // => "Country:s:USA/City:s:NYC"
      */
     public buildGroupKey(parentKey: string | null, field: string, value: unknown): string {
-        const segment = `${field}:${String(value ?? "")}`;
-        return parentKey != null ? `${parentKey}/${segment}` : segment;
+        return buildGroupKey(parentKey, field, value);
     }
 
     /**
@@ -32,6 +38,7 @@ export class GridRowFlattenerService {
      * @param collapsedKeys - The set of group keys that are currently collapsed.
      * @param groupAggregates - The dictionary of group aggregates.
      * @param orderGroups - Orders buckets by direction. Disable for client rows already ordered by Query.
+     * @param options - The locale used to order string group values.
      * @returns A flat array of `GridViewRow` items.
      */
     public flatten(
@@ -39,8 +46,9 @@ export class GridRowFlattenerService {
         groupColumns: Iterable<Column>,
         collapsedKeys: ReadonlySet<string>,
         showFooter: boolean,
-        groupAggregates: Dictionary<string, GridGroupAggregate> = new Dictionary<string, GridGroupAggregate>(),
-        orderGroups = true
+        groupAggregates: GridGroupAggregateLookup = new Dictionary<string, GridGroupAggregate>(),
+        orderGroups = true,
+        options: QueryOptions = {}
     ): GridViewRow[] {
         const columnArray = [...groupColumns];
         if (columnArray.length === 0) {
@@ -55,7 +63,7 @@ export class GridRowFlattenerService {
             null,
             collapsedKeys,
             showFooter,
-            orderGroups,
+            orderGroups ? options : null,
             result
         );
         return result;
@@ -75,12 +83,12 @@ export class GridRowFlattenerService {
     #flattenRecursive(
         rows: Row[],
         groupColumns: Column[],
-        groupAggregates: Dictionary<string, GridGroupAggregate>,
+        groupAggregates: GridGroupAggregateLookup,
         depth: number,
         parentKey: string | null,
         collapsedKeys: ReadonlySet<string>,
         showFooter: boolean,
-        orderGroups: boolean,
+        groupOrder: QueryOptions | null,
         result: GridViewRow[]
     ): void {
         const column = groupColumns[depth];
@@ -88,37 +96,17 @@ export class GridRowFlattenerService {
             return;
         }
         const field = column.field;
-        const isDate = column.dataType === "date";
-
-        const groupMap = new Map<unknown, Row[]>();
-        const keyOrder: unknown[] = [];
-
-        for (const row of rows) {
-            const rawValue = row.data[field];
-            const mapKey = isDate && rawValue instanceof Date ? rawValue.toISOString() : rawValue;
-            if (!groupMap.has(mapKey)) {
-                groupMap.set(mapKey, []);
-                keyOrder.push(mapKey);
-            }
-            groupMap.get(mapKey)!.push(row);
-        }
-
-        const entries = keyOrder.map((mapKey, index) => ({ mapKey, index, rows: groupMap.get(mapKey)! }));
+        const entries = groupRowsByField(rows, field).map((group, index) => ({ ...group, index }));
         const direction = column.groupSortDirection;
-        if (orderGroups && direction != null) {
+        if (groupOrder != null && direction != null) {
             entries.sort((left, right) => {
-                const comparison = compareGridComparableValues(
-                    toGridComparableValue(left.rows[0].data[field]),
-                    toGridComparableValue(right.rows[0].data[field])
-                );
+                const comparison = compareValues(left.value, right.value, groupOrder);
                 return (direction === "asc" ? comparison : -comparison) || left.index - right.index;
             });
         }
 
-        for (const { mapKey } of entries) {
-            const groupRows = groupMap.get(mapKey)!;
-            const groupValue = groupRows[0].data[field];
-            const groupKey = this.buildGroupKey(parentKey, field, groupValue);
+        for (const { rows: groupRows, value: groupValue } of entries) {
+            const groupKey = buildGroupKey(parentKey, field, groupValue);
 
             const groupRow: GridViewGroupRow = {
                 count: groupRows.length,
@@ -143,7 +131,7 @@ export class GridRowFlattenerService {
                         groupKey,
                         collapsedKeys,
                         showFooter,
-                        orderGroups,
+                        groupOrder,
                         result
                     );
                 } else {

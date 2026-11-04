@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { GridService } from "../../services/grid.service";
 
 /**
@@ -9,8 +9,7 @@ import { GridService } from "../../services/grid.service";
     // A <colgroup> must be a direct child of <table>, so an element selector cannot be used here.
     // eslint-disable-next-line @angular-eslint/component-selector
     selector: "colgroup[monaGridColgroup]",
-    templateUrl: "./grid-colgroup.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./grid-colgroup.component.html"
 })
 export class GridColgroupComponent {
     protected readonly gridService = inject(GridService);

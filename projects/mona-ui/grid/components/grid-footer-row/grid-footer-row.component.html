@@ -4,7 +4,15 @@
             monaGridFooterTableCell
             [monaGridLockedCell]="layoutColumn.key"
             [lockedCellHeader]="true"
-            [footerColumn]="layoutColumn.column">
+            [footerColumn]="layoutColumn.column"
+            monaGridLogicalCell
+            [cellKind]="'footer'"
+            [columnId]="layoutColumn.column.id"
+            [colIndex]="layoutColumn.logicalIndex"
+            [rowIndex]="rowIndex()"
+            [section]="section()"
+            [firstInRow]="layoutColumn.firstInRow"
+            [lastInRow]="layoutColumn.lastInRow">
             <mona-grid-footer-cell
                 [column]="layoutColumn.column"
                 [columnIndex]="layoutColumn.columnIndex"

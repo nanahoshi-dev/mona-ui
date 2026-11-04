@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, input, model } from "@angular/core";
+import { Component, computed, input, model } from "@angular/core";
 import { LucideChevronDown, LucideChevronRight, LucideDynamicIcon, LucideMinus, LucidePlus } from "@lucide/angular";
 
 @Component({
     selector: "mona-grid-toggle",
     imports: [LucideDynamicIcon],
-    templateUrl: "./grid-toggle.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./grid-toggle.component.html"
 })
 export class GridToggleComponent {
     protected readonly collapseIcon = computed(() => {
@@ -18,6 +17,8 @@ export class GridToggleComponent {
     });
 
     public readonly expanded = model.required<boolean>();
+    /** The detail toggle button's name, such as "Expand details of row 3". */
+    public readonly label = input<string | null>(null);
     public readonly type = input.required<"detail" | "group">();
     public readonly width = input.required<number>();
 

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
+import { Component, computed, inject, input } from "@angular/core";
 import { GridCellDirective } from "../../directives/grid-cell.directive";
 import { GridLockedCellDirective } from "../../directives/grid-locked-cell.directive";
 import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
@@ -15,13 +15,13 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
     // eslint-disable-next-line @angular-eslint/component-selector
     selector: "tr[monaGridGroupRow]",
     templateUrl: "./grid-group-row.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [GridCellDirective, GridLockedCellDirective, GridLogicalCellDirective, GridToggleComponent],
     host: {
         "[class]": "rowClass()",
         role: "row",
         "[attr.aria-level]": "group().depth + 1",
-        "[attr.aria-expanded]": "!collapsed()"
+        "[attr.aria-expanded]": "!collapsed()",
+        "[attr.aria-rowindex]": "ariaRowIndex()"
     }
 })
 export class GridGroupRowComponent {
@@ -38,12 +38,17 @@ export class GridGroupRowComponent {
             ? "absolute inset-0 flex items-center text-sm whitespace-nowrap overflow-hidden"
             : "flex min-h-9 items-center text-sm whitespace-nowrap"
     );
+    /** The title cell comes after the indents and the reorder placeholder. */
+    protected readonly titleColIndex = computed(
+        () => this.group().depth + (this.gridService.rowReorderColumnVisible() ? 1 : 0) + 1
+    );
     // Everything after the indents and the reorder placeholder.
     protected readonly titleColspan = computed(
         () =>
             this.gridService.layout().length - this.group().depth - (this.gridService.rowReorderColumnVisible() ? 1 : 0)
     );
 
+    public readonly ariaRowIndex = input<number | null>(null);
     public readonly group = input.required<GridViewGroupRow>();
     /** The index of this row among the rendered body rows. */
     public readonly rowIndex = input.required<number>();

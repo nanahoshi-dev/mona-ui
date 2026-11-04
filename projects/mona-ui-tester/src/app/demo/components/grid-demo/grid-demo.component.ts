@@ -1,6 +1,7 @@
 import { JsonPipe, NgComponentOutlet } from "@angular/common";
 import {
     afterNextRender,
+    booleanAttribute,
     ChangeDetectionStrategy,
     Component,
     computed,
@@ -8,6 +9,7 @@ import {
     inject,
     input,
     linkedSignal,
+    model,
     signal
 } from "@angular/core";
 import { FormField, type SchemaPathTree, validate } from "@angular/forms/signals";
@@ -473,8 +475,11 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
         }
 
         <mona-grid
+            ariaLabel="Orders"
             [data]="effectiveGridData"
-            [pageSize]="pageSize()"
+            [(pageSize)]="pageSize"
+            [(skip)]="skip"
+            [(expandedKeys)]="expandedKeys"
             [pageSizeValues]="pageSizeValues()"
             [resizeMethod]="resizeMethod()"
             [responsivePager]="responsivePager()"
@@ -576,6 +581,7 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
                             <div class="w-full h-full flex flex-col justify-center">
                                 <mona-text-box
                                     [formField]="$any(context.field)"
+                                    aria-label="Ship Name"
                                     [rounded]="'none'"
                                     [size]="'small'"
                                     (keydown.enter)="onCustomTextBoxEdit(context)"
@@ -603,7 +609,6 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
                 [width]="100"
                 [locked]="true"
                 [lockedPosition]="'right'"
-                [title]="'Commands'"
                 [removeConfirmation]="true">
                 <!--                <ng-template monaGridCellTemplate let-edit="edit">-->
                 <!--                    <button monaButton [iconOnly]="true" size="small" look="clear" (click)="edit()">-->
@@ -871,11 +876,13 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         return virtualization;
     });
     public readonly data = input<ReturnType<GridComponent<unknown>["data"]>>([]);
-    public readonly pageSize = input<ReturnType<GridComponent<unknown>["pageSize"]>>(10);
+    public readonly expandedKeys = model<unknown[]>([]);
+    public readonly pageSize = model<number | undefined>(10);
     public readonly pageSizeValues = input<ReturnType<GridComponent<unknown>["pageSizeValues"]>>([10, 20, 30, 40, 50]);
     public readonly resizeMethod = input<ReturnType<GridComponent<unknown>["resizeMethod"]>>("fitView");
     public readonly rounded = input<ReturnType<GridComponent<unknown>["rounded"]>>("medium");
-    public readonly responsivePager = input<ReturnType<GridComponent<unknown>["responsivePager"]>>(false);
+    public readonly responsivePager = input(false, { transform: booleanAttribute });
+    public readonly skip = model(0);
     public readonly userClass = input<ReturnType<GridComponent<unknown>["userClass"]>>("w-full h-112");
 
     public constructor() {
@@ -961,7 +968,9 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         if (originalRowData == null) {
             return;
         }
-        this.setActiveGridData(gridData.map(row => (row === originalRowData ? event.rowData : row)));
+        // Matched by key: the edited row may be a newer object than the one the edit started from.
+        const orderId = originalRowData["OrderID"];
+        this.setActiveGridData(gridData.map(row => (row["OrderID"] === orderId ? event.rowData : row)));
     }
 
     protected onScrollEnd(): void {

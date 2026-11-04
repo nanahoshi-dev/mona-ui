@@ -121,7 +121,8 @@ export const gridColumnDropHintThemeVariants = cva(`
 `);
 
 export const gridColumnResizerThemeVariants = cva(`
-    absolute top-0 bottom-0 w-3 bg-transparent cursor-col-resize z-10 -end-1.5
+    absolute top-0 bottom-0 w-3 bg-transparent cursor-col-resize z-10 -end-1.5 touch-none
+    outline-none focus-visible:bg-focus-indicator/40
 `);
 
 export const gridRowReorderHandleThemeVariants = cva(`
@@ -175,11 +176,13 @@ export const gridFooterTableRowThemeVariants = cva(`relative inline-flex [&>td:l
 
 export const gridFooterTableCellThemeVariants = cva(
     `
-        relative overflow-hidden
+        relative overflow-hidden outline-none
         text-start align-middle px-2 py-2
         bg-surface-muted
         border-e border-e-border-subtle border-b border-b-border-subtle
         font-medium
+        after:absolute after:inset-0 after:pointer-events-none
+        focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-focus-indicator
     `
 );
 
@@ -228,7 +231,17 @@ export const gridHeaderTableCellThemeVariants = cva(
         text-start overflow-visible
         outline-none border-e border-e-border-subtle
         after:absolute after:inset-0 after:pointer-events-none
-        focus:after:ring-1 focus:after:ring-inset focus:after:ring-focus-indicator/35
+        focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-focus-indicator
+    `
+);
+
+/** A `th` of the filter row: the grid's keys reach it, and Enter or F2 moves into its filter. */
+export const gridFilterRowHeaderCellThemeVariants = cva(
+    `
+        relative overflow-hidden
+        outline-none border-e border-border
+        after:absolute after:inset-0 after:pointer-events-none
+        focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-focus-indicator
     `
 );
 
@@ -299,7 +312,7 @@ export const gridListTableCellThemeVariants = cva(
         border-b border-b-border-subtle
         after:content-[''] after:block
         after:absolute after:inset-0 after:pointer-events-none
-        focus:after:ring-1 focus:after:ring-inset focus:after:ring-focus-indicator/35
+        focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-focus-indicator
     `,
     {
         variants: {

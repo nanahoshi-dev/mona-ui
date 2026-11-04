@@ -55,7 +55,7 @@ describe("MONA_ID_ID_LOCALE", () => {
         it("translates Grid messages correctly with Indonesian terminology", () => {
             expect(m.grid?.all).toBe("(Semua)");
             expect(m.grid?.delete).toBe("Hapus");
-            expect(m.grid?.deleteRowConfirmation).toBe("Anda yakin ingin menghapus item ini?");
+            expect(m.grid?.deleteRowConfirmation(3)).toBe("Anda yakin ingin menghapus baris 3?");
             expect(m.grid?.deleteRowTitle).toBe("Hapus baris?");
             expect(m.grid?.edit).toBe("Sunting");
             expect(m.grid?.filterPlaceholder).toBe("Saring...");

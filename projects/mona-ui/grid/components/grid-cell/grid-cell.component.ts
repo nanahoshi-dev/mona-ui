@@ -1,9 +1,9 @@
-import { A11yModule } from "@angular/cdk/a11y";
 import { formatDate, NgTemplateOutlet } from "@angular/common";
 import { afterNextRender, Component, computed, ElementRef, inject, Injector, input, LOCALE_ID } from "@angular/core";
 import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
 import { Column } from "../../models/Column";
 import { Row } from "../../models/Row";
+import { GRID_CELL_FOCUSABLE_SELECTOR } from "../../services/grid-cell-tab-stops";
 import { GridNavigationService } from "../../services/grid-navigation.service";
 import { GridService } from "../../services/grid.service";
 import {
@@ -13,14 +13,12 @@ import {
     gridCellTextThemeVariants
 } from "../../styles/grid.styles";
 import { GridCommandCellComponent } from "../grid-command-cell/grid-command-cell.component";
-import { GridEditorComponent } from "../grid-editor/grid-editor.component";
-
-const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [tabindex]";
+import { GridEditorComponent, type GridEditorCommitTrigger } from "../grid-editor/grid-editor.component";
 
 @Component({
     selector: "mona-grid-cell",
     templateUrl: "./grid-cell.component.html",
-    imports: [A11yModule, GridCommandCellComponent, GridEditorComponent, NgTemplateOutlet],
+    imports: [GridCommandCellComponent, GridEditorComponent, NgTemplateOutlet],
     host: {
         "[class]": "baseClass()"
     }
@@ -44,7 +42,7 @@ export class GridCellComponent {
     protected readonly cellTextClass = computed(() => {
         return gridCellTextThemeVariants();
     });
-    protected readonly cellUid = computed(() => `${this.row().uid}_${this.column().field}`);
+    protected readonly cellUid = computed(() => `${this.row().uid}_${this.column().id}`);
     protected readonly displayValue = computed(() => {
         const editedRowData = this.gridService.editViewDict().get(this.row().uid);
         const rowData = this.row().data;
@@ -60,7 +58,7 @@ export class GridCellComponent {
             return value;
         }
         if (typeof format === "function") {
-            return format(column);
+            return format(value, this.row().data, column);
         }
         if (column.dataType === "date") {
             return this.formatDateValue(value, format);
@@ -69,14 +67,13 @@ export class GridCellComponent {
     });
     protected readonly gridService = inject(GridService);
     protected readonly isCellPristine = computed(() => {
-        const rowUid = this.row().uid;
-        const field = this.column().field;
-        const originalRowData = this.gridService.editBaseDict().get(rowUid);
-        const editedRowData = this.gridService.editViewDict().get(rowUid);
-        if (!originalRowData || !editedRowData) {
+        const row = this.row();
+        const editedRowData = this.gridService.editViewDict().get(row.uid);
+        if (!editedRowData) {
             return true;
         }
-        return originalRowData[field] === editedRowData[field];
+        const field = this.column().field;
+        return row.data[field] === editedRowData[field];
     });
     protected readonly isEditing = computed(() => {
         const context = this.gridService.editContext();
@@ -96,6 +93,9 @@ export class GridCellComponent {
         if (context?.mode !== "row" || context.rowUid !== this.row().uid) {
             return false;
         }
+        if (context.focusColumnId != null) {
+            return context.focusColumnId === this.column().id;
+        }
         return (
             this.gridService.visibleColumns().firstOrDefault(column => column.kind === "data" && column.editable) ===
             this.column()
@@ -104,12 +104,12 @@ export class GridCellComponent {
     public readonly column = input.required<Column>();
     public readonly row = input.required<Row>();
 
+    /** Enter or F2: edits the cell in cell mode; in row mode, edits the row from this cell's editor. */
     public handleLogicalCellEnter(originalEvent?: Event): void {
-        if (!this.gridService.editableOptions().enabled || !this.column().editable || this.column().kind !== "data") {
+        const editableOptions = this.gridService.editableOptions();
+        if (!editableOptions.enabled || this.column().kind !== "data") {
             return;
         }
-
-        const editableOptions = this.gridService.editableOptions();
         if (editableOptions.mode === "cell") {
             this.startEdit(originalEvent);
             return;
@@ -120,7 +120,8 @@ export class GridCellComponent {
             this.focusInnerEditor();
             return;
         }
-        this.gridService.startRowEdit(this.row(), originalEvent);
+        const column = this.column();
+        this.gridService.startRowEdit(this.row(), originalEvent, column.editable ? column.id : null);
     }
 
     protected onCellDoubleClick(event: MouseEvent): void {
@@ -129,27 +130,23 @@ export class GridCellComponent {
         }
     }
 
-    protected onCellValueChange(value: unknown): void {
-        this.gridService.patchCellEdit(this.row().uid, this.column().field, value);
+    /** Escape: cancels the cell or row edit. Focus stays in the editor when the cancel is prevented. */
+    protected onEditCancel(): void {
+        if (this.gridService.editContext() != null && this.gridService.cancelEdit(undefined, "escape")) {
+            this.focusHostCell();
+        }
     }
 
-    protected onEditCancel(): void {
+    /** Ends a cell edit on Enter or blur; a row edit only on Enter, as focus moves between its editors. */
+    protected onEditCommit(trigger: GridEditorCommitTrigger): void {
         const context = this.gridService.editContext();
         if (context?.mode === "cell") {
-            this.gridService.cancelEdit();
-        }
-        this.focusHostCell();
-    }
-
-    protected onEditCommit(): void {
-        const context = this.gridService.editContext();
-        if (context && context.mode === "cell") {
             if (this.gridService.stopCellEdit()) {
                 this.focusHostCell();
             }
             return;
         }
-        if (this.#elementRef.nativeElement.contains(this.#elementRef.nativeElement.ownerDocument.activeElement)) {
+        if (context?.mode === "row" && trigger === "enter" && this.gridService.commitRowEdit()) {
             this.focusHostCell();
         }
     }
@@ -171,7 +168,10 @@ export class GridCellComponent {
                     if (this.#gridNavigationService.focusAdjacentEditableCell(rowUid, columnId, direction)) {
                         return;
                     }
-                    this.#logicalCell?.focusNextPageTabTarget(direction === "previous");
+                    // The last editable cell: Tab leaves the grid, or stays on the cell when nothing follows it.
+                    if (!this.#logicalCell?.leaveGrid(direction === "previous")) {
+                        this.focusHostCell();
+                    }
                 }
             },
             { injector: this.#injector }
@@ -184,7 +184,7 @@ export class GridCellComponent {
     }
 
     private focusInnerEditor(): void {
-        const target = this.#elementRef.nativeElement.querySelector(FOCUSABLE_TARGET_SELECTOR) as HTMLElement | null;
+        const target = this.#elementRef.nativeElement.querySelector(GRID_CELL_FOCUSABLE_SELECTOR) as HTMLElement | null;
         target?.focus();
     }
 

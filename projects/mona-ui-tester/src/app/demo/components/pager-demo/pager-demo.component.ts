@@ -1,6 +1,15 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, signal } from "@angular/core";
-import { FormsModule } from "@angular/forms";
+import {
+    booleanAttribute,
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    inject,
+    input,
+    linkedSignal,
+    model,
+    signal
+} from "@angular/core";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { DropdownListComponent, DropdownListValueTemplateDirective } from "@nanahoshi/mona-ui/dropdown-list";
 import { DropdownItemTemplateDirective } from "@nanahoshi/mona-ui/dropdowns";
@@ -34,45 +43,48 @@ const FIRST_PAGE_BUTTON_TEMPLATE_CODE = `<ng-template
     monaPagerNavigationButtonsTemplate
     type="first"
     let-disabled="disabled"
-    let-pageSize="pageSize"
-    let-totalPages="totalPages">
+    let-navigate="navigate">
     <button
         monaButton
         look="info"
         [rounded]="rounded()"
         [size]="size()"
-        (click)="skipValue.set(0)"
+        (click)="navigate()"
         [disabled]="disabled"
         class="mx-0.5">
         F
     </button>
 </ng-template>`;
 
-const NUMERIC_BUTTONS_TEMPLATE_CODE = `<ng-template monaPagerNumericButtonsTemplate let-totalPages="totalPages">
-    <div class="flex items-center h-full px-2">
+const NUMERIC_BUTTONS_TEMPLATE_CODE = `<ng-template
+    monaPagerNumericButtonsTemplate
+    let-totalPages="totalPages"
+    let-currentPage="currentPage"
+    let-goToPage="goToPage">
+    <li class="flex items-center h-full px-2">
         <mona-slider
+            aria-label="Page"
             [minValue]="1"
             [maxValue]="totalPages"
             [showTicks]="false"
             [showLabels]="false"
-            [value]="page()"
-            (valueChange)="onSliderChange($event)">
+            [value]="currentPage"
+            (valueChange)="goToPage($event)">
         </mona-slider>
-    </div>
+    </li>
 </ng-template>`;
 
 const LAST_PAGE_BUTTON_TEMPLATE_CODE = `<ng-template
     monaPagerNavigationButtonsTemplate
     type="last"
-    let-totalPages="totalPages"
-    let-pageSize="pageSize"
-    let-disabled="disabled">
+    let-disabled="disabled"
+    let-navigate="navigate">
     <button
         monaButton
         look="info"
         [rounded]="rounded()"
         [size]="size()"
-        (click)="skipValue.set((totalPages - 1) * pageSize)"
+        (click)="navigate()"
         [disabled]="disabled"
         class="mx-0.5">
         L
@@ -83,25 +95,29 @@ const NEXT_PAGE_BUTTON_TEMPLATE_CODE = `<ng-template
     monaPagerNavigationButtonsTemplate
     type="next"
     let-disabled="disabled"
-    let-pageSize="pageSize"
-    let-totalPages="totalPages">
+    let-navigate="navigate">
     <button
         monaButton
         look="success"
         [rounded]="rounded()"
         [size]="size()"
-        (click)="skipValue.set(page() * pageSize)"
+        (click)="navigate()"
         [disabled]="disabled"
         class="mx-0.5">
         N
     </button>
 </ng-template>`;
 
-const PAGE_SIZE_TEMPLATE_CODE = `<ng-template monaPagerPageSizeTemplate let-pageSizeValues>
+const PAGE_SIZE_TEMPLATE_CODE = `<ng-template
+    monaPagerPageSizeTemplate
+    let-pageSizeValues
+    let-pageSize="pageSize"
+    let-setPageSize="setPageSize">
     <mona-dropdown-list
         [data]="pageSizeValues"
-        [ngModel]="pageSizeValue()"
-        (ngModelChange)="pageSizeValue.set($event)"
+        aria-label="Items per page"
+        [value]="pageSize"
+        (valueChange)="setPageSize($event)"
         class="w-28">
         <ng-template monaDropDownListValueTemplate let-dataItem>
             <span class="px-2 text-blue-400">{{ dataItem }}</span>
@@ -116,14 +132,13 @@ const PREVIOUS_PAGE_BUTTON_TEMPLATE_CODE = `<ng-template
     monaPagerNavigationButtonsTemplate
     type="previous"
     let-disabled="disabled"
-    let-pageSize="pageSize"
-    let-totalPages="totalPages">
+    let-navigate="navigate">
     <button
         monaButton
         look="success"
         [rounded]="rounded()"
         [size]="size()"
-        (click)="skipValue.set((page() - 2) * pageSize)"
+        (click)="navigate()"
         [disabled]="disabled"
         class="mx-0.5">
         P
@@ -259,7 +274,6 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
         PagerInfoTemplateDirective,
         PagerNumericButtonsTemplateDirective,
         SliderComponent,
-        FormsModule,
         PagerNavigationButtonsTemplateDirective,
         ButtonDirective,
         PagerPageSizeTemplateDirective,
@@ -272,17 +286,18 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
         <div class="flex flex-col gap-4 w-full">
             <span class="text-4xl font-semibold inline-flex items-center justify-center">{{ page() }}</span>
             <mona-pager
+                aria-label="Demo pages"
                 [firstLast]="firstLast()"
                 [navigable]="navigable()"
                 [pageInput]="pageInput()"
-                [pageSize]="pageSizeValue()"
+                [(pageSize)]="pageSizeValue"
                 [pageSizeValues]="pageSizeValues()"
                 [previousNext]="previousNext()"
                 [responsive]="responsive()"
                 [rounded]="rounded()"
                 [showInfo]="showInfo()"
                 [size]="size()"
-                [skip]="skipValue()"
+                [(skip)]="skipValue"
                 [total]="total()"
                 [type]="type()"
                 [visiblePages]="visiblePages()"
@@ -304,14 +319,13 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
                         monaPagerNavigationButtonsTemplate
                         type="first"
                         let-disabled="disabled"
-                        let-pageSize="pageSize"
-                        let-totalPages="totalPages">
+                        let-navigate="navigate">
                         <button
                             monaButton
                             look="info"
                             [rounded]="rounded()"
                             [size]="size()"
-                            (click)="skipValue.set(0)"
+                            (click)="navigate()"
                             [disabled]="disabled"
                             class="mx-0.5">
                             F
@@ -319,32 +333,36 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
                     </ng-template>
                 }
                 @if (featureData["numericButtonsTemplate"].active) {
-                    <ng-template monaPagerNumericButtonsTemplate let-totalPages="totalPages">
-                        <div class="flex items-center h-full px-2">
+                    <ng-template
+                        monaPagerNumericButtonsTemplate
+                        let-totalPages="totalPages"
+                        let-currentPage="currentPage"
+                        let-goToPage="goToPage">
+                        <li class="flex items-center h-full px-2">
                             <mona-slider
+                                aria-label="Page"
                                 [minValue]="1"
                                 [maxValue]="totalPages"
                                 [showTicks]="false"
                                 [showLabels]="false"
-                                [value]="page()"
-                                (valueChange)="onSliderChange($event)">
+                                [value]="currentPage"
+                                (valueChange)="goToPage($event)">
                             </mona-slider>
-                        </div>
+                        </li>
                     </ng-template>
                 }
                 @if (featureData["lastPageButtonTemplate"].active) {
                     <ng-template
                         monaPagerNavigationButtonsTemplate
                         type="last"
-                        let-totalPages="totalPages"
-                        let-pageSize="pageSize"
-                        let-disabled="disabled">
+                        let-disabled="disabled"
+                        let-navigate="navigate">
                         <button
                             monaButton
                             look="info"
                             [rounded]="rounded()"
                             [size]="size()"
-                            (click)="skipValue.set((totalPages - 1) * pageSize)"
+                            (click)="navigate()"
                             [disabled]="disabled"
                             class="mx-0.5">
                             L
@@ -356,14 +374,13 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
                         monaPagerNavigationButtonsTemplate
                         type="next"
                         let-disabled="disabled"
-                        let-pageSize="pageSize"
-                        let-totalPages="totalPages">
+                        let-navigate="navigate">
                         <button
                             monaButton
                             look="success"
                             [rounded]="rounded()"
                             [size]="size()"
-                            (click)="skipValue.set(page() * pageSize)"
+                            (click)="navigate()"
                             [disabled]="disabled"
                             class="mx-0.5">
                             N
@@ -371,11 +388,16 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
                     </ng-template>
                 }
                 @if (featureData["pageSizeTemplate"].active) {
-                    <ng-template monaPagerPageSizeTemplate let-pageSizeValues>
+                    <ng-template
+                        monaPagerPageSizeTemplate
+                        let-pageSizeValues
+                        let-pageSize="pageSize"
+                        let-setPageSize="setPageSize">
                         <mona-dropdown-list
                             [data]="pageSizeValues"
-                            [ngModel]="pageSizeValue()"
-                            (ngModelChange)="pageSizeValue.set($event)"
+                            aria-label="Items per page"
+                            [value]="pageSize"
+                            (valueChange)="setPageSize($event)"
                             class="w-28">
                             <ng-template monaDropDownListValueTemplate let-dataItem>
                                 <span class="px-2 text-blue-400">{{ dataItem }}</span>
@@ -391,14 +413,13 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
                         monaPagerNavigationButtonsTemplate
                         type="previous"
                         let-disabled="disabled"
-                        let-pageSize="pageSize"
-                        let-totalPages="totalPages">
+                        let-navigate="navigate">
                         <button
                             monaButton
                             look="success"
                             [rounded]="rounded()"
                             [size]="size()"
-                            (click)="skipValue.set((page() - 2) * pageSize)"
+                            (click)="navigate()"
                             [disabled]="disabled"
                             class="mx-0.5">
                             P
@@ -424,28 +445,23 @@ class PagerWrapperComponent implements ComponentInputsAsSignal<PagerComponent> {
         source: () => this.skip(),
         computation: skip => skip
     });
-    public readonly firstLast = input<ReturnType<PagerComponent["firstLast"]>>(true);
-    public readonly navigable = input<ReturnType<PagerComponent["navigable"]>>(true);
-    public readonly pageInput = input<ReturnType<PagerComponent["pageInput"]>>(false);
-    public readonly pageSize = input<ReturnType<PagerComponent["pageSize"]>>(5);
+    public readonly firstLast = input(true, { transform: booleanAttribute });
+    public readonly navigable = input(true, { transform: booleanAttribute });
+    public readonly pageInput = input(false, { transform: booleanAttribute });
+    public readonly pageSize = model(5);
     public readonly pageSizeValues = input<ReturnType<PagerComponent["pageSizeValues"]>>([5, 10, 20, 50, 100]);
-    public readonly previousNext = input<ReturnType<PagerComponent["previousNext"]>>(true);
-    public readonly responsive = input<ReturnType<PagerComponent["responsive"]>>(true);
+    public readonly previousNext = input(true, { transform: booleanAttribute });
+    public readonly responsive = input(true, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<PagerComponent["rounded"]>>("medium");
-    public readonly showInfo = input<ReturnType<PagerComponent["showInfo"]>>(true);
+    public readonly showInfo = input(true, { transform: booleanAttribute });
     public readonly size = input<ReturnType<PagerComponent["size"]>>("medium");
-    public readonly skip = input<ReturnType<PagerComponent["skip"]>>(0);
-    public readonly total = input<ReturnType<PagerComponent["total"]>>(0);
+    public readonly skip = model(0);
+    public readonly total = input(0, { transform: (value: unknown) => Number(value) });
     public readonly type = input<ReturnType<PagerComponent["type"]>>("numeric");
     public readonly userClasses = input<ReturnType<PagerComponent["userClasses"]>>("");
-    public readonly visiblePages = input<ReturnType<PagerComponent["visiblePages"]>>(5);
+    public readonly visiblePages = input(5, { transform: (value: unknown) => Number(value) });
 
     protected onPageChange(event: PageChangeEvent) {
         this.page.set(event.page);
-        this.skipValue.set(event.skip);
-    }
-
-    protected onSliderChange(pageIndex: number) {
-        this.skipValue.set((pageIndex - 1) * this.pageSize());
     }
 }

@@ -1,6 +1,6 @@
 ## Overview & Component Selection
 
-The grid renders `data` as rows against a set of `mona-grid-column` (and optionally `mona-grid-command-column`) definitions projected as content into `<mona-grid>`. Paging is always active; every other behavior — sorting, filtering, grouping, row selection, inline editing, column resizing, column reordering, virtualization, state persistence, and CSV export — is opt-in through a companion attribute directive applied to the same `mona-grid` host element (for example `monaGridSortable`, `monaGridEditable`). `GridComponent` itself exposes no outputs; every event a consumer listens for (`columnSort`, `cellEdit`, `columnResize`, and so on) is emitted by the directive that enables the corresponding feature, not by `mona-grid` directly.
+The grid renders `data` as rows against a set of `mona-grid-column` (and optionally `mona-grid-command-column`) definitions projected as content into `<mona-grid>`. Paging is always active; every other behavior — sorting, filtering, grouping, row selection, inline editing, column resizing, column reordering, virtualization, state persistence, and CSV export — is opt-in through a companion attribute directive applied to the same `mona-grid` host element (for example `monaGridSortable`, `monaGridEditable`). `mona-grid` reports only paging and detail-row changes (`pageChange`, `skipChange`, `pageSizeChange`, `expandedKeysChange`); every feature event (`columnSort`, `cellEdit`, `columnResize`, and so on) is emitted by the directive that enables the feature.
 
 Columns are a flat, content-projected list — there is no column-group or nested-column concept.
 
@@ -54,7 +54,7 @@ Each directive below is an `ng-template` (or, for `monaGridColumnTitleTemplate`,
 | `GridHeaderTemplateDirective`      | `ng-template[monaGridHeaderTemplate]`      | `mona-grid-column`                               | `{ $implicit: column, column: Column }`                                                                                                                                                                                                                                                                                                                                 | The column header's default title text                                                     |
 | `GridDetailTemplateDirective`      | `ng-template[monaGridDetailTemplate]`      | `mona-grid`                                      | `{ $implicit: dataItem }`                                                                                                                                                                                                                                                                                                                                               | No default — renders as an expandable row beneath the data row when present                |
 | `GridNoDataTemplateDirective`      | `ng-template[monaGridNoDataTemplate]`      | `mona-grid`                                      | None                                                                                                                                                                                                                                                                                                                                                                    | The grid's default empty-state message                                                     |
-| `GridToolbarTemplateDirective`     | `ng-template[monaGridToolbarTemplate]`     | `mona-grid`                                      | `{ $implicit: GridService, addRowData, addRowVisible, cancelAdd(): boolean, editSession, saveAdd(): boolean, startAdd(): boolean }` — `TODO(owner-review): $implicit exposes GridService, an internal service class not in the public barrel; confirm this is an intended part of the template context before relying on members beyond addRowVisible/editSession/etc.` | No default — renders above the column headers                                              |
+| `GridToolbarTemplateDirective`     | `ng-template[monaGridToolbarTemplate]`     | `mona-grid`                                      | `GridToolbarTemplateContext`: `addRowData`, `addRowVisible`, `cancelAdd()`, `cancelEdit()`, `dataState`, `editSession`, `saveAdd()`, `selectedKeys`, `startAdd()`; the same object is also `$implicit`. | No default — renders above the column headers |
 
 ```html
 <mona-grid [data]="orders()">
@@ -94,7 +94,7 @@ Import `GridServerBindingDirective` and `GridDataState` from `@nanahoshi/mona-ui
 </mona-grid>
 ```
 
-`dataStateChange` supplies `{ skip, take, sort, filter }` once for a user page, page-size, sort, or filter action. Page-size, sort, and filter actions start at `skip: 0`. Sort order follows multi-column sort priority. Bindings from the parent synchronize silently, and ordinary directive creation does not emit an initial request: load the initial page yourself.
+`dataStateChange` supplies `{ skip, take, sort, filter }` once for a user page, page-size, sort, or filter action. Sort and filter actions start at `skip: 0`; a page-size change keeps the first row of the page in view. Sort order follows multi-column sort priority. Bindings from the parent synchronize silently, and ordinary directive creation does not emit an initial request: load the initial page yourself.
 
 The application owns HTTP requests, errors, and stale-response handling. For example, inject your repository and ignore responses from an older request:
 
@@ -140,7 +140,7 @@ Import `DestroyRef`, `inject`, and `signal` from `@angular/core`, `GridDataState
 
 The server must apply the descriptors to the whole matching dataset before paging. The Grid preserves returned row order and displays every supplied row, even when `skip` is nonzero. For example, ten supplied rows at `skip: 40`, `pageSize: 10`, and `total: 137` show page five and retain all ten rows.
 
-While `loading` is true, the body shows a localized loading indicator, preserves existing rows, and suppresses the ordinary empty state. The host exposes `aria-busy`; the header and pager remain available for another request. Set `loading` back to false on both success and error.
+While `loading` is true, the body shows a localized loading indicator, preserves existing rows, and suppresses the ordinary empty state. The grid element exposes `aria-busy`; the header and pager remain available for another request. Set `loading` back to false on both success and error.
 
 Server mode has these boundaries:
 
@@ -150,7 +150,7 @@ Server mode has these boundaries:
 - Editing events continue to describe loaded rows; the application saves changes to its server.
 - Row reordering is disabled with an accessible, localized server-binding reason.
 - `monaGridServerBinding` and enabled `monaGridVirtualScroll` cannot be combined; enabling both throws an error. This directive provides page-based loading rather than remote virtual scrolling.
-- State persistence restores sort, filter, and optionally page size, then emits one consolidated refresh at `skip: 0`. The offset is not persisted. When providing a saved initial state, use that refresh to load the restored query instead of starting a competing initial request.
+- State persistence restores sort, filter, and page size (unless `persistPageSize` is `false`), then emits one consolidated refresh at `skip: 0`. The offset is not persisted. When providing a saved initial state, use that refresh to load the restored query instead of starting a competing initial request.
 
 ### Row Sizing
 
@@ -184,7 +184,7 @@ Virtualization uses a fixed height in pixels for every rendered item and the scr
 
 ### Paging
 
-`pageSize` and `pageSizeValues` control the built-in pager. `responsivePager` collapses the pager into a dropdown when the grid narrows.
+`pageSize` and `pageSizeValues` control the built-in pager; `[(pageSize)]` and `[(skip)]` are two-way, and `pageChange` reports the user's page and page-size changes (not values set from code). A new page size keeps the first row of the current page in view. When the rows shrink below the current page (new data, a removed row, a filter), the grid moves to the last page and reports it. `responsivePager` collapses the pager into a dropdown when the grid narrows.
 
 ```html
 <mona-grid [data]="orders()" [pageSize]="10" [pageSizeValues]="[10, 20, 30]" [responsivePager]="true"></mona-grid>
@@ -192,7 +192,7 @@ Virtualization uses a fixed height in pixels for every rendered item and the scr
 
 ### Sorting
 
-`monaGridSortable` enables column-header sorting; `sort` is a two-way bindable model of the current sort descriptors.
+`monaGridSortable` enables column-header sorting; `sort` is a two-way bindable model of the current sort descriptors, and a restored grid state updates it. Descriptors are kept even when no column shows their field (a column added later shows the sort), and a repeated field keeps its last descriptor. A column's `sortComparator`, or the descriptor's own `sort` function, is kept when the user clicks the header.
 
 ```typescript
 protected readonly sort = signal<SortDescriptor[]>([]);
@@ -226,7 +226,7 @@ Set `[sortable]="false"` on a column to disable sorting through its header. Colu
 
 ### Filtering
 
-`monaGridFilterable` renders filter UI either in the column header menu, a dedicated filter row, or both, per `type`. `filter` is a two-way bindable model of the applied `CompositeFilterDescriptor[]`.
+`monaGridFilterable` renders filter UI either in the column header menu, a dedicated filter row, or both, per `type`. `filter` is a two-way bindable model of the applied `CompositeFilterDescriptor[]`, applied before the first render. Conditions on one field become that column's filter, and an `and` across fields is split per column; filters on the same field are combined with `and`. Filters that span columns (an `or` of two fields) are still applied, reported and sent to the server, without marking a column. Conditions with an unknown operator are ignored.
 
 ```typescript
 protected readonly filter = signal<CompositeFilterDescriptor[]>([]);
@@ -237,9 +237,13 @@ protected readonly filter = signal<CompositeFilterDescriptor[]>([]);
 </mona-grid>
 ```
 
+The header menu is a dialog named after its column (`filterByColumn`). It opens at the column type's first operator, keeps focus inside until it closes, and returns focus to its funnel button. `Enter` in a value applies the filter, and text that is only spaces is no value; text is trimmed before it is applied. A date column's menu and filter row use the column's string `format`, or the locale's date format without one. While a column is filtered, its funnel shows a dot as well as a colour, and its name says so (`filterByColumnFiltered`).
+
+In the filter row, typing filters after a 300 ms pause; choosing an operator, picking a date or a Boolean value, and `Clear` filter at once and drop typing that has not filtered yet. An operator chosen without a value stays chosen until there is one. A cell follows only its own column's filter, and its own filter coming back does not overwrite newer typing. Its inputs are named `"Filter by {column}"`, its operator button `"Filter operator for {column}: {operator}"` (`filterOperator`), and its clear button `"Clear filter for {column}"` (`clearFilter`).
+
 ### Grouping
 
-`monaGridGroupable` lets the consumer drag a column header into the group panel rendered above the grid. `group` binds the current group descriptors; `groupChange` emits whenever they change.
+`monaGridGroupable` lets the consumer drag a column header into the group panel rendered above the grid. `group` is a two-way bindable model of the group descriptors: `groupChange` emits once for each user change (grouping, ungrouping, reordering or re-sorting groups) and after a state is restored, never for a value set from code. `null`, `undefined` and empty text form one group; `1` and `"1"` are different groups; dates group by their time.
 
 ```html
 <mona-grid
@@ -252,7 +256,7 @@ protected readonly filter = signal<CompositeFilterDescriptor[]>([]);
 
 ### Row Selection
 
-`monaGridSelectable` enables single or multiple row selection. `selectedKeys` binds the currently selected keys; `selectBy` chooses which field identifies a row.
+`monaGridSelectable` enables single or multiple row selection. `selectedKeys` binds the currently selected keys; `selectBy` (a field name or a function) chooses what identifies a row. Without `selectBy`, rows are selected by the grid's `rowKey` value, so the selection survives a refetch; without either, by the data item. `selectedKeysChange` reports user changes only.
 
 ```html
 <mona-grid
@@ -303,6 +307,8 @@ Selection state always lives in `selectedKeys`. Row clicks and checkbox clicks m
 </mona-grid>
 ```
 
+While virtual scrolling is on, the grid shows no pager and no aggregate footer, and rejects detail rows and server binding.
+
 ### Editing
 
 `monaGridEditable` turns on inline editing, backed exclusively by Angular Signal Forms — see [Form Interaction](#form-interaction). `mode` chooses whether editing commits per cell or per row; `schema` validates the row being edited.
@@ -323,7 +329,15 @@ Selection state always lives in `selectedKeys`. Row clicks and checkbox clicks m
 </mona-grid>
 ```
 
-Each column's `type` (`"string"`, `"number"`, `"date"`, or `"boolean"`) selects the built-in editor rendered for that cell — a text box, numeric text box, date picker, or checkbox, respectively — unless the column provides its own `monaGridEditTemplate`. Set `editable="false"` on a `mona-grid-column` to exclude it from editing.
+Each column's `type` (`"string"`, `"number"`, `"date"`, or `"boolean"`) selects the built-in editor rendered for that cell — a text box, numeric text box, date picker, or checkbox, respectively — unless the column provides its own `monaGridEditTemplate`. Every column is editable except the one whose `field` is the `rowKey`; set `[editable]` on a `mona-grid-column` to change that, for example `[editable]="true"` to type the key of a new row.
+
+Each editor is named after its column title. Number text is read in the grid's locale (`1.234,5` in de-DE); a date picked in the calendar keeps the time of day the value had. A row without a value for an editable column starts that editor at `null`, and the field is left out of the saved row again if it stays empty.
+
+**Keys.** In cell mode, `Enter` or `F2` starts editing, `Enter` or leaving the editor saves, `Escape` cancels and `Tab` moves to the next editable cell. In row mode, `Enter` or `F2` on any cell edits the row from that cell's editor; `Tab` and `Shift+Tab` move between the row's editors and its Save and Cancel buttons, `Enter` saves the row (after validation) and `Escape` cancels it. The add row works the same way. `Enter` and `Escape` are left to an input method while it composes text. After Save, Cancel or Remove, focus moves to the row's cell, or to the nearest cell when the row is gone.
+
+**Events.** `save` is the one to persist from: its `rowData` holds the edited values and `originalRowData` the row as it was. `cellEdit` comes first in cell mode, with the field's old and new value; its `rowData` is the row as it was. Neither fires when nothing changed. To save on a server, prevent `save` to keep the editor open, then call `endEdit()` on the `GridEditableDirective` (from `viewChild(GridEditableDirective)`) when the request succeeds. `cancel` carries a `reason`: `"command"`, `"escape"`, `"switch"` (another edit or the add row started) or `"removed"` (the row left the data or the view, which can't be prevented). When `data` is replaced during an edit, the edit moves to the new item with the same `rowKey` and keeps what was typed. `remove` carries the row's `key` and its `index` in `data`.
+
+**Validation.** An invalid field is linked to its editor with `aria-describedby`, and a commit that fails validation is announced through a polite live region. The command buttons are named after their row (`Edit row 3`); `commandAriaLabel` in the options names them after something else, such as an order number.
 
 Custom edit templates receive a `GridEditTemplateContext` bound to the row's Signal Forms field:
 
@@ -337,7 +351,9 @@ Custom edit templates receive a `GridEditTemplateContext` bound to the row's Sig
 
 ### Column Resizing
 
-`monaGridResizable` renders a drag handle between header cells; `columnResize` emits the old and new width once a resize completes.
+`monaGridResizable` renders a drag handle between header cells; `columnResize` emits the old and new width once a resize completes. A drag stops at the column's `minWidth` and `maxWidth`, and `Escape` during a drag puts the width back.
+
+The handle is also a focusable `separator`: `F2` on a header moves to it, `ArrowLeft`/`ArrowRight` resize the column by 10px (mirrored in right-to-left layouts), `Home`/`End` set it to its narrowest/widest width, and `Enter` fits it to its content.
 
 ```html
 <mona-grid [data]="orders()" monaGridResizable (columnResize)="onColumnResize($event)"></mona-grid>
@@ -345,7 +361,7 @@ Custom edit templates receive a `GridEditTemplateContext` bound to the row's Sig
 
 ### Column Reordering
 
-`monaGridReorderable` lets the consumer drag column headers into a new order. `columnReorder` is cancelable — call `preventDefault()` to keep a column from moving.
+`monaGridReorderable` lets the consumer drag column headers into a new order. Dropping on the start half of a header puts the column before it, the end half after it; `Escape` cancels the drag. From the keyboard, `Ctrl+Shift+ArrowLeft`/`Ctrl+Shift+ArrowRight` moves the focused header one place and announces its new position. `columnReorder` is cancelable — call `preventDefault()` to keep a column from moving.
 
 ```html
 <mona-grid [data]="orders()" monaGridReorderable (columnReorder)="onColumnReorder($event)"></mona-grid>
@@ -401,7 +417,7 @@ Row reordering works with pagination (moving rows within the current page), mast
 
 ### Master-Detail Rows
 
-`monaGridDetailTemplate` renders projected content for each row that the consumer can expand.
+`monaGridDetailTemplate` renders projected content for each row that the consumer can expand. The detail toggle is a button named by the `expandDetail`/`collapseDetail` messages, with `aria-expanded`. Detail rows aren't supported with `monaGridVirtualScroll`, whose rows share one height: the grid ignores the template there and warns in development mode.
 
 ```html
 <mona-grid [data]="orders()">
@@ -413,7 +429,7 @@ Row reordering works with pagination (moving rows within the current page), mast
 
 ### State Persistence
 
-`monaGridStatePersistence` captures and restores column order/width/visibility, sort, filter, and group state through the two-way bindable `state` model.
+`monaGridStatePersistence` captures and restores column order/width/visibility, sort, filter, group state and the page size (unless `persistPageSize` is `false`) through the two-way bindable `state` model.
 
 ```typescript
 protected readonly state = signal<GridState | null>(null);
@@ -427,7 +443,7 @@ Persist `state()` to storage (for example in an `effect`) to restore it on the n
 
 ### CSV Export
 
-`monaGridExport` exposes `exportCsv(filename?)` through a template reference variable.
+`monaGridExport` exposes `exportCsv(filename?)` through a template reference variable. It exports the visible columns of every row in the current view (filtered and sorted, all pages); with server binding only the loaded page. Dates are written as the local calendar date (`YYYY-MM-DD`), and text starting with `=`, `+`, `-`, `@`, a tab or a carriage return is prefixed with `'` so spreadsheets don't run it as a formula.
 
 ```html
 <button (click)="gridExport.exportCsv('orders.csv')">Export as CSV</button>
@@ -436,7 +452,9 @@ Persist `state()` to storage (for example in an `effect`) to restore it on the n
 
 ### Aggregates and Footer
 
-Set `aggregate` on a `mona-grid-column` (`"sum"`, `"avg"`, `"count"`, `"min"`, `"max"`, or `"custom"`) to show a computed value in the grid footer. Enable `monaGridGroupable`'s `showFooter` option to show the same aggregate per group. `"custom"` requires a `monaGridFooterTemplate` (and, for grouped data, a `monaGridGroupFooterTemplate`) to render the value, since the grid does not compute a value for it.
+Set `aggregate` on a `mona-grid-column` (`"sum"`, `"avg"`, `"count"`, `"min"`, `"max"`, or `"custom"`) to show a computed value in the grid footer. Grouped rows show the same aggregate under each expanded group; `monaGridGroupable`'s `showFooter` option also keeps it under collapsed groups. `"custom"` requires a `monaGridFooterTemplate` (and, for grouped data, a `monaGridGroupFooterTemplate`) to render the value, since the grid does not compute a value for it.
+
+Aggregates cover the whole view (every filtered row, not only the current page), in the footer and in each group footer; with server binding they cover the loaded page. `count` counts values that aren't empty; `sum` and `avg` use numbers and numeric text (`"12.5"`), and the sum of no numbers is `0`.
 
 ```html
 <mona-grid-column field="freight" title="Freight" type="number" aggregate="avg"></mona-grid-column>
@@ -446,7 +464,7 @@ Set `aggregate` on a `mona-grid-column` (`"sum"`, `"avg"`, `"count"`, `"min"`, `
 
 ### `GridComponent` has no outputs of its own
 
-All grid events (`columnSort`, `columnResize`, `columnReorder`, `groupChange`, `selectedKeysChange`, `cellEdit`, `rowEdit`, `save`, `remove`, `cancel`, `add`, `edit`, `scrollEnd`) are emitted by the companion directive that enables the corresponding feature, not by `mona-grid` directly.
+Paging (`pageChange`, `skipChange`, `pageSizeChange`) and detail rows (`expandedKeysChange`) are reported by `mona-grid`. All other grid events (`columnSort`, `columnResize`, `columnReorder`, `groupChange`, `selectedKeysChange`, `cellEdit`, `rowEdit`, `save`, `remove`, `cancel`, `add`, `edit`, `scrollEnd`) are emitted by the companion directive that enables the corresponding feature.
 
 ### Cancelable events
 
@@ -468,48 +486,72 @@ The grid renders a built-in "Columns" toolbar button backed by an internal `Grid
 
 ### Keyboard
 
-| Key                        | Action                                                                                                                                                                                      |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ArrowDown` / `ArrowUp`    | Move focus to the same column in the next/previous row.                                                                                                                                     |
-| `Alt+ArrowDown`            | Toggle expand/collapse of a group row or master-detail row, instead of moving focus.                                                                                                        |
-| `ArrowLeft` / `ArrowRight` | Move focus to the previous/next cell in the row.                                                                                                                                            |
-| `Home` / `End`             | Move focus to the first/last cell in the current row.                                                                                                                                       |
-| `Ctrl+Home` / `Ctrl+End`   | Move focus to the first/last cell in the grid.                                                                                                                                              |
-| `Enter`                    | On a group header or header cell, toggles expand/collapse. On a command cell, focuses its first inner button. Otherwise starts cell editing (no-op while the grid is in row-edit mode).     |
-| `F2`                       | Same as `Enter`, except it never toggles a group/header row.                                                                                                                                |
-| `Tab` / `Shift+Tab`        | Outside a command cell, moves focus to the next/previous focusable element outside the grid (toolbar, pager, or beyond). Inside a command cell, cycles focus among that cell's own buttons. |
-| `Escape`                   | While focus is inside a command cell's inner button, returns focus to the cell.                                                                                                             |
-| `Ctrl+C` / `Cmd+C`         | Copies the focused cell's text to the clipboard (data rows only, and not while the grid is in edit mode).                                                                                   |
+The grid is one Tab stop: `Tab` moves into the grid at the cell that last had focus, and the next `Tab` leaves it. Inside, the keys below move between cells; the header, the filter row, the add row and the body rows are one column of rows.
 
-Toolbar controls (for example a custom `monaGridToolbarTemplate` button) support `ArrowLeft`/`ArrowRight` roving-tabindex navigation among the toolbar's own focusable elements.
+| Key                                  | Action                                                                                                                                                                      |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ArrowDown` / `ArrowUp`              | Move to the same column in the next/previous row, across the header, the filter row, the add row and the body.                                                              |
+| `ArrowLeft` / `ArrowRight`           | Move to the previous/next cell in the row (mirrored in right-to-left layouts).                                                                                              |
+| `Home` / `End`                       | Move to the first/last cell in the row.                                                                                                                                     |
+| `Ctrl+Home` / `Ctrl+End` (`Cmd` too) | Move to the first/last cell in the grid. With virtual scrolling, the grid scrolls to the last row first.                                                                    |
+| `PageUp` / `PageDown`                | Move up/down by the number of rows that fit in the body.                                                                                                                    |
+| `Enter`                              | On a header, sorts the column. On a group row or the detail toggle, expands or collapses it. On an editable cell, starts editing. On any other cell, moves into its controls. |
+| `F2`                                 | Starts editing an editable cell; on any other cell, including a header or a filter-row cell, moves into its controls (links, buttons, the filter button, the filter input).  |
+| `Alt+ArrowDown`                      | On a filterable header, opens its filter menu (`aria-keyshortcuts`). On a group or detail row, expands or collapses it.                                                     |
+| `Space` / `Shift+Space`              | With selection on, toggles the row's selection / selects the rows from the last selected row to this one.                                                                   |
+| `Shift+ArrowDown` / `Shift+ArrowUp`  | Moves to the next/previous row and extends the selection to it.                                                                                                             |
+| `Ctrl+A` / `Cmd+A`                   | With multiple selection, selects every row in the select-all scope.                                                                                                         |
+| `Ctrl+C` / `Cmd+C`                   | Copies the focused cell's text (body rows, not while editing, and not when text is selected).                                                                               |
+| `Ctrl+Shift+ArrowLeft` / `ArrowRight` | With `monaGridReorderable`, moves the focused header's column one place (mirrored in right-to-left layouts) and announces it. `Cmd` too.                                    |
+| `Ctrl+Shift+G` / `Cmd+Shift+G`       | With `monaGridGroupable`, groups the rows by the focused header's column and announces it.                                                                                  |
+| `Delete` / `Backspace`               | On a chip in the group panel, removes that grouping.                                                                                                                        |
+| `ArrowRight` / `ArrowLeft`           | On a group row, expands/collapses it first (mirrored in right-to-left layouts); on an expanded/collapsed group, moves as usual.                                             |
+| `Tab` / `Shift+Tab`                  | Leaves the grid. While editing a cell, commits it and edits the next/previous editable cell.                                                                                |
+
+Headers list their shortcuts in `aria-keyshortcuts`. The column resize handle has its own keys, described under [Column Resizing](#column-resizing).
+
+Inside a cell's controls, `Tab`, `Shift+Tab` and the arrows move between them (text fields keep their arrow keys), `Tab` past the last control moves on to the next cell, and `Escape` returns to the cell.
+
+The toolbar is a `role="toolbar"` named by the `toolbar` message. `ArrowLeft`/`ArrowRight` (mirrored in right-to-left layouts), `Home` and `End` move between its controls, except in text fields and other controls that use those keys; only one control is in the Tab order, including controls the toolbar template adds later.
 
 ### Focus
 
-Grid cells use a roving `tabindex`: the currently focused cell has `tabindex="0"`, every other cell has `tabindex="-1"`. Editors inside an actively-edited cell are excluded from the natural tab order until the consumer moves focus with the keys above.
+Grid cells use a roving `tabindex`: the cell that last had focus has `tabindex="0"`, every other cell and every control inside a cell has `tabindex="-1"`. Keyboard focus shows a solid 2px ring inside the cell. Cells moved to with the keys scroll clear of pinned columns. Focus returns to a header after it's dragged, and to a cell of a virtual grid when its row scrolls back into view. Changing the page from the pager scrolls the body to the first row.
 
 ### ARIA
 
 | Attribute          | When present                                               | Value                                                              |
 | ------------------ | ---------------------------------------------------------- | ------------------------------------------------------------------ |
-| `role`             | On the tabular content region                              | `"grid"`, or `"treegrid"` when grouping is enabled                 |
+| `role`             | On the tabular content region                              | `"grid"`, or `"treegrid"` while rows are grouped                   |
+| `aria-label`       | On the tabular content region                              | The `ariaLabel` input; `aria-labelledby` from `ariaLabelledBy`     |
+| `aria-rowcount`    | On the tabular content region                              | Every row, or `-1` when paged groups or detail rows make it unknown |
+| `aria-colcount`    | On the tabular content region                              | Every column, including group indent and selection columns         |
+| `aria-multiselectable` | On the tabular content region                              | `"true"` with multiple selection                                   |
+| `aria-readonly`    | On the tabular content region                              | `"true"` while editing is off                                      |
 | `role`             | On the header/body/footer row groups                       | `"rowgroup"`                                                       |
 | `role`             | On header cells                                            | `"columnheader"`                                                   |
 | `role`             | On data/group/footer rows                                  | `"row"`                                                            |
 | `role`             | On data cells                                              | `"gridcell"`                                                       |
 | `role`             | On the column resize handle                                | `"separator"`                                                      |
-| `aria-sort`        | On a header cell, only while `monaGridSortable` is enabled | `"ascending"`, `"descending"`, or `"none"`                         |
+| `aria-sort`        | On a header cell, only while `monaGridSortable` is enabled | `"ascending"`, `"descending"`, or `"none"`; only on the first sort |
+| `aria-describedby` | On a header cell sorted after another                      | Its place in the sort order (`sortOrder` message)                  |
+| `aria-keyshortcuts` | On a header cell with keyboard shortcuts                   | The keys that open its filter menu, move it or group by it         |
+| `role`             | On an open filter menu                                     | `"dialog"`, with `aria-label` `"Filter by {column}"`               |
+| `aria-haspopup`    | On a filter menu button / a filter row operator button     | `"dialog"` / `"menu"`; the operator button also has `aria-expanded` |
 | `aria-selected`    | On a row, only while `monaGridSelectable` is enabled       | Reflects whether the row is selected                               |
-| `aria-busy`        | On the Grid host in server mode                            | `"true"` while `loading` is true                                   |
-| `aria-rowindex`    | On every row                                               | 1-based row position, accounting for the header row                |
+| `aria-busy`        | On the tabular content region in server mode               | `"true"` while `loading` is true                                   |
+| `aria-rowindex`    | On every row                                               | 1-based position, counting header, filter and add rows and earlier pages |
 | `aria-colindex`    | On every cell                                              | 1-based column position, accounting for group indent columns       |
 | `aria-expanded`    | On a group header row                                      | Reflects whether the group is expanded                             |
-| `aria-level`       | On a group header row                                      | The group's nesting depth                                          |
+| `aria-level`       | On rows of a grouped grid                                  | The group's nesting depth; data rows sit one level below their group |
 | `aria-readonly`    | On a data cell                                             | `"true"` when editing is disabled for that cell or column          |
 | `aria-orientation` | On the column resize handle                                | `"vertical"`                                                       |
-| `aria-label`       | On the column resize handle                                | `"Resize column"`                                                  |
-| `aria-label`       | On the built-in command buttons                            | `"Save row"`, `"Cancel row edit"`, `"Edit row"`, or `"Remove row"` |
+| `aria-label`       | On the column resize handle                                | `"Resize {column}"` (`resizeColumn` message)                       |
+| `aria-valuenow`    | On the column resize handle                                | The column width in pixels, with `aria-valuemin`/`aria-valuemax`   |
+| `aria-expanded`    | On the detail toggle button                                | Reflects whether the detail row is open                            |
+| `aria-label`       | On the built-in command buttons                            | Names the row: `"Edit row 3"`, `"Remove row 3"`, `"Save row 3"`, `"Cancel editing row 3"`, or the `commandAriaLabel` option's text |
 
-`TODO(owner-review): no aria-live region or aria-multiselectable attribute was found for grouped or multi-select grids — confirm whether announcing selection/grouping changes to assistive technology is expected before relying on it.`
+Moving a column or grouping by one from the keyboard is announced through a polite live region (`columnMoved` and `columnGrouped` messages). The grid element has no name of its own: set `ariaLabel` or `ariaLabelledBy`.
 
 ### Form Interaction
 
@@ -525,16 +567,30 @@ Inline editing is built exclusively on Angular Signal Forms: the built-in editor
 
 | Name              | Type                                       | Default     | Description                                                                                                                                       |
 | ----------------- | ------------------------------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ariaLabel`       | `string \| null`                           | `null`      | Accessible name of the grid element. |
+| `ariaLabelledBy`  | `string \| null`                           | `null`      | Id of the element that names the grid, such as a heading; takes precedence over `ariaLabel`. |
 | `class`           | `string`                                   | `""`        | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                         |
 | `data`            | `Iterable<T>`                              | `[]`        | The row data to be displayed in the grid.                                                                                                         |
-| `pageSize`        | `number`                                   | `undefined` | The number of items to be displayed on a page.                                                                                                    |
+| `expandedKeys`    | `unknown[]`                                | `[]`        | Two-way bindable. Keys of the rows whose detail row is open: `rowKey` values, or the data items without a `rowKey`. |
+| `pageSize`        | `number`                                   | `undefined` | Two-way bindable. The number of rows per page; values that aren't positive integers are ignored, and a new size keeps the first row of the page in view. |
 | `pageSizeValues`  | `number[]`                                 | `[]`        | The page sizes that the user can select from, shown in the page size dropdown.                                                                    |
 | `resizeMethod`    | `ResizeMethod`                             | `"fitView"` | The method used to set initial column widths — see [`resizeMethod` controls initial column widths](#resizemethod-controls-initial-column-widths). |
 | `responsivePager` | `boolean`                                  | `true`      | Whether the pager collapses into a dropdown when the grid narrows.                                                                                |
+| `rowClass`        | `GridRowClass<T> \| null`                  | `null`      | Classes for a data row, from a string, a list, or a function of the row's item; not for group, footer or detail rows. |
 | `rowKey`          | `GridKeySelector<unknown> \| null`         | `null`      | Field name or selector used to derive a stable identity for each row; the resolved value must be unique within the grid data.                     |
+| `skip`            | `number`                                   | `0`         | Two-way bindable. The number of rows before the current page in client paging; with server binding, the directive's `skip` sets the page. |
 | `rounded`         | `"none" \| "small" \| "medium" \| "large"` | `"medium"`  | The border radius of the grid.                                                                                                                    |
 
-No outputs — see [`GridComponent` has no outputs of its own](#gridcomponent-has-no-outputs-of-its-own).
+#### Outputs
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `expandedKeysChange` | `unknown[]` | Emitted when the user opens or closes a detail row. |
+| `pageChange` | `PageChangeEvent` | Emitted when the user changes the page or page size, and when the grid moves back to the last page because the rows shrank. |
+| `pageSizeChange` | `number` | The `pageSize` model's change event. |
+| `skipChange` | `number` | The `skip` model's change event. |
+
+Feature events come from the companion directives — see [`GridComponent` events](#gridcomponent-has-no-outputs-of-its-own).
 
 ---
 
@@ -547,14 +603,17 @@ No outputs — see [`GridComponent` has no outputs of its own](#gridcomponent-ha
 | Name             | Type                        | Default     | Description                                                                                                                            |
 | ---------------- | --------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | `aggregate`      | `AggregateFunction \| null` | `null`      | The aggregate shown in the grid footer for this column.                                                                                |
-| `editable`       | `boolean`                   | `true`      | Whether this column is editable when the grid is in edit mode.                                                                         |
+| `editable`       | `boolean \| null`           | `null`      | Whether this column is editable when the grid is in edit mode. Unset, every column is editable except the `rowKey` field.              |
 | `field`          | `string`                    | `""`        | The field name of the data property to display in this column.                                                                         |
-| `format`         | `ColumnFormat \| null`      | `undefined` | Formats the displayed cell value. String formats apply to date, datetime, and time columns; formatter functions replace the cell text. |
+| `filterable`     | `boolean`                   | `true`      | Whether this column can be filtered when grid filtering is enabled. |
+| `format`         | `ColumnFormat \| null`      | `undefined` | Formats the displayed cell value. String formats apply to date columns, and also set the date format of their filter menu and filter row; a formatter function receives `(value, row, column)` and its result replaces the cell text. |
 | `hidden`         | `boolean`                   | `false`     | Whether this column is hidden from the rendered grid.                                                                                  |
 | `locked`         | `boolean`                   | `false`     | Whether this column remains fixed while the grid scrolls horizontally.                                                                 |
 | `lockedPosition` | `GridColumnLockedPosition`  | `"left"`    | The side of the grid where this locked column is fixed.                                                                                |
 | `maxWidth`       | `number \| null`            | `null`      | The maximum width of this column in pixels.                                                                                            |
 | `minWidth`       | `number`                    | `40`        | The minimum width of this column in pixels.                                                                                            |
+| `sortable`       | `boolean`                   | `true`      | Whether this column can be sorted from its header when grid sorting is enabled. |
+| `sortComparator` | `ColumnSortComparator \| null` | `null`   | Compares two values of this column when the user sorts it (negative, zero or positive). Without it, values sort by type with empty values first, and text by the locale. |
 | `stateKey`       | `string \| null`            | `null`      | A stable key used to persist state for columns whose field is empty or unstable.                                                       |
 | `title`          | `string`                    | `""`        | The title displayed in the column header.                                                                                              |
 | `type`           | `DataType`                  | `"string"`  | The data type of the column. Determines the default edit component and filter behavior.                                                |
@@ -579,7 +638,7 @@ No outputs.
 | `minWidth`           | `number \| null`           | `null`       | The minimum width of this command column in pixels.                                 |
 | `removeConfirmation` | `boolean`                  | `false`      | Whether the built-in remove command asks for confirmation before emitting `remove`. |
 | `stateKey`           | `string \| null`           | `"commands"` | A stable key used to persist state for this command column.                         |
-| `title`              | `string`                   | `"Commands"` | The title displayed in the command column header.                                   |
+| `title`              | `string \| null`           | `null`       | The title displayed in the command column header; without one, the localized `commandColumnTitle` message ("Commands").              |
 | `width`              | `number \| null`           | `160`        | The fixed width of this command column in pixels.                                   |
 
 No outputs. Accepts a `monaGridCellTemplate` content child to customize the rendered command buttons.
@@ -595,7 +654,7 @@ No outputs. Accepts a `monaGridCellTemplate` content child to customize the rend
 | Name               | Type                    | Default | Description                                                                                                                                                   |
 | ------------------ | ----------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `monaGridSortable` | `SortableOptions \| ""` | `""`    | Enables column sorting. An empty string enables sorting with default settings; pass an object to configure sort mode, unsort behavior, or sort-index display. |
-| `sort`             | `SortDescriptor[]`      | `[]`    | Two-way bindable. Current sort descriptors applied to the grid.                                                                                               |
+| `sort`             | `SortDescriptor[]`      | `[]`    | Two-way bindable. Current sort descriptors, kept even when no column shows the field; a repeated field keeps its last descriptor. |
 
 #### Outputs
 
@@ -613,7 +672,7 @@ No outputs. Accepts a `monaGridCellTemplate` content child to customize the rend
 
 | Name                 | Type                          | Default | Description                                                                                                                                                                      |
 | -------------------- | ----------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `filter`             | `CompositeFilterDescriptor[]` | `[]`    | Two-way bindable. Current filter descriptors applied to the grid.                                                                                                                |
+| `filter`             | `CompositeFilterDescriptor[]` | `[]`    | Two-way bindable. Current filter descriptors; see [filtering](#filtering) for how they map to columns. |
 | `monaGridFilterable` | `FilterableOptions \| ""`     | `""`    | Enables column filtering. An empty string enables filtering with default settings; pass an object to configure whether filters render in the header menu, a filter row, or both. |
 
 No outputs.
@@ -628,14 +687,14 @@ No outputs.
 
 | Name                | Type                                  | Default     | Description                                                                                                                        |
 | ------------------- | ------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `group`             | `GroupDescriptor[]`                   | `[]`        | Current group descriptors applied to the grid.                                                                                     |
+| `group`             | `GroupDescriptor[]`                   | `[]`        | Two-way bindable. Current group descriptors; a field without a column is grouped once the column appears. |
 | `monaGridGroupable` | `GroupableOptions \| "" \| undefined` | `undefined` | Enables column grouping. An empty string enables grouping with default settings; pass an object to configure group footer display. |
 
 #### Outputs
 
 | Name          | Type                | Description                                                                                                                 |
 | ------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `groupChange` | `GroupDescriptor[]` | Emitted when the applied group descriptors change, from dragging a column into the group panel or from a group sort change. |
+| `groupChange` | `GroupDescriptor[]` | Emitted once for each user grouping change and after a state is restored; not for values set from code. |
 
 ---
 
@@ -647,15 +706,15 @@ No outputs.
 
 | Name                 | Type                          | Default | Description                                                                                                                                    |
 | -------------------- | ----------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `monaGridSelectable` | `GridSelectableOptions \| ""` | `""`    | Enables row selection. An empty string enables selection with default settings; pass an object to configure single or multiple selection mode. |
-| `selectBy`           | `string`                      | `""`    | Field name or selector used to derive a row's selection key.                                                                                   |
+| `monaGridSelectable` | `SelectableOptions \| ""` | `""`    | Enables row selection. An empty string enables selection with default settings; pass an object to configure single or multiple selection mode. |
+| `selectBy`           | `GridKeySelector<unknown>`    | `""`    | Field name or function that gives a row's selection key. Without it, the grid's `rowKey` value (or the data item). |
 | `selectedKeys`       | `Iterable<unknown>`           | `[]`    | Currently selected row keys.                                                                                                                   |
 
 #### Outputs
 
 | Name                 | Type        | Description                                        |
 | -------------------- | ----------- | -------------------------------------------------- |
-| `selectedKeysChange` | `unknown[]` | Emitted when the set of selected row keys changes. |
+| `selectedKeysChange` | `unknown[]` | Emitted when the user changes the selection; not for `selectedKeys` set from code. |
 
 ---
 
@@ -670,17 +729,23 @@ No outputs.
 | `monaGridEditable` | `EditableOptions \| ""`              | `""`         | Enables inline editing. An empty string enables cell-mode editing with default settings; pass an object to choose `"cell"` or `"row"` mode and an optional validation `schema`. |
 | `newRowFactory`    | `() => Record<PropertyKey, unknown>` | `() => ({})` | Creates the initial data object used by the add-row editor.                                                                                                                     |
 
+#### Methods
+
+| Name        | Description                                                                                                   |
+| ----------- | ------------------------------------------------------------------------------------------------------------- |
+| `endEdit()` | Closes the current edit without reporting it, such as after a prevented `save` has been saved on the server. |
+
 #### Outputs
 
 | Name       | Type              | Description                                                       |
 | ---------- | ----------------- | ----------------------------------------------------------------- |
 | `add`      | `GridAddEvent`    | Emitted before the grid displays the new-row editor. Cancelable.  |
-| `cancel`   | `GridCancelEvent` | Emitted before an edit operation is canceled. Cancelable.         |
-| `cellEdit` | `CellEditEvent`   | Emitted when a cell is edited. Cancelable.                        |
+| `cancel`   | `GridCancelEvent` | Emitted before an edit operation is canceled, with a `reason`. Cancelable, except for `"removed"`. |
+| `cellEdit` | `CellEditEvent`   | Emitted before a changed cell is saved in cell mode. Cancelable.  |
 | `edit`     | `GridEditEvent`   | Emitted before a row enters edit mode. Cancelable.                |
-| `remove`   | `GridRemoveEvent` | Emitted when a row remove command is triggered. Cancelable.       |
-| `rowEdit`  | `RowEditEvent`    | Emitted when a row edit is committed (row mode only). Cancelable. |
-| `save`     | `GridSaveEvent`   | Emitted before an edited or new row is saved. Cancelable.         |
+| `remove`   | `GridRemoveEvent` | Emitted when a row remove command is triggered, with the row's `key` and `index`. Cancelable. |
+| `rowEdit`  | `RowEditEvent`    | Emitted after a changed row is saved (row mode only).             |
+| `save`     | `GridSaveEvent`   | Emitted before a changed or new row is saved. Cancelable: the editor stays open. |
 
 ---
 
@@ -748,7 +813,7 @@ No outputs.
 | --------- | --------- | -------- | ------------------------------------------------------------------------------------------- |
 | `total`   | `number`  | Required | Number of matching records before server paging. Must be a non-negative safe integer.       |
 | `skip`    | `number`  | `0`      | Zero-based server offset. Must be a non-negative safe integer. External updates are silent. |
-| `loading` | `boolean` | `false`  | Displays the body loading overlay and sets host `aria-busy`.                                |
+| `loading` | `boolean` | `false`  | Displays the body loading overlay and sets `aria-busy` on the grid element.                 |
 
 Use `GridComponent.pageSize` for the request's `take`; it must be a positive safe integer in server mode. The directive is enabled by its presence and does not add a second page-size input.
 
@@ -812,7 +877,7 @@ No outputs.
 | Name                         | Returns               | Description                                                                                                 |
 | ---------------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `captureState()`             | `GridState`           | Captures the grid's current state (columns, sort, filter, group) without waiting for the next change cycle. |
-| `loadState(state, options?)` | `GridStateLoadResult` | Applies a previously captured state to the grid.                                                            |
+| `loadState(state, options?)` | `GridStateLoadResult` | Applies a previously captured state to the grid. A state that isn't well formed (a missing array, a duplicate column id, an unknown filter operator, a page size or width that isn't a positive number) returns `rejected-invalid` and changes nothing. |
 
 ---
 
@@ -828,7 +893,7 @@ No inputs, no outputs.
 
 | Name                   | Returns | Description                                    |
 | ---------------------- | ------- | ---------------------------------------------- |
-| `exportCsv(filename?)` | `void`  | Exports the grid's current data as a CSV file. |
+| `exportCsv(filename?)` | `void`  | Exports the visible columns of the current view as CSV (only the loaded page with server binding). |
 
 ---
 
@@ -840,7 +905,7 @@ No inputs, no outputs.
 | -------------------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------- |
 | `aggregate`                                  | `AggregateFunction \| null` | The aggregate function applied to this column's footer value.                                       |
 | `dataType`                                   | `DataType`                  | The column's declared data type.                                                                    |
-| `editable`                                   | `boolean`                   | Whether the column can be edited.                                                                   |
+| `editable`                                   | `boolean`                   | Whether the column can be edited, with the `rowKey` default resolved.                               |
 | `field`                                      | `string`                    | The bound data field name.                                                                          |
 | `format`                                     | `ColumnFormat \| null`      | The format string or formatter function applied to cell values.                                     |
 | `hidden`                                     | `boolean`                   | Whether the column is hidden.                                                                       |
@@ -861,7 +926,8 @@ No inputs, no outputs.
 
 | Field     | Type                                 | Description                                                       |
 | --------- | ------------------------------------ | ----------------------------------------------------------------- |
-| `enabled` | `boolean \| undefined`               | Whether editing is active.                                        |
+| `commandAriaLabel` | `((command: GridRowCommand, rowData, absoluteIndex: number) => string) \| undefined` | Names a row's Edit, Remove, Save or Cancel button; by default they are named by position (`Edit row 3`). |
+| `enabled` | `boolean \| undefined`               | Whether editing is active. On unless set to `false`; options replace earlier ones.                                        |
 | `mode`    | `"cell" \| "row"`                    | Whether editing commits per cell or per row.                      |
 | `schema`  | `GridEditSchemaFactory \| undefined` | Builds a Signal Forms validation schema for the row being edited. |
 
@@ -870,42 +936,47 @@ No inputs, no outputs.
 | Field         | Type                                  | Description                                               |
 | ------------- | ------------------------------------- | --------------------------------------------------------- |
 | `allowUnsort` | `boolean \| undefined`                | Whether a third click on a sorted column clears its sort. |
-| `enabled`     | `boolean \| undefined`                | Whether sorting is active.                                |
+| `enabled`     | `boolean \| undefined`                | Whether sorting is active. On unless set to `false`; options replace earlier ones.                                |
 | `mode`        | `"single" \| "multiple" \| undefined` | Whether one or several columns can be sorted at once.     |
 | `showIndices` | `boolean \| undefined`                | Whether sort order indices are displayed on header cells. |
 
-#### `FilterableOptions` (exported as `GridFilterableOptions`)
+#### `FilterableOptions`
 
 | Field     | Type                             | Description                                                              |
 | --------- | -------------------------------- | ------------------------------------------------------------------------ |
-| `enabled` | `boolean`                        | Whether filtering is active.                                             |
+| `enabled` | `boolean`                        | Whether filtering is active. On unless set to `false`; options replace earlier ones.                                             |
 | `type`    | `"menu" \| "row" \| "menu, row"` | Where filter UI renders — the column header menu, a filter row, or both. |
 
-#### `GroupableOptions` (exported as `GridGroupableOptions`)
+#### `GroupableOptions`
 
 | Field        | Type      | Description                                          |
 | ------------ | --------- | ---------------------------------------------------- |
-| `enabled`    | `boolean` | Whether grouping is active.                          |
-| `showFooter` | `boolean` | Whether an aggregate footer is shown for each group. |
+| `enabled`    | `boolean` | Whether grouping is active. On unless set to `false`; options replace earlier ones.                          |
+| `showFooter` | `boolean` | Whether a group's aggregate footer also shows while the group is collapsed; expanded groups always show it. |
 
-#### `GridSelectableOptions`
+#### `SelectableOptions`
 
 | Field     | Type                                  | Description                                          |
 | --------- | ------------------------------------- | ---------------------------------------------------- |
-| `enabled` | `boolean \| undefined`                | Whether row selection is active.                     |
+| `enabled` | `boolean \| undefined`                | Whether row selection is active. On unless set to `false`; options replace earlier ones.                     |
 | `mode`    | `"single" \| "multiple" \| undefined` | Whether one or several rows can be selected at once. |
+| `rowAriaLabel` | `((rowData) => string) \| undefined` | Names a row's selection check box; by default the row number. |
+| `selectAllScope` | `"page" \| "view" \| undefined` | Which rows the header check box selects. |
+| `selectOnRowClick` | `boolean \| undefined` | Whether clicking a row changes its selection. |
+| `showCheckboxes` | `boolean \| undefined` | Whether the check box column is shown. |
+| `showSelectAll` | `boolean \| undefined` | Whether the header check box is shown in multiple mode. |
 
 #### `ReorderableOptions`
 
 | Field     | Type      | Description                          |
 | --------- | --------- | ------------------------------------ |
-| `enabled` | `boolean` | Whether column reordering is active. |
+| `enabled` | `boolean` | Whether column reordering is active. On unless set to `false`; options replace earlier ones. |
 
 #### `ResizableOptions`
 
 | Field     | Type      | Description                        |
 | --------- | --------- | ---------------------------------- |
-| `enabled` | `boolean` | Whether column resizing is active. |
+| `enabled` | `boolean` | Whether column resizing is active. On unless set to `false`; options replace earlier ones. |
 
 #### `GridState`
 
@@ -914,7 +985,7 @@ No inputs, no outputs.
 | `columns`       | `readonly GridColumnState[]`                    | Persisted per-column hidden/order/width state.                     |
 | `filter`        | `readonly GridStateCompositeFilterDescriptor[]` | Persisted filter descriptors.                                      |
 | `group`         | `readonly GroupDescriptor[]`                    | Persisted group descriptors.                                       |
-| `pageSize`      | `number \| undefined`                           | Persisted page size, when `persistPageSize` is enabled.            |
+| `pageSize`      | `number \| undefined`                           | Persisted page size, unless `persistPageSize` is `false`.          |
 | `schemaVersion` | `number \| string \| undefined`                 | Consumer-defined version tag used to reject stale persisted state. |
 | `sort`          | `readonly GridStateSortDescriptor[]`            | Persisted sort descriptors.                                        |
 | `version`       | `1`                                             | The state schema version produced by this version of the library.  |
@@ -955,7 +1026,7 @@ No inputs, no outputs.
 
 #### Event classes
 
-`ColumnSortEvent`, `ColumnReorderEvent`, `CellEditEvent`, `RowEditEvent`, `GridAddEvent`, `GridRemoveEvent`, `GridSaveEvent`, `GridCancelEvent`, and `GridEditEvent` all extend `PreventableEvent` (`preventDefault()`/`isDefaultPrevented()`) and expose a `.column`, `.rowData`, and/or `.session` getter matching the corresponding output above. `ColumnResizeEvent` is a plain `{ column, newWidth, oldWidth }` object, not a class.
+`ColumnSortEvent`, `ColumnReorderEvent`, `CellEditEvent`, `RowEditEvent`, `GridAddEvent`, `GridRemoveEvent`, `GridSaveEvent`, `GridCancelEvent`, and `GridEditEvent` all extend `PreventableEvent` (`preventDefault()`/`isDefaultPrevented()`) and expose a `.column`, `.rowData`, and/or `.session` getter matching the corresponding output above. `ColumnResizeEvent` is a plain `{ column, newWidth, oldWidth }` object, not a class. `GridCancelEvent.reason` is a `GridCancelReason`; `GridRemoveEvent` also has `key` and `index`.
 
 #### `ResizeMethod`
 

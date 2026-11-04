@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { DropdownListComponent } from "../../../dropdown-list/components/dropdown-list/dropdown-list.component";
 import { NumericTextBoxComponent } from "../../../numeric-text-box/components/numeric-text-box/numeric-text-box.component";
-import { PagerFocusableDirective } from "../../directives/pager-focusable.directive";
 import { PagerInfoTemplateDirective } from "../../directives/pager-info-template.directive";
 import { PagerNavigationButtonsTemplateDirective } from "../../directives/pager-navigation-buttons-template.directive";
 import { PagerNumericButtonsTemplateDirective } from "../../directives/pager-numeric-buttons-template.directive";
@@ -111,14 +110,6 @@ describe("PagerComponent", () => {
         return event;
     }
 
-    function getActiveElement(): Element {
-        const activeElement = document.activeElement;
-        if (!activeElement) {
-            throw new Error("Expected an active element to exist.");
-        }
-        return activeElement;
-    }
-
     function clickButton(label: string): void {
         getButtonByLabel(label).click();
         fixture.detectChanges();
@@ -127,14 +118,14 @@ describe("PagerComponent", () => {
     function triggerPageSizeChange(value: number): void {
         const dropdown = fixture.debugElement.query(By.directive(DropdownListComponent));
         expect(dropdown).toBeTruthy();
-        dropdown.triggerEventHandler("ngModelChange", value);
+        dropdown.triggerEventHandler("valueChange", value);
         fixture.detectChanges();
     }
 
     function triggerPageInputChange(value: number | null): void {
         const numericTextBox = fixture.debugElement.query(By.directive(NumericTextBoxComponent));
         expect(numericTextBox).toBeTruthy();
-        numericTextBox.triggerEventHandler("ngModelChange", value);
+        numericTextBox.triggerEventHandler("valueChange", value);
         numericTextBox.triggerEventHandler("inputBlur", new FocusEvent("blur"));
         fixture.detectChanges();
     }
@@ -188,7 +179,7 @@ describe("PagerComponent", () => {
             const events: PageChangeEvent[] = [];
             const sizes: PageSizeChangeEvent[] = [];
             fixture.componentInstance.pageChange.subscribe(event => events.push(event));
-            fixture.componentInstance.pageSizeChange.subscribe(event => sizes.push(event));
+            fixture.componentInstance.pageSizeSelect.subscribe(event => sizes.push(event));
             for (const label of ["First page", "Previous page", "Next page", "Last page"]) {
                 clickButton(label);
             }
@@ -203,14 +194,17 @@ describe("PagerComponent", () => {
         });
     });
 
-    it("clamps the range and disables forward navigation for controlled skip beyond the total", () => {
+    it("moves a controlled skip beyond the total to the last page and reports it", () => {
         fixture.componentRef.setInput("responsive", false);
+        const emitted: PageChangeEvent[] = [];
+        fixture.componentInstance.pageChange.subscribe(event => emitted.push(event));
         setup(5, 10, 40);
-        expect(getInfoText()).toContain("5 - 5 of 5 items");
-        expect(getButtonByLabel("Next page").disabled).toBe(true);
-        expect(getButtonByLabel("Last page").disabled).toBe(true);
-        clickButton("Previous page");
+        fixture.detectChanges();
+        expect(getInfoText()).toContain("1 - 5 of 5 items");
         expect(getActivePageButton().getAttribute("aria-label")).toBe("Page 1");
+        expect(getButtonByLabel("Next page").disabled).toBe(true);
+        expect(getButtonByLabel("Previous page").disabled).toBe(true);
+        expect(emitted).toEqual([{ page: 1, skip: 0, take: 10 }]);
     });
 
     describe("numeric page window", () => {
@@ -316,7 +310,7 @@ describe("PagerComponent", () => {
             expect(emitted.length).toBe(0);
         });
 
-        it("should emit pageChange when the skip input changes programmatically", () => {
+        it("should not emit pageChange when the skip input changes programmatically to a page boundary", () => {
             setup(100, 10, 0);
             const emitted: PageChangeEvent[] = [];
             fixture.componentInstance.pageChange.subscribe(event => emitted.push(event));
@@ -324,24 +318,25 @@ describe("PagerComponent", () => {
             fixture.componentRef.setInput("skip", 20);
             fixture.detectChanges();
 
-            expect(emitted[emitted.length - 1]).toEqual({ page: 3, skip: 20, take: 10 });
+            expect(emitted).toEqual([]);
+            expect(getActivePageButton().getAttribute("aria-label")).toBe("Page 3");
         });
     });
 
     describe("page-size selection", () => {
-        it("should update the page size and reset to page 1 when not prevented", () => {
+        it("should update the page size and keep the first item of the page in view", () => {
             setup(100, 10, 40);
 
             triggerPageSizeChange(20);
 
-            expect(getInfoText()).toContain("1 - 20 of 100 items");
-            expect(getActivePageButton().getAttribute("aria-label")).toBe("Page 1");
+            expect(getInfoText()).toContain("41 - 60 of 100 items");
+            expect(getActivePageButton().getAttribute("aria-label")).toBe("Page 3");
         });
 
-        it("should emit pageSizeChange with the old and new page size", () => {
+        it("should emit pageSizeSelect with the old and new page size", () => {
             setup(100, 10, 0);
             const emitted: PageSizeChangeEvent[] = [];
-            fixture.componentInstance.pageSizeChange.subscribe(event => emitted.push(event));
+            fixture.componentInstance.pageSizeSelect.subscribe(event => emitted.push(event));
 
             triggerPageSizeChange(25);
 
@@ -352,7 +347,7 @@ describe("PagerComponent", () => {
         it("should keep the previous page size when the consumer calls preventDefault", () => {
             setup(100, 10, 0);
             const emitted: PageChangeEvent[] = [];
-            fixture.componentInstance.pageSizeChange.subscribe(event => event.preventDefault());
+            fixture.componentInstance.pageSizeSelect.subscribe(event => event.preventDefault());
             fixture.componentInstance.pageChange.subscribe(event => emitted.push(event));
 
             triggerPageSizeChange(25);
@@ -361,10 +356,10 @@ describe("PagerComponent", () => {
             expect(emitted[emitted.length - 1]).toEqual({ page: 2, skip: 10, take: 10 });
         });
 
-        it("should not emit pageSizeChange when the selected value equals the current page size", () => {
+        it("should not emit pageSizeSelect when the selected value equals the current page size", () => {
             setup(100, 10, 0);
             const emitted: PageSizeChangeEvent[] = [];
-            fixture.componentInstance.pageSizeChange.subscribe(event => emitted.push(event));
+            fixture.componentInstance.pageSizeSelect.subscribe(event => emitted.push(event));
 
             triggerPageSizeChange(10);
 
@@ -412,16 +407,18 @@ describe("PagerComponent", () => {
     });
 
     describe("responsive behavior", () => {
-        it("should hide info, page-input, and numeric page buttons as the host narrows", async () => {
+        it("should replace the page buttons with a page dropdown when narrow, keeping info and page size", async () => {
             fixture.componentRef.setInput("pageInput", true);
             setup(100, 10, 0);
             await fixture.whenStable();
 
             resizeHost(300);
 
-            expect(getInfoText()).not.toContain("1 - 10 of 100 items");
+            expect(getInfoText()).toContain("1 - 10 of 100 items");
             expect(queryButtonByLabel("Page 1")).toBeUndefined();
             expect(fixture.debugElement.query(By.directive(NumericTextBoxComponent))).toBeNull();
+            const dropdowns = fixture.debugElement.queryAll(By.directive(DropdownListComponent));
+            expect(dropdowns.map(d => d.componentInstance.ariaLabel())).toEqual(["Page", "Items per page"]);
         });
 
         it("should show all sections when the host is wide enough", async () => {
@@ -477,14 +474,14 @@ describe("PagerComponent", () => {
     });
 
     describe("keyboard navigation", () => {
-        it("should make the host focusable and remove inner controls from the page tab order by default", async () => {
+        it("should keep the host out of the tab order and the buttons in it", async () => {
             setup(100, 10, 0);
             await fixture.whenStable();
 
             const host: HTMLElement = fixture.nativeElement;
 
-            expect(host.getAttribute("tabindex")).toBe("0");
-            expect(getButtonByLabel("Page 1").getAttribute("tabindex")).toBe("-1");
+            expect(host.getAttribute("tabindex")).toBeNull();
+            expect(getButtonByLabel("Page 1").getAttribute("tabindex")).toBe("0");
         });
 
         it("should preserve native inner control tab order when navigable is false", () => {
@@ -507,52 +504,39 @@ describe("PagerComponent", () => {
             expect(getActivePageButton().getAttribute("aria-label")).toBe("Page 1");
         });
 
-        it("should navigate previous and next pages from the focused wrapper", () => {
+        it("should navigate previous and next pages from a focused button", () => {
             setup(100, 10, 20);
-            const host: HTMLElement = fixture.nativeElement;
+            const button = (): HTMLButtonElement => getButtonByLabel("Next page");
 
-            dispatchKeydown(host, "ArrowLeft");
+            dispatchKeydown(button(), "ArrowLeft");
             expect(getActivePageButton().getAttribute("aria-label")).toBe("Page 2");
 
-            dispatchKeydown(host, "PageDown");
+            dispatchKeydown(button(), "PageDown");
             expect(getActivePageButton().getAttribute("aria-label")).toBe("Page 3");
 
-            dispatchKeydown(host, "PageUp");
+            dispatchKeydown(button(), "PageUp");
             expect(getActivePageButton().getAttribute("aria-label")).toBe("Page 2");
 
-            dispatchKeydown(host, "ArrowRight");
+            dispatchKeydown(button(), "ArrowRight");
             expect(getActivePageButton().getAttribute("aria-label")).toBe("Page 3");
         });
 
-        it("should activate inner navigation with Enter and wrap focus with Tab", () => {
-            fixture.componentRef.setInput("pageSizeValues", false);
+        it("should leave Tab and Enter to the browser", () => {
             setup(100, 10, 0);
-            const host: HTMLElement = fixture.nativeElement;
 
-            dispatchKeydown(host, "Enter");
-            expect(document.activeElement).toBe(getButtonByLabel("Page 1"));
-
-            dispatchKeydown(getActiveElement(), "Tab", { shiftKey: true });
-            expect(document.activeElement).toBe(getButtonByLabel("Last page"));
-
-            dispatchKeydown(getActiveElement(), "Tab");
-            expect(document.activeElement).toBe(getButtonByLabel("Page 1"));
+            expect(dispatchKeydown(getButtonByLabel("Page 1"), "Tab").defaultPrevented).toBe(false);
+            expect(dispatchKeydown(getButtonByLabel("Page 1"), "Tab", { shiftKey: true }).defaultPrevented).toBe(false);
+            expect(dispatchKeydown(getButtonByLabel("Page 1"), "Enter").defaultPrevented).toBe(false);
         });
 
-        it("should return focus to the wrapper with Escape and deactivate the focus loop", () => {
-            setup(100, 10, 0);
-            const host: HTMLElement = fixture.nativeElement;
+        it("should ignore page shortcuts when navigable is false", () => {
+            fixture.componentRef.setInput("navigable", false);
+            setup(100, 10, 20);
 
-            dispatchKeydown(host, "Enter");
-            const focusedButton = getActiveElement();
-            expect(focusedButton).toBe(getButtonByLabel("Page 1"));
+            const event = dispatchKeydown(getButtonByLabel("Page 3"), "End");
 
-            dispatchKeydown(focusedButton, "Escape");
-            expect(document.activeElement).toBe(host);
-
-            getButtonByLabel("Page 1").focus();
-            const event = dispatchKeydown(getButtonByLabel("Page 1"), "Tab");
             expect(event.defaultPrevented).toBe(false);
+            expect(getActivePageButton().getAttribute("aria-label")).toBe("Page 3");
         });
     });
 
@@ -698,45 +682,26 @@ describe("PagerComponent with numeric buttons template", () => {
 });
 
 @Component({
-    imports: [PagerComponent, PagerFocusableDirective, PagerNumericButtonsTemplateDirective],
+    imports: [PagerComponent, PagerNumericButtonsTemplateDirective],
     template: `
         <mona-pager [total]="100" [pageSize]="10" [pageSizeValues]="false">
             <ng-template monaPagerNumericButtonsTemplate>
-                <button class="hidden-marked" monaPagerFocusable hidden>Hidden marked</button>
-                <button class="unmarked">Unmarked</button>
-                <button class="marked" monaPagerFocusable>Marked</button>
+                <li><button class="custom" tabindex="0">Custom</button></li>
             </ng-template>
         </mona-pager>
     `
 })
-class PagerFocusableTemplateHostComponent {}
+class PagerCustomControlTemplateHostComponent {}
 
-describe("PagerComponent with focusable template markers", () => {
-    let hostFixture: ComponentFixture<PagerFocusableTemplateHostComponent>;
-
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            imports: [PagerFocusableTemplateHostComponent],
-            providers: []
-        });
-        hostFixture = TestBed.createComponent(PagerFocusableTemplateHostComponent);
-        hostFixture.detectChanges();
-    });
-
-    it("should include marked custom controls and skip hidden or unmarked controls", () => {
-        const root: HTMLElement = hostFixture.nativeElement;
-        const host = root.querySelector<HTMLElement>("mona-pager");
-        if (!host) {
-            throw new Error("Expected the pager host to exist.");
-        }
-        const event = new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "Enter" });
-
-        host.dispatchEvent(event);
+describe("PagerComponent with custom template controls", () => {
+    it("leaves the tab order of custom controls alone", () => {
+        TestBed.configureTestingModule({ imports: [PagerCustomControlTemplateHostComponent] });
+        const hostFixture = TestBed.createComponent(PagerCustomControlTemplateHostComponent);
         hostFixture.detectChanges();
 
-        expect(document.activeElement).toBe(hostFixture.nativeElement.querySelector(".marked"));
-        expect(document.activeElement).not.toBe(hostFixture.nativeElement.querySelector(".hidden-marked"));
-        expect(document.activeElement).not.toBe(hostFixture.nativeElement.querySelector(".unmarked"));
+        const custom = hostFixture.nativeElement.querySelector(".custom") as HTMLButtonElement;
+        expect(custom.getAttribute("tabindex")).toBe("0");
+        expect(hostFixture.nativeElement.querySelector("mona-pager").getAttribute("tabindex")).toBeNull();
     });
 });
 
@@ -801,6 +766,8 @@ describe("PagerComponent i18n and localization", () => {
                 lastPageLabel: "Son sayfa",
                 nextPageLabel: "Sonraki sayfa",
                 ofText: "/",
+                pageInputPrefix: () => "Sayfa",
+                pageInputSuffix: totalPages => `/ ${totalPages}`,
                 pageLabel: page => `Sayfa ${page}`,
                 pageSizeLabel: pageSize => `${pageSize} / sayfa`,
                 pageText: "Sayfa",
@@ -905,7 +872,7 @@ describe("PagerComponent i18n and localization", () => {
         expect(labels).toContain("5 sayfa ileri git");
     });
 
-    it("localizes input mode text ('Page' and 'of')", () => {
+    it("localizes the text around the input in input mode", () => {
         fixture.componentRef.setInput("type", "input");
         fixture.componentRef.setInput("total", 100);
         fixture.componentRef.setInput("pageSize", 10);
@@ -918,26 +885,22 @@ describe("PagerComponent i18n and localization", () => {
         const spanTexts = spans.map(s => s.textContent?.trim());
 
         expect(spanTexts).toContain("Sayfa");
-        expect(spanTexts).toContain("/");
+        expect(spanTexts).toContain("/ 10");
     });
 
-    it("applies localized pageStatus to page input aria-label", () => {
+    it("names the page input with the text around it and its value", () => {
         fixture.componentRef.setInput("type", "input");
         fixture.componentRef.setInput("total", 100);
         fixture.componentRef.setInput("pageSize", 10);
         fixture.detectChanges();
 
         const inputEl = fixture.nativeElement.querySelector("mona-numeric-text-box input") as HTMLInputElement;
-        expect(inputEl.getAttribute("aria-label")).toBe("Page 1 of 10");
+        const names = (inputEl.getAttribute("aria-labelledby") ?? "")
+            .split(" ")
+            .map(id => document.getElementById(id))
+            .map(element => (element instanceof HTMLInputElement ? element.value : element?.textContent?.trim()));
 
-        i18nService.patchMessages({
-            pager: {
-                pageStatus: (page, total) => `Sayfa ${page} / ${total}`
-            }
-        });
-        fixture.detectChanges();
-
-        expect(inputEl.getAttribute("aria-label")).toBe("Sayfa 1 / 10");
+        expect(names).toEqual(["Page", "1", "of 10"]);
     });
 
     it("uses rangeStatus message when calculating pagerInfo", () => {
@@ -1028,8 +991,10 @@ describe("PagerComponent i18n and localization", () => {
     });
 
     describe("RTL and direction-aware keyboard navigation", () => {
-        function dispatchKey(element: Element, key: string): void {
-            element.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key }));
+        /** Dispatches on the current page button: the host itself is not focusable. */
+        function dispatchKey(host: Element, key: string): void {
+            const target = host.querySelector("button[aria-current='page']") ?? host;
+            target.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key }));
             fixture.detectChanges();
         }
 
@@ -1190,13 +1155,13 @@ describe("PagerComponent i18n and localization", () => {
             setup(100, 10, 0);
             await fixture.whenStable();
 
-            i18nService.use({ id: "ar-SA", direction: "rtl", messages: {} });
+            i18nService.use(MONA_AR_SA_LOCALE);
             fixture.detectChanges();
             await fixture.whenStable();
 
             const spans = Array.from(fixture.nativeElement.querySelectorAll("li span")) as HTMLElement[];
             const texts = spans.map(s => s.textContent?.trim());
-            expect(texts).toContain("١٠");
+            expect(texts).toContain("من ١٠");
         });
 
         it("renders Arabic-Indic digits in page-list dropdown when narrow", async () => {

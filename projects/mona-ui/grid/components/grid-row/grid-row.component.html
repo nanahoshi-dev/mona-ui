@@ -13,6 +13,7 @@
             [section]="'body'"
             [firstInRow]="layoutColumn.firstInRow"
             [lastInRow]="layoutColumn.lastInRow"
+            [readOnly]="editingEnabled() && layoutColumn.column.kind === 'data' ? !layoutColumn.column.editable : null"
             (edit)="gridCell.handleLogicalCellEnter()">
             <mona-grid-cell #gridCell [column]="layoutColumn.column" [row]="row()" />
         </td>
@@ -49,6 +50,7 @@
             <span [class]="detailToggleClass()">
                 <mona-grid-toggle
                     [expanded]="expanded()"
+                    [label]="detailToggleLabel()"
                     [type]="'detail'"
                     [width]="gridService.detailColumnWidth"
                     (expandedChange)="toggleDetail()" />
@@ -70,7 +72,4 @@
             <mona-grid-selection-checkbox [row]="row()" [rowIndex]="index()" />
         </td>
     }
-}
-@if (gridService.contextMenuItems().length !== 0) {
-    <mona-contextmenu [target]="hostElement" [items]="gridService.contextMenuItems()" />
 }

@@ -66,6 +66,7 @@ export const LOCALE_COPY_EXCEPTIONS: readonly LocaleCopyException[] = [
     { localeId: "de-DE", messagePath: "chart.highAbbreviation", value: "H" },
     { localeId: "de-DE", messagePath: "dialog.ok", value: "OK" },
     { localeId: "de-DE", messagePath: "editor.format", value: "Format" },
+    { localeId: "de-DE", messagePath: "filter.operator", value: "Operator" },
     { localeId: "de-DE", messagePath: "timeSelector.am", value: "AM" },
     { localeId: "de-DE", messagePath: "timeSelector.amPm", value: "AM/PM" },
     { localeId: "de-DE", messagePath: "timeSelector.pm", value: "PM" },
@@ -79,7 +80,10 @@ export const LOCALE_COPY_EXCEPTIONS: readonly LocaleCopyException[] = [
     { localeId: "fr-FR", messagePath: "editor.format", value: "Format" },
     { localeId: "fr-FR", messagePath: "pager.jumpBackwardLabel", value: "pages" },
     { localeId: "fr-FR", messagePath: "pager.jumpForwardLabel", value: "pages" },
+    { localeId: "fr-FR", messagePath: "pager.pageInputPrefix", value: "Page" },
     { localeId: "fr-FR", messagePath: "pager.pageLabel", value: "Page" },
+    { localeId: "fr-FR", messagePath: "pager.pageSelectLabel", value: "Page" },
+    { localeId: "fr-FR", messagePath: "pager.pagerLabel", value: "Pagination" },
     { localeId: "fr-FR", messagePath: "pager.pageStatus", value: "Page" },
     { localeId: "fr-FR", messagePath: "pager.pageText", value: "Page" },
     { localeId: "fr-FR", messagePath: "scrollView.page", value: "Page" },
@@ -90,6 +94,7 @@ export const LOCALE_COPY_EXCEPTIONS: readonly LocaleCopyException[] = [
     { localeId: "fr-FR", messagePath: "timeSelector.pm", value: "PM" },
     { localeId: "ja-JP", messagePath: "dialog.ok", value: "OK" },
     { localeId: "pt-BR", messagePath: "dialog.ok", value: "OK" },
+    { localeId: "pt-BR", messagePath: "pager.rangeStatus", value: "item" },
     { localeId: "pt-BR", messagePath: "scrollView.slide", value: "slide" },
     { localeId: "pt-BR", messagePath: "timeSelector.am", value: "AM" },
     { localeId: "pt-BR", messagePath: "timeSelector.amPm", value: "AM/PM" },
@@ -100,7 +105,9 @@ export const LOCALE_COPY_EXCEPTIONS: readonly LocaleCopyException[] = [
     { localeId: "it-IT", messagePath: "timeSelector.amPm", value: "AM/PM" },
     { localeId: "it-IT", messagePath: "timeSelector.pm", value: "PM" },
     { localeId: "id-ID", messagePath: "dialog.ok", value: "OK" },
+    { localeId: "id-ID", messagePath: "filter.operator", value: "Operator" },
     { localeId: "id-ID", messagePath: "multiSelect.itemsCount", value: "item" },
+    { localeId: "id-ID", messagePath: "pager.rangeStatus", value: "item" },
     { localeId: "id-ID", messagePath: "scrollView.slide", value: "slide" },
     { localeId: "id-ID", messagePath: "timeSelector.am", value: "AM" },
     { localeId: "id-ID", messagePath: "timeSelector.amPm", value: "AM/PM" },
@@ -491,6 +498,10 @@ export function loadDefaultEnglishStrings(
 
         let fileHasProperties = false;
         for (const obj of sf.getDescendantsOfKind(SyntaxKind.ObjectLiteralExpression)) {
+            // Objects inside a message function (the plural forms of an ICU message) aren't messages.
+            if (obj.getFirstAncestor(node => Node.isArrowFunction(node) || Node.isFunctionExpression(node))) {
+                continue;
+            }
             for (const prop of obj.getProperties()) {
                 if (Node.isPropertyAssignment(prop)) {
                     const key = prop.getName();

@@ -1,9 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
-import type { FilterMenuDateOptions } from "@nanahoshi/mona-ui/filter";
 import { FilterMenuComponent, FilterService } from "@nanahoshi/mona-ui/filter";
-import { PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
-import { EMPTY, Subject } from "rxjs";
 import type { Column } from "../../models/Column";
 import { GridService } from "../../services/grid.service";
 
@@ -49,7 +46,6 @@ function createColumn(): Column {
 describe("GridFilterMenuComponent", () => {
     let component: GridFilterMenuComponent;
     let fixture: ComponentFixture<GridFilterMenuComponent>;
-    let popupService: PopupService;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -58,7 +54,6 @@ describe("GridFilterMenuComponent", () => {
         });
         fixture = TestBed.createComponent(GridFilterMenuComponent);
         component = fixture.componentInstance;
-        popupService = TestBed.inject(PopupService);
         setColumnInput(createColumn());
         fixture.detectChanges();
     });
@@ -71,43 +66,6 @@ describe("GridFilterMenuComponent", () => {
         const button: HTMLButtonElement = fixture.nativeElement.querySelector("button");
         expect(button.getAttribute("aria-label")).toBe("Filter by Test");
     });
-
-    it("uses the column string format for date options", () => {
-        setColumnInput({
-            ...createColumn(),
-            dataType: "date",
-            format: "yyyy-MM-dd"
-        });
-        fixture.detectChanges();
-
-        expect(readDateOptions()).toEqual({
-            format: "yyyy-MM-dd",
-            type: "date"
-        });
-    });
-
-    function readDateOptions(): FilterMenuDateOptions | null {
-        const setInputSpy = vi.fn();
-        vi.spyOn(popupService, "create").mockReturnValue({
-            close: vi.fn(),
-            component: {
-                changeDetectorRef: { detectChanges: vi.fn() },
-                instance: {
-                    apply: new Subject(),
-                    field: { set: vi.fn() },
-                    type: { set: vi.fn() },
-                    value: { set: vi.fn() }
-                },
-                setInput: setInputSpy
-            },
-            overlayRef: { backdropClick: () => EMPTY }
-        } as unknown as PopupRef);
-
-        (component as unknown as { openPopup(): void }).openPopup();
-
-        const dateOptionsCall = setInputSpy.mock.calls.find(call => call[0] === "dateOptions");
-        return dateOptionsCall ? (dateOptionsCall[1] as FilterMenuDateOptions) : null;
-    }
 
     function setColumnInput(column: Column): void {
         fixture.componentRef.setInput("column", column);

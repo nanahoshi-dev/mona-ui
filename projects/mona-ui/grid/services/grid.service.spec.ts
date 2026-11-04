@@ -360,16 +360,17 @@ describe("GridService", () => {
                 ],
                 "id"
             );
+            service.rowKey.set("id");
         });
 
-        it("keys expansion state by row uid instead of the selection key", () => {
+        it("keys expansion state by the rowKey value instead of the selection key", () => {
             const [first] = service.rows().toArray();
             service.selectBy.set("name");
             service.setRowExpanded(first, true);
 
             expect(service.isRowExpanded(first)).toBe(true);
             expect(service.expandedKeys().contains("Jane")).toBe(false);
-            expect(service.expandedKeys().contains(first.uid)).toBe(true);
+            expect(service.expandedKeys().toArray()).toEqual([1]);
         });
 
         it("keeps expansion state when the selection configuration changes", () => {
@@ -421,10 +422,10 @@ describe("GridService", () => {
             ]);
         });
 
-        it("applies a single sort and reflects it in appliedSorts and viewRows", () => {
+        it("applies a single sort and reflects it in the sort descriptors and viewRows", () => {
             service.loadSorts([{ field: "name", dir: "asc" }]);
 
-            expect(service.appliedSorts().containsKey("name")).toBe(true);
+            expect(service.getSortDescriptors()).toEqual([{ field: "name", dir: "asc" }]);
             const names = service
                 .viewRows()
                 .select(r => r.data["name"])
@@ -457,7 +458,7 @@ describe("GridService", () => {
             service.loadSorts([{ field: "name", dir: "asc" }]);
             service.loadSorts([]);
 
-            expect(service.appliedSorts().isEmpty()).toBe(true);
+            expect(service.getSortDescriptors()).toEqual([]);
             const column = service.columns().firstOrDefault(c => c.field === "name");
             expect(column?.columnSortDirection).toBeNull();
         });
@@ -953,7 +954,7 @@ describe("GridService", () => {
             expect(service.isRowSelected(second)).toBe(true);
         });
 
-        it("derives selectedRows only from currently available rows", () => {
+        it("keeps the keys of selected rows that leave the data", () => {
             service.selectBy.set("id");
             service.setRows(createRowData(3));
             const [first, second] = service.rows().toArray();
@@ -963,7 +964,7 @@ describe("GridService", () => {
 
             service.setRows(createRowData(1));
 
-            expect(service.selectedRows().size()).toBe(1);
+            expect(service.isRowSelected(service.rows().first())).toBe(true);
             expect(service.selectedKeys().size()).toBe(2);
         });
     });
@@ -1344,10 +1345,10 @@ describe("GridService", () => {
 
     describe("i18n messages", () => {
         it("returns default english messages", () => {
-            expect(service.messages().saveRow).toBe("Save row");
-            expect(service.messages().cancelRowEdit).toBe("Cancel row edit");
-            expect(service.messages().editRow).toBe("Edit row");
-            expect(service.messages().removeRow).toBe("Remove row");
+            expect(service.messages().saveRow(2)).toBe("Save row 2");
+            expect(service.messages().cancelRowEdit(2)).toBe("Cancel editing row 2");
+            expect(service.messages().editRow(2)).toBe("Edit row 2");
+            expect(service.messages().removeRow(2)).toBe("Remove row 2");
             expect(service.messages().rowReorder).toBe("Row reorder");
             expect(service.messages().noData).toBe("No data");
             expect(service.messages().reorderRow(1)).toBe("Reorder row 1");
@@ -1368,7 +1369,7 @@ describe("GridService", () => {
 
             expect(service.messages().noData).toBe("Veri yok");
             expect(service.messages().rowReorder).toBe("Satır yeniden sıralama");
-            expect(service.messages().saveRow).toBe("Save row");
+            expect(service.messages().saveRow(2)).toBe("Save row 2");
 
             i18n.use(MONA_DEFAULT_LOCALE);
         });

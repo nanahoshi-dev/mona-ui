@@ -1171,7 +1171,7 @@ describe("MONA_KO_KR_LOCALE Integration with MonaI18nService", () => {
         expect(service.localeId()).toBe("ko-KR");
         expect(gridMessages().columns).toBe("열");
         expect(gridMessages().save).toBe("저장");
-        expect(gridMessages().cancelRowEdit).toBe("행 편집 취소");
+        expect(gridMessages().cancelRowEdit(3)).toBe("3행 편집 취소");
         expect(gridMessages().noData).toBe("데이터 없음");
         expect(pagerMessages().firstPageLabel).toBe("첫 페이지");
         expect(getLocaleFirstDayOfWeek("ko-KR")).toBe("sunday");
@@ -1182,7 +1182,7 @@ describe("MONA_KO_KR_LOCALE Integration with MonaI18nService", () => {
         expect(service.localeId()).toBe("zh-CN");
         expect(gridMessages().columns).toBe("列");
         expect(gridMessages().save).toBe("保存");
-        expect(gridMessages().cancelRowEdit).toBe("取消编辑行");
+        expect(gridMessages().cancelRowEdit(3)).toBe("取消编辑第 3 行");
         expect(gridMessages().noData).toBe("没有数据");
         expect(pagerMessages().firstPageLabel).toBe("第一页");
         expect(getLocaleFirstDayOfWeek("zh-CN")).toBe("monday");
@@ -1193,7 +1193,7 @@ describe("MONA_KO_KR_LOCALE Integration with MonaI18nService", () => {
         expect(service.localeId()).toBe("ko-KR");
         expect(gridMessages().columns).toBe("열");
         expect(gridMessages().save).toBe("저장");
-        expect(gridMessages().cancelRowEdit).toBe("행 편집 취소");
+        expect(gridMessages().cancelRowEdit(3)).toBe("3행 편집 취소");
         expect(gridMessages().noData).toBe("데이터 없음");
         expect(pagerMessages().firstPageLabel).toBe("첫 페이지");
         expect(getLocaleFirstDayOfWeek("ko-KR")).toBe("sunday");

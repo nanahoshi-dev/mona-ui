@@ -1061,7 +1061,7 @@ describe("MONA_ZH_CN_LOCALE Integration with MonaI18nService", () => {
         expect(service.localeId()).toBe("zh-CN");
         expect(gridMessages().columns).toBe("列");
         expect(gridMessages().save).toBe("保存");
-        expect(gridMessages().cancelRowEdit).toBe("取消编辑行");
+        expect(gridMessages().cancelRowEdit(3)).toBe("取消编辑第 3 行");
         expect(gridMessages().noData).toBe("没有数据");
         expect(pagerMessages().firstPageLabel).toBe("第一页");
 
@@ -1070,7 +1070,7 @@ describe("MONA_ZH_CN_LOCALE Integration with MonaI18nService", () => {
         expect(service.localeId()).toBe("zh-TW");
         expect(gridMessages().columns).toBe("欄");
         expect(gridMessages().save).toBe("儲存");
-        expect(gridMessages().cancelRowEdit).toBe("取消編輯資料列");
+        expect(gridMessages().cancelRowEdit(3)).toBe("取消編輯第 3 個資料列");
         expect(gridMessages().noData).toBe("沒有資料");
         expect(pagerMessages().firstPageLabel).toBe("第一頁");
 
@@ -1079,7 +1079,7 @@ describe("MONA_ZH_CN_LOCALE Integration with MonaI18nService", () => {
         expect(service.localeId()).toBe("zh-CN");
         expect(gridMessages().columns).toBe("列");
         expect(gridMessages().save).toBe("保存");
-        expect(gridMessages().cancelRowEdit).toBe("取消编辑行");
+        expect(gridMessages().cancelRowEdit(3)).toBe("取消编辑第 3 行");
         expect(gridMessages().noData).toBe("没有数据");
         expect(pagerMessages().firstPageLabel).toBe("第一页");
     });

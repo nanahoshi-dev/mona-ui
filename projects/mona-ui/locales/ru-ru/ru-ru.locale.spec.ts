@@ -60,7 +60,7 @@ describe("MONA_RU_RU_LOCALE", () => {
             expect(m.grid?.apply).toBe("Применить");
             expect(m.grid?.cancel).toBe("Отмена");
             expect(m.grid?.delete).toBe("Удалить");
-            expect(m.grid?.deleteRowConfirmation).toBe("Удалить этот элемент?");
+            expect(m.grid?.deleteRowConfirmation(3)).toBe("Удалить строку 3?");
             expect(m.grid?.deleteRowTitle).toBe("Удалить строку?");
             expect(m.grid?.edit).toBe("Изменить");
             expect(m.grid?.filterPlaceholder).toBe("Фильтр…");

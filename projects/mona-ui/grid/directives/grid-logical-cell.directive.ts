@@ -1,7 +1,6 @@
 import { Clipboard } from "@angular/cdk/clipboard";
 import {
     afterNextRender,
-    afterEveryRender,
     afterRenderEffect,
     computed,
     DestroyRef,
@@ -14,7 +13,8 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { filter, fromEvent } from "rxjs";
+import { fromEvent } from "rxjs";
+import { GRID_CELL_FOCUSABLE_SELECTOR, isKeyboardEntryElement } from "../services/grid-cell-tab-stops";
 import {
     GridCellKind,
     GridNavigationSection,
@@ -23,14 +23,21 @@ import {
 } from "../services/grid-navigation.service";
 import { GridService } from "../services/grid.service";
 
-const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [tabindex]";
+/** Elements that Tab can reach outside the grid. */
+const PAGE_TABBABLE_SELECTOR = `${GRID_CELL_FOCUSABLE_SELECTOR}, summary, [contenteditable]`;
 
+/**
+ * A cell the grid's keyboard navigation can reach. Arrows, Home, End, PageUp and PageDown move between
+ * cells; Enter or F2 starts an edit or moves into the controls inside the cell, where Tab and the arrows
+ * move between them and Escape returns to the cell. Tab itself leaves the grid: only one cell is in the
+ * page Tab order.
+ */
 @Directive({
     selector: "td[monaGridLogicalCell], th[monaGridLogicalCell]",
     host: {
         "[attr.tabindex]": "focused() ? 0 : -1",
-        "[attr.aria-colindex]": "ariaColIndex()",
-        "[attr.aria-readonly]": "resolvedCellKind() === 'data' ? !editable() : null"
+        "[attr.aria-colindex]": "resolvedAriaColIndex()",
+        "[attr.aria-readonly]": "readOnly()"
     }
 })
 export class GridLogicalCellDirective {
@@ -61,7 +68,6 @@ export class GridLogicalCellDirective {
     readonly #startEdit = (): void => {
         this.edit.emit();
     };
-    protected readonly ariaColIndex = computed(() => this.colIndex() + this.#gridService.groupColumns().length + 1);
     protected readonly focused = computed(() => {
         const key = this.#cellKey();
         if (!key) {
@@ -69,6 +75,9 @@ export class GridLogicalCellDirective {
         }
         return this.#gridNavigationService.isFocused(key);
     });
+    protected readonly resolvedAriaColIndex = computed(
+        () => this.ariaColIndex() ?? this.colIndex() + this.#gridService.groupColumns().length + 1
+    );
     protected readonly resolvedCellKind = computed<GridCellKind>(() => {
         const cellKind = this.cellKind();
         if (cellKind != null) {
@@ -89,6 +98,11 @@ export class GridLogicalCellDirective {
         }
         return this.#hostElementRef.nativeElement.tagName === "TH" ? "header" : "body";
     });
+    /**
+     * @description The cell's `aria-colindex` when it isn't its column's place in the layout, as for a group
+     * row's title cell, which follows the group's indents.
+     */
+    public readonly ariaColIndex = input<number | null>(null);
     public readonly cellKind = input<GridCellKind | null>(null);
     public readonly colIndex = input.required<number>();
     public readonly columnId = input<string>();
@@ -98,18 +112,33 @@ export class GridLogicalCellDirective {
      * @description Marks the cell as a participant in Tab-driven cell edit traversal.
      */
     public readonly editable = input(false);
+    /**
+     * @description Whether the cell's row or group is expanded; ArrowRight expands a collapsed group row and
+     * ArrowLeft collapses an expanded one.
+     */
+    public readonly expanded = input<boolean | null>(null);
     public readonly firstInRow = input.required<boolean>();
     public readonly groupHeader = input<boolean>(false);
     public readonly groupKey = input<string>();
     public readonly lastInRow = input.required<boolean>();
+    /**
+     * @description Emits on Alt+ArrowDown in a header cell, to open the column's filter menu.
+     */
+    public readonly menuOpen = output();
+    /**
+     * @description The cell's `aria-readonly`: whether its column can't be edited, or `null` when the grid
+     * doesn't edit.
+     */
+    public readonly readOnly = input<boolean | null>(null);
     public readonly rowIndex = input.required<number>();
     public readonly rowUid = input<string>();
     public readonly section = input<GridNavigationSection | null>(null);
     public readonly toggleExpand = output();
 
     public constructor() {
+        // Registering the rendered cell writes the navigation registry's signals.
         afterRenderEffect({
-            read: () => {
+            mixedReadWrite: () => {
                 const data = this.#cellData();
                 // Cached virtual views must not re-register in response to another view's registry writes.
                 untracked(() => {
@@ -122,14 +151,8 @@ export class GridLogicalCellDirective {
                 });
             }
         });
-        afterEveryRender({
-            mixedReadWrite: () => this.#syncInnerFocusableTabIndexes()
-        });
         afterNextRender({
-            read: () => {
-                this.#setCellCopySubscription();
-                this.#setKeyboardNavigation();
-            }
+            read: () => this.#setKeyboardNavigation()
         });
         this.#destroyRef.onDestroy(() => {
             const cellKey = this.#cellKey();
@@ -140,14 +163,57 @@ export class GridLogicalCellDirective {
         });
     }
 
-    public focusNextPageTabTarget(backwards: boolean): boolean {
-        const host = this.#hostElementRef.nativeElement;
-        const targets = this.#getPageTabTargets();
-        const orderedTargets = backwards ? targets.reverse() : targets;
-        const documentPosition = backwards ? Node.DOCUMENT_POSITION_PRECEDING : Node.DOCUMENT_POSITION_FOLLOWING;
-        const target = orderedTargets.find(
-            candidate => (host.compareDocumentPosition(candidate) & documentPosition) !== 0
+    /**
+     * Moves focus to the next control outside the grid, as Tab would. Used when Tab ends an edit in the last
+     * editable cell, where the key was already taken; returns false when there is nowhere to go.
+     */
+    public leaveGrid(backwards: boolean): boolean {
+        const host: HTMLTableCellElement = this.#hostElementRef.nativeElement;
+        const document = host.ownerDocument;
+        const position = backwards ? Node.DOCUMENT_POSITION_PRECEDING : Node.DOCUMENT_POSITION_FOLLOWING;
+        const candidates = Array.from(document.querySelectorAll<HTMLElement>(PAGE_TABBABLE_SELECTOR)).filter(
+            candidate =>
+                candidate.tabIndex >= 0 &&
+                !host.contains(candidate) &&
+                !candidate.contains(host) &&
+                (host.compareDocumentPosition(candidate) & position) !== 0 &&
+                !this.#isElementDisabled(candidate) &&
+                !this.#isElementHidden(candidate)
         );
+        for (const candidate of backwards ? candidates.reverse() : candidates) {
+            candidate.focus();
+            // Hidden or inert elements don't take focus: try the next one.
+            if (document.activeElement === candidate) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    #copyCellText(event: KeyboardEvent): void {
+        // The physical key, so copying works with Caps Lock and with non-Latin layouts.
+        if (!(event.ctrlKey || event.metaKey) || event.altKey || event.code !== "KeyC") {
+            return;
+        }
+        if (this.rowIndex() < 0 || this.#gridService.isInEditMode()) {
+            return;
+        }
+        // Text the user selected is theirs to copy.
+        const selection = this.#hostElementRef.nativeElement.ownerDocument.getSelection();
+        if (selection != null && !selection.isCollapsed && selection.toString() !== "") {
+            return;
+        }
+        // The rendered text; textContent where there is no layout to give innerText.
+        const host: HTMLElement = this.#hostElementRef.nativeElement;
+        const text = (host.innerText ?? host.textContent ?? "").trim();
+        if (text) {
+            this.#clipboard.copy(text);
+        }
+    }
+
+    /** Moves focus into the cell, to its first control. */
+    #enterCell(): boolean {
+        const target = this.#getInnerFocusableTargets()[0];
         if (!target) {
             return false;
         }
@@ -155,75 +221,101 @@ export class GridLogicalCellDirective {
         return true;
     }
 
-    #focusInnerTarget(target: HTMLElement): void {
-        target.focus();
-    }
-
-    #focusNextInnerTarget(currentTarget: HTMLElement, backwards: boolean): void {
+    #focusNextInnerTarget(currentTarget: HTMLElement, backwards: boolean, wrap: boolean): boolean {
         const targets = this.#getInnerFocusableTargets();
         if (targets.length === 0) {
-            return;
-        }
-        const currentIndex = targets.findIndex(target => target === currentTarget || target.contains(currentTarget));
-        const nextIndex =
-            currentIndex === -1 ? 0 : (currentIndex + (backwards ? -1 : 1) + targets.length) % targets.length;
-        this.#focusInnerTarget(targets[nextIndex]);
-    }
-
-    #focusFirstInnerTarget(): boolean {
-        const target = this.#getInnerFocusableTargets()[0];
-        if (!target) {
             return false;
         }
-        this.#focusInnerTarget(target);
+        const currentIndex = targets.findIndex(target => target === currentTarget || target.contains(currentTarget));
+        let nextIndex = currentIndex === -1 ? 0 : currentIndex + (backwards ? -1 : 1);
+        if (nextIndex < 0 || nextIndex >= targets.length) {
+            if (!wrap) {
+                return false;
+            }
+            nextIndex = (nextIndex + targets.length) % targets.length;
+        }
+        targets[nextIndex].focus();
         return true;
     }
 
     #getInnerFocusableTargets(): HTMLElement[] {
         const host = this.#hostElementRef.nativeElement;
-        const targets = Array.from(host.querySelectorAll(FOCUSABLE_TARGET_SELECTOR)) as HTMLElement[];
+        const targets = Array.from(host.querySelectorAll(GRID_CELL_FOCUSABLE_SELECTOR)) as HTMLElement[];
         return targets.filter(
             target => target !== host && !this.#isElementDisabled(target) && !this.#isElementHidden(target)
         );
     }
 
-    #getPageTabTargets(): HTMLElement[] {
+    /** Keys pressed on a control inside the cell. */
+    #handleInnerKeydown(event: KeyboardEvent, target: HTMLElement): void {
+        // An open editor handles its own keys, except in the row editor's command cell.
+        if (this.#gridService.isInEditMode() && this.resolvedCellKind() !== "command") {
+            return;
+        }
         const host = this.#hostElementRef.nativeElement;
-        const targets = Array.from(host.ownerDocument.querySelectorAll(FOCUSABLE_TARGET_SELECTOR)) as HTMLElement[];
-        return targets.filter(
-            target =>
-                target !== host &&
-                !target.matches("mona-grid tbody[role='rowgroup']") &&
-                target.getAttribute("tabindex") !== "-1" &&
-                !this.#isElementDisabled(target) &&
-                !this.#isElementHidden(target)
-        );
-    }
-
-    #handleCommandInnerKeydown(event: KeyboardEvent, target: HTMLElement): void {
         if (event.key === "Escape") {
             event.preventDefault();
-            this.#hostElementRef.nativeElement.focus();
+            host.focus();
             return;
         }
 
         if (event.key === "Tab") {
             event.preventDefault();
-            this.#focusNextInnerTarget(target, event.shiftKey);
+            if (this.#focusNextInnerTarget(target, event.shiftKey, false)) {
+                return;
+            }
+            // Past the last control, Tab goes on to the next cell; before the first, back to this cell.
+            host.focus();
+            if (!event.shiftKey) {
+                this.#navigate("ArrowRight");
+            }
             return;
         }
 
+        // Text fields, lists and sliders use the arrows themselves.
+        if (isKeyboardEntryElement(target)) {
+            return;
+        }
         const key = this.#toLogicalArrowKey(event.key);
         if (key === "ArrowRight" || key === "ArrowDown") {
             event.preventDefault();
-            this.#focusNextInnerTarget(target, false);
-            return;
-        }
-
-        if (key === "ArrowLeft" || key === "ArrowUp") {
+            this.#focusNextInnerTarget(target, false, true);
+        } else if (key === "ArrowLeft" || key === "ArrowUp") {
             event.preventDefault();
-            this.#focusNextInnerTarget(target, true);
+            this.#focusNextInnerTarget(target, true, true);
         }
+    }
+
+    /** Space, Shift+Space, Shift+ArrowUp/Down and Ctrl+A select rows. Returns whether the key was one of them. */
+    #handleSelectionKey(event: KeyboardEvent): boolean {
+        const rowUid = this.rowUid();
+        if (this.resolvedSection() !== "body" || this.groupHeader() || rowUid == null) {
+            return false;
+        }
+        if (event.key === " " && !event.ctrlKey && !event.metaKey && !event.altKey) {
+            if (this.#gridService.selectRowFromKeyboard(rowUid, event.shiftKey)) {
+                event.preventDefault();
+            }
+            return true;
+        }
+        if ((event.ctrlKey || event.metaKey) && !event.altKey && !event.shiftKey && event.code === "KeyA") {
+            if (this.#gridService.selectAllRowsFromKeyboard()) {
+                event.preventDefault();
+            }
+            return true;
+        }
+        if (event.shiftKey && !event.altKey && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
+            event.preventDefault();
+            if (!this.#navigate(event.key)) {
+                return true;
+            }
+            const next = this.#gridNavigationService.getFocusedCell();
+            if (next?.section === "body" && !next.groupHeader && next.rowUid != null) {
+                this.#gridService.selectRowFromKeyboard(next.rowUid, true);
+            }
+            return true;
+        }
+        return false;
     }
 
     #isElementDisabled(element: HTMLElement): boolean {
@@ -241,7 +333,7 @@ export class GridLogicalCellDirective {
     }
 
     #isElementHidden(element: HTMLElement): boolean {
-        return element.closest("[hidden]") != null || element.getAttribute("aria-hidden") === "true";
+        return element.closest("[hidden], [inert]") != null || element.getAttribute("aria-hidden") === "true";
     }
 
     #navigate(navigationKey: string): boolean {
@@ -257,104 +349,104 @@ export class GridLogicalCellDirective {
             this.toggleExpand.emit();
             return;
         }
-        if (this.resolvedCellKind() === "command") {
-            this.#focusFirstInnerTarget();
-            return;
-        }
-        if (this.#gridService.editableOptions().mode === "row") {
-            return;
-        }
-        this.edit.emit();
+        this.#onF2Key();
     }
 
+    /** F2 edits an editable cell; on any other cell it moves into the cell's controls. */
     #onF2Key(): void {
-        if (this.resolvedCellKind() === "command") {
-            this.#focusFirstInnerTarget();
+        if (this.editable()) {
+            this.edit.emit();
             return;
         }
-        if (this.#gridService.editableOptions().mode === "row") {
+        if (this.#enterCell()) {
             return;
         }
-        this.edit.emit();
+        if (this.resolvedCellKind() === "data") {
+            this.edit.emit();
+        }
     }
 
     #onHostKeydown(event: KeyboardEvent): void {
-        if (event.defaultPrevented) {
+        if (event.defaultPrevented || event.isComposing) {
             return;
         }
         const target = event.target as HTMLElement | null;
         const host = this.#hostElementRef.nativeElement;
         if (target && target !== host) {
-            if (this.resolvedCellKind() === "command") {
-                this.#handleCommandInnerKeydown(event, target);
-            }
+            this.#handleInnerKeydown(event, target);
             return;
         }
 
-        if (event.key === "Tab") {
-            if (this.focusNextPageTabTarget(event.shiftKey)) {
+        this.#copyCellText(event);
+        if (this.#handleSelectionKey(event)) {
+            return;
+        }
+
+        const command = event.ctrlKey || event.metaKey;
+        switch (event.key) {
+            case "ArrowDown":
                 event.preventDefault();
-            }
-            return;
-        }
-
-        if (
-            !event.key.startsWith("Arrow") &&
-            event.key !== "Enter" &&
-            event.key !== "F2" &&
-            event.key !== "Home" &&
-            event.key !== "End"
-        ) {
-            return;
-        }
-
-        if (event.key === "ArrowDown") {
-            if (event.altKey) {
-                this.toggleExpand.emit();
+                if (event.altKey) {
+                    this.#onAltArrowDown();
+                    return;
+                }
+                this.#navigate("ArrowDown");
+                return;
+            case "ArrowUp":
                 event.preventDefault();
+                this.#navigate("ArrowUp");
+                return;
+            case "ArrowLeft":
+            case "ArrowRight": {
+                const key = this.#toLogicalArrowKey(event.key);
+                // A group row expands with ArrowRight and collapses with ArrowLeft, as in a tree.
+                const expanded = this.expanded();
+                if (this.groupHeader() && expanded === (key === "ArrowLeft")) {
+                    event.preventDefault();
+                    this.toggleExpand.emit();
+                    return;
+                }
+                if (this.#navigate(key)) {
+                    event.preventDefault();
+                }
                 return;
             }
-            event.preventDefault();
-            this.#navigate("ArrowDown");
-        } else if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-            if (this.#navigate(this.#toLogicalArrowKey(event.key))) {
+            case "Enter":
                 event.preventDefault();
-            }
-        } else if (event.key === "ArrowUp") {
-            event.preventDefault();
-            this.#navigate("ArrowUp");
-        } else if (event.key === "Enter") {
-            event.preventDefault();
-            this.#onEnterKey();
-        } else if (event.key === "F2") {
-            event.preventDefault();
-            this.#onF2Key();
-        } else if (event.key === "Home") {
-            event.preventDefault();
-            this.#navigate(event.ctrlKey ? "CtrlHome" : "Home");
-        } else if (event.key === "End") {
-            event.preventDefault();
-            this.#navigate(event.ctrlKey ? "CtrlEnd" : "End");
+                this.#onEnterKey();
+                return;
+            case "F2":
+                event.preventDefault();
+                this.#onF2Key();
+                return;
+            case "Home":
+                event.preventDefault();
+                this.#navigate(command ? "CtrlHome" : "Home");
+                return;
+            case "End":
+                event.preventDefault();
+                this.#navigate(command ? "CtrlEnd" : "End");
+                return;
+            case "PageDown":
+            case "PageUp":
+                if (this.#navigate(event.key)) {
+                    event.preventDefault();
+                }
+                return;
         }
     }
 
-    #setCellCopySubscription(): void {
-        fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
-            .pipe(
-                takeUntilDestroyed(this.#destroyRef),
-                filter(e => (e.ctrlKey || e.metaKey) && e.key === "c"),
-                filter(() => this.rowIndex() >= 0 && !this.#gridService.isInEditMode())
-            )
-            .subscribe(() => {
-                const text = this.#hostElementRef.nativeElement.innerText?.trim() ?? "";
-                if (text) {
-                    this.#clipboard.copy(text);
-                }
-            });
+    #onAltArrowDown(): void {
+        if (this.resolvedSection() === "header") {
+            this.menuOpen.emit();
+            return;
+        }
+        this.toggleExpand.emit();
     }
 
     #setKeyboardNavigation(): void {
-        fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focus")
+        const host = this.#hostElementRef.nativeElement;
+        fromEvent<FocusEvent>(host, "focus")
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(() => {
                 const key = this.#cellKey();
@@ -362,18 +454,14 @@ export class GridLogicalCellDirective {
                     this.#gridNavigationService.setLastFocusedCellKey(key);
                 }
             });
+        fromEvent<FocusEvent>(host, "blur")
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(() => this.#gridNavigationService.notifyCellBlur());
 
-        fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
+        // One keydown listener per cell handles copying, selection and navigation.
+        fromEvent<KeyboardEvent>(host, "keydown")
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(e => this.#onHostKeydown(e));
-    }
-
-    #syncInnerFocusableTabIndexes(): void {
-        for (const target of this.#getInnerFocusableTargets()) {
-            if (target.getAttribute("tabindex") !== "-1") {
-                target.setAttribute("tabindex", "-1");
-            }
-        }
     }
 
     /**
