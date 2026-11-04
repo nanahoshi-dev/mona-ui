@@ -1,5 +1,4 @@
 import { GRID_DEFAULT_VIRTUAL_ROW_HEIGHT } from "../constants/grid-virtual-scroll.constants";
-import { compareGridComparableValues, toGridComparableValue } from "../utils/grid-comparable-value";
 import { isPlatformBrowser } from "@angular/common";
 import {
     computed,
@@ -26,11 +25,12 @@ import { deepEquals, VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { PopupMenuItem } from "@nanahoshi/mona-ui/popup-menu";
 import {
-    CompositeFilterDescriptor,
-    FilterDescriptor,
+    compareValues,
+    type CompositeFilterDescriptor,
+    type FilterDescriptor,
     Query,
-    SortDescriptor,
-    SortDirection
+    type SortDescriptor,
+    type SortDirection
 } from "@nanahoshi/mona-ui/query";
 import { BehaviorSubject, Subject } from "rxjs";
 import { v4 } from "uuid";
@@ -95,6 +95,20 @@ interface GridEditSessionOptions extends GridEditFormContext {
 }
 
 const GRID_STATE_VERSION = 1;
+
+/** Min and max consider numbers, bigints, strings, booleans and valid dates; other values are skipped. */
+function isAggregateComparable(value: unknown): boolean {
+    switch (typeof value) {
+        case "bigint":
+        case "boolean":
+        case "string":
+            return true;
+        case "number":
+            return !Number.isNaN(value);
+        default:
+            return value instanceof Date && !Number.isNaN(value.getTime());
+    }
+}
 
 @Injectable()
 export class GridService {
@@ -479,7 +493,7 @@ export class GridService {
         const appliedSorts = this.appliedSorts();
         const groupColumns = this.groupColumns();
 
-        let queryEnumerable = Query.from(rows);
+        let queryEnumerable = Query.from(rows, { locale: this.#i18n.localeId() });
         for (const filter of appliedFilters) {
             if (filter.value.filter) {
                 queryEnumerable = queryEnumerable.filter(filter.value.filter, r => r.data);
@@ -751,7 +765,8 @@ export class GridService {
             new Set(this.collapsedGroupKeys()),
             this.groupableOptions().showFooter,
             groupAggregates,
-            this.serverBindingEnabled()
+            this.serverBindingEnabled(),
+            { locale: this.#i18n.localeId() }
         );
     }
 
@@ -1602,15 +1617,15 @@ export class GridService {
                 continue;
             }
 
-            const comparableValue = toGridComparableValue(value);
-            if (comparableValue == null) {
+            if (!isAggregateComparable(value)) {
                 continue;
             }
 
-            if (min == null || compareGridComparableValues(comparableValue, toGridComparableValue(min)) < 0) {
+            const options = { locale: this.#i18n.localeId() };
+            if (min == null || compareValues(value, min, options) < 0) {
                 min = value;
             }
-            if (max == null || compareGridComparableValues(comparableValue, toGridComparableValue(max)) > 0) {
+            if (max == null || compareValues(value, max, options) > 0) {
                 max = value;
             }
         }

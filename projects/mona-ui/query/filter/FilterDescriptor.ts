@@ -1,5 +1,3 @@
-import { Predicate } from "@mirei/ts-collections";
-
 export type CommonFilterOperators = "eq" | "neq";
 export type NullFilterOperators = "isnull" | "isnotnull";
 export type EmptyFilterOperators = "isempty" | "isnotempty";
@@ -41,7 +39,7 @@ export type FilterOperators =
     | FunctionFilterOperators;
 
 export type FieldDefinition = { field: string };
-export type CommonFilterDescriptor = FieldDefinition & { operator: CommonFilterOperators; value: any };
+export type CommonFilterDescriptor = FieldDefinition & { operator: CommonFilterOperators; value: unknown };
 export type NullFilterDescriptor = FieldDefinition & { operator: NullFilterOperators };
 export type EmptyFilterDescriptor = FieldDefinition & { operator: EmptyFilterOperators };
 export type NullOrEmptyFilterDescriptor = FieldDefinition & { operator: NullOrEmptyFilterOperators };
@@ -77,13 +75,22 @@ export type DateFilterDescriptor = FieldDefinition &
         | NullFilterDescriptor
     );
 
-export type ArrayFilterDescriptor = FieldDefinition & { operator: ArrayFilterOperators; value: any[] };
+export type ArrayFilterDescriptor = FieldDefinition & { operator: ArrayFilterOperators; value: readonly unknown[] };
 
-export type RangeFilterDescriptor = FieldDefinition & { operator: RangeFilterOperators; value: [number, number] };
+/** A bound of a range filter. `null` leaves that end open. */
+export type RangeFilterBound = number | Date | string | null;
+
+/** `between` and `notbetween` include both bounds. */
+export type RangeFilterDescriptor = FieldDefinition & {
+    operator: RangeFilterOperators;
+    value: readonly [from: RangeFilterBound, to: RangeFilterBound];
+};
 
 export type FunctionFilterDescriptor = FieldDefinition & {
     operator: FunctionFilterOperators;
-    predicate: Predicate<any>;
+
+    /** Receives the value of `field`, not the row. */
+    predicate(value: unknown): boolean;
 };
 
 export type FilterDescriptor =
@@ -101,7 +108,8 @@ export type FilterDescriptor =
 
 export type FilterLogic = "and" | "or";
 
+/** An empty `filters` list matches every item, whatever the logic. */
 export interface CompositeFilterDescriptor {
-    logic: FilterLogic;
     filters: Array<FilterDescriptor | CompositeFilterDescriptor>;
+    logic: FilterLogic;
 }

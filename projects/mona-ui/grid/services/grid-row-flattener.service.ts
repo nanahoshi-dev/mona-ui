@@ -1,10 +1,10 @@
 import { Injectable } from "@angular/core";
 import { Dictionary } from "@mirei/ts-collections";
+import { compareValues, type QueryOptions } from "@nanahoshi/mona-ui/query";
 import type { Column } from "../models/Column";
 import type { GridGroupAggregate } from "../models/GridAggregate";
 import type { GridViewDataRow, GridViewGroupFooterRow, GridViewGroupRow, GridViewRow } from "../models/GridGroup";
 import type { Row } from "../models/Row";
-import { compareGridComparableValues, toGridComparableValue } from "../utils/grid-comparable-value";
 
 /**
  * A stateless service that groups and flattens rows into a linear `GridViewRow[]`
@@ -32,6 +32,7 @@ export class GridRowFlattenerService {
      * @param collapsedKeys - The set of group keys that are currently collapsed.
      * @param groupAggregates - The dictionary of group aggregates.
      * @param orderGroups - Orders buckets by direction. Disable for client rows already ordered by Query.
+     * @param options - The locale used to order string group values.
      * @returns A flat array of `GridViewRow` items.
      */
     public flatten(
@@ -40,7 +41,8 @@ export class GridRowFlattenerService {
         collapsedKeys: ReadonlySet<string>,
         showFooter: boolean,
         groupAggregates: Dictionary<string, GridGroupAggregate> = new Dictionary<string, GridGroupAggregate>(),
-        orderGroups = true
+        orderGroups = true,
+        options: QueryOptions = {}
     ): GridViewRow[] {
         const columnArray = [...groupColumns];
         if (columnArray.length === 0) {
@@ -55,7 +57,7 @@ export class GridRowFlattenerService {
             null,
             collapsedKeys,
             showFooter,
-            orderGroups,
+            orderGroups ? options : null,
             result
         );
         return result;
@@ -80,7 +82,7 @@ export class GridRowFlattenerService {
         parentKey: string | null,
         collapsedKeys: ReadonlySet<string>,
         showFooter: boolean,
-        orderGroups: boolean,
+        groupOrder: QueryOptions | null,
         result: GridViewRow[]
     ): void {
         const column = groupColumns[depth];
@@ -105,12 +107,9 @@ export class GridRowFlattenerService {
 
         const entries = keyOrder.map((mapKey, index) => ({ mapKey, index, rows: groupMap.get(mapKey)! }));
         const direction = column.groupSortDirection;
-        if (orderGroups && direction != null) {
+        if (groupOrder != null && direction != null) {
             entries.sort((left, right) => {
-                const comparison = compareGridComparableValues(
-                    toGridComparableValue(left.rows[0].data[field]),
-                    toGridComparableValue(right.rows[0].data[field])
-                );
+                const comparison = compareValues(left.rows[0].data[field], right.rows[0].data[field], groupOrder);
                 return (direction === "asc" ? comparison : -comparison) || left.index - right.index;
             });
         }
@@ -143,7 +142,7 @@ export class GridRowFlattenerService {
                         groupKey,
                         collapsedKeys,
                         showFooter,
-                        orderGroups,
+                        groupOrder,
                         result
                     );
                 } else {

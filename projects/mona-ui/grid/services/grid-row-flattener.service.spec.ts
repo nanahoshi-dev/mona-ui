@@ -136,15 +136,23 @@ describe("page-local group bucket ordering", () => {
         expect(result.filter(row => row.type === "group").map(row => row.groupValue)).toEqual(ordered);
     });
 
-    it("keeps equal and unsupported values in encounter order", () => {
-        const values = [{ id: 1 }, Symbol("group"), { id: 2 }, 0, false];
+    it("keeps values with no natural order first, in encounter order", () => {
+        const first = { id: 1 };
+        const symbol = Symbol("group");
+        const second = { id: 2 };
         const result = service.flatten(
-            values.map(value => new Row({ value })),
+            [first, symbol, 0, second, false].map(value => new Row({ value })),
             [createColumn({ field: "value", groupSortDirection: "asc" })],
             new Set(),
             false
         );
-        expect(result.filter(row => row.type === "group").map(row => row.groupValue)).toEqual(values);
+        expect(result.filter(row => row.type === "group").map(row => row.groupValue)).toEqual([
+            first,
+            symbol,
+            second,
+            false,
+            0
+        ]);
     });
 
     it("preserves preordered client buckets when ordering is disabled", () => {
