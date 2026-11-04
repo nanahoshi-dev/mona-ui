@@ -1,6 +1,6 @@
-import { afterNextRender, DestroyRef, Directive, effect, inject, input, output, untracked } from "@angular/core";
+import { Directive, effect, inject, input, output, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ListKeySelector, ListService, SelectableOptions } from "@nanahoshi/mona-ui/internal/list";
+import { type ListKeySelector, ListService, type SelectableOptions } from "@nanahoshi/mona-ui/internal/list";
 
 @Directive({
     selector: "mona-list-view[monaListViewSelectable]"
@@ -11,15 +11,14 @@ export class ListViewSelectableDirective<T, K = unknown> {
         enabled: true,
         toggleable: false
     };
-    readonly #destroyRef = inject(DestroyRef);
     readonly #listService = inject<ListService<T>>(ListService);
 
-    public readonly selectedKeysChange = output<Array<K>>();
-    public options = input<Partial<SelectableOptions> | "">("", {
+    public readonly options = input<Partial<SelectableOptions> | "">("", {
         alias: "monaListViewSelectable"
     });
-    public selectBy = input<ListKeySelector<T, K> | undefined>("");
-    public selectedKeys = input<Iterable<K>>([]);
+    public readonly selectBy = input<ListKeySelector<T, K> | undefined>("");
+    public readonly selectedKeys = input<Iterable<K>>([]);
+    public readonly selectedKeysChange = output<Array<K>>();
 
     public constructor() {
         effect(() => {
@@ -47,12 +46,8 @@ export class ListViewSelectableDirective<T, K = unknown> {
                 }
             });
         });
-        afterNextRender({
-            read: () => {
-                this.#listService.selectedKeysChange$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(keys => {
-                    this.selectedKeysChange.emit(keys);
-                });
-            }
-        });
+        this.#listService.selectedKeysChange$
+            .pipe(takeUntilDestroyed())
+            .subscribe(keys => this.selectedKeysChange.emit(keys as K[]));
     }
 }

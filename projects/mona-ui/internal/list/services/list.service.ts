@@ -1,25 +1,25 @@
 import { computed, inject, Injectable, linkedSignal, signal } from "@angular/core";
 import {
     from,
-    IEnumerable,
+    type IEnumerable,
     ImmutableList,
     ImmutableSet,
-    Predicate,
-    Selector,
+    type Predicate,
+    type Selector,
     toImmutableSet
 } from "@mirei/ts-collections";
-import { FilterableOptions, FilterChangeEvent, VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
+import { type FilterableOptions, FilterChangeEvent, type VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { ReplaySubject, Subject } from "rxjs";
-import { GroupableOptions } from "../models/GroupableOptions";
+import type { GroupableOptions } from "../models/GroupableOptions";
 import { ListItem } from "../models/ListItem";
-import { ListKeySelector } from "../models/ListSelectors";
-import { NavigableOptions } from "../models/NavigableOptions";
-import { NavigationDirection } from "../models/NavigationDirection";
-import { NavigationMode } from "../models/NavigationMode";
-import { PagerSettings } from "../models/PagerSettings";
-import { PageState } from "../models/PageState";
-import { SelectableOptions } from "../models/SelectableOptions";
+import type { ListKeySelector } from "../models/ListSelectors";
+import type { NavigableOptions } from "../models/NavigableOptions";
+import type { NavigationDirection } from "../models/NavigationDirection";
+import type { NavigationMode } from "../models/NavigationMode";
+import type { PagerSettings } from "../models/PagerSettings";
+import type { PageState } from "../models/PageState";
+import type { SelectableOptions } from "../models/SelectableOptions";
 import { cycleThroughMatchedItems } from "../utils/cycleThroughMatchedItems";
 import { formatGroupHeader, toGroupKey } from "../utils/groupKey";
 
@@ -70,7 +70,13 @@ export class ListService<TData> {
                 const header =
                     previous && previous.header === text && previous.data === value
                         ? previous
-                        : new ListItem<TData>({ data: value, header: text, isHeader: true, uid: previous?.uid });
+                        : // A header carries its group's value in place of a data item.
+                          new ListItem<TData>({
+                              data: value as TData,
+                              header: text,
+                              isHeader: true,
+                              uid: previous?.uid
+                          });
                 headers.set(g.key, header);
                 return g.source.prepend(header);
             })
@@ -188,7 +194,7 @@ export class ListService<TData> {
         }
         return headerUids;
     });
-    public readonly groupableOptions = signal<GroupableOptions<TData, any>>({
+    public readonly groupableOptions = signal<GroupableOptions<TData, unknown>>({
         enabled: false,
         headerOrder: "asc"
     });
@@ -253,8 +259,8 @@ export class ListService<TData> {
         mode: "single",
         toggleable: false
     });
-    public readonly selectedKeys = signal(ImmutableSet.create<any>());
-    public readonly selectedKeysChange$ = new Subject<Array<any>>();
+    public readonly selectedKeys = signal(ImmutableSet.create<unknown>());
+    public readonly selectedKeysChange$ = new Subject<unknown[]>();
     public readonly selectedListItems = computed(() => {
         const selectedKeys = this.selectedKeys();
         const itemsByKey = this.#itemsByKey();
@@ -346,13 +352,13 @@ export class ListService<TData> {
         return filterableOptions.enabled ? filterableOptions.debounce : 0;
     }
 
-    public getGroupField(item: ListItem<TData>): any {
+    public getGroupField(item: ListItem<TData>): unknown {
         const groupSelector = this.groupBy();
         if (groupSelector == null) {
             return "";
         }
         if (typeof groupSelector === "string") {
-            return (item.data as any)?.[groupSelector] ?? "";
+            return (item.data as Record<string, unknown> | null | undefined)?.[groupSelector] ?? "";
         }
         return groupSelector(item.data);
     }
@@ -550,7 +556,7 @@ export class ListService<TData> {
         this.groupBy.set(groupSelector);
     }
 
-    public setGroupableOptions(options: GroupableOptions<TData, any>): void {
+    public setGroupableOptions(options: GroupableOptions<TData, unknown>): void {
         this.groupableOptions.update(o => ({ ...o, ...options }));
     }
 
@@ -627,11 +633,11 @@ export class ListService<TData> {
         return item != null && viewItems.contains(item) ? item : null;
     }
 
-    private getOrderKey(item: ListItem<TData>): any {
+    private getOrderKey(item: ListItem<TData>): unknown {
         const orderBy = this.groupableOptions().orderBy;
         if (orderBy) {
             if (typeof orderBy === "string") {
-                return (item.data as any)[orderBy];
+                return (item.data as Record<string, unknown>)[orderBy];
             } else {
                 return orderBy(item.data);
             }
@@ -655,7 +661,7 @@ export class ListService<TData> {
         return prevItem;
     }
 
-    private getSelectionKey(item: ListItem<TData>): any {
+    private getSelectionKey(item: ListItem<TData>): unknown {
         return this.getDataItemValue(item.data);
     }
 

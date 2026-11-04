@@ -30,7 +30,7 @@ class HostComponent {
 }
 
 describe("TreeViewFilterableDirective", () => {
-    let directive: TreeViewFilterableDirective<any>;
+    let directive: TreeViewFilterableDirective<TestItem>;
     beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [TreeService]

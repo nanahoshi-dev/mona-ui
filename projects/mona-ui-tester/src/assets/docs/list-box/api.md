@@ -20,11 +20,11 @@ Used on its own, a list box is a selectable list whose toolbar moves, clears and
 ## Import & Quick Start
 
 ```typescript
-import { ListBoxComponent } from "@nanahoshi/mona-ui";
+import { ListBoxComponent } from "@nanahoshi/mona-ui/list-box";
 ```
 
 ```html
-<mona-list-box [items]="items" textField="name" selectBy="id" [height]="'320px'"></mona-list-box>
+<mona-list-box aria-label="Foods" [items]="items" textField="name" selectBy="id" [height]="'320px'"></mona-list-box>
 ```
 
 `items` accepts any `Iterable<T>`. `selectBy` derives the key used by `selectedKeys`/`selectedKeysChange`; when omitted, the data item itself is used as the key. The toolbar is shown by default with Move Up, Move Down, Clear Selection and Remove; the transfer actions join it once a `connectedList` is set — see [Connected list boxes with a transfer toolbar](#connected-list-boxes-with-a-transfer-toolbar). Pass `[toolbar]="false"` for a list without one.
@@ -41,7 +41,7 @@ Each structural directive below is an `ng-template` placed as projected content 
 | `ListBoxNoDataTemplateDirective` | `ng-template[monaListBoxNoDataTemplate]` | None                                                                      | The default "No data" placeholder          |
 
 ```html
-<mona-list-box [items]="items" textField="name" selectBy="id">
+<mona-list-box aria-label="Foods" [items]="items" textField="name" selectBy="id">
     <ng-template monaListBoxHeaderTemplate>
         <div class="font-medium px-3 py-2 border-b border-input-border">Food Items</div>
     </ng-template>
@@ -62,12 +62,7 @@ Binding the list box's items to `monaListBoxItemTemplateOf` types `let-item` as 
 ### Single selection with toggle
 
 ```html
-<mona-list-box
-    [items]="items"
-    textField="name"
-    selectBy="id"
-    [selectedKeys]="selectedIds"
-    (selectedKeysChange)="onSelectedIdsChange($event)">
+<mona-list-box aria-label="Foods" [items]="items" textField="name" selectBy="id" [(selectedKeys)]="selectedIds">
 </mona-list-box>
 ```
 
@@ -76,7 +71,7 @@ With the default `selectionMode` (`"single"`) and `singleSelectionToggleable` (`
 ### Multiple selection
 
 ```html
-<mona-list-box [items]="items" textField="name" selectBy="id" selectionMode="multiple" [selectedKeys]="selectedIds">
+<mona-list-box aria-label="Foods" [items]="items" textField="name" selectBy="id" selectionMode="multiple" [(selectedKeys)]="selectedIds">
 </mona-list-box>
 ```
 
@@ -137,7 +132,7 @@ Once the consumer has moved the items, they are selected in the list box they mo
 ### Disabled items
 
 ```html
-<mona-list-box [items]="items" textField="name" selectBy="id" disabledBy="locked"></mona-list-box>
+<mona-list-box aria-label="Foods" [items]="items" textField="name" selectBy="id" disabledBy="locked"></mona-list-box>
 ```
 
 `disabledBy` takes a property name or a predicate. Disabled items can't be selected (by click, keys or typeahead), and no action carries them: Transfer All moves only the enabled items. Drag and drop between list boxes isn't supported; the [keyboard shortcuts](#keyboard) and the toolbar are the ways to move items.
@@ -146,6 +141,7 @@ Once the consumer has moved the items, they are selected in the list box they mo
 
 ```html
 <mona-list-box
+    aria-label="Available foods"
     [items]="items"
     textField="name"
     selectBy="id"
@@ -181,7 +177,7 @@ Every event lists items in list order, not the order they were selected in, and 
 
 ### Arrow-key navigation moves the selection
 
-Unlike List View (which defaults to highlight-only navigation), List Box always navigates in `"select"` mode: in single selection, arrow keys and typeahead immediately change the selection rather than only moving focus. In multiple selection they move focus only, and Space, Ctrl+A (Cmd+A) and clicks change the selection.
+Like List View's default, List Box navigates in `"select"` mode, and it can't be changed: in single selection, arrow keys and typeahead immediately change the selection rather than only moving focus. In multiple selection they move focus only, and Space, Ctrl+A (Cmd+A) and clicks change the selection.
 
 ### `selectBy`/`textField` accept a property name or a function
 
@@ -295,16 +291,16 @@ Form integration is not applicable — List Box is a display/selection widget, n
 
 ### Cancelable action events
 
-`ListBoxClearEvent`, `ListBoxMoveEvent`, `ListBoxRemoveEvent`, and `ListBoxTransferEvent` all extend `PreventableEvent`. Call `event.preventDefault()` in an `actionClick` handler to skip the component's internal selection-clearing/scroll bookkeeping for that action (this does not undo any data mutation the same handler already performed).
+`ListBoxClearEvent`, `ListBoxMoveEvent`, `ListBoxRemoveEvent`, and `ListBoxTransferEvent` all extend `PreventableEvent`. Their `T` defaults to `any`, so an event annotated without a type argument keeps untyped items; `actionClick` emits them typed with the list box's `T`. Call `event.preventDefault()` in an `actionClick` handler to skip the component's internal selection-clearing/scroll bookkeeping for that action (this does not undo any data mutation the same handler already performed).
 
-#### `ListBoxClearEvent<T = unknown>`
+#### `ListBoxClearEvent<T = any>`
 
 | Property        | Type      | Description                                                    |
 |-----------------|-----------|----------------------------------------------------------------|
 | `action`        | `"clear"` | Discriminant matching the `ListBoxActionEvent` union.          |
 | `selectedItems` | `T[]`     | The items that were selected when Clear Selection was clicked. |
 
-#### `ListBoxMoveEvent<T = unknown>`
+#### `ListBoxMoveEvent<T = any>`
 
 | Property          | Type                     | Description                                               |
 |-------------------|--------------------------|-----------------------------------------------------------|
@@ -314,14 +310,14 @@ Form integration is not applicable — List Box is a display/selection widget, n
 | `selectedIndices` | `number[]`               | Indices of all selected items before the move, ascending. |
 | `selectedItems`   | `T[]`                    | The items that were selected when the move was requested. |
 
-#### `ListBoxRemoveEvent<T = unknown>`
+#### `ListBoxRemoveEvent<T = any>`
 
 | Property        | Type       | Description                                           |
 |-----------------|------------|-------------------------------------------------------|
 | `action`        | `"remove"` | Discriminant matching the `ListBoxActionEvent` union. |
 | `selectedItems` | `T[]`      | The items that were selected when Remove was clicked. |
 
-#### `ListBoxTransferEvent<T = unknown>`
+#### `ListBoxTransferEvent<T = any>`
 
 | Property        | Type                                                                     | Description                                                                                                                                                                          |
 |-----------------|--------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -332,7 +328,7 @@ Form integration is not applicable — List Box is a display/selection widget, n
 
 ### Exported Types
 
-#### `ListBoxActionEvent<T = unknown>`
+#### `ListBoxActionEvent<T = any>`
 
 `ListBoxClearEvent<T> | ListBoxMoveEvent<T> | ListBoxRemoveEvent<T> | ListBoxTransferEvent<T>` — narrow on the `action` field to determine which one was emitted.
 
@@ -344,12 +340,12 @@ Form integration is not applicable — List Box is a display/selection widget, n
 
 `ListBoxItemTemplateDirective` checks templates against this context. `T` comes from `monaListBoxItemTemplateOf` when it is bound, and is `any` otherwise.
 
-#### `ListBoxSelectionEvent<T = unknown>`
+#### `ListBoxSelectionEvent<T = any>`
 
 | Field             | Type  | Description                  |
 |-------------------|-------|------------------------------|
-| `deselectedItems` | `T[]` | Items that were deselected.  |
-| `selectedItems`   | `T[]` | Items that are now selected. |
+| `deselectedItems` | `T[]` | Items that were deselected (read-only).  |
+| `selectedItems`   | `T[]` | Items that are now selected (read-only). |
 
 #### `ToolbarOptions`
 
@@ -365,18 +361,11 @@ Form integration is not applicable — List Box is a display/selection widget, n
 ---
 
 <!-- verification-checklist
-- [x] ListBoxComponent inputs/defaults verified against list-box.component.ts source and cross-checked against component-metadata.json's ListBoxComponent entry
-- [x] `ariaLabel` input's `{ alias: "aria-label" }` binding verified against list-box.component.ts; documented as bound via the alias per current source
-- [x] Toolbar visibility verified against list-box.component.ts's `toolbarButtons` computed: the toolbar renders whenever it has buttons, and the transfer actions need a connectedList
-- [x] "Component does not mutate items" and per-action actionClick-firing table verified against onClearClick/onMoveClick/onRemoveClick/onTransferClick in list-box.component.ts (no items()/listBoxItems.set() call in any of the four handlers) and cross-checked against list-box-demo.component.ts's ListBoxWrapperComponent.onActionClick, which performs all data mutation itself
-- [x] Toolbar customization (`toolbar: { actions: [] }` renders no toolbar) verified against the `toolbarButtons` computed and confirmed by a passing unit test in list-box.component.spec.ts
-- [x] singleSelectionToggleable verified against the selectableOptions computed (`toggleable: this.singleSelectionToggleable()` for `"single"` mode only)
-- [x] Arrow-key "select" mode verified against list-box.component.html's hardcoded `[monaListViewNavigable]="{ enabled: true, mode: 'select' }"`, contrasted with List View's own default (`mode: "highlight"`) documented in list-view/api.md
-- [x] Four structural template directives and selectors verified against list-box/directives/*-template.directive.ts; none currently have a public API surface beyond their selector (no inputs/outputs), so no separate API subsection was created for them
-- [x] ListBoxItemTemplateContext wired into ListBoxItemTemplateDirective through a generic ngTemplateContextGuard; T is inferred from monaListBoxItemTemplateOf and is any when it isn't bound, so untyped consumer templates (the tester demo's `let-item`) still compile
-- [x] Four action event classes (ListBoxClearEvent, ListBoxMoveEvent, ListBoxRemoveEvent, ListBoxTransferEvent), ListBoxActionEvent union, ListBoxSelectionEvent, ToolbarOptions/ToolbarAction confirmed exported via lib/index.ts; PreventableEvent base (preventDefault/isDefaultPrevented) confirmed exported via utils/PreventableEvent
-- [x] ListKeySelector and Position confirmed NOT exported from lib/index.ts; selectBy/textField/position documented using their resolved structural types instead of the internal type names, matching list-view/api.md's precedent
-- [x] Keyboard map, single-Tab-stop focus behavior, and ARIA attributes (role=listbox/option, aria-selected, aria-disabled, aria-posinset/aria-setsize) verified against the same common/list implementation documented in list-view/api.md, which ListBoxComponent uses via ListViewComponent
-- [x] Toolbar button aria-label values verified against the `toolbarButtons` computed and list-box.default-messages.ts (Move Up/Move Down/Transfer to {list}/Transfer from {list}/Transfer all to {list}/Transfer all from {list}, with "the other list" fallbacks/Clear Selection/Remove)
-- [x] No internal-only symbols (ListService, ListViewComponent's internals, activeListBox/getSelectedListBox, ListBoxWrapperComponent) documented as public API
+- [x] Inputs, outputs, defaults and public methods checked against list-box/components/list-box/list-box.component.ts and component-metadata.json
+- [x] Toolbar order, visibility (transfer actions need a connectedList), labels and shortcuts checked against list-box.component.ts (TOOLBAR_ORDER, toolbarButtons, resolveShortcut) and en-US.messages.json (listBox)
+- [x] Firing table and event contents (list order, no disabled items, "All" transfers carry the source's enabled items) checked against runAction/transfer/move/remove/clear in list-box.component.ts
+- [x] Selection events after actions and focus after actions checked against reportSelection/afterActionRender in list-box.component.ts
+- [x] Navigation in "select" mode checked against list-box.component.html; list-view's own default is also "select"
+- [x] Event model defaults (`T = any`) checked against list-box/models; ListBoxComponent's own `T` defaults to `unknown`
+- [x] Exports checked against list-box/public-api.ts; imports use @nanahoshi/mona-ui/list-box (the root entry exports nothing)
 -->

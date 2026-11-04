@@ -1,6 +1,8 @@
 import { PreventableEvent } from "@nanahoshi/mona-ui/common";
-import { ToolbarAction } from "./ToolbarOptions";
+import type { ToolbarAction } from "./ToolbarOptions";
 
+// `any` by default, so an event annotated without a type argument keeps untyped items.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class ListBoxMoveEvent<T = any> extends PreventableEvent {
     readonly #action: Extract<ToolbarAction, "moveDown" | "moveUp">;
     readonly #newIndex: number;

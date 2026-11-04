@@ -1,4 +1,4 @@
-import { NavigationDirection } from "../models/NavigationDirection";
+import type { NavigationDirection } from "../models/NavigationDirection";
 
 export const getListNavigationDirection = (key: string): NavigationDirection | null => {
     switch (key) {

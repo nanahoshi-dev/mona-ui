@@ -5,9 +5,9 @@ import { ListService } from "./list.service";
 
 interface Product {
     readonly id: number;
+    readonly inStock?: boolean;
     readonly name: string;
     readonly price?: number | null;
-    readonly inStock?: boolean;
 }
 
 const PRODUCTS: readonly Product[] = [

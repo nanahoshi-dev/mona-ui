@@ -1,4 +1,4 @@
-<div [class]="baseClass()" (click)="onNodeClick($event)" (contextmenu)="onNodeContextMenu($event)" #element>
+<div [class]="baseClass()" (click)="onNodeClick($event)" (contextmenu)="onNodeContextMenu()" #element>
     @if (treeService.nodeTemplate()) {
         <ng-container
             [ngTemplateOutlet]="treeService.nodeTemplate()"

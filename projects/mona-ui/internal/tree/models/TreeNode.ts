@@ -1,7 +1,7 @@
 import { signal } from "@angular/core";
 import { ImmutableSet } from "@mirei/ts-collections";
 import { v4 } from "uuid";
-import { NodeItem } from "./NodeItem";
+import type { NodeItem } from "./NodeItem";
 
 export class TreeNode<T> {
     public readonly checked = signal(false);

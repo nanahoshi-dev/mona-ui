@@ -261,6 +261,7 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
             [size]="size()"
             [textField]="textField()"
             [toolbar]="toolbarCustomizations()"
+            [toolbarAriaLabel]="toolbarAriaLabel()"
             [width]="width()">
             @if (featureData["headerTemplate"].active) {
                 <ng-template monaListBoxHeaderTemplate>
@@ -381,6 +382,7 @@ class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponen
         ReturnType<ListBoxComponent["toolbar"]>,
         ReturnType<ListBoxComponent["toolbar"]> | string | null | undefined
     >(true, { transform: value => (typeof value === "string" || value == null ? value !== "false" : value) });
+    public readonly toolbarAriaLabel = input("");
     public readonly width = input<ReturnType<ListBoxComponent["width"]>>("100%");
 
     protected onActionClick(

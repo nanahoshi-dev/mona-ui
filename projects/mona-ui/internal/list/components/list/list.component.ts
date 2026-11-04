@@ -13,9 +13,9 @@ import {
     ElementRef,
     inject,
     input,
-    OnInit,
+    type OnInit,
     output,
-    Signal,
+    type Signal,
     signal,
     TemplateRef,
     untracked,
@@ -38,9 +38,9 @@ import { ListItemTemplateDirective } from "../../directives/list-item-template.d
 import { ListItemDirective } from "../../directives/list-item.directive";
 import { ListNoDataTemplateDirective } from "../../directives/list-no-data-template.directive";
 import { ListItem } from "../../models/ListItem";
-import { ListKeySelector } from "../../models/ListSelectors";
-import { ListSizeInputType, ListSizeType } from "../../models/ListSizeType";
-import { SelectionChangeEvent, SelectionSource } from "../../models/SelectionChangeEvent";
+import type { ListKeySelector } from "../../models/ListSelectors";
+import type { ListSizeInputType, ListSizeType } from "../../models/ListSizeType";
+import type { SelectionChangeEvent, SelectionSource } from "../../models/SelectionChangeEvent";
 import { ListService } from "../../services/list.service";
 import { listGroupHeaderThemeVariants, listInnerListThemeVariants, listThemeVariants } from "../../styles/list.styles";
 import { getListNavigationDirection } from "../../utils/getListNavigationDirection";

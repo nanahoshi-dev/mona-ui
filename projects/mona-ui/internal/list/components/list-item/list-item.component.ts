@@ -1,9 +1,9 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { Component, computed, inject, input, Signal, TemplateRef } from "@angular/core";
+import { Component, computed, inject, input, type Signal, TemplateRef } from "@angular/core";
 import { CheckboxDirective } from "@nanahoshi/mona-ui/check-box";
 import { twMerge } from "tailwind-merge";
 import { ListItem } from "../../models/ListItem";
-import { ListItemTemplateContext } from "../../models/ListItemTemplateContext";
+import type { ListItemTemplateContext } from "../../models/ListItemTemplateContext";
 import { ListService } from "../../services/list.service";
 import { listGroupHeaderTextThemeVariants, listItemBaseThemeVariants } from "../../styles/list.styles";
 
@@ -27,6 +27,7 @@ export class ListItemComponent<TData> {
         return this.listService.selectableOptions().checkboxes && !this.isHeader();
     });
     protected readonly dataItem: Signal<TData | null> = computed(() => this.item()?.data ?? null);
+    protected readonly isHeader = computed(() => this.item()?.isHeader ?? false);
     protected readonly itemChecked = computed(() => this.listService.isSelected(this.item()));
     protected readonly itemText = computed(() => {
         const item = this.item();
@@ -38,7 +39,6 @@ export class ListItemComponent<TData> {
         }
         return this.listService.getItemText(item);
     });
-    protected readonly isHeader = computed(() => this.item()?.isHeader ?? false);
     protected readonly listService = inject(ListService);
     protected readonly textClasses = computed(() => {
         const isHeader = this.isHeader();

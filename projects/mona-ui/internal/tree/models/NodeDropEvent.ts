@@ -1,7 +1,7 @@
-import { DropPosition } from "./DropPositionChangeEvent";
-import { ITreeView } from "./ITreeView";
+import type { DropPosition } from "./DropPositionChangeEvent";
+import type { ITreeView } from "./ITreeView";
 import { NodeEvent } from "./NodeEvent";
-import { NodeItem } from "./NodeItem";
+import type { NodeItem } from "./NodeItem";
 import { TreeNode } from "./TreeNode";
 
 export class NodeDropEvent<T> extends NodeEvent<T> {

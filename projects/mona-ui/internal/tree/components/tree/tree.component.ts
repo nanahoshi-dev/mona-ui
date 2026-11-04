@@ -1,7 +1,6 @@
 import { FocusMonitor } from "@angular/cdk/a11y";
 import {
     afterNextRender,
-    ChangeDetectionStrategy,
     Component,
     computed,
     contentChild,
@@ -15,7 +14,7 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectComponentDirection } from "@nanahoshi/mona-ui/i18n";
 import { isTypeaheadKey, setupTypeahead } from "@nanahoshi/mona-ui/internal";
 import { asapScheduler, filter, fromEvent, Subject, switchMap, takeWhile } from "rxjs";
 import { TreeNodeTemplateDirective } from "../../directives/tree-node-template.directive";
@@ -31,7 +30,6 @@ import { TreeDropHintComponent } from "../tree-drop-hint/tree-drop-hint.componen
     selector: "mona-tree",
     imports: [SubTreeComponent, TreeDropHintComponent],
     templateUrl: "./tree.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         "[class]": "baseClass()",
         "[attr.role]": "'tree'",
@@ -48,11 +46,9 @@ export class TreeComponent<T> {
     readonly #direction = injectComponentDirection();
     readonly #focusMonitor = inject(FocusMonitor);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
-    readonly #i18n = inject(MonaI18nService);
     readonly #typeaheadKey$ = new Subject<string>();
     readonly #zone: NgZone = inject(NgZone);
     #lastNavigatedNode: TreeNode<T> | null = null;
-    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly activeDescendantId = computed<string | null>(() => {
         const node = this.treeService.navigatedNode();
         return node === null ? null : this.treeService.getNodeElementId(node.uid);
@@ -60,6 +56,7 @@ export class TreeComponent<T> {
     protected readonly baseClass = computed(() => {
         return treeBaseThemeVariants({ empty: this.treeService.viewNodeSet().isEmpty() });
     });
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     /**
      * With checkboxes, nodes report `aria-checked` and not `aria-selected`, so the tree isn't multiselectable in the
      * `aria-selected` sense.

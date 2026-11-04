@@ -1,9 +1,9 @@
 ## Overview & Component Selection
 
-List View renders a collection of items as a `role="listbox"` list. On its own it only renders items and an optional height/width — every interactive behavior (selection, keyboard navigation, grouping, pagination, virtual scrolling) is opt-in through a companion attribute directive applied to the same `<mona-list-view>` host element:
+List View renders a collection of items: a `role="list"` of `listitem`s, or, once you can select from it, a `role="listbox"` of `option`s. Keyboard navigation is on by default; the other behaviors are opt-in through a companion attribute directive applied to the same `<mona-list-view>` host element:
 
-- `monaListViewSelectable` — single or multiple selection, with optional checkboxes.
-- `monaListViewNavigable` — arrow-key/Home/End/typeahead navigation.
+- `monaListViewSelectable` — single or multiple selection, with optional checkboxes. Makes the list a listbox.
+- `monaListViewNavigable` — changes how arrow keys, Home/End and typeahead navigate, or turns navigation off.
 - `monaListViewGroupable` — groups items under a header row.
 - `monaListViewPageable` — adds a pager below the list.
 - `monaListViewVirtualScroll` — renders only the items currently in view.
@@ -24,14 +24,14 @@ List View renders a collection of items as a `role="listbox"` list. On its own i
 ## Import & Quick Start
 
 ```typescript
-import { ListViewComponent } from "@nanahoshi/mona-ui";
+import { ListViewComponent } from "@nanahoshi/mona-ui/list-view";
 ```
 
 ```html
-<mona-list-view [items]="items" textField="name" [height]="'300px'"></mona-list-view>
+<mona-list-view aria-label="Foods" [items]="items" textField="name" [height]="'300px'"></mona-list-view>
 ```
 
-`items` accepts any `Iterable<T>`, and `textField` accepts either a property name or a function `(item: T) => string` used to render each item's default text. Without any behavior directive, the list is a static, non-interactive listbox — add `monaListViewNavigable` and/or `monaListViewSelectable` for keyboard interaction and selection (see [Feature Examples](#feature-examples)).
+`items` accepts any `Iterable<T>`, and `textField` accepts either a property name or a function `(item: T) => string` used to render each item's default text. Without any behavior directive, the list is a `list` you can move through with the arrow keys; add `monaListViewSelectable` for selection (see [Feature Examples](#feature-examples)). Name every list view with `aria-label` or `aria-labelledby`.
 
 ## Anatomy & Public Structural Templates
 
@@ -40,17 +40,17 @@ Each structural directive below is an `ng-template` placed as projected content 
 | Directive                              | Selector                                       | Template context                           | Replaces                                             |
 |----------------------------------------|------------------------------------------------|--------------------------------------------|------------------------------------------------------|
 | `ListViewHeaderTemplateDirective`      | `ng-template[monaListViewHeaderTemplate]`      | None                                       | No default — renders above the list                  |
-| `ListViewItemTemplateDirective`        | `ng-template[monaListViewItemTemplate]`        | `{ $implicit: T }` (the raw data item)     | The default text rendered from `textField`           |
-| `ListViewGroupHeaderTemplateDirective` | `ng-template[monaListViewGroupHeaderTemplate]` | `{ $implicit: K }` (the group's key value) | The default bold group header text                   |
+| `ListViewItemTemplateDirective`        | `ng-template[monaListViewItemTemplate]`        | `ListViewItemTemplateContext<T>`: `{ $implicit: T }` (the raw data item) | The default text rendered from `textField` |
+| `ListViewGroupHeaderTemplateDirective` | `ng-template[monaListViewGroupHeaderTemplate]` | `ListViewGroupHeaderTemplateContext<K>`: `{ $implicit: K }` (the group's value) | The default bold group header text |
 | `ListViewFooterTemplateDirective`      | `ng-template[monaListViewFooterTemplate]`      | None                                       | No default — renders below the list, above the pager |
 | `ListViewNoDataTemplateDirective`      | `ng-template[monaListViewNoDataTemplate]`      | None                                       | The default "No data" placeholder                    |
 
 ```html
-<mona-list-view [items]="items" textField="name">
+<mona-list-view aria-label="Foods" [items]="items" textField="name">
     <ng-template monaListViewHeaderTemplate>
         <div class="font-bold px-3 py-1">Food List</div>
     </ng-template>
-    <ng-template monaListViewItemTemplate let-item>
+    <ng-template monaListViewItemTemplate [monaListViewItemTemplateOf]="items" let-item>
         <span class="flex-1">{{ item.name }}</span>
         <span class="text-green-600">${{ item.price }}</span>
     </ng-template>
@@ -60,12 +60,15 @@ Each structural directive below is an `ng-template` placed as projected content 
 </mona-list-view>
 ```
 
+Bind the list view's items to `[monaListViewItemTemplateOf]` to type `let-item` in the template; without it, the item is `any`. The group header template's value isn't type-checked. Both context types are exported.
+
 ## Feature Examples
 
 ### Single and multiple selection
 
 ```html
 <mona-list-view
+    aria-label="Foods"
     [items]="items"
     textField="name"
     [monaListViewSelectable]="{ mode: 'single', toggleable: true }"
@@ -75,21 +78,22 @@ Each structural directive below is an `ng-template` placed as projected content 
 </mona-list-view>
 ```
 
-`selectBy` derives the key used for `selectedKeys`/`selectedKeysChange`; when omitted, the data item itself is used as the key. `mode: "multiple"` allows selecting more than one item; `toggleable` (single mode only) lets the user deselect the current item by clicking it again. Set `checkboxes: true` on the options object to render a checkbox per item instead of relying on background color alone.
+`selectBy` derives the key used for `selectedKeys`/`selectedKeysChange`; when omitted, the data item itself is used as the key. `selectedKeysChange` fires for the user's selections, not for keys set through `selectedKeys`, so `[(selectedKeys)]` works. `mode: "multiple"` allows selecting more than one item; `toggleable` (single mode only) lets the user deselect the current item by clicking it again. Set `checkboxes: true` on the options object to render a checkbox per item instead of relying on background color alone.
 
 ### Keyboard navigation
 
 ```html
-<mona-list-view [items]="items" textField="name" [monaListViewNavigable]="{ mode: 'select', wrap: true }" monaListViewSelectable>
+<mona-list-view aria-label="Foods" [items]="items" textField="name" [monaListViewNavigable]="{ mode: 'highlight', wrap: true }" monaListViewSelectable>
 </mona-list-view>
 ```
 
-`monaListViewNavigable` is required for arrow-key/Home/End/typeahead navigation — see [Keyboard](#keyboard). `mode: "select"` moves the selection as the user navigates; `mode: "highlight"` (the default) only moves a visual highlight, leaving selection to click/Enter. `wrap` (default `false`) makes navigating past the last item cycle back to the first.
+Arrow-key/Home/End/typeahead navigation is on without the directive — see [Keyboard](#keyboard); `monaListViewNavigable` configures it. `mode: "select"` (the default) moves the selection as the user navigates a single-selection list; `mode: "highlight"` only moves a visual highlight, leaving selection to click/Enter. `wrap` (default `false`) makes navigating past the last item cycle back to the first. `{ enabled: false }` turns navigation off.
 
 ### Grouping
 
 ```html
 <mona-list-view
+    aria-label="Foods"
     [items]="items"
     textField="name"
     [monaListViewGroupable]="{ enabled: true, headerOrder: 'asc', orderBy: 'name' }"
@@ -102,7 +106,7 @@ Each structural directive below is an `ng-template` placed as projected content 
 ### Pagination
 
 ```html
-<mona-list-view [items]="items" textField="name" [monaListViewPageable]="{ pageSizeValues: [10, 25, 50] }"> </mona-list-view>
+<mona-list-view aria-label="Foods" [items]="items" textField="name" [monaListViewPageable]="{ pageSizeValues: [10, 25, 50] }"> </mona-list-view>
 ```
 
 Adds a pager below the list. Pagination and virtualization are mutually exclusive: if `monaListViewVirtualScroll` is also enabled, the pager is hidden regardless of `monaListViewPageable`'s state — see [Pagination and virtualization don't combine](#pagination-and-virtualization-dont-combine).
@@ -110,7 +114,7 @@ Adds a pager below the list. Pagination and virtualization are mutually exclusiv
 ### Virtual scrolling
 
 ```html
-<mona-list-view [items]="items" textField="name" [monaListViewVirtualScroll]="{ enabled: true, height: 32 }" [height]="'400px'">
+<mona-list-view aria-label="Foods" [items]="items" textField="name" [monaListViewVirtualScroll]="{ enabled: true, height: 32 }" [height]="'400px'">
 </mona-list-view>
 ```
 
@@ -125,7 +129,7 @@ protected onScrollBottom(): void {
 ```
 
 ```html
-<mona-list-view [items]="items | slice: 0 : visibleCount()" textField="name" [height]="'300px'" (scrollBottom)="onScrollBottom()">
+<mona-list-view aria-label="Foods" [items]="items | slice: 0 : visibleCount()" textField="name" [height]="'300px'" (scrollBottom)="onScrollBottom()">
 </mona-list-view>
 ```
 
@@ -207,7 +211,7 @@ Form integration is not applicable — List View is a display/selection widget, 
 
 | Name            | Type                                       | Default    | Description                                                                 |
 |-----------------|--------------------------------------------|------------|-----------------------------------------------------------------------------|
-| `aria-label`    | `string`                                   | `""`       | Accessible name for the list's `listbox` element.                           |
+| `aria-label`    | `string`                                   | `""`       | Accessible name of the inner list element (`list` or `listbox`).            |
 | `class`         | `string`                                   | `""`       | Additional CSS classes merged onto the host element via `tailwind-merge`.   |
 | `aria-labelledby` | `string`                                 | `""`       | Id of the element that names the list, instead of `aria-label`.             |
 | `disabledBy`    | `string \| ((item: T) => boolean) \| null` | `""`       | Property name or predicate that marks an item as disabled.                  |
@@ -245,13 +249,13 @@ Form integration is not applicable — List View is a display/selection widget, 
 |--------------------------|--------------------------------------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `monaListViewSelectable` | `Partial<SelectableOptions> \| ""`   | `""`    | Enables selection. An empty string enables single selection with default settings; pass an object to configure `mode` (`"single"` or `"multiple"`), `toggleable`, and `checkboxes`. |
 | `selectBy`               | `string \| ((item: T) => K) \| null` | `""`    | Property name or accessor used to derive the selection key from a data item. When omitted, the data item itself is used as the key.                                                 |
-| `selectedKeys`           | `Iterable<K>`                        | `[]`    | Two-way-equivalent initial/programmatic selection, expressed as keys rather than items. Pair with `(selectedKeysChange)` to keep it in sync.                                        |
+| `selectedKeys`           | `Iterable<K>`                        | `[]`    | The selection, expressed as keys rather than items. Bind `[(selectedKeys)]` to keep it in sync.                                                                                    |
 
 #### Outputs
 
 | Name                 | Type       | Description                                    |
 |----------------------|------------|------------------------------------------------|
-| `selectedKeysChange` | `Array<K>` | Emitted when the set of selected keys changes. |
+| `selectedKeysChange` | `Array<K>` | Emitted with the selected keys when the user selects or deselects an item. Not emitted for keys set through `selectedKeys`. |
 
 ---
 
@@ -263,7 +267,7 @@ Form integration is not applicable — List View is a display/selection widget, 
 
 | Name                    | Type                              | Default | Description                                                                                                                                                          |
 |-------------------------|-----------------------------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `monaListViewNavigable` | `Partial<NavigableOptions> \| ""` | `""`    | Enables keyboard navigation. An empty string enables navigation with default settings (`mode: "highlight"`, `wrap: false`); pass an object to override either field. |
+| `monaListViewNavigable` | `Partial<NavigableOptions> \| ""` | `""`    | Configures keyboard navigation, which is on without the directive. An empty string keeps the defaults (`enabled: true`, `mode: "select"`, `wrap: false`); pass an object to override any field. |
 
 ---
 
@@ -299,6 +303,18 @@ Form integration is not applicable — List View is a display/selection widget, 
 | `pageChange`     | `number`              | Emitted when the user moves to another page (not when `[page]` is set from code).                     |
 | `pageSizeChange` | `number`              | Emitted when the user picks another page size.                                                         |
 | `pageSizeSelect` | `PageSizeChangeEvent` | Emitted when the user picks a page size, before it applies. Call `preventDefault()` to keep the size. |
+
+---
+
+### `ListViewItemTemplateDirective<T = any>`
+
+**Selector:** `ng-template[monaListViewItemTemplate]`
+
+#### Inputs
+
+| Name                         | Type                                 | Default | Description                                                          |
+|------------------------------|--------------------------------------|---------|----------------------------------------------------------------------|
+| `monaListViewItemTemplateOf` | `Iterable<T> \| null \| undefined`   | `null`  | The list view's items, used only to type the template's item. Optional. |
 
 ---
 
@@ -347,6 +363,12 @@ Form integration is not applicable — List View is a display/selection widget, 
 | `type`           | `"numeric" \| "input"` | Whether pages are selected via numbered buttons or a page-number input.             |
 | `visiblePages`   | `number`               | Number of numeric page buttons shown at once, when `type` is `"numeric"`.           |
 
+#### `ListViewItemTemplateContext<T = unknown>` and `ListViewGroupHeaderTemplateContext<G = unknown>`
+
+| Field       | Type | Description                                                          |
+|-------------|------|----------------------------------------------------------------------|
+| `$implicit` | `T` / `G` | The data item (`let-item`), or the group's value (`let-group`). |
+
 #### `VirtualScrollOptions`
 
 | Field     | Type                  | Description                                                               |
@@ -357,16 +379,11 @@ Form integration is not applicable — List View is a display/selection widget, 
 ---
 
 <!-- verification-checklist
-- [x] ListViewComponent inputs/defaults verified against list-view.component.ts source and cross-checked against component-metadata.json's ListViewComponent entry
-- [x] scrollBottom output behavior (fires on plain-list or cdk-virtual-scroll-viewport scroll, suppressed while pageable is enabled via #scrollBottomEnabled) verified against list-view.component.ts setScrollBottomEvent()/#scrollBottomEnabled
-- [x] Five behavior directives (Selectable, Navigable, Groupable, Pageable, VirtualScroll) inputs/outputs and default option objects verified against their respective directive source files in list-view/directives
-- [x] Five structural template directives and their selectors verified against list-view/directives/*-template.directive.ts; template contexts verified against list-view.component.html's ngTemplateOutletContext bindings and list-item.component.html's dataItem() context
-- [x] Pagination/virtualization mutual exclusion verified against list-view.component.html's pager @if guard (pageableOptions.enabled && !virtualScrollOptions().enabled)
-- [x] Keyboard map (ArrowDown/ArrowUp/Home/End/PageUp/PageDown/Enter/typeahead) verified against common/list/utils/getListNavigationDirection.ts, common/list/components/list/list.component.ts (setNavigationEvents/setKeyboardEvents/handlePageScroll), and common/utils/typeahead.util.ts
-- [x] Single Tab-stop focus behavior verified against the roving-tabindex implementation: ListService.focusableItem (highlighted → selected → first enabled) drives ListItemDirective's rovingTabIndex (0 on the active item, -1 on all others) and ListComponent's hostTabIndex (0 only as a fallback when no item is focusable, -1 otherwise); the host's native "focus" listener's relatedTarget guard (list.component.ts) prevents it from stealing focus back from an item when programmatically re-focused
-- [x] ARIA attributes (role=listbox/option, aria-selected, aria-disabled, aria-current, aria-posinset, aria-setsize) verified against common/list/directives/list-item.directive.ts host bindings
-- [x] GroupableOptions, NavigableOptions, PagerSettings, VirtualScrollOptions confirmed exported via lib/index.ts; SelectableOptions (common/list one), ListKeySelector, ListItem, and ListItemTemplateContext confirmed NOT exported, and the list-view-demo's deep import of SelectableOptions from "mona-ui/src/lib/..." cited as evidence
-- [x] VirtualScrollOptions.height documented as optional per the N-2 fix (common/models/VirtualScrollOptions.ts), with the 28px fallback verified against list.component.ts's viewportHeight/scrollToItem computations
-- [x] disabledBy confirmed to exist only on ListService, with no corresponding ListViewComponent input — marked as owner-review TODO rather than documented as public API
-- [x] No internal-only symbols (ListService, ListComponent, ListItemComponent, ListItemDirective, ListItem, cycleThroughMatchedItems, typeahead.util) documented as public API
+- [x] Inputs, outputs and defaults checked against list-view/components/list-view/list-view.component.ts, the directives in list-view/directives, and component-metadata.json
+- [x] Roles checked against internal/list (ListService.role, list-item.directive.ts): `list`/`listitem` without selection, `listbox`/`option` with it; no aria-current
+- [x] Navigation default (`enabled: true`, `mode: "select"`) checked against list-view-navigable.directive.ts and the list view's own defaults
+- [x] Keyboard map checked against internal/list/utils/getListNavigationDirection.ts and internal/list/components/list/list.component.ts
+- [x] Template contexts checked against list-view.component.html and internal/list/components/list-item/list-item.component.html; ListViewItemTemplateDirective has a context guard
+- [x] Exports checked against list-view/public-api.ts (option types and template contexts as types)
+- [x] Paging (pageChange only for the user, page and pageSize models) checked against list-view-pageable.directive.ts
 -->

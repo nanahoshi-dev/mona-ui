@@ -1,7 +1,7 @@
 import { Directive, effect, inject, input, output, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import {
-    DraggableOptions,
+    type DraggableOptions,
     NodeDragEndEvent,
     NodeDragEvent,
     NodeDragStartEvent,

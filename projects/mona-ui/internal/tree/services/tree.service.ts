@@ -4,15 +4,15 @@ import {
     EnumerableSet,
     forEach,
     from,
-    IEnumerable,
+    type IEnumerable,
     ImmutableDictionary,
     ImmutableSet,
     List,
-    Predicate,
-    Selector,
+    type Predicate,
+    type Selector,
     sequenceEqual
 } from "@mirei/ts-collections";
-import { FilterableOptions, FilterChangeEvent } from "@nanahoshi/mona-ui/common";
+import { type FilterableOptions, FilterChangeEvent } from "@nanahoshi/mona-ui/common";
 import {
     BehaviorSubject,
     debounceTime,
@@ -24,41 +24,48 @@ import {
     switchMap,
     take
 } from "rxjs";
-import { CheckableOptions } from "../models/CheckableOptions";
-import { DataStructure } from "../models/DataStructure";
-import { DisableOptions } from "../models/DisableOptions";
-import { DraggableOptions } from "../models/DraggableOptions";
-import { DropPosition, DropPositionChangeEvent } from "../models/DropPositionChangeEvent";
-import { ExpandableOptions } from "../models/ExpandableOptions";
+import type { CheckableOptions } from "../models/CheckableOptions";
+import type { DataStructure } from "../models/DataStructure";
+import type { DisableOptions } from "../models/DisableOptions";
+import type { DraggableOptions } from "../models/DraggableOptions";
+import type { DropPosition, DropPositionChangeEvent } from "../models/DropPositionChangeEvent";
+import type { ExpandableOptions } from "../models/ExpandableOptions";
 import { NodeCheckEvent } from "../models/NodeCheckEvent";
 import { NodeClickEvent } from "../models/NodeClickEvent";
 import { NodeDragEndEvent } from "../models/NodeDragEndEvent";
 import { InternalNodeDragEvent } from "../models/NodeDragEvent";
 import { NodeDragStartEvent } from "../models/NodeDragStartEvent";
 import { NodeDropEventSansTree } from "../models/NodeDropEvent";
-import { NodeItem } from "../models/NodeItem";
+import type { NodeItem } from "../models/NodeItem";
 import { NodeSelectEvent } from "../models/NodeSelectEvent";
-import { SelectableOptions } from "../models/SelectableOptions";
+import type { SelectableOptions } from "../models/SelectableOptions";
 import { TreeNode } from "../models/TreeNode";
-import { TreeNodeCheckEvent } from "../models/TreeNodeCheckEvent";
-import { TreeNodeExpandEvent } from "../models/TreeNodeExpandEvent";
-import { TreeNodeSelectEvent } from "../models/TreeNodeSelectEvent";
-import { ChildrenSelector, NodeKeySelector } from "../models/TreeSelectors";
+import type { TreeNodeCheckEvent } from "../models/TreeNodeCheckEvent";
+import type { TreeNodeExpandEvent } from "../models/TreeNodeExpandEvent";
+import type { TreeNodeSelectEvent } from "../models/TreeNodeSelectEvent";
+import type { ChildrenSelector, NodeKeySelector } from "../models/TreeSelectors";
 import { getTreeNodeElementId } from "../utils/getTreeNodeElementId";
 
 @Injectable()
 export class TreeService<T> {
-    readonly #checkedKeys = signal(ImmutableSet.create<any>());
+    readonly #checkedKeys = signal(ImmutableSet.create<unknown>());
     /**
      * Pending asynchronous child loads by node uid, so a new load for a node cancels the previous one.
      */
     readonly #childLoads = new Map<string, Subscription>();
     readonly #data = signal(ImmutableSet.create<T>());
-    readonly #filteredExpandedKeys = signal(ImmutableSet.create<any>());
+    /** Private so that `filterText`, declared before the public `filterableOptions`, can read it. */
+    readonly #filterableOptions = signal<FilterableOptions>({
+        enabled: false,
+        debounce: 0,
+        caseSensitive: false,
+        operator: "contains"
+    });
+    readonly #filteredExpandedKeys = signal(ImmutableSet.create<unknown>());
     readonly #flatIdField = signal("");
     readonly #flatParentIdField = signal("");
     readonly #hasCheckboxPredicate = signal<((data: T, uid: string) => boolean) | null>(null);
-    readonly #hasChildrenPredicate = signal<Predicate<any> | null>(null);
+    readonly #hasChildrenPredicate = signal<Predicate<T> | null>(null);
     readonly #navigableNodes = computed(() => {
         const visibleUids = this.#visibleUids();
         const allFlatNodes = TreeService.flatten(this.nodeSet());
@@ -75,7 +82,7 @@ export class TreeService<T> {
         return this.createNodeDictionary(nodes);
     });
     readonly #structure = signal<DataStructure>("hierarchical");
-    readonly #unfilteredExpandedKeys = signal(ImmutableSet.create<any>());
+    readonly #unfilteredExpandedKeys = signal(ImmutableSet.create<unknown>());
     readonly #visibleUids = computed<Set<string> | null>(() => {
         const filterText = this.filterText();
         if (!filterText) {
@@ -84,8 +91,8 @@ export class TreeService<T> {
         // Tracked on purpose: moves, lazily loaded children and filter option changes re-run the filter.
         return this.computeVisibleUids(this.nodeSet(), filterText);
     });
-    public readonly animationTemporarilyDisabled = signal(false);
     public readonly animationEnabled = signal(true);
+    public readonly animationTemporarilyDisabled = signal(false);
     public readonly blur$ = new Subject<FocusEvent>();
     public readonly checkBy = signal<NodeKeySelector<T>>(null);
     public readonly checkableOptions = signal<CheckableOptions>({
@@ -115,7 +122,7 @@ export class TreeService<T> {
         disableChildren: true,
         enabled: false
     });
-    public readonly disabledKeys = signal(ImmutableSet.create<any>());
+    public readonly disabledKeys = signal(ImmutableSet.create<unknown>());
     public readonly draggableOptions = signal<DraggableOptions>({ enabled: false });
     public readonly dragging = signal(false);
     public readonly dragging$ = toObservable(this.dragging);
@@ -136,21 +143,16 @@ export class TreeService<T> {
      * and the user's changes to it while filtering, are view state and aren't reported.
      */
     public readonly expandedKeysChange$ = new Subject<ImmutableSet<unknown>>();
-    public readonly filterableOptions = signal<FilterableOptions>({
-        enabled: false,
-        debounce: 0,
-        caseSensitive: false,
-        operator: "contains"
-    });
     public readonly filter$ = new ReplaySubject<string>(1);
     public readonly filterChange$ = new Subject<FilterChangeEvent>();
     public readonly filterPlaceholder = signal("");
     public readonly filterText = toSignal(
-        toObservable(this.filterableOptions).pipe(
+        toObservable(this.#filterableOptions).pipe(
             switchMap(opts => this.filter$.pipe(debounceTime(opts.debounce), distinctUntilChanged()))
         ),
         { initialValue: "" }
     );
+    public readonly filterableOptions = this.#filterableOptions.asReadonly();
     public readonly focus$ = new Subject<FocusEvent>();
     /** The number of nodes whose text matches the filter (their ancestors, shown for context, aren't counted). */
     public readonly matchCount = computed(() => {
@@ -172,7 +174,7 @@ export class TreeService<T> {
     public readonly nodeSelect$ = new Subject<NodeSelectEvent<T>>();
     public readonly nodeSelectChange$ = new Subject<TreeNodeSelectEvent<T>>();
     public readonly nodeSet = signal(ImmutableSet.create<TreeNode<T>>());
-    public readonly nodeTemplate = signal<TemplateRef<any> | null>(null);
+    public readonly nodeTemplate = signal<TemplateRef<unknown> | null>(null);
     public readonly selectBy = signal<NodeKeySelector<T>>(null);
     public readonly selectableOptions = signal<SelectableOptions>({
         childrenOnly: false,
@@ -180,7 +182,7 @@ export class TreeService<T> {
         mode: "single",
         toggleable: false
     });
-    public readonly selectedKeys = signal(ImmutableSet.create<any>());
+    public readonly selectedKeys = signal(ImmutableSet.create<unknown>());
     /** The selected keys after the user selects or deselects a node. Keys set from code aren't reported. */
     public readonly selectedKeysChange$ = new Subject<ImmutableSet<unknown>>();
     public readonly selectedNodes = computed(() => {
@@ -235,6 +237,11 @@ export class TreeService<T> {
     }
 
     /** Whether two key sets hold the same keys, in any order. */
+    /** Reads a field of a data item by name (for the string forms of the key, id and children selectors). */
+    private static readField(item: unknown, field: string): unknown {
+        return item == null ? undefined : (item as Record<string, unknown>)[field];
+    }
+
     private static sameKeys(a: ImmutableSet<unknown>, b: ImmutableSet<unknown>): boolean {
         return a.size() === b.size() && a.all(key => b.contains(key));
     }
@@ -295,6 +302,28 @@ export class TreeService<T> {
             }
         }
         return null;
+    }
+
+    public getCheckKey(node: TreeNode<T>): unknown {
+        const checkBy = this.checkBy();
+        if (!checkBy) {
+            return node.data;
+        }
+        if (typeof checkBy === "string") {
+            return TreeService.readField(node.data, checkBy);
+        }
+        return checkBy(node.data);
+    }
+
+    public getDisableKey(node: TreeNode<T>): unknown {
+        const disableBy = this.disableBy();
+        if (!disableBy) {
+            return node.data;
+        }
+        if (typeof disableBy === "string") {
+            return TreeService.readField(node.data, disableBy);
+        }
+        return disableBy(node.data);
     }
 
     public getNodeByUid(uid: string): TreeNode<T> | null {
@@ -569,15 +598,6 @@ export class TreeService<T> {
         this.animationEnabled.set(enabled);
     }
 
-    public setChildrenSelector(selector: string | Selector<T, Iterable<T> | Observable<Iterable<T>>>): void {
-        if (this.children() === selector) {
-            return;
-        }
-        this.children.set(selector);
-        this.nodeSet.set(this.createNodes(this.#data()));
-        this.updateNodeIndices();
-    }
-
     public setCheckBy(selector: NodeKeySelector<T>): void {
         this.checkBy.set(selector);
     }
@@ -586,7 +606,7 @@ export class TreeService<T> {
         this.checkableOptions.update(o => ({ ...o, ...options }));
     }
 
-    public setCheckedKeys(keys: Iterable<any>): void {
+    public setCheckedKeys(keys: Iterable<unknown>): void {
         const checkedKeys = this.#checkedKeys().orderBy(k => k);
         const orderedKeys = from(keys).orderBy(k => k);
         if (sequenceEqual(checkedKeys, orderedKeys)) {
@@ -599,6 +619,15 @@ export class TreeService<T> {
         });
         this.#checkedKeys.set(ImmutableSet.create(keyList));
         this.applyCheckedKeysToNodes();
+    }
+
+    public setChildrenSelector(selector: string | Selector<T, Iterable<T> | Observable<Iterable<T>>>): void {
+        if (this.children() === selector) {
+            return;
+        }
+        this.children.set(selector);
+        this.nodeSet.set(this.createNodes(this.#data()));
+        this.updateNodeIndices();
     }
 
     public setData(data: Iterable<T>): void {
@@ -625,7 +654,7 @@ export class TreeService<T> {
         this.disableOptions.update(o => ({ ...o, ...options }));
     }
 
-    public setDisabledKeys(keys: Iterable<any>): void {
+    public setDisabledKeys(keys: Iterable<unknown>): void {
         const disabledKeys = this.disabledKeys().orderBy(k => k);
         const orderedKeys = from(keys).orderBy(k => k);
         if (sequenceEqual(disabledKeys, orderedKeys)) {
@@ -646,7 +675,7 @@ export class TreeService<T> {
         this.expandableOptions.update(o => ({ ...o, ...options }));
     }
 
-    public setExpandedKeys(keys: Iterable<any>): void {
+    public setExpandedKeys(keys: Iterable<unknown>): void {
         const unfilteredKeys = this.#unfilteredExpandedKeys().orderBy(k => k);
         const orderedKeys = from(keys).orderBy(k => k);
         if (sequenceEqual(unfilteredKeys, orderedKeys)) {
@@ -656,7 +685,7 @@ export class TreeService<T> {
     }
 
     public setFilterableOptions(options: Partial<FilterableOptions>): void {
-        this.filterableOptions.update(o => ({ ...o, ...options }));
+        this.#filterableOptions.update(o => ({ ...o, ...options }));
     }
 
     public setFlatIdField(field: string): void {
@@ -671,7 +700,7 @@ export class TreeService<T> {
         this.#hasCheckboxPredicate.set(fn);
     }
 
-    public setHasChildrenPredicate(predicate: Predicate<any> | null): void {
+    public setHasChildrenPredicate(predicate: Predicate<T> | null): void {
         this.#hasChildrenPredicate.set(predicate);
     }
 
@@ -811,7 +840,7 @@ export class TreeService<T> {
         }
     }
 
-    public setSelectedKeys(keys: Iterable<any>): void {
+    public setSelectedKeys(keys: Iterable<unknown>): void {
         const selectedKeys = this.selectedKeys().orderBy(k => k);
         const orderedKeys = from(keys).orderBy(k => k);
         if (sequenceEqual(selectedKeys, orderedKeys)) {
@@ -842,28 +871,6 @@ export class TreeService<T> {
             this.expandedKeysChange$.next(this.#unfilteredExpandedKeys());
         }
         return true;
-    }
-
-    public getCheckKey(node: TreeNode<T>): any {
-        const checkBy = this.checkBy();
-        if (!checkBy) {
-            return node.data;
-        }
-        if (typeof checkBy === "string") {
-            return (node.data as any)[checkBy];
-        }
-        return checkBy(node.data);
-    }
-
-    public getDisableKey(node: TreeNode<T>): any {
-        const disableBy = this.disableBy();
-        if (!disableBy) {
-            return node.data;
-        }
-        if (typeof disableBy === "string") {
-            return (node.data as any)[disableBy];
-        }
-        return disableBy(node.data);
     }
 
     private applyCheckedKeysToNodes(): void {
@@ -917,8 +924,7 @@ export class TreeService<T> {
         const childrenByParentId = new Map<string | null, T[]>();
 
         for (const item of data) {
-            const dataItem = item as any;
-            const pid = dataItem[flatParentIdField] ?? null;
+            const pid = (TreeService.readField(item, flatParentIdField) as string | null | undefined) ?? null;
             if (!childrenByParentId.has(pid)) {
                 childrenByParentId.set(pid, []);
             }
@@ -929,10 +935,9 @@ export class TreeService<T> {
             const items = childrenByParentId.get(pid) ?? [];
             const nodes = new List<TreeNode<T>>();
             for (const item of items) {
-                const dataItem = item as any;
                 const node = new TreeNode(item);
                 node.parent = parent;
-                node.children.set(buildNodes(dataItem[flatIdField], node));
+                node.children.set(buildNodes(TreeService.readField(item, flatIdField) as string | null, node));
                 nodes.add(node);
             }
             return nodes.toImmutableSet();
@@ -964,7 +969,7 @@ export class TreeService<T> {
             usedNodes.add(node);
 
             if (typeof children === "string") {
-                const subNodes = (dataItem as any)[children];
+                const subNodes = TreeService.readField(dataItem, children) as Iterable<T> | null | undefined;
                 if (subNodes) {
                     const childNodes = this.createHierarchicalNodes(subNodes, node, existingNodes, usedNodes);
                     node.children.update(list => list.clear().addAll(childNodes ?? []));
@@ -1028,31 +1033,31 @@ export class TreeService<T> {
             );
     }
 
-    private getExpandKey(node: TreeNode<T>): any {
-        const expandBy = this.expandBy();
-        if (!expandBy) {
-            return node.data;
-        }
-        if (typeof expandBy === "string") {
-            return (node.data as any)[expandBy];
-        }
-        return expandBy(node.data);
-    }
-
     private getChildNodes(node: TreeNode<T>): ImmutableSet<TreeNode<T>> {
         const nodes = TreeService.flatten([node]);
         return nodes.where(n => n !== node).toImmutableSet();
     }
 
-    private getDataItemSelectKey(dataItem: T): any {
+    private getDataItemSelectKey(dataItem: T): unknown {
         const selectBy = this.selectBy();
         if (!selectBy) {
             return dataItem;
         }
         if (typeof selectBy === "string") {
-            return (dataItem as any)[selectBy] ?? dataItem;
+            return TreeService.readField(dataItem, selectBy) ?? dataItem;
         }
         return selectBy(dataItem);
+    }
+
+    private getExpandKey(node: TreeNode<T>): unknown {
+        const expandBy = this.expandBy();
+        if (!expandBy) {
+            return node.data;
+        }
+        if (typeof expandBy === "string") {
+            return TreeService.readField(node.data, expandBy);
+        }
+        return expandBy(node.data);
     }
 
     private getParentNodes(node: TreeNode<T>): ImmutableSet<TreeNode<T>> {
@@ -1065,13 +1070,13 @@ export class TreeService<T> {
         return nodes.toImmutableSet();
     }
 
-    private getSelectKey(node: TreeNode<T>): any {
+    private getSelectKey(node: TreeNode<T>): unknown {
         const selectBy = this.selectBy();
         if (!selectBy) {
             return node.data;
         }
         if (typeof selectBy === "string") {
-            return (node.data as any)[selectBy];
+            return TreeService.readField(node.data, selectBy);
         }
         return selectBy(node.data);
     }

@@ -8,9 +8,9 @@ import { TreeNode } from "../models/TreeNode";
 import { TreeService } from "./tree.service";
 
 interface TestItem {
+    children?: TestItem[];
     id: string;
     text: string;
-    children?: TestItem[];
 }
 
 function buildData(): TestItem[] {

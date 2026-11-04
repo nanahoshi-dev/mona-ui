@@ -15,7 +15,7 @@ import { ListItemDirective } from "./list-item.directive";
     providers: [ListService]
 })
 class TestComponent {
-    public listItem: ListItem<any> = new ListItem<any>({
+    public listItem: ListItem<unknown> = new ListItem<unknown>({
         header: "header",
         data: {
             id: 1,

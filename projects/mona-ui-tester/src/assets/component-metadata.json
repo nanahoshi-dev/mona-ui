@@ -8,6 +8,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -15,6 +16,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -22,6 +24,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -185,6 +188,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -226,6 +230,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -239,6 +244,7 @@
         "kind": "input",
         "name": "ariaHasPopup",
         "type": "ButtonAriaHasPopup",
+        "alias": "aria-haspopup",
         "defaultValue": "\"false\""
       },
       {
@@ -316,6 +322,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -512,6 +519,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -525,6 +533,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -621,6 +630,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -688,6 +698,7 @@
         "kind": "input",
         "name": "options",
         "type": "Partial<FilterableOptions> | \"\"",
+        "alias": "monaDropDownFilterable",
         "defaultValue": "\"\""
       }
     ]
@@ -708,6 +719,7 @@
         "kind": "input",
         "name": "options",
         "type": "GroupableOptions<TData, unknown> | \"\"",
+        "alias": "monaDropDownGroupable",
         "defaultValue": "\"\""
       }
     ]
@@ -721,6 +733,7 @@
         "kind": "input",
         "name": "options",
         "type": "Partial<VirtualScrollOptions> | \"\"",
+        "alias": "monaDropDownVirtualScroll",
         "defaultValue": "\"\""
       }
     ]
@@ -786,6 +799,7 @@
         "kind": "input",
         "name": "row",
         "type": "Row | null",
+        "alias": "monaGridEditCommand",
         "defaultValue": "null"
       }
     ]
@@ -799,6 +813,7 @@
         "kind": "input",
         "name": "row",
         "type": "Row | null",
+        "alias": "monaGridRemoveCommand",
         "defaultValue": "null"
       }
     ]
@@ -842,6 +857,7 @@
         "kind": "input",
         "name": "options",
         "type": "EditableOptions | \"\"",
+        "alias": "monaGridEditable",
         "defaultValue": "\"\""
       },
       {
@@ -880,6 +896,7 @@
         "kind": "input",
         "name": "options",
         "type": "Partial<FilterableOptions> | \"\"",
+        "alias": "monaGridFilterable",
         "defaultValue": "\"\""
       }
     ]
@@ -926,7 +943,8 @@
         "description": "Enables column grouping on the grid. Pass a `GroupableOptions` object to configure group footer display. Grouping is on unless the object sets `enabled: false`.",
         "kind": "input",
         "name": "options",
-        "type": "Partial<GroupableOptions> | \"\" | undefined"
+        "type": "Partial<GroupableOptions> | \"\" | undefined",
+        "alias": "monaGridGroupable"
       }
     ]
   },
@@ -939,6 +957,7 @@
         "kind": "input",
         "name": "layoutKey",
         "type": "string | null",
+        "alias": "monaGridLockedCell",
         "defaultValue": "null"
       },
       {
@@ -1084,6 +1103,7 @@
         "kind": "input",
         "name": "options",
         "type": "ReorderableOptions | \"\"",
+        "alias": "monaGridReorderable",
         "defaultValue": "\"\""
       }
     ]
@@ -1103,6 +1123,7 @@
         "kind": "input",
         "name": "options",
         "type": "ResizableOptions | \"\"",
+        "alias": "monaGridResizable",
         "defaultValue": "\"\""
       }
     ]
@@ -1116,6 +1137,7 @@
         "kind": "input",
         "name": "options",
         "type": "RowReorderableOptions | \"\"",
+        "alias": "monaGridRowReorderable",
         "defaultValue": "\"\""
       },
       {
@@ -1135,6 +1157,7 @@
         "kind": "input",
         "name": "options",
         "type": "SelectableOptions | \"\"",
+        "alias": "monaGridSelectable",
         "defaultValue": "\"\""
       },
       {
@@ -1207,6 +1230,7 @@
         "kind": "input",
         "name": "options",
         "type": "SortableOptions | \"\"",
+        "alias": "monaGridSortable",
         "defaultValue": "\"\""
       },
       {
@@ -1227,6 +1251,7 @@
         "kind": "input",
         "name": "options",
         "type": "GridStatePersistenceOptions | \"\"",
+        "alias": "monaGridStatePersistence",
         "defaultValue": "\"\""
       },
       {
@@ -1246,7 +1271,8 @@
         "description": "Enables row virtualization on the grid. Pass a `VirtualScrollOptions` object to configure the fixed row height.",
         "kind": "input",
         "name": "options",
-        "type": "Partial<VirtualScrollOptions> | \"\" | undefined"
+        "type": "Partial<VirtualScrollOptions> | \"\" | undefined",
+        "alias": "monaGridVirtualScroll"
       },
       {
         "description": "Emitted when the scroll position reaches the configured threshold from the bottom of the virtualized list.",
@@ -1271,7 +1297,8 @@
         "description": "",
         "kind": "input",
         "name": "attributes",
-        "type": "AttributeConfig"
+        "type": "AttributeConfig",
+        "alias": "monaAttributeBinder"
       }
     ]
   },
@@ -1291,6 +1318,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -1324,7 +1352,21 @@
         "kind": "input",
         "name": "options",
         "type": "GroupableOptions<T, K> | \"\"",
+        "alias": "monaListViewGroupable",
         "defaultValue": "\"\""
+      }
+    ]
+  },
+  "ListViewItemTemplateDirective": {
+    "name": "ListViewItemTemplateDirective",
+    "selector": "\"ng-template[monaListViewItemTemplate]\"",
+    "inputs": [
+      {
+        "description": "The list view's items, used only to type the template's item. Optional.",
+        "kind": "input",
+        "name": "monaListViewItemTemplateOf",
+        "type": "Iterable<T> | null | undefined",
+        "defaultValue": "null"
       }
     ]
   },
@@ -1337,6 +1379,7 @@
         "kind": "input",
         "name": "options",
         "type": "Partial<NavigableOptions> | \"\"",
+        "alias": "monaListViewNavigable",
         "defaultValue": "\"\""
       }
     ]
@@ -1350,6 +1393,7 @@
         "kind": "input",
         "name": "options",
         "type": "Partial<PagerSettings> | \"\"",
+        "alias": "monaListViewPageable",
         "defaultValue": "\"\""
       },
       {
@@ -1380,15 +1424,10 @@
     "inputs": [
       {
         "description": "",
-        "kind": "output",
-        "name": "selectedKeysChange",
-        "type": "Array<K>"
-      },
-      {
-        "description": "",
         "kind": "input",
         "name": "options",
         "type": "Partial<SelectableOptions> | \"\"",
+        "alias": "monaListViewSelectable",
         "defaultValue": "\"\""
       },
       {
@@ -1404,6 +1443,12 @@
         "name": "selectedKeys",
         "type": "Iterable<K>",
         "defaultValue": "[]"
+      },
+      {
+        "description": "",
+        "kind": "output",
+        "name": "selectedKeysChange",
+        "type": "Array<K>"
       }
     ]
   },
@@ -1416,6 +1461,7 @@
         "kind": "input",
         "name": "options",
         "type": "VirtualScrollOptions",
+        "alias": "monaListViewVirtualScroll",
         "required": true
       }
     ]
@@ -1429,6 +1475,7 @@
         "kind": "input",
         "name": "tagCount",
         "type": "number",
+        "alias": "monaMultiSelectSummaryTag",
         "defaultValue": "-1"
       }
     ]
@@ -1502,6 +1549,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -1515,6 +1563,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -1528,6 +1577,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -1541,6 +1591,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -1582,6 +1633,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -1602,6 +1654,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -1615,6 +1668,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -1628,6 +1682,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -1641,6 +1696,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -1769,6 +1825,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -1810,6 +1867,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -1912,6 +1970,7 @@
         "kind": "input",
         "name": "rounded",
         "type": "TooltipVariantProps[\"rounded\"]",
+        "alias": "tooltipRounded",
         "defaultValue": "\"medium\""
       },
       {
@@ -2011,6 +2070,7 @@
         "kind": "input",
         "name": "options",
         "type": "Partial<CheckableOptions> | \"\"",
+        "alias": "monaTreeViewCheckable",
         "defaultValue": "\"\""
       }
     ]
@@ -2038,6 +2098,7 @@
         "kind": "input",
         "name": "options",
         "type": "Partial<DisableOptions> | \"\"",
+        "alias": "monaTreeViewDisable",
         "defaultValue": "\"\""
       }
     ]
@@ -2075,6 +2136,7 @@
         "kind": "input",
         "name": "options",
         "type": "Partial<DraggableOptions> | \"\"",
+        "alias": "monaTreeViewDragAndDrop",
         "defaultValue": "\"\""
       }
     ]
@@ -2120,6 +2182,7 @@
         "kind": "input",
         "name": "options",
         "type": "Partial<ExpandableOptions> | \"\"",
+        "alias": "monaTreeViewExpandable",
         "defaultValue": "\"\""
       }
     ]
@@ -2153,6 +2216,7 @@
         "kind": "input",
         "name": "options",
         "type": "Partial<FilterableOptions> | \"\"",
+        "alias": "monaTreeViewFilterable",
         "defaultValue": "\"\""
       }
     ]
@@ -2185,6 +2249,7 @@
         "kind": "input",
         "name": "options",
         "type": "Partial<SelectableOptions> | \"\"",
+        "alias": "monaTreeViewSelectable",
         "defaultValue": "\"\""
       },
       {
@@ -2295,6 +2360,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -2386,6 +2452,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -2399,6 +2466,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -2413,6 +2481,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -2451,7 +2520,8 @@
         "description": "Accessible name for the host element. Override when multiple button groups appear on the same page\r\nso screen reader users can distinguish them.",
         "kind": "input",
         "name": "ariaLabel",
-        "type": "string | undefined"
+        "type": "string | undefined",
+        "alias": "aria-label"
       },
       {
         "description": "Renders all child buttons with reduced visual emphasis and removes pointer interaction.",
@@ -2493,6 +2563,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -2593,6 +2664,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -2627,6 +2699,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -2640,6 +2713,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "ClassInputType",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -2653,6 +2727,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "ClassInputType",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -2792,6 +2867,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -2931,6 +3007,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -3084,6 +3161,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -3251,6 +3329,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -3320,6 +3399,7 @@
         "kind": "input",
         "name": "ariaDescription",
         "type": "string",
+        "alias": "aria-description",
         "defaultValue": "\"\""
       },
       {
@@ -3327,6 +3407,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -3415,6 +3496,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -3497,6 +3579,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -3599,6 +3682,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -3827,6 +3911,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -3873,6 +3958,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -3963,6 +4049,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -4069,6 +4156,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -4156,6 +4244,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -4292,6 +4381,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -4792,6 +4882,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -4958,6 +5049,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -5146,6 +5238,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -5292,6 +5385,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -5445,6 +5539,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -5619,6 +5714,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -5834,6 +5930,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -5952,6 +6049,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -6070,6 +6168,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -6271,6 +6370,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -6403,6 +6503,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -6535,6 +6636,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -6722,6 +6824,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -6833,6 +6936,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -7069,6 +7173,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -7250,6 +7355,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -7284,6 +7390,7 @@
         "kind": "input",
         "name": "labelId",
         "type": "string",
+        "alias": "monaChartDataLabelMeasure",
         "required": true
       }
     ]
@@ -7297,6 +7404,7 @@
         "kind": "input",
         "name": "sliceId",
         "type": "string",
+        "alias": "monaChartLabelMeasure",
         "required": true
       }
     ]
@@ -7310,6 +7418,7 @@
         "kind": "input",
         "name": "labelId",
         "type": "string",
+        "alias": "monaChartOverlayLabelMeasure",
         "required": true
       }
     ]
@@ -7323,6 +7432,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -7330,6 +7440,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -7438,6 +7549,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -7458,6 +7570,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -7465,6 +7578,7 @@
         "kind": "input",
         "name": "ariaValueText",
         "type": "string",
+        "alias": "aria-valuetext",
         "defaultValue": "\"\""
       },
       {
@@ -7521,6 +7635,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -7642,6 +7757,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -7731,6 +7847,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -7855,6 +7972,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -7862,6 +7980,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -7869,6 +7988,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -8025,6 +8145,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -8254,6 +8375,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -8261,6 +8383,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -8268,6 +8391,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -8435,6 +8559,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -8462,6 +8587,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -8469,6 +8595,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -8476,6 +8603,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -8678,6 +8806,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -8856,6 +8985,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -8863,6 +8993,7 @@
         "kind": "input",
         "name": "ariaLabelledby",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -8925,6 +9056,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -9068,6 +9200,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -9075,6 +9208,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -9082,6 +9216,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -9231,6 +9366,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -9307,6 +9443,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -9419,6 +9556,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -9581,6 +9719,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -10229,6 +10368,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -10248,6 +10388,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -10371,6 +10512,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -10378,6 +10520,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -10495,6 +10638,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -10713,6 +10857,7 @@
         "kind": "input",
         "name": "userClasses",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -10726,6 +10871,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -10733,6 +10879,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -10740,6 +10887,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -10902,6 +11050,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -10984,6 +11133,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -10991,6 +11141,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
+        "alias": "aria-label",
         "defaultValue": "null"
       },
       {
@@ -10998,6 +11149,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -11120,6 +11272,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -11168,6 +11321,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -11175,6 +11329,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
+        "alias": "aria-label",
         "defaultValue": "null"
       },
       {
@@ -11182,6 +11337,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -11304,6 +11460,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -11317,6 +11474,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -11324,6 +11482,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
+        "alias": "aria-label",
         "defaultValue": "null"
       },
       {
@@ -11331,6 +11490,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -11453,6 +11613,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -11616,6 +11777,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -11636,6 +11798,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
+        "alias": "aria-label",
         "defaultValue": "null"
       },
       {
@@ -11643,6 +11806,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -11753,6 +11917,7 @@
         "kind": "input",
         "name": "userClasses",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -11780,6 +11945,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -12107,6 +12273,7 @@
         "kind": "input",
         "name": "menuId",
         "type": "string",
+        "alias": "id",
         "defaultValue": "\"\""
       },
       {
@@ -12184,7 +12351,8 @@
         "description": "",
         "kind": "input",
         "name": "userClass",
-        "type": "string"
+        "type": "string",
+        "alias": "class"
       }
     ]
   },
@@ -12334,6 +12502,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -12341,6 +12510,7 @@
         "kind": "input",
         "name": "ariaValueText",
         "type": "string",
+        "alias": "aria-valuetext",
         "defaultValue": "\"\""
       },
       {
@@ -12411,6 +12581,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -12518,6 +12689,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -12538,6 +12710,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string | null",
+        "alias": "aria-describedby",
         "defaultValue": "null"
       },
       {
@@ -12545,6 +12718,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
+        "alias": "aria-label",
         "defaultValue": "null"
       },
       {
@@ -12552,6 +12726,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string | null",
+        "alias": "aria-labelledby",
         "defaultValue": "null"
       },
       {
@@ -12663,6 +12838,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -12760,6 +12936,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -12794,6 +12971,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
+        "alias": "aria-label",
         "defaultValue": "null"
       },
       {
@@ -12801,6 +12979,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string | null",
+        "alias": "aria-labelledby",
         "defaultValue": "null"
       },
       {
@@ -12856,6 +13035,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -12945,7 +13125,8 @@
         "description": "",
         "kind": "input",
         "name": "userClass",
-        "type": "string"
+        "type": "string",
+        "alias": "class"
       },
       {
         "description": "Explicit sheet width. Numbers are interpreted as pixels.",
@@ -12964,6 +13145,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -13027,6 +13209,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -13061,6 +13244,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -13108,6 +13292,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -13128,6 +13313,7 @@
         "kind": "input",
         "name": "ariaLabelEnd",
         "type": "string | null",
+        "alias": "aria-label-end",
         "defaultValue": "null"
       },
       {
@@ -13135,6 +13321,7 @@
         "kind": "input",
         "name": "ariaLabelStart",
         "type": "string | null",
+        "alias": "aria-label-start",
         "defaultValue": "null"
       },
       {
@@ -13301,6 +13488,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
+        "alias": "aria-label",
         "defaultValue": "null"
       },
       {
@@ -13308,6 +13496,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string | null",
+        "alias": "aria-labelledby",
         "defaultValue": "null"
       },
       {
@@ -13633,6 +13822,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | undefined",
+        "alias": "aria-label",
         "defaultValue": "undefined"
       },
       {
@@ -13654,6 +13844,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -13728,6 +13919,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -13735,6 +13927,7 @@
         "kind": "input",
         "name": "ariaLabelledby",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -13803,6 +13996,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -14007,6 +14201,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -14087,6 +14282,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -14142,6 +14338,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
+        "alias": "aria-label",
         "defaultValue": "null"
       },
       {
@@ -14149,6 +14346,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string | null",
+        "alias": "aria-labelledby",
         "defaultValue": "null"
       },
       {
@@ -14225,6 +14423,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -14381,6 +14580,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -14394,6 +14594,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -14401,6 +14602,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -14408,6 +14610,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -14552,6 +14755,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -14572,6 +14776,7 @@
         "kind": "input",
         "name": "ariaDescribedBy",
         "type": "string",
+        "alias": "aria-describedby",
         "defaultValue": "\"\""
       },
       {
@@ -14579,6 +14784,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -14586,6 +14792,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -14777,6 +14984,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       },
       {
@@ -14797,6 +15005,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -15380,6 +15589,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]

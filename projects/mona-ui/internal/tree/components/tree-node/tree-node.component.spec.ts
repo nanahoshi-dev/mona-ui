@@ -4,10 +4,14 @@ import { TreeService } from "../../services/tree.service";
 
 import { TreeNodeComponent } from "./tree-node.component";
 
+interface TestItem {
+    readonly id: string;
+}
+
 describe("TreeNodeComponent", () => {
-    let component: TreeNodeComponent<any>;
-    let fixture: ComponentFixture<TreeNodeComponent<any>>;
-    let treeService: TreeService<any>;
+    let component: TreeNodeComponent<TestItem>;
+    let fixture: ComponentFixture<TreeNodeComponent<TestItem>>;
+    let treeService: TreeService<TestItem>;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -15,7 +19,7 @@ describe("TreeNodeComponent", () => {
             providers: [TreeService]
         }).compileComponents();
 
-        fixture = TestBed.createComponent(TreeNodeComponent);
+        fixture = TestBed.createComponent(TreeNodeComponent<TestItem>);
         component = fixture.componentInstance;
         treeService = fixture.debugElement.injector.get(TreeService);
         fixture.detectChanges();

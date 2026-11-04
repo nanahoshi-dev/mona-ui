@@ -1,4 +1,4 @@
-import { Selector } from "@mirei/ts-collections";
+import type { Selector } from "@mirei/ts-collections";
 
 type OrderByOptions<T, R> =
     | { orderBy?: never; orderByDirection?: never }

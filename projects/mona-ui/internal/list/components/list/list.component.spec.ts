@@ -6,8 +6,8 @@ import { ListService } from "../../services/list.service";
 import { ListComponent } from "./list.component";
 
 describe("ListComponent", () => {
-    let component: ListComponent<any>;
-    let fixture: ComponentFixture<ListComponent<any>>;
+    let component: ListComponent<unknown>;
+    let fixture: ComponentFixture<ListComponent<unknown>>;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -26,7 +26,7 @@ describe("ListComponent", () => {
 });
 
 @Component({
-    selector: "app-shift-tab-test",
+    selector: "mona-shift-tab-test",
     imports: [ListComponent],
     providers: [ListService],
     template: `<mona-list [data]="data" textField="name"></mona-list>`
@@ -65,7 +65,7 @@ describe("ListComponent focus handling", () => {
 });
 
 @Component({
-    selector: "app-empty-list-test",
+    selector: "mona-empty-list-test",
     imports: [ListComponent],
     providers: [ListService],
     template: `<mona-list [data]="data" textField="name"></mona-list>`
@@ -107,7 +107,7 @@ describe("ListComponent focus handling with no focusable items", () => {
 });
 
 @Component({
-    selector: "app-navigable-keydown-test",
+    selector: "mona-navigable-keydown-test",
     imports: [ListComponent],
     providers: [ListService],
     template: `<mona-list [data]="data" textField="name"></mona-list>`

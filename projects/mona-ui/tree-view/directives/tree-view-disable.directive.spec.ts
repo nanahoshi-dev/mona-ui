@@ -29,7 +29,7 @@ class HostComponent {
 }
 
 describe("TreeViewDisableDirective", () => {
-    let directive: TreeViewDisableDirective<any>;
+    let directive: TreeViewDisableDirective<TestItem>;
     beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [TreeService]

@@ -1,5 +1,5 @@
 import { Directive, effect, inject, input, untracked } from "@angular/core";
-import { ListService, NavigableOptions } from "@nanahoshi/mona-ui/internal/list";
+import { ListService, type NavigableOptions } from "@nanahoshi/mona-ui/internal/list";
 
 @Directive({
     selector: "mona-list-view[monaListViewNavigable]"
@@ -12,7 +12,7 @@ export class ListViewNavigableDirective<T> {
     };
     readonly #listService = inject<ListService<T>>(ListService);
 
-    public options = input<Partial<NavigableOptions> | "">("", {
+    public readonly options = input<Partial<NavigableOptions> | "">("", {
         alias: "monaListViewNavigable"
     });
 

@@ -6,9 +6,9 @@ import { TreeViewComponent } from "../components/tree-view/tree-view.component";
 import { TreeViewExpandableDirective } from "./tree-view-expandable.directive";
 
 interface TestItem {
+    children?: TestItem[];
     id: string;
     text: string;
-    children?: TestItem[];
 }
 
 @Component({
@@ -30,7 +30,7 @@ class HostComponent {
 }
 
 describe("TreeViewExpandableDirective", () => {
-    let directive: TreeViewExpandableDirective<any>;
+    let directive: TreeViewExpandableDirective<TestItem>;
     beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [TreeService]

@@ -1,10 +1,10 @@
 import {
     CdkDrag,
-    CdkDragDrop,
-    CdkDragEnd,
-    CdkDragMove,
+    type CdkDragDrop,
+    type CdkDragEnd,
+    type CdkDragMove,
     CdkDragPreview,
-    CdkDragStart,
+    type CdkDragStart,
     CdkDropList
 } from "@angular/cdk/drag-drop";
 import {
@@ -17,7 +17,7 @@ import {
     LucideLoaderCircle,
     LucidePlus
 } from "@lucide/angular";
-import { ChangeDetectionStrategy, Component, computed, DOCUMENT, inject, input, NgZone } from "@angular/core";
+import { Component, computed, DOCUMENT, inject, input, NgZone } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ImmutableSet } from "@mirei/ts-collections";
 import { CheckBoxComponent } from "@nanahoshi/mona-ui/check-box";
@@ -42,7 +42,6 @@ import { TreeNodeComponent } from "../tree-node/tree-node.component";
 
 @Component({
     selector: "mona-sub-tree",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         LucideArrowDown,
         LucideArrowUp,

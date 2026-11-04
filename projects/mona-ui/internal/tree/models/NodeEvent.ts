@@ -1,5 +1,5 @@
 import { PreventableEvent } from "@nanahoshi/mona-ui/common";
-import { NodeItem } from "./NodeItem";
+import type { NodeItem } from "./NodeItem";
 import { TreeNode } from "./TreeNode";
 
 export abstract class NodeEvent<T> extends PreventableEvent<MouseEvent | TouchEvent> {

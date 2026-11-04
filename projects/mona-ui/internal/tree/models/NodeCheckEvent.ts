@@ -1,5 +1,5 @@
 import { PreventableEvent } from "@nanahoshi/mona-ui/common";
-import { NodeItem } from "./NodeItem";
+import type { NodeItem } from "./NodeItem";
 import { TreeNode } from "./TreeNode";
 
 export class NodeCheckEvent<T> extends PreventableEvent {

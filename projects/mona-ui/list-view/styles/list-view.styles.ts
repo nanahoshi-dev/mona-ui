@@ -1,6 +1,5 @@
-import { cva } from "class-variance-authority";
-import type { VariantProps } from "class-variance-authority";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import type { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { cva, type VariantProps } from "class-variance-authority";
 
 export const listViewBaseThemeVariants = cva(
     `

@@ -1,5 +1,5 @@
 import { NgComponentOutlet, SlicePipe } from "@angular/common";
-import { Component, computed, effect, inject, input, linkedSignal, signal } from "@angular/core";
+import { booleanAttribute, Component, computed, effect, inject, input, linkedSignal, signal } from "@angular/core";
 import type {
     GroupableOptions,
     NavigableOptions,
@@ -411,7 +411,10 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
         <mona-list-view
             [aria-label]="ariaLabel()"
+            [aria-labelledby]="ariaLabelledBy()"
             [height]="height()"
+            [loading]="loading()"
+            [pagerAriaLabel]="pagerAriaLabel()"
             [items]="listViewItems() | slice: 0 : scrollBottomItemCount()"
             [listClass]="listClassInput()"
             [listItemClass]="listItemClass()"
@@ -624,14 +627,17 @@ class ListViewWrapperComponent implements ComponentInputsAsSignal<ListViewCompon
         return options;
     });
     public readonly ariaLabel = input("Foods");
+    public readonly ariaLabelledBy = input("");
     public readonly height = input<ReturnType<ListViewComponent["height"]>>("100%");
     public readonly listClass = input<ReturnType<ListViewComponent["listClass"]>>("");
     public readonly listItemClass = input<ReturnType<ListViewComponent["listItemClass"]>>("");
     public readonly listItemStyle = input<ReturnType<ListViewComponent["listItemStyle"]>>({});
     public readonly listStyle = input<ReturnType<ListViewComponent["listStyle"]>>({});
+    public readonly loading = input(false, { transform: booleanAttribute });
     public readonly items = input<ReturnType<ListViewComponent["items"]>>([]);
     public readonly maxHeight = input<ReturnType<ListViewComponent["maxHeight"]>>("");
     public readonly maxWidth = input<ReturnType<ListViewComponent["maxWidth"]>>("");
+    public readonly pagerAriaLabel = input("");
     public readonly rounded = input<ReturnType<ListViewComponent["rounded"]>>("medium");
     public readonly size = input<ReturnType<ListViewComponent["size"]>>("medium");
     public readonly textField = input<ReturnType<ListViewComponent["textField"]>>("");
