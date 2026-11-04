@@ -1,5 +1,7 @@
+import type { Signal } from "@angular/core";
 import {
     afterNextRender,
+    booleanAttribute,
     Component,
     computed,
     DestroyRef,
@@ -13,54 +15,52 @@ import {
     untracked,
     viewChild
 } from "@angular/core";
-import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
 import { ButtonDirective, type ButtonVariantProps } from "@nanahoshi/mona-ui/button";
 import { PreventableEvent } from "@nanahoshi/mona-ui/common";
+import type { HourFormat, Meridiem, TimeUnit } from "@nanahoshi/mona-ui/date-input";
 import {
     generateHourSet,
     generateMinuteSet,
     generateSecondSet,
-    HourFormat,
-    Meridiem,
+    getLocaleHourFormat,
     TimeLimiterPipe,
     TimeSelectorService
 } from "@nanahoshi/mona-ui/date-input";
 import { formatNumber, injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { DateTime } from "luxon";
-import { fromEvent, tap } from "rxjs";
-import { filter } from "rxjs/operators";
+import { filter, fromEvent } from "rxjs";
 import { TimeSelectorItemDirective } from "../../directives/time-selector-item.directive";
 import { TimeSelectorListDirective } from "../../directives/time-selector-list.directive";
 import { TIME_SELECTOR_DEFAULT_MESSAGES } from "../../i18n/time-selector.default-messages";
-import { TimeListType } from "../../models/TimeListType";
+import type { TimeListType } from "../../models/TimeListType";
+import type { TimeSelectorVariantInput, TimeSelectorVariantProps } from "../../styles/time-selector.styles";
 import {
     timeSelectorBaseThemeVariants,
     timeSelectorFooterThemeVariants,
     timeSelectorHeaderThemeVariants,
     timeSelectorInfoContainerThemeVariants,
-    timeSelectorListContainerThemeVariants,
-    TimeSelectorVariantInput,
-    TimeSelectorVariantProps
+    timeSelectorListContainerThemeVariants
 } from "../../styles/time-selector.styles";
+
+const TIME_LIMITER = new TimeLimiterPipe();
 
 @Component({
     selector: "mona-time-selector",
     templateUrl: "./time-selector.component.html",
-    imports: [TimeLimiterPipe, TimeSelectorItemDirective, ButtonDirective, TimeSelectorListDirective],
+    imports: [TimeSelectorItemDirective, ButtonDirective, TimeSelectorListDirective],
     host: {
         role: "group",
         "[attr.aria-label]": "ariaLabel() || messages().timeSelector",
-        "[attr.aria-disabled]": "disabled()",
+        "[attr.aria-disabled]": "disabled() || null",
         "[attr.aria-invalid]": "invalidState() ? 'true' : null",
-        "[attr.aria-readonly]": "readonly()",
-        "[attr.aria-required]": "required()",
         "[attr.data-invalid]": "invalidState() || null",
         "[attr.data-readonly]": "readonly() || null",
         "[attr.data-required]": "required() || null",
         "[class]": "baseClass()",
-        "(blur)": "onBlur()"
+        "(focusout)": "onFocusOut($event)"
     }
 })
 export class TimeSelectorComponent implements FormValueControl<Date | null>, TimeSelectorVariantInput {
@@ -70,7 +70,6 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #i18n = inject(MonaI18nService);
     readonly #timeSelectorService = inject(TimeSelectorService, { optional: true });
-    protected readonly isRtl = computed(() => this.#direction() === "rtl");
 
     protected readonly amMeridiemVisible = computed(() => {
         const min = this.min();
@@ -81,6 +80,10 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
         return timeSelectorBaseThemeVariants({ disabled });
     });
     protected readonly computedPopupHeight = this.#height.asReadonly();
+    /** The clock in use: the `hourFormat` input, or the locale's own when it isn't set. */
+    protected readonly effectiveHourFormat = computed<HourFormat>(
+        () => this.hourFormat() ?? getLocaleHourFormat(this.#i18n.localeId())
+    );
     protected readonly focusedList = signal<TimeListType>("hours");
     protected readonly footerClass = computed(() => {
         return timeSelectorFooterThemeVariants();
@@ -90,18 +93,20 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
     });
     protected readonly hour = computed(() => {
         const hour = this.navigatedDate().hour;
-        const hourFormat = this.hourFormat();
-        if (hourFormat === "24") {
+        if (this.effectiveHourFormat() === "24") {
             return hour;
         }
         return hour % 12 || 12;
     });
     protected readonly hourListId = createElementControlId();
     protected readonly hourListRef = viewChild.required<ElementRef<HTMLOListElement>>("hourList");
+    /** The hours shown and reachable with the keyboard: on the step, within min and max. */
+    protected readonly hourOptions = computed(() => this.limit(this.viewHours(), "h"));
     protected readonly infoContainerClass = computed(() => {
         return timeSelectorInfoContainerThemeVariants();
     });
     protected readonly invalidState = computed(() => this.touched() && this.invalid());
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly listContainerClass = computed(() => {
         return timeSelectorListContainerThemeVariants();
     });
@@ -122,14 +127,13 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
     protected readonly minute = computed(() => this.navigatedDate().minute);
     protected readonly minuteListId = createElementControlId();
     protected readonly minuteListRef = viewChild.required<ElementRef<HTMLOListElement>>("minuteList");
-    protected readonly minutes = computed(() => generateMinuteSet(this.minuteStep()));
-    protected readonly navigatedDate = signal(DateTime.now());
+    protected readonly minuteOptions = computed(() => this.limit(generateMinuteSet(this.minuteStep()), "m"));
+    protected readonly navigatedDate = signal<DateTime>(DateTime.now());
     protected readonly navigatedDateText = computed(() => {
-        const hourFormat = this.hourFormat();
         const locale = this.#i18n.localeId();
         return this.navigatedDate()
             .setLocale(locale)
-            .toLocaleString({ hour: "numeric", minute: "numeric", hour12: hourFormat === "12" });
+            .toLocaleString({ hour: "numeric", minute: "numeric", hour12: this.effectiveHourFormat() === "12" });
     });
     protected readonly pmMeridiemVisible = computed(() => {
         const max = this.max();
@@ -138,23 +142,37 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
     protected readonly second = computed(() => this.navigatedDate().second);
     protected readonly secondListId = createElementControlId();
     protected readonly secondListRef = viewChild<ElementRef<HTMLOListElement>>("secondList");
-    protected readonly seconds = computed(() => generateSecondSet(this.secondStep()));
-    protected readonly viewHours = computed(() => {
-        const meridiem = this.meridiem();
-        const hourFormat = this.hourFormat();
-        const hourStep = this.hourStep();
-        return generateHourSet(hourFormat, meridiem, hourStep);
-    });
+    protected readonly secondOptions = computed(() => this.limit(generateSecondSet(this.secondStep()), "s"));
+    protected readonly viewHours = computed(() =>
+        generateHourSet(this.effectiveHourFormat(), this.meridiem(), this.hourStep())
+    );
 
     /**
      * @description Accessible label for the time selector group.
      * @default ""
      */
     public readonly ariaLabel = input<string>("", { alias: "aria-label" });
-    public readonly disabled = input(false);
-    public readonly focusOnMount = input(true);
-    public readonly footer = input(true);
-    public readonly hourFormat = input<HourFormat>("24");
+    public readonly disabled = input(false, { transform: booleanAttribute });
+
+    /**
+     * @description Moves focus to the hour list when the selector first renders.
+     * @default true
+     */
+    public readonly focusOnMount = input(true, { transform: booleanAttribute });
+
+    /**
+     * @description Shows the Set button. Without it, every change of hour, minute, second or AM/PM made by the user
+     * is written to the value at once.
+     * @default true
+     */
+    public readonly footer = input(true, { transform: booleanAttribute });
+
+    /**
+     * @description The clock to show: "12" with an AM/PM list, or "24". When not set, the active locale's own clock
+     * is used (12-hour for en-US, 24-hour for de-DE).
+     * @default null
+     */
+    public readonly hourFormat = input<HourFormat | null>(null);
     public readonly hourStep = input(1);
 
     /**
@@ -162,7 +180,7 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly invalid = input(false);
+    public readonly invalid = input(false, { transform: booleanAttribute });
 
     public readonly max = input<Date | undefined, unknown>(undefined, {
         transform: value => (value instanceof Date ? value : undefined)
@@ -176,23 +194,23 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
      * @description Prevents value changes while preserving the component's visual state.
      * @default false
      */
-    public readonly readonly = input(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
 
     /**
      * @description Sets whether the time selector is required. When bound to a signal form field via `[formField]`,
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly required = input(false);
+    public readonly required = input(false, { transform: booleanAttribute });
 
     public readonly rounded = input<ButtonVariantProps["rounded"]>("medium");
     public readonly secondStep = input(1);
-    public readonly showSeconds = input(false);
+    public readonly showSeconds = input(false, { transform: booleanAttribute });
     public readonly size = input<TimeSelectorVariantProps["size"]>("medium");
 
     /**
-     * @description Emitted when the time selector is interacted with via blur or value selection.
-     * The `FormField` directive listens to this to mark the field as touched.
+     * @description Emitted when focus leaves the time selector, as a native input is touched on blur. Moving between
+     * its lists and buttons doesn't count. The `FormField` directive listens to this to mark the field as touched.
      */
     public readonly touch = output<void>();
 
@@ -201,10 +219,11 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
 
     /**
-     * @description Two-way bindable current time value.
+     * @description Two-way bindable current time value. It is written by the Set button and Enter, or, without a
+     * footer, by each change the user makes; never on its own.
      * @default null
      */
     public readonly value = model<Date | null>(null);
@@ -233,17 +252,24 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
             const value = this.value();
             untracked(() => this.setDateValues(value));
         });
-        toObservable(this.navigatedDate)
-            .pipe(
-                takeUntilDestroyed(),
-                filter(() => !this.footer()),
-                tap(() => this.updateValue(this.navigatedDate().toJSDate(), true))
-            )
-            .subscribe();
     }
 
-    public focus(): void {
-        this.focusList(this.focusedList());
+    /**
+     * Moves focus to the active list.
+     * @param options passed to the native `focus()` call, for example `{ preventScroll: true }`.
+     */
+    public focus(options?: FocusOptions): void {
+        this.focusList(this.focusedList(), options);
+    }
+
+    /** The id of the active option, or null while the time isn't one of the options (between steps, say). */
+    protected activeOptionId(listId: string, options: Iterable<TimeUnit>, value: number): string | null {
+        for (const option of options) {
+            if (option.value === value) {
+                return `${listId}${value}`;
+            }
+        }
+        return null;
     }
 
     protected formatTwoDigit(value: number): string {
@@ -253,7 +279,15 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
         });
     }
 
-    protected onBlur(): void {
+    protected onFocusOut(event: FocusEvent): void {
+        // Removing a focused selector from the page fires focusout after it is destroyed.
+        if (this.#destroyRef.destroyed) {
+            return;
+        }
+        const nextTarget = event.relatedTarget;
+        if (nextTarget instanceof Node && this.#hostElementRef.nativeElement.contains(nextTarget)) {
+            return;
+        }
         this.touch.emit();
     }
 
@@ -261,10 +295,10 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
         if (this.disabled() || this.readonly()) {
             return;
         }
-        this.navigatedDate.update(d => d.set({ hour }));
+        this.navigateTo(this.navigatedDate().set({ hour }));
     }
 
-    protected onMeridiemClick(meridiem: "AM" | "PM"): void {
+    protected onMeridiemClick(meridiem: Meridiem): void {
         if (this.disabled() || this.readonly()) {
             return;
         }
@@ -272,65 +306,76 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
             return;
         }
         const hour = this.navigatedDate().hour;
-
         if (meridiem === "PM" && hour < 12) {
-            this.navigatedDate.update(date => date.set({ hour: hour + 12 }));
+            this.navigateTo(this.navigatedDate().set({ hour: hour + 12 }));
         } else if (meridiem === "AM" && hour >= 12) {
-            this.navigatedDate.update(date => date.set({ hour: hour - 12 }));
+            this.navigateTo(this.navigatedDate().set({ hour: hour - 12 }));
         }
-        this.meridiem.set(meridiem);
     }
 
     protected onMinuteChange(minute: number): void {
         if (this.disabled() || this.readonly()) {
             return;
         }
-        this.navigatedDate.update(date => date.set({ minute }));
+        this.navigateTo(this.navigatedDate().set({ minute }));
     }
 
-    protected onNowClick(_event: Event): void {
+    protected onNowClick(): void {
         if (this.disabled() || this.readonly()) {
             return;
         }
-        let now = DateTime.now().setLocale(this.#i18n.localeId());
-        const min = this.minDate();
-        const max = this.maxDate();
-        if (min && now < min) {
-            if (min.isValid) {
-                now = min;
-            }
-        } else if (max && now > max) {
-            if (max.isValid) {
-                now = max;
-            }
-        }
-        this.navigatedDate.update(date =>
-            date.set({ hour: now.hour, minute: now.minute, second: now.second, millisecond: now.millisecond })
+        const now = DateTime.now();
+        this.navigateTo(
+            this.navigatedDate().set({
+                hour: now.hour,
+                minute: now.minute,
+                second: now.second,
+                millisecond: now.millisecond
+            })
         );
-        this.meridiem.set(now.hour >= 12 ? "PM" : "AM");
     }
 
     protected onSecondChange(second: number): void {
         if (this.disabled() || this.readonly()) {
             return;
         }
-        this.navigatedDate.update(date => date.set({ second }));
+        this.navigateTo(this.navigatedDate().set({ second }));
     }
 
     protected onSetTimeClick(): void {
         if (this.disabled() || this.readonly()) {
             return;
         }
-        this.updateValue(this.navigatedDate().toJSDate(), true);
+        this.updateValue(this.clampToRange(this.navigatedDate()).toJSDate());
+    }
+
+    /** Moves a time inside min and max, on the same day. */
+    private clampToRange(date: DateTime): DateTime {
+        const day = { year: date.year, month: date.month, day: date.day };
+        const min = this.minDate()?.set(day);
+        const max = this.maxDate()?.set(day);
+        const timeOf = (bound: DateTime) => ({
+            hour: bound.hour,
+            minute: bound.minute,
+            second: bound.second,
+            millisecond: bound.millisecond
+        });
+        if (min && date < min) {
+            return date.set(timeOf(min));
+        }
+        if (max && date > max) {
+            return date.set(timeOf(max));
+        }
+        return date;
     }
 
     private dateValuesEqual(date1: Date | null, date2: Date | null): boolean {
         return date1?.getTime() === date2?.getTime();
     }
 
-    private focusList(listType: TimeListType): void {
+    private focusList(listType: TimeListType, options?: FocusOptions): void {
         const listRef = this.getListRef(listType);
-        listRef?.nativeElement.focus();
+        listRef?.nativeElement.focus(options);
     }
 
     private getListRef(listType: TimeListType): ElementRef<HTMLOListElement> | undefined {
@@ -351,7 +396,7 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
         if (this.showSeconds()) {
             lists.push("seconds");
         }
-        if (this.hourFormat() === "12") {
+        if (this.effectiveHourFormat() === "12") {
             lists.push("meridiem");
         }
         const currentIndex = lists.indexOf(current);
@@ -364,6 +409,12 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
         }
     }
 
+    private getOptions(listType: Exclude<TimeListType, "meridiem">): TimeUnit[] {
+        const options: Signal<Iterable<TimeUnit>> =
+            listType === "hours" ? this.hourOptions : listType === "minutes" ? this.minuteOptions : this.secondOptions;
+        return Array.from(options());
+    }
+
     private handleKeydown(event: KeyboardEvent): void {
         if (this.disabled() || this.readonly()) {
             return;
@@ -372,6 +423,11 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
         this.#timeSelectorService?.keydown$.next(preventableEvent);
 
         if (preventableEvent.isDefaultPrevented()) {
+            return;
+        }
+
+        // Keys pressed on the Now and Set buttons belong to the buttons, which act on click.
+        if ((event.target as HTMLElement).closest("button")) {
             return;
         }
 
@@ -412,7 +468,9 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
                 break;
             case "Enter":
             case " ":
-                this.updateValue(this.navigatedDate().toJSDate(), true);
+                // Space would otherwise scroll the focused list.
+                event.preventDefault();
+                this.updateValue(this.clampToRange(this.navigatedDate()).toJSDate());
                 break;
         }
     }
@@ -441,61 +499,58 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
         }
     }
 
-    private navigateItem(listType: TimeListType, direction: number): void {
-        switch (listType) {
-            case "hours": {
-                const hours = Array.from(this.viewHours());
-                const currentIndex = hours.findIndex(h => h.viewValue === this.hour());
-                const newIndex = Math.max(0, Math.min(hours.length - 1, currentIndex + direction));
-                if (hours[newIndex]) {
-                    this.onHourChange(hours[newIndex].value);
-                }
-                break;
+    /** The options of a list that pass the step and the min/max bounds for the time being edited. */
+    private limit(values: Iterable<TimeUnit>, type: "h" | "m" | "s"): Iterable<TimeUnit> {
+        return TIME_LIMITER.transform(values, type, this.navigatedDate(), this.minDate(), this.maxDate());
+    }
+
+    /** Moves through the options of a list, so the keyboard reaches what the mouse can: steps within min and max. */
+    private navigateItem(listType: TimeListType, direction: -1 | 1): void {
+        if (listType === "meridiem") {
+            const target: Meridiem = this.meridiem() === "AM" ? "PM" : "AM";
+            if (target === "AM" ? this.amMeridiemVisible() : this.pmMeridiemVisible()) {
+                this.onMeridiemClick(target);
             }
-            case "minutes": {
-                const currentMinute = this.minute();
-                const newMinute = Math.max(0, Math.min(59, currentMinute + direction));
-                this.onMinuteChange(newMinute);
-                break;
-            }
-            case "seconds": {
-                const currentSecond = this.second();
-                const newSecond = Math.max(0, Math.min(59, currentSecond + direction));
-                this.onSecondChange(newSecond);
-                break;
-            }
-            case "meridiem": {
-                const current = this.meridiem();
-                if (direction !== 0) {
-                    this.onMeridiemClick(current === "AM" ? "PM" : "AM");
-                }
-                break;
-            }
+            return;
+        }
+        const options = this.getOptions(listType);
+        if (options.length === 0) {
+            return;
+        }
+        const current =
+            listType === "hours" ? this.navigatedDate().hour : listType === "minutes" ? this.minute() : this.second();
+        const index = options.findIndex(option => option.value === current);
+        let target: TimeUnit | undefined;
+        if (index >= 0) {
+            target = options[Math.max(0, Math.min(options.length - 1, index + direction))];
+        } else {
+            // Between steps: go to the nearest option in the direction of the key.
+            target =
+                direction > 0
+                    ? (options.find(option => option.value > current) ?? options[options.length - 1])
+                    : ([...options].reverse().find(option => option.value < current) ?? options[0]);
+        }
+        this.setUnit(listType, target.value);
+    }
+
+    private navigateTo(date: DateTime): void {
+        const clamped = this.clampToRange(date);
+        this.navigatedDate.set(clamped);
+        this.meridiem.set(clamped.hour >= 12 ? "PM" : "AM");
+        if (!this.footer()) {
+            this.updateValue(clamped.toJSDate());
         }
     }
 
     private navigateToEdge(listType: TimeListType, edge: "first" | "last"): void {
-        switch (listType) {
-            case "hours": {
-                const hours = Array.from(this.viewHours());
-                const target = edge === "first" ? hours[0] : hours[hours.length - 1];
-                if (target) {
-                    this.onHourChange(target.value);
-                }
-                break;
-            }
-            case "minutes": {
-                this.onMinuteChange(edge === "first" ? 0 : 59);
-                break;
-            }
-            case "seconds": {
-                this.onSecondChange(edge === "first" ? 0 : 59);
-                break;
-            }
-            case "meridiem": {
-                this.onMeridiemClick(edge === "first" ? "AM" : "PM");
-                break;
-            }
+        if (listType === "meridiem") {
+            this.onMeridiemClick(edge === "first" ? "AM" : "PM");
+            return;
+        }
+        const options = this.getOptions(listType);
+        const target = edge === "first" ? options[0] : options[options.length - 1];
+        if (target) {
+            this.setUnit(listType, target.value);
         }
     }
 
@@ -508,6 +563,20 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
         this.meridiem.set(meridiem);
     }
 
+    private setUnit(listType: Exclude<TimeListType, "meridiem">, value: number): void {
+        switch (listType) {
+            case "hours":
+                this.onHourChange(value);
+                break;
+            case "minutes":
+                this.onMinuteChange(value);
+                break;
+            case "seconds":
+                this.onSecondChange(value);
+                break;
+        }
+    }
+
     private setupKeyboardNavigation(): void {
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
             .pipe(
@@ -517,16 +586,10 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
             .subscribe(event => this.handleKeydown(event));
     }
 
-    private updateValue(date: Date | null, notify: boolean): void {
+    private updateValue(date: Date | null): void {
         if (this.dateValuesEqual(this.value(), date)) {
-            if (notify) {
-                this.touch.emit();
-            }
             return;
         }
         this.value.set(date);
-        if (notify) {
-            this.touch.emit();
-        }
     }
 }
