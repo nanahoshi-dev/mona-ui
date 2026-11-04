@@ -1,12 +1,4 @@
-import {
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    contentChild,
-    forwardRef,
-    input,
-    TemplateRef
-} from "@angular/core";
+import { booleanAttribute, Component, computed, contentChild, forwardRef, input, TemplateRef } from "@angular/core";
 import { DataType } from "@nanahoshi/mona-ui/common";
 import { v4 } from "uuid";
 import { GridCellTemplateDirective } from "../../directives/grid-cell-template.directive";
@@ -20,10 +12,14 @@ import type { Column, ColumnFormat, ColumnSortComparator } from "../../models/Co
 import { GRID_COLUMN_DEFINITION, GridColumnDefinition } from "../../models/GridColumnDefinition";
 import type { GridColumnLockedPosition } from "../../models/GridColumnLockedPosition";
 
+/** Like `booleanAttribute`, but `null` and `undefined` stay `null`: not set, so the grid decides. */
+function nullableBooleanAttribute(value: unknown): boolean | null {
+    return value == null ? null : booleanAttribute(value);
+}
+
 @Component({
     selector: "mona-grid-column",
     template: "",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [{ provide: GRID_COLUMN_DEFINITION, useExisting: forwardRef(() => GridColumnComponent) }]
 })
 export class GridColumnComponent implements GridColumnDefinition {
@@ -80,7 +76,7 @@ export class GridColumnComponent implements GridColumnDefinition {
      * editable except the one whose `field` is the grid's `rowKey`.
      * @default null
      */
-    public readonly editable = input<boolean | null>(null);
+    public readonly editable = input<boolean | null, unknown>(null, { transform: nullableBooleanAttribute });
 
     /**
      * @description The field name of the data property to display in this column.
@@ -90,22 +86,22 @@ export class GridColumnComponent implements GridColumnDefinition {
     /**
      * @description Whether this column can be filtered when grid filtering is enabled. Has no effect if filtering is disabled on the grid.
      */
-    public readonly filterable = input<boolean>(true);
+    public readonly filterable = input(true, { transform: booleanAttribute });
 
     /**
-     * @description Formats the displayed cell value. String formats apply to date, datetime, and time columns; formatter functions replace the cell text.
+     * @description Formats the displayed cell value. String formats apply to date columns and their date filters; formatter functions replace the cell text.
      */
     public readonly format = input<ColumnFormat | null>();
 
     /**
      * @description Whether this column is hidden from the rendered grid.
      */
-    public readonly hidden = input(false);
+    public readonly hidden = input(false, { transform: booleanAttribute });
 
     /**
      * @description Whether this column remains fixed while the grid scrolls horizontally.
      */
-    public readonly locked = input(false);
+    public readonly locked = input(false, { transform: booleanAttribute });
 
     /**
      * @description The side of the grid where this locked column is fixed.
@@ -131,7 +127,7 @@ export class GridColumnComponent implements GridColumnDefinition {
     /**
      * @description Whether this column can be sorted through its header when grid sorting is enabled. Has no effect if sorting is disabled on the grid.
      */
-    public readonly sortable = input(true);
+    public readonly sortable = input(true, { transform: booleanAttribute });
 
     /**
      * @description A stable key used to persist state for columns whose field is empty or unstable.

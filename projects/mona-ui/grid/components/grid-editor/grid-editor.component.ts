@@ -26,10 +26,10 @@ import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.dir
 import { Column } from "../../models/Column";
 import type { GridEditSession } from "../../models/GridEditSession";
 import type { GridEditTemplateContext } from "../../models/GridEditTemplateContext";
+import { GRID_CELL_FOCUSABLE_SELECTOR } from "../../services/grid-cell-tab-stops";
 import { GridService } from "../../services/grid.service";
 import { gridCellEditorBaseThemeVariants, gridCellEditorInputThemeVariants } from "../../styles/grid.styles";
 
-const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [tabindex]";
 /** The controls Tab moves between in an edited row: each editor's first control and the row's command buttons. */
 const ROW_EDITOR_SELECTOR = "mona-grid-editor, mona-grid-command-cell";
 /** A number written the way JavaScript writes it, such as data from a server: `1234.5`, `-2e3`. */
@@ -72,6 +72,12 @@ export class GridEditorComponent {
     protected readonly baseClass = computed(() => {
         return gridCellEditorBaseThemeVariants({ virtual: this.#gridService?.virtualScrollOptions().enabled ?? false });
     });
+    /**
+     * The form field typed for the editor that the column's data type picks. The column's type is the contract
+     * for its values, so these narrow the field for the template instead of turning off its type checks.
+     */
+    protected readonly booleanField = computed(() => this.formField() as FieldTree<boolean> | null);
+    protected readonly dateField = computed(() => this.formField() as FieldTree<Date | null> | null);
     protected readonly editTemplateContext = computed<GridEditTemplateContext | null>(() => {
         const field = this.formField();
         if (field == null) {
@@ -115,7 +121,9 @@ export class GridEditorComponent {
         const field = this.formField()?.();
         return field != null && field.invalid() && field.touched();
     });
+    protected readonly numberField = computed(() => this.formField() as FieldTree<number | null> | null);
     protected readonly readOnlyValue = computed(() => this.session().model()[this.column().field]);
+    protected readonly stringField = computed(() => this.formField() as FieldTree<string> | null);
 
     /**
      * @description Controls whether the editor focuses its input after it renders.
@@ -315,7 +323,7 @@ export class GridEditorComponent {
     }
 
     #focusTargets(container: HTMLElement): HTMLElement[] {
-        return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_TARGET_SELECTOR)).filter(
+        return Array.from(container.querySelectorAll<HTMLElement>(GRID_CELL_FOCUSABLE_SELECTOR)).filter(
             candidate =>
                 !candidate.hasAttribute("disabled") &&
                 candidate.getAttribute("aria-hidden") !== "true" &&

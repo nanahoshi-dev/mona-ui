@@ -224,6 +224,7 @@ export const JA_JP_MESSAGES = {
             `${column} を ${localizeNumber(position)} 番目に移動しました`,
         columns: "列",
         columnsSelected: (count: number) => `${localizeNumber(count)}列を選択中`,
+        commandColumnTitle: "コマンド",
         delete: "削除",
         deleteRowConfirmation: (rowNumber: number) => `${localizeNumber(rowNumber)}行目を削除しますか？`,
         deleteRowTitle: "行を削除",

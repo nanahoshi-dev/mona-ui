@@ -232,6 +232,7 @@ export const AR_SA_MESSAGES = {
         columnMoved: (column: string, position: number) => `تم نقل ${column} إلى الموضع ${localizeNumber(position)}`,
         columns: "الأعمدة",
         columnsSelected: (count: number) => `عدد الأعمدة المحددة: ${localizeNumber(count)}`,
+        commandColumnTitle: "الأوامر",
         delete: "حذف",
         deleteRowConfirmation: (rowNumber: number) => `هل تريد حذف الصف ${localizeNumber(rowNumber)}؟`,
         deleteRowTitle: "حذف الصف؟",

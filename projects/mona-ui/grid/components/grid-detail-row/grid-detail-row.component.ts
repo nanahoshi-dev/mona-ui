@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
+import { Component, computed, inject, input } from "@angular/core";
 import { GridCellDirective } from "../../directives/grid-cell.directive";
 import { GridLockedCellDirective } from "../../directives/grid-locked-cell.directive";
 import type { Row } from "../../models/Row";
@@ -14,7 +14,6 @@ import { GridService } from "../../services/grid.service";
     // eslint-disable-next-line @angular-eslint/component-selector
     selector: "tr[monaGridDetailRow]",
     templateUrl: "./grid-detail-row.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [GridCellDirective, GridLockedCellDirective, NgTemplateOutlet],
     host: {
         role: "row",

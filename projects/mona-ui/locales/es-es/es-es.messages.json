@@ -209,6 +209,7 @@
         "columnMoved": "Columna {column} movida a la posición {position}",
         "columns": "Columnas",
         "columnsSelected": "{count, plural, =1 {1 columna seleccionada} other {# columnas seleccionadas}}",
+        "commandColumnTitle": "Comandos",
         "delete": "Eliminar",
         "deleteRowConfirmation": "¿Seguro que deseas eliminar la fila {rowNumber}?",
         "deleteRowTitle": "¿Eliminar fila?",

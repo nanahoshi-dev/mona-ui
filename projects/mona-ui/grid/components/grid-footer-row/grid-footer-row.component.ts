@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
+import { Component, computed, inject, input } from "@angular/core";
 import { GridFooterTableCellDirective } from "../../directives/grid-footer-table-cell.directive";
 import { GridLockedCellDirective } from "../../directives/grid-locked-cell.directive";
 import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
@@ -16,7 +16,6 @@ import { GridFooterCellComponent } from "../grid-footer-cell/grid-footer-cell.co
     // eslint-disable-next-line @angular-eslint/component-selector
     selector: "tr[monaGridFooterRow]",
     templateUrl: "./grid-footer-row.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [GridFooterCellComponent, GridFooterTableCellDirective, GridLockedCellDirective, GridLogicalCellDirective],
     host: {
         "[class]": "rowClass()",

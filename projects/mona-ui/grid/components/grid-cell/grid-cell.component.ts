@@ -3,6 +3,7 @@ import { afterNextRender, Component, computed, ElementRef, inject, Injector, inp
 import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
 import { Column } from "../../models/Column";
 import { Row } from "../../models/Row";
+import { GRID_CELL_FOCUSABLE_SELECTOR } from "../../services/grid-cell-tab-stops";
 import { GridNavigationService } from "../../services/grid-navigation.service";
 import { GridService } from "../../services/grid.service";
 import {
@@ -13,8 +14,6 @@ import {
 } from "../../styles/grid.styles";
 import { GridCommandCellComponent } from "../grid-command-cell/grid-command-cell.component";
 import { GridEditorComponent, type GridEditorCommitTrigger } from "../grid-editor/grid-editor.component";
-
-const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [tabindex]";
 
 @Component({
     selector: "mona-grid-cell",
@@ -131,10 +130,6 @@ export class GridCellComponent {
         }
     }
 
-    protected onCellValueChange(value: unknown): void {
-        this.gridService.patchCellEdit(this.row().uid, this.column().field, value);
-    }
-
     /** Escape: cancels the cell or row edit. Focus stays in the editor when the cancel is prevented. */
     protected onEditCancel(): void {
         if (this.gridService.editContext() != null && this.gridService.cancelEdit(undefined, "escape")) {
@@ -189,7 +184,7 @@ export class GridCellComponent {
     }
 
     private focusInnerEditor(): void {
-        const target = this.#elementRef.nativeElement.querySelector(FOCUSABLE_TARGET_SELECTOR) as HTMLElement | null;
+        const target = this.#elementRef.nativeElement.querySelector(GRID_CELL_FOCUSABLE_SELECTOR) as HTMLElement | null;
         target?.focus();
     }
 

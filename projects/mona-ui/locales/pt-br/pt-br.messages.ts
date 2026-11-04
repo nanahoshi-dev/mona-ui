@@ -228,6 +228,7 @@ export const PT_BR_MESSAGES = {
         columns: "Colunas",
         columnsSelected: (count: number) =>
             count === 1 ? "1 coluna selecionada" : `${localizeNumber(count)} colunas selecionadas`,
+        commandColumnTitle: "Comandos",
         delete: "Excluir",
         deleteRowConfirmation: (rowNumber: number) =>
             `Tem certeza de que deseja excluir a linha ${localizeNumber(rowNumber)}?`,

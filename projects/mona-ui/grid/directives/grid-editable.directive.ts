@@ -26,6 +26,8 @@ export class GridEditableDirective {
      * @description Emitted before an edit operation is canceled; `reason` says why. Prevent it to keep editing,
      * except for `"removed"`, when the edited row left the data or the view.
      */
+    // The public name matches the other edit events (add, save, remove); renaming it would break bindings.
+    // eslint-disable-next-line @angular-eslint/no-output-native
     public readonly cancel = output<GridCancelEvent>();
 
     /**

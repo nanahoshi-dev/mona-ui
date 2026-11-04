@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
+import { Component, computed, inject, input } from "@angular/core";
 import { GridCellDirective } from "../../directives/grid-cell.directive";
 import { GridLockedCellDirective } from "../../directives/grid-locked-cell.directive";
 import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
@@ -15,7 +15,6 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
     // eslint-disable-next-line @angular-eslint/component-selector
     selector: "tr[monaGridGroupRow]",
     templateUrl: "./grid-group-row.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [GridCellDirective, GridLockedCellDirective, GridLogicalCellDirective, GridToggleComponent],
     host: {
         "[class]": "rowClass()",

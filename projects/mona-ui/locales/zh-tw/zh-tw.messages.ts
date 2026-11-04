@@ -223,6 +223,7 @@ export const ZH_TW_MESSAGES = {
         columnMoved: (column: string, position: number) => `${column} 已移至第 ${localizeNumber(position)} 位`,
         columns: "欄",
         columnsSelected: (count: number) => `已選取 ${localizeNumber(count)} 欄`,
+        commandColumnTitle: "命令",
         delete: "刪除",
         deleteRowConfirmation: (rowNumber: number) => `確定要刪除第 ${localizeNumber(rowNumber)} 個資料列嗎？`,
         deleteRowTitle: "刪除資料列？",

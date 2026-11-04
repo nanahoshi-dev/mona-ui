@@ -209,6 +209,7 @@
         "columnMoved": "Spalte {column} an Position {position} verschoben",
         "columns": "Spalten",
         "columnsSelected": "{count, plural, =1 {1 Spalte ausgewählt} other {# Spalten ausgewählt}}",
+        "commandColumnTitle": "Befehle",
         "delete": "Löschen",
         "deleteRowConfirmation": "Zeile {rowNumber} wirklich löschen?",
         "deleteRowTitle": "Zeile löschen?",

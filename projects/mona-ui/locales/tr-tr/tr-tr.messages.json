@@ -209,6 +209,7 @@
         "columnMoved": "{column} {position}. konuma taşındı",
         "columns": "Sütunlar",
         "columnsSelected": "{count} sütun seçildi",
+        "commandColumnTitle": "Komutlar",
         "delete": "Sil",
         "deleteRowConfirmation": "{rowNumber}. satırı silmek istediğinizden emin misiniz?",
         "deleteRowTitle": "Satır silinsin mi?",

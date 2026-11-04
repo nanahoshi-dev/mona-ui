@@ -209,6 +209,7 @@
         "columnMoved": "{column} 已移至第 {position} 位",
         "columns": "欄",
         "columnsSelected": "已選取 {count} 欄",
+        "commandColumnTitle": "命令",
         "delete": "刪除",
         "deleteRowConfirmation": "確定要刪除第 {rowNumber} 個資料列嗎？",
         "deleteRowTitle": "刪除資料列？",

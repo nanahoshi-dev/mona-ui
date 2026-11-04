@@ -209,6 +209,7 @@
         "columnMoved": "Столбец {column} перемещён на позицию {position}",
         "columns": "Столбцы",
         "columnsSelected": "Выбрано столбцов: {count}",
+        "commandColumnTitle": "Команды",
         "delete": "Удалить",
         "deleteRowConfirmation": "Удалить строку {rowNumber}?",
         "deleteRowTitle": "Удалить строку?",

@@ -12,8 +12,8 @@ export interface GridStateFilterDescriptor {
 }
 
 export interface GridStateCompositeFilterDescriptor {
-    logic: FilterLogic;
     filters: readonly (GridStateFilterDescriptor | GridStateCompositeFilterDescriptor)[];
+    logic: FilterLogic;
 }
 
 export interface GridStateSortDescriptor {

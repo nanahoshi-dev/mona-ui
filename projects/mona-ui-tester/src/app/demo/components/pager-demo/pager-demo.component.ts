@@ -286,6 +286,7 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
         <div class="flex flex-col gap-4 w-full">
             <span class="text-4xl font-semibold inline-flex items-center justify-center">{{ page() }}</span>
             <mona-pager
+                aria-label="Demo pages"
                 [firstLast]="firstLast()"
                 [navigable]="navigable()"
                 [pageInput]="pageInput()"

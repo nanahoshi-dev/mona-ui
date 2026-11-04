@@ -1,4 +1,4 @@
-@if (formField(); as field) {
+@if (formField()) {
     @if (column().editTemplate) {
         <ng-container
             [ngTemplateOutlet]="column().editTemplate"
@@ -7,52 +7,60 @@
         <div class="relative flex items-center w-full min-h-8">
             @switch (column().dataType) {
                 @case ("string") {
-                    <mona-text-box
-                        [class]="editorInputClass()"
-                        [inputAttributes]="{ autocomplete: 'off' }"
-                        [rounded]="'none'"
-                        [formField]="$any(field)"
-                        [aria-label]="editorLabel()"
-                        [aria-describedby]="errorDescribedBy()"
-                        (keydown)="onEditorKeydown($event)"
-                        (inputBlur)="commit.emit('blur')"
-                        [size]="'small'"></mona-text-box>
+                    @if (stringField(); as field) {
+                        <mona-text-box
+                            [class]="editorInputClass()"
+                            [inputAttributes]="{ autocomplete: 'off' }"
+                            [rounded]="'none'"
+                            [formField]="field"
+                            [aria-label]="editorLabel()"
+                            [aria-describedby]="errorDescribedBy()"
+                            (keydown)="onEditorKeydown($event)"
+                            (inputBlur)="commit.emit('blur')"
+                            [size]="'small'"></mona-text-box>
+                    }
                 }
                 @case ("number") {
-                    <mona-numeric-text-box
-                        [class]="editorInputClass()"
-                        [rounded]="'none'"
-                        [formField]="$any(field)"
-                        [aria-label]="editorLabel()"
-                        [aria-describedby]="errorDescribedBy()"
-                        (keydown)="onEditorKeydown($event)"
-                        (inputBlur)="commit.emit('blur')"
-                        [size]="'small'"></mona-numeric-text-box>
+                    @if (numberField(); as field) {
+                        <mona-numeric-text-box
+                            [class]="editorInputClass()"
+                            [rounded]="'none'"
+                            [formField]="field"
+                            [aria-label]="editorLabel()"
+                            [aria-describedby]="errorDescribedBy()"
+                            (keydown)="onEditorKeydown($event)"
+                            (inputBlur)="commit.emit('blur')"
+                            [size]="'small'"></mona-numeric-text-box>
+                    }
                 }
                 @case ("boolean") {
-                    <mona-check-box
-                        class="{{ editorInputClass() }} ms-2"
-                        [rounded]="'none'"
-                        [formField]="$any(field)"
-                        [aria-label]="editorLabel()"
-                        [aria-describedby]="errorDescribedBy()"
-                        (click)="onBooleanEditorClick()"
-                        (focusout)="onBooleanEditorFocusOut($event)"
-                        (pointerdown)="onBooleanEditorPointerDown()"
-                        (keydown)="onEditorKeydown($event)"></mona-check-box>
+                    @if (booleanField(); as field) {
+                        <mona-check-box
+                            class="{{ editorInputClass() }} ms-2"
+                            [rounded]="'none'"
+                            [formField]="field"
+                            [aria-label]="editorLabel()"
+                            [aria-describedby]="errorDescribedBy()"
+                            (click)="onBooleanEditorClick()"
+                            (focusout)="onBooleanEditorFocusOut($event)"
+                            (pointerdown)="onBooleanEditorPointerDown()"
+                            (keydown)="onEditorKeydown($event)"></mona-check-box>
+                    }
                 }
                 @case ("date") {
-                    <mona-date-picker
-                        [class]="editorInputClass()"
-                        [rounded]="'none'"
-                        [formField]="$any(field)"
-                        [aria-label]="editorLabel()"
-                        [aria-describedby]="errorDescribedBy()"
-                        (keydown)="onEditorKeydown($event)"
-                        (touch)="commit.emit('blur')"
-                        (opened)="onDatePickerOpen()"
-                        (closed)="onDatePickerClose()"
-                        size="small"></mona-date-picker>
+                    @if (dateField(); as field) {
+                        <mona-date-picker
+                            [class]="editorInputClass()"
+                            [rounded]="'none'"
+                            [formField]="field"
+                            [aria-label]="editorLabel()"
+                            [aria-describedby]="errorDescribedBy()"
+                            (keydown)="onEditorKeydown($event)"
+                            (touch)="commit.emit('blur')"
+                            (opened)="onDatePickerOpen()"
+                            (closed)="onDatePickerClose()"
+                            size="small"></mona-date-picker>
+                    }
                 }
             }
             @if (hasFieldError()) {

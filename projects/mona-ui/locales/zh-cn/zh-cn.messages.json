@@ -209,6 +209,7 @@
         "columnMoved": "{column} 已移至第 {position} 位",
         "columns": "列",
         "columnsSelected": "已选择 {count} 列",
+        "commandColumnTitle": "命令",
         "delete": "删除",
         "deleteRowConfirmation": "确定要删除第 {rowNumber} 行吗？",
         "deleteRowTitle": "删除行？",

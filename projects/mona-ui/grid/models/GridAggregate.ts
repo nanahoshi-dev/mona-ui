@@ -1,9 +1,9 @@
 import type { ImmutableDictionary } from "@mirei/ts-collections";
 
 export interface GridAggregateBucket {
-    readonly field: string;
     readonly avg?: number;
     readonly count?: number;
+    readonly field: string;
     readonly max?: unknown;
     readonly min?: unknown;
     readonly sum?: number;

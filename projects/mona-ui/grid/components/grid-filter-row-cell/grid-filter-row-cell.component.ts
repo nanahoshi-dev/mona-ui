@@ -1,6 +1,5 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
-    ChangeDetectionStrategy,
     Component,
     computed,
     DestroyRef,
@@ -64,7 +63,6 @@ const VALUELESS_OPERATORS: ReadonlySet<FilterOperators> = new Set<FilterOperator
 @Component({
     selector: "mona-grid-filter-row-cell",
     templateUrl: "./grid-filter-row-cell.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         FormsModule,
         TextBoxComponent,

@@ -224,6 +224,7 @@ export const TR_TR_MESSAGES = {
         columnMoved: (column: string, position: number) => `${column} ${localizeNumber(position)}. konuma taşındı`,
         columns: "Sütunlar",
         columnsSelected: (count: number) => `${localizeNumber(count)} sütun seçildi`,
+        commandColumnTitle: "Komutlar",
         delete: "Sil",
         deleteRowConfirmation: (rowNumber: number) =>
             `${localizeNumber(rowNumber)}. satırı silmek istediğinizden emin misiniz?`,

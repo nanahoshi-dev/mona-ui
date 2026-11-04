@@ -1,15 +1,5 @@
 import { FocusTrapFactory } from "@angular/cdk/a11y";
-import {
-    ChangeDetectionStrategy,
-    Component,
-    ComponentRef,
-    computed,
-    ElementRef,
-    inject,
-    input,
-    output,
-    viewChild
-} from "@angular/core";
+import { Component, ComponentRef, computed, ElementRef, inject, input, output, viewChild } from "@angular/core";
 import { LucideFunnel } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { DataType } from "@nanahoshi/mona-ui/common";
@@ -28,7 +18,6 @@ import { GridService } from "../../services/grid.service";
 @Component({
     selector: "mona-grid-filter-menu",
     templateUrl: "./grid-filter-menu.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [ButtonDirective, LucideFunnel]
 })
 export class GridFilterMenuComponent {

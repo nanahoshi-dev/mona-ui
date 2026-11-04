@@ -954,7 +954,7 @@ describe("GridService", () => {
             expect(service.isRowSelected(second)).toBe(true);
         });
 
-        it("derives selectedRows only from currently available rows", () => {
+        it("keeps the keys of selected rows that leave the data", () => {
             service.selectBy.set("id");
             service.setRows(createRowData(3));
             const [first, second] = service.rows().toArray();
@@ -964,7 +964,7 @@ describe("GridService", () => {
 
             service.setRows(createRowData(1));
 
-            expect(service.selectedRows().size()).toBe(1);
+            expect(service.isRowSelected(service.rows().first())).toBe(true);
             expect(service.selectedKeys().size()).toBe(2);
         });
     });

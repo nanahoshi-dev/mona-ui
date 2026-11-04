@@ -13,7 +13,7 @@ export class GridSelectableDirective {
     readonly #destroyRef = inject(DestroyRef);
     readonly #gridService = inject(GridService);
     /**
-     * @description Enables row selection on the grid. Pass a `GridSelectableOptions` object to configure single or multiple selection mode. Selection is on unless the object sets `enabled: false`.
+     * @description Enables row selection on the grid. Pass a `SelectableOptions` object to configure single or multiple selection mode. Selection is on unless the object sets `enabled: false`.
      * @default ""
      */
     public readonly options = input<SelectableOptions | "">("", {

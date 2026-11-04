@@ -19,6 +19,7 @@ export const GRID_DEFAULT_MESSAGES = {
     columnMoved: (column: string, position: number) => `${column} moved to position ${localizeNumber(position)}`,
     columns: "Columns",
     columnsSelected: (count: number) => `${localizeNumber(count)} selected columns`,
+    commandColumnTitle: "Commands",
     delete: "Delete",
     deleteRowConfirmation: (rowNumber: number) => `Are you sure you want to delete row ${localizeNumber(rowNumber)}?`,
     deleteRowTitle: "Delete row?",

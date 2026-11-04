@@ -26,8 +26,9 @@ export class GridStatePersistenceDirective {
     public readonly state = model<GridState | null>(null);
 
     public constructor() {
+        // Applies the bound state once the columns exist; it reads no layout.
         afterNextRender({
-            read: () => {
+            write: () => {
                 if (this.#isEnabled()) {
                     const result = this.loadState(this.state());
                     if (result.status === "applied") {

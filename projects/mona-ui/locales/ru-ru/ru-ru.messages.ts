@@ -234,6 +234,7 @@ export const RU_RU_MESSAGES = {
             `Столбец ${column} перемещён на позицию ${localizeNumber(position)}`,
         columns: "Столбцы",
         columnsSelected: (count: number) => `Выбрано столбцов: ${localizeNumber(count)}`,
+        commandColumnTitle: "Команды",
         delete: "Удалить",
         deleteRowConfirmation: (rowNumber: number) => `Удалить строку ${localizeNumber(rowNumber)}?`,
         deleteRowTitle: "Удалить строку?",

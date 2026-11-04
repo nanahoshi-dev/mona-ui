@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
+import { Component, computed, inject, input } from "@angular/core";
 import { twMerge } from "tailwind-merge";
 import { GridCellDirective } from "../../directives/grid-cell.directive";
 import { GridLockedCellDirective } from "../../directives/grid-locked-cell.directive";
@@ -18,7 +18,6 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
     selector: "tr[monaGridRow]",
     exportAs: "monaGridRow",
     templateUrl: "./grid-row.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         GridCellComponent,
         GridCellDirective,

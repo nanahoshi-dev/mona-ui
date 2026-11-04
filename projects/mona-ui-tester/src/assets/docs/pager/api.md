@@ -94,7 +94,7 @@ protected onPageSizeSelect(event: PageSizeChangeEvent): void {
 - An invalid `skip` is corrected to the start of the page that holds it: a skip past the last page (the total shrank, a stale server skip) moves to the last page, and a skip between page boundaries (the host changed `pageSize`) moves to the start of its page. The correction updates `[(skip)]` and is reported through `pageChange`.
 - A page-size change keeps the first item of the current page in view: at `skip` 40 with 10 per page, choosing 20 gives `skip` 40 (page 3). It always emits `pageChange` with the new `take`.
 - Values below the minimum are ignored: `pageSize` and `visiblePages` count as at least 1, `skip` and `total` as at least 0.
-- Setting `pageSizeValues` to `false` or an empty array removes the page-size dropdown from the layout entirely. The page-size dropdown is not shown in `"input"` mode.
+- Setting `pageSizeValues` to `false` or an empty array removes the page-size dropdown from the layout entirely. In `"input"` mode the page-size dropdown is not shown, except in the responsive compact layout below 480px, which shows it and leaves out the page input box.
 
 ## Accessibility & Forms Integration
 

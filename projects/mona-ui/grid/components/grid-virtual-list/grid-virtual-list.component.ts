@@ -2,7 +2,6 @@ import { GRID_DEFAULT_VIRTUAL_ROW_HEIGHT } from "../../constants/grid-virtual-sc
 import { CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport } from "@angular/cdk/scrolling";
 import {
     afterNextRender,
-    ChangeDetectionStrategy,
     Component,
     computed,
     DestroyRef,
@@ -48,7 +47,6 @@ import { GridRowComponent } from "../grid-row/grid-row.component";
         GridRowComponent
     ],
     templateUrl: "./grid-virtual-list.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         "[class]": "baseClass()",
         "[style.--mona-grid-row-height]": "gridService.virtualScrollOptions().height + 'px'"

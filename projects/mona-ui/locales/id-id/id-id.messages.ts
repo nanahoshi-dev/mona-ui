@@ -224,6 +224,7 @@ export const ID_ID_MESSAGES = {
             `${column} dipindahkan ke posisi ${localizeNumber(position)}`,
         columns: "Kolom",
         columnsSelected: (count: number) => `${localizeNumber(count)} kolom dipilih`,
+        commandColumnTitle: "Perintah",
         delete: "Hapus",
         deleteRowConfirmation: (rowNumber: number) => `Anda yakin ingin menghapus baris ${localizeNumber(rowNumber)}?`,
         deleteRowTitle: "Hapus baris?",

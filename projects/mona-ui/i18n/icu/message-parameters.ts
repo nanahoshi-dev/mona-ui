@@ -245,6 +245,7 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         ],
         columns: null,
         columnsSelected: [{ name: "count", type: "number" }],
+        commandColumnTitle: null,
         delete: null,
         deleteRowConfirmation: [{ name: "rowNumber", type: "number" }],
         deleteRowTitle: null,

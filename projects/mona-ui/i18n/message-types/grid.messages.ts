@@ -13,6 +13,7 @@ export interface MonaGridMessages {
     columnMoved(column: string, position: number): string;
     readonly columns: string;
     columnsSelected(count: number): string;
+    readonly commandColumnTitle: string;
     readonly delete: string;
     deleteRowConfirmation(rowNumber: number): string;
     readonly deleteRowTitle: string;

@@ -224,6 +224,7 @@ export const KO_KR_MESSAGES = {
             `${column}을(를) ${localizeNumber(position)}번째 위치로 이동했습니다`,
         columns: "열",
         columnsSelected: (count: number) => `선택한 열: ${localizeNumber(count)}개`,
+        commandColumnTitle: "명령",
         delete: "삭제",
         deleteRowConfirmation: (rowNumber: number) => `${localizeNumber(rowNumber)}행을 삭제하시겠습니까?`,
         deleteRowTitle: "행 삭제?",

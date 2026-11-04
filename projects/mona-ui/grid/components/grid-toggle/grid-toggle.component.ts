@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, input, model } from "@angular/core";
+import { Component, computed, input, model } from "@angular/core";
 import { LucideChevronDown, LucideChevronRight, LucideDynamicIcon, LucideMinus, LucidePlus } from "@lucide/angular";
 
 @Component({
     selector: "mona-grid-toggle",
     imports: [LucideDynamicIcon],
-    templateUrl: "./grid-toggle.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./grid-toggle.component.html"
 })
 export class GridToggleComponent {
     protected readonly collapseIcon = computed(() => {

@@ -209,6 +209,7 @@
         "columnMoved": "{column}을(를) {position}번째 위치로 이동했습니다",
         "columns": "열",
         "columnsSelected": "선택한 열: {count}개",
+        "commandColumnTitle": "명령",
         "delete": "삭제",
         "deleteRowConfirmation": "{rowNumber}행을 삭제하시겠습니까?",
         "deleteRowTitle": "행 삭제?",

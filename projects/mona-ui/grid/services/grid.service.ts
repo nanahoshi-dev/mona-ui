@@ -525,12 +525,6 @@ export class GridService {
     public readonly selectedKeys = signal(ImmutableSet.create());
     public readonly selectedKeysChange$ = toObservable(this.selectedKeys);
     public readonly selectedKeysLoad$ = new BehaviorSubject<ImmutableSet<unknown>>(ImmutableSet.create());
-    public readonly selectedRows = computed(() => {
-        const selectedKeys = this.selectedKeys();
-        return this.rows()
-            .where(row => selectedKeys.contains(this.getRowSelectionKey(row)))
-            .toImmutableSet();
-    });
     public readonly selectionColumnVisible = computed(() => {
         const options = this.selectableOptions();
         return options.enabled === true && options.showCheckboxes === true;
@@ -1213,22 +1207,6 @@ export class GridService {
         }
         const devicePixelRatio = this.#document.defaultView?.devicePixelRatio ?? 1;
         return Math.max(0, Math.round(width * devicePixelRatio) / devicePixelRatio);
-    }
-
-    public patchAddCell(field: string, value: unknown): void {
-        const session = this.#editSession();
-        if (session?.operation !== "create") {
-            return;
-        }
-        this.patchSessionField(session, field, value);
-    }
-
-    public patchCellEdit(rowUid: string, field: string, value: unknown): void {
-        const session = this.#editSession();
-        if (session?.operation !== "update" || session.rowUid !== rowUid) {
-            return;
-        }
-        this.patchSessionField(session, field, value);
     }
 
     /** Ends an update whose row left the data or the view; the cancel can't be prevented. */
@@ -2209,10 +2187,6 @@ export class GridService {
         const unlockedColumns = columns.filter(column => this.getColumnLockBucket(column) === "unlocked");
         const rightLockedColumns = columns.filter(column => this.getColumnLockBucket(column) === "right");
         return [...leftLockedColumns, ...unlockedColumns, ...rightLockedColumns];
-    }
-
-    private patchSessionField(session: GridEditSession, field: string, value: unknown): void {
-        session.model.update(rowData => ({ ...rowData, [field]: value }));
     }
 
     private reconcileColumn(config: ColumnConfig, previous: Column | undefined): Column {

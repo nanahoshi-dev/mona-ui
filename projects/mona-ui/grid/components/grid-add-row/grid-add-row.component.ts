@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from "@angular/core";
+import { Component, computed, inject } from "@angular/core";
 import { GridCellDirective } from "../../directives/grid-cell.directive";
 import { GridLockedCellDirective } from "../../directives/grid-locked-cell.directive";
 import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
-import type { Column } from "../../models/Column";
 import type { StructuralColumnKind } from "../../models/StructuralColumn";
 import { GridNavigationService } from "../../services/grid-navigation.service";
 import { GridService } from "../../services/grid.service";
@@ -15,7 +14,6 @@ import { GridEditorComponent, type GridEditorCommitTrigger } from "../grid-edito
     // eslint-disable-next-line @angular-eslint/component-selector
     selector: "tr[monaGridAddRow]",
     templateUrl: "./grid-add-row.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         GridCellDirective,
         GridCommandCellComponent,
@@ -57,9 +55,5 @@ export class GridAddRowComponent {
         if (trigger === "enter" && this.gridService.saveAddRow()) {
             this.#gridNavigationService.refocusAfterRender();
         }
-    }
-
-    protected onValueChange(column: Column, value: unknown): void {
-        this.gridService.patchAddCell(column.field, value);
     }
 }

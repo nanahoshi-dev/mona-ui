@@ -408,23 +408,6 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
     }
 
     private setFilterValues(values: FilterMenuValue): void {
-        type TargetType = string | number | Date | boolean | null;
-        let filterValues: [TargetType, TargetType];
-
-        switch (this.type()) {
-            case "string":
-                filterValues = [values.value1 ?? "", values.value2 ?? ""];
-                break;
-            case "number":
-            case "date":
-            case "boolean":
-                filterValues = [values.value1 ?? null, values.value2 ?? null];
-                break;
-            default:
-                filterValues = [null, null];
-                break;
-        }
-
         const items = this.operatorItems();
         this.#chosenOperators = [values.operator1 != null, values.operator2 != null];
         this.selectedFilterMenuDataItemList.set([
@@ -432,19 +415,39 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
             items.find(f => f.value === values.operator2) ?? undefined
         ]);
 
+        // Values the menu's inputs can't show are left empty.
+        const { value1, value2 } = values;
         switch (this.type()) {
-            case "string":
-                this.stringFilterValues.set(filterValues as [string, string]);
+            case "string": {
+                const text = (value: unknown): string => (value == null ? "" : String(value));
+                this.stringFilterValues.set([text(value1), text(value2)]);
                 break;
-            case "number":
-                this.numberFilterValues.set(filterValues as [number, number]);
+            }
+            case "number": {
+                const num = (value: unknown): number | null => (typeof value === "number" ? value : null);
+                this.numberFilterValues.set([num(value1), num(value2)]);
                 break;
-            case "date":
-                this.dateFilterValues.set(filterValues as [Date, Date]);
+            }
+            case "date": {
+                // A date from saved state may be text or a time stamp.
+                const date = (value: unknown): Date | null => {
+                    if (value instanceof Date) {
+                        return value;
+                    }
+                    if (typeof value !== "string" && typeof value !== "number") {
+                        return null;
+                    }
+                    const parsed = new Date(value);
+                    return Number.isNaN(parsed.getTime()) ? null : parsed;
+                };
+                this.dateFilterValues.set([date(value1), date(value2)]);
                 break;
-            case "boolean":
-                this.#booleanFilterValues = filterValues as [boolean, boolean];
+            }
+            case "boolean": {
+                const bool = (value: unknown): boolean | null => (typeof value === "boolean" ? value : null);
+                this.#booleanFilterValues = [bool(value1), bool(value2)];
                 break;
+            }
             default:
                 break;
         }

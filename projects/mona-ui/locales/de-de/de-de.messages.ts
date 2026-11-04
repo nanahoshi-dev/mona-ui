@@ -227,6 +227,7 @@ export const DE_DE_MESSAGES = {
         columns: "Spalten",
         columnsSelected: (count: number) =>
             count === 1 ? "1 Spalte ausgewählt" : `${localizeNumber(count)} Spalten ausgewählt`,
+        commandColumnTitle: "Befehle",
         delete: "Löschen",
         deleteRowConfirmation: (rowNumber: number) => `Zeile ${localizeNumber(rowNumber)} wirklich löschen?`,
         deleteRowTitle: "Zeile löschen?",

@@ -136,8 +136,9 @@ export class GridLogicalCellDirective {
     public readonly toggleExpand = output();
 
     public constructor() {
+        // Registering the rendered cell writes the navigation registry's signals.
         afterRenderEffect({
-            read: () => {
+            mixedReadWrite: () => {
                 const data = this.#cellData();
                 // Cached virtual views must not re-register in response to another view's registry writes.
                 untracked(() => {

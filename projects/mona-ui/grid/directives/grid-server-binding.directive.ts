@@ -1,4 +1,4 @@
-import { DestroyRef, Directive, effect, inject, input, output, untracked } from "@angular/core";
+import { booleanAttribute, DestroyRef, Directive, effect, inject, input, output, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { GridDataState } from "../models/GridDataState";
 import { GridService } from "../services/grid.service";
@@ -12,7 +12,7 @@ export class GridServerBindingDirective {
     public readonly dataStateChange = output<GridDataState>();
 
     /** @description Shows a loading overlay while the application requests server data. */
-    public readonly loading = input(false);
+    public readonly loading = input(false, { transform: booleanAttribute });
 
     /** @description Zero-based offset of the supplied server page. External changes do not request data. */
     public readonly skip = input(0);

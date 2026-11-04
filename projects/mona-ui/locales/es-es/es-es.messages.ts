@@ -226,6 +226,7 @@ export const ES_ES_MESSAGES = {
         columns: "Columnas",
         columnsSelected: (count: number) =>
             count === 1 ? "1 columna seleccionada" : `${localizeNumber(count)} columnas seleccionadas`,
+        commandColumnTitle: "Comandos",
         delete: "Eliminar",
         deleteRowConfirmation: (rowNumber: number) =>
             `¿Seguro que deseas eliminar la fila ${localizeNumber(rowNumber)}?`,

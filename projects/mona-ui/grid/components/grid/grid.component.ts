@@ -19,9 +19,9 @@ import {
 } from "@lucide/angular";
 import { NgTemplateOutlet } from "@angular/common";
 import {
-    afterNextRender,
     afterEveryRender,
-    ChangeDetectionStrategy,
+    afterNextRender,
+    booleanAttribute,
     Component,
     computed,
     contentChild,
@@ -118,7 +118,6 @@ const TOOLBAR_ITEM_SELECTOR =
 @Component({
     selector: "mona-grid",
     templateUrl: "./grid.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [GridService, GridNavigationService, FilterService],
     imports: [
         LucideArrowDown,
@@ -448,7 +447,7 @@ export class GridComponent<T> implements GridVariantInput {
      * If set to `true`, the pager will be displayed as a dropdown when the grid width gets smaller.
      * @default true
      */
-    public readonly responsivePager = input(true);
+    public readonly responsivePager = input(true, { transform: booleanAttribute });
 
     /**
      * @description The border radius of the grid.
@@ -508,8 +507,9 @@ export class GridComponent<T> implements GridVariantInput {
             scrollElement: () => this.gridService.bodyScrollElement(),
             stickyInset: () => this.gridService.stickyInset()
         });
+        // Measures the first layout and stores it in signals: a read that writes.
         afterNextRender({
-            read: () => {
+            mixedReadWrite: () => {
                 this.gridService.gridHeaderElement.set(this.gridHeaderElement().nativeElement);
                 this.gridService.headerTableElement.set(this.gridHeaderTableElement().nativeElement);
                 this.setInitialCalculatedWidthOfColumns();
@@ -987,7 +987,8 @@ export class GridComponent<T> implements GridVariantInput {
             if (shouldRestoreGridFocus) {
                 afterNextRender(
                     {
-                        read: () => {
+                        // Moves focus, which writes to the DOM.
+                        mixedReadWrite: () => {
                             // An open editor owns its own focus; restoring the logical cell would steal it.
                             if (this.gridService.editContext() != null) {
                                 return;

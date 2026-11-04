@@ -1,5 +1,16 @@
-import { Component, computed, contentChild, forwardRef, input, TemplateRef } from "@angular/core";
+import {
+    booleanAttribute,
+    Component,
+    computed,
+    contentChild,
+    forwardRef,
+    inject,
+    input,
+    TemplateRef
+} from "@angular/core";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { v4 } from "uuid";
+import { GRID_DEFAULT_MESSAGES } from "../../i18n/grid.default-messages";
 import { GridCellTemplateDirective } from "../../directives/grid-cell-template.directive";
 import { Column } from "../../models/Column";
 import { GRID_COLUMN_DEFINITION, GridColumnDefinition } from "../../models/GridColumnDefinition";
@@ -43,23 +54,24 @@ export class GridCommandColumnComponent implements GridColumnDefinition {
             sortable: false,
             sortIndex: null,
             stateKey,
-            title: this.title(),
+            title: this.title() ?? this.#messages().commandColumnTitle,
             titleTemplate: null,
             width: this.width()
         };
     });
     readonly #columnId = v4();
+    readonly #messages = inject(MonaI18nService).componentMessages("grid", GRID_DEFAULT_MESSAGES);
     private readonly commandTemplate = contentChild(GridCellTemplateDirective, { read: TemplateRef });
 
     /**
      * @description Whether this command column is hidden from the rendered grid.
      */
-    public readonly hidden = input(false);
+    public readonly hidden = input(false, { transform: booleanAttribute });
 
     /**
      * @description Whether this command column remains fixed while the grid scrolls horizontally.
      */
-    public readonly locked = input(false);
+    public readonly locked = input(false, { transform: booleanAttribute });
 
     /**
      * @description The side of the grid where this locked command column is fixed.
@@ -79,7 +91,7 @@ export class GridCommandColumnComponent implements GridColumnDefinition {
     /**
      * @description Whether the built-in remove command asks for confirmation before emitting remove.
      */
-    public readonly removeConfirmation = input(false);
+    public readonly removeConfirmation = input(false, { transform: booleanAttribute });
 
     /**
      * @description A stable key used to persist state for this command column.
@@ -87,9 +99,11 @@ export class GridCommandColumnComponent implements GridColumnDefinition {
     public readonly stateKey = input<string | null>("commands");
 
     /**
-     * @description The title displayed in the command column header.
+     * @description The title displayed in the command column header. Without one, the localized
+     * `commandColumnTitle` message ("Commands").
+     * @default null
      */
-    public readonly title = input<string>("Commands");
+    public readonly title = input<string | null>(null);
 
     /**
      * @description The fixed width of this command column in pixels.

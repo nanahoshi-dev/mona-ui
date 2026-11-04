@@ -209,6 +209,7 @@
         "columnMoved": "تم نقل {column} إلى الموضع {position}",
         "columns": "الأعمدة",
         "columnsSelected": "عدد الأعمدة المحددة: {count}",
+        "commandColumnTitle": "الأوامر",
         "delete": "حذف",
         "deleteRowConfirmation": "هل تريد حذف الصف {rowNumber}؟",
         "deleteRowTitle": "حذف الصف؟",

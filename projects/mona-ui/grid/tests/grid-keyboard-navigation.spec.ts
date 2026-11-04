@@ -69,8 +69,8 @@ interface GridKeyboardRow {
     `
 })
 class GridKeyboardHostComponent {
-    public readonly editableOptions = signal<EditableOptions>({ enabled: true, mode: "cell" });
     public readonly customEditTemplate = signal(false);
+    public readonly editableOptions = signal<EditableOptions>({ enabled: true, mode: "cell" });
     public readonly rowKey = signal<string | null>("id");
     public readonly rows = signal<GridKeyboardRow[]>([
         { active: true, amount: 42, id: 1, name: "Jane" },

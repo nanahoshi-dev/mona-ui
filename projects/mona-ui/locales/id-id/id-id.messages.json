@@ -209,6 +209,7 @@
         "columnMoved": "{column} dipindahkan ke posisi {position}",
         "columns": "Kolom",
         "columnsSelected": "{count} kolom dipilih",
+        "commandColumnTitle": "Perintah",
         "delete": "Hapus",
         "deleteRowConfirmation": "Anda yakin ingin menghapus baris {rowNumber}?",
         "deleteRowTitle": "Hapus baris?",

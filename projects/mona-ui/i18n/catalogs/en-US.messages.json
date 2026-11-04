@@ -209,6 +209,7 @@
         "columnMoved": "{column} moved to position {position}",
         "columns": "Columns",
         "columnsSelected": "{count} selected columns",
+        "commandColumnTitle": "Commands",
         "delete": "Delete",
         "deleteRowConfirmation": "Are you sure you want to delete row {rowNumber}?",
         "deleteRowTitle": "Delete row?",

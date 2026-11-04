@@ -1131,7 +1131,7 @@
     "selector": "\"mona-grid[monaGridSelectable]\"",
     "inputs": [
       {
-        "description": "Enables row selection on the grid. Pass a `GridSelectableOptions` object to configure single or multiple selection mode. Selection is on unless the object sets `enabled: false`.",
+        "description": "Enables row selection on the grid. Pass a `SelectableOptions` object to configure single or multiple selection mode. Selection is on unless the object sets `enabled: false`.",
         "kind": "input",
         "name": "options",
         "type": "SelectableOptions | \"\"",
@@ -9599,7 +9599,7 @@
         "defaultValue": "true"
       },
       {
-        "description": "Formats the displayed cell value. String formats apply to date, datetime, and time columns; formatter functions replace the cell text.",
+        "description": "Formats the displayed cell value. String formats apply to date columns and their date filters; formatter functions replace the cell text.",
         "kind": "input",
         "name": "format",
         "type": "ColumnFormat | null"
@@ -9781,11 +9781,11 @@
         "defaultValue": "\"commands\""
       },
       {
-        "description": "The title displayed in the command column header.",
+        "description": "The title displayed in the command column header. Without one, the localized\r\n`commandColumnTitle` message (\"Commands\").",
         "kind": "input",
         "name": "title",
-        "type": "string",
-        "defaultValue": "\"Commands\""
+        "type": "string | null",
+        "defaultValue": "null"
       },
       {
         "description": "The fixed width of this command column in pixels.",

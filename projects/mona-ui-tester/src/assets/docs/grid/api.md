@@ -1,6 +1,6 @@
 ## Overview & Component Selection
 
-The grid renders `data` as rows against a set of `mona-grid-column` (and optionally `mona-grid-command-column`) definitions projected as content into `<mona-grid>`. Paging is always active; every other behavior — sorting, filtering, grouping, row selection, inline editing, column resizing, column reordering, virtualization, state persistence, and CSV export — is opt-in through a companion attribute directive applied to the same `mona-grid` host element (for example `monaGridSortable`, `monaGridEditable`). `GridComponent` itself exposes no outputs; every event a consumer listens for (`columnSort`, `cellEdit`, `columnResize`, and so on) is emitted by the directive that enables the corresponding feature, not by `mona-grid` directly.
+The grid renders `data` as rows against a set of `mona-grid-column` (and optionally `mona-grid-command-column`) definitions projected as content into `<mona-grid>`. Paging is always active; every other behavior — sorting, filtering, grouping, row selection, inline editing, column resizing, column reordering, virtualization, state persistence, and CSV export — is opt-in through a companion attribute directive applied to the same `mona-grid` host element (for example `monaGridSortable`, `monaGridEditable`). `mona-grid` reports only paging and detail-row changes (`pageChange`, `skipChange`, `pageSizeChange`, `expandedKeysChange`); every feature event (`columnSort`, `cellEdit`, `columnResize`, and so on) is emitted by the directive that enables the feature.
 
 Columns are a flat, content-projected list — there is no column-group or nested-column concept.
 
@@ -94,7 +94,7 @@ Import `GridServerBindingDirective` and `GridDataState` from `@nanahoshi/mona-ui
 </mona-grid>
 ```
 
-`dataStateChange` supplies `{ skip, take, sort, filter }` once for a user page, page-size, sort, or filter action. Page-size, sort, and filter actions start at `skip: 0`. Sort order follows multi-column sort priority. Bindings from the parent synchronize silently, and ordinary directive creation does not emit an initial request: load the initial page yourself.
+`dataStateChange` supplies `{ skip, take, sort, filter }` once for a user page, page-size, sort, or filter action. Sort and filter actions start at `skip: 0`; a page-size change keeps the first row of the page in view. Sort order follows multi-column sort priority. Bindings from the parent synchronize silently, and ordinary directive creation does not emit an initial request: load the initial page yourself.
 
 The application owns HTTP requests, errors, and stale-response handling. For example, inject your repository and ignore responses from an older request:
 
@@ -150,7 +150,7 @@ Server mode has these boundaries:
 - Editing events continue to describe loaded rows; the application saves changes to its server.
 - Row reordering is disabled with an accessible, localized server-binding reason.
 - `monaGridServerBinding` and enabled `monaGridVirtualScroll` cannot be combined; enabling both throws an error. This directive provides page-based loading rather than remote virtual scrolling.
-- State persistence restores sort, filter, and optionally page size, then emits one consolidated refresh at `skip: 0`. The offset is not persisted. When providing a saved initial state, use that refresh to load the restored query instead of starting a competing initial request.
+- State persistence restores sort, filter, and page size (unless `persistPageSize` is `false`), then emits one consolidated refresh at `skip: 0`. The offset is not persisted. When providing a saved initial state, use that refresh to load the restored query instead of starting a competing initial request.
 
 ### Row Sizing
 
@@ -307,6 +307,8 @@ Selection state always lives in `selectedKeys`. Row clicks and checkbox clicks m
 </mona-grid>
 ```
 
+While virtual scrolling is on, the grid shows no pager and no aggregate footer, and rejects detail rows and server binding.
+
 ### Editing
 
 `monaGridEditable` turns on inline editing, backed exclusively by Angular Signal Forms — see [Form Interaction](#form-interaction). `mode` chooses whether editing commits per cell or per row; `schema` validates the row being edited.
@@ -427,7 +429,7 @@ Row reordering works with pagination (moving rows within the current page), mast
 
 ### State Persistence
 
-`monaGridStatePersistence` captures and restores column order/width/visibility, sort, filter, and group state through the two-way bindable `state` model.
+`monaGridStatePersistence` captures and restores column order/width/visibility, sort, filter, group state and the page size (unless `persistPageSize` is `false`) through the two-way bindable `state` model.
 
 ```typescript
 protected readonly state = signal<GridState | null>(null);
@@ -450,7 +452,7 @@ Persist `state()` to storage (for example in an `effect`) to restore it on the n
 
 ### Aggregates and Footer
 
-Set `aggregate` on a `mona-grid-column` (`"sum"`, `"avg"`, `"count"`, `"min"`, `"max"`, or `"custom"`) to show a computed value in the grid footer. Enable `monaGridGroupable`'s `showFooter` option to show the same aggregate per group. `"custom"` requires a `monaGridFooterTemplate` (and, for grouped data, a `monaGridGroupFooterTemplate`) to render the value, since the grid does not compute a value for it.
+Set `aggregate` on a `mona-grid-column` (`"sum"`, `"avg"`, `"count"`, `"min"`, `"max"`, or `"custom"`) to show a computed value in the grid footer. Grouped rows show the same aggregate under each expanded group; `monaGridGroupable`'s `showFooter` option also keeps it under collapsed groups. `"custom"` requires a `monaGridFooterTemplate` (and, for grouped data, a `monaGridGroupFooterTemplate`) to render the value, since the grid does not compute a value for it.
 
 Aggregates cover the whole view (every filtered row, not only the current page), in the footer and in each group footer; with server binding they cover the loaded page. `count` counts values that aren't empty; `sum` and `avg` use numbers and numeric text (`"12.5"`), and the sum of no numbers is `0`.
 
@@ -547,7 +549,7 @@ Grid cells use a roving `tabindex`: the cell that last had focus has `tabindex="
 | `aria-label`       | On the column resize handle                                | `"Resize {column}"` (`resizeColumn` message)                       |
 | `aria-valuenow`    | On the column resize handle                                | The column width in pixels, with `aria-valuemin`/`aria-valuemax`   |
 | `aria-expanded`    | On the detail toggle button                                | Reflects whether the detail row is open                            |
-| `aria-label`       | On the built-in command buttons                            | `"Save row"`, `"Cancel row edit"`, `"Edit row"`, or `"Remove row"` |
+| `aria-label`       | On the built-in command buttons                            | Names the row: `"Edit row 3"`, `"Remove row 3"`, `"Save row 3"`, `"Cancel editing row 3"`, or the `commandAriaLabel` option's text |
 
 Moving a column or grouping by one from the keyboard is announced through a polite live region (`columnMoved` and `columnGrouped` messages). The grid element has no name of its own: set `ariaLabel` or `ariaLabelledBy`.
 
@@ -574,6 +576,7 @@ Inline editing is built exclusively on Angular Signal Forms: the built-in editor
 | `pageSizeValues`  | `number[]`                                 | `[]`        | The page sizes that the user can select from, shown in the page size dropdown.                                                                    |
 | `resizeMethod`    | `ResizeMethod`                             | `"fitView"` | The method used to set initial column widths — see [`resizeMethod` controls initial column widths](#resizemethod-controls-initial-column-widths). |
 | `responsivePager` | `boolean`                                  | `true`      | Whether the pager collapses into a dropdown when the grid narrows.                                                                                |
+| `rowClass`        | `GridRowClass<T> \| null`                  | `null`      | Classes for a data row, from a string, a list, or a function of the row's item; not for group, footer or detail rows. |
 | `rowKey`          | `GridKeySelector<unknown> \| null`         | `null`      | Field name or selector used to derive a stable identity for each row; the resolved value must be unique within the grid data.                     |
 | `skip`            | `number`                                   | `0`         | Two-way bindable. The number of rows before the current page in client paging; with server binding, the directive's `skip` sets the page. |
 | `rounded`         | `"none" \| "small" \| "medium" \| "large"` | `"medium"`  | The border radius of the grid.                                                                                                                    |
@@ -602,12 +605,14 @@ Feature events come from the companion directives — see [`GridComponent` event
 | `aggregate`      | `AggregateFunction \| null` | `null`      | The aggregate shown in the grid footer for this column.                                                                                |
 | `editable`       | `boolean \| null`           | `null`      | Whether this column is editable when the grid is in edit mode. Unset, every column is editable except the `rowKey` field.              |
 | `field`          | `string`                    | `""`        | The field name of the data property to display in this column.                                                                         |
-| `format`         | `ColumnFormat \| null`      | `undefined` | Formats the displayed cell value. String formats apply to date, datetime, and time columns; a formatter function receives `(value, row, column)` and its result replaces the cell text. |
+| `filterable`     | `boolean`                   | `true`      | Whether this column can be filtered when grid filtering is enabled. |
+| `format`         | `ColumnFormat \| null`      | `undefined` | Formats the displayed cell value. String formats apply to date columns, and also set the date format of their filter menu and filter row; a formatter function receives `(value, row, column)` and its result replaces the cell text. |
 | `hidden`         | `boolean`                   | `false`     | Whether this column is hidden from the rendered grid.                                                                                  |
 | `locked`         | `boolean`                   | `false`     | Whether this column remains fixed while the grid scrolls horizontally.                                                                 |
 | `lockedPosition` | `GridColumnLockedPosition`  | `"left"`    | The side of the grid where this locked column is fixed.                                                                                |
 | `maxWidth`       | `number \| null`            | `null`      | The maximum width of this column in pixels.                                                                                            |
 | `minWidth`       | `number`                    | `40`        | The minimum width of this column in pixels.                                                                                            |
+| `sortable`       | `boolean`                   | `true`      | Whether this column can be sorted from its header when grid sorting is enabled. |
 | `sortComparator` | `ColumnSortComparator \| null` | `null`   | Compares two values of this column when the user sorts it (negative, zero or positive). Without it, values sort by type with empty values first, and text by the locale. |
 | `stateKey`       | `string \| null`            | `null`      | A stable key used to persist state for columns whose field is empty or unstable.                                                       |
 | `title`          | `string`                    | `""`        | The title displayed in the column header.                                                                                              |
@@ -633,7 +638,7 @@ No outputs.
 | `minWidth`           | `number \| null`           | `null`       | The minimum width of this command column in pixels.                                 |
 | `removeConfirmation` | `boolean`                  | `false`      | Whether the built-in remove command asks for confirmation before emitting `remove`. |
 | `stateKey`           | `string \| null`           | `"commands"` | A stable key used to persist state for this command column.                         |
-| `title`              | `string`                   | `"Commands"` | The title displayed in the command column header.                                   |
+| `title`              | `string \| null`           | `null`       | The title displayed in the command column header; without one, the localized `commandColumnTitle` message ("Commands").              |
 | `width`              | `number \| null`           | `160`        | The fixed width of this command column in pixels.                                   |
 
 No outputs. Accepts a `monaGridCellTemplate` content child to customize the rendered command buttons.
@@ -701,7 +706,7 @@ No outputs.
 
 | Name                 | Type                          | Default | Description                                                                                                                                    |
 | -------------------- | ----------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `monaGridSelectable` | `GridSelectableOptions \| ""` | `""`    | Enables row selection. An empty string enables selection with default settings; pass an object to configure single or multiple selection mode. |
+| `monaGridSelectable` | `SelectableOptions \| ""` | `""`    | Enables row selection. An empty string enables selection with default settings; pass an object to configure single or multiple selection mode. |
 | `selectBy`           | `GridKeySelector<unknown>`    | `""`    | Field name or function that gives a row's selection key. Without it, the grid's `rowKey` value (or the data item). |
 | `selectedKeys`       | `Iterable<unknown>`           | `[]`    | Currently selected row keys.                                                                                                                   |
 
@@ -935,26 +940,31 @@ No inputs, no outputs.
 | `mode`        | `"single" \| "multiple" \| undefined` | Whether one or several columns can be sorted at once.     |
 | `showIndices` | `boolean \| undefined`                | Whether sort order indices are displayed on header cells. |
 
-#### `FilterableOptions` (exported as `GridFilterableOptions`)
+#### `FilterableOptions`
 
 | Field     | Type                             | Description                                                              |
 | --------- | -------------------------------- | ------------------------------------------------------------------------ |
 | `enabled` | `boolean`                        | Whether filtering is active. On unless set to `false`; options replace earlier ones.                                             |
 | `type`    | `"menu" \| "row" \| "menu, row"` | Where filter UI renders — the column header menu, a filter row, or both. |
 
-#### `GroupableOptions` (exported as `GridGroupableOptions`)
+#### `GroupableOptions`
 
 | Field        | Type      | Description                                          |
 | ------------ | --------- | ---------------------------------------------------- |
 | `enabled`    | `boolean` | Whether grouping is active. On unless set to `false`; options replace earlier ones.                          |
-| `showFooter` | `boolean` | Whether an aggregate footer is shown for each group. |
+| `showFooter` | `boolean` | Whether a group's aggregate footer also shows while the group is collapsed; expanded groups always show it. |
 
-#### `GridSelectableOptions`
+#### `SelectableOptions`
 
 | Field     | Type                                  | Description                                          |
 | --------- | ------------------------------------- | ---------------------------------------------------- |
 | `enabled` | `boolean \| undefined`                | Whether row selection is active. On unless set to `false`; options replace earlier ones.                     |
 | `mode`    | `"single" \| "multiple" \| undefined` | Whether one or several rows can be selected at once. |
+| `rowAriaLabel` | `((rowData) => string) \| undefined` | Names a row's selection check box; by default the row number. |
+| `selectAllScope` | `"page" \| "view" \| undefined` | Which rows the header check box selects. |
+| `selectOnRowClick` | `boolean \| undefined` | Whether clicking a row changes its selection. |
+| `showCheckboxes` | `boolean \| undefined` | Whether the check box column is shown. |
+| `showSelectAll` | `boolean \| undefined` | Whether the header check box is shown in multiple mode. |
 
 #### `ReorderableOptions`
 
@@ -975,7 +985,7 @@ No inputs, no outputs.
 | `columns`       | `readonly GridColumnState[]`                    | Persisted per-column hidden/order/width state.                     |
 | `filter`        | `readonly GridStateCompositeFilterDescriptor[]` | Persisted filter descriptors.                                      |
 | `group`         | `readonly GroupDescriptor[]`                    | Persisted group descriptors.                                       |
-| `pageSize`      | `number \| undefined`                           | Persisted page size, when `persistPageSize` is enabled.            |
+| `pageSize`      | `number \| undefined`                           | Persisted page size, unless `persistPageSize` is `false`.          |
 | `schemaVersion` | `number \| string \| undefined`                 | Consumer-defined version tag used to reject stale persisted state. |
 | `sort`          | `readonly GridStateSortDescriptor[]`            | Persisted sort descriptors.                                        |
 | `version`       | `1`                                             | The state schema version produced by this version of the library.  |
