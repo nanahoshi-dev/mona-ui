@@ -32,6 +32,7 @@ import { ImmutableList, type Predicate } from "@mirei/ts-collections";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import type { SelectionMode } from "@nanahoshi/mona-ui/common";
 import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectLabelledByText } from "@nanahoshi/mona-ui/internal";
 import {
     LIST_VIEW_HOST_LIST_SERVICE,
     type ListKeySelector,
@@ -174,8 +175,11 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
         });
         return indexes;
     });
+    readonly #labelledByText = injectLabelledByText(() => this.ariaLabelledBy());
     readonly #listService = inject<ListService<T>>(ListService);
     readonly #liveAnnouncer = inject(LiveAnnouncer);
+    /** The list box's name as text: its `aria-label`, else the text of its `aria-labelledby` elements. */
+    readonly #name = computed(() => this.ariaLabel().trim() || this.#labelledByText());
     /** The list box whose `connectedList` is this one, if any: its toolbar transfers items to and from this one. */
     readonly #owner = signal<ListBoxComponent<T, K> | null>(null);
     /** The toolbar button that last had focus, which keeps the toolbar's Tab stop. */
@@ -264,7 +268,7 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
         const connectedList = this.connectedList();
         const messages = this.messages();
         const holder = this.selectionHolder();
-        const target = connectedList?.ariaLabel().trim() ?? "";
+        const target = connectedList ? connectedList.#name() : "";
         const enabled: Readonly<Record<ToolbarAction, boolean>> = {
             clear: holder != null,
             moveDown: this.canMoveDown(),
@@ -299,7 +303,7 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
         if (label) {
             return label;
         }
-        const list = this.ariaLabel().trim();
+        const list = this.#name();
         return list ? this.messages().toolbarLabel(list) : null;
     });
     protected readonly toolbarOptions = computed<ToolbarOptions | null>(() => {
@@ -336,6 +340,13 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
      * @default ""
      */
     public readonly ariaLabel = input<string>("", { alias: "aria-label" });
+
+    /**
+     * @description Id of the element that names the list box, as an alternative to `aria-label`. Without an
+     * `aria-label`, the toolbar's name and the transfer buttons' labels are built from that element's text.
+     * @default ""
+     */
+    public readonly ariaLabelledBy = input<string>("", { alias: "aria-labelledby" });
 
     /**
      * @description The other list box to transfer items to and from using the toolbar actions.
@@ -442,7 +453,7 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
     >(true, { transform: toToolbarSetting });
 
     /**
-     * @description Accessible name for the toolbar. By default it is built from the list box's `aria-label`
+     * @description Accessible name for the toolbar. By default it is built from the list box's name
      * ("Available foods actions").
      * @default ""
      */
@@ -853,7 +864,7 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
                 target.selectTransferredItems(arrived);
                 target.revealItem(arrived[0], false);
             }
-            const name = target.ariaLabel().trim();
+            const name = target.#name();
             const messages = this.messages();
             let announcement: string | null = null;
             if (arrived.length > 0) {

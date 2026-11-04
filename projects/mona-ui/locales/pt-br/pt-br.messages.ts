@@ -431,6 +431,9 @@ export const PT_BR_MESSAGES = {
         filterTree: "Filtrar árvore",
         loadError: (node: string) => `Não foi possível carregar os itens de ${node}`,
         loadingNode: (node: string) => `Carregando ${node}`,
+        movedAfter: (node: string, target: string) => `${node} movido para depois de ${target}`,
+        movedBefore: (node: string, target: string) => `${node} movido para antes de ${target}`,
+        movedInto: (node: string, target: string) => `${node} movido para dentro de ${target}`,
         noData: "Nenhum dado disponível",
         noMatches: "Nenhum item correspondente",
         results: (count: number) =>

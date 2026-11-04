@@ -2114,7 +2114,7 @@
         "type": "NodeDragEvent<T>"
       },
       {
-        "description": "Emitted when a node drag ends.",
+        "description": "Emitted when a node drag ends, dropped or not. Not cancelable: the drag is over either way.",
         "kind": "output",
         "name": "nodeDragEnd",
         "type": "NodeDragEndEvent<T>"
@@ -2126,7 +2126,7 @@
         "type": "NodeDragStartEvent<T>"
       },
       {
-        "description": "Emitted when a node is dropped.",
+        "description": "Emitted when a node is dropped on another node, or moved with Ctrl+Shift+Arrow (Cmd+Shift+Arrow on\nmacOS). The tree doesn't move the node: the handler applies the move (with `moveTreeNode`,\n`moveFlatTreeNode` or `event.treeView.moveNode`). Call `preventDefault()` when the move isn't applied.",
         "kind": "output",
         "name": "nodeDrop",
         "type": "NodeDropEvent<T>"
@@ -10392,6 +10392,14 @@
         "defaultValue": "\"\""
       },
       {
+        "description": "Id of the element that names the list box, as an alternative to `aria-label`. Without an\n`aria-label`, the toolbar's name and the transfer buttons' labels are built from that element's text.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "The other list box to transfer items to and from using the toolbar actions.",
         "kind": "input",
         "name": "connectedList",
@@ -10488,7 +10496,7 @@
         "defaultValue": "true"
       },
       {
-        "description": "Accessible name for the toolbar. By default it is built from the list box's `aria-label`\n(\"Available foods actions\").",
+        "description": "Accessible name for the toolbar. By default it is built from the list box's name\n(\"Available foods actions\").",
         "kind": "input",
         "name": "toolbarAriaLabel",
         "type": "string",

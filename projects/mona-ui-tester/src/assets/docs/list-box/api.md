@@ -197,7 +197,7 @@ Both accept a string property name or a function `(item: T) => K`/`(item: T) => 
 | `PageUp`                                        | Scroll the list back by roughly one viewport.                                                               |
 | `Enter`                                         | Select the highlighted or currently selected item.                                                          |
 | `Space`, `Ctrl+A`/`Cmd+A` (multiple selection)  | Toggle the focused item; select every enabled item.                                                         |
-| Any letter, digit, hyphen, or underscore        | Typeahead: jumps to the next item whose text starts with the typed characters (resets after a short pause). In multiple selection it moves focus without changing the selection. |
+| Any letter, digit, hyphen, or underscore        | Typeahead: jumps to the next item whose text starts with the typed characters, staying on the active item while it still matches (resets after a short pause). In multiple selection it moves focus without changing the selection. |
 | `Alt+ArrowUp` / `Alt+ArrowDown`                 | Move the selection up or down (Move Up / Move Down).                                                        |
 | `Delete`                                        | Remove the selection (Remove).                                                                              |
 | `Alt+ArrowRight` (`Alt+ArrowLeft` in RTL)       | In a list box with a `connectedList`: transfer the selection to it (Transfer To).                           |
@@ -226,6 +226,7 @@ After an action, focus stays on the button that ran it while that button is stil
 |----------------------------------|------------------------------------------------|----------------------------------------------------------------|
 | `role`                           | Always, on the inner list element (even empty) | `"listbox"`                                                    |
 | `aria-label`                     | When `ariaLabel`/`aria-label` is set           | The provided string (on the listbox, not on the host)          |
+| `aria-labelledby`                | When `aria-labelledby` is set                  | The provided ids (on the listbox, not on the host)             |
 | `aria-multiselectable`           | In multiple selection                          | `"true"`                                                       |
 | `aria-describedby`               | On an empty listbox                            | The "No data" text (or the `monaListBoxNoDataTemplate`)         |
 | `role`                           | Always, on each item                           | `"option"`                                                     |
@@ -236,7 +237,7 @@ After an action, focus stays on the button that ran it while that button is stil
 | `aria-label`                     | On the toolbar, when it has a name             | `toolbarAriaLabel`, else "{list box name} actions"             |
 | `aria-orientation`               | On the toolbar                                 | `"vertical"` beside the list, `"horizontal"` above or below it |
 
-Each toolbar button carries its own `aria-label` matching its tooltip. The transfer buttons name the connected list box ("Transfer to Chosen foods", "Transfer all from Chosen foods") when it has an `aria-label`, and fall back to "Transfer to the other list" and similar when it doesn't.
+Each toolbar button carries its own `aria-label` matching its tooltip. The transfer buttons name the connected list box ("Transfer to Chosen foods", "Transfer all from Chosen foods") when it has a name (its `aria-label`, or the text of its `aria-labelledby` elements), and fall back to "Transfer to the other list" and similar when it doesn't.
 
 After each action, a polite announcement reports what happened once the consumer's change has rendered: "2 items moved to Chosen foods", "Moved to position 1 of 4", "1 item removed" or "Selection cleared". Nothing is announced when the consumer didn't carry out the action (for example, the items didn't arrive in the target). The announcements and labels are translated messages (`listBox` namespace).
 
@@ -255,6 +256,7 @@ Form integration is not applicable — List Box is a display/selection widget, n
 | Name                        | Type                                       | Default    | Description                                                                                                                                                                                                                                 |
 |-----------------------------|--------------------------------------------|------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `aria-label`                | `string`                                   | `""`       | Accessible name for the list box's `listbox` element. Describe what the list represents, which matters in particular when connecting two list boxes. Bound as `[aria-label]`/plain `aria-label` (the input's property name is `ariaLabel`). |
+| `aria-labelledby`           | `string`                                   | `""`       | Id of the element that names the list box, as an alternative to `aria-label` (property `ariaLabelledBy`). Without an `aria-label`, the toolbar's name and the transfer buttons' labels are built from that element's text. |
 | `connectedList`             | `ListBoxComponent<T, K> \| null`           | `null`     | The other list box to transfer items to and from using the toolbar actions.                                                                                                                                                                 |
 | `disabledBy`                | `string \| ((item: T) => boolean) \| null` | `""`       | Property name or predicate that marks items as disabled. Disabled items can't be selected, and no action (including the "All" transfers) carries them.                                                                                      |
 | `height`                    | `string \| number`                         | `"100%"`   | Sets the height of the component.                                                                                                                                                                                                           |
@@ -267,7 +269,7 @@ Form integration is not applicable — List Box is a display/selection widget, n
 | `size`                      | `"small" \| "medium" \| "large"`           | `"medium"` | Size preset controlling the component's dimensions.                                                                                                                                                                                         |
 | `textField`                 | `string \| ((item: T) => string) \| null`  | `""`       | Property name or accessor used to derive the display text from a data item.                                                                                                                                                                 |
 | `toolbar`                   | `boolean \| Partial<ToolbarOptions>`       | `true`     | Shows the action toolbar. Pass `false` to hide it entirely, or an options object to customize which actions are shown and where the toolbar is positioned. The transfer actions appear only with a `connectedList`. Accepts the bare attribute. |
-| `toolbarAriaLabel`          | `string`                                   | `""`       | Accessible name for the toolbar. By default it is built from the list box's `aria-label` ("Available foods actions").                                                                                                                       |
+| `toolbarAriaLabel`          | `string`                                   | `""`       | Accessible name for the toolbar. By default it is built from the list box's name ("Available foods actions").                                                                                                                       |
 | `width`                     | `string \| number`                         | `"100%"`   | Sets the width of the component.                                                                                                                                                                                                            |
 
 #### Outputs
@@ -361,7 +363,7 @@ Form integration is not applicable — List Box is a display/selection widget, n
 ---
 
 <!-- verification-checklist
-- [x] Inputs, outputs, defaults and public methods checked against list-box/components/list-box/list-box.component.ts and component-metadata.json
+- [x] Inputs, outputs, defaults and public methods checked against list-box/components/list-box/list-box.component.ts and component-metadata.json, including `aria-labelledby` and the name built from it (#name)
 - [x] Toolbar order, visibility (transfer actions need a connectedList), labels and shortcuts checked against list-box.component.ts (TOOLBAR_ORDER, toolbarButtons, resolveShortcut) and en-US.messages.json (listBox)
 - [x] Firing table and event contents (list order, no disabled items, "All" transfers carry the source's enabled items) checked against runAction/transfer/move/remove/clear in list-box.component.ts
 - [x] Selection events after actions and focus after actions checked against reportSelection/afterActionRender in list-box.component.ts

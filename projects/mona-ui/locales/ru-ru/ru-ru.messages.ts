@@ -446,6 +446,9 @@ export const RU_RU_MESSAGES = {
         filterTree: "Фильтр дерева",
         loadError: (node: string) => `Не удалось загрузить элементы «${node}»`,
         loadingNode: (node: string) => `Загрузка «${node}»`,
+        movedAfter: (node: string, target: string) => `Элемент ${node} перемещён после ${target}`,
+        movedBefore: (node: string, target: string) => `Элемент ${node} перемещён перед ${target}`,
+        movedInto: (node: string, target: string) => `Элемент ${node} перемещён в ${target}`,
         noData: "Нет данных",
         noMatches: "Нет подходящих элементов",
         results: (count: number) =>

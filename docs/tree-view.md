@@ -64,7 +64,7 @@ Name the tree with the `ariaLabel` input, or point `ariaLabelledBy` at a visible
 
 - These are inputs, not ARIA attributes. A plain `aria-label` attribute on `mona-tree-view` stays on the host element, which has no role, so it **doesn't name the tree**.
 - In development, a tree with neither input logs a console warning ("A tree view needs an accessible name").
-- The filter input is named "Filter {name}" from `ariaLabel`. With only `ariaLabelledBy`, it falls back to "Filter tree"; set `ariaLabel` as well if the filter should carry the tree's name.
+- The filter input is named "Filter {name}" from `ariaLabel`, or from the text of the `ariaLabelledBy` elements.
 - Each node is named by its own content (its text, or what the node template renders). The expand button and nested nodes aren't part of the name.
 
 ---
@@ -239,7 +239,18 @@ export class FoldersComponent {
 
 ## 10. Drag and Drop
 
-`monaTreeViewDragAndDrop` lets the user drag nodes with a pointer to reorder or re-parent them. The tree doesn't change your data: in `(nodeDrop)`, move the node with `event.treeView.moveNode(event.sourceNode, event.targetNode, event.position)`, or update `data` with `moveTreeNode(data, event, "id", "items")` (hierarchical) or `moveFlatTreeNode` (flat). `(nodeDragStart)` and `(nodeDragEnd)` can be cancelled. There is no keyboard alternative, so offer another way to move nodes (a "Move to…" command, for example) where moving matters.
+`monaTreeViewDragAndDrop` lets the user drag nodes with the mouse or by touch to reorder or re-parent them, and move them with the keyboard. The tree doesn't change your data: in `(nodeDrop)`, move the node with `event.treeView.moveNode(event.sourceNode, event.targetNode, event.position)`, or update `data` with `moveTreeNode(data, event, "id", "items")` (hierarchical) or `moveFlatTreeNode` (flat). Call `event.preventDefault()` when you don't apply the move. `(nodeDragStart)` can be cancelled; `(nodeDragEnd)` can't, since the drag is over either way.
+
+The keyboard moves the active node with <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+arrow (<kbd>Cmd</kbd> on macOS):
+
+| Keys                                          | Move                                                    |
+| --------------------------------------------- | ------------------------------------------------------- |
+| <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>↑</kbd> | before the previous sibling                             |
+| <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>↓</kbd> | after the next sibling                                  |
+| <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>→</kbd> | into the previous sibling, as its last child (it opens) |
+| <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>←</kbd> | out of the parent, after it                             |
+
+A keyboard move emits the same `(nodeDrop)` as a drop, with the `KeyboardEvent` as `originalEvent`, so one handler serves both. Once the move is applied, the node stays active and the move is announced ("Apple moved into Fruits"). The tree lists the keys in `aria-keyshortcuts`. In right-to-left layouts <kbd>→</kbd> and <kbd>←</kbd> swap.
 
 ---
 
@@ -256,7 +267,7 @@ export class FoldersComponent {
 
 - `let-file` is the data item, and `let-element="element"` the node's element. Bind `monaTreeViewNodeTemplateOf` to the tree's data to type the data item; without it, it is `any`.
 - The template's content is the node's accessible name. Hide decorative icons with `aria-hidden="true"`.
-- The tree handles keys itself, so avoid interactive controls inside a node.
+- Keys pressed in a control inside a node (an input, a button) go to that control, not the tree. The control isn't a Tab stop of its own unless you make it one.
 
 ---
 
@@ -264,19 +275,21 @@ export class FoldersComponent {
 
 The tree is one Tab stop. The active node is conveyed with `aria-activedescendant` and has a 2px focus ring. When the tree gets focus, the last active node becomes active again (the first node the first time).
 
-| Key                              | Action                                                                    |
-| -------------------------------- | ------------------------------------------------------------------------- |
-| <kbd>↓</kbd> / <kbd>↑</kbd>      | next / previous visible node; wraps around at the ends                    |
-| <kbd>→</kbd>                     | closed node: open it; open node: move to its first child                  |
-| <kbd>←</kbd>                     | open node: close it; otherwise move to the parent                         |
-| <kbd>Home</kbd> / <kbd>End</kbd> | first / last visible node                                                 |
-| <kbd>Enter</kbd>                 | select or deselect the node (with `monaTreeViewSelectable`)               |
-| <kbd>Space</kbd>                 | check or uncheck the node (with `monaTreeViewCheckable`)                  |
-| <kbd>*</kbd>                     | open every sibling of the node                                            |
-| letters                          | type ahead to the next visible node whose text starts with the typed text |
+| Key                                    | Action                                                                                                           |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| <kbd>↓</kbd> / <kbd>↑</kbd>            | next / previous visible node; wraps around at the ends                                                           |
+| <kbd>→</kbd>                           | closed node: open it; open node: move to its first child                                                         |
+| <kbd>←</kbd>                           | open node: close it; otherwise move to the parent                                                                |
+| <kbd>Home</kbd> / <kbd>End</kbd>       | first / last visible node                                                                                        |
+| <kbd>Enter</kbd>                       | select or deselect the node (with `monaTreeViewSelectable`)                                                      |
+| <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+arrow | move the node (with `monaTreeViewDragAndDrop`, see Drag and Drop)                                                |
+| <kbd>Space</kbd>                       | check or uncheck the node (with `monaTreeViewCheckable`)                                                         |
+| <kbd>*</kbd>                           | open every sibling of the node                                                                                   |
+| letters                                | type ahead to the next visible node whose text starts with the typed text; the node stays while it still matches |
 
 - In right-to-left layouts <kbd>→</kbd> and <kbd>←</kbd> swap: <kbd>←</kbd> opens and moves to the first child, <kbd>→</kbd> closes and moves to the parent. The closed-node chevron is mirrored too.
-- Disabled nodes can be reached, but the keys don't open, close, select or check them.
+- Disabled nodes can be reached, but the keys don't open, close, select, check or move them. <kbd>←</kbd> on an open node that can't close (disabled, or without `monaTreeViewExpandable`) moves to the parent.
+- Other keys held with <kbd>Ctrl</kbd>, <kbd>Alt</kbd> or <kbd>Meta</kbd>, and keys pressed while an input method composes text, are left to the page.
 - When the active node is hidden by a collapse or a filter, its nearest visible ancestor (else the first visible node) becomes active, so `aria-activedescendant` never points at a missing node.
 
 ---
@@ -293,16 +306,17 @@ provideMonaI18n({
 });
 ```
 
-| Key                           | Used for                                                          |
-| ----------------------------- | ----------------------------------------------------------------- |
-| `expand`, `collapse`          | the expand button ("Expand src", "Collapse src")                  |
-| `filterLabel(tree)`           | the filter input and its search landmark, from `ariaLabel`        |
-| `filterTree`                  | the filter input when the tree has no `ariaLabel`                 |
-| `results(count)`, `noMatches` | the filter announcement; `noMatches` also under an unmatched tree |
-| `noData`                      | the text under an empty tree                                      |
-| `loadingNode(node)`           | the expand button while loading, and the loading announcement     |
-| `loadError(node)`             | the failure announcement and the node's description               |
-| `retryLoading(node)`          | the expand button after a failed load                             |
+| Key                                                                                | Used for                                                          |
+| ---------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `expand`, `collapse`                                                               | the expand button ("Expand src", "Collapse src")                  |
+| `filterLabel(tree)`                                                                | the filter input and its search landmark, from the tree's name    |
+| `filterTree`                                                                       | the filter input when the tree has no name                        |
+| `results(count)`, `noMatches`                                                      | the filter announcement; `noMatches` also under an unmatched tree |
+| `noData`                                                                           | the text under an empty tree                                      |
+| `loadingNode(node)`                                                                | the expand button while loading, and the loading announcement     |
+| `loadError(node)`                                                                  | the failure announcement and the node's description               |
+| `retryLoading(node)`                                                               | the expand button after a failed load                             |
+| `movedBefore(node, target)`, `movedAfter(node, target)`, `movedInto(node, target)` | the keyboard move announcement                                    |
 
 `filter` is deprecated and no longer rendered. The full list is in `TREE_VIEW_DEFAULT_MESSAGES`, exported from `@nanahoshi/mona-ui/tree-view`.
 
@@ -312,5 +326,4 @@ provideMonaI18n({
 
 - **Virtualization.** Every visible node is rendered. For very large trees, load levels lazily and keep the initial expansion small.
 - **Range selection.** <kbd>Shift</kbd>+arrow and <kbd>Shift</kbd>+click don't select ranges, and there is no select-all shortcut; in multiple mode each node is toggled on its own.
-- **Keyboard drag and drop.** Dragging needs a pointer (see Drag and Drop).
 - **An expand-all API.** Set `expandedKeys` to the keys you want open (for loaded nodes), or use <kbd>*</kbd> on a level.

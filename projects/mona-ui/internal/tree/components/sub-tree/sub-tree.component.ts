@@ -152,14 +152,11 @@ export class SubTreeComponent<T> {
         this.treeService.toggleNodeExpand(node, !this.treeService.isExpanded(node));
     }
 
+    /** The drag is over whatever a `nodeDragEnd` handler does, so it can't be kept going with `preventDefault()`. */
     public onNodeDragEnd(event: CdkDragEnd<TreeNode<T>>): void {
-        const nodeDragEndEvent = new NodeDragEndEvent(event.source.data, event.event);
-        this.treeService.nodeDragEnd$.next(nodeDragEndEvent);
-        if (nodeDragEndEvent.isDefaultPrevented()) {
-            return;
-        }
         this.treeService.dropAllowed.set(false);
         this.treeService.dragging.set(false);
+        this.treeService.nodeDragEnd$.next(new NodeDragEndEvent(event.source.data, event.event));
     }
 
     public onNodeDragMove(event: CdkDragMove<TreeNode<T>>, node: TreeNode<T>): void {

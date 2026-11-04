@@ -111,6 +111,31 @@ class StandaloneHostComponent {
     public readonly items = FOODS;
 }
 
+@Component({
+    imports: [ListBoxComponent],
+    template: `
+        <h2 id="available-heading">Available foods</h2>
+        <mona-list-box
+            aria-labelledby="available-heading"
+            [items]="items"
+            textField="name"
+            selectBy="id"
+            [connectedList]="chosen"></mona-list-box>
+        <h2 id="chosen-heading">Chosen foods</h2>
+        <mona-list-box
+            #chosen
+            aria-labelledby="chosen-heading"
+            [items]="chosenItems"
+            textField="name"
+            selectBy="id"
+            [toolbar]="false"></mona-list-box>
+    `
+})
+class LabelledHostComponent {
+    public readonly chosenItems: Food[] = [];
+    public readonly items = FOODS;
+}
+
 const AXE_OPTIONS: axe.RunOptions = {
     rules: { "color-contrast": { enabled: false }, region: { enabled: false } }
 };
@@ -430,6 +455,34 @@ describe("list box accessibility", () => {
             expect(Array.from(root.querySelectorAll(".food")).map(element => element.textContent)).toEqual(
                 FOODS.map(food => food.name)
             );
+        });
+    });
+
+    describe("named with aria-labelledby", () => {
+        it("names the list from the heading, and builds the toolbar's and the transfer buttons' names from it", async () => {
+            const fixture = TestBed.createComponent(LabelledHostComponent);
+            const root = fixture.nativeElement as HTMLElement;
+            document.body.appendChild(root);
+            try {
+                for (let pass = 0; pass < 2; pass++) {
+                    fixture.detectChanges();
+                    await fixture.whenStable();
+                }
+                fixture.detectChanges();
+                const listboxes = root.querySelectorAll("[role='listbox']");
+                expect(listboxes[0].getAttribute("aria-labelledby")).toBe("available-heading");
+                expect(listboxes[1].getAttribute("aria-labelledby")).toBe("chosen-heading");
+                expect(root.querySelector("[role='toolbar']")?.getAttribute("aria-label")).toBe(
+                    "Available foods actions"
+                );
+                const labels = Array.from(root.querySelectorAll("[role='toolbar'] button")).map(
+                    button => button.getAttribute("aria-label") ?? ""
+                );
+                expect(labels.filter(label => label.includes("Chosen foods")).length).toBe(4);
+                expect(await violations(root)).toEqual([]);
+            } finally {
+                root.remove();
+            }
         });
     });
 

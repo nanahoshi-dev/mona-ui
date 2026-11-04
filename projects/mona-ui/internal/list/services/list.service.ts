@@ -303,18 +303,24 @@ export class ListService<TData> {
     }
 
     /**
-     * Finds the next item whose text starts with the typeahead buffer, starting after the active item.
+     * Finds the next item whose text starts with the typeahead buffer, starting after the active item; once the
+     * buffer holds more than one character, an active item that still matches stays.
      * Group headers and disabled items are never matched.
      */
     public cycleThroughMatchedItems(buffer: string): ListItem<TData> | null {
         const activeItem = this.highlightedItem() || this.selectedListItems().lastOrDefault();
         const prefix = buffer.toLowerCase();
-        return cycleThroughMatchedItems(this.viewItems(), activeItem ?? null, item => {
-            if (item.isHeader || this.isDisabled(item)) {
-                return false;
-            }
-            return this.getItemText(item).toLowerCase().startsWith(prefix);
-        });
+        return cycleThroughMatchedItems(
+            this.viewItems(),
+            activeItem ?? null,
+            item => {
+                if (item.isHeader || this.isDisabled(item)) {
+                    return false;
+                }
+                return this.getItemText(item).toLowerCase().startsWith(prefix);
+            },
+            prefix.length > 1
+        );
     }
 
     public deselectItems(item: Iterable<ListItem<TData>>): void {

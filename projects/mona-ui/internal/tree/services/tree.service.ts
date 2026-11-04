@@ -13,17 +13,7 @@ import {
     sequenceEqual
 } from "@mirei/ts-collections";
 import { type FilterableOptions, FilterChangeEvent } from "@nanahoshi/mona-ui/common";
-import {
-    BehaviorSubject,
-    debounceTime,
-    distinctUntilChanged,
-    Observable,
-    ReplaySubject,
-    Subject,
-    Subscription,
-    switchMap,
-    take
-} from "rxjs";
+import { BehaviorSubject, distinctUntilChanged, Observable, ReplaySubject, Subject, Subscription, take } from "rxjs";
 import type { CheckableOptions } from "../models/CheckableOptions";
 import type { DataStructure } from "../models/DataStructure";
 import type { DisableOptions } from "../models/DisableOptions";
@@ -42,6 +32,7 @@ import type { SelectableOptions } from "../models/SelectableOptions";
 import { TreeNode } from "../models/TreeNode";
 import type { TreeNodeCheckEvent } from "../models/TreeNodeCheckEvent";
 import type { TreeNodeExpandEvent } from "../models/TreeNodeExpandEvent";
+import type { TreeKeyboardMove, TreeKeyboardMoveDirection } from "../models/TreeKeyboardMove";
 import type { TreeNodeSelectEvent } from "../models/TreeNodeSelectEvent";
 import type { ChildrenSelector, NodeKeySelector } from "../models/TreeSelectors";
 import { getTreeNodeElementId } from "../utils/getTreeNodeElementId";
@@ -146,12 +137,8 @@ export class TreeService<T> {
     public readonly filter$ = new ReplaySubject<string>(1);
     public readonly filterChange$ = new Subject<FilterChangeEvent>();
     public readonly filterPlaceholder = signal("");
-    public readonly filterText = toSignal(
-        toObservable(this.#filterableOptions).pipe(
-            switchMap(opts => this.filter$.pipe(debounceTime(opts.debounce), distinctUntilChanged()))
-        ),
-        { initialValue: "" }
-    );
+    /** The applied filter. Typing is debounced by the filter input; a filter set from code applies at once. */
+    public readonly filterText = toSignal(this.filter$.pipe(distinctUntilChanged()), { initialValue: "" });
     public readonly filterableOptions = this.#filterableOptions.asReadonly();
     public readonly focus$ = new Subject<FocusEvent>();
     /** The number of nodes whose text matches the filter (their ancestors, shown for context, aren't counted). */
@@ -234,6 +221,20 @@ export class TreeService<T> {
             const navigatedNode = this.navigatedNode();
             untracked(() => this.keepNavigatedNodeVisible(navigableNodes, navigatedNode));
         });
+        // An expanded node whose children come from an observable loads them, including nodes expanded from the
+        // start through `expandedKeys`, and not just nodes the user expands.
+        effect(() => {
+            const expandedKeys = this.#unfilteredExpandedKeys();
+            const nodes = this.nodeSet();
+            const enabled = this.expandableOptions().enabled;
+            const children = this.children();
+            this.expandBy();
+            untracked(() => {
+                if (enabled && typeof children === "function") {
+                    this.loadExpandedNodes(nodes, expandedKeys);
+                }
+            });
+        });
     }
 
     /** Whether two key sets hold the same keys, in any order. */
@@ -287,15 +288,34 @@ export class TreeService<T> {
     }
 
     /**
-     * Finds the next visible node, after the navigated node and wrapping around, whose text starts with `prefix`
-     * (case-insensitive). Used for typeahead.
+     * The node of the current nodes that stands for `node`: the node itself, or after a data refresh rebuilt the
+     * nodes, the node of the same data item (or, for flat data, of the same id).
+     */
+    public findCounterpart(node: TreeNode<T>): TreeNode<T> | null {
+        const sameNode = this.getNodeByUid(node.uid);
+        if (sameNode) {
+            return sameNode;
+        }
+        const identity = this.getNodeIdentity(node);
+        return (
+            TreeService.flatten(this.nodeSet()).firstOrDefault(
+                candidate => candidate.data === node.data || this.getNodeIdentity(candidate) === identity
+            ) ?? null
+        );
+    }
+
+    /**
+     * Finds the next visible node whose text starts with `prefix` (case-insensitive), wrapping around. Used for
+     * typeahead: a first character searches after the navigated node, and each further character keeps the
+     * navigated node while it still matches.
      */
     public findNodeByText(prefix: string): TreeNode<T> | null {
         const normalizedPrefix = prefix.toLowerCase();
         const nodes = this.#navigableNodes().toArray();
         const navigatedNode = this.navigatedNode();
         const start = navigatedNode ? nodes.indexOf(navigatedNode) : -1;
-        for (let offset = 1; offset <= nodes.length; offset++) {
+        const first = normalizedPrefix.length > 1 && start !== -1 ? 0 : 1;
+        for (let offset = first; offset <= nodes.length; offset++) {
             const node = nodes[(start + offset) % nodes.length];
             if (this.getNodeText(node).toLowerCase().startsWith(normalizedPrefix)) {
                 return node;
@@ -326,6 +346,34 @@ export class TreeService<T> {
         return disableBy(node.data);
     }
 
+    /**
+     * Where a keyboard move takes a node: before its previous or after its next visible sibling (`"up"`, `"down"`),
+     * inside its previous visible sibling as the last child (`"in"`), or after its parent (`"out"`). `null` when the
+     * node can't move that way or is disabled.
+     */
+    public getKeyboardMove(node: TreeNode<T>, direction: TreeKeyboardMoveDirection): TreeKeyboardMove<T> | null {
+        if (this.isDisabled(node)) {
+            return null;
+        }
+        if (direction === "out") {
+            return node.parent ? { position: "after", targetNode: node.parent } : null;
+        }
+        const siblings = (node.parent ? node.parent.children() : this.nodeSet())
+            .where(sibling => this.isVisible(sibling))
+            .toArray();
+        const index = siblings.indexOf(node);
+        const previous = index > 0 ? siblings[index - 1] : null;
+        const next = index !== -1 && index < siblings.length - 1 ? siblings[index + 1] : null;
+        switch (direction) {
+            case "up":
+                return previous ? { position: "before", targetNode: previous } : null;
+            case "down":
+                return next ? { position: "after", targetNode: next } : null;
+            case "in":
+                return previous && !this.isDisabled(previous) ? { position: "inside", targetNode: previous } : null;
+        }
+    }
+
     public getNodeByUid(uid: string): TreeNode<T> | null {
         const nodeDictionary = this.#nodeDictionary();
         return nodeDictionary.get(uid) ?? null;
@@ -333,6 +381,12 @@ export class TreeService<T> {
 
     public getNodeElementId(uid: string): string {
         return getTreeNodeElementId(uid);
+    }
+
+    /** What identifies a node's data item across data refreshes: its id for flat data, else the item itself. */
+    public getNodeIdentity(node: TreeNode<T>): unknown {
+        const idField = this.#flatIdField();
+        return this.#structure() === "flat" && idField ? TreeService.readField(node.data, idField) : node.data;
     }
 
     public getNodeText(node: TreeNode<T>): string {
@@ -538,11 +592,16 @@ export class TreeService<T> {
 
     /**
      * Moves a node relative to a target node. Moving a node onto itself or into its own subtree is ignored,
-     * because it would detach the subtree and create a parent cycle.
+     * because it would detach the subtree and create a parent cycle, and so is moving it inside its own parent or
+     * a disabled node, or `"outside"`.
+     * @returns whether the node moved.
      */
-    public moveNode(sourceNode: TreeNode<T>, targetNode: TreeNode<T>, position: DropPosition): void {
-        if (sourceNode === targetNode || targetNode.isDescendantOf(sourceNode)) {
-            return;
+    public moveNode(sourceNode: TreeNode<T>, targetNode: TreeNode<T>, position: DropPosition): boolean {
+        if (sourceNode === targetNode || targetNode.isDescendantOf(sourceNode) || position === "outside") {
+            return false;
+        }
+        if (position === "inside" && (sourceNode.parent === targetNode || this.isDisabled(targetNode))) {
+            return false;
         }
         const oldParent = sourceNode.parent;
         switch (position) {
@@ -558,6 +617,7 @@ export class TreeService<T> {
         }
         this.updateNodeIndices();
         this.recalculateCheckedAncestors(oldParent, sourceNode.parent);
+        return true;
     }
 
     public navigate(direction: "next" | "previous" | "first" | "last"): TreeNode<T> | null {
@@ -592,6 +652,15 @@ export class TreeService<T> {
 
     public notifySelectionChange(node: TreeNode<T>): void {
         this.selectionChange$.next(node.nodeItem);
+    }
+
+    /**
+     * Whether selecting `node` the way the user does (a click, or Enter) changes the selection. It doesn't for the
+     * selected node of a single selection that can't be toggled off.
+     */
+    public selectionWouldChange(node: TreeNode<T>): boolean {
+        const options = this.selectableOptions();
+        return !(options.mode === "single" && !options.toggleable && this.isSelected(node));
     }
 
     public setAnimationEnabled(enabled: boolean): void {
@@ -637,8 +706,9 @@ export class TreeService<T> {
         this.applyCheckedKeysToNodes();
         const navigatedNode = this.navigatedNode();
         if (navigatedNode && this.#nodeDictionary().get(navigatedNode.uid) == null) {
-            // The node was removed: drop it so aria-activedescendant never points at a missing element.
-            this.navigatedNode.set(null);
+            // Rebuilt nodes (flat data always is) keep the active node; a removed node is dropped, so
+            // aria-activedescendant never points at a missing element.
+            this.navigatedNode.set(this.findCounterpart(navigatedNode));
         }
     }
 
@@ -789,14 +859,15 @@ export class TreeService<T> {
         this.navigatedNode.set(node);
     }
 
-    public setNodeSelect(node: TreeNode<T>, selected: boolean): void {
+    /** @returns whether the selection changed. */
+    public setNodeSelect(node: TreeNode<T>, selected: boolean): boolean {
         const selectableOptions = this.selectableOptions();
         if (!selectableOptions.enabled) {
-            return;
+            return false;
         }
         const childrenOnly = selectableOptions.childrenOnly;
         if (childrenOnly && this.hasChildren(node)) {
-            return;
+            return false;
         }
         const key = this.getSelectKey(node);
         const mode = selectableOptions.mode;
@@ -817,9 +888,11 @@ export class TreeService<T> {
         });
         this.navigatedNode.set(node);
         const nextKeys = this.selectedKeys();
-        if (!TreeService.sameKeys(previousKeys, nextKeys)) {
-            this.selectedKeysChange$.next(nextKeys);
+        if (TreeService.sameKeys(previousKeys, nextKeys)) {
+            return false;
         }
+        this.selectedKeysChange$.next(nextKeys);
+        return true;
     }
 
     public setSelectBy(selector: NodeKeySelector<T>): void {
@@ -855,11 +928,12 @@ export class TreeService<T> {
 
     /**
      * Expands or collapses a node the way user interaction does: disabled nodes are left alone, children of an
-     * asynchronous children selector are loaded on first expand, and `nodeExpand$` is notified.
+     * asynchronous children selector are loaded on first expand, and `nodeExpand$` is notified. Without expanding
+     * (every node is then open), nothing changes.
      * @returns whether the expand state changed.
      */
     public toggleNodeExpand(node: TreeNode<T>, expanded: boolean): boolean {
-        if (this.isDisabled(node) || this.isExpanded(node) === expanded) {
+        if (!this.expandableOptions().enabled || this.isDisabled(node) || this.isExpanded(node) === expanded) {
             return false;
         }
         if (expanded) {
@@ -1153,6 +1227,22 @@ export class TreeService<T> {
                     n.checked.set(true);
                 }
             });
+        }
+    }
+
+    /** Loads the children of the expanded, shown nodes whose children come from an observable and aren't loaded. */
+    private loadExpandedNodes(nodes: Iterable<TreeNode<T>>, expandedKeys: ImmutableSet<unknown>): void {
+        for (const node of TreeService.flatten(nodes)) {
+            if (node.childrenLoaded || node.loading() || node.loadFailed() || !node.children().isEmpty()) {
+                continue;
+            }
+            if (
+                expandedKeys.contains(this.getExpandKey(node)) &&
+                this.hasChildren(node) &&
+                !this.isAnyParentCollapsed(node)
+            ) {
+                this.loadNodeChildren(node);
+            }
         }
     }
 

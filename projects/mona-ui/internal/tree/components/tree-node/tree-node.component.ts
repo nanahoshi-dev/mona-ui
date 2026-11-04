@@ -133,15 +133,18 @@ export class TreeNodeComponent<T> {
         if (selectableOptions.childrenOnly && this.treeService.hasChildren(node)) {
             return;
         }
+        if (!this.treeService.selectionWouldChange(node)) {
+            return;
+        }
         const nodeSelectEvent = new NodeSelectEvent(node, event);
         this.treeService.nodeSelect$.next(nodeSelectEvent);
         if (nodeSelectEvent.isDefaultPrevented()) {
             return;
         }
-        const newSelected = !this.selected();
-        this.treeService.setNodeSelect(node, newSelected);
-        this.treeService.nodeSelectChange$.next({ node, selected: newSelected });
-        this.treeService.notifySelectionChange(node);
+        if (this.treeService.setNodeSelect(node, !this.selected())) {
+            this.treeService.nodeSelectChange$.next({ node, selected: this.treeService.isSelected(node) });
+            this.treeService.notifySelectionChange(node);
+        }
     }
 
     public onNodeContextMenu(): void {

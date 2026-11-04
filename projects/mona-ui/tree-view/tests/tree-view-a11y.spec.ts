@@ -94,12 +94,15 @@ class FeaturesHostComponent {
             [hasChildren]="hasChildren"
             textField="text"
             monaTreeViewExpandable
+            expandBy="id"
+            [expandedKeys]="expanded()"
             (childrenLoadError)="errors.push($event)"></mona-tree-view>
     `
 })
 class LazyHostComponent {
     public readonly data: Food[] = [{ id: "A", lazy: true, text: "Fruits" }];
     public readonly errors: Array<ChildrenLoadErrorEvent<Food>> = [];
+    public readonly expanded = signal<string[]>([]);
     public readonly loads: Array<Subject<Food[]>> = [];
     /** Each subscription is a load (the tree also calls the selector, without subscribing, to build the nodes). */
     public readonly children = (_food: Food): Observable<Food[]> =>
@@ -205,6 +208,27 @@ describe("tree view accessibility", () => {
 
         afterEach(() => root.remove());
 
+        it("loads a lazy node that expandedKeys expands from the start", async () => {
+            const expandedFixture = TestBed.createComponent(LazyHostComponent);
+            const expandedHost = expandedFixture.componentInstance;
+            expandedHost.expanded.set(["A"]);
+            const expandedRoot = expandedFixture.nativeElement as HTMLElement;
+            document.body.appendChild(expandedRoot);
+            try {
+                await settle(expandedFixture);
+                expect(expandedHost.loads.length).toBe(1);
+                expect(rowOf(expandedRoot, "Fruits").getAttribute("aria-busy")).toBe("true");
+
+                expandedHost.loads[0].next([{ id: "A1", text: "Apple" }]);
+                await settle(expandedFixture);
+                expect(rowOf(expandedRoot, "Fruits").getAttribute("aria-expanded")).toBe("true");
+                expect(rowOf(expandedRoot, "Apple")).toBeTruthy();
+                expect(expandedHost.loads.length).toBe(1);
+            } finally {
+                expandedRoot.remove();
+            }
+        });
+
         it("names the tree, and each node by its text alone", () => {
             expect(tree().getAttribute("aria-label")).toBe("Food");
             const fruits = rowOf(root, "Fruits");
@@ -295,6 +319,26 @@ describe("tree view accessibility", () => {
                 await settle(fixture);
                 expect(root.querySelectorAll("li[role='treeitem']").length).toBe(2);
                 expect(announce).not.toHaveBeenCalled();
+            });
+
+            it("names the filter input from the elements that name the tree", async () => {
+                host.ariaLabel.set("");
+                host.ariaLabelledBy.set("food-label");
+                await settle(fixture);
+                await settle(fixture);
+                const input = root.querySelector("mona-filter-input input") as HTMLInputElement;
+                expect(input.getAttribute("aria-label")).toBe("Filter Food");
+            });
+
+            it("applies typing after one debounce, not two", async () => {
+                host.filterable.set({ debounce: 100 });
+                await settle(fixture);
+                const input = root.querySelector("mona-filter-input input") as HTMLInputElement;
+                input.value = "Apple";
+                input.dispatchEvent(new Event("input", { bubbles: true }));
+                await new Promise(resolve => setTimeout(resolve, 160));
+                await settle(fixture);
+                expect(root.querySelectorAll("li[role='treeitem']").length).toBe(2);
             });
 
             it("passes axe", async () => {

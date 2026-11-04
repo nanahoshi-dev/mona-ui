@@ -20,7 +20,7 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FilterChangeEvent } from "@nanahoshi/mona-ui/common";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { createElementControlId } from "@nanahoshi/mona-ui/internal";
+import { createElementControlId, injectLabelledByText } from "@nanahoshi/mona-ui/internal";
 import { FilterInputComponent } from "@nanahoshi/mona-ui/internal/filter-input";
 import {
     type ChildrenLoadErrorEvent,
@@ -55,6 +55,7 @@ export class TreeViewComponent<T> implements ITreeView<T> {
     readonly #announcer = inject(LiveAnnouncer);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
+    readonly #labelledByText = injectLabelledByText(() => this.ariaLabelledBy());
     readonly #loadingTimers = new Set<ReturnType<typeof setTimeout>>();
     readonly #zone = inject(NgZone);
     /** The filter text the user typed, announced with its result count once the tree applies it. */
@@ -63,9 +64,10 @@ export class TreeViewComponent<T> implements ITreeView<T> {
     protected readonly emptyText = computed(() =>
         this.treeService.isTreeFiltered() ? this.messages().noMatches : this.messages().noData
     );
+    /** "Filter {name}", from the tree's `ariaLabel` or else the text of its `ariaLabelledBy` elements. */
     protected readonly filterAriaLabel = computed<string>(() => {
-        const ariaLabel = this.ariaLabel().trim();
-        return ariaLabel ? this.messages().filterLabel(ariaLabel) : this.messages().filterTree;
+        const name = this.ariaLabel().trim() || this.#labelledByText();
+        return name ? this.messages().filterLabel(name) : this.messages().filterTree;
     });
     protected readonly messages = this.#i18n.componentMessages("treeView", TREE_VIEW_DEFAULT_MESSAGES);
     protected readonly nodeTemplate = contentChild<
@@ -210,6 +212,12 @@ export class TreeViewComponent<T> implements ITreeView<T> {
         }
     }
 
+    /**
+     * Moves a node in the tree's internal structure, without going through `data`.
+     * @returns a snapshot for `undoMoveNode`, or `null` when nothing moved: `position` is `"outside"`, a node isn't
+     * in the tree, or the move isn't possible (onto the node itself or into its own subtree, inside its own parent or
+     * a disabled node).
+     */
     public moveNode(source: NodeItem<T>, target: NodeItem<T>, position: DropPosition): NodeMoveSnapshot | null {
         if (position === "outside") {
             return null;
@@ -227,7 +235,9 @@ export class TreeViewComponent<T> implements ITreeView<T> {
             sourceNode.parent !== null
                 ? sourceNode.parent.children().toList().indexOf(sourceNode)
                 : this.treeService.nodeSet().toList().indexOf(sourceNode);
-        this.treeService.moveNode(sourceNode, targetNode, position);
+        if (!this.treeService.moveNode(sourceNode, targetNode, position)) {
+            return null;
+        }
         return { originalParentUid, originalIndex, sourceNodeUid: sourceNode.uid };
     }
 

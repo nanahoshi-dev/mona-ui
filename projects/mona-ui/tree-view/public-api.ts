@@ -32,11 +32,13 @@ export type {
     DataStructure,
     DisableOptions,
     DraggableOptions,
+    DropPosition,
     DropPositionChangeEvent,
     ExpandableOptions,
     ITreeView,
     NodeItem,
     NodeKeySelector,
+    NodeDropOriginalEvent,
     NodeMoveSnapshot,
     SelectableOptions
 } from "@nanahoshi/mona-ui/internal/tree";

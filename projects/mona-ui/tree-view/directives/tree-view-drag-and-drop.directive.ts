@@ -27,7 +27,7 @@ export class TreeViewDragAndDropDirective<T> {
     public readonly nodeDrag = output<NodeDragEvent<T>>();
 
     /**
-     * @description Emitted when a node drag ends.
+     * @description Emitted when a node drag ends, dropped or not. Not cancelable: the drag is over either way.
      */
     public readonly nodeDragEnd = output<NodeDragEndEvent<T>>();
 
@@ -37,7 +37,9 @@ export class TreeViewDragAndDropDirective<T> {
     public readonly nodeDragStart = output<NodeDragStartEvent<T>>();
 
     /**
-     * @description Emitted when a node is dropped.
+     * @description Emitted when a node is dropped on another node, or moved with Ctrl+Shift+Arrow (Cmd+Shift+Arrow on
+     * macOS). The tree doesn't move the node: the handler applies the move (with `moveTreeNode`,
+     * `moveFlatTreeNode` or `event.treeView.moveNode`). Call `preventDefault()` when the move isn't applied.
      */
     public readonly nodeDrop = output<NodeDropEvent<T>>();
 
@@ -81,6 +83,9 @@ export class TreeViewDragAndDropDirective<T> {
                 treeView: this.#treeView
             });
             this.nodeDrop.emit(event);
+            if (event.isDefaultPrevented()) {
+                e.preventDefault();
+            }
         });
     }
 }

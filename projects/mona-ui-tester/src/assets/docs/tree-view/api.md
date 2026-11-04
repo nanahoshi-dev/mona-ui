@@ -168,7 +168,7 @@ Apply `monaTreeViewExpandable` to show an expander on every node with children, 
 
 ### Filtering
 
-Apply `monaTreeViewFilterable` to show a filter input above the tree that narrows the visible nodes to those whose text matches, plus their ancestors, and expands those ancestors. By default a node matches when its text contains the filter text, ignoring case; the options' `operator` (`"contains"`, `"startsWith"`, `"endsWith"` or a function), `caseSensitive` and `debounce` change that. Bind `[(filter)]` to read the text or set it from code (setting it back to `""` clears the filter, even after the user typed). `filterInput` fires first with a cancelable `FilterChangeEvent`. The expansion a filter applies is view state: it isn't reported through `expandedKeysChange` and is undone when the filter is cleared. Lazily loaded children that haven't been loaded yet aren't searched.
+Apply `monaTreeViewFilterable` to show a filter input above the tree that narrows the visible nodes to those whose text matches, plus their ancestors, and expands those ancestors. By default a node matches when its text contains the filter text, ignoring case; the options' `operator` (`"contains"`, `"startsWith"`, `"endsWith"` or a function), `caseSensitive` and `debounce` (how long after the user stops typing the filter applies; a filter set from code applies at once) change that. Bind `[(filter)]` to read the text or set it from code (setting it back to `""` clears the filter, even after the user typed). `filterInput` fires first with a cancelable `FilterChangeEvent`. The expansion a filter applies is view state: it isn't reported through `expandedKeysChange` and is undone when the filter is cleared. Lazily loaded children that haven't been loaded yet aren't searched.
 
 ```html
 <mona-tree-view
@@ -183,7 +183,7 @@ Apply `monaTreeViewFilterable` to show a filter input above the tree that narrow
 
 ### Drag and drop reordering
 
-Apply `monaTreeViewDragAndDrop` to let the consumer reorder or reparent nodes by dragging them with the mouse. Dropping near the top or bottom edge of a node places the dragged node before or after it; dropping on the rest of the node places it inside, as its last child. A node can't be dropped onto itself or into its own subtree, and disabled nodes can't be dragged.
+Apply `monaTreeViewDragAndDrop` to let the consumer reorder or reparent nodes by dragging them with the mouse or by touch, or by moving them with the keyboard. Dropping near the top or bottom edge of a node places the dragged node before or after it; dropping on the rest of the node places it inside, as its last child. A node can't be dropped onto itself or into its own subtree, and disabled nodes can't be dragged.
 
 A drop changes nothing by itself: the tree emits `nodeDrop`, and the consumer applies the move. Use the exported `moveTreeNode` (hierarchical data) or `moveFlatTreeNode` (flat data) helper inside the `nodeDrop` handler to compute an updated array and pass it back through `data`. `moveTreeNode` returns a new top-level array and updates nested children arrays in place, so untouched data items keep their identity and their tree state; `moveFlatTreeNode` returns a new array in which the moved item is replaced by a copy with its parent id updated, so key the flat tree's state with `selectBy`, `checkBy` and `expandBy` rather than by data item.
 
@@ -207,11 +207,13 @@ protected onNodeDrop(event: NodeDropEvent<FileItem>): void {
 }
 ```
 
-For flat data, call `moveFlatTreeNode(this.data(), event, "id", "parentId")` instead. Dragging has no keyboard equivalent; offer another way to move nodes (for example a "Move to…" command) when reordering is essential.
+For flat data, call `moveFlatTreeNode(this.data(), event, "id", "parentId")` instead.
+
+The keyboard moves the active node with Ctrl+Shift+Arrow (Cmd+Shift+Arrow on macOS): ArrowUp and ArrowDown move it before its previous or after its next visible sibling, ArrowRight (ArrowLeft in RTL) moves it into its previous sibling as the last child, and ArrowLeft (ArrowRight in RTL) moves it out, after its parent. A keyboard move emits the same `nodeDrop` as a drop, with the `KeyboardEvent` as `originalEvent`, so the handler above serves both. Once the handler has applied the move, the node stays active, a node it moved into opens, and the move is announced ("Apple moved after Bread"); a move the handler didn't apply isn't announced. Disabled nodes don't move, and nothing moves into a disabled node.
 
 ### Lazy-loaded children
 
-Pass a function returning an `Observable` as `children` to load a node's children on first expand instead of upfront. Provide `hasChildren` so unexpanded nodes can render an expander before their children are fetched, and apply `monaTreeViewExpandable`: without it there is no expander and nothing triggers the load. Loaded children are cached, so collapsing and expanding the node again doesn't request them again. Pass the function as a property (an arrow function), not a method, so it keeps `this`.
+Pass a function returning an `Observable` as `children` to load a node's children on first expand instead of upfront. Provide `hasChildren` so unexpanded nodes can render an expander before their children are fetched, and apply `monaTreeViewExpandable`: without it there is no expander and nothing triggers the load. Loaded children are cached, so collapsing and expanding the node again doesn't request them again. A node expanded through `expandedKeys`, from the start or later, loads its children once it is shown. Pass the function as a property (an arrow function), not a method, so it keeps `this`.
 
 While children load, the node is expanded and `aria-busy`, its expander reads "Loading {node}", and a load that takes more than a moment (400 ms) is announced. If the observable errors, `childrenLoadError` emits with the node and the error, the failure is announced, and the node is collapsed again and described as failed ("Couldn't load the items in {node}"); its expander reads "Retry loading {node}", and expanding it loads again.
 
@@ -254,19 +256,19 @@ protected onLoadError(event: ChildrenLoadErrorEvent<FolderItem>): void {
 
 ### Cancelable events
 
-`nodeSelect`, `nodeCheck`, `nodeClick`, `nodeDragStart`, `nodeDragEnd`, `nodeDrop`, and `filterInput` emit an event object with `preventDefault()` and `isDefaultPrevented()`. Calling `preventDefault()` in a handler stops the corresponding state change (selection, check, the click's selection, drag, drop, or filter) from being applied. `nodeDrag` is not cancelable.
+`nodeSelect`, `nodeCheck`, `nodeClick`, `nodeDragStart`, `nodeDrop`, and `filterInput` emit an event object with `preventDefault()` and `isDefaultPrevented()`. Calling `preventDefault()` in a handler stops the corresponding state change (selection, check, the click's selection, drag, or filter) from being applied. A drop changes nothing by itself, so `preventDefault()` on `nodeDrop` tells the tree the move wasn't applied: it doesn't move focus to the dropped node. `nodeDrag` and `nodeDragEnd` aren't cancelable: a drag always ends, and `preventDefault()` on `nodeDragEnd` has no effect. `nodeSelect` and `selectionChange` fire only when the selection would change: clicking (or pressing Enter on) the selected node of a single selection that isn't `toggleable` fires neither.
 
 ### Data modes
 
-Switching `mode` requires providing the matching fields: `children` for `"hierarchical"`, or `idField` and `parentIdField` for `"flat"`. The two field sets are independent inputs and are not cross-validated. In hierarchical mode, a new `data` value reuses the node of every data object the tree already had, so lazily loaded children and the active node survive a refresh such as the one after `moveTreeNode`. Changing `textField` doesn't rebuild the nodes.
+Switching `mode` requires providing the matching fields: `children` for `"hierarchical"`, or `idField` and `parentIdField` for `"flat"`. The two field sets are independent inputs and are not cross-validated. In hierarchical mode, a new `data` value reuses the node of every data object the tree already had, so lazily loaded children and the active node survive a refresh such as the one after `moveTreeNode`. In flat mode the nodes are rebuilt on every refresh; the active node is kept by its `idField` value, so it survives `moveFlatTreeNode` too. Changing `textField` doesn't rebuild the nodes.
 
 ### Without `monaTreeViewExpandable` every node is open
 
-Without `monaTreeViewExpandable` (or with `{ enabled: false }`), every node with children is rendered expanded, has no expander and no `aria-expanded`, and can't be collapsed. Apply the directive for collapsible trees and for lazily loaded children.
+Without `monaTreeViewExpandable` (or with `{ enabled: false }`), every node with children is rendered expanded, has no expander and no `aria-expanded`, and can't be collapsed: the collapse key moves to the parent, `*` does nothing, and no expanded keys are written. Apply the directive for collapsible trees and for lazily loaded children.
 
 ### Moving nodes from code
 
-`TreeViewComponent` exposes `moveNode(source, target, position)` and `undoMoveNode(snapshot)` for moving nodes in the tree's internal structure directly, without going through `data`. The `nodeDrop` event's `treeView` property refers to the emitting `TreeViewComponent` instance, typed as the exported `ITreeView<T>`.
+`TreeViewComponent` exposes `moveNode(source, target, position)` and `undoMoveNode(snapshot)` for moving nodes in the tree's internal structure directly, without going through `data`. `moveNode` returns `null`, and changes nothing, for a move it can't make: onto the node itself or into its own subtree, inside the node's own parent or inside a disabled node, or `"outside"`. The `nodeDrop` event's `treeView` property refers to the emitting `TreeViewComponent` instance, typed as the exported `ITreeView<T>`.
 
 ### Each tree view has its own state
 
@@ -274,7 +276,7 @@ Every `mona-tree-view` provides its own tree state, so several trees on a page, 
 
 ### Keys inside node templates
 
-The tree handles the keys pressed anywhere inside it, including in controls placed in a node template: arrows, Home, End, `*`, Enter, Space and typeahead characters are taken by the tree. Keep node templates to static content (text, icons, badges).
+Keys pressed in a control placed in a node template (an input, a button, a nested tree) are left to that control: the tree only handles keys pressed while it has focus itself. The control still isn't a Tab stop of its own unless you make it one, and a click on it also activates its node.
 
 ## Accessibility & Forms Integration
 
@@ -282,20 +284,21 @@ The tree handles the keys pressed anywhere inside it, including in controls plac
 
 The arrow keys that open and close nodes follow the tree's text direction (the nearest `dir`, or the application's direction): in a right-to-left tree, ArrowLeft and ArrowRight swap.
 
-| Key                                    | Action                                                                                                                                                                                                                                                                               |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `ArrowDown`                            | Move to the next visible node. From the last node, wraps to the first.                                                                                                                                                                                                               |
-| `ArrowUp`                              | Move to the previous visible node. From the first node, wraps to the last.                                                                                                                                                                                                           |
-| `Home`                                 | Move to the first visible node.                                                                                                                                                                                                                                                      |
-| `End`                                  | Move to the last visible node.                                                                                                                                                                                                                                                       |
-| `ArrowRight` (LTR) / `ArrowLeft` (RTL) | On a closed node with children, expand it (loading lazy children). On an open node, move to its first child. On a node without children, nothing.                                                                                                                                    |
-| `ArrowLeft` (LTR) / `ArrowRight` (RTL) | On an open node, collapse it. On a closed node or a node without children, move to its parent. On a root node that isn't open, nothing.                                                                                                                                              |
-| `*`                                    | Expand the active node and all of its siblings that have children.                                                                                                                                                                                                                   |
-| `Enter`                                | With `monaTreeViewSelectable`, select the active node. In multiple mode, or in single mode with `toggleable`, Enter on a selected node deselects it. `nodeSelect` fires first and can cancel it. With `childrenOnly`, nodes with children aren't selected.                           |
-| `Space`                                | With `monaTreeViewCheckable`, check or uncheck the active node when it has a checkbox (`hasCheckbox`, and only nodes without children with `childrenOnly`). `nodeCheck` fires first and can cancel it.                                                                               |
-| Any letter or digit, `-` or `_`        | Typeahead: move to the next visible node, after the active one and wrapping around, whose text starts with the typed characters (ignoring case). Keys typed within 200 ms build one prefix; after a pause the next key starts a new search. Ignored while Ctrl, Alt or Meta is held. |
+| Key                                    | Action                                                                                                                                                                                                                                                                                                                                         |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ArrowDown`                            | Move to the next visible node. From the last node, wraps to the first.                                                                                                                                                                                                                                                                         |
+| `ArrowUp`                              | Move to the previous visible node. From the first node, wraps to the last.                                                                                                                                                                                                                                                                     |
+| `Home`                                 | Move to the first visible node.                                                                                                                                                                                                                                                                                                                |
+| `End`                                  | Move to the last visible node.                                                                                                                                                                                                                                                                                                                 |
+| `ArrowRight` (LTR) / `ArrowLeft` (RTL) | On a closed node with children, expand it (loading lazy children). On an open node, move to its first child. On a node without children, nothing.                                                                                                                                                                                              |
+| `ArrowLeft` (LTR) / `ArrowRight` (RTL) | On an open node, collapse it. On a closed node, a node without children, or a node that can't be collapsed (disabled, or expanding is off), move to its parent. On a root node, nothing else.                                                                                                                                                  |
+| `*`                                    | Expand the active node and all of its siblings that have children.                                                                                                                                                                                                                                                                             |
+| `Enter`                                | With `monaTreeViewSelectable`, select the active node. In multiple mode, or in single mode with `toggleable`, Enter on a selected node deselects it; otherwise Enter on the selected node does nothing. `nodeSelect` fires first and can cancel it. With `childrenOnly`, nodes with children aren't selected.                                  |
+| `Space`                                | With `monaTreeViewCheckable`, check or uncheck the active node when it has a checkbox (`hasCheckbox`, and only nodes without children with `childrenOnly`). `nodeCheck` fires first and can cancel it.                                                                                                                                         |
+| Any letter or digit, `-` or `_`        | Typeahead: move to the next visible node, after the active one and wrapping around, whose text starts with the typed characters (ignoring case). Keys typed within 200 ms build one prefix, and the active node stays while it still matches the longer prefix ("ap" on Apple stays on Apple); after a pause the next key starts a new search. |
+| `Ctrl`+`Shift`+arrow (`Cmd` on macOS)  | With `monaTreeViewDragAndDrop`, move the active node: ArrowUp / ArrowDown before its previous or after its next sibling, ArrowRight (LTR) into its previous sibling, ArrowLeft (LTR) out after its parent. See [Drag and drop reordering](#drag-and-drop-reordering).                                                                          |
 
-Disabled nodes can be moved to, but Enter, Space, the expand and collapse keys and `*` leave them as they are. Visible nodes are those not hidden by a collapsed ancestor or by the filter.
+Disabled nodes can be moved to, but Enter, Space, the expand and collapse keys, `*` and the move keys leave them as they are. Visible nodes are those not hidden by a collapsed ancestor or by the filter. Other keys held with Ctrl, Alt or Meta, and keys pressed while an input method is composing text, are left to the page.
 
 ### Focus
 
@@ -313,6 +316,7 @@ The tree element is the `mona-tree` element inside `mona-tree-view`; the `mona-t
 | Tree            | `aria-describedby`                            | When no node is shown                                                                                                         | The "No data" or "No matching items" text                                      |
 | Tree            | `aria-multiselectable`                        | When selectable with `mode: "multiple"` and not checkable                                                                     | `true`                                                                         |
 | Tree            | `aria-activedescendant`                       | While a node is active                                                                                                        | The active node's element id                                                   |
+| Tree            | `aria-keyshortcuts`                           | With `monaTreeViewDragAndDrop`                                                                                                | The four Ctrl+Shift+arrow move keys                                            |
 | Child node list | `role`                                        | The nested list of an expanded node                                                                                           | `group`                                                                        |
 | Node            | `role`                                        | Always                                                                                                                        | `treeitem`                                                                     |
 | Node            | `aria-level`, `aria-setsize`, `aria-posinset` | Always                                                                                                                        | The node's depth and position among its visible siblings                       |
@@ -325,9 +329,9 @@ The tree element is the `mona-tree` element inside `mona-tree-view`; the `mona-t
 | Node            | `aria-checked`                                | When the node is checkable                                                                                                    | `true` / `false` / `mixed`                                                     |
 | Expander        | `aria-label`                                  | On each expander button (not a Tab stop)                                                                                      | "Expand {node}", "Collapse {node}", "Loading {node}" or "Retry loading {node}" |
 | Filter          | `role="search"`, `aria-label`                 | When filterable                                                                                                               | A search landmark around the filter input, named like the input                |
-| Filter input    | `aria-label`, `aria-controls`                 | When filterable                                                                                                               | "Filter {name}" from `ariaLabel` (or "Filter tree"), and the tree's id         |
+| Filter input    | `aria-label`, `aria-controls`                 | When filterable                                                                                                               | "Filter {name}" from the tree's name (or "Filter tree"), and the tree's id     |
 
-Name every tree with `ariaLabel` or `ariaLabelledBy`; in development, an unnamed tree logs a warning. A plain `aria-label` attribute on `mona-tree-view` doesn't name the tree. The filter input takes its name from `ariaLabel` only: a tree named through `ariaLabelledBy` gets a filter named "Filter tree". After the user types in the filter, the number of matching nodes is announced ("3 results", or "No matching items"); a filter set from code isn't announced. Each node's checkbox is hidden from assistive technology, because the node itself reports `aria-checked`. Announcements and labels are translated messages (`treeView` namespace); `TREE_VIEW_DEFAULT_MESSAGES` holds the English defaults.
+Name every tree with `ariaLabel` or `ariaLabelledBy`; in development, an unnamed tree logs a warning. A plain `aria-label` attribute on `mona-tree-view` doesn't name the tree. The filter input's name is built from `ariaLabel`, or else from the text of the `ariaLabelledBy` elements. After the user types in the filter, the number of matching nodes is announced ("3 results", or "No matching items"); a filter set from code isn't announced. A keyboard move is announced once it's applied ("Apple moved into Fruits"). Each node's checkbox is hidden from assistive technology, because the node itself reports `aria-checked`. Announcements and labels are translated messages (`treeView` namespace); `TREE_VIEW_DEFAULT_MESSAGES` holds the English defaults.
 
 ### Form Interaction
 
@@ -365,10 +369,10 @@ Tree View does not implement `ControlValueAccessor` or the signal forms `FormVal
 
 #### Methods
 
-| Name           | Signature                                                                                                                        | Description                                                                                                                                                              |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `moveNode`     | `(source: NodeItem<T>, target: NodeItem<T>, position: "before" \| "after" \| "inside" \| "outside") => NodeMoveSnapshot \| null` | Moves a node in the tree's internal structure. Returns a snapshot usable with `undoMoveNode`, or `null` when `position` is `"outside"` or either node isn't in the tree. |
-| `undoMoveNode` | `(snapshot: NodeMoveSnapshot) => void`                                                                                           | Reverts a move previously performed by `moveNode`.                                                                                                                       |
+| Name           | Signature                                                                                        | Description                                                                                                                                                                                                                                                               |
+| -------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `moveNode`     | `(source: NodeItem<T>, target: NodeItem<T>, position: DropPosition) => NodeMoveSnapshot \| null` | Moves a node in the tree's internal structure. Returns a snapshot usable with `undoMoveNode`, or `null` when nothing moved: `position` is `"outside"`, either node isn't in the tree, or the move isn't possible (see [Moving nodes from code](#moving-nodes-from-code)). |
+| `undoMoveNode` | `(snapshot: NodeMoveSnapshot) => void`                                                           | Reverts a move previously performed by `moveNode`.                                                                                                                                                                                                                        |
 
 ---
 
@@ -487,12 +491,12 @@ No outputs.
 
 #### Outputs
 
-| Name            | Type                    | Description                                                                                                                                                                         |
-| --------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `nodeDrag`      | `NodeDragEvent<T>`      | Emitted while a node is being dragged, with the node under the pointer. Not cancelable.                                                                                             |
-| `nodeDragEnd`   | `NodeDragEndEvent<T>`   | Emitted when a node drag ends. Cancelable.                                                                                                                                          |
-| `nodeDragStart` | `NodeDragStartEvent<T>` | Emitted when a node drag starts. Cancelable.                                                                                                                                        |
-| `nodeDrop`      | `NodeDropEvent<T>`      | Emitted when a node is dropped before, after or inside another node. Cancelable. The tree doesn't move the node itself — see [Drag and drop reordering](#drag-and-drop-reordering). |
+| Name            | Type                    | Description                                                                                                                                                                                                                                                  |
+| --------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `nodeDrag`      | `NodeDragEvent<T>`      | Emitted while a node is being dragged, with the node under the pointer. Not cancelable.                                                                                                                                                                      |
+| `nodeDragEnd`   | `NodeDragEndEvent<T>`   | Emitted when a node drag ends, dropped or not. Not cancelable: the drag is over either way.                                                                                                                                                                  |
+| `nodeDragStart` | `NodeDragStartEvent<T>` | Emitted when a node drag starts. Cancelable.                                                                                                                                                                                                                 |
+| `nodeDrop`      | `NodeDropEvent<T>`      | Emitted when a node is dropped before, after or inside another node, or moved with Ctrl+Shift+arrow. The tree doesn't move the node itself — see [Drag and drop reordering](#drag-and-drop-reordering). Call `preventDefault()` when the move isn't applied. |
 
 ---
 
@@ -530,6 +534,7 @@ Everything below is exported from `@nanahoshi/mona-ui/tree-view`, except `Filter
 | `ChildrenSelector<T>`            | `string \| Selector<T, Iterable<T> \| Observable<Iterable<T>>>`                                           |
 | `NodeKeySelector<T, K>`          | `string \| Selector<T, K> \| null`                                                                        |
 | `DataStructure`                  | `"flat" \| "hierarchical"` (the `mode` input's type)                                                      |
+| `DropPosition`                   | `"before" \| "after" \| "inside" \| "outside"` (where a node is dropped or moved)                         |
 | `NodeItem<T>`                    | `{ data: T; hasChildren: boolean; uid: string }` — a node as the events and methods report it             |
 | `NodeMoveSnapshot`               | `{ originalIndex: number; originalParentUid: string \| null; sourceNodeUid: string }`                     |
 | `ITreeView<T>`                   | `moveNode(...)` and `undoMoveNode(...)`, as on `TreeViewComponent` (the type of `NodeDropEvent.treeView`) |
@@ -539,15 +544,15 @@ Everything below is exported from `@nanahoshi/mona-ui/tree-view`, except `Filter
 
 The cancelable events have `preventDefault()`, `isDefaultPrevented()`, `originalEvent` and `type`.
 
-| Type                         | Members                                                                                                                                       |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NodeClickEvent<T>`          | `nodeItem`; `originalEvent: MouseEvent`. Cancelable.                                                                                          |
-| `NodeSelectEvent<T>`         | `nodeItem`; `originalEvent: MouseEvent \| KeyboardEvent`. Cancelable.                                                                         |
-| `NodeCheckEvent<T>`          | `nodeItem`; `originalEvent: MouseEvent \| KeyboardEvent`. Cancelable.                                                                         |
-| `NodeDragEvent<T>`           | `nodeItem` (the dragged node); `targetNodeItem: NodeItem<T> \| null` (the node under the pointer); `originalEvent`; `type`. Not cancelable.   |
-| `NodeDragStartEvent<T>`      | `nodeItem`; `originalEvent: MouseEvent \| TouchEvent`. Cancelable.                                                                            |
-| `NodeDragEndEvent<T>`        | `nodeItem`; `originalEvent: MouseEvent \| TouchEvent`. Cancelable.                                                                            |
-| `NodeDropEvent<T>`           | `sourceNode` (also `nodeItem`); `targetNode`; `position: "before" \| "after" \| "inside" \| "outside"`; `treeView: ITreeView<T>`. Cancelable. |
-| `FilterChangeEvent`          | `filter: string`. Cancelable.                                                                                                                 |
-| `ChildrenLoadErrorEvent<T>`  | `error: unknown`; `node: NodeItem<T>`.                                                                                                        |
-| `DropPositionChangeEvent<T>` | `position`; `targetNode`. Exported, but not emitted by any public output.                                                                     |
+| Type                         | Members                                                                                                                                                                                                                                    |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `NodeClickEvent<T>`          | `nodeItem`; `originalEvent: MouseEvent`. Cancelable.                                                                                                                                                                                       |
+| `NodeSelectEvent<T>`         | `nodeItem`; `originalEvent: MouseEvent \| KeyboardEvent`. Cancelable.                                                                                                                                                                      |
+| `NodeCheckEvent<T>`          | `nodeItem`; `originalEvent: MouseEvent \| KeyboardEvent`. Cancelable.                                                                                                                                                                      |
+| `NodeDragEvent<T>`           | `nodeItem` (the dragged node); `targetNodeItem: NodeItem<T> \| null` (the node under the pointer); `originalEvent`; `type`. Not cancelable.                                                                                                |
+| `NodeDragStartEvent<T>`      | `nodeItem`; `originalEvent: MouseEvent \| TouchEvent`. Cancelable.                                                                                                                                                                         |
+| `NodeDragEndEvent<T>`        | `nodeItem`; `originalEvent: MouseEvent \| TouchEvent`. Not cancelable (`preventDefault()` has no effect).                                                                                                                                  |
+| `NodeDropEvent<T>`           | `sourceNode` (also `nodeItem`); `targetNode`; `position: DropPosition`; `treeView: ITreeView<T>`; `originalEvent: NodeDropOriginalEvent` (`MouseEvent \| TouchEvent \| KeyboardEvent`: a keyboard move carries its key press). Cancelable. |
+| `FilterChangeEvent`          | `filter: string`. Cancelable.                                                                                                                                                                                                              |
+| `ChildrenLoadErrorEvent<T>`  | `error: unknown`; `node: NodeItem<T>`.                                                                                                                                                                                                     |
+| `DropPositionChangeEvent<T>` | `position`; `targetNode`. Exported, but not emitted by any public output.                                                                                                                                                                  |

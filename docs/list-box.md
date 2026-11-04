@@ -99,11 +99,11 @@ export class MenuEditorComponent {
 
 ## 2. Labelling
 
-Name each list box with `aria-label`. The name moves to the inner `listbox`; the host keeps no ARIA attributes.
+Name each list box with `aria-label`, or point `aria-labelledby` at a visible heading. The name moves to the inner `listbox`; the host keeps no ARIA attributes.
 
 - The toolbar is a `toolbar` named "{name} actions" ("Menu actions"). Set `toolbarAriaLabel` to name it yourself.
 - Each button has a name, also shown as its tooltip. The transfer buttons name the connected box: "Transfer to Available foods", "Transfer all from Available foods". Without a name on the connected box they say "the other list".
-- The list box has no `aria-labelledby` input. Use `aria-label`; the toolbar and transfer labels are built from it.
+- With `aria-labelledby` and no `aria-label`, the toolbar and transfer labels are built from the heading's text.
 - An empty list box keeps its named listbox as a Tab stop, described by "No data".
 
 ---

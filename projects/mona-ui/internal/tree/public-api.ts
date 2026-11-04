@@ -28,6 +28,7 @@ export * from "./models/TreeNodeCheckEvent";
 export * from "./models/TreeNodeExpandEvent";
 export * from "./models/TreeNodeSelectEvent";
 export * from "./models/SelectableOptions";
+export type * from "./models/TreeKeyboardMove";
 export * from "./models/TreeSelectors";
 export * from "./services/tree.service";
 export * from "./utils/moveFlatTreeNode";

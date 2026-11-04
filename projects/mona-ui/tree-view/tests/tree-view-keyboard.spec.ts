@@ -3,7 +3,9 @@ import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { TreeViewComponent } from "../components/tree-view/tree-view.component";
 import { TreeViewCheckableDirective } from "../directives/tree-view-checkable.directive";
+import { TreeViewDisableDirective } from "../directives/tree-view-disable.directive";
 import { TreeViewExpandableDirective } from "../directives/tree-view-expandable.directive";
+import { TreeViewNodeTemplateDirective } from "../directives/tree-view-node-template.directive";
 import { TreeViewSelectableDirective } from "../directives/tree-view-selectable.directive";
 
 interface Food {
@@ -18,15 +20,29 @@ const FOODS: Food[] = [
         text: "Fruits",
         children: [
             { id: "A1", text: "Apple" },
+            { id: "A3", text: "Apricot" },
             { id: "A2", text: "Avocado" }
         ]
     },
-    { id: "B", text: "Vegetables", children: [{ id: "B1", text: "Beet" }] },
+    {
+        id: "B",
+        text: "Vegetables",
+        children: [
+            { id: "B1", text: "Beet" },
+            { id: "B2", text: "Roots", children: [{ id: "B21", text: "Carrot" }] }
+        ]
+    },
     { id: "C", text: "Cereals" }
 ];
 
 @Component({
-    imports: [TreeViewComponent, TreeViewExpandableDirective, TreeViewSelectableDirective, TreeViewCheckableDirective],
+    imports: [
+        TreeViewComponent,
+        TreeViewExpandableDirective,
+        TreeViewSelectableDirective,
+        TreeViewCheckableDirective,
+        TreeViewDisableDirective
+    ],
     template: `
         <div [attr.dir]="dir()">
             <mona-tree-view
@@ -34,15 +50,20 @@ const FOODS: Food[] = [
                 [data]="data"
                 children="children"
                 textField="text"
-                monaTreeViewExpandable
+                [monaTreeViewExpandable]="expandable()"
                 expandBy="id"
                 [(expandedKeys)]="expanded"
                 monaTreeViewSelectable
                 selectBy="id"
                 [(selectedKeys)]="selected"
+                (nodeSelect)="nodeSelects = nodeSelects + 1"
+                (selectionChange)="selectionChanges = selectionChanges + 1"
                 [monaTreeViewCheckable]="checkable()"
                 checkBy="id"
-                [(checkedKeys)]="checked"></mona-tree-view>
+                [(checkedKeys)]="checked"
+                monaTreeViewDisable
+                disableBy="id"
+                [disabledKeys]="disabled()"></mona-tree-view>
         </div>
     `
 })
@@ -51,8 +72,34 @@ class HostComponent {
     public readonly checked = signal<string[]>([]);
     public readonly data = FOODS;
     public readonly dir = signal<"ltr" | "rtl">("ltr");
+    public readonly disabled = signal<string[]>([]);
+    public readonly expandable = signal<"" | { enabled: false }>("");
     public readonly expanded = signal<string[]>([]);
     public readonly selected = signal<string[]>([]);
+    public nodeSelects = 0;
+    public selectionChanges = 0;
+}
+
+@Component({
+    imports: [TreeViewComponent, TreeViewExpandableDirective, TreeViewNodeTemplateDirective],
+    template: `
+        <mona-tree-view
+            ariaLabel="Food"
+            [data]="data"
+            children="children"
+            textField="text"
+            monaTreeViewExpandable
+            expandBy="id"
+            [(expandedKeys)]="expanded">
+            <ng-template monaTreeViewNodeTemplate let-item>
+                {{ item.text }} <input [attr.aria-label]="'Rename ' + item.text" />
+            </ng-template>
+        </mona-tree-view>
+    `
+})
+class TemplateHostComponent {
+    public readonly data = FOODS;
+    public readonly expanded = signal<string[]>([]);
 }
 
 describe("tree view keyboard", () => {
@@ -78,8 +125,8 @@ describe("tree view keyboard", () => {
         return id ? (document.getElementById(id)?.querySelector("mona-tree-node")?.textContent?.trim() ?? null) : null;
     }
 
-    async function press(key: string): Promise<KeyboardEvent> {
-        const event = new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true });
+    async function press(key: string, init: KeyboardEventInit = {}): Promise<KeyboardEvent> {
+        const event = new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true, ...init });
         tree().dispatchEvent(event);
         await settle();
         return event;
@@ -166,5 +213,91 @@ describe("tree view keyboard", () => {
         await settle();
         await press(" ");
         expect(host.checked()).toContain("B");
+    });
+
+    it("reports nothing for Enter on the node that is already selected", async () => {
+        await press("Enter");
+        expect(host.selected()).toEqual(["A"]);
+        expect([host.nodeSelects, host.selectionChanges]).toEqual([1, 1]);
+
+        await press("Enter");
+        expect(host.selected()).toEqual(["A"]);
+        expect([host.nodeSelects, host.selectionChanges]).toEqual([1, 1]);
+    });
+
+    it("keeps the active node while a longer typeahead still matches it", async () => {
+        await press("ArrowRight");
+        await press("a");
+        expect(active()).toBe("Apple");
+        await press("p");
+        expect(active()).toBe("Apple");
+        await press("r");
+        expect(active()).toBe("Apricot");
+    });
+
+    it("leaves keys with Ctrl, Alt or Meta, and keys while composing, to the page", async () => {
+        for (const init of [{ ctrlKey: true }, { altKey: true }, { metaKey: true }, { isComposing: true }]) {
+            const event = await press("ArrowDown", init);
+            expect(event.defaultPrevented).toBe(false);
+            expect(active()).toBe("Fruits");
+        }
+    });
+
+    it("moves to the parent with ArrowLeft when expanding is off, without writing expanded keys", async () => {
+        host.expandable.set({ enabled: false });
+        await settle();
+        await press("ArrowRight");
+        expect(active()).toBe("Apple");
+
+        await press("ArrowLeft");
+        expect(active()).toBe("Fruits");
+        await press("ArrowLeft");
+        expect(active()).toBe("Fruits");
+        await press("*");
+        expect(host.expanded()).toEqual([]);
+    });
+
+    it("moves from a disabled open node to its parent with ArrowLeft", async () => {
+        host.expanded.set(["B", "B2"]);
+        host.disabled.set(["B2"]);
+        await settle();
+        await press("End");
+        await press("ArrowUp");
+        await press("ArrowUp");
+        expect(active()).toBe("Roots");
+
+        await press("ArrowLeft");
+        expect(active()).toBe("Vegetables");
+        expect(host.expanded()).toEqual(["B", "B2"]);
+    });
+});
+
+describe("tree view keyboard with controls in node templates", () => {
+    it("leaves keys typed into a control in a node template to that control", async () => {
+        const fixture: ComponentFixture<TemplateHostComponent> = TestBed.createComponent(TemplateHostComponent);
+        const root = fixture.nativeElement as HTMLElement;
+        document.body.appendChild(root);
+        try {
+            fixture.detectChanges();
+            await fixture.whenStable();
+            const tree = root.querySelector("[role='tree']") as HTMLElement;
+            tree.focus();
+            await new Promise(resolve => setTimeout(resolve, 5));
+            fixture.detectChanges();
+            const input = root.querySelector("input") as HTMLInputElement;
+            for (const key of ["ArrowRight", "Home", " ", "a"]) {
+                const event = new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true });
+                input.dispatchEvent(event);
+                expect(event.defaultPrevented).toBe(false);
+            }
+            fixture.detectChanges();
+            expect(fixture.componentInstance.expanded()).toEqual([]);
+
+            const event = new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true });
+            tree.dispatchEvent(event);
+            expect(event.defaultPrevented).toBe(true);
+        } finally {
+            root.remove();
+        }
     });
 });

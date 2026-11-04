@@ -431,6 +431,9 @@ export const IT_IT_MESSAGES = {
         filterTree: "Filtra albero",
         loadError: (node: string) => `Impossibile caricare gli elementi di ${node}`,
         loadingNode: (node: string) => `Caricamento di ${node}`,
+        movedAfter: (node: string, target: string) => `${node} spostato dopo ${target}`,
+        movedBefore: (node: string, target: string) => `${node} spostato prima di ${target}`,
+        movedInto: (node: string, target: string) => `${node} spostato in ${target}`,
         noData: "Nessun dato disponibile",
         noMatches: "Nessun elemento corrispondente",
         results: (count: number) =>

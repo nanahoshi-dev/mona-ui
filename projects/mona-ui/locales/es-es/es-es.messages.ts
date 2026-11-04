@@ -433,6 +433,9 @@ export const ES_ES_MESSAGES = {
         filterTree: "Filtrar árbol",
         loadError: (node: string) => `No se pudieron cargar los elementos de ${node}`,
         loadingNode: (node: string) => `Cargando ${node}`,
+        movedAfter: (node: string, target: string) => `${node} se movió después de ${target}`,
+        movedBefore: (node: string, target: string) => `${node} se movió antes de ${target}`,
+        movedInto: (node: string, target: string) => `${node} se movió dentro de ${target}`,
         noData: "No hay datos",
         noMatches: "No hay elementos coincidentes",
         results: (count: number) =>

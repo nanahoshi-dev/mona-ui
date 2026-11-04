@@ -433,6 +433,9 @@ export const DE_DE_MESSAGES = {
         filterTree: "Baum filtern",
         loadError: (node: string) => `Die Elemente in ${node} konnten nicht geladen werden`,
         loadingNode: (node: string) => `${node} wird geladen`,
+        movedAfter: (node: string, target: string) => `${node} nach ${target} verschoben`,
+        movedBefore: (node: string, target: string) => `${node} vor ${target} verschoben`,
+        movedInto: (node: string, target: string) => `${node} in ${target} verschoben`,
         noData: "Keine Daten",
         noMatches: "Keine passenden Elemente",
         results: (count: number) =>

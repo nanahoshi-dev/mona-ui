@@ -443,6 +443,9 @@ export const FR_FR_MESSAGES = {
         filterTree: "Filtrer l’arborescence",
         loadError: (node: string) => `Impossible de charger les éléments de ${node}`,
         loadingNode: (node: string) => `Chargement de ${node}`,
+        movedAfter: (node: string, target: string) => `${node} déplacé après ${target}`,
+        movedBefore: (node: string, target: string) => `${node} déplacé avant ${target}`,
+        movedInto: (node: string, target: string) => `${node} déplacé dans ${target}`,
         noData: "Aucune donnée",
         noMatches: "Aucun élément correspondant",
         results: (count: number) =>

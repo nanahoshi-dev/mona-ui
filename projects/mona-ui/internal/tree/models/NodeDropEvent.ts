@@ -4,7 +4,11 @@ import { NodeEvent } from "./NodeEvent";
 import type { NodeItem } from "./NodeItem";
 import { TreeNode } from "./TreeNode";
 
-export class NodeDropEvent<T> extends NodeEvent<T> {
+/**
+ * A request to move a node: a drop, or a keyboard move (Ctrl+Shift+Arrow), whose original event is then the
+ * `KeyboardEvent`.
+ */
+export class NodeDropEvent<T> extends NodeEvent<T, NodeDropOriginalEvent> {
     readonly #params: NodeDropEventArgs<T>;
     public constructor(params: NodeDropEventArgs<T>) {
         super("nodeDrop", params.sourceNode, params.event);
@@ -28,14 +32,14 @@ export class NodeDropEvent<T> extends NodeEvent<T> {
     }
 }
 
-export class NodeDropEventSansTree<T> extends NodeEvent<T> {
+export class NodeDropEventSansTree<T> extends NodeEvent<T, NodeDropOriginalEvent> {
     readonly #params: NodeDropEventArgsSansTree<T>;
     public constructor(params: NodeDropEventArgsSansTree<T>) {
         super("nodeDropSansTree", params.sourceNode, params.event);
         this.#params = params;
     }
 
-    public get event(): MouseEvent | TouchEvent {
+    public get event(): NodeDropOriginalEvent {
         return this.#params.event;
     }
 
@@ -52,8 +56,11 @@ export class NodeDropEventSansTree<T> extends NodeEvent<T> {
     }
 }
 
+/** The event behind a `nodeDrop`: the pointer event of a drop, or the key press of a keyboard move. */
+export type NodeDropOriginalEvent = MouseEvent | TouchEvent | KeyboardEvent;
+
 export interface NodeDropEventArgs<T> {
-    event: MouseEvent | TouchEvent;
+    event: NodeDropOriginalEvent;
     position: DropPosition;
     sourceNode: TreeNode<T>;
     targetNode: TreeNode<T>;

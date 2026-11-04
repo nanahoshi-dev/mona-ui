@@ -17,6 +17,15 @@ export interface MonaTreeViewMessages {
     /** Announced while a node's children take a while to load, and the expander's name meanwhile. */
     loadingNode(node: string): string;
 
+    /** Announced when a keyboard move (Ctrl+Shift+Arrow) put a node after another node. */
+    movedAfter(node: string, target: string): string;
+
+    /** Announced when a keyboard move put a node before another node. */
+    movedBefore(node: string, target: string): string;
+
+    /** Announced when a keyboard move put a node inside another node, as its last child. */
+    movedInto(node: string, target: string): string;
+
     /** Shown, and describes the tree, when the tree view has no data. */
     readonly noData: string;
 

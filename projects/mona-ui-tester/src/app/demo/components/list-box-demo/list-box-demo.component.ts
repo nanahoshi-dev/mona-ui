@@ -261,6 +261,7 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
             [size]="size()"
             [textField]="textField()"
             [toolbar]="toolbarCustomizations()"
+            [aria-labelledby]="ariaLabelledBy()"
             [toolbarAriaLabel]="toolbarAriaLabel()"
             [width]="width()">
             @if (featureData["headerTemplate"].active) {
@@ -370,6 +371,7 @@ class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponen
     });
     protected readonly viewItems = computed(() => this.#listData());
     public readonly ariaLabel = input("Available foods");
+    public readonly ariaLabelledBy = input("");
     public readonly connectedList = input<ReturnType<ListBoxComponent["connectedList"]>>(null);
     public readonly height = input<ReturnType<ListBoxComponent["height"]>>("100%");
     public readonly rounded = input<ReturnType<ListBoxComponent["rounded"]>>("medium");
