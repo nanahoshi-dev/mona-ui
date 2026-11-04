@@ -11,20 +11,28 @@
             <tr monaGridAddRow></tr>
         }
         @for (bodyRow of bodyRows(); track bodyRow.key; let rowIndex = $index) {
+            @let ariaRowIndex = ariaRows().indices[rowIndex];
             @if (bodyRow.type === "group") {
-                <tr monaGridGroupRow [group]="bodyRow" [rowIndex]="rowIndex"></tr>
+                <tr monaGridGroupRow [group]="bodyRow" [rowIndex]="rowIndex" [ariaRowIndex]="ariaRowIndex"></tr>
             } @else if (bodyRow.type === "groupFooter") {
-                <tr monaGridFooterRow [groupKey]="bodyRow.groupAggregate.groupKey"></tr>
+                <tr
+                    monaGridFooterRow
+                    [groupKey]="bodyRow.groupAggregate.groupKey"
+                    [rowIndex]="rowIndex"
+                    [section]="'body'"
+                    [ariaLevel]="bodyRow.depth + 2"
+                    [ariaRowIndex]="ariaRowIndex"></tr>
             } @else if (!gridService.rowReorderColumnVisible()) {
-                <tr monaGridRow [row]="bodyRow.row" [index]="rowIndex"></tr>
+                <tr monaGridRow [row]="bodyRow.row" [index]="rowIndex" [ariaRowIndex]="ariaRowIndex"></tr>
                 @if (gridService.isRowExpanded(bodyRow.row)) {
-                    <tr monaGridDetailRow [row]="bodyRow.row"></tr>
+                    <tr monaGridDetailRow [row]="bodyRow.row" [ariaRowIndex]="ariaRowIndex + 1"></tr>
                 }
             } @else {
                 <tr
                     monaGridRow
                     [row]="bodyRow.row"
                     [index]="rowIndex"
+                    [ariaRowIndex]="ariaRowIndex"
                     cdkDrag
                     cdkDragLockAxis="y"
                     [cdkDragData]="bodyRow.row"
@@ -44,7 +52,7 @@
                     </ng-template>
                 </tr>
                 @if (gridService.isRowExpanded(bodyRow.row) && !gridService.rowDragInProgress()) {
-                    <tr monaGridDetailRow [row]="bodyRow.row"></tr>
+                    <tr monaGridDetailRow [row]="bodyRow.row" [ariaRowIndex]="ariaRowIndex + 1"></tr>
                 }
             }
         }

@@ -225,7 +225,7 @@ describe("GridComponent", () => {
             gridService.setReorderableOptions({ enabled: true });
 
             component["onColumnDragStart"](createDragStart(colA));
-            component["onColumnMouseEnter"](colC);
+            component["dropColumn"].set(colC);
             component["onColumnDrop"]();
 
             const fields = gridService
@@ -240,7 +240,7 @@ describe("GridComponent", () => {
             gridService.setReorderableOptions({ enabled: false });
 
             component["onColumnDragStart"](createDragStart(colA));
-            component["onColumnMouseEnter"](colC);
+            component["dropColumn"].set(colC);
             component["onColumnDrop"]();
 
             const fields = gridService
@@ -256,7 +256,7 @@ describe("GridComponent", () => {
             gridService.columnReorder$.subscribe((event: ColumnReorderEvent) => event.preventDefault());
 
             component["onColumnDragStart"](createDragStart(colA));
-            component["onColumnMouseEnter"](colC);
+            component["dropColumn"].set(colC);
             component["onColumnDrop"]();
 
             const fields = gridService

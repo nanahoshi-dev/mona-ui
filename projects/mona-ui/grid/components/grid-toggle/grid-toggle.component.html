@@ -1,10 +1,28 @@
-<span
-    [style.width.px]="width()"
-    class="inline-flex items-center justify-center min-h-9 aspect-square"
-    (click)="onToggleDetailClick($event)">
-    @if (expanded()) {
-        <svg [lucideIcon]="collapseIcon()" [size]="16"></svg>
-    } @else {
-        <svg [lucideIcon]="expandIcon()" [size]="16"></svg>
-    }
-</span>
+@if (type() === "detail") {
+    <button
+        type="button"
+        [style.width.px]="width()"
+        class="inline-flex items-center justify-center min-h-9 aspect-square cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator"
+        [attr.aria-expanded]="expanded()"
+        [attr.aria-label]="label()"
+        (click)="onToggleDetailClick($event)">
+        @if (expanded()) {
+            <svg [lucideIcon]="collapseIcon()" [size]="16" aria-hidden="true"></svg>
+        } @else {
+            <svg [lucideIcon]="expandIcon()" [size]="16" aria-hidden="true"></svg>
+        }
+    </button>
+} @else {
+    <!-- The group row carries aria-expanded, and its cell expands with Enter and the arrows. -->
+    <span
+        [style.width.px]="width()"
+        class="inline-flex items-center justify-center min-h-9 aspect-square"
+        aria-hidden="true"
+        (click)="onToggleDetailClick($event)">
+        @if (expanded()) {
+            <svg [lucideIcon]="collapseIcon()" [size]="16"></svg>
+        } @else {
+            <svg [lucideIcon]="expandIcon()" [size]="16"></svg>
+        }
+    </span>
+}

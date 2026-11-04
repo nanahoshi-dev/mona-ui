@@ -30,7 +30,6 @@ import {
 import { ContextMenuComponent } from "@nanahoshi/mona-ui/contextmenu";
 import { GridAddRowComponent } from "../grid-add-row/grid-add-row.component";
 import { GridColgroupComponent } from "../grid-colgroup/grid-colgroup.component";
-import { GridDetailRowComponent } from "../grid-detail-row/grid-detail-row.component";
 import { GridFooterRowComponent } from "../grid-footer-row/grid-footer-row.component";
 import { GridGroupRowComponent } from "../grid-group-row/grid-group-row.component";
 import { GridRowComponent } from "../grid-row/grid-row.component";
@@ -44,7 +43,6 @@ import { GridRowComponent } from "../grid-row/grid-row.component";
         CdkVirtualForOf,
         GridAddRowComponent,
         GridColgroupComponent,
-        GridDetailRowComponent,
         GridFooterRowComponent,
         GridGroupRowComponent,
         GridRowComponent
@@ -79,6 +77,10 @@ export class GridVirtualListComponent {
     protected readonly footerTableClass = computed(() => {
         return gridFooterTableThemeVariants();
     });
+    /** The grid footer is the last row of the grid: after the header rows, the add row and every body row. */
+    protected readonly gridAriaRowCount = computed(
+        () => this.gridService.bodyAriaRowStart() + this.bodyRows().length + 1
+    );
     protected readonly gridService = inject(GridService);
     protected readonly tableClass = computed(() => {
         return gridListTableThemeVariants();
@@ -119,6 +121,10 @@ export class GridVirtualListComponent {
                 });
             }
         });
+        effect(() => {
+            const count = this.bodyRows().length;
+            untracked(() => this.gridService.renderedBodyRowCount.set(count));
+        });
         this.setGroupSubscriptions();
         this.setSelectedKeysLoadSubscription();
     }
@@ -157,7 +163,7 @@ export class GridVirtualListComponent {
     private setRowScroller(): void {
         const viewport = this.viewport();
         this.#gridNavigationService.setRowScroller({
-            isNavigableRow: index => this.bodyRows()[index]?.type !== "groupFooter",
+            isNavigableRow: index => this.bodyRows()[index] != null,
             rowCount: () => this.bodyRows().length,
             scrollToRow: index => viewport.scrollToIndex(index)
         });

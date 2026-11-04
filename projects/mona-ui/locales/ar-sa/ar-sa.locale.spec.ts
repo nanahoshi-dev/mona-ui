@@ -110,7 +110,7 @@ describe("MONA_AR_SA_LOCALE", () => {
             expect(m.grid.noData).toBe("لا توجد بيانات");
             expect(m.grid.remove).toBe("إزالة");
             expect(m.grid.removeRow).toBe("إزالة الصف");
-            expect(m.grid.resizeColumn).toBe("تغيير عرض العمود");
+            expect(m.grid.resizeColumn("الاسم")).toBe("تغيير عرض العمود الاسم");
             expect(m.grid.rowReorder).toBe("إعادة ترتيب الصفوف");
             expect(m.grid.rowReorderDisabled).toBe("إعادة ترتيب الصفوف غير متاح.");
             expect(m.grid.rowReorderDisabledEditing).toBe("أكمل التحرير قبل إعادة ترتيب الصفوف.");

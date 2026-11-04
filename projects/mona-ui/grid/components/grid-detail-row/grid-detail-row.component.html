@@ -7,7 +7,7 @@
         <td monaGridCell [monaGridLockedCell]="layoutColumn.key"></td>
     }
 }
-<td monaGridCell [lastInRow]="true" [attr.colspan]="contentColspan()">
+<td monaGridCell [lastInRow]="true" [attr.colspan]="contentColspan()" [attr.aria-colindex]="contentColIndex()">
     <ng-container
         [ngTemplateOutlet]="gridService.masterDetailTemplate()"
         [ngTemplateOutletContext]="{ $implicit: row().data }" />

@@ -3,17 +3,31 @@ export interface MonaGridMessages {
     readonly apply: string;
     readonly cancel: string;
     readonly cancelRowEdit: string;
+    /** The name of the button that closes a row's detail row. */
+    collapseDetail(rowNumber: number): string;
+    /** Announced when the keyboard groups the grid by a column. */
+    columnGrouped(column: string): string;
+    /** Announced when the keyboard moves a column; the position counts visible columns from 1. */
+    columnMoved(column: string, position: number): string;
     readonly columns: string;
     columnsSelected(count: number): string;
     readonly delete: string;
     readonly deleteRowConfirmation: string;
     readonly deleteRowTitle: string;
+    /** The name of the detail-toggle column's header. */
+    readonly details: string;
     readonly dragColumnHeaderToGroup: string;
     readonly edit: string;
     readonly editRow: string;
+    /** The name of the button that opens a row's detail row. */
+    expandDetail(rowNumber: number): string;
     readonly fieldValidationError?: string;
     filterByColumn(column: string): string;
     readonly filterPlaceholder: string;
+    /** The name of a group indent column's header. */
+    readonly group: string;
+    /** Shown while the grid body loads. */
+    readonly loading: string;
     readonly modified: string;
     readonly moveAsNext: string;
     readonly moveAsPrevious: string;
@@ -22,7 +36,7 @@ export interface MonaGridMessages {
     readonly remove: string;
     readonly removeRow: string;
     reorderRow(rowNumber: number): string;
-    readonly resizeColumn: string;
+    resizeColumn(column: string): string;
     readonly rowReorder: string;
     readonly rowReorderDisabled: string;
     readonly rowReorderDisabledEditing: string;
@@ -40,6 +54,8 @@ export interface MonaGridMessages {
     readonly saveRow: string;
     readonly selectAllRows: string;
     selectRow(rowNumber: number): string;
+    /** Describes a header's place in a multi-column sort, from 1. */
+    sortOrder(position: number): string;
     /** The accessible name of the toolbar above the grid. */
     readonly toolbar: string;
 }

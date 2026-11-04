@@ -18,6 +18,8 @@ export class GridToggleComponent {
     });
 
     public readonly expanded = model.required<boolean>();
+    /** The detail toggle button's name, such as "Expand details of row 3". */
+    public readonly label = input<string | null>(null);
     public readonly type = input.required<"detail" | "group">();
     public readonly width = input.required<number>();
 

@@ -1,8 +1,10 @@
+import { LiveAnnouncer } from "@angular/cdk/a11y";
 import {
     CdkDrag,
     CdkDragDrop,
     CdkDragEnd,
     CdkDragEnter,
+    CdkDragMove,
     CdkDragPlaceholder,
     CdkDragPreview,
     CdkDragStart,
@@ -25,11 +27,13 @@ import {
     contentChild,
     contentChildren,
     DestroyRef,
+    DOCUMENT,
     effect,
     ElementRef,
     inject,
     Injector,
     input,
+    isDevMode,
     model,
     output,
     signal,
@@ -39,6 +43,7 @@ import {
     viewChildren
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { fromEvent, type Subscription } from "rxjs";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ChipComponent } from "@nanahoshi/mona-ui/chip";
 import { FilterService } from "@nanahoshi/mona-ui/filter";
@@ -61,7 +66,6 @@ import { GridNoDataTemplateDirective } from "../../directives/grid-no-data-templ
 import { GridToolbarTemplateDirective } from "../../directives/grid-toolbar-template.directive";
 import type { Column } from "../../models/Column";
 import { ColumnFilterState } from "../../models/ColumnFilterState";
-import { ColumnReorderEvent } from "../../models/ColumnReorderEvent";
 import type { ColumnResizeEvent } from "../../models/ColumnResizeEvent";
 import { ColumnSortEvent } from "../../models/ColumnSortEvent";
 import { GRID_COLUMN_DEFINITION, type GridColumnDefinition } from "../../models/GridColumnDefinition";
@@ -151,13 +155,13 @@ const TOOLBAR_ITEM_SELECTOR =
     ],
     host: {
         "[class]": "baseClass()",
-        "[attr.data-uid]": "uid",
-        "[attr.aria-busy]": "gridService.serverLoading() || null",
-        role: "group"
+        "[attr.data-uid]": "uid"
     }
 })
 export class GridComponent<T> implements GridVariantInput {
     readonly #destroyRef = inject(DestroyRef);
+
+    readonly #document = inject(DOCUMENT);
 
     readonly #fitViewInitialScrollbarGutterWidth = signal<number | null>(null);
 
@@ -169,9 +173,16 @@ export class GridComponent<T> implements GridVariantInput {
 
     readonly #injector = inject(Injector);
 
+    readonly #liveAnnouncer = inject(LiveAnnouncer);
+
     readonly #manuallyResized = signal(false);
 
     readonly #registeredFooterScrollElement = signal<HTMLDivElement | null>(null);
+
+    /** Escape was pressed during the current column drag. */
+    #dragCancelled = false;
+
+    #dragKeySubscription: Subscription | null = null;
 
     #resizeObserver: ResizeObserver | null = null;
 
@@ -186,6 +197,29 @@ export class GridComponent<T> implements GridVariantInput {
     private readonly filterMenus = viewChildren(GridFilterMenuComponent);
 
     private readonly footerScrollElement = viewChild<ElementRef<HTMLDivElement>>("footerScrollElement");
+
+    /**
+     * Every row of the grid: header rows, add row, body rows (group, detail and group footer rows included) and
+     * footer. Exact when every row is drawn or rows are plain; -1 (unknown) for paged groups or detail rows.
+     */
+    protected readonly ariaRowCount = computed(() => {
+        const gridService = this.gridService;
+        const before = gridService.headerRowCount() + (gridService.addRowVisible() ? 1 : 0);
+        const footer = gridService.hasFooter() ? 1 : 0;
+        const allDrawn =
+            gridService.virtualScrollOptions().enabled ||
+            gridService.pagerTotal() <= gridService.paginationState().take;
+        if (allDrawn) {
+            // With no rows the body shows one row with the empty message.
+            const bodyRows = gridService.renderedBodyRowCount();
+            const emptyRow = bodyRows === 0 && !gridService.addRowVisible() ? 1 : 0;
+            return before + bodyRows + emptyRow + footer;
+        }
+        const plainRows =
+            gridService.groupColumns().length === 0 &&
+            (gridService.masterDetailTemplate() == null || gridService.expandedKeys().size() === 0);
+        return plainRows ? before + gridService.pagerTotal() + footer : -1;
+    });
 
     protected readonly baseClass = computed(() => {
         const rounded = this.rounded();
@@ -205,7 +239,7 @@ export class GridComponent<T> implements GridVariantInput {
     protected readonly columnDragging = signal(false);
 
     protected readonly columnDropHintClass = computed(() => {
-        return gridColumnDropHintThemeVariants();
+        return gridColumnDropHintThemeVariants() + (this.dropAfter() ? " end-0" : " start-0");
     });
 
     protected readonly columnResizerClass = computed(() => {
@@ -213,6 +247,9 @@ export class GridComponent<T> implements GridVariantInput {
     });
 
     protected readonly dragColumn = signal<Column | null>(null);
+
+    /** Whether a dragged column goes after the hovered column rather than before it. */
+    protected readonly dropAfter = signal(false);
 
     protected readonly dropColumn = signal<Column | null>(null);
 
@@ -223,10 +260,7 @@ export class GridComponent<T> implements GridVariantInput {
 
     protected readonly filterRowCellClass = computed(() => gridFilterRowHeaderCellThemeVariants());
 
-    protected readonly filterRowEnabled = computed(() => {
-        const opts = this.gridService.filterableOptions();
-        return opts.enabled && (opts.type === "row" || opts.type === "menu, row");
-    });
+    protected readonly filterRowEnabled = computed(() => this.gridService.filterRowEnabled());
 
     protected readonly footerClass = computed(() => {
         return gridFooterThemeVariants();
@@ -242,9 +276,12 @@ export class GridComponent<T> implements GridVariantInput {
 
     protected readonly gridDetailTemplate = contentChild(GridDetailTemplateDirective, { read: TemplateRef });
 
+    /** A treegrid while rows are grouped, a grid otherwise. */
     protected readonly gridHeaderElement = viewChild.required<ElementRef<HTMLDivElement>>("gridHeaderElement");
 
     protected readonly gridHeaderTableElement = viewChild.required<ElementRef<HTMLTableElement>>("headerTable");
+
+    protected readonly gridRole = computed(() => (this.gridService.groupColumns().length > 0 ? "treegrid" : "grid"));
 
     protected readonly gridService = inject(GridService);
 
@@ -270,6 +307,29 @@ export class GridComponent<T> implements GridVariantInput {
         return gridHeaderThemeVariants();
     });
 
+    /** Each header's keyboard shortcuts, for `aria-keyshortcuts`. */
+    protected readonly headerKeyShortcuts = computed(() => {
+        const shortcuts = new Map<string, string>();
+        const reorderable = this.gridService.reorderableOptions().enabled;
+        const groupable = this.groupable();
+        for (const column of this.gridService.visibleColumns()) {
+            const keys: string[] = [];
+            if (this.filterMenuEnabled() && column.kind === "data" && column.filterable) {
+                keys.push("Alt+ArrowDown");
+            }
+            if (reorderable && !column.locked) {
+                keys.push("Control+Shift+ArrowLeft", "Control+Shift+ArrowRight");
+            }
+            if (groupable && column.kind === "data" && column.field !== "") {
+                keys.push("Control+Shift+G");
+            }
+            if (keys.length !== 0) {
+                shortcuts.set(column.id, keys.join(" "));
+            }
+        }
+        return shortcuts;
+    });
+
     protected readonly headerMarginInlineEnd = computed(() => this.gridService.scrollbarGutterWidth());
 
     protected readonly headerTableCellClass = computed(() => {
@@ -293,6 +353,11 @@ export class GridComponent<T> implements GridVariantInput {
     });
 
     protected readonly messages = this.gridService.messages;
+
+    protected readonly multiselectable = computed(() => {
+        const options = this.gridService.selectableOptions();
+        return options.enabled && options.mode === "multiple";
+    });
 
     protected readonly noDataClass = computed(() => {
         return gridNoDataThemeVariants();
@@ -322,6 +387,19 @@ export class GridComponent<T> implements GridVariantInput {
     protected readonly toolbarTemplate = contentChild(GridToolbarTemplateDirective, { read: TemplateRef });
 
     protected readonly uid = v4();
+
+    /**
+     * @description The grid's accessible name, such as "Orders". Use it, or `ariaLabelledBy`, rather than
+     * an `aria-label` attribute on the host, which names nothing.
+     * @default null
+     */
+    public readonly ariaLabel = input<string | null>(null);
+
+    /**
+     * @description The id of the element that names the grid, such as a heading above it.
+     * @default null
+     */
+    public readonly ariaLabelledBy = input<string | null>(null);
 
     /**
      * @description The row data to be displayed in the grid.
@@ -477,24 +555,55 @@ export class GridComponent<T> implements GridVariantInput {
         this.groupingInProgress.set(false);
     }
 
+    /** Puts the drop hint before or after the header under the pointer, which works for touch too. */
+    protected onColumnDragMove(event: CdkDragMove<Column>): void {
+        if (!this.columnDragging() || this.resizing() || this.#dragCancelled) {
+            return;
+        }
+        const x = event.pointerPosition.x;
+        const rtl = this.#isRtl();
+        for (const headerCell of this.getTableColumnHeaderCellList()) {
+            const columnId = headerCell.getAttribute("data-column-id");
+            const rect = headerCell.getBoundingClientRect();
+            if (columnId == null || x < rect.left || x > rect.right) {
+                continue;
+            }
+            const column = this.gridService.columns().firstOrDefault(candidate => candidate.id === columnId);
+            if (column == null) {
+                return;
+            }
+            const pastMiddle = x > rect.left + rect.width / 2;
+            this.dropColumn.set(column);
+            this.dropAfter.set(pastMiddle !== rtl);
+            return;
+        }
+    }
+
     protected onColumnDragStart(event: CdkDragStart<Column>): void {
         if (this.resizing() || event.source.data.locked) {
             return;
         }
         this.columnDragging.set(true);
         this.dragColumn.set(event.source.data);
+        // Escape cancels the drag: the column stays where it was when it's released.
+        this.#dragCancelled = false;
+        this.#dragKeySubscription?.unsubscribe();
+        this.#dragKeySubscription = fromEvent<KeyboardEvent>(this.#document, "keydown")
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(keyEvent => {
+                if (keyEvent.key === "Escape") {
+                    keyEvent.preventDefault();
+                    this.#dragCancelled = true;
+                    this.dropColumn.set(null);
+                    this.groupingInProgress.set(false);
+                }
+            });
     }
 
     protected onColumnDrop(): void {
         const dragColumn = this.dragColumn();
         const dropColumn = this.dropColumn();
-        if (
-            !dropColumn ||
-            !dragColumn ||
-            !this.columnDragging() ||
-            this.resizing() ||
-            !this.gridService.reorderableOptions().enabled
-        ) {
+        if (!dropColumn || !dragColumn || !this.columnDragging() || this.resizing() || this.#dragCancelled) {
             this.clearDragState();
             return;
         }
@@ -502,37 +611,18 @@ export class GridComponent<T> implements GridVariantInput {
             this.clearDragState();
             return;
         }
-        const columnIds = this.gridService
+        const dropColumnIndex = this.gridService
             .columns()
-            .select(column => column.id)
-            .toArray();
-        const dropColumnIndex = columnIds.indexOf(dropColumn.id);
-        const dragColumnIndex = columnIds.indexOf(dragColumn.id);
-        if (dropColumnIndex < 0 || dragColumnIndex < 0) {
-            this.clearDragState();
-            return;
+            .toArray()
+            .findIndex(column => column.id === dropColumn.id);
+        if (dropColumnIndex >= 0) {
+            this.gridService.reorderColumn(dragColumn, dropColumnIndex + (this.dropAfter() ? 1 : 0));
         }
-        if (dropColumnIndex === dragColumnIndex + 1) {
-            this.clearDragState();
-            return;
-        }
-
-        const event = new ColumnReorderEvent(dragColumn, dragColumnIndex, dropColumnIndex);
-        this.gridService.columnReorder$.next(event);
-        if (event.isDefaultPrevented()) {
-            this.clearDragState();
-            return;
-        }
-
-        const [dragColumnId] = columnIds.splice(dragColumnIndex, 1);
-        const index = dropColumnIndex > dragColumnIndex ? dropColumnIndex - 1 : dropColumnIndex;
-        columnIds.splice(index, 0, dragColumnId);
-        this.gridService.setColumnOrder(columnIds);
         this.clearDragState();
     }
 
     protected onColumnDropForGrouping(event: CdkDragDrop<Column, void, Column>): void {
-        if (!this.groupable()) {
+        if (!this.groupable() || this.#dragCancelled) {
             this.clearDragState();
             return;
         }
@@ -562,13 +652,6 @@ export class GridComponent<T> implements GridVariantInput {
         this.gridService.requestDataStateChange({ resetPage: true });
     }
 
-    protected onColumnMouseEnter(column: Column): void {
-        if (!this.columnDragging() || this.resizing()) {
-            return;
-        }
-        this.dropColumn.set(column);
-    }
-
     protected onColumnResizeEnd(event: ColumnResizeEvent): void {
         this.resizing.set(false);
         this.gridService.columnResize$.next(event);
@@ -592,6 +675,15 @@ export class GridComponent<T> implements GridVariantInput {
         this.gridService.columnSort$.next(new ColumnSortEvent(column));
     }
 
+    /** Delete or Backspace on a group chip, or on its remove button, removes the group. */
+    protected onGroupChipKeydown(event: KeyboardEvent, column: Column): void {
+        if (event.key !== "Delete" && event.key !== "Backspace") {
+            return;
+        }
+        event.preventDefault();
+        this.onGroupingColumnRemove(event, column);
+    }
+
     protected onGroupColumnReorder(column: Column, moveAs: "prev" | "next"): void {
         this.gridService.moveGroupColumn(column, moveAs);
     }
@@ -610,6 +702,28 @@ export class GridComponent<T> implements GridVariantInput {
             nextGroupSortDirection = "asc";
         }
         this.gridService.setGroupSortDirection(column, nextGroupSortDirection);
+    }
+
+    /**
+     * Ctrl+Shift+ArrowLeft/Right (Cmd on macOS) moves the focused header's column, and Ctrl+Shift+G groups the
+     * grid by it: the keyboard way to drag a header.
+     */
+    protected onHeaderKeydown(event: KeyboardEvent, column: Column): void {
+        if (event.defaultPrevented || !(event.ctrlKey || event.metaKey) || !event.shiftKey || event.altKey) {
+            return;
+        }
+        // Only keys pressed on the header itself, not on a control inside it.
+        if (event.target !== event.currentTarget) {
+            return;
+        }
+        if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+            event.preventDefault();
+            const forward = (event.key === "ArrowRight") !== this.#isRtl();
+            this.#moveColumnByKeyboard(column, forward ? 1 : -1);
+        } else if (event.code === "KeyG") {
+            event.preventDefault();
+            this.#groupByKeyboard(column);
+        }
     }
 
     protected onPageChange(event: PageChangeEvent): void {
@@ -699,11 +813,73 @@ export class GridComponent<T> implements GridVariantInput {
         return this.gridService.normalizeRenderedWidth(calculatedWidth);
     }
 
+    #groupByKeyboard(column: Column): void {
+        if (!this.groupable() || column.kind !== "data" || column.field === "") {
+            return;
+        }
+        if (this.gridService.groupColumns().any(groupColumn => groupColumn.id === column.id)) {
+            return;
+        }
+        this.gridService.addGroupColumn(column);
+        void this.#liveAnnouncer.announce(this.messages().columnGrouped(column.title));
+        this.#refocusHeader(column.id);
+    }
+
+    #isRtl(): boolean {
+        const host: HTMLElement = this.#hostElementRef.nativeElement;
+        return host.ownerDocument.defaultView?.getComputedStyle(host).direction === "rtl";
+    }
+
+    /** Moves a column past its visible neighbor, within its pinned group. */
+    #moveColumnByKeyboard(column: Column, step: 1 | -1): void {
+        if (column.locked || !this.gridService.reorderableOptions().enabled) {
+            return;
+        }
+        const columns = this.gridService.columns().toArray();
+        const bucket = this.getColumnLockBucket(column);
+        const index = columns.findIndex(candidate => candidate.id === column.id);
+        let neighbor = index + step;
+        while (neighbor >= 0 && neighbor < columns.length && columns[neighbor].hidden) {
+            neighbor += step;
+        }
+        const target = columns[neighbor];
+        if (index < 0 || target == null || this.getColumnLockBucket(target) !== bucket) {
+            return;
+        }
+        if (!this.gridService.reorderColumn(column, step === 1 ? neighbor + 1 : neighbor)) {
+            return;
+        }
+        const position =
+            this.gridService
+                .visibleColumns()
+                .toArray()
+                .findIndex(candidate => candidate.id === column.id) + 1;
+        void this.#liveAnnouncer.announce(this.messages().columnMoved(column.title, position));
+        this.#refocusHeader(column.id);
+    }
+
+    /** Moving or grouping re-renders the header; keep focus on it, or on the grid when it's gone. */
+    #refocusHeader(columnId: string): void {
+        afterNextRender(
+            {
+                write: () => {
+                    if (!this.#gridNavigationService.focusHeaderCell(columnId)) {
+                        this.#gridNavigationService.focusActiveCellOrFirstHeader();
+                    }
+                }
+            },
+            { injector: this.#injector }
+        );
+    }
+
     private clearDragState(): void {
         this.dragColumn.set(null);
         this.dropColumn.set(null);
+        this.dropAfter.set(false);
         this.columnDragging.set(false);
         this.groupingInProgress.set(false);
+        this.#dragKeySubscription?.unsubscribe();
+        this.#dragKeySubscription = null;
     }
 
     private createFitViewWidthMap(headerWidth: number): ReadonlyMap<string, number> {
@@ -881,7 +1057,16 @@ export class GridComponent<T> implements GridVariantInput {
 
     private setGridDetailEffect(): void {
         effect(() => {
-            const detailTemplate = this.gridDetailTemplate() ?? null;
+            let detailTemplate = this.gridDetailTemplate() ?? null;
+            // Virtual scrolling needs rows of one height, which a detail row would break.
+            if (detailTemplate != null && this.gridService.virtualScrollOptions().enabled) {
+                if (isDevMode()) {
+                    console.warn(
+                        "mona-grid: detail rows (monaGridDetailTemplate) aren't supported with virtual scrolling and are not shown."
+                    );
+                }
+                detailTemplate = null;
+            }
             untracked(() => this.gridService.masterDetailTemplate.set(detailTemplate));
         });
     }

@@ -6,9 +6,11 @@ import {
     Component,
     computed,
     DestroyRef,
+    effect,
     ElementRef,
     inject,
     input,
+    untracked,
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
@@ -72,6 +74,7 @@ export class GridListComponent implements GridListVariantInput {
     #dropping = false;
     #rowPositionsBeforeMove: { readonly positions: ReadonlyMap<string, number>; readonly time: number } | null = null;
     private readonly bodyTableElementRef = viewChild.required<ElementRef<HTMLTableElement>>("bodyTable");
+    protected readonly ariaRows = computed(() => this.gridService.getBodyAriaRowIndices(this.bodyRows()));
     protected readonly baseClass = gridListBaseThemeVariants({ virtual: false });
     protected readonly bodyRows = computed(() => this.gridService.createBodyRows(this.data()));
     protected readonly dropListData = computed(() => this.data().toArray());
@@ -82,6 +85,10 @@ export class GridListComponent implements GridListVariantInput {
     public readonly data = input<ImmutableList<Row>>(ImmutableList.create());
 
     public constructor() {
+        effect(() => {
+            const count = this.ariaRows().count;
+            untracked(() => this.gridService.renderedBodyRowCount.set(count));
+        });
         afterNextRender({
             read: () => {
                 const bodyTableElement = this.bodyTableElementRef().nativeElement;

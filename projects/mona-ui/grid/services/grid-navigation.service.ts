@@ -221,7 +221,12 @@ export class GridNavigationService {
         if (data.groupHeader) {
             return `group:${data.groupKey ?? v4()}`;
         }
-        if (data.section === "header" || data.section === "filter" || data.section === "add") {
+        if (
+            data.section === "header" ||
+            data.section === "filter" ||
+            data.section === "add" ||
+            data.section === "footer"
+        ) {
             return `${data.section}:${data.columnId ?? data.colIndex}`;
         }
         if (data.rowUid != null || data.columnId != null) {
@@ -672,6 +677,8 @@ export class GridNavigationService {
                 return 2;
             case "body":
                 return 3;
+            case "footer":
+                return 4;
         }
     }
 
@@ -681,9 +688,9 @@ export class GridNavigationService {
     }
 }
 
-export type GridCellKind = "command" | "data" | "detail" | "filter" | "group" | "header";
+export type GridCellKind = "command" | "data" | "detail" | "filter" | "footer" | "group" | "header";
 
-export type GridNavigationSection = "add" | "body" | "filter" | "header";
+export type GridNavigationSection = "add" | "body" | "filter" | "footer" | "header";
 
 /** Lets the navigation reach rows of a virtual list that aren't drawn. */
 export interface GridNavigationRowScroller {

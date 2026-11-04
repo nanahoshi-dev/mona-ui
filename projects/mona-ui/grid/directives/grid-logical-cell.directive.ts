@@ -36,8 +36,8 @@ const PAGE_TABBABLE_SELECTOR = `${GRID_CELL_FOCUSABLE_SELECTOR}, summary, [conte
     selector: "td[monaGridLogicalCell], th[monaGridLogicalCell]",
     host: {
         "[attr.tabindex]": "focused() ? 0 : -1",
-        "[attr.aria-colindex]": "ariaColIndex()",
-        "[attr.aria-readonly]": "resolvedCellKind() === 'data' ? !editable() : null"
+        "[attr.aria-colindex]": "resolvedAriaColIndex()",
+        "[attr.aria-readonly]": "readOnly()"
     }
 })
 export class GridLogicalCellDirective {
@@ -68,7 +68,6 @@ export class GridLogicalCellDirective {
     readonly #startEdit = (): void => {
         this.edit.emit();
     };
-    protected readonly ariaColIndex = computed(() => this.colIndex() + this.#gridService.groupColumns().length + 1);
     protected readonly focused = computed(() => {
         const key = this.#cellKey();
         if (!key) {
@@ -76,6 +75,9 @@ export class GridLogicalCellDirective {
         }
         return this.#gridNavigationService.isFocused(key);
     });
+    protected readonly resolvedAriaColIndex = computed(
+        () => this.ariaColIndex() ?? this.colIndex() + this.#gridService.groupColumns().length + 1
+    );
     protected readonly resolvedCellKind = computed<GridCellKind>(() => {
         const cellKind = this.cellKind();
         if (cellKind != null) {
@@ -96,6 +98,11 @@ export class GridLogicalCellDirective {
         }
         return this.#hostElementRef.nativeElement.tagName === "TH" ? "header" : "body";
     });
+    /**
+     * @description The cell's `aria-colindex` when it isn't its column's place in the layout, as for a group
+     * row's title cell, which follows the group's indents.
+     */
+    public readonly ariaColIndex = input<number | null>(null);
     public readonly cellKind = input<GridCellKind | null>(null);
     public readonly colIndex = input.required<number>();
     public readonly columnId = input<string>();
@@ -105,6 +112,11 @@ export class GridLogicalCellDirective {
      * @description Marks the cell as a participant in Tab-driven cell edit traversal.
      */
     public readonly editable = input(false);
+    /**
+     * @description Whether the cell's row or group is expanded; ArrowRight expands a collapsed group row and
+     * ArrowLeft collapses an expanded one.
+     */
+    public readonly expanded = input<boolean | null>(null);
     public readonly firstInRow = input.required<boolean>();
     public readonly groupHeader = input<boolean>(false);
     public readonly groupKey = input<string>();
@@ -113,6 +125,11 @@ export class GridLogicalCellDirective {
      * @description Emits on Alt+ArrowDown in a header cell, to open the column's filter menu.
      */
     public readonly menuOpen = output();
+    /**
+     * @description The cell's `aria-readonly`: whether its column can't be edited, or `null` when the grid
+     * doesn't edit.
+     */
+    public readonly readOnly = input<boolean | null>(null);
     public readonly rowIndex = input.required<number>();
     public readonly rowUid = input<string>();
     public readonly section = input<GridNavigationSection | null>(null);
@@ -379,11 +396,20 @@ export class GridLogicalCellDirective {
                 this.#navigate("ArrowUp");
                 return;
             case "ArrowLeft":
-            case "ArrowRight":
-                if (this.#navigate(this.#toLogicalArrowKey(event.key))) {
+            case "ArrowRight": {
+                const key = this.#toLogicalArrowKey(event.key);
+                // A group row expands with ArrowRight and collapses with ArrowLeft, as in a tree.
+                const expanded = this.expanded();
+                if (this.groupHeader() && expanded === (key === "ArrowLeft")) {
+                    event.preventDefault();
+                    this.toggleExpand.emit();
+                    return;
+                }
+                if (this.#navigate(key)) {
                     event.preventDefault();
                 }
                 return;
+            }
             case "Enter":
                 event.preventDefault();
                 this.#onEnterKey();

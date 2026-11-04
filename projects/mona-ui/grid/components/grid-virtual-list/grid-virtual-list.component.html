@@ -21,15 +21,20 @@
         <colgroup monaGridColgroup></colgroup>
         <tbody role="rowgroup" #bodyElement>
             <ng-container *cdkVirtualFor="let bodyRow of bodyRows(); let rowIndex = index; trackBy: trackBodyRow">
+                @let ariaRowIndex = gridService.bodyAriaRowStart() + rowIndex + 1;
                 @if (bodyRow.type === "group") {
-                    <tr monaGridGroupRow [group]="bodyRow" [rowIndex]="rowIndex"></tr>
+                    <tr monaGridGroupRow [group]="bodyRow" [rowIndex]="rowIndex" [ariaRowIndex]="ariaRowIndex"></tr>
                 } @else if (bodyRow.type === "groupFooter") {
-                    <tr monaGridFooterRow [groupKey]="bodyRow.groupAggregate.groupKey"></tr>
+                    <tr
+                        monaGridFooterRow
+                        [groupKey]="bodyRow.groupAggregate.groupKey"
+                        [rowIndex]="rowIndex"
+                        [section]="'body'"
+                        [ariaLevel]="bodyRow.depth + 2"
+                        [ariaRowIndex]="ariaRowIndex"></tr>
                 } @else {
-                    <tr monaGridRow [row]="bodyRow.row" [index]="rowIndex"></tr>
-                    @if (gridService.isRowExpanded(bodyRow.row) && !gridService.rowDragInProgress()) {
-                        <tr monaGridDetailRow [row]="bodyRow.row"></tr>
-                    }
+                    <!-- Detail rows aren't drawn with virtual scrolling: they would break the fixed row height. -->
+                    <tr monaGridRow [row]="bodyRow.row" [index]="rowIndex" [ariaRowIndex]="ariaRowIndex"></tr>
                 }
             </ng-container>
         </tbody>
@@ -45,7 +50,7 @@
             <table role="presentation" [class]="footerTableClass()" [style.width.px]="gridService.tableWidth()">
                 <colgroup monaGridColgroup></colgroup>
                 <tfoot role="rowgroup">
-                    <tr monaGridFooterRow></tr>
+                    <tr monaGridFooterRow [ariaRowIndex]="gridAriaRowCount()"></tr>
                 </tfoot>
             </table>
         </div>

@@ -39,7 +39,7 @@ import type { AggregateFunction } from "../models/AggregateFunction";
 import { CellEditEvent } from "../models/CellEditEvent";
 import type { Column, ColumnConfig } from "../models/Column";
 import { ColumnFilterState } from "../models/ColumnFilterState";
-import type { ColumnReorderEvent } from "../models/ColumnReorderEvent";
+import { ColumnReorderEvent } from "../models/ColumnReorderEvent";
 import type { ColumnResizeEvent } from "../models/ColumnResizeEvent";
 import type { ColumnSortEvent } from "../models/ColumnSortEvent";
 import { EditableOptions } from "../models/EditableOptions";
@@ -229,6 +229,16 @@ export class GridService {
         return scopeSize > 0 && this.#bulkSelectionSelectedCount() === scopeSize;
     });
     public readonly appliedFilters = signal(ImmutableDictionary.create<string, ColumnFilterState>());
+    /**
+     * The `aria-rowindex` before the first body row: the header rows, the add row and, when paged, the rows of
+     * the earlier pages (counted as data rows).
+     */
+    public readonly bodyAriaRowStart = computed(
+        () =>
+            this.headerRowCount() +
+            (this.addRowVisible() ? 1 : 0) +
+            (this.virtualScrollOptions().enabled ? 0 : this.paginationState().skip)
+    );
     public readonly bodyScrollElement = signal<HTMLElement | null>(null);
     public readonly bodyTableElement = signal<HTMLTableElement | null>(null);
     public readonly bulkSelectionRows = computed(() => {
@@ -271,6 +281,10 @@ export class GridService {
     /** Emits the expanded keys after the user opens or closes a detail row. */
     public readonly expandedKeysChange$ = new Subject<unknown[]>();
     public readonly filterChange$ = new Subject<CompositeFilterDescriptor[]>();
+    public readonly filterRowEnabled = computed(() => {
+        const options = this.#filterableOptions();
+        return options.enabled && (options.type === "row" || options.type === "menu, row");
+    });
     public readonly filterableOptions = this.#filterableOptions.asReadonly();
     public readonly footerScrollElement = signal<HTMLElement | null>(null);
     public readonly gridHeaderElement = signal<HTMLDivElement | null>(null);
@@ -318,6 +332,8 @@ export class GridService {
             this.visibleColumns().any(column => column.locked && column.lockedPosition === "left")
     );
     public readonly hasLiveScrollbarGutterWidth = computed(() => this.#scrollbarGutterMeasurementSource() === "body");
+    /** The header rows: the column headers and, when shown, the filter row. */
+    public readonly headerRowCount = computed(() => (this.filterRowEnabled() ? 2 : 1));
     public readonly headerTableElement = signal<HTMLTableElement | null>(null);
     public readonly horizontalScrollLeft = this.#horizontalScrollLeft.asReadonly();
     public readonly isInEditMode = computed(() => this.#editSession() != null);
@@ -416,6 +432,8 @@ export class GridService {
     );
     public readonly paginationState = signal<PaginationState>({ page: 1, skip: 0, take: 10 });
     public readonly remove$ = new Subject<GridRemoveEvent>();
+    /** How many rows the body draws, detail and group rows included; the body list keeps it current. */
+    public readonly renderedBodyRowCount = signal(0);
     public readonly reorderableOptions = this.#reorderableOptions.asReadonly();
     public readonly resizableOptions = this.#resizableOptions.asReadonly();
     public readonly rowClass = signal<GridRowClass<unknown> | null>(null);
@@ -859,6 +877,25 @@ export class GridService {
         return this.normalizeRenderedWidth(measured + totalAdditionalWidth);
     }
 
+    /**
+     * The `aria-rowindex` of each body row, after the rows before the body and the detail rows opened above
+     * it, and how many rows the body draws. A row's detail row takes the next index.
+     */
+    public getBodyAriaRowIndices(bodyRows: readonly GridViewRow[]): { count: number; indices: readonly number[] } {
+        const start = this.bodyAriaRowStart();
+        const details = this.masterDetailTemplate() != null && !this.virtualScrollOptions().enabled;
+        const indices: number[] = [];
+        let count = 0;
+        for (const bodyRow of bodyRows) {
+            count++;
+            indices.push(start + count);
+            if (details && bodyRow.type === "data" && this.isRowExpanded(bodyRow.row)) {
+                count++;
+            }
+        }
+        return { count, indices };
+    }
+
     public getColumnStateId(column: Column): string | null {
         return column.stateKey || column.field || null;
     }
@@ -1120,6 +1157,38 @@ export class GridService {
         const event = new GridRemoveEvent({ originalEvent, rowData: row.data });
         this.remove$.next(event);
         return !event.isDefaultPrevented();
+    }
+
+    /**
+     * Moves a column in front of the column at `beforeIndex` in `columns()`, or to the end with
+     * `columns().length`. Reports `columnReorder$`, which can cancel the move. Returns whether it moved.
+     */
+    public reorderColumn(column: Column, beforeIndex: number): boolean {
+        if (!this.reorderableOptions().enabled) {
+            return false;
+        }
+        const columnIds = this.columns()
+            .select(candidate => candidate.id)
+            .toArray();
+        const oldIndex = columnIds.indexOf(column.id);
+        if (
+            oldIndex < 0 ||
+            beforeIndex < 0 ||
+            beforeIndex > columnIds.length ||
+            beforeIndex === oldIndex ||
+            beforeIndex === oldIndex + 1
+        ) {
+            return false;
+        }
+        const event = new ColumnReorderEvent(column, oldIndex, beforeIndex);
+        this.columnReorder$.next(event);
+        if (event.isDefaultPrevented()) {
+            return false;
+        }
+        const [columnId] = columnIds.splice(oldIndex, 1);
+        columnIds.splice(beforeIndex > oldIndex ? beforeIndex - 1 : beforeIndex, 0, columnId);
+        this.setColumnOrder(columnIds);
+        return true;
     }
 
     public requestDataStateChange(options: { readonly resetPage?: boolean } = {}): void {

@@ -35,11 +35,16 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
         role: "row",
         "[attr.aria-selected]": "selectable() ? selected() : null",
         "[attr.aria-rowindex]": "ariaRowIndex()",
+        "[attr.aria-level]": "ariaLevel()",
         "(click)": "onClick($event)"
     }
 })
 export class GridRowComponent {
-    protected readonly ariaRowIndex = computed(() => this.index() + this.gridService.paginationState().skip + 2);
+    /** Rows under groups sit one level below the innermost group (treegrid). */
+    protected readonly ariaLevel = computed(() => {
+        const groupCount = this.gridService.groupColumns().length;
+        return groupCount === 0 ? null : groupCount + 1;
+    });
     protected readonly baseClass = computed(() => {
         const variantClass = gridListTableRowThemeVariants({
             selected: this.selected(),
@@ -57,9 +62,18 @@ export class GridRowComponent {
             ? "flex h-full w-full items-stretch justify-center"
             : "flex min-h-9 w-full items-center justify-center"
     );
+    protected readonly detailToggleLabel = computed(() => {
+        const messages = this.gridService.messages();
+        const rowNumber = this.index() + this.gridService.paginationState().skip + 1;
+        return this.expanded() ? messages.collapseDetail(rowNumber) : messages.expandDetail(rowNumber);
+    });
+    /** With editing on, data cells say whether their column can be edited, in either edit mode. */
+    protected readonly editingEnabled = computed(() => this.gridService.editableOptions().enabled === true);
     protected readonly gridService = inject(GridService);
     protected readonly selectable = computed(() => this.gridService.selectableOptions().enabled);
 
+    /** The row's `aria-rowindex`, counted by the body list across every row of the grid. */
+    public readonly ariaRowIndex = input<number | null>(null);
     public readonly expanded = computed(() => this.gridService.isRowExpanded(this.row()));
     /** The index of this row among the rendered body rows. */
     public readonly index = input.required<number>();

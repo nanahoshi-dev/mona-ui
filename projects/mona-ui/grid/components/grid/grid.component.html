@@ -40,6 +40,7 @@
                     size="small"
                     [rounded]="rounded()"
                     (click)="onGroupingColumnSort(groupColumn)"
+                    (keydown)="onGroupChipKeydown($event, groupColumn)"
                     (remove)="onGroupingColumnRemove($event, groupColumn)">
                     @if (groupColumn.groupSortDirection === "asc") {
                         <svg lucideArrowDown [size]="16" aria-hidden="true"></svg>
@@ -75,7 +76,16 @@
         }
     </div>
 }
-<div class="flex flex-col flex-1 min-h-0" [attr.role]="groupable() ? 'treegrid' : 'grid'">
+<div
+    class="flex flex-col flex-1 min-h-0"
+    [attr.role]="gridRole()"
+    [attr.aria-label]="ariaLabel()"
+    [attr.aria-labelledby]="ariaLabelledBy()"
+    [attr.aria-busy]="gridService.serverLoading() || null"
+    [attr.aria-rowcount]="ariaRowCount()"
+    [attr.aria-colcount]="gridService.layout().length"
+    [attr.aria-multiselectable]="multiselectable() || null"
+    [attr.aria-readonly]="gridService.editableOptions().enabled ? null : true">
     <div [class]="headerClass()" [style.margin-inline-end.px]="headerMarginInlineEnd()" #gridHeaderElement>
         <div>
             <table
@@ -87,7 +97,10 @@
                 <thead role="rowgroup" [style.visibility]="!gridWidthSet() ? 'hidden' : undefined">
                     <tr
                         role="row"
+                        aria-rowindex="1"
                         cdkDropList
+                        cdkDropListOrientation="horizontal"
+                        [cdkDropListSortingDisabled]="true"
                         [cdkDropListConnectedTo]="groupable() ? [groupColumnList()!] : []"
                         (cdkDropListDropped)="onColumnDrop()"
                         [class]="headerTableRowClass()">
@@ -99,9 +112,19 @@
                                     column.kind === "data" &&
                                     column.sortable &&
                                     column.field !== "";
+                                @let sortOrderShown =
+                                    gridService.sortableOptions().enabled &&
+                                    gridService.sortableOptions().mode === "multiple" &&
+                                    gridService.sortableOptions().showIndices &&
+                                    column.sortIndex !== null;
+                                @let defaultTitle = !column.headerTemplate && !column.titleTemplate;
                                 <th
                                     scope="col"
                                     role="columnheader"
+                                    [attr.data-column-id]="column.id"
+                                    [attr.aria-labelledby]="defaultTitle ? uid + '-title-' + column.id : null"
+                                    [attr.aria-label]="!defaultTitle && column.title ? column.title : null"
+                                    [attr.aria-describedby]="sortOrderShown ? uid + '-sort-' + column.id : null"
                                     cdkDrag
                                     [monaGridLockedCell]="layoutColumn.key"
                                     [lockedCellHeader]="true"
@@ -115,22 +138,21 @@
                                     [lastInRow]="layoutColumn.lastInRow"
                                     (toggleExpand)="onColumnSort(column)"
                                     (menuOpen)="openColumnFilterMenu(column)"
-                                    [attr.aria-keyshortcuts]="
-                                        filterMenuEnabled() && column.kind === 'data' && column.filterable
-                                            ? 'Alt+ArrowDown'
-                                            : null
-                                    "
+                                    [attr.aria-keyshortcuts]="headerKeyShortcuts().get(column.id) ?? null"
+                                    (keydown)="onHeaderKeydown($event, column)"
                                     [cdkDragData]="column"
                                     [cdkDragDisabled]="isColumnDragDisabled(column)"
                                     [class]="headerTableCellClass()"
-                                    (mouseenter)="onColumnMouseEnter(column)"
+                                    (cdkDragMoved)="onColumnDragMove($event)"
                                     (cdkDragEntered)="onColumnDragEnter($event)"
                                     (cdkDragStarted)="onColumnDragStart($event)"
                                     (cdkDragEnded)="onColumnDragEnd($event)"
                                     [style.min-width.px]="column.minWidth"
                                     [style.width.px]="column.calculatedWidth"
                                     [attr.aria-sort]="
-                                        columnSortable ? (column.columnSortDirection | columnAriaSort) : null
+                                        columnSortable && (column.sortIndex ?? 1) === 1
+                                            ? (column.columnSortDirection | columnAriaSort)
+                                            : null
                                     ">
                                     <div
                                         [class]="headerTableColumnWrapClass()"
@@ -147,6 +169,7 @@
                                         } @else {
                                             <span
                                                 [class]="headerTableColumnTitleClass()"
+                                                [id]="uid + '-title-' + column.id"
                                                 data-column-title
                                                 (click)="onColumnSort(column)"
                                                 [title]="column.title"
@@ -154,6 +177,11 @@
                                             >
                                         }
 
+                                        @if (sortOrderShown) {
+                                            <span class="sr-only" [id]="uid + '-sort-' + column.id">{{
+                                                messages().sortOrder(column.sortIndex ?? 1)
+                                            }}</span>
+                                        }
                                         <div [class]="columnActionsClass()" [attr.data-column-actions]="true">
                                             @if (
                                                 gridService.sortableOptions().enabled &&
@@ -170,7 +198,9 @@
                                                         gridService.sortableOptions().showIndices &&
                                                         column.sortIndex !== null
                                                     ) {
-                                                        <span class="tabular-nums">{{ column.sortIndex }}</span>
+                                                        <span class="tabular-nums" aria-hidden="true">{{
+                                                            column.sortIndex
+                                                        }}</span>
                                                     }
                                                 </div>
                                             }
@@ -222,6 +252,7 @@
                                     <th
                                         [monaGridLockedCell]="layoutColumn.key"
                                         [lockedCellHeader]="true"
+                                        aria-hidden="true"
                                         [class]="headerTableCellClass()"
                                         [style.min-width.px]="column.minWidth"
                                         [style.width.px]="column.calculatedWidth">
@@ -259,6 +290,7 @@
                                     [firstInRow]="layoutColumn.firstInRow"
                                     [lastInRow]="layoutColumn.lastInRow"
                                     scope="col"
+                                    role="columnheader"
                                     [attr.aria-label]="gridService.messages().rowReorder"
                                     class="border-e border-border"
                                     [style.width.px]="layoutColumn.width"></th>
@@ -275,6 +307,7 @@
                                     [firstInRow]="layoutColumn.firstInRow"
                                     [lastInRow]="layoutColumn.lastInRow"
                                     scope="col"
+                                    role="columnheader"
                                     class="border-e border-border"
                                     [style.width.px]="layoutColumn.width">
                                     @if (
@@ -289,13 +322,18 @@
                                     [monaGridLockedCell]="layoutColumn.key"
                                     [lockedCellHeader]="true"
                                     scope="col"
+                                    role="columnheader"
                                     class="border-e border-border"
-                                    [style.width.px]="layoutColumn.width"></th>
+                                    [style.width.px]="layoutColumn.width">
+                                    <span class="sr-only">{{
+                                        layoutColumn.kind === "detail" ? messages().details : messages().group
+                                    }}</span>
+                                </th>
                             }
                         }
                     </tr>
                     @if (filterRowEnabled()) {
-                        <tr role="row" [class]="headerTableRowClass()">
+                        <tr role="row" aria-rowindex="2" [class]="headerTableRowClass()">
                             @for (layoutColumn of gridService.layout(); track layoutColumn.key) {
                                 @if (layoutColumn.kind === "column") {
                                     @let column = layoutColumn.column;
@@ -310,7 +348,7 @@
                                         [section]="'filter'"
                                         [firstInRow]="layoutColumn.firstInRow"
                                         [lastInRow]="layoutColumn.lastInRow"
-                                        scope="col"
+                                        role="gridcell"
                                         [class]="filterRowCellClass()"
                                         [style.width.px]="layoutColumn.width"
                                         [attr.aria-label]="messages().filterByColumn(column.title)">
@@ -324,7 +362,7 @@
                                     <th
                                         [monaGridLockedCell]="layoutColumn.key"
                                         [lockedCellHeader]="true"
-                                        scope="col"
+                                        role="gridcell"
                                         class="border-e border-border"
                                         [style.width.px]="layoutColumn.width"></th>
                                 }
@@ -351,7 +389,10 @@
                     <ng-container [ngTemplateOutlet]="emptyGridTemplate" />
                 }
                 @if (gridService.serverLoading()) {
-                    <div class="absolute inset-0 z-20 flex items-center justify-center bg-surface/60" data-grid-loading>
+                    <div
+                        class="absolute inset-0 z-20 flex items-center justify-center bg-surface/60"
+                        aria-hidden="true"
+                        data-grid-loading>
                         <mona-spinner size="large" />
                     </div>
                 }
@@ -370,7 +411,7 @@
                                 [style.width.px]="gridService.tableWidth()">
                                 <colgroup monaGridColgroup></colgroup>
                                 <tfoot role="rowgroup">
-                                    <tr monaGridFooterRow></tr>
+                                    <tr monaGridFooterRow [ariaRowIndex]="ariaRowCount()"></tr>
                                 </tfoot>
                             </table>
                         </div>
@@ -379,7 +420,7 @@
             }
         }
     } @placeholder {
-        <mona-placeholder text="Loading..." />
+        <mona-placeholder [text]="messages().loading" />
     }
 </div>
 @if (!gridService.virtualScrollOptions().enabled) {
@@ -399,11 +440,15 @@
 }
 
 <ng-template #emptyGridTemplate>
-    <div [class]="noDataClass()">
-        @if (noDataTemplate()) {
-            <ng-container [ngTemplateOutlet]="noDataTemplate() ?? null"></ng-container>
-        } @else {
-            <mona-placeholder [text]="gridService.messages().noData"></mona-placeholder>
-        }
+    <div [class]="noDataClass()" role="rowgroup">
+        <div role="row" class="contents" [attr.aria-rowindex]="gridService.bodyAriaRowStart() + 1">
+            <div role="gridcell" class="contents" [attr.aria-colspan]="gridService.layout().length">
+                @if (noDataTemplate()) {
+                    <ng-container [ngTemplateOutlet]="noDataTemplate() ?? null"></ng-container>
+                } @else {
+                    <mona-placeholder [text]="gridService.messages().noData"></mona-placeholder>
+                }
+            </div>
+        </div>
     </div>
 </ng-template>

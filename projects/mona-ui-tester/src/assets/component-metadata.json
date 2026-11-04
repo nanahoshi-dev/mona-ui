@@ -955,6 +955,13 @@
     "selector": "\"td[monaGridLogicalCell], th[monaGridLogicalCell]\"",
     "inputs": [
       {
+        "description": "The cell's `aria-colindex` when it isn't its column's place in the layout, as for a group\r\nrow's title cell, which follows the group's indents.",
+        "kind": "input",
+        "name": "ariaColIndex",
+        "type": "number | null",
+        "defaultValue": "null"
+      },
+      {
         "description": "",
         "kind": "input",
         "name": "cellKind",
@@ -988,6 +995,13 @@
         "defaultValue": "false"
       },
       {
+        "description": "Whether the cell's row or group is expanded; ArrowRight expands a collapsed group row and\r\nArrowLeft collapses an expanded one.",
+        "kind": "input",
+        "name": "expanded",
+        "type": "boolean | null",
+        "defaultValue": "null"
+      },
+      {
         "description": "",
         "kind": "input",
         "name": "firstInRow",
@@ -1019,6 +1033,13 @@
         "kind": "output",
         "name": "menuOpen",
         "type": "void"
+      },
+      {
+        "description": "The cell's `aria-readonly`: whether its column can't be edited, or `null` when the grid\r\ndoesn't edit.",
+        "kind": "input",
+        "name": "readOnly",
+        "type": "boolean | null",
+        "defaultValue": "null"
       },
       {
         "description": "",
@@ -9413,6 +9434,20 @@
     "selector": "\"mona-grid\"",
     "inputs": [
       {
+        "description": "The grid's accessible name, such as \"Orders\". Use it, or `ariaLabelledBy`, rather than\r\nan `aria-label` attribute on the host, which names nothing.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "The id of the element that names the grid, such as a heading above it.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string | null",
+        "defaultValue": "null"
+      },
+      {
         "description": "The row data to be displayed in the grid.",
         "kind": "input",
         "name": "data",
@@ -9753,6 +9788,13 @@
       {
         "description": "",
         "kind": "input",
+        "name": "ariaRowIndex",
+        "type": "number | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "",
+        "kind": "input",
         "name": "row",
         "type": "Row",
         "required": true
@@ -9897,9 +9939,37 @@
       {
         "description": "",
         "kind": "input",
+        "name": "ariaLevel",
+        "type": "number | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "ariaRowIndex",
+        "type": "number | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "",
+        "kind": "input",
         "name": "groupKey",
         "type": "string | null",
         "defaultValue": "null"
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "rowIndex",
+        "type": "number",
+        "defaultValue": "0"
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "section",
+        "type": "GridNavigationSection",
+        "defaultValue": "\"footer\""
       }
     ]
   },
@@ -9907,6 +9977,13 @@
     "name": "GridGroupRowComponent",
     "selector": "\"tr[monaGridGroupRow]\"",
     "inputs": [
+      {
+        "description": "",
+        "kind": "input",
+        "name": "ariaRowIndex",
+        "type": "number | null",
+        "defaultValue": "null"
+      },
       {
         "description": "",
         "kind": "input",
@@ -9939,6 +10016,13 @@
     "name": "GridRowComponent",
     "selector": "\"tr[monaGridRow]\"",
     "inputs": [
+      {
+        "description": "",
+        "kind": "input",
+        "name": "ariaRowIndex",
+        "type": "number | null",
+        "defaultValue": "null"
+      },
       {
         "description": "",
         "kind": "input",
@@ -10005,6 +10089,13 @@
         "name": "expanded",
         "type": "boolean",
         "required": true
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "label",
+        "type": "string | null",
+        "defaultValue": "null"
       },
       {
         "description": "",

@@ -25,6 +25,7 @@ import { GridEditorComponent } from "../grid-editor/grid-editor.component";
     host: {
         "[class]": "baseClass()",
         role: "row",
+        "[attr.aria-rowindex]": "gridService.headerRowCount() + 1",
         "data-grid-add-row": "true"
     }
 })

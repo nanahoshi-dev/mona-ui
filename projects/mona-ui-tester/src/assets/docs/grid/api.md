@@ -140,7 +140,7 @@ Import `DestroyRef`, `inject`, and `signal` from `@angular/core`, `GridDataState
 
 The server must apply the descriptors to the whole matching dataset before paging. The Grid preserves returned row order and displays every supplied row, even when `skip` is nonzero. For example, ten supplied rows at `skip: 40`, `pageSize: 10`, and `total: 137` show page five and retain all ten rows.
 
-While `loading` is true, the body shows a localized loading indicator, preserves existing rows, and suppresses the ordinary empty state. The host exposes `aria-busy`; the header and pager remain available for another request. Set `loading` back to false on both success and error.
+While `loading` is true, the body shows a localized loading indicator, preserves existing rows, and suppresses the ordinary empty state. The grid element exposes `aria-busy`; the header and pager remain available for another request. Set `loading` back to false on both success and error.
 
 Server mode has these boundaries:
 
@@ -337,7 +337,9 @@ Custom edit templates receive a `GridEditTemplateContext` bound to the row's Sig
 
 ### Column Resizing
 
-`monaGridResizable` renders a drag handle between header cells; `columnResize` emits the old and new width once a resize completes.
+`monaGridResizable` renders a drag handle between header cells; `columnResize` emits the old and new width once a resize completes. A drag stops at the column's `minWidth` and `maxWidth`, and `Escape` during a drag puts the width back.
+
+The handle is also a focusable `separator`: `F2` on a header moves to it, `ArrowLeft`/`ArrowRight` resize the column by 10px (mirrored in right-to-left layouts), `Home`/`End` set it to its narrowest/widest width, and `Enter` fits it to its content.
 
 ```html
 <mona-grid [data]="orders()" monaGridResizable (columnResize)="onColumnResize($event)"></mona-grid>
@@ -345,7 +347,7 @@ Custom edit templates receive a `GridEditTemplateContext` bound to the row's Sig
 
 ### Column Reordering
 
-`monaGridReorderable` lets the consumer drag column headers into a new order. `columnReorder` is cancelable — call `preventDefault()` to keep a column from moving.
+`monaGridReorderable` lets the consumer drag column headers into a new order. Dropping on the start half of a header puts the column before it, the end half after it; `Escape` cancels the drag. From the keyboard, `Ctrl+Shift+ArrowLeft`/`Ctrl+Shift+ArrowRight` moves the focused header one place and announces its new position. `columnReorder` is cancelable — call `preventDefault()` to keep a column from moving.
 
 ```html
 <mona-grid [data]="orders()" monaGridReorderable (columnReorder)="onColumnReorder($event)"></mona-grid>
@@ -401,7 +403,7 @@ Row reordering works with pagination (moving rows within the current page), mast
 
 ### Master-Detail Rows
 
-`monaGridDetailTemplate` renders projected content for each row that the consumer can expand.
+`monaGridDetailTemplate` renders projected content for each row that the consumer can expand. The detail toggle is a button named by the `expandDetail`/`collapseDetail` messages, with `aria-expanded`. Detail rows aren't supported with `monaGridVirtualScroll`, whose rows share one height: the grid ignores the template there and warns in development mode.
 
 ```html
 <mona-grid [data]="orders()">
@@ -486,7 +488,13 @@ The grid is one Tab stop: `Tab` moves into the grid at the cell that last had fo
 | `Shift+ArrowDown` / `Shift+ArrowUp`  | Moves to the next/previous row and extends the selection to it.                                                                                                             |
 | `Ctrl+A` / `Cmd+A`                   | With multiple selection, selects every row in the select-all scope.                                                                                                         |
 | `Ctrl+C` / `Cmd+C`                   | Copies the focused cell's text (body rows, not while editing, and not when text is selected).                                                                               |
+| `Ctrl+Shift+ArrowLeft` / `ArrowRight` | With `monaGridReorderable`, moves the focused header's column one place (mirrored in right-to-left layouts) and announces it. `Cmd` too.                                    |
+| `Ctrl+Shift+G` / `Cmd+Shift+G`       | With `monaGridGroupable`, groups the rows by the focused header's column and announces it.                                                                                  |
+| `Delete` / `Backspace`               | On a chip in the group panel, removes that grouping.                                                                                                                        |
+| `ArrowRight` / `ArrowLeft`           | On a group row, expands/collapses it first (mirrored in right-to-left layouts); on an expanded/collapsed group, moves as usual.                                             |
 | `Tab` / `Shift+Tab`                  | Leaves the grid. While editing a cell, commits it and edits the next/previous editable cell.                                                                                |
+
+Headers list their shortcuts in `aria-keyshortcuts`. The column resize handle has its own keys, described under [Column Resizing](#column-resizing).
 
 Inside a cell's controls, `Tab`, `Shift+Tab` and the arrows move between them (text fields keep their arrow keys), `Tab` past the last control moves on to the next cell, and `Escape` returns to the cell.
 
@@ -500,25 +508,34 @@ Grid cells use a roving `tabindex`: the cell that last had focus has `tabindex="
 
 | Attribute          | When present                                               | Value                                                              |
 | ------------------ | ---------------------------------------------------------- | ------------------------------------------------------------------ |
-| `role`             | On the tabular content region                              | `"grid"`, or `"treegrid"` when grouping is enabled                 |
+| `role`             | On the tabular content region                              | `"grid"`, or `"treegrid"` while rows are grouped                   |
+| `aria-label`       | On the tabular content region                              | The `ariaLabel` input; `aria-labelledby` from `ariaLabelledBy`     |
+| `aria-rowcount`    | On the tabular content region                              | Every row, or `-1` when paged groups or detail rows make it unknown |
+| `aria-colcount`    | On the tabular content region                              | Every column, including group indent and selection columns         |
+| `aria-multiselectable` | On the tabular content region                              | `"true"` with multiple selection                                   |
+| `aria-readonly`    | On the tabular content region                              | `"true"` while editing is off                                      |
 | `role`             | On the header/body/footer row groups                       | `"rowgroup"`                                                       |
 | `role`             | On header cells                                            | `"columnheader"`                                                   |
 | `role`             | On data/group/footer rows                                  | `"row"`                                                            |
 | `role`             | On data cells                                              | `"gridcell"`                                                       |
 | `role`             | On the column resize handle                                | `"separator"`                                                      |
-| `aria-sort`        | On a header cell, only while `monaGridSortable` is enabled | `"ascending"`, `"descending"`, or `"none"`                         |
+| `aria-sort`        | On a header cell, only while `monaGridSortable` is enabled | `"ascending"`, `"descending"`, or `"none"`; only on the first sort |
+| `aria-describedby` | On a header cell sorted after another                      | Its place in the sort order (`sortOrder` message)                  |
+| `aria-keyshortcuts` | On a header cell with keyboard shortcuts                   | The keys that open its filter menu, move it or group by it         |
 | `aria-selected`    | On a row, only while `monaGridSelectable` is enabled       | Reflects whether the row is selected                               |
-| `aria-busy`        | On the Grid host in server mode                            | `"true"` while `loading` is true                                   |
-| `aria-rowindex`    | On every row                                               | 1-based row position, accounting for the header row                |
+| `aria-busy`        | On the tabular content region in server mode               | `"true"` while `loading` is true                                   |
+| `aria-rowindex`    | On every row                                               | 1-based position, counting header, filter and add rows and earlier pages |
 | `aria-colindex`    | On every cell                                              | 1-based column position, accounting for group indent columns       |
 | `aria-expanded`    | On a group header row                                      | Reflects whether the group is expanded                             |
-| `aria-level`       | On a group header row                                      | The group's nesting depth                                          |
+| `aria-level`       | On rows of a grouped grid                                  | The group's nesting depth; data rows sit one level below their group |
 | `aria-readonly`    | On a data cell                                             | `"true"` when editing is disabled for that cell or column          |
 | `aria-orientation` | On the column resize handle                                | `"vertical"`                                                       |
-| `aria-label`       | On the column resize handle                                | `"Resize column"`                                                  |
+| `aria-label`       | On the column resize handle                                | `"Resize {column}"` (`resizeColumn` message)                       |
+| `aria-valuenow`    | On the column resize handle                                | The column width in pixels, with `aria-valuemin`/`aria-valuemax`   |
+| `aria-expanded`    | On the detail toggle button                                | Reflects whether the detail row is open                            |
 | `aria-label`       | On the built-in command buttons                            | `"Save row"`, `"Cancel row edit"`, `"Edit row"`, or `"Remove row"` |
 
-`TODO(owner-review): no aria-live region or aria-multiselectable attribute was found for grouped or multi-select grids — confirm whether announcing selection/grouping changes to assistive technology is expected before relying on it.`
+Moving a column or grouping by one from the keyboard is announced through a polite live region (`columnMoved` and `columnGrouped` messages). The grid element has no name of its own: set `ariaLabel` or `ariaLabelledBy`.
 
 ### Form Interaction
 
@@ -534,6 +551,8 @@ Inline editing is built exclusively on Angular Signal Forms: the built-in editor
 
 | Name              | Type                                       | Default     | Description                                                                                                                                       |
 | ----------------- | ------------------------------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ariaLabel`       | `string \| null`                           | `null`      | Accessible name of the grid element. |
+| `ariaLabelledBy`  | `string \| null`                           | `null`      | Id of the element that names the grid, such as a heading; takes precedence over `ariaLabel`. |
 | `class`           | `string`                                   | `""`        | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                         |
 | `data`            | `Iterable<T>`                              | `[]`        | The row data to be displayed in the grid.                                                                                                         |
 | `expandedKeys`    | `unknown[]`                                | `[]`        | Two-way bindable. Keys of the rows whose detail row is open: `rowKey` values, or the data items without a `rowKey`. |
@@ -769,7 +788,7 @@ No outputs.
 | --------- | --------- | -------- | ------------------------------------------------------------------------------------------- |
 | `total`   | `number`  | Required | Number of matching records before server paging. Must be a non-negative safe integer.       |
 | `skip`    | `number`  | `0`      | Zero-based server offset. Must be a non-negative safe integer. External updates are silent. |
-| `loading` | `boolean` | `false`  | Displays the body loading overlay and sets host `aria-busy`.                                |
+| `loading` | `boolean` | `false`  | Displays the body loading overlay and sets `aria-busy` on the grid element.                 |
 
 Use `GridComponent.pageSize` for the request's `take`; it must be a positive safe integer in server mode. The directive is enabled by its presence and does not add a second page-size input.
 
