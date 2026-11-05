@@ -5,6 +5,7 @@ import { EDITOR_DEFAULT_MESSAGES } from "../../i18n/editor.default-messages";
 import { EditorService } from "../../services/editor.service";
 import { editorFontColorPreviewThemeVariants, editorFontColorValueThemeVariants } from "../../styles/editor.styles";
 import { htmlColorCode } from "../../utils/htmlColorCode";
+import { selectionMarkAttribute } from "../../utils/selectionMarkAttribute";
 
 @Component({
     selector: "mona-editor-font-color",
@@ -15,25 +16,22 @@ export class EditorFontColorComponent {
     readonly #document = inject(DOCUMENT);
     readonly #editorService: EditorService = inject(EditorService);
     readonly #i18n = inject(MonaI18nService);
-    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
-    #lastColor: string = "";
     protected readonly colorPreviewClass = computed(() => {
         return editorFontColorPreviewThemeVariants();
     });
     protected readonly colorValueClass = computed(() => {
         return editorFontColorValueThemeVariants();
     });
+    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
     protected readonly selectedColor = computed(() => {
-        this.#editorService.state();
-        const attributes = this.#editorService.editor.getAttributes("textStyle");
-        const color = attributes["color"] || this.#lastColor;
-        return htmlColorCode(color, this.#document);
+        const state = this.#editorService.state();
+        const color = state ? selectionMarkAttribute(state, "textStyle", "color") : null;
+        return color ? htmlColorCode(color, this.#document) : null;
     });
 
     public onColorChange(color: string | null): void {
         if (color) {
             this.#editorService.editor.chain().focus().setColor(color).run();
-            this.#lastColor = color;
         } else {
             this.#editorService.editor.chain().focus().unsetColor().run();
         }

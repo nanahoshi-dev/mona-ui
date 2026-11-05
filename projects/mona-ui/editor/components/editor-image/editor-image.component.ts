@@ -15,8 +15,8 @@ import { EditorImageInserterComponent } from "../editor-image-inserter/editor-im
 export class EditorImageComponent {
     readonly #editorService: EditorService = inject(EditorService);
     readonly #i18n = inject(MonaI18nService);
-    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
     protected readonly inserterVisible = signal(false);
+    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
 
     public onDisplayInserterClick(): void {
         this.inserterVisible.set(true);
@@ -42,14 +42,13 @@ export class EditorImageComponent {
     private insertImage(event: EditorImageInsertEvent): void {
         this.#editorService.editor
             .chain()
+            .focus()
             .setImage({
-                src: event.link,
                 alt: event.alt,
-                title: event.alt
-            })
-            .updateAttributes("extendedImage", {
-                width: event.width,
-                height: event.height
+                height: event.height ?? undefined,
+                src: event.link,
+                title: event.alt,
+                width: event.width ?? undefined
             })
             .run();
     }

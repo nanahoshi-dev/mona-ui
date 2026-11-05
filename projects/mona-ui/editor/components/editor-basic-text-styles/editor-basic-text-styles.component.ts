@@ -4,15 +4,15 @@ import { ButtonGroupComponent } from "@nanahoshi/mona-ui/button-group";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { EDITOR_DEFAULT_MESSAGES } from "../../i18n/editor.default-messages";
 import { EditorService } from "../../services/editor.service";
+import { EditorPressedDirective } from "../../directives/editor-pressed.directive";
 
 @Component({
     selector: "mona-editor-basic-text-styles",
-    imports: [ButtonDirective, ButtonGroupComponent],
+    imports: [ButtonDirective, ButtonGroupComponent, EditorPressedDirective],
     templateUrl: "./editor-basic-text-styles.component.html"
 })
 export class EditorBasicTextStylesComponent {
     readonly #i18n = inject(MonaI18nService);
-    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
     protected readonly anyToolVisible = computed(() => {
         return (
             this.boldVisible() ||
@@ -38,6 +38,7 @@ export class EditorBasicTextStylesComponent {
     protected readonly italicVisible = computed(() => {
         return this.editorService.settings().italic;
     });
+    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
     protected readonly strikeThroughSelected = computed(() => {
         this.editorService.state();
         return this.editorService.editor.isActive("strike");

@@ -1,15 +1,18 @@
-<div [class]="tableCreatorClass()" (pointerleave)="onCellMouseLeave()">
-    @for (rx of [1, 2, 3, 4, 5, 6, 7, 8]; track rx) {
-        @for (cx of [1, 2, 3, 4, 5, 6, 7, 8]; track cx) {
-            <div
+<div role="group" [attr.aria-label]="messages().insertTable" (keydown)="onKeydown($event)">
+    <div [class]="tableCreatorClass()">
+        @for (cell of cells; track $index) {
+            <button
+                type="button"
                 [class]="tableCreatorCellClass()"
-                [style.background-color]="
-                    rx <= highlightedCell.row && cx <= highlightedCell.col
-                        ? 'var(--color-primary)'
-                        : 'var(--color-surface-muted)'
-                "
-                (click)="onCellClick(rx, cx)"
-                (pointerenter)="onCellMouseEnter(rx, cx)"></div>
+                [attr.data-highlighted]="isHighlighted(cell) || null"
+                [attr.tabindex]="isTabStop(cell) ? 0 : -1"
+                [attr.aria-label]="messages().tableSize(cell.row, cell.col)"
+                (click)="onCellClick(cell)"
+                (focus)="onCellFocus(cell)"
+                (pointerenter)="onCellPointerEnter(cell)"></button>
         }
-    }
+    </div>
+    <p class="m-0 px-1 pb-1 text-center text-sm" aria-live="polite">
+        {{ messages().tableSize(highlighted().row, highlighted().col) }}
+    </p>
 </div>

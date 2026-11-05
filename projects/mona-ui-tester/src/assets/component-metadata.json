@@ -738,6 +738,20 @@
       }
     ]
   },
+  "EditorPressedDirective": {
+    "name": "EditorPressedDirective",
+    "selector": "\"button[monaEditorPressed]\"",
+    "inputs": [
+      {
+        "description": "",
+        "kind": "input",
+        "name": "pressed",
+        "type": "boolean",
+        "alias": "monaEditorPressed",
+        "required": true
+      }
+    ]
+  },
   "GridCellDirective": {
     "name": "GridCellDirective",
     "selector": "\"td[monaGridCell]\"",
@@ -9460,22 +9474,93 @@
     "selector": "\"mona-editor\"",
     "inputs": [
       {
+        "description": "The id of an element that describes the content, such as a hint or an error message.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "alias": "aria-describedby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The accessible name of the content. Without it or `aria-labelledby`, the content is named \"Rich\ntext editor\" (translated).",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The id of a visible label for the content, such as a `<label>` next to the editor.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Emits when the editor loses focus.",
         "kind": "output",
         "name": "blur",
         "type": "void"
       },
       {
-        "description": "Emits when the editor is created for the first time and is ready to be used.",
+        "description": "The initial content of the editor, as HTML or a {@link JSONContent} document. A later change\nreplaces the document, unless it is the content the editor already has.",
+        "kind": "input",
+        "name": "content",
+        "type": "string | JSONContent"
+      },
+      {
+        "description": "Emits when the editor is created and ready to be used, and again when it is rebuilt for new\n`settings`.",
         "kind": "output",
         "name": "create",
         "type": "void"
       },
       {
+        "description": "Disables the editor: the content can't be edited or focused for editing, and the toolbar is inert.\nWhen bound to a signal form field via `[formField]`, the form sets it.",
+        "kind": "input",
+        "name": "disabled",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Emits when the editor loses focus.",
+        "kind": "output",
+        "name": "editorBlur",
+        "type": "void"
+      },
+      {
         "description": "Emits when the editor gains focus.",
         "kind": "output",
-        "name": "focus",
+        "name": "editorFocus",
         "type": "void"
+      },
+      {
+        "description": "Marks the editor as invalid once it has been touched. When bound to a signal form field via\n`[formField]`, the form sets it.",
+        "kind": "input",
+        "name": "invalid",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Text shown in the empty editor, and given to assistive technology as `aria-placeholder`. It is not\na name: use a label or `aria-label` too.",
+        "kind": "input",
+        "name": "placeholder",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Makes the content read-only and hides the toolbar. When bound to a signal form field via\n`[formField]`, the form sets it.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Marks the editor as required: once touched, an empty editor is invalid.",
+        "kind": "input",
+        "name": "required",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Emits when the selection of the editor changes.",
@@ -9484,22 +9569,29 @@
         "type": "void"
       },
       {
-        "description": "Emits when the content of the editor changes.",
-        "kind": "output",
-        "name": "update",
-        "type": "ContentChangeEvent"
-      },
-      {
-        "description": "The initial content of the editor.",
-        "kind": "input",
-        "name": "content",
-        "type": "string | JSONContent"
-      },
-      {
-        "description": "The settings of the editor.",
+        "description": "The settings of the editor. Changing them rebuilds the editor and keeps its document.",
         "kind": "input",
         "name": "settings",
         "type": "Partial<EditorSettings>"
+      },
+      {
+        "description": "Emits when the editor loses focus.\nForm directives (`[formField]`, `ngModel`, `formControl`) listen to this to mark the field as touched.",
+        "kind": "output",
+        "name": "touch",
+        "type": "void"
+      },
+      {
+        "description": "Sets the touched state. When bound to a signal form field via `[formField]`, the form sets it.",
+        "kind": "input",
+        "name": "touched",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Emits when the user changes the content. It isn't emitted when `value` or `content` is set from\noutside.",
+        "kind": "output",
+        "name": "update",
+        "type": "ContentChangeEvent"
       },
       {
         "description": "",
@@ -9507,6 +9599,13 @@
         "name": "userClass",
         "type": "string",
         "alias": "class",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The content of the editor as HTML. An empty editor has the value `\"\"`. Use `[(value)]`, or\n`[formField]` with a signal form.",
+        "kind": "model",
+        "name": "value",
+        "type": "string",
         "defaultValue": "\"\""
       }
     ]
@@ -9518,14 +9617,14 @@
       {
         "description": "",
         "kind": "output",
-        "name": "cancel",
-        "type": "void"
+        "name": "insert",
+        "type": "EditorImageInsertEvent"
       },
       {
         "description": "",
         "kind": "output",
-        "name": "insert",
-        "type": "EditorImageInsertEvent"
+        "name": "insertCancel",
+        "type": "void"
       }
     ]
   },

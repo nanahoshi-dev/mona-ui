@@ -1,23 +1,14 @@
-import { Image, SetImageOptions } from "@tiptap/extension-image";
+import { Image } from "@tiptap/extension-image";
 
-type ImageAttributes = {
-    alt?: string;
-    src: string;
-    title?: string;
-};
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        image: {
-            setImage: (options: SetImageOptions) => ReturnType;
-        };
-    }
-}
-
+/**
+ * The image node with `width` and `height` kept as attributes, on top of the base `src`, `alt` and `title`.
+ */
+// eslint-disable-next-line @typescript-eslint/naming-convention -- Tiptap extensions are named in PascalCase.
 export const ExtendedImage = Image.extend({
     name: "extendedImage",
     addAttributes() {
         return {
+            ...this.parent?.(),
             width: {
                 default: null,
                 parseHTML: (element: Element) => element.getAttribute("width"),
@@ -27,7 +18,7 @@ export const ExtendedImage = Image.extend({
             height: {
                 default: null,
                 parseHTML: (element: Element) => element.getAttribute("height"),
-                renderHTML: (attributes: Record<string, never>) =>
+                renderHTML: (attributes: Record<string, unknown>) =>
                     attributes["height"] ? { height: attributes["height"] } : {}
             }
         };

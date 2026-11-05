@@ -1,3 +1,4 @@
+import { InteractivityChecker } from "@angular/cdk/a11y";
 import { OverlayContainer } from "@angular/cdk/overlay";
 import {
     ApplicationRef,
@@ -596,6 +597,27 @@ describe("Window contract", () => {
         settle();
         expect(windowElements()).toHaveLength(1);
         fixture.destroy();
+        finishLeaveAnimation();
+    });
+
+    it("focuses the element it is given when it opens, ahead of its first tabbable element", () => {
+        // jsdom has no layout, so the focus trap sees nothing as visible and never moves focus on its own.
+        vi.spyOn(TestBed.inject(InteractivityChecker), "isVisible").mockReturnValue(true);
+        const parent = Injector.create({
+            providers: [{ provide: GREETING, useValue: "Hello" }],
+            parent: TestBed.inject(Injector)
+        });
+        const windowRef = service.open({
+            content: WindowBodyComponent,
+            data: { name: "Mona" },
+            focusedElement: "#body-input",
+            injector: parent,
+            title: "Focus"
+        });
+        settle();
+
+        expect(document.activeElement).toBe(within(windowRef).querySelector("#body-input"));
+        windowRef.close();
         finishLeaveAnimation();
     });
 });

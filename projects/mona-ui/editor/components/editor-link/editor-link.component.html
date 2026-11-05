@@ -1,13 +1,19 @@
-<mona-button-group selection="single" [size]="'small'">
+<mona-button-group selection="single" [size]="'small'" [aria-label]="messages().linkGroup">
     <button
         monaButton
         [selected]="linkSelected()"
         [toggleable]="false"
+        aria-haspopup="dialog"
         (click)="onLinkDialogDisplay()"
         [title]="messages().insertLink">
         <i class="ri-link-m"></i>
     </button>
-    <button monaButton [disabled]="unlinkDisabled()" (click)="onUnlinkClick()" [title]="messages().removeLink">
+    <button
+        monaButton
+        [toggleable]="false"
+        [disabled]="unlinkDisabled()"
+        (click)="onUnlinkClick()"
+        [title]="messages().removeLink">
         <i class="ri-link-unlink-m"></i>
     </button>
 </mona-button-group>

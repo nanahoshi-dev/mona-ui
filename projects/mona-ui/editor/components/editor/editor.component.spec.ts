@@ -15,6 +15,8 @@ describe("EditorComponent", () => {
         fixture = TestBed.createComponent(EditorComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
     });
 
     it("should create", () => {

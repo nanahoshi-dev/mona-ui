@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit } from "@angular/core";
+import { Component, computed, inject } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
 import { DropdownItemTemplateDirective } from "@nanahoshi/mona-ui/dropdowns";
@@ -12,13 +12,13 @@ import { editorFontFamilyDropdownListThemeVariants } from "../../styles/editor.s
     imports: [DropdownListComponent, FormsModule, DropdownItemTemplateDirective],
     templateUrl: "./editor-font-family.component.html"
 })
-export class EditorFontFamilyComponent implements OnInit {
+export class EditorFontFamilyComponent {
     readonly #i18n = inject(MonaI18nService);
-    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
     protected readonly dropdownListClass = computed(() => {
         return editorFontFamilyDropdownListThemeVariants();
     });
     protected readonly editorService: EditorService = inject(EditorService);
+    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
     protected readonly selectedFontFamily = computed(() => {
         this.editorService.state();
         return (
@@ -27,11 +27,6 @@ export class EditorFontFamilyComponent implements OnInit {
                 .firstOrDefault(ff => this.editorService.editor.isActive("textStyle", { fontFamily: ff })) ?? null
         );
     });
-
-    public ngOnInit(): void {
-        const defaultFontFamily = this.editorService.fonts().first();
-        this.editorService.editor.chain().focus().setFontFamily(defaultFontFamily).run();
-    }
 
     public onFontFamilyChange(fontFamily: string | null | undefined): void {
         if (!fontFamily) {

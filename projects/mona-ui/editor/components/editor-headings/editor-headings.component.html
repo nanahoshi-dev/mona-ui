@@ -6,28 +6,29 @@
     [class]="dropdownListClass()"
     textField="text"
     valueField="value"
+    [aria-label]="messages().format"
     [title]="messages().format">
     <ng-template monaDropDownListItemTemplate let-dataItem>
         @switch (dataItem.value) {
-            @case (HeadingType.Heading1) {
+            @case (headingType.Heading1) {
                 <h1 class="m-0 text-2xl font-bold">{{ dataItem.text }}</h1>
             }
-            @case (HeadingType.Heading2) {
+            @case (headingType.Heading2) {
                 <h2 class="m-0 text-xl font-bold">{{ dataItem.text }}</h2>
             }
-            @case (HeadingType.Heading3) {
+            @case (headingType.Heading3) {
                 <h3 class="m-0 text-lg font-bold">{{ dataItem.text }}</h3>
             }
-            @case (HeadingType.Heading4) {
+            @case (headingType.Heading4) {
                 <h4 class="m-0 text-base font-bold">{{ dataItem.text }}</h4>
             }
-            @case (HeadingType.Heading5) {
+            @case (headingType.Heading5) {
                 <h5 class="m-0 text-sm font-bold">{{ dataItem.text }}</h5>
             }
-            @case (HeadingType.Heading6) {
+            @case (headingType.Heading6) {
                 <h6 class="m-0 text-xs font-bold">{{ dataItem.text }}</h6>
             }
-            @case (HeadingType.Paragraph) {
+            @case (headingType.Paragraph) {
                 <p class="m-0 text-sm">{{ dataItem.text }}</p>
             }
             @default {

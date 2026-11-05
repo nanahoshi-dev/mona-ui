@@ -2,6 +2,7 @@ import { Component, computed, inject, output, signal } from "@angular/core";
 import { form, FormField, FormRoot, maxLength, required } from "@angular/forms/signals";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
 import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
 import { EDITOR_DEFAULT_MESSAGES } from "../../i18n/editor.default-messages";
@@ -21,7 +22,6 @@ import {
 })
 export class EditorImageInserterComponent {
     readonly #i18n = inject(MonaI18nService);
-    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
     readonly #imageFormModel = signal<ImageInsertFormModel>({
         alt: "",
         height: null,
@@ -38,6 +38,13 @@ export class EditorImageInserterComponent {
         required(schema.link);
         maxLength(schema.link, 2048);
     });
+    protected readonly labelIds = {
+        alt: createElementControlId(),
+        height: createElementControlId(),
+        link: createElementControlId(),
+        width: createElementControlId()
+    };
+    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
     protected readonly rowClass = computed(() => {
         return editorImageInserterRowThemeVariants();
     });
@@ -45,11 +52,11 @@ export class EditorImageInserterComponent {
         return editorImageInserterRowLabelThemeVariants();
     });
 
-    public readonly cancel = output();
     public readonly insert = output<EditorImageInsertEvent>();
+    public readonly insertCancel = output();
 
     protected onCancel(): void {
-        this.cancel.emit();
+        this.insertCancel.emit();
     }
 
     protected onImageInsert(): void {

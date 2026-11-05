@@ -3,6 +3,7 @@
     [value]="selectedColor()"
     (valueChange)="onColorChange($event)"
     [size]="'small'"
+    [aria-label]="messages().backgroundColor"
     [title]="messages().backgroundColor">
     <ng-template monaColorPickerValueTemplate let-color>
         <div [class]="highlightValueClass()">

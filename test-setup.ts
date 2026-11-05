@@ -21,6 +21,14 @@ window.scrollTo = vi.fn();
 window.scrollBy = vi.fn();
 
 /**
+ * jsdom's Range has no layout, so ProseMirror's scroll-into-view after a focused command (which runs on a timer)
+ * throws. An empty rect list is what an unrendered range reports.
+ */
+Range.prototype.getClientRects = (): DOMRectList =>
+    ({ item: () => null, length: 0, [Symbol.iterator]: [][Symbol.iterator] }) as unknown as DOMRectList;
+Range.prototype.getBoundingClientRect = (): DOMRect => new DOMRect();
+
+/**
  * jsdom has no native canvas backend (it would need the optional `canvas` npm
  * package), so HTMLCanvasElement.getContext("2d") always returns null and
  * logs a "Not implemented" warning. Chart's canvas render backend always

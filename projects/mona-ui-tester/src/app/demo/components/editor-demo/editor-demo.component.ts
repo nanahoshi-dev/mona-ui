@@ -1,7 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
-import { Component, computed, inject, input, signal } from "@angular/core";
-import { type ContentChangeEvent, EditorComponent, type EditorSettings } from "@nanahoshi/mona-ui/editor";
-import type { JSONContent } from "@tiptap/core";
+import { booleanAttribute, Component, computed, inject, input, signal } from "@angular/core";
+import { EditorComponent, type EditorSettings } from "@nanahoshi/mona-ui/editor";
 import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -156,9 +155,17 @@ export class EditorDemoComponent extends AbstractDemoComponent<EditorComponent> 
     protected readonly EditorWrapperComponent = EditorWrapperComponent;
     protected readonly config = signal<ComponentConfig<EditorComponent>>({
         inputs: {
-            content: {
-                type: "string",
-                value: ""
+            disabled: {
+                type: "boolean",
+                value: false
+            },
+            readonly: {
+                type: "boolean",
+                value: false
+            },
+            required: {
+                type: "boolean",
+                value: false
             },
             settings: {
                 type: "object"
@@ -174,15 +181,22 @@ export class EditorDemoComponent extends AbstractDemoComponent<EditorComponent> 
     imports: [EditorComponent],
     template: `
         <mona-editor
-            [content]="editorContent()"
+            [(value)]="html"
             [settings]="editorSettings()"
-            (update)="onEditorUpdate($event)"
+            [disabled]="disabled()"
+            [readonly]="readonly()"
+            [required]="required()"
+            [touched]="editorTouched()"
+            (touch)="editorTouched.set(true)"
             class="w-full h-96"></mona-editor>
+        <details class="mt-2">
+            <summary>HTML value</summary>
+            <pre class="text-xs whitespace-pre-wrap">{{ html() }}</pre>
+        </details>
     `
 })
 class EditorWrapperComponent implements ComponentInputsAsSignal<EditorComponent> {
     readonly #features = inject(FeatureConfigHandler).data;
-    protected readonly editorContent = signal<string | JSONContent>("");
     protected readonly editorSettings = computed<EditorSettings>(() => {
         const features = this.#features();
         const settings: EditorSettings = {
@@ -198,6 +212,7 @@ class EditorWrapperComponent implements ComponentInputsAsSignal<EditorComponent>
                     ? (["Arial", "Helvetica", "Times New Roman", "Verdana", "Courier New"] as const)
                     : [],
             fontSize: features["fontSize"]?.active ?? false,
+            fontSizeList: [],
             headings: features["headings"]?.active ?? false,
             history: features["history"]?.active ?? false,
             horizontalRule: features["horizontalRule"]?.active ?? false,
@@ -215,10 +230,10 @@ class EditorWrapperComponent implements ComponentInputsAsSignal<EditorComponent>
         };
         return settings;
     });
-    public readonly content = input<ReturnType<EditorComponent["content"]>>("");
+    protected readonly editorTouched = signal(false);
+    protected readonly html = signal("<p>Hello, <strong>Mona</strong>!</p>");
+    public readonly disabled = input(false, { transform: booleanAttribute });
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
     public readonly settings = input<ReturnType<EditorComponent["settings"]>>(this.editorSettings());
-
-    protected onEditorUpdate(content: ContentChangeEvent) {
-        this.editorContent.set(content.json);
-    }
 }

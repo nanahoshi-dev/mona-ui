@@ -13,11 +13,11 @@ import { editorFontSizeDropdownListThemeVariants } from "../../styles/editor.sty
 })
 export class EditorFontSizeComponent {
     readonly #i18n = inject(MonaI18nService);
-    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
-    protected readonly editorService: EditorService = inject(EditorService);
     protected readonly dropdownListClass = computed(() => {
         return editorFontSizeDropdownListThemeVariants();
     });
+    protected readonly editorService: EditorService = inject(EditorService);
+    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
     protected readonly selectedFontSize = computed(() => {
         this.editorService.state();
         return (

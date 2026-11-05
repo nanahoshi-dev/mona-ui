@@ -4,6 +4,8 @@
     (valueChange)="onFontFamilyChange($event)"
     [size]="'small'"
     [class]="dropdownListClass()"
+    [aria-label]="messages().selectFontFamily"
+    [placeholder]="messages().defaultFontFamily"
     [title]="messages().selectFontFamily">
     <ng-template monaDropDownListItemTemplate let-font>
         <span [style.font-family]="font">{{ font }}</span>

@@ -1,7 +1,8 @@
-<mona-button-group selection="single" [size]="'small'">
+<mona-button-group selection="single" [size]="'small'" [aria-label]="messages().listGroup">
     <button
         monaButton
         [selected]="unorderedListSelected()"
+        [monaEditorPressed]="unorderedListSelected()"
         [toggleable]="false"
         (click)="onUnorderedListToggle()"
         [title]="messages().insertUnorderedList">
@@ -10,6 +11,7 @@
     <button
         monaButton
         [selected]="orderedListSelected()"
+        [monaEditorPressed]="orderedListSelected()"
         [toggleable]="false"
         (click)="onOrderedListToggle()"
         [title]="messages().insertOrderedList">

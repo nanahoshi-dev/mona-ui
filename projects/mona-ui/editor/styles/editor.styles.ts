@@ -9,11 +9,20 @@ export const editorBaseThemeVariants = cva(
         focus-within:border-focus-indicator
         focus-within:ring-2 focus-within:ring-focus-indicator/35
 
+        data-[disabled='true']:cursor-not-allowed
+        data-[disabled='true']:border-disabled-border
+        data-[disabled='true']:text-disabled-foreground
+        data-[invalid='true']:border-error
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:focus-within:border-error
+        data-[invalid='true']:focus-within:ring-error/35
+
         prose prose-neutral max-w-none
         prose-headings:text-foreground prose-headings:font-bold
         prose-headings:mt-1 prose-headings:mb-1
         prose-p:text-foreground prose-p:my-1
-        prose-strong:text-foreground
+        prose-strong:text-inherit
+        [&_span[style*=color]_mark]:text-inherit
         prose-a:text-primary
 
         [&_ol]:ps-8 [&_ul]:ps-8
@@ -86,17 +95,28 @@ export const editorBaseThemeVariants = cva(
 export const editorContainerThemeVariants = cva(
     `
         h-full w-full bg-surface
-        [&_div:first-child[contenteditable='true']]:p-1.5
-        [&_div:first-child[contenteditable='true']]:text-foreground
-        [&_div:first-child[contenteditable='true']]:border-none
-        [&_div:first-child[contenteditable='true']]:outline-none
-        [&_div:first-child[contenteditable='true']]:w-full
-        [&_div:first-child[contenteditable='true']]:h-full
-        [&_div:first-child[contenteditable='true']]:overflow-auto
-        [&_div:first-child[contenteditable='true']]:resize-none
-        [&_div:first-child[contenteditable='true']]:[scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)]
-        [&_div:first-child[contenteditable='true']]:[scrollbar-width:thin]
-    `
+        [&>.ProseMirror]:p-1.5
+        [&>.ProseMirror]:text-foreground
+        [&>.ProseMirror]:border-none
+        [&>.ProseMirror]:outline-none
+        [&>.ProseMirror]:w-full
+        [&>.ProseMirror]:h-full
+        [&>.ProseMirror]:overflow-auto
+        [&>.ProseMirror]:resize-none
+        [&>.ProseMirror]:[scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)]
+        [&>.ProseMirror]:[scrollbar-width:thin]
+    `,
+    {
+        variants: {
+            disabled: {
+                true: "bg-disabled-background [&>.ProseMirror]:text-disabled-foreground",
+                false: ""
+            }
+        },
+        defaultVariants: {
+            disabled: false
+        }
+    }
 );
 
 export const editorFontColorPreviewThemeVariants = cva(
@@ -169,6 +189,13 @@ export const editorImageInserterRowThemeVariants = cva(
     `
 );
 
+export const editorPlaceholderThemeVariants = cva(
+    `
+        pointer-events-none absolute top-0 start-0 px-1.5 py-2.5
+        text-muted-foreground select-none
+    `
+);
+
 export const editorTableCreatorThemeVariants = cva(
     `
         grid grid-cols-8 gap-0.5 p-1
@@ -177,8 +204,10 @@ export const editorTableCreatorThemeVariants = cva(
 
 export const editorTableCreatorCellThemeVariants = cva(
     `
-        flex h-6 w-6
-        bg-input-background border border-input-border
+        flex h-6 w-6 p-0 cursor-pointer
+        bg-surface-muted border border-input-border
+        data-[highlighted]:bg-primary data-[highlighted]:border-primary
+        focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus-indicator
     `
 );
 
@@ -186,5 +215,16 @@ export const editorToolbarThemeVariants = cva(
     `
         flex flex-wrap items-center justify-start gap-1 p-1
         bg-surface-muted text-foreground border-b border-b-border-subtle
-    `
+    `,
+    {
+        variants: {
+            disabled: {
+                true: "opacity-50",
+                false: ""
+            }
+        },
+        defaultVariants: {
+            disabled: false
+        }
+    }
 );

@@ -22,6 +22,7 @@ export * from "./utils/core/inertOutside";
 export * from "./utils/core/injectLabelledByText";
 export * from "./utils/core/positionGlobalOverlay";
 export * from "./utils/core/rxFromResize";
+export * from "./utils/core/rovingToolbar";
 export * from "./utils/core/rxTimeout";
 export * from "./utils/core/VariantInputs";
 export * from "./utils/core/themeSurfaceClasses";
