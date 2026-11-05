@@ -1,10 +1,11 @@
-import { Component, computed, DOCUMENT, inject, signal } from "@angular/core";
+import { Component, computed, DOCUMENT, inject } from "@angular/core";
 import { ColorPickerComponent, ColorPickerValueTemplateDirective } from "@nanahoshi/mona-ui/color-picker";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { EDITOR_DEFAULT_MESSAGES } from "../../i18n/editor.default-messages";
 import { EditorService } from "../../services/editor.service";
 import { editorFontColorPreviewThemeVariants, editorFontColorValueThemeVariants } from "../../styles/editor.styles";
 import { htmlColorCode } from "../../utils/htmlColorCode";
+import { selectionMarkAttribute } from "../../utils/selectionMarkAttribute";
 
 @Component({
     selector: "mona-editor-font-color",
@@ -15,7 +16,6 @@ export class EditorFontColorComponent {
     readonly #document = inject(DOCUMENT);
     readonly #editorService: EditorService = inject(EditorService);
     readonly #i18n = inject(MonaI18nService);
-    readonly #lastColor = signal("");
     protected readonly colorPreviewClass = computed(() => {
         return editorFontColorPreviewThemeVariants();
     });
@@ -24,16 +24,14 @@ export class EditorFontColorComponent {
     });
     protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
     protected readonly selectedColor = computed(() => {
-        this.#editorService.state();
-        const attributes = this.#editorService.editor.getAttributes("textStyle");
-        const color = attributes["color"] || this.#lastColor();
-        return htmlColorCode(color, this.#document);
+        const state = this.#editorService.state();
+        const color = state ? selectionMarkAttribute(state, "textStyle", "color") : null;
+        return color ? htmlColorCode(color, this.#document) : null;
     });
 
     public onColorChange(color: string | null): void {
         if (color) {
             this.#editorService.editor.chain().focus().setColor(color).run();
-            this.#lastColor.set(color);
         } else {
             this.#editorService.editor.chain().focus().unsetColor().run();
         }

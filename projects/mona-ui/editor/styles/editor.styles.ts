@@ -21,7 +21,8 @@ export const editorBaseThemeVariants = cva(
         prose-headings:text-foreground prose-headings:font-bold
         prose-headings:mt-1 prose-headings:mb-1
         prose-p:text-foreground prose-p:my-1
-        prose-strong:text-foreground
+        prose-strong:text-inherit
+        [&_span[style*=color]_mark]:text-inherit
         prose-a:text-primary
 
         [&_ol]:ps-8 [&_ul]:ps-8
