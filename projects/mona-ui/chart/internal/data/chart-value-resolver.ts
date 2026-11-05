@@ -1,4 +1,5 @@
 import type { ChartField, ChartValueAccessor } from "../../models/chart.models";
+import { chartMessages } from "../utils/chart-locale";
 
 export function resolveData(
     seriesData: readonly unknown[] | undefined,
@@ -70,5 +71,5 @@ export function resolveSeriesDisplayName(
     if (typeof field === "string" && field.trim().length > 0) {
         return field.trim();
     }
-    return `Series ${seriesIndex + 1}`;
+    return chartMessages().seriesFallbackName(seriesIndex + 1);
 }

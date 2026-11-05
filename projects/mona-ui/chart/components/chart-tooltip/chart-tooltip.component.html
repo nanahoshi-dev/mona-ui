@@ -57,7 +57,7 @@
                     <div>
                         {{ messages().range }}{{ messages().labelValueSeparator }}
                         <span class="font-medium text-foreground"
-                            >{{ context.point.formattedRadialMin }} – {{ context.point.formattedRadialMax }}</span
+                            >{{ messages().valueRange(context.point.formattedRadialMin, context.point.formattedRadialMax) }}</span
                         >
                     </div>
                 }
@@ -77,7 +77,7 @@
             <div class="flex flex-col gap-0.5 text-xs text-muted-foreground">
                 @if (context.point.hierarchy?.formattedPath && context.point.hierarchy!.formattedPath.length > 1) {
                     <div class="text-[11px] truncate max-w-[220px]">
-                        {{ context.point.hierarchy!.formattedPath.join(" / ") }}
+                        {{ context.point.hierarchy!.formattedPath.join(messages().pathSeparator) }}
                     </div>
                 }
                 <div class="flex items-center gap-2">
@@ -127,7 +127,7 @@
                 }
                 @if (context.point.funnel?.dropOff !== undefined && context.point.funnel!.dropOff > 0) {
                     <div>
-                        {{ messages().dropOff }}{{ messages().labelValueSeparator }} <span class="font-medium text-foreground">{{ context.point.funnel!.dropOff }}</span>
+                        {{ messages().dropOff }}{{ messages().labelValueSeparator }} <span class="font-medium text-foreground">{{ formatValue(context.point.funnel!.dropOff) }}</span>
                     </div>
                 }
             </div>
@@ -241,7 +241,7 @@
                             </div>
                             <div class="flex items-center gap-1">
                                 <span class="font-medium text-foreground"
-                                    >{{ pt.formattedFrom }} – {{ pt.formattedTo }}</span
+                                    >{{ messages().valueRange(pt.formattedFrom ?? "", pt.formattedTo ?? "") }}</span
                                 >
                             </div>
                         </div>

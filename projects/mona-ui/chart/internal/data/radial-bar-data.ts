@@ -5,6 +5,7 @@ import { deriveRadialDatumId, serializeRadialCategoryKey, serializeRadialExplici
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { formatYValue } from "../utils/chart-formatter";
+import { chartMessages } from "../utils/chart-locale";
 
 export interface PreparedRadialBarDatum {
     readonly animationKey: string;
@@ -148,13 +149,13 @@ export class RadialBarDataProcessor {
             const itemId = deriveRadialDatumId(row, rawCat, rawKey, i);
 
             const formattedCategory = categoryFormatter
-                ? categoryFormatter(rawCat ?? `Item ${i + 1}`, i)
+                ? categoryFormatter(rawCat ?? chartMessages().itemFallbackName(i + 1), i)
                 : rawCat !== undefined && rawCat !== null
                   ? String(rawCat)
-                  : `Item ${i + 1}`;
+                  : chartMessages().itemFallbackName(i + 1);
 
             validEntries.push({
-                category: rawCat ?? `Item ${i + 1}`,
+                category: rawCat ?? chartMessages().itemFallbackName(i + 1),
                 categoryKey,
                 dataIndex: i,
                 datum: row,

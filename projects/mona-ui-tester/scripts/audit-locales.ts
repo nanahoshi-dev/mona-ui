@@ -48,6 +48,8 @@ export const TECHNICAL_ALLOWLIST = new Set([
     "HTML",
     "px",
     ":",
+    ",",
+    "/",
     "-",
     "+"
 ]);

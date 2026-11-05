@@ -7,6 +7,15 @@ function localizeNumber(value: number, options?: Intl.NumberFormatOptions): stri
     return formatNumber(value, "it-IT", options);
 }
 
+const PLURAL_RULES = new Intl.PluralRules("it-IT");
+
+function plural(
+    category: Intl.LDMLPluralRule,
+    forms: Partial<Record<Intl.LDMLPluralRule, () => string>> & { readonly other: () => string }
+): string {
+    return (forms[category] ?? forms.other)();
+}
+
 export const IT_IT_MESSAGES = {
     autoComplete: {
         clear: "Cancella"
@@ -41,34 +50,86 @@ export const IT_IT_MESSAGES = {
         actionsLabel: "Azioni della scheda"
     },
     chart: {
+        announcementSeparator: ", ",
+        categoryFallbackName: (index: number) => `Categoria ${localizeNumber(index)}`,
         change: "Variazione",
+        changeValue: (change: string) => `variazione ${change}`,
         chart: "Grafico",
         chartLegend: "Legenda del grafico",
         close: "Chiusura",
         closeAbbreviation: "C",
         colorScale: "Scala colori",
         conversion: "Conversione",
+        conversionOfPrevious: (rate: string) => `Conversione del ${rate} rispetto alla fase precedente`,
+        decrease: "Diminuzione",
+        decreaseAnnouncement: (delta: string, from: string, to: string) =>
+            `diminuzione di ${delta}, totale progressivo da ${from} a ${to}`,
         divergingRangeDescription: (title: string, minimum: string, midpoint: string, maximum: string) =>
             `${title}, da ${minimum} a ${maximum}, valore intermedio ${midpoint}`,
         dropOff: "Abbandono",
+        dropOffValue: (value: string) => `Abbandono ${value}`,
         falling: "In calo",
+        gaugeRange: (minimum: string, maximum: string) => `intervallo da ${minimum} a ${maximum}`,
         high: "Massimo",
         highAbbreviation: "Max",
+        increase: "Aumento",
+        increaseAnnouncement: (delta: string, from: string, to: string) =>
+            `aumento di ${delta}, totale progressivo da ${from} a ${to}`,
+        itemDeselected: (item: string) => `${item}, deselezionato`,
+        itemFallbackName: (index: number) => `Elemento ${localizeNumber(index)}`,
+        itemSelected: (item: string) => `${item}, selezionato`,
         labelValueSeparator: ":",
+        labeledValue: (label: string, value: string) => `${label}: ${value}`,
         low: "Minimo",
         lowAbbreviation: "Min",
+        noChange: "Nessuna variazione",
+        noChangeAnnouncement: (value: string) => `nessuna variazione, totale progressivo ${value}`,
         noData: "Nessun dato disponibile",
+        ohlcValues: (open: string, high: string, low: string, close: string) =>
+            `Apertura ${open}, massimo ${high}, minimo ${low}, chiusura ${close}`,
         open: "Apertura",
         openAbbreviation: "A",
         overall: "Complessivo",
+        overallConversion: (rate: string) => `Conversione complessiva ${rate}`,
+        pannedDown: "Spostato in basso",
+        pannedLeft: "Spostato a sinistra",
+        pannedRight: "Spostato a destra",
+        pannedUp: "Spostato in alto",
+        pathSeparator: " / ",
         range: "Intervallo",
         rangeDescription: (title: string, minimum: string, maximum: string) => `${title}, da ${minimum} a ${maximum}`,
+        rangeValue: (from: string, to: string) => `da ${from} a ${to}`,
         rising: "In rialzo",
         runningTotal: "Totale progressivo",
+        seriesFallbackName: (index: number) => `Serie ${localizeNumber(index)}`,
+        shareOfTotal: (share: string) => `${share} del totale`,
         size: "dimensione",
+        sizeValue: (size: string) => `dimensione ${size}`,
+        stackShare: (share: string) => `quota della pila ${share}`,
+        stageFallbackName: (index: number) => `Fase ${localizeNumber(index)}`,
+        stagePosition: (position: number, total: number) =>
+            `fase ${localizeNumber(position)} di ${localizeNumber(total)}`,
+        stepFallbackName: (index: number) => `Passo ${localizeNumber(index)}`,
+        stepPosition: (position: number, total: number) =>
+            `passo ${localizeNumber(position)} di ${localizeNumber(total)}`,
+        subtotal: "Subtotale",
+        subtotalAnnouncement: (value: string) => `subtotale ${value}`,
+        total: "Totale",
+        totalAnnouncement: (value: string) => `totale ${value}`,
+        treemapGroup: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `Gruppo (${localizeNumber(count)} elemento figlio)`,
+                other: () => `Gruppo (${localizeNumber(count)} elementi figli)`
+            }),
+        treemapLeaf: "Foglia",
         unchanged: "Invariato",
         value: "Valore",
-        visualIndicatorClamped: "Indicatore visivo limitato"
+        valueRange: (from: string, to: string) => `${from} – ${to}`,
+        viewportResetToDefault: "Vista ripristinata all’intervallo predefinito",
+        viewportResetToFull: "Vista ripristinata all’intervallo completo",
+        visualIndicatorClamped: "Indicatore visivo limitato",
+        zoomedIn: "Ingrandito",
+        zoomedOut: "Ridotto"
     },
     chip: {
         removeLabel: (label?: string) => (label ? `Rimuovi ${label}` : "Rimuovi elemento")

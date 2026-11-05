@@ -4,6 +4,7 @@ import type { ChartAxisFormatter } from "../../models/chart-axis.models";
 import { canonicalPolarAngle, normalizeDegrees } from "../utils/angle-utils";
 import { isFiniteNumber } from "../utils/number-utils";
 import { resolveData, resolveNumericValue, resolveValue } from "./chart-value-resolver";
+import { formatChartNumber } from "../utils/chart-locale";
 
 const warnedSignatures = new Set<string>();
 
@@ -40,13 +41,9 @@ export interface ContinuousPolarDataResult {
     seriesList: readonly ContinuousPolarSeriesData[];
 }
 
-const DEFAULT_NUMBER_FORMATTER = new Intl.NumberFormat();
-
+/** Formats a value for the chart locale. */
 export function formatContinuousPolarValue(value: number): string {
-    if (!isFiniteNumber(value)) {
-        return "0";
-    }
-    return DEFAULT_NUMBER_FORMATTER.format(value);
+    return formatChartNumber(isFiniteNumber(value) ? value : 0);
 }
 
 export function formatContinuousPolarAngle(
@@ -57,7 +54,12 @@ export function formatContinuousPolarAngle(
     if (angularFormatter) {
         return angularFormatter(angleDeg, index);
     }
-    return `${Math.round(angleDeg * 10) / 10}°`;
+    return formatChartNumber(angleDeg, {
+        maximumFractionDigits: 1,
+        style: "unit",
+        unit: "degree",
+        unitDisplay: "narrow"
+    });
 }
 
 export function prepareContinuousPolarData(

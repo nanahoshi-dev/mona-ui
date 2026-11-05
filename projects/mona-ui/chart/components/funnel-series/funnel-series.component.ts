@@ -26,6 +26,7 @@ import type {
     ChartFunnelStageVisibilityEvent
 } from "../../models/chart-funnel.models";
 import type { ChartField, ChartValueFormatter } from "../../models/chart.models";
+import { chartMessages } from "../../internal/utils/chart-locale";
 
 let nextFunnelSeriesId = 0;
 
@@ -226,7 +227,7 @@ export class FunnelSeriesComponent implements OnInit {
                     ? catFmt(rawCat, i)
                     : rawCat !== undefined && rawCat !== null
                       ? String(rawCat)
-                      : `Stage ${i + 1}`;
+                      : chartMessages().stageFallbackName(i + 1);
 
                 this.#stageIdentityMap.set(identity.stageId, {
                     category: rawCat,

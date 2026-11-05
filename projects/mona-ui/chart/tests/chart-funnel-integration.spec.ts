@@ -197,20 +197,20 @@ describe("ChartComponent Funnel Integration", () => {
         // Keydown 1: Select stage 1 (overall 100%, no previous-stage conversion)
         rootDiv.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "ArrowDown" }));
         fixture.detectChanges();
-        expect(liveRegion.textContent?.trim()).toBe("Pipeline, Visits, stage 1 of 3: 2000. Overall conversion 100%.");
+        expect(liveRegion.textContent?.trim()).toBe("Pipeline, Visits, stage 1 of 3: 2,000, Overall conversion 100%");
 
         // Keydown 2: Qualified (400 / 2000 = 20% overall, 20% conversion, drop-off 1600)
         rootDiv.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "ArrowDown" }));
         fixture.detectChanges();
         expect(liveRegion.textContent?.trim()).toBe(
-            "Pipeline, Qualified, stage 2 of 3: 400. Conversion 20% of previous stage. Overall conversion 20%. Drop-off 1600."
+            "Pipeline, Qualified, stage 2 of 3: 400, Conversion 20% of previous stage, Overall conversion 20%, Drop-off 1,600"
         );
 
         // Keydown 3: Widening stage (600 > 400 -> conversion 150%, overall 30%, NO negative drop-off)
         rootDiv.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "ArrowDown" }));
         fixture.detectChanges();
         expect(liveRegion.textContent?.trim()).toBe(
-            "Pipeline, Expanding, stage 3 of 3: 600. Conversion 150% of previous stage. Overall conversion 30%."
+            "Pipeline, Expanding, stage 3 of 3: 600, Conversion 150% of previous stage, Overall conversion 30%"
         );
     });
 });

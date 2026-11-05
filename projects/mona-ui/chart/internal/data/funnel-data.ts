@@ -5,6 +5,7 @@ import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import { FunnelIdentity } from "./funnel-identity";
 import { resolveNumericValue, resolveValue } from "./chart-value-resolver";
+import { chartMessages, formatChartNumber, formatChartPercent } from "../utils/chart-locale";
 
 export interface PreparedFunnelStage {
     readonly animationKey: string;
@@ -56,12 +57,9 @@ export interface FunnelDataOptions {
     readonly warnedDiagnosticSignatures?: Set<string>;
 }
 
+/** Formats a conversion rate for the chart locale, with at most one decimal. */
 export function formatFunnelPercentage(ratio: number): string {
-    const pct = ratio * 100;
-    if (pct === Math.floor(pct)) {
-        return `${pct}%`;
-    }
-    return `${pct.toFixed(1)}%`;
+    return formatChartPercent(ratio);
 }
 
 export class FunnelDataProcessor {
@@ -158,7 +156,7 @@ export class FunnelDataProcessor {
                 ? categoryFormatter(rawCat, i)
                 : rawCat !== undefined && rawCat !== null
                   ? String(rawCat)
-                  : `Stage ${i + 1}`;
+                  : chartMessages().stageFallbackName(i + 1);
 
             const identity = FunnelIdentity.resolveStageIdentity(
                 datum,
@@ -206,7 +204,7 @@ export class FunnelDataProcessor {
                 stageColor = styleResolver.resolvePaletteColor(i);
             }
 
-            const formattedValue = valueFormatter ? valueFormatter(numVal, i) : String(numVal);
+            const formattedValue = valueFormatter ? valueFormatter(numVal, i) : formatChartNumber(numVal);
 
             allStages.push({
                 animationKey,

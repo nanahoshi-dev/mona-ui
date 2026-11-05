@@ -28,6 +28,7 @@ import type {
     ChartValueFormatter
 } from "../../models/chart-polar.models";
 import type { ChartField } from "../../models/chart.models";
+import { chartMessages } from "../../internal/utils/chart-locale";
 
 let nextDonutSeriesId = 0;
 
@@ -328,7 +329,7 @@ export class DonutSeriesComponent implements OnInit {
         const raw = resolveData(this.data(), this.#chartContext?.rootData() ?? []);
         const datum = raw[dataIndex];
         const category = datum
-            ? (resolveValue(datum, this.categoryField(), dataIndex) ?? `Item ${dataIndex + 1}`)
+            ? (resolveValue(datum, this.categoryField(), dataIndex) ?? chartMessages().itemFallbackName(dataIndex + 1))
             : undefined;
 
         this.sliceVisibilityChange.emit({

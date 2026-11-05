@@ -238,6 +238,15 @@ import {
     chartSubtitleBaseThemeVariants,
     chartTitleBaseThemeVariants
 } from "../../styles/chart.styles";
+import {
+    formatChartNumber,
+    formatChartPercent,
+    joinChartAnnouncement,
+    setChartLocale
+} from "../../internal/utils/chart-locale";
+
+/** A sign at the start of a formatted number, after any bidi marks ("+5", "-3", "−" in some locales). */
+const LEADING_SIGN = /^[\u200e\u200f\u061c]*[+\-\u2212]/;
 
 function easingToCss(easing: string): string {
     switch (easing) {
@@ -1014,6 +1023,20 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         });
 
         // Dynamic backend synchronization
+        // A locale change (MonaI18nService.load) or new messages reformat every label and restyle in place.
+        let isLocaleApplied = false;
+        effect(() => {
+            const localeId = this.#i18n.localeId();
+            const messages = this.messages();
+            untracked(() => {
+                setChartLocale(localeId, messages);
+                if (isLocaleApplied) {
+                    this.invalidate(ChartInvalidationReason.Style);
+                }
+                isLocaleApplied = true;
+            });
+        });
+
         effect(() => {
             const mode = this.renderer();
             const canvas = this.canvasElement()?.nativeElement ?? null;
@@ -1757,11 +1780,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const fromStr =
             matchingHit.formattedFrom ?? (matchingHit.fromValue !== undefined ? String(matchingHit.fromValue) : "");
         const toStr = matchingHit.formattedTo ?? (matchingHit.toValue !== undefined ? String(matchingHit.toValue) : "");
+        const messages = this.messages();
         if (isRange && fromStr && toStr) {
-            const title = `${matchingHit.seriesName}: ${xStr}`;
-            return this.messages().rangeDescription(title, fromStr, toStr);
+            const title = messages.labeledValue(matchingHit.seriesName, xStr);
+            return messages.rangeDescription(title, fromStr, toStr);
         }
-        return `${matchingHit.seriesName}: ${xStr}, ${yStr}`;
+        return messages.labeledValue(
+            matchingHit.seriesName,
+            joinChartAnnouncement([xStr, yStr], messages.announcementSeparator)
+        );
     }
 
     #getOrCreateBrushMarkIndex(scene: CartesianXYChartScene): CartesianBrushMarkIndex {
@@ -1961,6 +1988,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#synchronizationController?.onCommittedViewportChange(notification);
     }
 
+    /** Formats the layout, data labels and announcements that follow for this chart's locale and messages. */
+    #applyLocale(): void {
+        setChartLocale(this.#i18n.localeId(), this.messages());
+    }
+
     /** The styles the chart reads from its host, as one string to compare between mutations. */
     #captureThemeSignature(): string {
         const snapshot = ChartStyleResolver.captureStyleSnapshot(this.#elementRef.nativeElement);
@@ -1976,6 +2008,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     #paint(): void {
+        this.#applyLocale();
         const currentScene = this.#renderScene ?? this.scene();
         if (!currentScene) {
             return;
@@ -2076,6 +2109,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         if (this.#isDestroyed || !this.#isBrowser) {
             return;
         }
+        this.#applyLocale();
         if (reason !== ChartInvalidationReason.Interaction) {
             this.#styleResolver.clearCache();
         }
@@ -2871,35 +2905,48 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         this.pointFocusChange.emit(this.#toPointFocusEvent(matchingHit));
 
+        const messages = this.messages();
+        const join = (parts: readonly (string | null | undefined | false)[]): string =>
+            joinChartAnnouncement(parts, messages.announcementSeparator);
         if (currentScene.coordinateSystem === "hierarchical" && currentScene.hierarchicalKind === "treemap") {
             const hit = matchingHit;
             if (hit.hierarchy) {
-                const pathStr = hit.hierarchy.formattedPath.join(" / ");
-                const valStr = hit.hierarchy.formattedValue;
-                const pctStr =
+                const pathStr = hit.hierarchy.formattedPath.join(messages.pathSeparator);
+                const shareStr =
                     hit.hierarchy.percentageOfRoot !== undefined
-                        ? `, ${(hit.hierarchy.percentageOfRoot * 100).toFixed(1)}% of total`
-                        : "";
-                const leafStr = hit.hierarchy.isLeaf ? "Leaf" : `Group (${hit.hierarchy.childCount} children)`;
-                this.activeAccessibilityText.set(`${pathStr}: ${valStr}${pctStr}, ${leafStr}`);
+                        ? messages.shareOfTotal(formatChartPercent(hit.hierarchy.percentageOfRoot))
+                        : null;
+                const kindStr = hit.hierarchy.isLeaf
+                    ? messages.treemapLeaf
+                    : messages.treemapGroup(hit.hierarchy.childCount);
+                this.activeAccessibilityText.set(
+                    join([messages.labeledValue(pathStr, hit.hierarchy.formattedValue), shareStr, kindStr])
+                );
             }
         } else if (currentScene.coordinateSystem === "polar") {
             if (matchingHit.seriesType === "gauge") {
                 const valStr = matchingHit.formattedValue ?? String(matchingHit.yValue);
-                const clampedStr = matchingHit.isClamped ? " (visual indicator clamped)" : "";
+                const clampedStr = matchingHit.isClamped ? messages.visualIndicatorClamped : null;
                 const minStr =
                     matchingHit.formattedRadialMin ??
                     (matchingHit.radialMin !== undefined ? String(matchingHit.radialMin) : "");
                 const maxStr =
                     matchingHit.formattedRadialMax ??
                     (matchingHit.radialMax !== undefined ? String(matchingHit.radialMax) : "");
-                const rangeStr = minStr && maxStr ? `, range ${minStr} to ${maxStr}` : "";
-                this.activeAccessibilityText.set(`${matchingHit.seriesName}: ${valStr}${rangeStr}${clampedStr}`);
+                const rangeStr = minStr && maxStr ? messages.gaugeRange(minStr, maxStr) : null;
+                this.activeAccessibilityText.set(
+                    join([messages.labeledValue(matchingHit.seriesName, valStr), rangeStr, clampedStr])
+                );
             } else {
-                const pctStr = matchingHit.formattedPercentage ? `, ${matchingHit.formattedPercentage}` : "";
                 const valStr = matchingHit.formattedValue ?? String(matchingHit.yValue);
                 const catStr = matchingHit.formattedCategory ?? matchingHit.category ?? matchingHit.seriesName;
-                this.activeAccessibilityText.set(`${matchingHit.seriesName}, ${catStr}: ${valStr}${pctStr}`);
+                this.activeAccessibilityText.set(
+                    join([
+                        matchingHit.seriesName,
+                        messages.labeledValue(String(catStr), valStr),
+                        matchingHit.formattedPercentage
+                    ])
+                );
             }
         } else if (currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "heatmap") {
             const primaryX = this.#xAxes()[0];
@@ -2909,51 +2956,59 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             const xStr = `${xTitle}${matchingHit.formattedXValue ?? matchingHit.formattedCategory ?? matchingHit.categoryX ?? matchingHit.xValue}`;
             const yStr = `${yTitle}${matchingHit.formattedYCategory ?? matchingHit.categoryY ?? matchingHit.category}`;
             const valStr = matchingHit.formattedValue ?? String(matchingHit.yValue);
-            this.activeAccessibilityText.set(`${matchingHit.seriesName}: ${xStr}, ${yStr}, ${valStr}`);
+            this.activeAccessibilityText.set(messages.labeledValue(matchingHit.seriesName, join([xStr, yStr, valStr])));
         } else if (currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "funnel") {
             const totalStages = currentScene.hitTargets.length;
             const stageNum = (matchingHit.renderOrder ?? 0) + 1;
-            const stagePrefix = totalStages > 0 ? `, stage ${stageNum} of ${totalStages}` : "";
-            const parts: string[] = [];
-            if (matchingHit.funnel?.formattedConversionRate) {
-                parts.push(`Conversion ${matchingHit.funnel.formattedConversionRate} of previous stage.`);
-            }
-            if (matchingHit.funnel?.formattedOverallConversionRate) {
-                parts.push(`Overall conversion ${matchingHit.funnel.formattedOverallConversionRate}.`);
-            }
-            if (matchingHit.funnel?.dropOff !== undefined && matchingHit.funnel.dropOff > 0) {
-                parts.push(`Drop-off ${matchingHit.funnel.dropOff}.`);
-            }
-            const details = parts.length > 0 ? ` ${parts.join(" ")}` : "";
+            const funnel = matchingHit.funnel;
+            const stageStr = totalStages > 0 ? messages.stagePosition(stageNum, totalStages) : null;
             this.activeAccessibilityText.set(
-                `${matchingHit.seriesName}, ${matchingHit.formattedCategory}${stagePrefix}: ${matchingHit.formattedValue}.${details}`.trim()
+                join([
+                    matchingHit.seriesName,
+                    messages.labeledValue(
+                        join([matchingHit.formattedCategory, stageStr]),
+                        matchingHit.formattedValue ?? ""
+                    ),
+                    funnel?.formattedConversionRate && messages.conversionOfPrevious(funnel.formattedConversionRate),
+                    funnel?.formattedOverallConversionRate &&
+                        messages.overallConversion(funnel.formattedOverallConversionRate),
+                    funnel?.dropOff !== undefined &&
+                        funnel.dropOff > 0 &&
+                        messages.dropOffValue(formatChartNumber(funnel.dropOff))
+                ])
             );
         } else if (currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "waterfall") {
             const wf = matchingHit.waterfall;
             const totalSteps = currentScene.hitTargets.length;
             const stepNum = (matchingHit.renderOrder ?? 0) + 1;
-            const stepPrefix = totalSteps > 0 ? `, step ${stepNum} of ${totalSteps}` : "";
-            let detail = "";
+            const stepStr = totalSteps > 0 ? messages.stepPosition(stepNum, totalSteps) : null;
+            const valueStr = matchingHit.formattedValue ?? "";
+            const beforeStr = wf?.formattedCumulativeBefore ?? "";
+            const afterStr = wf?.formattedCumulativeAfter ?? "";
+            let detail: string;
             if (wf?.kind === "subtotal") {
-                detail = `subtotal ${matchingHit.formattedValue}`;
+                detail = messages.subtotalAnnouncement(valueStr);
             } else if (wf?.kind === "total") {
-                detail = `total ${matchingHit.formattedValue}`;
+                detail = messages.totalAnnouncement(valueStr);
             } else {
                 const delta = wf?.deltaValue ?? 0;
+                // The message says increase or decrease, so the amount drops its sign.
+                const deltaStr = wf?.formattedDelta
+                    ? wf.formattedDelta.replace(LEADING_SIGN, "")
+                    : formatChartNumber(Math.abs(delta));
                 if (delta > 0) {
-                    const deltaFormatted = wf?.formattedDelta ? wf.formattedDelta.replace(/^\+/, "") : String(delta);
-                    detail = `increase ${deltaFormatted}, running total ${wf?.formattedCumulativeBefore ?? ""} to ${wf?.formattedCumulativeAfter ?? ""}`;
+                    detail = messages.increaseAnnouncement(deltaStr, beforeStr, afterStr);
                 } else if (delta < 0) {
-                    const deltaFormatted = wf?.formattedDelta
-                        ? wf.formattedDelta.replace(/^-/, "")
-                        : String(Math.abs(delta));
-                    detail = `decrease ${deltaFormatted}, running total ${wf?.formattedCumulativeBefore ?? ""} to ${wf?.formattedCumulativeAfter ?? ""}`;
+                    detail = messages.decreaseAnnouncement(deltaStr, beforeStr, afterStr);
                 } else {
-                    detail = `no change, running total ${wf?.formattedCumulativeAfter ?? matchingHit.formattedValue}`;
+                    detail = messages.noChangeAnnouncement(wf?.formattedCumulativeAfter ?? valueStr);
                 }
             }
             this.activeAccessibilityText.set(
-                `${matchingHit.seriesName}, ${matchingHit.formattedCategory}${stepPrefix}: ${detail}.`
+                join([
+                    matchingHit.seriesName,
+                    messages.labeledValue(join([matchingHit.formattedCategory, stepStr]), detail)
+                ])
             );
         } else {
             const xAxis =
@@ -2971,15 +3026,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             const yStr =
                 matchingHit.formattedValue ??
                 (isRange && fromStr && toStr
-                    ? `${fromStr} – ${toStr}`
+                    ? messages.valueRange(fromStr, toStr)
                     : formatYValue(matchingHit.yValue, matchingHit.index, yAxis?.formatter()));
             const sizeStr =
                 matchingHit.formattedSize ?? (matchingHit.sizeValue !== undefined ? String(matchingHit.sizeValue) : "");
             const isPercent = matchingHit.stackMode === "percent";
             const shareStr =
                 isPercent && matchingHit.formattedStackPercentage
-                    ? `, stack share ${matchingHit.formattedStackPercentage}`
-                    : "";
+                    ? messages.stackShare(matchingHit.formattedStackPercentage)
+                    : null;
 
             const isFinancial =
                 matchingHit.valueKind === "ohlc" ||
@@ -2995,20 +3050,39 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     fin?.formattedLow ?? (fin?.low !== undefined ? String(fin.low) : String(matchingHit.low));
                 const closeStr =
                     fin?.formattedClose ?? (fin?.close !== undefined ? String(fin.close) : String(matchingHit.close));
-                const dirStr = fin?.direction ?? matchingHit.financialDirection ?? "";
-                const changeStr = fin?.formattedChange ? `, change ${fin.formattedChange}` : "";
-                const dirPhrase = dirStr ? `, ${dirStr}` : "";
+                const direction = fin?.direction ?? matchingHit.financialDirection;
+                const directionStr =
+                    direction === "rising"
+                        ? messages.rising
+                        : direction === "falling"
+                          ? messages.falling
+                          : direction === "neutral"
+                            ? messages.unchanged
+                            : null;
                 this.activeAccessibilityText.set(
-                    `${matchingHit.seriesName}, ${xStr}. Open ${openStr}, high ${highStr}, low ${lowStr}, close ${closeStr}${dirPhrase}${changeStr}.`
+                    join([
+                        matchingHit.seriesName,
+                        xStr,
+                        messages.ohlcValues(openStr, highStr, lowStr, closeStr),
+                        directionStr,
+                        fin?.formattedChange && messages.changeValue(fin.formattedChange)
+                    ])
                 );
             } else if (isRange && fromStr && toStr) {
-                this.activeAccessibilityText.set(`${matchingHit.seriesName}: ${xStr}, ${fromStr} to ${toStr}`);
+                this.activeAccessibilityText.set(
+                    messages.labeledValue(matchingHit.seriesName, join([xStr, messages.rangeValue(fromStr, toStr)]))
+                );
             } else if (matchingHit.seriesType === "bubble" && sizeStr) {
                 this.activeAccessibilityText.set(
-                    `${matchingHit.seriesName}: ${xStr}, ${yStr}, size ${sizeStr}${shareStr}`
+                    messages.labeledValue(
+                        matchingHit.seriesName,
+                        join([xStr, yStr, messages.sizeValue(sizeStr), shareStr])
+                    )
                 );
             } else {
-                this.activeAccessibilityText.set(`${matchingHit.seriesName}: ${xStr}, ${yStr}${shareStr}`);
+                this.activeAccessibilityText.set(
+                    messages.labeledValue(matchingHit.seriesName, join([xStr, yStr, shareStr]))
+                );
             }
         }
 
@@ -3831,7 +3905,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                         selReg.emitSelectionChange?.(changeEvt);
                         const isSelected = mutation.added.includes(markId);
                         const pointLabel = this.#formatHitAnnouncement(targetHit);
-                        this.activeAccessibilityText.set(`${pointLabel}, ${isSelected ? "selected" : "deselected"}`);
+                        this.activeAccessibilityText.set(
+                            isSelected
+                                ? this.messages().itemSelected(pointLabel)
+                                : this.messages().itemDeselected(pointLabel)
+                        );
                         this.#paint();
                     }
                 }

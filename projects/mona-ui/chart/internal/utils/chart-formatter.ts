@@ -1,39 +1,25 @@
 import type { ChartAxisFormatter, ChartXAxisType } from "../../models/chart-axis.models";
 import { resolveCartesianTemporalValue } from "../data/cartesian-temporal-value-resolver";
+import { formatChartDate, formatChartNumber } from "./chart-locale";
 import { formatCompactNumber, isFiniteNumber } from "./number-utils";
 
+/** Formats a time tick for the chart locale, with the precision the axis span needs. */
 export function formatTimeRange(date: Date, spanMs: number, utc: boolean = false): string {
     const timeZone = utc ? "UTC" : undefined;
     // < ~2 days: hour/minute
     if (spanMs <= 2 * 86400000) {
-        return new Intl.DateTimeFormat(undefined, {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-            timeZone
-        }).format(date);
+        return formatChartDate(date, { hour: "2-digit", hourCycle: "h23", minute: "2-digit", timeZone });
     }
     // < ~60 days: month + day
     if (spanMs <= 60 * 86400000) {
-        return new Intl.DateTimeFormat(undefined, {
-            month: "short",
-            day: "numeric",
-            timeZone
-        }).format(date);
+        return formatChartDate(date, { day: "numeric", month: "short", timeZone });
     }
     // < ~730 days: month + year
     if (spanMs <= 730 * 86400000) {
-        return new Intl.DateTimeFormat(undefined, {
-            month: "short",
-            year: "numeric",
-            timeZone
-        }).format(date);
+        return formatChartDate(date, { month: "short", timeZone, year: "numeric" });
     }
     // > 2 years: year
-    return new Intl.DateTimeFormat(undefined, {
-        year: "numeric",
-        timeZone
-    }).format(date);
+    return formatChartDate(date, { timeZone, year: "numeric" });
 }
 
 export function formatXValue(
@@ -77,12 +63,12 @@ export function formatYValue(value: unknown, index: number = 0, formatter?: Char
     return value !== undefined && value !== null ? String(value) : "";
 }
 
+/** Formats a percentage point value (12.5 for 12.5 %) for the chart locale. */
 export function formatPercentagePoint(value: number, digits: number = 1): string {
     if (!isFiniteNumber(value)) {
         return "";
     }
-    const fixed = Number(value.toFixed(digits));
-    return `${fixed}%`;
+    return formatChartNumber(value / 100, { maximumFractionDigits: digits, style: "percent" });
 }
 
 export interface CartesianAxisSemanticFormatOptions {

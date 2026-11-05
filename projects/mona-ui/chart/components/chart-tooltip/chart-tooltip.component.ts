@@ -194,4 +194,8 @@ export class ChartTooltipComponent implements OnInit {
             maximumFractionDigits: 1
         });
     }
+
+    protected formatValue(value: number): string {
+        return formatNumber(value, this.#i18n.localeId());
+    }
 }

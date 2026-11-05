@@ -12,6 +12,7 @@ import { CartesianViewportOperationCoordinator } from "./cartesian-viewport-oper
 import { areInternalViewportStatesEqual, type InternalCartesianViewportState } from "./cartesian-viewport-normalizer";
 import { CartesianViewportTargetResolver, type CartesianNavigationProfile } from "./cartesian-viewport-target-resolver";
 import type { NormalizedChartNavigationOptions } from "./chart-navigation-options";
+import { chartMessages } from "../utils/chart-locale";
 
 export interface ChartViewportKeyboardResult {
     announcement: string | null;
@@ -119,7 +120,7 @@ export class ChartViewportKeyboardController {
                 if (res.accepted) {
                     nextState = res.viewport;
                     changedAxes = res.changedAxes;
-                    announcement = "Panned left";
+                    announcement = chartMessages().pannedLeft;
                     handled = true;
                 }
             } else if (event.key === "ArrowRight") {
@@ -133,7 +134,7 @@ export class ChartViewportKeyboardController {
                 if (res.accepted) {
                     nextState = res.viewport;
                     changedAxes = res.changedAxes;
-                    announcement = "Panned right";
+                    announcement = chartMessages().pannedRight;
                     handled = true;
                 }
             } else if (event.key === "ArrowUp") {
@@ -147,7 +148,7 @@ export class ChartViewportKeyboardController {
                 if (res.accepted) {
                     nextState = res.viewport;
                     changedAxes = res.changedAxes;
-                    announcement = "Panned up";
+                    announcement = chartMessages().pannedUp;
                     handled = true;
                 }
             } else if (event.key === "ArrowDown") {
@@ -161,7 +162,7 @@ export class ChartViewportKeyboardController {
                 if (res.accepted) {
                     nextState = res.viewport;
                     changedAxes = res.changedAxes;
-                    announcement = "Panned down";
+                    announcement = chartMessages().pannedDown;
                     handled = true;
                 }
             }
@@ -176,7 +177,7 @@ export class ChartViewportKeyboardController {
             if (res.accepted) {
                 nextState = res.viewport;
                 changedAxes = res.changedAxes;
-                announcement = "Zoomed in";
+                announcement = chartMessages().zoomedIn;
                 handled = true;
             }
         } else if (event.key === "-" || event.key === "_") {
@@ -190,7 +191,7 @@ export class ChartViewportKeyboardController {
             if (res.accepted) {
                 nextState = res.viewport;
                 changedAxes = res.changedAxes;
-                announcement = "Zoomed out";
+                announcement = chartMessages().zoomedOut;
                 handled = true;
             }
         } else if (isResetKey) {
@@ -206,8 +207,8 @@ export class ChartViewportKeyboardController {
                 changedAxes = res.changedAxes;
                 announcement =
                     defaultViewport && defaultViewport.axes && defaultViewport.axes.length > 0
-                        ? "Viewport reset to default range"
-                        : "Viewport reset to full range";
+                        ? chartMessages().viewportResetToDefault
+                        : chartMessages().viewportResetToFull;
                 handled = true;
             }
         }

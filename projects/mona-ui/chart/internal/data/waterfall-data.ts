@@ -6,6 +6,10 @@ import type { ChartWaterfallSeriesStyle } from "../scene/waterfall-scene";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import { serializeKeyPart } from "../animation/animation-identity";
 import { resolveNumericValue, resolveValue } from "./chart-value-resolver";
+import { chartMessages, formatChartNumber } from "../utils/chart-locale";
+
+/** A change shows its sign ("+5", "-3"); zero shows none. */
+const SIGNED_NUMBER: Intl.NumberFormatOptions = { signDisplay: "exceptZero" };
 
 export interface PreparedWaterfallPoint {
     readonly animationKey: string;
@@ -192,7 +196,8 @@ export class WaterfallDataProcessor {
 
             // 4. Resolve category
             const rawCat = effectiveXField !== undefined ? resolveValue(datum, effectiveXField, i) : undefined;
-            const formattedCategory = rawCat !== undefined && rawCat !== null ? String(rawCat) : `Step ${i + 1}`;
+            const formattedCategory =
+                rawCat !== undefined && rawCat !== null ? String(rawCat) : chartMessages().stepFallbackName(i + 1);
             categories.push(rawCat ?? formattedCategory);
 
             // 5. Cumulative calculations
@@ -258,22 +263,22 @@ export class WaterfallDataProcessor {
             const formattedValue = valueFormatter
                 ? valueFormatter(primaryValue, i)
                 : kind === "change" && deltaValue !== undefined
-                  ? `${deltaValue >= 0 ? "+" : ""}${deltaValue}`
-                  : String(primaryValue);
+                  ? formatChartNumber(deltaValue, SIGNED_NUMBER)
+                  : formatChartNumber(primaryValue);
 
             const formattedDelta =
                 kind === "change" && deltaValue !== undefined
                     ? valueFormatter
                         ? valueFormatter(deltaValue, i)
-                        : `${deltaValue >= 0 ? "+" : ""}${deltaValue}`
+                        : formatChartNumber(deltaValue, SIGNED_NUMBER)
                     : undefined;
 
             const formattedCumulativeBefore = valueFormatter
                 ? valueFormatter(cumulativeBefore, i)
-                : String(cumulativeBefore);
+                : formatChartNumber(cumulativeBefore);
             const formattedCumulativeAfter = valueFormatter
                 ? valueFormatter(cumulativeAfter, i)
-                : String(cumulativeAfter);
+                : formatChartNumber(cumulativeAfter);
 
             points.push({
                 animationKey,
@@ -309,12 +314,13 @@ export class WaterfallDataProcessor {
         const kindSignature = points.map(p => `${p.kind}:${p.visualKind}`).join(";");
         const sequenceSignature = JSON.stringify(points.map(p => p.animationKey));
 
+        const messages = chartMessages();
         const KIND_NAMES: Record<ChartWaterfallVisualKind, string> = {
-            decrease: "Decrease",
-            increase: "Increase",
-            neutral: "No Change",
-            subtotal: "Subtotal",
-            total: "Total"
+            decrease: messages.decrease,
+            increase: messages.increase,
+            neutral: messages.noChange,
+            subtotal: messages.subtotal,
+            total: messages.total
         };
         const KIND_COLORS: Record<ChartWaterfallVisualKind, string> = {
             decrease: style.decreaseColor,

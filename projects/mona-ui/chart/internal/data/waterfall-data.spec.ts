@@ -112,7 +112,7 @@ describe("WaterfallDataProcessor", () => {
         expect(p5.barEnd).toBe(120);
         expect(p5.isZeroChange).toBe(true);
         expect(p5.value).toBe(0);
-        expect(p5.formattedValue).toBe("+0");
+        expect(p5.formattedValue).toBe("0");
         expect(p5.visualKind).toBe("neutral");
         expect(p5.color).toBe(style.neutralColor);
 
