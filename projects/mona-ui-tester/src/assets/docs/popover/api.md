@@ -18,7 +18,7 @@
 ## Import & Quick Start
 
 ```typescript
-import { PopoverComponent } from "@nanahoshi/mona-ui";
+import { PopoverComponent } from "@nanahoshi/mona-ui/popover";
 ```
 
 ```html
@@ -121,7 +121,7 @@ A popover is a dialog, and needs a name: a `title`, a title template, or `ariaLa
 ### Preventing a close
 
 ```typescript
-import type { PopoverHideEvent } from "@nanahoshi/mona-ui";
+import type { PopoverHideEvent } from "@nanahoshi/mona-ui/popover";
 
 protected onHide(event: PopoverHideEvent): void {
     if (!this.canClose()) {

@@ -7,7 +7,7 @@ Use `ScrollViewComponent` when you need to display a sequence of items — image
 ## Import & Basic Usage
 
 ```typescript
-import { ScrollViewComponent } from "@nanahoshi/mona-ui";
+import { ScrollViewComponent } from "@nanahoshi/mona-ui/scroll-view";
 ```
 
 A slide template projected inside `<mona-scroll-view>` is required. Without it, no content is rendered inside each slide.
@@ -213,7 +213,7 @@ Project a single `ng-template` inside `<mona-scroll-view>` to control how each s
 | `PagerOverlay` | `'dark' \| 'light' \| 'none'` — valid values for the `pagerOverlay` input. |
 
 ```typescript
-import type { PagerOverlay } from "@nanahoshi/mona-ui";
+import type { PagerOverlay } from "@nanahoshi/mona-ui/scroll-view";
 ```
 
 ---

@@ -1,4 +1,4 @@
-import { PopupAnimationSettings } from "./PopupSettings";
+import { type PopupAnimationSettings } from "./PopupSettings";
 
 export const defaultPopupAnimation: Required<PopupAnimationSettings> = {
     enter: "mona-popup-enter",

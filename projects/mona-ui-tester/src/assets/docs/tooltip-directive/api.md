@@ -9,7 +9,7 @@ Use `TooltipDirective` when you want a styled, positioned tooltip without adding
 ## Import & Basic Usage
 
 ```typescript
-import { TooltipDirective } from "@nanahoshi/mona-ui";
+import { TooltipDirective } from "@nanahoshi/mona-ui/tooltip";
 ```
 
 **Basic usage — `host` mode:**

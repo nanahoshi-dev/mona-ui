@@ -9,7 +9,7 @@ Use `TextBoxComponent` when the user needs freeform text. `NumericTextBoxCompone
 ## Import & Quick Start
 
 ```typescript
-import { NumericTextBoxComponent } from "@nanahoshi/mona-ui";
+import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
 import { FormField, form } from "@angular/forms/signals";
 ```
 

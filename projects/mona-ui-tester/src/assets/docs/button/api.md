@@ -22,7 +22,7 @@ When used inside a `ButtonGroup`, the group's look, size, and rounded values tak
 ## Import & Basic Usage
 
 ```typescript
-import { ButtonDirective } from "@nanahoshi/mona-ui";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 ```
 
 Add `ButtonDirective` to your standalone component's `imports` array.

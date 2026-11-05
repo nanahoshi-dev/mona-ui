@@ -9,7 +9,7 @@ Use `ColorPaletteComponent` when the user should choose only from known colors. 
 ## Import & Quick Start
 
 ```typescript
-import { ColorGradientComponent } from "@nanahoshi/mona-ui";
+import { ColorGradientComponent } from "@nanahoshi/mona-ui/color-gradient";
 ```
 
 **Direct value binding**
@@ -26,7 +26,7 @@ protected readonly color = signal<string | null | undefined>("#336699");
 
 ```typescript
 import { FormField, form } from "@angular/forms/signals";
-import { ColorGradientComponent } from "@nanahoshi/mona-ui";
+import { ColorGradientComponent } from "@nanahoshi/mona-ui/color-gradient";
 
 protected readonly form = form({ color: "#336699" });
 ```

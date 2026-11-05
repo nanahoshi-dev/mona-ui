@@ -1,4 +1,4 @@
-import { WindowRef } from "./WindowRef";
+import { type WindowRef } from "./WindowRef";
 
 export interface WindowActionTemplateContext {
     $implicit: WindowRef;

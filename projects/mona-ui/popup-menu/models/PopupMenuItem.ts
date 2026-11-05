@@ -12,15 +12,15 @@ export interface PopupMenuItem {
      * with a description, is the group's title.
      */
     group: string | symbol;
-    groupTemplate: Signal<TemplateRef<any> | null> | null;
-    iconTemplate: Signal<TemplateRef<any> | null> | null;
+    groupTemplate: Signal<TemplateRef<unknown> | null> | null;
+    iconTemplate: Signal<TemplateRef<unknown> | null> | null;
     items: PopupMenuItem[];
     label: string;
     radio?: boolean;
     selected?: Signal<boolean>;
     separator?: boolean;
-    shortcutTemplate: Signal<TemplateRef<any> | null> | null;
-    textTemplate: Signal<TemplateRef<any> | null> | null;
+    shortcutTemplate: Signal<TemplateRef<unknown> | null> | null;
+    textTemplate: Signal<TemplateRef<unknown> | null> | null;
     uid: string;
     value?: Signal<unknown>;
 }

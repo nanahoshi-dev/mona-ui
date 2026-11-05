@@ -118,7 +118,7 @@ export class PopoverDemoComponent extends AbstractDemoComponent<PopoverComponent
                 <img
                     [ngSrc]="'https://images.pexels.com/photos/33145847/pexels-photo-33145847.jpeg'"
                     [width]="400"
-                    [height]="300"
+                    [height]="267"
                     alt="Arashiyama, Japan" />
             </div>
             @if (featureData && featureData["footerTemplate"].active) {

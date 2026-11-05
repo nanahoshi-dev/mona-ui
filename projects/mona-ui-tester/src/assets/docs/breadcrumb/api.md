@@ -18,9 +18,9 @@ Separators between items default to a `ChevronRight` icon and are hidden from as
 ## Import & Basic Usage
 
 ```typescript
-import { BreadcrumbComponent, BreadcrumbItemComponent } from "@nanahoshi/mona-ui";
+import { BreadcrumbComponent, BreadcrumbItemComponent } from "@nanahoshi/mona-ui/breadcrumb";
 // Optional: only needed when providing a custom separator
-import { BreadcrumbSeparatorTemplateDirective } from "@nanahoshi/mona-ui";
+import { BreadcrumbSeparatorTemplateDirective } from "@nanahoshi/mona-ui/breadcrumb";
 ```
 
 Add the imported symbols to your standalone component's `imports` array.

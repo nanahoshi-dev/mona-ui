@@ -17,7 +17,7 @@ The legend is hidden entirely when neither `legend` nor `monaFieldsetLegendTempl
 ## Import & Basic Usage
 
 ```typescript
-import { FieldsetComponent } from "@nanahoshi/mona-ui";
+import { FieldsetComponent } from "@nanahoshi/mona-ui/fieldset";
 ```
 
 Add `FieldsetComponent` to your standalone component's `imports` array.
@@ -105,7 +105,7 @@ Set `disabled` to disable the rendered `<fieldset>` and all projected form contr
 Replaces the string `legend` with projected content inside the `<legend>` element. When this template is present, no default legend styling is applied — the consumer is responsible for all visual treatment. The template has no context variables.
 
 ```typescript
-import { FieldsetComponent, FieldsetLegendTemplateDirective } from "@nanahoshi/mona-ui";
+import { FieldsetComponent, FieldsetLegendTemplateDirective } from "@nanahoshi/mona-ui/fieldset";
 ```
 
 ---

@@ -119,7 +119,8 @@ export class PopupMenuListComponent implements OnInit {
 
     public constructor() {
         afterNextRender({
-            read: () => {
+            // Moving focus and the highlight writes to the page, so this is the write phase.
+            write: () => {
                 const config = this.#parentConfig;
                 // A submenu opened by the pointer leaves focus in its parent menu.
                 if (config.isRoot || config.viaKeyboardNavigation) {

@@ -16,7 +16,7 @@ The selected range is always returned as a sorted `[min, max]` tuple — even if
 ## Import & Quick Start
 
 ```typescript
-import { RangeSliderComponent } from "@nanahoshi/mona-ui";
+import { RangeSliderComponent } from "@nanahoshi/mona-ui/slider";
 ```
 
 **Direct value binding:**
@@ -48,7 +48,7 @@ protected readonly filterForm = form({ price: [0, 100] as [number, number] });
 `monaSliderHandleTemplate` applies to **both** handles. The implicit variable is the current value of the respective handle:
 
 ```typescript
-import { RangeSliderComponent, SliderHandleTemplateDirective } from "@nanahoshi/mona-ui";
+import { RangeSliderComponent, SliderHandleTemplateDirective } from "@nanahoshi/mona-ui/slider";
 ```
 
 ```html
@@ -229,11 +229,7 @@ These structural directives are projected inside `<mona-range-slider>` and are s
 **Imports:**
 
 ```typescript
-import {
-    RangeSliderComponent,
-    SliderHandleTemplateDirective,
-    SliderTickValueTemplateDirective
-} from "@nanahoshi/mona-ui";
+import { RangeSliderComponent, SliderHandleTemplateDirective, SliderTickValueTemplateDirective } from "@nanahoshi/mona-ui/slider";
 ```
 
 ---

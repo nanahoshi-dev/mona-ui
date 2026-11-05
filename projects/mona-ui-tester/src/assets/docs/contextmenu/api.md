@@ -18,11 +18,7 @@ Menu content is built from content-projected items — `mona-contextmenu-item`, 
 ## Import & Quick Start
 
 ```typescript
-import {
-    ContextMenuComponent,
-    ContextMenuItemComponent,
-    ContextMenuSeparatorComponent
-} from "@nanahoshi/mona-ui";
+import { ContextMenuComponent, ContextMenuItemComponent, ContextMenuSeparatorComponent } from "@nanahoshi/mona-ui/contextmenu";
 ```
 
 Add the components you need to your standalone component's `imports` array.
@@ -40,7 +36,7 @@ Add the components you need to your standalone component's `imports` array.
 ```
 
 ```typescript
-import type { MenuItemClickEvent } from "@nanahoshi/mona-ui";
+import type { MenuItemClickEvent } from "@nanahoshi/mona-ui/menubar";
 
 protected onMenuClick(event: MenuItemClickEvent): void { /* ... */ }
 ```
@@ -206,7 +202,7 @@ protected readonly sortField = signal("name");
 | `Enter` / `Space`                 | Activates the highlighted item, or opens its submenu if it has nested items                                 |
 | `Escape`                          | Closes the open submenu                                                                                     |
 | `Tab`                             | Closes the menu and its submenus; focus moves on from the target                                            |
-| Letter, digit, space, `-`, or `_` | Jumps to (cycles through) items whose label starts with the typed text                                      |
+| Letter, digit, `-`, or `_`        | Jumps to (cycles through) items whose label starts with the typed text                                      |
 
 ### ARIA
 
@@ -259,7 +255,7 @@ protected readonly sortField = signal("name");
 | Name        | Type                                       | Default     | Description                                                                                                                                                                                                                                                                                                                              |
 |-------------|--------------------------------------------|-------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `ariaLabel` | `string`                                   | `''`        | Accessible name for the menu. When empty, the menu is named by the target if it has an `id`.                                                                                                                                                                                                                                             |
-| `items`     | `Iterable<PopupMenuItem>`                  | `[]`        | Menu items to render directly, instead of content-projected item components. Takes precedence over projected content when non-empty. TODO(owner-review): `PopupMenuItem` is not exported from `@nanahoshi/mona-ui`; prefer content projection until this type is exported.                                                               |
+| `items`     | `Iterable<PopupMenuItem>`                  | `[]`        | Menu items to render directly, instead of content-projected item components. Takes precedence over projected content when non-empty. `PopupMenuItem` is exported from `@nanahoshi/mona-ui/popup-menu`.                                                                                                                                   |
 | `minWidth`  | `string \| number`                         | `undefined` | Minimum width applied to the root menu and all submenus.                                                                                                                                                                                                                                                                                 |
 | `rounded`   | `'none' \| 'small' \| 'medium' \| 'large'` | `'medium'`  | Border-radius preset applied to the root menu and all submenus.                                                                                                                                                                                                                                                                          |
 | `size`      | `'small' \| 'medium' \| 'large'`           | `'medium'`  | Size preset applied to the root menu and all submenus.                                                                                                                                                                                                                                                                                   |
@@ -268,9 +264,9 @@ protected readonly sortField = signal("name");
 
 #### Outputs
 
-| Name        | Type                 | Description                                                                                                        |
-|-------------|----------------------|--------------------------------------------------------------------------------------------------------------------|
-| `menuClick` | `MenuItemClickEvent` | Emitted when a menu item is activated by pointer or keyboard. Call `event.preventDefault()` to keep the menu open. |
+| Name        | Type                      | Description                                                                                                        |
+|-------------|---------------------------|--------------------------------------------------------------------------------------------------------------------|
+| `menuClick` | `PopupMenuItemClickEvent` | Emitted when a menu item is activated by pointer or keyboard. Call `event.preventDefault()` to keep the menu open. |
 
 ---
 
@@ -288,9 +284,9 @@ protected readonly sortField = signal("name");
 
 #### Outputs
 
-| Name        | Type                 | Description                                                                                                                         |
-|-------------|----------------------|-------------------------------------------------------------------------------------------------------------------------------------|
-| `menuClick` | `MenuItemClickEvent` | Emitted when this item is selected by pointer or keyboard. Not emitted when the item has nested items (it opens a submenu instead). |
+| Name        | Type                      | Description                                                                                                                         |
+|-------------|---------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| `menuClick` | `PopupMenuItemClickEvent` | Emitted when this item is selected by pointer or keyboard. Not emitted when the item has nested items (it opens a submenu instead). |
 
 ---
 
@@ -309,10 +305,10 @@ protected readonly sortField = signal("name");
 
 #### Outputs
 
-| Name            | Type                 | Description                                                                                                              |
-|-----------------|----------------------|--------------------------------------------------------------------------------------------------------------------------|
-| `checkedChange` | `boolean`            | Emitted with the new checked state after activation. Not emitted when `event.preventDefault()` is called on `menuClick`. |
-| `menuClick`     | `MenuItemClickEvent` | Emitted when the item is activated. Call `event.preventDefault()` to suppress the checked-state change.                  |
+| Name            | Type                      | Description                                                                                                              |
+|-----------------|---------------------------|--------------------------------------------------------------------------------------------------------------------------|
+| `checkedChange` | `boolean`                 | Emitted with the new checked state after activation. Not emitted when `event.preventDefault()` is called on `menuClick`. |
+| `menuClick`     | `PopupMenuItemClickEvent` | Emitted when the item is activated. Call `event.preventDefault()` to suppress the checked-state change.                  |
 
 ---
 
@@ -345,9 +341,9 @@ protected readonly sortField = signal("name");
 
 #### Outputs
 
-| Name        | Type                 | Description                                                                                                                            |
-|-------------|----------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| `menuClick` | `MenuItemClickEvent` | Emitted when the item is selected. Call `event.preventDefault()` to suppress the resulting selection update on the parent radio group. |
+| Name        | Type                      | Description                                                                                                                            |
+|-------------|---------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| `menuClick` | `PopupMenuItemClickEvent` | Emitted when the item is selected. Call `event.preventDefault()` to suppress the resulting selection update on the parent radio group. |
 
 Must be projected inside a `mona-contextmenu-radio-group` to participate in selection.
 
@@ -359,9 +355,9 @@ Must be projected inside a `mona-contextmenu-radio-group` to participate in sele
 
 #### Inputs
 
-| Name    | Type     | Default | Description                                                        |
-|---------|----------|---------|--------------------------------------------------------------------|
-| `title` | `string` | —       | Required. Header text displayed above the group's projected items. |
+| Name    | Type                  | Default     | Description                                                                                                                        |
+|---------|-----------------------|-------------|------------------------------------------------------------------------------------------------------------------------------------|
+| `title` | `string \| undefined` | `undefined` | Header text displayed above the group's items. Without it, no header is rendered and the items aren't wrapped in a `role="group"`. |
 
 `ContextMenuGroupComponent` has no outputs.
 
@@ -393,18 +389,18 @@ Customizes a group header's content.
 
 Customize, respectively, an item's leading icon area, its trailing shortcut area (shown only on leaf items), and its label text.
 
-| Variable                    | Type            | Description                                                                                                                                                                                                                 |
-|-----------------------------|-----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `$implicit` (as `let-item`) | `PopupMenuItem` | The menu item. TODO(owner-review): `PopupMenuItem` is not exported from `@nanahoshi/mona-ui`; consumers can read properties such as `item.label` and `item.disabled` but cannot import the type for an explicit annotation. |
+| Variable                    | Type            | Description                                                                                                                               |
+|-----------------------------|-----------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| `$implicit` (as `let-item`) | `PopupMenuItem` | The menu item, with `label`, `disabled`, `checked` and its other state. `PopupMenuItem` is exported from `@nanahoshi/mona-ui/popup-menu`. |
 
 ---
 
-TODO(owner-review): `PopupMenuItem` (used by `ContextMenuComponent.items` and by the icon/shortcut/text template contexts) is not exported from `@nanahoshi/mona-ui`. `MenuItemClickEvent` (used by every `menuClick` output above) **is** exported, as a type alias for `PopupMenuItemClickEvent`.
+`PopupMenuItem` (used by `ContextMenuComponent.items` and by the icon, shortcut and text template contexts), `MenuItem` and `PopupMenuItemClickEvent` (used by every `menuClick` output above) are exported from `@nanahoshi/mona-ui/popup-menu`.
 
 <!-- verification-checklist
-- [x] API definitions and defaults verified against source (context-menu.component.ts and inherited PopupMenu* base classes under common/popup-menu)
-- [x] menuClick output type documented as MenuItemClickEvent (exported alias for PopupMenuItemClickEvent, lib/index.ts) — not the unexported PopupMenuItemClickEvent name
-- [x] ContextMenuGroupComponent.title and ContextMenuRadioItemComponent.value confirmed as input.required<string>() — marked Required, default "—"
+- [x] API definitions and defaults verified against source (context-menu.component.ts and the inherited PopupMenu* base classes in popup-menu/)
+- [x] menuClick output type documented as PopupMenuItemClickEvent, exported from @nanahoshi/mona-ui/popup-menu
+- [x] ContextMenuGroupComponent.title is optional (input<string>()); ContextMenuRadioItemComponent.value is input.required<string>()
 - [x] ContextMenuRadioGroupComponent.value confirmed as model<string>("") — documented as two-way bindable
 - [x] ContextMenuCheckboxItemComponent.checked confirmed as model(false): two-way bindable, and the item toggles itself
 - [x] ariaLabel is passed to the root menu as its aria-label
@@ -415,7 +411,7 @@ TODO(owner-review): `PopupMenuItem` (used by `ContextMenuComponent.items` and by
 - [x] Keyboard map verified against PopupMenuListComponent's handle*Key methods and isNavigationKey/isTypeaheadKey
 - [x] Focus-restoration-on-close behavior verified against PopupMenuComponent's open-menu state (`restoreFocus`, `returnFocusTo`)
 - [x] No open/close output on ContextMenuComponent confirmed — only menuClick is defined in context-menu.component.ts
-- [x] PopupMenuItem confirmed not exported from lib/index.ts; MenuItem (common/popup-menu/models/PopupMenuItem.ts) also confirmed not exported
+- [x] PopupMenuItem and MenuItem confirmed exported from popup-menu/public-api.ts; typeahead no longer lists space, which activates the item
 - [x] No internal or unexported APIs exposed beyond the documented TODOs
 - [x] Inputs sorted A→Z within each table
 - [x] Basic examples compile against the public API surface

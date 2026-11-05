@@ -23,7 +23,7 @@ There are two ways to use it:
 ## Import & Quick Start
 
 ```typescript
-import { WindowComponent } from "@nanahoshi/mona-ui";
+import { WindowComponent } from "@nanahoshi/mona-ui/window";
 ```
 
 ```html
@@ -40,7 +40,7 @@ Imperative usage returns a `WindowRef` synchronously:
 
 ```typescript
 import { inject, TemplateRef, viewChild } from "@angular/core";
-import { WindowService } from "@nanahoshi/mona-ui";
+import { WindowService } from "@nanahoshi/mona-ui/window";
 
 protected readonly content = viewChild<TemplateRef<unknown>>("content");
 protected readonly windowService = inject(WindowService);

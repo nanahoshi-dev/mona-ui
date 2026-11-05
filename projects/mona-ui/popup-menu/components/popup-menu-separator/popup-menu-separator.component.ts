@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, forwardRef } from "@angular/core";
+import { Component, forwardRef } from "@angular/core";
 import { PopupMenuItem } from "../../models/PopupMenuItem";
 import { PopupMenuConfig, PopupMenuItemType, PopupMenuOrigin, PopupMenuToken } from "../../models/PopupMenuConfig";
 
 @Component({
     selector: "mona-popup-menu-separator",
     template: "",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [
         {
             provide: PopupMenuToken,

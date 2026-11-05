@@ -27,7 +27,7 @@ Suggestion filtering, grouping, and virtual scrolling are opt-in through compani
 ## Import & Quick Start
 
 ```typescript
-import { AutoCompleteComponent } from "@nanahoshi/mona-ui";
+import { AutoCompleteComponent } from "@nanahoshi/mona-ui/auto-complete";
 ```
 
 ```typescript

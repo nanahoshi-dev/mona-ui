@@ -1,5 +1,5 @@
 import { InjectionToken } from "@angular/core";
-import { PopupSettings } from "./PopupSettings";
+import { type PopupSettings } from "./PopupSettings";
 
 /**
  * The `data` passed in `PopupSettings`, available to the popup content.

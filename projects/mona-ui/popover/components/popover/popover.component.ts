@@ -81,6 +81,7 @@ export class PopoverComponent implements PopoverVariantInputs {
     /** The element that carries the popover's `aria-*` attributes. */
     #ariaTarget: Element | null = null;
     #destroyed = false;
+    #popupRef: PopupRef | null = null;
     protected readonly arrowClasses = computed(() => {
         return popoverArrowThemeVariants();
     });
@@ -105,7 +106,6 @@ export class PopoverComponent implements PopoverVariantInputs {
     protected readonly templateRef = viewChild.required(TemplateRef);
     protected readonly titleTemplateRef = contentChild(PopoverTitleTemplateDirective, { read: TemplateRef });
     protected readonly uid = createElementControlId();
-    protected popupRef: PopupRef | null = null;
 
     /**
      * @description Accessible name for the popover when it has no `title` or title template.
@@ -194,7 +194,7 @@ export class PopoverComponent implements PopoverVariantInputs {
             untracked(() => {
                 this.#ariaTarget = element;
                 element.setAttribute("aria-haspopup", "dialog");
-                element.setAttribute("aria-expanded", this.popupRef ? "true" : "false");
+                element.setAttribute("aria-expanded", this.#popupRef ? "true" : "false");
             });
             onCleanup(() => {
                 this.close();
@@ -223,11 +223,11 @@ export class PopoverComponent implements PopoverVariantInputs {
     }
 
     public close(): void {
-        this.popupRef?.close();
+        this.#popupRef?.close();
     }
 
     public open(): void {
-        if (this.popupRef) {
+        if (this.#popupRef) {
             return;
         }
         this.#createPopover();
@@ -251,7 +251,7 @@ export class PopoverComponent implements PopoverVariantInputs {
             positions: overlaySidePositions(side, gap, direction),
             withPush: true
         });
-        this.popupRef = popupRef;
+        this.#popupRef = popupRef;
         targetElement.setAttribute("aria-controls", this.uid);
         targetElement.setAttribute("aria-expanded", "true");
         if (this.trigger() === "hover") {
@@ -280,8 +280,8 @@ export class PopoverComponent implements PopoverVariantInputs {
             this.#intent.closed(targetElement as HTMLElement, event.via === PopupCloseSource.Escape);
         });
         popupRef.closed.pipe(take(1)).subscribe(() => {
-            if (this.popupRef === popupRef) {
-                this.popupRef = null;
+            if (this.#popupRef === popupRef) {
+                this.#popupRef = null;
             }
             targetElement.removeAttribute("aria-controls");
             if (this.#ariaTarget === targetElement) {
@@ -296,7 +296,7 @@ export class PopoverComponent implements PopoverVariantInputs {
             {
                 write: () => {
                     const panel = popupRef.overlayRef.overlayElement.querySelector<HTMLElement>('[role="dialog"]');
-                    if (!panel || this.popupRef !== popupRef) {
+                    if (!panel || this.#popupRef !== popupRef) {
                         return;
                     }
                     if (isDevMode() && !this.hasTitle() && !this.ariaLabel()) {
@@ -333,7 +333,7 @@ export class PopoverComponent implements PopoverVariantInputs {
             if (trigger === "contextmenu") {
                 event.preventDefault();
             }
-            if (this.popupRef) {
+            if (this.#popupRef) {
                 this.close();
             } else {
                 this.#openViaTrigger();
@@ -344,7 +344,7 @@ export class PopoverComponent implements PopoverVariantInputs {
     }
 
     #openViaTrigger(): void {
-        if (this.popupRef || this.#destroyed) {
+        if (this.#popupRef || this.#destroyed) {
             return;
         }
         const showEvent = new PopoverShowEvent(this.#elementOf(this.target()));

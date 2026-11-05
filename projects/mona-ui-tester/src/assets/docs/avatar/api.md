@@ -17,7 +17,7 @@
 ## Import & Basic Usage
 
 ```typescript
-import { AvatarComponent } from "@nanahoshi/mona-ui";
+import { AvatarComponent } from "@nanahoshi/mona-ui/avatar";
 ```
 
 Add `AvatarComponent` to your standalone component's `imports` array.

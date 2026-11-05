@@ -12,8 +12,8 @@ On narrow hosts the sections wrap onto further lines rather than being hidden. W
 ## Import & Quick Start
 
 ```typescript
-import { PagerComponent } from "@nanahoshi/mona-ui";
-import type { PageChangeEvent } from "@nanahoshi/mona-ui";
+import { PagerComponent } from "@nanahoshi/mona-ui/pager";
+import type { PageChangeEvent } from "@nanahoshi/mona-ui/pager";
 ```
 
 ```html

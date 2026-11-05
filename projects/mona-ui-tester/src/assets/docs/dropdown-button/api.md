@@ -16,15 +16,7 @@
 ## Import & Quick Start
 
 ```typescript
-import {
-    DropdownButtonComponent,
-    DropdownButtonItemComponent,
-    DropdownButtonGroupComponent,
-    DropdownButtonSeparatorComponent,
-    DropdownButtonCheckboxItemComponent,
-    DropdownButtonRadioGroupComponent,
-    DropdownButtonRadioItemComponent
-} from "@nanahoshi/mona-ui";
+import { DropdownButtonCheckboxItemComponent, DropdownButtonComponent, DropdownButtonGroupComponent, DropdownButtonItemComponent, DropdownButtonRadioGroupComponent, DropdownButtonRadioItemComponent, DropdownButtonSeparatorComponent } from "@nanahoshi/mona-ui/dropdown-button";
 ```
 
 Add the components you need to your standalone component's `imports` array.
@@ -41,9 +33,9 @@ Add the components you need to your standalone component's `imports` array.
 ```
 
 ```typescript
-import type { MenuItemClickEvent } from "@nanahoshi/mona-ui";
+import type { PopupMenuItemClickEvent } from "@nanahoshi/mona-ui/popup-menu";
 
-protected onAction(event: MenuItemClickEvent): void { /* ... */ }
+protected onAction(event: PopupMenuItemClickEvent): void { /* ... */ }
 ```
 
 ## Anatomy & Structural Templates
@@ -68,7 +60,7 @@ mona-dropdown-button
 Templates placed directly inside `<mona-dropdown-button>` apply globally to all matching items. Templates nested inside a specific item override only that item.
 
 | Directive attribute                          | Scope          | Template context                                     |
-| -------------------------------------------- | -------------- | ---------------------------------------------------- |
+|----------------------------------------------|----------------|------------------------------------------------------|
 | `monaDropdownButtonTextTemplate`             | Button label   | `$implicit: string` — the current `text` input value |
 | `monaDropdownButtonMenuGroupTemplate`        | Global / Group | `$implicit: string` — the group title                |
 | `monaDropdownButtonMenuItemIconTemplate`     | Global / Item  | `$implicit` — menu item object (`label`, `disabled`) |
@@ -268,9 +260,9 @@ The button element carries the following attributes:
 
 #### Outputs
 
-| Name            | Type                 | Description                                            |
-| --------------- | -------------------- | ------------------------------------------------------ |
-| `menuItemClick` | `MenuItemClickEvent` | Emitted when any item in the dropdown menu is clicked. |
+| Name            | Type                      | Description                                            |
+|-----------------|---------------------------|--------------------------------------------------------|
+| `menuItemClick` | `PopupMenuItemClickEvent` | Emitted when any item in the dropdown menu is clicked. |
 
 ---
 
@@ -288,9 +280,9 @@ The button element carries the following attributes:
 
 #### Outputs
 
-| Name        | Type                 | Description                                             |
-| ----------- | -------------------- | ------------------------------------------------------- |
-| `menuClick` | `MenuItemClickEvent` | Emitted when the item is selected by mouse or keyboard. |
+| Name        | Type                      | Description                                             |
+|-------------|---------------------------|---------------------------------------------------------|
+| `menuClick` | `PopupMenuItemClickEvent` | Emitted when the item is selected by mouse or keyboard. |
 
 ---
 
@@ -301,7 +293,7 @@ The button element carries the following attributes:
 #### Inputs
 
 | Name    | Type     | Default | Description                                                      |
-| ------- | -------- | ------- | ---------------------------------------------------------------- |
+|---------|----------|---------|------------------------------------------------------------------|
 | `title` | `string` | —       | Required. Section header text displayed above the group's items. |
 
 ---
@@ -321,10 +313,10 @@ The button element carries the following attributes:
 
 #### Outputs
 
-| Name            | Type                 | Description                                                                                                               |
-| --------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `checkedChange` | `boolean`            | Emitted when the checked state changes after a click. Not emitted when `event.preventDefault()` is called on `menuClick`. |
-| `menuClick`     | `MenuItemClickEvent` | Emitted when the item is clicked. Call `event.preventDefault()` to suppress the state change.                             |
+| Name            | Type                      | Description                                                                                                               |
+|-----------------|---------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| `checkedChange` | `boolean`                 | Emitted when the checked state changes after a click. Not emitted when `event.preventDefault()` is called on `menuClick`. |
+| `menuClick`     | `PopupMenuItemClickEvent` | Emitted when the item is clicked. Call `event.preventDefault()` to suppress the state change.                             |
 
 ---
 
@@ -335,7 +327,7 @@ The button element carries the following attributes:
 #### Inputs
 
 | Name    | Type     | Default | Description                                                                                                                                                                          |
-| ------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+|---------|----------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `title` | `string` | `""`    | Section header text displayed above the radio items. When empty, the items are still grouped logically but no header is rendered.                                                    |
 | `value` | `string` | `""`    | Two-way bindable selected value. Use `[(value)]` to synchronize with a signal or property. The matching `mona-dropdown-button-radio-item` with the same `value` renders as selected. |
 
@@ -348,16 +340,16 @@ The button element carries the following attributes:
 #### Inputs
 
 | Name       | Type      | Default | Description                                                                                              |
-| ---------- | --------- | ------- | -------------------------------------------------------------------------------------------------------- |
+|------------|-----------|---------|----------------------------------------------------------------------------------------------------------|
 | `disabled` | `boolean` | `false` | Renders the radio item with reduced visual emphasis and prevents selection.                              |
 | `label`    | `string`  | `""`    | Display text of the radio item.                                                                          |
 | `value`    | `string`  | —       | Required. The value emitted to the parent `mona-dropdown-button-radio-group` when this item is selected. |
 
 #### Outputs
 
-| Name        | Type                 | Description                        |
-| ----------- | -------------------- | ---------------------------------- |
-| `menuClick` | `MenuItemClickEvent` | Emitted when the item is selected. |
+| Name        | Type                      | Description                        |
+|-------------|---------------------------|------------------------------------|
+| `menuClick` | `PopupMenuItemClickEvent` | Emitted when the item is selected. |
 
 ---
 
@@ -374,7 +366,7 @@ Renders a horizontal visual divider between sections. Has no inputs or outputs.
 - [x] DropdownButtonGroupComponent.title confirmed as input.required<string>() — marked Required in description, default "—"
 - [x] DropdownButtonRadioItemComponent.value confirmed as input.required<string>() — marked Required in description, default "—"
 - [x] DropdownButtonRadioGroupComponent.value confirmed as model<string>("") — documented as two-way bindable
-- [x] MenuItemClickEvent confirmed as exported type alias for PopupMenuItemClickEvent (index.ts line 295)
+- [x] menuItemClick/menuClick typed PopupMenuItemClickEvent, exported from @nanahoshi/mona-ui/popup-menu
 - [x] No "Kind" or "Required" columns — matches chip docs format
 - [x] Inputs sorted A→Z within each table
 - [x] No generated aria-label: the button is named by its content unless aria-label is set

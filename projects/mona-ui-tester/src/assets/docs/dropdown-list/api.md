@@ -28,7 +28,7 @@ Filtering, grouping, and virtual scrolling are opt-in through companion attribut
 ## Import & Quick Start
 
 ```typescript
-import { DropdownListComponent } from "@nanahoshi/mona-ui";
+import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
 ```
 
 ```typescript

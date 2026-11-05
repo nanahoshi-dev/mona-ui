@@ -12,7 +12,7 @@ Each pane controls its own sizing through `size`, `min`, and `max`, and can opt 
 ## Import & Basic Usage
 
 ```typescript
-import { SplitterComponent, SplitterPaneComponent } from "@nanahoshi/mona-ui";
+import { SplitterComponent, SplitterPaneComponent } from "@nanahoshi/mona-ui/splitter";
 ```
 
 Add both to your standalone component's `imports` array.

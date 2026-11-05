@@ -1,6 +1,6 @@
 ## Overview
 
-`SplitButtonComponent` is a compound control made of two adjacent buttons — a primary action button on the left and a menu toggle on the right — that share the same visual style. Clicking the left button triggers `buttonClick` directly. Clicking the right button opens a popup containing secondary actions structured as items, groups, separators, checkboxes, or radio groups.
+`SplitButtonComponent` is a compound control made of two adjacent buttons — a primary action button at the start and a menu toggle at the end (the right of it in left-to-right pages, the left in right-to-left ones) — that share the same visual style. Clicking the main button triggers `buttonClick` directly. Clicking the toggle opens a popup containing secondary actions structured as items, groups, separators, checkboxes, or radio groups.
 
 **Use `SplitButtonComponent` when you need to:**
 
@@ -15,15 +15,7 @@
 ## Import & Quick Start
 
 ```typescript
-import {
-    SplitButtonComponent,
-    SplitButtonItemComponent,
-    SplitButtonGroupComponent,
-    SplitButtonSeparatorComponent,
-    SplitButtonCheckboxItemComponent,
-    SplitButtonRadioGroupComponent,
-    SplitButtonRadioItemComponent
-} from "@nanahoshi/mona-ui";
+import { SplitButtonCheckboxItemComponent, SplitButtonComponent, SplitButtonGroupComponent, SplitButtonItemComponent, SplitButtonRadioGroupComponent, SplitButtonRadioItemComponent, SplitButtonSeparatorComponent } from "@nanahoshi/mona-ui/split-button";
 ```
 
 Add the components you need to your standalone component's `imports` array.
@@ -39,7 +31,7 @@ Add the components you need to your standalone component's `imports` array.
 ```
 
 ```typescript
-import { MenuItemClickEvent } from "@nanahoshi/mona-ui";
+import { PopupMenuItemClickEvent } from "@nanahoshi/mona-ui/popup-menu";
 
 protected
 onSave()
@@ -48,13 +40,13 @@ void { /* ... */}
 protected
 onSaveAs(event
 :
-MenuItemClickEvent
+PopupMenuItemClickEvent
 ):
 void { /* ... */}
 protected
 onExport(event
 :
-MenuItemClickEvent
+PopupMenuItemClickEvent
 ):
 void { /* ... */}
 ```
@@ -224,7 +216,7 @@ Both the whole component and individual items can be disabled independently:
 
 ### Popup positioning
 
-The popup menu anchors to the left edge of the main button (`bottomleft` / `topleft`) with a 2px vertical offset. The `popupWidth` input sets the minimum width of the popup in pixels; `0` means no minimum width. Clicking the main button while the menu is open closes the menu, then emits `buttonClick`.
+The popup menu anchors to the start edge of the main button (its left edge in left-to-right pages, its right edge in right-to-left ones) with a 2px vertical offset. The `popupWidth` input sets the minimum width of the popup in pixels; `0` means no minimum width. Clicking the main button while the menu is open closes the menu, then emits `buttonClick`.
 
 ### Naming
 
@@ -310,10 +302,10 @@ The main button carries:
 
 #### Outputs
 
-| Name            | Type                 | Description                                       |
-|-----------------|----------------------|---------------------------------------------------|
-| `buttonClick`   | `MouseEvent`         | Emitted when the main action button is clicked.   |
-| `menuItemClick` | `MenuItemClickEvent` | Emitted when a menu item in the popup is clicked. |
+| Name            | Type                      | Description                                       |
+|-----------------|---------------------------|---------------------------------------------------|
+| `buttonClick`   | `MouseEvent`              | Emitted when the main action button is clicked.   |
+| `menuItemClick` | `PopupMenuItemClickEvent` | Emitted when a menu item in the popup is clicked. |
 
 ---
 
@@ -331,9 +323,9 @@ The main button carries:
 
 #### Outputs
 
-| Name        | Type                 | Description                                             |
-|-------------|----------------------|---------------------------------------------------------|
-| `menuClick` | `MenuItemClickEvent` | Emitted when the item is selected by keyboard or mouse. |
+| Name        | Type                      | Description                                             |
+|-------------|---------------------------|---------------------------------------------------------|
+| `menuClick` | `PopupMenuItemClickEvent` | Emitted when the item is selected by keyboard or mouse. |
 
 ---
 
@@ -364,10 +356,10 @@ The main button carries:
 
 #### Outputs
 
-| Name            | Type                 | Description                                             |
-|-----------------|----------------------|---------------------------------------------------------|
-| `checkedChange` | `boolean`            | Emitted when the checked state changes.                 |
-| `menuClick`     | `MenuItemClickEvent` | Emitted when the item is selected by keyboard or mouse. |
+| Name            | Type                      | Description                                             |
+|-----------------|---------------------------|---------------------------------------------------------|
+| `checkedChange` | `boolean`                 | Emitted when the checked state changes.                 |
+| `menuClick`     | `PopupMenuItemClickEvent` | Emitted when the item is selected by keyboard or mouse. |
 
 ---
 
@@ -398,9 +390,9 @@ The main button carries:
 
 #### Outputs
 
-| Name        | Type                 | Description                                             |
-|-------------|----------------------|---------------------------------------------------------|
-| `menuClick` | `MenuItemClickEvent` | Emitted when the item is selected by keyboard or mouse. |
+| Name        | Type                      | Description                                             |
+|-------------|---------------------------|---------------------------------------------------------|
+| `menuClick` | `PopupMenuItemClickEvent` | Emitted when the item is selected by keyboard or mouse. |
 
 ---
 
@@ -418,7 +410,7 @@ No inputs or outputs. Renders a horizontal visual divider between menu sections.
 - [x] aria-label and aria-labelledby are the inputs' aliases on this component
 - [x] SplitButtonGroupComponent.title and SplitButtonRadioItemComponent.value marked Required (input.required<string>())
 - [x] SplitButtonRadioGroupComponent.value documented as two-way bindable model
-- [x] menuItemClick and buttonClick output type verified: MenuItemClickEvent is the public alias exported from @nanahoshi/mona-ui
+- [x] menuItemClick typed PopupMenuItemClickEvent (exported from @nanahoshi/mona-ui/popup-menu); buttonClick typed MouseEvent
 - [x] Kind and Required columns removed from API tables; tables split into Inputs / Outputs per doc guidelines
 - [x] No internal or unexported APIs exposed
 - [x] ChangeDetectionStrategy.OnPush confirmed on all components

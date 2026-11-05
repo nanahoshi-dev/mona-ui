@@ -16,7 +16,7 @@ Notifications are shown imperatively through `NotificationService`, not by placi
 ## Import & Quick Start
 
 ```typescript
-import { NotificationService } from "@nanahoshi/mona-ui";
+import { NotificationService } from "@nanahoshi/mona-ui/notification";
 ```
 
 Inject `NotificationService` (it is `providedIn: "root"`, so no module setup is required) and call `show()`:

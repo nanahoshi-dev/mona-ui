@@ -19,7 +19,8 @@ When `selection` is `"single"` or `"multiple"`, the group coordinates toggle sta
 ## Import & Basic Usage
 
 ```typescript
-import { ButtonGroupComponent, ButtonDirective } from "@nanahoshi/mona-ui";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { ButtonGroupComponent } from "@nanahoshi/mona-ui/button-group";
 ```
 
 Add both to your standalone component's `imports` array. `ButtonDirective` is required on each child button.

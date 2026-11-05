@@ -24,6 +24,8 @@ export interface WindowPlacement {
  */
 export class WindowReference<R = unknown> implements WindowRefParams<R> {
     readonly #closed$ = new ReplaySubject<WindowResult<R>>(1);
+    readonly #document: Document;
+    readonly #options: WindowReferenceOptions;
     readonly #windowRef: WindowRef<R>;
     #left: number | null = null;
     #top: number | null = null;
@@ -32,10 +34,9 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
     public readonly moveStart$$: Subject<void> = new Subject<void>();
     public readonly resize$$: Subject<ResizeEvent> = new Subject<ResizeEvent>();
 
-    public constructor(
-        private readonly options: WindowReferenceOptions,
-        private readonly document: Document
-    ) {
+    public constructor(options: WindowReferenceOptions, document: Document) {
+        this.#options = options;
+        this.#document = document;
         this.#windowRef = new WindowRef<R>(this);
     }
 
@@ -54,10 +55,10 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
         if (!topmost || topmost === host) {
             return;
         }
-        const active = this.document.activeElement;
+        const active = this.#document.activeElement;
         const focused = active instanceof HTMLElement && host.contains(active) ? active : null;
         topmost.after(host);
-        if (focused && this.document.activeElement !== focused) {
+        if (focused && this.#document.activeElement !== focused) {
             focused.focus({ preventScroll: true });
         }
     }
@@ -84,7 +85,7 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
      * Connects the window to its popup and places it: at `left`/`top`, or centered on an axis that isn't given.
      */
     public initializePopupRef(popupRef: PopupRef, placement: Partial<WindowPlacement> = {}): void {
-        this.options.popupRef = popupRef;
+        this.#options.popupRef = popupRef;
         this.#left = placement.left ?? null;
         this.#top = placement.top ?? null;
         popupRef.overlayRef.hostElement.classList.add(WINDOW_HOST_CLASS);
@@ -144,7 +145,7 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
     }
 
     public setComponentRef(componentRef: ComponentRef<unknown> | undefined): void {
-        this.options.componentRef = componentRef;
+        this.#options.componentRef = componentRef;
     }
 
     /**
@@ -171,7 +172,7 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
     }
 
     public get component(): ComponentRef<unknown> | null {
-        return this.options.componentRef ?? null;
+        return this.#options.componentRef ?? null;
     }
 
     public get drag$(): Observable<MoveEvent> {
@@ -223,9 +224,9 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
     }
 
     get #popupRefOrThrow(): PopupRef {
-        if (!this.options.popupRef) {
+        if (!this.#options.popupRef) {
             throw new Error("WindowReference: popupRef has not been initialized.");
         }
-        return this.options.popupRef;
+        return this.#options.popupRef;
     }
 }

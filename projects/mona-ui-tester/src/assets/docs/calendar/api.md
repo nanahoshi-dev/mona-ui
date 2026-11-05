@@ -7,7 +7,7 @@ Use the calendar as a standalone date selection control when a popup picker is n
 ## Import & Quick Start
 
 ```typescript
-import { CalendarComponent } from "@nanahoshi/mona-ui";
+import { CalendarComponent } from "@nanahoshi/mona-ui/calendar";
 ```
 
 Add `CalendarComponent` to your standalone component's `imports` array.

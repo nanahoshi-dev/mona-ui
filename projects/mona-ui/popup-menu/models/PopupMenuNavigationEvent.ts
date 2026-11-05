@@ -1,4 +1,4 @@
-import { PopupMenuItem } from "./PopupMenuItem";
+import { type PopupMenuItem } from "./PopupMenuItem";
 
 export interface PopupMenuNavigationEvent {
     direction: "up" | "down" | "left" | "right";

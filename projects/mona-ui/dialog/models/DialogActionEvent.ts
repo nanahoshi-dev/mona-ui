@@ -1,5 +1,5 @@
 import { PreventableEvent } from "@nanahoshi/mona-ui/common";
-import { DialogAction } from "./DialogAction";
+import { type DialogAction } from "./DialogAction";
 
 /**
  * @description Emitted when the user clicks a dialog action button. Call `preventDefault()` to keep the dialog open.

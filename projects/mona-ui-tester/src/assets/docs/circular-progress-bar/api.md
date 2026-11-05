@@ -15,7 +15,7 @@ The circular progress bar communicates a quantified progress value within an exp
 ## Import & Basic Usage
 
 ```typescript
-import { CircularProgressBarComponent } from "@nanahoshi/mona-ui";
+import { CircularProgressBarComponent } from "@nanahoshi/mona-ui/circular-progress-bar";
 ```
 
 Add `CircularProgressBarComponent` to your standalone component's `imports` array.
@@ -134,7 +134,7 @@ The template context exposes four variables:
 The label is hidden in indeterminate mode. Importing the context type:
 
 ```typescript
-import type { LabelTemplateContext } from "@nanahoshi/mona-ui";
+import type { LabelTemplateContext } from "@nanahoshi/mona-ui/circular-progress-bar";
 ```
 
 ## Accessibility Notes
@@ -186,10 +186,7 @@ Consumer responsibilities:
 Structural template directive that replaces the default numeric label inside the circle. The template is hidden when `indeterminate` is `true`. Import alongside the component:
 
 ```typescript
-import {
-    CircularProgressBarComponent,
-    CircularProgressBarLabelTemplateDirective
-} from "@nanahoshi/mona-ui";
+import { CircularProgressBarComponent, CircularProgressBarLabelTemplateDirective } from "@nanahoshi/mona-ui/circular-progress-bar";
 ```
 
 ---

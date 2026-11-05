@@ -7,7 +7,7 @@ Use `TextAreaDirective` when you need a styled multi-line input and want full co
 ## Import & Basic Usage
 
 ```typescript
-import { TextAreaDirective } from "@nanahoshi/mona-ui";
+import { TextAreaDirective } from "@nanahoshi/mona-ui/text-area";
 ```
 
 Add the imported symbol to your standalone component's `imports` array.

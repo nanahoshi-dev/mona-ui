@@ -1,14 +1,14 @@
 import {
-    ComponentType,
-    ConnectedPosition,
-    ConnectionPositionPair,
-    FlexibleConnectedPositionStrategyOrigin
+    type ComponentType,
+    type ConnectedPosition,
+    type ConnectionPositionPair,
+    type FlexibleConnectedPositionStrategyOrigin
 } from "@angular/cdk/overlay";
-import { Injector, StaticProvider, TemplateRef } from "@angular/core";
-import { Action } from "@nanahoshi/mona-ui/internal";
-import { ConnectionPoint } from "../utils/connectionPosition";
-import { PopupCloseEvent } from "./PopupCloseEvent";
-import { PopupOffset } from "./PopupOffset";
+import { type Injector, type StaticProvider, type TemplateRef } from "@angular/core";
+import { type Action } from "@nanahoshi/mona-ui/internal";
+import { type ConnectionPoint } from "../utils/connectionPosition";
+import { type PopupCloseEvent } from "./PopupCloseEvent";
+import { type PopupOffset } from "./PopupOffset";
 
 export type PopupAnchor = FlexibleConnectedPositionStrategyOrigin | string;
 

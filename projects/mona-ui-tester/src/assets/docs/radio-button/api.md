@@ -20,7 +20,7 @@ When both are absent the radio button has no accessible name. Always provide eit
 ### Import & Basic Usage
 
 ```typescript
-import { RadioButtonComponent } from "@nanahoshi/mona-ui";
+import { RadioButtonComponent } from "@nanahoshi/mona-ui/radio-button";
 ```
 
 **Minimal group with `ngModel`:**
@@ -149,7 +149,7 @@ protected readonly selectedSize = signal<string>("M");
 ### Import & Basic Usage
 
 ```typescript
-import { RadioButtonDirective } from "@nanahoshi/mona-ui";
+import { RadioButtonDirective } from "@nanahoshi/mona-ui/radio-button";
 ```
 
 Pair each input with a `<label>` for accessibility. The `<label>` must either wrap the input or reference it via `for`/`id`:

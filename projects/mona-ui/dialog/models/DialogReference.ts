@@ -18,14 +18,13 @@ export class DialogReference<R = unknown> implements DialogRefParams<R> {
     readonly #action$ = new Subject<DialogActionEvent>();
     readonly #closed$ = new ReplaySubject<DialogResult<R>>(1);
     readonly #dialogRef: DialogRef<R>;
+    readonly #options: DialogReferenceOptions;
     readonly #result$ = new ReplaySubject<DialogResult<R>>(1);
     #pendingAction: DialogAction | null = null;
     #resultValue: DialogResult<R> | null = null;
     public readonly data: WritableSignal<DialogInjectorData>;
-    public constructor(
-        private readonly options: DialogReferenceOptions,
-        initialData: DialogInjectorData
-    ) {
+    public constructor(options: DialogReferenceOptions, initialData: DialogInjectorData) {
+        this.#options = options;
         this.#dialogRef = new DialogRef<R>(this);
         this.data = signal(initialData);
     }
@@ -39,7 +38,7 @@ export class DialogReference<R = unknown> implements DialogRefParams<R> {
     }
 
     public initializePopupRef(popupRef: PopupRef): void {
-        this.options.popupRef = popupRef;
+        this.#options.popupRef = popupRef;
         popupRef.closeStart.pipe(take(1)).subscribe(event => this.#settle(event));
         popupRef.closed.pipe(take(1)).subscribe(event => {
             const result = this.#settle(event);
@@ -73,7 +72,7 @@ export class DialogReference<R = unknown> implements DialogRefParams<R> {
     }
 
     public setComponentRef(componentRef: ComponentRef<unknown> | undefined): void {
-        this.options.componentRef = componentRef;
+        this.#options.componentRef = componentRef;
     }
 
     public update(data: Partial<DialogSettings>): void {
@@ -119,7 +118,7 @@ export class DialogReference<R = unknown> implements DialogRefParams<R> {
     }
 
     public get component(): ComponentRef<unknown> | null {
-        return this.options.componentRef ?? null;
+        return this.#options.componentRef ?? null;
     }
 
     public get dialogRef(): DialogRef<R> {
@@ -139,10 +138,10 @@ export class DialogReference<R = unknown> implements DialogRefParams<R> {
     }
 
     get #popupRefOrThrow(): PopupRef {
-        if (!this.options.popupRef) {
+        if (!this.#options.popupRef) {
             throw new Error("DialogReference: popupRef has not been initialized.");
         }
-        return this.options.popupRef;
+        return this.#options.popupRef;
     }
 
     public get result(): Observable<DialogResult<R>> {

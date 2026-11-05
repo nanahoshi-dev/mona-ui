@@ -1,5 +1,5 @@
 import { InjectionToken } from "@angular/core";
-import { PopupReference } from "./PopupReference";
+import { type PopupReference } from "./PopupReference";
 
 /**
  * @internal - used by the popup service. Do not use directly or export.

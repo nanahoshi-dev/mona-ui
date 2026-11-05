@@ -2,6 +2,8 @@
 
 `@nanahoshi/mona-ui/popup` is the overlay layer under every dropdown, menu, tooltip, popover, dialog, window and sheet in the library. It wraps the Angular CDK overlay and adds positioning presets, close handling, focus management, animations, and the `lang` and `dir` of the anchor. Use `PopupService` to open a popup from code, or `<mona-popup>` to attach one to an element in a template.
 
+For what dialogs, windows and sheets add on top (the close contract, data, modality), see [Overlays](overlays.md); for menus, see [Menus](menus.md).
+
 ---
 
 ## 1. Opening a Popup from Code

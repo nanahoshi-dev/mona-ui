@@ -26,7 +26,7 @@ Both close the same way: an action button, the close button, Escape, or a progra
 ## Import & Quick Start
 
 ```typescript
-import { DialogComponent } from "@nanahoshi/mona-ui";
+import { DialogComponent } from "@nanahoshi/mona-ui/dialog";
 ```
 
 ```html
@@ -46,7 +46,7 @@ Imperative usage returns a `DialogRef` synchronously. The dialog closes itself w
 
 ```typescript
 import { inject } from "@angular/core";
-import { DialogService } from "@nanahoshi/mona-ui";
+import { DialogService } from "@nanahoshi/mona-ui/dialog";
 
 protected readonly dialogService = inject(DialogService);
 
@@ -446,7 +446,7 @@ The settings object accepted by `DialogService.show()`. Fields mirror the `Dialo
 - [x] DialogSettings fields verified against models/DialogSettings.ts; internal-only DialogInjectorData/DialogReference/DialogRefParams confirmed NOT exported and NOT documented as public API
 - [x] Five structural template directives verified against directives/*.ts and dialog-content.component.html; confirmed none pass a template context
 - [x] `close` firing for every close path (including post-action programmatic close) verified against dialog.component.ts's #dialogRef.result subscription and DialogReference.close()/PopupReference.close()
-- [x] Role/aria-labelledby/aria-describedby verified against dialog-content.component.ts's role()/describedById() computed signals and host bindings; confirmed no aria-modal binding exists, flagged as TODO(owner-review)
+- [x] Role/aria-labelledby/aria-describedby verified against dialog-content.component.ts; aria-modal is set when modal (batch 5)
 - [x] Auto-focus-in and focusedElement override verified against dialog-content.component.ts's CdkTrapFocus autoCapture + afterNextRender-driven focusElement()
 - [x] Escape-key close behavior verified against dialog.service.ts passing closeOnEscape through to PopupService
 - [x] component-metadata.json regenerated via `npm run build:metadata` and cross-checked for the `closed` output and current descriptions

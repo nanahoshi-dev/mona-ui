@@ -7,7 +7,7 @@ Use `TooltipComponent` when the tooltip needs more than plain text. Use `Tooltip
 ## Import & Basic Usage
 
 ```typescript
-import { TooltipComponent } from "@nanahoshi/mona-ui";
+import { TooltipComponent } from "@nanahoshi/mona-ui/tooltip";
 ```
 
 **Targeting an element reference:**
@@ -124,7 +124,7 @@ While a tooltip is open, its id is added to the target's `aria-describedby`, alo
 | `showDelay` | `number`                                             | `0`        | Delay in milliseconds before showing the tooltip after the trigger event.                                                                                     |
 | `target`    | `Element \| ElementRef<HTMLElement> \| string`¹      | —          | Required. The target element(s) the tooltip is attached to: a direct element/`ElementRef`, or a CSS selector string matching one or more elements.            |
 
-¹ Exposed publicly via the `PopupAnchor` type, which is referenced by this input but not exported from `@nanahoshi/mona-ui`. <!-- TODO(owner-review): confirm whether PopupAnchor should be exported. -->
+¹ The `PopupAnchor` type, exported from `@nanahoshi/mona-ui/popup`.
 
 #### Outputs
 
@@ -149,7 +149,7 @@ type TooltipPosition = "top" | "bottom" | "left" | "right" | "start" | "end";
 - [x] API definitions and defaults verified against source (tooltip.component.ts) and regenerated component-metadata.json
 - [x] `shown`/`hidden` outputs included, emitted once open and once closed
 - [x] CSS-selector `target` documented as document-level delegation with `closest()` (no MutationObserver), covered by tooltip-behavior.spec.ts
-- [x] `TooltipPosition` documented as exported; `PopupAnchor` usage still flagged as TODO(owner-review)
+- [x] `TooltipPosition` documented as exported; `PopupAnchor` confirmed exported from popup
 - [x] WCAG 1.4.13 hoverable / dismissible / persistent behavior documented from HoverIntent (100 ms grace, panel hover, Escape until leave), covered by specs
 - [x] aria-describedby documented as appended to and removed by token, not replaced; role="tooltip" from tooltip.component.html
 - [x] RTL: left/right physical, start/end by direction, flip to the opposite side with the arrow following
