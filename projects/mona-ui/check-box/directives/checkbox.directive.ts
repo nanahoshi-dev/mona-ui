@@ -1,4 +1,4 @@
-import { computed, Directive, input } from "@angular/core";
+import { booleanAttribute, computed, Directive, input } from "@angular/core";
 import { twMerge } from "tailwind-merge";
 import {
     checkboxDirectiveThemeVariants,
@@ -27,7 +27,7 @@ export class CheckboxDirective implements CheckboxDirectiveVariantInput {
      * @description Marks the checkbox as invalid, triggering error border and ring styling.
      * @default false
      */
-    public readonly invalid = input(false);
+    public readonly invalid = input(false, { transform: booleanAttribute });
 
     /**
      * @description Border-radius preset applied to the checkbox.
@@ -39,7 +39,7 @@ export class CheckboxDirective implements CheckboxDirectiveVariantInput {
      * @description Marks the checkbox as touched. Error styling is only shown when both `invalid` and `touched` are `true`.
      * @default false
      */
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
 
     /**
      * @description Additional CSS classes merged onto the host element via `tailwind-merge`.

@@ -1,20 +1,7 @@
 import { NgTemplateOutlet } from "@angular/common";
-import {
-    Component,
-    computed,
-    contentChild,
-    effect,
-    ElementRef,
-    inject,
-    input,
-    model,
-    output,
-    signal,
-    TemplateRef,
-    viewChild
-} from "@angular/core";
+import { booleanAttribute, Component, computed, contentChild, effect, ElementRef, inject, input, model, output, signal, TemplateRef, viewChild } from "@angular/core";
 import { type FormValueControl } from "@angular/forms/signals";
-import { AttributeBinderDirective, AttributeConfig } from "@nanahoshi/mona-ui/internal";
+import { AttributeBinderDirective, AttributeConfig, injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { OtpInputSeparatorTemplateDirective } from "../../directives/otp-input-separator-template.directive";
@@ -59,7 +46,7 @@ interface OtpGroupViewModel {
     host: {
         dir: "ltr",
         "[attr.dir]": "'ltr'",
-        "[attr.data-disabled]": "disabled() || null",
+        "[attr.data-disabled]": "effectiveDisabled() || null",
         "[attr.data-readonly]": "readonly() || null",
         "[attr.data-required]": "required() || null",
         "[attr.data-invalid]": "invalidState() || null",
@@ -123,6 +110,15 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         }
         return this.type() === "number" ? "numeric" : "text";
     });
+    protected readonly derivedName = computed(() => {
+        const name = this.name();
+        if (name) {
+            return name;
+        }
+        const attribute = findUsableAttribute(this.inputAttributes(), "name");
+        return attribute != null ? String(attribute) : null;
+    });
+    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly hasFocus = signal(false);
     protected readonly inputClass = computed(() => otpInputFieldThemeVariants());
     protected readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>("input");
@@ -243,7 +239,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
      * When bound to a signal form field via `[formField]`, this is written by the `FormField` directive.
      * @default false
      */
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
      * @description Configures slot grouping lengths. Accepts a uniform number or an array of group sizes.
@@ -272,13 +268,20 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly invalid = input(false);
+    public readonly invalid = input(false, { transform: booleanAttribute });
 
     /**
      * @description Sets the total number of characters accepted by the OTP input and the number of visual slots.
      * @default 4
      */
     public readonly length = input(4);
+
+    /**
+     * @description Name of the native input, used in native form submission and by browsers for autofill. When bound to
+     * a signal form field via `[formField]`, this is written by the `FormField` directive.
+     * @default ""
+     */
+    public readonly name = input("");
 
     /**
      * @description Hint character displayed in empty visual slots.
@@ -291,14 +294,14 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
      * When bound to a signal form field via `[formField]`, this is written by the `FormField` directive.
      * @default false
      */
-    public readonly readonly = input(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
 
     /**
      * @description Marks the OTP input as required. Triggers invalid state when touched and incomplete.
      * When bound to a signal form field via `[formField]`, this is written by the `FormField` directive.
      * @default false
      */
-    public readonly required = input(false);
+    public readonly required = input(false, { transform: booleanAttribute });
 
     /**
      * @description Border-radius preset applied to the OTP slots.
@@ -334,7 +337,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
      * @description Determines whether visual slots within a group have spacing between them or are joined together.
      * @default true
      */
-    public readonly spacing = input(true);
+    public readonly spacing = input(true, { transform: booleanAttribute });
 
     /**
      * @description Emitted when the OTP input is interacted with — on blur or user value change.
@@ -347,7 +350,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
 
     /**
      * @description Sets the type of the OTP input ("text", "number", or "password").
@@ -388,7 +391,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     public focus(options?: FocusOptions): void;
     public focus(index?: number): void;
     public focus(target?: number | FocusOptions): void {
-        if (this.disabled()) {
+        if (this.effectiveDisabled()) {
             return;
         }
         const el = this.inputRef().nativeElement;
@@ -420,7 +423,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     }
 
     protected onBeforeInput(event: InputEvent): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             event.preventDefault();
             return;
         }
@@ -486,7 +489,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     }
 
     protected onInput(_event?: Event): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             const inputEl = this.inputRef().nativeElement;
             inputEl.value = this.value();
             return;
@@ -502,7 +505,6 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         inputEl.value = nextVal;
         const wasIncomplete = prevVal.length < this.normalizedLength();
         this.value.set(nextVal);
-        this.touch.emit();
 
         if (wasIncomplete && nextVal.length === this.normalizedLength()) {
             this.complete.emit(nextVal);
@@ -511,7 +513,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     }
 
     protected onKeyDown(event: KeyboardEvent): void {
-        if (this.disabled() || this.readonly() || this.isComposing() || event.isComposing) {
+        if (this.effectiveDisabled() || this.readonly() || this.isComposing() || event.isComposing) {
             return;
         }
         if (event.ctrlKey || event.metaKey || event.altKey) {
@@ -547,7 +549,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     }
 
     protected onPaste(event: ClipboardEvent): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             event.preventDefault();
             return;
         }
@@ -568,7 +570,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     }
 
     protected onSlotPointerDown(event: PointerEvent, index: number): void {
-        if (this.disabled()) {
+        if (this.effectiveDisabled()) {
             return;
         }
         event.preventDefault();
@@ -576,7 +578,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     }
 
     private applyUserInsertion(text: string, selectionStart: number, selectionEnd: number): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             return;
         }
         const inputEl = this.inputRef().nativeElement;
@@ -606,7 +608,6 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         inputEl.setSelectionRange(newCaretPos, newCaretPos);
         this.selectionStart.set(newCaretPos);
         this.selectionEnd.set(newCaretPos);
-        this.touch.emit();
 
         if (wasIncomplete && combined.length === maxLen) {
             this.complete.emit(combined);

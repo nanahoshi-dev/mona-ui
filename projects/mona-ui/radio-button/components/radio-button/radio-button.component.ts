@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { Component, computed, inject, input, model, output } from "@angular/core";
+import { booleanAttribute, Component, computed, ElementRef, input, model, output, viewChild } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import type { FormValueControl } from "@angular/forms/signals";
 import { twMerge } from "tailwind-merge";
@@ -11,14 +11,20 @@ import {
     RadioButtonVariantInput,
     RadioButtonVariantProps
 } from "../../styles/radio.styles";
+import { createElementControlId, injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
 
 @Component({
     selector: "mona-radio-button",
     imports: [FormsModule, NgTemplateOutlet],
     templateUrl: "./radio-button.component.html",
     host: {
+        // The ARIA inputs below are applied to the native input, so the host must not keep the static attributes.
+        "[attr.aria-describedby]": "null",
+        "[attr.aria-label]": "null",
+        "[attr.aria-labelledby]": "null",
+        "[attr.data-readonly]": "readonly() || null",
         "[attr.data-selected]": "radioValue()===value()",
-        "[attr.data-disabled]": "disabled()"
+        "[attr.data-disabled]": "effectiveDisabled()"
     }
 })
 export class RadioButtonComponent implements RadioButtonVariantInput, FormValueControl<unknown> {
@@ -28,6 +34,8 @@ export class RadioButtonComponent implements RadioButtonVariantInput, FormValueC
         const variantClasses = radioButtonContainerLabelThemeVariants({ labelSize });
         return twMerge(variantClasses, userClasses);
     });
+    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
+    protected readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>("input");
     protected readonly invalidState = computed(() => this.touched() && this.invalid());
     protected readonly radioButtonCircleClasses = computed(() => {
         const rounded = this.rounded();
@@ -40,10 +48,28 @@ export class RadioButtonComponent implements RadioButtonVariantInput, FormValueC
     });
 
     /**
+     * @description Id of an element that describes the radio button, such as an error message.
+     * @default ""
+     */
+    public readonly ariaDescribedBy = input("", { alias: "aria-describedby" });
+
+    /**
+     * @description Accessible name of the radio button when it has no visible label.
+     * @default ""
+     */
+    public readonly ariaLabel = input("", { alias: "aria-label" });
+
+    /**
+     * @description Id of the element that labels the radio button.
+     * @default ""
+     */
+    public readonly ariaLabelledBy = input("", { alias: "aria-labelledby" });
+
+    /**
      * @description Sets the disabled state of the radio button.
      * @default false
      */
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
      * @description Emits when the input loses focus.
@@ -61,11 +87,18 @@ export class RadioButtonComponent implements RadioButtonVariantInput, FormValueC
     public readonly inputFocus = output<FocusEvent>();
 
     /**
+     * @description Id of the native radio input. Point a `<label for>` at it to label the radio button from outside.
+     * A unique id is generated when it isn't set.
+     * @default generated
+     */
+    public readonly inputId = input(createElementControlId());
+
+    /**
      * @description Marks the radio button as invalid. When bound to a signal form field via `[field]`,
      * this is written by the signal forms `Field` directive.
      * @default false
      */
-    public readonly invalid = input(false);
+    public readonly invalid = input(false, { transform: booleanAttribute });
 
     /**
      * @description Text label displayed alongside the radio button.
@@ -104,6 +137,20 @@ export class RadioButtonComponent implements RadioButtonVariantInput, FormValueC
     public readonly radioValue = input<any>(undefined);
 
     /**
+     * @description Prevents value changes while the control stays focusable and readable. When bound to a signal form
+     * field via `[formField]`, this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly readonly = input(false, { transform: booleanAttribute });
+
+    /**
+     * @description Marks the radio button as required, as the native `required` attribute. When bound to a signal form
+     * field via `[formField]`, this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly required = input(false, { transform: booleanAttribute });
+
+    /**
      * @description Sets the border radius of the radio button circle and indicator.
      * @default "full"
      */
@@ -116,7 +163,7 @@ export class RadioButtonComponent implements RadioButtonVariantInput, FormValueC
      * When bound to a signal form field via `[field]`, this is written by the signal forms `Field` directive.
      * @default false
      */
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
 
     /**
      * @description Additional CSS classes merged onto the label container element via `tailwind-merge`.
@@ -132,9 +179,25 @@ export class RadioButtonComponent implements RadioButtonVariantInput, FormValueC
      */
     public readonly value = model<any>(undefined);
 
+    /**
+     * @description Moves focus to the native radio input.
+     * @param options Options passed to the native `focus()` call, such as `preventScroll`.
+     */
+    public focus(options?: FocusOptions): void {
+        this.inputRef().nativeElement.focus(options);
+    }
+
     protected onBlur(event: FocusEvent): void {
         this.inputBlur.emit(event);
         this.touch.emit();
+    }
+
+    protected onInputClick(event: MouseEvent): void {
+        // Canceling the click makes the browser restore the previously checked radio.
+        if (this.readonly()) {
+            event.preventDefault();
+        }
+        this.inputClick.emit(event);
     }
 
     protected onSelectionChange(): void {

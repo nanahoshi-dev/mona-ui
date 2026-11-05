@@ -24,7 +24,7 @@ import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { PreventableEvent, TakeFirstPipe } from "@nanahoshi/mona-ui/common";
 import type { CalendarView, DateDisabledType } from "@nanahoshi/mona-ui/date-input";
 import { CalendarService } from "@nanahoshi/mona-ui/date-input";
-import { createElementControlId, rxTimeout } from "@nanahoshi/mona-ui/internal";
+import { createElementControlId, injectEffectiveDisabled, rxTimeout } from "@nanahoshi/mona-ui/internal";
 import type { DurationObjectUnits } from "luxon";
 import { DateTime } from "luxon";
 import { fromEvent, skip } from "rxjs";
@@ -95,7 +95,7 @@ const FIRST_DAY_OF_WEEK_TO_ISO: Record<FirstDayOfWeek, number> = {
         // The host is a plain container: the grid inside it is the widget, and focus moves through its cells. A
         // static aria-label written on <mona-calendar> would otherwise stay on the role-less host.
         "[attr.aria-label]": "null",
-        "[attr.data-disabled]": "disabled() || null",
+        "[attr.data-disabled]": "effectiveDisabled() || null",
         "[attr.data-invalid]": "invalidState() || null",
         "[attr.data-required]": "required() || null",
         "[class]": "baseClass()",
@@ -169,7 +169,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         }
     });
     protected readonly baseClass = computed(() => {
-        const disabled = this.disabled();
+        const disabled = this.effectiveDisabled();
         const readonly = this.readonly();
         const rounded = this.rounded() === "full" ? "large" : this.rounded();
         const variantClass = calendarBaseThemeVariants({ disabled, readonly, rounded });
@@ -197,6 +197,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
             .select(e => e.toArray())
             .toArray();
     });
+    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly effectiveFirstDay = computed<FirstDayOfWeek>(() => {
         return this.firstDay() ?? getLocaleFirstDayOfWeek(this.#i18n.localeId());
     });
@@ -545,7 +546,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
 
     protected onDayClick(date: Date, event: MouseEvent): void {
         event.preventDefault();
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             return;
         }
         const selection = this.selection();
@@ -566,7 +567,12 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     }
 
     protected onDayPointerEnter(date: Date): void {
-        if (this.disabled() || this.readonly() || this.selection() !== "range" || this.pendingRangeStart() == null) {
+        if (
+            this.effectiveDisabled() ||
+            this.readonly() ||
+            this.selection() !== "range" ||
+            this.pendingRangeStart() == null
+        ) {
             return;
         }
         this.rangePreviewDate.set(date);
@@ -613,7 +619,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
 
     protected onTodayButtonClick(): void {
         this.refreshToday();
-        if (this.disabled() || this.readonly() || this.todayUnavailable()) {
+        if (this.effectiveDisabled() || this.readonly() || this.todayUnavailable()) {
             return;
         }
         // Today is picked as a click on its day would pick it, so the same rules apply.
@@ -717,7 +723,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     }
 
     private handleKeydown(event: KeyboardEvent): void {
-        if (this.disabled()) {
+        if (this.effectiveDisabled()) {
             return;
         }
 

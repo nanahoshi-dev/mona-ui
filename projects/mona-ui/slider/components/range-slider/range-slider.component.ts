@@ -18,6 +18,7 @@ import { SliderBaseComponent } from "../slider-base/slider-base.component";
         "[class.mona-slider]": "true",
         "[attr.data-disabled]": "effectiveDisabled()",
         "[attr.data-orientation]": "orientation()",
+        "[attr.data-readonly]": "readonly() || null",
         "(focus)": "focus()"
     }
 })
@@ -139,11 +140,13 @@ export class RangeSliderComponent extends SliderBaseComponent implements FormVal
             .pipe(
                 takeUntilDestroyed(this.destroyRef),
                 tap(() => this.dragging.set(false)),
-                filter(() => !this.effectiveDisabled())
+                filter(() => !this.interactionDisabled())
             )
             .subscribe((event: PointerEvent) => {
                 const isSecondary = this.getClosestHandle(event);
                 this.handleHandleMove(event, isSecondary);
+                const handle = isSecondary ? this.secondarySliderHandle() : this.sliderHandle();
+                handle.nativeElement.focus({ preventScroll: true });
             });
     }
 
@@ -189,7 +192,7 @@ export class RangeSliderComponent extends SliderBaseComponent implements FormVal
         fromEvent<KeyboardEvent>(this.sliderHandle().nativeElement, "keydown")
             .pipe(
                 takeUntilDestroyed(this.destroyRef),
-                filter(() => !this.effectiveDisabled()),
+                filter(() => !this.interactionDisabled()),
                 filter(event => this.isNavigationKey(event)),
                 tap(event => {
                     event.preventDefault();
@@ -204,7 +207,7 @@ export class RangeSliderComponent extends SliderBaseComponent implements FormVal
         fromEvent<KeyboardEvent>(this.secondarySliderHandle().nativeElement, "keydown")
             .pipe(
                 takeUntilDestroyed(this.destroyRef),
-                filter(() => !this.effectiveDisabled()),
+                filter(() => !this.interactionDisabled()),
                 filter(event => this.isNavigationKey(event)),
                 tap(event => {
                     event.preventDefault();
@@ -224,7 +227,7 @@ export class RangeSliderComponent extends SliderBaseComponent implements FormVal
         fromEvent<PointerEvent>(this.sliderHandle().nativeElement, "pointerdown")
             .pipe(
                 takeUntilDestroyed(this.destroyRef),
-                filter(() => !this.effectiveDisabled()),
+                filter(() => !this.interactionDisabled()),
                 tap(() => this.dragging.set(true)),
                 switchMap(() =>
                     pointerMove$.pipe(
@@ -238,7 +241,7 @@ export class RangeSliderComponent extends SliderBaseComponent implements FormVal
         fromEvent<PointerEvent>(this.secondarySliderHandle().nativeElement, "pointerdown")
             .pipe(
                 takeUntilDestroyed(this.destroyRef),
-                filter(() => !this.effectiveDisabled()),
+                filter(() => !this.interactionDisabled()),
                 tap(() => this.dragging.set(true)),
                 switchMap(() =>
                     pointerMove$.pipe(
@@ -289,9 +292,6 @@ export class RangeSliderComponent extends SliderBaseComponent implements FormVal
             return;
         }
 
-        this.zone.run(() => {
-            this.value.set([newMinValue, newMaxValue]);
-            this.touch.emit();
-        });
+        this.zone.run(() => this.value.set([newMinValue, newMaxValue]));
     }
 }

@@ -3,16 +3,16 @@
         [class]="hsvRectangleHandleClasses()"
         [style.left.px]="hsvHandleLeft()"
         [style.top.px]="hsvHandleTop()"
-        [attr.tabindex]="disabled() ? -1 : 0"
+        [attr.tabindex]="effectiveDisabled() ? -1 : 0"
         [attr.role]="'slider'"
         [attr.aria-label]="messages().saturationAndValue"
         [attr.aria-valuemin]="0"
         [attr.aria-valuemax]="100"
         [attr.aria-valuenow]="hsv().s"
         [attr.aria-valuetext]="messages().saturationAndValueText(hsv().s ?? 0, hsv().v ?? 0)"
-        [attr.aria-disabled]="disabled() || null"
+        [attr.aria-disabled]="effectiveDisabled() || null"
+        [attr.aria-readonly]="readonly() || null"
         (keydown)="onHsvHandleKeyDown($event)"
-        (blur)="onHsvHandleBlur()"
         #hsvPointer></div>
 </div>
 <div class="flex items-center gap-2">
@@ -26,8 +26,9 @@
             [trackSize]="sliderHeight"
             [rounded]="rounded()"
             [value]="hsv().h ?? 0"
-            (valueChange)="hueValue$.next($event)"
-            (touch)="onSliderBlur()"></mona-slider>
+            [disabled]="effectiveDisabled()"
+            [readonly]="readonly()"
+            (valueChange)="hueValue$.next($event)"></mona-slider>
         @if (opacity()) {
             <mona-slider
                 [minValue]="0"
@@ -38,8 +39,9 @@
                 [trackSize]="sliderHeight"
                 [rounded]="rounded()"
                 [value]="alpha()"
-                (valueChange)="onAlphaChange($event)"
-                (touch)="onSliderBlur()"></mona-slider>
+                [disabled]="effectiveDisabled()"
+                [readonly]="readonly()"
+                (valueChange)="onAlphaChange($event)"></mona-slider>
         }
     </div>
     @for (preview of colorPreviews(); track preview.type) {
@@ -51,11 +53,17 @@
             [attr.aria-label]="$index === 1 ? preview.title : null"
             [attr.aria-hidden]="$index === 0 ? 'true' : null"
             [attr.role]="$index === 1 ? 'button' : null"
-            [attr.tabindex]="$index === 1 ? 0 : null"
+            [attr.tabindex]="$index === 1 && !interactionDisabled() ? 0 : null"
             (click)="preview.onClick?.()"
             (keydown)="onPreviousColorKeyDown($event, preview.onClick)"></div>
     }
-    <button monaButton look="ghost" size="small" [attr.aria-label]="messages().clearColor" (click)="onClearClick()">
+    <button
+        monaButton
+        look="ghost"
+        size="small"
+        [disabled]="interactionDisabled()"
+        [attr.aria-label]="messages().clearColor"
+        (click)="onClearClick()">
         <svg lucideDropletOff [size]="16" aria-hidden="true"></svg>
     </button>
 </div>
@@ -74,8 +82,9 @@
                         [rounded]="rounded()"
                         [size]="'small'"
                         class="w-18"
-                        (valueChange)="input.change($event)"
-                        (inputBlur)="onNumericInputBlur()">
+                        [disabled]="effectiveDisabled()"
+                        [readonly]="readonly()"
+                        (valueChange)="input.change($event)">
                         <ng-template monaNumericTextBoxPrefixTemplate>
                             <ng-container
                                 [ngTemplateOutlet]="numericInputPrefixTemplate"
@@ -90,6 +99,7 @@
                     look="ghost"
                     [rounded]="rounded()"
                     size="small"
+                    [disabled]="effectiveDisabled()"
                     [attr.aria-label]="messages().switchColorMode"
                     (click)="onSwitchColorModeClick()">
                     <svg lucideChevronsUpDown [size]="16" aria-hidden="true"></svg>
@@ -101,6 +111,8 @@
         <mona-text-box
             [rounded]="rounded()"
             [value]="hex()"
+            [disabled]="effectiveDisabled()"
+            [readonly]="readonly()"
             (valueChange)="onHexChange($event)"
             (inputBlur)="onHexInputBlur()"
             (inputFocus)="onHexInputFocus()"
@@ -127,8 +139,17 @@
     }
     @if (showButtons()) {
         <div class="flex items-center justify-end gap-2">
-            <button monaButton [rounded]="rounded()" look="primary" (click)="onApply()">{{ messages().apply }}</button>
-            <button monaButton [rounded]="rounded()" (click)="onCancel()">{{ messages().cancel }}</button>
+            <button
+                monaButton
+                [rounded]="rounded()"
+                look="primary"
+                [disabled]="interactionDisabled()"
+                (click)="onApply()">
+                {{ messages().apply }}
+            </button>
+            <button monaButton [rounded]="rounded()" [disabled]="effectiveDisabled()" (click)="onCancel()">
+                {{ messages().cancel }}
+            </button>
         </div>
     }
 </div>

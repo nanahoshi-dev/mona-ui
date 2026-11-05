@@ -5,7 +5,7 @@
     [aria-label]="ariaLabel()"
     [aria-labelledby]="ariaLabelledBy()"
     [clearButton]="showClearButton()"
-    [disabled]="disabled()"
+    [disabled]="effectiveDisabled()"
     [inputAttributes]="inputAttributes()"
     [inputId]="inputId()"
     [invalid]="invalidState()"
@@ -33,7 +33,7 @@
             [attr.aria-expanded]="expanded()"
             [attr.aria-controls]="popupId"
             (click)="onDateInputButtonClick()"
-            [disabled]="disabled() || readonly()"
+            [disabled]="effectiveDisabled() || readonly()"
             [tabindex]="-1">
             <svg lucideCalendar [size]="16" aria-hidden="true"></svg>
         </button>
@@ -59,7 +59,7 @@
                     [id]="dateTabId"
                     [attr.aria-controls]="panelId"
                     [attr.aria-selected]="activeView() === 'date'"
-                    [disabled]="disabled()"
+                    [disabled]="effectiveDisabled()"
                     [rounded]="rounded()"
                     [selected]="activeView() === 'date'"
                     [size]="size()"
@@ -75,7 +75,7 @@
                     [id]="timeTabId"
                     [attr.aria-controls]="panelId"
                     [attr.aria-selected]="activeView() === 'time'"
-                    [disabled]="disabled()"
+                    [disabled]="effectiveDisabled()"
                     [rounded]="rounded()"
                     [selected]="activeView() === 'time'"
                     [size]="size()"
@@ -100,7 +100,7 @@
                         [firstDay]="firstDay()"
                         [weekNumber]="weekNumber()"
                         [value]="navigatedDate()"
-                        [disabled]="disabled()"
+                        [disabled]="effectiveDisabled()"
                         [readonly]="readonly()"
                         [rounded]="rounded()"
                         (valueChange)="onCalendarValueChange($event)"
@@ -135,7 +135,7 @@
                         [focusOnMount]="focusViewOnMount()"
                         [value]="navigatedDate()"
                         (valueChange)="onTimeSelectorValueChange($event)"
-                        [disabled]="disabled()"
+                        [disabled]="effectiveDisabled()"
                         [readonly]="readonly()"
                         [max]="timePickerMax()"
                         [min]="timePickerMin()"
@@ -154,7 +154,7 @@
             <button
                 monaButton
                 look="primary"
-                [disabled]="disabled()"
+                [disabled]="effectiveDisabled()"
                 [rounded]="rounded()"
                 [size]="size()"
                 (click)="onSetDateClick()">
@@ -163,7 +163,7 @@
             <button
                 monaButton
                 look="default"
-                [disabled]="disabled()"
+                [disabled]="effectiveDisabled()"
                 [rounded]="rounded()"
                 [size]="size()"
                 (click)="onCancelClick()">

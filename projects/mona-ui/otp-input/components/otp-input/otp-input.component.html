@@ -3,7 +3,7 @@
     [class]="inputClass()"
     tabindex="0"
     [value]="value()"
-    [disabled]="disabled()"
+    [disabled]="effectiveDisabled()"
     [readOnly]="readonly()"
     [required]="required()"
     [type]="nativeInputType()"
@@ -16,6 +16,7 @@
     [attr.aria-invalid]="invalidState() ? 'true' : null"
     [attr.aria-required]="required() ? 'true' : null"
     [attr.maxlength]="normalizedLength()"
+    [attr.name]="derivedName()"
     [monaAttributeBinder]="sanitizedAttributes()"
     (beforeinput)="onBeforeInput($event)"
     (keydown)="onKeyDown($event)"
@@ -43,13 +44,13 @@
                 [attr.data-selected]="slot.selected || null"
                 [attr.data-filled]="slot.filled || null"
                 [attr.data-placeholder]="slot.placeholder || null"
-                [attr.data-disabled]="disabled() || null"
+                [attr.data-disabled]="effectiveDisabled() || null"
                 [attr.data-readonly]="readonly() || null"
                 [attr.data-invalid]="invalidState() || null"
                 (pointerdown)="onSlotPointerDown($event, slot.index)"
                 aria-hidden="true">
                 {{ slot.displayCharacter }}
-                @if (slot.active && !slot.filled && hasFocus() && !disabled() && !readonly()) {
+                @if (slot.active && !slot.filled && hasFocus() && !effectiveDisabled() && !readonly()) {
                     <span
                         class="pointer-events-none absolute inset-y-2 w-0.5 animate-pulse motion-reduce:animate-none bg-foreground"
                         aria-hidden="true"></span>

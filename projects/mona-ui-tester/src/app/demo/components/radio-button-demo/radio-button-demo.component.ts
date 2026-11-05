@@ -1,7 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, input, model, signal } from "@angular/core";
+import { booleanAttribute, ChangeDetectionStrategy, Component, computed, input, model, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { disabled, form, FormField } from "@angular/forms/signals";
+import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { RadioButtonComponent, RadioButtonDirective } from "@nanahoshi/mona-ui/radio-button";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
@@ -43,6 +43,11 @@ export class RadioButtonDemoComponent extends AbstractDemoComponent<RadioButtonC
             // Angular forbids binding them directly, so exclude them rather than expose a dead control.
             invalid: undefined,
             touched: undefined,
+            // The demo shows a group of radios, so one name or id for all of them means nothing.
+            ariaDescribedBy: undefined,
+            ariaLabel: undefined,
+            ariaLabelledBy: undefined,
+            inputId: undefined,
             userClass: {
                 alias: "class",
                 type: "string",
@@ -159,15 +164,19 @@ export class RadioButtonWrapperComponent implements ComponentInputsAsSignal<Radi
     protected readonly form = form(this.#formModel, schema => {
         disabled(schema.season, { when: () => this.disabled() });
         disabled(schema.direction, { when: () => this.disabled() });
+        readonly(schema.season, { when: () => this.readonly() });
+        required(schema.season, { when: () => this.required() });
     });
     protected readonly selectedDirection = signal("West");
     protected readonly selectedSeason = signal("Autumn");
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly label = input("Autumn");
     public readonly labelPosition = input<ReturnType<RadioButtonComponent["labelPosition"]>>("after");
     public readonly labelSize = input<ReturnType<RadioButtonComponent["labelSize"]>>("medium");
     public readonly name = input("seasons");
     public readonly radioValue = model("Autumn");
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<RadioButtonComponent["rounded"]>>("full");
     public readonly userClass = input<ReturnType<RadioButtonComponent["userClass"]>>("");
     public readonly value = model<any>(undefined);

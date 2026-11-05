@@ -3,7 +3,7 @@
         role="toolbar"
         [class]="toolbarClass()"
         [attr.aria-label]="messages().toolbar"
-        [attr.inert]="disabled() || null"
+        [attr.inert]="effectiveDisabled() || null"
         (focusin)="onToolbarFocusIn($event)"
         (keydown)="onToolbarKeydown($event)"
         #toolbar>

@@ -17,6 +17,8 @@ export const switchThemeVariants = cva(
         data-[disabled='true']:bg-disabled-background
         data-[disabled='true']:text-disabled-foreground
 
+        data-[readonly='true']:cursor-default
+
         data-[active='true']:bg-primary
         data-[active='true']:text-primary-foreground
         data-[disabled='true']:data-[active='true']:bg-disabled-background

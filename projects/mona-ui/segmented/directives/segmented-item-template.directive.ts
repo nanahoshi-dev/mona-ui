@@ -13,8 +13,8 @@ export class SegmentedItemTemplateDirective {
 
     public static ngTemplateContextGuard(
         _directive: SegmentedItemTemplateDirective,
-        context: unknown
-    ): context is SegmentedItemTemplateContext {
+        _context: unknown
+    ): _context is SegmentedItemTemplateContext {
         return true;
     }
 }

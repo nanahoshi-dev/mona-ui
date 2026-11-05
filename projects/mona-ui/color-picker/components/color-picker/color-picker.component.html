@@ -38,8 +38,7 @@
                 [columns]="columns()"
                 [readonly]="readonly()"
                 [value]="value()"
-                (valueChange)="onColorPaletteValueChange($event)"
-                (touch)="onColorPaletteTouch()"></mona-color-palette>
+                (valueChange)="onColorPaletteValueChange($event)"></mona-color-palette>
         </div>
     } @else if (view() === "gradient") {
         <div
@@ -51,10 +50,9 @@
             <mona-color-gradient
                 [opacity]="opacity()"
                 [rounded]="rounded()"
-                [disabled]="disabled() || readonly()"
+                [disabled]="effectiveDisabled() || readonly()"
                 [value]="value()"
                 (valueChange)="onColorGradientValueChange($event)"
-                (touch)="onColorGradientTouch()"
                 (apply)="onColorGradientApply()"
                 (cancel)="onColorGradientCancel()"></mona-color-gradient>
         </div>

@@ -817,7 +817,7 @@ describe("SegmentedComponent", () => {
             expect(touches).toBe(1);
         });
 
-        it("emits touch when focus leaves a radio input", () => {
+        it("emits touch when focus leaves the group", () => {
             const componentInstance = fixture.debugElement
                 .query(By.directive(SegmentedComponent))
                 .componentInstance as SegmentedComponent;
@@ -827,7 +827,7 @@ describe("SegmentedComponent", () => {
             });
 
             const radio = getRadios(fixture)[0];
-            radio.dispatchEvent(new FocusEvent("blur"));
+            radio.dispatchEvent(new FocusEvent("focusout", { bubbles: true }));
             fixture.detectChanges();
 
             expect(touches).toBe(1);

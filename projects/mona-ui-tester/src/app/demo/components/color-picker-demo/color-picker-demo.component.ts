@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { Component, inject, input, signal } from "@angular/core";
+import { booleanAttribute, Component, inject, input, signal } from "@angular/core";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { ColorPickerComponent } from "@nanahoshi/mona-ui/color-picker";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
@@ -108,15 +108,15 @@ export class ColorPickerWrapperComponent implements ComponentInputsAsSignal<Colo
         required(schema.color, { when: () => this.required() });
     });
     protected readonly customPalette = customColorPalette;
-    public readonly closeOnSelect = input<ReturnType<ColorPickerComponent["closeOnSelect"]>>(true);
+    public readonly closeOnSelect = input(true, { transform: booleanAttribute });
     public readonly columns = input<ReturnType<ColorPickerComponent["columns"]>>(10);
-    public readonly disabled = input<ReturnType<ColorPickerComponent["disabled"]>>(false);
-    public readonly readonly = input<ReturnType<ColorPickerComponent["readonly"]>>(false);
-    public readonly required = input<ReturnType<ColorPickerComponent["required"]>>(false);
-    public readonly opacity = input<ReturnType<ColorPickerComponent["opacity"]>>(true);
+    public readonly disabled = input(false, { transform: booleanAttribute });
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
+    public readonly opacity = input(true, { transform: booleanAttribute });
     public readonly palette = input<ReturnType<ColorPickerComponent["palette"]>>("flat");
     public readonly rounded = input<ReturnType<ColorPickerComponent["rounded"]>>("medium");
-    public readonly showClearButton = input<ReturnType<ColorPickerComponent["showClearButton"]>>(false);
+    public readonly showClearButton = input(false, { transform: booleanAttribute });
     public readonly size = input<ReturnType<ColorPickerComponent["size"]>>("medium");
     public readonly view = input<ReturnType<ColorPickerComponent["view"]>>("palette");
 }

@@ -18,6 +18,9 @@ export const sliderBaseThemeVariants = cva(
         data-[disabled="true"]:pointer-events-none
         data-[disabled="true"]:cursor-not-allowed
         data-[disabled="true"]:opacity-50
+
+        data-[readonly="true"]:cursor-default
+        data-[readonly="true"]:[&_*]:cursor-default
     `
 );
 

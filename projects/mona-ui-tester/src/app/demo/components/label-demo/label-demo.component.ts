@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, input } from "@angular/core";
+import { booleanAttribute, ChangeDetectionStrategy, Component, computed, input } from "@angular/core";
 import { LabelComponent } from "@nanahoshi/mona-ui/label";
 import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
@@ -46,7 +46,7 @@ export class LabelDemoComponent extends AbstractDemoComponent<LabelComponent> {
     }
 })
 class LabelWrapperComponent implements ComponentInputsAsSignal<LabelComponent> {
-    public readonly optional = input<ReturnType<LabelComponent["optional"]>>(false);
+    public readonly optional = input(false, { transform: booleanAttribute });
     public readonly optionalText = input<ReturnType<LabelComponent["optionalText"]>>("Optional");
     public readonly text = input<ReturnType<LabelComponent["text"]>>("Email address");
     public readonly userClass = input<ReturnType<LabelComponent["userClass"]>>("");

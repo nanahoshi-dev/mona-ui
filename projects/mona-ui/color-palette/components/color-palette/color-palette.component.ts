@@ -1,4 +1,15 @@
-import { Component, computed, ElementRef, inject, input, model, output, signal, Signal } from "@angular/core";
+import {
+    booleanAttribute,
+    Component,
+    computed,
+    ElementRef,
+    inject,
+    input,
+    model,
+    output,
+    signal,
+    Signal
+} from "@angular/core";
 import type { FormValueControl } from "@angular/forms/signals";
 import { PaletteType } from "@nanahoshi/mona-ui/common";
 import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
@@ -12,6 +23,7 @@ import {
 } from "../../styles/color-palette.styles";
 import { COLOR_PALETTE_DEFAULT_MESSAGES } from "../../i18n/color-palette.default-messages";
 import { flatColorScheme, materialColorScheme, websafeColorScheme } from "../../utils/colorSchemes";
+import { injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
 
 @Component({
     selector: "mona-color-palette",
@@ -20,13 +32,14 @@ import { flatColorScheme, materialColorScheme, websafeColorScheme } from "../../
         "[class]": "baseClasses()",
         "[style.grid-template-columns]": "'repeat('+colorScheme().columns+', minmax('+tileSize()+'px, 1fr))'",
         "[style.grid-auto-rows]": "tileSize()+'px'",
-        "[attr.data-disabled]": "disabled()",
+        "[attr.data-disabled]": "effectiveDisabled()",
         "[attr.data-invalid]": "invalidState() || null",
         "[attr.data-readonly]": "readonly()",
+        "(focusout)": "onFocusOut($event)",
         "[attr.data-required]": "required() || null",
         "[attr.role]": "'grid'",
         "[attr.aria-label]": "ariaLabel() || messages().colorPalette",
-        "[attr.aria-disabled]": "disabled()",
+        "[attr.aria-disabled]": "effectiveDisabled()",
         "[attr.aria-invalid]": "invalidState() ? 'true' : null",
         "[attr.aria-readonly]": "readonly()",
         "[attr.aria-required]": "required()"
@@ -36,7 +49,6 @@ export class ColorPaletteComponent implements ColorPaletteVariantInput, FormValu
     readonly #direction = injectComponentDirection();
     readonly #elementRef = inject(ElementRef<HTMLElement>);
     readonly #i18n = inject(MonaI18nService);
-    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly activeColorIndex = computed(() =>
         this.focusedColorIndex() === -1 ? 0 : this.focusedColorIndex()
     );
@@ -69,10 +81,12 @@ export class ColorPaletteComponent implements ColorPaletteVariantInput, FormValu
             name: "custom"
         };
     });
+    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly focusedColorIndex = signal<number>(-1);
     protected readonly invalidState = computed(
         () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly messages = this.#i18n.componentMessages("colorPalette", COLOR_PALETTE_DEFAULT_MESSAGES);
     protected readonly paletteItemClasses = computed(() => {
         const rounded = this.rounded();
@@ -96,14 +110,14 @@ export class ColorPaletteComponent implements ColorPaletteVariantInput, FormValu
      * @description Renders the component with reduced visual emphasis and removes pointer interaction.
      * @default false
      */
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
      * @description Marks the color palette as invalid. When bound to a signal form field via `[formField]`,
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly invalid = input(false);
+    public readonly invalid = input(false, { transform: booleanAttribute });
 
     /**
      * @description The palette to display — one of the built-in `"flat"`, `"material"`, or `"websafe"` schemes, or a
@@ -117,14 +131,14 @@ export class ColorPaletteComponent implements ColorPaletteVariantInput, FormValu
      * form field via `[formField]`, this is written by the `FormField` directive.
      * @default false
      */
-    public readonly readonly = input(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
 
     /**
      * @description Sets whether the color palette is required. When bound to a signal form field via `[formField]`,
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly required = input(false);
+    public readonly required = input(false, { transform: booleanAttribute });
 
     /**
      * @description Border-radius preset applied to the color palette items.
@@ -149,13 +163,22 @@ export class ColorPaletteComponent implements ColorPaletteVariantInput, FormValu
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
 
     /**
      * @description Two-way bindable current color value.
      * @default null
      */
     public readonly value = model<string | null>(null);
+
+    /**
+     * @description Moves focus to the palette's active tile.
+     * @param options Options passed to the native `focus()` call, such as `preventScroll`.
+     */
+    public focus(options?: FocusOptions): void {
+        const element: HTMLElement = this.#elementRef.nativeElement;
+        element.querySelector<HTMLElement>('[data-color-index][tabindex="0"]')?.focus(options);
+    }
 
     protected focusColorTile(index: number): void {
         setTimeout(() => {
@@ -167,16 +190,12 @@ export class ColorPaletteComponent implements ColorPaletteVariantInput, FormValu
         });
     }
 
-    protected onColorBlur(): void {
-        this.touch.emit();
-    }
-
     protected onColorFocus(index: number): void {
         this.focusedColorIndex.set(index);
     }
 
     protected onColorSelect(color: string): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             return;
         }
 
@@ -185,8 +204,17 @@ export class ColorPaletteComponent implements ColorPaletteVariantInput, FormValu
         this.touch.emit();
     }
 
+    protected onFocusOut(event: FocusEvent): void {
+        const nextTarget = event.relatedTarget;
+        const element: HTMLElement = this.#elementRef.nativeElement;
+        if (nextTarget instanceof Node && element.contains(nextTarget)) {
+            return;
+        }
+        this.touch.emit();
+    }
+
     protected onKeyDown(event: KeyboardEvent, colorIndex: number): void {
-        if (this.disabled()) {
+        if (this.effectiveDisabled()) {
             return;
         }
 

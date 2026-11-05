@@ -1,6 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
-import { Component, computed, input, signal } from "@angular/core";
-import { disabled, form, FormField, required } from "@angular/forms/signals";
+import { booleanAttribute, Component, computed, input, signal } from "@angular/core";
+import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { ColorGradientComponent } from "@nanahoshi/mona-ui/color-gradient";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
@@ -62,12 +62,14 @@ export class ColorGradientWrapperComponent implements ComponentInputsAsSignal<Co
     readonly #formModel = signal<ColorGradientFormModel>({ color: "" });
     protected readonly form = form(this.#formModel, schema => {
         disabled(schema.color, { when: () => this.disabled() });
+        readonly(schema.color, { when: () => this.readonly() });
         required(schema.color, { when: () => this.required() });
     });
-    public readonly disabled = input<ReturnType<ColorGradientComponent["disabled"]>>(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly format = input<ReturnType<ColorGradientComponent["format"]>>("hex");
     public readonly opacity = input<ReturnType<ColorGradientComponent["opacity"]>>(true);
-    public readonly required = input<ReturnType<ColorGradientComponent["required"]>>(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<ColorGradientComponent["rounded"]>>("medium");
     public readonly showButtons = input<ReturnType<ColorGradientComponent["showButtons"]>>(true);
     public readonly showHexInput = input<ReturnType<ColorGradientComponent["showHexInput"]>>(true);

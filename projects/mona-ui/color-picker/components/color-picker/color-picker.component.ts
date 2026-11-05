@@ -1,5 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
+    booleanAttribute,
     Component,
     computed,
     contentChild,
@@ -22,7 +23,11 @@ import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ColorGradientComponent } from "@nanahoshi/mona-ui/color-gradient";
 import { ColorPaletteComponent } from "@nanahoshi/mona-ui/color-palette";
 import { PaletteType } from "@nanahoshi/mona-ui/common";
-import { createElementControlId, themeOverlaySurfaceClasses } from "@nanahoshi/mona-ui/internal";
+import {
+    createElementControlId,
+    injectEffectiveDisabled,
+    themeOverlaySurfaceClasses
+} from "@nanahoshi/mona-ui/internal";
 import { IndicatorIconComponent } from "@nanahoshi/mona-ui/internal/indicator-icon";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { dropdownPopupAnimation, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
@@ -52,8 +57,8 @@ import {
     ],
     host: {
         "[class]": "baseClasses()",
-        "[attr.tabindex]": "disabled() ? -1 : 0",
-        "[attr.data-disabled]": "disabled()",
+        "[attr.tabindex]": "effectiveDisabled() ? -1 : 0",
+        "[attr.data-disabled]": "effectiveDisabled()",
         "[attr.data-invalid]": "invalidState() || null",
         "[attr.data-open]": "expanded() || null",
         "[attr.data-readonly]": "readonly()",
@@ -63,7 +68,7 @@ import {
         "[attr.aria-expanded]": "expanded() ? 'true' : 'false'",
         "[attr.aria-haspopup]": "'dialog'",
         "[attr.aria-label]": "ariaLabel() || messages().colorPicker",
-        "[attr.aria-disabled]": "disabled()",
+        "[attr.aria-disabled]": "effectiveDisabled()",
         "[attr.aria-invalid]": "invalidState() ? 'true' : null",
         "[attr.aria-readonly]": "readonly()",
         "[attr.aria-required]": "required()"
@@ -86,6 +91,7 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
         const size = this.size();
         return colorPickerColorThemeVariants({ rounded, size });
     });
+    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly expanded = computed(() => this.#popupRef() !== null);
     protected readonly gradientPopupClasses = `${themeOverlaySurfaceClasses} border border-border shadow-(--shadow-overlay)`;
     protected readonly invalidState = computed(
@@ -108,7 +114,7 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
      * Only applies when the view is set to "palette".
      * @default true
      */
-    public readonly closeOnSelect = input(true);
+    public readonly closeOnSelect = input(true, { transform: booleanAttribute });
 
     /**
      * @description The number of columns to display in the color palette.
@@ -121,21 +127,21 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
      * @description Renders the component with reduced visual emphasis and removes pointer interaction.
      * @default false
      */
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
      * @description Marks the color picker as invalid. When bound to a signal form field via `[formField]`,
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly invalid = input(false);
+    public readonly invalid = input(false, { transform: booleanAttribute });
 
     /**
      * @description Whether to display the opacity slider.
      * Only applies when the view is set to "gradient".
      * @default true
      */
-    public readonly opacity = input(true);
+    public readonly opacity = input(true, { transform: booleanAttribute });
 
     /**
      * @description The type of color palette to use.
@@ -150,14 +156,14 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
      * form field via `[formField]`, this is written by the `FormField` directive.
      * @default false
      */
-    public readonly readonly = input(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
 
     /**
      * @description Sets whether the color picker is required. When bound to a signal form field via `[formField]`,
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly required = input(false);
+    public readonly required = input(false, { transform: booleanAttribute });
 
     /**
      * @description Border-radius preset applied to the color picker.
@@ -170,7 +176,7 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
      * This is only applicable when the view is set to "palette".
      * @default false
      */
-    public readonly showClearButton = input(false);
+    public readonly showClearButton = input(false, { transform: booleanAttribute });
 
     /**
      * @description Size preset controlling the color picker's dimensions.
@@ -179,7 +185,7 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
     public readonly size = input<ColorPickerVariantProps["size"]>("medium");
 
     /**
-     * @description Emitted when the color picker is interacted with on blur or color selection.
+     * @description Emitted when focus leaves the color picker, its popup closes or a color is selected.
      * The `FormField` directive listens to this to mark the field as touched.
      */
     public readonly touch = output<void>();
@@ -189,7 +195,7 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
 
     /**
      * @description Two-way bindable current color value.
@@ -210,7 +216,7 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
     }
 
     protected onClearClick(): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             return;
         }
 
@@ -229,27 +235,19 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
         this.#popupRef()?.close();
     }
 
-    protected onColorGradientTouch(): void {
-        this.touch.emit();
-    }
-
     protected onColorGradientValueChange(value: string | null | undefined): void {
         if (value === undefined) {
             return;
         }
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             return;
         }
 
         this.value.set(value);
     }
 
-    protected onColorPaletteTouch(): void {
-        this.touch.emit();
-    }
-
     protected onColorPaletteValueChange(value: string | null): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             return;
         }
 
@@ -287,7 +285,7 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
     }
 
     protected open(): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             return;
         }
 
@@ -315,6 +313,7 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
         this.#popupRef.set(popupRef);
         popupRef.closed.pipe(take(1)).subscribe(() => {
             this.#popupRef.set(null);
+            this.touch.emit();
             this.#hostElementRef.nativeElement.focus();
         });
     }
@@ -370,7 +369,7 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
         fromEvent<MouseEvent>(this.#hostElementRef.nativeElement, "click")
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(() => {
-                if (this.disabled() || this.readonly()) {
+                if (this.effectiveDisabled() || this.readonly()) {
                     return;
                 }
                 if (this.#popupRef()) {
@@ -385,7 +384,7 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe((event: KeyboardEvent) => {
-                if (this.disabled() || this.readonly()) {
+                if (this.effectiveDisabled() || this.readonly()) {
                     return;
                 }
 
@@ -415,11 +414,13 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
                 }
             });
 
-        // Handle blur events for touched callback
+        // Focus moving into the popup isn't the end of the interaction: closing the popup marks the field as touched.
         fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "blur")
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(() => {
-                this.touch.emit();
+                if (!this.#popupRef()) {
+                    this.touch.emit();
+                }
             });
     }
 

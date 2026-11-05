@@ -1814,18 +1814,18 @@
     "selector": "\"textarea[monaTextArea]\"",
     "inputs": [
       {
-        "description": "Sets the border radius of the textarea.",
-        "kind": "input",
-        "name": "rounded",
-        "type": "TextAreaVariantProps[\"rounded\"]",
-        "defaultValue": "\"medium\""
-      },
-      {
         "description": "Marks the textarea as invalid, triggering error border and ring styling.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
         "defaultValue": "false"
+      },
+      {
+        "description": "Sets the border radius of the textarea.",
+        "kind": "input",
+        "name": "rounded",
+        "type": "TextAreaVariantProps[\"rounded\"]",
+        "defaultValue": "\"medium\""
       },
       {
         "description": "Marks the textarea as touched. Error styling is only shown when both `invalid` and `touched` are `true`.",
@@ -7606,6 +7606,14 @@
         "defaultValue": "\"\""
       },
       {
+        "description": "Id of the element that labels the check box.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Whether the control is checked.",
         "kind": "model",
         "name": "checked",
@@ -7645,6 +7653,13 @@
         "type": "FocusEvent"
       },
       {
+        "description": "Id of the native checkbox input. Point a `<label for>` at it to label the check box from outside.\nA unique id is generated when it isn't set.",
+        "kind": "input",
+        "name": "inputId",
+        "type": "string",
+        "defaultValue": "generated"
+      },
+      {
         "description": "Marks the checkbox as invalid. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
         "kind": "input",
         "name": "invalid",
@@ -7671,6 +7686,20 @@
         "name": "labelSize",
         "type": "CheckboxVariantProps[\"labelSize\"]",
         "defaultValue": "\"medium\""
+      },
+      {
+        "description": "Name of the native checkbox input, used in native form submission. When bound to a signal form field\nvia `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "name",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Prevents value changes while the control stays focusable and readable. When bound to a signal form\nfield via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Marks the control as required for form validation.",
@@ -7854,6 +7883,13 @@
         "defaultValue": "true"
       },
       {
+        "description": "Prevents value changes while the control stays focusable and readable. When bound to a signal form\nfield via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
         "description": "Marks the color gradient as required for form validation.",
         "kind": "input",
         "name": "required",
@@ -7875,16 +7911,16 @@
         "defaultValue": "true"
       },
       {
-        "description": "Specifies whether the color picker should display the hex input.",
+        "description": "Specifies whether the color picker should display the channel inputs (RGB or HSV).",
         "kind": "input",
-        "name": "showHexInput",
+        "name": "showColorInputs",
         "type": "boolean",
         "defaultValue": "true"
       },
       {
-        "description": "Specifies whether the color picker should display the channel inputs (RGB or HSV).",
+        "description": "Specifies whether the color picker should display the hex input.",
         "kind": "input",
-        "name": "showColorInputs",
+        "name": "showHexInput",
         "type": "boolean",
         "defaultValue": "true"
       },
@@ -8090,7 +8126,7 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Emitted when the color picker is interacted with on blur or color selection.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when focus leaves the color picker, its popup closes or a color is selected.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
@@ -9803,7 +9839,7 @@
     "selector": "\"mona-fieldset\"",
     "inputs": [
       {
-        "description": "Whether the fieldset and its projected form controls are disabled.\nReflected as the native `disabled` attribute on the rendered `<fieldset>`.",
+        "description": "Whether the fieldset and the Mona UI form controls inside it are disabled, including nested fieldsets.\nReflected as the native `disabled` attribute on the rendered `<fieldset>`, which also covers native controls.\nA signal form field inside stays enabled in the form model, so its validation keeps running.",
         "kind": "input",
         "name": "disabled",
         "type": "boolean",
@@ -11990,6 +12026,13 @@
         "defaultValue": "4"
       },
       {
+        "description": "Name of the native input, used in native form submission and by browsers for autofill. When bound to\na signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "name",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Hint character displayed in empty visual slots.",
         "kind": "input",
         "name": "placeholder",
@@ -12944,6 +12987,30 @@
     "selector": "\"mona-radio-button\"",
     "inputs": [
       {
+        "description": "Id of an element that describes the radio button, such as an error message.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "alias": "aria-describedby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Accessible name of the radio button when it has no visible label.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Id of the element that labels the radio button.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Sets the disabled state of the radio button.",
         "kind": "input",
         "name": "disabled",
@@ -12967,6 +13034,13 @@
         "kind": "output",
         "name": "inputFocus",
         "type": "FocusEvent"
+      },
+      {
+        "description": "Id of the native radio input. Point a `<label for>` at it to label the radio button from outside.\nA unique id is generated when it isn't set.",
+        "kind": "input",
+        "name": "inputId",
+        "type": "string",
+        "defaultValue": "generated"
       },
       {
         "description": "Marks the radio button as invalid. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
@@ -13009,6 +13083,20 @@
         "name": "radioValue",
         "type": "any",
         "defaultValue": "undefined"
+      },
+      {
+        "description": "Prevents value changes while the control stays focusable and readable. When bound to a signal form\nfield via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Marks the radio button as required, as the native `required` attribute. When bound to a signal form\nfield via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "required",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Sets the border radius of the radio button circle and indicator.",
@@ -13146,6 +13234,13 @@
         "defaultValue": "false"
       },
       {
+        "description": "Shows the invalid state while the rating is `0` and the control is touched. The `required` rule of\nsignal forms doesn't treat `0` as empty, so it won't fail the form by itself: use `min(path, 1)` to reject an\nunrated value. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "required",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
         "description": "Controls cumulative or single-item filling.",
         "kind": "input",
         "name": "selection",
@@ -13167,7 +13262,7 @@
         "defaultValue": "0"
       },
       {
-        "description": "Emitted when the user interacts with the control, marking the field as touched.",
+        "description": "Emitted when the control loses focus or a pointer commits a rating, marking the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
@@ -13350,6 +13445,20 @@
         "required": true
       },
       {
+        "description": "Prevents value changes while the control stays focusable and readable. When bound to a signal form\nfield via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Marks the group as required, as `aria-required`. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "required",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
         "description": "Border-radius preset applied to the segmented container and its options.",
         "kind": "input",
         "name": "rounded",
@@ -13364,7 +13473,7 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Emitted when the selected value changes or focus leaves a radio input.",
+        "description": "Emitted when the selected value changes or focus leaves the group.",
         "kind": "output",
         "name": "touch",
         "type": "void"
@@ -13706,7 +13815,7 @@
         "defaultValue": "{}"
       },
       {
-        "description": "Marks the control as invalid for form validation purposes, reflecting `aria-invalid` on the handle element.",
+        "description": "Marks the control as invalid for form validation purposes, reflecting `aria-invalid` on the handle\nelement once the control is touched.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
@@ -13753,6 +13862,13 @@
         "name": "orientation",
         "type": "Orientation",
         "defaultValue": "\"horizontal\""
+      },
+      {
+        "description": "Prevents value changes while the control stays focusable and readable. When bound to a signal form\nfield via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Border-radius preset applied to the slider handle.",
@@ -13804,10 +13920,17 @@
         "defaultValue": "1"
       },
       {
-        "description": "Emitted when the slider loses focus or its value changes via keyboard navigation.",
+        "description": "Emitted when a handle loses focus. A click on the track moves focus to the handle first.",
         "kind": "output",
         "name": "touch",
         "type": "void"
+      },
+      {
+        "description": "Marks the slider as touched. Error styling requires both `invalid` and `touched` to be `true`.\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "touched",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Background color of the unfilled track portion. Accepts a CSS color string or a `CSSStyleDeclaration` partial.",
@@ -13846,6 +13969,20 @@
         "defaultValue": "null"
       },
       {
+        "description": "Upper bound that wins over `maxValue`. When bound to a signal form field via `[formField]`, this is\nwritten from the field's `max` rule.",
+        "kind": "input",
+        "name": "max",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Lower bound that wins over `minValue`. When bound to a signal form field via `[formField]`, this is\nwritten from the field's `min` rule.",
+        "kind": "input",
+        "name": "min",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Current value. Values outside `[minValue, maxValue]` are clamped before rendering.",
         "kind": "model",
         "name": "value",
@@ -13881,7 +14018,7 @@
         "defaultValue": "{}"
       },
       {
-        "description": "Marks the control as invalid for form validation purposes, reflecting `aria-invalid` on the handle element.",
+        "description": "Marks the control as invalid for form validation purposes, reflecting `aria-invalid` on the handle\nelement once the control is touched.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
@@ -13928,6 +14065,13 @@
         "name": "orientation",
         "type": "Orientation",
         "defaultValue": "\"horizontal\""
+      },
+      {
+        "description": "Prevents value changes while the control stays focusable and readable. When bound to a signal form\nfield via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Border-radius preset applied to the slider handle.",
@@ -13979,10 +14123,17 @@
         "defaultValue": "1"
       },
       {
-        "description": "Emitted when the slider loses focus or its value changes via keyboard navigation.",
+        "description": "Emitted when a handle loses focus. A click on the track moves focus to the handle first.",
         "kind": "output",
         "name": "touch",
         "type": "void"
+      },
+      {
+        "description": "Marks the slider as touched. Error styling requires both `invalid` and `touched` to be `true`.\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "touched",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Background color of the unfilled track portion. Accepts a CSS color string or a `CSSStyleDeclaration` partial.",
@@ -14033,7 +14184,7 @@
         "defaultValue": "{}"
       },
       {
-        "description": "Marks the control as invalid for form validation purposes, reflecting `aria-invalid` on the handle element.",
+        "description": "Marks the control as invalid for form validation purposes, reflecting `aria-invalid` on the handle\nelement once the control is touched.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
@@ -14080,6 +14231,13 @@
         "name": "orientation",
         "type": "Orientation",
         "defaultValue": "\"horizontal\""
+      },
+      {
+        "description": "Prevents value changes while the control stays focusable and readable. When bound to a signal form\nfield via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Border-radius preset applied to the slider handle.",
@@ -14131,10 +14289,17 @@
         "defaultValue": "1"
       },
       {
-        "description": "Emitted when the slider loses focus or its value changes via keyboard navigation.",
+        "description": "Emitted when a handle loses focus. A click on the track moves focus to the handle first.",
         "kind": "output",
         "name": "touch",
         "type": "void"
+      },
+      {
+        "description": "Marks the slider as touched. Error styling requires both `invalid` and `touched` to be `true`.\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "touched",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Background color of the unfilled track portion. Accepts a CSS color string or a `CSSStyleDeclaration` partial.",
@@ -14749,6 +14914,13 @@
         "name": "onLabel",
         "type": "string",
         "defaultValue": "\"\""
+      },
+      {
+        "description": "Prevents value changes while the control stays focusable and readable. When bound to a signal form\nfield via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Marks the switch as required for form validation.",

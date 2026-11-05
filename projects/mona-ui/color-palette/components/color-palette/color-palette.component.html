@@ -7,17 +7,16 @@
                 [attr.data-selected]="color === value()"
                 [attr.data-color-index]="i"
                 [attr.data-readonly]="readonly()"
-                [attr.tabindex]="disabled() ? -1 : i === activeColorIndex() ? 0 : -1"
+                [attr.tabindex]="effectiveDisabled() ? -1 : i === activeColorIndex() ? 0 : -1"
                 [attr.role]="'gridcell'"
                 [attr.aria-label]="messages().color(color)"
-                [attr.aria-disabled]="disabled()"
+                [attr.aria-disabled]="effectiveDisabled()"
                 [attr.aria-readonly]="readonly()"
                 [attr.aria-selected]="color === value()"
                 [style.background-color]="color"
                 (click)="onColorSelect(color)"
                 (keydown)="onKeyDown($event, i)"
-                (focus)="onColorFocus(i)"
-                (blur)="onColorBlur()"></div>
+                (focus)="onColorFocus(i)"></div>
         }
     </div>
 }

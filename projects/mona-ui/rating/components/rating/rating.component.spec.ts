@@ -788,7 +788,7 @@ describe("RatingComponent", () => {
             expect(emissions).toBe(1);
         });
 
-        it("emits touch on keyboard interaction", () => {
+        it("leaves touch for blur on keyboard interaction", () => {
             const componentInstance = getRatingComponent(fixture);
             let touches = 0;
             const subscription = componentInstance.touch.subscribe(() => {
@@ -798,7 +798,7 @@ describe("RatingComponent", () => {
             pressKey(fixture, "ArrowRight");
             subscription.unsubscribe();
 
-            expect(touches).toBe(1);
+            expect(touches).toBe(0);
         });
 
         it("keeps arrow meaning consistent under RTL", () => {
@@ -1020,7 +1020,7 @@ describe("RatingComponent", () => {
             expect(touches).toBe(1);
         });
 
-        it("emits touch on keyboard commit", () => {
+        it("leaves touch for blur on keyboard commit", () => {
             const componentInstance = getRatingComponent(fixture);
             let touches = 0;
             const subscription = componentInstance.touch.subscribe(() => {
@@ -1030,7 +1030,7 @@ describe("RatingComponent", () => {
             pressKey(fixture, "ArrowRight");
             subscription.unsubscribe();
 
-            expect(touches).toBe(1);
+            expect(touches).toBe(0);
         });
     });
 

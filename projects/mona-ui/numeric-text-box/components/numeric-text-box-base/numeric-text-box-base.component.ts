@@ -20,7 +20,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { Action } from "@nanahoshi/mona-ui/internal";
-import { createElementControlId, rxTimeout } from "@nanahoshi/mona-ui/internal";
+import { createElementControlId, injectEffectiveDisabled, rxTimeout } from "@nanahoshi/mona-ui/internal";
 import { formatNumber, getNumberSymbols, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { concatMap, delay, filter, map, of, Subject, switchMap, takeUntil, tap, timer } from "rxjs";
 import { twMerge } from "tailwind-merge";
@@ -56,7 +56,7 @@ export interface NumericTextBoxTextResult<TValue> {
         "[attr.aria-label]": "null",
         "[attr.aria-labelledby]": "null",
         "[class]": "classes()",
-        "[attr.data-disabled]": "disabled() || null",
+        "[attr.data-disabled]": "effectiveDisabled() || null",
         "[attr.data-invalid]": "invalidInput() || null",
         "[attr.data-readonly]": "readonly() || null",
         "[attr.data-required]": "required() || null",
@@ -82,6 +82,7 @@ export abstract class NumericTextBoxBaseComponent<
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
+    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly focused = signal(false);
     protected readonly formattedValue = computed(() => {
         if (this.focused() && !this.readonly()) {
@@ -553,7 +554,7 @@ export abstract class NumericTextBoxBaseComponent<
                 takeUntilDestroyed(this.#destroyRef),
                 // Keys pressed while an IME is composing belong to the IME (Safari reports them as keyCode 229).
                 filter(event => !event.isComposing && event.keyCode !== 229),
-                filter(() => !this.readonly() && !this.disabled())
+                filter(() => !this.readonly() && !this.effectiveDisabled())
             )
             .subscribe((event: KeyboardEvent) => {
                 switch (event.key) {
@@ -596,7 +597,7 @@ export abstract class NumericTextBoxBaseComponent<
     private setSpinSubscription(): void {
         this.spin$
             .pipe(
-                filter(() => !this.readonly() && !this.disabled()),
+                filter(() => !this.readonly() && !this.effectiveDisabled()),
                 switchMap(sign =>
                     of(sign).pipe(
                         tap(sign => (sign === "-" ? this.decrease() : this.increase())),
@@ -639,7 +640,7 @@ export abstract class NumericTextBoxBaseComponent<
                 // The wheel spins only the field being edited: scrolling the page over an unfocused field, a
                 // horizontal scroll and Ctrl+wheel (zoom) are left to the browser.
                 filter(event => this.focused() && event.deltaY !== 0 && !event.ctrlKey),
-                filter(() => !this.readonly() && !this.disabled())
+                filter(() => !this.readonly() && !this.effectiveDisabled())
             )
             .subscribe((event: WheelEvent) => {
                 event.preventDefault();

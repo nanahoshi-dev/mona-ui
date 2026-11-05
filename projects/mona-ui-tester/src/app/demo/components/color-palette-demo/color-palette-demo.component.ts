@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { Component, computed, inject, input, signal } from "@angular/core";
+import { booleanAttribute, Component, computed, inject, input, signal } from "@angular/core";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { ColorPaletteComponent } from "@nanahoshi/mona-ui/color-palette";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
@@ -58,6 +58,7 @@ export class ColorPaletteDemoComponent extends AbstractDemoComponent<ColorPalett
         <div class="flex flex-col gap-4">
             <span>Color: {{ form.color().value() }}</span>
             <mona-color-palette
+                [aria-label]="ariaLabel()"
                 [columns]="columns()"
                 [formField]="form.color"
                 [palette]="customPaletteActive ? customPalette : palette()"
@@ -75,11 +76,12 @@ export class ColorPaletteWrapperComponent implements ComponentInputsAsSignal<Col
         required(schema.color, { when: () => this.required() });
     });
     protected readonly customPalette = customColorPalette;
+    public readonly ariaLabel = input<ReturnType<ColorPaletteComponent["ariaLabel"]>>("");
     public readonly columns = input<ReturnType<ColorPaletteComponent["columns"]>>(10);
-    public readonly disabled = input<ReturnType<ColorPaletteComponent["disabled"]>>(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly palette = input<ReturnType<ColorPaletteComponent["palette"]>>("flat");
-    public readonly readonly = input<ReturnType<ColorPaletteComponent["readonly"]>>(false);
-    public readonly required = input<ReturnType<ColorPaletteComponent["required"]>>(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<ColorPaletteComponent["rounded"]>>("none");
     public readonly tileSize = input<ReturnType<ColorPaletteComponent["tileSize"]>>(24);
 }

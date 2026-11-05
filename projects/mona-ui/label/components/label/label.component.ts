@@ -1,4 +1,4 @@
-import { Component, computed, input } from "@angular/core";
+import { booleanAttribute, Component, computed, input } from "@angular/core";
 import { twMerge } from "tailwind-merge";
 import type { LabelTarget } from "../../models/LabelTarget";
 import {
@@ -50,7 +50,7 @@ export class LabelComponent {
      * @description Whether to display optional-field text next to the caption.
      * @default false
      */
-    public readonly optional = input(false);
+    public readonly optional = input(false, { transform: booleanAttribute });
 
     /**
      * @description Text displayed when `optional` is enabled.

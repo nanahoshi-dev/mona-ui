@@ -29,7 +29,7 @@ import {
     TimeSelectorService
 } from "@nanahoshi/mona-ui/date-input";
 import { formatNumber, injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { createElementControlId } from "@nanahoshi/mona-ui/internal";
+import { createElementControlId, injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
 import { DateTime } from "luxon";
 import { filter, fromEvent } from "rxjs";
 import { TimeSelectorItemDirective } from "../../directives/time-selector-item.directive";
@@ -54,7 +54,7 @@ const TIME_LIMITER = new TimeLimiterPipe();
     host: {
         role: "group",
         "[attr.aria-label]": "ariaLabel() || messages().timeSelector",
-        "[attr.aria-disabled]": "disabled() || null",
+        "[attr.aria-disabled]": "effectiveDisabled() || null",
         "[attr.aria-invalid]": "invalidState() ? 'true' : null",
         "[attr.data-invalid]": "invalidState() || null",
         "[attr.data-readonly]": "readonly() || null",
@@ -76,11 +76,12 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
         return !(min && min.getHours() >= 12);
     });
     protected readonly baseClass = computed(() => {
-        const disabled = this.disabled();
+        const disabled = this.effectiveDisabled();
         return timeSelectorBaseThemeVariants({ disabled });
     });
     protected readonly computedPopupHeight = this.#height.asReadonly();
     /** The clock in use: the `hourFormat` input, or the locale's own when it isn't set. */
+    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly effectiveHourFormat = computed<HourFormat>(
         () => this.hourFormat() ?? getLocaleHourFormat(this.#i18n.localeId())
     );
@@ -293,14 +294,14 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
     }
 
     protected onHourChange(hour: number): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             return;
         }
         this.navigateTo(this.navigatedDate().set({ hour }));
     }
 
     protected onMeridiemClick(meridiem: Meridiem): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             return;
         }
         if (this.meridiem() === meridiem) {
@@ -315,14 +316,14 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
     }
 
     protected onMinuteChange(minute: number): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             return;
         }
         this.navigateTo(this.navigatedDate().set({ minute }));
     }
 
     protected onNowClick(): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             return;
         }
         const now = DateTime.now();
@@ -337,14 +338,14 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
     }
 
     protected onSecondChange(second: number): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             return;
         }
         this.navigateTo(this.navigatedDate().set({ second }));
     }
 
     protected onSetTimeClick(): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             return;
         }
         this.updateValue(this.clampToRange(this.navigatedDate()).toJSDate());
@@ -417,7 +418,7 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
     }
 
     private handleKeydown(event: KeyboardEvent): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             return;
         }
         const preventableEvent = new PreventableEvent("calendarKeydown", event);
@@ -582,7 +583,7 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                filter(() => !this.disabled())
+                filter(() => !this.effectiveDisabled())
             )
             .subscribe(event => this.handleKeydown(event));
     }

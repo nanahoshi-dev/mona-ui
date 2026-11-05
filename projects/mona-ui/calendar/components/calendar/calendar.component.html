@@ -4,7 +4,7 @@
         look="ghost"
         [rounded]="rounded()"
         [size]="'small'"
-        [disabled]="disabled() || todayUnavailable()"
+        [disabled]="effectiveDisabled() || todayUnavailable()"
         (click)="onTodayButtonClick()"
         [attr.aria-label]="todayButtonLabel()">
         <span>{{ messages().today }}</span>
@@ -15,7 +15,7 @@
                 monaButton
                 look="ghost"
                 [rounded]="rounded()"
-                [disabled]="disabled()"
+                [disabled]="effectiveDisabled()"
                 (click)="onViewChangeClick('year')"
                 [attr.aria-label]="viewSwitchButtonLabel()">
                 <span class="text-primary font-semibold" [id]="gridId + '-heading'">{{
@@ -28,7 +28,7 @@
                 monaButton
                 look="ghost"
                 [rounded]="rounded()"
-                [disabled]="disabled()"
+                [disabled]="effectiveDisabled()"
                 (click)="onViewChangeClick('decade')"
                 [attr.aria-label]="viewSwitchButtonLabel()">
                 <span class="text-primary font-semibold" [id]="gridId + '-heading'">{{
@@ -53,7 +53,7 @@
         [rounded]="rounded()"
         [iconOnly]="true"
         [size]="'small'"
-        [disabled]="disabled()"
+        [disabled]="effectiveDisabled()"
         (click)="onNavigationClick('prev')"
         [attr.aria-label]="prevButtonLabel()">
         <svg lucideChevronLeft class="rtl:rotate-180"></svg>
@@ -64,7 +64,7 @@
         [rounded]="rounded()"
         [iconOnly]="true"
         [size]="'small'"
-        [disabled]="disabled()"
+        [disabled]="effectiveDisabled()"
         (click)="onNavigationClick('next')"
         [attr.aria-label]="nextButtonLabel()">
         <svg lucideChevronRight class="rtl:rotate-180"></svg>
@@ -79,7 +79,7 @@
         role="grid"
         class="flex flex-col gap-0.5"
         [attr.aria-labelledby]="gridId + '-heading'"
-        [attr.aria-disabled]="disabled() || null"
+        [attr.aria-disabled]="effectiveDisabled() || null"
         [attr.aria-invalid]="invalidState() ? 'true' : null"
         [attr.aria-readonly]="readonly() || null"
         [attr.aria-required]="required() || null"
@@ -111,7 +111,7 @@
                         (dayPointerEnter)="onDayPointerEnter($event)"
                         (daySelect)="onDayClick($event.date, $event.event)"
                         monaMonthDay
-                        [disabled]="disabled()"
+                        [disabled]="effectiveDisabled()"
                         [isDayUnavailable]="isDayUnavailable()"
                         [monthBounds]="[monthBounds().start, monthBounds().end]"
                         [navigatedDate]="navigatedDate()"
@@ -138,9 +138,9 @@
             <div role="row" [class]="yearGridClass()">
                 @for (monthItem of row; track monthItem) {
                     <div
-                        (click)="!disabled() && onMonthClick(monthItem[0])"
+                        (click)="!effectiveDisabled() && onMonthClick(monthItem[0])"
                         monaYearMonth
-                        [disabled]="disabled()"
+                        [disabled]="effectiveDisabled()"
                         [month]="monthItem[0]"
                         [navigatedDate]="navigatedDate()"
                         [rounded]="rounded()"
@@ -164,9 +164,9 @@
             <div role="row" [class]="decadeGridClass()">
                 @for (year of row; track year) {
                     <div
-                        (click)="!disabled() && onYearClick(year)"
+                        (click)="!effectiveDisabled() && onYearClick(year)"
                         monaDecadeYear
-                        [disabled]="disabled()"
+                        [disabled]="effectiveDisabled()"
                         [navigatedDate]="navigatedDate()"
                         [rounded]="rounded()"
                         [year]="year"

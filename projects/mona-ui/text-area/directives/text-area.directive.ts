@@ -1,4 +1,4 @@
-import { computed, Directive, inject, input } from "@angular/core";
+import { booleanAttribute, computed, Directive, input } from "@angular/core";
 import { twMerge } from "tailwind-merge";
 import { textAreaThemeVariants, TextAreaVariantInput, TextAreaVariantProps } from "../styles/textarea.styles";
 
@@ -20,22 +20,21 @@ export class TextAreaDirective implements TextAreaVariantInput {
     protected readonly inputInvalid = computed(() => this.touched() && this.invalid());
 
     /**
+     * @description Marks the textarea as invalid, triggering error border and ring styling.
+     * @default false
+     */
+    public readonly invalid = input(false, { transform: booleanAttribute });
+    /**
      * @description Sets the border radius of the textarea.
      * @default "medium"
      */
     public readonly rounded = input<TextAreaVariantProps["rounded"]>("medium");
 
     /**
-     * @description Marks the textarea as invalid, triggering error border and ring styling.
-     * @default false
-     */
-    public readonly invalid = input(false);
-
-    /**
      * @description Marks the textarea as touched. Error styling is only shown when both `invalid` and `touched` are `true`.
      * @default false
      */
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
 
     /**
      * @description Additional CSS classes merged onto the host element via `tailwind-merge`.

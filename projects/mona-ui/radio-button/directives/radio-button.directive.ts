@@ -1,4 +1,4 @@
-import { computed, Directive, inject, input } from "@angular/core";
+import { booleanAttribute, computed, Directive, input } from "@angular/core";
 import {
     RadioButtonDirectiveInput,
     RadioButtonDirectiveProps,
@@ -25,7 +25,7 @@ export class RadioButtonDirective implements RadioButtonDirectiveInput {
      * @description Marks the radio button as invalid, triggering error border and ring styling.
      * @default false
      */
-    public readonly invalid = input(false);
+    public readonly invalid = input(false, { transform: booleanAttribute });
 
     /**
      * @description Sets the border radius of the radio button.
@@ -37,5 +37,5 @@ export class RadioButtonDirective implements RadioButtonDirectiveInput {
      * @description Marks the radio button as touched. Error styling is only shown when both `invalid` and `touched` are `true`.
      * @default false
      */
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
 }

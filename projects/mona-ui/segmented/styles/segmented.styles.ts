@@ -10,6 +10,7 @@ export const segmentedContainerThemeVariants = cva(
         p-1
         data-[invalid='true']:border-error
         data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[readonly='true']:[&_*]:cursor-default
         transition-colors duration-(--mona-motion-fast)
     `,
     {

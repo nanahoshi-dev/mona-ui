@@ -2,6 +2,7 @@ import { Clipboard } from "@angular/cdk/clipboard";
 import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
+    booleanAttribute,
     Component,
     computed,
     DestroyRef,
@@ -31,6 +32,7 @@ import {
     HSVA,
     hsva2rgba,
     HSVChannel,
+    injectEffectiveDisabled,
     isValidHex,
     isValidHsla,
     isValidRgb,
@@ -57,7 +59,7 @@ import {
 } from "@nanahoshi/mona-ui/text-box";
 import { type ColorMode, type ColorOutputFormat } from "@nanahoshi/mona-ui/common";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { distinctUntilChanged, fromEvent, Subject, switchMap, takeUntil } from "rxjs";
+import { filter, distinctUntilChanged, fromEvent, Subject, switchMap, takeUntil } from "rxjs";
 import { COLOR_GRADIENT_DEFAULT_MESSAGES } from "../../i18n/color-gradient.default-messages";
 import { ColorInput } from "../../models/ColorInput";
 import {
@@ -91,7 +93,9 @@ import {
     ],
     host: {
         "[class]": "baseClasses()",
-        "[attr.data-disabled]": "disabled()",
+        "[attr.data-disabled]": "effectiveDisabled()",
+        "[attr.data-readonly]": "readonly() || null",
+        "(focusout)": "onFocusOut($event)",
         "[attr.data-invalid]": "invalidState() || null",
         "[attr.aria-invalid]": "invalidState() ? 'true' : null"
     }
@@ -99,6 +103,7 @@ import {
 export class ColorGradientComponent implements ColorGradientVariantInputs, FormValueControl<string | null | undefined> {
     readonly #clipboard = inject(Clipboard);
     readonly #destroyRef = inject(DestroyRef);
+    readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #i18n = inject(MonaI18nService);
     readonly #injector = inject(Injector);
     readonly #valueChange$ = new Subject<string | null>();
@@ -151,6 +156,7 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
             onClick: () => this.onResetColorClick()
         }
     ]);
+    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly hex = computed(() => {
         const rgb = this.rgb();
         const alpha = this.alpha();
@@ -161,11 +167,11 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
         return this.hexInputValue();
     });
     protected readonly hexFocused = signal(false);
+    protected readonly hexInputValue = signal("");
+    protected readonly hsv = signal<HSV>({ h: 360, s: 100, v: 100 });
     protected readonly hsvHandle: Signal<ElementRef<HTMLDivElement>> = viewChild.required("hsvPointer");
     protected readonly hsvHandleLeft = signal(0);
     protected readonly hsvHandleTop = signal(0);
-    protected readonly hexInputValue = signal("");
-    protected readonly hsv = signal<HSV>({ h: 360, s: 100, v: 100 });
     protected readonly hsvRectangle: Signal<ElementRef<HTMLDivElement>> = viewChild.required("hsvRectangle");
     protected readonly hsvRectangleBackground = computed(() => {
         const hsv = this.hsv();
@@ -181,6 +187,7 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
         return colorGradientHsvRectangleHandleThemeVariants({ rounded });
     });
     protected readonly hueValue$ = new Subject<number>();
+    protected readonly interactionDisabled = computed(() => this.effectiveDisabled() || this.readonly());
     protected readonly invalidState = computed(
         () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
@@ -215,7 +222,7 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
      * @description Sets the disabled state of the color gradient.
      * @default false
      */
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
      * @description Specifies the format of the color output.
@@ -228,7 +235,7 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
      * this is written by the signal forms `Field` directive.
      * @default false
      */
-    public readonly invalid = input(false);
+    public readonly invalid = input(false, { transform: booleanAttribute });
 
     /**
      * @description Specifies whether the color picker should display the alpha slider.
@@ -237,10 +244,17 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
     public readonly opacity = input<boolean>(true);
 
     /**
+     * @description Prevents value changes while the control stays focusable and readable. When bound to a signal form
+     * field via `[formField]`, this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly readonly = input(false, { transform: booleanAttribute });
+
+    /**
      * @description Marks the color gradient as required for form validation.
      * @default false
      */
-    public readonly required = input(false);
+    public readonly required = input(false, { transform: booleanAttribute });
 
     /**
      * @description Specifies the rounded variant of the color picker.
@@ -257,16 +271,15 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
     public readonly showButtons = input<boolean>(true);
 
     /**
-     * @description Specifies whether the color picker should display the hex input.
-     * @default true
-     */
-    public readonly showHexInput = input<boolean>(true);
-
-    /**
      * @description Specifies whether the color picker should display the channel inputs (RGB or HSV).
      * @default true
      */
     public readonly showColorInputs = input<boolean>(true);
+    /**
+     * @description Specifies whether the color picker should display the hex input.
+     * @default true
+     */
+    public readonly showHexInput = input<boolean>(true);
 
     /**
      * @description Emitted when the color gradient is interacted with on blur or value adjustment.
@@ -279,7 +292,7 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
      * this is written by the signal forms `Field` directive.
      * @default false
      */
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
 
     /**
      * @description Two-way bindable current color value.
@@ -305,6 +318,14 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
         });
     }
 
+    /**
+     * @description Moves focus to the saturation and value handle.
+     * @param options Options passed to the native `focus()` call, such as `preventScroll`.
+     */
+    public focus(options?: FocusOptions): void {
+        this.hsvHandle().nativeElement.focus(options);
+    }
+
     protected onAlphaChange(value: number | null): void {
         if (value == null) {
             return;
@@ -318,6 +339,9 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
     }
 
     protected onApply(): void {
+        if (this.interactionDisabled()) {
+            return;
+        }
         this.lastSelectedColor.set(this.hex());
         this.emitValue();
         this.apply.emit();
@@ -329,6 +353,9 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
     }
 
     protected onClearClick(): void {
+        if (this.interactionDisabled()) {
+            return;
+        }
         this.clear();
         if (!this.showButtons()) {
             this.emitValue(null);
@@ -343,6 +370,14 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
             const alpha = Math.round((this.alpha() / 255) * 100) / 100;
             this.#clipboard.copy(`rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`);
         }
+    }
+
+    protected onFocusOut(event: FocusEvent): void {
+        const nextTarget = event.relatedTarget;
+        if (nextTarget instanceof Node && this.#hostElementRef.nativeElement.contains(nextTarget)) {
+            return;
+        }
+        this.touch.emit();
     }
 
     protected onHexChange(value: string): void {
@@ -365,7 +400,6 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
     protected onHexInputBlur(): void {
         this.hexFocused.set(false);
         this.updateHexInputValue();
-        this.touch.emit();
     }
 
     protected onHexInputFocus(): void {
@@ -393,12 +427,8 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
         }
     }
 
-    protected onHsvHandleBlur(): void {
-        this.touch.emit();
-    }
-
     protected onHsvHandleKeyDown(event: KeyboardEvent): void {
-        if (this.disabled()) {
+        if (this.interactionDisabled()) {
             return;
         }
 
@@ -459,10 +489,6 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
         }
     }
 
-    protected onNumericInputBlur(): void {
-        this.touch.emit();
-    }
-
     protected onPreviousColorKeyDown(event: KeyboardEvent, handler?: () => void): void {
         if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
@@ -471,6 +497,9 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
     }
 
     protected onResetColorClick(): void {
+        if (this.interactionDisabled()) {
+            return;
+        }
         this.onHexChange(this.lastSelectedColor());
     }
 
@@ -493,10 +522,6 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
         if (!this.showButtons()) {
             this.emitValue();
         }
-    }
-
-    protected onSliderBlur(): void {
-        this.touch.emit();
     }
 
     protected onSwitchColorModeClick(): void {
@@ -691,7 +716,10 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
         );
         const pointerUp$ = fromEvent<PointerEvent>(document, "pointerup").pipe(takeUntilDestroyed(this.#destroyRef));
         pointerDown$
-            .pipe(switchMap(() => pointerMove$.pipe(takeUntil(pointerUp$))))
+            .pipe(
+                filter(() => !this.interactionDisabled()),
+                switchMap(() => pointerMove$.pipe(takeUntil(pointerUp$)))
+            )
             .subscribe((event: PointerEvent) => {
                 this.#zone.run(() => {
                     const position = this.updateHsvRectPointerPosition(event);
@@ -703,7 +731,10 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
                 });
             });
         fromEvent<PointerEvent>(this.hsvRectangle().nativeElement, "click")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .pipe(
+                takeUntilDestroyed(this.#destroyRef),
+                filter(() => !this.interactionDisabled())
+            )
             .subscribe((event: PointerEvent) => {
                 const position = this.updateHsvRectPointerPosition(event);
                 this.updateHsvValues(

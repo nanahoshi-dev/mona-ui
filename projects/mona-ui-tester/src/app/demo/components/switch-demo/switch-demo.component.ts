@@ -1,6 +1,16 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, model, signal } from "@angular/core";
-import { disabled, form, FormField, required } from "@angular/forms/signals";
+import {
+    booleanAttribute,
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    effect,
+    inject,
+    input,
+    model,
+    signal
+} from "@angular/core";
+import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideMoon, LucideSun } from "@lucide/angular";
 import {
     SwitchComponent,
@@ -130,15 +140,17 @@ export class SwitchWrapperComponent implements ComponentInputsAsSignal<SwitchCom
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly form = form(this.#formModel, schema => {
         disabled(schema.switched, { when: () => this.disabled() });
+        readonly(schema.switched, { when: () => this.readonly() });
         required(schema.switched, { when: () => this.required() });
     });
     public readonly ariaLabel = input<ReturnType<SwitchComponent["ariaLabel"]>>("");
     public readonly ariaLabelledBy = input<ReturnType<SwitchComponent["ariaLabelledBy"]>>("");
     public readonly checked = model<ReturnType<SwitchComponent["checked"]>>(false);
-    public readonly disabled = input<ReturnType<SwitchComponent["disabled"]>>(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly offLabel = input<ReturnType<SwitchComponent["offLabel"]>>("");
     public readonly onLabel = input<ReturnType<SwitchComponent["onLabel"]>>("");
-    public readonly required = input(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<SwitchComponent["rounded"]>>("full");
     public readonly size = input<ReturnType<SwitchComponent["size"]>>("medium");
     public readonly userClass = input<ReturnType<SwitchComponent["userClass"]>>("");

@@ -18,6 +18,7 @@ import { SliderBaseComponent } from "../slider-base/slider-base.component";
         "[class.mona-slider]": "true",
         "[attr.data-disabled]": "effectiveDisabled() || null",
         "[attr.data-orientation]": "orientation()",
+        "[attr.data-readonly]": "readonly() || null",
         "(focus)": "focus()"
     }
 })
@@ -49,6 +50,20 @@ export class SliderComponent extends SliderBaseComponent implements FormValueCon
     public readonly ariaLabelledBy = input<string | null>(null, { alias: "aria-labelledby" });
 
     /**
+     * @description Upper bound that wins over `maxValue`. When bound to a signal form field via `[formField]`, this is
+     * written from the field's `max` rule.
+     * @default undefined
+     */
+    public readonly max = input<number | undefined>(undefined);
+
+    /**
+     * @description Lower bound that wins over `minValue`. When bound to a signal form field via `[formField]`, this is
+     * written from the field's `min` rule.
+     * @default undefined
+     */
+    public readonly min = input<number | undefined>(undefined);
+
+    /**
      * @description Current value. Values outside `[minValue, maxValue]` are clamped before rendering.
      * @default 0
      */
@@ -58,6 +73,14 @@ export class SliderComponent extends SliderBaseComponent implements FormValueCon
         if (!this.effectiveDisabled()) {
             this.sliderHandle().nativeElement.focus(options);
         }
+    }
+
+    protected override getMaxOverride(): number | undefined {
+        return this.max();
+    }
+
+    protected override getMinOverride(): number | undefined {
+        return this.min();
     }
 
     protected handleHandleMove(event: PointerEvent): void {
@@ -76,9 +99,12 @@ export class SliderComponent extends SliderBaseComponent implements FormValueCon
             .pipe(
                 takeUntilDestroyed(this.destroyRef),
                 tap(() => this.dragging.set(false)),
-                filter(() => !this.effectiveDisabled())
+                filter(() => !this.interactionDisabled())
             )
-            .subscribe((event: PointerEvent) => this.handleHandleMove(event));
+            .subscribe((event: PointerEvent) => {
+                this.handleHandleMove(event);
+                this.sliderHandle().nativeElement.focus({ preventScroll: true });
+            });
     }
 
     private setFocusSubscription(): void {
@@ -100,7 +126,7 @@ export class SliderComponent extends SliderBaseComponent implements FormValueCon
         fromEvent<KeyboardEvent>(this.sliderHandle().nativeElement, "keydown")
             .pipe(
                 takeUntilDestroyed(this.destroyRef),
-                filter(() => !this.effectiveDisabled()),
+                filter(() => !this.interactionDisabled()),
                 filter(event => this.isNavigationKey(event)),
                 tap(event => {
                     event.preventDefault();
@@ -117,7 +143,7 @@ export class SliderComponent extends SliderBaseComponent implements FormValueCon
         fromEvent<PointerEvent>(this.sliderHandle().nativeElement, "pointerdown")
             .pipe(
                 takeUntilDestroyed(this.destroyRef),
-                filter(() => !this.effectiveDisabled()),
+                filter(() => !this.interactionDisabled()),
                 tap(() => this.dragging.set(true)),
                 switchMap(() =>
                     pointerMove$.pipe(
@@ -134,9 +160,6 @@ export class SliderComponent extends SliderBaseComponent implements FormValueCon
         if (nextValue === this.normalizedValue()) {
             return;
         }
-        this.zone.run(() => {
-            this.value.set(nextValue);
-            this.touch.emit();
-        });
+        this.zone.run(() => this.value.set(nextValue));
     }
 }

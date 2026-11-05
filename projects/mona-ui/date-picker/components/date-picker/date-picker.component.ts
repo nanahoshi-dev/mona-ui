@@ -46,7 +46,7 @@ import {
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
 import { getLocaleDateInputFormat, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { type AttributeConfig, createElementControlId } from "@nanahoshi/mona-ui/internal";
+import { type AttributeConfig, createElementControlId, injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
 import type { ListSizeInputType } from "@nanahoshi/mona-ui/internal/list";
 import type { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import {
@@ -93,9 +93,9 @@ import {
         "[attr.aria-describedby]": "null",
         "[attr.aria-label]": "null",
         "[attr.aria-labelledby]": "null",
-        "[attr.tabindex]": "disabled() ? null : -1",
+        "[attr.tabindex]": "effectiveDisabled() ? null : -1",
         "[attr.aria-invalid]": "invalidState() ? 'true' : null",
-        "[attr.data-disabled]": "disabled() || null",
+        "[attr.data-disabled]": "effectiveDisabled() || null",
         "[attr.data-expanded]": "expanded()",
         "[attr.data-invalid]": "invalidState() || null",
         "[attr.data-readonly]": "readonly() || null",
@@ -122,6 +122,7 @@ export class DatePickerComponent
         return twMerge(variantClass, userClass);
     });
     protected readonly decadeCellTemplate = contentChild(CalendarDecadeCellTemplateDirective);
+    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly effectiveFormat = computed(() => {
         return this.format() ?? getLocaleDateInputFormat(this.#i18n.localeId());
     });
@@ -378,7 +379,7 @@ export class DatePickerComponent
 
     protected onDateInputButtonClick(): void {
         const popupRef = this.#dropdownService.popupRef();
-        if (!this.popupTemplate() || this.disabled() || this.readonly()) {
+        if (!this.popupTemplate() || this.effectiveDisabled() || this.readonly()) {
             return;
         }
         if (popupRef) {
@@ -415,7 +416,7 @@ export class DatePickerComponent
     }
 
     protected onKeydown(event: KeyboardEvent): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             return;
         }
         if (event.altKey && event.key === "ArrowDown") {

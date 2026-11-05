@@ -1,20 +1,6 @@
-import {
-    afterNextRender,
-    computed,
-    contentChild,
-    DestroyRef,
-    Directive,
-    ElementRef,
-    inject,
-    input,
-    NgZone,
-    output,
-    signal,
-    Signal,
-    TemplateRef,
-    viewChildren
-} from "@angular/core";
+import { afterNextRender, booleanAttribute, computed, contentChild, DestroyRef, Directive, ElementRef, inject, input, NgZone, output, signal, Signal, TemplateRef, viewChildren } from "@angular/core";
 import { Orientation } from "@nanahoshi/mona-ui/common";
+import { injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { SliderHandleTemplateDirective } from "../../directives/slider-handle-template.directive";
@@ -42,8 +28,11 @@ import { valueToPosition } from "../../utils/valueToPosition";
 export abstract class SliderBaseComponent implements SliderVariantInputs {
     protected readonly baseClasses = computed(() => sliderBaseThemeVariants());
     protected readonly destroyRef = inject(DestroyRef);
+    protected readonly direction = injectComponentDirection();
     protected readonly dragging = signal(false);
-    protected readonly effectiveDisabled = computed(() => this.disabled());
+    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
+    protected readonly effectiveMax = computed(() => this.getMaxOverride() ?? this.maxValue());
+    protected readonly effectiveMin = computed(() => this.getMinOverride() ?? this.minValue());
     protected readonly handleTemplate = contentChild(SliderHandleTemplateDirective, { read: TemplateRef });
     protected readonly handleTemplateStyles = computed<Partial<CSSStyleDeclaration>>(() => {
         const template = this.handleTemplate();
@@ -52,15 +41,28 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         }
         return { background: "transparent", border: "none", boxShadow: "none" };
     });
-    protected readonly direction = injectComponentDirection();
+    protected readonly horizontalSelectionLeft = computed(() => {
+        if (this.orientation() !== "horizontal") {
+            return undefined;
+        }
+        return this.isRtl() ? 100 - this.selectionRight() : this.selectionLeft();
+    });
+    protected readonly horizontalSelectionRight = computed(() => {
+        if (this.orientation() !== "horizontal") {
+            return undefined;
+        }
+        return this.isRtl() ? this.selectionLeft() : 100 - this.selectionRight();
+    });
     protected readonly hostElementRef: ElementRef<HTMLDivElement> = inject(ElementRef);
     protected readonly i18n = inject(MonaI18nService);
+    protected readonly interactionDisabled = computed(() => this.effectiveDisabled() || this.readonly());
+    protected readonly invalidState = computed(() => this.touched() && this.invalid());
     protected readonly isRtl = computed(() => this.direction() === "rtl");
     protected readonly labelStyleArgs = computed<LabelStyleArgs>(() => {
         const direction = this.direction();
         const labelPosition = this.labelPosition();
-        const max = this.maxValue();
-        const min = this.minValue();
+        const max = this.effectiveMax();
+        const min = this.effectiveMin();
         const orientation = this.orientation();
         const tickCount = this.labelTicks().length;
         return { direction, labelPosition, max, min, orientation, tickCount };
@@ -80,8 +82,8 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         if (labels.length >= 2) {
             const penultimate = labels[labels.length - 2];
             const last = labels[labels.length - 1];
-            const penultimatePos = valueToPosition(penultimate.value, this.minValue(), this.maxValue());
-            const lastPos = valueToPosition(last.value, this.minValue(), this.maxValue());
+            const penultimatePos = valueToPosition(penultimate.value, this.effectiveMin(), this.effectiveMax());
+            const lastPos = valueToPosition(last.value, this.effectiveMin(), this.effectiveMax());
             if (this.step() !== 1 && lastPos - penultimatePos < 4) {
                 labels.splice(labels.length - 2, 1);
             }
@@ -101,20 +103,6 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
             return {};
         }
         return typeof bg === "string" ? { background: bg } : bg;
-    });
-    protected abstract readonly selectionLeft: Signal<number>;
-    protected abstract readonly selectionRight: Signal<number>;
-    protected readonly horizontalSelectionLeft = computed(() => {
-        if (this.orientation() !== "horizontal") {
-            return undefined;
-        }
-        return this.isRtl() ? 100 - this.selectionRight() : this.selectionLeft();
-    });
-    protected readonly horizontalSelectionRight = computed(() => {
-        if (this.orientation() !== "horizontal") {
-            return undefined;
-        }
-        return this.isRtl() ? this.selectionLeft() : 100 - this.selectionRight();
     });
     protected readonly selectionClasses = computed(() => sliderSelectionThemeVariants());
     protected readonly sliderHandleClasses = computed(() => {
@@ -145,16 +133,16 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
     protected readonly tickStyleArgs = computed<TickStyleArgs>(() => {
         const direction = this.direction();
         const largeTickStep = this.largeTickStep();
-        const max = this.maxValue();
-        const min = this.minValue();
+        const max = this.effectiveMax();
+        const min = this.effectiveMin();
         const orientation = this.orientation();
         const smallTickStep = this.smallTickStep();
         return { direction, largeTickStep, max, min, orientation, smallTickStep };
     });
     protected readonly tickValueTemplate = contentChild(SliderTickValueTemplateDirective, { read: TemplateRef });
     protected readonly ticks = computed(() => {
-        const min = this.minValue();
-        const max = this.maxValue();
+        const min = this.effectiveMin();
+        const max = this.effectiveMax();
         const step = this.step();
         const ticks: SliderTick[] = [];
         const count = Math.floor((max - min) / step);
@@ -190,7 +178,7 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
      * @description Renders the component with reduced visual emphasis and removes pointer interaction.
      * @default false
      */
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
      * @description Additional CSS classes to apply to the slider handle.
@@ -205,10 +193,11 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
     public readonly handleStyles = input<Partial<CSSStyleDeclaration>>({});
 
     /**
-     * @description Marks the control as invalid for form validation purposes, reflecting `aria-invalid` on the handle element.
+     * @description Marks the control as invalid for form validation purposes, reflecting `aria-invalid` on the handle
+     * element once the control is touched.
      * @default false
      */
-    public readonly invalid = input(false);
+    public readonly invalid = input(false, { transform: booleanAttribute });
 
     /**
      * @description Position of the label relative to the component.
@@ -247,6 +236,13 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
     public readonly orientation = input<Orientation>("horizontal");
 
     /**
+     * @description Prevents value changes while the control stays focusable and readable. When bound to a signal form
+     * field via `[formField]`, this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly readonly = input(false, { transform: booleanAttribute });
+
+    /**
      * @description Border-radius preset applied to the slider handle.
      * @default "full"
      */
@@ -268,13 +264,13 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
      * @description Displays value labels alongside tick marks. Only takes effect when `showTicks` is `true`.
      * @default false
      */
-    public readonly showLabels = input(false);
+    public readonly showLabels = input(false, { transform: booleanAttribute });
 
     /**
      * @description Displays tick marks at each step position along the track.
      * @default false
      */
-    public readonly showTicks = input(false);
+    public readonly showTicks = input(false, { transform: booleanAttribute });
 
     /**
      * @description Controls how many ticks are visible — only every n<sup>th</sup> tick is rendered.
@@ -293,9 +289,16 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
     });
 
     /**
-     * @description Emitted when the slider loses focus or its value changes via keyboard navigation.
+     * @description Emitted when a handle loses focus. A click on the track moves focus to the handle first.
      */
     public readonly touch = output<void>();
+
+    /**
+     * @description Marks the slider as touched. Error styling requires both `invalid` and `touched` to be `true`.
+     * When bound to a signal form field via `[formField]`, this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly touched = input(false, { transform: booleanAttribute });
 
     /**
      * @description Background color of the unfilled track portion. Accepts a CSS color string or a `CSSStyleDeclaration` partial.
@@ -309,6 +312,9 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
      */
     public readonly trackSize = input<string | number>();
 
+    protected abstract readonly selectionLeft: Signal<number>;
+    protected abstract readonly selectionRight: Signal<number>;
+
     public constructor() {
         afterNextRender({
             read: () => this.zone.runOutsideAngular(() => this.setSubscriptions())
@@ -316,8 +322,8 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
     }
 
     protected calculateNewValue(currentValue: number, event: KeyboardEvent): number {
-        const min = this.minValue();
-        const max = this.maxValue();
+        const min = this.effectiveMin();
+        const max = this.effectiveMax();
         const step = this.step();
         const isRtl = this.isRtl();
         const decreaseKey = isRtl ? "ArrowRight" : "ArrowLeft";
@@ -352,7 +358,7 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
     }
 
     protected clampValue(value: number): number {
-        return Math.max(this.minValue(), Math.min(this.maxValue(), value));
+        return Math.max(this.effectiveMin(), Math.min(this.effectiveMax(), value));
     }
 
     protected findClosestTickElement(event: PointerEvent): HTMLSpanElement {
@@ -370,11 +376,19 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         return elements[index] as HTMLSpanElement;
     }
 
+    protected getMaxOverride(): number | undefined {
+        return undefined;
+    }
+
+    protected getMinOverride(): number | undefined {
+        return undefined;
+    }
+
     protected getValueFromPointerEvent(event: PointerEvent): number {
         if (this.showTicks()) {
             const tick = this.findClosestTickElement(event);
             const valueStr = tick.getAttribute("data-value");
-            return valueStr ? Number(valueStr) : this.minValue();
+            return valueStr ? Number(valueStr) : this.effectiveMin();
         }
 
         const containerRect = this.hostElementRef.nativeElement.getBoundingClientRect();
@@ -395,8 +409,8 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
     }
 
     protected getValueFromPosition(position: number): number {
-        const min = this.minValue();
-        const max = this.maxValue();
+        const min = this.effectiveMin();
+        const max = this.effectiveMax();
 
         if (position >= 100) {
             return max;
@@ -417,11 +431,11 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
     }
 
     protected positionFromValue(value: number): number {
-        return valueToPosition(value, this.minValue(), this.maxValue());
+        return valueToPosition(value, this.effectiveMin(), this.effectiveMax());
     }
 
     protected snapValue(value: number): number {
-        const min = this.minValue();
+        const min = this.effectiveMin();
         const step = this.step();
         const clampedValue = this.clampValue(value);
         const snappedValue = Math.round((clampedValue - min) / step) * step + min;

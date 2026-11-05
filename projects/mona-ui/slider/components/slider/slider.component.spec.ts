@@ -427,7 +427,6 @@ describe("SliderComponent", () => {
 
             const handle = fixture.nativeElement.querySelector("[role='slider']") as HTMLElement;
             const ticks = fixture.nativeElement.querySelectorAll("span[monaSliderTick]") as NodeListOf<HTMLElement>;
-            const labels = fixture.nativeElement.querySelectorAll(".mona-slider span[data-orientation='horizontal']") as NodeListOf<HTMLElement>;
 
             // Min value (0) handle is at right: 0%
             expect(handle.style.right).toBe("0%");

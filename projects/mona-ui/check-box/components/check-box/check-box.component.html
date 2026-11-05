@@ -1,20 +1,28 @@
-<label [class]="containerLabelClasses()" [attr.data-disabled]="disabled()">
+<label
+    [class]="containerLabelClasses()"
+    [attr.data-disabled]="effectiveDisabled()"
+    [attr.data-readonly]="readonly() || null">
     @if (labelPosition() === "before") {
         <ng-container [ngTemplateOutlet]="labelTemplate"></ng-container>
     }
 
     <input
         type="checkbox"
-        [disabled]="disabled()"
+        [id]="inputId()"
+        [name]="name()"
+        [disabled]="effectiveDisabled()"
         [indeterminate]="indeterminate()"
         [required]="required()"
         [checked]="checked()"
-        [tabindex]="disabled() ? -1 : tabIndex()"
+        [tabindex]="effectiveDisabled() ? -1 : tabIndex()"
         [class]="checkBoxClasses()"
         [attr.aria-checked]="indeterminate() ? 'mixed' : null"
         [attr.aria-invalid]="invalidState() ? 'true' : null"
         [attr.aria-label]="ariaLabel() || label() || null"
+        [attr.aria-labelledby]="ariaLabelledBy() || null"
         [attr.aria-describedby]="ariaDescribedBy() || null"
+        [attr.aria-readonly]="readonly() ? 'true' : null"
+        (click)="onInputClick($event)"
         (change)="onInputChange($event)"
         (blur)="onInputBlur($event)"
         (focus)="inputFocus.emit($event)"

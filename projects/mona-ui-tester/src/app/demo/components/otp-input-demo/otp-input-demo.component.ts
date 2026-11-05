@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { Component, computed, effect, inject, input, model, signal } from "@angular/core";
+import { booleanAttribute, Component, computed, effect, inject, input, model, signal } from "@angular/core";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideHeart } from "@lucide/angular";
 import { OtpInputComponent, OtpInputSeparatorTemplateDirective } from "@nanahoshi/mona-ui/otp-input";
@@ -29,9 +29,10 @@ export class OtpInputDemoComponent extends AbstractDemoComponent<OtpInputCompone
     });
     protected readonly config = computed<ComponentConfig<OtpInputComponent>>(() => ({
         inputs: deriveInputConfig<OtpInputComponent>(this.metadata(), {
-            // invalid/touched are written by the FormField directive via [formField] below;
+            // invalid/name/touched are written by the FormField directive via [formField] below;
             // Angular forbids binding them directly, so exclude them rather than expose a dead control.
             invalid: undefined,
+            name: undefined,
             touched: undefined,
             groupLength: {
                 max: 6,
@@ -138,16 +139,16 @@ export class OtpInputWrapperComponent implements ComponentInputsAsSignal<OtpInpu
     });
 
     public readonly ariaLabel = input<string | null>("Verification code");
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly groupLength = input<number | number[] | null>(null);
     public readonly length = input(6);
     public readonly placeholder = input("");
-    public readonly readonly = input(false);
-    public readonly required = input(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<OtpInputComponent["rounded"]>>("medium");
     public readonly separator = input("-");
     public readonly size = input<ReturnType<OtpInputComponent["size"]>>("medium");
-    public readonly spacing = input(true);
+    public readonly spacing = input(true, { transform: booleanAttribute });
     public readonly type = input<ReturnType<OtpInputComponent["type"]>>("number");
     public readonly userClass = input<ReturnType<OtpInputComponent["userClass"]>>("");
     public readonly value = model("");

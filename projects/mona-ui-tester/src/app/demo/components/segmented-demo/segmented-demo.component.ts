@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { Component, computed, inject, input, model } from "@angular/core";
+import { booleanAttribute, Component, computed, inject, input, model } from "@angular/core";
 import {
     LucideBell,
     LucideDynamicIcon,
@@ -92,6 +92,8 @@ export class SegmentedDemoComponent extends AbstractDemoComponent<SegmentedCompo
                 [disabled]="disabled()"
                 [invalid]="invalid()"
                 [options]="options()"
+                [readonly]="readonly()"
+                [required]="required()"
                 [rounded]="rounded()"
                 [size]="size()"
                 [touched]="touched()"
@@ -121,11 +123,11 @@ class SegmentedWrapperComponent implements ComponentInputsAsSignal<SegmentedComp
     };
 
     public readonly alignment = input<ReturnType<SegmentedComponent["alignment"]>>("stretch");
-    public readonly animate = input(true);
+    public readonly animate = input(true, { transform: booleanAttribute });
     public readonly ariaLabel = input<ReturnType<SegmentedComponent["ariaLabel"]>>("Course section");
     public readonly ariaLabelledBy = input<ReturnType<SegmentedComponent["ariaLabelledBy"]>>("");
-    public readonly disabled = input(false);
-    public readonly invalid = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
+    public readonly invalid = input(false, { transform: booleanAttribute });
     public readonly options = input<readonly SegmentedOption[]>([
         { label: "Personal", value: "personal" },
         { label: "Premium Features", value: "premium", disabled: true },
@@ -133,9 +135,11 @@ class SegmentedWrapperComponent implements ComponentInputsAsSignal<SegmentedComp
         { label: "Security", value: "security" },
         { label: "Notifications", value: "notifications" }
     ]);
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<SegmentedComponent["rounded"]>>("medium");
     public readonly size = input<ReturnType<SegmentedComponent["size"]>>("medium");
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
     public readonly userClass = input<ReturnType<SegmentedComponent["userClass"]>>("");
     public readonly value = model<SegmentedValue | null>("security");
 }

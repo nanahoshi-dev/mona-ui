@@ -1,6 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
-import { Component, computed, effect, inject, input, model, signal } from "@angular/core";
-import { disabled, form, FormField } from "@angular/forms/signals";
+import { booleanAttribute, Component, computed, effect, inject, input, model, signal } from "@angular/core";
+import { disabled, form, FormField, readonly } from "@angular/forms/signals";
 import { LucideMoon, LucideStar, LucideSun } from "@lucide/angular";
 import {
     SliderComponent,
@@ -43,9 +43,10 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
                 type: "string",
                 value: ""
             },
-            // invalid is written by the FormField directive via [formField] below; Angular
-            // forbids binding it directly, so exclude it rather than expose a dead control.
+            // invalid/touched are written by the FormField directive via [formField] below;
+            // Angular forbids binding them directly, so exclude them rather than expose a dead control.
             invalid: undefined,
+            touched: undefined,
             labelPosition: {
                 type: "dropdown",
                 value: ["before", "after"],
@@ -165,24 +166,26 @@ export class SliderWrapperComponent implements ComponentInputsAsSignal<SliderCom
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly form = form(this.#formModel, schema => {
         disabled(schema.value, { when: () => this.disabled() });
+        readonly(schema.value, { when: () => this.readonly() });
     });
     protected readonly size = computed(() =>
         this.orientation() === "horizontal" ? { width: "400px" } : { height: "400px" }
     );
     public readonly ariaLabel = input<ReturnType<SliderComponent["ariaLabel"]>>("Slider value");
     public readonly ariaLabelledBy = input<ReturnType<SliderComponent["ariaLabelledBy"]>>("");
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly labelPosition = input<ReturnType<SliderComponent["labelPosition"]>>("after");
     public readonly labelStep = input(1);
     public readonly largeTickStep = input<ReturnType<SliderComponent["largeTickStep"]>>(null); // Large step can be null
     public readonly maxValue = input(23);
     public readonly minValue = input(0);
     public readonly orientation = input<ReturnType<SliderComponent["orientation"]>>("horizontal");
+    public readonly readonly = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<SliderComponent["rounded"]>>("full");
     public readonly selectionBackground = input<ReturnType<SliderComponent["selectionBackground"]>>("transparent");
     public readonly shiftMultiplier = input(10);
-    public readonly showLabels = input(false);
-    public readonly showTicks = input(false);
+    public readonly showLabels = input(false, { transform: booleanAttribute });
+    public readonly showTicks = input(false, { transform: booleanAttribute });
     public readonly smallTickStep = input(1);
     public readonly step = input(1);
     public readonly trackBackground = input<ReturnType<SliderComponent["trackBackground"]>>(null);

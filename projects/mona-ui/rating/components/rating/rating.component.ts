@@ -1,5 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
+    booleanAttribute,
     Component,
     computed,
     contentChild,
@@ -22,7 +23,7 @@ import {
     LucideStar,
     type LucideIcon
 } from "@lucide/angular";
-import { createElementControlId } from "@nanahoshi/mona-ui/internal";
+import { createElementControlId, injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
 import { range } from "@mirei/ts-collections";
 import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { RATING_DEFAULT_MESSAGES } from "../../i18n/rating.default-messages";
@@ -105,15 +106,18 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
             ? this.messages().notRated
             : this.messages().valueText(this.normalizedValue(), this.itemsCount());
     });
-    protected readonly effectiveTabIndex = computed(() => (this.disabled() ? -1 : this.tabindex()));
+    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
+    protected readonly effectiveTabIndex = computed(() => (this.effectiveDisabled() ? -1 : this.tabindex()));
     protected readonly hoveredTemplate = contentChild(RatingHoveredItemTemplateDirective, {
         read: TemplateRef
     });
     protected readonly iconClasses = computed(() => ratingIconThemeVariants({ size: this.size() }));
     protected readonly iconToRender = computed(() => ratingIcons[this.icon()]);
-    protected readonly interactionDisabled = computed(() => this.disabled() || this.readonly());
+    protected readonly interactionDisabled = computed(() => this.effectiveDisabled() || this.readonly());
     protected readonly interactionStep = computed(() => getRatingStep(this.precision()));
-    protected readonly invalidState = computed(() => this.touched() && this.invalid());
+    protected readonly invalidState = computed(
+        () => this.touched() && (this.invalid() || (this.required() && this.normalizedValue() === 0))
+    );
     protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly itemClasses = computed(() => ratingItemThemeVariants({ size: this.size() }));
     protected readonly itemTemplate = contentChild(RatingItemTemplateDirective, { read: TemplateRef });
@@ -180,7 +184,7 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
      * forms `Field` directive.
      * @default false
      */
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
      * @description Built-in icon used for the default rating visuals. Choose `star`, `heart`,
@@ -195,7 +199,7 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
      * by the signal forms `Field` directive.
      * @default false
      */
-    public readonly invalid = input(false);
+    public readonly invalid = input(false, { transform: booleanAttribute });
 
     /**
      * @description Number of rating items. Fractional values are floored and values below one are
@@ -230,7 +234,15 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
      * @description Prevents value changes while preserving focusability and normal visual emphasis.
      * @default false
      */
-    public readonly readonly = input(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
+
+    /**
+     * @description Shows the invalid state while the rating is `0` and the control is touched. The `required` rule of
+     * signal forms doesn't treat `0` as empty, so it won't fail the form by itself: use `min(path, 1)` to reject an
+     * unrated value. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly required = input(false, { transform: booleanAttribute });
 
     /**
      * @description Controls cumulative or single-item filling.
@@ -255,7 +267,7 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
     });
 
     /**
-     * @description Emitted when the user interacts with the control, marking the field as touched.
+     * @description Emitted when the control loses focus or a pointer commits a rating, marking the field as touched.
      */
     public readonly touch = output<void>();
 
@@ -264,7 +276,7 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
      * `[formField]`, this is written by the signal forms `Field` directive.
      * @default false
      */
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
 
     /**
      * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
@@ -284,7 +296,7 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
     }
 
     public focus(options?: FocusOptions): void {
-        if (!this.disabled()) {
+        if (!this.effectiveDisabled()) {
             this.controlElement().nativeElement.focus(options);
         }
     }
@@ -357,7 +369,6 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
         if (next !== current) {
             this.value.set(next);
         }
-        this.touch.emit();
     }
 
     protected onPointerLeave(): void {

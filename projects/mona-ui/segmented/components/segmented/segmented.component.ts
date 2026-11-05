@@ -2,6 +2,7 @@ import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
     afterRenderEffect,
+    booleanAttribute,
     Component,
     computed,
     contentChild,
@@ -16,7 +17,7 @@ import {
     viewChildren
 } from "@angular/core";
 import type { FormValueControl } from "@angular/forms/signals";
-import { createElementControlId } from "@nanahoshi/mona-ui/internal";
+import { createElementControlId, injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { SegmentedItemTemplateDirective } from "../../directives/segmented-item-template.directive";
 import type { SegmentedIndicatorGeometry } from "../../models/SegmentedIndicatorGeometry";
@@ -37,11 +38,15 @@ import {
     templateUrl: "./segmented.component.html",
     imports: [NgTemplateOutlet],
     host: {
-        "[attr.aria-disabled]": "disabled() || undefined",
+        "[attr.aria-disabled]": "effectiveDisabled() || undefined",
         "[attr.aria-invalid]": "invalidState() ? 'true' : null",
         "[attr.aria-label]": "ariaLabel()",
         "[attr.aria-labelledby]": "ariaLabelledBy()",
-        "[attr.data-disabled]": "disabled()",
+        "[attr.aria-readonly]": "readonly() || null",
+        "[attr.aria-required]": "required() || null",
+        "[attr.data-disabled]": "effectiveDisabled()",
+        "[attr.data-readonly]": "readonly() || null",
+        "(focusout)": "onFocusOut($event)",
         "[attr.data-invalid]": "invalidState() || null",
         "[attr.role]": "'radiogroup'",
         "[class]": "containerClasses()"
@@ -62,6 +67,7 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
         const classes = segmentedContainerThemeVariants({ alignment: this.alignment(), rounded: this.rounded() });
         return twMerge(classes, this.userClass());
     });
+    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly groupName = createElementControlId();
     protected readonly indicatorClasses = computed(() => {
         const animate = this.animate() && this.indicatorTransitionEnabled();
@@ -91,7 +97,7 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
             return false;
         }
         const option = this.options()[selectedIndex];
-        return this.disabled() || !!option?.disabled;
+        return this.effectiveDisabled() || !!option?.disabled;
     });
 
     /**
@@ -105,7 +111,7 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
      * When false, selection changes are applied immediately without transition.
      * @default true
      */
-    public readonly animate = input(true);
+    public readonly animate = input(true, { transform: booleanAttribute });
 
     /**
      * @description Accessible name for the radio group. Provide either `aria-label` or `aria-labelledby`.
@@ -123,19 +129,33 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
      * @description Disables every option in the group and prevents value changes.
      * @default false
      */
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
      * @description Marks the component as invalid. Error styling requires both `invalid` and `touched` to be `true`.
      * When bound to a signal form field via `[formField]`, this is written by the signal forms `Field` directive.
      * @default false
      */
-    public readonly invalid = input(false);
+    public readonly invalid = input(false, { transform: booleanAttribute });
 
     /**
      * @description The list of selectable options. Exactly one option is selected at a time.
      */
     public readonly options = input.required<readonly SegmentedOption<T>[]>();
+
+    /**
+     * @description Prevents value changes while the control stays focusable and readable. When bound to a signal form
+     * field via `[formField]`, this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly readonly = input(false, { transform: booleanAttribute });
+
+    /**
+     * @description Marks the group as required, as `aria-required`. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly required = input(false, { transform: booleanAttribute });
 
     /**
      * @description Border-radius preset applied to the segmented container and its options.
@@ -150,7 +170,7 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
     public readonly size = input<SegmentedVariantProps["size"]>("medium");
 
     /**
-     * @description Emitted when the selected value changes or focus leaves a radio input.
+     * @description Emitted when the selected value changes or focus leaves the group.
      */
     public readonly touch = output<void>();
 
@@ -159,7 +179,7 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
      * this is written by the signal forms `Field` directive.
      * @default false
      */
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
 
     /**
      * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
@@ -207,26 +227,49 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
         });
     }
 
+    /**
+     * @description Moves focus to the selected option, or the first enabled one.
+     * @param options Options passed to the native `focus()` call, such as `preventScroll`.
+     */
+    public focus(options?: FocusOptions): void {
+        const host = this.#hostElementRef.nativeElement;
+        const target =
+            host.querySelector<HTMLInputElement>("input:checked:not(:disabled)") ??
+            host.querySelector<HTMLInputElement>("input:not(:disabled)");
+        target?.focus(options);
+    }
+
     protected createOptionContext(option: SegmentedOption<T>, index: number): SegmentedItemTemplateContext<T> {
         return {
             $implicit: option,
-            disabled: this.disabled() || !!option.disabled,
+            disabled: this.effectiveDisabled() || !!option.disabled,
             index,
             option,
             selected: option.value === this.value()
         };
     }
 
-    protected onOptionBlur(): void {
+    protected onFocusOut(event: FocusEvent): void {
+        const nextTarget = event.relatedTarget;
+        if (nextTarget instanceof Node && this.#hostElementRef.nativeElement.contains(nextTarget)) {
+            return;
+        }
         this.touch.emit();
     }
 
     protected onOptionChange(option: SegmentedOption<T>): void {
-        if (this.disabled() || option.disabled) {
+        if (this.effectiveDisabled() || this.readonly() || option.disabled) {
             return;
         }
         this.value.set(option.value);
         this.touch.emit();
+    }
+
+    protected onOptionClick(event: Event): void {
+        // Canceling the click makes the browser restore the previously checked option.
+        if (this.readonly()) {
+            event.preventDefault();
+        }
     }
 
     private observeOptionElements(optionElements: readonly ElementRef<HTMLLabelElement>[]): void {

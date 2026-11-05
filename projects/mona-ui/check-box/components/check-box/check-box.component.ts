@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { Component, computed, input, model, output } from "@angular/core";
+import { booleanAttribute, Component, computed, ElementRef, input, model, output, viewChild } from "@angular/core";
 import { type FormCheckboxControl } from "@angular/forms/signals";
 import { twMerge } from "tailwind-merge";
 import {
@@ -11,15 +11,21 @@ import {
     CheckmarkVariantInput,
     CheckmarkVariantProps
 } from "../../styles/checkbox.styles";
+import { createElementControlId, injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
 
 @Component({
     selector: "mona-check-box",
     imports: [NgTemplateOutlet],
     templateUrl: "./check-box.component.html",
     host: {
+        // The ARIA inputs below are applied to the native input, so the host must not keep the static attributes.
+        "[attr.aria-describedby]": "null",
+        "[attr.aria-label]": "null",
+        "[attr.aria-labelledby]": "null",
+        "[attr.data-readonly]": "readonly() || null",
         "[class]": "'flex'",
         "[attr.data-checked]": "checked()",
-        "[attr.data-disabled]": "disabled()",
+        "[attr.data-disabled]": "effectiveDisabled()",
         "[attr.data-indeterminate]": "indeterminate()"
     }
 })
@@ -37,6 +43,8 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
         const variantClasses = checkboxContainerLabelThemeVariants({ labelSize });
         return twMerge(variantClasses, classes);
     });
+    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
+    protected readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>("checkBox");
     protected readonly invalidState = computed(
         () => this.touched() && (this.invalid() || (this.required() && !this.checked()))
     );
@@ -54,6 +62,12 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
     public readonly ariaLabel = input("", { alias: "aria-label" });
 
     /**
+     * @description Id of the element that labels the check box.
+     * @default ""
+     */
+    public readonly ariaLabelledBy = input("", { alias: "aria-labelledby" });
+
+    /**
      * @description Whether the control is checked.
      * @default false
      */
@@ -63,13 +77,13 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
      * @description Renders the component with reduced visual emphasis and removes pointer interaction.
      * @default false
      */
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
      * @description Activates indeterminate mode, showing a dash instead of a checkmark.
      * @default false
      */
-    public readonly indeterminate = input(false);
+    public readonly indeterminate = input(false, { transform: booleanAttribute });
 
     /**
      * @description Emitted when the checkbox input loses focus.
@@ -87,11 +101,18 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
     public readonly inputFocus = output<FocusEvent>();
 
     /**
+     * @description Id of the native checkbox input. Point a `<label for>` at it to label the check box from outside.
+     * A unique id is generated when it isn't set.
+     * @default generated
+     */
+    public readonly inputId = input(createElementControlId());
+
+    /**
      * @description Marks the checkbox as invalid. When bound to a signal form field via `[field]`,
      * this is written by the signal forms `Field` directive.
      * @default false
      */
-    public readonly invalid = input(false);
+    public readonly invalid = input(false, { transform: booleanAttribute });
 
     /**
      * @description Text label displayed alongside the checkbox. When provided, takes precedence over projected content.
@@ -112,10 +133,24 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
     public readonly labelSize = input<CheckboxVariantProps["labelSize"]>("medium");
 
     /**
+     * @description Name of the native checkbox input, used in native form submission. When bound to a signal form field
+     * via `[formField]`, this is written by the `FormField` directive.
+     * @default ""
+     */
+    public readonly name = input("");
+
+    /**
+     * @description Prevents value changes while the control stays focusable and readable. When bound to a signal form
+     * field via `[formField]`, this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly readonly = input(false, { transform: booleanAttribute });
+
+    /**
      * @description Marks the control as required for form validation.
      * @default false
      */
-    public readonly required = input(false);
+    public readonly required = input(false, { transform: booleanAttribute });
 
     /**
      * @description Border-radius preset applied to the checkmark box.
@@ -139,13 +174,21 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
      * this is written by the signal forms `Field` directive.
      * @default false
      */
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
 
     /**
      * @description Additional CSS classes merged onto the label container via `tailwind-merge`.
      * @default ""
      */
     public readonly userClass = input<string>("", { alias: "class" });
+
+    /**
+     * @description Moves focus to the native checkbox input.
+     * @param options Options passed to the native `focus()` call, such as `preventScroll`.
+     */
+    public focus(options?: FocusOptions): void {
+        this.inputRef().nativeElement.focus(options);
+    }
 
     protected onInputBlur(event: FocusEvent): void {
         this.inputBlur.emit(event);
@@ -157,5 +200,12 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
         this.checked.set(checked);
         this.inputChange.emit(event);
         this.touch.emit();
+    }
+
+    protected onInputClick(event: Event): void {
+        // Canceling the click makes the browser restore the checked and indeterminate states.
+        if (this.readonly()) {
+            event.preventDefault();
+        }
     }
 }

@@ -55,6 +55,8 @@ export const checkboxContainerLabelThemeVariants = cva(
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed
         data-[disabled='true']:text-disabled-foreground
+        data-[readonly='true']:cursor-default
+        [&[data-readonly='true']>*]:cursor-default
     `,
     {
         variants: {

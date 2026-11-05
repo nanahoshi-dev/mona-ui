@@ -444,14 +444,14 @@ describe("OtpInputComponent", () => {
     });
 
     describe("Typing, Insertion, and Input Events", () => {
-        it("updates value and emits touch on typing", () => {
+        it("updates value and leaves touch for blur on typing", () => {
             const input = getNativeInput();
             input.value = "12";
             input.dispatchEvent(new Event("input"));
             fixture.detectChanges();
 
             expect(host.value()).toBe("12");
-            expect(host.touchCount).toBe(1);
+            expect(host.touchCount).toBe(0);
             expect(host.completeEvents.length).toBe(0);
         });
 
@@ -662,7 +662,7 @@ describe("OtpInputComponent", () => {
             fixture.detectChanges();
 
             expect(host.value()).toBe("9876");
-            expect(host.touchCount).toBe(1);
+            expect(host.touchCount).toBe(0);
             expect(host.completeEvents).toEqual(["9876"]);
         });
 
@@ -832,7 +832,7 @@ describe("OtpInputComponent", () => {
             fixture.detectChanges();
 
             expect(host.value()).toBe("12");
-            expect(host.touchCount).toBe(1);
+            expect(host.touchCount).toBe(0);
         });
 
         it("prevents beforeinput even during composition if disabled or readonly", () => {
@@ -1454,7 +1454,7 @@ describe("OtpInputComponent with Signal Forms", () => {
         fixture.detectChanges();
 
         expect(host.form.code().value()).toBe("123456");
-        expect(host.form.code().touched()).toBe(true);
+        expect(host.form.code().touched()).toBe(false);
         expect(host.completeEvents).toEqual(["123456"]);
     });
 
