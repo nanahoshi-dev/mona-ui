@@ -8182,7 +8182,7 @@
     "selector": "\"mona-contextmenu\"",
     "inputs": [
       {
-        "description": "Reserved for an ARIA label on the context menu.\r\nNot currently applied to the target element or the rendered menu.",
+        "description": "Accessible name for the menu. When empty, the menu is named by the target if it has an `id`.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
@@ -8222,7 +8222,7 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "The target element that will be used to trigger the context menu.",
+        "description": "The target element that will be used to trigger the context menu. It can change: the menu, its\nkeyboard shortcuts and its ARIA attributes follow. `aria-haspopup`, `aria-expanded` and `aria-controls` are set\nonly on targets whose role allows them (button, link, gridcell, menuitem, tab, treeitem), and are put back\nwhen the target changes or the menu is destroyed.",
         "kind": "input",
         "name": "target",
         "type": "ElementRef<HTMLElement> | HTMLElement",

@@ -183,7 +183,11 @@ protected readonly sortField = signal("name");
 
 **No open/close output.** `ContextMenuComponent` only exposes `menuClick`. It does not re-emit `PopupMenuComponent`'s `open`/`close`/`navigate` events. If your use case needs to react to the menu opening or closing, use `PopupMenuComponent` directly.
 
-**`ariaLabel` input.** TODO(owner-review): the `ariaLabel` input is declared but is not currently applied to the target element, the menu container, or anywhere else in the rendered output. Do not rely on it for the target's accessible name — see Accessibility below.
+**`ariaLabel` names the menu.** It becomes the menu's `aria-label`. When it's empty, the menu is labelled by the target, if the target has an `id`.
+
+**The target can change.** Binding a different element to `target` moves the right-click, the keyboard shortcuts and the ARIA attributes to it. The old target gets its own attributes back, and so does the target when the context menu is destroyed.
+
+**Closing.** Besides Escape, choosing an item and clicking outside, the menu closes when the page scrolls and when the window loses focus, as a native context menu does.
 
 ## Accessibility
 
@@ -206,13 +210,13 @@ protected readonly sortField = signal("name");
 
 ### ARIA
 
-**Target element** (the element bound to `target`):
+**Target element** (the element bound to `target`), only when its role allows these attributes: a button, a link, or an element with `role` `button`, `gridcell`, `link`, `menuitem`, `tab` or `treeitem`. On any other target (a `div`, a section, a table row) they would be invalid, so they're left off; the menu is still found through the `ContextMenu` key and `Shift+F10`.
 
-| Attribute       | When present | Value                                                |
-|-----------------|--------------|------------------------------------------------------|
-| `aria-haspopup` | Always       | `"menu"`                                             |
-| `aria-controls` | Always       | The menu container's auto-generated ID               |
-| `aria-expanded` | Always       | `"true"` while the menu is open, otherwise `"false"` |
+| Attribute       | When present            | Value                                                |
+|-----------------|-------------------------|------------------------------------------------------|
+| `aria-haspopup` | Always (on those roles) | `"menu"`                                             |
+| `aria-controls` | While the menu is open  | The menu's ID                                        |
+| `aria-expanded` | Always (on those roles) | `"true"` while the menu is open, otherwise `"false"` |
 
 **Menu container** (`role="menu"`):
 
@@ -241,7 +245,7 @@ protected readonly sortField = signal("name");
 
 **Consumer responsibilities:**
 
-- Provide an accessible name for the `target` element itself (visible text, or its own `aria-label`) — `ContextMenuComponent` does not add one, and the component's `ariaLabel` input has no effect (see Technical Notes).
+- Provide an accessible name for the `target` element itself (visible text, or its own `aria-label`) — `ContextMenuComponent` does not add one. Its `ariaLabel` input names the menu, not the target.
 - When an item uses a `monaContextMenuTextTemplate` and the item's `label` is left empty, no `aria-label` fallback is applied; ensure the projected template content alone communicates the item (it is read as the item's accessible name via its text content).
 
 ## API
@@ -252,15 +256,15 @@ protected readonly sortField = signal("name");
 
 #### Inputs
 
-| Name        | Type                                       | Default     | Description                                                                                                                                                                                                                                                                |
-|-------------|--------------------------------------------|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `ariaLabel` | `string`                                   | `''`        | Reserved for an ARIA label on the context menu. TODO(owner-review): not currently applied to the target element or the rendered menu.                                                                                                                                      |
-| `items`     | `Iterable<PopupMenuItem>`                  | `[]`        | Menu items to render directly, instead of content-projected item components. Takes precedence over projected content when non-empty. TODO(owner-review): `PopupMenuItem` is not exported from `@nanahoshi/mona-ui`; prefer content projection until this type is exported. |
-| `minWidth`  | `string \| number`                         | `undefined` | Minimum width applied to the root menu and all submenus.                                                                                                                                                                                                                   |
-| `rounded`   | `'none' \| 'small' \| 'medium' \| 'large'` | `'medium'`  | Border-radius preset applied to the root menu and all submenus.                                                                                                                                                                                                            |
-| `size`      | `'small' \| 'medium' \| 'large'`           | `'medium'`  | Size preset applied to the root menu and all submenus.                                                                                                                                                                                                                     |
-| `target`    | `ElementRef<HTMLElement> \| HTMLElement`   | —           | Required. The element that opens the menu on right-click or keyboard activation.                                                                                                                                                                                           |
-| `width`     | `string \| number`                         | `undefined` | Width applied to the root menu and all submenus.                                                                                                                                                                                                                           |
+| Name        | Type                                       | Default     | Description                                                                                                                                                                                                                                                                                                                              |
+|-------------|--------------------------------------------|-------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `ariaLabel` | `string`                                   | `''`        | Accessible name for the menu. When empty, the menu is named by the target if it has an `id`.                                                                                                                                                                                                                                             |
+| `items`     | `Iterable<PopupMenuItem>`                  | `[]`        | Menu items to render directly, instead of content-projected item components. Takes precedence over projected content when non-empty. TODO(owner-review): `PopupMenuItem` is not exported from `@nanahoshi/mona-ui`; prefer content projection until this type is exported.                                                               |
+| `minWidth`  | `string \| number`                         | `undefined` | Minimum width applied to the root menu and all submenus.                                                                                                                                                                                                                                                                                 |
+| `rounded`   | `'none' \| 'small' \| 'medium' \| 'large'` | `'medium'`  | Border-radius preset applied to the root menu and all submenus.                                                                                                                                                                                                                                                                          |
+| `size`      | `'small' \| 'medium' \| 'large'`           | `'medium'`  | Size preset applied to the root menu and all submenus.                                                                                                                                                                                                                                                                                   |
+| `target`    | `ElementRef<HTMLElement> \| HTMLElement`   | —           | Required. The element that opens the menu on right-click or keyboard activation. It can change: the menu, its keyboard shortcuts and its ARIA attributes follow. `aria-haspopup`, `aria-expanded` and `aria-controls` are set only on targets whose role allows them, and are put back when the target changes or the menu is destroyed. |
+| `width`     | `string \| number`                         | `undefined` | Width applied to the root menu and all submenus.                                                                                                                                                                                                                                                                                         |
 
 #### Outputs
 
@@ -403,7 +407,7 @@ TODO(owner-review): `PopupMenuItem` (used by `ContextMenuComponent.items` and by
 - [x] ContextMenuGroupComponent.title and ContextMenuRadioItemComponent.value confirmed as input.required<string>() — marked Required, default "—"
 - [x] ContextMenuRadioGroupComponent.value confirmed as model<string>("") — documented as two-way bindable
 - [x] ContextMenuCheckboxItemComponent.checked confirmed as model(false): two-way bindable, and the item toggles itself
-- [x] ariaLabel input confirmed unused anywhere in context-menu.component.ts — documented as TODO(owner-review), not as working behavior
+- [x] ariaLabel is passed to the root menu as its aria-label
 - [x] items input precedence over projected content verified against ContextMenuComponent.menuItems computed
 - [x] preventDefault-keeps-menu-open verified against PopupMenuComponent.setMenuItemClickSubscription
 - [x] preventDefault-suppresses-checked/selection verified against PopupMenuCheckboxItemComponent and PopupMenuRadioGroupComponent setSubscription(s)

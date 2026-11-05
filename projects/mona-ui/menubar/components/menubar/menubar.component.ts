@@ -18,8 +18,8 @@ import {
     viewChildren
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { rotate, zip } from "@mirei/ts-collections";
-import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { zip } from "@mirei/ts-collections";
+import { injectComponentDirection } from "@nanahoshi/mona-ui/i18n";
 import {
     PopupMenuComponent,
     PopupMenuGroupTemplateDirective,
@@ -28,7 +28,7 @@ import {
     PopupMenuShortcutTemplateDirective,
     PopupMenuTextTemplateDirective
 } from "@nanahoshi/mona-ui/popup-menu";
-import { pairwise, startWith, Subject, tap } from "rxjs";
+import { Subject, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { MenuGroupTemplateDirective } from "../../directives/menu-group-template.directive";
 import { MenuIconTemplateDirective } from "../../directives/menu-icon-template.directive";
@@ -67,8 +67,6 @@ export class MenubarComponent implements MenubarVariantInput {
     readonly #direction = injectComponentDirection();
     readonly #document = inject(DOCUMENT);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
-    readonly #i18n = inject(MonaI18nService);
-    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly activeIndex = signal(0);
     protected readonly baseClasses = computed(() => {
         const rounded = this.rounded();
@@ -77,7 +75,6 @@ export class MenubarComponent implements MenubarVariantInput {
         const variants = menubarBaseThemeVariants({ rounded, size });
         return twMerge(variants, userClasses);
     });
-    protected readonly currentPopupElement = signal<HTMLElement | null>(null);
     protected readonly currentPopupMenu = signal<PopupMenuComponent | null>(null);
     protected readonly groupTemplate = contentChild(MenuGroupTemplateDirective, {
         read: TemplateRef,
@@ -87,6 +84,7 @@ export class MenubarComponent implements MenubarVariantInput {
         read: TemplateRef,
         descendants: false
     });
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly listClasses = computed(() => {
         return menubarListThemeVariants();
     });
@@ -163,32 +161,19 @@ export class MenubarComponent implements MenubarVariantInput {
             untracked(() => {
                 this.currentPopupMenu()?.closeMenu();
                 this.currentPopupMenu.set(null);
-                this.currentPopupElement.set(null);
             });
         });
         effect(() => {
             const menuList = this.menuList();
             untracked(() => {
-                const currentItem = menuList[this.activeIndex()];
-                if (!currentItem || currentItem.disabled()) {
-                    const fallbackIndex = menuList.findIndex(m => !m.disabled());
-                    this.activeIndex.set(fallbackIndex >= 0 ? fallbackIndex : 0);
+                if (this.activeIndex() >= menuList.length) {
+                    this.activeIndex.set(0);
                 }
             });
         });
         afterNextRender({
             read: () => this.setSubscriptions()
         });
-    }
-
-    protected onMenuBlur(event: FocusEvent): void {
-        if (!this.currentPopupMenu()) {
-            const relatedTarget = event.relatedTarget as HTMLElement;
-            const menubarElement = this.#hostElementRef.nativeElement;
-            if (!relatedTarget || !menubarElement.contains(relatedTarget)) {
-                this.currentPopupElement.set(null);
-            }
-        }
     }
 
     protected onMenuClick(event: MouseEvent, item: MenuComponent): void {
@@ -215,11 +200,12 @@ export class MenubarComponent implements MenubarVariantInput {
         const nextMenuKey = isRtl ? "ArrowLeft" : "ArrowRight";
         const prevMenuKey = isRtl ? "ArrowRight" : "ArrowLeft";
 
+        const canOpen = !!popupMenu && !item.disabled() && item.menuItems().length > 0;
         switch (event.key) {
             case "Enter":
             case " ":
                 event.preventDefault();
-                if (popupMenu && !item.disabled()) {
+                if (canOpen) {
                     popupMenu.openMenuViaKeyboard();
                 }
                 break;
@@ -233,8 +219,14 @@ export class MenubarComponent implements MenubarVariantInput {
                 break;
             case "ArrowDown":
                 event.preventDefault();
-                if (popupMenu && !item.disabled() && !this.currentPopupMenu()) {
+                if (canOpen && !this.currentPopupMenu()) {
                     popupMenu.openMenuViaKeyboard();
+                }
+                break;
+            case "ArrowUp":
+                event.preventDefault();
+                if (canOpen && !this.currentPopupMenu()) {
+                    popupMenu.openMenuViaKeyboard(false, "last");
                 }
                 break;
             case "Home":
@@ -249,31 +241,37 @@ export class MenubarComponent implements MenubarVariantInput {
                 event.preventDefault();
                 this.closeCurrentMenu();
                 break;
+            default:
+                if (event.key.length === 1 && event.key.trim() && !event.altKey && !event.ctrlKey && !event.metaKey) {
+                    this.moveToMenuStartingWith(event.key);
+                }
         }
     }
 
-    protected onMenuPointerEnter(item: MenuComponent, element: HTMLLIElement, popupMenu: PopupMenuComponent): void {
-        if (this.disabled() || item.disabled() || this.currentPopupMenu() === popupMenu || !this.currentPopupMenu()) {
+    protected onMenuPointerEnter(item: MenuComponent, popupMenu: PopupMenuComponent): void {
+        const current = this.currentPopupMenu();
+        if (this.disabled() || current === popupMenu || !current) {
             return;
         }
-        this.currentPopupMenu()?.clearFocusRestoration();
-        this.currentPopupMenu()?.closeMenu();
-        this.currentPopupMenu.set(popupMenu);
-        this.currentPopupElement.set(element);
-        this.currentPopupMenu()!.openMenu(false);
+        current.clearFocusRestoration();
+        current.closeMenu();
+        this.currentPopupMenu.set(null);
+        // A disabled menu, or one without items, has no popup to switch to: the open one just closes.
+        if (!item.disabled() && item.menuItems().length > 0) {
+            this.currentPopupMenu.set(popupMenu);
+            popupMenu.openMenu(false);
+        }
     }
 
     protected onPopupMenuClose(): void {
         this.currentPopupMenu.set(null);
-        this.currentPopupElement.set(null);
     }
 
-    protected onPopupMenuOpen(popupMenu: PopupMenuComponent, element: HTMLLIElement): void {
+    protected onPopupMenuOpen(popupMenu: PopupMenuComponent): void {
         if (this.currentPopupMenu() === popupMenu) {
             return;
         }
         this.currentPopupMenu.set(popupMenu);
-        this.currentPopupElement.set(element);
     }
 
     private closeCurrentMenu(): void {
@@ -303,77 +301,70 @@ export class MenubarComponent implements MenubarVariantInput {
         return this.#hostElementRef.nativeElement.querySelector(`li[data-mid="${uid}"]`) as HTMLLIElement | null;
     }
 
-    private findNextNonDisabledMenuIndex(): number {
+    private findNextMenuIndex(): number {
+        const menuList = this.menuList();
+        if (menuList.length === 0) {
+            return -1;
+        }
         const currentIndex = this.findCurrentMenuIndex();
-        if (currentIndex == null || currentIndex < 0) {
-            return this.menuList().findIndex(m => !m.disabled());
-        }
-        const next = rotate(this.menuList(), currentIndex)
-            .skip(1)
-            .firstOrDefault(m => !m.disabled());
-        if (next) {
-            return this.menuList().findIndex(m => m === next);
-        }
-        return -1;
+        return currentIndex == null ? 0 : (currentIndex + 1) % menuList.length;
     }
 
-    private findPreviousNonDisabledMenuIndex(): number {
+    private findPreviousMenuIndex(): number {
+        const menuList = this.menuList();
+        if (menuList.length === 0) {
+            return -1;
+        }
         const currentIndex = this.findCurrentMenuIndex();
-        if (currentIndex == null || currentIndex < 0) {
-            const menuList = this.menuList();
-            const lastEnabledIndex = menuList
-                .slice()
-                .reverse()
-                .findIndex(m => !m.disabled());
-            return lastEnabledIndex >= 0 ? menuList.length - 1 - lastEnabledIndex : -1;
-        }
-        const next = rotate(this.menuList(), currentIndex)
-            .reverse()
-            .firstOrDefault(m => !m.disabled());
-        if (next) {
-            return this.menuList().findIndex(m => m === next);
-        }
-        return -1;
+        return currentIndex == null ? menuList.length - 1 : (currentIndex - 1 + menuList.length) % menuList.length;
     }
 
     private focusMenuAt(index: number): void {
         const menu = this.menuList()[index];
-        if (menu && !menu.disabled()) {
-            const element = this.findMenuElementByUid(menu.uid);
-            if (element) {
-                element.focus();
-            }
+        if (menu) {
+            this.activeIndex.set(index);
+            this.findMenuElementByUid(menu.uid)?.focus();
         }
     }
 
     private moveToFirstMenu(): void {
-        const firstEnabledIndex = this.menuList().findIndex(m => !m.disabled());
-        if (firstEnabledIndex >= 0) {
-            this.focusMenuAt(firstEnabledIndex);
+        if (this.menuList().length > 0) {
+            this.focusMenuAt(0);
         }
     }
 
     private moveToLastMenu(): void {
+        const length = this.menuList().length;
+        if (length > 0) {
+            this.focusMenuAt(length - 1);
+        }
+    }
+
+    /**
+     * Typeahead on the menubar: moves to the next menu whose text starts with the character, after the current one.
+     */
+    private moveToMenuStartingWith(character: string): void {
         const menuList = this.menuList();
-        const lastEnabledIndex = menuList
-            .slice()
-            .reverse()
-            .findIndex(m => !m.disabled());
-        if (lastEnabledIndex >= 0) {
-            const actualIndex = menuList.length - 1 - lastEnabledIndex;
-            this.focusMenuAt(actualIndex);
+        const currentIndex = this.findCurrentMenuIndex() ?? -1;
+        const key = character.toLocaleLowerCase();
+        for (let offset = 1; offset <= menuList.length; offset++) {
+            const index = (currentIndex + offset) % menuList.length;
+            if (menuList[index].text().trim().toLocaleLowerCase().startsWith(key)) {
+                this.focusMenuAt(index);
+                return;
+            }
         }
     }
 
     private moveToNextMenu(): void {
-        const index = this.findNextNonDisabledMenuIndex();
+        const index = this.findNextMenuIndex();
         if (index >= 0) {
             this.focusMenuAt(index);
         }
     }
 
     private moveToPreviousMenu(): void {
-        const index = this.findPreviousNonDisabledMenuIndex();
+        const index = this.findPreviousMenuIndex();
         if (index >= 0) {
             this.focusMenuAt(index);
         }
@@ -383,25 +374,23 @@ export class MenubarComponent implements MenubarVariantInput {
         this.navigate$
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                startWith(null),
-                pairwise(),
-                tap(([prev, next]) => {
+                tap(event => {
                     const isRtl = this.isRtl();
                     const nextDir = isRtl ? "left" : "right";
                     const prevDir = isRtl ? "right" : "left";
-                    if (next && next.direction === nextDir && (next.level === 0 || (next.level > 0 && !next.item))) {
-                        const index = this.findNextNonDisabledMenuIndex();
+                    // Forward from the root menu, or from an item without a submenu, moves to the next menu.
+                    if (event.direction === nextDir && (event.level === 0 || !event.item)) {
+                        const index = this.findNextMenuIndex();
                         if (index >= 0) {
                             this.updateCurrentMenuData(index);
                         }
-                    } else if (next && prev && next.direction === prevDir && prev.level === 0 && next.level === 0) {
-                        const index = this.findPreviousNonDisabledMenuIndex();
+                    } else if (event.direction === prevDir && event.level === 0 && !event.item) {
+                        // Backward in the root menu itself. Closing a submenu also reports backward at level 0, but
+                        // with the parent item, and stays in the same menu.
+                        const index = this.findPreviousMenuIndex();
                         if (index >= 0) {
                             this.updateCurrentMenuData(index);
                         }
-                    }
-                    if (next && this.currentPopupMenu()) {
-                        this.currentPopupMenu()?.setRestoreFocusForKeyboard();
                     }
                 })
             )
@@ -413,11 +402,17 @@ export class MenubarComponent implements MenubarVariantInput {
     }
 
     private updateCurrentMenuData(index: number): void {
+        const menu = this.menuList()[index];
         this.currentPopupMenu()?.clearFocusRestoration();
         this.currentPopupMenu()?.closeMenu();
-        this.currentPopupMenu.set(this.menuList()[index].popupMenu);
-        const element = this.findMenuElementByUid(this.menuList()[index].uid);
-        this.currentPopupElement.set(element);
-        this.currentPopupMenu()?.openMenuViaKeyboard();
+        this.currentPopupMenu.set(null);
+        this.activeIndex.set(index);
+        if (menu.disabled() || menu.menuItems().length === 0 || !menu.popupMenu) {
+            // Nothing to open: the menubar item itself takes focus.
+            this.findMenuElementByUid(menu.uid)?.focus();
+            return;
+        }
+        this.currentPopupMenu.set(menu.popupMenu);
+        menu.popupMenu.openMenuViaKeyboard();
     }
 }

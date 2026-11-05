@@ -190,7 +190,7 @@ protected readonly theme = signal("system");
 </mona-menubar>
 ```
 
-Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or on an individual `mona-menu` to disable only that menu. A disabled menu does not open on click, hover, or keyboard activation.
+Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or on an individual `mona-menu` to disable only that menu. A disabled menu does not open on click, hover, or keyboard activation, but the arrow keys still reach it, so it can be read and found. A `mona-menu` without items is a plain menubar item: it doesn't advertise or open a popup.
 
 ### Sizing and rounding
 
@@ -214,7 +214,9 @@ Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or
 
 **Suppressing checkbox/radio state changes.** Calling `event.preventDefault()` on a `mona-menu-checkbox-item`'s or `mona-menu-radio-item`'s `menuClick` event suppresses the resulting `checkedChange` emission (checkbox item) or selection update (radio group). Use this to confirm or validate a change before it applies.
 
-**Switching menus by pointer.** While one menu's popup is open, moving the pointer over a different (enabled) top-level menu closes the current popup and opens the new one. Hovering a disabled menu, or hovering while the menubar itself is disabled, has no effect.
+**Switching menus.** While one menu's popup is open, moving the pointer over a different top-level menu closes the current popup and opens the new one; `ArrowLeft`/`ArrowRight` in the popup do the same. When the new menu is disabled or has no items, the popup just closes (from the keyboard, focus lands on that menubar item). The Tab stop follows the menu you're in. Hovering while the menubar itself is disabled has no effect.
+
+**Items from another menu family** (a `mona-contextmenu-item` inside a `mona-menu`, say) throw an error naming the component to use.
 
 ## Accessibility
 
@@ -222,31 +224,33 @@ Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or
 
 **On the menubar itself** (before a menu is open, or moving between top-level menus):
 
-| Key               | Action                                                                               |
-| ----------------- | ------------------------------------------------------------------------------------ |
-| `Tab`             | Moves focus to or from the menubar. Only one top-level menu is a Tab stop at a time. |
-| `ArrowRight`      | Moves focus to the next enabled top-level menu, wrapping to the first                |
-| `ArrowLeft`       | Moves focus to the previous enabled top-level menu, wrapping to the last             |
-| `Home`            | Moves focus to the first enabled top-level menu                                      |
-| `End`             | Moves focus to the last enabled top-level menu                                       |
-| `Enter` / `Space` | Opens the focused menu                                                               |
-| `ArrowDown`       | Opens the focused menu, if none is currently open                                    |
-| `Escape`          | Closes the currently open menu                                                       |
+| Key               | Action                                                                                        |
+|-------------------|-----------------------------------------------------------------------------------------------|
+| `Tab`             | Moves focus to or from the menubar. Only one top-level menu is a Tab stop at a time.          |
+| `ArrowRight`      | Moves focus to the next top-level menu, wrapping to the first. Disabled menus are reached too |
+| `ArrowLeft`       | Moves focus to the previous top-level menu, wrapping to the last                              |
+| `Home`            | Moves focus to the first top-level menu                                                       |
+| `End`             | Moves focus to the last top-level menu                                                        |
+| `Enter` / `Space` | Opens the focused menu, with its first item highlighted                                       |
+| `ArrowDown`       | Opens the focused menu with its first item highlighted, if none is currently open             |
+| `ArrowUp`         | Opens the focused menu with its last item highlighted, if none is currently open              |
+| `Escape`          | Closes the currently open menu                                                                |
+| A letter or digit | Moves focus to the next top-level menu whose text starts with it                              |
 
 **Within an open menu's popup** (same list navigation as `ContextMenuComponent`):
 
-| Key                               | Action                                                                                                                              |
-|-----------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
-| `ArrowDown`                       | Highlights the next item, wrapping to the first. Disabled items are highlighted too, but can't be activated                         |
-| `ArrowUp`                         | Highlights the previous item, wrapping to the last                                                                                  |
-| `ArrowRight`                      | Opens the highlighted item's submenu if it has nested items; at the popup's root level, moves to the next top-level menu instead    |
-| `ArrowLeft`                       | Closes the current submenu and returns to the parent level; at the popup's root level, moves to the previous top-level menu instead |
-| `Home`                            | Highlights the first item                                                                                                           |
-| `End`                             | Highlights the last item                                                                                                            |
-| `Enter` / `Space`                 | Activates the highlighted item, or opens its submenu if it has nested items                                                         |
-| `Escape`                          | Closes the open submenu, or the menu itself at the root level                                                                       |
-| `Tab`                             | Closes the open menus; focus moves on from the menubar                                                                              |
-| Letter, digit, space, `-`, or `_` | Jumps to (cycles through) items whose label starts with the typed text                                                              |
+| Key                               | Action                                                                                                                                                  |
+|-----------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `ArrowDown`                       | Highlights the next item, wrapping to the first. Disabled items are highlighted too, but can't be activated                                             |
+| `ArrowUp`                         | Highlights the previous item, wrapping to the last                                                                                                      |
+| `ArrowRight`                      | Opens the highlighted item's submenu if it has nested items; at the popup's root level, moves to the next top-level menu instead                        |
+| `ArrowLeft`                       | Closes the current submenu and returns to the parent level; at the popup's root level, moves to the previous top-level menu instead, on the first press |
+| `Home`                            | Highlights the first item                                                                                                                               |
+| `End`                             | Highlights the last item                                                                                                                                |
+| `Enter` / `Space`                 | Activates the highlighted item, or opens its submenu if it has nested items                                                                             |
+| `Escape`                          | Closes the open submenu, or the menu itself at the root level                                                                                           |
+| `Tab`                             | Closes the open menus; focus moves on from the menubar                                                                                                  |
+| Letter, digit, space, `-`, or `_` | Jumps to (cycles through) items whose label starts with the typed text                                                                                  |
 
 ### ARIA
 
@@ -261,16 +265,17 @@ Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or
 
 **Top-level menu** (`role="menuitem"`, one per `mona-menu`):
 
-| Attribute       | When present                    | Value                                                                                          |
-| --------------- | ------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `role`          | Always                          | `"menuitem"`                                                                                   |
-| `tabindex`      | Always                          | `-1` when disabled; otherwise `0` for exactly one menu (roving tab stop) and `-1` for the rest |
-| `aria-disabled` | Always                          | Reflects the menu's `disabled` input                                                           |
-| `aria-haspopup` | Always                          | `"menu"`                                                                                       |
-| `aria-expanded` | Always                          | `"true"` while that menu's popup is open, otherwise `"false"`                                  |
-| `aria-controls` | While that menu's popup is open | The popup menu container's auto-generated ID                                                   |
+| Attribute       | When present                    | Value                                                                                                                                 |
+|-----------------|---------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
+| `role`          | Always                          | `"menuitem"`                                                                                                                          |
+| `tabindex`      | Always                          | `0` for exactly one menu (roving tab stop) and `-1` for the rest; disabled menus take part. `-1` for all when the menubar is disabled |
+| `aria-disabled` | Always                          | Reflects the menu's `disabled` input                                                                                                  |
+| `id`            | Always                          | An auto-generated ID that names the menu's popup                                                                                      |
+| `aria-haspopup` | When the menu has items         | `"menu"`                                                                                                                              |
+| `aria-expanded` | When the menu has items         | `"true"` while that menu's popup is open, otherwise `"false"`                                                                         |
+| `aria-controls` | While that menu's popup is open | The popup menu container's auto-generated ID                                                                                          |
 
-**Popup menu container** (`role="menu"`), **item** (`role="menuitem"`), and **group** (`role="group"`): same attributes as `ContextMenuComponent`'s popup — see its documentation for the full table. In summary: the container carries `aria-orientation="vertical"` and `aria-activedescendant` while an item is highlighted; checkbox and radio items are `menuitemcheckbox` and `menuitemradio` with `aria-checked`; each item carries `aria-disabled`, `aria-haspopup`/`aria-expanded` when it has nested items, and `aria-label` when its `label` is non-empty; groups wrap their header and items and carry `aria-labelledby`.
+**Popup menu container** (`role="menu"`), **item** (`role="menuitem"`), and **group** (`role="group"`): the popup is labelled by its top-level menu (`aria-labelledby`); otherwise the same attributes as `ContextMenuComponent`'s popup — see its documentation for the full table. In summary: the container carries `aria-orientation="vertical"` and `aria-activedescendant` while an item is highlighted; checkbox and radio items are `menuitemcheckbox` and `menuitemradio` with `aria-checked`; each item carries `aria-disabled`, `aria-haspopup`/`aria-expanded` when it has nested items, and `aria-label` when its `label` is non-empty; groups wrap their header and items and carry `aria-labelledby`.
 
 **Focus behavior:** on the menubar itself, exactly one top-level menu is a Tab stop at a time (roving tabindex) and Arrow keys move it. Once a popup opens, focus moves into its `role="menu"` container the same way as `ContextMenuComponent`; the highlighted item is communicated through `aria-activedescendant` rather than DOM focus. When a popup closes (Escape, choosing an item, or a click outside that doesn't move focus elsewhere), focus returns to its top-level menu. `Tab` closes the popup and moves focus out of the menubar. A submenu opened by the pointer leaves focus in its parent menu.
 
@@ -468,7 +473,7 @@ TODO(owner-review): `PopupMenuItem` and `MenuItem` (used by `MenuComponent.items
 - [x] MenuGroupComponent.title and MenuRadioItemComponent.value confirmed as input.required<string>() — marked Required, default "—"
 - [x] MenuRadioGroupComponent.value confirmed as model<string>("") — documented as two-way bindable
 - [x] MenuCheckboxItemComponent.checked confirmed as model(false): two-way bindable, and the item toggles itself
-- [x] disabled-not-enforced-for-pointer/click bug (menubar and per-item) confirmed fixed in menubar.component.ts (onMenuPointerEnter/onMenuClick/onMenuKeyDown guards) before documenting "blocks click, hover, and keyboard activation" as fact
+- [x] Disabled menus are reached by the arrow keys but don't open on click (trigger off), hover or keyboard (onMenuPointerEnter/onMenuKeyDown guards)
 - [x] Roving tabindex (single Tab stop) confirmed implemented via activeIndex signal in menubar.component.ts before documenting it as fact
 - [x] aria-controls / aria-expanded null-vs-null false-positive bug confirmed fixed in menubar.component.html before documenting aria-expanded/aria-controls as reliable
 - [x] rounded/size variant unions verified against menu.styles.ts (menubarBaseThemeVariants: rounded none/small/medium/large, size small/medium/large)
@@ -478,7 +483,7 @@ TODO(owner-review): `PopupMenuItem` and `MenuItem` (used by `MenuComponent.items
 - [x] Keyboard map (menubar level) verified against MenubarComponent.onMenuKeyDown, moveToNext/PreviousMenu, findNextNonDisabledMenuIndex/findPreviousNonDisabledMenuIndex
 - [x] Keyboard map (popup level) verified against PopupMenuListComponent's handle*Key methods, shared with ContextMenuComponent
 - [x] Cross-popup ArrowLeft/ArrowRight-moves-between-top-level-menus behavior verified against MenubarComponent.setNavigationSubscription and PopupMenuListComponent.handleNavigationKey's level===0 branches
-- [x] Pointer hover-switch-between-open-menus behavior, including disabled guard, verified against onMenuPointerEnter
+- [x] Pointer and keyboard switching between open menus, including disabled and empty menus, verified against onMenuPointerEnter and updateCurrentMenuData
 - [x] Focus-restoration-on-close behavior verified against PopupMenuComponent's open-menu state (`restoreFocus`, `returnFocusTo`)
 - [x] MenuComponent.items type documented as Iterable<MenuItem>; MenuItem shape (label required, optional checkable/checked/disabled/group/items/separator) taken from common/popup-menu/models/PopupMenuItem.ts
 - [x] PopupMenuItem and MenuItem confirmed not exported from lib/index.ts

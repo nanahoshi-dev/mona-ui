@@ -1,11 +1,11 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
-    afterNextRender,
+    afterRenderEffect,
     Component,
     computed,
     contentChild,
     contentChildren,
-    DestroyRef,
+    DOCUMENT,
     effect,
     ElementRef,
     inject,
@@ -13,9 +13,9 @@ import {
     output,
     signal,
     TemplateRef,
+    untracked,
     viewChild
 } from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import {
     PopupMenuComponent,
     PopupMenuGroupTemplateDirective,
@@ -28,13 +28,37 @@ import {
 } from "@nanahoshi/mona-ui/popup-menu";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { any } from "@mirei/ts-collections";
-import { fromEvent } from "rxjs";
 import { ContextMenuGroupTemplateDirective } from "../../directives/context-menu-group-template.directive";
 import { ContextMenuIconTemplateDirective } from "../../directives/context-menu-icon-template.directive";
 import { ContextMenuShortcutTemplateDirective } from "../../directives/context-menu-shortcut-template.directive";
 import { ContextMenuTextTemplateDirective } from "../../directives/context-menu-text-template.directive";
 import { ContextMenuVariantInput, ContextMenuVariantProps } from "../../styles/contextmenu.styles";
 import { ensureContextMenuComponentTypes } from "../../utils/ctx-menu.utils";
+
+/**
+ * Roles that allow both `aria-haspopup` and `aria-expanded`. On any other target (a `div`, a `section`, a table row)
+ * the attributes are invalid, so the menu leaves them off: context menus are found through the ContextMenu key and
+ * Shift+F10, not through `aria-haspopup`.
+ */
+const POPUP_ROLES: ReadonlySet<string> = new Set(["button", "gridcell", "link", "menuitem", "tab", "treeitem"]);
+const MANAGED_ATTRIBUTES = ["aria-controls", "aria-expanded", "aria-haspopup"] as const;
+
+const roleOf = (element: HTMLElement): string | null => {
+    const explicit = element.getAttribute("role")?.trim().split(/\s+/)[0];
+    if (explicit) {
+        return explicit;
+    }
+    if (element instanceof HTMLButtonElement) {
+        return "button";
+    }
+    if (element instanceof HTMLAnchorElement && element.hasAttribute("href")) {
+        return "link";
+    }
+    if (element instanceof HTMLInputElement && ["button", "image", "reset", "submit"].includes(element.type)) {
+        return "button";
+    }
+    return null;
+};
 
 @Component({
     selector: "mona-contextmenu",
@@ -49,7 +73,9 @@ import { ensureContextMenuComponentTypes } from "../../utils/ctx-menu.utils";
     ]
 })
 export class ContextMenuComponent implements ContextMenuVariantInput {
-    readonly #destroyRef = inject(DestroyRef);
+    /** The target, while it has a role that allows the popup attributes. */
+    readonly #ariaTarget = signal<HTMLElement | null>(null);
+    readonly #document = inject(DOCUMENT);
     readonly #isMenuOpen = signal(false);
 
     private readonly menuItemComponents = contentChildren(PopupMenuToken, { descendants: false });
@@ -81,8 +107,7 @@ export class ContextMenuComponent implements ContextMenuVariantInput {
     });
 
     /**
-     * @description Reserved for an ARIA label on the context menu.
-     * Not currently applied to the target element or the rendered menu.
+     * @description Accessible name for the menu. When empty, the menu is named by the target if it has an `id`.
      */
     public readonly ariaLabel = input<string>("");
 
@@ -114,7 +139,10 @@ export class ContextMenuComponent implements ContextMenuVariantInput {
     public readonly size = input<ContextMenuVariantProps["size"]>("medium");
 
     /**
-     * @description The target element that will be used to trigger the context menu.
+     * @description The target element that will be used to trigger the context menu. It can change: the menu, its
+     * keyboard shortcuts and its ARIA attributes follow. `aria-haspopup`, `aria-expanded` and `aria-controls` are set
+     * only on targets whose role allows them (button, link, gridcell, menuitem, tab, treeitem), and are put back
+     * when the target changes or the menu is destroyed.
      */
     public readonly target = input.required<ElementRef<HTMLElement> | HTMLElement>();
 
@@ -126,22 +154,80 @@ export class ContextMenuComponent implements ContextMenuVariantInput {
 
     public constructor() {
         effect(() => ensureContextMenuComponentTypes(this.menuItemComponents()));
-        afterNextRender({
-            read: () => {
-                this.setTargetAriaAttributes();
-                this.setKeyboardEvents();
+        // After render, so the target's own host bindings (a monaButton's aria-haspopup) have run and don't undo it.
+        afterRenderEffect(onCleanup => {
+            const target = this.target();
+            const element = target instanceof ElementRef ? target.nativeElement : target;
+            if (!element) {
+                return;
             }
+            onCleanup(untracked(() => this.#attachTo(element)));
+        });
+        effect(() => {
+            const element = this.#ariaTarget();
+            const open = this.#isMenuOpen();
+            if (!element) {
+                return;
+            }
+            element.setAttribute("aria-expanded", String(open));
+            if (open) {
+                element.setAttribute("aria-controls", this.menuId);
+            } else {
+                element.removeAttribute("aria-controls");
+            }
+        });
+        effect(onCleanup => {
+            const view = this.#document.defaultView;
+            if (!this.#isMenuOpen() || !view) {
+                return;
+            }
+            // Like a native context menu, it closes when the window loses focus.
+            const close = (): void => this.popupMenuRef()?.closeMenu();
+            view.addEventListener("blur", close);
+            onCleanup(() => view.removeEventListener("blur", close));
         });
     }
 
     protected onMenuClose(): void {
         this.#isMenuOpen.set(false);
-        this.updateTargetAriaAttributes();
     }
 
     protected onMenuOpen(): void {
         this.#isMenuOpen.set(true);
-        this.updateTargetAriaAttributes();
+    }
+
+    /**
+     * Listens for the keyboard shortcuts on the target and, when its role allows them, sets the popup attributes.
+     * Returns the cleanup that undoes both.
+     */
+    #attachTo(element: HTMLElement): () => void {
+        const onKeydown = (event: KeyboardEvent): void => {
+            if (event.key === "ContextMenu" || (event.key === "F10" && event.shiftKey)) {
+                event.preventDefault();
+                this.openMenuViaKeyboard();
+            }
+        };
+        element.addEventListener("keydown", onKeydown);
+        const role = roleOf(element);
+        const managed = role !== null && POPUP_ROLES.has(role);
+        const previous = MANAGED_ATTRIBUTES.map(name => [name, element.getAttribute(name)] as const);
+        if (managed) {
+            element.setAttribute("aria-haspopup", "menu");
+            this.#ariaTarget.set(element);
+        }
+        return () => {
+            element.removeEventListener("keydown", onKeydown);
+            if (managed) {
+                this.#ariaTarget.set(null);
+                for (const [name, value] of previous) {
+                    if (value === null) {
+                        element.removeAttribute(name);
+                    } else {
+                        element.setAttribute(name, value);
+                    }
+                }
+            }
+        };
     }
 
     private openMenuViaKeyboard(): void {
@@ -149,43 +235,5 @@ export class ContextMenuComponent implements ContextMenuVariantInput {
         if (popupMenu && !this.#isMenuOpen()) {
             popupMenu.openMenuViaKeyboard(true);
         }
-    }
-
-    private setKeyboardEvents(): void {
-        const target = this.target();
-        const targetElement = target instanceof ElementRef ? target.nativeElement : target;
-        if (!targetElement) {
-            return;
-        }
-
-        fromEvent<KeyboardEvent>(targetElement, "keydown")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(event => {
-                if (event.key === "ContextMenu" || (event.key === "F10" && event.shiftKey)) {
-                    event.preventDefault();
-                    this.openMenuViaKeyboard();
-                }
-            });
-    }
-
-    private setTargetAriaAttributes(): void {
-        const target = this.target();
-        const targetElement = target instanceof ElementRef ? target.nativeElement : target;
-        if (!targetElement) {
-            return;
-        }
-
-        targetElement.setAttribute("aria-haspopup", "menu");
-        targetElement.setAttribute("aria-controls", this.menuId);
-        this.updateTargetAriaAttributes();
-    }
-
-    private updateTargetAriaAttributes(): void {
-        const target = this.target();
-        const targetElement = target instanceof ElementRef ? target.nativeElement : target;
-        if (!targetElement) {
-            return;
-        }
-        targetElement.setAttribute("aria-expanded", this.#isMenuOpen().toString());
     }
 }

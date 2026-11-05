@@ -4,6 +4,7 @@ import {
     computed,
     contentChild,
     contentChildren,
+    effect,
     input,
     TemplateRef
 } from "@angular/core";
@@ -12,6 +13,7 @@ import { MenuItem, PopupMenuComponent, PopupMenuToken, preparePopupMenuItems } f
 import { v4 } from "uuid";
 import { MenuIconTemplateDirective } from "../../directives/menu-icon-template.directive";
 import { MenuTextTemplateDirective } from "../../directives/menu-text-template.directive";
+import { ensureMenubarComponentTypes } from "../../utils/menubar.utils";
 
 @Component({
     selector: "mona-menu",
@@ -49,4 +51,8 @@ export class MenuComponent {
     public readonly textTemplate = contentChild(MenuTextTemplateDirective, { read: TemplateRef });
     public readonly uid = v4();
     public popupMenu: PopupMenuComponent | null = null;
+
+    public constructor() {
+        effect(() => ensureMenubarComponentTypes(this.menuItemComponents()));
+    }
 }
