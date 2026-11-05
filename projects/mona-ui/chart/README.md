@@ -230,6 +230,122 @@ The benchmark is intentionally non-gating and emits one compact JSON record for 
 
 ---
 
+## Guide and Reference
+
+The [chart guide](../../../docs/charts.md) covers data, locale, accessibility, the keyboard, right-to-left and theming. The [chart reference](../../mona-ui-tester/src/assets/docs/chart/api.md) lists every input, output, method and template of every component; the tables below list the common ones.
+
+| Family | Components |
+| :--- | :--- |
+| Container | `<mona-chart>` |
+| Axes | `<mona-chart-x-axis>`, `<mona-chart-y-axis>`, `<mona-chart-angular-axis>`, `<mona-chart-radial-axis>` |
+| Cartesian series | `<mona-line-series>`, `<mona-area-series>`, `<mona-bar-series>`, `<mona-range-bar-series>`, `<mona-range-area-series>`, `<mona-scatter-series>`, `<mona-bubble-series>`, `<mona-heatmap-series>` |
+| Financial series | `<mona-candlestick-series>`, `<mona-ohlc-series>` |
+| Sector series | `<mona-pie-series>`, `<mona-donut-series>` |
+| Polar series | `<mona-radar-series>`, `<mona-polar-series>` |
+| Radial arc series | `<mona-radial-bar-series>`, `<mona-rose-series>`, `<mona-gauge-series>` |
+| Other series | `<mona-treemap-series>`, `<mona-funnel-series>`, `<mona-waterfall-series>` |
+| Overlays | `<mona-chart-crosshair>`, `<mona-chart-reference-line>`, `<mona-chart-reference-band>`, `<mona-chart-annotation>` |
+| Interaction | `<mona-chart-legend>`, `<mona-chart-tooltip>`, `<mona-chart-brush>`, `<mona-chart-selection>` |
+
+### Candlestick & OHLC Charts
+
+Financial series require `openField`, `highField`, `lowField` and `closeField`. Rising candles are hollow by default, so they differ from falling ones by shape as well as color.
+
+```html
+<mona-chart aria-label="Share price" [data]="prices" xField="date">
+    <mona-chart-x-axis type="time" />
+    <mona-candlestick-series name="ACME" keyField="date" openField="open" highField="high" lowField="low" closeField="close" />
+    <!-- Or as bars: <mona-ohlc-series name="ACME" keyField="date" openField="open" highField="high" lowField="low" closeField="close" /> -->
+    <mona-chart-tooltip />
+</mona-chart>
+```
+
+### Radial Bar, Rose & Gauge Charts
+
+```html
+<mona-chart aria-label="Goals" [data]="goals">
+    <mona-radial-bar-series field="value" categoryField="goal" keyField="goal" />
+    <mona-chart-legend />
+</mona-chart>
+
+<mona-chart aria-label="Incidents by month" [data]="incidents">
+    <mona-rose-series field="count" categoryField="month" keyField="month" scaleMode="area" />
+</mona-chart>
+
+<mona-chart aria-label="Disk usage">
+    <mona-gauge-series name="Disk" [value]="72" [min]="0" [max]="100" indicator="both" />
+</mona-chart>
+```
+
+### Treemap, Funnel & Waterfall Charts
+
+```html
+<mona-chart aria-label="Storage by folder" [data]="folders">
+    <mona-treemap-series field="size" labelField="name" keyField="id" childrenField="children" />
+</mona-chart>
+
+<mona-chart aria-label="Signup funnel" [data]="stages">
+    <mona-funnel-series field="visitors" categoryField="stage" keyField="stage" />
+</mona-chart>
+
+<mona-chart aria-label="Cash flow" [data]="steps" xField="label">
+    <mona-waterfall-series field="amount" kindField="kind" keyField="label" [showLabels]="true" />
+    <mona-chart-legend />
+</mona-chart>
+```
+
+### Pie & Donut Options
+
+`<mona-pie-series>` and `<mona-donut-series>` read `category` and `value` by default. `[(hiddenIndices)]` holds what the legend hides, and `showLabels` with `labelContent` adds slice labels.
+
+### Crosshair, Reference Lines, Bands & Annotations
+
+```html
+<mona-chart aria-label="Latency" [data]="latency" xField="time">
+    <mona-line-series field="p95" name="p95" keyField="time" />
+    <mona-chart-crosshair mode="x" />
+    <mona-chart-reference-line axis="y" [value]="200" label="Target" />
+    <mona-chart-reference-band axis="y" [from]="200" [to]="400" label="At risk" />
+    <mona-chart-annotation [x]="incidentTime" [y]="480" label="Incident" />
+</mona-chart>
+```
+
+### Legend, Tooltip, Brush & Selection
+
+```html
+<mona-chart aria-label="Sales" [data]="sales" xField="month">
+    <mona-bar-series field="revenue" name="Revenue" keyField="month" />
+    <mona-chart-legend position="end" [interactive]="true" />
+    <mona-chart-tooltip [shared]="true" />
+    <mona-chart-selection mode="multiple" [(selectedMarkIds)]="selected" />
+    <mona-chart-brush mode="x" selectionBehavior="replace" (brushChange)="onBrush($event)" />
+</mona-chart>
+```
+
+Use `keyField` so a selection follows its rows when the data changes.
+
+### Viewport, Navigation & Rendering
+
+`[navigation]="true"` turns on pan and zoom with the wheel, a drag, a pinch and the keyboard. Bind `[(viewport)]` to own the viewport, or set `defaultViewport` for a starting window. `viewportChange` emits the `ChartViewportState`, and `viewportChangeDetails` adds the previous state, source and gesture phase. `synchronization="group"` links charts, `renderer="svg"` renders SVG instead of canvas, and `downsampling` controls how dense data is reduced for drawing.
+
+```html
+<mona-chart
+    aria-label="Traffic"
+    [data]="traffic"
+    xField="time"
+    [navigation]="true"
+    [(viewport)]="viewport"
+    [defaultViewport]="lastWeek"
+    synchronization="dashboard"
+    (viewportChangeDetails)="onViewportChange($event)">
+    <mona-line-series field="visits" name="Visits" keyField="time" [downsampling]="true" />
+</mona-chart>
+```
+
+### Locale, Right-to-Left & Accessibility
+
+Numbers, dates and built-in text follow the library locale (`provideMonaI18n`). The frame follows the host's direction: the title, legend order and default Y axis mirror, and the X axis stays left to right. The host is `role="application"`, is named by `aria-label` or `title`, describes itself from the data, and offers a hidden table with `dataTable`. See the [chart guide](../../../docs/charts.md).
+
 ## Components & Directives
 
 ### `<mona-chart>`
@@ -244,30 +360,51 @@ The root container that coordinates layout measurement, data domains, rendering 
 | `subtitle`               | `string`                             | `""`      | Subtitle text rendered beneath the title.                                                                                               |
 | `titleAlign`             | `ChartHeaderAlignment`               | `"start"` | Alignment of the chart title and subtitle: `"start"` and `"end"` follow the direction, `"center"`, and `"left"` and `"right"` stay on that side.                                                         |
 | `animation`              | `ChartAnimationInput`                | `true`    | Animation settings (`boolean` or `Partial<ChartAnimationOptions>`) for initial render, data transitions, and series visibility toggles. |
-| `aria-label`             | `string`                             | `"Chart"` | Accessible name for the chart container (falls back to `title`).                                                                        |
-| `aria-description`       | `string`                             | `""`      | Detailed accessible description explaining the chart's purpose and trends (falls back to `subtitle`).                                   |
+| `aria-label` | `string` | `""` | Accessible name; falls back to `title`, then the translated "Chart". |
+| `aria-description` | `string` | `""` | Replaces the generated summary in the chart's description; the keyboard help still follows. |
+| `class` | `string` | `""` | CSS classes applied to the chart container. |
+| `landmark` | `boolean` | `false` | Makes the host a `region` landmark instead of `role="application"`. |
+| `dataTable` | `boolean` | `false` | Adds a visually hidden table of the first 100 rows for screen readers. |
+| `renderer` | `ChartRendererMode` | `"canvas"` | Render with `"canvas"` or `"svg"`. |
+| `downsampling` | `ChartDownsamplingInput` | `true` | Density policy for dense continuous-X Cartesian series. |
+| `navigation` | `ChartNavigationInput` | `false` | Turns on pan and zoom for Cartesian charts. |
+| `viewport` | `ChartViewportState` | `undefined` | The active viewport. Bind `[(viewport)]`. While it is defined the parent owns the viewport. |
+| `defaultViewport` | `ChartViewportState` | `undefined` | The starting viewport when the parent does not control `viewport`. |
+| `synchronization` | `ChartSynchronizationInput` | `false` | Joins a named group that shares the viewport and crosshair across charts. |
+| `viewportChange` | `output<ChartViewportState>` | — | Emits the new viewport state. |
+| `viewportChangeDetails` | `output<ChartViewportChangeEvent>` | — | Emits each change with the previous state, source and gesture phase. |
 | `pointClick`             | `output<ChartPointEvent>`            | —         | Emits when a data point, vertex, bar, marker, or sector slice is clicked.                                                               |
 | `pointFocusChange`       | `output<ChartPointFocusEvent>`       | —         | Emits when keyboard focus moves to a new data point, marker, spoke, or slice.                                                           |
 | `seriesVisibilityChange` | `output<ChartSeriesVisibilityEvent>` | —         | Emits when a series visibility state is toggled via legend interaction.                                                                 |
 
-### Cartesian Axes (`<mona-chart-x-axis>`, `<mona-chart-y-axis>`)
+### `<mona-chart-x-axis>`
 
-| Input           | Type                     | Default               | Description                                                                                                                        |
-| :-------------- | :----------------------- | :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------- |
-| `axisLine`      | `boolean`                | `true`                | Whether to draw the baseline border axis line.                                                                                     |
-| `gridLines`     | `boolean`                | `auto`                | Whether to render orthogonal grid lines across the plot area (default `false` on X, `true` on Y in vertical charts).               |
-| `labels`        | `boolean`                | `true`                | Whether to render tick labels.                                                                                                     |
-| `labelRotation` | `ChartAxisLabelRotation` | `0`                   | Axis label rotation in degrees (`-90` to `90`) or `"auto"` (auto-rotates to -45° when labels collide on physical X category axis). |
-| `labelPadding`  | `number`                 | `4`                   | Spacing in pixels between the baseline/tick marks and the label bounds.                                                            |
-| `labelMaxWidth` | `number`                 | `undefined`           | Optional maximum width in pixels applied to label spans with text truncation.                                                      |
-| `tickMarks`     | `boolean`                | `false`               | Whether to render outward tick marks along the axis baseline.                                                                      |
-| `tickSize`      | `number`                 | `6`                   | Length in pixels of outward tick marks.                                                                                            |
-| `titlePadding`  | `number`                 | `8`                   | Spacing in pixels between the outer label edge and the axis title.                                                                 |
-| `position`      | `string`                 | `"bottom"` / `"start"` | Axis placement (`"bottom"` or `"top"` for X; `"start"`, `"end"`, `"left"` or `"right"` for Y). `start` and `end` follow the direction.                                                         |
-| `min` / `max`   | `number \| Date`         | `undefined`           | Explicit domain bounds for continuous scales.                                                                                      |
-| `nice`          | `boolean`                | `true`                | Rounds continuous domain bounds to clean tick increments.                                                                          |
-| `tickCount`     | `number`                 | `5`                   | Desired tick mark frequency for continuous scales or preferred maximum tick cap for category axes.                                 |
-| `visible`       | `boolean`                | `true`                | Whether the axis is visible.                                                                                                       |
+| Input           | Type                     | Default     | Description |
+| :-------------- | :----------------------- | :---------- | :---------- |
+| `axisLine`      | `boolean`                | `true`      | Whether to draw the baseline. |
+| `gridLines`     | `boolean`                | `undefined` | Whether to draw grid lines across the plot. Omitted, the axis default applies. |
+| `labels`        | `boolean`                | `true`      | Whether to draw tick labels. |
+| `labelRotation` | `ChartAxisLabelRotation` | `0`         | Label rotation in degrees (`-90` to `90`), or `"auto"`. |
+| `labelPadding`  | `number`                 | `undefined` | Space in pixels between the ticks and labels (effective default `4`). |
+| `labelMaxWidth` | `number`                 | `undefined` | Maximum width in pixels of a tick label. |
+| `tickMarks`     | `boolean`                | `false`     | Whether to draw tick marks. |
+| `tickSize`      | `number`                 | `undefined` | Length in pixels of the tick marks (effective default `6`). |
+| `titlePadding`  | `number`                 | `undefined` | Space in pixels between the labels and the title (effective default `6`). |
+| `position`      | `ChartXAxisPosition`     | `"bottom"`  | `"bottom"` or `"top"`. |
+| `min`           | `number \| Date`         | `undefined` | Lower domain bound of a continuous scale. |
+| `max`           | `number \| Date`         | `undefined` | Upper domain bound of a continuous scale. |
+| `nice`          | `boolean`                | `true`      | Rounds continuous domain bounds to clean tick values. |
+| `tickCount`     | `number`                 | `undefined` | Desired number of ticks (effective default `5`). |
+| `type`          | `ChartXAxisType`         | `"auto"`    | Scale type; `"auto"` infers it from the data. |
+| `visible`       | `boolean`                | `true`      | Whether the axis is visible. |
+
+### `<mona-chart-y-axis>`
+
+It takes the inputs above, without `Date` bounds or the `time` and `utc` types, and with its own position:
+
+| Input      | Type                 | Default   | Description |
+| :--------- | :------------------- | :-------- | :---------- |
+| `position` | `ChartYAxisPosition` | `"start"` | `"start"` and `"end"` follow the direction; `"left"` and `"right"` stay on that side. |
 
 ### Animation & Transitions
 
@@ -324,17 +461,17 @@ Renders a Cartesian bar series supporting standalone bars, grouped slots, stacke
 
 | Input / Output   | Type                  | Default      | Description                                                                                                 |
 | :--------------- | :-------------------- | :----------- | :---------------------------------------------------------------------------------------------------------- |
-| `field`          | `ChartField`          | `"value"`    | Property key or accessor extracting numeric bar height/value.                                               |
+| `field`          | `ChartField`          | `""` | Property key or accessor extracting the value. Object rows render nothing without it; rows that are plain numbers do not need it. |
 | `xField`         | `ChartField`          | `undefined`  | Property key or accessor extracting X-axis coordinate (overrides chart-level `xField`).                     |
 | `keyField`       | `ChartField`          | `undefined`  | Unique identifier field for stable mark tracking across animation transitions.                              |
-| `name`           | `string`              | `"Bar"`      | Series name for tooltips, legend, and accessibility.                                                        |
+| `name`           | `string`              | `""` | Series name for tooltips, legend and accessibility. Falls back to the field name when it is a string, then to "Series N". |
 | `orientation`    | `ChartBarOrientation` | `"vertical"` | Bar orientation: `"vertical"` (category on X, value on Y) or `"horizontal"` (category on Y, value on X).    |
 | `stack`          | `string`              | `undefined`  | Stack group name. Series sharing the same stack identifier are stacked cumulatively into a single bar slot. |
 | `stackMode`      | `ChartStackMode`      | `"normal"`   | Stacking calculation mode: `"normal"` (raw cumulative sum) or `"percent"` (normalized to 100%).             |
-| `borderRadius`   | `number`              | `0`          | Corner radius for the outer cap of the bar/stack.                                                           |
+| `borderRadius`   | `number`              | `undefined` | Corner radius for the outer cap of the bar/stack.                                                           |
 | `maxBarWidth`    | `number`              | `undefined`  | Maximum width/height of the bar in pixels.                                                                  |
-| `color`          | `string`              | `undefined`  | Bar fill color. Defaults to palette token.                                                                  |
-| `fillOpacity`    | `number`              | `1.0`        | Bar fill opacity between 0.0 and 1.0.                                                                       |
+| `color`          | `string`              | `""` | Bar fill color. Defaults to palette token.                                                                  |
+| `fillOpacity`    | `number`              | `undefined` | Bar fill opacity between 0.0 and 1.0.                                                                       |
 | `valueFormatter` | `ChartValueFormatter` | `undefined`  | Custom formatter callback for bar raw values and stack totals in tooltips and live region.                  |
 | `visible`        | `model(boolean)`      | `true`       | Two-way bindable series visibility.                                                                         |
 
@@ -344,16 +481,16 @@ Renders a Cartesian floating range bar series plotting discrete min-max interval
 
 | Input / Output   | Type                  | Default       | Description                                                                             |
 | :--------------- | :-------------------- | :------------ | :-------------------------------------------------------------------------------------- |
-| `fromField`      | `ChartField`          | (required)    | Property key or accessor extracting the range starting/lower value.                     |
-| `toField`        | `ChartField`          | (required)    | Property key or accessor extracting the range ending/upper value.                       |
+| `fromField`      | `ChartField`          | required | Property key or accessor extracting the range starting/lower value.                     |
+| `toField`        | `ChartField`          | required | Property key or accessor extracting the range ending/upper value.                       |
 | `xField`         | `ChartField`          | `undefined`   | Property key or accessor extracting X-axis coordinate (overrides chart-level `xField`). |
 | `orientation`    | `ChartBarOrientation` | `"vertical"`  | Bar orientation: `"vertical"` or `"horizontal"`.                                        |
 | `keyField`       | `ChartField`          | `undefined`   | Unique identifier field for stable mark tracking across animation transitions.          |
 | `name`           | `string`              | `"Range Bar"` | Series name for tooltips, legend, and accessibility.                                    |
-| `borderRadius`   | `number`              | `4`           | Corner radius applied to all 4 corners of floating bars.                                |
+| `borderRadius`   | `number`              | `undefined` | Corner radius applied to all 4 corners of floating bars.                                |
 | `maxBarWidth`    | `number`              | `undefined`   | Maximum width/height of the bar in pixels.                                              |
-| `color`          | `string`              | `undefined`   | Bar fill color. Defaults to palette token.                                              |
-| `fillOpacity`    | `number`              | `1.0`         | Bar fill opacity between 0.0 and 1.0.                                                   |
+| `color`          | `string`              | `""` | Bar fill color. Defaults to palette token.                                              |
+| `fillOpacity`    | `number`              | `undefined` | Bar fill opacity between 0.0 and 1.0.                                                   |
 | `valueFormatter` | `ChartValueFormatter` | `undefined`   | Custom formatter callback for formatting range bounds in tooltips and live region.      |
 | `visible`        | `model(boolean)`      | `true`        | Two-way bindable series visibility.                                                     |
 
@@ -364,15 +501,15 @@ Renders a continuous Cartesian line series connecting data points with configura
 | Input / Output   | Type                     | Default      | Description                                                                                          |
 | :--------------- | :----------------------- | :----------- | :--------------------------------------------------------------------------------------------------- |
 | `field`          | `ChartField`             | `""`         | Property key or accessor extracting numeric Y value.                                                 |
-| `xField`         | `ChartField | undefined` | `undefined`  | Property key or accessor extracting X-axis coordinate (overrides chart-level `xField`).              |
-| `keyField`       | `ChartField | undefined` | `undefined`  | Unique identifier field for stable mark tracking across animation transitions.                       |
+| `xField`         | `ChartField | `undefined` | `undefined`  | Property key or accessor extracting X-axis coordinate (overrides chart-level `xField`).              |
+| `keyField`       | `ChartField | `undefined` | `undefined`  | Unique identifier field for stable mark tracking across animation transitions.                       |
 | `name`           | `string`                 | `""`         | Series name for tooltips, legend, and accessibility.                                                 |
 | `lineStyle`      | `ChartLineStyle`         | `"solid"`    | Stroke pattern used to render the series line (`"solid"`, `"dashed"`, or `"dotted"`).               |
 | `curve`          | `ChartCurve`             | `"linear"`   | Curve interpolation algorithm (`"linear"`, `"monotone-x"`, `"natural"`, `"step"`, `"step-after"`).   |
 | `connectNulls`   | `boolean`                | `false`      | Whether to interpolate across null/missing data points without gaps.                                 |
 | `showPoints`     | `boolean`                | `false`      | Whether to render point markers at data coordinates.                                                 |
-| `pointRadius`    | `number | undefined`     | `undefined`  | Radius in pixels for point markers. Defaults to `--mona-chart-point-radius` (3px).                    |
-| `strokeWidth`    | `number | undefined`     | `undefined`  | Stroke width in pixels for the series line. Defaults to 2px.                                         |
+| `pointRadius`    | `number | `undefined` | `undefined`  | Radius in pixels for point markers. Defaults to `--mona-chart-point-radius` (3px).                    |
+| `strokeWidth`    | `number | `undefined` | `undefined`  | Stroke width in pixels for the series line. Defaults to 2px.                                         |
 | `color`          | `string`                 | `""`         | Explicit stroke color override for the series line. Defaults to palette token.                       |
 | `visible`        | `model(boolean)`         | `true`       | Two-way bindable series visibility.                                                                  |
 
@@ -382,22 +519,22 @@ Renders a continuous Cartesian area series supporting gradient fades, solid fill
 
 | Input / Output   | Type                     | Default      | Description                                                                                          |
 | :--------------- | :----------------------- | :----------- | :--------------------------------------------------------------------------------------------------- |
-| `field`          | `ChartField`             | `""`         | Property key or accessor extracting numeric Y value.                                                 |
-| `xField`         | `ChartField | undefined` | `undefined`  | Property key or accessor extracting X-axis coordinate (overrides chart-level `xField`).              |
-| `keyField`       | `ChartField | undefined` | `undefined`  | Unique identifier field for stable mark tracking across animation transitions.                       |
-| `name`           | `string`                 | `""`         | Series name for tooltips, legend, and accessibility.                                                 |
-| `stack`          | `string | undefined`     | `undefined`  | Stack group name. Series sharing the same stack identifier are stacked into cumulative bands.        |
+| `field`          | `ChartField`             | `""`         | Property key or accessor extracting the value. Object rows render nothing without it; rows that are plain numbers do not need it. |
+| `xField`         | `ChartField | `undefined` | `undefined`  | Property key or accessor extracting X-axis coordinate (overrides chart-level `xField`).              |
+| `keyField`       | `ChartField | `undefined` | `undefined`  | Unique identifier field for stable mark tracking across animation transitions.                       |
+| `name`           | `string`                 | `""`         | Series name for tooltips, legend and accessibility. Falls back to the field name when it is a string, then to "Series N". |
+| `stack`          | `string | `undefined` | `undefined`  | Stack group name. Series sharing the same stack identifier are stacked into cumulative bands.        |
 | `stackMode`      | `ChartStackMode`         | `"normal"`   | Stacking calculation mode: `"normal"` (raw cumulative sum) or `"percent"` (normalized to 100%).      |
 | `fillMode`       | `ChartAreaFillMode`      | `"gradient"` | Area fill style: `"gradient"` fading to zero baseline, or uniform `"solid"`.                        |
 | `lineStyle`      | `ChartLineStyle`         | `"solid"`    | Stroke pattern used for the area's boundary line (`"solid"`, `"dashed"`, or `"dotted"`). Fill is unaffected. |
-| `fillOpacity`    | `number | undefined`     | `undefined`  | Maximum opacity applied to the area fill. Defaults to 0.18.                                          |
+| `fillOpacity`    | `number | `undefined` | `undefined`  | Maximum opacity applied to the area fill. Defaults to 0.18.                                          |
 | `curve`          | `ChartCurve`             | `"linear"`   | Curve interpolation algorithm (`"linear"`, `"monotone-x"`, `"natural"`, `"step"`, `"step-after"`).   |
 | `connectNulls`   | `boolean`                | `false`      | Whether to interpolate across null/missing data points without gaps.                                 |
 | `showPoints`     | `boolean`                | `false`      | Whether to render point markers at data coordinates.                                                 |
-| `pointRadius`    | `number | undefined`     | `undefined`  | Radius in pixels for point markers. Defaults to `--mona-chart-point-radius` (4px).                    |
-| `strokeWidth`    | `number | undefined`     | `undefined`  | Stroke width in pixels for the area boundary line. Defaults to 2px.                                  |
+| `pointRadius`    | `number | `undefined` | `undefined`  | Radius in pixels for point markers. Defaults to `--mona-chart-point-radius` (4px).                    |
+| `strokeWidth`    | `number | `undefined` | `undefined`  | Stroke width in pixels for the area boundary line. Defaults to 2px.                                  |
 | `color`          | `string`                 | `""`         | Explicit stroke and fill color override for the area series. Defaults to palette token.              |
-| `valueFormatter` | `ChartValueFormatter | undefined` | `undefined` | Custom formatter callback for area raw values and stack totals in tooltips and live region.       |
+| `valueFormatter` | `ChartValueFormatter | `undefined` | `undefined` | Custom formatter callback for area raw values and stack totals in tooltips and live region.       |
 | `visible`        | `model(boolean)`         | `true`       | Two-way bindable series visibility.                                                                  |
 
 
@@ -408,18 +545,18 @@ Renders a continuous Cartesian range area series enclosing a confidence or varia
 
 | Input / Output   | Type                  | Default        | Description                                                                                        |
 | :--------------- | :-------------------- | :------------- | :------------------------------------------------------------------------------------------------- |
-| `fromField`      | `ChartField`          | (required)     | Property key or accessor extracting the range starting boundary value.                             |
-| `toField`        | `ChartField`          | (required)     | Property key or accessor extracting the range ending boundary value.                               |
+| `fromField`      | `ChartField`          | required | Property key or accessor extracting the range starting boundary value.                             |
+| `toField`        | `ChartField`          | required | Property key or accessor extracting the range ending boundary value.                               |
 | `xField`         | `ChartField`          | `undefined`    | Property key or accessor extracting X-axis coordinate (overrides chart-level `xField`).            |
 | `keyField`       | `ChartField`          | `undefined`    | Unique identifier field for stable mark tracking across animation transitions.                     |
 | `name`           | `string`              | `"Range Area"` | Series name for tooltips, legend, and accessibility.                                               |
-| `fillOpacity`    | `number`              | `0.18`         | Range band fill opacity between 0.0 and 1.0.                                                       |
+| `fillOpacity`    | `number`              | `undefined` | Range band fill opacity between 0.0 and 1.0.                                                       |
 | `curve`          | `ChartCurve`          | `"linear"`     | Curve interpolation algorithm (`"linear"`, `"monotone-x"`, `"natural"`, `"step"`, `"step-after"`). |
 | `connectNulls`   | `boolean`             | `false`        | Whether to interpolate across null/missing data points.                                            |
 | `showPoints`     | `boolean`             | `false`        | Whether to render point markers at boundary coordinates.                                           |
-| `pointRadius`    | `number`              | `4`            | Boundary marker radius in pixels when `showPoints` is true.                                        |
-| `strokeWidth`    | `number`              | `2`            | Boundary outline stroke width in pixels.                                                           |
-| `color`          | `string`              | `undefined`    | Range band line and fill color. Defaults to palette token.                                         |
+| `pointRadius`    | `number`              | `undefined` | Boundary marker radius in pixels when `showPoints` is true.                                        |
+| `strokeWidth`    | `number`              | `undefined` | Boundary outline stroke width in pixels.                                                           |
+| `color`          | `string`              | `""` | Range band line and fill color. Defaults to palette token.                                         |
 | `valueFormatter` | `ChartValueFormatter` | `undefined`    | Custom formatter callback for formatting range bounds in tooltips and live region.                 |
 | `visible`        | `model(boolean)`      | `true`         | Two-way bindable series visibility.                                                                |
 
@@ -433,11 +570,11 @@ Renders a Cartesian scatter series representing individual points along continuo
 | `xField`       | `ChartField`     | `undefined` | Property key or accessor extracting X-axis coordinate (overrides chart-level `xField`). |
 | `keyField`     | `ChartField`     | `undefined` | Unique identifier field for stable mark tracking across animation transitions.          |
 | `name`         | `string`         | `"Scatter"` | Series name for tooltips, legend, and accessibility.                                    |
-| `color`        | `string`         | `undefined` | Series mark color. Defaults to palette token.                                           |
+| `color`        | `string`         | `""` | Series mark color. Defaults to palette token.                                           |
 | `pointRadius`  | `number`         | `undefined` | Marker circle radius in pixels. Defaults to `--mona-chart-point-radius` (4px).          |
-| `fillOpacity`  | `number`         | `0.9`       | Fill opacity between 0.0 and 1.0.                                                       |
-| `strokeColor`  | `string`         | `"#ffffff"` | Border stroke color.                                                                    |
-| `strokeWidth`  | `number`         | `1.5`       | Border stroke width in pixels.                                                          |
+| `fillOpacity`  | `number`         | `undefined` | Fill opacity between 0.0 and 1.0.                                                       |
+| `strokeColor`  | `string`         | `""` | Border stroke color.                                                                    |
+| `strokeWidth`  | `number`         | `undefined` | Border stroke width in pixels.                                                          |
 | `visible`      | `model(boolean)` | `true`      | Two-way bindable series visibility.                                                     |
 
 ### `<mona-bubble-series>`
@@ -449,28 +586,28 @@ Renders a Cartesian bubble series encoding a 3rd quantitative dimension into mar
 | `field`         | `ChartField`                  | `"value"`   | Property key or accessor extracting numeric Y-axis coordinate.                                                   |
 | `sizeField`     | `ChartField`                  | `"size"`    | Property key or accessor extracting quantitative magnitude for bubble area.                                      |
 | `sizeFormatter` | `ChartValueFormatter<number>` | `undefined` | Formatter callback generating formatted size strings for tooltips and accessibility announcements.               |
-| `minRadius`     | `number`                      | `undefined` | Minimum bubble radius in pixels for the minimum size value. Defaults to `--mona-chart-bubble-min-radius` (4px).  |
-| `maxRadius`     | `number`                      | `undefined` | Maximum bubble radius in pixels for the maximum size value. Defaults to `--mona-chart-bubble-max-radius` (24px). |
+| `minRadius`     | `number`                      | `4` | Minimum bubble radius in pixels for the minimum size value. Defaults to `--mona-chart-bubble-min-radius` (4px).  |
+| `maxRadius`     | `number`                      | `24` | Maximum bubble radius in pixels for the maximum size value. Defaults to `--mona-chart-bubble-max-radius` (24px). |
 | `xField`        | `ChartField`                  | `undefined` | Property key or accessor extracting X-axis coordinate (overrides chart-level `xField`).                          |
 | `keyField`      | `ChartField`                  | `undefined` | Unique identifier field for stable mark tracking across animation transitions.                                   |
 | `name`          | `string`                      | `"Bubble"`  | Series name for tooltips, legend, and accessibility.                                                             |
-| `color`         | `string`                      | `undefined` | Series mark color. Defaults to palette token.                                                                    |
-| `fillOpacity`   | `number`                      | `0.55`      | Fill opacity between 0.0 and 1.0.                                                                                |
-| `strokeColor`   | `string`                      | `"#ffffff"` | Border stroke color.                                                                                             |
-| `strokeWidth`   | `number`                      | `1.5`       | Border stroke width in pixels.                                                                                   |
+| `color`         | `string`                      | `""` | Series mark color. Defaults to palette token.                                                                    |
+| `fillOpacity`   | `number`                      | `undefined` | Fill opacity between 0.0 and 1.0.                                                                                |
+| `strokeColor`   | `string`                      | `""` | Border stroke color.                                                                                             |
+| `strokeWidth`   | `number`                      | `undefined` | Border stroke width in pixels.                                                                                   |
 | `visible`       | `model(boolean)`              | `true`      | Two-way bindable series visibility.                                                                              |
 
 ### CSS Variables for Styling
 
-Mona UI Charts support theme customization via standard CSS custom properties:
+Mona UI Charts support theme customization via standard CSS custom properties. The [chart guide](../../../docs/charts.md#6-theming) lists all of them:
 
 ```css
 :root {
     --mona-chart-point-radius: 5px;
     --mona-chart-bubble-min-radius: 4px;
     --mona-chart-bubble-max-radius: 28px;
-    --mona-chart-focus-indicator-color: #3b82f6;
-    --mona-chart-focus-indicator-width: 2px;
+    --mona-chart-grid-color: #e2e8f0;
+    --mona-chart-financial-rising-color: #15803d;
 }
 ```
 
@@ -484,7 +621,7 @@ Configures the angular (spoke / degree) dimension in Polar and Radar charts.
 | `gridLines` | `boolean` | `true`  | Whether to render radiating spoke lines from the pole to the outer boundary. |
 | `labels`    | `boolean` | `true`  | Whether to render angular category/degree labels.                            |
 | `rotation`  | `number`  | `0`     | Angle rotation in degrees (clockwise) of the 0° reference position.          |
-| `tickCount` | `number`  | `12`    | Desired number of angular ticks for continuous polar charts.                 |
+| `tickCount` | `number`  | `undefined` | Desired number of angular ticks for continuous polar charts.                 |
 | `visible`   | `boolean` | `true`  | Whether the angular axis is visible.                                         |
 
 ### `<mona-chart-radial-axis>`
@@ -511,7 +648,7 @@ Renders a closed polygonal series comparing categorical metrics across angular s
 | `categoryField` | `ChartField`          | `"category"` | Property key or accessor extracting spoke category.                            |
 | `keyField`      | `ChartField`          | `undefined`  | Unique identifier field for stable mark tracking across animation transitions. |
 | `name`          | `string`              | `"Radar"`    | Series name for tooltips, legend, and accessibility.                           |
-| `fillMode`      | `ChartRadialFillMode` | `"solid"`    | Fill styling: `"solid"` wash, radial `"gradient"`, or `"none"`.                |
+| `fillMode`      | `ChartRadialFillMode` | `"none"` | Fill styling: `"solid"` wash, radial `"gradient"`, or `"none"`.                |
 | `curve`         | `ChartRadialCurve`    | `"linear"`   | Curve interpolation: `"linear"` or `"smooth"` (closed Catmull-Rom spline).     |
 | `showPoints`    | `boolean`             | `true`       | Whether vertex point markers are rendered.                                     |
 | `pointRadius`   | `number`              | `undefined`  | Vertex marker radius in pixels.                                                |
@@ -542,20 +679,20 @@ Renders a 2D matrix heatmap visualization with perceptual Culori color scale int
 | Input / Output   | Type                    | Default        | Description                                                                                   |
 | :--------------- | :---------------------- | :------------- | :-------------------------------------------------------------------------------------------- |
 | `data`           | `readonly unknown[]`    | `undefined`    | Matrix cell dataset or sparse records.                                                        |
-| `field`          | `ChartField`            | `"value"`      | Property key or accessor extracting numeric heat value.                                       |
-| `xField`         | `ChartField`            | `"x"`          | Property key or accessor extracting X category column.                                        |
-| `yField`         | `ChartField`            | `"y"`          | Property key or accessor extracting Y category row.                                           |
+| `field`          | `ChartField`            | required | Property key or accessor extracting numeric heat value.                                       |
+| `xField`         | `ChartField`            | `undefined` | Property key or accessor extracting X category column.                                        |
+| `yField`         | `ChartField`            | required | Property key or accessor extracting Y category row.                                           |
 | `keyField`       | `ChartField`            | `undefined`    | Unique identifier field for stable cell mark tracking across animation transitions.           |
-| `color`          | `string`                | `undefined`    | Custom single base color for sequential ramp generation.                                      |
+| `color`          | `string`                | `""` | Custom single base color for sequential ramp generation.                                      |
 | `colors`         | `readonly string[]`     | `undefined`    | Custom palette stops for color interpolation.                                                 |
 | `colorMode`      | `ChartHeatmapColorMode` | `"sequential"` | Color scale mode: `"sequential"` or `"diverging"`.                                            |
 | `min`            | `number`                | `undefined`    | Explicit minimum domain value for color scale.                                                |
 | `max`            | `number`                | `undefined`    | Explicit maximum domain value for color scale.                                                |
 | `midpoint`       | `number`                | `undefined`    | Explicit midpoint value for diverging color scales (defaults to `(min + max) / 2`).           |
 | `cellGap`        | `number`                | `1`            | Pixel gap between matrix cells.                                                               |
-| `borderRadius`   | `number`                | `0`            | Corner border radius in pixels for each cell rectangle.                                       |
-| `strokeColor`    | `string`                | `undefined`    | Optional cell border outline color.                                                           |
-| `strokeWidth`    | `number`                | `0`            | Optional cell border outline width in pixels.                                                 |
+| `borderRadius`   | `number`                | `undefined` | Corner border radius in pixels for each cell rectangle.                                       |
+| `strokeColor`    | `string`                | `""` | Optional cell border outline color.                                                           |
+| `strokeWidth`    | `number`                | `undefined` | Optional cell border outline width in pixels.                                                 |
 | `showValues`     | `boolean`               | `false`        | Whether to render numeric text labels inside cells with high-contrast text color calculation. |
 | `xCategories`    | `readonly unknown[]`    | `undefined`    | Explicit X-axis category order.                                                               |
 | `yCategories`    | `readonly unknown[]`    | `undefined`    | Explicit Y-axis category order.                                                               |
