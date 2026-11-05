@@ -517,6 +517,24 @@ export const ALLOWLIST: AllowlistEntry[] = [
     },
     {
         category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/window/directives/window-drag-handler.directive.ts",
+        lineSnippet: "rect.left",
+        reason: "Desktop window drag handler operates in 2D viewport coordinates"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/sheet/styles/sheet.styles.ts",
+        lineSnippet: "border-l border-border",
+        reason: "The sheet resolves start/end to a physical side when it opens; its border faces the page on that physical edge"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/sheet/styles/sheet.styles.ts",
+        lineSnippet: "border-r border-border",
+        reason: "The sheet resolves start/end to a physical side when it opens; its border faces the page on that physical edge"
+    },
+    {
+        category: "rtl-manual-review",
         filePattern: "projects/mona-ui/window/directives/window-resize-handler.directive.ts",
         lineSnippet: "element.style.left",
         reason: "Desktop window resize handler operates in 2D viewport coordinates"
