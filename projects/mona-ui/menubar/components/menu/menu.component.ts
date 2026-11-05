@@ -1,22 +1,14 @@
-import {
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    contentChild,
-    contentChildren,
-    input,
-    TemplateRef
-} from "@angular/core";
+import { Component, computed, contentChild, contentChildren, effect, input, TemplateRef } from "@angular/core";
 import { any } from "@mirei/ts-collections";
+import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { MenuItem, PopupMenuComponent, PopupMenuToken, preparePopupMenuItems } from "@nanahoshi/mona-ui/popup-menu";
-import { v4 } from "uuid";
 import { MenuIconTemplateDirective } from "../../directives/menu-icon-template.directive";
 import { MenuTextTemplateDirective } from "../../directives/menu-text-template.directive";
+import { ensureMenubarComponentTypes } from "../../utils/menubar.utils";
 
 @Component({
     selector: "mona-menu",
-    template: "",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    template: ""
 })
 export class MenuComponent {
     private readonly menuItemComponents = contentChildren(PopupMenuToken, { descendants: false });
@@ -47,6 +39,10 @@ export class MenuComponent {
      */
     public readonly text = input("");
     public readonly textTemplate = contentChild(MenuTextTemplateDirective, { read: TemplateRef });
-    public readonly uid = v4();
+    public readonly uid = createElementControlId();
     public popupMenu: PopupMenuComponent | null = null;
+
+    public constructor() {
+        effect(() => ensureMenubarComponentTypes(this.menuItemComponents()));
+    }
 }

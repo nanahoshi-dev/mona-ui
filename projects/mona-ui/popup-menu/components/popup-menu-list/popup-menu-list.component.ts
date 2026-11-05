@@ -1,16 +1,29 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { afterNextRender, Component, computed, DestroyRef, ElementRef, inject, OnInit, signal } from "@angular/core";
+import {
+    afterNextRender,
+    Component,
+    computed,
+    DestroyRef,
+    DOCUMENT,
+    effect,
+    ElementRef,
+    inject,
+    OnInit,
+    signal,
+    untracked
+} from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { LucideCheck, LucideChevronRight } from "@lucide/angular";
 import { createElementControlId, isNavigationKey, isTypeaheadKey, setupTypeahead } from "@nanahoshi/mona-ui/internal";
-import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { PopupCloseEvent, PopupDataInjectionToken, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
-import { groupBy, selectMany } from "@mirei/ts-collections";
-import { filter, fromEvent, Observable, Subject, switchMap, take, takeUntil, tap } from "rxjs";
+import { injectComponentDirection } from "@nanahoshi/mona-ui/i18n";
+import { PopupDataInjectionToken, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
+import { selectMany } from "@mirei/ts-collections";
+import { fromEvent, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { PopupMenuItem } from "../../models/PopupMenuItem";
 import { PopupMenuItemClickEvent } from "../../models/PopupMenuItemClickEvent";
 import { PopupMenuListConfig } from "../../models/PopupMenuListConfig";
+import { groupPopupMenuItems } from "../../utils/popup-menu.utils";
 import {
     popupMenuBaseThemeVariants,
     popupMenuContainerThemeVariants,
@@ -20,62 +33,45 @@ import {
     popupMenuLinkThemeVariants
 } from "../../styles/popup-menu.styles";
 
+/**
+ * How long the pointer can cross other items, while a submenu is open, before that submenu closes. It gives the
+ * pointer time to travel diagonally from a parent item to its submenu.
+ */
+const SUBMENU_SWITCH_DELAY = 250;
+
 @Component({
     selector: "mona-popup-menu-list",
     imports: [NgTemplateOutlet, LucideChevronRight, LucideCheck],
     templateUrl: "./popup-menu-list.component.html",
     host: {
-        "[class]": "baseClasses()"
+        "[class]": "baseClasses()",
+        "(focusout)": "onFocusOut($event)",
+        "(pointerenter)": "onHostPointerEnter()"
     }
 })
 export class PopupMenuListComponent implements OnInit {
     readonly #childCloseRequest$ = new Subject<void>();
-    readonly #childMenuItems = computed(() => {
-        const activeMenuItem = this.activeMenuItem();
-        if (activeMenuItem) {
-            return groupBy(activeMenuItem.items, item => item.group).toArray();
-        }
-        return [];
-    });
-    readonly #close$ = new Subject<void>();
-    readonly #config = computed(() => {
-        const data: PopupMenuListConfig = {
-            childCloseRequest$: this.#childCloseRequest$,
-            isRoot: false,
-            items: this.#childMenuItems(),
-            level: this.#parentConfig.level + 1,
-            menuId: createElementControlId(this.#parentConfig.level + 1),
-            menuItemClick$: this.#parentConfig.menuItemClick$,
-            minWidth: this.#parentConfig.minWidth,
-            navigate$: this.#parentConfig.navigate$,
-            parentClose$: this.#close$,
-            popupGroupTemplate: this.#parentConfig.popupGroupTemplate,
-            popupIconTemplate: this.#parentConfig.popupIconTemplate,
-            popupShortcutTemplate: this.#parentConfig.popupShortcutTemplate,
-            popupTextTemplate: this.#parentConfig.popupTextTemplate,
-            rounded: this.#parentConfig.rounded,
-            size: this.#parentConfig.size,
-            viaKeyboardNavigation: this.#viaKeyboardNavigation(),
-            width: this.#parentConfig.width
-        };
-        return data;
-    });
     readonly #destroyRef = inject(DestroyRef);
     readonly #direction = injectComponentDirection();
+    readonly #document = inject(DOCUMENT);
     readonly #host = inject(ElementRef<HTMLElement>);
-    readonly #i18n = inject(MonaI18nService);
-    protected readonly isRtl = computed(() => this.#direction() === "rtl");
+    // Disabled items stay in the arrow-key order (they can't be activated), as the APG menu pattern asks.
     readonly #navigationItems = computed(() => {
-        const items = this.#parentConfig.items;
-        return selectMany(items, i => i.source)
-            .where(i => !i.separator && !i.disabled)
+        const items = this.#parentConfig.items();
+        return selectMany(items, i => i.items)
+            .where(i => !i.separator)
             .toImmutableSet();
     });
+    readonly #openSubmenuItem = signal<PopupMenuItem | null>(null);
     readonly #parentConfig = inject<PopupMenuListConfig>(PopupDataInjectionToken);
     readonly #popupService = inject(PopupService);
+    readonly #submenuId = signal<string | null>(null);
     readonly #typeaheadKey$ = new Subject<string>();
-    readonly #viaKeyboardNavigation = signal(false);
+    #childClose$: Subject<void> | null = null;
+    #closing = false;
+    #hoverTimer: ReturnType<typeof setTimeout> | undefined;
     protected readonly activeMenuItem = signal<PopupMenuItem | null>(null);
+    protected readonly ariaLabel = this.#parentConfig.ariaLabel || null;
     protected readonly baseClasses = computed(() => {
         const rounded = this.#parentConfig.rounded();
         return popupMenuBaseThemeVariants({ rounded });
@@ -89,8 +85,8 @@ export class PopupMenuListComponent implements OnInit {
         return popupMenuGroupHeaderThemeVariants({ size });
     });
     protected readonly iconAreaVisible = computed(() => {
-        const items = this.#parentConfig.items;
-        const hasIconsOrSelectable = selectMany(items, i => i.source).any(
+        const items = this.#parentConfig.items();
+        const hasIconsOrSelectable = selectMany(items, i => i.items).any(
             i => i.iconTemplate?.() != null || i.checkable === true || i.radio === true
         );
         return hasIconsOrSelectable || !!this.#parentConfig.popupIconTemplate?.();
@@ -98,6 +94,8 @@ export class PopupMenuListComponent implements OnInit {
     protected readonly iconContainerClasses = computed(() => {
         return popupMenuIconContainerThemeVariants();
     });
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
+    protected readonly labelledBy = this.ariaLabel ? null : this.#parentConfig.labelledBy;
     protected readonly linkContainerClasses = computed(() => {
         return popupMenuLinkThemeVariants();
     });
@@ -110,25 +108,60 @@ export class PopupMenuListComponent implements OnInit {
         const iconClasses = hasIcon ? "ps-8" : "ps-2";
         return twMerge(variantClasses, iconClasses);
     });
-    protected readonly menuItems = computed(() => this.#parentConfig.items);
-    protected readonly pointerEnter$ = new Subject<{ event: PointerEvent; item: PopupMenuItem }>();
-    protected readonly pointerLeave$ = new Subject<{ event: PointerEvent; item: PopupMenuItem }>();
+    protected readonly menuItems = computed(() => this.#parentConfig.items());
+    protected readonly openSubmenuItem = this.#openSubmenuItem.asReadonly();
     protected readonly popupGroupTemplate = computed(() => this.#parentConfig.popupGroupTemplate?.() ?? null);
     protected readonly popupIconTemplate = computed(() => this.#parentConfig.popupIconTemplate?.() ?? null);
     protected readonly popupShortcutTemplate = computed(() => this.#parentConfig.popupShortcutTemplate?.() ?? null);
     protected readonly popupTextTemplate = computed(() => this.#parentConfig.popupTextTemplate?.());
+    protected readonly submenuId = this.#submenuId.asReadonly();
     protected popupRef: PopupRef | null = null;
 
     public constructor() {
         afterNextRender({
-            read: () => {
-                this.#host.nativeElement.firstElementChild?.focus();
-                if (!this.#parentConfig.isRoot && this.#parentConfig.viaKeyboardNavigation) {
+            // Moving focus and the highlight writes to the page, so this is the write phase.
+            write: () => {
+                const config = this.#parentConfig;
+                // A submenu opened by the pointer leaves focus in its parent menu.
+                if (config.isRoot || config.viaKeyboardNavigation) {
+                    this.#menuElement()?.focus();
+                }
+                if (config.isRoot && config.initialFocus) {
+                    if (config.initialFocus === "last") {
+                        this.handleEndKey();
+                    } else {
+                        this.focusFirstItem();
+                    }
+                } else if (!config.isRoot && config.viaKeyboardNavigation) {
                     const item = this.focusFirstItem();
                     const isRtl = this.isRtl();
                     this.notifyNavigation(item, isRtl ? "left" : "right");
                 }
             }
+        });
+        // Items can change while the menu is open: keep the highlight and the open submenu on the same items.
+        effect(() => {
+            const items = this.#navigationItems();
+            untracked(() => {
+                const active = this.activeMenuItem();
+                if (active && !items.any(i => i === active)) {
+                    this.activeMenuItem.set(items.firstOrDefault(i => i.uid === active.uid) ?? null);
+                }
+                const open = this.#openSubmenuItem();
+                if (open && !items.any(i => i === open)) {
+                    const current = items.firstOrDefault(i => i.uid === open.uid);
+                    if (current && current.items.length > 0) {
+                        this.#openSubmenuItem.set(current);
+                    } else {
+                        this.closePopup();
+                    }
+                }
+            });
+        });
+        this.#destroyRef.onDestroy(() => {
+            clearTimeout(this.#hoverTimer);
+            this.#closing = true;
+            this.closePopup();
         });
     }
 
@@ -136,7 +169,37 @@ export class PopupMenuListComponent implements OnInit {
         this.setSubscriptions();
     }
 
+    #menuElement(): HTMLElement | null {
+        return this.#host.nativeElement.firstElementChild as HTMLElement | null;
+    }
+
+    protected asItems(items: unknown): readonly PopupMenuItem[] {
+        return items as readonly PopupMenuItem[];
+    }
+
+    protected onFocusOut(event: FocusEvent): void {
+        const next = event.relatedTarget;
+        // Focus that leaves every menu of the chain closes it. Focus moving between the menus doesn't, and nor does
+        // focus going nowhere (the window losing focus).
+        if (next instanceof Element && !next.closest("mona-popup-menu-list")) {
+            this.#parentConfig.closeMenu({ focusLeftTo: next });
+        }
+    }
+
+    protected onHostPointerEnter(): void {
+        this.#parentConfig.submenuPointerEnter?.();
+    }
+
     protected onItemClick(event: MouseEvent, item: PopupMenuItem): void {
+        if (item.disabled) {
+            return;
+        }
+        if (item.items.length > 0) {
+            // An item with a submenu opens it; only leaf items are activated. A click with no pointer behind it
+            // (assistive technology) opens the submenu as the keyboard does.
+            this.openSubmenuFromClick(item, event.currentTarget as HTMLElement | null, event.detail === 0);
+            return;
+        }
         const popupMenuItemClickEvent = new PopupMenuItemClickEvent(item, event);
         item.click$?.next(popupMenuItemClickEvent);
         if (popupMenuItemClickEvent.isDefaultPrevented()) {
@@ -145,44 +208,109 @@ export class PopupMenuListComponent implements OnInit {
         this.#parentConfig.menuItemClick$.next(popupMenuItemClickEvent);
     }
 
-    private closePopup(): void {
-        if (this.popupRef) {
-            this.popupRef.close();
-            this.popupRef = null;
+    protected onItemPointerEnter(event: PointerEvent, item: PopupMenuItem): void {
+        clearTimeout(this.#hoverTimer);
+        const open = this.#openSubmenuItem();
+        if (open === item) {
+            this.activeMenuItem.set(item);
+            return;
         }
-        this.#close$.next();
+        const target = event.currentTarget as HTMLElement;
+        const hover = (): void => {
+            this.closePopup();
+            if (item.items.length > 0 && !item.disabled) {
+                this.activeMenuItem.set(item);
+                this.createSubmenu(target, false, item);
+            } else {
+                this.activeMenuItem.set(null);
+            }
+        };
+        if (open) {
+            // Wait before switching, so the pointer can cross other items on its way into the open submenu.
+            this.#hoverTimer = setTimeout(hover, SUBMENU_SWITCH_DELAY);
+        } else {
+            hover();
+        }
+    }
+
+    private closePopup(): void {
+        const ref = this.popupRef;
+        this.popupRef = null;
+        this.#openSubmenuItem.set(null);
+        this.#submenuId.set(null);
+        const childClose$ = this.#childClose$;
+        this.#childClose$ = null;
+        childClose$?.next();
+        if (ref) {
+            this.reclaimFocus();
+            ref.close();
+        }
     }
 
     private closeSubmenu(): void {
         this.#parentConfig.childCloseRequest$?.next();
     }
 
-    private createSubmenu(target: HTMLElement, viaKeyboard: boolean): Observable<PopupCloseEvent> {
-        this.#viaKeyboardNavigation.set(viaKeyboard);
-        const minWidth = this.#parentConfig.minWidth?.() ?? undefined;
-        const width = this.#parentConfig.width?.() ?? undefined;
-        this.popupRef = this.#popupService.create({
+    private createSubmenu(target: HTMLElement, viaKeyboard: boolean, item: PopupMenuItem): void {
+        // One submenu at a time: a submenu that is open (for this item or another) closes first.
+        this.closePopup();
+        const uid = item.uid;
+        const close$ = new Subject<void>();
+        const menuId = createElementControlId(this.#parentConfig.level + 1);
+        const data: PopupMenuListConfig = {
+            childCloseRequest$: this.#childCloseRequest$,
+            closeMenu: this.#parentConfig.closeMenu,
+            isRoot: false,
+            items: computed(() => groupPopupMenuItems(this.findItem(uid)?.items ?? [])),
+            labelledBy: uid,
+            level: this.#parentConfig.level + 1,
+            menuId,
+            menuItemClick$: this.#parentConfig.menuItemClick$,
+            minWidth: this.#parentConfig.minWidth,
+            navigate$: this.#parentConfig.navigate$,
+            parentClose$: close$,
+            popupGroupTemplate: this.#parentConfig.popupGroupTemplate,
+            popupIconTemplate: this.#parentConfig.popupIconTemplate,
+            popupShortcutTemplate: this.#parentConfig.popupShortcutTemplate,
+            popupTextTemplate: this.#parentConfig.popupTextTemplate,
+            rounded: this.#parentConfig.rounded,
+            size: this.#parentConfig.size,
+            submenuPointerEnter: () => this.onSubmenuPointerEnter(),
+            viaKeyboardNavigation: viaKeyboard,
+            width: this.#parentConfig.width
+        };
+        const ref = this.#popupService.create({
             anchor: target,
             anchorConnectionPoint: "topright",
             closeOnScroll: true,
             content: PopupMenuListComponent,
-            data: this.#config(),
-            minWidth,
+            data,
+            minWidth: this.#parentConfig.minWidth?.() ?? undefined,
             popupConnectionPoint: "topleft",
             restoreFocus: false,
-            width
+            width: this.#parentConfig.width?.() ?? undefined
         });
-        return this.popupRef.closed.pipe(
-            take(1),
-            tap(() => {
-                this.popupRef = null;
-                this.#host.nativeElement.firstElementChild?.focus();
-                this.#close$.next();
-                if (!viaKeyboard) {
-                    this.activeMenuItem.set(null);
-                }
-            })
-        );
+        this.popupRef = ref;
+        this.#childClose$ = close$;
+        this.#openSubmenuItem.set(item);
+        this.#submenuId.set(menuId);
+        ref.closed.pipe(take(1)).subscribe(() => {
+            close$.complete();
+            // Closed by the popup itself (Escape, scroll); a submenu closed or replaced from here is done already.
+            if (this.popupRef !== ref) {
+                return;
+            }
+            this.popupRef = null;
+            this.#childClose$ = null;
+            this.#openSubmenuItem.set(null);
+            this.#submenuId.set(null);
+            if (!this.#closing) {
+                this.#menuElement()?.focus();
+            }
+            if (!viaKeyboard) {
+                this.activeMenuItem.set(null);
+            }
+        });
     }
 
     private cycleThroughMatchedItems(buffer: string): void {
@@ -191,7 +319,6 @@ export class PopupMenuListComponent implements OnInit {
             .toArray();
         const activeMenuItem = this.activeMenuItem();
         if (matchedItems.length === 0) {
-            this.activeMenuItem.set(null);
             return;
         }
         if (matchedItems.length === 1) {
@@ -203,6 +330,10 @@ export class PopupMenuListComponent implements OnInit {
             const nextIndex = (currentIndex + 1) % matchedItems.length;
             this.activeMenuItem.set(matchedItems[nextIndex]);
         }
+    }
+
+    private findItem(uid: string): PopupMenuItem | null {
+        return this.#navigationItems().firstOrDefault(i => i.uid === uid) ?? null;
     }
 
     private focusFirstItem(): PopupMenuItem | null {
@@ -264,10 +395,13 @@ export class PopupMenuListComponent implements OnInit {
 
     private handleEnterKey(): void {
         const activeItem = this.activeMenuItem();
+        if (activeItem?.disabled) {
+            return;
+        }
         if (activeItem && activeItem.items.length > 0) {
             const target = this.#host.nativeElement.querySelector('[data-active="true"]');
             if (target) {
-                this.createSubmenu(target as HTMLElement, true).subscribe();
+                this.createSubmenu(target as HTMLElement, true, activeItem);
             }
         } else if (activeItem) {
             const syntheticEvent = new MouseEvent("click", {
@@ -338,14 +472,23 @@ export class PopupMenuListComponent implements OnInit {
         });
     }
 
+    private onSubmenuPointerEnter(): void {
+        // The pointer reached the open submenu: keep it, and its parent item highlighted.
+        clearTimeout(this.#hoverTimer);
+        const open = this.#openSubmenuItem();
+        if (open) {
+            this.activeMenuItem.set(open);
+        }
+    }
+
     private openSubmenu(): { item: PopupMenuItem | null; hasChild: boolean } {
         const activeItem = this.activeMenuItem();
-        if (!activeItem) {
+        if (!activeItem || activeItem.disabled) {
             return { item: null, hasChild: false };
         }
         const target = this.#host.nativeElement.querySelector('[data-active="true"]');
         if (target && activeItem.items.length > 0) {
-            this.createSubmenu(target as HTMLElement, true).subscribe();
+            this.createSubmenu(target as HTMLElement, true, activeItem);
             return { item: activeItem, hasChild: true };
         }
         if (activeItem && activeItem.items.length > 0) {
@@ -354,13 +497,38 @@ export class PopupMenuListComponent implements OnInit {
         return { item: null, hasChild: false };
     }
 
+    private openSubmenuFromClick(item: PopupMenuItem, target: HTMLElement | null, viaKeyboard: boolean): void {
+        if (!target || (this.popupRef && this.#openSubmenuItem() === item)) {
+            return;
+        }
+        this.activeMenuItem.set(item);
+        this.createSubmenu(target, viaKeyboard, item);
+    }
+
+    private reclaimFocus(): void {
+        // Focus inside the closing submenu (or deeper) comes back to this menu.
+        if (this.#closing) {
+            return;
+        }
+        const active = this.#document.activeElement;
+        if (active && !this.#host.nativeElement.contains(active) && active.closest("mona-popup-menu-list")) {
+            this.#menuElement()?.focus();
+        }
+    }
+
     private setKeyboardEvents(): void {
-        const element = this.#host.nativeElement.firstElementChild as HTMLDivElement;
+        const element = this.#menuElement();
+        if (!element) {
+            return;
+        }
         fromEvent<KeyboardEvent>(element, "keydown")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
                 tap(e => {
-                    if (isNavigationKey(e.key)) {
+                    if (e.key === "Tab") {
+                        // Tab closes every menu and moves on from the trigger, as the APG menu button asks.
+                        this.#parentConfig.closeMenu({ tab: true });
+                    } else if (isNavigationKey(e.key)) {
                         e.preventDefault();
                         this.#typeaheadKey$.next("");
                         this.handleNavigationKey(e);
@@ -373,36 +541,14 @@ export class PopupMenuListComponent implements OnInit {
             .subscribe();
     }
 
-    private setPointerSubscriptions(): void {
-        this.pointerEnter$
-            .pipe(
-                takeUntilDestroyed(this.#destroyRef),
-                takeUntil(this.#parentConfig.parentClose$),
-                filter(e => e.item !== this.activeMenuItem()),
-                tap(e => {
-                    this.closePopup();
-                    if (e.item.items.length === 0) {
-                        this.activeMenuItem.set(null);
-                    }
-                }),
-                filter(e => e.item.items.length > 0),
-                switchMap(e => {
-                    this.activeMenuItem.set(e.item);
-                    return this.createSubmenu(e.event.currentTarget as HTMLElement, false);
-                })
-            )
-            .subscribe();
-
-        this.pointerLeave$
-            .pipe(takeUntilDestroyed(this.#destroyRef), takeUntil(this.pointerEnter$))
-            .subscribe(() => this.popupRef?.close());
-    }
-
     private setPopupCloseSubscription(): void {
         this.#parentConfig.parentClose$
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                tap(() => this.closePopup())
+                tap(() => {
+                    this.#closing = true;
+                    this.closePopup();
+                })
             )
             .subscribe();
         this.#childCloseRequest$
@@ -420,7 +566,6 @@ export class PopupMenuListComponent implements OnInit {
 
     private setSubscriptions(): void {
         this.setKeyboardEvents();
-        this.setPointerSubscriptions();
         this.setPopupCloseSubscription();
         this.setTypeaheadSubscription();
     }

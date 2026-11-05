@@ -510,35 +510,30 @@ describe("MONA_ID_ID_LOCALE Integration with MonaI18nService", () => {
         fixture.detectChanges();
 
         const hostEl = fixture.nativeElement as HTMLElement;
-        const mainBtn = hostEl.querySelector("button[aria-label='Simpan, tombol pisah']");
-        expect(mainBtn).not.toBeNull();
-
-        const menuBtn = hostEl.querySelector("button[aria-label='Tampilkan opsi menu']");
-        expect(menuBtn).not.toBeNull();
+        const [mainBtn, menuBtn] = Array.from(hostEl.querySelectorAll("button"));
+        // The main button is named by its text; the arrow is named after it.
+        expect(mainBtn.hasAttribute("aria-label")).toBe(false);
+        expect(menuBtn.getAttribute("aria-label")).toBe("Opsi Simpan lainnya");
 
         // Dynamic text update
         fixture.componentInstance.text.set("Bagikan");
         fixture.detectChanges();
-        const updatedMainBtn = hostEl.querySelector("button[aria-label='Bagikan, tombol pisah']");
-        expect(updatedMainBtn).not.toBeNull();
+        expect(menuBtn.getAttribute("aria-label")).toBe("Opsi Bagikan lainnya");
 
         // Explicit application aria-label override takes precedence
         fixture.componentInstance.ariaLabel.set("Tindakan pisah khusus");
         fixture.detectChanges();
-        const overrideMainBtn = hostEl.querySelector("button[aria-label='Tindakan pisah khusus']");
-        expect(overrideMainBtn).not.toBeNull();
+        expect(mainBtn.getAttribute("aria-label")).toBe("Tindakan pisah khusus");
 
-        // Clearing override restores localized Indonesian default with updated text
+        // Clearing the override leaves the main button to its text again
         fixture.componentInstance.ariaLabel.set("");
         fixture.detectChanges();
-        expect(hostEl.querySelector("button[aria-label='Bagikan, tombol pisah']")).not.toBeNull();
+        expect(mainBtn.hasAttribute("aria-label")).toBe(false);
 
-        // Empty text fallback
+        // Empty text falls back to the general arrow name
         fixture.componentInstance.text.set("");
         fixture.detectChanges();
-
-        const emptyMainBtn = hostEl.querySelector("button[aria-label='Tombol pisah']");
-        expect(emptyMainBtn).not.toBeNull();
+        expect(menuBtn.getAttribute("aria-label")).toBe("Tampilkan opsi menu");
     });
 
     it("renders connected ListBox components with self-contained Indonesian transfer accessible names", () => {

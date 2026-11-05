@@ -290,6 +290,7 @@
         "close": "Kapat",
         "error": "Hata",
         "info": "Bilgi",
+        "region": "Bildirimler",
         "success": "Başarılı",
         "warning": "Uyarı"
     },
@@ -347,6 +348,7 @@
     },
     "splitButton": {
         "menuButtonAriaLabel": "Menü seçeneklerini göster",
+        "menuButtonWithText": "Diğer {text} seçenekleri",
         "splitButton": "{text, select, undefined {Bölünmüş düğme} other {{text}, bölünmüş düğme}}"
     },
     "splitter": {
@@ -407,6 +409,7 @@
         "closeWindow": "Pencereyi kapat",
         "maximize": "Ekranı kapla",
         "minimize": "Simge durumuna küçült",
+        "moveOrResizeWindow": "Pencereyi taşı veya yeniden boyutlandır. Taşımak için ok tuşlarını, yeniden boyutlandırmak için Ctrl ve ok tuşlarını kullanın.",
         "moveWindow": "Pencereyi taşı. Taşımak için ok tuşlarını kullanın.",
         "resizeBottom": "Pencereyi alt kenardan yeniden boyutlandırın. Yeniden boyutlandırmak için ok tuşlarını kullanın.",
         "resizeBottomLeft": "Pencereyi sol alt köşeden yeniden boyutlandırın. Yeniden boyutlandırmak için ok tuşlarını kullanın.",
@@ -416,6 +419,7 @@
         "resizeTop": "Pencereyi üst kenardan yeniden boyutlandırın. Yeniden boyutlandırmak için ok tuşlarını kullanın.",
         "resizeTopLeft": "Pencereyi sol üst köşeden yeniden boyutlandırın. Yeniden boyutlandırmak için ok tuşlarını kullanın.",
         "resizeTopRight": "Pencereyi sağ üst köşeden yeniden boyutlandırın. Yeniden boyutlandırmak için ok tuşlarını kullanın.",
+        "resizeWindow": "Pencereyi yeniden boyutlandır. Yeniden boyutlandırmak için Ctrl ve ok tuşlarını kullanın.",
         "restore": "Geri yükle"
     }
 }

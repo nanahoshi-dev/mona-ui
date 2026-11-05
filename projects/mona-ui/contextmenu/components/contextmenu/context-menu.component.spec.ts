@@ -27,13 +27,13 @@ describe("ContextMenuComponent", () => {
         expect(component).toBeTruthy();
     });
 
-    it("should set aria-haspopup and aria-controls on the target element after render", async () => {
+    it("leaves the popup attributes off a target whose role doesn't allow them", async () => {
         await fixture.whenStable();
 
         const target = document.documentElement;
-        expect(target.getAttribute("aria-haspopup")).toBe("menu");
-        expect(target.getAttribute("aria-controls")).toBeTruthy();
-        expect(target.getAttribute("aria-expanded")).toBe("false");
+        expect(target.hasAttribute("aria-haspopup")).toBe(false);
+        expect(target.hasAttribute("aria-controls")).toBe(false);
+        expect(target.hasAttribute("aria-expanded")).toBe(false);
     });
 });
 

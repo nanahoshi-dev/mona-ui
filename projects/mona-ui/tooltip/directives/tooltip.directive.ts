@@ -1,96 +1,121 @@
+import { Directionality } from "@angular/cdk/bidi";
+import { NgTemplateOutlet } from "@angular/common";
 import {
-    afterRenderEffect,
-    ChangeDetectionStrategy,
+    afterNextRender,
     Component,
-    ComponentRef,
     computed,
     createComponent,
     DestroyRef,
     Directive,
+    effect,
     ElementRef,
     EnvironmentInjector,
     inject,
     input,
-    linkedSignal,
     output,
-    Renderer2,
     signal,
     TemplateRef,
+    untracked,
     viewChild
 } from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { Position } from "@nanahoshi/mona-ui/common";
-import { createElementControlId } from "@nanahoshi/mona-ui/internal";
-import { fadePopupAnimation, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
-import { fromEvent, Subscription, take, takeUntil, tap } from "rxjs";
+import { resolveComponentDirection } from "@nanahoshi/mona-ui/i18n";
+import {
+    addAriaReference,
+    createElementControlId,
+    HoverIntent,
+    listenForHover,
+    onDisconnect,
+    overlaySidePositions,
+    type PhysicalOverlaySide,
+    removeAriaReference,
+    resolveOverlaySide,
+    sideOfPosition
+} from "@nanahoshi/mona-ui/internal";
+import { fadePopupAnimation, PopupCloseSource, type PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
+import { take, takeUntil } from "rxjs";
 import { twMerge } from "tailwind-merge";
+import type { TooltipPosition } from "../models/TooltipPosition";
 import {
     tooltipArrowThemeVariants,
     tooltipBaseThemeVariants,
-    TooltipVariantInputs,
-    TooltipVariantProps
+    type TooltipVariantInputs,
+    type TooltipVariantProps
 } from "../styles/tooltip.styles";
-import {
-    getArrowPositionFromConnectionPair,
-    getOffsetForPosition,
-    getPositionConnectionPoints
-} from "../utils/tooltip.utils";
+
+/** The gap between a tooltip and its anchor, leaving room for the arrow. */
+const TOOLTIP_GAP = 12;
+
+/** Where the directive keeps an element's `title`, so the browser's own tooltip never shows next to it. */
+const TITLE_ATTRIBUTE = "data-mona-title";
 
 @Directive({
-    selector: "[monaTooltip]",
-    host: {
-        "[attr.data-mona-title]": "originalTitle()"
-    }
+    selector: "[monaTooltip]"
 })
 export class TooltipDirective implements TooltipVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
-    readonly #host = inject(ElementRef<HTMLElement>);
+    readonly #directionality = inject(Directionality, { optional: true });
+    readonly #host: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #injector = inject(EnvironmentInjector);
+    readonly #intent = new HoverIntent({
+        hide: () => this.#popupRef?.close(),
+        hideDelay: () => this.hideDelay(),
+        show: anchor => this.#open(anchor),
+        showDelay: () => this.showDelay()
+    });
+    /** Elements named by their title, which the directive labels with `aria-label` once the title has moved. */
+    readonly #labelled = new Set<HTMLElement>();
     readonly #popupService = inject(PopupService);
-    readonly #renderer = inject(Renderer2);
-    readonly #selfTitleWrites = new Map<Element, number>();
-    #currentAnchor: HTMLElement | null = null;
-    #hideTimeoutId: ReturnType<typeof setTimeout> | null = null;
-    #mutationObserver: MutationObserver | null = null;
+    readonly #stripped = new Set<HTMLElement>();
+    readonly #tooltipId = createElementControlId();
+    #destroyed = false;
     #popupRef: PopupRef | null = null;
-    #showTimeoutId: ReturnType<typeof setTimeout> | null = null;
-    #subscription: Subscription | null = null;
-    #tooltipId = createElementControlId();
-    protected readonly originalTitle = signal("");
 
     /**
-     * @description Whether the tooltip is disabled. When disabled, the tooltip will not be shown.
+     * @description Whether the tooltip is disabled. When disabled, the tooltip will not be shown, and an open one
+     * closes.
      * @default false
      */
     public readonly disabled = input<boolean>(false);
 
     /**
      * @description The filter to select elements that will have tooltips.
-     * It can be a CSS selector that matches elements within the host element.
+     * It can be a CSS selector that matches elements within the host element, including ones added later.
      * Only applies when `mode` is set to `content`.
      * @default "[title]"
      */
     public readonly filter = input<string>("[title]");
 
     /**
-     * @description The delay in milliseconds before hiding the tooltip.
+     * @description Emitted when the tooltip popup is hidden.
+     */
+    public readonly hidden = output<void>();
+
+    /**
+     * @description The delay in milliseconds before hiding the tooltip after the pointer or focus leaves. A pointer
+     * that leaves always gets a short grace, so it can move onto the tooltip.
      * @default 0
      */
     public readonly hideDelay = input<number>(0);
 
     /**
      * @description The mode of the tooltip.
-     * "host" mode receives the tooltip from the host element's title attribute.
+     * "host" mode shows the host's tooltip content, or its title attribute.
      * "content" mode uses the title attribute of elements matching the filter.
      * @default "host"
      */
     public readonly mode = input<"host" | "content">("host");
 
     /**
-     * @description The position of the tooltip relative to the target element.
+     * @description The tooltip's content in host mode: text, or a template. Without it, the host's `title` is shown.
+     */
+    public readonly monaTooltip = input<string | TemplateRef<unknown> | null | undefined>("");
+
+    /**
+     * @description The side of the target the tooltip opens on. `left` and `right` are physical; `start` and `end`
+     * follow the text direction. It flips to the opposite side when there isn't room.
      * @default "top"
      */
-    public readonly position = input<Position>("top");
+    public readonly position = input<TooltipPosition>("top");
 
     /**
      * @description The border radius of the tooltip.
@@ -107,271 +132,171 @@ export class TooltipDirective implements TooltipVariantInputs {
     public readonly showDelay = input<number>(0);
 
     /**
-     * @description Emitted when the tooltip popup is hidden.
-     */
-    public readonly hidden = output<void>();
-
-    /**
      * @description Emitted when the tooltip popup is shown.
      */
     public readonly shown = output<void>();
 
     public constructor() {
-        afterRenderEffect({
-            read: () => {
-                this.mode();
-                this.position();
-                this.#currentAnchor = null;
-                this.#popupRef?.close();
-                this.#refreshSubscription();
-                this.#mutationObserver?.disconnect();
-                this.#mutationObserver = null;
-                if (this.mode() === "content") {
-                    this.#mutationObserver = new MutationObserver(records => this.#onMutations(records));
-                    this.#mutationObserver.observe(this.#host.nativeElement, {
-                        attributeFilter: ["title"],
-                        attributes: true,
-                        childList: true,
-                        subtree: true
-                    });
+        effect(onCleanup => {
+            const mode = this.mode();
+            const filter = this.filter();
+            this.position();
+            const stop = untracked(() => this.#listen(mode, filter));
+            onCleanup(() => {
+                stop();
+                this.#intent.hideNow();
+            });
+        });
+        effect(() => {
+            if (this.disabled()) {
+                untracked(() => this.#intent.hideNow());
+            }
+        });
+        // The host's title moves aside at once, so the browser's tooltip never shows for it.
+        afterNextRender({
+            write: () => {
+                if (this.mode() === "host") {
+                    this.#textOf(this.#host.nativeElement);
                 }
             }
         });
-
         this.#destroyRef.onDestroy(() => {
-            if (this.#showTimeoutId != null) {
-                clearTimeout(this.#showTimeoutId);
-                this.#showTimeoutId = null;
-            }
-            if (this.#hideTimeoutId != null) {
-                clearTimeout(this.#hideTimeoutId);
-                this.#hideTimeoutId = null;
-            }
-            this.#mutationObserver?.disconnect();
-            this.#mutationObserver = null;
+            this.#destroyed = true;
+            this.#intent.dispose();
             this.#popupRef?.close();
+            for (const element of this.#stripped) {
+                const title = element.getAttribute(TITLE_ATTRIBUTE);
+                element.removeAttribute(TITLE_ATTRIBUTE);
+                if (this.#labelled.has(element) && element.getAttribute("aria-label") === title) {
+                    element.removeAttribute("aria-label");
+                }
+                if (title != null && !element.hasAttribute("title")) {
+                    element.setAttribute("title", title);
+                }
+            }
+            this.#labelled.clear();
+            this.#stripped.clear();
         });
     }
 
-    #createTooltip(text: string, anchor: HTMLElement): void {
-        this.#currentAnchor = anchor;
-        const component = this.#createTooltipTemplate(text);
-        if (!component) {
+    #listen(mode: "host" | "content", filter: string): () => void {
+        const host = this.#host.nativeElement;
+        if (mode === "host") {
+            return listenForHover(host, node => (host.contains(node) ? host : null), this.#intent);
+        }
+        // Elements whose title the directive has already moved aside no longer match a `[title]` filter.
+        const selector = `${filter}, [${TITLE_ATTRIBUTE}]`;
+        return listenForHover(
+            host,
+            node => {
+                const match = node.closest<HTMLElement>(selector);
+                return match && match !== host && host.contains(match) ? match : null;
+            },
+            this.#intent
+        );
+    }
+
+    #open(anchor: HTMLElement): void {
+        if (this.disabled() || this.#destroyed) {
             return;
         }
+        const content = this.mode() === "host" ? this.monaTooltip() || this.#textOf(anchor) : this.#textOf(anchor);
+        if (!content) {
+            return;
+        }
+        const direction = resolveComponentDirection(anchor, this.#directionality);
+        const side = resolveOverlaySide(this.position(), direction);
+        const component = createComponent(TooltipTemplateComponent, { environmentInjector: this.#injector });
+        component.setInput("content", content);
+        component.setInput("rounded", this.rounded());
+        component.setInput("tooltipId", this.#tooltipId);
+        component.instance.currentArrowPosition.set(side);
+        component.changeDetectorRef.detectChanges();
 
-        const connectionPoints = getPositionConnectionPoints(this.position());
-        const offset = getOffsetForPosition(this.position(), true);
         const popupRef = this.#popupService.create({
             anchor,
-            anchorConnectionPoint: connectionPoints.anchor,
             animation: fadePopupAnimation,
             closeOnEscape: true,
             closeOnMouseLeave: false,
             closeOnOutsideClick: true,
             content: component.instance.templateRef(),
             hasBackdrop: false,
-            popupConnectionPoint: connectionPoints.popup,
-            offset,
+            positions: overlaySidePositions(side, TOOLTIP_GAP, direction),
             restoreFocus: false,
             withPush: false
         });
         this.#popupRef = popupRef;
+        addAriaReference(anchor, "aria-describedby", this.#tooltipId);
+        this.#intent.opened(anchor, popupRef.overlayRef.overlayElement);
+        const stopWatching = onDisconnect(anchor, () => popupRef.close());
 
-        this.#renderer.setAttribute(anchor, "aria-describedby", this.#tooltipId);
-
-        popupRef.opened.pipe(take(1)).subscribe(() => this.shown.emit());
-
-        popupRef.positionChanges
-            .pipe(takeUntil(popupRef.closed), takeUntilDestroyed(this.#destroyRef))
-            .subscribe(connectionPair => {
-                const newArrowPosition = getArrowPositionFromConnectionPair(connectionPair);
-                component.instance.currentArrowPosition.set(newArrowPosition);
-            });
+        popupRef.opened.pipe(take(1)).subscribe(() => {
+            if (!this.#destroyed) {
+                this.shown.emit();
+            }
+        });
+        popupRef.positionChanges.pipe(takeUntil(popupRef.closeStart)).subscribe(position => {
+            component.instance.currentArrowPosition.set(sideOfPosition(position, direction));
+        });
+        popupRef.closeStart.pipe(take(1)).subscribe(event => {
+            stopWatching();
+            removeAriaReference(anchor, "aria-describedby", this.#tooltipId);
+            this.#intent.closed(anchor, event.via === PopupCloseSource.Escape);
+        });
         popupRef.closed.pipe(take(1)).subscribe(() => {
             if (this.#popupRef === popupRef) {
                 this.#popupRef = null;
-                this.#currentAnchor = null;
             }
-            this.#renderer.removeAttribute(anchor, "aria-describedby");
-            this.#markSelfTitleWrite(anchor);
-            this.#renderer.setAttribute(anchor, "title", text);
             component.destroy();
-            this.hidden.emit();
-        });
-    }
-
-    #createTooltipTemplate(text: string): ComponentRef<TooltipTemplateComponent> | null {
-        if (!text) {
-            return null;
-        }
-        const component = createComponent(TooltipTemplateComponent, {
-            environmentInjector: this.#injector
-        });
-        component.setInput("content", text);
-        component.setInput("position", this.position());
-        component.setInput("rounded", this.rounded());
-        component.setInput("tooltipId", this.#tooltipId);
-        return component;
-    }
-
-    #handleHide(): void {
-        if (!this.#popupRef) {
-            return;
-        }
-        const hideDelay = this.hideDelay();
-        if (hideDelay > 0) {
-            const popupRef = this.#popupRef;
-            this.#hideTimeoutId = setTimeout(() => {
-                this.#hideTimeoutId = null;
-                if (this.#popupRef === popupRef) {
-                    popupRef.close();
-                }
-            }, hideDelay);
-        } else {
-            this.#popupRef.close();
-        }
-    }
-
-    #handleShow(targetElement: HTMLElement): void {
-        if (this.disabled()) {
-            return;
-        }
-        if (this.#popupRef && this.#currentAnchor === targetElement) {
-            return;
-        }
-        this.#popupRef?.close();
-        const title = targetElement.getAttribute("title") || "";
-        if (title) {
-            this.#markSelfTitleWrite(targetElement);
-        }
-        this.#renderer.removeAttribute(targetElement, "title");
-        if (this.mode() === "host") {
-            this.originalTitle.set(title);
-        }
-        if (title) {
-            const showDelay = this.showDelay();
-            if (showDelay > 0) {
-                this.#showTimeoutId = setTimeout(() => {
-                    this.#showTimeoutId = null;
-                    if (!this.#popupRef || this.#currentAnchor !== targetElement) {
-                        this.#createTooltip(title, targetElement);
-                    }
-                }, showDelay);
-            } else {
-                this.#createTooltip(title, targetElement);
+            if (!this.#destroyed) {
+                this.hidden.emit();
             }
-        }
+        });
     }
 
     /**
-     * The directive strips a `title` while its tooltip is open and restores it on close. Those writes
-     * reach the observer too, so each one is booked ahead of time and cancelled out here — otherwise
-     * showing a tooltip would tear down and rebuild the very subscriptions driving it.
+     * The tooltip text of an element. A `title` set on it (again) moves to `data-mona-title`, where it stays for
+     * the directive's lifetime and is put back when the directive is destroyed. An element that has no other name,
+     * such as an icon-only button, keeps the title as its name through `aria-label`.
      */
-    #isSelfTitleWrite(element: Element): boolean {
-        const pending = this.#selfTitleWrites.get(element) ?? 0;
-        if (pending <= 0) {
-            return false;
-        }
-        if (pending === 1) {
-            this.#selfTitleWrites.delete(element);
-        } else {
-            this.#selfTitleWrites.set(element, pending - 1);
-        }
-        return true;
-    }
-
-    #markSelfTitleWrite(element: Element): void {
-        this.#selfTitleWrites.set(element, (this.#selfTitleWrites.get(element) ?? 0) + 1);
-    }
-
-    #onMutations(records: MutationRecord[]): void {
-        // Mapped rather than short circuited, so every self inflicted record is still cancelled out.
-        const externalChanges = records.map(record => {
-            if (record.type !== "attributes") {
-                return true;
+    #textOf(element: HTMLElement): string {
+        const title = element.getAttribute("title");
+        if (title != null) {
+            const namedByTitle = this.#labelled.has(element) || !hasNameOfItsOwn(element);
+            element.setAttribute(TITLE_ATTRIBUTE, title);
+            element.removeAttribute("title");
+            this.#stripped.add(element);
+            if (namedByTitle && title.trim()) {
+                element.setAttribute("aria-label", title);
+                this.#labelled.add(element);
             }
-            if (record.attributeName !== "title") {
-                return false;
-            }
-            return !this.#isSelfTitleWrite(record.target as Element);
-        });
-        if (externalChanges.some(Boolean)) {
-            this.#refreshSubscription();
         }
-    }
-
-    #refreshSubscription(): void {
-        if (this.#subscription) {
-            this.#subscription.unsubscribe();
-            this.#subscription = null;
-        }
-        this.#setSubscription();
-    }
-
-    #setSubscription(): void {
-        const composite = new Subscription();
-        let elements: HTMLElement[];
-        if (this.mode() === "host") {
-            elements = [this.#host.nativeElement];
-        } else {
-            elements = Array.from(this.#host.nativeElement.querySelectorAll(this.filter()) as NodeListOf<HTMLElement>);
-        }
-
-        composite.add(
-            fromEvent<PointerEvent>(elements, "pointerenter")
-                .pipe(
-                    tap(event => {
-                        const targetElement = event.currentTarget as HTMLElement;
-                        this.#handleShow(targetElement);
-                    }),
-                    takeUntilDestroyed(this.#destroyRef)
-                )
-                .subscribe()
-        );
-
-        composite.add(
-            fromEvent<PointerEvent>(elements, "pointerleave")
-                .pipe(
-                    tap(() => this.#handleHide()),
-                    takeUntilDestroyed(this.#destroyRef)
-                )
-                .subscribe()
-        );
-
-        composite.add(
-            fromEvent<FocusEvent>(elements, "focusin")
-                .pipe(
-                    tap(event => {
-                        const targetElement = event.currentTarget as HTMLElement;
-                        this.#handleShow(targetElement);
-                    }),
-                    takeUntilDestroyed(this.#destroyRef)
-                )
-                .subscribe()
-        );
-
-        composite.add(
-            fromEvent<FocusEvent>(elements, "focusout")
-                .pipe(
-                    tap(() => this.#handleHide()),
-                    takeUntilDestroyed(this.#destroyRef)
-                )
-                .subscribe()
-        );
-
-        this.#subscription = composite;
+        return element.getAttribute(TITLE_ATTRIBUTE) ?? "";
     }
 }
 
+/** Whether an element is named by something other than its `title`: a label attribute, or text or images inside. */
+function hasNameOfItsOwn(element: HTMLElement): boolean {
+    if (element.hasAttribute("aria-labelledby") || element.getAttribute("aria-label")?.trim()) {
+        return true;
+    }
+    if ((element as Partial<HTMLInputElement>).labels?.length) {
+        return true;
+    }
+    return !!element.textContent?.trim() || element.querySelector('img[alt]:not([alt=""])') != null;
+}
+
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [NgTemplateOutlet],
     template: `
         <ng-template>
             <div role="tooltip" [id]="tooltipId()" [class]="baseClasses()">
                 <div>
-                    {{ content() }}
+                    @if (contentTemplate(); as template) {
+                        <ng-container [ngTemplateOutlet]="template"></ng-container>
+                    } @else {
+                        {{ content() }}
+                    }
                 </div>
                 <div [class]="arrowClasses()" [attr.data-position]="currentArrowPosition()"></div>
             </div>
@@ -388,27 +313,26 @@ class TooltipTemplateComponent {
         const variants = tooltipBaseThemeVariants({ rounded });
         return twMerge(variants, userClasses);
     });
-    public readonly currentArrowPosition = linkedSignal(() => this.position());
-
+    protected readonly contentTemplate = computed(() => {
+        const content = this.content();
+        return content instanceof TemplateRef ? content : null;
+    });
     /**
-     * @description The text content displayed in the tooltip.
+     * @description The content displayed in the tooltip: text or a template.
      */
-    public readonly content = input.required<string>();
+    public readonly content = input.required<string | TemplateRef<unknown>>();
 
-    /**
-     * @description The position of the tooltip relative to the target element.
-     */
-    public readonly position = input<Position>("top");
+    public readonly currentArrowPosition = signal<PhysicalOverlaySide>("top");
 
     /**
      * @description The border radius of the tooltip.
      */
     public readonly rounded = input<TooltipVariantProps["rounded"]>("medium");
 
+    public readonly templateRef = viewChild.required(TemplateRef);
+
     /**
      * @description The unique id for the tooltip element, used for aria-describedby linkage.
      */
     public readonly tooltipId = input<string>("");
-
-    public readonly templateRef = viewChild.required(TemplateRef);
 }

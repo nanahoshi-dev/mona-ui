@@ -7,8 +7,8 @@ Use the Stepper when a task must be completed in a defined series of stages — 
 ## Import & Quick Start
 
 ```typescript
-import { StepperComponent } from "@nanahoshi/mona-ui";
-import type { StepOptions } from "@nanahoshi/mona-ui";
+import { StepperComponent } from "@nanahoshi/mona-ui/stepper";
+import type { StepOptions } from "@nanahoshi/mona-ui/stepper";
 ```
 
 Add `StepperComponent` to your standalone component's `imports` array.
@@ -55,7 +55,7 @@ import {
     StepperIndicatorTemplateDirective,
     StepperLabelTemplateDirective,
     StepperStepTemplateDirective
-} from "@nanahoshi/mona-ui";
+} from "@nanahoshi/mona-ui/stepper";
 ```
 
 ### Indicator template

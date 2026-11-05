@@ -55,7 +55,9 @@ describe("ContextMenuGroupComponent.getPopupMenuItem()", () => {
         const items = host.group().getPopupMenuItem();
 
         expect(items.length).toBe(2);
-        expect(items.every(i => i.group === "System Actions")).toBe(true);
+        const key = items[0].group;
+        expect(typeof key === "symbol" ? key.description : key).toBe("System Actions");
+        expect(items.every(i => i.group === key)).toBe(true);
         expect(items.map(i => i.label)).toEqual(["Share", "Properties"]);
     });
 });

@@ -1,10 +1,10 @@
-import { ConnectionPositionPair, OverlayRef } from "@angular/cdk/overlay";
-import { ComponentRef } from "@angular/core";
-import { Action } from "@nanahoshi/mona-ui/internal";
-import { asyncScheduler, Observable, ReplaySubject, Subject } from "rxjs";
+import { type ConnectionPositionPair, type OverlayRef } from "@angular/cdk/overlay";
+import { type ComponentRef } from "@angular/core";
+import { type Action } from "@nanahoshi/mona-ui/internal";
+import { asyncScheduler, type Observable, ReplaySubject, Subject } from "rxjs";
 import { PopupCloseEvent, PopupCloseSource } from "./PopupCloseEvent";
 import { PopupRef } from "./PopupRef";
-import { PopupRefParams } from "./PopupRefParams";
+import { type PopupRefParams } from "./PopupRefParams";
 
 /**
  * @internal - used by the popup service. Do not use directly or export.

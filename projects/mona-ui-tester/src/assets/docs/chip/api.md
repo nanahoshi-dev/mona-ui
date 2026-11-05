@@ -19,9 +19,9 @@ When `toggleable` is `true`, each activation flips the `selected` model. When `r
 ## Import & Basic Usage
 
 ```typescript
-import { ChipComponent } from "@nanahoshi/mona-ui";
+import { ChipComponent } from "@nanahoshi/mona-ui/chip";
 // Optional: only needed when adding a prefix template
-import { ChipPrefixTemplateDirective } from "@nanahoshi/mona-ui";
+import { ChipPrefixTemplateDirective } from "@nanahoshi/mona-ui/chip";
 ```
 
 Add the imported symbols to your standalone component's `imports` array.

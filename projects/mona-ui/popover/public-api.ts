@@ -8,6 +8,7 @@ export * from "./directives/popover-footer-template.directive";
 export * from "./directives/popover-title-template.directive";
 
 export * from "./models/PopoverHideEvent";
+export type * from "./models/PopoverPosition";
 export * from "./models/PopoverShowEvent";
 export * from "./models/PopoverShownEvent";
 export * from "./models/PopoverTrigger";

@@ -1,4 +1,3 @@
-@for (notificationData of notificationDataList(); track notificationData.options.id) {
-    <mona-notification [data]="notificationData" [animate.enter]="enterAnimClass()" [animate.leave]="leaveAnimClass()">
-    </mona-notification>
+@for (notificationData of notificationDataList(); track notificationData) {
+    <mona-notification [data]="notificationData" [side]="side()" [animate.enter]="enterAnimClass()"></mona-notification>
 }

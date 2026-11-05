@@ -78,6 +78,7 @@ export const LOCALE_COPY_EXCEPTIONS: readonly LocaleCopyException[] = [
     { localeId: "fr-FR", messagePath: "dateTimePicker.date", value: "Date" },
     { localeId: "fr-FR", messagePath: "dialog.ok", value: "OK" },
     { localeId: "fr-FR", messagePath: "editor.format", value: "Format" },
+    { localeId: "fr-FR", messagePath: "notification.region", value: "Notifications" },
     { localeId: "fr-FR", messagePath: "pager.jumpBackwardLabel", value: "pages" },
     { localeId: "fr-FR", messagePath: "pager.jumpForwardLabel", value: "pages" },
     { localeId: "fr-FR", messagePath: "pager.pageInputPrefix", value: "Page" },

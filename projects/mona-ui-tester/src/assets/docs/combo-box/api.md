@@ -27,7 +27,7 @@ Filtering, grouping, and virtual scrolling are opt-in through companion attribut
 ## Import & Quick Start
 
 ```typescript
-import { ComboBoxComponent } from "@nanahoshi/mona-ui";
+import { ComboBoxComponent } from "@nanahoshi/mona-ui/combo-box";
 ```
 
 ```typescript

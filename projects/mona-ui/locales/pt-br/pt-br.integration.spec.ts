@@ -461,8 +461,11 @@ describe("MONA_PT_BR_LOCALE Integration with MonaI18nService", () => {
         fixture.detectChanges();
 
         const hostEl = fixture.nativeElement as HTMLElement;
-        const mainBtn = hostEl.querySelector("button[aria-label='Salvar, botão com menu']");
-        expect(mainBtn).not.toBeNull();
+        const [mainBtn, menuBtn] = Array.from(hostEl.querySelectorAll("button"));
+        expect(mainBtn.textContent?.trim()).toBe("Salvar");
+        // The main button is named by its text; the arrow is named after it.
+        expect(mainBtn.hasAttribute("aria-label")).toBe(false);
+        expect(menuBtn.getAttribute("aria-label")).toBe("Mais opções de Salvar");
     });
 
     it("renders connected ListBox components with self-contained Portuguese transfer accessible names", () => {

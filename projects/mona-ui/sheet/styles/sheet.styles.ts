@@ -17,11 +17,12 @@ export const sheetBaseVariants = cva(
     `,
     {
         variants: {
+            /* The physical edge the sheet opens from: its border faces the page, whatever the direction. */
             side: {
                 top: "border-b border-border",
-                right: "border-s border-border rtl:border-e rtl:border-s-0",
+                right: "border-l border-border",
                 bottom: "border-t border-border",
-                left: "border-e border-border rtl:border-s rtl:border-e-0"
+                left: "border-r border-border"
             }
         },
         defaultVariants: {

@@ -1,4 +1,4 @@
-import { PopupRef } from "@nanahoshi/mona-ui/popup";
+import { type PopupRef } from "@nanahoshi/mona-ui/popup";
 
 export class PopoverShownEvent {
     public constructor(

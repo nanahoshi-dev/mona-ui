@@ -7,7 +7,7 @@ Use `TooltipComponent` when the tooltip needs more than plain text. Use `Tooltip
 ## Import & Basic Usage
 
 ```typescript
-import { TooltipComponent } from "@nanahoshi/mona-ui";
+import { TooltipComponent } from "@nanahoshi/mona-ui/tooltip";
 ```
 
 **Targeting an element reference:**
@@ -19,7 +19,7 @@ import { TooltipComponent } from "@nanahoshi/mona-ui";
 
 **Targeting a CSS selector:**
 
-A selector target attaches the same tooltip behavior to every matching element, including ones added after initial render:
+A selector target attaches the same tooltip behavior to every matching element in the document, including ones added after initial render. One listener on the document handles them all, so nothing watches the page for changes:
 
 ```html
 <div class="flex gap-2">
@@ -31,9 +31,9 @@ A selector target attaches the same tooltip behavior to every matching element, 
 
 ## Public Customization
 
-- **`position`** — `"top"` (default), `"right"`, `"bottom"`, or `"left"`. Controls which side of the target the tooltip and its arrow are anchored to.
+- **`position`** — `"top"` (default), `"bottom"`, `"left"`, `"right"`, `"start"`, or `"end"`. The side of the target the tooltip opens on. `left` and `right` are physical sides in both directions; `start` and `end` follow the text direction (in RTL, `start` is the right). When there isn't room, the tooltip flips to the opposite side, and its arrow follows.
 - **`rounded`** — `'none'`, `'small'`, `'medium'` (default), `'large'`, or `'full'`. Controls the tooltip panel's border radius.
-- **`showDelay`** / **`hideDelay`** — milliseconds to wait before showing or hiding the tooltip after the trigger event. Both default to `0`.
+- **`showDelay`** / **`hideDelay`** — milliseconds to wait before showing the tooltip, or before hiding it once the pointer or focus has left. Both default to `0`. A pointer that leaves always gets a grace of about 100 ms, so it can move onto the tooltip.
 - **Projected content** — anything placed between the `<mona-tooltip>` tags is rendered inside the tooltip panel, including markup and other components.
 
 ## Examples
@@ -85,22 +85,27 @@ A selector target attaches the same tooltip behavior to every matching element, 
 
 ## Accessibility Notes
 
-While a tooltip is open, the component sets `aria-describedby` on the `target` element, pointing at the tooltip panel, which renders `role="tooltip"`. Both are removed when the tooltip closes.
+The tooltip opens when the pointer moves onto the target or keyboard focus enters it, and closes when both have left. Touch pointers don't open it, since a tap would show it and hide it again at once; touch users get the target's own name and description.
 
-The `target` element still needs its own accessible name (native label text, `aria-label`, or equivalent), independent of the tooltip's description.
+It meets WCAG 1.4.13 (content on hover or focus):
 
-An open tooltip closes on <kbd>Escape</kbd> and on an outside click, in addition to `pointerleave` / `focusout` on the target.
+- **Hoverable:** the pointer can move from the target onto the tooltip, and the tooltip stays open while the pointer is on it.
+- **Dismissible:** <kbd>Escape</kbd> closes it without moving the pointer or focus. It stays closed until the pointer or focus leaves the target and comes back.
+- **Persistent:** it stays open until the pointer and focus have left, it's dismissed, or the target leaves the page.
 
-**Known limitation:** with the default `hideDelay` of `0`, the tooltip closes as soon as the pointer leaves the target. There is currently no way to move the pointer onto the tooltip panel itself before it closes.
+An outside click also closes it.
 
-| Attribute          | When present                            | Value                            |
-|--------------------|-----------------------------------------|----------------------------------|
-| `aria-describedby` | While the tooltip is open               | The tooltip panel's generated id |
-| `role="tooltip"`   | On the tooltip panel itself, while open | `"tooltip"`                      |
+While a tooltip is open, its id is added to the target's `aria-describedby`, alongside any ids already there, and removed again when it closes. The panel renders `role="tooltip"`.
+
+| Attribute          | When present                            | Value                                                        |
+|--------------------|-----------------------------------------|--------------------------------------------------------------|
+| `aria-describedby` | While the tooltip is open               | The target's own ids, followed by the tooltip's generated id |
+| `role="tooltip"`   | On the tooltip panel itself, while open | `"tooltip"`                                                  |
 
 **Consumer responsibilities:**
 
 - Provide an accessible name for the `target` element independent of the tooltip (the tooltip supplies a description, not a name).
+- Don't put interactive content (links, buttons) in a tooltip. It isn't focusable; use `Popover` for that.
 
 ## API
 
@@ -110,39 +115,45 @@ An open tooltip closes on <kbd>Escape</kbd> and on an outside click, in addition
 
 #### Inputs
 
-| Name        | Type                                                 | Default    | Description                                                                                                                                        |
-|-------------|------------------------------------------------------|------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
-| `disabled`  | `boolean`                                            | `false`    | Whether the tooltip is disabled. When disabled, the tooltip will not be shown.                                                                     |
-| `hideDelay` | `number`                                             | `0`        | Delay in milliseconds before hiding the tooltip after the trigger event ends.                                                                      |
-| `position`  | `"top" \| "right" \| "bottom" \| "left"`¹            | `'top'`    | Side of the target element the tooltip is anchored to.                                                                                             |
-| `rounded`   | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Border-radius preset applied to the tooltip panel.                                                                                                 |
-| `showDelay` | `number`                                             | `0`        | Delay in milliseconds before showing the tooltip after the trigger event.                                                                          |
-| `target`    | `Element \| ElementRef<HTMLElement> \| string`²      | —          | Required. The target element(s) the tooltip is attached to: a direct element/`ElementRef`, or a CSS selector string matching one or more elements. |
+| Name        | Type                                                 | Default    | Description                                                                                                                                                   |
+|-------------|------------------------------------------------------|------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `disabled`  | `boolean`                                            | `false`    | Whether the tooltip is disabled. When disabled, the tooltip isn't shown, and an open one closes.                                                              |
+| `hideDelay` | `number`                                             | `0`        | Delay in milliseconds before hiding the tooltip after the pointer or focus leaves. A leaving pointer always gets a grace of about 100 ms.                     |
+| `position`  | `TooltipPosition`                                    | `'top'`    | Side of the target the tooltip opens on: `"top"`, `"bottom"`, `"left"`, `"right"`, `"start"` or `"end"`. It flips to the opposite side when there isn't room. |
+| `rounded`   | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Border-radius preset applied to the tooltip panel.                                                                                                            |
+| `showDelay` | `number`                                             | `0`        | Delay in milliseconds before showing the tooltip after the trigger event.                                                                                     |
+| `target`    | `Element \| ElementRef<HTMLElement> \| string`¹      | —          | Required. The target element(s) the tooltip is attached to: a direct element/`ElementRef`, or a CSS selector string matching one or more elements.            |
 
-¹ Exposed publicly via the `Position` type, which is referenced by this input but not exported from `@nanahoshi/mona-ui`. <!-- TODO(owner-review): confirm whether Position should be exported. -->
-
-² Exposed publicly via the `PopupAnchor` type, which is referenced by this input but not exported from `@nanahoshi/mona-ui`. <!-- TODO(owner-review): confirm whether PopupAnchor should be exported. -->
+¹ The `PopupAnchor` type, exported from `@nanahoshi/mona-ui/popup`.
 
 #### Outputs
 
-| Name     | Type   | Description                               |
-|----------|--------|-------------------------------------------|
-| `hidden` | `void` | Emitted when the tooltip popup is hidden. |
-| `shown`  | `void` | Emitted when the tooltip popup is shown.  |
+| Name     | Type   | Description                          |
+|----------|--------|--------------------------------------|
+| `hidden` | `void` | Emitted once the tooltip has closed. |
+| `shown`  | `void` | Emitted once the tooltip has opened. |
 
 `TooltipComponent` has no public methods.
+
+### Exported Types
+
+#### `TooltipPosition`
+
+```typescript
+type TooltipPosition = "top" | "bottom" | "left" | "right" | "start" | "end";
+```
 
 ---
 
 <!-- verification-checklist
 - [x] API definitions and defaults verified against source (tooltip.component.ts) and regenerated component-metadata.json
-- [x] `shown`/`hidden` outputs included (confirmed present in source and metadata after regeneration)
-- [x] CSS-selector `target` dynamic descendant tracking documented (confirmed via MutationObserver-backed re-subscription in source and a dedicated spec test)
-- [x] No internal or unexported APIs exposed; `Position` and `PopupAnchor` type usage flagged as TODO(owner-review) instead of presented as exported
-- [x] aria-describedby / role="tooltip" documented from source (#createTooltip, tooltip.component.html); accessible-name consumer responsibility stated explicitly
-- [x] Escape / outside-click close behavior documented (closeOnEscape: true, closeOnOutsideClick: true in #createTooltip)
-- [x] Known hover-dismiss limitation documented (hideDelay default 0; closeOnMouseLeave: false; no pointer bridge onto the tooltip panel) instead of presented as an accessibility guarantee
-- [x] Projected content documented as the supported way to provide rich tooltip content, with TooltipDirective referenced as the plain-text alternative
+- [x] `shown`/`hidden` outputs included, emitted once open and once closed
+- [x] CSS-selector `target` documented as document-level delegation with `closest()` (no MutationObserver), covered by tooltip-behavior.spec.ts
+- [x] `TooltipPosition` documented as exported; `PopupAnchor` confirmed exported from popup
+- [x] WCAG 1.4.13 hoverable / dismissible / persistent behavior documented from HoverIntent (100 ms grace, panel hover, Escape until leave), covered by specs
+- [x] aria-describedby documented as appended to and removed by token, not replaced; role="tooltip" from tooltip.component.html
+- [x] RTL: left/right physical, start/end by direction, flip to the opposite side with the arrow following
+- [x] Touch pointers ignored for hover; focus opens the tooltip
 - [x] API table rows sorted A→Z
 - [x] No Tailwind/internal CSS class names, internal data attributes, or DOM structure exposed
 - [x] No claim of public methods (none exist on TooltipComponent)

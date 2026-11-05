@@ -21,8 +21,8 @@ Mona UI provides two ways to render a styled checkbox:
 ## Import & Basic Usage
 
 ```typescript
-import { CheckBoxComponent } from "@nanahoshi/mona-ui";   // component
-import { CheckboxDirective } from "@nanahoshi/mona-ui";   // directive
+import { CheckBoxComponent } from "@nanahoshi/mona-ui/check-box";   // component
+import { CheckboxDirective } from "@nanahoshi/mona-ui/check-box";   // directive
 ```
 
 Add the imported symbols to your standalone component's `imports` array.

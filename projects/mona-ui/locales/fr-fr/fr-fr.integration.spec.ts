@@ -335,8 +335,11 @@ describe("MONA_FR_FR_LOCALE Integration with MonaI18nService", () => {
         fixture.detectChanges();
 
         const hostEl = fixture.nativeElement as HTMLElement;
-        const mainBtn = hostEl.querySelector("button[aria-label='Enregistrer, bouton fractionné']");
-        expect(mainBtn).not.toBeNull();
+        const [mainBtn, menuBtn] = Array.from(hostEl.querySelectorAll("button"));
+        expect(mainBtn.textContent?.trim()).toBe("Enregistrer");
+        // The main button is named by its text; the arrow is named after it.
+        expect(mainBtn.hasAttribute("aria-label")).toBe(false);
+        expect(menuBtn.getAttribute("aria-label")).toBe("Autres options pour Enregistrer");
     });
 
     it("renders connected ListBox components with self-contained French transfer accessible names", () => {

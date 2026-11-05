@@ -1,5 +1,4 @@
 import {
-    ChangeDetectionStrategy,
     Component,
     computed,
     contentChild,
@@ -28,7 +27,6 @@ import { PopupMenuItemClickEvent } from "../../models/PopupMenuItemClickEvent";
 @Component({
     selector: "mona-popup-menu-radio-group",
     template: "",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [
         {
             provide: PopupMenuToken,
@@ -39,6 +37,10 @@ import { PopupMenuItemClickEvent } from "../../models/PopupMenuItemClickEvent";
 export class PopupMenuRadioGroupComponent implements PopupMenuConfig, OnInit {
     readonly #click$ = new Subject<PopupMenuItemClickEvent>();
     readonly #destroyRef = inject(DestroyRef);
+    // One key per group: consecutive items with it form the group, and its description is the title.
+    readonly #groupKey = computed(() => Symbol(this.title()));
+    // The radio items' own click subjects, so their `menuClick` runs before the group selects.
+    readonly #itemClicks = new WeakMap<PopupMenuItem, Subject<PopupMenuItemClickEvent>>();
     protected readonly groupTemplateConfig = contentChild(PopupMenuGroupTemplateToken, {
         descendants: false
     });
@@ -57,15 +59,22 @@ export class PopupMenuRadioGroupComponent implements PopupMenuConfig, OnInit {
     public readonly value = model<string>("");
 
     public getPopupMenuItem(): PopupMenuItem[] {
+        const group = this.#groupKey();
         const menuItems = this.items().map(i =>
-            i.getPopupMenuItem().map<PopupMenuItem>(item => ({
-                ...item,
-                click$: this.#click$,
-                group: this.title() || Symbol(),
-                groupTemplate: computed(() => this.groupTemplateConfig()?.template ?? null),
-                radio: true,
-                selected: computed(() => item.value?.() === this.value())
-            }))
+            i.getPopupMenuItem().map<PopupMenuItem>(item => {
+                const groupItem: PopupMenuItem = {
+                    ...item,
+                    click$: this.#click$,
+                    group,
+                    groupTemplate: computed(() => this.groupTemplateConfig()?.template ?? null),
+                    radio: true,
+                    selected: computed(() => item.value?.() === this.value())
+                };
+                if (item.click$) {
+                    this.#itemClicks.set(groupItem, item.click$);
+                }
+                return groupItem;
+            })
         );
         return selectMany(menuItems, i => i).toArray();
     }
@@ -80,11 +89,12 @@ export class PopupMenuRadioGroupComponent implements PopupMenuConfig, OnInit {
                 takeUntilDestroyed(this.#destroyRef),
                 filter(e => e.item.radio == true),
                 tap(event => {
+                    this.#itemClicks.get(event.item)?.next(event);
                     if (event.isDefaultPrevented()) {
                         return;
                     }
                     const value = event.item.value?.();
-                    if (value != null) {
+                    if (typeof value === "string") {
                         this.value.set(value);
                     }
                 })

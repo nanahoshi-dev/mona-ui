@@ -17,7 +17,7 @@
 ## Import & Basic Usage
 
 ```typescript
-import { SwitchComponent } from "@nanahoshi/mona-ui";
+import { SwitchComponent } from "@nanahoshi/mona-ui/switch";
 ```
 
 **Direct binding:**
@@ -205,12 +205,7 @@ These structural directives are projected inside `<mona-switch>` to customize sp
 **Imports:**
 
 ```typescript
-import {
-    SwitchComponent,
-    SwitchOnLabelTemplateDirective,
-    SwitchOffLabelTemplateDirective,
-    SwitchHandleContentTemplateDirective
-} from "@nanahoshi/mona-ui";
+import { SwitchComponent, SwitchHandleContentTemplateDirective, SwitchOffLabelTemplateDirective, SwitchOnLabelTemplateDirective } from "@nanahoshi/mona-ui/switch";
 ```
 
 ---

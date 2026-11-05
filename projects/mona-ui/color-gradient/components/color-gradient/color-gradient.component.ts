@@ -43,7 +43,11 @@ import {
     string2Hsla,
     string2rgba
 } from "@nanahoshi/mona-ui/internal";
-import { DropdownButtonComponent, DropdownButtonItemComponent } from "@nanahoshi/mona-ui/dropdown-button";
+import {
+    DropdownButtonComponent,
+    DropdownButtonItemComponent,
+    DropdownButtonTextTemplateDirective
+} from "@nanahoshi/mona-ui/dropdown-button";
 import { NumericTextBoxComponent, NumericTextBoxPrefixTemplateDirective } from "@nanahoshi/mona-ui/numeric-text-box";
 import { SliderComponent } from "@nanahoshi/mona-ui/slider";
 import {
@@ -82,6 +86,7 @@ import {
         NgTemplateOutlet,
         DropdownButtonComponent,
         DropdownButtonItemComponent,
+        DropdownButtonTextTemplateDirective,
         LucideCopy
     ],
     host: {

@@ -338,6 +338,7 @@ export const RU_RU_MESSAGES = {
         close: "Закрыть",
         error: "Ошибка",
         info: "Информация",
+        region: "Уведомления",
         success: "Успешно",
         warning: "Предупреждение"
     },
@@ -399,6 +400,7 @@ export const RU_RU_MESSAGES = {
     },
     splitButton: {
         menuButtonAriaLabel: "Показать параметры меню",
+        menuButtonWithText: (text: string) => `Другие параметры: ${text}`,
         splitButton: (text: string) => (text ? `${text}, разделённая кнопка` : "Разделённая кнопка")
     },
     splitter: {
@@ -465,6 +467,8 @@ export const RU_RU_MESSAGES = {
         closeWindow: "Закрыть окно",
         maximize: "Развернуть",
         minimize: "Свернуть",
+        moveOrResizeWindow:
+            "Переместить окно или изменить его размер. Используйте клавиши со стрелками для перемещения или Ctrl и клавиши со стрелками для изменения размера.",
         moveWindow: "Переместить окно. Используйте клавиши со стрелками для перемещения.",
         resizeBottom: "Изменить размер окна снизу. Используйте клавиши со стрелками для изменения размера.",
         resizeBottomLeft:
@@ -478,6 +482,7 @@ export const RU_RU_MESSAGES = {
             "Изменить размер окна из левого верхнего угла. Используйте клавиши со стрелками для изменения размера.",
         resizeTopRight:
             "Изменить размер окна из правого верхнего угла. Используйте клавиши со стрелками для изменения размера.",
+        resizeWindow: "Изменить размер окна. Используйте Ctrl и клавиши со стрелками для изменения размера.",
         restore: "Восстановить"
     }
 } satisfies MonaLocaleMessages;

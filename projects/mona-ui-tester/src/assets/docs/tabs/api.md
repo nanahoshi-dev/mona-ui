@@ -12,7 +12,7 @@ Tabs is not a routing mechanism. Switching tabs does not change the URL, and the
 ## Import & Quick Start
 
 ```typescript
-import { TabComponent, TabContentTemplateDirective, TabsComponent } from "@nanahoshi/mona-ui";
+import { TabComponent, TabContentTemplateDirective, TabsComponent } from "@nanahoshi/mona-ui/tabs";
 ```
 
 ```html

@@ -1,14 +1,18 @@
 <button
     monaButton
-    (click)="buttonClick.emit($event)"
+    (click)="onMainButtonClick($event)"
+    (keydown)="onMainButtonKeydown($event)"
     [disabled]="disabled()"
+    [iconOnly]="iconOnly()"
+    [loading]="loading()"
     [look]="look()"
     [size]="size()"
     [rounded]="rounded()"
+    [toggleable]="false"
     class="rounded-e-none"
-    [attr.aria-label]="splitButtonAriaLabel() || null"
+    [id]="mainButtonId"
+    [attr.aria-label]="ariaLabelledby() ? null : ariaLabel() || null"
     [attr.aria-labelledby]="ariaLabelledby() || null"
-    [tabindex]="disabled() ? -1 : 0"
     #mainButton>
     @if (mainButtonTextTemplate()) {
         <ng-container [ngTemplateOutlet]="mainButtonTextTemplate()"></ng-container>
@@ -23,12 +27,12 @@
     [look]="look()"
     [size]="size()"
     [rounded]="rounded()"
+    [toggleable]="false"
     class="rounded-s-none border-s-0"
-    [attr.aria-haspopup]="'menu'"
+    aria-haspopup="menu"
     [attr.aria-expanded]="menuOpen()"
-    [attr.aria-controls]="menuId"
+    [attr.aria-controls]="menuOpen() ? menuId : null"
     [attr.aria-label]="effectiveMenuButtonAriaLabel()"
-    [tabindex]="disabled() ? -1 : 0"
     #menuButton>
     @if (menuButtonTemplate()) {
         <ng-container [ngTemplateOutlet]="menuButtonTemplate()"></ng-container>
@@ -49,7 +53,7 @@
     [rounded]="popupMenuRounded()"
     [size]="size()"
     [target]="menuButton"
-    [trigger]="'click'"
+    [trigger]="loading() ? 'none' : 'click'"
     [id]="menuId"
     [minWidth]="popupWidth() || undefined"
     #popupMenu>

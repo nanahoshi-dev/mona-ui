@@ -308,6 +308,7 @@ export const ID_ID_MESSAGES = {
         close: "Tutup",
         error: "Kesalahan",
         info: "Informasi",
+        region: "Notifikasi",
         success: "Berhasil",
         warning: "Peringatan"
     },
@@ -367,6 +368,7 @@ export const ID_ID_MESSAGES = {
     },
     splitButton: {
         menuButtonAriaLabel: "Tampilkan opsi menu",
+        menuButtonWithText: (text: string) => `Opsi ${text} lainnya`,
         splitButton: (text: string) => (text ? `${text}, tombol pisah` : "Tombol pisah")
     },
     splitter: {
@@ -427,6 +429,8 @@ export const ID_ID_MESSAGES = {
         closeWindow: "Tutup jendela",
         maximize: "Maksimalkan",
         minimize: "Minimalkan",
+        moveOrResizeWindow:
+            "Pindahkan atau ubah ukuran jendela. Gunakan tombol panah untuk memindahkan, atau Ctrl dan tombol panah untuk mengubah ukuran.",
         moveWindow: "Pindahkan jendela. Gunakan tombol panah untuk memindahkan.",
         resizeBottom: "Ubah ukuran jendela dari tepi bawah. Gunakan tombol panah untuk mengubah ukuran.",
         resizeBottomLeft: "Ubah ukuran jendela dari sudut kiri bawah. Gunakan tombol panah untuk mengubah ukuran.",
@@ -436,6 +440,7 @@ export const ID_ID_MESSAGES = {
         resizeTop: "Ubah ukuran jendela dari tepi atas. Gunakan tombol panah untuk mengubah ukuran.",
         resizeTopLeft: "Ubah ukuran jendela dari sudut kiri atas. Gunakan tombol panah untuk mengubah ukuran.",
         resizeTopRight: "Ubah ukuran jendela dari sudut kanan atas. Gunakan tombol panah untuk mengubah ukuran.",
+        resizeWindow: "Ubah ukuran jendela. Gunakan Ctrl dan tombol panah untuk mengubah ukuran.",
         restore: "Pulihkan"
     }
 } satisfies MonaLocaleMessages;

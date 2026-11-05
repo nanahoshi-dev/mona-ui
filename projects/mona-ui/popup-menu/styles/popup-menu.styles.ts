@@ -57,6 +57,7 @@ export const popupMenuItemThemeVariants = cva(
         data-[disabled='true']:text-disabled-foreground
         data-[active='true']:bg-[var(--mona-menu-item-hover-background,var(--color-hover))]
         data-[active='true']:text-foreground
+        data-[active='true']:data-[disabled='true']:text-disabled-foreground
     `,
     {
         variants: {

@@ -290,6 +290,7 @@
         "close": "Cerrar",
         "error": "Error",
         "info": "Información",
+        "region": "Notificaciones",
         "success": "Éxito",
         "warning": "Advertencia"
     },
@@ -347,6 +348,7 @@
     },
     "splitButton": {
         "menuButtonAriaLabel": "Mostrar opciones de menú",
+        "menuButtonWithText": "Más opciones de {text}",
         "splitButton": "{text, select, undefined {Botón dividido} other {{text}, botón dividido}}"
     },
     "splitter": {
@@ -407,6 +409,7 @@
         "closeWindow": "Cerrar ventana",
         "maximize": "Maximizar",
         "minimize": "Minimizar",
+        "moveOrResizeWindow": "Mover o cambiar el tamaño de la ventana. Usa las teclas de flecha para mover, o Ctrl y las teclas de flecha para cambiar el tamaño.",
         "moveWindow": "Mover ventana. Usa las teclas de flecha para mover.",
         "resizeBottom": "Cambiar tamaño de ventana desde abajo. Usa las teclas de flecha para cambiar el tamaño.",
         "resizeBottomLeft": "Cambiar tamaño de ventana desde la esquina inferior izquierda. Usa las teclas de flecha para cambiar el tamaño.",
@@ -416,6 +419,7 @@
         "resizeTop": "Cambiar tamaño de ventana desde arriba. Usa las teclas de flecha para cambiar el tamaño.",
         "resizeTopLeft": "Cambiar tamaño de ventana desde la esquina superior izquierda. Usa las teclas de flecha para cambiar el tamaño.",
         "resizeTopRight": "Cambiar tamaño de ventana desde la esquina superior derecha. Usa las teclas de flecha para cambiar el tamaño.",
+        "resizeWindow": "Cambiar el tamaño de la ventana. Usa Ctrl y las teclas de flecha para cambiar el tamaño.",
         "restore": "Restaurar"
     }
 }

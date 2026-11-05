@@ -308,6 +308,7 @@ export const JA_JP_MESSAGES = {
         close: "閉じる",
         error: "エラー",
         info: "情報",
+        region: "通知",
         success: "成功",
         warning: "警告"
     },
@@ -367,6 +368,7 @@ export const JA_JP_MESSAGES = {
     },
     splitButton: {
         menuButtonAriaLabel: "メニューオプションを表示",
+        menuButtonWithText: (text: string) => `${text}のその他のオプション`,
         splitButton: (text: string) => (text ? `${text}、分割ボタン` : "分割ボタン")
     },
     splitter: {
@@ -427,6 +429,8 @@ export const JA_JP_MESSAGES = {
         closeWindow: "ウィンドウを閉じる",
         maximize: "最大化",
         minimize: "最小化",
+        moveOrResizeWindow:
+            "ウィンドウを移動またはサイズ変更。矢印キーで移動し、Ctrl キーと矢印キーでサイズを変更します。",
         moveWindow: "ウィンドウを移動。矢印キーで移動します。",
         resizeBottom: "下辺からウィンドウのサイズを変更。矢印キーでサイズを変更します。",
         resizeBottomLeft: "左下隅からウィンドウのサイズを変更。矢印キーでサイズを変更します。",
@@ -436,6 +440,7 @@ export const JA_JP_MESSAGES = {
         resizeTop: "上辺からウィンドウのサイズを変更。矢印キーでサイズを変更します。",
         resizeTopLeft: "左上隅からウィンドウのサイズを変更。矢印キーでサイズを変更します。",
         resizeTopRight: "右上隅からウィンドウのサイズを変更。矢印キーでサイズを変更します。",
+        resizeWindow: "ウィンドウのサイズを変更。Ctrl キーと矢印キーでサイズを変更します。",
         restore: "元のサイズに戻す"
     }
 } satisfies MonaLocaleMessages;

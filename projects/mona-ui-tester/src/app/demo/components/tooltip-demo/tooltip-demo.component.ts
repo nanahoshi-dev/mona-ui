@@ -18,7 +18,7 @@ export class TooltipDemoComponent extends AbstractDemoComponent<TooltipComponent
         inputs: deriveInputConfig<TooltipComponent>(this.metadata(), {
             position: {
                 type: "dropdown",
-                value: ["top", "bottom", "left", "right"],
+                value: ["top", "bottom", "left", "right", "start", "end"],
                 defaultValue: "top"
             },
             rounded: {

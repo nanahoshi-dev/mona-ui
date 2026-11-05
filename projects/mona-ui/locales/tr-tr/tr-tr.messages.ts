@@ -309,6 +309,7 @@ export const TR_TR_MESSAGES = {
         close: "Kapat",
         error: "Hata",
         info: "Bilgi",
+        region: "Bildirimler",
         success: "Başarılı",
         warning: "Uyarı"
     },
@@ -368,6 +369,7 @@ export const TR_TR_MESSAGES = {
     },
     splitButton: {
         menuButtonAriaLabel: "Menü seçeneklerini göster",
+        menuButtonWithText: (text: string) => `Diğer ${text} seçenekleri`,
         splitButton: (text: string) => (text ? `${text}, bölünmüş düğme` : "Bölünmüş düğme")
     },
     splitter: {
@@ -428,6 +430,8 @@ export const TR_TR_MESSAGES = {
         closeWindow: "Pencereyi kapat",
         maximize: "Ekranı kapla",
         minimize: "Simge durumuna küçült",
+        moveOrResizeWindow:
+            "Pencereyi taşı veya yeniden boyutlandır. Taşımak için ok tuşlarını, yeniden boyutlandırmak için Ctrl ve ok tuşlarını kullanın.",
         moveWindow: "Pencereyi taşı. Taşımak için ok tuşlarını kullanın.",
         resizeBottom:
             "Pencereyi alt kenardan yeniden boyutlandırın. Yeniden boyutlandırmak için ok tuşlarını kullanın.",
@@ -442,6 +446,7 @@ export const TR_TR_MESSAGES = {
             "Pencereyi sol üst köşeden yeniden boyutlandırın. Yeniden boyutlandırmak için ok tuşlarını kullanın.",
         resizeTopRight:
             "Pencereyi sağ üst köşeden yeniden boyutlandırın. Yeniden boyutlandırmak için ok tuşlarını kullanın.",
+        resizeWindow: "Pencereyi yeniden boyutlandır. Yeniden boyutlandırmak için Ctrl ve ok tuşlarını kullanın.",
         restore: "Geri yükle"
     }
 } satisfies MonaLocaleMessages;

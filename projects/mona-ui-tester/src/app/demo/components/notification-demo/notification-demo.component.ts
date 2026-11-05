@@ -119,7 +119,8 @@ export class NotificationDemoComponent extends AbstractDemoComponent<never> {
         }
     });
     protected readonly config = computed<ComponentConfig<never>>(() => ({
-        inputs: deriveInputConfig<never>(this.metadata(), {}),
+        // `side` is set by the notification container, not by consumers.
+        inputs: deriveInputConfig<never>(this.metadata(), { side: undefined }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
     }));
     protected readonly featureInjector = this.#injector;

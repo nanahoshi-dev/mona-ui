@@ -1,6 +1,7 @@
-import { InjectionToken, TemplateRef } from "@angular/core";
-import { PopupMenuItem } from "./PopupMenuItem";
+import { InjectionToken, type TemplateRef } from "@angular/core";
+import type { PopupMenuItem } from "./PopupMenuItem";
 
+/* eslint-disable @typescript-eslint/naming-convention -- exported token names; renaming them would break consumers. */
 export const PopupMenuToken = new InjectionToken<PopupMenuConfig>("MONA_POPUP_MENU");
 export const PopupMenuRadioItemToken = new InjectionToken<PopupMenuConfig>("MONA_POPUP_MENU_RADIO_ITEM");
 export const PopupMenuGroupTemplateToken = new InjectionToken<PopupTemplateConfig>("MONA_POPUP_MENU_GROUP_TEMPLATE");
@@ -9,6 +10,7 @@ export const PopupMenuShortcutTemplateToken = new InjectionToken<PopupTemplateCo
     "MONA_POPUP_MENU_SHORTCUT_TEMPLATE"
 );
 export const PopupMenuTextTemplateToken = new InjectionToken<PopupTemplateConfig>("MONA_POPUP_MENU_TEXT_TEMPLATE");
+/* eslint-enable @typescript-eslint/naming-convention */
 
 export interface PopupMenuConfig {
     getPopupMenuItem: () => PopupMenuItem[];
@@ -18,7 +20,7 @@ export interface PopupMenuConfig {
 
 export interface PopupTemplateConfig {
     readonly origin: PopupMenuTemplateOrigin;
-    readonly template: TemplateRef<any>;
+    readonly template: TemplateRef<unknown>;
     readonly type: PopupMenuTemplateType;
 }
 

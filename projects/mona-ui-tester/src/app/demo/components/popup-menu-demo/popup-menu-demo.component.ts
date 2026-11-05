@@ -277,6 +277,8 @@ export class PopupMenuDemoComponent extends AbstractDemoComponent<PopupMenuCompo
             }
         </div>
         <mona-popup-menu
+            [ariaLabel]="ariaLabel()"
+            [ariaLabelledBy]="ariaLabelledBy()"
             [anchor]="popupAnchor()"
             [anchorConnectionPoint]="anchorConnectionPoint()"
             (close)="onClose($event)"
@@ -451,6 +453,8 @@ export class PopupMenuWrapperComponent implements ComponentInputsAsSignal<PopupM
     protected readonly popupAnchor = viewChild<ElementRef>("popupAnchorElement");
     public readonly anchor = input<ReturnType<PopupMenuComponent["anchor"]>>();
     public readonly anchorConnectionPoint = input<ReturnType<PopupMenuComponent["anchorConnectionPoint"]>>(null);
+    public readonly ariaLabel = input<ReturnType<PopupMenuComponent["ariaLabel"]>>("");
+    public readonly ariaLabelledBy = input<ReturnType<PopupMenuComponent["ariaLabelledBy"]>>("");
     public readonly items = input<any>([]);
     public readonly menuId = input("");
     public readonly minWidth = input<ReturnType<PopupMenuComponent["minWidth"]>>();

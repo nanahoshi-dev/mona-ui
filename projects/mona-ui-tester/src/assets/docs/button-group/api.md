@@ -19,7 +19,8 @@ When `selection` is `"single"` or `"multiple"`, the group coordinates toggle sta
 ## Import & Basic Usage
 
 ```typescript
-import { ButtonGroupComponent, ButtonDirective } from "@nanahoshi/mona-ui";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { ButtonGroupComponent } from "@nanahoshi/mona-ui/button-group";
 ```
 
 Add both to your standalone component's `imports` array. `ButtonDirective` is required on each child button.
@@ -152,7 +153,7 @@ Each child button's `aria-pressed` attribute is managed by `ButtonDirective` and
 
 **Selector:** `mona-button-group`
 
-**Content projection:** accepts elements carrying the `monaButton` attribute (`<ng-content select="[monaButton]">`).
+**Content projection:** accepts `monaButton` buttons, `mona-dropdown-button` and `mona-split-button` (`<ng-content select="[monaButton], mona-dropdown-button, mona-split-button">`). The buttons inside dropdown and split buttons take the group's look, size, rounding and disabled state, but they aren't toggles and take no part in its selection.
 
 #### Inputs
 

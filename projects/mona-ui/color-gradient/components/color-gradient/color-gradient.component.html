@@ -111,8 +111,10 @@
                     [ngTemplateOutletContext]="{ $implicit: 'HEX', classes: 'w-auto px-2' }"></ng-container>
             </ng-template>
             <ng-template monaTextBoxSuffixTemplate>
-                <mona-dropdown-button look="ghost" [attr.aria-label]="messages().copyColor" class="h-full">
-                    <svg lucideCopy [size]="12"></svg>
+                <mona-dropdown-button look="ghost" [iconOnly]="true" [aria-label]="messages().copyColor" class="h-full">
+                    <ng-template monaDropdownButtonTextTemplate>
+                        <svg lucideCopy [size]="12"></svg>
+                    </ng-template>
                     <mona-dropdown-button-item
                         [label]="messages().copyAsHex"
                         (menuClick)="onCopyColorSelect('hex')"></mona-dropdown-button-item>

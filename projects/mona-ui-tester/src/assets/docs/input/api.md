@@ -18,7 +18,7 @@
 ## Import & Basic Usage
 
 ```typescript
-import { TextBoxDirective } from "@nanahoshi/mona-ui";
+import { TextBoxDirective } from "@nanahoshi/mona-ui/text-box";
 ```
 
 Add `TextBoxDirective` to your standalone component's `imports` array.

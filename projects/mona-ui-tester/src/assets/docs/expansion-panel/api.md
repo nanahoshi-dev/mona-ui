@@ -13,7 +13,7 @@ When multiple panels are stacked directly adjacent to one another, the component
 ## Import & Basic Usage
 
 ```typescript
-import { ExpansionPanelComponent } from "@nanahoshi/mona-ui";
+import { ExpansionPanelComponent } from "@nanahoshi/mona-ui/expansion-panel";
 ```
 
 Add `ExpansionPanelComponent` to your standalone component's `imports` array.
@@ -180,12 +180,7 @@ Replaces the default plus/minus toggle icon. The template context exposes one va
 Import all template directives alongside the component:
 
 ```typescript
-import {
-    ExpansionPanelComponent,
-    ExpansionPanelTitleTemplateDirective,
-    ExpansionPanelActionsTemplateDirective,
-    ExpansionPanelIconTemplateDirective
-} from "@nanahoshi/mona-ui";
+import { ExpansionPanelActionsTemplateDirective, ExpansionPanelComponent, ExpansionPanelIconTemplateDirective, ExpansionPanelTitleTemplateDirective } from "@nanahoshi/mona-ui/expansion-panel";
 ```
 
 ---

@@ -1,9 +1,15 @@
-import { ComponentRef } from "@angular/core";
-import { Observable } from "rxjs";
+import type { ComponentRef } from "@angular/core";
+import type { Observable } from "rxjs";
+import type { NotificationOptions } from "./NotificationOptions";
+
+/**
+ * @description The options `NotificationRef.update()` can change on a notification that is already shown.
+ */
+export type NotificationUpdate = Partial<Pick<NotificationOptions, "closable" | "content" | "title" | "type">>;
 
 export interface NotificationRef {
     /**
-     * @description Emits once the notification has finished closing and been removed.
+     * @description Emits once the notification has finished closing, after its leave animation, and been removed.
      */
     readonly afterHide: Observable<void>;
 
@@ -16,4 +22,15 @@ export interface NotificationRef {
      * @description Closes the notification.
      */
     hide(): void;
+
+    /**
+     * @description The notification's id: the one given in its options, or a generated one.
+     */
+    readonly id: string;
+
+    /**
+     * @description Changes the content, title, type or close button of the notification. The new message is
+     * announced to assistive technology.
+     */
+    update(changes: NotificationUpdate): void;
 }

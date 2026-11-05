@@ -334,8 +334,11 @@ describe("MONA_ES_ES_LOCALE Integration with MonaI18nService", () => {
         fixture.detectChanges();
 
         const hostEl = fixture.nativeElement as HTMLElement;
-        const mainBtn = hostEl.querySelector("button[aria-label='Guardar, botón dividido']");
-        expect(mainBtn).not.toBeNull();
+        const [mainBtn, menuBtn] = Array.from(hostEl.querySelectorAll("button"));
+        expect(mainBtn.textContent?.trim()).toBe("Guardar");
+        // The main button is named by its text; the arrow is named after it.
+        expect(mainBtn.hasAttribute("aria-label")).toBe(false);
+        expect(menuBtn.getAttribute("aria-label")).toBe("Más opciones de Guardar");
     });
 
     it("renders connected ListBox components with self-contained Spanish transfer accessible names", () => {

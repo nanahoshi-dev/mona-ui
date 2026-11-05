@@ -1,6 +1,5 @@
 import { Component, computed, contentChild, contentChildren, forwardRef, input } from "@angular/core";
 import { selectMany } from "@mirei/ts-collections";
-import { v4 } from "uuid";
 import {
     PopupMenuConfig,
     PopupMenuGroupTemplateToken,
@@ -21,7 +20,8 @@ import { PopupMenuItem } from "../../models/PopupMenuItem";
     ]
 })
 export class PopupMenuGroupComponent implements PopupMenuConfig {
-    readonly #groupSymbol = Symbol(v4());
+    // One key per group: consecutive items with it form the group, and its description is the title.
+    readonly #groupKey = computed(() => Symbol(this.title() ?? ""));
     protected readonly groupTemplateConfig = contentChild(PopupMenuGroupTemplateToken, {
         descendants: false
     });
@@ -35,10 +35,11 @@ export class PopupMenuGroupComponent implements PopupMenuConfig {
     public readonly type = PopupMenuItemType.MenuGroup;
 
     public getPopupMenuItem(): PopupMenuItem[] {
+        const group = this.#groupKey();
         const menuItems = this.items().map(i =>
             i.getPopupMenuItem().map(item => ({
                 ...item,
-                group: this.title() || this.#groupSymbol,
+                group,
                 groupTemplate: computed(() => this.groupTemplateConfig()?.template ?? null)
             }))
         );

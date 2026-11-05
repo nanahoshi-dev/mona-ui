@@ -453,12 +453,6 @@ export const ALLOWLIST: AllowlistEntry[] = [
         lineSnippet: "left,",
         reason: "Tree drop hint position calculation explicitly branches on isRtl"
     },
-    {
-        category: "rtl-physical-style",
-        filePattern: "projects/mona-ui/internal/utils/setWindowStyles.ts",
-        lineSnippet: "left,",
-        reason: "Desktop window floating coordinate management operates in 2D viewport coordinates"
-    },
 
     // Manual review exemptions for directional gradients, translate transforms, and DOM/coordinate operations
     {
@@ -520,6 +514,24 @@ export const ALLOWLIST: AllowlistEntry[] = [
         filePattern: "projects/mona-ui/window/directives/window-drag-handler.directive.ts",
         lineSnippet: "getBoundingClientRect().left",
         reason: "Desktop window drag handler operates in 2D viewport coordinates"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/window/directives/window-drag-handler.directive.ts",
+        lineSnippet: "rect.left",
+        reason: "Desktop window drag handler operates in 2D viewport coordinates"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/sheet/styles/sheet.styles.ts",
+        lineSnippet: "border-l border-border",
+        reason: "The sheet resolves start/end to a physical side when it opens; its border faces the page on that physical edge"
+    },
+    {
+        category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/sheet/styles/sheet.styles.ts",
+        lineSnippet: "border-r border-border",
+        reason: "The sheet resolves start/end to a physical side when it opens; its border faces the page on that physical edge"
     },
     {
         category: "rtl-manual-review",

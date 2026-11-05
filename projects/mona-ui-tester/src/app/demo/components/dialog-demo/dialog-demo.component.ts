@@ -240,6 +240,7 @@ export class DialogDemoComponent extends AbstractDemoComponent<DialogComponent> 
         <button monaButton look="primary" (click)="openDialog()">Open via Dialog Service</button>
         @if (dialogVisible()) {
             <mona-dialog
+                [ariaLabel]="ariaLabel()"
                 (action)="onAction($event)"
                 [actions]="actions()"
                 [actionsLayout]="actionsLayout()"
@@ -318,6 +319,7 @@ class DialogWrapperComponent implements ComponentInputsAsSignal<DialogComponent>
     protected readonly features = inject(FeatureConfigHandler).data;
     protected dynamicDialogRef: DialogRef | null = null;
     public readonly actions = input<ReturnType<DialogComponent["actions"]>>([]);
+    public readonly ariaLabel = input<ReturnType<DialogComponent["ariaLabel"]>>();
     public readonly actionsLayout = input<ReturnType<DialogComponent["actionsLayout"]>>("end");
     public readonly closable = input<ReturnType<DialogComponent["closable"]>>(true);
     public readonly closeOnEscape = input<ReturnType<DialogComponent["closeOnEscape"]>>(true);
@@ -377,7 +379,6 @@ class DialogWrapperComponent implements ComponentInputsAsSignal<DialogComponent>
         });
         this.dynamicDialogRef.result.pipe(take(1)).subscribe(result => {
             console.log("Dialog result:", result);
-            this.dynamicDialogRef?.close();
         });
     }
 }

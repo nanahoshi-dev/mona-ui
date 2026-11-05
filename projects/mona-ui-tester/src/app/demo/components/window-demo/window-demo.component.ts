@@ -181,6 +181,7 @@ export class WindowDemoComponent extends AbstractDemoComponent<WindowComponent> 
         <button monaButton (click)="openWindow()">Open via Window Service</button>
         @if (windowVisible()) {
             <mona-window
+                [ariaLabel]="ariaLabel()"
                 [closable]="closable()"
                 [closeOnEscape]="closeOnEscape()"
                 [draggable]="draggable()"
@@ -280,6 +281,7 @@ class WindowWrapperComponent implements ComponentInputsAsSignal<WindowComponent>
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly windowVisible = signal(false);
     protected dynamicWindowRef: WindowRef | null = null;
+    public readonly ariaLabel = input<ReturnType<WindowComponent["ariaLabel"]>>();
     public readonly closable = input<ReturnType<WindowComponent["closable"]>>(true);
     public readonly closeOnEscape = input<ReturnType<WindowComponent["closeOnEscape"]>>(true);
     public readonly draggable = input<ReturnType<WindowComponent["draggable"]>>(true);

@@ -1,4 +1,4 @@
-import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
+import { type PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 
 export class PopupMenuCloseEvent extends PreventableEvent {

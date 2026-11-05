@@ -1,7 +1,7 @@
-import { ConnectionPositionPair, OverlayRef } from "@angular/cdk/overlay";
-import { ComponentRef } from "@angular/core";
-import { Observable } from "rxjs";
-import { PopupCloseEvent } from "./PopupCloseEvent";
+import { type ConnectionPositionPair, type OverlayRef } from "@angular/cdk/overlay";
+import { type ComponentRef } from "@angular/core";
+import { type Observable } from "rxjs";
+import { type PopupCloseEvent } from "./PopupCloseEvent";
 
 export interface PopupRefParams {
     get beforeClose$(): Observable<PopupCloseEvent>;

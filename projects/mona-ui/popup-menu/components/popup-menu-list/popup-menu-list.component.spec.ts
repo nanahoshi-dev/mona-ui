@@ -1,12 +1,12 @@
 import { Signal, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { groupBy } from "@mirei/ts-collections";
 import { MONA_DEFAULT_LOCALE, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { PopupCloseEvent, PopupDataInjectionToken, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
 import { Subject } from "rxjs";
 import { PopupMenuItem } from "../../models/PopupMenuItem";
 import { PopupMenuItemClickEvent } from "../../models/PopupMenuItemClickEvent";
 import { PopupMenuListConfig } from "../../models/PopupMenuListConfig";
+import { groupPopupMenuItems } from "../../utils/popup-menu.utils";
 import { PopupMenuListComponent } from "./popup-menu-list.component";
 
 interface TestPopupMenuListComponent {
@@ -27,8 +27,10 @@ const createItem = (overrides: Partial<PopupMenuItem> & { label: string; uid: st
 
 const createConfig = (menuItems: PopupMenuItem[]): PopupMenuListConfig => ({
     childCloseRequest$: new Subject(),
+    closeMenu: () => undefined,
     isRoot: true,
-    items: groupBy(menuItems, i => i.group).toArray(),
+    items: signal(groupPopupMenuItems(menuItems)),
+    labelledBy: null,
     level: 0,
     menuId: "menu-1",
     menuItemClick$: new Subject(),

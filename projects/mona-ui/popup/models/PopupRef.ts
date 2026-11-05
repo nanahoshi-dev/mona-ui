@@ -1,8 +1,8 @@
-import { ConnectionPositionPair, OverlayRef } from "@angular/cdk/overlay";
-import { ComponentRef } from "@angular/core";
-import { asapScheduler, Observable } from "rxjs";
-import { PopupCloseEvent } from "./PopupCloseEvent";
-import { PopupRefParams } from "./PopupRefParams";
+import { type ConnectionPositionPair, type OverlayRef } from "@angular/cdk/overlay";
+import { type ComponentRef } from "@angular/core";
+import { asapScheduler, type Observable } from "rxjs";
+import { type PopupCloseEvent } from "./PopupCloseEvent";
+import { type PopupRefParams } from "./PopupRefParams";
 
 export class PopupRef {
     #options: PopupRefParams;

@@ -18,7 +18,7 @@ Menu content is built the same way as `ContextMenuComponent`: `mona-menu-item`, 
 ## Import & Quick Start
 
 ```typescript
-import { MenubarComponent, MenuComponent, MenuItemComponent } from "@nanahoshi/mona-ui";
+import { MenubarComponent, MenuComponent, MenuItemComponent } from "@nanahoshi/mona-ui/menubar";
 ```
 
 Add the components you need to your standalone component's `imports` array.
@@ -41,7 +41,7 @@ Add the components you need to your standalone component's `imports` array.
 ```
 
 ```typescript
-import type { MenuItemClickEvent } from "@nanahoshi/mona-ui";
+import type { MenuItemClickEvent } from "@nanahoshi/mona-ui/menubar";
 
 protected onMenuClick(event: MenuItemClickEvent): void { /* ... */ }
 ```
@@ -69,7 +69,7 @@ Alternatively, a `mona-menu` can be given an `items` collection directly (see th
 Two directives customize a top-level menu itself (`monaMenuIconTemplate`, `monaMenuTextTemplate`); the rest customize the items inside a menu's popup, the same way `ContextMenuComponent`'s template directives do.
 
 | Directive attribute            | Scope          | Template context                                                                  |
-| ------------------------------ | -------------- | --------------------------------------------------------------------------------- |
+|--------------------------------|----------------|-----------------------------------------------------------------------------------|
 | `monaMenuGroupTemplate`        | Global / Group | `$implicit: string` — the group title                                             |
 | `monaMenuIconTemplate`         | Global / Menu  | `$implicit: string` — the menu's `text`, `items` — the menu's resolved items      |
 | `monaMenuItemIconTemplate`     | Global / Item  | `$implicit` — the menu item (`label`, `disabled`, …); see API for the type caveat |
@@ -190,7 +190,7 @@ protected readonly theme = signal("system");
 </mona-menubar>
 ```
 
-Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or on an individual `mona-menu` to disable only that menu. A disabled menu does not open on click, hover, or keyboard activation.
+Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or on an individual `mona-menu` to disable only that menu. A disabled menu does not open on click, hover, or keyboard activation, but the arrow keys still reach it, so it can be read and found. A `mona-menu` without items is a plain menubar item: it doesn't advertise or open a popup.
 
 ### Sizing and rounding
 
@@ -210,9 +210,13 @@ Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or
 
 **Keep the menu open after a click.** Calling `event.preventDefault()` in a `(menuItemClick)` handler — on `<mona-menubar>` itself or on an individual item's own `(menuClick)` — prevents the menu from closing after that selection.
 
+**Identifying the item.** The click event's `value` is the item's `value` input, so handlers don't need to compare label text (which changes with translation). `label` is the item's label, and for checkbox and radio items `checked` is the state the item has once the click is applied.
+
 **Suppressing checkbox/radio state changes.** Calling `event.preventDefault()` on a `mona-menu-checkbox-item`'s or `mona-menu-radio-item`'s `menuClick` event suppresses the resulting `checkedChange` emission (checkbox item) or selection update (radio group). Use this to confirm or validate a change before it applies.
 
-**Switching menus by pointer.** While one menu's popup is open, moving the pointer over a different (enabled) top-level menu closes the current popup and opens the new one. Hovering a disabled menu, or hovering while the menubar itself is disabled, has no effect.
+**Switching menus.** While one menu's popup is open, moving the pointer over a different top-level menu closes the current popup and opens the new one; `ArrowLeft`/`ArrowRight` in the popup do the same. When the new menu is disabled or has no items, the popup just closes (from the keyboard, focus lands on that menubar item). The Tab stop follows the menu you're in. Hovering while the menubar itself is disabled has no effect.
+
+**Items from another menu family** (a `mona-contextmenu-item` inside a `mona-menu`, say) throw an error naming the component to use.
 
 ## Accessibility
 
@@ -220,37 +224,40 @@ Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or
 
 **On the menubar itself** (before a menu is open, or moving between top-level menus):
 
-| Key               | Action                                                                               |
-| ----------------- | ------------------------------------------------------------------------------------ |
-| `Tab`             | Moves focus to or from the menubar. Only one top-level menu is a Tab stop at a time. |
-| `ArrowRight`      | Moves focus to the next enabled top-level menu, wrapping to the first                |
-| `ArrowLeft`       | Moves focus to the previous enabled top-level menu, wrapping to the last             |
-| `Home`            | Moves focus to the first enabled top-level menu                                      |
-| `End`             | Moves focus to the last enabled top-level menu                                       |
-| `Enter` / `Space` | Opens the focused menu                                                               |
-| `ArrowDown`       | Opens the focused menu, if none is currently open                                    |
-| `Escape`          | Closes the currently open menu                                                       |
+| Key               | Action                                                                                        |
+|-------------------|-----------------------------------------------------------------------------------------------|
+| `Tab`             | Moves focus to or from the menubar. Only one top-level menu is a Tab stop at a time.          |
+| `ArrowRight`      | Moves focus to the next top-level menu, wrapping to the first. Disabled menus are reached too |
+| `ArrowLeft`       | Moves focus to the previous top-level menu, wrapping to the last                              |
+| `Home`            | Moves focus to the first top-level menu                                                       |
+| `End`             | Moves focus to the last top-level menu                                                        |
+| `Enter` / `Space` | Opens the focused menu, with its first item highlighted                                       |
+| `ArrowDown`       | Opens the focused menu with its first item highlighted, if none is currently open             |
+| `ArrowUp`         | Opens the focused menu with its last item highlighted, if none is currently open              |
+| `Escape`          | Closes the currently open menu                                                                |
+| A letter or digit | Moves focus to the next top-level menu whose text starts with it                              |
 
 **Within an open menu's popup** (same list navigation as `ContextMenuComponent`):
 
-| Key                               | Action                                                                                                                              |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `ArrowDown`                       | Highlights the next item, wrapping to the first                                                                                     |
-| `ArrowUp`                         | Highlights the previous item, wrapping to the last                                                                                  |
-| `ArrowRight`                      | Opens the highlighted item's submenu if it has nested items; at the popup's root level, moves to the next top-level menu instead    |
-| `ArrowLeft`                       | Closes the current submenu and returns to the parent level; at the popup's root level, moves to the previous top-level menu instead |
-| `Home`                            | Highlights the first item                                                                                                           |
-| `End`                             | Highlights the last item                                                                                                            |
-| `Enter` / `Space`                 | Activates the highlighted item, or opens its submenu if it has nested items                                                         |
-| `Escape`                          | Closes the open submenu, or the menu itself at the root level                                                                       |
-| Letter, digit, space, `-`, or `_` | Jumps to (cycles through) items whose label starts with the typed text                                                              |
+| Key                        | Action                                                                                                                                                  |
+|----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `ArrowDown`                | Highlights the next item, wrapping to the first. Disabled items are highlighted too, but can't be activated                                             |
+| `ArrowUp`                  | Highlights the previous item, wrapping to the last                                                                                                      |
+| `ArrowRight`               | Opens the highlighted item's submenu if it has nested items; at the popup's root level, moves to the next top-level menu instead                        |
+| `ArrowLeft`                | Closes the current submenu and returns to the parent level; at the popup's root level, moves to the previous top-level menu instead, on the first press |
+| `Home`                     | Highlights the first item                                                                                                                               |
+| `End`                      | Highlights the last item                                                                                                                                |
+| `Enter` / `Space`          | Activates the highlighted item, or opens its submenu if it has nested items                                                                             |
+| `Escape`                   | Closes the open submenu, or the menu itself at the root level                                                                                           |
+| `Tab`                      | Closes the open menus; focus moves on from the menubar                                                                                                  |
+| Letter, digit, `-`, or `_` | Jumps to (cycles through) items whose label starts with the typed text                                                                                  |
 
 ### ARIA
 
 **Menubar** (`role="menubar"`):
 
 | Attribute         | When present                       | Value                         |
-| ----------------- | ---------------------------------- | ----------------------------- |
+|-------------------|------------------------------------|-------------------------------|
 | `role`            | Always                             | `"menubar"`                   |
 | `aria-disabled`   | Always                             | Reflects the `disabled` input |
 | `aria-label`      | When `ariaLabel` is non-empty      | Value of `ariaLabel`          |
@@ -258,18 +265,19 @@ Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or
 
 **Top-level menu** (`role="menuitem"`, one per `mona-menu`):
 
-| Attribute       | When present                    | Value                                                                                          |
-| --------------- | ------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `role`          | Always                          | `"menuitem"`                                                                                   |
-| `tabindex`      | Always                          | `-1` when disabled; otherwise `0` for exactly one menu (roving tab stop) and `-1` for the rest |
-| `aria-disabled` | Always                          | Reflects the menu's `disabled` input                                                           |
-| `aria-haspopup` | Always                          | `"menu"`                                                                                       |
-| `aria-expanded` | Always                          | `"true"` while that menu's popup is open, otherwise `"false"`                                  |
-| `aria-controls` | While that menu's popup is open | The popup menu container's auto-generated ID                                                   |
+| Attribute       | When present                    | Value                                                                                                                                 |
+|-----------------|---------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
+| `role`          | Always                          | `"menuitem"`                                                                                                                          |
+| `tabindex`      | Always                          | `0` for exactly one menu (roving tab stop) and `-1` for the rest; disabled menus take part. `-1` for all when the menubar is disabled |
+| `aria-disabled` | Always                          | Reflects the menu's `disabled` input                                                                                                  |
+| `id`            | Always                          | An auto-generated ID that names the menu's popup                                                                                      |
+| `aria-haspopup` | When the menu has items         | `"menu"`                                                                                                                              |
+| `aria-expanded` | When the menu has items         | `"true"` while that menu's popup is open, otherwise `"false"`                                                                         |
+| `aria-controls` | While that menu's popup is open | The popup menu container's auto-generated ID                                                                                          |
 
-**Popup menu container** (`role="menu"`), **item** (`role="menuitem"`), and **group** (`role="group"`): same attributes as `ContextMenuComponent`'s popup — see its documentation for the full table. In summary: the container carries `aria-orientation="vertical"` and `aria-activedescendant` while an item is highlighted; each item carries `aria-disabled`, `aria-haspopup`/`aria-expanded` when it has nested items, and `aria-label` when its `label` is non-empty; groups carry `aria-labelledby`.
+**Popup menu container** (`role="menu"`), **item** (`role="menuitem"`), and **group** (`role="group"`): the popup is labelled by its top-level menu (`aria-labelledby`); otherwise the same attributes as `ContextMenuComponent`'s popup — see its documentation for the full table. In summary: the container carries `aria-orientation="vertical"` and `aria-activedescendant` while an item is highlighted; checkbox and radio items are `menuitemcheckbox` and `menuitemradio` with `aria-checked`; each item carries `aria-disabled`, `aria-haspopup`/`aria-expanded` when it has nested items, and `aria-label` when its `label` is non-empty; groups wrap their header and items and carry `aria-labelledby`.
 
-**Focus behavior:** on the menubar itself, exactly one top-level menu is a Tab stop at a time (roving tabindex) and Arrow keys move it. Once a popup opens, focus moves into its `role="menu"` container the same way as `ContextMenuComponent`; the highlighted item is communicated through `aria-activedescendant` rather than DOM focus. When a popup opened via keyboard closes, focus returns to its triggering top-level menu.
+**Focus behavior:** on the menubar itself, exactly one top-level menu is a Tab stop at a time (roving tabindex) and Arrow keys move it. Once a popup opens, focus moves into its `role="menu"` container the same way as `ContextMenuComponent`; the highlighted item is communicated through `aria-activedescendant` rather than DOM focus. When a popup closes (Escape, choosing an item, or a click outside that doesn't move focus elsewhere), focus returns to its top-level menu. `Tab` closes the popup and moves focus out of the menubar. A submenu opened by the pointer leaves focus in its parent menu.
 
 **Consumer responsibilities:**
 
@@ -285,7 +293,7 @@ Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or
 #### Inputs
 
 | Name             | Type                                       | Default    | Description                                                                             |
-| ---------------- | ------------------------------------------ | ---------- | --------------------------------------------------------------------------------------- |
+|------------------|--------------------------------------------|------------|-----------------------------------------------------------------------------------------|
 | `ariaLabel`      | `string`                                   | `''`       | ARIA label for the menubar.                                                             |
 | `ariaLabelledby` | `string`                                   | `''`       | ARIA labelledby for the menubar.                                                        |
 | `class`          | `string`                                   | `''`       | Additional CSS classes to apply to the menubar, merged with the computed theme classes. |
@@ -296,7 +304,7 @@ Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or
 #### Outputs
 
 | Name            | Type                 | Description                                                                                                                    |
-| --------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+|-----------------|----------------------|--------------------------------------------------------------------------------------------------------------------------------|
 | `menuItemClick` | `MenuItemClickEvent` | Emitted when a menu item in any menu is activated by pointer or keyboard. Call `event.preventDefault()` to keep the menu open. |
 
 ---
@@ -309,11 +317,11 @@ A top-level menu. Its `text` is displayed on the menubar; its projected items (o
 
 #### Inputs
 
-| Name       | Type                 | Default | Description                                                                                                                                                                                                                                                                                                                                             |
-| ---------- | -------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `disabled` | `boolean`            | `false` | Renders the menu with reduced visual emphasis and prevents it from opening.                                                                                                                                                                                                                                                                             |
-| `items`    | `Iterable<MenuItem>` | `[]`    | Menu items to render directly, instead of content-projected item components. Takes precedence over projected content when non-empty. TODO(owner-review): `MenuItem` is not exported from `@nanahoshi/mona-ui`; it is a plain object with `label` (required), and optional `checkable`, `checked`, `disabled`, `group`, `items`, and `separator` fields. |
-| `text`     | `string`             | `''`    | Display text of the menu on the menubar.                                                                                                                                                                                                                                                                                                                |
+| Name       | Type                 | Default | Description                                                                                                                                                                                                                                                                                                                          |
+|------------|----------------------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `disabled` | `boolean`            | `false` | Renders the menu with reduced visual emphasis and prevents it from opening.                                                                                                                                                                                                                                                          |
+| `items`    | `Iterable<MenuItem>` | `[]`    | Menu items to render directly, instead of content-projected item components. Takes precedence over projected content when non-empty. `MenuItem` is exported from `@nanahoshi/mona-ui/popup-menu`: a plain object with `label` (required), and optional `checkable`, `checked`, `disabled`, `group`, `items`, and `separator` fields. |
+| `text`     | `string`             | `''`    | Display text of the menu on the menubar.                                                                                                                                                                                                                                                                                             |
 
 `MenuComponent` has no outputs.
 
@@ -325,15 +333,16 @@ A top-level menu. Its `text` is displayed on the menubar; its projected items (o
 
 #### Inputs
 
-| Name       | Type      | Default | Description                                                           |
-| ---------- | --------- | ------- | --------------------------------------------------------------------- |
-| `disabled` | `boolean` | `false` | Renders the item with reduced visual emphasis and prevents selection. |
-| `label`    | `string`  | `''`    | Display text of the item.                                             |
+| Name       | Type      | Default     | Description                                                             |
+|------------|-----------|-------------|-------------------------------------------------------------------------|
+| `disabled` | `boolean` | `false`     | Renders the item with reduced visual emphasis and prevents selection.   |
+| `label`    | `string`  | `''`        | Display text of the item.                                               |
+| `value`    | `unknown` | `undefined` | Identifies the item: it's the `value` of the item's `menuClick` events. |
 
 #### Outputs
 
 | Name        | Type                 | Description                                                                                                                         |
-| ----------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+|-------------|----------------------|-------------------------------------------------------------------------------------------------------------------------------------|
 | `menuClick` | `MenuItemClickEvent` | Emitted when this item is selected by pointer or keyboard. Not emitted when the item has nested items (it opens a submenu instead). |
 
 ---
@@ -344,16 +353,17 @@ A top-level menu. Its `text` is displayed on the menubar; its projected items (o
 
 #### Inputs
 
-| Name       | Type      | Default | Description                                                                 |
-| ---------- | --------- | ------- | --------------------------------------------------------------------------- |
-| `checked`  | `boolean` | `false` | Whether the item is checked. Bind `(checkedChange)` to track state changes. |
-| `disabled` | `boolean` | `false` | Renders the item with reduced visual emphasis and prevents selection.       |
-| `label`    | `string`  | `''`    | Display text of the item.                                                   |
+| Name       | Type      | Default     | Description                                                                                                                                                    |
+|------------|-----------|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `checked`  | `boolean` | `false`     | Whether the item is checked. Two-way bindable with `[(checked)]`; activating the item toggles it (unless `menuClick` is prevented), with or without a binding. |
+| `disabled` | `boolean` | `false`     | Renders the item with reduced visual emphasis and prevents selection.                                                                                          |
+| `label`    | `string`  | `''`        | Display text of the item.                                                                                                                                      |
+| `value`    | `unknown` | `undefined` | Identifies the item: it's the `value` of the item's `menuClick` events.                                                                                        |
 
 #### Outputs
 
 | Name            | Type                 | Description                                                                                                              |
-| --------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+|-----------------|----------------------|--------------------------------------------------------------------------------------------------------------------------|
 | `checkedChange` | `boolean`            | Emitted with the new checked state after activation. Not emitted when `event.preventDefault()` is called on `menuClick`. |
 | `menuClick`     | `MenuItemClickEvent` | Emitted when the item is activated. Call `event.preventDefault()` to suppress the checked-state change.                  |
 
@@ -366,7 +376,7 @@ A top-level menu. Its `text` is displayed on the menubar; its projected items (o
 #### Inputs
 
 | Name    | Type     | Default | Description                                                                                                                                                          |
-| ------- | -------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|---------|----------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `title` | `string` | `''`    | Section header text displayed above the radio items. When empty, the items are still grouped logically but no header is rendered.                                    |
 | `value` | `string` | `''`    | Two-way bindable selected value. Use `[(value)]` to synchronize with a signal or property. The `mona-menu-radio-item` with the matching `value` renders as selected. |
 
@@ -381,7 +391,7 @@ A top-level menu. Its `text` is displayed on the menubar; its projected items (o
 #### Inputs
 
 | Name       | Type      | Default | Description                                                                                    |
-| ---------- | --------- | ------- | ---------------------------------------------------------------------------------------------- |
+|------------|-----------|---------|------------------------------------------------------------------------------------------------|
 | `disabled` | `boolean` | `false` | Renders the item with reduced visual emphasis and prevents selection.                          |
 | `label`    | `string`  | `''`    | Display text of the item.                                                                      |
 | `value`    | `string`  | —       | Required. The value reported to the parent `mona-menu-radio-group` when this item is selected. |
@@ -389,7 +399,7 @@ A top-level menu. Its `text` is displayed on the menubar; its projected items (o
 #### Outputs
 
 | Name        | Type                 | Description                                                                                                                            |
-| ----------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+|-------------|----------------------|----------------------------------------------------------------------------------------------------------------------------------------|
 | `menuClick` | `MenuItemClickEvent` | Emitted when the item is selected. Call `event.preventDefault()` to suppress the resulting selection update on the parent radio group. |
 
 Must be projected inside a `mona-menu-radio-group` to participate in selection.
@@ -402,9 +412,9 @@ Must be projected inside a `mona-menu-radio-group` to participate in selection.
 
 #### Inputs
 
-| Name    | Type     | Default | Description                                                        |
-| ------- | -------- | ------- | ------------------------------------------------------------------ |
-| `title` | `string` | —       | Required. Header text displayed above the group's projected items. |
+| Name    | Type                  | Default     | Description                                                                                                                        |
+|---------|-----------------------|-------------|------------------------------------------------------------------------------------------------------------------------------------|
+| `title` | `string \| undefined` | `undefined` | Header text displayed above the group's items. Without it, no header is rendered and the items aren't wrapped in a `role="group"`. |
 
 `MenuGroupComponent` has no outputs.
 
@@ -425,7 +435,7 @@ Renders a horizontal visual divider between items. Has no inputs or outputs.
 Customizes a group header's content.
 
 | Variable                     | Type     | Description        |
-| ---------------------------- | -------- | ------------------ |
+|------------------------------|----------|--------------------|
 | `$implicit` (as `let-title`) | `string` | The group's title. |
 
 ---
@@ -436,10 +446,10 @@ Customizes a group header's content.
 
 Customize a top-level menu's icon area and its displayed text, respectively.
 
-| Variable                         | Type        | Description                                                                                                                                      |
-| -------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `$implicit` (as `let-text`)      | `string`    | The menu's `text` input value.                                                                                                                   |
-| `items` (as `let-items="items"`) | `unknown[]` | TODO(owner-review): the menu's resolved items, typed as `PopupMenuItem[]` internally; `PopupMenuItem` is not exported from `@nanahoshi/mona-ui`. |
+| Variable                         | Type              | Description                                                                                  |
+|----------------------------------|-------------------|----------------------------------------------------------------------------------------------|
+| `$implicit` (as `let-text`)      | `string`          | The menu's `text` input value.                                                               |
+| `items` (as `let-items="items"`) | `PopupMenuItem[]` | The menu's resolved items. `PopupMenuItem` is exported from `@nanahoshi/mona-ui/popup-menu`. |
 
 ---
 
@@ -449,21 +459,21 @@ Customize a top-level menu's icon area and its displayed text, respectively.
 
 Customize, respectively, an item's leading icon area, its trailing shortcut area (shown only on leaf items), and its label text.
 
-| Variable                    | Type            | Description                                                                                                                                                                                                                 |
-| --------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `$implicit` (as `let-item`) | `PopupMenuItem` | The menu item. TODO(owner-review): `PopupMenuItem` is not exported from `@nanahoshi/mona-ui`; consumers can read properties such as `item.label` and `item.disabled` but cannot import the type for an explicit annotation. |
+| Variable                    | Type            | Description                                                                                                                               |
+|-----------------------------|-----------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| `$implicit` (as `let-item`) | `PopupMenuItem` | The menu item, with `label`, `disabled`, `checked` and its other state. `PopupMenuItem` is exported from `@nanahoshi/mona-ui/popup-menu`. |
 
 ---
 
-TODO(owner-review): `PopupMenuItem` and `MenuItem` (used by `MenuComponent.items` and by the template contexts above) are not exported from `@nanahoshi/mona-ui`. `MenuItemClickEvent` (used by every `menuClick`/`menuItemClick` output above) **is** exported, as a type alias for `PopupMenuItemClickEvent`.
+`PopupMenuItem` and `MenuItem` (used by `MenuComponent.items` and by the template contexts above) are exported from `@nanahoshi/mona-ui/popup-menu`. `MenuItemClickEvent` (used by every `menuClick`/`menuItemClick` output above) is exported from `@nanahoshi/mona-ui/menubar`, as an alias of `PopupMenuItemClickEvent`.
 
 <!-- verification-checklist
-- [x] API definitions and defaults verified against source (menubar/*.component.ts and inherited PopupMenu* base classes under common/popup-menu)
-- [x] menuItemClick/menuClick output types documented as MenuItemClickEvent (exported alias for PopupMenuItemClickEvent, lib/index.ts) — not the unexported PopupMenuItemClickEvent name
-- [x] MenuGroupComponent.title and MenuRadioItemComponent.value confirmed as input.required<string>() — marked Required, default "—"
+- [x] API definitions and defaults verified against source (menubar/*.component.ts and the inherited PopupMenu* base classes in popup-menu/)
+- [x] menuItemClick/menuClick output types documented as MenuItemClickEvent, the menubar's alias of PopupMenuItemClickEvent
+- [x] MenuGroupComponent.title is optional (input<string>()); MenuRadioItemComponent.value is input.required<string>()
 - [x] MenuRadioGroupComponent.value confirmed as model<string>("") — documented as two-way bindable
-- [x] MenuCheckboxItemComponent.checked/checkedChange confirmed as plain input()/output() pair (not model())
-- [x] disabled-not-enforced-for-pointer/click bug (menubar and per-item) confirmed fixed in menubar.component.ts (onMenuPointerEnter/onMenuClick/onMenuKeyDown guards) before documenting "blocks click, hover, and keyboard activation" as fact
+- [x] MenuCheckboxItemComponent.checked confirmed as model(false): two-way bindable, and the item toggles itself
+- [x] Disabled menus are reached by the arrow keys but don't open on click (trigger off), hover or keyboard (onMenuPointerEnter/onMenuKeyDown guards)
 - [x] Roving tabindex (single Tab stop) confirmed implemented via activeIndex signal in menubar.component.ts before documenting it as fact
 - [x] aria-controls / aria-expanded null-vs-null false-positive bug confirmed fixed in menubar.component.html before documenting aria-expanded/aria-controls as reliable
 - [x] rounded/size variant unions verified against menu.styles.ts (menubarBaseThemeVariants: rounded none/small/medium/large, size small/medium/large)
@@ -473,10 +483,10 @@ TODO(owner-review): `PopupMenuItem` and `MenuItem` (used by `MenuComponent.items
 - [x] Keyboard map (menubar level) verified against MenubarComponent.onMenuKeyDown, moveToNext/PreviousMenu, findNextNonDisabledMenuIndex/findPreviousNonDisabledMenuIndex
 - [x] Keyboard map (popup level) verified against PopupMenuListComponent's handle*Key methods, shared with ContextMenuComponent
 - [x] Cross-popup ArrowLeft/ArrowRight-moves-between-top-level-menus behavior verified against MenubarComponent.setNavigationSubscription and PopupMenuListComponent.handleNavigationKey's level===0 branches
-- [x] Pointer hover-switch-between-open-menus behavior, including disabled guard, verified against onMenuPointerEnter
-- [x] Focus-restoration-on-close behavior verified against PopupMenuComponent's #shouldRestoreFocus handling
-- [x] MenuComponent.items type documented as Iterable<MenuItem>; MenuItem shape (label required, optional checkable/checked/disabled/group/items/separator) taken from common/popup-menu/models/PopupMenuItem.ts
-- [x] PopupMenuItem and MenuItem confirmed not exported from lib/index.ts
+- [x] Pointer and keyboard switching between open menus, including disabled and empty menus, verified against onMenuPointerEnter and updateCurrentMenuData
+- [x] Focus-restoration-on-close behavior verified against PopupMenuComponent's open-menu state (`restoreFocus`, `returnFocusTo`)
+- [x] MenuComponent.items type documented as Iterable<MenuItem>; MenuItem shape taken from popup-menu/models/PopupMenuItem.ts
+- [x] PopupMenuItem and MenuItem confirmed exported from popup-menu/public-api.ts; typeahead no longer lists space, which activates the item
 - [x] No internal or unexported APIs exposed beyond the documented TODOs
 - [x] Inputs sorted A→Z within each table
 - [x] Basic examples compile against the public API surface

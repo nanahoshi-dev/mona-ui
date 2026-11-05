@@ -308,6 +308,7 @@ export const KO_KR_MESSAGES = {
         close: "닫기",
         error: "오류",
         info: "정보",
+        region: "알림",
         success: "성공",
         warning: "경고"
     },
@@ -368,6 +369,7 @@ export const KO_KR_MESSAGES = {
     },
     splitButton: {
         menuButtonAriaLabel: "메뉴 옵션 표시",
+        menuButtonWithText: (text: string) => `${text} 추가 옵션`,
         splitButton: (text: string) => (text ? `${text}, 분할 버튼` : "분할 버튼")
     },
     splitter: {
@@ -428,6 +430,7 @@ export const KO_KR_MESSAGES = {
         closeWindow: "창 닫기",
         maximize: "최대화",
         minimize: "최소화",
+        moveOrResizeWindow: "창 이동 또는 크기 조정. 화살표 키로 이동하고, Ctrl 키와 화살표 키로 크기를 조정합니다.",
         moveWindow: "창 이동. 화살표 키로 이동합니다.",
         resizeBottom: "아래쪽에서 창 크기 조정. 화살표 키로 크기를 조정합니다.",
         resizeBottomLeft: "왼쪽 아래 모서리에서 창 크기 조정. 화살표 키로 크기를 조정합니다.",
@@ -437,6 +440,7 @@ export const KO_KR_MESSAGES = {
         resizeTop: "위쪽에서 창 크기 조정. 화살표 키로 크기를 조정합니다.",
         resizeTopLeft: "왼쪽 위 모서리에서 창 크기 조정. 화살표 키로 크기를 조정합니다.",
         resizeTopRight: "오른쪽 위 모서리에서 창 크기 조정. 화살표 키로 크기를 조정합니다.",
+        resizeWindow: "창 크기 조정. Ctrl 키와 화살표 키로 크기를 조정합니다.",
         restore: "복원"
     }
 } satisfies MonaLocaleMessages;

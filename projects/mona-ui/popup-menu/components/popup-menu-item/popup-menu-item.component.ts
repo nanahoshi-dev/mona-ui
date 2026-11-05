@@ -13,7 +13,7 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { selectMany } from "@mirei/ts-collections";
 import { Subject, tap } from "rxjs";
-import { v4 } from "uuid";
+import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import {
     PopupMenuConfig,
     PopupMenuIconTemplateToken,
@@ -39,6 +39,8 @@ import { PopupMenuItemClickEvent } from "../../models/PopupMenuItemClickEvent";
 export class PopupMenuItemComponent implements PopupMenuConfig, OnInit {
     readonly #click$ = new Subject<PopupMenuItemClickEvent>();
     readonly #destroyRef = inject(DestroyRef);
+    // One id per item for its lifetime, so the menu keeps track of it when the items are rebuilt.
+    readonly #uid = createElementControlId();
     protected readonly iconTemplateConfig = contentChild(PopupMenuIconTemplateToken, {
         descendants: false
     });
@@ -68,6 +70,12 @@ export class PopupMenuItemComponent implements PopupMenuConfig, OnInit {
     public readonly origin: PopupMenuOrigin = PopupMenuOrigin.Popup;
     public readonly type: PopupMenuItemType = PopupMenuItemType.MenuItem;
 
+    /**
+     * @description A value that identifies the item. It's the `value` of the item's `menuClick` events, so
+     * handlers don't depend on the label's text.
+     */
+    public readonly value = input<unknown>();
+
     public getPopupMenuItem(): PopupMenuItem[] {
         return [
             {
@@ -83,7 +91,8 @@ export class PopupMenuItemComponent implements PopupMenuConfig, OnInit {
                 label: this.label(),
                 shortcutTemplate: computed(() => this.shortcutTemplateConfig()?.template ?? null),
                 textTemplate: computed(() => this.textTemplateConfig()?.template ?? null),
-                uid: v4()
+                uid: this.#uid,
+                value: computed(() => this.value())
             }
         ];
     }

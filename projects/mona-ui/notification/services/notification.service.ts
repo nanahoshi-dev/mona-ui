@@ -1,238 +1,151 @@
+import { Directionality } from "@angular/cdk/bidi";
 import {
     ApplicationRef,
-    ComponentRef,
+    type ComponentRef,
     createComponent,
     DestroyRef,
     DOCUMENT,
     inject,
     Injectable,
-    signal,
-    ViewContainerRef
+    type ViewContainerRef
 } from "@angular/core";
-import { Subject, Subscription, take } from "rxjs";
-import { v4 } from "uuid";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { NotificationContainerComponent } from "../components/notification-container/notification-container.component";
-import { NotificationContainerData } from "../models/NotificationContainerData";
-import { NotificationData } from "../models/NotificationData";
-import { NotificationOptions } from "../models/NotificationOptions";
-import { NotificationPosition } from "../models/NotificationPosition";
-import { NotificationRef } from "../models/NotificationRef";
+import { NotificationData, type ResolvedNotificationOptions } from "../models/NotificationData";
+import type { NotificationOptions } from "../models/NotificationOptions";
+import type { NotificationPosition } from "../models/NotificationPosition";
+import type { NotificationRef } from "../models/NotificationRef";
+import { NOTIFICATION_DEFAULTS } from "../tokens/notification.tokens";
+
+interface NotificationContainer {
+    readonly componentRef: ComponentRef<NotificationContainerComponent>;
+    readonly notifications: Map<string, NotificationData>;
+}
 
 @Injectable({
     providedIn: "root"
 })
 export class NotificationService {
     readonly #appRef = inject(ApplicationRef);
+    readonly #containers = new Map<NotificationPosition, NotificationContainer>();
+    readonly #defaults = inject(NOTIFICATION_DEFAULTS);
+    readonly #directionality = inject(Directionality, { optional: true });
     readonly #document = inject(DOCUMENT);
-    readonly #pendingTimeouts = new Set<number>();
-    private notificationContainerMap: Map<NotificationPosition, NotificationContainerData> = new Map<
-        NotificationPosition,
-        NotificationContainerData
-    >();
-    private notificationContainerSubscriptions: Record<NotificationPosition, Subscription | null> = {
-        bottom: null,
-        bottomleft: null,
-        bottomright: null,
-        top: null,
-        topleft: null,
-        topright: null
-    };
+    readonly #i18n = inject(MonaI18nService, { optional: true });
+    #destroyed = false;
 
     public constructor() {
-        this.initialize();
-        // The ApplicationRef is destroyed with the same injector, so a timeout firing afterwards would detach
-        // views from a destroyed ApplicationRef.
         inject(DestroyRef).onDestroy(() => {
-            this.#pendingTimeouts.forEach(handle => window.clearTimeout(handle));
-            this.#pendingTimeouts.clear();
+            this.#destroyed = true;
+            for (const container of this.#containers.values()) {
+                this.#destroyContainer(container);
+            }
+            this.#containers.clear();
         });
     }
 
     public hide(id: string): void {
-        const notificationData = this.getNotificationDataById(id);
-        if (notificationData) {
-            notificationData.componentDestroy$.next(id);
+        for (const container of this.#containers.values()) {
+            container.notifications.get(id)?.close();
         }
     }
 
     public hideAll(): void {
-        this.notificationContainerMap.forEach(container => {
-            container.notifications.forEach(notification => {
-                this.hide(notification.options.id as string);
-            });
-        });
+        for (const container of [...this.#containers.values()]) {
+            for (const notification of [...container.notifications.values()]) {
+                notification.close();
+            }
+        }
     }
 
     public show(options: NotificationOptions): NotificationRef {
         const position = options.position ?? "topright";
-        const type = options.type ?? "info";
-        const resolvedOptions: NotificationOptions = {
+        const id = options.id ?? createElementControlId();
+        const existing = this.#containers.get(position)?.notifications.get(id);
+        if (existing && !existing.finished) {
+            return existing.ref;
+        }
+        const duration =
+            options.duration != null && this.#defaults.autoHide
+                ? options.duration * this.#defaults.durationScale
+                : undefined;
+        const resolved: ResolvedNotificationOptions = {
             ...options,
-            id: options.id ?? `Notification_${v4()}`,
+            closable: options.closable ?? true,
+            duration,
+            id,
             position,
-            type,
-            title: options.title,
-            closable: options.closable ?? (options.duration == null ? true : undefined)
+            type: options.type ?? "info"
         };
-        const containerData: NotificationContainerData | undefined = this.notificationContainerMap.get(position);
-        if (containerData?.notifications.has(resolvedOptions.id as string)) {
-            const existing = containerData.notifications.get(resolvedOptions.id as string)!;
-            return {
-                afterHide: existing.afterHide$.asObservable(),
-                get content() {
-                    return existing.contentComponentRef();
-                },
-                hide: () => this.hide(resolvedOptions.id as string)
-            };
-        }
-        if (this.notificationContainerSubscriptions[position]) {
-            return this.createNotification(resolvedOptions);
-        } else {
-            return this.createNotificationContainer(resolvedOptions);
-        }
+        const container = this.#containers.get(position) ?? this.#createContainer(position, options.appendTo);
+        const data = new NotificationData(resolved, finished => this.#remove(position, finished));
+        container.notifications.set(id, data);
+        this.#limit(container);
+        this.#sync(container);
+        return data.ref;
     }
 
-    private createContainerComponent(
-        appendTo?: ViewContainerRef
-    ): Subject<ComponentRef<NotificationContainerComponent>> {
-        const containerSubject = new Subject<ComponentRef<NotificationContainerComponent>>();
-        const notificationContainerComponent = createComponent(NotificationContainerComponent, {
+    #createContainer(position: NotificationPosition, appendTo: ViewContainerRef | undefined): NotificationContainer {
+        // Created and attached at once, so a notification hidden in the same tick never leaves a container behind.
+        const componentRef = createComponent(NotificationContainerComponent, {
             environmentInjector: this.#appRef.injector
         });
-        const host = appendTo ? appendTo.element.nativeElement : this.#document.body;
-        notificationContainerComponent.instance.positionType.set(appendTo ? "absolute" : "fixed");
-        host.appendChild(notificationContainerComponent.location.nativeElement);
-        this.#appRef.attachView(notificationContainerComponent.hostView);
-        notificationContainerComponent.changeDetectorRef.detectChanges();
-        this.scheduleTimeout(() => {
-            containerSubject.next(notificationContainerComponent);
-        });
-        return containerSubject;
-    }
-
-    private createNotification(options: NotificationOptions): NotificationRef {
-        const position = options.position as NotificationPosition;
-        const notificationContainerData: NotificationContainerData | undefined =
-            this.notificationContainerMap.get(position);
-        if (!notificationContainerData) {
-            throw new Error(`Notification container for position ${position} was not found.`);
-        }
-        const componentDestroy$ = new Subject<string>();
-        const afterHide$ = new Subject<void>();
-        const notificationData: NotificationData = {
-            options,
-            componentDestroy$,
-            afterHide$,
-            contentComponentRef: signal(null)
-        };
-        if (!notificationContainerData.notifications.has(options.id as string)) {
-            notificationContainerData.notifications.set(options.id as string, notificationData);
-            if (notificationContainerData.componentRef) {
-                notificationContainerData.componentRef.instance.notificationDataList.set(
-                    Array.from(notificationContainerData.notifications.values())
-                );
+        const element: HTMLElement = componentRef.location.nativeElement;
+        const host: HTMLElement = appendTo ? appendTo.element.nativeElement : this.#document.body;
+        componentRef.instance.position.set(position);
+        componentRef.instance.positionType.set(appendTo ? "absolute" : "fixed");
+        if (!appendTo) {
+            // The container sits outside the app root, so it takes the app's direction and language explicitly.
+            element.setAttribute("dir", this.#directionality?.value ?? "ltr");
+            const lang = this.#i18n?.localeId();
+            if (lang) {
+                element.setAttribute("lang", lang);
             }
         }
-        componentDestroy$.pipe(take(1)).subscribe(id => {
-            afterHide$.next();
-            afterHide$.complete();
-            this.removeNotificationData(id, position);
-        });
-        return {
-            afterHide: afterHide$.asObservable(),
-            get content() {
-                return notificationData.contentComponentRef();
-            },
-            hide: () => this.hide(options.id as string)
-        };
+        host.appendChild(element);
+        this.#appRef.attachView(componentRef.hostView);
+        componentRef.changeDetectorRef.detectChanges();
+        const container: NotificationContainer = { componentRef, notifications: new Map() };
+        this.#containers.set(position, container);
+        return container;
     }
 
-    private createNotificationContainer(options: NotificationOptions): NotificationRef {
-        const position = options.position as NotificationPosition;
-        const ref = this.createNotification(options);
-        this.notificationContainerSubscriptions[position] = this.createContainerComponent(options.appendTo).subscribe(
-            ncr => {
-                ncr.instance.position.set(options.position as NotificationPosition);
-                const notificationContainerData = this.notificationContainerMap.get(
-                    position
-                ) as NotificationContainerData;
-                notificationContainerData.componentRef = ncr;
-                notificationContainerData.appendTo = options.appendTo;
-                notificationContainerData.subscription = this.notificationContainerSubscriptions[
-                    position
-                ] as Subscription;
-                ncr.instance.notificationDataList.set(Array.from(notificationContainerData.notifications.values()));
-            }
-        );
-        return ref;
-    }
-
-    private getNotificationDataById(id: string): NotificationData | null {
-        for (const notificationContainerData of this.notificationContainerMap.values()) {
-            const notificationData = notificationContainerData.notifications.get(id);
-            if (notificationData) {
-                return notificationData;
-            }
+    #destroyContainer(container: NotificationContainer): void {
+        const { componentRef } = container;
+        if (!componentRef.hostView.destroyed) {
+            componentRef.destroy();
         }
-        return null;
+        componentRef.location.nativeElement.remove();
     }
 
-    private initialize(): void {
-        this.notificationContainerMap.set("bottom", {
-            componentRef: null,
-            notifications: new Map<string, NotificationData>()
-        });
-        this.notificationContainerMap.set("bottomleft", {
-            componentRef: null,
-            notifications: new Map<string, NotificationData>()
-        });
-        this.notificationContainerMap.set("bottomright", {
-            componentRef: null,
-            notifications: new Map<string, NotificationData>()
-        });
-        this.notificationContainerMap.set("top", {
-            componentRef: null,
-            notifications: new Map<string, NotificationData>()
-        });
-        this.notificationContainerMap.set("topleft", {
-            componentRef: null,
-            notifications: new Map<string, NotificationData>()
-        });
-        this.notificationContainerMap.set("topright", {
-            componentRef: null,
-            notifications: new Map<string, NotificationData>()
-        });
-    }
-
-    private removeNotificationData(id: string, position: NotificationPosition): void {
-        const container = this.notificationContainerMap.get(position);
-        if (!container) {
+    /** Closes the oldest notifications beyond `maxVisible`. */
+    #limit(container: NotificationContainer): void {
+        const max = this.#defaults.maxVisible;
+        if (max == null || max < 1) {
             return;
         }
-        container.notifications.delete(id);
-        if (container.componentRef) {
-            container.componentRef.instance.notificationDataList.set(Array.from(container.notifications.values()));
-        }
-        if (container.notifications.size === 0) {
-            container.subscription?.unsubscribe();
-            const componentRefToDestroy = container.componentRef;
-            container.componentRef = null;
-            container.subscription = undefined;
-            this.notificationContainerSubscriptions[position] = null;
-            this.scheduleTimeout(() => {
-                if (componentRefToDestroy) {
-                    this.#appRef.detachView(componentRefToDestroy.hostView);
-                    componentRefToDestroy.destroy();
-                }
-            }, 300);
+        const open = [...container.notifications.values()].filter(notification => !notification.closing());
+        for (const notification of open.slice(0, Math.max(0, open.length - max))) {
+            notification.close();
         }
     }
 
-    private scheduleTimeout(callback: () => void, delay?: number): void {
-        const handle = window.setTimeout(() => {
-            this.#pendingTimeouts.delete(handle);
-            callback();
-        }, delay);
-        this.#pendingTimeouts.add(handle);
+    #remove(position: NotificationPosition, data: NotificationData): void {
+        const container = this.#containers.get(position);
+        if (this.#destroyed || !container || container.notifications.get(data.id) !== data) {
+            return;
+        }
+        container.notifications.delete(data.id);
+        if (container.notifications.size === 0) {
+            this.#containers.delete(position);
+            this.#destroyContainer(container);
+            return;
+        }
+        this.#sync(container);
+    }
+
+    #sync(container: NotificationContainer): void {
+        container.componentRef.instance.notificationDataList.set([...container.notifications.values()]);
     }
 }

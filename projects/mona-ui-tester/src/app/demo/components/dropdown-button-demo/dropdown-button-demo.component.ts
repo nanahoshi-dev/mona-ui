@@ -215,7 +215,9 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
             [iconOnly]="iconOnly()"
             [loading]="loading()"
             [look]="look()"
+            [popupWidth]="popupWidth()"
             [rounded]="rounded()"
+            [showArrow]="showArrow()"
             [size]="size()"
             [text]="!iconOnly() ? text() : ''"
             [class]="userClass()">
@@ -317,7 +319,9 @@ export class DropdownButtonWrapperComponent implements ComponentInputsAsSignal<D
     public readonly iconOnly = input<ReturnType<DropdownButtonComponent["iconOnly"]>>(false);
     public readonly loading = input<ReturnType<DropdownButtonComponent["loading"]>>(false);
     public readonly look = input<ReturnType<DropdownButtonComponent["look"]>>("default");
+    public readonly popupWidth = input(0);
     public readonly rounded = input<ReturnType<DropdownButtonComponent["rounded"]>>("medium");
+    public readonly showArrow = input(true);
     public readonly size = input<ReturnType<DropdownButtonComponent["size"]>>("medium");
     public readonly text = input("Dropdown Button");
     public readonly userClass = input("");

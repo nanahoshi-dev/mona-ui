@@ -4,7 +4,7 @@ import { VariantProps } from "class-variance-authority";
 
 export const dialogBaseThemeVariants = cva(
     `
-        flex h-full w-full flex-col gap-0.5 overflow-hidden
+        flex h-full max-h-[inherit] min-h-0 w-full flex-col gap-0.5 overflow-hidden
         ${themeOverlaySurfaceClasses} text-foreground
         border border-border shadow-(--shadow-overlay) outline-none
     `,
@@ -25,13 +25,13 @@ export const dialogBaseThemeVariants = cva(
 
 export const dialogContentContainerThemeVariants = cva(
     `
-        flex flex-1 flex-row gap-1
+        flex min-h-0 flex-1 flex-row gap-1
     `
 );
 
 export const dialogBodyThemeVariants = cva(
     `
-        flex h-full w-full flex-col gap-0 pe-2 pb-2
+        flex h-full min-h-0 w-full flex-col gap-0 pe-2 pb-2
     `,
     {
         variants: {
@@ -45,8 +45,7 @@ export const dialogBodyThemeVariants = cva(
 
 export const dialogHeaderThemeVariants = cva(
     `
-        flex flex-row gap-2 pt-4
-        select-none
+        flex shrink-0 flex-row gap-2 pt-4
     `
 );
 
@@ -82,7 +81,6 @@ export const dialogIconThemeVariants = cva(
 export const dialogTitleContainerThemeVariants = cva(
     `
         flex flex-1 items-center justify-start p-1
-        select-none
     `
 );
 
@@ -101,21 +99,19 @@ export const dialogTitleThemeVariants = cva(
 export const dialogDescriptionThemeVariants = cva(
     `
         text-sm text-muted-foreground
-        select-none
     `
 );
 
 export const dialogContentThemeVariants = cva(
     `
-        flex-1 overflow-auto p-1
+        min-h-0 flex-1 overflow-auto p-1
         [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]
     `
 );
 
 export const dialogFooterThemeVariants = cva(
     `
-        flex flex-row gap-2 px-4 py-2
-        select-none
+        flex shrink-0 flex-row gap-2 px-4 py-2
         bg-surface-muted
         border-t border-border-subtle
     `,

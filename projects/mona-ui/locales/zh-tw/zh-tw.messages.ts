@@ -307,6 +307,7 @@ export const ZH_TW_MESSAGES = {
         close: "關閉",
         error: "錯誤",
         info: "資訊",
+        region: "通知",
         success: "成功",
         warning: "警告"
     },
@@ -366,6 +367,7 @@ export const ZH_TW_MESSAGES = {
     },
     splitButton: {
         menuButtonAriaLabel: "顯示選單選項",
+        menuButtonWithText: (text: string) => `更多${text}選項`,
         splitButton: (text: string) => (text ? `${text}，分割按鈕` : "分割按鈕")
     },
     splitter: {
@@ -426,6 +428,7 @@ export const ZH_TW_MESSAGES = {
         closeWindow: "關閉視窗",
         maximize: "最大化",
         minimize: "最小化",
+        moveOrResizeWindow: "移動或調整視窗大小。使用方向鍵移動，或使用 Ctrl 加方向鍵調整大小。",
         moveWindow: "移動視窗。使用方向鍵移動。",
         resizeBottom: "從底部調整視窗大小。使用方向鍵調整大小。",
         resizeBottomLeft: "從左下角調整視窗大小。使用方向鍵調整大小。",
@@ -435,6 +438,7 @@ export const ZH_TW_MESSAGES = {
         resizeTop: "從頂部調整視窗大小。使用方向鍵調整大小。",
         resizeTopLeft: "從左上角調整視窗大小。使用方向鍵調整大小。",
         resizeTopRight: "從右上角調整視窗大小。使用方向鍵調整大小。",
+        resizeWindow: "調整視窗大小。使用 Ctrl 加方向鍵調整大小。",
         restore: "還原"
     }
 } satisfies MonaLocaleMessages;

@@ -290,6 +290,7 @@
         "close": "Fechar",
         "error": "Erro",
         "info": "Informação",
+        "region": "Notificações",
         "success": "Sucesso",
         "warning": "Aviso"
     },
@@ -347,6 +348,7 @@
     },
     "splitButton": {
         "menuButtonAriaLabel": "Mostrar opções do menu",
+        "menuButtonWithText": "Mais opções de {text}",
         "splitButton": "{text, select, undefined {Botão com menu} other {{text}, botão com menu}}"
     },
     "splitter": {
@@ -407,6 +409,7 @@
         "closeWindow": "Fechar janela",
         "maximize": "Maximizar",
         "minimize": "Minimizar",
+        "moveOrResizeWindow": "Mover ou redimensionar janela. Use as teclas de seta para mover, ou Ctrl e as teclas de seta para redimensionar.",
         "moveWindow": "Mover janela. Use as teclas de seta para mover.",
         "resizeBottom": "Redimensionar janela a partir da borda inferior. Use as teclas de seta para redimensionar.",
         "resizeBottomLeft": "Redimensionar janela a partir do canto inferior esquerdo. Use as teclas de seta para redimensionar.",
@@ -416,6 +419,7 @@
         "resizeTop": "Redimensionar janela a partir da borda superior. Use as teclas de seta para redimensionar.",
         "resizeTopLeft": "Redimensionar janela a partir do canto superior esquerdo. Use as teclas de seta para redimensionar.",
         "resizeTopRight": "Redimensionar janela a partir do canto superior direito. Use as teclas de seta para redimensionar.",
+        "resizeWindow": "Redimensionar janela. Use Ctrl e as teclas de seta para redimensionar.",
         "restore": "Restaurar"
     }
 }

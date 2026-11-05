@@ -20,6 +20,8 @@ A modern, high-performance, accessible UI component library built for Angular an
 - [Internationalization (i18n) & RTL Guide](docs/i18n.md)
 - [Buttons](docs/button.md)
 - [Popups](docs/popup.md)
+- [Overlays: Dialog, Window and Sheet](docs/overlays.md)
+- [Menus](docs/menus.md)
 - [Text Boxes](docs/text-box.md)
 - [Dropdowns](docs/dropdowns.md)
 - [Numeric Text Boxes](docs/numeric-text-box.md)

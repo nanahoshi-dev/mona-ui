@@ -1,16 +1,16 @@
-import { ElementRef, TemplateRef, Type } from "@angular/core";
-import { WindowMessages } from "@nanahoshi/mona-ui/i18n";
-import { Action } from "@nanahoshi/mona-ui/internal";
-import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
-import { WindowVariantProps } from "../styles/window.styles";
-import { WindowActionTemplateContext } from "./WindowActionTemplateContext";
-import { WindowReference } from "./WindowReference";
+import type { ElementRef, TemplateRef, Type } from "@angular/core";
+import type { WindowMessages } from "@nanahoshi/mona-ui/i18n";
+import type { WindowVariantProps } from "../styles/window.styles";
+import type { WindowActionTemplateContext } from "./WindowActionTemplateContext";
+import type { WindowReference } from "./WindowReference";
 
 export interface WindowInjectorData {
     actionTemplate?: TemplateRef<WindowActionTemplateContext>;
+    ariaLabel?: string;
     closable?: boolean;
     closeOnEscape?: boolean;
     content?: TemplateRef<unknown> | Type<unknown>;
+    data?: unknown;
     draggable: boolean;
     focusedElement?: HTMLElement | ElementRef<HTMLElement> | string | null;
     footerTemplate?: TemplateRef<unknown>;
@@ -25,7 +25,6 @@ export interface WindowInjectorData {
     minWidth: number;
     minimizable: boolean;
     modal?: boolean;
-    preventClose?: Action<PopupCloseEvent, boolean>;
     resizable: boolean;
     rounded: WindowVariantProps["rounded"];
     title?: string;

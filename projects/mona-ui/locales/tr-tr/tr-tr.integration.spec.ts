@@ -518,35 +518,30 @@ describe("MONA_TR_TR_LOCALE Integration with MonaI18nService", () => {
         fixture.detectChanges();
 
         const hostEl = fixture.nativeElement as HTMLElement;
-        const mainBtn = hostEl.querySelector("button[aria-label='Kaydet, bölünmüş düğme']");
-        expect(mainBtn).not.toBeNull();
-
-        const menuBtn = hostEl.querySelector("button[aria-label='Menü seçeneklerini göster']");
-        expect(menuBtn).not.toBeNull();
+        const [mainBtn, menuBtn] = Array.from(hostEl.querySelectorAll("button"));
+        // The main button is named by its text; the arrow is named after it.
+        expect(mainBtn.hasAttribute("aria-label")).toBe(false);
+        expect(menuBtn.getAttribute("aria-label")).toBe("Diğer Kaydet seçenekleri");
 
         // Dynamic text update
         fixture.componentInstance.text.set("Paylaş");
         fixture.detectChanges();
-        const updatedMainBtn = hostEl.querySelector("button[aria-label='Paylaş, bölünmüş düğme']");
-        expect(updatedMainBtn).not.toBeNull();
+        expect(menuBtn.getAttribute("aria-label")).toBe("Diğer Paylaş seçenekleri");
 
         // Explicit application aria-label override takes precedence
         fixture.componentInstance.ariaLabel.set("Özel bölünmüş eylem");
         fixture.detectChanges();
-        const overrideMainBtn = hostEl.querySelector("button[aria-label='Özel bölünmüş eylem']");
-        expect(overrideMainBtn).not.toBeNull();
+        expect(mainBtn.getAttribute("aria-label")).toBe("Özel bölünmüş eylem");
 
-        // Clearing override restores localized Turkish default with updated text
+        // Clearing the override leaves the main button to its text again
         fixture.componentInstance.ariaLabel.set("");
         fixture.detectChanges();
-        expect(hostEl.querySelector("button[aria-label='Paylaş, bölünmüş düğme']")).not.toBeNull();
+        expect(mainBtn.hasAttribute("aria-label")).toBe(false);
 
-        // Empty text fallback
+        // Empty text falls back to the general arrow name
         fixture.componentInstance.text.set("");
         fixture.detectChanges();
-
-        const emptyMainBtn = hostEl.querySelector("button[aria-label='Bölünmüş düğme']");
-        expect(emptyMainBtn).not.toBeNull();
+        expect(menuBtn.getAttribute("aria-label")).toBe("Menü seçeneklerini göster");
     });
 
     it("renders connected ListBox components with self-contained Turkish transfer accessible names", () => {

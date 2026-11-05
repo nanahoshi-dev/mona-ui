@@ -321,6 +321,7 @@ export const IT_IT_MESSAGES = {
         close: "Chiudi",
         error: "Errore",
         info: "Informazioni",
+        region: "Notifiche",
         success: "Operazione riuscita",
         warning: "Avviso"
     },
@@ -384,6 +385,7 @@ export const IT_IT_MESSAGES = {
     },
     splitButton: {
         menuButtonAriaLabel: "Mostra opzioni del menu",
+        menuButtonWithText: (text: string) => `Altre opzioni per ${text}`,
         splitButton: (text: string) => (text ? `${text}, pulsante con menu` : "Pulsante con menu")
     },
     splitter: {
@@ -445,6 +447,8 @@ export const IT_IT_MESSAGES = {
         closeWindow: "Chiudi finestra",
         maximize: "Massimizza",
         minimize: "Minimizza",
+        moveOrResizeWindow:
+            "Sposta o ridimensiona finestra. Usa i tasti freccia per spostarla, oppure Ctrl e i tasti freccia per ridimensionarla.",
         moveWindow: "Sposta finestra. Usa i tasti freccia per spostarla.",
         resizeBottom: "Ridimensiona la finestra dal bordo inferiore. Usa i tasti freccia per ridimensionarla.",
         resizeBottomLeft:
@@ -458,6 +462,7 @@ export const IT_IT_MESSAGES = {
             "Ridimensiona la finestra dall'angolo superiore sinistro. Usa i tasti freccia per ridimensionarla.",
         resizeTopRight:
             "Ridimensiona la finestra dall'angolo superiore destro. Usa i tasti freccia per ridimensionarla.",
+        resizeWindow: "Ridimensiona finestra. Usa Ctrl e i tasti freccia per ridimensionarla.",
         restore: "Ripristina"
     }
 } satisfies MonaLocaleMessages;

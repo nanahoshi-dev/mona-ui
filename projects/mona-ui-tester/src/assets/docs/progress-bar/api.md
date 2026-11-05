@@ -17,7 +17,7 @@ An indeterminate mode is available for tasks where the total duration is unknown
 ## Import & Basic Usage
 
 ```typescript
-import { ProgressBarComponent } from "@nanahoshi/mona-ui";
+import { ProgressBarComponent } from "@nanahoshi/mona-ui/progress-bar";
 ```
 
 Add `ProgressBarComponent` to your standalone component's `imports` array.
@@ -200,16 +200,13 @@ Consumer responsibilities:
 Structural template directive that replaces the default percentage label. The template is hidden when `indeterminate` is `true`. Import alongside the component:
 
 ```typescript
-import {
-    ProgressBarComponent,
-    ProgressBarLabelTemplateDirective
-} from "@nanahoshi/mona-ui";
+import { ProgressBarComponent, ProgressBarLabelTemplateDirective } from "@nanahoshi/mona-ui/progress-bar";
 ```
 
 The `LabelPosition` type used by the `labelPosition` input is also exported for use in consuming components:
 
 ```typescript
-import type { LabelPosition } from "@nanahoshi/mona-ui";
+import type { LabelPosition } from "@nanahoshi/mona-ui/progress-bar";
 ```
 
 ---

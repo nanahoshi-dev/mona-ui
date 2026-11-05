@@ -1,16 +1,28 @@
-import { ComponentRef } from "@angular/core";
-import { PopupCloseEvent, PopupRef } from "@nanahoshi/mona-ui/popup";
-import { Observable } from "rxjs";
-import { DialogRefParams } from "./DialogRefParams";
-import { DialogResult } from "./DialogResult";
-import { DialogSettings } from "./DialogSettings";
+import type { ComponentRef } from "@angular/core";
+import type { PopupCloseEvent, PopupRef } from "@nanahoshi/mona-ui/popup";
+import type { Observable } from "rxjs";
+import type { DialogActionEvent } from "./DialogActionEvent";
+import type { DialogRefParams } from "./DialogRefParams";
+import type { DialogResult } from "./DialogResult";
+import type { DialogSettings } from "./DialogSettings";
 
+/**
+ * A handle on an open dialog. The close contract:
+ * - `action$` emits when an action button is clicked, before the dialog closes; `preventDefault()` keeps it open.
+ * - `close$` emits before any close, and `preventDefault()` keeps the dialog open.
+ * - `result` emits how the dialog closed as soon as the close goes ahead, and `closed$` emits the same result once
+ *   the dialog is gone. All of them complete when it closes.
+ */
 export class DialogRef<R = unknown> implements DialogRefParams<R> {
     #options: DialogRefParams<R>;
     public constructor(options: DialogRefParams<R>) {
         this.#options = options;
     }
 
+    /**
+     * @description Closes the dialog. The value is the `value` of the result, which reports the close as
+     * programmatic.
+     */
     public close(result?: R): void {
         this.#options.close(result);
     }
@@ -23,14 +35,33 @@ export class DialogRef<R = unknown> implements DialogRefParams<R> {
         this.#options.update(data);
     }
 
+    /**
+     * @description Emits when an action button is clicked, before the dialog closes. Call `preventDefault()` on
+     * the event to keep the dialog open. Completes when the dialog closes.
+     */
+    public get action$(): Observable<DialogActionEvent> {
+        return this.#options.action$;
+    }
+
+    /**
+     * @description Emits before the dialog closes, whatever closes it. Call `preventDefault()` to keep it open.
+     * Completes when the dialog closes.
+     */
     public get close$(): Observable<PopupCloseEvent<R>> {
         return this.#options.close$;
     }
 
-    public get closed$(): Observable<void> {
+    /**
+     * @description Emits the dialog's result once it has closed and its leave animation has finished, then
+     * completes.
+     */
+    public get closed$(): Observable<DialogResult<R>> {
         return this.#options.closed$;
     }
 
+    /**
+     * @description The component given as `content`, or `null` for template and text content.
+     */
     public get component(): ComponentRef<unknown> | null {
         return this.#options.component;
     }
@@ -47,7 +78,12 @@ export class DialogRef<R = unknown> implements DialogRefParams<R> {
         return this.#options.popupRef;
     }
 
-    public get result(): Observable<DialogResult> {
+    /**
+     * @description Emits how the dialog closed (an action, the close button, Escape, a backdrop click or
+     * `close()`) as soon as the close goes ahead, then completes when the dialog is gone. Late subscribers get the
+     * result too.
+     */
+    public get result(): Observable<DialogResult<R>> {
         return this.#options.result;
     }
 

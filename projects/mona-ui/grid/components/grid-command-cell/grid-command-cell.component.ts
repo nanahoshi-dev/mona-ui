@@ -136,7 +136,6 @@ export class GridCommandCellComponent {
             if (!result.viaClose && result.action.data === DELETE_ACTION) {
                 this.#removeRow(row, event);
             }
-            dialogRef.close();
         });
     }
 

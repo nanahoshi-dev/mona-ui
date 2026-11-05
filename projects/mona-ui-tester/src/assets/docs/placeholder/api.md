@@ -16,7 +16,7 @@ When both are provided, `text` takes precedence and projected content is not ren
 ## Import & Basic Usage
 
 ```typescript
-import { PlaceholderComponent } from "@nanahoshi/mona-ui";
+import { PlaceholderComponent } from "@nanahoshi/mona-ui/placeholder";
 ```
 
 Add `PlaceholderComponent` to your standalone component's `imports` array.

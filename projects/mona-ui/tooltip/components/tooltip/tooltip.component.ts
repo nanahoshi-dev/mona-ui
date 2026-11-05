@@ -1,33 +1,50 @@
+import { Directionality } from "@angular/cdk/bidi";
 import { DOCUMENT } from "@angular/common";
 import {
-    afterRenderEffect,
     Component,
     computed,
     DestroyRef,
+    effect,
+    ElementRef,
     inject,
     input,
-    linkedSignal,
     output,
-    Renderer2,
+    signal,
     TemplateRef,
+    untracked,
     viewChild
 } from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { Position } from "@nanahoshi/mona-ui/common";
-import { createElementControlId } from "@nanahoshi/mona-ui/internal";
-import { fadePopupAnimation, PopupAnchor, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
-import { fromEvent, Subscription, take, takeUntil } from "rxjs";
+import { resolveComponentDirection } from "@nanahoshi/mona-ui/i18n";
+import {
+    addAriaReference,
+    createElementControlId,
+    HoverIntent,
+    listenForHover,
+    onDisconnect,
+    overlaySidePositions,
+    type PhysicalOverlaySide,
+    removeAriaReference,
+    resolveOverlaySide,
+    sideOfPosition
+} from "@nanahoshi/mona-ui/internal";
+import {
+    fadePopupAnimation,
+    type PopupAnchor,
+    PopupCloseSource,
+    type PopupRef,
+    PopupService
+} from "@nanahoshi/mona-ui/popup";
+import { take, takeUntil } from "rxjs";
+import type { TooltipPosition } from "../../models/TooltipPosition";
 import {
     tooltipArrowThemeVariants,
     tooltipBaseThemeVariants,
-    TooltipVariantInputs,
-    TooltipVariantProps
+    type TooltipVariantInputs,
+    type TooltipVariantProps
 } from "../../styles/tooltip.styles";
-import {
-    getArrowPositionFromConnectionPair,
-    getOffsetForPosition,
-    getPositionConnectionPoints
-} from "../../utils/tooltip.utils";
+
+/** The gap between a tooltip and its anchor, leaving room for the arrow. */
+const TOOLTIP_GAP = 12;
 
 @Component({
     selector: "mona-tooltip",
@@ -42,15 +59,17 @@ import {
 })
 export class TooltipComponent implements TooltipVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #directionality = inject(Directionality, { optional: true });
     readonly #document = inject(DOCUMENT);
+    readonly #intent = new HoverIntent({
+        hide: () => this.#popupRef?.close(),
+        hideDelay: () => this.hideDelay(),
+        show: anchor => this.#open(anchor),
+        showDelay: () => this.showDelay()
+    });
     readonly #popupService = inject(PopupService);
-    readonly #renderer = inject(Renderer2);
-    #currentAnchor: HTMLElement | null = null;
-    #eventSubscription: Subscription | null = null;
-    #hideTimeoutId: ReturnType<typeof setTimeout> | null = null;
-    #mutationObserver: MutationObserver | null = null;
+    #destroyed = false;
     #popupRef: PopupRef | null = null;
-    #showTimeoutId: ReturnType<typeof setTimeout> | null = null;
     protected readonly arrowClasses = computed(() => {
         return tooltipArrowThemeVariants();
     });
@@ -58,12 +77,13 @@ export class TooltipComponent implements TooltipVariantInputs {
         const rounded = this.rounded();
         return tooltipBaseThemeVariants({ rounded });
     });
-    protected readonly currentArrowPosition = linkedSignal(() => this.position());
+    protected readonly currentArrowPosition = signal<PhysicalOverlaySide>("top");
     protected readonly templateRef = viewChild.required(TemplateRef);
     protected readonly tooltipId = createElementControlId();
 
     /**
-     * @description Whether the tooltip is disabled. When disabled, the tooltip will not be shown.
+     * @description Whether the tooltip is disabled. When disabled, the tooltip will not be shown, and an open one
+     * closes.
      */
     public readonly disabled = input<boolean>(false);
 
@@ -73,14 +93,16 @@ export class TooltipComponent implements TooltipVariantInputs {
     public readonly hidden = output<void>();
 
     /**
-     * @description The delay in milliseconds before hiding the tooltip after the trigger event ends.
+     * @description The delay in milliseconds before hiding the tooltip after the pointer or focus leaves. A pointer
+     * that leaves always gets a short grace, so it can move onto the tooltip.
      */
     public readonly hideDelay = input<number>(0);
 
     /**
-     * @description The position of the tooltip relative to the target element.
+     * @description The side of the target the tooltip opens on. `left` and `right` are physical; `start` and `end`
+     * follow the text direction. It flips to the opposite side when there isn't room.
      */
-    public readonly position = input<Position>("top");
+    public readonly position = input<TooltipPosition>("top");
 
     /**
      * @description The border radius of the tooltip.
@@ -99,182 +121,88 @@ export class TooltipComponent implements TooltipVariantInputs {
 
     /**
      * @description The target element(s) to which the tooltip is attached.
-     * Can be an Element, ElementRef, or CSS selector string.
+     * Can be an Element, ElementRef, or CSS selector string. A selector matches elements anywhere in the document,
+     * including ones added later.
      */
     public readonly target = input.required<PopupAnchor>();
 
     public constructor() {
-        afterRenderEffect({
-            read: () => {
-                this.target();
-                this.position(); // reactive dependency: re-run when position changes
-
-                this.#currentAnchor = null;
-                this.#popupRef?.close();
-                this.#refreshSubscription();
-
-                this.#mutationObserver?.disconnect();
-                this.#mutationObserver = null;
-                if (typeof this.target() === "string") {
-                    this.#mutationObserver = new MutationObserver(() => this.#refreshSubscription());
-                    this.#mutationObserver.observe(this.#document.body, { childList: true, subtree: true });
-                }
+        effect(onCleanup => {
+            const target = this.target();
+            this.position();
+            const stop = untracked(() => this.#listen(target));
+            onCleanup(() => {
+                stop();
+                this.#intent.hideNow();
+            });
+        });
+        effect(() => {
+            if (this.disabled()) {
+                untracked(() => this.#intent.hideNow());
             }
         });
         this.#destroyRef.onDestroy(() => {
-            if (this.#showTimeoutId != null) {
-                clearTimeout(this.#showTimeoutId);
-                this.#showTimeoutId = null;
-            }
-            if (this.#hideTimeoutId != null) {
-                clearTimeout(this.#hideTimeoutId);
-                this.#hideTimeoutId = null;
-            }
-            this.#mutationObserver?.disconnect();
-            this.#mutationObserver = null;
+            this.#destroyed = true;
+            this.#intent.dispose();
             this.#popupRef?.close();
         });
     }
 
-    #createTooltip(anchor: HTMLElement): void {
-        this.#currentAnchor = anchor;
-        this.currentArrowPosition.set(this.position());
-        const connectionPoints = getPositionConnectionPoints(this.position());
-        const offset = getOffsetForPosition(this.position(), true);
+    #listen(target: PopupAnchor): () => void {
+        if (typeof target === "string") {
+            return listenForHover(this.#document, node => node.closest<HTMLElement>(target), this.#intent);
+        }
+        const element = target instanceof ElementRef ? target.nativeElement : target;
+        if (!(element instanceof HTMLElement)) {
+            return () => undefined;
+        }
+        return listenForHover(element, node => (element.contains(node) ? element : null), this.#intent);
+    }
 
+    #open(anchor: HTMLElement): void {
+        if (this.disabled() || this.#destroyed) {
+            return;
+        }
+        const direction = resolveComponentDirection(anchor, this.#directionality);
+        const side = resolveOverlaySide(this.position(), direction);
+        this.currentArrowPosition.set(side);
         const popupRef = this.#popupService.create({
             anchor,
-            anchorConnectionPoint: connectionPoints.anchor,
             animation: fadePopupAnimation,
             closeOnEscape: true,
             closeOnMouseLeave: false,
             closeOnOutsideClick: true,
             content: this.templateRef(),
             hasBackdrop: false,
-            offset,
-            popupConnectionPoint: connectionPoints.popup,
+            positions: overlaySidePositions(side, TOOLTIP_GAP, direction),
             restoreFocus: false,
             withPush: false
         });
         this.#popupRef = popupRef;
+        addAriaReference(anchor, "aria-describedby", this.tooltipId);
+        this.#intent.opened(anchor, popupRef.overlayRef.overlayElement);
+        const stopWatching = onDisconnect(anchor, () => popupRef.close());
 
-        this.#renderer.setAttribute(anchor, "aria-describedby", this.tooltipId);
-
-        popupRef.opened.pipe(take(1)).subscribe(() => this.shown.emit());
-
+        popupRef.opened.pipe(take(1)).subscribe(() => {
+            if (!this.#destroyed) {
+                this.shown.emit();
+            }
+        });
+        popupRef.positionChanges.pipe(takeUntil(popupRef.closeStart)).subscribe(position => {
+            this.currentArrowPosition.set(sideOfPosition(position, direction));
+        });
+        popupRef.closeStart.pipe(take(1)).subscribe(event => {
+            stopWatching();
+            removeAriaReference(anchor, "aria-describedby", this.tooltipId);
+            this.#intent.closed(anchor, event.via === PopupCloseSource.Escape);
+        });
         popupRef.closed.pipe(take(1)).subscribe(() => {
             if (this.#popupRef === popupRef) {
                 this.#popupRef = null;
-                this.#currentAnchor = null;
             }
-            this.#renderer.removeAttribute(anchor, "aria-describedby");
-            this.hidden.emit();
+            if (!this.#destroyed) {
+                this.hidden.emit();
+            }
         });
-
-        popupRef.positionChanges
-            .pipe(takeUntil(popupRef.closed), takeUntilDestroyed(this.#destroyRef))
-            .subscribe(connectionPair => {
-                const newArrowPosition = getArrowPositionFromConnectionPair(connectionPair);
-                this.currentArrowPosition.set(newArrowPosition);
-            });
-    }
-
-    #getAnchorElement(anchor: PopupAnchor): HTMLElement | null {
-        if (anchor instanceof HTMLElement) {
-            return anchor;
-        }
-        if (typeof anchor === "object" && "nativeElement" in anchor && anchor.nativeElement instanceof HTMLElement) {
-            return anchor.nativeElement;
-        }
-        return null;
-    }
-
-    #handleHide(): void {
-        if (!this.#popupRef) {
-            return;
-        }
-        const hideDelay = this.hideDelay();
-        if (hideDelay > 0) {
-            const popupRef = this.#popupRef;
-            this.#hideTimeoutId = setTimeout(() => {
-                this.#hideTimeoutId = null;
-                if (this.#popupRef === popupRef) {
-                    popupRef.close();
-                }
-            }, hideDelay);
-        } else {
-            this.#popupRef.close();
-        }
-    }
-
-    #handleShow(element: HTMLElement): void {
-        if (this.disabled()) {
-            return;
-        }
-        if (this.#popupRef && this.#currentAnchor === element) {
-            return;
-        }
-        this.#popupRef?.close();
-        const showDelay = this.showDelay();
-        if (showDelay > 0) {
-            this.#showTimeoutId = setTimeout(() => {
-                this.#showTimeoutId = null;
-                if (!this.#popupRef || this.#currentAnchor !== element) {
-                    this.#createTooltip(element);
-                }
-            }, showDelay);
-        } else {
-            this.#createTooltip(element);
-        }
-    }
-
-    #refreshSubscription(): void {
-        this.#eventSubscription?.unsubscribe();
-        this.#eventSubscription = null;
-
-        const target = this.target();
-        if (typeof target === "string") {
-            const elements = Array.from(this.#document.querySelectorAll<HTMLElement>(target));
-            const composite = new Subscription();
-            for (const element of elements) {
-                composite.add(this.#subscribeToElement(element));
-            }
-            this.#eventSubscription = composite;
-        } else {
-            const element = this.#getAnchorElement(target);
-            if (element) {
-                this.#eventSubscription = this.#subscribeToElement(element);
-            }
-        }
-    }
-
-    #subscribeToElement(element: HTMLElement): Subscription {
-        const composite = new Subscription();
-
-        composite.add(
-            fromEvent<PointerEvent>(element, "pointerenter")
-                .pipe(takeUntilDestroyed(this.#destroyRef))
-                .subscribe(() => this.#handleShow(element))
-        );
-
-        composite.add(
-            fromEvent<PointerEvent>(element, "pointerleave")
-                .pipe(takeUntilDestroyed(this.#destroyRef))
-                .subscribe(() => this.#handleHide())
-        );
-
-        composite.add(
-            fromEvent<FocusEvent>(element, "focusin")
-                .pipe(takeUntilDestroyed(this.#destroyRef))
-                .subscribe(() => this.#handleShow(element))
-        );
-
-        composite.add(
-            fromEvent<FocusEvent>(element, "focusout")
-                .pipe(takeUntilDestroyed(this.#destroyRef))
-                .subscribe(() => this.#handleHide())
-        );
-
-        return composite;
     }
 }

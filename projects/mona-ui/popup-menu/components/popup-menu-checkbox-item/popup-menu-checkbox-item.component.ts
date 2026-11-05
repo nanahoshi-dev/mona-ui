@@ -1,5 +1,4 @@
 import {
-    ChangeDetectionStrategy,
     Component,
     computed,
     contentChild,
@@ -7,13 +6,13 @@ import {
     forwardRef,
     inject,
     input,
-    linkedSignal,
+    model,
     OnInit,
     output
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Subject, tap } from "rxjs";
-import { v4 } from "uuid";
+import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import {
     PopupMenuConfig,
     PopupMenuItemType,
@@ -28,7 +27,6 @@ import { PopupMenuItemClickEvent } from "../../models/PopupMenuItemClickEvent";
 @Component({
     selector: "mona-popup-menu-checkbox-item",
     template: "",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [
         {
             provide: PopupMenuToken,
@@ -37,9 +35,10 @@ import { PopupMenuItemClickEvent } from "../../models/PopupMenuItemClickEvent";
     ]
 })
 export class PopupMenuCheckboxItemComponent implements PopupMenuConfig, OnInit {
-    readonly #checked = linkedSignal(() => this.checked());
     readonly #click$ = new Subject<PopupMenuItemClickEvent>();
     readonly #destroyRef = inject(DestroyRef);
+    // One id per item for its lifetime, so the menu keeps track of it when the items are rebuilt.
+    readonly #uid = createElementControlId();
     protected readonly shortcutTemplateConfig = contentChild(PopupMenuShortcutTemplateToken, {
         descendants: false
     });
@@ -48,14 +47,10 @@ export class PopupMenuCheckboxItemComponent implements PopupMenuConfig, OnInit {
     });
 
     /**
-     * @description Sets the checked state of the menu item.
+     * @description The checked state of the menu item. Activating the item toggles it (unless its `menuClick` is
+     * prevented) and emits `checkedChange`, so it works with or without a two-way binding.
      */
-    public readonly checked = input(false);
-
-    /**
-     * @description Emits when the checked state of the menu item changes.
-     */
-    public readonly checkedChange = output<boolean>();
+    public readonly checked = model(false);
 
     /**
      * @description Sets the disabled state of the menu item.
@@ -73,11 +68,17 @@ export class PopupMenuCheckboxItemComponent implements PopupMenuConfig, OnInit {
     public readonly menuClick = output<PopupMenuItemClickEvent>();
     public readonly origin: PopupMenuOrigin = PopupMenuOrigin.Popup;
     public readonly type = PopupMenuItemType.CheckboxMenuItem;
+
+    /**
+     * @description A value that identifies the item. It's the `value` of the item's `menuClick` events.
+     */
+    public readonly value = input<unknown>();
+
     public getPopupMenuItem(): PopupMenuItem[] {
         return [
             {
                 checkable: true,
-                checked: computed(() => this.#checked()),
+                checked: computed(() => this.checked()),
                 click$: this.#click$,
                 disabled: this.disabled(),
                 group: Symbol(),
@@ -87,7 +88,8 @@ export class PopupMenuCheckboxItemComponent implements PopupMenuConfig, OnInit {
                 label: this.label(),
                 shortcutTemplate: computed(() => this.shortcutTemplateConfig()?.template ?? null),
                 textTemplate: computed(() => this.textTemplateConfig()?.template ?? null),
-                uid: v4()
+                uid: this.#uid,
+                value: computed(() => this.value())
             }
         ];
     }
@@ -103,7 +105,7 @@ export class PopupMenuCheckboxItemComponent implements PopupMenuConfig, OnInit {
                 tap(e => {
                     this.menuClick.emit(e);
                     if (!e.isDefaultPrevented()) {
-                        this.checkedChange.emit(!this.#checked());
+                        this.checked.set(e.checked === true);
                     }
                 })
             )

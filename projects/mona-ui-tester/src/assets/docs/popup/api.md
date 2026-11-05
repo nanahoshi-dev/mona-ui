@@ -27,7 +27,7 @@ There are two ways to use it:
 ## Import & Quick Start
 
 ```typescript
-import { PopupComponent } from "@nanahoshi/mona-ui";
+import { PopupComponent } from "@nanahoshi/mona-ui/popup";
 ```
 
 ```html
@@ -102,7 +102,7 @@ protected readonly positions: ConnectedPosition[] = [
 | `fadePopupAnimation`     | Fade only, no scaling                                                                  |
 
 ```typescript
-import { dropdownPopupAnimation } from "@nanahoshi/mona-ui";
+import { dropdownPopupAnimation } from "@nanahoshi/mona-ui/popup";
 ```
 
 ```html
@@ -121,7 +121,7 @@ protected readonly animation = { enter: "my-enter-class", leave: "my-leave-class
 
 ```typescript
 import { inject, TemplateRef } from "@angular/core";
-import { PopupService } from "@nanahoshi/mona-ui";
+import { PopupService } from "@nanahoshi/mona-ui/popup";
 
 protected readonly popupService = inject(PopupService);
 
@@ -276,9 +276,9 @@ The built-in animation presets respect `prefers-reduced-motion`.
 | `withPush`              | `boolean`                                            | `true`           | Pushes the popup back into the viewport when it would otherwise overflow.                                                             |
 | `withScrollTracking`    | `boolean`                                            | `true`           | Repositions the popup on ancestor or window scroll/resize. No effect when `positionStrategy` is `"global"`.                           |
 
-¹ `ConnectionPoint` is `"topleft" | "topcenter" | "topright" | "centerleft" | "center" | "centerright" | "bottomleft" | "bottomcenter" | "bottomright"`. <!-- TODO(owner-review): this type is referenced by the public API but is not exported under its own name from the package — confirm whether it should be exported. -->
+¹ `ConnectionPoint` is `"topleft" | "topcenter" | "topright" | "centerleft" | "center" | "centerright" | "bottomleft" | "bottomcenter" | "bottomright"`. It is exported from `@nanahoshi/mona-ui/popup`. Its `left` and `right` are the start and end sides, so they swap in right-to-left pages.
 
-² `PopupOffset` is `{ horizontal?: number; vertical?: number }`. <!-- TODO(owner-review): not exported under its own name — confirm whether it should be exported. -->
+² `PopupOffset` is `{ horizontal?: number; vertical?: number }`. It is exported from `@nanahoshi/mona-ui/popup`.
 
 #### Outputs
 
@@ -338,12 +338,12 @@ Extends `PreventableEvent`.
 
 #### Properties
 
-| Name            | Type                                                                                                                         | Description                                                                                        |
-|-----------------|------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
-| `result`        | `R \| undefined`                                                                                                             | The result value passed to `close()`, if any.                                                      |
-| `via`           | `"backdropClick" \| "closeButton" \| "escape" \| "mouseLeave" \| "outsideClick" \| "programmatic" \| "scroll" \| undefined`³ | The source of the close.                                                                           |
-| `originalEvent` | `Event \| undefined`                                                                                                         | Inherited from `PreventableEvent`. The native DOM event that triggered the close, when applicable. |
-| `type`          | `string \| undefined`                                                                                                        | Inherited from `PreventableEvent`.                                                                 |
+| Name            | Type                             | Description                                                                                        |
+|-----------------|----------------------------------|----------------------------------------------------------------------------------------------------|
+| `result`        | `R \| undefined`                 | The result value passed to `close()`, if any.                                                      |
+| `via`           | `PopupCloseSource \| undefined`³ | The source of the close.                                                                           |
+| `originalEvent` | `Event \| undefined`             | Inherited from `PreventableEvent`. The native DOM event that triggered the close, when applicable. |
+| `type`          | `string \| undefined`            | Inherited from `PreventableEvent`.                                                                 |
 
 #### Inherited methods
 
@@ -352,7 +352,7 @@ Extends `PreventableEvent`.
 | `preventDefault(): void`        | Marks the event as prevented.          |
 | `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
 
-³ `"closeButton"` is part of the underlying `PopupCloseSource` type but is not currently emitted by Popup itself. <!-- TODO(owner-review): PopupCloseSource enum is not exported from the package; via's literal values are documented here from source instead. -->
+³ `PopupCloseSource` (exported from `@nanahoshi/mona-ui/popup`) is `"action"`, `"backdropClick"`, `"closeButton"`, `"escape"`, `"mouseLeave"`, `"outsideClick"`, `"programmatic"` or `"scroll"`. `"action"` and `"closeButton"` come from dialogs and windows; Popup itself doesn't emit them.
 
 ---
 
@@ -400,9 +400,9 @@ See [Animation presets](#animation-presets) above for their visual effect.
 - [x] closePopup() public method verified
 - [x] PopupService.create() verified as the only public method; single-element vs CSS-selector branching verified in source
 - [x] PopupRef public methods/properties verified against models/PopupRef.ts
-- [x] PopupCloseEvent properties verified against models/PopupCloseEvent.ts; PreventableEvent base verified exported via index.ts
-- [x] PopupCloseSource enum confirmed NOT exported from index.ts (only PopupCloseEvent is) — documented via's values as literals instead, flagged TODO(owner-review)
-- [x] ConnectionPoint and PopupOffset confirmed referenced in public API surface but not separately exported — flagged TODO(owner-review)
+- [x] PopupCloseEvent properties verified against models/PopupCloseEvent.ts; PreventableEvent exported from @nanahoshi/mona-ui/common
+- [x] PopupCloseSource enum confirmed exported from popup/public-api.ts; via documented by that type
+- [x] ConnectionPoint and PopupOffset confirmed exported from popup/public-api.ts; ConnectionPoint left/right map to CDK start/end (connectionPosition.ts)
 - [x] preventClose vs beforeClose.preventDefault() distinction verified against PopupReference.close() and PopupService's shouldPreventClose() call sites
 - [x] Close timing (animation-aware vs delay=0) verified against PopupReference.close() and the wrapper's animation-complete signal
 - [x] Multi-element CSS-selector behavior verified against PopupService.setupInternalEventDelegation() — pointerenter/pointerleave only, one-time querySelectorAll, no MutationObserver

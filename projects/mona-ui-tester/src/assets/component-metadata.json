@@ -1931,38 +1931,51 @@
     "selector": "\"[monaTooltip]\"",
     "inputs": [
       {
-        "description": "Whether the tooltip is disabled. When disabled, the tooltip will not be shown.",
+        "description": "Whether the tooltip is disabled. When disabled, the tooltip will not be shown, and an open one\ncloses.",
         "kind": "input",
         "name": "disabled",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "The filter to select elements that will have tooltips.\r\nIt can be a CSS selector that matches elements within the host element.\r\nOnly applies when `mode` is set to `content`.",
+        "description": "The filter to select elements that will have tooltips.\nIt can be a CSS selector that matches elements within the host element, including ones added later.\nOnly applies when `mode` is set to `content`.",
         "kind": "input",
         "name": "filter",
         "type": "string",
         "defaultValue": "\"[title]\""
       },
       {
-        "description": "The delay in milliseconds before hiding the tooltip.",
+        "description": "Emitted when the tooltip popup is hidden.",
+        "kind": "output",
+        "name": "hidden",
+        "type": "void"
+      },
+      {
+        "description": "The delay in milliseconds before hiding the tooltip after the pointer or focus leaves. A pointer\nthat leaves always gets a short grace, so it can move onto the tooltip.",
         "kind": "input",
         "name": "hideDelay",
         "type": "number",
         "defaultValue": "0"
       },
       {
-        "description": "The mode of the tooltip.\r\n\"host\" mode receives the tooltip from the host element's title attribute.\r\n\"content\" mode uses the title attribute of elements matching the filter.",
+        "description": "The mode of the tooltip.\n\"host\" mode shows the host's tooltip content, or its title attribute.\n\"content\" mode uses the title attribute of elements matching the filter.",
         "kind": "input",
         "name": "mode",
         "type": "\"host\" | \"content\"",
         "defaultValue": "\"host\""
       },
       {
-        "description": "The position of the tooltip relative to the target element.",
+        "description": "The tooltip's content in host mode: text, or a template. Without it, the host's `title` is shown.",
+        "kind": "input",
+        "name": "monaTooltip",
+        "type": "string | TemplateRef<unknown> | null | undefined",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The side of the target the tooltip opens on. `left` and `right` are physical; `start` and `end`\nfollow the text direction. It flips to the opposite side when there isn't room.",
         "kind": "input",
         "name": "position",
-        "type": "Position",
+        "type": "TooltipPosition",
         "defaultValue": "\"top\""
       },
       {
@@ -1981,12 +1994,6 @@
         "defaultValue": "0"
       },
       {
-        "description": "Emitted when the tooltip popup is hidden.",
-        "kind": "output",
-        "name": "hidden",
-        "type": "void"
-      },
-      {
         "description": "Emitted when the tooltip popup is shown.",
         "kind": "output",
         "name": "shown",
@@ -1999,18 +2006,11 @@
     "selector": "",
     "inputs": [
       {
-        "description": "The text content displayed in the tooltip.",
+        "description": "The content displayed in the tooltip: text or a template.",
         "kind": "input",
         "name": "content",
-        "type": "string",
+        "type": "string | TemplateRef<unknown>",
         "required": true
-      },
-      {
-        "description": "The position of the tooltip relative to the target element.",
-        "kind": "input",
-        "name": "position",
-        "type": "Position",
-        "defaultValue": "\"top\""
       },
       {
         "description": "The border radius of the tooltip.",
@@ -2290,6 +2290,37 @@
         "name": "draggable",
         "type": "boolean",
         "defaultValue": "true"
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "maxHeight",
+        "type": "number"
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "maxWidth",
+        "type": "number"
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "minHeight",
+        "type": "number"
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "minWidth",
+        "type": "number"
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "resizable",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "",
@@ -8182,7 +8213,7 @@
     "selector": "\"mona-contextmenu\"",
     "inputs": [
       {
-        "description": "Reserved for an ARIA label on the context menu.\r\nNot currently applied to the target element or the rendered menu.",
+        "description": "Accessible name for the menu. When empty, the menu is named by the target if it has an `id`.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
@@ -8222,7 +8253,7 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "The target element that will be used to trigger the context menu.",
+        "description": "The target element that will be used to trigger the context menu. It can change: the menu, its\nkeyboard shortcuts and its ARIA attributes follow. `aria-haspopup`, `aria-expanded` and `aria-controls` are set\nonly on targets whose role allows them (button, link, gridcell, menuitem, tab, treeitem), and are put back\nwhen the target changes or the menu is destroyed.",
         "kind": "input",
         "name": "target",
         "type": "ElementRef<HTMLElement> | HTMLElement",
@@ -8241,17 +8272,11 @@
     "selector": "\"mona-contextmenu-checkbox-item\"",
     "inputs": [
       {
-        "description": "Sets the checked state of the menu item.",
-        "kind": "input",
+        "description": "The checked state of the menu item. Activating the item toggles it (unless its `menuClick` is\nprevented) and emits `checkedChange`, so it works with or without a two-way binding.",
+        "kind": "model",
         "name": "checked",
         "type": "boolean",
         "defaultValue": "false"
-      },
-      {
-        "description": "Emits when the checked state of the menu item changes.",
-        "kind": "output",
-        "name": "checkedChange",
-        "type": "boolean"
       },
       {
         "description": "Sets the disabled state of the menu item.",
@@ -8272,6 +8297,12 @@
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
+      },
+      {
+        "description": "A value that identifies the item. It's the `value` of the item's `menuClick` events.",
+        "kind": "input",
+        "name": "value",
+        "type": "unknown"
       }
     ]
   },
@@ -8310,6 +8341,12 @@
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
+      },
+      {
+        "description": "A value that identifies the item. It's the `value` of the item's `menuClick` events, so\nhandlers don't depend on the label's text.",
+        "kind": "input",
+        "name": "value",
+        "type": "unknown"
       }
     ]
   },
@@ -8352,7 +8389,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "description": "The click event of the menu item.\nEmits when the menu item is selected by keyboard or mouse, before the radio group selects it. Preventing it\nkeeps the group's value and the menu open.",
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
@@ -8850,6 +8887,12 @@
         "defaultValue": "\"end\""
       },
       {
+        "description": "Accessible name for the dialog when it has no `title` or title template.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string"
+      },
+      {
         "description": "Sets the visibility of the close button in the dialog header.",
         "kind": "input",
         "name": "closable",
@@ -8857,7 +8900,7 @@
         "defaultValue": "true"
       },
       {
-        "description": "Emits when the user clicks on the close button or presses the escape key.\r\nThis event is preventable.",
+        "description": "Emits before the dialog closes, whatever closes it: an action, the close button, Escape, or the\ncomponent being destroyed. Call `preventDefault()` to keep it open (a close caused by destruction can't be\nkept).",
         "kind": "output",
         "name": "close",
         "type": "PopupCloseEvent"
@@ -8870,7 +8913,7 @@
         "defaultValue": "true"
       },
       {
-        "description": "Emits when the dialog is closed.",
+        "description": "Emits when the dialog has closed and its leave animation has finished.",
         "kind": "output",
         "name": "closed",
         "type": "void"
@@ -8930,7 +8973,7 @@
         "type": "number"
       },
       {
-        "description": "Sets whether the dialog should have an overlay behind it.",
+        "description": "Whether the dialog is modal: a backdrop, `aria-modal=\"true\"`, focus kept inside, page scroll\nlocked, and the rest of the page inert.",
         "kind": "input",
         "name": "modal",
         "type": "boolean",
@@ -8981,7 +9024,7 @@
     "selector": "\"mona-dropdown-button\"",
     "inputs": [
       {
-        "description": "Accessible name for the dropdown button.\r\nFalls back to `\"{text} dropdown button\"` when empty; provide an explicit value when no visible text is present.",
+        "description": "Accessible name for the dropdown button. Leave it empty when the button shows its name as text;\nset it (or `aria-labelledby`) when the button shows only an icon.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
@@ -8989,7 +9032,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "ID of an external element that provides the accessible name for the dropdown button.\r\nTakes precedence over `ariaLabel` when both are set.",
+        "description": "ID of an external element that provides the accessible name for the dropdown button.\nTakes precedence over `aria-label` when both are set.",
         "kind": "input",
         "name": "ariaLabelledby",
         "type": "string",
@@ -8997,21 +9040,21 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Renders the button as a square for icon-only usage, removing horizontal text padding.\r\nSet `ariaLabel` when no visible text is present to ensure an accessible name.",
-        "kind": "input",
-        "name": "iconOnly",
-        "type": "boolean",
-        "defaultValue": "false"
-      },
-      {
-        "description": "Renders the button with reduced visual emphasis and removes pointer interaction.",
+        "description": "Renders the button with reduced visual emphasis and removes pointer interaction. Disabling the\nbutton closes its open menu.",
         "kind": "input",
         "name": "disabled",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Displays a loading indicator and prevents interaction while an operation is in progress.",
+        "description": "Renders the button as a square for icon-only usage, removing horizontal text padding and the arrow.\nSet `aria-label` when no visible text is present to ensure an accessible name.",
+        "kind": "input",
+        "name": "iconOnly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Displays a loading indicator and prevents interaction while an operation is in progress. Starting\nto load closes the open menu.",
         "kind": "input",
         "name": "loading",
         "type": "boolean",
@@ -9031,11 +9074,25 @@
         "type": "PopupMenuItemClickEvent"
       },
       {
-        "description": "Border-radius preset applied to the button.",
+        "description": "Minimum width of the popup menu in pixels. A value of `0` makes the menu at least as wide as the\nbutton.",
+        "kind": "input",
+        "name": "popupWidth",
+        "type": "number",
+        "defaultValue": "0"
+      },
+      {
+        "description": "Border-radius preset applied to the button. The menu follows it (`\"full\"` gives it large corners).",
         "kind": "input",
         "name": "rounded",
         "type": "ButtonVariantProps[\"rounded\"]",
         "defaultValue": "\"medium\""
+      },
+      {
+        "description": "Shows a down arrow after the text, so the button reads as one that opens a menu. Icon-only buttons\nnever show it.",
+        "kind": "input",
+        "name": "showArrow",
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "Size preset controlling the button's dimensions.",
@@ -9066,17 +9123,11 @@
     "selector": "\"mona-dropdown-button-checkbox-item\"",
     "inputs": [
       {
-        "description": "Sets the checked state of the menu item.",
-        "kind": "input",
+        "description": "The checked state of the menu item. Activating the item toggles it (unless its `menuClick` is\nprevented) and emits `checkedChange`, so it works with or without a two-way binding.",
+        "kind": "model",
         "name": "checked",
         "type": "boolean",
         "defaultValue": "false"
-      },
-      {
-        "description": "Emits when the checked state of the menu item changes.",
-        "kind": "output",
-        "name": "checkedChange",
-        "type": "boolean"
       },
       {
         "description": "Sets the disabled state of the menu item.",
@@ -9097,6 +9148,12 @@
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
+      },
+      {
+        "description": "A value that identifies the item. It's the `value` of the item's `menuClick` events.",
+        "kind": "input",
+        "name": "value",
+        "type": "unknown"
       }
     ]
   },
@@ -9135,6 +9192,12 @@
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
+      },
+      {
+        "description": "A value that identifies the item. It's the `value` of the item's `menuClick` events, so\nhandlers don't depend on the label's text.",
+        "kind": "input",
+        "name": "value",
+        "type": "unknown"
       }
     ]
   },
@@ -9177,7 +9240,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "description": "The click event of the menu item.\nEmits when the menu item is selected by keyboard or mouse, before the radio group selects it. Preventing it\nkeeps the group's value and the menu open.",
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
@@ -10690,17 +10753,11 @@
     "selector": "\"mona-menu-checkbox-item\"",
     "inputs": [
       {
-        "description": "Sets the checked state of the menu item.",
-        "kind": "input",
+        "description": "The checked state of the menu item. Activating the item toggles it (unless its `menuClick` is\nprevented) and emits `checkedChange`, so it works with or without a two-way binding.",
+        "kind": "model",
         "name": "checked",
         "type": "boolean",
         "defaultValue": "false"
-      },
-      {
-        "description": "Emits when the checked state of the menu item changes.",
-        "kind": "output",
-        "name": "checkedChange",
-        "type": "boolean"
       },
       {
         "description": "Sets the disabled state of the menu item.",
@@ -10721,6 +10778,12 @@
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
+      },
+      {
+        "description": "A value that identifies the item. It's the `value` of the item's `menuClick` events.",
+        "kind": "input",
+        "name": "value",
+        "type": "unknown"
       }
     ]
   },
@@ -10759,6 +10822,12 @@
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
+      },
+      {
+        "description": "A value that identifies the item. It's the `value` of the item's `menuClick` events, so\nhandlers don't depend on the label's text.",
+        "kind": "input",
+        "name": "value",
+        "type": "unknown"
       }
     ]
   },
@@ -10801,7 +10870,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "description": "The click event of the menu item.\nEmits when the menu item is selected by keyboard or mouse, before the radio group selects it. Preventing it\nkeeps the group's value and the menu open.",
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
@@ -11094,6 +11163,13 @@
         "name": "data",
         "type": "NotificationData",
         "required": true
+      },
+      {
+        "description": "The edge the notification's container is on, which its leave animation moves towards.",
+        "kind": "input",
+        "name": "side",
+        "type": "\"top\" | \"bottom\"",
+        "defaultValue": "\"top\""
       }
     ]
   },
@@ -11963,17 +12039,37 @@
     "selector": "\"mona-popover\"",
     "inputs": [
       {
+        "description": "Accessible name for the popover when it has no `title` or title template.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string"
+      },
+      {
+        "description": "Whether focus moves into the popover when it opens: to its first focusable element, or to the\npopover itself. Defaults to `true`, except for the `hover` trigger.",
+        "kind": "input",
+        "name": "autoFocus",
+        "type": "boolean | undefined"
+      },
+      {
+        "description": "Whether pressing Escape closes the popover.",
+        "kind": "input",
+        "name": "closeOnEscape",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Whether a click outside the popover and its target closes it.",
+        "kind": "input",
+        "name": "closeOnOutsideClick",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
         "description": "Display the arrow of the popover.",
         "kind": "input",
         "name": "displayArrow",
         "type": "boolean",
         "defaultValue": "false"
-      },
-      {
-        "description": "Emits when the popover is about to be closed.\nThis event is preventable.",
-        "kind": "output",
-        "name": "hide",
-        "type": "PopoverHideEvent"
       },
       {
         "description": "Emits when the popover is hidden.",
@@ -11982,10 +12078,16 @@
         "type": "void"
       },
       {
-        "description": "The position of the popover relative to the target element.",
+        "description": "Emits when the popover is about to be closed.\nThis event is preventable.",
+        "kind": "output",
+        "name": "hide",
+        "type": "PopoverHideEvent"
+      },
+      {
+        "description": "The side of the target the popover opens on. `left` and `right` are physical; `start` and `end`\nfollow the text direction. It flips to the opposite side when there isn't room.",
         "kind": "input",
         "name": "position",
-        "type": "Position",
+        "type": "PopoverPosition",
         "defaultValue": "\"top\""
       },
       {
@@ -12002,7 +12104,7 @@
         "type": "PopoverShowEvent"
       },
       {
-        "description": "Emits when the popover is shown.",
+        "description": "Emits once the popover has opened.",
         "kind": "output",
         "name": "shown",
         "type": "PopoverShownEvent"
@@ -12022,7 +12124,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "The trigger that opens/closes the popover.\n\"click\" toggles on click, \"hover\" opens on pointer enter and closes on\npointer leave, \"none\" disables automatic triggering (use `open()`/`close()`\ninstead). Any other DOM event name is also accepted and used as-is.",
+        "description": "The trigger that opens/closes the popover.\n\"click\" toggles on click, \"hover\" opens while the pointer is on the target or the popover, or focus is on the\ntarget, \"none\" disables automatic triggering (use `open()`/`close()` instead). Any other DOM event name is\nalso accepted and used as-is.",
         "kind": "input",
         "name": "trigger",
         "type": "PopoverTrigger",
@@ -12258,6 +12360,20 @@
         "type": "ConnectionPoint | null"
       },
       {
+        "description": "The accessible name of the root menu. Takes precedence over `ariaLabelledBy`.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The ids of the elements that name the root menu. When neither this nor `ariaLabel` is set, the\nmenu is named by the target element if it has an id.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "The event that is emitted when the popup menu is closed.",
         "kind": "output",
         "name": "close",
@@ -12350,17 +12466,17 @@
         "defaultValue": "\"click\""
       },
       {
-        "description": "Sets the width of the popup menu.\nThis will be applied to the root menu and all submenus.",
-        "kind": "input",
-        "name": "width",
-        "type": "string | number"
-      },
-      {
         "description": "",
         "kind": "input",
         "name": "userClass",
         "type": "string",
         "alias": "class"
+      },
+      {
+        "description": "Sets the width of the popup menu.\nThis will be applied to the root menu and all submenus.",
+        "kind": "input",
+        "name": "width",
+        "type": "string | number"
       }
     ]
   },
@@ -12369,17 +12485,11 @@
     "selector": "\"mona-popup-menu-checkbox-item\"",
     "inputs": [
       {
-        "description": "Sets the checked state of the menu item.",
-        "kind": "input",
+        "description": "The checked state of the menu item. Activating the item toggles it (unless its `menuClick` is\nprevented) and emits `checkedChange`, so it works with or without a two-way binding.",
+        "kind": "model",
         "name": "checked",
         "type": "boolean",
         "defaultValue": "false"
-      },
-      {
-        "description": "Emits when the checked state of the menu item changes.",
-        "kind": "output",
-        "name": "checkedChange",
-        "type": "boolean"
       },
       {
         "description": "Sets the disabled state of the menu item.",
@@ -12400,6 +12510,12 @@
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
+      },
+      {
+        "description": "A value that identifies the item. It's the `value` of the item's `menuClick` events.",
+        "kind": "input",
+        "name": "value",
+        "type": "unknown"
       }
     ]
   },
@@ -12438,6 +12554,12 @@
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
+      },
+      {
+        "description": "A value that identifies the item. It's the `value` of the item's `menuClick` events, so\nhandlers don't depend on the label's text.",
+        "kind": "input",
+        "name": "value",
+        "type": "unknown"
       }
     ]
   },
@@ -12480,7 +12602,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "description": "The click event of the menu item.\nEmits when the menu item is selected by keyboard or mouse, before the radio group selects it. Preventing it\nkeeps the group's value and the menu open.",
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
@@ -13117,7 +13239,7 @@
         "type": "Partial<SheetMessages>"
       },
       {
-        "description": "Edge of the viewport from which the sheet opens.",
+        "description": "Edge of the viewport from which the sheet opens. `left` and `right` are physical; `start` and\n`end` follow the direction (`start` is the left edge in LTR and the right edge in RTL). The edge is fixed\nonce the sheet opens.",
         "kind": "input",
         "name": "side",
         "type": "SheetSide",
@@ -13130,7 +13252,7 @@
         "type": "string"
       },
       {
-        "description": "",
+        "description": "Additional CSS classes merged onto the sheet panel via `tailwind-merge`.",
         "kind": "input",
         "name": "userClass",
         "type": "string",
@@ -13923,7 +14045,7 @@
     "selector": "\"mona-split-button\"",
     "inputs": [
       {
-        "description": "Accessible name for the main action button.\nFalls back to `\"{text} splitbutton\"` when empty.",
+        "description": "Accessible name for the main action button. Leave it empty when the button shows its name as\ntext; set it (or `aria-labelledby`) when it shows only an icon. The pair of buttons is a group named by the\nmain button.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
@@ -13945,9 +14067,23 @@
         "type": "MouseEvent"
       },
       {
-        "description": "Renders the component with reduced visual emphasis\nand removes pointer interaction from both the main button and the menu toggle button.",
+        "description": "Renders the component with reduced visual emphasis\nand removes pointer interaction from both the main button and the menu toggle button. Disabling it closes the\nopen menu.",
         "kind": "input",
         "name": "disabled",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Renders the main button as a square for icon-only content, removing horizontal text padding.\nSet `aria-label` so the main button has a name.",
+        "kind": "input",
+        "name": "iconOnly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Shows a loading indicator on the main button and keeps the menu from opening while an operation\nis in progress. Starting to load closes the open menu.",
+        "kind": "input",
+        "name": "loading",
         "type": "boolean",
         "defaultValue": "false"
       },
@@ -13959,7 +14095,7 @@
         "defaultValue": "\"default\""
       },
       {
-        "description": "Accessible name for the menu toggle button.\nIf not provided, falls back to the localized default message.",
+        "description": "Accessible name for the menu toggle button.\nIf not provided, it's the localized \"More {text} options\", or \"Show menu options\" when the main button has no\n`text` or `aria-label`.",
         "kind": "input",
         "name": "menuButtonAriaLabel",
         "type": "string",
@@ -14014,17 +14150,11 @@
     "selector": "\"mona-split-button-checkbox-item\"",
     "inputs": [
       {
-        "description": "Sets the checked state of the menu item.",
-        "kind": "input",
+        "description": "The checked state of the menu item. Activating the item toggles it (unless its `menuClick` is\nprevented) and emits `checkedChange`, so it works with or without a two-way binding.",
+        "kind": "model",
         "name": "checked",
         "type": "boolean",
         "defaultValue": "false"
-      },
-      {
-        "description": "Emits when the checked state of the menu item changes.",
-        "kind": "output",
-        "name": "checkedChange",
-        "type": "boolean"
       },
       {
         "description": "Sets the disabled state of the menu item.",
@@ -14045,6 +14175,12 @@
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
+      },
+      {
+        "description": "A value that identifies the item. It's the `value` of the item's `menuClick` events.",
+        "kind": "input",
+        "name": "value",
+        "type": "unknown"
       }
     ]
   },
@@ -14083,6 +14219,12 @@
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
+      },
+      {
+        "description": "A value that identifies the item. It's the `value` of the item's `menuClick` events, so\nhandlers don't depend on the label's text.",
+        "kind": "input",
+        "name": "value",
+        "type": "unknown"
       }
     ]
   },
@@ -14125,7 +14267,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "description": "The click event of the menu item.\nEmits when the menu item is selected by keyboard or mouse, before the radio group selects it. Preventing it\nkeeps the group's value and the menu open.",
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
@@ -15146,7 +15288,7 @@
     "selector": "\"mona-tooltip\"",
     "inputs": [
       {
-        "description": "Whether the tooltip is disabled. When disabled, the tooltip will not be shown.",
+        "description": "Whether the tooltip is disabled. When disabled, the tooltip will not be shown, and an open one\ncloses.",
         "kind": "input",
         "name": "disabled",
         "type": "boolean",
@@ -15159,17 +15301,17 @@
         "type": "void"
       },
       {
-        "description": "The delay in milliseconds before hiding the tooltip after the trigger event ends.",
+        "description": "The delay in milliseconds before hiding the tooltip after the pointer or focus leaves. A pointer\nthat leaves always gets a short grace, so it can move onto the tooltip.",
         "kind": "input",
         "name": "hideDelay",
         "type": "number",
         "defaultValue": "0"
       },
       {
-        "description": "The position of the tooltip relative to the target element.",
+        "description": "The side of the target the tooltip opens on. `left` and `right` are physical; `start` and `end`\nfollow the text direction. It flips to the opposite side when there isn't room.",
         "kind": "input",
         "name": "position",
-        "type": "Position",
+        "type": "TooltipPosition",
         "defaultValue": "\"top\""
       },
       {
@@ -15193,7 +15335,7 @@
         "type": "void"
       },
       {
-        "description": "The target element(s) to which the tooltip is attached.\nCan be an Element, ElementRef, or CSS selector string.",
+        "description": "The target element(s) to which the tooltip is attached.\nCan be an Element, ElementRef, or CSS selector string. A selector matches elements anywhere in the document,\nincluding ones added later.",
         "kind": "input",
         "name": "target",
         "type": "PopupAnchor",
@@ -15306,6 +15448,12 @@
     "selector": "\"mona-window\"",
     "inputs": [
       {
+        "description": "Accessible name for the window when it has no `title` or title template.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string"
+      },
+      {
         "description": "Sets the visibility of the close button in the window header.",
         "kind": "input",
         "name": "closable",
@@ -15313,7 +15461,7 @@
         "defaultValue": "true"
       },
       {
-        "description": "",
+        "description": "Emits before the window closes, whatever closes it: the close button, Escape, a programmatic close,\nor the component being destroyed. Call `preventDefault()` to keep it open (a close caused by destruction can't\nbe kept).",
         "kind": "output",
         "name": "close",
         "type": "PopupCloseEvent"

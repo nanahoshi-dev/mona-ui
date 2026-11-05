@@ -573,7 +573,7 @@ describe("ColorGradientComponent i18n", () => {
         const switchBtn = fixture.nativeElement.querySelector("button[aria-label='Switch color mode']");
         expect(switchBtn).toBeTruthy();
 
-        const copyDropdown = fixture.nativeElement.querySelector("mona-dropdown-button[aria-label='Copy color']");
+        const copyDropdown = fixture.nativeElement.querySelector("mona-dropdown-button button[aria-label='Copy color']");
         expect(copyDropdown).toBeTruthy();
 
         const buttons = Array.from(
@@ -610,7 +610,7 @@ describe("ColorGradientComponent i18n", () => {
         const switchBtn = fixture.nativeElement.querySelector("button[aria-label='Renk modunu değiştir']");
         expect(switchBtn).toBeTruthy();
 
-        const copyDropdown = fixture.nativeElement.querySelector("mona-dropdown-button[aria-label='Rengi kopyala']");
+        const copyDropdown = fixture.nativeElement.querySelector("mona-dropdown-button button[aria-label='Rengi kopyala']");
         expect(copyDropdown).toBeTruthy();
 
         const buttons = Array.from(

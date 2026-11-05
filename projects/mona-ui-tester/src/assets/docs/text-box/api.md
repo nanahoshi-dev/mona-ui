@@ -16,9 +16,9 @@ For a plain styled `<input>` without a wrapper element, use `TextBoxDirective` (
 ## Import & Basic Usage
 
 ```typescript
-import { TextBoxComponent } from "@nanahoshi/mona-ui";
+import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
 // For template slots:
-import { TextBoxPrefixTemplateDirective, TextBoxSuffixTemplateDirective } from "@nanahoshi/mona-ui";
+import { TextBoxPrefixTemplateDirective, TextBoxSuffixTemplateDirective } from "@nanahoshi/mona-ui/text-box";
 ```
 
 Add the imported symbols to your standalone component's `imports` array.

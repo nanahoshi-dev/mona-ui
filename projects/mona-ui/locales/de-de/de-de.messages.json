@@ -290,6 +290,7 @@
         "close": "Schließen",
         "error": "Fehler",
         "info": "Information",
+        "region": "Benachrichtigungen",
         "success": "Erfolg",
         "warning": "Warnung"
     },
@@ -347,6 +348,7 @@
     },
     "splitButton": {
         "menuButtonAriaLabel": "Menüoptionen anzeigen",
+        "menuButtonWithText": "Weitere Optionen für {text}",
         "splitButton": "{text, select, undefined {Geteilte Schaltfläche} other {{text}, geteilte Schaltfläche}}"
     },
     "splitter": {
@@ -407,6 +409,7 @@
         "closeWindow": "Fenster schließen",
         "maximize": "Maximieren",
         "minimize": "Minimieren",
+        "moveOrResizeWindow": "Fenster verschieben oder Größe ändern. Pfeiltasten zum Verschieben, Strg und Pfeiltasten zum Ändern der Größe verwenden.",
         "moveWindow": "Fenster verschieben. Pfeiltasten zum Verschieben verwenden.",
         "resizeBottom": "Fenster von unten in der Größe ändern. Pfeiltasten zum Ändern der Größe verwenden.",
         "resizeBottomLeft": "Fenster von der unteren linken Ecke in der Größe ändern. Pfeiltasten zum Ändern der Größe verwenden.",
@@ -416,6 +419,7 @@
         "resizeTop": "Fenster von oben in der Größe ändern. Pfeiltasten zum Ändern der Größe verwenden.",
         "resizeTopLeft": "Fenster von der oberen linken Ecke in der Größe ändern. Pfeiltasten zum Ändern der Größe verwenden.",
         "resizeTopRight": "Fenster von der oberen rechten Ecke in der Größe ändern. Pfeiltasten zum Ändern der Größe verwenden.",
+        "resizeWindow": "Fenstergröße ändern. Strg und Pfeiltasten zum Ändern der Größe verwenden.",
         "restore": "Wiederherstellen"
     }
 }

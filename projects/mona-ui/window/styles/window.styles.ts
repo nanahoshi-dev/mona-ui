@@ -49,7 +49,7 @@ export const windowContentThemeVariants = cva(
 
 export const windowResizerThemeVariants = cva(
     `
-        absolute flex
+        absolute flex touch-none
     `,
     {
         variants: {

@@ -10,23 +10,24 @@ import {
     model,
     output,
     TemplateRef,
-    untracked
+    untracked,
+    viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { WindowMessages } from "@nanahoshi/mona-ui/i18n";
-import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
-import { take } from "rxjs";
+import type { WindowMessages } from "@nanahoshi/mona-ui/i18n";
+import type { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import { WindowActionTemplateDirective } from "../../directives/window-action-template.directive";
 import { WindowContentTemplateDirective } from "../../directives/window-content-template.directive";
 import { WindowFooterTemplateDirective } from "../../directives/window-footer-template.directive";
 import { WindowTitleTemplateDirective } from "../../directives/window-title-template.directive";
-import { WindowRef } from "../../models/WindowRef";
+import type { WindowRef } from "../../models/WindowRef";
 import { WindowService } from "../../services/window.service";
-import { WindowVariantInput, WindowVariantProps } from "../../styles/window.styles";
+import type { WindowVariantInput, WindowVariantProps } from "../../styles/window.styles";
 
 @Component({
     selector: "mona-window",
-    template: ``,
+    // Content placed directly inside <mona-window> is the window's content, unless a monaWindowContentTemplate is given.
+    template: `<ng-template #projectedContent><ng-content /></ng-template>`,
     host: {
         class: "hidden"
     }
@@ -34,11 +35,18 @@ import { WindowVariantInput, WindowVariantProps } from "../../styles/window.styl
 export class WindowComponent implements WindowVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #windowService = inject(WindowService);
+    #destroyed = false;
     #windowRef?: WindowRef;
     private readonly actionTemplate = contentChild(WindowActionTemplateDirective, { read: TemplateRef });
     private readonly contentTemplate = contentChild(WindowContentTemplateDirective, { read: TemplateRef });
     private readonly footerTemplate = contentChild(WindowFooterTemplateDirective, { read: TemplateRef });
+    private readonly projectedContent = viewChild.required("projectedContent", { read: TemplateRef });
     private readonly titleTemplate = contentChild(WindowTitleTemplateDirective, { read: TemplateRef });
+
+    /**
+     * @description Accessible name for the window when it has no `title` or title template.
+     */
+    public readonly ariaLabel = input<string>();
 
     /**
      * @description Sets the visibility of the close button in the window header.
@@ -46,6 +54,11 @@ export class WindowComponent implements WindowVariantInput {
      */
     public readonly closable = input(true);
 
+    /**
+     * @description Emits before the window closes, whatever closes it: the close button, Escape, a programmatic close,
+     * or the component being destroyed. Call `preventDefault()` to keep it open (a close caused by destruction can't
+     * be kept).
+     */
     // eslint-disable-next-line @angular-eslint/no-output-native
     public readonly close = output<PopupCloseEvent>();
 
@@ -180,42 +193,50 @@ export class WindowComponent implements WindowVariantInput {
             const center = untracked(() => this.top() == null && this.left() == null);
             this.#windowRef?.resize({ height, width, center });
         });
-        afterNextRender({ read: () => this.#openWindow() });
-        this.#destroyRef.onDestroy(() => this.#windowRef?.close());
+        afterNextRender({ write: () => this.#openWindow() });
+        this.#destroyRef.onDestroy(() => {
+            // Outputs can't emit once the component is destroyed, so this close is silent.
+            this.#destroyed = true;
+            this.#windowRef?.close();
+        });
     }
 
     public closeWindow(): void {
         this.#windowRef?.close();
     }
 
+    /**
+     * Moves the window, in pixels. An axis that isn't given keeps its place.
+     */
     public move(position: { top?: number; left?: number }): void {
-        if (position.top !== undefined) {
-            this.#windowRef?.move({ top: position.top });
-        }
-        if (position.left !== undefined) {
-            this.#windowRef?.move({ left: position.left });
-        }
+        this.#windowRef?.move(position);
     }
 
+    /**
+     * Opens the window. Called once after the first render; call it again to reopen a window that was closed. Does
+     * nothing while the window is open.
+     */
     public openWindow(): void {
         this.#openWindow();
     }
 
+    /**
+     * Resizes the window, in pixels. A dimension that isn't given keeps its size.
+     */
     public resize(dimensions: { width?: number; height?: number }): void {
-        if (dimensions.width !== undefined) {
-            this.#windowRef?.resize({ width: dimensions.width });
-        }
-        if (dimensions.height !== undefined) {
-            this.#windowRef?.resize({ height: dimensions.height });
-        }
+        this.#windowRef?.resize(dimensions);
     }
 
     #openWindow(): void {
+        if (this.#windowRef || this.#destroyed) {
+            return;
+        }
         this.#windowRef = this.#windowService.open({
             actionTemplate: this.actionTemplate(),
+            ariaLabel: this.ariaLabel(),
             closable: this.closable(),
             closeOnEscape: this.closeOnEscape(),
-            content: this.contentTemplate(),
+            content: this.contentTemplate() ?? this.projectedContent(),
             draggable: this.draggable(),
             focusedElement: this.focusedElement(),
             footerTemplate: this.footerTemplate(),
@@ -240,14 +261,23 @@ export class WindowComponent implements WindowVariantInput {
     }
 
     #setCloseSubscription(): void {
-        if (!this.#windowRef) {
+        const windowRef = this.#windowRef;
+        if (!windowRef) {
             return;
         }
-        this.#windowRef.popupRef.beforeClose.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
-            this.close.emit(event);
+        // Not tied to this component's lifetime: destroying it closes the window, and these finish with it.
+        windowRef.close$.subscribe(event => {
+            if (!this.#destroyed) {
+                this.close.emit(event);
+            }
         });
-        this.#windowRef.closed$.pipe(take(1), takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
-            this.closed.emit();
+        windowRef.closed$.subscribe(() => {
+            if (this.#windowRef === windowRef) {
+                this.#windowRef = undefined;
+            }
+            if (!this.#destroyed) {
+                this.closed.emit();
+            }
         });
     }
 

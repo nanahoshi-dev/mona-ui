@@ -23,7 +23,7 @@ Filtering, grouping, and virtual scrolling are opt-in through companion attribut
 ## Import & Quick Start
 
 ```typescript
-import { MultiSelectComponent } from "@nanahoshi/mona-ui";
+import { MultiSelectComponent } from "@nanahoshi/mona-ui/multi-select";
 ```
 
 ```typescript

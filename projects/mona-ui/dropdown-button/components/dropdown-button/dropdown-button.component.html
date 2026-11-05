@@ -6,11 +6,12 @@
     [loading]="loading()"
     [rounded]="rounded()"
     [disabled]="disabled()"
-    [attr.aria-label]="ariaLabelledby() ? null : dropdownButtonAriaLabel() || null"
+    [toggleable]="false"
+    aria-haspopup="menu"
+    [attr.aria-label]="ariaLabelledby() ? null : ariaLabel() || null"
     [attr.aria-labelledby]="ariaLabelledby() || null"
-    [attr.aria-haspopup]="'menu'"
     [attr.aria-expanded]="isMenuOpen()"
-    [attr.aria-controls]="menuId"
+    [attr.aria-controls]="isMenuOpen() ? menuId : null"
     #dropdownButton>
     @if (textTemplate()) {
         <ng-container
@@ -18,6 +19,9 @@
             [ngTemplateOutletContext]="{ $implicit: text() }"></ng-container>
     } @else {
         {{ text() }}
+    }
+    @if (showArrow() && !iconOnly()) {
+        <svg lucideChevronDown [size]="16" class="shrink-0"></svg>
     }
 </button>
 
@@ -29,8 +33,10 @@
     [anchorConnectionPoint]="'bottomcenter'"
     [id]="menuId"
     [items]="menuItems()"
+    [minWidth]="popupMinWidth()"
     [offset]="{ horizontal: 0, vertical: 2 }"
     [popupConnectionPoint]="'topcenter'"
+    [rounded]="popupMenuRounded()"
     [size]="size()"
     [target]="dropdownButton"
     [trigger]="'click'">

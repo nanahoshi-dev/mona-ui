@@ -15,6 +15,8 @@ export * from "./services/window.service";
 export * from "./models/MoveEvent";
 export * from "./models/ResizeEvent";
 export * from "./models/WindowActionTemplateContext";
+export * from "./models/WindowData";
 export { WindowRef } from "./models/WindowRef";
+export type * from "./models/WindowResult";
 export * from "./models/WindowSettings";
 export type { WindowVariantProps } from "./styles/window.styles";

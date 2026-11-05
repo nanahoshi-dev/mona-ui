@@ -342,6 +342,7 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         close: null,
         error: null,
         info: null,
+        region: null,
         success: null,
         warning: null
     },
@@ -412,6 +413,7 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
     },
     splitButton: {
         menuButtonAriaLabel: null,
+        menuButtonWithText: [{ name: "text", type: "string" }],
         splitButton: [{ name: "text", type: "string" }]
     },
     splitter: {
@@ -481,6 +483,7 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         closeWindow: null,
         maximize: null,
         minimize: null,
+        moveOrResizeWindow: null,
         moveWindow: null,
         resizeBottom: null,
         resizeBottomLeft: null,
@@ -490,6 +493,7 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         resizeTop: null,
         resizeTopLeft: null,
         resizeTopRight: null,
+        resizeWindow: null,
         restore: null
     }
 };

@@ -323,6 +323,7 @@ export const DE_DE_MESSAGES = {
         close: "Schließen",
         error: "Fehler",
         info: "Information",
+        region: "Benachrichtigungen",
         success: "Erfolg",
         warning: "Warnung"
     },
@@ -386,6 +387,7 @@ export const DE_DE_MESSAGES = {
     },
     splitButton: {
         menuButtonAriaLabel: "Menüoptionen anzeigen",
+        menuButtonWithText: (text: string) => `Weitere Optionen für ${text}`,
         splitButton: (text: string) => (text ? `${text}, geteilte Schaltfläche` : "Geteilte Schaltfläche")
     },
     splitter: {
@@ -447,6 +449,8 @@ export const DE_DE_MESSAGES = {
         closeWindow: "Fenster schließen",
         maximize: "Maximieren",
         minimize: "Minimieren",
+        moveOrResizeWindow:
+            "Fenster verschieben oder Größe ändern. Pfeiltasten zum Verschieben, Strg und Pfeiltasten zum Ändern der Größe verwenden.",
         moveWindow: "Fenster verschieben. Pfeiltasten zum Verschieben verwenden.",
         resizeBottom: "Fenster von unten in der Größe ändern. Pfeiltasten zum Ändern der Größe verwenden.",
         resizeBottomLeft:
@@ -460,6 +464,7 @@ export const DE_DE_MESSAGES = {
             "Fenster von der oberen linken Ecke in der Größe ändern. Pfeiltasten zum Ändern der Größe verwenden.",
         resizeTopRight:
             "Fenster von der oberen rechten Ecke in der Größe ändern. Pfeiltasten zum Ändern der Größe verwenden.",
+        resizeWindow: "Fenstergröße ändern. Strg und Pfeiltasten zum Ändern der Größe verwenden.",
         restore: "Wiederherstellen"
     }
 } satisfies MonaLocaleMessages;

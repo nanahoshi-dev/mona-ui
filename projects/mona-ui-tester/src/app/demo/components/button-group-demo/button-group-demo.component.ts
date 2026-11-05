@@ -2,6 +2,8 @@ import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, input, model } from "@angular/core";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ButtonGroupComponent } from "@nanahoshi/mona-ui/button-group";
+import { DropdownButtonComponent, DropdownButtonItemComponent } from "@nanahoshi/mona-ui/dropdown-button";
+import { SplitButtonComponent, SplitButtonItemComponent } from "@nanahoshi/mona-ui/split-button";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -53,22 +55,47 @@ export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupC
 }
 
 @Component({
-    imports: [ButtonGroupComponent, ButtonDirective],
+    imports: [
+        ButtonGroupComponent,
+        ButtonDirective,
+        DropdownButtonComponent,
+        DropdownButtonItemComponent,
+        SplitButtonComponent,
+        SplitButtonItemComponent
+    ],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
-        <mona-button-group
-            [aria-label]="ariaLabel()"
-            [allowEmpty]="allowEmpty()"
-            [disabled]="disabled()"
-            [selection]="selection()"
-            [look]="look()"
-            [rounded]="rounded()"
-            [size]="size()"
-            [class]="userClass()">
-            <button monaButton>B1</button>
-            <button monaButton>B2</button>
-            <button monaButton>B3</button>
-        </mona-button-group>
+        <div class="flex flex-col items-start gap-4">
+            <mona-button-group
+                [aria-label]="ariaLabel()"
+                [allowEmpty]="allowEmpty()"
+                [disabled]="disabled()"
+                [selection]="selection()"
+                [look]="look()"
+                [rounded]="rounded()"
+                [size]="size()"
+                [class]="userClass()">
+                <button monaButton>B1</button>
+                <button monaButton>B2</button>
+                <button monaButton>B3</button>
+            </mona-button-group>
+            <mona-button-group
+                aria-label="Document"
+                [disabled]="disabled()"
+                [look]="look()"
+                [rounded]="rounded()"
+                [size]="size()">
+                <button monaButton>Bold</button>
+                <mona-dropdown-button text="Insert">
+                    <mona-dropdown-button-item label="Table"></mona-dropdown-button-item>
+                    <mona-dropdown-button-item label="Image"></mona-dropdown-button-item>
+                </mona-dropdown-button>
+                <mona-split-button text="Save">
+                    <mona-split-button-item label="Save as"></mona-split-button-item>
+                    <mona-split-button-item label="Save a copy"></mona-split-button-item>
+                </mona-split-button>
+            </mona-button-group>
+        </div>
     `
 })
 export class ButtonGroupWrapperComponent implements ComponentInputsAsSignal<ButtonGroupComponent> {

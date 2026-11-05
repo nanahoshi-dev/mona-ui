@@ -1,5 +1,5 @@
 import { PreventableEvent } from "@nanahoshi/mona-ui/common";
-import { PopupRef } from "@nanahoshi/mona-ui/popup";
+import { type PopupRef } from "@nanahoshi/mona-ui/popup";
 
 export class PopoverHideEvent extends PreventableEvent {
     public constructor(

@@ -317,6 +317,7 @@ export const AR_SA_MESSAGES = {
         close: "إغلاق",
         error: "خطأ",
         info: "معلومات",
+        region: "الإشعارات",
         success: "نجاح",
         warning: "تحذير"
     },
@@ -378,6 +379,7 @@ export const AR_SA_MESSAGES = {
     },
     splitButton: {
         menuButtonAriaLabel: "عرض خيارات القائمة",
+        menuButtonWithText: (text: string) => `مزيد من خيارات ${text}`,
         splitButton: (text: string) => (text ? `${text}، زر تقسيم` : "زر تقسيم")
     },
     splitter: {
@@ -438,6 +440,8 @@ export const AR_SA_MESSAGES = {
         closeWindow: "إغلاق النافذة",
         maximize: "تكبير",
         minimize: "تصغير",
+        moveOrResizeWindow:
+            "نقل النافذة أو تغيير حجمها. استخدم مفاتيح الأسهم للتحريك، أو Ctrl مع مفاتيح الأسهم لتغيير الحجم.",
         moveWindow: "نقل النافذة. استخدم مفاتيح الأسهم للتحريك.",
         resizeBottom: "تغيير حجم النافذة من الأسفل. استخدم مفاتيح الأسهم لتغيير الحجم.",
         resizeBottomLeft: "تغيير حجم النافذة من الزاوية السفلية اليسرى. استخدم مفاتيح الأسهم لتغيير الحجم.",
@@ -447,6 +451,7 @@ export const AR_SA_MESSAGES = {
         resizeTop: "تغيير حجم النافذة من الأعلى. استخدم مفاتيح الأسهم لتغيير الحجم.",
         resizeTopLeft: "تغيير حجم النافذة من الزاوية العلوية اليسرى. استخدم مفاتيح الأسهم لتغيير الحجم.",
         resizeTopRight: "تغيير حجم النافذة من الزاوية العلوية اليمنى. استخدم مفاتيح الأسهم لتغيير الحجم.",
+        resizeWindow: "تغيير حجم النافذة. استخدم Ctrl مع مفاتيح الأسهم لتغيير الحجم.",
         restore: "استعادة"
     }
 } satisfies MonaLocaleMessages;
