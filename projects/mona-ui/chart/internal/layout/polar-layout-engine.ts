@@ -60,7 +60,8 @@ export class PolarLayoutEngine {
                 measurements: options.measurements,
                 rootData: options.rootData,
                 series: sectorSeries,
-                styleResolver: options.styleResolver
+                styleResolver: options.styleResolver,
+                warnedDiagnosticSignatures: options.warnedDiagnosticSignatures
             });
         }
 

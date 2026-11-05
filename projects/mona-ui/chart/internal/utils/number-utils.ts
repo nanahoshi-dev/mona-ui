@@ -1,3 +1,5 @@
+import { formatChartNumber } from "./chart-locale";
+
 export function clamp(value: number, min: number, max: number): number {
     return Math.min(Math.max(value, min), max);
 }
@@ -52,18 +54,20 @@ export function normalizeTickCount(value: unknown, fallback: number = 5, min: nu
     return fallback;
 }
 
+/**
+ * Formats a tick or value label for the chart locale: compact from a thousand up ("1.2K", "3.4M", "200T" in English,
+ * "1,5 Mio." in German), grouped decimals below, and significant digits for tiny values instead of a run of zeros.
+ */
 export function formatCompactNumber(value: number): string {
     if (!Number.isFinite(value)) {
         return "";
     }
     const abs = Math.abs(value);
-    if (abs >= 1_000_000) {
-        const formatted = (value / 1_000_000).toFixed(1).replace(/\.0$/, "");
-        return `${formatted}M`;
-    }
     if (abs >= 1_000) {
-        const formatted = (value / 1_000).toFixed(1).replace(/\.0$/, "");
-        return `${formatted}K`;
+        return formatChartNumber(value, { maximumFractionDigits: 1, notation: "compact" });
     }
-    return String(value);
+    if (abs !== 0 && abs < 1e-6) {
+        return formatChartNumber(value, { maximumSignificantDigits: 6 });
+    }
+    return formatChartNumber(value, { maximumFractionDigits: 6 });
 }

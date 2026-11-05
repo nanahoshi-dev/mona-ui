@@ -1,7 +1,9 @@
+// The chart imports Angular services, which need the JIT compiler outside an Angular build.
+import "@angular/compiler";
 import { performance } from "node:perf_hooks";
-import { buildScalarDensityData } from "../internal/density/cartesian-density-preparer";
-import { ChartSeriesMarkIdentityAuthority } from "../internal/animation/chart-series-mark-identity-authority";
-import { ChartDensityTracker } from "../internal/layout/chart-density-instrumentation";
+import { buildScalarDensityData } from "../projects/mona-ui/chart/internal/density/cartesian-density-preparer";
+import { ChartSeriesMarkIdentityAuthority } from "../projects/mona-ui/chart/internal/animation/chart-series-mark-identity-authority";
+import { ChartDensityTracker } from "../projects/mona-ui/chart/internal/layout/chart-density-instrumentation";
 
 interface BenchmarkDataPoint {
     readonly x: number;

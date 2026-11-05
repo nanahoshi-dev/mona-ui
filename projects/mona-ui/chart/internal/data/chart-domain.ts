@@ -6,7 +6,7 @@ import type {
     ChartSeriesRegistration
 } from "../context/chart-registration-context";
 import type { ResolvedChartCartesianAxisType } from "../scale/chart-scale";
-import { resolveData, resolveValue } from "./chart-value-resolver";
+import { resolveData, resolveNumericValue, resolveValue } from "./chart-value-resolver";
 import { resolveFiniteRangeValues } from "./chart-range-resolver";
 import { FinancialDataResolver } from "./financial-data-resolver";
 import { isFiniteNumber } from "../utils/number-utils";
@@ -163,10 +163,10 @@ export function inferXAxisType(
             const lowField = finReg.lowField();
             const closeField = finReg.closeField();
             for (let i = 0; i < data.length; i++) {
-                const openVal = resolveValue(data[i], openField, i);
-                const highVal = resolveValue(data[i], highField, i);
-                const lowVal = resolveValue(data[i], lowField, i);
-                const closeVal = resolveValue(data[i], closeField, i);
+                const openVal = resolveNumericValue(data[i], openField, i);
+                const highVal = resolveNumericValue(data[i], highField, i);
+                const lowVal = resolveNumericValue(data[i], lowField, i);
+                const closeVal = resolveNumericValue(data[i], closeField, i);
                 if (
                     typeof openVal !== "number" ||
                     !Number.isFinite(openVal) ||
@@ -385,11 +385,11 @@ export function calculateTimeDomain(
                 if (!range) continue;
             } else if (isScatter || isBubble) {
                 if (!field) continue;
-                const yVal = resolveValue(data[i], field, i);
+                const yVal = resolveNumericValue(data[i], field, i);
                 if (!isFiniteNumber(yVal)) continue;
 
                 if (isBubble && sizeField) {
-                    const sVal = resolveValue(data[i], sizeField, i);
+                    const sVal = resolveNumericValue(data[i], sizeField, i);
                     if (!isFiniteNumber(sVal) || (sVal as number) <= 0) continue;
                 }
             }
@@ -497,11 +497,11 @@ export function calculateLinearXDomain(
                 if (!range) continue;
             } else if (isScatter || isBubble) {
                 if (!field) continue;
-                const yVal = resolveValue(data[i], field, i);
+                const yVal = resolveNumericValue(data[i], field, i);
                 if (!isFiniteNumber(yVal)) continue;
 
                 if (isBubble && sizeField) {
-                    const sVal = resolveValue(data[i], sizeField, i);
+                    const sVal = resolveNumericValue(data[i], sizeField, i);
                     if (!isFiniteNumber(sVal) || (sVal as number) <= 0) continue;
                 }
             }
@@ -691,7 +691,7 @@ export function calculateContinuousYDomain(
             const sizeField = isBubble ? (s as { sizeField?: () => ChartField }).sizeField?.() : undefined;
 
             for (let i = 0; i < data.length; i++) {
-                const yVal = resolveValue(data[i], field, i);
+                const yVal = resolveNumericValue(data[i], field, i);
                 if (!isFiniteNumber(yVal)) {
                     continue;
                 }
@@ -703,7 +703,7 @@ export function calculateContinuousYDomain(
                     }
 
                     if (isBubble && sizeField) {
-                        const sVal = resolveValue(data[i], sizeField, i);
+                        const sVal = resolveNumericValue(data[i], sizeField, i);
                         if (!isFiniteNumber(sVal) || (sVal as number) <= 0) {
                             continue;
                         }
@@ -864,7 +864,7 @@ export function hasRenderableData(
         }
 
         for (let i = 0; i < data.length; i++) {
-            const val = resolveValue(data[i], field, i);
+            const val = resolveNumericValue(data[i], field, i);
             if (!isFiniteNumber(val)) {
                 continue;
             }
@@ -873,7 +873,7 @@ export function hasRenderableData(
             } else if (s.type === "bubble") {
                 const xVal = resolveValue(data[i], xField, i);
                 if (!isContinuousXValid(xVal, xAxisType ?? "linear")) continue;
-                const sizeVal = resolveValue(data[i], (s as { sizeField: () => ChartField }).sizeField(), i);
+                const sizeVal = resolveNumericValue(data[i], (s as { sizeField: () => ChartField }).sizeField(), i);
                 if (isFiniteNumber(sizeVal) && sizeVal > 0) {
                     return true;
                 }

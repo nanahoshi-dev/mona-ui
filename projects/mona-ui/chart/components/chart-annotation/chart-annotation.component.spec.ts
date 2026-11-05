@@ -23,7 +23,7 @@ import type { ChartAnnotationMarker } from "../../models/chart-annotation.models
             [color]="'#8b5cf6'">
             @if (useTemplate()) {
                 <ng-template monaChartAnnotationLabel let-d>
-                    <span class="custom-ann">{{ d.note }}</span>
+                    <span class="custom-ann">{{ $any(d).note }}</span>
                 </ng-template>
             }
         </mona-chart-annotation>

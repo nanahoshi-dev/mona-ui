@@ -6,11 +6,12 @@ import type {
     ChartAxisPosition,
     ChartXAxisPosition,
     ChartXAxisType,
-    ChartYAxisPosition,
+    ChartYAxisSide,
     ChartYAxisType
 } from "../../models/chart-axis.models";
 import type { ChartField } from "../../models/chart.models";
 import { CartesianStageTracker } from "./cartesian-stage-instrumentation";
+import { resolveYAxisSide } from "../utils/chart-direction";
 
 export interface ResolvedCartesianAxisDescriptor<D extends "x" | "y" = "x" | "y"> {
     readonly axisId: string;
@@ -32,7 +33,7 @@ export interface ResolvedCartesianAxisDescriptor<D extends "x" | "y" = "x" | "y"
     readonly logBase?: number;
     readonly nice: boolean;
     readonly order: number;
-    readonly position: D extends "x" ? ChartXAxisPosition : ChartYAxisPosition;
+    readonly position: D extends "x" ? ChartXAxisPosition : ChartYAxisSide;
     readonly registration?: D extends "x" ? ChartXAxisRegistration : ChartYAxisRegistration;
     readonly registrationId: string;
     readonly stackIndex: number;
@@ -166,6 +167,7 @@ export class CartesianAxisRegistryResolver {
 
         // Resolve Y axes
         if (rawY.length === 0) {
+            const syntheticSide = resolveYAxisSide();
             const syntheticY: ResolvedCartesianAxisDescriptor<"y"> = {
                 axisId: "default-y",
                 axisLine: true,
@@ -174,7 +176,7 @@ export class CartesianAxisRegistryResolver {
                 isSynthetic: true,
                 nice: true,
                 order: resolvedX.length,
-                position: "left",
+                position: syntheticSide,
                 registrationId: "synthetic-y-0",
                 stackIndex: 0,
                 title: "",
@@ -183,7 +185,7 @@ export class CartesianAxisRegistryResolver {
             };
             resolvedY.push(syntheticY);
             yAxisById.set("default-y", syntheticY);
-            sideCounts.left++;
+            sideCounts[syntheticSide]++;
         } else {
             for (let i = 0; i < rawY.length; i++) {
                 const reg = rawY[i];
@@ -202,7 +204,7 @@ export class CartesianAxisRegistryResolver {
                 }
                 seenYIds.add(id);
 
-                const pos = reg.position?.() ?? "left";
+                const pos = resolveYAxisSide(reg.position?.());
                 const stackIndex = sideCounts[pos]++;
 
                 const desc: ResolvedCartesianAxisDescriptor<"y"> = {

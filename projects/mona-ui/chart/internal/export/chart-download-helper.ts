@@ -1,5 +1,11 @@
 import { ChartExportError } from "../../models/chart-export.models";
 
+/**
+ * How long the download's object URL stays valid. Some browsers (older Safari among them) start reading the file
+ * after the click returns, so revoking it at once, or after a fraction of a second, can cancel the download.
+ */
+export const DOWNLOAD_URL_LIFETIME_MS = 40_000;
+
 export class ChartDownloadHelper {
     public static download(blob: Blob, fileName: string): void {
         if (typeof document === "undefined" || typeof URL === "undefined") {
@@ -22,7 +28,7 @@ export class ChartDownloadHelper {
             document.body.removeChild(anchor);
             setTimeout(() => {
                 URL.revokeObjectURL(url);
-            }, 100);
+            }, DOWNLOAD_URL_LIFETIME_MS);
         }
     }
 }

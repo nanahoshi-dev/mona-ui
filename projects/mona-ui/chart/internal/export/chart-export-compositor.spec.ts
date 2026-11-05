@@ -232,4 +232,21 @@ describe("ChartExportCompositor", () => {
         expect(images[1].getAttribute("data-export-role")).toBe("template-a");
         expect(images[1].getAttribute("href")).toBe("data:image/png;base64,dataA");
     });
+
+    it.each<["left" | "right", number, string]>([
+        ["left", 20, "end"],
+        ["right", 140, "start"]
+    ])("anchors right-to-left text aligned %s at its edge", (textAlign, x, anchor) => {
+        const text = { ...textItem1, direction: "rtl" as const, textAlign };
+        const snapshot = createTestSnapshot({
+            domLayers: { badges: [], primitives: [{ kind: "text", ...text }], rasterIslands: [], vectorTexts: [text] }
+        });
+
+        const svg = ChartExportCompositor.compose(snapshot, createTestRequest());
+
+        const element = svg.querySelector('[data-export-role="title"]');
+        expect(element?.getAttribute("direction")).toBe("rtl");
+        expect(element?.getAttribute("x")).toBe(String(x));
+        expect(element?.getAttribute("text-anchor")).toBe(anchor);
+    });
 });

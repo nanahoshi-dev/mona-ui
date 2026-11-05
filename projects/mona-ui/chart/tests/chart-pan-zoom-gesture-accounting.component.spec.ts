@@ -36,7 +36,7 @@ interface DataItem {
             [xField]="xField()"
             [navigation]="navigation()"
             [viewport]="viewport()"
-            (viewportChange)="onViewportChange($event)"
+            (viewportChangeDetails)="onViewportChange($event)"
             style="width: 500px; height: 300px; display: block;">
             <mona-chart-x-axis axisId="x-main" type="linear" />
             <mona-chart-y-axis axisId="y-main" type="linear" />

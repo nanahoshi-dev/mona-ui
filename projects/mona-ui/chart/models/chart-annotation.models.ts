@@ -16,9 +16,14 @@ export interface ChartReferenceLineLabelContext<T extends ChartAnnotationAxisVal
     readonly $implicit: T;
     readonly axis: "x" | "y";
     readonly axisId: string;
+    readonly bounds?: undefined;
     readonly coordinate: number;
+    readonly formattedFrom?: undefined;
+    readonly formattedTo?: undefined;
     readonly formattedValue: string;
+    readonly from?: undefined;
     readonly kind: "line";
+    readonly to?: undefined;
     readonly value: T;
 }
 
@@ -30,11 +35,14 @@ export interface ChartReferenceBandLabelContext<
     readonly axis: "x" | "y";
     readonly axisId: string;
     readonly bounds: ChartRect;
+    readonly coordinate?: undefined;
     readonly formattedFrom: string;
     readonly formattedTo: string;
+    readonly formattedValue?: undefined;
     readonly from: TFrom;
     readonly kind: "band";
     readonly to: TTo;
+    readonly value?: undefined;
 }
 
 export type ChartReferenceLabelTemplateContext = ChartReferenceLineLabelContext | ChartReferenceBandLabelContext;

@@ -2429,7 +2429,7 @@
                                     class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-muted/60 border border-border text-xs">
                                     <span class="h-2 w-2 rounded-full" [style.background-color]="series.color"></span>
                                     <span class="font-semibold">{{ series.name }}</span>
-                                    <span class="text-[10px] text-muted-foreground">({{ series.type }})</span>
+                                    <span class="text-[10px] text-muted-foreground">({{ series.seriesType }})</span>
                                 </div>
                             </ng-template>
                         </mona-chart-legend>
@@ -3154,7 +3154,7 @@
                         [renderer]="'svg'"
                         class="h-96 w-full"
                         aria-label="High-Density Telemetry Pan and Zoom Chart"
-                        (viewportChange)="onPanZoomViewportChange($event)"
+                        (viewportChangeDetails)="onPanZoomViewportChange($event)"
                         (pointClick)="onPointClick($event)"
                         (pointFocusChange)="onPointFocusChange($event)">
                         <mona-chart-x-axis
@@ -3418,11 +3418,14 @@
                                 [showAxisLabels]="showCrosshairAxisLabels()"
                                 [snap]="crosshairSnap()">
                                 @if (useCustomCrosshairTemplate()) {
-                                    <ng-template monaChartCrosshairLabel let-ctx>
+                                    <ng-template
+                                        monaChartCrosshairLabelTemplate
+                                        let-axis="axis"
+                                        let-formattedValue="formattedValue">
                                         <div
                                             class="flex items-center gap-1 bg-primary text-primary-foreground font-semibold px-2 py-0.5 rounded shadow text-xs">
-                                            <span>{{ ctx.axis === "x" ? "📅" : "💰" }}</span>
-                                            <span>{{ ctx.formattedValue }}</span>
+                                            <span>{{ axis === "x" ? "📅" : "💰" }}</span>
+                                            <span>{{ formattedValue }}</span>
                                         </div>
                                     </ng-template>
                                 }
@@ -3468,10 +3471,10 @@
                                 [layer]="referenceBandLayer()"
                                 [to]="referenceBandTo()">
                                 @if (useCustomRefBandTemplate()) {
-                                    <ng-template monaChartReferenceLabel let-ctx>
+                                    <ng-template monaChartReferenceLabel let-from="from" let-to="to">
                                         <div
                                             class="bg-blue-500/20 text-blue-800 dark:text-blue-200 border border-blue-400 font-semibold text-[10px] px-1.5 py-0.5 rounded backdrop-blur-xs">
-                                            📊 Band: {{ currencyFormatter(ctx.from) }} – {{ currencyFormatter(ctx.to) }}
+                                            📊 Band: {{ currencyFormatter(from) }} – {{ currencyFormatter(to) }}
                                         </div>
                                     </ng-template>
                                 }
@@ -3494,7 +3497,7 @@
                                         <div
                                             class="bg-purple-600 text-white font-bold text-xs px-2.5 py-1 rounded-md shadow-lg flex items-center gap-1.5">
                                             <span>✨</span>
-                                            <span>{{ d.note }}</span>
+                                            <span>{{ $any(d).note }}</span>
                                         </div>
                                     </ng-template>
                                 }

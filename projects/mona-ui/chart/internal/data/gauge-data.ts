@@ -1,6 +1,6 @@
 import type { ChartField } from "../../models/chart.models";
 import type { ChartValueFormatter } from "../../models/chart-polar.models";
-import { resolveData, resolveValue } from "./chart-value-resolver";
+import { resolveData, resolveNumericValue, resolveValue } from "./chart-value-resolver";
 import { deriveRadialDatumId } from "./radial-datum-identity";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import { formatYValue } from "../utils/chart-formatter";
@@ -94,7 +94,7 @@ export class GaugeDataProcessor {
                 let validCount = 0;
                 for (let i = 0; i < rawData.length; i++) {
                     const row = rawData[i];
-                    const val = resolveValue(row, seriesField, i);
+                    const val = resolveNumericValue(row, seriesField, i);
                     if (typeof val === "number" && Number.isFinite(val)) {
                         validCount++;
                         if (validCount === 1) {

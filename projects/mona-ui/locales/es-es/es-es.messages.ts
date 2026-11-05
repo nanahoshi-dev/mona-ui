@@ -7,6 +7,15 @@ function localizeNumber(value: number, options?: Intl.NumberFormatOptions): stri
     return formatNumber(value, "es-ES", options);
 }
 
+const PLURAL_RULES = new Intl.PluralRules("es-ES");
+
+function plural(
+    category: Intl.LDMLPluralRule,
+    forms: Partial<Record<Intl.LDMLPluralRule, () => string>> & { readonly other: () => string }
+): string {
+    return (forms[category] ?? forms.other)();
+}
+
 export const ES_ES_MESSAGES = {
     autoComplete: {
         clear: "Limpiar"
@@ -40,34 +49,110 @@ export const ES_ES_MESSAGES = {
         actionsLabel: "Acciones de la tarjeta"
     },
     chart: {
+        announcementSeparator: ", ",
+        brushApplied: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `Selección aplicada, ${localizeNumber(count)} punto`,
+                other: () => `Selección aplicada, ${localizeNumber(count)} puntos`
+            }),
+        brushCleared: "Selección borrada",
+        brushRange: (from: string, to: string) => `Selección de ${from} a ${to}`,
+        category: "Categoría",
+        categoryFallbackName: (index: number) => `Categoría ${localizeNumber(index)}`,
+        categoryRange: (from: string, to: string) => `De ${from} a ${to}.`,
         change: "Cambio",
+        changeValue: (change: string) => `cambio ${change}`,
         chart: "Gráfico",
         chartLegend: "Leyenda del gráfico",
+        chartRoleDescription: "gráfico",
         close: "Cierre",
         closeAbbreviation: "C",
         colorScale: "Escala de colores",
         conversion: "Conversión",
+        conversionOfPrevious: (rate: string) => `Conversión del ${rate} respecto a la etapa anterior`,
+        dataTableTruncated: (shown: number, total: number) =>
+            `Se muestran las primeras ${localizeNumber(shown)} de ${localizeNumber(total)} filas.`,
+        decrease: "Disminución",
+        decreaseAnnouncement: (delta: string, from: string, to: string) =>
+            `disminución de ${delta}, total acumulado de ${from} a ${to}`,
         divergingRangeDescription: (title: string, minimum: string, midpoint: string, maximum: string) =>
             `${title}, de ${minimum} a ${maximum}, con punto medio en ${midpoint}`,
         dropOff: "Abandono",
+        dropOffValue: (value: string) => `Abandono ${value}`,
         falling: "En descenso",
+        gaugeRange: (minimum: string, maximum: string) => `rango de ${minimum} a ${maximum}`,
         high: "Máximo",
         highAbbreviation: "Máx",
+        increase: "Aumento",
+        increaseAnnouncement: (delta: string, from: string, to: string) =>
+            `aumento de ${delta}, total acumulado de ${from} a ${to}`,
+        itemDeselected: (item: string) => `${item}, deseleccionado`,
+        itemFallbackName: (index: number) => `Elemento ${localizeNumber(index)}`,
+        itemSelected: (item: string) => `${item}, seleccionado`,
+        keyboardHelp:
+            "Use las flechas para moverse entre los puntos de datos, Inicio y Fin para ir al primero y al último, Intro o Espacio para activar y Escape para borrar.",
         labelValueSeparator: ":",
+        labeledValue: (label: string, value: string) => `${label}: ${value}`,
         low: "Mínimo",
         lowAbbreviation: "Mín",
+        noChange: "Sin cambios",
+        noChangeAnnouncement: (value: string) => `sin cambios, total acumulado ${value}`,
         noData: "No hay datos disponibles",
+        ohlcValues: (open: string, high: string, low: string, close: string) =>
+            `Apertura ${open}, máximo ${high}, mínimo ${low}, cierre ${close}`,
         open: "Apertura",
         openAbbreviation: "A",
         overall: "Global",
+        overallConversion: (rate: string) => `Conversión global ${rate}`,
+        pannedDown: "Desplazado hacia abajo",
+        pannedLeft: "Desplazado a la izquierda",
+        pannedRight: "Desplazado a la derecha",
+        pannedUp: "Desplazado hacia arriba",
+        pathSeparator: " / ",
+        pointPosition: (position: number, total: number) => `${localizeNumber(position)} de ${localizeNumber(total)}`,
         range: "Rango",
         rangeDescription: (title: string, minimum: string, maximum: string) => `${title}, de ${minimum} a ${maximum}`,
+        rangeValue: (from: string, to: string) => `de ${from} a ${to}`,
         rising: "En alza",
         runningTotal: "Total acumulado",
+        seriesFallbackName: (index: number) => `Serie ${localizeNumber(index)}`,
+        seriesHidden: (series: string) => `${series} oculta`,
+        seriesShown: (series: string) => `${series} visible`,
+        seriesSummary: (count: number, names: string) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `Una serie: ${names}.`,
+                other: () => `${localizeNumber(count)} series: ${names}.`
+            }),
+        seriesValueRange: (series: string, minimum: string, maximum: string) =>
+            `${series}: mínimo ${minimum}, máximo ${maximum}.`,
+        shareOfTotal: (share: string) => `${share} del total`,
         size: "tamaño",
+        sizeValue: (size: string) => `tamaño ${size}`,
+        stackShare: (share: string) => `proporción de la pila ${share}`,
+        stageFallbackName: (index: number) => `Etapa ${localizeNumber(index)}`,
+        stagePosition: (position: number, total: number) =>
+            `etapa ${localizeNumber(position)} de ${localizeNumber(total)}`,
+        stepFallbackName: (index: number) => `Paso ${localizeNumber(index)}`,
+        stepPosition: (position: number, total: number) =>
+            `paso ${localizeNumber(position)} de ${localizeNumber(total)}`,
+        subtotal: "Total parcial",
+        subtotalAnnouncement: (value: string) => `total parcial ${value}`,
+        total: "Suma total",
+        totalAnnouncement: (value: string) => `suma total ${value}`,
+        treemapGroup: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `Grupo (${localizeNumber(count)} elemento secundario)`,
+                other: () => `Grupo (${localizeNumber(count)} elementos secundarios)`
+            }),
+        treemapLeaf: "Hoja",
         unchanged: "Sin cambios",
         value: "Valor",
-        visualIndicatorClamped: "Indicador visual acotado"
+        valueRange: (from: string, to: string) => `${from} – ${to}`,
+        viewportResetToDefault: "Vista restablecida al rango predeterminado",
+        viewportResetToFull: "Vista restablecida al rango completo",
+        visualIndicatorClamped: "Indicador visual acotado",
+        zoomedIn: "Acercado",
+        zoomedOut: "Alejado"
     },
     chip: {
         removeLabel: (label?: string) => (label ? `Quitar ${label}` : "Quitar elemento")

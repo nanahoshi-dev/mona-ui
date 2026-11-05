@@ -27,6 +27,7 @@ A modern, high-performance, accessible UI component library built for Angular an
 - [Numeric Text Boxes](docs/numeric-text-box.md)
 - [Dates and Times](docs/dates.md)
 - [Grid](docs/grid.md)
+- [Charts](docs/charts.md)
 - [Pager](docs/pager.md)
 - [Tree View](docs/tree-view.md)
 - [List View](docs/list-view.md)

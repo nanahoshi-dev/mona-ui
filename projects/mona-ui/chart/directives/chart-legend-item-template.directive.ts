@@ -6,4 +6,11 @@ import type { ChartLegendItemTemplateContext } from "../models/chart-series.mode
 })
 export class ChartLegendItemTemplateDirective {
     public readonly templateRef = inject<TemplateRef<ChartLegendItemTemplateContext>>(TemplateRef);
+
+    public static ngTemplateContextGuard(
+        _dir: ChartLegendItemTemplateDirective,
+        _ctx: unknown
+    ): _ctx is ChartLegendItemTemplateContext {
+        return true;
+    }
 }

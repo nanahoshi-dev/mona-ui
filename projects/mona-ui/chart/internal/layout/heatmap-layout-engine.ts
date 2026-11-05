@@ -18,6 +18,7 @@ import type { ChartInteractionBucket, ChartInteractionXKey, SceneHitTarget } fro
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import { clamp, formatCompactNumber, normalizeNonNegativeNumber } from "../utils/number-utils";
+import { resolveYAxisSide } from "../utils/chart-direction";
 
 export interface HeatmapLayoutOptions {
     readonly containerHeight: number;
@@ -143,7 +144,7 @@ export class HeatmapLayoutEngine {
         const isXAxisVisible = xAxis?.visible() ?? true;
         const xAxisPosition = xAxis?.position() ?? "bottom";
         const isYAxisVisible = yAxis?.visible() ?? true;
-        const yAxisPosition = yAxis?.position() ?? "left";
+        const yAxisPosition = resolveYAxisSide(yAxis?.position());
         const yTitle = yAxis?.title() ?? "";
         const xTitle = xAxis?.title() ?? "";
         const yFormatter = yAxis?.formatter();

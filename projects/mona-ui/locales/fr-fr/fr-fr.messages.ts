@@ -50,34 +50,110 @@ export const FR_FR_MESSAGES = {
         actionsLabel: "Actions de la carte"
     },
     chart: {
+        announcementSeparator: ", ",
+        brushApplied: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `Sélection appliquée, ${localizeNumber(count)} point`,
+                other: () => `Sélection appliquée, ${localizeNumber(count)} points`
+            }),
+        brushCleared: "Sélection effacée",
+        brushRange: (from: string, to: string) => `Sélection de ${from} à ${to}`,
+        category: "Catégorie",
+        categoryFallbackName: (index: number) => `Catégorie ${localizeNumber(index)}`,
+        categoryRange: (from: string, to: string) => `De ${from} à ${to}.`,
         change: "Variation",
+        changeValue: (change: string) => `variation ${change}`,
         chart: "Graphique",
         chartLegend: "Légende du graphique",
+        chartRoleDescription: "graphique",
         close: "Clôture",
         closeAbbreviation: "C",
         colorScale: "Échelle de couleurs",
         conversion: "Conversion",
+        conversionOfPrevious: (rate: string) => `Conversion de ${rate} par rapport à l’étape précédente`,
+        dataTableTruncated: (shown: number, total: number) =>
+            `Affichage des ${localizeNumber(shown)} premières lignes sur ${localizeNumber(total)}.`,
+        decrease: "Baisse",
+        decreaseAnnouncement: (delta: string, from: string, to: string) =>
+            `baisse de ${delta}, total cumulé de ${from} à ${to}`,
         divergingRangeDescription: (title: string, minimum: string, midpoint: string, maximum: string) =>
             `${title}, de ${minimum} à ${maximum}, point médian ${midpoint}`,
         dropOff: "Abandon",
+        dropOffValue: (value: string) => `Abandon ${value}`,
         falling: "En baisse",
+        gaugeRange: (minimum: string, maximum: string) => `plage de ${minimum} à ${maximum}`,
         high: "Haut",
         highAbbreviation: "H",
-        labelValueSeparator: ":",
+        increase: "Hausse",
+        increaseAnnouncement: (delta: string, from: string, to: string) =>
+            `hausse de ${delta}, total cumulé de ${from} à ${to}`,
+        itemDeselected: (item: string) => `${item}, désélectionné`,
+        itemFallbackName: (index: number) => `Élément ${localizeNumber(index)}`,
+        itemSelected: (item: string) => `${item}, sélectionné`,
+        keyboardHelp:
+            "Utilisez les flèches pour passer d’un point de données à l’autre, Début et Fin pour aller au premier et au dernier, Entrée ou Espace pour activer, et Échap pour effacer.",
+        labelValueSeparator: "\u00A0:",
+        labeledValue: (label: string, value: string) => `${label}\u00A0: ${value}`,
         low: "Bas",
         lowAbbreviation: "B",
+        noChange: "Aucune variation",
+        noChangeAnnouncement: (value: string) => `aucune variation, total cumulé ${value}`,
         noData: "Aucune donnée disponible",
+        ohlcValues: (open: string, high: string, low: string, close: string) =>
+            `Ouverture ${open}, haut ${high}, bas ${low}, clôture ${close}`,
         open: "Ouverture",
         openAbbreviation: "O",
         overall: "Total",
+        overallConversion: (rate: string) => `Conversion globale ${rate}`,
+        pannedDown: "Déplacé vers le bas",
+        pannedLeft: "Déplacé vers la gauche",
+        pannedRight: "Déplacé vers la droite",
+        pannedUp: "Déplacé vers le haut",
+        pathSeparator: " / ",
+        pointPosition: (position: number, total: number) => `${localizeNumber(position)} sur ${localizeNumber(total)}`,
         range: "Plage",
         rangeDescription: (title: string, minimum: string, maximum: string) => `${title}, de ${minimum} à ${maximum}`,
+        rangeValue: (from: string, to: string) => `de ${from} à ${to}`,
         rising: "En hausse",
         runningTotal: "Total cumulé",
+        seriesFallbackName: (index: number) => `Série ${localizeNumber(index)}`,
+        seriesHidden: (series: string) => `${series} masquée`,
+        seriesShown: (series: string) => `${series} affichée`,
+        seriesSummary: (count: number, names: string) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `Une série\u00A0: ${names}.`,
+                other: () => `${localizeNumber(count)} séries\u00A0: ${names}.`
+            }),
+        seriesValueRange: (series: string, minimum: string, maximum: string) =>
+            `${series}\u00A0: minimum ${minimum}, maximum ${maximum}.`,
+        shareOfTotal: (share: string) => `${share} du total`,
         size: "Taille",
+        sizeValue: (size: string) => `taille ${size}`,
+        stackShare: (share: string) => `part de la pile ${share}`,
+        stageFallbackName: (index: number) => `Étape ${localizeNumber(index)}`,
+        stagePosition: (position: number, total: number) =>
+            `étape ${localizeNumber(position)} sur ${localizeNumber(total)}`,
+        stepFallbackName: (index: number) => `Pas ${localizeNumber(index)}`,
+        stepPosition: (position: number, total: number) =>
+            `pas ${localizeNumber(position)} sur ${localizeNumber(total)}`,
+        subtotal: "Sous-total",
+        subtotalAnnouncement: (value: string) => `sous-total ${value}`,
+        total: "Montant total",
+        totalAnnouncement: (value: string) => `montant total ${value}`,
+        treemapGroup: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `Groupe (${localizeNumber(count)} enfant)`,
+                other: () => `Groupe (${localizeNumber(count)} enfants)`
+            }),
+        treemapLeaf: "Feuille",
         unchanged: "Inchangé",
         value: "Valeur",
-        visualIndicatorClamped: "Indicateur visuel limité"
+        valueRange: (from: string, to: string) => `${from} – ${to}`,
+        viewportResetToDefault: "Vue réinitialisée à la plage par défaut",
+        viewportResetToFull: "Vue réinitialisée à la plage complète",
+        visualIndicatorClamped: "Indicateur visuel limité",
+        zoomedIn: "Zoom avant",
+        zoomedOut: "Zoom arrière"
     },
     chip: {
         removeLabel: (label?: string) => (label ? `Retirer ${label}` : "Retirer l’élément")

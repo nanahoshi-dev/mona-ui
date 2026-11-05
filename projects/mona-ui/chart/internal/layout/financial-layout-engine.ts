@@ -13,6 +13,7 @@ import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { isFiniteNumber, normalizeNonNegativeNumber } from "../utils/number-utils";
 import { FinancialWidthEngine } from "./financial-width-engine";
 import { resolveCartesianTemporalValue } from "../data/cartesian-temporal-value-resolver";
+import { formatChartNumber } from "../utils/chart-locale";
 
 export interface FinancialLayoutContext {
     readonly animationKeys?: readonly string[];
@@ -61,7 +62,7 @@ function formatValue(
     index: number
 ): string {
     if (!formatter) {
-        return String(value);
+        return formatChartNumber(value);
     }
     return (formatter as (val: unknown, idx?: number) => string)(value, index);
 }

@@ -13,6 +13,7 @@ import type { ChartInteractionXKey, SceneHitTarget, SceneOhlcMark } from "../sce
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { formatXValue } from "../utils/chart-formatter";
 import { FinancialLayoutEngine, type FinancialLayoutContext } from "./financial-layout-engine";
+import { formatChartNumber } from "../utils/chart-locale";
 
 export interface CartesianFinancialLayoutResult {
     readonly financialIndex: CartesianFinancialIndex;
@@ -167,12 +168,21 @@ export function computeFinancialLayout(ctx: CartesianFinancialLayoutContext): Ca
                 );
                 formattedChange = `${change >= 0 ? "+" : "-"}${absFmt}`;
             } else {
-                formattedChange = `${change >= 0 ? "+" : ""}${change.toFixed(2)}`;
+                formattedChange = formatChartNumber(change, {
+                    maximumFractionDigits: 2,
+                    minimumFractionDigits: 2,
+                    signDisplay: "exceptZero"
+                });
             }
         }
         const formattedChangePercentage =
             changePercentage !== undefined
-                ? `${changePercentage >= 0 ? "+" : ""}${(changePercentage * 100).toFixed(2)}%`
+                ? formatChartNumber(changePercentage, {
+                      maximumFractionDigits: 2,
+                      minimumFractionDigits: 2,
+                      signDisplay: "exceptZero",
+                      style: "percent"
+                  })
                 : undefined;
 
         const target: SceneHitTarget = {

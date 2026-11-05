@@ -26,6 +26,8 @@ describe("audit-locales", () => {
             expect(isAllowedTechnicalToken("HTML")).toBe(true);
             expect(isAllowedTechnicalToken("px")).toBe(true);
             expect(isAllowedTechnicalToken(":")).toBe(true);
+            expect(isAllowedTechnicalToken(",")).toBe(true);
+            expect(isAllowedTechnicalToken("/")).toBe(true);
         });
 
         it("disallows general English words and language-specific words", () => {

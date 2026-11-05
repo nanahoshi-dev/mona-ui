@@ -1,6 +1,3 @@
-import type { ChartPoint } from "./chart.models";
-import type { SceneHitTarget } from "../internal/scene/scene-geometry";
-
 export type ChartHeatmapColorMode = "diverging" | "sequential";
 export type HeatmapColorScaleType = "categorical" | "diverging" | "sequential" | "threshold";
 export type ChartLegendMode = "auto" | "color" | "series";
@@ -40,6 +37,7 @@ export interface ChartHeatmapSeriesStyle {
     readonly strokeWidth: number;
 }
 
+/** @deprecated No chart input takes this. */
 export interface HeatmapColorStop {
     readonly color: string;
     readonly offset: number;
@@ -129,17 +127,7 @@ export interface ChartHeatmapSeriesScene {
     readonly yCategories: readonly ChartHeatmapCategory[];
 }
 
-export interface HeatmapCellIndex {
-    readonly byCoordinate: ReadonlyMap<string, SceneHeatmapCell>;
-    readonly byIndex: ReadonlyMap<string, SceneHeatmapCell>;
-    readonly cellCount: number;
-    get(columnIndex: number, rowIndex: number): SceneHitTarget | undefined;
-    getCell(columnIndex: number, rowIndex: number): SceneHeatmapCell | undefined;
-    hitTest(pointer: ChartPoint): SceneHitTarget | null;
-    readonly xCount: number;
-    readonly yCount: number;
-}
-
+/** @deprecated Nothing emits this. Use `pointClick` on the chart. */
 export interface HeatmapCellClickEvent<T = unknown> {
     readonly categoryX: string;
     readonly categoryY: string;

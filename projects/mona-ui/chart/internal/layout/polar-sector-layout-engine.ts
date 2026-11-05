@@ -34,6 +34,7 @@ export interface PolarSectorLayoutOptions {
     rootData: readonly unknown[];
     series: readonly ChartSectorSeriesRegistration[];
     styleResolver: ChartStyleResolver;
+    warnedDiagnosticSignatures?: Set<string>;
 }
 
 export class PolarSectorLayoutEngine {
@@ -87,7 +88,7 @@ export class PolarSectorLayoutEngine {
             : "percentage";
         const fillMode = targetSeries.fillMode ? targetSeries.fillMode() : "solid";
 
-        const dataResult = preparePolarData(targetSeries, rootData, styleResolver);
+        const dataResult = preparePolarData(targetSeries, rootData, styleResolver, options.warnedDiagnosticSignatures);
         const seriesStyle = styleResolver.resolvePolarSeriesStyle(targetSeries);
 
         const strokeWidth = normalizeNonNegativeNumber(seriesStyle.strokeWidth, 1);

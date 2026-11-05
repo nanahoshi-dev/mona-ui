@@ -1,6 +1,7 @@
 import { serializeKeyPart } from "../animation/animation-identity";
-import { resolveValue } from "./chart-value-resolver";
+import { resolveNumericValue, resolveValue } from "./chart-value-resolver";
 import type { ChartField } from "../../models/chart.models";
+import { chartMessages } from "../utils/chart-locale";
 
 export type RadialDatumIdentitySource = "category" | "index" | "key";
 
@@ -119,7 +120,7 @@ export function extractRetainedRadialBarIdentities(
 
     for (let i = 0; i < data.length; i++) {
         const row = data[i];
-        const rawVal = resolveValue(row, seriesField, i);
+        const rawVal = resolveNumericValue(row, seriesField, i);
         if (typeof rawVal !== "number" || !Number.isFinite(rawVal) || rawVal < 0) {
             continue;
         }
@@ -144,7 +145,7 @@ export function extractRetainedRadialBarIdentities(
         const itemId = deriveRadialDatumId(row, rawCat, rawKey, i);
 
         results.push({
-            category: rawCat ?? `Item ${i + 1}`,
+            category: rawCat ?? chartMessages().itemFallbackName(i + 1),
             categoryKey: catKey,
             dataIndex: i,
             datum: row,
@@ -196,7 +197,7 @@ export function extractRetainedRoseIdentities(
 
             const itemId = deriveRadialDatumId(row, rawCat, rawKey, i);
             slot = {
-                category: rawCat ?? `Item ${i + 1}`,
+                category: rawCat ?? chartMessages().itemFallbackName(i + 1),
                 categoryKey: catKey,
                 dataIndex: i,
                 datum: row,
@@ -208,7 +209,7 @@ export function extractRetainedRoseIdentities(
         }
 
         if (slot.validDatum === undefined) {
-            const rawVal = resolveValue(row, seriesField, i);
+            const rawVal = resolveNumericValue(row, seriesField, i);
             if (typeof rawVal === "number" && Number.isFinite(rawVal) && rawVal >= 0) {
                 slot.validDatum = row;
                 slot.validDataIndex = i;

@@ -48,6 +48,8 @@ export const TECHNICAL_ALLOWLIST = new Set([
     "HTML",
     "px",
     ":",
+    ",",
+    "/",
     "-",
     "+"
 ]);
@@ -60,6 +62,7 @@ export interface LocaleCopyException {
 
 export const LOCALE_COPY_EXCEPTIONS: readonly LocaleCopyException[] = [
     { localeId: "es-ES", messagePath: "chart.closeAbbreviation", value: "C" },
+    { localeId: "es-ES", messagePath: "chart.seriesSummary", value: "series:" },
     { localeId: "es-ES", messagePath: "editor.color", value: "Color" },
     { localeId: "es-ES", messagePath: "notification.error", value: "Error" },
     { localeId: "es-ES", messagePath: "colorPalette.color", value: "Color" },
@@ -70,6 +73,8 @@ export const LOCALE_COPY_EXCEPTIONS: readonly LocaleCopyException[] = [
     { localeId: "de-DE", messagePath: "timeSelector.am", value: "AM" },
     { localeId: "de-DE", messagePath: "timeSelector.amPm", value: "AM/PM" },
     { localeId: "de-DE", messagePath: "timeSelector.pm", value: "PM" },
+    { localeId: "fr-FR", messagePath: "chart.brushApplied", value: "point" },
+    { localeId: "fr-FR", messagePath: "chart.brushApplied", value: "points" },
     { localeId: "fr-FR", messagePath: "chart.closeAbbreviation", value: "C" },
     { localeId: "fr-FR", messagePath: "chart.conversion", value: "Conversion" },
     { localeId: "fr-FR", messagePath: "chart.highAbbreviation", value: "H" },

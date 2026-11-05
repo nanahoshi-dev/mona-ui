@@ -1,6 +1,6 @@
 import type { ChartField } from "../../models/chart.models";
 import type { ChartCartesianSeriesRegistration } from "../context/chart-registration-context";
-import { resolveData, resolveValue } from "../data/chart-value-resolver";
+import { resolveData, resolveNumericValue, resolveValue } from "../data/chart-value-resolver";
 import type { CartesianXMonotonicity } from "./cartesian-density-segments";
 import {
     buildDefinedSegments,
@@ -58,7 +58,7 @@ export function buildScalarDensityData(input: CartesianScalarDensityInput): Cart
     for (let i = 0; i < count; i++) {
         const datum = data[i];
         const rawX = resolveValue(datum, xField, i);
-        const rawY = resolveValue(datum, yField, i);
+        const rawY = resolveNumericValue(datum, yField, i);
 
         const nx = temporal
             ? normalizeScalarXValue(rawX)
@@ -147,8 +147,8 @@ export function buildRangeDensityData(input: CartesianRangeDensityInput): Cartes
     for (let i = 0; i < count; i++) {
         const datum = data[i];
         const rawX = resolveValue(datum, xField, i);
-        const rawFrom = resolveValue(datum, fromField, i);
-        const rawTo = resolveValue(datum, toField, i);
+        const rawFrom = resolveNumericValue(datum, fromField, i);
+        const rawTo = resolveNumericValue(datum, toField, i);
 
         const nx = temporal
             ? (resolveRangeTemporalXValue(rawX)?.epochMs ?? Number.NaN)

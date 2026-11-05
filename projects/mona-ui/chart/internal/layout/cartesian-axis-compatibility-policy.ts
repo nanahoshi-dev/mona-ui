@@ -1,6 +1,7 @@
 import type { ChartField } from "../../models/chart.models";
 import type { ChartSeriesRegistration } from "../context/chart-registration-context";
-import { resolveData, resolveValue } from "../data/chart-value-resolver";
+import { isCartesianSeriesCompatibleWithXAxisType } from "../data/chart-domain";
+import { resolveData, resolveNumericValue, resolveValue } from "../data/chart-value-resolver";
 import type { ResolvedChartCartesianAxisType } from "../scale/chart-scale";
 import type { ResolvedCartesianAxisDescriptor } from "./cartesian-axis-registry-resolver";
 
@@ -38,7 +39,59 @@ type SeriesWithOptionalFieldAccessors = {
     data?: () => readonly unknown[] | undefined;
     field?: () => ChartField | undefined;
     fromField?: () => ChartField | undefined;
+    highField?: () => ChartField | undefined;
+    lowField?: () => ChartField | undefined;
+    openField?: () => ChartField | undefined;
+    toField?: () => ChartField | undefined;
 };
+
+/** Series that draw one band per category, so their X axis can only be a category axis. */
+const CATEGORY_X_SERIES_TYPES: ReadonlySet<string> = new Set(["bar", "rangeBar"]);
+
+/** Series whose X axis types `isCartesianSeriesCompatibleWithXAxisType` decides. */
+const X_AXIS_CHECKED_SERIES_TYPES: ReadonlySet<string> = new Set([
+    "area",
+    "bar",
+    "bubble",
+    "candlestick",
+    "line",
+    "ohlc",
+    "rangeArea",
+    "rangeBar",
+    "scatter"
+]);
+
+const VALUE_FIELD_NAMES = [
+    "field",
+    "fromField",
+    "toField",
+    "openField",
+    "highField",
+    "lowField",
+    "closeField"
+] as const;
+
+/** A sample that says something about the axis type: not a gap, not blank text, and not NaN or Infinity. */
+function isUsableSample(value: unknown): boolean {
+    if (value === null || value === undefined) {
+        return false;
+    }
+    if (typeof value === "number") {
+        return Number.isFinite(value);
+    }
+    if (typeof value === "string") {
+        return value.trim().length > 0;
+    }
+    return true;
+}
+
+function seriesName(series: ChartSeriesRegistration): string {
+    return "name" in series && typeof series.name === "function" ? (series.name() ?? series.id) : series.id;
+}
+
+function isDevMode(): boolean {
+    return typeof ngDevMode === "undefined" || !!ngDevMode;
+}
 
 export class CartesianAxisCompatibilityPolicy {
     public static isSeriesCompatibleWithAxis(
@@ -139,7 +192,30 @@ export class CartesianAxisCompatibilityPolicy {
         } else {
             // Auto inference based on bound series data
             const sampleValues = this.#collectSampleValues(axis, boundSeries, rootData, rootXField, orientation);
-            resolvedType = this.#inferScaleType(axis.dimension, sampleValues, orientation);
+            resolvedType = this.#inferScaleType(axis.dimension, sampleValues, orientation, boundSeries);
+        }
+
+        if (orientation === "vertical" && axis.dimension === "x") {
+            for (const s of boundSeries) {
+                if (
+                    X_AXIS_CHECKED_SERIES_TYPES.has(s.type) &&
+                    !isCartesianSeriesCompatibleWithXAxisType(s.type, resolvedType)
+                ) {
+                    if (!incompatibleSeriesIds.includes(s.id)) {
+                        incompatibleSeriesIds.push(s.id);
+                    }
+                    const needs = CATEGORY_X_SERIES_TYPES.has(s.type) ? "a category" : "a numeric or time";
+                    const inferred = configuredType === "auto" ? " (inferred from the data)" : "";
+                    warnings.push(
+                        `[MonaChart] ${s.type} series "${seriesName(s)}" needs ${needs} X axis, but axis "${axis.axisId}" is "${resolvedType}"${inferred}. Series geometry is omitted.`
+                    );
+                }
+            }
+        }
+
+        const isValueAxis = orientation === "horizontal" ? axis.dimension === "x" : axis.dimension === "y";
+        if (isValueAxis && isDevMode()) {
+            warnings.push(...this.#droppedValueWarnings(axis, boundSeries, rootData));
         }
 
         return {
@@ -161,41 +237,29 @@ export class CartesianAxisCompatibilityPolicy {
         const isCategoryDim = orientation === "horizontal" ? axis.dimension === "y" : axis.dimension === "x";
 
         for (const s of boundSeries) {
-            const data = resolveData(
-                "data" in s && typeof (s as SeriesWithOptionalFieldAccessors).data === "function"
-                    ? (s as SeriesWithOptionalFieldAccessors).data!()
-                    : undefined,
-                rootData
-            );
+            const accessors = s as SeriesWithOptionalFieldAccessors;
+            const data = resolveData(typeof accessors.data === "function" ? accessors.data() : undefined, rootData);
+            const valueAccessor = accessors.field ?? accessors.fromField ?? accessors.closeField;
+            const valueField = typeof valueAccessor === "function" ? valueAccessor() : undefined;
+            const categoryField =
+                "xField" in s && typeof s.xField === "function" && s.xField() !== undefined
+                    ? s.xField()
+                    : orientation === "vertical" && axis.field !== undefined
+                      ? axis.field
+                      : rootXField;
+
+            // Gaps, blank text and NaN or Infinity are skipped, so one bad value doesn't decide the axis type.
             for (let i = 0; i < data.length && samples.length < maxSamples; i++) {
                 const item = data[i];
                 if (isCategoryDim) {
-                    const field =
-                        "xField" in s && typeof s.xField === "function" && s.xField() !== undefined
-                            ? s.xField()
-                            : orientation === "vertical" && axis.field !== undefined
-                              ? axis.field
-                              : rootXField;
-                    const val = resolveValue(item, field, i);
-                    if (val !== null && val !== undefined) {
+                    const val = resolveValue(item, categoryField, i);
+                    if (isUsableSample(val)) {
                         samples.push(val);
                     }
-                } else {
-                    if ("field" in s && typeof (s as SeriesWithOptionalFieldAccessors).field === "function") {
-                        const val = resolveValue(item, (s as SeriesWithOptionalFieldAccessors).field!(), i);
-                        if (val !== null && val !== undefined) samples.push(val);
-                    } else if (
-                        "fromField" in s &&
-                        typeof (s as SeriesWithOptionalFieldAccessors).fromField === "function"
-                    ) {
-                        const fv = resolveValue(item, (s as SeriesWithOptionalFieldAccessors).fromField!(), i);
-                        if (fv !== null && fv !== undefined) samples.push(fv);
-                    } else if (
-                        "closeField" in s &&
-                        typeof (s as SeriesWithOptionalFieldAccessors).closeField === "function"
-                    ) {
-                        const cv = resolveValue(item, (s as SeriesWithOptionalFieldAccessors).closeField!(), i);
-                        if (cv !== null && cv !== undefined) samples.push(cv);
+                } else if (typeof valueAccessor === "function") {
+                    const val = resolveNumericValue(item, valueField, i);
+                    if (isUsableSample(val)) {
+                        samples.push(val);
                     }
                 }
             }
@@ -207,10 +271,46 @@ export class CartesianAxisCompatibilityPolicy {
         return samples;
     }
 
+    /**
+     * In dev mode, names each series on a value axis that has values the chart can't place (NaN, Infinity, or text
+     * that isn't a number); those points are left out. Gaps (`null`, `undefined`) are expected and not reported.
+     */
+    static #droppedValueWarnings(
+        axis: ResolvedCartesianAxisDescriptor,
+        boundSeries: readonly ChartSeriesRegistration[],
+        rootData?: readonly unknown[]
+    ): string[] {
+        const warnings: string[] = [];
+        for (const s of boundSeries) {
+            const accessors = s as SeriesWithOptionalFieldAccessors;
+            const fields = VALUE_FIELD_NAMES.flatMap(name => {
+                const accessor = accessors[name];
+                return typeof accessor === "function" ? [accessor()] : [];
+            });
+            if (fields.length === 0) {
+                continue;
+            }
+            const data = resolveData(typeof accessors.data === "function" ? accessors.data() : undefined, rootData);
+            const hasDropped = data.some((datum, i) =>
+                fields.some(field => {
+                    const val = resolveNumericValue(datum, field, i);
+                    return val !== null && val !== undefined && !(typeof val === "number" && Number.isFinite(val));
+                })
+            );
+            if (hasDropped) {
+                warnings.push(
+                    `[MonaChart] ${s.type} series "${seriesName(s)}" has values on axis "${axis.axisId}" that aren't finite numbers (NaN, Infinity, or text that isn't a number). Those points are left out.`
+                );
+            }
+        }
+        return warnings;
+    }
+
     static #inferScaleType(
         dimension: "x" | "y",
         values: unknown[],
-        orientation: "horizontal" | "vertical" = "vertical"
+        orientation: "horizontal" | "vertical",
+        boundSeries: readonly ChartSeriesRegistration[]
     ): ResolvedChartCartesianAxisType {
         const defaultType =
             orientation === "horizontal"
@@ -221,6 +321,13 @@ export class CartesianAxisCompatibilityPolicy {
                   ? "category"
                   : "linear";
 
+        const isValueAxis = orientation === "horizontal" ? dimension === "x" : dimension === "y";
+
+        // Bars draw one band per category, so numbers (years, ids) on their axis are categories too.
+        if (!isValueAxis && boundSeries.some(s => CATEGORY_X_SERIES_TYPES.has(s.type))) {
+            return "category";
+        }
+
         if (values.length === 0) {
             return defaultType;
         }
@@ -230,11 +337,12 @@ export class CartesianAxisCompatibilityPolicy {
             return "time";
         }
 
-        const allNumbers = values.every(v => typeof v === "number" && Number.isFinite(v));
+        const allNumbers = values.every(v => typeof v === "number");
         if (allNumbers) {
             return "linear";
         }
 
-        return "category";
+        // No series can draw on a category value axis, so text among the values doesn't make it one.
+        return isValueAxis ? "linear" : "category";
     }
 }

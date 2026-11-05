@@ -1,7 +1,9 @@
 import type { ChartPolarSeriesRegistration } from "../context/chart-registration-context";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
+import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import { isFiniteNumber } from "../utils/number-utils";
-import { resolveData, resolveValue } from "./chart-value-resolver";
+import { resolveData, resolveNumericValue, resolveValue } from "./chart-value-resolver";
+import { chartMessages, formatChartNumber, formatChartPercent } from "../utils/chart-locale";
 
 export interface PolarDatum {
     category: unknown;
@@ -24,31 +26,21 @@ export interface PolarDataResult {
     visibleTotal: number;
 }
 
-const DEFAULT_PERCENT_FORMATTER = new Intl.NumberFormat(undefined, {
-    maximumFractionDigits: 1,
-    style: "percent"
-});
-
-const DEFAULT_NUMBER_FORMATTER = new Intl.NumberFormat();
-
+/** Formats a share for the chart locale ("12.5%", "12,5 %"). */
 export function formatPolarPercentage(ratio: number): string {
-    if (!isFiniteNumber(ratio)) {
-        return "0%";
-    }
-    return DEFAULT_PERCENT_FORMATTER.format(ratio);
+    return formatChartPercent(isFiniteNumber(ratio) ? ratio : 0);
 }
 
+/** Formats a value for the chart locale. */
 export function formatPolarValue(value: number): string {
-    if (!isFiniteNumber(value)) {
-        return "0";
-    }
-    return DEFAULT_NUMBER_FORMATTER.format(value);
+    return formatChartNumber(isFiniteNumber(value) ? value : 0);
 }
 
 export function preparePolarData(
     series: ChartPolarSeriesRegistration,
     rootData: readonly unknown[],
-    styleResolver: ChartStyleResolver
+    styleResolver: ChartStyleResolver,
+    warnedDiagnosticSignatures?: Set<string>
 ): PolarDataResult {
     const rawData = resolveData(series.data(), rootData);
     const valueField = series.field();
@@ -61,13 +53,25 @@ export function preparePolarData(
     let validPaletteIndex = 0;
     let total = 0;
     let visibleTotal = 0;
+    let hasNegative = false;
+    let hasInvalid = false;
+    let hasValue = false;
 
     for (let dataIndex = 0; dataIndex < rawData.length; dataIndex++) {
         const item = rawData[dataIndex];
-        let val: unknown = resolveValue(item, valueField, dataIndex);
+        let val: unknown = resolveNumericValue(item, valueField, dataIndex);
 
         if (val === undefined && isFiniteNumber(item)) {
             val = item;
+        }
+
+        if (val !== null && val !== undefined) {
+            hasValue = true;
+            if (!isFiniteNumber(val)) {
+                hasInvalid = true;
+            } else if (val < 0) {
+                hasNegative = true;
+            }
         }
 
         if (!isFiniteNumber(val) || (val as number) <= 0) {
@@ -77,7 +81,7 @@ export function preparePolarData(
         const numVal = val as number;
         let cat = resolveValue(item, categoryField, dataIndex);
         if (cat === undefined || cat === null || cat === "") {
-            cat = `Item ${dataIndex + 1}`;
+            cat = chartMessages().itemFallbackName(dataIndex + 1);
         }
 
         const formattedCategory = categoryFormatter ? categoryFormatter(cat, dataIndex) : String(cat);
@@ -106,6 +110,31 @@ export function preparePolarData(
         total += numVal;
         if (isSliceVisible) {
             visibleTotal += numVal;
+        }
+    }
+
+    if (warnedDiagnosticSignatures) {
+        const name = series.name?.() || series.id;
+        if (hasNegative) {
+            ChartDiagnostics.warnOnce(
+                warnedDiagnosticSignatures,
+                `${series.type} series "${name}" has negative values. A slice can't be negative, so those are left out.`,
+                `${series.id}:negative-values`
+            );
+        }
+        if (hasInvalid) {
+            ChartDiagnostics.warnOnce(
+                warnedDiagnosticSignatures,
+                `${series.type} series "${name}" has values that aren't finite numbers (NaN, Infinity, or text that isn't a number). Those are left out.`,
+                `${series.id}:invalid-values`
+            );
+        }
+        if (hasValue && allData.length === 0 && !hasNegative && !hasInvalid) {
+            ChartDiagnostics.warnOnce(
+                warnedDiagnosticSignatures,
+                `${series.type} series "${name}" has no values above zero, so nothing is drawn.`,
+                `${series.id}:no-positive-values`
+            );
         }
     }
 

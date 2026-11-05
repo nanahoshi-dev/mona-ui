@@ -46,13 +46,39 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         actionsLabel: null
     },
     chart: {
+        announcementSeparator: null,
+        brushApplied: [{ name: "count", type: "number" }],
+        brushCleared: null,
+        brushRange: [
+            { name: "from", type: "string" },
+            { name: "to", type: "string" }
+        ],
+        category: null,
+        categoryFallbackName: [{ name: "index", type: "number" }],
+        categoryRange: [
+            { name: "from", type: "string" },
+            { name: "to", type: "string" }
+        ],
         change: null,
+        changeValue: [{ name: "change", type: "string" }],
         chart: null,
         chartLegend: null,
+        chartRoleDescription: null,
         close: null,
         closeAbbreviation: null,
         colorScale: null,
         conversion: null,
+        conversionOfPrevious: [{ name: "rate", type: "string" }],
+        dataTableTruncated: [
+            { name: "shown", type: "number" },
+            { name: "total", type: "number" }
+        ],
+        decrease: null,
+        decreaseAnnouncement: [
+            { name: "delta", type: "string" },
+            { name: "from", type: "string" },
+            { name: "to", type: "string" }
+        ],
         divergingRangeDescription: [
             { name: "title", type: "string" },
             { name: "minimum", type: "string" },
@@ -60,28 +86,108 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
             { name: "maximum", type: "string" }
         ],
         dropOff: null,
+        dropOffValue: [{ name: "value", type: "string" }],
         falling: null,
+        gaugeRange: [
+            { name: "minimum", type: "string" },
+            { name: "maximum", type: "string" }
+        ],
         high: null,
         highAbbreviation: null,
+        increase: null,
+        increaseAnnouncement: [
+            { name: "delta", type: "string" },
+            { name: "from", type: "string" },
+            { name: "to", type: "string" }
+        ],
+        itemDeselected: [{ name: "item", type: "string" }],
+        itemFallbackName: [{ name: "index", type: "number" }],
+        itemSelected: [{ name: "item", type: "string" }],
+        keyboardHelp: null,
         labelValueSeparator: null,
+        labeledValue: [
+            { name: "label", type: "string" },
+            { name: "value", type: "string" }
+        ],
         low: null,
         lowAbbreviation: null,
+        noChange: null,
+        noChangeAnnouncement: [{ name: "value", type: "string" }],
         noData: null,
+        ohlcValues: [
+            { name: "open", type: "string" },
+            { name: "high", type: "string" },
+            { name: "low", type: "string" },
+            { name: "close", type: "string" }
+        ],
         open: null,
         openAbbreviation: null,
         overall: null,
+        overallConversion: [{ name: "rate", type: "string" }],
+        pannedDown: null,
+        pannedLeft: null,
+        pannedRight: null,
+        pannedUp: null,
+        pathSeparator: null,
+        pointPosition: [
+            { name: "position", type: "number" },
+            { name: "total", type: "number" }
+        ],
         range: null,
         rangeDescription: [
             { name: "title", type: "string" },
             { name: "minimum", type: "string" },
             { name: "maximum", type: "string" }
         ],
+        rangeValue: [
+            { name: "from", type: "string" },
+            { name: "to", type: "string" }
+        ],
         rising: null,
         runningTotal: null,
+        seriesFallbackName: [{ name: "index", type: "number" }],
+        seriesHidden: [{ name: "series", type: "string" }],
+        seriesShown: [{ name: "series", type: "string" }],
+        seriesSummary: [
+            { name: "count", type: "number" },
+            { name: "names", type: "string" }
+        ],
+        seriesValueRange: [
+            { name: "series", type: "string" },
+            { name: "minimum", type: "string" },
+            { name: "maximum", type: "string" }
+        ],
+        shareOfTotal: [{ name: "share", type: "string" }],
         size: null,
+        sizeValue: [{ name: "size", type: "string" }],
+        stackShare: [{ name: "share", type: "string" }],
+        stageFallbackName: [{ name: "index", type: "number" }],
+        stagePosition: [
+            { name: "position", type: "number" },
+            { name: "total", type: "number" }
+        ],
+        stepFallbackName: [{ name: "index", type: "number" }],
+        stepPosition: [
+            { name: "position", type: "number" },
+            { name: "total", type: "number" }
+        ],
+        subtotal: null,
+        subtotalAnnouncement: [{ name: "value", type: "string" }],
+        total: null,
+        totalAnnouncement: [{ name: "value", type: "string" }],
+        treemapGroup: [{ name: "count", type: "number" }],
+        treemapLeaf: null,
         unchanged: null,
         value: null,
-        visualIndicatorClamped: null
+        valueRange: [
+            { name: "from", type: "string" },
+            { name: "to", type: "string" }
+        ],
+        viewportResetToDefault: null,
+        viewportResetToFull: null,
+        visualIndicatorClamped: null,
+        zoomedIn: null,
+        zoomedOut: null
     },
     chip: {
         removeLabel: [{ name: "label", optional: true, type: "string" }]

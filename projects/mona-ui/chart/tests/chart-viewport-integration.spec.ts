@@ -28,7 +28,7 @@ interface DataItem {
             [navigation]="navigation()"
             [viewport]="viewport()"
             [defaultViewport]="defaultViewport()"
-            (viewportChange)="onViewportChange($event)"
+            (viewportChangeDetails)="onViewportChange($event)"
             style="width: 500px; height: 300px; display: block;">
             <mona-chart-x-axis axisId="x-main" type="linear" />
             <mona-chart-y-axis axisId="y-main" type="linear" />

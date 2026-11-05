@@ -220,9 +220,11 @@ describe("MonaChartComponent", () => {
         it("should create chart with canvas and aria attributes", () => {
             const chartEl = fixture.debugElement.query(By.directive(ChartComponent));
             expect(chartEl).not.toBeNull();
-            expect(chartEl.nativeElement.getAttribute("role")).toBe("region");
+            expect(chartEl.nativeElement.getAttribute("role")).toBe("application");
+            expect(chartEl.nativeElement.getAttribute("aria-roledescription")).toBe("chart");
             expect(chartEl.nativeElement.getAttribute("aria-label")).toBe("Activity Metrics");
-            expect(chartEl.nativeElement.getAttribute("aria-description")).toBe("Detailed activity chart");
+            const descriptionId = chartEl.nativeElement.getAttribute("aria-describedby") as string;
+            expect(document.getElementById(descriptionId)?.textContent).toContain("Detailed activity chart");
             expect(chartEl.nativeElement.getAttribute("tabindex")).toBe("0");
 
             const canvas = chartEl.query(By.css("canvas"));

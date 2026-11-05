@@ -3,6 +3,7 @@ import type { ChartPoint, ChartRect } from "../../models/chart.models";
 import { CartesianMarkVisualGeometry } from "../interaction/cartesian-mark-visual-geometry";
 import type { SceneHitTarget } from "../scene/scene-geometry";
 import type { NormalizedChartDataLabelOptions } from "./chart-data-label-options";
+import { chartDirection } from "../utils/chart-locale";
 
 export interface DataLabelPlacementResult {
     readonly anchor: ChartPoint;
@@ -324,6 +325,9 @@ export class ChartDataLabelPlacement {
 
         const type = hit.seriesType;
         const isHorizontal = hit.barOrientation === "horizontal" || orientation === "horizontal";
+        // A label beside a point prefers the side reading runs towards.
+        const [ahead, behind]: readonly ChartDataLabelPosition[] =
+            chartDirection() === "rtl" ? ["left", "right"] : ["right", "left"];
 
         if (type === "bar") {
             if (hit.stackMode) {
@@ -340,15 +344,15 @@ export class ChartDataLabelPlacement {
         }
 
         if (type === "rangeArea") {
-            return ["center", "top", "bottom", "right", "left"];
+            return ["center", "top", "bottom", ahead, behind];
         }
 
         if (type === "candlestick" || type === "ohlc") {
-            return ["right", "left", "top", "bottom"];
+            return [ahead, behind, "top", "bottom"];
         }
 
         // Point-like: line, area, scatter, bubble
-        return ["top", "bottom", "right", "left", "center"];
+        return ["top", "bottom", ahead, behind, "center"];
     }
 
     static #normalizePosition(

@@ -1,10 +1,11 @@
 import type { ChartField } from "../../models/chart.models";
 import type { ChartValueFormatter } from "../../models/chart-polar.models";
-import { resolveData, resolveValue } from "./chart-value-resolver";
+import { resolveData, resolveNumericValue, resolveValue } from "./chart-value-resolver";
 import { deriveRadialDatumId, serializeRadialCategoryKey, serializeRadialExplicitKey } from "./radial-datum-identity";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { formatYValue } from "../utils/chart-formatter";
+import { chartMessages } from "../utils/chart-locale";
 
 export interface PreparedRadialBarDatum {
     readonly animationKey: string;
@@ -97,7 +98,7 @@ export class RadialBarDataProcessor {
 
         for (let i = 0; i < rawData.length; i++) {
             const row = rawData[i];
-            const rawVal = resolveValue(row, seriesField, i);
+            const rawVal = resolveNumericValue(row, seriesField, i);
 
             if (typeof rawVal === "number" && rawVal < 0) {
                 if (warnedDiagnosticSignatures) {
@@ -148,13 +149,13 @@ export class RadialBarDataProcessor {
             const itemId = deriveRadialDatumId(row, rawCat, rawKey, i);
 
             const formattedCategory = categoryFormatter
-                ? categoryFormatter(rawCat ?? `Item ${i + 1}`, i)
+                ? categoryFormatter(rawCat ?? chartMessages().itemFallbackName(i + 1), i)
                 : rawCat !== undefined && rawCat !== null
                   ? String(rawCat)
-                  : `Item ${i + 1}`;
+                  : chartMessages().itemFallbackName(i + 1);
 
             validEntries.push({
-                category: rawCat ?? `Item ${i + 1}`,
+                category: rawCat ?? chartMessages().itemFallbackName(i + 1),
                 categoryKey,
                 dataIndex: i,
                 datum: row,

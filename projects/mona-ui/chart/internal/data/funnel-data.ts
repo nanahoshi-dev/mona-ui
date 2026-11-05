@@ -4,7 +4,8 @@ import type { ChartLegendItem } from "../../models/chart-series.models";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import { FunnelIdentity } from "./funnel-identity";
-import { resolveValue } from "./chart-value-resolver";
+import { resolveNumericValue, resolveValue } from "./chart-value-resolver";
+import { chartMessages, formatChartNumber, formatChartPercent } from "../utils/chart-locale";
 
 export interface PreparedFunnelStage {
     readonly animationKey: string;
@@ -56,12 +57,9 @@ export interface FunnelDataOptions {
     readonly warnedDiagnosticSignatures?: Set<string>;
 }
 
+/** Formats a conversion rate for the chart locale, with at most one decimal. */
 export function formatFunnelPercentage(ratio: number): string {
-    const pct = ratio * 100;
-    if (pct === Math.floor(pct)) {
-        return `${pct}%`;
-    }
-    return `${pct.toFixed(1)}%`;
+    return formatChartPercent(ratio);
 }
 
 export class FunnelDataProcessor {
@@ -132,13 +130,20 @@ export class FunnelDataProcessor {
         const seenExplicitKeys = new Set<string>();
         const allStages: PreparedFunnelStage[] = [];
         let hasNegative = false;
+        let hasInvalid = false;
 
         for (let i = 0; i < rawData.length; i++) {
             const datum = rawData[i];
-            const rawVal = resolveValue(datum, field, i);
+            const rawVal = resolveNumericValue(datum, field, i);
 
             if (typeof rawVal === "number" && Number.isFinite(rawVal) && rawVal < 0) {
                 hasNegative = true;
+            } else if (
+                rawVal !== null &&
+                rawVal !== undefined &&
+                !(typeof rawVal === "number" && Number.isFinite(rawVal))
+            ) {
+                hasInvalid = true;
             }
 
             if (!FunnelIdentity.isValidFunnelValue(rawVal)) {
@@ -151,7 +156,7 @@ export class FunnelDataProcessor {
                 ? categoryFormatter(rawCat, i)
                 : rawCat !== undefined && rawCat !== null
                   ? String(rawCat)
-                  : `Stage ${i + 1}`;
+                  : chartMessages().stageFallbackName(i + 1);
 
             const identity = FunnelIdentity.resolveStageIdentity(
                 datum,
@@ -199,7 +204,7 @@ export class FunnelDataProcessor {
                 stageColor = styleResolver.resolvePaletteColor(i);
             }
 
-            const formattedValue = valueFormatter ? valueFormatter(numVal, i) : String(numVal);
+            const formattedValue = valueFormatter ? valueFormatter(numVal, i) : formatChartNumber(numVal);
 
             allStages.push({
                 animationKey,
@@ -223,6 +228,20 @@ export class FunnelDataProcessor {
                 warnedDiagnosticSignatures,
                 `Funnel series "${seriesName}" encountered negative values. Negative values are omitted.`,
                 `${seriesId}:negative-values`
+            );
+        }
+        if (hasInvalid && warnedDiagnosticSignatures) {
+            ChartDiagnostics.warnOnce(
+                warnedDiagnosticSignatures,
+                `Funnel series "${seriesName}" has values that aren't finite numbers (NaN, Infinity, or text that isn't a number). Those stages are left out.`,
+                `${seriesId}:invalid-values`
+            );
+        }
+        if (warnedDiagnosticSignatures && allStages.length > 0 && allStages.every(stage => stage.value === 0)) {
+            ChartDiagnostics.warnOnce(
+                warnedDiagnosticSignatures,
+                `Funnel series "${seriesName}" has no values above zero, so nothing is drawn.`,
+                `${seriesId}:no-positive-values`
             );
         }
 

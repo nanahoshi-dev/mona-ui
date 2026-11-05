@@ -25,7 +25,8 @@ let synchronizationGroupSessionCounter = 0;
 export class ChartSynchronizationCoordinator {
     readonly #entriesByMemberId = new Map<string, CoordinatorEntry>();
     readonly #groups = new Map<string, SynchronizationGroupState>();
-    readonly #lastDeliveredSequence = new Map<string, number>();
+    /** The last message sequence delivered to each member, per group session and channel. */
+    readonly #lastDeliveredSequence = new Map<string, Map<string, number>>();
     readonly #scheduler = new ChartSynchronizationScheduler(() => {
         ChartSynchronizationTracker.current?.onSyncMessageCoalesced?.();
     });
@@ -159,6 +160,21 @@ export class ChartSynchronizationCoordinator {
         this.#scheduler.cancelByRecipient(memberId);
         this.#leaveGroup(entry);
         this.#entriesByMemberId.delete(memberId);
+        this.#lastDeliveredSequence.delete(memberId);
+    }
+
+    /** Records `sequence` for the member unless it isn't newer than the last one delivered; returns whether it was. */
+    #acceptSequence(memberId: string, key: string, sequence: number): boolean {
+        let sequences = this.#lastDeliveredSequence.get(memberId);
+        if ((sequences?.get(key) ?? 0) >= sequence) {
+            return false;
+        }
+        if (!sequences) {
+            sequences = new Map();
+            this.#lastDeliveredSequence.set(memberId, sequences);
+        }
+        sequences.set(key, sequence);
+        return true;
     }
 
     #clearCrosshair(originMemberId: string): void {
@@ -273,12 +289,9 @@ export class ChartSynchronizationCoordinator {
             if (currentGroup !== groupName) {
                 continue;
             }
-            const seqKey = `${group.groupSessionId}:${member.memberId}:${channel}`;
-            const lastSeq = this.#lastDeliveredSequence.get(seqKey) ?? 0;
-            if (message.sequence <= lastSeq) {
+            if (!this.#acceptSequence(member.memberId, `${group.groupSessionId}:${channel}`, message.sequence)) {
                 continue;
             }
-            this.#lastDeliveredSequence.set(seqKey, message.sequence);
             ChartSynchronizationTracker.current?.onSyncMessageDelivered?.();
             invoke(member);
         }
@@ -314,12 +327,9 @@ export class ChartSynchronizationCoordinator {
                     if (!currentGroup || currentGroup.groupSessionId !== groupSessionId) {
                         return;
                     }
-                    const seqKey = `${groupSessionId}:${recipientMemberId}:${channel}`;
-                    const lastSeq = this.#lastDeliveredSequence.get(seqKey) ?? 0;
-                    if (sequence <= lastSeq) {
+                    if (!this.#acceptSequence(recipientMemberId, `${groupSessionId}:${channel}`, sequence)) {
                         return;
                     }
-                    this.#lastDeliveredSequence.set(seqKey, sequence);
                     ChartSynchronizationTracker.current?.onSyncMessageDelivered?.();
                     buildInvoke(currentEntry.member);
                 },

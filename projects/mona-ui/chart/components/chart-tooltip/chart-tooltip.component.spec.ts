@@ -266,4 +266,46 @@ describe("MonaChartTooltipComponent", () => {
         expect(tooltipEl.nativeElement.textContent).toContain("Jan —");
         expect(tooltipEl.nativeElement.textContent).toContain("50");
     });
+
+    function renderPoint(point: Partial<ChartTooltipPointContext>): HTMLElement {
+        tooltipPositionSignal.set({ x: 100, y: 200 });
+        tooltipContextSignal.set(createMockTemplateContext({ ...createMockPointContext("Jan", "50"), ...point }));
+        const rendered = TestBed.createComponent(TestHostComponent);
+        rendered.detectChanges();
+        return rendered.nativeElement as HTMLElement;
+    }
+
+    it.each<["ltr" | "rtl", string]>([
+        ["ltr", "100 → 120"],
+        ["rtl", "100 ← 120"]
+    ])("points the running total from before to after in %s", (dir, expected) => {
+        document.documentElement.setAttribute("dir", dir);
+        const element = renderPoint({
+            seriesType: "waterfall",
+            waterfall: { formattedCumulativeAfter: "120", formattedCumulativeBefore: "100", kind: "change" }
+        } as Partial<ChartTooltipPointContext>);
+        document.documentElement.removeAttribute("dir");
+
+        expect(element.textContent?.replace(/\s+/g, " ")).toContain(expected);
+    });
+
+    it("shows the clamp warning on a token pair that keeps text contrast", () => {
+        const element = renderPoint({ isClamped: true, seriesType: "gauge" });
+        const warning = [...element.querySelectorAll("div")].find(
+            div => div.children.length === 0 && div.textContent?.trim() === "Visual indicator clamped"
+        );
+
+        expect(warning).toBeDefined();
+        expect(warning?.className).toContain("text-warning-subtle-foreground");
+        expect(warning?.className).toContain("bg-warning-subtle");
+        expect(warning?.className).not.toContain("amber");
+    });
+
+    it("writes the direction badge in the foreground color, not the series color", () => {
+        const element = renderPoint({ color: "#16a34a", financialDirection: "rising", seriesType: "candlestick" });
+        const badge = [...element.querySelectorAll("span")].find(span => span.textContent?.trim() === "Rising");
+
+        expect(badge?.className).toContain("text-foreground");
+        expect(badge?.style.color).toBe("");
+    });
 });

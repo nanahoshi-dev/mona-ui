@@ -8,10 +8,8 @@ import {
     input,
     model,
     OnInit,
-    output,
-    signal
+    output
 } from "@angular/core";
-import { ImmutableSet } from "@mirei/ts-collections";
 import { ChartFunnelLabelTemplateDirective } from "../../directives/chart-funnel-label-template.directive";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import {
@@ -19,13 +17,15 @@ import {
     type ChartFunnelSeriesRegistration
 } from "../../internal/context/chart-registration-context";
 import { FunnelIdentity } from "../../internal/data/funnel-identity";
-import { resolveValue } from "../../internal/data/chart-value-resolver";
+import { resolveNumericValue, resolveValue } from "../../internal/data/chart-value-resolver";
 import type {
     ChartFunnelLabelContent,
     ChartFunnelOrientation,
     ChartFunnelStageVisibilityEvent
 } from "../../models/chart-funnel.models";
 import type { ChartField, ChartValueFormatter } from "../../models/chart.models";
+import { chartMessages } from "../../internal/utils/chart-locale";
+import { createChartHiddenItems } from "../../internal/utils/chart-hidden-items";
 
 let nextFunnelSeriesId = 0;
 
@@ -49,10 +49,12 @@ export class FunnelSeriesComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
-    readonly #hiddenStageIds = signal<ImmutableSet<string>>(ImmutableSet.create());
+    readonly #hidden = createChartHiddenItems<string>(
+        () => this.hiddenStageIds,
+        () => this.#chartContext?.invalidate(ChartInvalidationReason.Visibility)
+    );
     readonly #seriesId = `mona-funnel-series-${++nextFunnelSeriesId}`;
     readonly #stageIdentityMap = new Map<string, StageIdentityInfo>();
-    readonly #visibilityRevision = signal<number>(0);
     #registered = false;
     /**
      * @description Property key or accessor extracting stage names.
@@ -101,6 +103,12 @@ export class FunnelSeriesComponent implements OnInit {
      * @default 2
      */
     public readonly gap = input<number>(2);
+
+    /**
+     * @description The hidden stage IDs. Bind `[(hiddenStageIds)]` for two-way binding; legend toggles write to it.
+     * @default []
+     */
+    public readonly hiddenStageIds = model<readonly string[]>([]);
 
     /**
      * @description Unique identifier key field for datums.
@@ -214,7 +222,7 @@ export class FunnelSeriesComponent implements OnInit {
 
             for (let i = 0; i < arr.length; i++) {
                 const datum = arr[i];
-                const rawVal = resolveValue(datum, fieldF, i);
+                const rawVal = resolveNumericValue(datum, fieldF, i);
                 if (!FunnelIdentity.isValidFunnelValue(rawVal)) {
                     continue;
                 }
@@ -226,7 +234,7 @@ export class FunnelSeriesComponent implements OnInit {
                     ? catFmt(rawCat, i)
                     : rawCat !== undefined && rawCat !== null
                       ? String(rawCat)
-                      : `Stage ${i + 1}`;
+                      : chartMessages().stageFallbackName(i + 1);
 
                 this.#stageIdentityMap.set(identity.stageId, {
                     category: rawCat,
@@ -236,10 +244,8 @@ export class FunnelSeriesComponent implements OnInit {
                 });
             }
 
-            const currentHidden = this.#hiddenStageIds();
-            const validHidden = currentHidden.where(id => this.#stageIdentityMap.has(id)).toImmutableSet();
-            if (validHidden.count() !== currentHidden.count()) {
-                this.#hiddenStageIds.set(validHidden);
+            if (this.#stageIdentityMap.size > 0) {
+                this.#hidden.prune(id => this.#stageIdentityMap.has(id));
             }
         });
 
@@ -292,8 +298,7 @@ export class FunnelSeriesComponent implements OnInit {
     }
 
     public isDatumVisible(stageId: string): boolean {
-        this.#visibilityRevision();
-        return !this.#hiddenStageIds().contains(stageId);
+        return !this.#hidden.has(stageId);
     }
 
     public ngOnInit(): void {
@@ -308,7 +313,7 @@ export class FunnelSeriesComponent implements OnInit {
             colorField: this.colorField,
             colors: this.colors,
             data: this.data,
-            datumVisibilityRevision: this.#visibilityRevision.asReadonly(),
+            datumVisibilityRevision: this.#hidden.revision,
             element: this.#elementRef,
             field: this.field,
             fillOpacity: this.fillOpacity,
@@ -343,8 +348,7 @@ export class FunnelSeriesComponent implements OnInit {
     }
 
     public resetVisibility(): void {
-        this.#hiddenStageIds.set(ImmutableSet.create());
-        this.#visibilityRevision.update(r => r + 1);
+        this.#hidden.reset();
         this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
     }
 
@@ -354,13 +358,7 @@ export class FunnelSeriesComponent implements OnInit {
             return;
         }
 
-        if (visible) {
-            this.#hiddenStageIds.update(set => set.remove(stageId));
-        } else {
-            this.#hiddenStageIds.update(set => set.add(stageId));
-        }
-
-        this.#visibilityRevision.update(r => r + 1);
+        this.#hidden.setVisible(stageId, visible);
 
         const info = this.#stageIdentityMap.get(stageId);
         this.stageVisibilityChange.emit({

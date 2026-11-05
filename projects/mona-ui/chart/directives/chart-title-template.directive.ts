@@ -6,4 +6,11 @@ import type { ChartTitleTemplateContext } from "../models/chart-axis.models";
 })
 export class ChartTitleTemplateDirective {
     public readonly templateRef = inject<TemplateRef<ChartTitleTemplateContext>>(TemplateRef);
+
+    public static ngTemplateContextGuard(
+        _dir: ChartTitleTemplateDirective,
+        _ctx: unknown
+    ): _ctx is ChartTitleTemplateContext {
+        return true;
+    }
 }

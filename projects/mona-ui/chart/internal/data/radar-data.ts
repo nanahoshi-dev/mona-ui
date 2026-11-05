@@ -2,7 +2,8 @@ import { isDevMode } from "@angular/core";
 import type { ChartRadarSeriesRegistration } from "../context/chart-registration-context";
 import type { ChartAxisFormatter } from "../../models/chart-axis.models";
 import { isFiniteNumber } from "../utils/number-utils";
-import { resolveData, resolveValue } from "./chart-value-resolver";
+import { resolveData, resolveNumericValue, resolveValue } from "./chart-value-resolver";
+import { chartMessages, formatChartNumber } from "../utils/chart-locale";
 
 const warnedSignatures = new Set<string>();
 
@@ -45,13 +46,9 @@ export interface RadarDataResult {
     seriesList: readonly RadarSeriesData[];
 }
 
-const DEFAULT_NUMBER_FORMATTER = new Intl.NumberFormat();
-
+/** Formats a value for the chart locale. */
 export function formatRadarValue(value: number): string {
-    if (!isFiniteNumber(value)) {
-        return "0";
-    }
-    return DEFAULT_NUMBER_FORMATTER.format(value);
+    return formatChartNumber(isFiniteNumber(value) ? value : 0);
 }
 
 export const formatRadialValue = formatRadarValue;
@@ -74,7 +71,7 @@ export function prepareRadarData(
             const item = rawData[dataIndex];
             let rawCat = resolveValue(item, categoryField, dataIndex);
             if (rawCat === undefined || rawCat === null || rawCat === "") {
-                rawCat = `Category ${dataIndex + 1}`;
+                rawCat = chartMessages().categoryFallbackName(dataIndex + 1);
             }
             const categoryKey = String(rawCat);
 
@@ -113,11 +110,11 @@ export function prepareRadarData(
             const item = rawData[dataIndex];
             let rawCat = resolveValue(item, categoryField, dataIndex);
             if (rawCat === undefined || rawCat === null || rawCat === "") {
-                rawCat = `Category ${dataIndex + 1}`;
+                rawCat = chartMessages().categoryFallbackName(dataIndex + 1);
             }
             const categoryKey = String(rawCat);
 
-            let val = resolveValue(item, valueField, dataIndex);
+            let val = resolveNumericValue(item, valueField, dataIndex);
             if (val === undefined && isFiniteNumber(item)) {
                 val = item;
             }

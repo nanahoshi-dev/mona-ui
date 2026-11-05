@@ -5,7 +5,7 @@ import { ChartInvalidationReason } from "../../internal/context/chart-registrati
 import type { ChartDataLabelsInput } from "../../models/chart-data-label.models";
 import type { ChartDownsamplingInput } from "../../models/chart-downsampling.models";
 import type { ChartCurve, ChartLineStyle } from "../../models/chart-series.models";
-import type { ChartField } from "../../models/chart.models";
+import type { ChartField, ChartValueFormatter } from "../../models/chart.models";
 
 
 let nextSeriesId = 0;
@@ -117,6 +117,12 @@ export class LineSeriesComponent implements OnInit {
     public readonly userClass = input("", { alias: "class" });
 
     /**
+     * @description Formats this series' values in tooltips, data labels and announcements, without changing the axis ticks. Takes precedence over the axis formatter.
+     * @default undefined
+     */
+    public readonly valueFormatter = input<ChartValueFormatter | undefined>(undefined);
+
+    /**
      * @description Whether the series is currently visible on the chart and in calculations.
      * @default true
      */
@@ -154,6 +160,7 @@ export class LineSeriesComponent implements OnInit {
             this.field();
             this.keyField();
             this.seriesKey();
+            this.valueFormatter();
             this.xField();
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Data);
@@ -224,6 +231,7 @@ export class LineSeriesComponent implements OnInit {
             },
             type: "line",
             userClass: this.userClass,
+            valueFormatter: this.valueFormatter,
             visible: this.visible,
             xAxisId: this.xAxisId,
             xField: this.xField,

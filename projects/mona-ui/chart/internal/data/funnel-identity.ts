@@ -1,7 +1,7 @@
 import type { ChartField } from "../../models/chart.models";
 import { serializeKeyPart } from "../animation/animation-identity";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
-import { resolveValue } from "./chart-value-resolver";
+import { resolveNumericValue, resolveValue } from "./chart-value-resolver";
 
 export interface FunnelStageIdentityResult {
     readonly animationKey: string;
@@ -35,7 +35,7 @@ export class FunnelIdentity {
 
         for (let i = 0; i < rawData.length; i++) {
             const datum = rawData[i];
-            const rawVal = resolveValue(datum, field, i);
+            const rawVal = resolveNumericValue(datum, field, i);
             if (!this.isValidFunnelValue(rawVal)) {
                 continue;
             }

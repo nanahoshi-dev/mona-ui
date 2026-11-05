@@ -73,6 +73,7 @@ import {
     type ChartGaugeIndicator,
     type ChartHeaderAlignment,
     type ChartHeatmapColorMode,
+    type ChartLegendPosition,
     type ChartNavigationInput,
     type ChartOverlayLayer,
     type ChartPointEvent,
@@ -467,10 +468,12 @@ export class ChartDemoComponent {
     // Chart Title & Subtitle Controls
     protected readonly chartTitle = signal<string>("Quarterly Revenue & Targets");
     protected readonly chartSubtitle = signal<string>("Comparison across regional performance metrics");
-    protected readonly chartTitleAlign = signal<ChartHeaderAlignment>("left");
+    protected readonly chartTitleAlign = signal<ChartHeaderAlignment>("start");
     protected readonly titleAlignOptions: readonly { label: string; value: ChartHeaderAlignment }[] = [
-        { label: "Left", value: "left" },
+        { label: "Start", value: "start" },
         { label: "Center", value: "center" },
+        { label: "End", value: "end" },
+        { label: "Left", value: "left" },
         { label: "Right", value: "right" }
     ];
     protected readonly useCustomTitleTemplate = signal<boolean>(false);
@@ -709,11 +712,13 @@ export class ChartDemoComponent {
         { label: "Outside (Leader Lines)", value: "outside" },
         { label: "Inside (Slice Center)", value: "inside" }
     ];
-    protected readonly legendPosition = signal<"bottom" | "left" | "right" | "top">("bottom");
-    protected readonly legendPositionOptions: readonly { label: string; value: "bottom" | "left" | "right" | "top" }[] =
+    protected readonly legendPosition = signal<ChartLegendPosition>("bottom");
+    protected readonly legendPositionOptions: readonly { label: string; value: ChartLegendPosition }[] =
         [
             { label: "Bottom", value: "bottom" },
             { label: "Top", value: "top" },
+            { label: "Start", value: "start" },
+            { label: "End", value: "end" },
             { label: "Left", value: "left" },
             { label: "Right", value: "right" }
         ];
@@ -1176,7 +1181,14 @@ export class ChartDemoComponent {
     }
 
     public onLegendPositionChange(pos: unknown): void {
-        if (pos === "bottom" || pos === "top" || pos === "left" || pos === "right") {
+        if (
+            pos === "bottom" ||
+            pos === "top" ||
+            pos === "start" ||
+            pos === "end" ||
+            pos === "left" ||
+            pos === "right"
+        ) {
             this.legendPosition.set(pos);
             this.#addLog("settingChange", `Legend Position: ${pos}`);
         }
@@ -1609,7 +1621,7 @@ export class ChartDemoComponent {
 
     public onTitleAlignChange(val: unknown): void {
         const v = typeof val === "string" ? val : (val as { value?: string })?.value;
-        if (v === "left" || v === "center" || v === "right") {
+        if (v === "start" || v === "end" || v === "left" || v === "center" || v === "right") {
             this.chartTitleAlign.set(v);
             this.#addLog("settingChange", `Chart Title Alignment: ${v}`);
         }

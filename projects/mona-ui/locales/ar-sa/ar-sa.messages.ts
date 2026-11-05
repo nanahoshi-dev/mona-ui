@@ -49,34 +49,122 @@ export const AR_SA_MESSAGES = {
         actionsLabel: "إجراءات البطاقة"
     },
     chart: {
+        announcementSeparator: "، ",
+        brushApplied: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                zero: () => "تم تطبيق التحديد، بلا نقاط",
+                one: () => "تم تطبيق التحديد، نقطة واحدة",
+                two: () => "تم تطبيق التحديد، نقطتان",
+                few: () => `تم تطبيق التحديد، ${localizeNumber(count)} نقاط`,
+                many: () => `تم تطبيق التحديد، ${localizeNumber(count)} نقطة`,
+                other: () => `تم تطبيق التحديد، ${localizeNumber(count)} نقطة`
+            }),
+        brushCleared: "تم مسح التحديد",
+        brushRange: (from: string, to: string) => `التحديد من ${from} إلى ${to}`,
+        category: "الفئة",
+        categoryFallbackName: (index: number) => `الفئة ${localizeNumber(index)}`,
+        categoryRange: (from: string, to: string) => `من ${from} إلى ${to}.`,
         change: "التغير",
+        changeValue: (change: string) => `التغير ${change}`,
         chart: "مخطط",
         chartLegend: "وسيلة إيضاح المخطط",
+        chartRoleDescription: "مخطط",
         close: "الإغلاق",
         closeAbbreviation: "إ",
         colorScale: "مقياس الألوان",
         conversion: "التحويل",
+        conversionOfPrevious: (rate: string) => `التحويل ${rate} من المرحلة السابقة`,
+        dataTableTruncated: (shown: number, total: number) =>
+            `عرض أول ${localizeNumber(shown)} من ${localizeNumber(total)} صف.`,
+        decrease: "نقصان",
+        decreaseAnnouncement: (delta: string, from: string, to: string) =>
+            `نقصان ${delta}، المجموع التراكمي من ${from} إلى ${to}`,
         divergingRangeDescription: (title: string, minimum: string, midpoint: string, maximum: string) =>
             `${title}، ${minimum} – ${midpoint} – ${maximum}`,
         dropOff: "الانخفاض",
+        dropOffValue: (value: string) => `الانخفاض ${value}`,
         falling: "هبوط",
+        gaugeRange: (minimum: string, maximum: string) => `النطاق من ${minimum} إلى ${maximum}`,
         high: "الأعلى",
         highAbbreviation: "ع",
+        increase: "زيادة",
+        increaseAnnouncement: (delta: string, from: string, to: string) =>
+            `زيادة ${delta}، المجموع التراكمي من ${from} إلى ${to}`,
+        itemDeselected: (item: string) => `${item}، تم إلغاء التحديد`,
+        itemFallbackName: (index: number) => `العنصر ${localizeNumber(index)}`,
+        itemSelected: (item: string) => `${item}، محدد`,
+        keyboardHelp:
+            "استخدم مفاتيح الأسهم للتنقل بين نقاط البيانات، وHome وEnd للانتقال إلى الأولى والأخيرة، وEnter أو المسافة للتفعيل، وEscape للمسح.",
         labelValueSeparator: ":",
+        labeledValue: (label: string, value: string) => `${label}: ${value}`,
         low: "الأدنى",
         lowAbbreviation: "د",
+        noChange: "بلا تغيير",
+        noChangeAnnouncement: (value: string) => `بلا تغيير، المجموع التراكمي ${value}`,
         noData: "لا توجد بيانات متاحة",
+        ohlcValues: (open: string, high: string, low: string, close: string) =>
+            `الافتتاح ${open}، الأعلى ${high}، الأدنى ${low}، الإغلاق ${close}`,
         open: "الافتتاح",
         openAbbreviation: "ا",
         overall: "الإجمالي",
+        overallConversion: (rate: string) => `التحويل الإجمالي ${rate}`,
+        pannedDown: "تم التحريك لأسفل",
+        pannedLeft: "تم التحريك لليسار",
+        pannedRight: "تم التحريك لليمين",
+        pannedUp: "تم التحريك لأعلى",
+        pathSeparator: " / ",
+        pointPosition: (position: number, total: number) => `${localizeNumber(position)} من ${localizeNumber(total)}`,
         range: "النطاق",
         rangeDescription: (title: string, minimum: string, maximum: string) => `${title}، ${minimum}–${maximum}`,
+        rangeValue: (from: string, to: string) => `من ${from} إلى ${to}`,
         rising: "صعود",
         runningTotal: "المجموع التراكمي",
+        seriesFallbackName: (index: number) => `السلسلة ${localizeNumber(index)}`,
+        seriesHidden: (series: string) => `تم إخفاء ${series}`,
+        seriesShown: (series: string) => `تم إظهار ${series}`,
+        seriesSummary: (count: number, names: string) =>
+            plural(PLURAL_RULES.select(count), {
+                zero: () => "لا توجد سلاسل.",
+                one: () => `سلسلة واحدة: ${names}.`,
+                two: () => `سلسلتان: ${names}.`,
+                few: () => `${localizeNumber(count)} سلاسل: ${names}.`,
+                many: () => `${localizeNumber(count)} سلسلة: ${names}.`,
+                other: () => `${localizeNumber(count)} سلسلة: ${names}.`
+            }),
+        seriesValueRange: (series: string, minimum: string, maximum: string) =>
+            `${series}: الأدنى ${minimum}، الأعلى ${maximum}.`,
+        shareOfTotal: (share: string) => `${share} من الإجمالي`,
         size: "الحجم",
+        sizeValue: (size: string) => `الحجم ${size}`,
+        stackShare: (share: string) => `الحصة في المكدس ${share}`,
+        stageFallbackName: (index: number) => `المرحلة ${localizeNumber(index)}`,
+        stagePosition: (position: number, total: number) =>
+            `المرحلة ${localizeNumber(position)} من ${localizeNumber(total)}`,
+        stepFallbackName: (index: number) => `الخطوة ${localizeNumber(index)}`,
+        stepPosition: (position: number, total: number) =>
+            `الخطوة ${localizeNumber(position)} من ${localizeNumber(total)}`,
+        subtotal: "الإجمالي الفرعي",
+        subtotalAnnouncement: (value: string) => `الإجمالي الفرعي ${value}`,
+        total: "الإجمالي",
+        totalAnnouncement: (value: string) => `الإجمالي ${value}`,
+        treemapGroup: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                zero: () => "مجموعة (بلا عناصر فرعية)",
+                one: () => "مجموعة (عنصر فرعي واحد)",
+                two: () => "مجموعة (عنصران فرعيان)",
+                few: () => `مجموعة (${localizeNumber(count)} عناصر فرعية)`,
+                many: () => `مجموعة (${localizeNumber(count)} عنصرًا فرعيًا)`,
+                other: () => `مجموعة (${localizeNumber(count)} عنصر فرعي)`
+            }),
+        treemapLeaf: "ورقة",
         unchanged: "دون تغيير",
         value: "القيمة",
-        visualIndicatorClamped: "تم تقييد المؤشر المرئي"
+        valueRange: (from: string, to: string) => `${from} – ${to}`,
+        viewportResetToDefault: "تمت إعادة تعيين العرض إلى النطاق الافتراضي",
+        viewportResetToFull: "تمت إعادة تعيين العرض إلى النطاق الكامل",
+        visualIndicatorClamped: "تم تقييد المؤشر المرئي",
+        zoomedIn: "تم التكبير",
+        zoomedOut: "تم التصغير"
     },
     chip: {
         removeLabel: (label?: string) => (label ? `حذف ${label}` : "حذف العنصر")

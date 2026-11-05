@@ -6,7 +6,7 @@ import type {
     ChartXAxisRegistration,
     ChartYAxisRegistration
 } from "../context/chart-registration-context";
-import { resolveValue } from "../data/chart-value-resolver";
+import { resolveNumericValue, resolveValue } from "../data/chart-value-resolver";
 import type { ChartPositionScale } from "../scale/chart-scale";
 import type { SceneHitTarget, SceneMarker, ChartInteractionXKey } from "../scene/scene-geometry";
 import { formatXValue, formatYValue } from "../utils/chart-formatter";
@@ -130,7 +130,7 @@ export function resolveCartesianMarkerDatum(
         return null;
     }
     const rawXVal = resolveValue(datum, context.xField, sourceIndex);
-    const rawYVal = resolveValue(datum, context.valueField, sourceIndex);
+    const rawYVal = resolveNumericValue(datum, context.valueField, sourceIndex);
 
     const resolvedX = resolveCartesianContinuousXCoordinate(rawXVal, undefined, undefined, sourceIndex, context.xScale);
     if (!resolvedX.valid || !isFiniteNumber(rawYVal)) {
@@ -150,7 +150,7 @@ export function resolveCartesianMarkerDatum(
     let formattedSizeStr: string | undefined;
 
     if (isBubble) {
-        const rawSize = resolveValue(datum, context.sizeField, sourceIndex);
+        const rawSize = resolveNumericValue(datum, context.sizeField, sourceIndex);
         if (!isFiniteNumber(rawSize) || (rawSize as number) <= 0) {
             return null;
         }
@@ -201,7 +201,7 @@ export function resolveCartesianMarkerDatum(
         formattedValue: formatYValue(
             yVal,
             sourceIndex,
-            context.yAxisFormatter ?? (context.valueFormatter as ChartAxisFormatter<unknown> | undefined)
+            (context.valueFormatter as ChartAxisFormatter<unknown> | undefined) ?? context.yAxisFormatter
         ),
         index: sourceIndex,
         markerInteractionOrder: {

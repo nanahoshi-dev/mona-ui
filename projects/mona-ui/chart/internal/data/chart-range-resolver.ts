@@ -1,6 +1,6 @@
 import type { ChartField } from "../../models/chart.models";
 import { isFiniteNumber } from "../utils/number-utils";
-import { resolveValue } from "./chart-value-resolver";
+import { resolveNumericValue } from "./chart-value-resolver";
 
 export interface ResolvedRangeValues {
     readonly fromValue: number;
@@ -15,8 +15,8 @@ export function resolveFiniteRangeValues(
     toField: ChartField,
     index: number
 ): ResolvedRangeValues | null {
-    const rawFrom = resolveValue(datum, fromField, index);
-    const rawTo = resolveValue(datum, toField, index);
+    const rawFrom = resolveNumericValue(datum, fromField, index);
+    const rawTo = resolveNumericValue(datum, toField, index);
 
     if (!isFiniteNumber(rawFrom) || !isFiniteNumber(rawTo)) {
         return null;

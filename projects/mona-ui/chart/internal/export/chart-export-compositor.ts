@@ -188,12 +188,17 @@ export class ChartExportCompositor {
                 let anchorX = prim.bounds.x + prim.bounds.width / 2;
                 let textAnchor = "middle";
 
+                // text-anchor is relative to the text's direction: "start" is the right edge of right-to-left text.
+                const isRtl = prim.direction === "rtl";
                 if (prim.textAlign === "left") {
                     anchorX = prim.bounds.x;
-                    textAnchor = "start";
+                    textAnchor = isRtl ? "end" : "start";
                 } else if (prim.textAlign === "right") {
                     anchorX = prim.bounds.x + prim.bounds.width;
-                    textAnchor = "end";
+                    textAnchor = isRtl ? "start" : "end";
+                }
+                if (isRtl) {
+                    textEl.setAttribute("direction", "rtl");
                 }
 
                 const anchorY = prim.bounds.y + prim.bounds.height / 2;

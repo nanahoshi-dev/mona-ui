@@ -1,22 +1,26 @@
-import { NgTemplateOutlet } from "@angular/common";
+import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
     AfterContentChecked,
+    booleanAttribute,
     Component,
     computed,
     contentChild,
     DestroyRef,
     effect,
     ElementRef,
+    ErrorHandler,
     inject,
     input,
     output,
+    PLATFORM_ID,
     Signal,
     signal,
     untracked,
     viewChild
 } from "@angular/core";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { ChartAxisLabelTemplateDirective } from "../../directives/chart-axis-label-template.directive";
 import { ChartNoDataTemplateDirective } from "../../directives/chart-no-data-template.directive";
@@ -32,6 +36,7 @@ import {
 import { ChartTransitionPlanner } from "../../internal/animation/chart-transition-planner";
 import type { ChartAnimationRenderFrame, ChartAnimationTrigger } from "../../internal/animation/chart-transition-types";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
+import { guardChartCallback, guardRegistrationCallbacks } from "../../internal/utils/chart-callback-guard";
 import {
     ChartInvalidationReason,
     hasInvalidationReason,
@@ -163,7 +168,20 @@ import { degreesToRadians } from "../../internal/utils/angle-utils";
 import { formatXValue, formatYValue } from "../../internal/utils/chart-formatter";
 import { clamp } from "../../internal/utils/number-utils";
 import type { ChartAnimationInput } from "../../models/chart-animation.models";
-import type { ChartBrushCancelReason, ChartBrushPhase } from "../../models/chart-brush.models";
+import type {
+    ChartBrushAxisRange,
+    ChartBrushCancelReason,
+    ChartBrushHitPolicy,
+    ChartBrushMode,
+    ChartBrushPhase,
+    ChartBrushSelectionBehavior
+} from "../../models/chart-brush.models";
+import {
+    buildChartDataTable,
+    type ChartDataTableModel,
+    describeChartData
+} from "../../internal/accessibility/chart-data-description";
+import { resolveSeriesDisplayName } from "../../internal/data/chart-value-resolver";
 import type { ChartSelectionMode } from "../../models/chart-selection.models";
 import type {
     ChartPointEvent,
@@ -235,6 +253,61 @@ import {
     chartSubtitleBaseThemeVariants,
     chartTitleBaseThemeVariants
 } from "../../styles/chart.styles";
+import {
+    formatChartNumber,
+    formatChartPercent,
+    joinChartAnnouncement,
+    setChartLocale
+} from "../../internal/utils/chart-locale";
+import { resolveHeaderAlignment, resolveLegendPlacement } from "../../internal/utils/chart-direction";
+
+/** A sign at the start of a formatted number, after any bidi marks ("+5", "-3", "−" in some locales). */
+const LEADING_SIGN = /^[\u200e\u200f\u061c]*[+\-\u2212]/;
+
+/** Keys that move between points; at an edge they read the focused point again. */
+const NAVIGATION_KEYS: ReadonlySet<string> = new Set([
+    "ArrowDown",
+    "ArrowLeft",
+    "ArrowRight",
+    "ArrowUp",
+    "End",
+    "Home",
+    "PageDown",
+    "PageUp"
+]);
+const ARROW_KEYS: ReadonlySet<string> = new Set(["ArrowDown", "ArrowLeft", "ArrowRight", "ArrowUp"]);
+
+/** A hit's box in plot pixels; a point has no size. */
+function hitBox(hit: SceneHitTarget): ChartRect {
+    if (hit.bounds) {
+        return hit.bounds;
+    }
+    return { height: 0, width: 0, x: hit.point?.x ?? 0, y: hit.point?.y ?? 0 };
+}
+
+/** The pixel bounds of a keyboard brush from one point to another, along the brush's dimensions. */
+function keyboardBrushBounds(
+    from: SceneHitTarget,
+    to: SceneHitTarget,
+    plot: ChartRect,
+    mode: ChartBrushMode
+): ChartRect {
+    const a = hitBox(from);
+    const b = hitBox(to);
+    // A pixel of padding so a point on the edge counts for both hit policies.
+    const pad = 1;
+    const left = Math.min(a.x, b.x) - pad;
+    const right = Math.max(a.x + a.width, b.x + b.width) + pad;
+    const top = Math.min(a.y, b.y) - pad;
+    const bottom = Math.max(a.y + a.height, b.y + b.height) + pad;
+    if (mode === "x") {
+        return { height: plot.height, width: right - left, x: left, y: plot.y };
+    }
+    if (mode === "y") {
+        return { height: bottom - top, width: plot.width, x: plot.x, y: top };
+    }
+    return { height: bottom - top, width: right - left, x: left, y: top };
+}
 
 function easingToCss(easing: string): string {
     switch (easing) {
@@ -266,22 +339,24 @@ type ChartTransientInteractionOwner = "tooltip" | "crosshair" | "keyboard" | nul
     providers: [
         {
             provide: CHART_CONTEXT,
-            useExisting: ChartComponent
+            // A factory rather than `implements`, so the published types don't name the internal context.
+            useFactory: (): ChartRegistrationContext => inject(ChartComponent)
         }
     ],
     host: {
         "[class]": "baseClasses()",
         "[attr.tabindex]": "0",
-        role: "region",
+        "[attr.role]": "landmark() ? 'region' : 'application'",
+        "[attr.aria-roledescription]": "landmark() ? null : messages().chartRoleDescription",
         "[attr.aria-label]": "effectiveAriaLabel()",
-        "[attr.aria-description]": "effectiveAriaDescription()",
+        "[attr.aria-describedby]": "descriptionId",
         "[style.--mona-chart-animation-duration]": "animationDurationCss()",
         "[style.--mona-chart-animation-easing]": "animationEasingCss()",
         "(keydown)": "onKeyDown($event)",
         "(focusout)": "onFocusOut($event)"
     }
 })
-export class ChartComponent implements ChartRegistrationContext, AfterContentChecked {
+export class ChartComponent implements AfterContentChecked {
     readonly #activeBrushBounds = signal<ChartRect | null>(null);
     readonly #activeExportControllers = new Set<AbortController>();
     readonly #angularAxis = signal<ChartAngularAxisRegistration | null>(null);
@@ -301,12 +376,17 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     readonly #dataLabelMeasurementRevision = signal(0);
     readonly #dataLabelMeasurements = new Map<string, ChartSize>();
     readonly #destroyRef = inject(DestroyRef);
+    readonly #direction = injectComponentDirection();
+    readonly #document = inject(DOCUMENT);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
-    readonly #i18n = inject(MonaI18nService);
+    readonly #errorHandler = inject(ErrorHandler);
     readonly #hasInitializedDefaultSelection = signal(false);
     readonly #hasInitializedDefaultViewport = signal(false);
+    readonly #i18n = inject(MonaI18nService);
     readonly #internalSelectedMarkIds = signal<readonly string[]>([]);
     readonly #isAnimating = signal(false);
+    /** On the server the chart renders its empty host: no layout, scheduling, observers or measurement. */
+    readonly #isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
     readonly #isExitingData = signal(false);
     readonly #isStructuralAnimation = signal(false);
     readonly #labelMeasurements = new Map<string, ChartLabelMeasurement>();
@@ -335,10 +415,17 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     readonly #referenceLines = signal<ChartReferenceLineRegistration[]>([]);
     readonly #registeredSeries = signal<ChartSeriesRegistration[]>([]);
     readonly #renderScheduler: ChartRenderScheduler;
+    readonly #reportedCallbackErrors = new Set<string>();
+    readonly #rootXField = computed(() =>
+        guardChartCallback(this.xField(), "xField", (_, error) => this.#reportCallbackError("chart xField", error))
+    );
+    readonly #sceneState = signal<ChartScene | null>(null);
     readonly #selection = signal<ChartSelectionRegistration | null>(null);
     readonly #styleResolver: ChartStyleResolver;
     readonly #synchronizationCoordinator = inject(ChartSynchronizationCoordinator);
     readonly #tooltip = signal<ChartTooltipRegistration | null>(null);
+    readonly #tooltipContextState = signal<ChartTooltipTemplateContext | null>(null);
+    readonly #tooltipPositionState = signal<ChartPoint | null>(null);
     readonly #uncontrolledViewportState = signal<InternalCartesianViewportState>({ x: new Map(), y: new Map() });
     readonly #warnedDiagnosticSignatures = new Set<string>();
     readonly #xAxes = signal<ChartXAxisRegistration[]>([]);
@@ -347,6 +434,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #activeKeyboardHitKey: string | null = null;
     #activeKeyboardNamespace: ChartKeyboardAxisNamespace | null = null;
     #activeKeyboardSeriesId: string | null = null;
+    /** Announced after the next structural layout, which clears the live region (a legend toggle's result). */
+    #announcementAfterLayout: string | null = null;
     #brushMarkIndex: CartesianBrushMarkIndex | null = null;
     #brushMarkIndexScene: ChartScene | null = null;
     #canvasContext: CanvasRenderingContext2D | null = null;
@@ -355,6 +444,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #currentHeight: number = 300;
     #currentWidth: number = 500;
     #dataLabelResizeObserver: ResizeObserver | null = null;
+    #devicePixelRatioListener: (() => void) | null = null;
+    #devicePixelRatioQuery: MediaQueryList | null = null;
     #gestureController: ChartViewportGestureController | null = null;
     #hasCommittedVisualScene: boolean = false;
     #hasEmittedBrushStart = false;
@@ -368,6 +459,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #interactionRevision: number = 0;
     #interactionState: ChartInteractionState | null = null;
     #isDestroyed = false;
+    /** The point a keyboard brush started from, while one is being extended. */
+    #keyboardBrushAnchor: SceneHitTarget | null = null;
     #labelResizeObserver: ResizeObserver | null = null;
     #lastControlledSelection: readonly string[] | undefined = undefined;
     #lastInteractionSource: "pointer" | "keyboard" | null = null;
@@ -395,7 +488,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #suppressNextCanvasClick: boolean = false;
     #synchronizationController: ChartSynchronizationController | null = null;
     #themeObserver: MutationObserver | null = null;
-    protected readonly messages = this.#i18n.componentMessages("chart", CHART_DEFAULT_MESSAGES);
+    #themeSignature = "";
     protected readonly activeAccessibilityText = signal<string>("");
     protected readonly animationDurationCss = computed(() => `${this.normalizedAnimationOptions().duration}ms`);
     protected readonly animationEasingCss = computed(() => easingToCss(this.normalizedAnimationOptions().easing));
@@ -523,6 +616,43 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     });
     protected readonly crosshairLabelClasses = computed(() => chartCrosshairLabelBaseThemeVariants());
     protected readonly crosshairState = signal<ChartCrosshairState | null>(null);
+    /** The visually hidden data table, when `dataTable` is on. */
+    protected readonly dataTableModel = computed<ChartDataTableModel | null>(() => {
+        const scene = this.scene();
+        if (!this.dataTable() || !scene) {
+            return null;
+        }
+        this.#i18n.localeId();
+        const xTitle = this.#xAxes()[0]?.title?.() ?? "";
+        return buildChartDataTable(scene, this.messages(), xTitle);
+    });
+    protected readonly descriptionId = createElementControlId();
+    /**
+     * The chart's description (`aria-describedby`): `ariaDescription` when set, else the subtitle and a summary of the
+     * data, followed by the keyboard instructions.
+     */
+    protected readonly descriptionText = computed<string>(() => {
+        const messages = this.messages();
+        this.#i18n.localeId();
+        const scene = this.scene();
+        const explicit = this.ariaDescription().trim();
+        const parts: string[] = [];
+        if (explicit) {
+            parts.push(explicit);
+        } else {
+            const subtitle = this.subtitle().trim();
+            if (subtitle) {
+                parts.push(subtitle);
+            }
+            if (scene) {
+                parts.push(...describeChartData(scene, messages));
+            }
+        }
+        if (scene?.hasRenderableData) {
+            parts.push(messages.keyboardHelp);
+        }
+        return parts.join(" ");
+    });
     protected readonly donutSeriesRegistration = computed<ChartDonutSeriesRegistration | null>(() => {
         const list = this.#registeredSeries();
         return (list.find(s => s.type === "donut") as ChartDonutSeriesRegistration) ?? null;
@@ -591,7 +721,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         return !sc.hasRenderableData;
     });
     protected readonly headerClasses = computed(() =>
-        twMerge(chartHeaderBaseThemeVariants({ align: this.titleAlign() }))
+        twMerge(chartHeaderBaseThemeVariants({ align: resolveHeaderAlignment(this.titleAlign(), this.#direction()) }))
     );
     protected readonly heatmapScene = computed<CartesianHeatmapChartScene | null>(() => {
         const sc = this.scene();
@@ -604,16 +734,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         return (list.find(s => s.type === "heatmap") as ChartHeatmapSeriesRegistration) ?? null;
     });
     protected readonly layoutClasses = computed(() => {
-        const pos = this.legendPosition();
-        if (pos === "top" || pos === "bottom") {
-            return "relative flex flex-col flex-1 min-h-0 min-w-0 w-full overflow-hidden";
-        }
-        if (pos === "left" || pos === "right") {
-            return "relative flex flex-row items-center flex-1 min-h-0 min-w-0 w-full overflow-hidden";
-        }
-        return "relative flex flex-col flex-1 min-h-0 min-w-0 w-full overflow-hidden";
+        const placement = this.legendPlacement();
+        return placement === "start" || placement === "end"
+            ? "relative flex flex-row items-center flex-1 min-h-0 min-w-0 w-full overflow-hidden"
+            : "relative flex flex-col flex-1 min-h-0 min-w-0 w-full overflow-hidden";
     });
-    protected readonly legendPosition = computed(() => this.#legend()?.position() ?? "bottom");
+    protected readonly legendPlacement = computed(() =>
+        resolveLegendPlacement(this.#legend()?.position() ?? "bottom", this.#direction())
+    );
+    protected readonly messages = this.#i18n.componentMessages("chart", CHART_DEFAULT_MESSAGES);
     protected readonly noDataClasses = computed(() => chartNoDataBaseThemeVariants());
     protected readonly noDataTemplate = contentChild(ChartNoDataTemplateDirective);
     protected readonly normalizedAnimationOptions = computed(() => normalizeChartAnimationOptions(this.animation()));
@@ -623,8 +752,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         normalizeChartSynchronizationOptions(this.synchronization(), this.#warnedDiagnosticSignatures)
     );
     protected readonly plotOrder = computed(() => {
-        const pos = this.legendPosition();
-        return pos === "top" || pos === "left" ? 1 : 0;
+        const placement = this.legendPlacement();
+        return placement === "top" || placement === "start" ? 1 : 0;
     });
     protected readonly plotSurfaceElement = viewChild<ElementRef<HTMLElement>>("plotSurface");
     protected readonly polarArcScene = computed<PolarArcChartScene | null>(() => {
@@ -721,6 +850,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const list = this.#registeredSeries();
         return (list.find(s => s.type === "waterfall") as ChartWaterfallSeriesRegistration) ?? null;
     });
+    /** @internal */
     public readonly angularAxisRegistration: Signal<ChartAngularAxisRegistration | null> =
         this.#angularAxis.asReadonly();
     /**
@@ -728,6 +858,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
      * @default true
      */
     public readonly animation = input<ChartAnimationInput>(true);
+    /** @internal */
     public readonly animationMode = this.#animationMode.asReadonly();
     /**
      * @description Detailed accessible description explaining the chart's purpose and trends.
@@ -745,6 +876,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
      */
     public readonly data = input<readonly unknown[]>([]);
     /**
+     * @description Renders a visually hidden table of the chart's data (its first 100 rows) for screen readers.
+     * @default false
+     */
+    public readonly dataTable = input(false, { transform: booleanAttribute });
+    /**
      * @description Initial default viewport window state for chart axes.
      * @default undefined
      */
@@ -754,9 +890,18 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
      * @default true
      */
     public readonly downsampling = input<ChartDownsamplingInput>(true);
+    /** @internal */
     public readonly isAnimating = this.#isAnimating.asReadonly();
+    /** @internal */
     public readonly isExitingData = this.#isExitingData.asReadonly();
+    /** @internal */
     public readonly isStructuralAnimation = this.#isStructuralAnimation.asReadonly();
+    /**
+     * @description Makes the chart a `region` landmark instead of an `application`. A landmark keeps screen readers in
+     * browse mode, so they read the arrow keys themselves; give each landmark chart a unique name.
+     * @default false
+     */
+    public readonly landmark = input(false, { transform: booleanAttribute });
     public readonly legendItems = computed<readonly ChartLegendItem[]>(() => {
         this.styleRevision();
         return this.scene()?.legendItems ?? [];
@@ -782,6 +927,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
      * @description Emits when the keyboard focus moves to a new data point, spoke, or series.
      */
     public readonly pointFocusChange = output<ChartPointFocusEvent>();
+    /** @internal */
     public readonly radialAxisRegistration: Signal<ChartRadialAxisRegistration | null> = this.#radialAxis.asReadonly();
     /**
      * The rendering engine used to draw the chart surface.
@@ -790,8 +936,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
      * @default "canvas"
      */
     public readonly renderer = input<ChartRendererMode>("canvas");
+    /** @internal */
     public readonly rootData: Signal<readonly unknown[]> = this.data;
-    public readonly scene = signal<ChartScene | null>(null);
+    /** @internal */
+    public readonly scene = this.#sceneState.asReadonly();
     /**
      * @description Emits when a series visibility state is toggled via legend interaction.
      */
@@ -813,33 +961,43 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     public readonly title = input("");
     /**
      * @description Horizontal alignment of the title and subtitle ('center', 'left', or 'right').
-     * @default "left"
+     * @default "start"
      */
-    public readonly titleAlign = input<ChartHeaderAlignment>("left");
-    public readonly tooltipContext = signal<ChartTooltipTemplateContext | null>(null);
-    public readonly tooltipPosition = signal<ChartPoint | null>(null);
+    public readonly titleAlign = input<ChartHeaderAlignment>("start");
+    /** @internal */
+    public readonly tooltipContext = this.#tooltipContextState.asReadonly();
+    /** @internal */
+    public readonly tooltipPosition = this.#tooltipPositionState.asReadonly();
     /**
      * @description Additional CSS classes applied to chart root container.
      * @default ""
      */
     public readonly userClass = input("", { alias: "class" });
     /**
-     * @description Active viewport window state for chart axes.
+     * @description Active viewport window state for chart axes. Bind `[(viewport)]` for two-way binding. While it is defined the parent owns the viewport: a change applies once the parent writes it back.
      * @default undefined
      */
     public readonly viewport = input<ChartViewportState | undefined>(undefined);
     /**
-     * @description Emits when the chart viewport changes via pan, zoom, fit, reset, or keyboard navigation.
+     * @description Emits the new viewport state when it changes via pan, zoom, fit, reset, or keyboard navigation.
      */
-    public readonly viewportChange = output<ChartViewportChangeEvent>();
+    public readonly viewportChange = output<ChartViewportState>();
+    /**
+     * @description Emits with each viewport change, along with the previous state, source, gesture phase and changed axes.
+     */
+    public readonly viewportChangeDetails = output<ChartViewportChangeEvent>();
+    /** @internal */
     public readonly xAxesRegistration: Signal<readonly ChartXAxisRegistration[]> = this.#xAxes.asReadonly();
+    /** @internal */
     public readonly xAxisRegistration: Signal<ChartXAxisRegistration | null> = computed(() => this.#xAxes()[0] ?? null);
     /**
      * @description Property key or accessor extracting the X-axis coordinate for each data item.
      * @default ""
      */
     public readonly xField = input<ChartField>("");
+    /** @internal */
     public readonly yAxesRegistration: Signal<readonly ChartYAxisRegistration[]> = this.#yAxes.asReadonly();
+    /** @internal */
     public readonly yAxisRegistration: Signal<ChartYAxisRegistration | null> = computed(() => this.#yAxes()[0] ?? null);
 
     public constructor() {
@@ -918,8 +1076,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             untracked(() => {
                 this.#synchronizationController?.setOptions(syncOptions);
                 if (!syncOptions?.crosshair.showTooltip && this.crosshairState()?.source === "sync") {
-                    this.tooltipContext.set(null);
-                    this.tooltipPosition.set(null);
+                    this.#tooltipContextState.set(null);
+                    this.#tooltipPositionState.set(null);
                 }
             });
         });
@@ -934,8 +1092,17 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             this.#mediaQueryList.addEventListener("change", this.#mediaQueryListener);
         }
 
+        // A hover tooltip can be dismissed with Escape without moving the pointer, wherever the focus is.
+        const onDocumentKeyDown = (event: KeyboardEvent): void => this.#dismissPointerTooltip(event);
+        if (this.#isBrowser) {
+            this.#document.addEventListener("keydown", onDocumentKeyDown);
+        }
+
         this.#destroyRef.onDestroy(() => {
+            this.#document.removeEventListener("keydown", onDocumentKeyDown);
             this.#isDestroyed = true;
+            this.#canvasContext = null;
+            this.#unwatchDevicePixelRatio();
             releaseCartesianLayoutRuntime(this.#cartesianLayoutRuntime, "destroy");
             this.#cartesianLayoutRuntime = null;
             this.#synchronizationController?.destroy();
@@ -991,7 +1158,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 this.#renderBackend = null;
             }
             this.#renderScene = null;
-            this.scene.set(null);
+            this.#sceneState.set(null);
             for (const ctrl of this.#activeExportControllers) {
                 ctrl.abort();
             }
@@ -999,6 +1166,22 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         });
 
         // Dynamic backend synchronization
+        // A locale change (MonaI18nService.load), new messages or a new direction reformat every label and restyle in
+        // place.
+        let isLocaleApplied = false;
+        effect(() => {
+            const direction = this.#direction();
+            const localeId = this.#i18n.localeId();
+            const messages = this.messages();
+            untracked(() => {
+                setChartLocale(localeId, messages, direction);
+                if (isLocaleApplied) {
+                    this.invalidate(ChartInvalidationReason.Style);
+                }
+                isLocaleApplied = true;
+            });
+        });
+
         effect(() => {
             const mode = this.renderer();
             const canvas = this.canvasElement()?.nativeElement ?? null;
@@ -1298,6 +1481,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             const svg = this.svgElement()?.nativeElement ?? null;
             this.#setupRenderBackend(mode, canvas, svg);
             this.#canvasReady = true;
+            this.#watchDevicePixelRatio();
             if (!this.scene()) {
                 this.#renderScheduler.flushWithDefault(ChartInvalidationReason.Data | ChartInvalidationReason.Size);
             } else if (this.#currentWidth !== oldWidth || this.#currentHeight !== oldHeight) {
@@ -1312,7 +1496,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #applyGestureViewportEvent(nextState: InternalCartesianViewportState, event: ChartViewportChangeEvent): void {
         if (this.#isDestroyed) return;
         this.#retireTransientInteractionForViewportChange();
-        this.viewportChange.emit(event);
+        this.#emitViewportChange(event);
 
         const isControlled = this.viewport() !== undefined;
         if (!isControlled && event.phase === "update") {
@@ -1362,19 +1546,19 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     sharedTooltip: this.#tooltip()?.shared() ?? false
                 });
                 if (res && res.primaryHit) {
-                    this.tooltipPosition.set(res.nearestAnchor);
-                    this.tooltipContext.set(
+                    this.#tooltipPositionState.set(res.nearestAnchor);
+                    this.#tooltipContextState.set(
                         this.#buildTooltipContext(res.sharedHits, this.#resolveSharedTooltip(sc), res.primaryHit)
                     );
                 } else {
-                    this.tooltipContext.set(null);
-                    this.tooltipPosition.set(null);
+                    this.#tooltipContextState.set(null);
+                    this.#tooltipPositionState.set(null);
                 }
             }
         } else if (state === null && !localActive) {
             if (this.tooltipContext()) {
-                this.tooltipContext.set(null);
-                this.tooltipPosition.set(null);
+                this.#tooltipContextState.set(null);
+                this.#tooltipPositionState.set(null);
             }
         }
     }
@@ -1393,7 +1577,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         this.#retireTransientInteractionForViewportChange();
         this.#uncontrolledViewportState.set(state);
-        this.viewportChange.emit({
+        this.#emitViewportChange({
             changedAxes,
             phase,
             previousViewport: toPublicViewportState(previousState, resolvedAxisMap),
@@ -1420,7 +1604,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         const isControlled = this.viewport() !== undefined;
 
-        this.viewportChange.emit({
+        this.#emitViewportChange({
             changedAxes: changedAxes ?? [],
             phase,
             previousViewport: prevPublicState,
@@ -1633,8 +1817,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#interactionState = null;
         this.#interactionOwner = null;
         this.crosshairState.set(null);
-        this.tooltipContext.set(null);
-        this.tooltipPosition.set(null);
+        this.#tooltipContextState.set(null);
+        this.#tooltipPositionState.set(null);
     }
 
     #clearTransientInteractionOwnedBy(owner: Exclude<ChartTransientInteractionOwner, null>): boolean {
@@ -1679,7 +1863,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const previousState = this.#effectiveViewportState();
         const resolvedAxisMap = sc.coordinateSpace.toResolvedAxisInfoMap();
 
-        this.viewportChange.emit({
+        this.#emitViewportChange({
             changedAxes,
             phase,
             previousViewport: toPublicViewportState(previousState, resolvedAxisMap),
@@ -1741,11 +1925,205 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const fromStr =
             matchingHit.formattedFrom ?? (matchingHit.fromValue !== undefined ? String(matchingHit.fromValue) : "");
         const toStr = matchingHit.formattedTo ?? (matchingHit.toValue !== undefined ? String(matchingHit.toValue) : "");
+        const messages = this.messages();
         if (isRange && fromStr && toStr) {
-            const title = `${matchingHit.seriesName}: ${xStr}`;
-            return this.messages().rangeDescription(title, fromStr, toStr);
+            const title = messages.labeledValue(matchingHit.seriesName, xStr);
+            return messages.rangeDescription(title, fromStr, toStr);
         }
-        return `${matchingHit.seriesName}: ${xStr}, ${yStr}`;
+        return messages.labeledValue(
+            matchingHit.seriesName,
+            joinChartAnnouncement([xStr, yStr], messages.announcementSeparator)
+        );
+    }
+
+    /** Matches the marks inside a finished brush, applies its selection behavior and emits the `end` phase. */
+    #commitBrush(
+        xyScene: CartesianXYChartScene,
+        brushReg: ChartBrushRegistration,
+        bounds: ChartRect,
+        target: ResolvedCartesianBrushTarget,
+        hitPolicy: ChartBrushHitPolicy,
+        selectionBehavior: ChartBrushSelectionBehavior,
+        ranges: { xRange?: ChartBrushAxisRange; yRange?: ChartBrushAxisRange }
+    ): number {
+        const markIndex = this.#getOrCreateBrushMarkIndex(xyScene);
+        const ordinaryBrushHits = markIndex.query(
+            bounds,
+            hitPolicy,
+            target,
+            undefined,
+            undefined,
+            undefined,
+            xyScene.primaryXAxisId,
+            xyScene.primaryYAxisId
+        );
+        // Dense raw range providers keep exact brush semantics over
+        // unsampled source points (§68/§70). Explicit exact results
+        // may legitimately be O(M); they are never truncated.
+        const matchedHits = mergeBrushHitsByIdentity(
+            ordinaryBrushHits,
+            collectDenseBrushHits(xyScene, bounds, target),
+            {
+                seriesOrdinalById: new Map(xyScene.series.map((series, index) => [series.id, index]))
+            }
+        );
+        const matchedMarkIds = matchedHits.map(h => ChartMarkIdentityResolver.resolve(h));
+        const matchedPoints = matchedHits.map(h => toSelectedPoint(h, xyScene));
+
+        const selReg = this.#selection();
+        if (selectionBehavior !== "none" && selReg && selReg.enabled?.() !== false) {
+            const currentSelected = this.effectiveSelectedMarkIds();
+            const mode = selReg.mode?.() ?? "single";
+            const mutation = ChartSelectionController.applyBrush(
+                currentSelected,
+                matchedMarkIds,
+                selectionBehavior,
+                mode
+            );
+            if (mutation.added.length > 0 || mutation.removed.length > 0) {
+                if (selReg.selectedMarkIds?.() === undefined) {
+                    this.#internalSelectedMarkIds.set(mutation.next);
+                }
+                const changeEvt = ChartSelectionController.buildChangeEvent(
+                    "brush",
+                    mutation,
+                    currentSelected,
+                    this.visibleMarkIndex(),
+                    matchedHits,
+                    xyScene
+                );
+                selReg.emitSelectionChange?.(changeEvt);
+            }
+        }
+
+        brushReg.emitBrushChange?.({
+            matchedMarkIds,
+            matchedPoints,
+            mode: target.mode,
+            phase: "end",
+            pixelBounds: bounds,
+            xRange: ranges.xRange,
+            yRange: ranges.yRange
+        });
+        return matchedMarkIds.length;
+    }
+
+    /**
+     * With a brush, Shift+arrow from a focused point moves the focus and extends a brush from where it started; Enter
+     * commits the brush and Escape cancels it. Returns whether it handled the key.
+     */
+    #handleKeyboardBrush(event: KeyboardEvent, scene: ChartScene): boolean {
+        const brushReg = this.#brush();
+        if (
+            !brushReg ||
+            brushReg.enabled?.() === false ||
+            scene.coordinateSystem !== "cartesian" ||
+            scene.cartesianKind !== "xy"
+        ) {
+            this.#keyboardBrushAnchor = null;
+            return false;
+        }
+        const xyScene = scene as CartesianXYChartScene;
+        if (this.#keyboardBrushAnchor && this.#activeBrushBounds() === null) {
+            // A layout, viewport or pointer change canceled the brush.
+            this.#keyboardBrushAnchor = null;
+        }
+        const anchor = this.#keyboardBrushAnchor;
+        const messages = this.messages();
+
+        if (anchor && event.key === "Enter") {
+            event.preventDefault();
+            const bounds = this.#activeBrushBounds() as ChartRect;
+            const target = CartesianBrushTargetResolver.resolve(xyScene, brushReg);
+            const ranges = xyScene.coordinateSpace
+                ? CartesianBrushRangeResolver.resolve(bounds, xyScene.coordinateSpace, target)
+                : {};
+            this.#keyboardBrushAnchor = null;
+            this.#activeBrushBounds.set(null);
+            const count = this.#commitBrush(
+                xyScene,
+                brushReg,
+                bounds,
+                target,
+                brushReg.hitPolicy?.() ?? "intersect",
+                brushReg.selectionBehavior?.() ?? "none",
+                ranges
+            );
+            this.#announce(messages.brushApplied(count));
+            this.#paint();
+            return true;
+        }
+        if (anchor && event.key === "Escape") {
+            event.preventDefault();
+            this.#keyboardBrushAnchor = null;
+            this.#cancelBrushAuthority("escape");
+            this.#announce(messages.brushCleared);
+            return true;
+        }
+
+        const focused = this.#interactionState?.source === "keyboard" ? this.#interactionState.activeHitTarget : null;
+        if (!event.shiftKey || !ARROW_KEYS.has(event.key) || !focused) {
+            return false;
+        }
+        event.preventDefault();
+        const navResult = ChartKeyboardNavigation.handleKeyDown(
+            event,
+            scene,
+            this.#activeKeyboardBucketIndex,
+            this.#activeKeyboardSeriesId,
+            this.#activeKeyboardHitKey,
+            this.#activeKeyboardNamespace
+        );
+        if (navResult) {
+            this.#setKeyboardSelection(
+                navResult.bucketIndex,
+                navResult.seriesId,
+                navResult.hitKey,
+                navResult.namespace
+            );
+        }
+        const current = this.#interactionState?.activeHitTarget ?? focused;
+        const start = anchor ?? focused;
+        const target = CartesianBrushTargetResolver.resolve(xyScene, brushReg);
+        const bounds = keyboardBrushBounds(start, current, xyScene.plotRect, target.mode);
+        const ranges = xyScene.coordinateSpace
+            ? CartesianBrushRangeResolver.resolve(bounds, xyScene.coordinateSpace, target)
+            : {};
+        if (!anchor) {
+            this.#keyboardBrushAnchor = start;
+            brushReg.emitBrushChange?.({
+                mode: target.mode,
+                phase: "start",
+                pixelBounds: bounds,
+                xRange: ranges.xRange,
+                yRange: ranges.yRange
+            });
+        }
+        brushReg.emitBrushChange?.({
+            mode: target.mode,
+            phase: "update",
+            pixelBounds: bounds,
+            xRange: ranges.xRange,
+            yRange: ranges.yRange
+        });
+        this.#activeBrushBounds.set(bounds);
+        this.#paint();
+        const label = (hit: SceneHitTarget): string =>
+            hit.formattedCategory ?? hit.formattedXValue ?? String(hit.xValue ?? "");
+        this.#announce(messages.brushRange(label(start), label(current)));
+        return true;
+    }
+
+    /** Escape anywhere hides a tooltip the pointer opened, unless something else handled the key. */
+    #dismissPointerTooltip(event: KeyboardEvent): void {
+        if (event.key !== "Escape" || event.defaultPrevented) {
+            return;
+        }
+        if (this.#interactionState?.source !== "pointer" || this.tooltipContext() === null) {
+            return;
+        }
+        this.#cancelPendingPointerInteraction();
+        this.#clearInteraction();
     }
 
     #getOrCreateBrushMarkIndex(scene: CartesianXYChartScene): CartesianBrushMarkIndex {
@@ -1871,6 +2249,13 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         const plotEl = this.#getPlotElement();
 
+        // recomputeScene() can run this before the first render; the second call replaces the observers.
+        this.#resizeObserver?.disconnect();
+        this.#resizeObserver = null;
+        this.#resizeObserverTarget = null;
+        this.#themeObserver?.disconnect();
+        this.#themeObserver = null;
+
         if (typeof ResizeObserver !== "undefined") {
             this.#resizeObserver = new ResizeObserver(entries => {
                 this.#syncResizeObserverTarget();
@@ -1885,7 +2270,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
 
         if (typeof MutationObserver !== "undefined") {
+            // A class or style change on <html> or <body> (a theme switch, or a dialog's scroll block) only
+            // restyles the chart when the styles it reads changed.
+            this.#themeSignature = this.#captureThemeSignature();
             this.#themeObserver = new MutationObserver(() => {
+                const signature = this.#captureThemeSignature();
+                if (signature === this.#themeSignature) {
+                    return;
+                }
+                this.#themeSignature = signature;
                 this.styleRevision.update(v => v + 1);
                 this.invalidate(ChartInvalidationReason.Style);
             });
@@ -1930,7 +2323,51 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#synchronizationController?.onCommittedViewportChange(notification);
     }
 
+    /**
+     * Updates the live region. The same text again (Home twice, an edge) gets a trailing no-break space toggled, so
+     * screen readers read it again instead of ignoring a region that didn't change.
+     */
+    #announce(text: string): void {
+        const current = this.activeAccessibilityText();
+        if (text && current.replace(/\u00a0$/, "") === text) {
+            this.activeAccessibilityText.set(current.endsWith("\u00a0") ? text : `${text}\u00a0`);
+            return;
+        }
+        this.activeAccessibilityText.set(text);
+    }
+
+    /** Announces a visibility toggle now and again after the layout it causes, which clears the live region. */
+    #announceToggle(text: string): void {
+        this.#announce(text);
+        this.#announcementAfterLayout = text;
+    }
+
+    /** Lays out and formats what follows for this chart's locale, messages and direction. */
+    #applyLocale(): void {
+        setChartLocale(this.#i18n.localeId(), this.messages(), this.#direction());
+    }
+
+    /** The styles the chart reads from its host, as one string to compare between mutations. */
+    #captureThemeSignature(): string {
+        const snapshot = ChartStyleResolver.captureStyleSnapshot(this.#elementRef.nativeElement);
+        let signature = "";
+        for (const [name, value] of snapshot) {
+            signature += `${name}:${value};`;
+        }
+        return signature;
+    }
+
+    #emitViewportChange(event: ChartViewportChangeEvent): void {
+        this.viewportChangeDetails.emit(event);
+        this.viewportChange.emit(event.viewport);
+    }
+
+    #guardCallbacks(registration: object, owner: () => string): void {
+        guardRegistrationCallbacks(registration, owner, (name, error) => this.#reportCallbackError(name, error));
+    }
+
     #paint(): void {
+        this.#applyLocale();
         const currentScene = this.#renderScene ?? this.scene();
         if (!currentScene) {
             return;
@@ -2012,7 +2449,37 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#reconcilePointerInteractionFeaturesFromRetainedPointer();
     }
 
+    /** Reports an error from the app's callbacks (or the layout) through `ErrorHandler`, once per callback and message. */
+    #reportCallbackError(source: string, error: unknown): void {
+        const message = error instanceof Error ? error.message : String(error);
+        const key = `${source}\u0000${message}`;
+        if (this.#reportedCallbackErrors.has(key)) {
+            return;
+        }
+        this.#reportedCallbackErrors.add(key);
+        this.#errorHandler.handleError(new Error(`[MonaChart] The ${source} threw: ${message}`, { cause: error }));
+    }
+
+    /**
+     * Recomputes and paints, keeping an error out of change detection: an error the guarded callbacks didn't catch is
+     * reported, and the chart keeps the scene it had.
+     */
     #recomputeAndPaint(reason: ChartInvalidationReason): void {
+        if (this.#isDestroyed || !this.#isBrowser) {
+            return;
+        }
+        this.#applyLocale();
+        if (reason !== ChartInvalidationReason.Interaction) {
+            this.#styleResolver.clearCache();
+        }
+        try {
+            this.#recomputeAndPaintUnguarded(reason);
+        } catch (error) {
+            this.#reportCallbackError("layout", error);
+        }
+    }
+
+    #recomputeAndPaintUnguarded(reason: ChartInvalidationReason): void {
         if (reason === ChartInvalidationReason.Interaction) {
             this.#paint();
             return;
@@ -2076,7 +2543,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         if (isStructural) {
             this.#clearInteractionState();
-            this.activeAccessibilityText.set("");
+            this.activeAccessibilityText.set(this.#announcementAfterLayout ?? "");
+            this.#announcementAfterLayout = null;
         }
 
         let newScene: ChartScene;
@@ -2103,7 +2571,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             );
 
             if (reconciliationEvent) {
-                this.viewportChange.emit(reconciliationEvent);
+                this.#emitViewportChange(reconciliationEvent);
             }
 
             const projectedComp = CartesianLayoutEngine.projectRuntime(
@@ -2127,7 +2595,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 measurements: this.#labelMeasurements,
                 radialAxis: this.#radialAxis() ?? undefined,
                 rootData: this.data(),
-                rootXField: this.xField(),
+                rootXField: this.#rootXField(),
                 series: this.#registeredSeries(),
                 styleResolver: this.#styleResolver,
                 viewport: undefined,
@@ -2148,7 +2616,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 );
 
                 if (reconciliationEvent) {
-                    this.viewportChange.emit(reconciliationEvent);
+                    this.#emitViewportChange(reconciliationEvent);
                 }
 
                 const projectedComp = CartesianLayoutEngine.projectRuntime(
@@ -2186,7 +2654,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
 
         // Commit semantic target scene immediately
-        this.scene.set(newScene);
+        this.#sceneState.set(newScene);
         this.#updateGestureController();
 
         const isWaitingForInitialPolarSvgMeasurement =
@@ -2281,7 +2749,12 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const mustCommitSizeImmediately =
             sizeChanged && hasInvalidationReason(reason, ChartInvalidationReason.Size) && previousScene !== null;
 
-        if (isAnimationDisabled || mustCommitSizeImmediately) {
+        // A restyle (a theme switch) repaints in place; only data, layout and visibility changes animate.
+        const isStyleOnly =
+            hasInvalidationReason(reason, ChartInvalidationReason.Style) &&
+            (reason & ~(ChartInvalidationReason.Style | ChartInvalidationReason.Interaction)) === 0;
+
+        if (isAnimationDisabled || mustCommitSizeImmediately || isStyleOnly) {
             this.#animationController.cancel("keep-current");
             this.#renderScene = newScene;
             this.#hasCommittedVisualScene = true;
@@ -2390,11 +2863,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         if (!tooltipEnabled) {
             if (this.tooltipPosition() !== null) {
-                this.tooltipPosition.set(null);
+                this.#tooltipPositionState.set(null);
                 changed = true;
             }
             if (this.tooltipContext() !== null) {
-                this.tooltipContext.set(null);
+                this.#tooltipContextState.set(null);
                 changed = true;
             }
             if (this.#clearTransientInteractionOwnedBy("tooltip")) {
@@ -2495,8 +2968,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     x: clampedX,
                     y: clampedY
                 };
-                this.tooltipPosition.set(tooltipPos);
-                this.tooltipContext.set(
+                this.#tooltipPositionState.set(tooltipPos);
+                this.#tooltipContextState.set(
                     this.#buildTooltipContext(
                         hitState.activeHits.length > 0 ? hitState.activeHits : [primaryHit],
                         shared,
@@ -2521,13 +2994,13 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 },
                 "crosshair"
             );
-            this.tooltipPosition.set(null);
-            this.tooltipContext.set(null);
+            this.#tooltipPositionState.set(null);
+            this.#tooltipContextState.set(null);
             hasAnyState = true;
         } else {
             this.#setTransientInteraction(null, null);
-            this.tooltipPosition.set(null);
-            this.tooltipContext.set(null);
+            this.#tooltipPositionState.set(null);
+            this.#tooltipContextState.set(null);
         }
 
         if (hasAnyState || changed) {
@@ -2787,40 +3260,54 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             "keyboard"
         );
 
-        this.tooltipPosition.set(pointPos);
-        this.tooltipContext.set(this.#buildTooltipContext(activeHits, shared, matchingHit));
+        this.#tooltipPositionState.set(pointPos);
+        this.#tooltipContextState.set(this.#buildTooltipContext(activeHits, shared, matchingHit));
 
         this.pointFocusChange.emit(this.#toPointFocusEvent(matchingHit));
 
+        const messages = this.messages();
+        const join = (parts: readonly (string | null | undefined | false)[]): string =>
+            joinChartAnnouncement(parts, messages.announcementSeparator);
+        const positionStr =
+            resolvedBuckets && resolvedBuckets.length > 1
+                ? messages.pointPosition(this.#activeKeyboardBucketIndex + 1, resolvedBuckets.length)
+                : null;
         if (currentScene.coordinateSystem === "hierarchical" && currentScene.hierarchicalKind === "treemap") {
             const hit = matchingHit;
             if (hit.hierarchy) {
-                const pathStr = hit.hierarchy.formattedPath.join(" / ");
-                const valStr = hit.hierarchy.formattedValue;
-                const pctStr =
+                const pathStr = hit.hierarchy.formattedPath.join(messages.pathSeparator);
+                const shareStr =
                     hit.hierarchy.percentageOfRoot !== undefined
-                        ? `, ${(hit.hierarchy.percentageOfRoot * 100).toFixed(1)}% of total`
-                        : "";
-                const leafStr = hit.hierarchy.isLeaf ? "Leaf" : `Group (${hit.hierarchy.childCount} children)`;
-                this.activeAccessibilityText.set(`${pathStr}: ${valStr}${pctStr}, ${leafStr}`);
+                        ? messages.shareOfTotal(formatChartPercent(hit.hierarchy.percentageOfRoot))
+                        : null;
+                const kindStr = hit.hierarchy.isLeaf
+                    ? messages.treemapLeaf
+                    : messages.treemapGroup(hit.hierarchy.childCount);
+                this.#announce(join([messages.labeledValue(pathStr, hit.hierarchy.formattedValue), shareStr, kindStr]));
             }
         } else if (currentScene.coordinateSystem === "polar") {
             if (matchingHit.seriesType === "gauge") {
                 const valStr = matchingHit.formattedValue ?? String(matchingHit.yValue);
-                const clampedStr = matchingHit.isClamped ? " (visual indicator clamped)" : "";
+                const clampedStr = matchingHit.isClamped ? messages.visualIndicatorClamped : null;
                 const minStr =
                     matchingHit.formattedRadialMin ??
                     (matchingHit.radialMin !== undefined ? String(matchingHit.radialMin) : "");
                 const maxStr =
                     matchingHit.formattedRadialMax ??
                     (matchingHit.radialMax !== undefined ? String(matchingHit.radialMax) : "");
-                const rangeStr = minStr && maxStr ? `, range ${minStr} to ${maxStr}` : "";
-                this.activeAccessibilityText.set(`${matchingHit.seriesName}: ${valStr}${rangeStr}${clampedStr}`);
+                const rangeStr = minStr && maxStr ? messages.gaugeRange(minStr, maxStr) : null;
+                this.#announce(join([messages.labeledValue(matchingHit.seriesName, valStr), rangeStr, clampedStr]));
             } else {
-                const pctStr = matchingHit.formattedPercentage ? `, ${matchingHit.formattedPercentage}` : "";
                 const valStr = matchingHit.formattedValue ?? String(matchingHit.yValue);
                 const catStr = matchingHit.formattedCategory ?? matchingHit.category ?? matchingHit.seriesName;
-                this.activeAccessibilityText.set(`${matchingHit.seriesName}, ${catStr}: ${valStr}${pctStr}`);
+                this.#announce(
+                    join([
+                        matchingHit.seriesName,
+                        messages.labeledValue(String(catStr), valStr),
+                        matchingHit.formattedPercentage,
+                        positionStr
+                    ])
+                );
             }
         } else if (currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "heatmap") {
             const primaryX = this.#xAxes()[0];
@@ -2830,51 +3317,59 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             const xStr = `${xTitle}${matchingHit.formattedXValue ?? matchingHit.formattedCategory ?? matchingHit.categoryX ?? matchingHit.xValue}`;
             const yStr = `${yTitle}${matchingHit.formattedYCategory ?? matchingHit.categoryY ?? matchingHit.category}`;
             const valStr = matchingHit.formattedValue ?? String(matchingHit.yValue);
-            this.activeAccessibilityText.set(`${matchingHit.seriesName}: ${xStr}, ${yStr}, ${valStr}`);
+            this.#announce(messages.labeledValue(matchingHit.seriesName, join([xStr, yStr, valStr])));
         } else if (currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "funnel") {
             const totalStages = currentScene.hitTargets.length;
             const stageNum = (matchingHit.renderOrder ?? 0) + 1;
-            const stagePrefix = totalStages > 0 ? `, stage ${stageNum} of ${totalStages}` : "";
-            const parts: string[] = [];
-            if (matchingHit.funnel?.formattedConversionRate) {
-                parts.push(`Conversion ${matchingHit.funnel.formattedConversionRate} of previous stage.`);
-            }
-            if (matchingHit.funnel?.formattedOverallConversionRate) {
-                parts.push(`Overall conversion ${matchingHit.funnel.formattedOverallConversionRate}.`);
-            }
-            if (matchingHit.funnel?.dropOff !== undefined && matchingHit.funnel.dropOff > 0) {
-                parts.push(`Drop-off ${matchingHit.funnel.dropOff}.`);
-            }
-            const details = parts.length > 0 ? ` ${parts.join(" ")}` : "";
-            this.activeAccessibilityText.set(
-                `${matchingHit.seriesName}, ${matchingHit.formattedCategory}${stagePrefix}: ${matchingHit.formattedValue}.${details}`.trim()
+            const funnel = matchingHit.funnel;
+            const stageStr = totalStages > 0 ? messages.stagePosition(stageNum, totalStages) : null;
+            this.#announce(
+                join([
+                    matchingHit.seriesName,
+                    messages.labeledValue(
+                        join([matchingHit.formattedCategory, stageStr]),
+                        matchingHit.formattedValue ?? ""
+                    ),
+                    funnel?.formattedConversionRate && messages.conversionOfPrevious(funnel.formattedConversionRate),
+                    funnel?.formattedOverallConversionRate &&
+                        messages.overallConversion(funnel.formattedOverallConversionRate),
+                    funnel?.dropOff !== undefined &&
+                        funnel.dropOff > 0 &&
+                        messages.dropOffValue(formatChartNumber(funnel.dropOff))
+                ])
             );
         } else if (currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "waterfall") {
             const wf = matchingHit.waterfall;
             const totalSteps = currentScene.hitTargets.length;
             const stepNum = (matchingHit.renderOrder ?? 0) + 1;
-            const stepPrefix = totalSteps > 0 ? `, step ${stepNum} of ${totalSteps}` : "";
-            let detail = "";
+            const stepStr = totalSteps > 0 ? messages.stepPosition(stepNum, totalSteps) : null;
+            const valueStr = matchingHit.formattedValue ?? "";
+            const beforeStr = wf?.formattedCumulativeBefore ?? "";
+            const afterStr = wf?.formattedCumulativeAfter ?? "";
+            let detail: string;
             if (wf?.kind === "subtotal") {
-                detail = `subtotal ${matchingHit.formattedValue}`;
+                detail = messages.subtotalAnnouncement(valueStr);
             } else if (wf?.kind === "total") {
-                detail = `total ${matchingHit.formattedValue}`;
+                detail = messages.totalAnnouncement(valueStr);
             } else {
                 const delta = wf?.deltaValue ?? 0;
+                // The message says increase or decrease, so the amount drops its sign.
+                const deltaStr = wf?.formattedDelta
+                    ? wf.formattedDelta.replace(LEADING_SIGN, "")
+                    : formatChartNumber(Math.abs(delta));
                 if (delta > 0) {
-                    const deltaFormatted = wf?.formattedDelta ? wf.formattedDelta.replace(/^\+/, "") : String(delta);
-                    detail = `increase ${deltaFormatted}, running total ${wf?.formattedCumulativeBefore ?? ""} to ${wf?.formattedCumulativeAfter ?? ""}`;
+                    detail = messages.increaseAnnouncement(deltaStr, beforeStr, afterStr);
                 } else if (delta < 0) {
-                    const deltaFormatted = wf?.formattedDelta
-                        ? wf.formattedDelta.replace(/^-/, "")
-                        : String(Math.abs(delta));
-                    detail = `decrease ${deltaFormatted}, running total ${wf?.formattedCumulativeBefore ?? ""} to ${wf?.formattedCumulativeAfter ?? ""}`;
+                    detail = messages.decreaseAnnouncement(deltaStr, beforeStr, afterStr);
                 } else {
-                    detail = `no change, running total ${wf?.formattedCumulativeAfter ?? matchingHit.formattedValue}`;
+                    detail = messages.noChangeAnnouncement(wf?.formattedCumulativeAfter ?? valueStr);
                 }
             }
-            this.activeAccessibilityText.set(
-                `${matchingHit.seriesName}, ${matchingHit.formattedCategory}${stepPrefix}: ${detail}.`
+            this.#announce(
+                join([
+                    matchingHit.seriesName,
+                    messages.labeledValue(join([matchingHit.formattedCategory, stepStr]), detail)
+                ])
             );
         } else {
             const xAxis =
@@ -2892,15 +3387,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             const yStr =
                 matchingHit.formattedValue ??
                 (isRange && fromStr && toStr
-                    ? `${fromStr} – ${toStr}`
+                    ? messages.valueRange(fromStr, toStr)
                     : formatYValue(matchingHit.yValue, matchingHit.index, yAxis?.formatter()));
             const sizeStr =
                 matchingHit.formattedSize ?? (matchingHit.sizeValue !== undefined ? String(matchingHit.sizeValue) : "");
             const isPercent = matchingHit.stackMode === "percent";
             const shareStr =
                 isPercent && matchingHit.formattedStackPercentage
-                    ? `, stack share ${matchingHit.formattedStackPercentage}`
-                    : "";
+                    ? messages.stackShare(matchingHit.formattedStackPercentage)
+                    : null;
 
             const isFinancial =
                 matchingHit.valueKind === "ohlc" ||
@@ -2916,20 +3411,49 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     fin?.formattedLow ?? (fin?.low !== undefined ? String(fin.low) : String(matchingHit.low));
                 const closeStr =
                     fin?.formattedClose ?? (fin?.close !== undefined ? String(fin.close) : String(matchingHit.close));
-                const dirStr = fin?.direction ?? matchingHit.financialDirection ?? "";
-                const changeStr = fin?.formattedChange ? `, change ${fin.formattedChange}` : "";
-                const dirPhrase = dirStr ? `, ${dirStr}` : "";
-                this.activeAccessibilityText.set(
-                    `${matchingHit.seriesName}, ${xStr}. Open ${openStr}, high ${highStr}, low ${lowStr}, close ${closeStr}${dirPhrase}${changeStr}.`
+                const direction = fin?.direction ?? matchingHit.financialDirection;
+                const directionStr =
+                    direction === "rising"
+                        ? messages.rising
+                        : direction === "falling"
+                          ? messages.falling
+                          : direction === "neutral"
+                            ? messages.unchanged
+                            : null;
+                this.#announce(
+                    join([
+                        matchingHit.seriesName,
+                        xStr,
+                        messages.ohlcValues(openStr, highStr, lowStr, closeStr),
+                        directionStr,
+                        fin?.formattedChange && messages.changeValue(fin.formattedChange),
+                        positionStr
+                    ])
                 );
             } else if (isRange && fromStr && toStr) {
-                this.activeAccessibilityText.set(`${matchingHit.seriesName}: ${xStr}, ${fromStr} to ${toStr}`);
+                this.#announce(
+                    join([
+                        messages.labeledValue(
+                            matchingHit.seriesName,
+                            join([xStr, messages.rangeValue(fromStr, toStr)])
+                        ),
+                        positionStr
+                    ])
+                );
             } else if (matchingHit.seriesType === "bubble" && sizeStr) {
-                this.activeAccessibilityText.set(
-                    `${matchingHit.seriesName}: ${xStr}, ${yStr}, size ${sizeStr}${shareStr}`
+                this.#announce(
+                    join([
+                        messages.labeledValue(
+                            matchingHit.seriesName,
+                            join([xStr, yStr, messages.sizeValue(sizeStr), shareStr])
+                        ),
+                        positionStr
+                    ])
                 );
             } else {
-                this.activeAccessibilityText.set(`${matchingHit.seriesName}: ${xStr}, ${yStr}${shareStr}`);
+                this.#announce(
+                    join([messages.labeledValue(matchingHit.seriesName, join([xStr, yStr, shareStr])), positionStr])
+                );
             }
         }
 
@@ -3066,6 +3590,37 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
     #toPointFocusEvent(target: SceneHitTarget): ChartPointFocusEvent {
         return this.#toPointEvent(target);
+    }
+
+    /**
+     * Keeps the canvas sharp when the device pixel ratio changes (browser zoom, or a move to another monitor), which
+     * no resize reports: a resolution query for the current ratio fires once it stops matching, and is re-armed.
+     */
+    #watchDevicePixelRatio(): void {
+        this.#unwatchDevicePixelRatio();
+        if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+            return;
+        }
+        const query = window.matchMedia(`(resolution: ${window.devicePixelRatio || 1}dppx)`);
+        const listener = (): void => {
+            if (this.#isDestroyed) {
+                return;
+            }
+            this.#updateCanvasBackingStore(this.#currentWidth, this.#currentHeight);
+            this.#paint();
+            this.#watchDevicePixelRatio();
+        };
+        query.addEventListener("change", listener);
+        this.#devicePixelRatioQuery = query;
+        this.#devicePixelRatioListener = listener;
+    }
+
+    #unwatchDevicePixelRatio(): void {
+        if (this.#devicePixelRatioQuery && this.#devicePixelRatioListener) {
+            this.#devicePixelRatioQuery.removeEventListener("change", this.#devicePixelRatioListener);
+        }
+        this.#devicePixelRatioQuery = null;
+        this.#devicePixelRatioListener = null;
     }
 
     #updateCanvasBackingStore(width: number, height: number): void {
@@ -3282,6 +3837,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
     }
 
+    /** @internal */
     public flushPendingRender(): void {
         this.#cancelPendingPointerInteraction();
         this.#flushPendingBrushFrameNow();
@@ -3300,17 +3856,35 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         return toPublicViewportState(this.#effectiveViewportState(), xyScene.coordinateSpace.toResolvedAxisInfoMap());
     }
 
+    /**
+     * @description Schedules a new layout and paint, for changes the chart can't see, such as a mutated data array.
+     */
+    public invalidate(): void;
+    /** @internal */
+    public invalidate(reason: ChartInvalidationReason): void;
     public invalidate(reason: ChartInvalidationReason = ChartInvalidationReason.Layout): void {
+        if (this.#isDestroyed || !this.#isBrowser) {
+            return;
+        }
+        // An input changed (a series color, the crosshair style): read styles afresh on the next paint.
+        this.#styleResolver.clearCache();
         this.#renderScheduler.schedule(reason);
     }
 
     public ngAfterContentChecked(): void {
+        if (!this.#isBrowser) {
+            return;
+        }
         this.#syncResizeObserverTarget();
+        // Once rendered, a chart waiting for a size (hidden in a tab or a closed panel) is measured by its
+        // ResizeObserver, not by forcing a layout on every change-detection pass.
+        const observedBySize = this.#canvasReady && this.#resizeObserver !== null;
         if (
-            !this.#canvasReady ||
-            this.#initialMeasurementPending ||
-            this.#currentWidth <= 0 ||
-            this.#currentHeight <= 0
+            !observedBySize &&
+            (!this.#canvasReady ||
+                this.#initialMeasurementPending ||
+                this.#currentWidth <= 0 ||
+                this.#currentHeight <= 0)
         ) {
             const measurement = this.#measurePlotElement(this.#getPlotElement());
             if (measurement) {
@@ -3324,6 +3898,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#renderScheduler.flushStructural();
     }
 
+    /** @internal */
     public observeDataLabelElement(element: HTMLElement, labelId: string): void {
         if (!labelId || typeof ResizeObserver === "undefined") {
             return;
@@ -3355,6 +3930,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#dataLabelResizeObserver.observe(element);
     }
 
+    /** @internal */
     public observeLabelElement(element: HTMLElement, labelId: string): void {
         if (!labelId || typeof ResizeObserver === "undefined") {
             return;
@@ -3416,6 +3992,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#labelResizeObserver.observe(element);
     }
 
+    /** @internal */
     public observeOverlayLabelElement(element: HTMLElement, labelId: string): void {
         if (!labelId || typeof ResizeObserver === "undefined") {
             return;
@@ -3496,6 +4073,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#overlayLabelResizeObserver.observe(element);
     }
 
+    /** @internal */
     public onCanvasClick(event: MouseEvent): void {
         if (this.#isAnimating() && !this.#isStructuralAnimation()) {
             return;
@@ -3575,18 +4153,29 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
     }
 
+    /** @internal */
     public onFocusOut(event: FocusEvent): void {
         const related = event.relatedTarget as Node | null;
         if (!related || !this.#elementRef.nativeElement.contains(related)) {
+            if (this.#keyboardBrushAnchor) {
+                this.#keyboardBrushAnchor = null;
+                this.#cancelBrushAuthority("authority-change");
+            }
             this.#cancelPendingPointerInteraction();
             this.#clearInteraction();
             this.activeAccessibilityText.set("");
         }
     }
 
+    /** @internal */
     public onKeyDown(event: KeyboardEvent): void {
-        if (this.#isAnimating() && !this.#isStructuralAnimation()) {
+        // Keys pressed in the legend, a tooltip or projected content belong to that content.
+        if (event.target !== this.#elementRef.nativeElement) {
             return;
+        }
+        if (this.#isAnimating() && !this.#isStructuralAnimation()) {
+            // Settle a restyle or data transition at once instead of dropping the key.
+            this.#animationController.finish();
         }
 
         let currentScene = this.#renderScene ?? this.scene();
@@ -3595,6 +4184,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             currentScene = this.#renderScene ?? this.scene();
         }
         if (!currentScene) {
+            return;
+        }
+
+        if (this.#handleKeyboardBrush(event, currentScene)) {
             return;
         }
 
@@ -3623,7 +4216,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     this.#applyViewportUpdate(kbResult.nextState, "keyboard", "end", kbResult.changedAxes);
                 }
                 if (kbResult.announcement) {
-                    this.activeAccessibilityText.set(kbResult.announcement);
+                    this.#announce(kbResult.announcement);
                 }
                 return;
             }
@@ -3655,8 +4248,19 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             return;
         }
 
-        if (event.key === "Enter" || event.key === " ") {
+        if (NAVIGATION_KEYS.has(event.key) && this.#activeKeyboardHitKey !== null) {
+            // At an edge the focused point stays; read it again so the key isn't silent.
             event.preventDefault();
+            this.#setKeyboardSelection(
+                this.#activeKeyboardBucketIndex,
+                this.#activeKeyboardSeriesId,
+                this.#activeKeyboardHitKey,
+                this.#activeKeyboardNamespace
+            );
+            return;
+        }
+
+        if (event.key === "Enter" || event.key === " ") {
             const activeHit = this.#interactionState?.activeHitTarget;
             let targetHit: SceneHitTarget | undefined = activeHit ?? undefined;
 
@@ -3678,18 +4282,20 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             }
 
             if (targetHit) {
-                if (event.key === "Enter") {
-                    this.pointClick.emit(this.#toPointEvent(targetHit));
-                }
-
+                event.preventDefault();
                 const selReg = this.#selection();
-                if (
-                    selReg &&
+                const isSelectable =
+                    selReg !== null &&
                     selReg.enabled?.() !== false &&
                     selReg.keyboardSelection?.() !== false &&
                     currentScene.coordinateSystem === "cartesian" &&
-                    currentScene.cartesianKind === "xy"
-                ) {
+                    currentScene.cartesianKind === "xy";
+                // Enter activates the point; Space toggles its selection, or activates it where there is none.
+                if (event.key === "Enter" || !isSelectable) {
+                    this.pointClick.emit(this.#toPointEvent(targetHit));
+                }
+
+                if (isSelectable && selReg) {
                     const markId = ChartMarkIdentityResolver.resolve(targetHit);
                     const currentSelected = this.effectiveSelectedMarkIds();
                     const mode = selReg.mode?.() ?? "single";
@@ -3709,12 +4315,26 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                         selReg.emitSelectionChange?.(changeEvt);
                         const isSelected = mutation.added.includes(markId);
                         const pointLabel = this.#formatHitAnnouncement(targetHit);
-                        this.activeAccessibilityText.set(`${pointLabel}, ${isSelected ? "selected" : "deselected"}`);
+                        this.#announce(
+                            isSelected
+                                ? this.messages().itemSelected(pointLabel)
+                                : this.messages().itemDeselected(pointLabel)
+                        );
                         this.#paint();
                     }
                 }
             }
         } else if (event.key === "Escape") {
+            const hasInteraction =
+                this.#interactionState !== null ||
+                this.tooltipContext() !== null ||
+                this.#activeBrushBounds() !== null ||
+                this.#brushGestureController.isBrushing ||
+                this.activeAccessibilityText() !== "";
+            if (!hasInteraction) {
+                // Nothing to clear: let Escape reach the page, such as a dialog around the chart.
+                return;
+            }
             event.preventDefault();
             this.#cancelPendingPointerInteraction();
             this.#cancelBrushAuthority("escape");
@@ -3724,6 +4344,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
     }
 
+    /** @internal */
     public onLostPointerCapture(event: PointerEvent): void {
         if (this.#brushGestureController.activeSession?.pointerId === event.pointerId) {
             this.#cancelBrushAuthority("lost-pointer-capture");
@@ -3731,11 +4352,13 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#gestureController?.handleLostPointerCapture(event);
     }
 
+    /** @internal */
     public onPointerCancel(event: PointerEvent): void {
         this.#cancelBrushAuthority("pointer-cancel");
         this.#gestureController?.handlePointerCancel(event);
     }
 
+    /** @internal */
     public onPointerDown(event: PointerEvent): void {
         const brushReg = this.#brush();
         const currentScene = this.scene();
@@ -3779,6 +4402,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#gestureController?.handlePointerDown(event, pointer, event.currentTarget as Element);
     }
 
+    /** @internal */
     public onPointerLeave(event?: PointerEvent): void {
         this.#cancelPendingPointerInteraction();
         if (event) {
@@ -3796,6 +4420,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
     }
 
+    /** @internal */
     public onPointerMove(event: PointerEvent): void {
         const brushReg = this.#brush();
         const currentScene = this.scene();
@@ -3850,6 +4475,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
     }
 
+    /** @internal */
     public onPointerUp(event: PointerEvent): void {
         const brushReg = this.#brush();
         const currentScene = this.scene();
@@ -3894,66 +4520,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     });
                 }
 
-                const markIndex = this.#getOrCreateBrushMarkIndex(xyScene);
-                const ordinaryBrushHits = markIndex.query(
+                this.#commitBrush(
+                    xyScene,
+                    brushReg,
                     result.bounds,
-                    result.session.hitPolicy,
                     target,
-                    undefined,
-                    undefined,
-                    undefined,
-                    xyScene.primaryXAxisId,
-                    xyScene.primaryYAxisId
+                    result.session.hitPolicy,
+                    result.session.selectionBehavior,
+                    ranges
                 );
-                // Dense raw range providers keep exact brush semantics over
-                // unsampled source points (§68/§70). Explicit exact results
-                // may legitimately be O(M); they are never truncated.
-                const matchedHits = mergeBrushHitsByIdentity(
-                    ordinaryBrushHits,
-                    collectDenseBrushHits(xyScene, result.bounds, target),
-                    {
-                        seriesOrdinalById: new Map(xyScene.series.map((series, index) => [series.id, index]))
-                    }
-                );
-                const matchedMarkIds = matchedHits.map(h => ChartMarkIdentityResolver.resolve(h));
-                const matchedPoints = matchedHits.map(h => toSelectedPoint(h, xyScene));
-
-                const selectionBehavior = result.session.selectionBehavior;
-                const selReg = this.#selection();
-                if (selectionBehavior !== "none" && selReg && selReg.enabled?.() !== false) {
-                    const currentSelected = this.effectiveSelectedMarkIds();
-                    const mode = selReg.mode?.() ?? "single";
-                    const mutation = ChartSelectionController.applyBrush(
-                        currentSelected,
-                        matchedMarkIds,
-                        selectionBehavior,
-                        mode
-                    );
-                    if (mutation.added.length > 0 || mutation.removed.length > 0) {
-                        if (selReg.selectedMarkIds?.() === undefined) {
-                            this.#internalSelectedMarkIds.set(mutation.next);
-                        }
-                        const changeEvt = ChartSelectionController.buildChangeEvent(
-                            "brush",
-                            mutation,
-                            currentSelected,
-                            this.visibleMarkIndex(),
-                            matchedHits,
-                            xyScene
-                        );
-                        selReg.emitSelectionChange?.(changeEvt);
-                    }
-                }
-
-                brushReg.emitBrushChange?.({
-                    matchedMarkIds,
-                    matchedPoints,
-                    mode: target.mode,
-                    phase: "end",
-                    pixelBounds: result.bounds,
-                    xRange: ranges.xRange,
-                    yRange: ranges.yRange
-                });
 
                 this.#hasEmittedBrushStart = false;
                 this.#paint();
@@ -3967,6 +4542,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#gestureController?.handlePointerUp(event);
     }
 
+    /** @internal */
     public onWheel(event: WheelEvent): void {
         const pointer = this.#normalizePointer(event);
         if (!pointer) return;
@@ -4013,7 +4589,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
     }
 
+    /** @internal */
     public recomputeScene(reason: ChartInvalidationReason = ChartInvalidationReason.Layout): void {
+        if (this.#isDestroyed || !this.#isBrowser) {
+            return;
+        }
         this.#renderScheduler.cancel();
         if (!this.#canvasReady) {
             const surfaceRef = this.#getSurfaceElement();
@@ -4025,7 +4605,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#recomputeAndPaint(reason);
     }
 
+    /** @internal */
     public registerAngularAxis(registration: ChartAngularAxisRegistration): () => void {
+        this.#guardCallbacks(registration, () => "angular axis");
         this.#angularAxis.set(registration);
         this.invalidate(ChartInvalidationReason.Data);
         return () => {
@@ -4036,6 +4618,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerAnnotation(registration: ChartAnnotationRegistration): () => void {
         this.#annotations.update(list => [...list, registration]);
         this.invalidate(ChartInvalidationReason.Interaction);
@@ -4045,6 +4628,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerBrush(registration: ChartBrushRegistration): () => void {
         if (this.#brush() !== null) {
             if (!this.#hasWarnedMultiBrush && typeof ngDevMode !== "undefined" && ngDevMode) {
@@ -4066,6 +4650,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerCrosshair(registration: ChartCrosshairRegistration): () => void {
         this.#crosshair.set(registration);
         return () => {
@@ -4075,6 +4660,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerLegend(registration: ChartLegendRegistration): () => void {
         this.#legend.set(registration);
         this.invalidate(ChartInvalidationReason.Data);
@@ -4086,7 +4672,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerRadialAxis(registration: ChartRadialAxisRegistration): () => void {
+        this.#guardCallbacks(registration, () => "radial axis");
         this.#radialAxis.set(registration);
         this.invalidate(ChartInvalidationReason.Data);
         return () => {
@@ -4097,6 +4685,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerReferenceBand(registration: ChartReferenceBandRegistration): () => void {
         this.#referenceBands.update(list => [...list, registration]);
         this.invalidate(ChartInvalidationReason.Interaction);
@@ -4106,6 +4695,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerReferenceLine(registration: ChartReferenceLineRegistration): () => void {
         this.#referenceLines.update(list => [...list, registration]);
         this.invalidate(ChartInvalidationReason.Interaction);
@@ -4115,6 +4705,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerSelection(registration: ChartSelectionRegistration): () => void {
         if (this.#selection() !== null) {
             if (!this.#hasWarnedMultiSelection && typeof ngDevMode !== "undefined" && ngDevMode) {
@@ -4147,7 +4738,12 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerSeries(registration: ChartSeriesRegistration): () => void {
+        this.#guardCallbacks(registration, () => {
+            const name = "name" in registration && typeof registration.name === "function" ? registration.name() : "";
+            return `${registration.type} series "${name || registration.id}"`;
+        });
         this.#registeredSeries.update(list => [...list, registration]);
         this.invalidate(ChartInvalidationReason.Data);
 
@@ -4157,6 +4753,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerTooltip(registration: ChartTooltipRegistration): () => void {
         this.#tooltip.set(registration);
         return () => {
@@ -4166,7 +4763,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerXAxis(registration: ChartXAxisRegistration): () => void {
+        this.#guardCallbacks(registration, () => `X axis "${registration.axisId?.() ?? "x"}"`);
         this.#xAxes.update(list => [...list, registration]);
         this.invalidate(ChartInvalidationReason.Layout);
         return () => {
@@ -4175,7 +4774,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerYAxis(registration: ChartYAxisRegistration): () => void {
+        this.#guardCallbacks(registration, () => `Y axis "${registration.axisId?.() ?? "y"}"`);
         this.#yAxes.update(list => [...list, registration]);
         this.invalidate(ChartInvalidationReason.Layout);
         return () => {
@@ -4259,6 +4860,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
     }
 
+    /** @internal */
     public toggleLegendItem(item: ChartLegendItem): void {
         if (item.kind === "semantic" || item.interactive === false) {
             return;
@@ -4266,6 +4868,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         if (item.kind === "datum") {
             const series = this.#registeredSeries().find(s => s.id === item.seriesId);
             if (series) {
+                this.#announceToggle(
+                    item.visible ? this.messages().seriesHidden(item.name) : this.messages().seriesShown(item.name)
+                );
                 if (series.type === "pie" || series.type === "donut") {
                     const sec = series as ChartSectorSeriesRegistration;
                     if (item.dataIndex !== undefined) {
@@ -4307,6 +4912,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 seriesName: s.name(),
                 visible: nextVisibility
             });
+            const seriesName = resolveSeriesDisplayName(s);
+            this.#announceToggle(
+                nextVisibility ? this.messages().seriesShown(seriesName) : this.messages().seriesHidden(seriesName)
+            );
 
             if (this.#interactionState) {
                 const activeHits = this.#interactionState.activeHits.filter(
@@ -4331,13 +4940,14 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     if (this.#interactionOwner === "tooltip" || this.#interactionOwner === "keyboard") {
                         const currentScene = this.#renderScene ?? this.scene();
                         const shared = currentScene ? this.#resolveSharedTooltip(currentScene) : false;
-                        this.tooltipContext.set(this.#buildTooltipContext(activeHits, shared, primary));
+                        this.#tooltipContextState.set(this.#buildTooltipContext(activeHits, shared, primary));
                     }
                 }
             }
         }
     }
 
+    /** @internal */
     public unobserveDataLabelElement(element: HTMLElement, _labelId: string): void {
         if (this.#dataLabelResizeObserver) {
             this.#dataLabelResizeObserver.unobserve(element);
@@ -4345,6 +4955,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#observedDataLabelElements.delete(element);
     }
 
+    /** @internal */
     public unobserveLabelElement(element: HTMLElement, _labelId: string): void {
         if (this.#labelResizeObserver) {
             this.#labelResizeObserver.unobserve(element);
@@ -4352,6 +4963,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#observedLabelElements.delete(element);
     }
 
+    /** @internal */
     public unobserveOverlayLabelElement(element: HTMLElement, labelId: string): void {
         if (this.#overlayLabelResizeObserver) {
             this.#overlayLabelResizeObserver.unobserve(element);

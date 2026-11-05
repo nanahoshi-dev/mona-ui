@@ -11,7 +11,7 @@ import type { ChartInteractionXKey } from "../scene/scene-geometry";
 import { ChartMarkKeyResolver } from "../animation/animation-identity";
 import { isFiniteNumber } from "../utils/number-utils";
 import type { ChartDiagnostic } from "../utils/chart-diagnostics";
-import { resolveData, resolveValue } from "./chart-value-resolver";
+import { resolveData, resolveNumericValue, resolveValue } from "./chart-value-resolver";
 import { isCartesianSeriesCompatibleWithXAxisType } from "./chart-domain";
 import { resolveCartesianTemporalValue } from "./cartesian-temporal-value-resolver";
 
@@ -353,7 +353,7 @@ export class CartesianStackEngine {
                 const sData = resolveData(s.data(), rootData);
                 const sField = s.field();
                 for (let i = 0; i < sData.length; i++) {
-                    const y = resolveValue(sData[i], sField, i);
+                    const y = resolveNumericValue(sData[i], sField, i);
                     if (isFiniteNumber(y)) {
                         if (y > 0) regHasPos = true;
                         if (y < 0) regHasNeg = true;
@@ -472,7 +472,7 @@ export class CartesianStackEngine {
                 for (let dIdx = 0; dIdx < sData.length; dIdx++) {
                     const datum = sData[dIdx];
                     const xVal = resolveValue(datum, sXField, dIdx);
-                    const yVal = resolveValue(datum, sField, dIdx);
+                    const yVal = resolveNumericValue(datum, sField, dIdx);
 
                     const xKey = this.resolveNormalizedXKey(
                         xVal,

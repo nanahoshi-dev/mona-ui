@@ -1,8 +1,9 @@
 import { isDevMode } from "@angular/core";
 import type { ChartField } from "../../models/chart.models";
 import type { ChartHeatmapCategory } from "../../models/chart-heatmap.models";
-import { resolveValue } from "./chart-value-resolver";
+import { resolveNumericValue, resolveValue } from "./chart-value-resolver";
 import { isFiniteNumber } from "../utils/number-utils";
+import { formatChartDate } from "../utils/chart-locale";
 
 export type ChartCategoryKey = string;
 
@@ -31,7 +32,7 @@ export function toFormattedCategoryValue(value: unknown): string {
         return "";
     }
     if (value instanceof Date) {
-        return value.toLocaleDateString();
+        return formatChartDate(value, { day: "numeric", month: "numeric", year: "numeric" });
     }
     return String(value);
 }
@@ -184,7 +185,7 @@ export class HeatmapDataResolver {
                 continue;
             }
 
-            const rawVal = resolveValue(datum, field, i);
+            const rawVal = resolveNumericValue(datum, field, i);
             if (rawVal === undefined || rawVal === null || typeof rawVal !== "number" || !isFiniteNumber(rawVal)) {
                 continue;
             }

@@ -9,7 +9,7 @@ import type {
     ChartYAxisRegistration
 } from "../context/chart-registration-context";
 import { isContinuousXValid } from "../data/chart-domain";
-import { resolveData, resolveSeriesDisplayName, resolveValue } from "../data/chart-value-resolver";
+import { resolveData, resolveNumericValue, resolveSeriesDisplayName, resolveValue } from "../data/chart-value-resolver";
 import type { LinearScale, TimeScale, UtcScale } from "../scale/cartesian-scale-factory";
 import type { ChartBubbleSeriesScene, ChartMarkerSeriesStyle, ChartScatterSeriesScene } from "../scene/cartesian-scene";
 import type { SceneHitTarget, SceneMarker } from "../scene/scene-geometry";
@@ -108,8 +108,8 @@ export class CartesianMarkerLayout {
 
             for (let i = 0; i < sData.length; i++) {
                 const rawX = resolveValue(sData[i], sXField, i);
-                const rawY = resolveValue(sData[i], sField, i);
-                const sVal = resolveValue(sData[i], sizeField, i);
+                const rawY = resolveNumericValue(sData[i], sField, i);
+                const sVal = resolveNumericValue(sData[i], sizeField, i);
 
                 // Fully valid check: X is valid, Y is finite, size is finite > 0
                 if (

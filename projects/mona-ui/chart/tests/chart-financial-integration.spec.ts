@@ -242,7 +242,7 @@ describe("Chart Financial Series Integration (Candlestick & OHLC)", () => {
         expect(text).toContain("high 108");
         expect(text).toContain("low 98");
         expect(text).toContain("close 104");
-        expect(text).toContain("rising");
+        expect(text).toContain("Rising");
     });
 
     it("should render candlestick marks properly when xAxisType is auto", () => {

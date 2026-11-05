@@ -99,6 +99,7 @@ export type {
     ChartXAxisPosition,
     ChartXAxisType,
     ChartYAxisPosition,
+    ChartYAxisSide,
     ChartYAxisType
 } from "./models/chart-axis.models";
 
@@ -108,6 +109,7 @@ export type {
     ChartLegendItem,
     ChartLegendItemKind,
     ChartLegendItemTemplateContext,
+    ChartLegendPosition,
     ChartLineStyle,
     ChartSeriesFamily,
     ChartSeriesType

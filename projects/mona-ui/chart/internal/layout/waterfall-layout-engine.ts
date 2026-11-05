@@ -22,6 +22,7 @@ import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import { formatXValue, formatYValue } from "../utils/chart-formatter";
 import { isFiniteNumber, normalizeTickCount } from "../utils/number-utils";
+import { resolveYAxisSide } from "../utils/chart-direction";
 
 export class WaterfallLayoutEngine {
     public static computeEmptyScene(width: number, height: number): CartesianWaterfallChartScene {
@@ -83,7 +84,7 @@ export class WaterfallLayoutEngine {
         const isXAxisVisible = xAxis?.visible() ?? true;
         const isYAxisVisible = yAxis?.visible() ?? true;
         const xAxisPosition = xAxis?.position() ?? "bottom";
-        const yAxisPosition = yAxis?.position() ?? "left";
+        const yAxisPosition = resolveYAxisSide(yAxis?.position());
         const xTitle = xAxis?.title() ?? "";
         const yTitle = yAxis?.title() ?? "";
         const yFormatter = yAxis?.formatter() ?? registration.valueFormatter?.();

@@ -1,7 +1,7 @@
 import type { ChartField } from "../../models/chart.models";
 import type { ResolvedChartCartesianAxisType } from "../scale/chart-scale";
 import type { ChartCartesianSeriesRegistration } from "../context/chart-registration-context";
-import { resolveData, resolveValue } from "../data/chart-value-resolver";
+import { resolveData, resolveNumericValue } from "../data/chart-value-resolver";
 import type { CartesianAxisResolvedContext } from "../layout/cartesian-axis-resolved-context";
 import type { CartesianDomainPreparation } from "../layout/cartesian-multi-axis-coordinator";
 import type { CartesianXYLayoutRuntime } from "../layout/cartesian-layout-engine";
@@ -373,13 +373,13 @@ function buildMarkerHierarchy(
         const datum = seriesData[i];
         // Reuse the already-normalized semantic values where possible.
         const xu = xBaseMapper.map(temporal ? new Date(scalar.x[i]) : scalar.x[i]) ?? Number.NaN;
-        const rawY = resolveValue(datum, yField, i);
+        const rawY = resolveNumericValue(datum, yField, i);
         const vu = Number.isFinite(rawY as number) ? (yBaseMapper.map(rawY) ?? Number.NaN) : Number.NaN;
         u[i] = xu;
         v[i] = vu;
         if (Number.isFinite(xu) && Number.isFinite(vu)) {
             if (sizes) {
-                const rawSize = resolveValue(datum, sizeField, i);
+                const rawSize = resolveNumericValue(datum, sizeField, i);
                 const s = typeof rawSize === "number" && Number.isFinite(rawSize) && rawSize > 0 ? rawSize : 0;
                 sizes[i] = s;
                 if (s > 0) {

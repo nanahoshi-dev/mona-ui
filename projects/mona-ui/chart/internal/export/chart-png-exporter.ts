@@ -4,6 +4,9 @@ import type { FinalizedSvgOutput } from "./chart-export-svg-finalizer";
 import { MAX_RASTER_DIMENSION, MAX_RASTER_TOTAL_PIXELS } from "./chart-export-options";
 import { ChartExportError, type ChartExportResult } from "../../models/chart-export.models";
 
+/** How long the composed SVG may take to decode before the PNG export fails instead of waiting forever. */
+export const PNG_DECODE_TIMEOUT_MS = 15_000;
+
 export class ChartPngExporter {
     public static async exportPng(
         finalizedSvg: FinalizedSvgOutput,
@@ -43,26 +46,40 @@ export class ChartPngExporter {
             img.crossOrigin = "anonymous";
 
             await new Promise<void>((resolve, reject) => {
+                const settle = (): void => {
+                    clearTimeout(timeout);
+                    if (request.signal) {
+                        request.signal.removeEventListener("abort", onAbort);
+                    }
+                };
                 const onAbort = () => {
+                    clearTimeout(timeout);
                     img.src = "";
                     reject(new DOMException("Export was aborted", "AbortError"));
                 };
+                // An image that never loads nor fails (a stalled decode) would otherwise keep the export pending.
+                const timeout = setTimeout(() => {
+                    settle();
+                    img.src = "";
+                    reject(
+                        new ChartExportError(
+                            "png-rasterization-failed",
+                            `The composed SVG image didn't decode within ${PNG_DECODE_TIMEOUT_MS} ms.`
+                        )
+                    );
+                }, PNG_DECODE_TIMEOUT_MS);
 
                 if (request.signal) {
                     request.signal.addEventListener("abort", onAbort, { once: true });
                 }
 
                 img.onload = () => {
-                    if (request.signal) {
-                        request.signal.removeEventListener("abort", onAbort);
-                    }
+                    settle();
                     resolve();
                 };
 
                 img.onerror = e => {
-                    if (request.signal) {
-                        request.signal.removeEventListener("abort", onAbort);
-                    }
+                    settle();
                     reject(
                         new ChartExportError(
                             "png-rasterization-failed",

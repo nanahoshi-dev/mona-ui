@@ -7,6 +7,15 @@ function localizeNumber(value: number, options?: Intl.NumberFormatOptions): stri
     return formatNumber(value, "tr-TR", options);
 }
 
+const PLURAL_RULES = new Intl.PluralRules("tr-TR");
+
+function plural(
+    category: Intl.LDMLPluralRule,
+    forms: Partial<Record<Intl.LDMLPluralRule, () => string>> & { readonly other: () => string }
+): string {
+    return (forms[category] ?? forms.other)();
+}
+
 export const TR_TR_MESSAGES = {
     autoComplete: {
         clear: "Temizle"
@@ -40,35 +49,110 @@ export const TR_TR_MESSAGES = {
         actionsLabel: "Kart işlemleri"
     },
     chart: {
+        announcementSeparator: ", ",
+        brushApplied: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `Seçim uygulandı, ${localizeNumber(count)} nokta`,
+                other: () => `Seçim uygulandı, ${localizeNumber(count)} nokta`
+            }),
+        brushCleared: "Seçim temizlendi",
+        brushRange: (from: string, to: string) => `${from} ile ${to} arası seçim`,
+        category: "Kategori",
+        categoryFallbackName: (index: number) => `Kategori ${localizeNumber(index)}`,
+        categoryRange: (from: string, to: string) => `${from} ile ${to} arası.`,
         change: "Değişim",
+        changeValue: (change: string) => `değişim ${change}`,
         chart: "Grafik",
         chartLegend: "Grafik göstergesi",
+        chartRoleDescription: "grafik",
         close: "Kapanış",
         closeAbbreviation: "K",
         colorScale: "Renk ölçeği",
         conversion: "Dönüşüm",
+        conversionOfPrevious: (rate: string) => `Önceki aşamaya göre dönüşüm ${rate}`,
+        dataTableTruncated: (shown: number, total: number) =>
+            `${localizeNumber(total)} satırın ilk ${localizeNumber(shown)} tanesi gösteriliyor.`,
+        decrease: "Azalış",
+        decreaseAnnouncement: (delta: string, from: string, to: string) =>
+            `azalış ${delta}, kümülatif toplam ${from} değerinden ${to} değerine`,
         divergingRangeDescription: (title: string, minimum: string, midpoint: string, maximum: string) =>
             `${title}, ${minimum} ile ${maximum} arasında, orta değer ${midpoint}`,
         dropOff: "Kayıp",
+        dropOffValue: (value: string) => `Kayıp ${value}`,
         falling: "Düşüş",
+        gaugeRange: (minimum: string, maximum: string) => `aralık ${minimum} ile ${maximum} arası`,
         high: "En yüksek",
         highAbbreviation: "Y",
+        increase: "Artış",
+        increaseAnnouncement: (delta: string, from: string, to: string) =>
+            `artış ${delta}, kümülatif toplam ${from} değerinden ${to} değerine`,
+        itemDeselected: (item: string) => `${item}, seçim kaldırıldı`,
+        itemFallbackName: (index: number) => `Öğe ${localizeNumber(index)}`,
+        itemSelected: (item: string) => `${item}, seçildi`,
+        keyboardHelp:
+            "Veri noktaları arasında gezinmek için ok tuşlarını, ilk ve son noktaya gitmek için Home ve End tuşlarını, etkinleştirmek için Enter veya Boşluk tuşunu, temizlemek için Escape tuşunu kullanın.",
         labelValueSeparator: ":",
+        labeledValue: (label: string, value: string) => `${label}: ${value}`,
         low: "En düşük",
         lowAbbreviation: "D",
+        noChange: "Değişiklik yok",
+        noChangeAnnouncement: (value: string) => `değişiklik yok, kümülatif toplam ${value}`,
         noData: "Veri yok",
+        ohlcValues: (open: string, high: string, low: string, close: string) =>
+            `Açılış ${open}, en yüksek ${high}, en düşük ${low}, kapanış ${close}`,
         open: "Açılış",
         openAbbreviation: "A",
         overall: "Genel",
+        overallConversion: (rate: string) => `Genel dönüşüm ${rate}`,
+        pannedDown: "Aşağı kaydırıldı",
+        pannedLeft: "Sola kaydırıldı",
+        pannedRight: "Sağa kaydırıldı",
+        pannedUp: "Yukarı kaydırıldı",
+        pathSeparator: " / ",
+        pointPosition: (position: number, total: number) => `${localizeNumber(position)}/${localizeNumber(total)}`,
         range: "Aralık",
         rangeDescription: (title: string, minimum: string, maximum: string) =>
             `${title}, ${minimum} ile ${maximum} arasında`,
+        rangeValue: (from: string, to: string) => `${from} ile ${to} arası`,
         rising: "Yükseliş",
         runningTotal: "Kümülatif toplam",
+        seriesFallbackName: (index: number) => `Seri ${localizeNumber(index)}`,
+        seriesHidden: (series: string) => `${series} gizlendi`,
+        seriesShown: (series: string) => `${series} gösterildi`,
+        seriesSummary: (count: number, names: string) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} seri: ${names}.`,
+                other: () => `${localizeNumber(count)} seri: ${names}.`
+            }),
+        seriesValueRange: (series: string, minimum: string, maximum: string) =>
+            `${series}: en düşük ${minimum}, en yüksek ${maximum}.`,
+        shareOfTotal: (share: string) => `toplamın ${share} kadarı`,
         size: "boyut",
+        sizeValue: (size: string) => `boyut ${size}`,
+        stackShare: (share: string) => `yığın payı ${share}`,
+        stageFallbackName: (index: number) => `Aşama ${localizeNumber(index)}`,
+        stagePosition: (position: number, total: number) =>
+            `aşama ${localizeNumber(position)}/${localizeNumber(total)}`,
+        stepFallbackName: (index: number) => `Adım ${localizeNumber(index)}`,
+        stepPosition: (position: number, total: number) => `adım ${localizeNumber(position)}/${localizeNumber(total)}`,
+        subtotal: "Ara toplam",
+        subtotalAnnouncement: (value: string) => `ara toplam ${value}`,
+        total: "Toplam",
+        totalAnnouncement: (value: string) => `toplam ${value}`,
+        treemapGroup: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `Grup (${localizeNumber(count)} alt öğe)`,
+                other: () => `Grup (${localizeNumber(count)} alt öğe)`
+            }),
+        treemapLeaf: "Yaprak",
         unchanged: "Değişmedi",
         value: "Değer",
-        visualIndicatorClamped: "Görsel gösterge sınırlandı"
+        valueRange: (from: string, to: string) => `${from} – ${to}`,
+        viewportResetToDefault: "Görünüm varsayılan aralığa sıfırlandı",
+        viewportResetToFull: "Görünüm tam aralığa sıfırlandı",
+        visualIndicatorClamped: "Görsel gösterge sınırlandı",
+        zoomedIn: "Yakınlaştırıldı",
+        zoomedOut: "Uzaklaştırıldı"
     },
     chip: {
         removeLabel: (label?: string) => (label ? `${label} öğesini kaldır` : "Öğeyi kaldır")

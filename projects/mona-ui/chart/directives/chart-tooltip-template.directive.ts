@@ -6,4 +6,11 @@ import type { ChartTooltipTemplateContext } from "../models/chart-tooltip.models
 })
 export class ChartTooltipTemplateDirective {
     public readonly templateRef = inject<TemplateRef<ChartTooltipTemplateContext>>(TemplateRef);
+
+    public static ngTemplateContextGuard(
+        _dir: ChartTooltipTemplateDirective,
+        _ctx: unknown
+    ): _ctx is ChartTooltipTemplateContext {
+        return true;
+    }
 }

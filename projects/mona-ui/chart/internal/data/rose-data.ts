@@ -1,11 +1,12 @@
 import type { ChartField } from "../../models/chart.models";
 import type { ChartValueFormatter } from "../../models/chart-polar.models";
 import type { ChartRoseScaleMode } from "../../models/chart-radial-arc.models";
-import { resolveData, resolveValue } from "./chart-value-resolver";
+import { resolveData, resolveNumericValue, resolveValue } from "./chart-value-resolver";
 import { deriveRadialDatumId, serializeRadialCategoryKey, serializeRadialExplicitKey } from "./radial-datum-identity";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { formatYValue } from "../utils/chart-formatter";
+import { chartMessages } from "../utils/chart-locale";
 
 export interface PreparedRoseCategory {
     readonly category: unknown;
@@ -145,13 +146,13 @@ export class RoseDataProcessor {
 
                 const itemId = deriveRadialDatumId(row, rawCat, rawKey, i);
                 const formattedCategory = categoryFormatter
-                    ? categoryFormatter(rawCat ?? `Item ${i + 1}`, i)
+                    ? categoryFormatter(rawCat ?? chartMessages().itemFallbackName(i + 1), i)
                     : rawCat !== undefined && rawCat !== null
                       ? String(rawCat)
-                      : `Item ${i + 1}`;
+                      : chartMessages().itemFallbackName(i + 1);
 
                 slot = {
-                    category: rawCat ?? `Item ${i + 1}`,
+                    category: rawCat ?? chartMessages().itemFallbackName(i + 1),
                     categoryKey: catKey,
                     dataIndex: i,
                     datum: row,
@@ -166,7 +167,7 @@ export class RoseDataProcessor {
 
             // Check if this row can provide the valid datum for this category slot (if not already populated)
             if (!slot.validDatum) {
-                const rawVal = resolveValue(row, seriesField, i);
+                const rawVal = resolveNumericValue(row, seriesField, i);
                 if (typeof rawVal === "number" && rawVal < 0) {
                     if (warnedDiagnosticSignatures) {
                         ChartDiagnostics.warnOnce(

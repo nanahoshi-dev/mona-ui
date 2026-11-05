@@ -20,6 +20,8 @@ export interface ChartExportPrimitiveBase {
 export interface ChartExportVectorTextSnapshot extends ChartExportPrimitiveBase {
     readonly bounds: ChartRect;
     readonly color: string;
+    /** Set for right-to-left text, whose order depends on it. */
+    readonly direction?: "rtl";
     readonly fontFamily: string;
     readonly fontSize: number;
     readonly fontStyle: string;
