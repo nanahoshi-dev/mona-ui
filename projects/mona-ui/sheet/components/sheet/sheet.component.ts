@@ -10,6 +10,7 @@ import {
     inject,
     Injector,
     input,
+    isDevMode,
     output,
     TemplateRef,
     viewChild
@@ -18,8 +19,14 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { LucideX } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
-import { mergeMessages, type MonaSheetMessages, MonaI18nService, type SheetMessages } from "@nanahoshi/mona-ui/i18n";
-import { createElementControlId } from "@nanahoshi/mona-ui/internal";
+import {
+    injectComponentDirection,
+    mergeMessages,
+    type MonaSheetMessages,
+    MonaI18nService,
+    type SheetMessages
+} from "@nanahoshi/mona-ui/i18n";
+import { createElementControlId, inertOutside } from "@nanahoshi/mona-ui/internal";
 import {
     PopupCloseEvent,
     PopupCloseSource,
@@ -31,10 +38,10 @@ import {
     slideFromTopPopupAnimation,
     type PopupAnimationSettings
 } from "@nanahoshi/mona-ui/popup";
-import { take } from "rxjs";
+import { merge, take } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { SHEET_DEFAULT_MESSAGES } from "../../i18n/sheet.default-messages";
-import { SheetSide } from "../../models/SheetSide";
+import type { SheetPhysicalSide, SheetSide } from "../../models/SheetSide";
 import {
     sheetBaseVariants,
     sheetCloseButtonVariants,
@@ -53,19 +60,34 @@ import {
         class: "hidden"
     }
 })
-export class SheetComponent implements SheetVariantInput {
+/* `side` also takes the logical `start`/`end`, which resolve to a physical variant at open time. */
+export class SheetComponent implements Omit<SheetVariantInput, "side"> {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #direction = injectComponentDirection();
     readonly #document = inject(DOCUMENT);
     readonly #i18n = inject(MonaI18nService);
     readonly #injector = inject(Injector);
     readonly #localeMessages = this.#i18n.componentMessages("sheet", SHEET_DEFAULT_MESSAGES);
     readonly #popupService = inject(PopupService);
+    /** The physical edge: `side`, with `start`/`end` resolved against the direction. */
+    readonly #resolvedSide = computed<SheetPhysicalSide>(() => {
+        const side = this.side();
+        const rtl = this.#direction() === "rtl";
+        if (side === "start") {
+            return rtl ? "right" : "left";
+        }
+        if (side === "end") {
+            return rtl ? "left" : "right";
+        }
+        return side;
+    });
     #destroyed = false;
     #horizontal = false;
+    #openedSide: SheetPhysicalSide | null = null;
     #popupRef?: PopupRef;
     private readonly sheetTemplate = viewChild.required<TemplateRef<void>>("sheetTemplate");
     protected readonly baseClass = computed(() => {
-        const variantClass = sheetBaseVariants({ side: this.side() });
+        const variantClass = sheetBaseVariants({ side: this.#openedSide ?? this.#resolvedSide() });
         const userClass = classInputToClass(this.userClass());
         return twMerge(variantClass, userClass);
     });
@@ -108,12 +130,17 @@ export class SheetComponent implements SheetVariantInput {
     /** @description Internationalization message overrides for accessible labels. */
     public readonly messages = input<Partial<SheetMessages>>();
 
-    /** @description Edge of the viewport from which the sheet opens. @default "right" */
+    /**
+     * @description Edge of the viewport from which the sheet opens. `left` and `right` are physical; `start` and
+     * `end` follow the direction (`start` is the left edge in LTR and the right edge in RTL). The edge is fixed
+     * once the sheet opens. @default "right"
+     */
     public readonly side = input<SheetSide>("right");
 
     /** @description Title displayed in the sheet header and used as its accessible name. */
     public readonly title = input<string>();
 
+    /** @description Additional CSS classes merged onto the sheet panel via `tailwind-merge`. */
     public readonly userClass = input<string, ClassInputType>(undefined, {
         alias: "class",
         transform: value => classInputToClass(value)
@@ -124,7 +151,7 @@ export class SheetComponent implements SheetVariantInput {
 
     public constructor() {
         afterNextRender({
-            read: () => this.#open()
+            write: () => this.#open()
         });
         this.#destroyRef.onDestroy(() => {
             this.#destroyed = true;
@@ -147,8 +174,12 @@ export class SheetComponent implements SheetVariantInput {
     #open(): void {
         const activeElement = this.#document.activeElement;
         const anchor = activeElement instanceof HTMLElement ? activeElement : this.#document.body;
-        const side = this.side();
+        const side = this.#resolvedSide();
+        this.#openedSide = side;
         this.#horizontal = side === "left" || side === "right";
+        if (isDevMode() && !this.title() && !this.ariaLabel()) {
+            console.warn("[Mona Sheet] A sheet needs an accessible name. Set title or ariaLabel.");
+        }
 
         this.#popupRef = this.#popupService.create({
             anchor,
@@ -184,6 +215,11 @@ export class SheetComponent implements SheetVariantInput {
 
         this.#positionOverlay(this.#popupRef, side);
         this.#trackSize(this.#popupRef);
+        // A sheet is always modal: the page behind it is inert until it starts closing.
+        const release = inertOutside(this.#popupRef.overlayRef.hostElement);
+        merge(this.#popupRef.closeStart, this.#popupRef.closed)
+            .pipe(take(1))
+            .subscribe(() => release());
         this.#popupRef.beforeClose.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
             if (this.#isSuppressedCloseSource(event.via)) {
                 event.preventDefault();
@@ -196,7 +232,7 @@ export class SheetComponent implements SheetVariantInput {
         this.#popupRef.closed.pipe(take(1), takeUntilDestroyed(this.#destroyRef)).subscribe(() => this.closed.emit());
     }
 
-    #positionOverlay(ref: PopupRef, side: SheetSide): void {
+    #positionOverlay(ref: PopupRef, side: SheetPhysicalSide): void {
         const strategy = ref.overlayRef.getConfig().positionStrategy;
         if (!(strategy instanceof GlobalPositionStrategy)) {
             return;
@@ -218,7 +254,7 @@ export class SheetComponent implements SheetVariantInput {
         ref.overlayRef.updatePosition();
     }
 
-    #resolveAnimation(side: SheetSide): Required<PopupAnimationSettings> {
+    #resolveAnimation(side: SheetPhysicalSide): Required<PopupAnimationSettings> {
         switch (side) {
             case "top":
                 return slideFromTopPopupAnimation;

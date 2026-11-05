@@ -16,13 +16,17 @@
     }
     <div [class]="bodyClass()">
         <div [class]="headerClass()">
-            <div [id]="headerId" [class]="titleContainerClass()">
-                @if (data.titleTemplate) {
-                    <ng-container [ngTemplateOutlet]="data.titleTemplate"></ng-container>
-                } @else {
-                    <h2 [class]="titleClass()">{{ data.title }}</h2>
-                }
-            </div>
+            @if (hasTitle()) {
+                <div [id]="headerId" [class]="titleContainerClass()">
+                    @if (data.titleTemplate) {
+                        <ng-container [ngTemplateOutlet]="data.titleTemplate"></ng-container>
+                    } @else {
+                        <h2 [class]="titleClass()">{{ data.title }}</h2>
+                    }
+                </div>
+            } @else {
+                <div class="flex-1"></div>
+            }
             @if (data.closable) {
                 <div [class]="closeButtonContainerClass()">
                     <button
@@ -48,10 +52,14 @@
         </div>
 
         <div [class]="contentClass()">
-            @if (data.content) {
-                <ng-container [ngTemplateOutlet]="data.content"></ng-container>
+            @if (contentTemplate(); as template) {
+                <ng-container
+                    [ngTemplateOutlet]="template"
+                    [ngTemplateOutletContext]="{ $implicit: data.data, dialogRef: dialogRef }"></ng-container>
+            } @else if (contentComponent()) {
+                <ng-container #componentHost></ng-container>
             } @else if (data.text) {
-                <p class="select-none">{{ data.text }}</p>
+                <p>{{ data.text }}</p>
             }
         </div>
     </div>

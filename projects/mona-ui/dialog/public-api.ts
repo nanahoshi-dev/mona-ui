@@ -13,6 +13,7 @@ export * from "./services/dialog.service";
 
 export type { ActionsLayout } from "./models/ActionsLayout";
 export * from "./models/DialogAction";
+export * from "./models/DialogData";
 export * from "./models/DialogActionEvent";
 export * from "./models/DialogRef";
 export type { DialogResult } from "./models/DialogResult";

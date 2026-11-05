@@ -377,7 +377,6 @@ class DialogWrapperComponent implements ComponentInputsAsSignal<DialogComponent>
         });
         this.dynamicDialogRef.result.pipe(take(1)).subscribe(result => {
             console.log("Dialog result:", result);
-            this.dynamicDialogRef?.close();
         });
     }
 }

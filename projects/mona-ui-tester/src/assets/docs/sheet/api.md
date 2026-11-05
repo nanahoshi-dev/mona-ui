@@ -47,7 +47,7 @@ import { SheetComponent } from "@nanahoshi/mona-ui/sheet";
 <mona-sheet side="bottom" title="Filters"> </mona-sheet>
 ```
 
-`side` accepts `"top" | "right" | "bottom" | "left"` and defaults to `"right"`. Left and right sheets default to `min(100dvw, 24rem)` wide and `100dvh` high; top and bottom sheets default to `100dvw` wide with automatic height capped at `90dvh`.
+`side` accepts `"top" | "right" | "bottom" | "left" | "start" | "end"` and defaults to `"right"`. `left` and `right` are physical edges in every direction; `start` and `end` follow the text direction, so `start` opens from the left in left-to-right pages and from the right in right-to-left ones. The border always faces the page. Left and right sheets default to `min(100dvw, 24rem)` wide and `100dvh` high; top and bottom sheets default to `100dvw` wide with automatic height capped at `90dvh`.
 
 ### Mobile bottom sheet
 
@@ -96,7 +96,7 @@ protected onSheetClose(event: PopupCloseEvent): void {
 
 ### `side` is fixed once the sheet opens
 
-`side` is read once, on the first render, and fixes both the viewport edge the sheet is attached to and the direction it slides in and out. Changing it on an open sheet has no effect — close the sheet and reopen it with the new value.
+`side` is read once, on the first render, and fixes the viewport edge the sheet is attached to, the direction it slides in and out, and the edge its border is on. `start` and `end` are resolved against the direction at that moment. Changing `side` or the direction on an open sheet has no effect — close the sheet and reopen it.
 
 Every other input is live: `title`, `description`, `ariaLabel`, and `closable` re-render as usual, `width` and `height` resize the open sheet, and `closeOnEscape` and `closeOnBackdropClick` apply from the moment they change.
 
@@ -106,7 +106,7 @@ Every other input is live: `title`, `description`, `ariaLabel`, and `closable` r
 
 ### Scroll blocking
 
-Sheet blocks scrolling of the page behind it for as long as it is open, regardless of `side`.
+Sheet blocks scrolling of the page behind it for as long as it is open, regardless of `side`. The rest of the page is also `inert` until the sheet starts closing, so a pointer, Tab, or a screen reader can't reach it; popups opened from inside the sheet stay usable.
 
 ## Accessibility & Forms Integration
 
@@ -120,15 +120,15 @@ Sheet traps focus inside itself for as long as it is open — Tab and Shift+Tab 
 
 ### ARIA
 
-| Attribute          | When present               | Value                                                       |
-| ------------------ | --------------------------- | ------------------------------------------------------------ |
-| `role`             | Always                      | `"dialog"`                                                   |
-| `aria-modal`       | Always                      | `"true"`                                                     |
-| `aria-labelledby`  | Only when `title` is set    | ID of the title element                                      |
-| `aria-describedby` | Only when `description` is set | ID of the description element                              |
-| `aria-label`       | Only when `title` is absent | The `ariaLabel` input                                        |
+| Attribute          | When present                   | Value                         |
+|--------------------|--------------------------------|-------------------------------|
+| `role`             | Always                         | `"dialog"`                    |
+| `aria-modal`       | Always                         | `"true"`                      |
+| `aria-labelledby`  | Only when `title` is set       | ID of the title element       |
+| `aria-describedby` | Only when `description` is set | ID of the description element |
+| `aria-label`       | Only when `title` is absent    | The `ariaLabel` input         |
 
-Sheet content must have either a `title` or an `ariaLabel` so that the modal has an accessible name.
+Sheet content must have either a `title` or an `ariaLabel` so that the modal has an accessible name. In development mode, a sheet without one logs a warning.
 
 Form integration is not applicable — Sheet is a container, not a form control.
 
@@ -140,30 +140,32 @@ Form integration is not applicable — Sheet is a container, not a form control.
 
 #### Inputs
 
-| Name                   | Type                                     | Default        | Description                                                               |
-| ---------------------- | ----------------------------------------- | -------------- | -------------------------------------------------------------------------- |
-| `ariaLabel`            | `string`                                  | —              | Accessible name used when `title` is absent.                              |
-| `closable`             | `boolean`                                 | `true`         | Sets the visibility of the close button.                                  |
-| `closeOnBackdropClick` | `boolean`                                 | `true`         | Sets whether a backdrop click requests that the sheet close.              |
-| `closeOnEscape`        | `boolean`                                 | `true`         | Sets whether the sheet should close when the escape key is pressed.       |
-| `description`          | `string`                                  | —              | Supporting text displayed below the title and referenced by `aria-describedby`. |
-| `height`               | `number \| string`                        | side-dependent | Explicit height. Numbers are interpreted as pixels.                       |
-| `side`                 | `"top" \| "right" \| "bottom" \| "left"`  | `"right"`      | Viewport edge to which the sheet is attached.                             |
-| `title`                | `string`                                  | —              | Visible title and accessible name.                                        |
-| `width`                | `number \| string`                        | side-dependent | Explicit width. Numbers are interpreted as pixels.                        |
+| Name                   | Type                                            | Default        | Description                                                                                                           |
+|------------------------|-------------------------------------------------|----------------|-----------------------------------------------------------------------------------------------------------------------|
+| `ariaLabel`            | `string`                                        | —              | Accessible name used when `title` is absent.                                                                          |
+| `class`                | `string \| string[] \| Record<string, unknown>` | —              | Additional classes merged onto the sheet panel with `tailwind-merge`, so they can override its own.                   |
+| `closable`             | `boolean`                                       | `true`         | Sets the visibility of the close button.                                                                              |
+| `closeOnBackdropClick` | `boolean`                                       | `true`         | Sets whether a backdrop click requests that the sheet close.                                                          |
+| `closeOnEscape`        | `boolean`                                       | `true`         | Sets whether the sheet should close when the escape key is pressed.                                                   |
+| `description`          | `string`                                        | —              | Supporting text displayed below the title and referenced by `aria-describedby`.                                       |
+| `height`               | `number \| string`                              | side-dependent | Explicit height. Numbers are interpreted as pixels.                                                                   |
+| `side`                 | `SheetSide`                                     | `"right"`      | Viewport edge to which the sheet is attached: `top`, `right`, `bottom`, `left`, or the direction-aware `start`/`end`. |
+| `title`                | `string`                                        | —              | Visible title and accessible name.                                                                                    |
+| `width`                | `number \| string`                              | side-dependent | Explicit width. Numbers are interpreted as pixels.                                                                    |
 
 #### Outputs
 
-| Name     | Type              | Description                                                             |
-| -------- | ----------------- | ------------------------------------------------------------------------ |
+| Name     | Type              | Description                                                                                                        |
+|----------|-------------------|--------------------------------------------------------------------------------------------------------------------|
 | `close`  | `PopupCloseEvent` | Emitted before closing. Preventable — see [`close` fires for every close path](#close-fires-for-every-close-path). |
-| `closed` | `void`            | Emitted after the leave animation completes and the popup is disposed.  |
+| `closed` | `void`            | Emitted after the leave animation completes and the popup is disposed.                                             |
 
 ---
 
 <!-- verification-checklist
 - [x] SheetComponent inputs and defaults verified against sheet.component.ts source, including the horizontal-vs-vertical width/height defaults resolved in #open()
 - [x] SheetComponent outputs verified (close: PopupCloseEvent, closed: void) against sheet.component.ts source
+- [x] Batch 5 (module 11): start/end resolved against injectComponentDirection() at open time, physical left/right in RTL, inert page, and the dev-mode naming warning verified against sheet.component.ts and sheet.component.spec.ts
 - [x] side-is-fixed behavior verified: side is read only inside #open(), which runs once via afterNextRender, and drives both #positionOverlay() and #resolveAnimation()
 - [x] Live width/height verified against the #trackSize() effect calling overlayRef.updateSize()
 - [x] Live closeOnEscape/closeOnBackdropClick verified against #isSuppressedCloseSource(), which vetoes those sources in the beforeClose subscription
@@ -171,5 +173,5 @@ Form integration is not applicable — Sheet is a container, not a form control.
 - [x] blockScroll: true verified against the PopupSettings passed in #open()
 - [x] role="dialog"/aria-modal/aria-labelledby/aria-describedby/aria-label verified against sheet.component.html template bindings
 - [x] Focus trap (cdkTrapFocus, cdkTrapFocusAutoCapture) and restoreFocus: true verified against sheet.component.html and the PopupSettings passed in #open()
-- [x] No SheetService or SheetRef exists — SheetComponent is the sole export alongside the SheetSide type, verified against public-api.ts
+- [x] No SheetService or SheetRef exists — SheetComponent is the sole export alongside the SheetSide and SheetPhysicalSide types, verified against public-api.ts
 -->

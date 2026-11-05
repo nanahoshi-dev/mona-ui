@@ -25,6 +25,8 @@ export interface PopupCloseEventOptions<R = unknown, E = unknown> {
 }
 
 export enum PopupCloseSource {
+    /** A dialog action button, such as OK or Cancel. */
+    Action = "action",
     BackdropClick = "backdropClick",
     CloseButton = "closeButton",
     Escape = "escape",

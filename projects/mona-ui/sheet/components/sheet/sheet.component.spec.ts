@@ -139,6 +139,56 @@ describe("SheetComponent", () => {
         expect({ justifyContent: style?.justifyContent, alignItems: style?.alignItems }).toEqual(expected);
     });
 
+    /*
+     * In RTL the overlay wrapper has `dir="rtl"`, so its `justify-content` is logical: `flex-start` is the right
+     * edge. The pane's margin names the physical edge it's pinned to.
+     */
+    it.each([
+        ["start", "ltr", "flex-start", "marginLeft", "border-r"],
+        ["end", "ltr", "flex-end", "marginRight", "border-l"],
+        ["start", "rtl", "flex-start", "marginRight", "border-l"],
+        ["end", "rtl", "flex-end", "marginLeft", "border-r"],
+        ["left", "rtl", "flex-end", "marginLeft", "border-r"],
+        ["right", "rtl", "flex-start", "marginRight", "border-l"]
+    ] as const)(
+        "opens a %s sheet in %s against the matching physical edge",
+        async (side, dir, justify, margin, border) => {
+            document.documentElement.setAttribute("dir", dir);
+            try {
+                await createSheet({ side, ariaLabel: `${side} sheet` });
+
+                expect(getPanel().parentElement?.style.justifyContent).toBe(justify);
+                expect(getPanel().style[margin]).toBe("0px");
+                expect(getDialog().classList).toContain(border);
+            } finally {
+                document.documentElement.removeAttribute("dir");
+            }
+        }
+    );
+
+    it("makes the page inert while open and releases it when the sheet starts closing", async () => {
+        const page = document.createElement("main");
+        document.body.prepend(page);
+        try {
+            const component = await createSheet({ title: "Inert sheet" });
+            expect(page.hasAttribute("inert")).toBe(true);
+            expect(overlayContainer.hasAttribute("inert")).toBe(false);
+
+            component["closeSheet"]();
+            expect(page.hasAttribute("inert")).toBe(false);
+        } finally {
+            page.remove();
+        }
+    });
+
+    it("warns in dev mode when the sheet has no accessible name", async () => {
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+        await createSheet({ closable: false });
+
+        expect(warn).toHaveBeenCalledWith(expect.stringContaining("[Mona Sheet]"));
+        warn.mockRestore();
+    });
+
     it("uses mobile-safe defaults and applies explicit dimensions", async () => {
         const popupService = TestBed.inject(PopupService);
         const createPopup = popupService.create.bind(popupService);

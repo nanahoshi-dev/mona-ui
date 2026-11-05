@@ -11,8 +11,7 @@ import {
     TemplateRef
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { PopupCloseEvent, PopupCloseSource } from "@nanahoshi/mona-ui/popup";
-import { take, takeUntil } from "rxjs";
+import type { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import { DialogContentTemplateDirective } from "../../directives/dialog-content-template.directive";
 import { DialogDescriptionTemplateDirective } from "../../directives/dialog-description-template.directive";
 import { DialogFooterTemplateDirective } from "../../directives/dialog-footer-template.directive";
@@ -20,7 +19,7 @@ import { DialogIconTemplateDirective } from "../../directives/dialog-icon-templa
 import { DialogTitleTemplateDirective } from "../../directives/dialog-title-template.directive";
 import { ActionsLayout } from "../../models/ActionsLayout";
 import { DialogAction } from "../../models/DialogAction";
-import { DialogActionEvent } from "../../models/DialogActionEvent";
+import type { DialogActionEvent } from "../../models/DialogActionEvent";
 import { DialogRef } from "../../models/DialogRef";
 import { DialogService } from "../../services/dialog.service";
 import { DialogMessages } from "@nanahoshi/mona-ui/i18n";
@@ -36,6 +35,7 @@ import { DialogVariantInput, DialogVariantProps } from "../../styles/dialog.styl
 export class DialogComponent implements DialogVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #dialogService = inject(DialogService);
+    #destroyed = false;
     #dialogRef?: DialogRef;
 
     private readonly contentTemplate = contentChild(DialogContentTemplateDirective, { read: TemplateRef });
@@ -63,14 +63,20 @@ export class DialogComponent implements DialogVariantInput {
     public readonly actionsLayout = input<ActionsLayout>("end");
 
     /**
+     * @description Accessible name for the dialog when it has no `title` or title template.
+     */
+    public readonly ariaLabel = input<string>();
+
+    /**
      * @description Sets the visibility of the close button in the dialog header.
      * @default true
      */
     public readonly closable = input(true);
 
     /**
-     * @description Emits when the user clicks on the close button or presses the escape key.
-     * This event is preventable.
+     * @description Emits before the dialog closes, whatever closes it: an action, the close button, Escape, or the
+     * component being destroyed. Call `preventDefault()` to keep it open (a close caused by destruction can't be
+     * kept).
      */
     // eslint-disable-next-line @angular-eslint/no-output-native
     public readonly close = output<PopupCloseEvent>();
@@ -82,7 +88,7 @@ export class DialogComponent implements DialogVariantInput {
     public readonly closeOnEscape = input(true);
 
     /**
-     * @description Emits when the dialog is closed.
+     * @description Emits when the dialog has closed and its leave animation has finished.
      */
     public readonly closed = output<void>();
 
@@ -133,7 +139,8 @@ export class DialogComponent implements DialogVariantInput {
     public readonly minWidth = input<number>();
 
     /**
-     * @description Sets whether the dialog should have an overlay behind it.
+     * @description Whether the dialog is modal: a backdrop, `aria-modal="true"`, focus kept inside, page scroll
+     * locked, and the rest of the page inert.
      * @default true
      */
     public readonly modal = input(true);
@@ -173,13 +180,14 @@ export class DialogComponent implements DialogVariantInput {
 
     public constructor() {
         afterNextRender({
-            read: () => this.#openDialog()
+            write: () => this.#openDialog()
         });
         effect(() => {
             const actions = this.actions() ? [...this.actions()] : undefined;
             const update = {
                 actions,
                 actionsLayout: this.actionsLayout(),
+                ariaLabel: this.ariaLabel(),
                 closable: this.closable(),
                 description: this.description(),
                 messages: this.messages(),
@@ -190,7 +198,11 @@ export class DialogComponent implements DialogVariantInput {
             };
             this.#dialogRef?.update(update);
         });
-        this.#destroyRef.onDestroy(() => this.#dialogRef?.close());
+        this.#destroyRef.onDestroy(() => {
+            // Outputs can't emit once the component is destroyed, so this close is silent.
+            this.#destroyed = true;
+            this.#dialogRef?.close();
+        });
     }
 
     #openDialog(): void {
@@ -198,6 +210,7 @@ export class DialogComponent implements DialogVariantInput {
         this.#dialogRef = this.#dialogService.show({
             actions,
             actionsLayout: this.actionsLayout(),
+            ariaLabel: this.ariaLabel(),
             closable: this.closable(),
             closeOnEscape: this.closeOnEscape(),
             content: this.contentTemplate(),
@@ -223,23 +236,18 @@ export class DialogComponent implements DialogVariantInput {
             width: this.width()
         });
 
-        this.#dialogRef.result.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(result => {
-            if (result.viaClose) {
-                this.#dialogRef?.close(new PopupCloseEvent({ via: PopupCloseSource.CloseButton }));
-                return;
-            }
-            const event = new DialogActionEvent(result.action);
+        this.#dialogRef.action$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe((event: DialogActionEvent) => {
             this.action.emit(event);
-            if (!event.isDefaultPrevented()) {
-                this.#dialogRef?.close();
+        });
+        this.#dialogRef.close$.subscribe((event: PopupCloseEvent) => {
+            if (!this.#destroyed) {
+                this.close.emit(event);
             }
         });
-
-        this.#dialogRef.close$.pipe(takeUntil(this.#dialogRef.popupRef.closed)).subscribe(event => {
-            this.close.emit(event);
-        });
-        this.#dialogRef.closed$.pipe(take(1)).subscribe(() => {
-            this.closed.emit();
+        this.#dialogRef.closed$.subscribe(() => {
+            if (!this.#destroyed) {
+                this.closed.emit();
+            }
         });
     }
 }

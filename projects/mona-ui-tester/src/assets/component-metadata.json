@@ -8856,6 +8856,12 @@
         "defaultValue": "\"end\""
       },
       {
+        "description": "Accessible name for the dialog when it has no `title` or title template.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string"
+      },
+      {
         "description": "Sets the visibility of the close button in the dialog header.",
         "kind": "input",
         "name": "closable",
@@ -8863,7 +8869,7 @@
         "defaultValue": "true"
       },
       {
-        "description": "Emits when the user clicks on the close button or presses the escape key.\r\nThis event is preventable.",
+        "description": "Emits before the dialog closes, whatever closes it: an action, the close button, Escape, or the\ncomponent being destroyed. Call `preventDefault()` to keep it open (a close caused by destruction can't be\nkept).",
         "kind": "output",
         "name": "close",
         "type": "PopupCloseEvent"
@@ -8876,7 +8882,7 @@
         "defaultValue": "true"
       },
       {
-        "description": "Emits when the dialog is closed.",
+        "description": "Emits when the dialog has closed and its leave animation has finished.",
         "kind": "output",
         "name": "closed",
         "type": "void"
@@ -8936,7 +8942,7 @@
         "type": "number"
       },
       {
-        "description": "Sets whether the dialog should have an overlay behind it.",
+        "description": "Whether the dialog is modal: a backdrop, `aria-modal=\"true\"`, focus kept inside, page scroll\nlocked, and the rest of the page inert.",
         "kind": "input",
         "name": "modal",
         "type": "boolean",
@@ -13169,7 +13175,7 @@
         "type": "Partial<SheetMessages>"
       },
       {
-        "description": "Edge of the viewport from which the sheet opens.",
+        "description": "Edge of the viewport from which the sheet opens. `left` and `right` are physical; `start` and\n`end` follow the direction (`start` is the left edge in LTR and the right edge in RTL). The edge is fixed\nonce the sheet opens.",
         "kind": "input",
         "name": "side",
         "type": "SheetSide",
@@ -13182,7 +13188,7 @@
         "type": "string"
       },
       {
-        "description": "",
+        "description": "Additional CSS classes merged onto the sheet panel via `tailwind-merge`.",
         "kind": "input",
         "name": "userClass",
         "type": "string",

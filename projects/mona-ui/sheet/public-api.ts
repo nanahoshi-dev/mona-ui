@@ -4,4 +4,4 @@
 
 export * from "./components/sheet/sheet.component";
 export * from "./i18n/sheet.default-messages";
-export type { SheetSide } from "./models/SheetSide";
+export type { SheetPhysicalSide, SheetSide } from "./models/SheetSide";
