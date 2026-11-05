@@ -342,6 +342,7 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         close: null,
         error: null,
         info: null,
+        region: null,
         success: null,
         warning: null
     },

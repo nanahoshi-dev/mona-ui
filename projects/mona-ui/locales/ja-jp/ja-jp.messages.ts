@@ -308,6 +308,7 @@ export const JA_JP_MESSAGES = {
         close: "閉じる",
         error: "エラー",
         info: "情報",
+        region: "通知",
         success: "成功",
         warning: "警告"
     },

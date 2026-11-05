@@ -317,6 +317,7 @@ export const AR_SA_MESSAGES = {
         close: "إغلاق",
         error: "خطأ",
         info: "معلومات",
+        region: "الإشعارات",
         success: "نجاح",
         warning: "تحذير"
     },

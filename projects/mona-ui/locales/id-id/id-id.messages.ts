@@ -308,6 +308,7 @@ export const ID_ID_MESSAGES = {
         close: "Tutup",
         error: "Kesalahan",
         info: "Informasi",
+        region: "Notifikasi",
         success: "Berhasil",
         warning: "Peringatan"
     },

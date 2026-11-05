@@ -11163,6 +11163,13 @@
         "name": "data",
         "type": "NotificationData",
         "required": true
+      },
+      {
+        "description": "The edge the notification's container is on, which its leave animation moves towards.",
+        "kind": "input",
+        "name": "side",
+        "type": "\"top\" | \"bottom\"",
+        "defaultValue": "\"top\""
       }
     ]
   },

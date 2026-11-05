@@ -309,6 +309,7 @@ export const TR_TR_MESSAGES = {
         close: "Kapat",
         error: "Hata",
         info: "Bilgi",
+        region: "Bildirimler",
         success: "Başarılı",
         warning: "Uyarı"
     },

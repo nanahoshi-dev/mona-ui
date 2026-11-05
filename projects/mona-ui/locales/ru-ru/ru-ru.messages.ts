@@ -338,6 +338,7 @@ export const RU_RU_MESSAGES = {
         close: "Закрыть",
         error: "Ошибка",
         info: "Информация",
+        region: "Уведомления",
         success: "Успешно",
         warning: "Предупреждение"
     },

@@ -307,6 +307,7 @@ export const ZH_CN_MESSAGES = {
         close: "关闭",
         error: "错误",
         info: "信息",
+        region: "通知",
         success: "成功",
         warning: "警告"
     },

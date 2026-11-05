@@ -1,25 +1,21 @@
-import { signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { generatePseudoLocale, MonaI18nService, type MonaLocale } from "@nanahoshi/mona-ui/i18n";
-import { Subject } from "rxjs";
 import { describe, expect, it } from "vitest";
 import { NOTIFICATION_DEFAULT_MESSAGES } from "../../i18n/notification.default-messages";
 import { NotificationData } from "../../models/NotificationData";
+import type { NotificationOptions } from "../../models/NotificationOptions";
 import { NotificationType } from "../../models/NotificationType";
 import { NotificationComponent } from "./notification.component";
 
-function createNotificationData(overrides: Partial<NotificationData["options"]> = {}): NotificationData {
-    return {
-        componentDestroy$: new Subject<string>(),
-        options: {
-            content: "Notification i18n content",
-            id: "i18n-test-id",
-            closable: true,
-            ...overrides
-        },
-        afterHide$: new Subject(),
-        contentComponentRef: signal(null)
-    };
+function createNotificationData(overrides: Partial<NotificationOptions> = {}): NotificationData {
+    return new NotificationData({
+        content: "Notification i18n content",
+        closable: true,
+        ...overrides,
+        id: "i18n-test-id",
+        position: "topright",
+        type: overrides.type ?? "info"
+    });
 }
 
 function createFixture(data: NotificationData): ComponentFixture<NotificationComponent> {

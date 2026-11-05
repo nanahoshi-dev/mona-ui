@@ -323,6 +323,7 @@ export const ES_ES_MESSAGES = {
         close: "Cerrar",
         error: "Error",
         info: "Información",
+        region: "Notificaciones",
         success: "Éxito",
         warning: "Advertencia"
     },

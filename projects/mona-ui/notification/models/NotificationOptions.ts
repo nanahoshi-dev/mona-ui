@@ -1,6 +1,6 @@
-import { TemplateRef, Type, ViewContainerRef } from "@angular/core";
-import { NotificationPosition } from "./NotificationPosition";
-import { NotificationType } from "./NotificationType";
+import type { TemplateRef, Type, ViewContainerRef } from "@angular/core";
+import type { NotificationPosition } from "./NotificationPosition";
+import type { NotificationType } from "./NotificationType";
 
 export interface NotificationOptions {
     /**
@@ -9,8 +9,9 @@ export interface NotificationOptions {
     appendTo?: ViewContainerRef;
 
     /**
-     * @description Whether a close button is rendered on the notification.
-     * @default true when `duration` is not set, otherwise `false`
+     * @description Whether a close button is rendered on the notification. Timed notifications have one too, so
+     * they can be dismissed before their time is up.
+     * @default true
      */
     closable?: boolean;
 
@@ -21,11 +22,20 @@ export interface NotificationOptions {
 
     /**
      * @description The notification's content. Accepts plain text, a `TemplateRef`, or a component `Type` to render.
+     * A template gets the `NotificationRef` as `$implicit` and `data` as `data`; a component can inject
+     * `NOTIFICATION_REF` and `NOTIFICATION_DATA`.
      */
     content: string | TemplateRef<unknown> | Type<unknown>;
 
     /**
+     * @description Data for a content component or template, available through `NOTIFICATION_DATA` or the
+     * template's `data` context property.
+     */
+    data?: unknown;
+
+    /**
      * @description The time, in milliseconds, before the notification automatically closes. Omit to keep the notification open until manually closed.
+     * The countdown pauses while the notification is hovered or has focus, and while the window is in the background.
      */
     duration?: number;
 
@@ -36,7 +46,7 @@ export interface NotificationOptions {
 
     /**
      * @description A unique identifier for the notification. Reusing an `id` for the same `position` returns the existing notification instead of creating a new one.
-     * @default a generated UUID
+     * @default a generated id
      */
     id?: string;
 

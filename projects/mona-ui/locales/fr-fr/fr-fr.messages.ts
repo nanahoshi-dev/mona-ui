@@ -333,6 +333,7 @@ export const FR_FR_MESSAGES = {
         close: "Fermer",
         error: "Erreur",
         info: "Information",
+        region: "Notifications",
         success: "Succès",
         warning: "Avertissement"
     },

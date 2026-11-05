@@ -290,6 +290,7 @@
         "close": "Cerrar",
         "error": "Error",
         "info": "Información",
+        "region": "Notificaciones",
         "success": "Éxito",
         "warning": "Advertencia"
     },

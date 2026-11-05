@@ -308,6 +308,7 @@ export const KO_KR_MESSAGES = {
         close: "닫기",
         error: "오류",
         info: "정보",
+        region: "알림",
         success: "성공",
         warning: "경고"
     },

@@ -321,6 +321,7 @@ export const IT_IT_MESSAGES = {
         close: "Chiudi",
         error: "Errore",
         info: "Informazioni",
+        region: "Notifiche",
         success: "Operazione riuscita",
         warning: "Avviso"
     },
