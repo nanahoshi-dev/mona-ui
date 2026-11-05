@@ -177,6 +177,8 @@ protected readonly sortField = signal("name");
 
 **Keep the menu open after a click.** Calling `event.preventDefault()` in a `(menuClick)` handler — on `<mona-contextmenu>` itself or on an individual item — prevents the menu from closing after that selection.
 
+**Identifying the item.** The click event's `value` is the item's `value` input, so handlers don't need to compare label text (which changes with translation). `label` is the item's label, and for checkbox and radio items `checked` is the state the item has once the click is applied.
+
 **Suppressing checkbox/radio state changes.** Calling `event.preventDefault()` on a `mona-contextmenu-checkbox-item`'s or `mona-contextmenu-radio-item`'s `menuClick` event suppresses the resulting `checkedChange` emission (checkbox item) or selection update (radio group). Use this to confirm or validate a change before it applies.
 
 **No open/close output.** `ContextMenuComponent` only exposes `menuClick`. It does not re-emit `PopupMenuComponent`'s `open`/`close`/`navigate` events. If your use case needs to react to the menu opening or closing, use `PopupMenuComponent` directly.
@@ -187,19 +189,19 @@ protected readonly sortField = signal("name");
 
 ### Keyboard navigation
 
-| Key                               | Action                                                                      |
-|-----------------------------------|-----------------------------------------------------------------------------|
-| Right-click                       | Opens the menu at the pointer position                                      |
-| `ContextMenu` key, or `Shift+F10` | Opens the menu at the target's center, while the target has focus           |
-| `ArrowDown`                       | Highlights the next item, wrapping to the first                             |
-| `ArrowUp`                         | Highlights the previous item, wrapping to the last                          |
-| `ArrowRight`                      | Opens the highlighted item's submenu, if it has nested items                |
-| `ArrowLeft`                       | Closes the current submenu and returns to the parent level                  |
-| `Home`                            | Highlights the first item                                                   |
-| `End`                             | Highlights the last item                                                    |
-| `Enter` / `Space`                 | Activates the highlighted item, or opens its submenu if it has nested items |
-| `Escape`                          | Closes the open submenu                                                     |
-| Letter, digit, space, `-`, or `_` | Jumps to (cycles through) items whose label starts with the typed text      |
+| Key                               | Action                                                                                                      |
+|-----------------------------------|-------------------------------------------------------------------------------------------------------------|
+| Right-click                       | Opens the menu at the pointer position                                                                      |
+| `ContextMenu` key, or `Shift+F10` | Opens the menu at the target's center, while the target has focus                                           |
+| `ArrowDown`                       | Highlights the next item, wrapping to the first. Disabled items are highlighted too, but can't be activated |
+| `ArrowUp`                         | Highlights the previous item, wrapping to the last                                                          |
+| `ArrowRight`                      | Opens the highlighted item's submenu, if it has nested items                                                |
+| `ArrowLeft`                       | Closes the current submenu and returns to the parent level                                                  |
+| `Home`                            | Highlights the first item                                                                                   |
+| `End`                             | Highlights the last item                                                                                    |
+| `Enter` / `Space`                 | Activates the highlighted item, or opens its submenu if it has nested items                                 |
+| `Escape`                          | Closes the open submenu                                                                                     |
+| Letter, digit, space, `-`, or `_` | Jumps to (cycles through) items whose label starts with the typed text                                      |
 
 ### ARIA
 
@@ -219,17 +221,18 @@ protected readonly sortField = signal("name");
 | `aria-orientation`      | Always                                               | `"vertical"`              |
 | `aria-activedescendant` | While an item is highlighted via keyboard or pointer | The highlighted item's ID |
 
-**Item** (`role="menuitem"`):
+**Item** (`role="menuitem"`, `"menuitemcheckbox"` or `"menuitemradio"`):
 
-| Attribute       | When present                         | Value                                |
-|-----------------|--------------------------------------|--------------------------------------|
-| `role`          | Always                               | `"menuitem"`                         |
-| `aria-disabled` | Always                               | Reflects the item's `disabled` input |
-| `aria-haspopup` | When the item has nested items       | `"menu"`                             |
-| `aria-expanded` | When the item has nested items       | `"true"` while its submenu is open   |
-| `aria-label`    | When the item's `label` is non-empty | The item's `label` text              |
+| Attribute       | When present                         | Value                                                                                    |
+|-----------------|--------------------------------------|------------------------------------------------------------------------------------------|
+| `role`          | Always                               | `"menuitem"`; `"menuitemcheckbox"` for checkbox items, `"menuitemradio"` for radio items |
+| `aria-checked`  | Checkbox and radio items             | `"true"` while checked or selected, otherwise `"false"`                                  |
+| `aria-disabled` | Always                               | Reflects the item's `disabled` input                                                     |
+| `aria-haspopup` | When the item has nested items       | `"menu"`                                                                                 |
+| `aria-expanded` | When the item has nested items       | `"true"` while its submenu is open                                                       |
+| `aria-label`    | When the item's `label` is non-empty | The item's `label` text                                                                  |
 
-**Group** (`role="group"`): carries `aria-labelledby` pointing at the group header. **Separator:** `role="separator"`.
+**Group** (`role="group"`): wraps a titled group's header and its items, with `aria-labelledby` pointing at the header. **Separator:** `role="separator"`.
 
 **Focus behavior:** focus stays on the `role="menu"` container rather than moving to individual items; the highlighted item is communicated through `aria-activedescendant`. When the menu is opened via keyboard, focus returns to the target element after the menu closes.
 
@@ -270,10 +273,11 @@ protected readonly sortField = signal("name");
 
 #### Inputs
 
-| Name       | Type      | Default | Description                                                           |
-|------------|-----------|---------|-----------------------------------------------------------------------|
-| `disabled` | `boolean` | `false` | Renders the item with reduced visual emphasis and prevents selection. |
-| `label`    | `string`  | `''`    | Display text of the item.                                             |
+| Name       | Type      | Default     | Description                                                             |
+|------------|-----------|-------------|-------------------------------------------------------------------------|
+| `disabled` | `boolean` | `false`     | Renders the item with reduced visual emphasis and prevents selection.   |
+| `label`    | `string`  | `''`        | Display text of the item.                                               |
+| `value`    | `unknown` | `undefined` | Identifies the item: it's the `value` of the item's `menuClick` events. |
 
 #### Outputs
 
@@ -289,11 +293,12 @@ protected readonly sortField = signal("name");
 
 #### Inputs
 
-| Name       | Type      | Default | Description                                                                 |
-|------------|-----------|---------|-----------------------------------------------------------------------------|
-| `checked`  | `boolean` | `false` | Whether the item is checked. Bind `(checkedChange)` to track state changes. |
-| `disabled` | `boolean` | `false` | Renders the item with reduced visual emphasis and prevents selection.       |
-| `label`    | `string`  | `''`    | Display text of the item.                                                   |
+| Name       | Type      | Default     | Description                                                                                                                                                    |
+|------------|-----------|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `checked`  | `boolean` | `false`     | Whether the item is checked. Two-way bindable with `[(checked)]`; activating the item toggles it (unless `menuClick` is prevented), with or without a binding. |
+| `disabled` | `boolean` | `false`     | Renders the item with reduced visual emphasis and prevents selection.                                                                                          |
+| `label`    | `string`  | `''`        | Display text of the item.                                                                                                                                      |
+| `value`    | `unknown` | `undefined` | Identifies the item: it's the `value` of the item's `menuClick` events.                                                                                        |
 
 #### Outputs
 
@@ -394,7 +399,7 @@ TODO(owner-review): `PopupMenuItem` (used by `ContextMenuComponent.items` and by
 - [x] menuClick output type documented as MenuItemClickEvent (exported alias for PopupMenuItemClickEvent, lib/index.ts) — not the unexported PopupMenuItemClickEvent name
 - [x] ContextMenuGroupComponent.title and ContextMenuRadioItemComponent.value confirmed as input.required<string>() — marked Required, default "—"
 - [x] ContextMenuRadioGroupComponent.value confirmed as model<string>("") — documented as two-way bindable
-- [x] ContextMenuCheckboxItemComponent.checked/checkedChange confirmed as plain input()/output() pair (not model()) — phrased to match DropdownButtonCheckboxItemComponent's documented convention
+- [x] ContextMenuCheckboxItemComponent.checked confirmed as model(false): two-way bindable, and the item toggles itself
 - [x] ariaLabel input confirmed unused anywhere in context-menu.component.ts — documented as TODO(owner-review), not as working behavior
 - [x] items input precedence over projected content verified against ContextMenuComponent.menuItems computed
 - [x] preventDefault-keeps-menu-open verified against PopupMenuComponent.setMenuItemClickSubscription

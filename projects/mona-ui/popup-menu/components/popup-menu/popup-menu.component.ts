@@ -23,7 +23,7 @@ import {
     PopupRef,
     PopupService
 } from "@nanahoshi/mona-ui/popup";
-import { any, groupBy, select } from "@mirei/ts-collections";
+import { any, select } from "@mirei/ts-collections";
 import { fromEvent, Subject, Subscription, take, takeUntil, tap } from "rxjs";
 import { PopupMenuCloseEvent } from "../../models/PopupMenuCloseEvent";
 import {
@@ -38,7 +38,7 @@ import { PopupMenuItemClickEvent } from "../../models/PopupMenuItemClickEvent";
 import { PopupMenuListConfig } from "../../models/PopupMenuListConfig";
 import { PopupMenuNavigationEvent } from "../../models/PopupMenuNavigationEvent";
 import { PopupMenuVariantInput, PopupMenuVariantProps } from "../../styles/popup-menu.styles";
-import { preparePopupMenuItems } from "../../utils/popup-menu.utils";
+import { groupPopupMenuItems, isMenuOwnedCheckState, preparePopupMenuItems } from "../../utils/popup-menu.utils";
 import { PopupMenuListComponent } from "../popup-menu-list/popup-menu-list.component";
 
 @Component({
@@ -93,10 +93,10 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
             const items = select(inputItems, i =>
                 Object.hasOwn(i, "uid") ? (i as PopupMenuItem) : preparePopupMenuItems([i as MenuItem])[0]
             );
-            return groupBy(items, i => i.group).toImmutableSet();
+            return groupPopupMenuItems(items);
         }
         const items = this.nestedComponents().flatMap(i => i.getPopupMenuItem());
-        return groupBy(items, i => i.group).toImmutableSet();
+        return groupPopupMenuItems(items);
     });
     protected popupRef: PopupRef | null = null;
 
@@ -338,6 +338,10 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
                     this.menuClick.emit(event);
                     if (event.isDefaultPrevented()) {
                         return;
+                    }
+                    const item = event.item;
+                    if (isMenuOwnedCheckState(item)) {
+                        item.checked.set(event.checked === true);
                     }
                     this.popupRef?.close();
                 })

@@ -68,6 +68,12 @@ export class PopupMenuItemComponent implements PopupMenuConfig, OnInit {
     public readonly origin: PopupMenuOrigin = PopupMenuOrigin.Popup;
     public readonly type: PopupMenuItemType = PopupMenuItemType.MenuItem;
 
+    /**
+     * @description A value that identifies the item. It's the `value` of the item's `menuClick` events, so
+     * handlers don't depend on the label's text.
+     */
+    public readonly value = input<unknown>();
+
     public getPopupMenuItem(): PopupMenuItem[] {
         return [
             {
@@ -83,7 +89,8 @@ export class PopupMenuItemComponent implements PopupMenuConfig, OnInit {
                 label: this.label(),
                 shortcutTemplate: computed(() => this.shortcutTemplateConfig()?.template ?? null),
                 textTemplate: computed(() => this.textTemplateConfig()?.template ?? null),
-                uid: v4()
+                uid: v4(),
+                value: computed(() => this.value())
             }
         ];
     }

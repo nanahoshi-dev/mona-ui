@@ -1,15 +1,14 @@
 import { Signal, TemplateRef } from "@angular/core";
-import { IGroup } from "@mirei/ts-collections";
 import { Subject } from "rxjs";
 import { PopupMenuVariantProps } from "../styles/popup-menu.styles";
-import { PopupMenuItem } from "./PopupMenuItem";
+import type { PopupMenuItemGroup } from "./PopupMenuItemGroup";
 import { PopupMenuItemClickEvent } from "./PopupMenuItemClickEvent";
 import { PopupMenuNavigationEvent } from "./PopupMenuNavigationEvent";
 
 export interface PopupMenuListConfig {
     childCloseRequest$?: Subject<void>;
     isRoot: boolean;
-    items: Iterable<IGroup<string | symbol, PopupMenuItem>>;
+    items: readonly PopupMenuItemGroup[];
     level: number;
     menuId: string;
     menuItemClick$: Subject<PopupMenuItemClickEvent>;

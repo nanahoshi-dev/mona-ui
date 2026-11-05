@@ -234,6 +234,8 @@ When `[aria-label]` is empty, the main button's `aria-label` is computed as `"{t
 
 `menuItemClick` on `SplitButtonComponent` fires for every item click in the popup (top-level aggregator). `menuClick` on individual `mona-split-button-item` / `mona-split-button-checkbox-item` / `mona-split-button-radio-item` fires only for that specific item. Use item-level `menuClick` when you need per-action handlers; use the top-level `menuItemClick` when you need a single entry point.
 
+
+The click event's `value` is the item's `value` input, so handlers don't need to compare label text. For checkbox and radio items, `checked` is the state the item has once the click is applied. Calling `event.preventDefault()` on a checkbox item's `menuClick` keeps its state, and on a radio item's keeps the group's value.
 ## Accessibility
 
 ### Keyboard navigation
@@ -297,10 +299,11 @@ The main button carries:
 
 #### Inputs
 
-| Name       | Type      | Default | Description                                                                         |
-|------------|-----------|---------|-------------------------------------------------------------------------------------|
-| `disabled` | `boolean` | `false` | Renders the menu item with reduced visual emphasis and removes pointer interaction. |
-| `label`    | `string`  | `''`    | Text label displayed in the menu item.                                              |
+| Name       | Type      | Default     | Description                                                                         |
+|------------|-----------|-------------|-------------------------------------------------------------------------------------|
+| `disabled` | `boolean` | `false`     | Renders the menu item with reduced visual emphasis and removes pointer interaction. |
+| `label`    | `string`  | `''`        | Text label displayed in the menu item.                                              |
+| `value`    | `unknown` | `undefined` | Identifies the item: it's the `value` of the item's `menuClick` events.             |
 
 #### Outputs
 
@@ -328,11 +331,12 @@ The main button carries:
 
 #### Inputs
 
-| Name       | Type      | Default | Description                                                                         |
-|------------|-----------|---------|-------------------------------------------------------------------------------------|
-| `checked`  | `boolean` | `false` | Whether the menu item is checked.                                                   |
-| `disabled` | `boolean` | `false` | Renders the menu item with reduced visual emphasis and removes pointer interaction. |
-| `label`    | `string`  | `''`    | Text label displayed in the menu item.                                              |
+| Name       | Type      | Default     | Description                                                                                                                                                    |
+|------------|-----------|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `checked`  | `boolean` | `false`     | Whether the item is checked. Two-way bindable with `[(checked)]`; activating the item toggles it (unless `menuClick` is prevented), with or without a binding. |
+| `disabled` | `boolean` | `false`     | Renders the menu item with reduced visual emphasis and removes pointer interaction.                                                                            |
+| `label`    | `string`  | `''`        | Text label displayed in the menu item.                                                                                                                         |
+| `value`    | `unknown` | `undefined` | Identifies the item: it's the `value` of the item's `menuClick` events.                                                                                        |
 
 #### Outputs
 

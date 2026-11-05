@@ -1,5 +1,4 @@
 import {
-    ChangeDetectionStrategy,
     Component,
     computed,
     contentChild,
@@ -28,7 +27,6 @@ import { PopupMenuItemClickEvent } from "../../models/PopupMenuItemClickEvent";
 @Component({
     selector: "mona-popup-menu-radio-item",
     template: "",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [
         {
             provide: PopupMenuToken,
@@ -62,7 +60,8 @@ export class PopupMenuRadioItemComponent implements PopupMenuConfig, OnInit {
 
     /**
      * @description The click event of the menu item.
-     * Emits when the menu item is selected by keyboard or mouse.
+     * Emits when the menu item is selected by keyboard or mouse, before the radio group selects it. Preventing it
+     * keeps the group's value and the menu open.
      */
     public readonly menuClick = output<PopupMenuItemClickEvent>();
     public readonly origin: PopupMenuOrigin = PopupMenuOrigin.Popup;
@@ -75,6 +74,7 @@ export class PopupMenuRadioItemComponent implements PopupMenuConfig, OnInit {
     public getPopupMenuItem(): PopupMenuItem[] {
         return [
             {
+                click$: this.#click$,
                 disabled: this.disabled(),
                 group: Symbol(),
                 groupTemplate: null,

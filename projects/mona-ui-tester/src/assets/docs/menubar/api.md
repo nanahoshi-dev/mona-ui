@@ -210,6 +210,8 @@ Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or
 
 **Keep the menu open after a click.** Calling `event.preventDefault()` in a `(menuItemClick)` handler — on `<mona-menubar>` itself or on an individual item's own `(menuClick)` — prevents the menu from closing after that selection.
 
+**Identifying the item.** The click event's `value` is the item's `value` input, so handlers don't need to compare label text (which changes with translation). `label` is the item's label, and for checkbox and radio items `checked` is the state the item has once the click is applied.
+
 **Suppressing checkbox/radio state changes.** Calling `event.preventDefault()` on a `mona-menu-checkbox-item`'s or `mona-menu-radio-item`'s `menuClick` event suppresses the resulting `checkedChange` emission (checkbox item) or selection update (radio group). Use this to confirm or validate a change before it applies.
 
 **Switching menus by pointer.** While one menu's popup is open, moving the pointer over a different (enabled) top-level menu closes the current popup and opens the new one. Hovering a disabled menu, or hovering while the menubar itself is disabled, has no effect.
@@ -234,8 +236,8 @@ Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or
 **Within an open menu's popup** (same list navigation as `ContextMenuComponent`):
 
 | Key                               | Action                                                                                                                              |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `ArrowDown`                       | Highlights the next item, wrapping to the first                                                                                     |
+|-----------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| `ArrowDown`                       | Highlights the next item, wrapping to the first. Disabled items are highlighted too, but can't be activated                         |
 | `ArrowUp`                         | Highlights the previous item, wrapping to the last                                                                                  |
 | `ArrowRight`                      | Opens the highlighted item's submenu if it has nested items; at the popup's root level, moves to the next top-level menu instead    |
 | `ArrowLeft`                       | Closes the current submenu and returns to the parent level; at the popup's root level, moves to the previous top-level menu instead |
@@ -267,7 +269,7 @@ Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or
 | `aria-expanded` | Always                          | `"true"` while that menu's popup is open, otherwise `"false"`                                  |
 | `aria-controls` | While that menu's popup is open | The popup menu container's auto-generated ID                                                   |
 
-**Popup menu container** (`role="menu"`), **item** (`role="menuitem"`), and **group** (`role="group"`): same attributes as `ContextMenuComponent`'s popup — see its documentation for the full table. In summary: the container carries `aria-orientation="vertical"` and `aria-activedescendant` while an item is highlighted; each item carries `aria-disabled`, `aria-haspopup`/`aria-expanded` when it has nested items, and `aria-label` when its `label` is non-empty; groups carry `aria-labelledby`.
+**Popup menu container** (`role="menu"`), **item** (`role="menuitem"`), and **group** (`role="group"`): same attributes as `ContextMenuComponent`'s popup — see its documentation for the full table. In summary: the container carries `aria-orientation="vertical"` and `aria-activedescendant` while an item is highlighted; checkbox and radio items are `menuitemcheckbox` and `menuitemradio` with `aria-checked`; each item carries `aria-disabled`, `aria-haspopup`/`aria-expanded` when it has nested items, and `aria-label` when its `label` is non-empty; groups wrap their header and items and carry `aria-labelledby`.
 
 **Focus behavior:** on the menubar itself, exactly one top-level menu is a Tab stop at a time (roving tabindex) and Arrow keys move it. Once a popup opens, focus moves into its `role="menu"` container the same way as `ContextMenuComponent`; the highlighted item is communicated through `aria-activedescendant` rather than DOM focus. When a popup opened via keyboard closes, focus returns to its triggering top-level menu.
 
@@ -325,10 +327,11 @@ A top-level menu. Its `text` is displayed on the menubar; its projected items (o
 
 #### Inputs
 
-| Name       | Type      | Default | Description                                                           |
-| ---------- | --------- | ------- | --------------------------------------------------------------------- |
-| `disabled` | `boolean` | `false` | Renders the item with reduced visual emphasis and prevents selection. |
-| `label`    | `string`  | `''`    | Display text of the item.                                             |
+| Name       | Type      | Default     | Description                                                             |
+|------------|-----------|-------------|-------------------------------------------------------------------------|
+| `disabled` | `boolean` | `false`     | Renders the item with reduced visual emphasis and prevents selection.   |
+| `label`    | `string`  | `''`        | Display text of the item.                                               |
+| `value`    | `unknown` | `undefined` | Identifies the item: it's the `value` of the item's `menuClick` events. |
 
 #### Outputs
 
@@ -344,11 +347,12 @@ A top-level menu. Its `text` is displayed on the menubar; its projected items (o
 
 #### Inputs
 
-| Name       | Type      | Default | Description                                                                 |
-| ---------- | --------- | ------- | --------------------------------------------------------------------------- |
-| `checked`  | `boolean` | `false` | Whether the item is checked. Bind `(checkedChange)` to track state changes. |
-| `disabled` | `boolean` | `false` | Renders the item with reduced visual emphasis and prevents selection.       |
-| `label`    | `string`  | `''`    | Display text of the item.                                                   |
+| Name       | Type      | Default     | Description                                                                                                                                                    |
+|------------|-----------|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `checked`  | `boolean` | `false`     | Whether the item is checked. Two-way bindable with `[(checked)]`; activating the item toggles it (unless `menuClick` is prevented), with or without a binding. |
+| `disabled` | `boolean` | `false`     | Renders the item with reduced visual emphasis and prevents selection.                                                                                          |
+| `label`    | `string`  | `''`        | Display text of the item.                                                                                                                                      |
+| `value`    | `unknown` | `undefined` | Identifies the item: it's the `value` of the item's `menuClick` events.                                                                                        |
 
 #### Outputs
 
@@ -462,7 +466,7 @@ TODO(owner-review): `PopupMenuItem` and `MenuItem` (used by `MenuComponent.items
 - [x] menuItemClick/menuClick output types documented as MenuItemClickEvent (exported alias for PopupMenuItemClickEvent, lib/index.ts) — not the unexported PopupMenuItemClickEvent name
 - [x] MenuGroupComponent.title and MenuRadioItemComponent.value confirmed as input.required<string>() — marked Required, default "—"
 - [x] MenuRadioGroupComponent.value confirmed as model<string>("") — documented as two-way bindable
-- [x] MenuCheckboxItemComponent.checked/checkedChange confirmed as plain input()/output() pair (not model())
+- [x] MenuCheckboxItemComponent.checked confirmed as model(false): two-way bindable, and the item toggles itself
 - [x] disabled-not-enforced-for-pointer/click bug (menubar and per-item) confirmed fixed in menubar.component.ts (onMenuPointerEnter/onMenuClick/onMenuKeyDown guards) before documenting "blocks click, hover, and keyboard activation" as fact
 - [x] Roving tabindex (single Tab stop) confirmed implemented via activeIndex signal in menubar.component.ts before documenting it as fact
 - [x] aria-controls / aria-expanded null-vs-null false-positive bug confirmed fixed in menubar.component.html before documenting aria-expanded/aria-controls as reliable

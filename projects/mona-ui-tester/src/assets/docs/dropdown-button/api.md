@@ -185,9 +185,13 @@ When `ariaLabel` is empty, the button's `aria-label` is computed as `"{text} dro
 
 `menuItemClick` on `DropdownButtonComponent` fires for any item in the popup. `menuClick` on individual `mona-dropdown-button-item`, `mona-dropdown-button-checkbox-item`, or `mona-dropdown-button-radio-item` fires only for that specific item. Use item-level `menuClick` for per-action handlers.
 
+### Identifying the clicked item
+
+The click event's `value` is the item's `value` input, so handlers don't need to compare label text (which changes with translation). `label` is the item's label, and for checkbox and radio items `checked` is the state the item has once the click is applied.
+
 ### Preventing default behavior in checkbox items
 
-Calling `event.preventDefault()` on the `menuClick` event of a `mona-dropdown-button-checkbox-item` suppresses both the state flip and the `checkedChange` emission. Use this when you need to validate or confirm the change before applying it.
+Calling `event.preventDefault()` on the `menuClick` event of a `mona-dropdown-button-checkbox-item` suppresses both the state flip and the `checkedChange` emission. On a `mona-dropdown-button-radio-item`, it keeps the radio group's value. Use this when you need to validate or confirm the change before applying it.
 
 ## Accessibility
 
@@ -253,10 +257,11 @@ The button element carries the following attributes:
 
 #### Inputs
 
-| Name       | Type      | Default | Description                                                                |
-| ---------- | --------- | ------- | -------------------------------------------------------------------------- |
-| `disabled` | `boolean` | `false` | Renders the menu item with reduced visual emphasis and prevents selection. |
-| `label`    | `string`  | `""`    | Display text of the menu item.                                             |
+| Name       | Type      | Default     | Description                                                                |
+|------------|-----------|-------------|----------------------------------------------------------------------------|
+| `disabled` | `boolean` | `false`     | Renders the menu item with reduced visual emphasis and prevents selection. |
+| `label`    | `string`  | `""`        | Display text of the menu item.                                             |
+| `value`    | `unknown` | `undefined` | Identifies the item: it's the `value` of the item's `menuClick` events.    |
 
 #### Outputs
 
@@ -284,11 +289,12 @@ The button element carries the following attributes:
 
 #### Inputs
 
-| Name       | Type      | Default | Description                                                                 |
-| ---------- | --------- | ------- | --------------------------------------------------------------------------- |
-| `checked`  | `boolean` | `false` | Whether the item is checked. Bind `(checkedChange)` to track state changes. |
-| `disabled` | `boolean` | `false` | Renders the menu item with reduced visual emphasis and prevents selection.  |
-| `label`    | `string`  | `""`    | Display text of the menu item.                                              |
+| Name       | Type      | Default     | Description                                                                                                                                                    |
+|------------|-----------|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `checked`  | `boolean` | `false`     | Whether the item is checked. Two-way bindable with `[(checked)]`; activating the item toggles it (unless `menuClick` is prevented), with or without a binding. |
+| `disabled` | `boolean` | `false`     | Renders the menu item with reduced visual emphasis and prevents selection.                                                                                     |
+| `label`    | `string`  | `""`        | Display text of the menu item.                                                                                                                                 |
+| `value`    | `unknown` | `undefined` | Identifies the item: it's the `value` of the item's `menuClick` events.                                                                                        |
 
 #### Outputs
 

@@ -5,12 +5,13 @@ import { LucideCheck, LucideChevronRight } from "@lucide/angular";
 import { createElementControlId, isNavigationKey, isTypeaheadKey, setupTypeahead } from "@nanahoshi/mona-ui/internal";
 import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { PopupCloseEvent, PopupDataInjectionToken, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
-import { groupBy, selectMany } from "@mirei/ts-collections";
+import { selectMany } from "@mirei/ts-collections";
 import { filter, fromEvent, Observable, Subject, switchMap, take, takeUntil, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { PopupMenuItem } from "../../models/PopupMenuItem";
 import { PopupMenuItemClickEvent } from "../../models/PopupMenuItemClickEvent";
 import { PopupMenuListConfig } from "../../models/PopupMenuListConfig";
+import { groupPopupMenuItems } from "../../utils/popup-menu.utils";
 import {
     popupMenuBaseThemeVariants,
     popupMenuContainerThemeVariants,
@@ -33,7 +34,7 @@ export class PopupMenuListComponent implements OnInit {
     readonly #childMenuItems = computed(() => {
         const activeMenuItem = this.activeMenuItem();
         if (activeMenuItem) {
-            return groupBy(activeMenuItem.items, item => item.group).toArray();
+            return groupPopupMenuItems(activeMenuItem.items);
         }
         return [];
     });
@@ -65,10 +66,11 @@ export class PopupMenuListComponent implements OnInit {
     readonly #host = inject(ElementRef<HTMLElement>);
     readonly #i18n = inject(MonaI18nService);
     protected readonly isRtl = computed(() => this.#direction() === "rtl");
+    // Disabled items stay in the arrow-key order (they can't be activated), as the APG menu pattern asks.
     readonly #navigationItems = computed(() => {
         const items = this.#parentConfig.items;
-        return selectMany(items, i => i.source)
-            .where(i => !i.separator && !i.disabled)
+        return selectMany(items, i => i.items)
+            .where(i => !i.separator)
             .toImmutableSet();
     });
     readonly #parentConfig = inject<PopupMenuListConfig>(PopupDataInjectionToken);
@@ -90,7 +92,7 @@ export class PopupMenuListComponent implements OnInit {
     });
     protected readonly iconAreaVisible = computed(() => {
         const items = this.#parentConfig.items;
-        const hasIconsOrSelectable = selectMany(items, i => i.source).any(
+        const hasIconsOrSelectable = selectMany(items, i => i.items).any(
             i => i.iconTemplate?.() != null || i.checkable === true || i.radio === true
         );
         return hasIconsOrSelectable || !!this.#parentConfig.popupIconTemplate?.();
@@ -136,7 +138,20 @@ export class PopupMenuListComponent implements OnInit {
         this.setSubscriptions();
     }
 
+    protected asItems(items: unknown): readonly PopupMenuItem[] {
+        return items as readonly PopupMenuItem[];
+    }
+
     protected onItemClick(event: MouseEvent, item: PopupMenuItem): void {
+        if (item.disabled) {
+            return;
+        }
+        if (item.items.length > 0) {
+            // An item with a submenu opens it; only leaf items are activated. A click with no pointer behind it
+            // (assistive technology) opens the submenu as the keyboard does.
+            this.openSubmenuFromClick(item, event.currentTarget as HTMLElement | null, event.detail === 0);
+            return;
+        }
         const popupMenuItemClickEvent = new PopupMenuItemClickEvent(item, event);
         item.click$?.next(popupMenuItemClickEvent);
         if (popupMenuItemClickEvent.isDefaultPrevented()) {
@@ -191,7 +206,6 @@ export class PopupMenuListComponent implements OnInit {
             .toArray();
         const activeMenuItem = this.activeMenuItem();
         if (matchedItems.length === 0) {
-            this.activeMenuItem.set(null);
             return;
         }
         if (matchedItems.length === 1) {
@@ -264,6 +278,9 @@ export class PopupMenuListComponent implements OnInit {
 
     private handleEnterKey(): void {
         const activeItem = this.activeMenuItem();
+        if (activeItem?.disabled) {
+            return;
+        }
         if (activeItem && activeItem.items.length > 0) {
             const target = this.#host.nativeElement.querySelector('[data-active="true"]');
             if (target) {
@@ -340,7 +357,7 @@ export class PopupMenuListComponent implements OnInit {
 
     private openSubmenu(): { item: PopupMenuItem | null; hasChild: boolean } {
         const activeItem = this.activeMenuItem();
-        if (!activeItem) {
+        if (!activeItem || activeItem.disabled) {
             return { item: null, hasChild: false };
         }
         const target = this.#host.nativeElement.querySelector('[data-active="true"]');
@@ -352,6 +369,15 @@ export class PopupMenuListComponent implements OnInit {
             return { item: activeItem, hasChild: true };
         }
         return { item: null, hasChild: false };
+    }
+
+    private openSubmenuFromClick(item: PopupMenuItem, target: HTMLElement | null, viaKeyboard: boolean): void {
+        if (!target || (this.popupRef && this.activeMenuItem() === item)) {
+            return;
+        }
+        this.closePopup();
+        this.activeMenuItem.set(item);
+        this.createSubmenu(target, viaKeyboard).subscribe();
     }
 
     private setKeyboardEvents(): void {

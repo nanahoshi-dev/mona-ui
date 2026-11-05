@@ -8241,17 +8241,11 @@
     "selector": "\"mona-contextmenu-checkbox-item\"",
     "inputs": [
       {
-        "description": "Sets the checked state of the menu item.",
-        "kind": "input",
+        "description": "The checked state of the menu item. Activating the item toggles it (unless its `menuClick` is\nprevented) and emits `checkedChange`, so it works with or without a two-way binding.",
+        "kind": "model",
         "name": "checked",
         "type": "boolean",
         "defaultValue": "false"
-      },
-      {
-        "description": "Emits when the checked state of the menu item changes.",
-        "kind": "output",
-        "name": "checkedChange",
-        "type": "boolean"
       },
       {
         "description": "Sets the disabled state of the menu item.",
@@ -8272,6 +8266,12 @@
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
+      },
+      {
+        "description": "A value that identifies the item. It's the `value` of the item's `menuClick` events.",
+        "kind": "input",
+        "name": "value",
+        "type": "unknown"
       }
     ]
   },
@@ -8310,6 +8310,12 @@
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
+      },
+      {
+        "description": "A value that identifies the item. It's the `value` of the item's `menuClick` events, so\nhandlers don't depend on the label's text.",
+        "kind": "input",
+        "name": "value",
+        "type": "unknown"
       }
     ]
   },
@@ -8352,7 +8358,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "description": "The click event of the menu item.\nEmits when the menu item is selected by keyboard or mouse, before the radio group selects it. Preventing it\nkeeps the group's value and the menu open.",
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
@@ -9066,17 +9072,11 @@
     "selector": "\"mona-dropdown-button-checkbox-item\"",
     "inputs": [
       {
-        "description": "Sets the checked state of the menu item.",
-        "kind": "input",
+        "description": "The checked state of the menu item. Activating the item toggles it (unless its `menuClick` is\nprevented) and emits `checkedChange`, so it works with or without a two-way binding.",
+        "kind": "model",
         "name": "checked",
         "type": "boolean",
         "defaultValue": "false"
-      },
-      {
-        "description": "Emits when the checked state of the menu item changes.",
-        "kind": "output",
-        "name": "checkedChange",
-        "type": "boolean"
       },
       {
         "description": "Sets the disabled state of the menu item.",
@@ -9097,6 +9097,12 @@
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
+      },
+      {
+        "description": "A value that identifies the item. It's the `value` of the item's `menuClick` events.",
+        "kind": "input",
+        "name": "value",
+        "type": "unknown"
       }
     ]
   },
@@ -9135,6 +9141,12 @@
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
+      },
+      {
+        "description": "A value that identifies the item. It's the `value` of the item's `menuClick` events, so\nhandlers don't depend on the label's text.",
+        "kind": "input",
+        "name": "value",
+        "type": "unknown"
       }
     ]
   },
@@ -9177,7 +9189,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "description": "The click event of the menu item.\nEmits when the menu item is selected by keyboard or mouse, before the radio group selects it. Preventing it\nkeeps the group's value and the menu open.",
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
@@ -10690,17 +10702,11 @@
     "selector": "\"mona-menu-checkbox-item\"",
     "inputs": [
       {
-        "description": "Sets the checked state of the menu item.",
-        "kind": "input",
+        "description": "The checked state of the menu item. Activating the item toggles it (unless its `menuClick` is\nprevented) and emits `checkedChange`, so it works with or without a two-way binding.",
+        "kind": "model",
         "name": "checked",
         "type": "boolean",
         "defaultValue": "false"
-      },
-      {
-        "description": "Emits when the checked state of the menu item changes.",
-        "kind": "output",
-        "name": "checkedChange",
-        "type": "boolean"
       },
       {
         "description": "Sets the disabled state of the menu item.",
@@ -10721,6 +10727,12 @@
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
+      },
+      {
+        "description": "A value that identifies the item. It's the `value` of the item's `menuClick` events.",
+        "kind": "input",
+        "name": "value",
+        "type": "unknown"
       }
     ]
   },
@@ -10759,6 +10771,12 @@
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
+      },
+      {
+        "description": "A value that identifies the item. It's the `value` of the item's `menuClick` events, so\nhandlers don't depend on the label's text.",
+        "kind": "input",
+        "name": "value",
+        "type": "unknown"
       }
     ]
   },
@@ -10801,7 +10819,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "description": "The click event of the menu item.\nEmits when the menu item is selected by keyboard or mouse, before the radio group selects it. Preventing it\nkeeps the group's value and the menu open.",
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
@@ -12369,17 +12387,11 @@
     "selector": "\"mona-popup-menu-checkbox-item\"",
     "inputs": [
       {
-        "description": "Sets the checked state of the menu item.",
-        "kind": "input",
+        "description": "The checked state of the menu item. Activating the item toggles it (unless its `menuClick` is\nprevented) and emits `checkedChange`, so it works with or without a two-way binding.",
+        "kind": "model",
         "name": "checked",
         "type": "boolean",
         "defaultValue": "false"
-      },
-      {
-        "description": "Emits when the checked state of the menu item changes.",
-        "kind": "output",
-        "name": "checkedChange",
-        "type": "boolean"
       },
       {
         "description": "Sets the disabled state of the menu item.",
@@ -12400,6 +12412,12 @@
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
+      },
+      {
+        "description": "A value that identifies the item. It's the `value` of the item's `menuClick` events.",
+        "kind": "input",
+        "name": "value",
+        "type": "unknown"
       }
     ]
   },
@@ -12438,6 +12456,12 @@
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
+      },
+      {
+        "description": "A value that identifies the item. It's the `value` of the item's `menuClick` events, so\nhandlers don't depend on the label's text.",
+        "kind": "input",
+        "name": "value",
+        "type": "unknown"
       }
     ]
   },
@@ -12480,7 +12504,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "description": "The click event of the menu item.\nEmits when the menu item is selected by keyboard or mouse, before the radio group selects it. Preventing it\nkeeps the group's value and the menu open.",
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
@@ -14014,17 +14038,11 @@
     "selector": "\"mona-split-button-checkbox-item\"",
     "inputs": [
       {
-        "description": "Sets the checked state of the menu item.",
-        "kind": "input",
+        "description": "The checked state of the menu item. Activating the item toggles it (unless its `menuClick` is\nprevented) and emits `checkedChange`, so it works with or without a two-way binding.",
+        "kind": "model",
         "name": "checked",
         "type": "boolean",
         "defaultValue": "false"
-      },
-      {
-        "description": "Emits when the checked state of the menu item changes.",
-        "kind": "output",
-        "name": "checkedChange",
-        "type": "boolean"
       },
       {
         "description": "Sets the disabled state of the menu item.",
@@ -14045,6 +14063,12 @@
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
+      },
+      {
+        "description": "A value that identifies the item. It's the `value` of the item's `menuClick` events.",
+        "kind": "input",
+        "name": "value",
+        "type": "unknown"
       }
     ]
   },
@@ -14083,6 +14107,12 @@
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
+      },
+      {
+        "description": "A value that identifies the item. It's the `value` of the item's `menuClick` events, so\nhandlers don't depend on the label's text.",
+        "kind": "input",
+        "name": "value",
+        "type": "unknown"
       }
     ]
   },
@@ -14125,7 +14155,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "description": "The click event of the menu item.\nEmits when the menu item is selected by keyboard or mouse, before the radio group selects it. Preventing it\nkeeps the group's value and the menu open.",
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
