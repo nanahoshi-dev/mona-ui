@@ -143,6 +143,7 @@ export const TR_TR_MESSAGES = {
         cancel: "İptal",
         codeBlock: "Kod bloğu",
         color: "Renk",
+        defaultFontFamily: "Varsayılan yazı tipi",
         deleteColumn: "Sütunu sil",
         deleteRow: "Satırı sil",
         deleteTable: "Tabloyu sil",

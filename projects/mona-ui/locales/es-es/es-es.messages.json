@@ -128,9 +128,11 @@
         "cancel": "Cancelar",
         "codeBlock": "Bloque de código",
         "color": "Color",
+        "defaultFontFamily": "Fuente predeterminada",
         "deleteColumn": "Eliminar columna",
         "deleteRow": "Eliminar fila",
         "deleteTable": "Eliminar tabla",
+
         "enterUrl": "Introducir la URL",
         "fontSize": "Tamaño de fuente",
         "format": "Formato",

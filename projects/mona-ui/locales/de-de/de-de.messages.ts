@@ -144,6 +144,7 @@ export const DE_DE_MESSAGES = {
         cancel: "Abbrechen",
         codeBlock: "Codeblock",
         color: "Farbe",
+        defaultFontFamily: "Standardschrift",
         deleteColumn: "Spalte löschen",
         deleteRow: "Zeile löschen",
         deleteTable: "Tabelle löschen",

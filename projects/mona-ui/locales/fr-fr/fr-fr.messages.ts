@@ -153,6 +153,7 @@ export const FR_FR_MESSAGES = {
         cancel: "Annuler",
         codeBlock: "Bloc de code",
         color: "Couleur",
+        defaultFontFamily: "Police par défaut",
         deleteColumn: "Supprimer la colonne",
         deleteRow: "Supprimer la ligne",
         deleteTable: "Supprimer le tableau",

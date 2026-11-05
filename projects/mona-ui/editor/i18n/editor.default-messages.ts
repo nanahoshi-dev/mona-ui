@@ -22,6 +22,7 @@ export const EDITOR_DEFAULT_MESSAGES: MonaEditorMessages = {
     cancel: "Cancel",
     codeBlock: "Code block",
     color: "Color",
+    defaultFontFamily: "Default font",
     deleteColumn: "Delete column",
     deleteRow: "Delete row",
     deleteTable: "Delete table",

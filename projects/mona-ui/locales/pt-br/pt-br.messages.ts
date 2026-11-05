@@ -145,6 +145,7 @@ export const PT_BR_MESSAGES = {
         cancel: "Cancelar",
         codeBlock: "Bloco de código",
         color: "Cor",
+        defaultFontFamily: "Fonte padrão",
         deleteColumn: "Excluir coluna",
         deleteRow: "Excluir linha",
         deleteTable: "Excluir tabela",

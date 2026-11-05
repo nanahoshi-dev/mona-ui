@@ -19,6 +19,6 @@ export class EditorCodeBlockComponent {
     });
 
     public onCodeBlockClick(): void {
-        this.#editorService.editor.chain().toggleCodeBlock().run();
+        this.#editorService.editor.chain().focus().toggleCodeBlock().run();
     }
 }

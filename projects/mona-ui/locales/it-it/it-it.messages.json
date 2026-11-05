@@ -128,9 +128,11 @@
         "cancel": "Annulla",
         "codeBlock": "Blocco di codice",
         "color": "Colore",
+        "defaultFontFamily": "Carattere predefinito",
         "deleteColumn": "Elimina colonna",
         "deleteRow": "Elimina riga",
         "deleteTable": "Elimina tabella",
+
         "enterUrl": "Inserisci l'URL",
         "fontSize": "Dimensione carattere",
         "format": "Formattazione",

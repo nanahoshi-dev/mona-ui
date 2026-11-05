@@ -26,6 +26,9 @@ export class EditorFontHighlightComponent {
     });
     protected readonly selectedColor = computed(() => {
         const state = this.#editorService.state();
+        if (!state) {
+            return "";
+        }
         if (state.selection.empty) {
             const marks = state.storedMarks || state.selection.$from.marks();
             const highlightMark = marks.find(mark => mark.type.name === "highlight");

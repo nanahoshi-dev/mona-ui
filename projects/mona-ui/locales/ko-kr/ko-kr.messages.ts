@@ -142,6 +142,7 @@ export const KO_KR_MESSAGES = {
         cancel: "취소",
         codeBlock: "코드 블록",
         color: "색상",
+        defaultFontFamily: "기본 글꼴",
         deleteColumn: "열 삭제",
         deleteRow: "행 삭제",
         deleteTable: "표 삭제",

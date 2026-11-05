@@ -144,6 +144,7 @@ export const IT_IT_MESSAGES = {
         cancel: "Annulla",
         codeBlock: "Blocco di codice",
         color: "Colore",
+        defaultFontFamily: "Carattere predefinito",
         deleteColumn: "Elimina colonna",
         deleteRow: "Elimina riga",
         deleteTable: "Elimina tabella",

@@ -151,6 +151,7 @@ export const AR_SA_MESSAGES = {
         cancel: "إلغاء",
         codeBlock: "كتلة تعليمات برمجية",
         color: "لون",
+        defaultFontFamily: "الخط الافتراضي",
         deleteColumn: "حذف العمود",
         deleteRow: "حذف الصف",
         deleteTable: "حذف الجدول",

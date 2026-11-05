@@ -152,6 +152,7 @@ export const RU_RU_MESSAGES = {
         cancel: "Отмена",
         codeBlock: "Блок кода",
         color: "Цвет",
+        defaultFontFamily: "Шрифт по умолчанию",
         deleteColumn: "Удалить столбец",
         deleteRow: "Удалить строку",
         deleteTable: "Удалить таблицу",

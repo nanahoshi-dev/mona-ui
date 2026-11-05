@@ -142,6 +142,7 @@ export const JA_JP_MESSAGES = {
         cancel: "キャンセル",
         codeBlock: "コードブロック",
         color: "色",
+        defaultFontFamily: "既定のフォント",
         deleteColumn: "列を削除",
         deleteRow: "行を削除",
         deleteTable: "表を削除",

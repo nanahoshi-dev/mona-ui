@@ -161,6 +161,7 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         cancel: null,
         codeBlock: null,
         color: null,
+        defaultFontFamily: null,
         deleteColumn: null,
         deleteRow: null,
         deleteTable: null,

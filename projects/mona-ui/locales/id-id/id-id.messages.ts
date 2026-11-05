@@ -142,6 +142,7 @@ export const ID_ID_MESSAGES = {
         cancel: "Batal",
         codeBlock: "Blok kode",
         color: "Warna",
+        defaultFontFamily: "Font default",
         deleteColumn: "Hapus kolom",
         deleteRow: "Hapus baris",
         deleteTable: "Hapus tabel",

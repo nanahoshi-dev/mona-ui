@@ -128,9 +128,11 @@
         "cancel": "取消",
         "codeBlock": "程式碼區塊",
         "color": "顏色",
+        "defaultFontFamily": "預設字型",
         "deleteColumn": "刪除欄",
         "deleteRow": "刪除列",
         "deleteTable": "刪除表格",
+
         "enterUrl": "輸入 URL",
         "fontSize": "字型大小",
         "format": "格式",

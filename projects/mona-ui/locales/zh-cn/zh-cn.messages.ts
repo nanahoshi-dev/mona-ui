@@ -142,6 +142,7 @@ export const ZH_CN_MESSAGES = {
         cancel: "取消",
         codeBlock: "代码块",
         color: "颜色",
+        defaultFontFamily: "默认字体",
         deleteColumn: "删除列",
         deleteRow: "删除行",
         deleteTable: "删除表格",

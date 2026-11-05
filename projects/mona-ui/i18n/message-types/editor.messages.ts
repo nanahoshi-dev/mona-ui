@@ -13,6 +13,7 @@ export interface MonaEditorMessages {
     readonly cancel: string;
     readonly codeBlock: string;
     readonly color: string;
+    readonly defaultFontFamily: string;
     readonly deleteColumn: string;
     readonly deleteRow: string;
     readonly deleteTable: string;

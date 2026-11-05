@@ -117,10 +117,14 @@ export class EditorTableComponent {
 
     public onTableInsert(event: EditorTableInsertEvent): void {
         this.popover()?.close();
-        this.#editorService.editor.commands.insertTable({
-            rows: event.row,
-            cols: event.col
-        });
+        this.#editorService.editor
+            .chain()
+            .focus()
+            .insertTable({
+                cols: event.col,
+                rows: event.row
+            })
+            .run();
     }
 
     public onToggleHeaderRow(): void {

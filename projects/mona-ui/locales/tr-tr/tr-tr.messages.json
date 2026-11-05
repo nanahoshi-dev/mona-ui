@@ -128,9 +128,11 @@
         "cancel": "İptal",
         "codeBlock": "Kod bloğu",
         "color": "Renk",
+        "defaultFontFamily": "Varsayılan yazı tipi",
         "deleteColumn": "Sütunu sil",
         "deleteRow": "Satırı sil",
         "deleteTable": "Tabloyu sil",
+
         "enterUrl": "URL'yi gir",
         "fontSize": "Yazı tipi boyutu",
         "format": "Biçim",

@@ -143,6 +143,7 @@ export const ES_ES_MESSAGES = {
         cancel: "Cancelar",
         codeBlock: "Bloque de código",
         color: "Color",
+        defaultFontFamily: "Fuente predeterminada",
         deleteColumn: "Eliminar columna",
         deleteRow: "Eliminar fila",
         deleteTable: "Eliminar tabla",

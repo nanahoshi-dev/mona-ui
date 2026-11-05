@@ -128,9 +128,11 @@
         "cancel": "إلغاء",
         "codeBlock": "كتلة تعليمات برمجية",
         "color": "لون",
+        "defaultFontFamily": "الخط الافتراضي",
         "deleteColumn": "حذف العمود",
         "deleteRow": "حذف الصف",
         "deleteTable": "حذف الجدول",
+
         "enterUrl": "إدخال عنوان URL",
         "fontSize": "حجم الخط",
         "format": "تنسيق",

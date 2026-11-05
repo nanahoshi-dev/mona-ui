@@ -128,9 +128,11 @@
         "cancel": "취소",
         "codeBlock": "코드 블록",
         "color": "색상",
+        "defaultFontFamily": "기본 글꼴",
         "deleteColumn": "열 삭제",
         "deleteRow": "행 삭제",
         "deleteTable": "표 삭제",
+
         "enterUrl": "URL 입력",
         "fontSize": "글꼴 크기",
         "format": "서식",

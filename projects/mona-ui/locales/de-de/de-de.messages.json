@@ -128,9 +128,11 @@
         "cancel": "Abbrechen",
         "codeBlock": "Codeblock",
         "color": "Farbe",
+        "defaultFontFamily": "Standardschrift",
         "deleteColumn": "Spalte löschen",
         "deleteRow": "Zeile löschen",
         "deleteTable": "Tabelle löschen",
+
         "enterUrl": "URL eingeben",
         "fontSize": "Schriftgröße",
         "format": "Format",

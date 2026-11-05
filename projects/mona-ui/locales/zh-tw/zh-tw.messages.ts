@@ -142,6 +142,7 @@ export const ZH_TW_MESSAGES = {
         cancel: "取消",
         codeBlock: "程式碼區塊",
         color: "顏色",
+        defaultFontFamily: "預設字型",
         deleteColumn: "刪除欄",
         deleteRow: "刪除列",
         deleteTable: "刪除表格",

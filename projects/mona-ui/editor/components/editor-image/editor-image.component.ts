@@ -42,14 +42,13 @@ export class EditorImageComponent {
     private insertImage(event: EditorImageInsertEvent): void {
         this.#editorService.editor
             .chain()
+            .focus()
             .setImage({
-                src: event.link,
                 alt: event.alt,
-                title: event.alt
-            })
-            .updateAttributes("extendedImage", {
-                width: event.width,
-                height: event.height
+                height: event.height ?? undefined,
+                src: event.link,
+                title: event.alt,
+                width: event.width ?? undefined
             })
             .run();
     }

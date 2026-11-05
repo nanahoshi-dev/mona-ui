@@ -36,7 +36,7 @@ export class EditorHeadingsComponent {
     });
     protected readonly selectedHeadingsDropdownItem = computed(() => {
         const state = this.#editorService.state();
-        const node = state.selection.$from.node();
+        const node = state?.selection.$from.node();
         const data = this.headingsDropdownListData();
         if (node && node.type.name === "heading") {
             return data.find(item => item.value === node.attrs["level"]);
