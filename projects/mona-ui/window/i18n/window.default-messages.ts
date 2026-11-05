@@ -8,6 +8,7 @@ export const WINDOW_DEFAULT_MESSAGES: MonaWindowMessages = {
     closeWindow: "Close window",
     maximize: "Maximize",
     minimize: "Minimize",
+    moveOrResizeWindow: "Move or resize window. Use arrow keys to move, or Control and arrow keys to resize.",
     moveWindow: "Move window. Use arrow keys to move.",
     resizeBottom: "Resize window from the bottom. Use arrow keys to resize.",
     resizeBottomLeft: "Resize window from the bottom-left corner. Use arrow keys to resize.",
@@ -17,5 +18,6 @@ export const WINDOW_DEFAULT_MESSAGES: MonaWindowMessages = {
     resizeTop: "Resize window from the top. Use arrow keys to resize.",
     resizeTopLeft: "Resize window from the top-left corner. Use arrow keys to resize.",
     resizeTopRight: "Resize window from the top-right corner. Use arrow keys to resize.",
+    resizeWindow: "Resize window. Use Control and arrow keys to resize.",
     restore: "Restore"
 };

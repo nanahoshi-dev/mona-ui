@@ -427,6 +427,7 @@ export const ZH_TW_MESSAGES = {
         closeWindow: "關閉視窗",
         maximize: "最大化",
         minimize: "最小化",
+        moveOrResizeWindow: "移動或調整視窗大小。使用方向鍵移動，或使用 Ctrl 加方向鍵調整大小。",
         moveWindow: "移動視窗。使用方向鍵移動。",
         resizeBottom: "從底部調整視窗大小。使用方向鍵調整大小。",
         resizeBottomLeft: "從左下角調整視窗大小。使用方向鍵調整大小。",
@@ -436,6 +437,7 @@ export const ZH_TW_MESSAGES = {
         resizeTop: "從頂部調整視窗大小。使用方向鍵調整大小。",
         resizeTopLeft: "從左上角調整視窗大小。使用方向鍵調整大小。",
         resizeTopRight: "從右上角調整視窗大小。使用方向鍵調整大小。",
+        resizeWindow: "調整視窗大小。使用 Ctrl 加方向鍵調整大小。",
         restore: "還原"
     }
 } satisfies MonaLocaleMessages;

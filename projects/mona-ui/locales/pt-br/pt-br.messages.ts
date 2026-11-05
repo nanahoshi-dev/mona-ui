@@ -446,6 +446,8 @@ export const PT_BR_MESSAGES = {
         closeWindow: "Fechar janela",
         maximize: "Maximizar",
         minimize: "Minimizar",
+        moveOrResizeWindow:
+            "Mover ou redimensionar janela. Use as teclas de seta para mover, ou Ctrl e as teclas de seta para redimensionar.",
         moveWindow: "Mover janela. Use as teclas de seta para mover.",
         resizeBottom: "Redimensionar janela a partir da borda inferior. Use as teclas de seta para redimensionar.",
         resizeBottomLeft:
@@ -459,6 +461,7 @@ export const PT_BR_MESSAGES = {
             "Redimensionar janela a partir do canto superior esquerdo. Use as teclas de seta para redimensionar.",
         resizeTopRight:
             "Redimensionar janela a partir do canto superior direito. Use as teclas de seta para redimensionar.",
+        resizeWindow: "Redimensionar janela. Use Ctrl e as teclas de seta para redimensionar.",
         restore: "Restaurar"
     }
 } satisfies MonaLocaleMessages;

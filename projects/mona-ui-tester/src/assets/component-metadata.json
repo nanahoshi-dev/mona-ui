@@ -2294,6 +2294,37 @@
       {
         "description": "",
         "kind": "input",
+        "name": "maxHeight",
+        "type": "number"
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "maxWidth",
+        "type": "number"
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "minHeight",
+        "type": "number"
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "minWidth",
+        "type": "number"
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "resizable",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "",
+        "kind": "input",
         "name": "windowRef",
         "type": "WindowReference",
         "required": true
@@ -15384,6 +15415,12 @@
     "selector": "\"mona-window\"",
     "inputs": [
       {
+        "description": "Accessible name for the window when it has no `title` or title template.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string"
+      },
+      {
         "description": "Sets the visibility of the close button in the window header.",
         "kind": "input",
         "name": "closable",
@@ -15391,7 +15428,7 @@
         "defaultValue": "true"
       },
       {
-        "description": "",
+        "description": "Emits before the window closes, whatever closes it: the close button, Escape, a programmatic close,\nor the component being destroyed. Call `preventDefault()` to keep it open (a close caused by destruction can't\nbe kept).",
         "kind": "output",
         "name": "close",
         "type": "PopupCloseEvent"

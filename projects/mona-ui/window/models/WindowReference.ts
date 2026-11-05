@@ -1,18 +1,32 @@
-import { ComponentRef } from "@angular/core";
-import { PopupCloseEvent, PopupCloseSource, PopupRef } from "@nanahoshi/mona-ui/popup";
-import { asapScheduler, map, Observable, Subject } from "rxjs";
-import { DEFAULT_MAX_WINDOW_HEIGHT, DEFAULT_MAX_WINDOW_WIDTH } from "../utils/defaults";
-import { MoveEvent } from "./MoveEvent";
-import { ResizeEvent } from "./ResizeEvent";
+import type { OverlaySizeConfig } from "@angular/cdk/overlay";
+import type { ComponentRef } from "@angular/core";
+import { positionGlobalOverlay } from "@nanahoshi/mona-ui/internal";
+import { PopupCloseEvent, PopupCloseSource, type PopupRef } from "@nanahoshi/mona-ui/popup";
+import { asapScheduler, map, merge, type Observable, ReplaySubject, Subject, take, takeUntil } from "rxjs";
+import type { MoveEvent } from "./MoveEvent";
+import type { ResizeEvent } from "./ResizeEvent";
 import { WindowRef } from "./WindowRef";
-import { WindowReferenceOptions } from "./WindowReferenceOptions";
-import { WindowRefParams } from "./WindowRefParams";
+import type { WindowReferenceOptions } from "./WindowReferenceOptions";
+import type { WindowRefParams } from "./WindowRefParams";
+import type { WindowResult } from "./WindowResult";
+
+/** Marks the overlay hosts that hold a window, so a window can be raised above the other windows. */
+export const WINDOW_HOST_CLASS = "mona-window-host";
+
+/** Where a window sits, in pixels from the viewport's top-left corner; `null` centers it on that axis. */
+export interface WindowPlacement {
+    readonly left: number | null;
+    readonly top: number | null;
+}
 
 /**
  * @internal - used by WindowService. Do not export.
  */
 export class WindowReference<R = unknown> implements WindowRefParams<R> {
+    readonly #closed$ = new ReplaySubject<WindowResult<R>>(1);
     readonly #windowRef: WindowRef<R>;
+    #left: number | null = null;
+    #top: number | null = null;
     public readonly move$$: Subject<MoveEvent> = new Subject<MoveEvent>();
     public readonly moveEnd$$: Subject<void> = new Subject<void>();
     public readonly moveStart$$: Subject<void> = new Subject<void>();
@@ -25,14 +39,33 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
         this.#windowRef = new WindowRef<R>(this);
     }
 
+    /**
+     * Raises the window above the other open windows, keeping focus where it was inside it. Other overlays keep
+     * their order.
+     */
+    public bringToFront(): void {
+        const host = this.#popupRefOrThrow.overlayRef.hostElement;
+        const container = host.parentElement;
+        if (!container) {
+            return;
+        }
+        const windows = Array.from(container.children).filter(child => child.classList.contains(WINDOW_HOST_CLASS));
+        const topmost = windows.at(-1);
+        if (!topmost || topmost === host) {
+            return;
+        }
+        const active = this.document.activeElement;
+        const focused = active instanceof HTMLElement && host.contains(active) ? active : null;
+        topmost.after(host);
+        if (focused && this.document.activeElement !== focused) {
+            focused.focus({ preventScroll: true });
+        }
+    }
+
     public center(): void {
-        const element = this.#popupRefOrThrow.overlayRef.overlayElement;
-        const width = element.getBoundingClientRect().width;
-        const height = element.getBoundingClientRect().height;
-        const left = (this.document.defaultView?.innerWidth || DEFAULT_MAX_WINDOW_WIDTH - width) / 2;
-        const top = (this.document.defaultView?.innerHeight || DEFAULT_MAX_WINDOW_HEIGHT - height) / 2;
-        element.style.left = `${left}px`;
-        element.style.top = `${top}px`;
+        this.#left = null;
+        this.#top = null;
+        this.#place();
     }
 
     public close(result?: R): void {
@@ -47,56 +80,110 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
         asapScheduler.schedule(() => this.close(result), delay);
     }
 
-    public initializePopupRef(popupRef: PopupRef): void {
+    /**
+     * Connects the window to its popup and places it: at `left`/`top`, or centered on an axis that isn't given.
+     */
+    public initializePopupRef(popupRef: PopupRef, placement: Partial<WindowPlacement> = {}): void {
         this.options.popupRef = popupRef;
+        this.#left = placement.left ?? null;
+        this.#top = placement.top ?? null;
+        popupRef.overlayRef.hostElement.classList.add(WINDOW_HOST_CLASS);
+        this.#place();
+        popupRef.closed.pipe(take(1)).subscribe(event => {
+            this.move$$.complete();
+            this.moveEnd$$.complete();
+            this.moveStart$$.complete();
+            this.resize$$.complete();
+            this.#closed$.next({
+                value: event.result as R | undefined,
+                via: event.via ?? PopupCloseSource.Programmatic
+            });
+            this.#closed$.complete();
+        });
     }
 
+    /**
+     * Moves the window. An axis that isn't given keeps its place.
+     */
     public move(params: { top?: number; left?: number }): void {
-        const element = this.#popupRefOrThrow.overlayRef.overlayElement;
-        const top = params.top != null ? `${params.top}px` : ``;
-        const left = params.left != null ? `${params.left}px` : ``;
-        element.style.top = top;
-        element.style.left = left;
+        if (params.left != null) {
+            this.#left = params.left;
+        }
+        if (params.top != null) {
+            this.#top = params.top;
+        }
+        this.#place();
     }
 
+    /**
+     * Places the window on both axes at once; `null` centers it on that axis.
+     */
+    public place(placement: WindowPlacement): void {
+        this.#left = placement.left;
+        this.#top = placement.top;
+        this.#place();
+    }
+
+    /**
+     * Resizes the window. A dimension that isn't given keeps its size.
+     */
     public resize(params: { width?: number; height?: number; center?: boolean }): void {
-        const element = this.#popupRefOrThrow.overlayRef.overlayElement;
-        const width = params.width ? `${params.width}px` : ``;
-        const height = params.height ? `${params.height}px` : ``;
-        element.style.width = width;
-        element.style.height = height;
-        if (params.center) {
-            asapScheduler.schedule(() => this.center());
+        const size: OverlaySizeConfig = {};
+        if (params.width != null) {
+            size.width = params.width;
         }
+        if (params.height != null) {
+            size.height = params.height;
+        }
+        if (size.width != null || size.height != null) {
+            this.setSize(size);
+        }
+        if (params.center) {
+            this.center();
+        }
+    }
+
+    public setComponentRef(componentRef: ComponentRef<unknown> | undefined): void {
+        this.options.componentRef = componentRef;
+    }
+
+    /**
+     * Sets any of the overlay's sizes, CSS lengths included. Sizes that aren't given keep their value.
+     */
+    public setSize(size: OverlaySizeConfig): void {
+        this.#popupRefOrThrow.overlayRef.updateSize(size);
+    }
+
+    #place(): void {
+        positionGlobalOverlay(this.#popupRefOrThrow.overlayRef, { left: this.#left, top: this.#top });
     }
 
     public get close$(): Observable<PopupCloseEvent<R>> {
-        return this.#popupRefOrThrow.beforeClose.pipe(map(event => event as PopupCloseEvent<R>));
+        const popupRef = this.#popupRefOrThrow;
+        return popupRef.beforeClose.pipe(
+            takeUntil(merge(popupRef.closed, this.#closed$).pipe(take(1))),
+            map(event => event as PopupCloseEvent<R>)
+        );
     }
 
-    public get closed$(): Observable<void> {
-        return this.#popupRefOrThrow.closed.pipe(map(() => undefined));
+    public get closed$(): Observable<WindowResult<R>> {
+        return this.#closed$.asObservable();
     }
 
     public get component(): ComponentRef<unknown> | null {
-        // The type of component is ComponentRef<WindowContentComponent>. It is set as unknown to avoid circular dependency.
-        const popupComponent = this.popupRef.component;
-        if (!popupComponent) {
-            return null;
-        }
-        return (popupComponent as ComponentRef<{ componentRef: ComponentRef<unknown> }>).instance.componentRef ?? null;
+        return this.options.componentRef ?? null;
     }
 
     public get drag$(): Observable<MoveEvent> {
-        return this.move$$;
+        return this.move$$.asObservable();
     }
 
     public get dragEnd$(): Observable<void> {
-        return this.moveEnd$$;
+        return this.moveEnd$$.asObservable();
     }
 
     public get dragStart$(): Observable<void> {
-        return this.moveStart$$;
+        return this.moveStart$$.asObservable();
     }
 
     public get element(): HTMLElement {
@@ -107,12 +194,24 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
         return this.element.offsetHeight;
     }
 
+    /** Where the window was last placed; `null` on an axis it is centered on. */
+    public get placement(): WindowPlacement {
+        return { left: this.#left, top: this.#top };
+    }
+
     public get popupRef(): PopupRef {
         return this.#popupRefOrThrow;
     }
 
     public get resize$(): Observable<ResizeEvent> {
-        return this.resize$$;
+        return this.resize$$.asObservable();
+    }
+
+    /** The sizes the overlay was last given, as set (pixels or CSS lengths). */
+    public get size(): OverlaySizeConfig {
+        const { height, maxHeight, maxWidth, minHeight, minWidth, width } =
+            this.#popupRefOrThrow.overlayRef.getConfig();
+        return { height, maxHeight, maxWidth, minHeight, minWidth, width };
     }
 
     public get width(): number {

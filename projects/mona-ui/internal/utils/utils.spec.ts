@@ -2,40 +2,10 @@ import { firstValueFrom } from "rxjs";
 import { rgba2hex } from "./color/rgba2hex";
 import { createElementControlId } from "./core/createElementControlId";
 import { rxFromResize } from "./core/rxFromResize";
-import { setWindowStyles } from "./setWindowStyles";
 import { toCssValue } from "./toCssValue";
 import { isTypeaheadKey } from "./typeahead.util";
 
 describe("internal utils", () => {
-    describe("setWindowStyles", () => {
-        it("should add a string windowClass as whole class names", () => {
-            const element = document.createElement("div");
-            setWindowStyles(element, { windowClass: "my-window  elevated" });
-            expect(Array.from(element.classList)).toEqual(["my-window", "elevated"]);
-        });
-
-        it("should add every class of an array windowClass and skip empty entries", () => {
-            const element = document.createElement("div");
-            setWindowStyles(element, { windowClass: ["first", "", "second"] });
-            expect(Array.from(element.classList)).toEqual(["first", "second"]);
-        });
-
-        it("should position the element at zero instead of centering it", () => {
-            const element = document.createElement("div");
-            setWindowStyles(element, { top: 0, left: 0, minWidth: 0 });
-            expect(element.style.top).toBe("0px");
-            expect(element.style.left).toBe("0px");
-            expect(element.style.minWidth).toBe("0px");
-        });
-
-        it("should center the element when no position is given", () => {
-            const element = document.createElement("div");
-            setWindowStyles(element, {});
-            expect(element.style.top).toContain("calc(50%");
-            expect(element.style.left).toContain("calc(50%");
-        });
-    });
-
     describe("rxFromResize", () => {
         it("should accept non-array iterables of elements", async () => {
             const observed: Element[] = [];

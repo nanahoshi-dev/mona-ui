@@ -428,6 +428,8 @@ export const JA_JP_MESSAGES = {
         closeWindow: "ウィンドウを閉じる",
         maximize: "最大化",
         minimize: "最小化",
+        moveOrResizeWindow:
+            "ウィンドウを移動またはサイズ変更。矢印キーで移動し、Ctrl キーと矢印キーでサイズを変更します。",
         moveWindow: "ウィンドウを移動。矢印キーで移動します。",
         resizeBottom: "下辺からウィンドウのサイズを変更。矢印キーでサイズを変更します。",
         resizeBottomLeft: "左下隅からウィンドウのサイズを変更。矢印キーでサイズを変更します。",
@@ -437,6 +439,7 @@ export const JA_JP_MESSAGES = {
         resizeTop: "上辺からウィンドウのサイズを変更。矢印キーでサイズを変更します。",
         resizeTopLeft: "左上隅からウィンドウのサイズを変更。矢印キーでサイズを変更します。",
         resizeTopRight: "右上隅からウィンドウのサイズを変更。矢印キーでサイズを変更します。",
+        resizeWindow: "ウィンドウのサイズを変更。Ctrl キーと矢印キーでサイズを変更します。",
         restore: "元のサイズに戻す"
     }
 } satisfies MonaLocaleMessages;

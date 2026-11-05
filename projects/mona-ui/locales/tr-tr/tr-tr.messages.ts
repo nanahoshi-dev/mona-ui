@@ -429,6 +429,8 @@ export const TR_TR_MESSAGES = {
         closeWindow: "Pencereyi kapat",
         maximize: "Ekranı kapla",
         minimize: "Simge durumuna küçült",
+        moveOrResizeWindow:
+            "Pencereyi taşı veya yeniden boyutlandır. Taşımak için ok tuşlarını, yeniden boyutlandırmak için Ctrl ve ok tuşlarını kullanın.",
         moveWindow: "Pencereyi taşı. Taşımak için ok tuşlarını kullanın.",
         resizeBottom:
             "Pencereyi alt kenardan yeniden boyutlandırın. Yeniden boyutlandırmak için ok tuşlarını kullanın.",
@@ -443,6 +445,7 @@ export const TR_TR_MESSAGES = {
             "Pencereyi sol üst köşeden yeniden boyutlandırın. Yeniden boyutlandırmak için ok tuşlarını kullanın.",
         resizeTopRight:
             "Pencereyi sağ üst köşeden yeniden boyutlandırın. Yeniden boyutlandırmak için ok tuşlarını kullanın.",
+        resizeWindow: "Pencereyi yeniden boyutlandır. Yeniden boyutlandırmak için Ctrl ve ok tuşlarını kullanın.",
         restore: "Geri yükle"
     }
 } satisfies MonaLocaleMessages;

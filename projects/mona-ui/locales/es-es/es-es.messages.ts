@@ -448,6 +448,8 @@ export const ES_ES_MESSAGES = {
         closeWindow: "Cerrar ventana",
         maximize: "Maximizar",
         minimize: "Minimizar",
+        moveOrResizeWindow:
+            "Mover o cambiar el tamaño de la ventana. Usa las teclas de flecha para mover, o Ctrl y las teclas de flecha para cambiar el tamaño.",
         moveWindow: "Mover ventana. Usa las teclas de flecha para mover.",
         resizeBottom: "Cambiar tamaño de ventana desde abajo. Usa las teclas de flecha para cambiar el tamaño.",
         resizeBottomLeft:
@@ -461,6 +463,7 @@ export const ES_ES_MESSAGES = {
             "Cambiar tamaño de ventana desde la esquina superior izquierda. Usa las teclas de flecha para cambiar el tamaño.",
         resizeTopRight:
             "Cambiar tamaño de ventana desde la esquina superior derecha. Usa las teclas de flecha para cambiar el tamaño.",
+        resizeWindow: "Cambiar el tamaño de la ventana. Usa Ctrl y las teclas de flecha para cambiar el tamaño.",
         restore: "Restaurar"
     }
 } satisfies MonaLocaleMessages;

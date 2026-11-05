@@ -25,7 +25,6 @@ export * from "./utils/core/rxTimeout";
 export * from "./utils/core/VariantInputs";
 export * from "./utils/core/themeSurfaceClasses";
 export * from "./utils/restoreOverlayScroll";
-export * from "./utils/setWindowStyles";
 export * from "./utils/toCssValue";
 export * from "./utils/navigation.utils";
 export * from "./utils/typeahead.util";

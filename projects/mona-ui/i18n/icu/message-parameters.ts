@@ -482,6 +482,7 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         closeWindow: null,
         maximize: null,
         minimize: null,
+        moveOrResizeWindow: null,
         moveWindow: null,
         resizeBottom: null,
         resizeBottomLeft: null,
@@ -491,6 +492,7 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         resizeTop: null,
         resizeTopLeft: null,
         resizeTopRight: null,
+        resizeWindow: null,
         restore: null
     }
 };

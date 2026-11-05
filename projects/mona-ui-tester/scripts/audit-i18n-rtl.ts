@@ -453,12 +453,6 @@ export const ALLOWLIST: AllowlistEntry[] = [
         lineSnippet: "left,",
         reason: "Tree drop hint position calculation explicitly branches on isRtl"
     },
-    {
-        category: "rtl-physical-style",
-        filePattern: "projects/mona-ui/internal/utils/setWindowStyles.ts",
-        lineSnippet: "left,",
-        reason: "Desktop window floating coordinate management operates in 2D viewport coordinates"
-    },
 
     // Manual review exemptions for directional gradients, translate transforms, and DOM/coordinate operations
     {

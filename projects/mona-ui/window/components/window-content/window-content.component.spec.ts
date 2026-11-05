@@ -48,7 +48,11 @@ describe("WindowContentComponent", () => {
 
     it("renders default English messages for header action buttons and drag handler", () => {
         const dragBar = fixture.nativeElement.querySelector("[monaWindowDragHandler]");
-        expect(dragBar?.getAttribute("aria-label")).toBe("Move window. Use arrow keys to move.");
+        expect(dragBar?.getAttribute("aria-label")).toBe(
+            "Move or resize window. Use arrow keys to move, or Control and arrow keys to resize."
+        );
+        expect(dragBar?.getAttribute("role")).toBe("group");
+        expect(dragBar?.getAttribute("tabindex")).toBe("0");
 
         const buttons = fixture.nativeElement.querySelectorAll("button[monaButton]");
         const minimizeBtn = buttons[0] as HTMLButtonElement;
@@ -65,19 +69,23 @@ describe("WindowContentComponent", () => {
         expect(closeBtn.getAttribute("title")).toBe("Close");
     });
 
-    it("renders default English messages for resize handles", () => {
-        const resizers = fixture.nativeElement.querySelectorAll("[monaWindowResizeHandler]");
-        expect(resizers.length).toBe(8);
-
-        const north = fixture.nativeElement.querySelector("[monaWindowResizeHandler][direction='north']");
-        const south = fixture.nativeElement.querySelector("[monaWindowResizeHandler][direction='south']");
-        const east = fixture.nativeElement.querySelector("[monaWindowResizeHandler][direction='east']");
-        const west = fixture.nativeElement.querySelector("[monaWindowResizeHandler][direction='west']");
-
-        expect(north?.getAttribute("aria-label")).toBe("Resize window from the top. Use arrow keys to resize.");
-        expect(south?.getAttribute("aria-label")).toBe("Resize window from the bottom. Use arrow keys to resize.");
-        expect(east?.getAttribute("aria-label")).toBe("Resize window from the right. Use arrow keys to resize.");
-        expect(west?.getAttribute("aria-label")).toBe("Resize window from the left. Use arrow keys to resize.");
+    it("keeps the resize handles out of the Tab order and the accessibility tree", () => {
+        const resizers: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll("[monaWindowResizeHandler]"));
+        expect(resizers.map(resizer => resizer.dataset["direction"])).toEqual([
+            "north",
+            "south",
+            "east",
+            "west",
+            "northeast",
+            "northwest",
+            "southeast",
+            "southwest"
+        ]);
+        for (const resizer of resizers) {
+            expect(resizer.getAttribute("aria-hidden")).toBe("true");
+            expect(resizer.hasAttribute("tabindex")).toBe(false);
+            expect(resizer.hasAttribute("aria-label")).toBe(false);
+        }
     });
 
     it("dynamically updates messages on MonaI18nService.use", () => {
@@ -90,6 +98,7 @@ describe("WindowContentComponent", () => {
                     closeWindow: "Pencereyi kapat",
                     maximize: "Büyüt",
                     minimize: "Küçült",
+                    moveOrResizeWindow: "Pencereyi taşı veya yeniden boyutlandır.",
                     moveWindow: "Pencereyi taşı.",
                     resizeBottom: "Alttan yeniden boyutlandır.",
                     resizeBottomLeft: "Sol alttan yeniden boyutlandır.",
@@ -99,6 +108,7 @@ describe("WindowContentComponent", () => {
                     resizeTop: "Üstten yeniden boyutlandır.",
                     resizeTopLeft: "Sol üstten yeniden boyutlandır.",
                     resizeTopRight: "Sağ üstten yeniden boyutlandır.",
+                    resizeWindow: "Pencereyi yeniden boyutlandır.",
                     restore: "Geri yükle"
                 }
             }
@@ -109,7 +119,7 @@ describe("WindowContentComponent", () => {
         expect(closeBtn?.getAttribute("aria-label")).toBe("Pencereyi kapat");
 
         const dragBar = fixture.nativeElement.querySelector("[monaWindowDragHandler]");
-        expect(dragBar?.getAttribute("aria-label")).toBe("Pencereyi taşı.");
+        expect(dragBar?.getAttribute("aria-label")).toBe("Pencereyi taşı veya yeniden boyutlandır.");
 
         i18n.use(MONA_DEFAULT_LOCALE);
     });

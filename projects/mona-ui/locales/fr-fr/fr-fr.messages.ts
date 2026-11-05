@@ -461,6 +461,8 @@ export const FR_FR_MESSAGES = {
         closeWindow: "Fermer la fenêtre",
         maximize: "Agrandir",
         minimize: "Réduire",
+        moveOrResizeWindow:
+            "Déplacer ou redimensionner la fenêtre. Utilisez les touches fléchées pour la déplacer, ou Ctrl et les touches fléchées pour la redimensionner.",
         moveWindow: "Déplacer la fenêtre. Utilisez les touches fléchées pour la déplacer.",
         resizeBottom: "Redimensionner la fenêtre depuis le bas. Utilisez les touches fléchées pour redimensionner.",
         resizeBottomLeft:
@@ -474,6 +476,7 @@ export const FR_FR_MESSAGES = {
             "Redimensionner la fenêtre depuis le coin supérieur gauche. Utilisez les touches fléchées pour redimensionner.",
         resizeTopRight:
             "Redimensionner la fenêtre depuis le coin supérieur droit. Utilisez les touches fléchées pour redimensionner.",
+        resizeWindow: "Redimensionner la fenêtre. Utilisez Ctrl et les touches fléchées pour la redimensionner.",
         restore: "Restaurer"
     }
 } satisfies MonaLocaleMessages;

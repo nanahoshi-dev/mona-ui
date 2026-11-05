@@ -1,8 +1,8 @@
 import { afterNextRender, DestroyRef, Directive, DOCUMENT, ElementRef, inject, input, NgZone } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { fromEvent } from "rxjs";
-import { WindowReference } from "../models/WindowReference";
-import { WindowResizeHandlerDirection } from "../models/WindowResizeHandlerDirection";
+import type { WindowReference } from "../models/WindowReference";
+import type { WindowResizeHandlerDirection } from "../models/WindowResizeHandlerDirection";
 import {
     DEFAULT_MAX_WINDOW_HEIGHT,
     DEFAULT_MAX_WINDOW_WIDTH,
@@ -26,14 +26,12 @@ interface ResizeBounds {
     minWidth: number;
 }
 
-const KEYBOARD_RESIZE_STEP = 10;
-const KEYBOARD_RESIZE_STEP_FINE = 1;
-
+/**
+ * A resize handle on a window's edge or corner, for the pointer. The keyboard resizes from the title bar instead
+ * (see `WindowDragHandlerDirective`), so the handles stay out of the Tab order.
+ */
 @Directive({
-    selector: "div[monaWindowResizeHandler]",
-    host: {
-        "(keydown)": "onKeydown($event)"
-    }
+    selector: "div[monaWindowResizeHandler]"
 })
 export class WindowResizeHandlerDirective {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
@@ -51,63 +49,17 @@ export class WindowResizeHandlerDirective {
 
     public constructor() {
         afterNextRender({
-            read: () => this.#setEvents()
+            write: () => this.#setEvents()
         });
         this.#destroyRef.onDestroy(() => this.#activeCleanup?.());
     }
 
-    protected onKeydown(event: KeyboardEvent): void {
-        const step = event.shiftKey ? KEYBOARD_RESIZE_STEP_FINE : KEYBOARD_RESIZE_STEP;
-        let deltaX = 0;
-        let deltaY = 0;
-
-        switch (event.key) {
-            case "ArrowUp":
-                deltaY = -step;
-                break;
-            case "ArrowDown":
-                deltaY = step;
-                break;
-            case "ArrowLeft":
-                deltaX = -step;
-                break;
-            case "ArrowRight":
-                deltaX = step;
-                break;
-            default:
-                return;
-        }
-
-        const element = this.windowRef().element;
-        const rect = element.getBoundingClientRect();
-        const initial: ResizeBox = { width: rect.width, height: rect.height, top: rect.top, left: rect.left };
-        const result = this.#computeResize(this.direction(), deltaX, deltaY, initial, this.#bounds());
-        if (!result) {
-            return;
-        }
-
-        event.preventDefault();
-        this.#applyResize(element, result, initial);
-    }
-
-    #applyResize(
-        element: HTMLElement,
-        result: { width?: number; height?: number; left?: number; top?: number },
-        initial: ResizeBox
-    ): void {
-        if (result.height != null) {
-            element.style.height = `${result.height}px`;
-        }
-        if (result.top != null) {
-            element.style.top = `${result.top}px`;
-        }
-        if (result.width != null) {
-            element.style.width = `${result.width}px`;
-        }
-        if (result.left != null) {
-            element.style.left = `${result.left}px`;
-        }
-        this.windowRef().resize$$.next({
+    #applyResize(result: { width?: number; height?: number; left?: number; top?: number }, initial: ResizeBox): void {
+        const windowRef = this.windowRef();
+        // Pin both axes first, so the edge that isn't dragged stays put even when the window was centered.
+        windowRef.move({ left: result.left ?? initial.left, top: result.top ?? initial.top });
+        windowRef.resize({ height: result.height, width: result.width });
+        windowRef.resize$$.next({
             width: result.width ?? initial.width,
             height: result.height ?? initial.height,
             left: result.left ?? initial.left,
@@ -181,7 +133,7 @@ export class WindowResizeHandlerDirective {
                 height = initial.height - deltaY;
                 top = initial.top + deltaY;
 
-                if (initial.width + deltaX < 100 || initial.left + initial.width + deltaX > innerWidth) {
+                if (initial.width + deltaX < minWidth || initial.left + initial.width + deltaX > innerWidth) {
                     return null;
                 }
 
@@ -257,6 +209,12 @@ export class WindowResizeHandlerDirective {
     }
 
     #onPointerDown(event: PointerEvent): void {
+        if (event.button !== 0 || !event.isPrimary) {
+            return;
+        }
+        event.preventDefault();
+        const handle = this.#hostElementRef.nativeElement;
+        const pointerId = event.pointerId;
         const element = this.windowRef().element;
         const rect = element.getBoundingClientRect();
         const initial: ResizeBox = { width: rect.width, height: rect.height, top: rect.top, left: rect.left };
@@ -270,28 +228,44 @@ export class WindowResizeHandlerDirective {
 
         const bounds = this.#bounds();
 
-        const onPointerMove = (event: PointerEvent) => {
-            const deltaX = event.clientX - initialX;
-            const deltaY = event.clientY - initialY;
+        const onPointerMove = (moveEvent: PointerEvent) => {
+            if (moveEvent.pointerId !== pointerId) {
+                return;
+            }
+            const deltaX = moveEvent.clientX - initialX;
+            const deltaY = moveEvent.clientY - initialY;
             const result = this.#computeResize(this.direction(), deltaX, deltaY, initial, bounds);
             if (!result) {
                 return;
             }
-            this.#applyResize(element, result, initial);
+            this.#applyResize(result, initial);
         };
         const cleanup = () => {
             this.#document.removeEventListener("pointermove", onPointerMove);
-            this.#document.removeEventListener("pointerup", onPointerUp);
+            this.#document.removeEventListener("pointerup", onPointerEnd);
+            this.#document.removeEventListener("pointercancel", onPointerEnd);
             this.#document.onselectstart = oldSelectStart;
             this.#document.ondragstart = oldDragStart;
+            if (handle.hasPointerCapture?.(pointerId)) {
+                handle.releasePointerCapture(pointerId);
+            }
             this.#activeCleanup = undefined;
         };
-        const onPointerUp = () => {
-            cleanup();
+        const onPointerEnd = (endEvent: PointerEvent) => {
+            if (endEvent.pointerId === pointerId) {
+                cleanup();
+            }
         };
+        this.#activeCleanup?.();
         this.#activeCleanup = cleanup;
+        try {
+            handle.setPointerCapture?.(pointerId);
+        } catch {
+            // The pointer may already be gone; the document listeners still finish the resize.
+        }
         this.#document.addEventListener("pointermove", onPointerMove);
-        this.#document.addEventListener("pointerup", onPointerUp);
+        this.#document.addEventListener("pointerup", onPointerEnd);
+        this.#document.addEventListener("pointercancel", onPointerEnd);
     }
 
     #setEvents(): void {
