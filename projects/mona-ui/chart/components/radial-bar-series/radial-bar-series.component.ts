@@ -1,5 +1,4 @@
-import { Component, DestroyRef, effect, ElementRef, inject, input, model, OnInit, output, signal } from "@angular/core";
-import { ImmutableSet } from "@mirei/ts-collections";
+import { Component, DestroyRef, effect, ElementRef, inject, input, model, OnInit, output } from "@angular/core";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import {
     ChartInvalidationReason,
@@ -10,6 +9,7 @@ import { extractRetainedRadialBarIdentities } from "../../internal/data/radial-d
 import type { ChartField } from "../../models/chart.models";
 import type { ChartRadialArcFillMode, ChartRadialDatumVisibilityEvent } from "../../models/chart-radial-arc.models";
 import type { ChartValueFormatter } from "../../models/chart-polar.models";
+import { createChartHiddenItems } from "../../internal/utils/chart-hidden-items";
 
 let nextRadialBarSeriesId = 0;
 
@@ -26,10 +26,12 @@ export class RadialBarSeriesComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
-    readonly #hiddenItemIds = signal<ImmutableSet<string>>(ImmutableSet.create());
+    readonly #hidden = createChartHiddenItems<string>(
+        () => this.hiddenItemIds,
+        () => this.#chartContext?.invalidate(ChartInvalidationReason.Visibility)
+    );
     readonly #identityMap = new Map<string, { category: unknown; dataIndex: number; datum: unknown }>();
     readonly #seriesId = `mona-radial-bar-series-${++nextRadialBarSeriesId}`;
-    readonly #visibilityRevision = signal<number>(0);
     #registered = false;
 
     /**
@@ -106,6 +108,12 @@ export class RadialBarSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly fillOpacity = input<number | undefined>(undefined);
+
+    /**
+     * @description The hidden item IDs. Bind `[(hiddenItemIds)]` for two-way binding; legend toggles write to it.
+     * @default []
+     */
+    public readonly hiddenItemIds = model<readonly string[]>([]);
 
     /**
      * @description Inner radius ratio relative to available plot bounds (0 to 1).
@@ -231,7 +239,9 @@ export class RadialBarSeriesComponent implements OnInit {
                 });
             }
 
-            this.#hiddenItemIds.update(set => set.where((id: string) => retainedIdSet.has(id)).toImmutableSet());
+            if (retainedIdSet.size > 0) {
+                this.#hidden.prune(id => retainedIdSet.has(id));
+            }
 
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Data);
@@ -288,7 +298,7 @@ export class RadialBarSeriesComponent implements OnInit {
             colors: this.colors,
             cornerRadius: this.cornerRadius,
             data: this.data,
-            datumVisibilityRevision: this.#visibilityRevision.asReadonly(),
+            datumVisibilityRevision: this.#hidden.revision,
             element: this.#elementRef,
             endAngle: this.endAngle,
             field: this.field,
@@ -296,7 +306,7 @@ export class RadialBarSeriesComponent implements OnInit {
             fillOpacity: this.fillOpacity,
             id: this.#seriesId,
             innerRadiusRatio: this.innerRadiusRatio,
-            isDatumVisible: (itemId: string) => !this.#hiddenItemIds().contains(itemId),
+            isDatumVisible: (itemId: string) => !this.#hidden.has(itemId),
             keyField: this.keyField,
             max: this.max,
             min: this.min,
@@ -320,17 +330,7 @@ export class RadialBarSeriesComponent implements OnInit {
     }
 
     public toggleDatum(itemId: string): boolean {
-        let isNowVisible = false;
-        this.#hiddenItemIds.update(set => {
-            if (set.contains(itemId)) {
-                isNowVisible = true;
-                return set.remove(itemId);
-            }
-            isNowVisible = false;
-            return set.add(itemId);
-        });
-
-        this.#visibilityRevision.update(v => v + 1);
+        const isNowVisible = this.#hidden.toggle(itemId);
 
         const match = this.#identityMap.get(itemId);
         const matchedCategory = match?.category ?? "Item";

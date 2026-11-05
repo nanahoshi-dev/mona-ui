@@ -1,4 +1,15 @@
-import { Component, contentChild, DestroyRef, effect, ElementRef, inject, input, model, OnInit } from "@angular/core";
+import {
+    Component,
+    contentChild,
+    DestroyRef,
+    computed,
+    effect,
+    ElementRef,
+    inject,
+    input,
+    model,
+    OnInit
+} from "@angular/core";
 import { ChartDataLabelTemplateDirective } from "../../directives/chart-data-label-template.directive";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import {
@@ -76,6 +87,12 @@ export class CandlestickSeriesComponent implements OnInit {
     public readonly fillMode = input<ChartFinancialFillMode>("hollow");
 
     /**
+     * @description Fill and stroke opacity ratio (0 to 1).
+     * @default undefined
+     */
+    public readonly fillOpacity = input<number | undefined>(undefined);
+
+    /**
      * @description Property key or accessor extracting the highest price for each data item.
      */
     public readonly highField = input.required<ChartField>();
@@ -112,6 +129,7 @@ export class CandlestickSeriesComponent implements OnInit {
     /**
      * @description Overall opacity multiplier applied to candle wicks and bodies.
      * @default undefined
+     * @deprecated Use `fillOpacity`, as on the other series.
      */
     public readonly opacity = input<number | undefined>(undefined);
 
@@ -221,6 +239,7 @@ export class CandlestickSeriesComponent implements OnInit {
             this.fallingColor();
             this.fillMode();
             this.neutralColor();
+            this.fillOpacity();
             this.opacity();
             this.risingColor();
             this.userClass();
@@ -258,7 +277,7 @@ export class CandlestickSeriesComponent implements OnInit {
             maxBodyWidth: this.maxBodyWidth,
             name: this.name,
             neutralColor: this.neutralColor,
-            opacity: this.opacity,
+            opacity: computed(() => this.fillOpacity() ?? this.opacity()),
             openField: this.openField,
             risingColor: this.risingColor,
             seriesKey: this.seriesKey,

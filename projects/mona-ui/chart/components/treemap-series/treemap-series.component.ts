@@ -2,16 +2,15 @@ import {
     Component,
     contentChild,
     DestroyRef,
+    computed,
     effect,
     ElementRef,
     inject,
     input,
     model,
     OnInit,
-    output,
-    signal
+    output
 } from "@angular/core";
-import { ImmutableSet } from "@mirei/ts-collections";
 import { ChartTreemapLabelTemplateDirective } from "../../directives/chart-treemap-label-template.directive";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import {
@@ -26,6 +25,7 @@ import type {
     ChartTreemapTile
 } from "../../models/chart-treemap.models";
 import type { ChartField } from "../../models/chart.models";
+import { createChartHiddenItems } from "../../internal/utils/chart-hidden-items";
 
 let nextTreemapSeriesId = 0;
 
@@ -42,10 +42,12 @@ export class TreemapSeriesComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
-    readonly #hiddenNodeIds = signal<ImmutableSet<string>>(ImmutableSet.create());
+    readonly #hidden = createChartHiddenItems<string>(
+        () => this.hiddenNodeIds,
+        () => this.#chartContext?.invalidate(ChartInvalidationReason.Visibility)
+    );
     readonly #identityMap = new Map<string, RootBranchIdentityInfo>();
     readonly #seriesId = `mona-treemap-series-${++nextTreemapSeriesId}`;
-    readonly #visibilityRevision = signal<number>(0);
     #registered = false;
 
     /**
@@ -53,6 +55,12 @@ export class TreemapSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly borderRadius = input<number | undefined>(undefined);
+
+    /**
+     * @description Formatter callback for node labels.
+     * @default undefined
+     */
+    public readonly categoryFormatter = input<ChartValueFormatter | undefined>(undefined);
 
     /**
      * @description Property key or accessor function extracting child nodes from a hierarchical data object.
@@ -97,6 +105,12 @@ export class TreemapSeriesComponent implements OnInit {
     public readonly fillOpacity = input<number | undefined>(undefined);
 
     /**
+     * @description The hidden top-level node IDs. Bind `[(hiddenNodeIds)]` for two-way binding; legend toggles write to it.
+     * @default []
+     */
+    public readonly hiddenNodeIds = model<readonly string[]>([]);
+
+    /**
      * @description Property key or accessor extracting a stable datum identity across data updates.
      * @default undefined
      */
@@ -111,6 +125,7 @@ export class TreemapSeriesComponent implements OnInit {
     /**
      * @description Formatter callback for node display labels.
      * @default undefined
+     * @deprecated Use `categoryFormatter`, as on the other series.
      */
     public readonly labelFormatter = input<ChartValueFormatter | undefined>(undefined);
 
@@ -250,7 +265,7 @@ export class TreemapSeriesComponent implements OnInit {
             const effectiveData = dataVal !== undefined ? dataVal : rootDataVal;
             const keyF = this.keyField();
             const labelF = this.labelField();
-            const labelFmt = this.labelFormatter();
+            const labelFmt = this.categoryFormatter() ?? this.labelFormatter();
             const childrenF = this.childrenField();
 
             const newMap = TreemapIdentity.extractRetainedRootBranchIdentities({
@@ -266,15 +281,9 @@ export class TreemapSeriesComponent implements OnInit {
                 this.#identityMap.set(k, v);
             }
 
-            this.#hiddenNodeIds.update(set => {
-                let nextSet = set;
-                for (const hiddenId of set) {
-                    if (!newMap.has(hiddenId)) {
-                        nextSet = nextSet.remove(hiddenId);
-                    }
-                }
-                return nextSet;
-            });
+            if (newMap.size > 0) {
+                this.#hidden.prune(id => newMap.has(id));
+            }
 
             this.field();
             this.childrenField();
@@ -334,15 +343,15 @@ export class TreemapSeriesComponent implements OnInit {
             colorField: this.colorField,
             colors: this.colors,
             data: this.data,
-            datumVisibilityRevision: this.#visibilityRevision.asReadonly(),
+            datumVisibilityRevision: this.#hidden.revision,
             element: this.#elementRef,
             field: this.field,
             fillOpacity: this.fillOpacity,
             id: this.#seriesId,
-            isDatumVisible: (nodeId: string) => !this.#hiddenNodeIds().contains(nodeId),
+            isDatumVisible: (nodeId: string) => !this.#hidden.has(nodeId),
             keyField: this.keyField,
             labelField: this.labelField,
-            labelFormatter: this.labelFormatter,
+            labelFormatter: computed(() => this.categoryFormatter() ?? this.labelFormatter()),
             labelTemplate: this.labelTemplate,
             maxDepth: this.maxDepth,
             maxLabels: this.maxLabels,
@@ -372,17 +381,7 @@ export class TreemapSeriesComponent implements OnInit {
     }
 
     public toggleNode(nodeId: string): boolean {
-        let isNowVisible = false;
-        this.#hiddenNodeIds.update(set => {
-            if (set.contains(nodeId)) {
-                isNowVisible = true;
-                return set.remove(nodeId);
-            }
-            isNowVisible = false;
-            return set.add(nodeId);
-        });
-
-        this.#visibilityRevision.update(v => v + 1);
+        const isNowVisible = this.#hidden.toggle(nodeId);
 
         const match = this.#identityMap.get(nodeId);
 

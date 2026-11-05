@@ -81,6 +81,12 @@ export class OhlcSeriesComponent implements OnInit {
     public readonly fallingColor = input("");
 
     /**
+     * @description Fill and stroke opacity ratio (0 to 1).
+     * @default undefined
+     */
+    public readonly fillOpacity = input<number | undefined>(undefined);
+
+    /**
      * @description Property key or accessor extracting the highest price for each data item.
      */
     public readonly highField = input.required<ChartField>();
@@ -117,6 +123,7 @@ export class OhlcSeriesComponent implements OnInit {
     /**
      * @description Overall opacity multiplier applied to OHLC stems and tick arms.
      * @default undefined
+     * @deprecated Use `fillOpacity`, as on the other series.
      */
     public readonly opacity = input<number | undefined>(undefined);
 
@@ -237,6 +244,7 @@ export class OhlcSeriesComponent implements OnInit {
             this.color();
             this.fallingColor();
             this.neutralColor();
+            this.fillOpacity();
             this.opacity();
             this.risingColor();
             this.userClass();
@@ -273,7 +281,7 @@ export class OhlcSeriesComponent implements OnInit {
             maxBodyWidth: this.maxBodyWidth,
             name: this.name,
             neutralColor: this.neutralColor,
-            opacity: this.opacity,
+            opacity: computed(() => this.fillOpacity() ?? this.opacity()),
             openField: this.openField,
             risingColor: this.risingColor,
             seriesKey: this.seriesKey,

@@ -32,6 +32,7 @@ The Mona UI Chart library combines declarative Angular template composition with
     - Announcements give the point's position ("2 of 12"), read the point again at an edge, and report legend toggles.
 - **Right-to-Left:** In an RTL subtree the title, legend order, tooltip text and the default Y axis follow the direction, and the chart lays out again when the direction changes. `start` and `end` follow it (`titleAlign`, the Y axis and legend `position`); `left` and `right` stay on that side. The X axis keeps its left-to-right order, so categories and time read the same in both directions.
 - **Contrast:** The fallback palette (used when `--color-chart-N` isn't set) and the default financial colors reach 3:1 on light and dark surfaces. Rising candles are hollow by default, so they differ from falling ones by more than color; `fillMode="filled"` brings back solid bodies. A `--color-chart-N` theme is yours to keep at 3:1.
+- **Two-Way Binding:** `[(viewport)]` on the chart, `[(selectedMarkIds)]` on `<mona-chart-selection>`, `[(visible)]` on series, and hidden items on pie, donut (`[(hiddenIndices)]`), radial bar, rose (`[(hiddenItemIds)]`), treemap (`[(hiddenNodeIds)]`) and funnel (`[(hiddenStageIds)]`). `viewportChange` emits the viewport state; `viewportChangeDetails` adds the previous state, source and gesture phase.
 - **Interactive Legend:** Clickable legend items that toggle series or individual slice/stage/ring visibility with stable palette coloring (and semantic presentation legend markers for Waterfall steps).
 - **Customizable Templates:** Custom Angular templates for tooltips (`monaChartTooltipTemplate`), axis tick labels (`monaChartAxisLabelTemplate`), legend items (`monaChartLegendItemTemplate`), slice data labels (`monaChartSliceLabelTemplate`), donut center content (`monaChartCenterTemplate`), gauge center content (`monaChartGaugeCenterTemplate`), treemap node labels (`monaChartTreemapLabelTemplate`), funnel stage labels (`monaChartFunnelLabelTemplate`), waterfall step labels (`monaChartWaterfallLabelTemplate`), and empty states (`monaChartNoDataTemplate`).
 
@@ -155,7 +156,7 @@ The benchmark is intentionally non-gating and emits one compact JSON record for 
 
     <mona-polar-series
         field="gain"
-        angleField="angle"
+        categoryField="angle"
         name="Gain (dBi)"
         fillMode="gradient"
         curve="smooth"
@@ -243,8 +244,8 @@ The root container that coordinates layout measurement, data domains, rendering 
 | `subtitle`               | `string`                             | `""`      | Subtitle text rendered beneath the title.                                                                                               |
 | `titleAlign`             | `ChartHeaderAlignment`               | `"start"` | Alignment of the chart title and subtitle: `"start"` and `"end"` follow the direction, `"center"`, and `"left"` and `"right"` stay on that side.                                                         |
 | `animation`              | `ChartAnimationInput`                | `true`    | Animation settings (`boolean` or `Partial<ChartAnimationOptions>`) for initial render, data transitions, and series visibility toggles. |
-| `ariaLabel`              | `string`                             | `"Chart"` | Accessible name for the chart container (falls back to `title`).                                                                        |
-| `ariaDescription`        | `string`                             | `""`      | Detailed accessible description explaining the chart's purpose and trends (falls back to `subtitle`).                                   |
+| `aria-label`             | `string`                             | `"Chart"` | Accessible name for the chart container (falls back to `title`).                                                                        |
+| `aria-description`       | `string`                             | `""`      | Detailed accessible description explaining the chart's purpose and trends (falls back to `subtitle`).                                   |
 | `pointClick`             | `output<ChartPointEvent>`            | —         | Emits when a data point, vertex, bar, marker, or sector slice is clicked.                                                               |
 | `pointFocusChange`       | `output<ChartPointFocusEvent>`       | —         | Emits when keyboard focus moves to a new data point, marker, spoke, or slice.                                                           |
 | `seriesVisibilityChange` | `output<ChartSeriesVisibilityEvent>` | —         | Emits when a series visibility state is toggled via legend interaction.                                                                 |
@@ -524,7 +525,8 @@ Renders a continuous polar series plotting values over continuous angular degree
 | Input / Output | Type                  | Default     | Description                                                                    |
 | :------------- | :-------------------- | :---------- | :----------------------------------------------------------------------------- |
 | `field`        | `ChartField`          | `"value"`   | Property key or accessor extracting numeric radial magnitude.                  |
-| `angleField`   | `ChartField`          | `"angle"`   | Property key or accessor extracting angle in degrees.                          |
+| `categoryField` | `ChartField`         | `undefined` | Property key or accessor extracting angle in degrees. Takes precedence over `angleField`. |
+| `angleField`   | `ChartField`          | `"angle"`   | **Deprecated.** Use `categoryField`. |
 | `keyField`     | `ChartField`          | `undefined` | Unique identifier field for stable mark tracking across animation transitions. |
 | `name`         | `string`              | `"Polar"`   | Series name for tooltips, legend, and accessibility.                           |
 | `fillMode`     | `ChartRadialFillMode` | `"none"`    | Fill styling: `"solid"` wash, radial `"gradient"` (to pole), or `"none"`.      |

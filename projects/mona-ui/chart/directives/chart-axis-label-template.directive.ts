@@ -6,4 +6,11 @@ import type { ChartAxisLabelTemplateContext } from "../models/chart-axis.models"
 })
 export class ChartAxisLabelTemplateDirective {
     public readonly templateRef = inject<TemplateRef<ChartAxisLabelTemplateContext>>(TemplateRef);
+
+    public static ngTemplateContextGuard(
+        _dir: ChartAxisLabelTemplateDirective,
+        _ctx: unknown
+    ): _ctx is ChartAxisLabelTemplateContext {
+        return true;
+    }
 }

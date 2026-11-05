@@ -8,10 +8,8 @@ import {
     input,
     model,
     OnInit,
-    output,
-    signal
+    output
 } from "@angular/core";
-import { ImmutableSet } from "@mirei/ts-collections";
 import { ChartCenterTemplateDirective } from "../../directives/chart-center-template.directive";
 import { ChartSliceLabelTemplateDirective } from "../../directives/chart-slice-label-template.directive";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
@@ -29,6 +27,7 @@ import type {
 } from "../../models/chart-polar.models";
 import type { ChartField } from "../../models/chart.models";
 import { chartMessages } from "../../internal/utils/chart-locale";
+import { createChartHiddenItems } from "../../internal/utils/chart-hidden-items";
 
 let nextDonutSeriesId = 0;
 
@@ -45,9 +44,11 @@ export class DonutSeriesComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
-    readonly #hiddenIndices = signal<ImmutableSet<number>>(ImmutableSet.create());
+    readonly #hidden = createChartHiddenItems<number>(
+        () => this.hiddenIndices,
+        () => this.#chartContext?.invalidate(ChartInvalidationReason.Visibility)
+    );
     readonly #seriesId = `mona-donut-series-${++nextDonutSeriesId}`;
-    readonly #visibilityRevision = signal<number>(0);
 
     #registered = false;
 
@@ -113,6 +114,12 @@ export class DonutSeriesComponent implements OnInit {
      * @default undefined
      */
     public readonly fillOpacity = input<number | undefined>(undefined);
+
+    /**
+     * @description The hidden data indices. Bind `[(hiddenIndices)]` for two-way binding; legend toggles write to it.
+     * @default []
+     */
+    public readonly hiddenIndices = model<readonly number[]>([]);
 
     /**
      * @description Ratio of the inner hole radius relative to the outer radius (0 to 0.95).
@@ -231,7 +238,9 @@ export class DonutSeriesComponent implements OnInit {
             // Prune hidden indices that no longer exist
             const raw = resolveData(this.data(), this.#chartContext?.rootData() ?? []);
             const maxLen = raw.length;
-            this.#hiddenIndices.update(set => set.where((idx: number) => idx < maxLen).toImmutableSet());
+            if (maxLen > 0) {
+                this.#hidden.prune(index => index < maxLen);
+            }
 
             if (this.#registered) {
                 this.#chartContext?.invalidate(ChartInvalidationReason.Data);
@@ -288,7 +297,7 @@ export class DonutSeriesComponent implements OnInit {
             fillOpacity: this.fillOpacity,
             id: this.#seriesId,
             innerRadiusRatio: this.innerRadiusRatio,
-            isSliceVisible: (idx: number) => !this.#hiddenIndices().contains(idx),
+            isSliceVisible: (idx: number) => !this.#hidden.has(idx),
             keyField: this.keyField,
             labelContent: this.labelContent,
             labelPosition: this.labelPosition,
@@ -305,7 +314,7 @@ export class DonutSeriesComponent implements OnInit {
             type: "donut",
             userClass: this.userClass,
             valueFormatter: this.valueFormatter,
-            visibilityRevision: this.#visibilityRevision.asReadonly(),
+            visibilityRevision: this.#hidden.revision,
             visible: this.visible
         };
 
@@ -314,17 +323,7 @@ export class DonutSeriesComponent implements OnInit {
     }
 
     public toggleSlice(dataIndex: number): boolean {
-        let isNowVisible = false;
-        this.#hiddenIndices.update(set => {
-            if (set.contains(dataIndex)) {
-                isNowVisible = true;
-                return set.remove(dataIndex);
-            }
-            isNowVisible = false;
-            return set.add(dataIndex);
-        });
-
-        this.#visibilityRevision.update(v => v + 1);
+        const isNowVisible = this.#hidden.toggle(dataIndex);
 
         const raw = resolveData(this.data(), this.#chartContext?.rootData() ?? []);
         const datum = raw[dataIndex];

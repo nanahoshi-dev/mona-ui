@@ -81,19 +81,19 @@ export type ChartLegendItemKind = "datum" | "semantic" | "series";
 export type ChartLegendPosition = "bottom" | "end" | "left" | "right" | "start" | "top";
 
 export interface ChartLegendItem {
-    color: string;
-    dataIndex?: number;
-    datum?: unknown;
-    interactive?: boolean;
-    itemId: string;
-    kind?: ChartLegendItemKind;
-    name: string;
-    percentage?: number;
-    secondaryColor?: string;
-    seriesId: string;
-    seriesType: ChartSeriesType;
-    value?: number;
-    visible: boolean;
+    readonly color: string;
+    readonly dataIndex?: number;
+    readonly datum?: unknown;
+    readonly interactive?: boolean;
+    readonly itemId: string;
+    readonly kind?: ChartLegendItemKind;
+    readonly name: string;
+    readonly percentage?: number;
+    readonly secondaryColor?: string;
+    readonly seriesId: string;
+    readonly seriesType: ChartSeriesType;
+    readonly value?: number;
+    readonly visible: boolean;
 }
 
 export interface ChartLegendItemTemplateContext {

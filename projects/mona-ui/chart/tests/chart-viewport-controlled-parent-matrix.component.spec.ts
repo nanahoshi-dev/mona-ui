@@ -38,7 +38,7 @@ interface FlexibleDataItem {
             [navigation]="navigation()"
             [viewport]="viewport()"
             [defaultViewport]="defaultViewport()"
-            (viewportChange)="onViewportChange($event)"
+            (viewportChangeDetails)="onViewportChange($event)"
             style="width: 500px; height: 300px; display: block;">
             @if (showXAxis()) {
                 <mona-chart-x-axis [axisId]="xAxisId()" [type]="xAxisType()" />

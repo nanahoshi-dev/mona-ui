@@ -1,4 +1,4 @@
-import { Component, DestroyRef, effect, ElementRef, inject, input, model, OnInit } from "@angular/core";
+import { Component, DestroyRef, computed, effect, ElementRef, inject, input, model, OnInit } from "@angular/core";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { ChartRadialCurve, ChartRadialFillMode, ChartValueFormatter } from "../../models/chart-polar.models";
@@ -26,8 +26,15 @@ export class PolarSeriesComponent implements OnInit {
     /**
      * @description Property key or accessor function extracting the degree angle (0° to 360°) for each data item.
      * @default "angle"
+     * @deprecated Use `categoryField`, as on the other series.
      */
     public readonly angleField = input<ChartField>("angle");
+
+    /**
+     * @description Property key or accessor extracting the angle for each point. Takes precedence over `angleField`.
+     * @default undefined
+     */
+    public readonly categoryField = input<ChartField | undefined>(undefined);
 
     /**
      * @description Explicit stroke and marker color override for the series.
@@ -129,6 +136,7 @@ export class PolarSeriesComponent implements OnInit {
 
         effect(() => {
             this.angleField();
+            this.categoryField();
             this.data();
             this.field();
             this.keyField();
@@ -169,7 +177,7 @@ export class PolarSeriesComponent implements OnInit {
         this.#registered = true;
 
         const unregister = this.#chartContext.registerSeries({
-            angleField: this.angleField,
+            angleField: computed(() => this.categoryField() ?? this.angleField()),
             color: this.color,
             connectNulls: this.connectNulls,
             curve: this.curve,

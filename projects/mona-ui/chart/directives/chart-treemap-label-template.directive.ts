@@ -6,4 +6,11 @@ import type { ChartTreemapLabelTemplateContext } from "../models/chart-treemap.m
 })
 export class ChartTreemapLabelTemplateDirective {
     public readonly templateRef = inject<TemplateRef<ChartTreemapLabelTemplateContext>>(TemplateRef);
+
+    public static ngTemplateContextGuard(
+        _dir: ChartTreemapLabelTemplateDirective,
+        _ctx: unknown
+    ): _ctx is ChartTreemapLabelTemplateContext {
+        return true;
+    }
 }

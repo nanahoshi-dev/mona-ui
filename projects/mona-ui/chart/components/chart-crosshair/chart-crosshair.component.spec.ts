@@ -21,8 +21,8 @@ import type { ChartCrosshairMode, ChartCrosshairSnapMode } from "../../models/ch
             [color]="color()"
             [lineStyle]="'dotted'">
             @if (useTemplate()) {
-                <ng-template monaChartCrosshairLabel let-ctx>
-                    <span class="custom-badge">{{ ctx.formattedValue }}</span>
+                <ng-template monaChartCrosshairLabel let-formattedValue="formattedValue">
+                    <span class="custom-badge">{{ formattedValue }}</span>
                 </ng-template>
             }
         </mona-chart-crosshair>

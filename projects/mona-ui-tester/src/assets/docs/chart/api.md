@@ -50,6 +50,9 @@ Root visualization container coordinating coordinate layouts, canvas rendering, 
 | `landmark` | `boolean` | `false` | Makes the host a `region` landmark instead of `role="application"`. Give each landmark chart a unique name. |
 | `dataTable` | `boolean` | `false` | Adds a visually hidden table of the data (the first 100 rows) for screen readers. |
 | `titleAlign` | `ChartHeaderAlignment` | `"start"` | Alignment of the title and subtitle. `"start"` and `"end"` follow the direction; `"left"` and `"right"` stay on that side; or `"center"`. |
+| `viewport` | `ChartViewportState` | `undefined` | Active viewport window. Bind `[(viewport)]` for two-way binding. While it is defined the parent owns the viewport: a change applies once the parent writes it back. |
+| `viewportChange` | `output<ChartViewportState>` | - | Emits the new viewport state on pan, zoom, fit, reset or keyboard navigation. |
+| `viewportChangeDetails` | `output<ChartViewportChangeEvent>` | - | Emits with each change, along with the previous state, source, gesture phase and changed axes. |
 | `pointClick` | `output<ChartPointEvent>` | - | Emitted when a data point, spoke, or slice is clicked. |
 | `pointFocusChange` | `output<ChartPointFocusEvent>` | - | Emitted when keyboard navigation moves between data points or slices. |
 | `seriesVisibilityChange` | `output<ChartSeriesVisibilityEvent>` | - | Emitted when series visibility is toggled via legend or API. |
@@ -129,7 +132,8 @@ Renders continuous polar series mapping magnitude over continuous degree angles 
 
 | Input / Output | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `angleField` | `ChartField` | `"angle"` | Property key or accessor extracting angle in degrees (0 to 360). |
+| `angleField` | `ChartField` | `"angle"` | **Deprecated.** Use `categoryField`. |
+| `categoryField` | `ChartField` | `undefined` | Property key or accessor extracting angle in degrees (0 to 360). Takes precedence over `angleField`. |
 | `color` | `string` | `""` | Explicit stroke/marker color override. |
 | `connectNulls` | `boolean` | `false` | Whether to connect points across null values without gaps. |
 | `curve` | `ChartRadialCurve` | `"linear"` | Curve interpolation: `"linear"` or `"smooth"`. |
@@ -164,6 +168,7 @@ Renders a continuous Cartesian line series with configurable interpolation, opti
 | `showPoints` | `boolean` | `false` | Whether to draw point markers at each data coordinate along the line. |
 | `strokeWidth` | `number` | `undefined` | Stroke width in pixels for the series line. |
 | `class` | `string` | `""` | Additional CSS classes applied to the series host element. |
+| `valueFormatter` | `ChartValueFormatter` | `undefined` | Formats this series' values in tooltips, data labels and announcements, without changing the axis ticks. Takes precedence over the axis formatter. |
 | `visible` | `model(boolean)` | `true` | Two-way bindable visibility for the series. |
 | `xAxisId` | `string` | `undefined` | Optional Cartesian X-axis ID; omitted uses the primary X axis. |
 | `xField` | `ChartField` | `undefined` | Property key or accessor extracting X, overriding the root chart X field. |
@@ -227,6 +232,7 @@ Renders individual point markers across continuous numeric (linear) or temporal 
 | `pointRadius` | `number` | `undefined` | Radius in pixels for scatter point markers. |
 | `strokeColor` | `string` | `""` | Outline stroke color for markers. |
 | `strokeWidth` | `number` | `undefined` | Outline stroke width in pixels. |
+| `valueFormatter` | `ChartValueFormatter` | `undefined` | Formats this series' values in tooltips, data labels and announcements, without changing the axis ticks. Takes precedence over the axis formatter. |
 | `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
 | `xField` | `ChartField` | `undefined` | Property key or accessor extracting X coordinate value. |
 
@@ -249,6 +255,7 @@ Renders 3-dimensional data points with position (X, Y) and proportionally-scaled
 | `sizeFormatter` | `ChartValueFormatter` | `undefined` | Custom formatting function for bubble size in tooltips and live region. |
 | `strokeColor` | `string` | `""` | Outline stroke color for bubble circles. |
 | `strokeWidth` | `number` | `undefined` | Outline stroke width in pixels. |
+| `valueFormatter` | `ChartValueFormatter` | `undefined` | Formats this series' values in tooltips, data labels and announcements, without changing the axis ticks. Takes precedence over the axis formatter. |
 | `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
 | `xField` | `ChartField` | `undefined` | Property key or accessor extracting X coordinate value. |
 
@@ -307,13 +314,14 @@ Renders financial Japanese candlestick series with central high/low wicks, recta
 | `data` | `readonly unknown[]` | `undefined` | Series-specific dataset overriding root data. |
 | `fallingColor` | `string` | `"#ef4444"` | Color override for falling candles (Close < Open). |
 | `fillMode` | `ChartFinancialFillMode` | `"hollow"` | Body fill styling. `"hollow"` draws rising candles as outlines, so they differ from falling ones by more than color; `"filled"` draws solid bodies. |
+| `fillOpacity` | `number` | `undefined` | Fill and stroke opacity ratio (0 to 1). |
 | `highField` | `ChartField` | `"high"` | Property key or accessor extracting highest price/value. |
 | `keyField` | `ChartField` | `undefined` | Property key or accessor extracting stable datum identity for animations. |
 | `lowField` | `ChartField` | `"low"` | Property key or accessor extracting lowest price/value. |
 | `maxBodyWidth` | `number` | `32` | Maximum width constraint in pixels for candle bodies. |
 | `name` | `string` | `"Candlestick"` | Series name for tooltips, legend, and accessibility. |
 | `neutralColor` | `string` | `"#6b7280"` | Color override for neutral candles (Close == Open). |
-| `opacity` | `number` | `undefined` | Fill and stroke opacity ratio (0 to 1). |
+| `opacity` | `number` | `undefined` | **Deprecated.** Use `fillOpacity`. |
 | `openField` | `ChartField` | `"open"` | Property key or accessor extracting opening price/value. |
 | `risingColor` | `string` | `"#16a34a"` | Color override for rising candles (Close > Open). |
 | `valueFormatter` | `ChartValueFormatter` | `undefined` | Custom formatting function for prices/values in tooltips and live region. |
@@ -334,13 +342,14 @@ Renders traditional financial OHLC (Open-High-Low-Close) bar series with vertica
 | `color` | `string` | `undefined` | Explicit unified color override for all OHLC bars. |
 | `data` | `readonly unknown[]` | `undefined` | Series-specific dataset overriding root data. |
 | `fallingColor` | `string` | `"#ef4444"` | Color override for falling bars (Close < Open). |
+| `fillOpacity` | `number` | `undefined` | Stroke opacity ratio (0 to 1). |
 | `highField` | `ChartField` | `"high"` | Property key or accessor extracting highest price/value. |
 | `keyField` | `ChartField` | `undefined` | Property key or accessor extracting stable datum identity for animations. |
 | `lowField` | `ChartField` | `"low"` | Property key or accessor extracting lowest price/value. |
 | `maxBodyWidth` | `number` | `32` | Maximum total width constraint in pixels for OHLC bars. |
 | `name` | `string` | `"OHLC"` | Series name for tooltips, legend, and accessibility. |
 | `neutralColor` | `string` | `"#6b7280"` | Color override for neutral bars (Close == Open). |
-| `opacity` | `number` | `undefined` | Stroke opacity ratio (0 to 1). |
+| `opacity` | `number` | `undefined` | **Deprecated.** Use `fillOpacity`. |
 | `openField` | `ChartField` | `"open"` | Property key or accessor extracting opening price/value. |
 | `risingColor` | `string` | `"#22c55e"` | Color override for rising bars (Close > Open). |
 | `tickLength` / `tickWidth` | `number` | `undefined` | Explicit length in pixels for left open and right close tick arms. |
@@ -382,6 +391,7 @@ Renders concentric circular progress rings with customizable bar gap, thickness,
 | `trackOpacity` | `number` | `undefined` | Opacity of background track rings. |
 | `valueFormatter` | `ChartValueFormatter` | `undefined` | Formatter callback for bar numeric values. |
 | `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
+| `hiddenItemIds` | `model(readonly string[])` | `[]` | The hidden item IDs. Bindable with `[(hiddenItemIds)]`; legend toggles write to it. |
 | `datumVisibilityChange` | `output<ChartRadialDatumVisibilityEvent>` | - | Emitted when an individual ring's visibility is toggled via the legend. |
 
 ### `<mona-rose-series>`
@@ -411,6 +421,7 @@ Renders Nightingale rose (coxcomb) charts with angular category petals whose rad
 | `strokeWidth` | `number` | `undefined` | Stroke width in pixels for petal boundaries. |
 | `valueFormatter` | `ChartValueFormatter` | `undefined` | Formatter callback for petal numeric values. |
 | `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
+| `hiddenItemIds` | `model(readonly string[])` | `[]` | The hidden item IDs. Bindable with `[(hiddenItemIds)]`; legend toggles write to it. |
 | `datumVisibilityChange` | `output<ChartRadialDatumVisibilityEvent>` | - | Emitted when an individual petal's visibility is toggled via the legend. |
 
 ### `<mona-gauge-series>`
@@ -455,6 +466,7 @@ Renders hierarchical treemap visualizations using nested squarified, binary, dic
 | Input / Output | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `borderRadius` | `number` | `undefined` | Uniform corner radius in pixels applied to cell boundaries. |
+| `categoryFormatter` | `ChartValueFormatter` | `undefined` | Formatter callback for node text labels. |
 | `childrenField` | `ChartField` | `"children"` | Property key or accessor extracting child node array. |
 | `color` | `string` | `undefined` | Explicit unified fill color for all nodes. |
 | `colorField` | `ChartField` | `undefined` | Property key or accessor extracting explicit color per item. |
@@ -464,7 +476,7 @@ Renders hierarchical treemap visualizations using nested squarified, binary, dic
 | `fillOpacity` | `number` | `undefined` | Fill opacity for terminal leaf cells (0 to 1). |
 | `keyField` | `ChartField` | `undefined` | Property key or accessor extracting unique node identifier. |
 | `labelField` | `ChartField` | `"name"` | Property key or accessor extracting node text label. |
-| `labelFormatter` | `ChartValueFormatter` | `undefined` | Formatter callback for node text labels. |
+| `labelFormatter` | `ChartValueFormatter` | `undefined` | **Deprecated.** Use `categoryFormatter`. |
 | `maxDepth` | `number` | `undefined` | Maximum hierarchy depth to render; deeper subtrees are aggregated into solid terminal nodes. |
 | `maxLabels` | `number` | `100` | Maximum number of DOM overlay labels to render concurrently. |
 | `minLabelHeight` | `number` | `18` | Minimum node height in pixels required to render a DOM label. |
@@ -483,6 +495,7 @@ Renders hierarchical treemap visualizations using nested squarified, binary, dic
 | `tile` | `ChartTreemapTile` | `"squarify"` | Tiling algorithm: `"squarify"`, `"binary"`, `"dice"`, `"slice"`, or `"slice-dice"`. |
 | `valueFormatter` | `ChartValueFormatter` | `undefined` | Formatter callback for numeric values. |
 | `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
+| `hiddenNodeIds` | `model(readonly string[])` | `[]` | The hidden top-level node IDs. Bindable with `[(hiddenNodeIds)]`; legend toggles write to it. |
 | `nodeVisibilityChange` | `output<ChartTreemapNodeVisibilityEvent>` | - | Emitted when a top-level branch visibility is toggled via legend or API. |
 
 ### `<mona-funnel-series>`
@@ -517,6 +530,7 @@ Renders conversion pipeline and sales funnel visualizations using connected trap
 | `valueFormatter` | `ChartValueFormatter` | `undefined` | Custom formatter function for numeric values. |
 | `visible` | `model(boolean)` | `true` | Controls overall visibility of the funnel series. |
 | `widthRatio` | `number` | `0.9` | Maximum width ratio (0.1 to 1) for the funnel's widest stage relative to plot area. |
+| `hiddenStageIds` | `model(readonly string[])` | `[]` | The hidden stage IDs. Bindable with `[(hiddenStageIds)]`; legend toggles write to it. |
 | `stageVisibilityChange` | `output<ChartFunnelStageVisibilityEvent>` | - | Emits when a stage's visibility is toggled via legend or API. |
 
 ### `<mona-waterfall-series>`
@@ -645,6 +659,20 @@ Renders callouts, milestone badges, and outlier markers anchored to specific (X,
 | `y` | `number \| string` | required | Target Y coordinate or category key. |
 | `yAxisId` | `string` | `undefined` | Target Y axis ID for multi-axis charts. |
 
+## Two-Way Binding
+
+| Binding | On | Holds |
+| :--- | :--- | :--- |
+| `[(viewport)]` | `<mona-chart>` | The viewport state. |
+| `[(selectedMarkIds)]` | `<mona-chart-selection>` | The selected mark IDs. |
+| `[(visible)]` | Every series | Whether the series is visible. |
+| `[(hiddenIndices)]` | `<mona-pie-series>`, `<mona-donut-series>` | The hidden data indices. They refer to positions, so they follow the position, not the item, when rows are reordered. |
+| `[(hiddenItemIds)]` | `<mona-radial-bar-series>`, `<mona-rose-series>` | The hidden item IDs. |
+| `[(hiddenNodeIds)]` | `<mona-treemap-series>` | The hidden top-level node IDs. |
+| `[(hiddenStageIds)]` | `<mona-funnel-series>` | The hidden stage IDs. |
+
+Hidden items the data no longer has are dropped from the binding when the data changes. A chart with no data keeps them, so a value set before the data loads still applies.
+
 ## Template Directives
 
 - `ng-template[monaChartTooltipTemplate]`: Customizes hover and keyboard tooltip contents with `{ $implicit, point, points, shared }`.
@@ -656,9 +684,11 @@ Renders callouts, milestone badges, and outlier markers anchored to specific (X,
 - `ng-template[monaChartTreemapLabelTemplate]`: Customizes DOM treemap node labels with `{ $implicit, bounds, color, datum, depth, formattedLabel, formattedPath, formattedValue, isCollapsed, isLeaf, label, node, nodeId, path, percentageOfParent, percentageOfRoot, textColor, value }`.
 - `ng-template[monaChartFunnelLabelTemplate]`: Customizes DOM funnel stage labels with `{ $implicit, bounds, category, color, conversionRate, dataIndex, datum, dropOff, formattedCategory, formattedConversionRate, formattedOverallConversionRate, formattedValue, overallConversionRate, previousValue, stage, stageId, stageIndex, textColor, value }`.
 - `ng-template[monaChartWaterfallLabelTemplate]`: Customizes DOM waterfall step labels with `{ $implicit, barEnd, barStart, bounds, category, color, cumulativeAfter, cumulativeBefore, dataIndex, datum, deltaValue, formattedCategory, formattedCumulativeAfter, formattedCumulativeBefore, formattedDelta, formattedValue, kind, step, textColor, value, visualKind }`.
-- `ng-template[monaChartCrosshairLabel]`: Customizes DOM crosshair coordinate badges with `{ $implicit, axis, axisId, coordinate, formattedValue, snapped, source, value }`.
-- `ng-template[monaChartReferenceLabel]`: Customizes DOM reference line or band labels with `{ $implicit, axis, axisId, coordinate, from, label, to, value }`.
-- `ng-template[monaChartAnnotationLabel]`: Customizes DOM point annotation callout badges with `{ $implicit, color, data, formattedText, label, point, x, y }`.
+- `ng-template[monaChartCrosshairLabelTemplate]` (or `[monaChartCrosshairLabel]`): Customizes DOM crosshair coordinate badges with `{ $implicit, axis, axisId, coordinate, formattedValue, snapped, source, value }`.
+- `ng-template[monaChartReferenceLabelTemplate]` (or `[monaChartReferenceLabel]`): Customizes DOM reference line or band labels with `{ $implicit, axis, axisId, coordinate, from, label, to, value }`.
+- `ng-template[monaChartAnnotationLabelTemplate]` (or `[monaChartAnnotationLabel]`): Customizes DOM point annotation callout badges with `{ $implicit, color, data, formattedText, label, point, x, y }`.
+
+Every directive types its `let-` variables under `strictTemplates`. `let-value` is the context's `$implicit`, which is the tick, line or annotation value, not the whole context: read other members by name, as in `let-axis="axis"`. Annotation data is `unknown`, so use `$any(data).note` or a typed method to read it.
 
 ## Keyboard Navigation
 

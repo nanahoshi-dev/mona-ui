@@ -22,8 +22,8 @@ import type { ChartOverlayLayer } from "../../models/chart-annotation.models";
             [layer]="layer()"
             [fillColor]="'#bfdbfe'">
             @if (useTemplate()) {
-                <ng-template monaChartReferenceLabel let-ctx>
-                    <span class="custom-band">{{ ctx.from }} - {{ ctx.to }}</span>
+                <ng-template monaChartReferenceLabel let-from="from" let-to="to">
+                    <span class="custom-band">{{ from }} - {{ to }}</span>
                 </ng-template>
             }
         </mona-chart-reference-band>

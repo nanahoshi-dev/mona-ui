@@ -61,10 +61,14 @@ export class ChartSelectionComponent implements OnInit {
      */
     public readonly retainOnDataChange = input(true);
     /**
-     * @description Controlled selected mark IDs. When defined, component acts as controlled state.
+     * @description Controlled selected mark IDs. When defined, component acts as controlled state. Bind `[(selectedMarkIds)]` for two-way binding.
      * @default undefined
      */
     public readonly selectedMarkIds = input<readonly string[] | undefined>(undefined);
+    /**
+     * @description Emits the proposed selected mark IDs.
+     */
+    public readonly selectedMarkIdsChange = output<readonly string[]>();
     /**
      * @description Emitted when mark selection is proposed or changed.
      */
@@ -112,7 +116,10 @@ export class ChartSelectionComponent implements OnInit {
             clickSelection: this.clickSelection,
             color: this.color,
             defaultSelectedMarkIds: this.defaultSelectedMarkIds,
-            emitSelectionChange: event => this.selectionChange.emit(event),
+            emitSelectionChange: event => {
+                this.selectionChange.emit(event);
+                this.selectedMarkIdsChange.emit(event.selectedMarkIds);
+            },
             enabled: this.enabled,
             fillOpacity: computed(() => {
                 const o = this.fillOpacity();

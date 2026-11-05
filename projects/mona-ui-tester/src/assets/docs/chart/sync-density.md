@@ -50,7 +50,7 @@ type ChartSynchronizationInput =
 
 ### Controlled charts
 
-Controlled charts publish to peers **only after** their parent accepts a viewport proposal via `[viewport]`. A rejected proposal never moves peers. A controlled recipient treats inbound synchronization as a proposal (`viewportChange` with `source="sync"`); hidden state is never mutated. The accepted controlled echo is consumed by the committed-viewport path and is not rebroadcast, so groups cannot ping-pong.
+Controlled charts publish to peers **only after** their parent accepts a viewport proposal via `[viewport]`. A rejected proposal never moves peers. A controlled recipient treats inbound synchronization as a proposal (`viewportChangeDetails` with `source="sync"`); hidden state is never mutated. The accepted controlled echo is consumed by the committed-viewport path and is not rebroadcast, so groups cannot ping-pong.
 
 ### Crosshair synchronization
 

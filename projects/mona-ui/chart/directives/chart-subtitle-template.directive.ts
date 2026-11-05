@@ -6,4 +6,11 @@ import type { ChartSubtitleTemplateContext } from "../models/chart-axis.models";
 })
 export class ChartSubtitleTemplateDirective {
     public readonly templateRef = inject<TemplateRef<ChartSubtitleTemplateContext>>(TemplateRef);
+
+    public static ngTemplateContextGuard(
+        _dir: ChartSubtitleTemplateDirective,
+        _ctx: unknown
+    ): _ctx is ChartSubtitleTemplateContext {
+        return true;
+    }
 }

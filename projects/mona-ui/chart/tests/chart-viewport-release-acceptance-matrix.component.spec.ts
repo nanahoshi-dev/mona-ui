@@ -86,7 +86,7 @@ class FakeResizeObserver {
             [animation]="animation()"
             [viewport]="viewport()"
             [defaultViewport]="defaultViewport()"
-            (viewportChange)="onViewportChange($event)"
+            (viewportChangeDetails)="onViewportChange($event)"
             (pointClick)="onPointClick($event)"
             [style.width.px]="chartWidth()"
             [style.height.px]="chartHeight()"

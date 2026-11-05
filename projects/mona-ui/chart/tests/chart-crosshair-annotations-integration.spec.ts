@@ -45,8 +45,8 @@ interface SampleDatum {
             @if (showCrosshair()) {
                 <mona-chart-crosshair [mode]="crosshairMode()" [snap]="crosshairSnap()" [color]="'#3b82f6'">
                     @if (useCrosshairTemplate()) {
-                        <ng-template monaChartCrosshairLabel let-ctx>
-                            <span class="custom-crosshair-badge">{{ ctx.axis }}: {{ ctx.formattedValue }}</span>
+                        <ng-template monaChartCrosshairLabel let-axis="axis" let-formattedValue="formattedValue">
+                            <span class="custom-crosshair-badge">{{ axis }}: {{ formattedValue }}</span>
                         </ng-template>
                     }
                 </mona-chart-crosshair>
@@ -70,8 +70,8 @@ interface SampleDatum {
                     [label]="'Optimal'"
                     [layer]="'underlay'">
                     @if (useRefBandTemplate()) {
-                        <ng-template monaChartReferenceLabel let-ctx>
-                            <span class="custom-band-badge">Band: {{ ctx.from }}-{{ ctx.to }}</span>
+                        <ng-template monaChartReferenceLabel let-from="from" let-to="to">
+                            <span class="custom-band-badge">Band: {{ from }}-{{ to }}</span>
                         </ng-template>
                     }
                 </mona-chart-reference-band>
@@ -86,7 +86,7 @@ interface SampleDatum {
                     [marker]="'diamond'">
                     @if (useAnnotationTemplate()) {
                         <ng-template monaChartAnnotationLabel let-d>
-                            <span class="custom-ann-badge">{{ d.desc }}</span>
+                            <span class="custom-ann-badge">{{ $any(d).desc }}</span>
                         </ng-template>
                     }
                 </mona-chart-annotation>

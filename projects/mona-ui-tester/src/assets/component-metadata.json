@@ -3210,6 +3210,13 @@
         "defaultValue": "\"\""
       },
       {
+        "description": "Formats this series' values in tooltips, data labels and announcements, without changing the axis ticks. Takes precedence over the axis formatter.",
+        "kind": "input",
+        "name": "valueFormatter",
+        "type": "ChartValueFormatter | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Whether the series is currently visible on the chart and in calculations.",
         "kind": "model",
         "name": "visible",
@@ -3298,6 +3305,13 @@
         "name": "fillMode",
         "type": "ChartFinancialFillMode",
         "defaultValue": "\"filled\""
+      },
+      {
+        "description": "Fill and stroke opacity ratio (0 to 1).",
+        "kind": "input",
+        "name": "fillOpacity",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
       },
       {
         "description": "Property key or accessor extracting the highest price for each data item.",
@@ -3559,16 +3573,22 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Active viewport window state for chart axes.",
+        "description": "Active viewport window state for chart axes. Bind `[(viewport)]` for two-way binding. While it is defined the parent owns the viewport: a change applies once the parent writes it back.",
         "kind": "input",
         "name": "viewport",
         "type": "ChartViewportState | undefined",
         "defaultValue": "undefined"
       },
       {
-        "description": "Emits when the chart viewport changes via pan, zoom, fit, reset, or keyboard navigation.",
+        "description": "Emits the new viewport state when it changes via pan, zoom, fit, reset, or keyboard navigation.",
         "kind": "output",
         "name": "viewportChange",
+        "type": "ChartViewportState"
+      },
+      {
+        "description": "Emits with each viewport change, along with the previous state, source, gesture phase and changed axes.",
+        "kind": "output",
+        "name": "viewportChangeDetails",
         "type": "ChartViewportChangeEvent"
       },
       {
@@ -4396,11 +4416,17 @@
         "defaultValue": "true"
       },
       {
-        "description": "Controlled selected mark IDs. When defined, component acts as controlled state.",
+        "description": "Controlled selected mark IDs. When defined, component acts as controlled state. Bind `[(selectedMarkIds)]` for two-way binding.",
         "kind": "input",
         "name": "selectedMarkIds",
         "type": "readonly string[] | undefined",
         "defaultValue": "undefined"
+      },
+      {
+        "description": "Emits the proposed selected mark IDs.",
+        "kind": "output",
+        "name": "selectedMarkIdsChange",
+        "type": "readonly string[]"
       },
       {
         "description": "Emitted when mark selection is proposed or changed.",
@@ -4847,6 +4873,13 @@
         "defaultValue": "undefined"
       },
       {
+        "description": "The hidden data indices. Bind `[(hiddenIndices)]` for two-way binding; legend toggles write to it.",
+        "kind": "model",
+        "name": "hiddenIndices",
+        "type": "readonly number[]",
+        "defaultValue": "[]"
+      },
+      {
         "description": "Ratio of the inner hole radius relative to the outer radius (0 to 0.95).",
         "kind": "input",
         "name": "innerRadiusRatio",
@@ -5026,6 +5059,13 @@
         "name": "gap",
         "type": "number",
         "defaultValue": "2"
+      },
+      {
+        "description": "The hidden stage IDs. Bind `[(hiddenStageIds)]` for two-way binding; legend toggles write to it.",
+        "kind": "model",
+        "name": "hiddenStageIds",
+        "type": "readonly string[]",
+        "defaultValue": "[]"
       },
       {
         "description": "Unique identifier key field for datums.",
@@ -5602,6 +5642,13 @@
         "defaultValue": "\"\""
       },
       {
+        "description": "Formats this series' values in tooltips, data labels and announcements, without changing the axis ticks. Takes precedence over the axis formatter.",
+        "kind": "input",
+        "name": "valueFormatter",
+        "type": "ChartValueFormatter | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Whether the series is currently visible on the chart and in calculations.",
         "kind": "model",
         "name": "visible",
@@ -5683,6 +5730,13 @@
         "name": "fallingColor",
         "type": "string",
         "defaultValue": "\"\""
+      },
+      {
+        "description": "Fill and stroke opacity ratio (0 to 1).",
+        "kind": "input",
+        "name": "fillOpacity",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
       },
       {
         "description": "Property key or accessor extracting the highest price for each data item.",
@@ -5902,6 +5956,13 @@
         "defaultValue": "undefined"
       },
       {
+        "description": "The hidden data indices. Bind `[(hiddenIndices)]` for two-way binding; legend toggles write to it.",
+        "kind": "model",
+        "name": "hiddenIndices",
+        "type": "readonly number[]",
+        "defaultValue": "[]"
+      },
+      {
         "description": "Property key or accessor extracting a stable datum identity across updates.",
         "kind": "input",
         "name": "keyField",
@@ -6018,6 +6079,13 @@
         "name": "angleField",
         "type": "ChartField",
         "defaultValue": "\"angle\""
+      },
+      {
+        "description": "Property key or accessor extracting the angle for each point. Takes precedence over `angleField`.",
+        "kind": "input",
+        "name": "categoryField",
+        "type": "ChartField | undefined",
+        "defaultValue": "undefined"
       },
       {
         "description": "Explicit stroke and marker color override for the series.",
@@ -6339,6 +6407,13 @@
         "name": "fillOpacity",
         "type": "number | undefined",
         "defaultValue": "undefined"
+      },
+      {
+        "description": "The hidden item IDs. Bind `[(hiddenItemIds)]` for two-way binding; legend toggles write to it.",
+        "kind": "model",
+        "name": "hiddenItemIds",
+        "type": "readonly string[]",
+        "defaultValue": "[]"
       },
       {
         "description": "Inner radius ratio relative to available plot bounds (0 to 1).",
@@ -6816,6 +6891,13 @@
         "defaultValue": "undefined"
       },
       {
+        "description": "The hidden item IDs. Bind `[(hiddenItemIds)]` for two-way binding; legend toggles write to it.",
+        "kind": "model",
+        "name": "hiddenItemIds",
+        "type": "readonly string[]",
+        "defaultValue": "[]"
+      },
+      {
         "description": "Inner radius ratio relative to available plot bounds (0 to 1).",
         "kind": "input",
         "name": "innerRadiusRatio",
@@ -6999,6 +7081,13 @@
         "defaultValue": "\"\""
       },
       {
+        "description": "Formats this series' values in tooltips, data labels and announcements, without changing the axis ticks. Takes precedence over the axis formatter.",
+        "kind": "input",
+        "name": "valueFormatter",
+        "type": "ChartValueFormatter | undefined",
+        "defaultValue": "undefined"
+      },
+      {
         "description": "Whether the series is currently visible on the chart and in calculations.",
         "kind": "model",
         "name": "visible",
@@ -7037,6 +7126,13 @@
         "kind": "input",
         "name": "borderRadius",
         "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Formatter callback for node labels.",
+        "kind": "input",
+        "name": "categoryFormatter",
+        "type": "ChartValueFormatter | undefined",
         "defaultValue": "undefined"
       },
       {
@@ -7087,6 +7183,13 @@
         "name": "fillOpacity",
         "type": "number | undefined",
         "defaultValue": "undefined"
+      },
+      {
+        "description": "The hidden top-level node IDs. Bind `[(hiddenNodeIds)]` for two-way binding; legend toggles write to it.",
+        "kind": "model",
+        "name": "hiddenNodeIds",
+        "type": "readonly string[]",
+        "defaultValue": "[]"
       },
       {
         "description": "Property key or accessor extracting a stable datum identity across data updates.",

@@ -6,4 +6,11 @@ import type { ChartCenterTemplateContext } from "../models/chart-polar.models";
 })
 export class ChartCenterTemplateDirective {
     public readonly templateRef = inject<TemplateRef<ChartCenterTemplateContext>>(TemplateRef);
+
+    public static ngTemplateContextGuard(
+        _dir: ChartCenterTemplateDirective,
+        _ctx: unknown
+    ): _ctx is ChartCenterTemplateContext {
+        return true;
+    }
 }

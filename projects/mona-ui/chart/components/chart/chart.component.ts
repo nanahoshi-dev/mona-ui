@@ -339,7 +339,8 @@ type ChartTransientInteractionOwner = "tooltip" | "crosshair" | "keyboard" | nul
     providers: [
         {
             provide: CHART_CONTEXT,
-            useExisting: ChartComponent
+            // A factory rather than `implements`, so the published types don't name the internal context.
+            useFactory: (): ChartRegistrationContext => inject(ChartComponent)
         }
     ],
     host: {
@@ -355,7 +356,7 @@ type ChartTransientInteractionOwner = "tooltip" | "crosshair" | "keyboard" | nul
         "(focusout)": "onFocusOut($event)"
     }
 })
-export class ChartComponent implements ChartRegistrationContext, AfterContentChecked {
+export class ChartComponent implements AfterContentChecked {
     readonly #activeBrushBounds = signal<ChartRect | null>(null);
     readonly #activeExportControllers = new Set<AbortController>();
     readonly #angularAxis = signal<ChartAngularAxisRegistration | null>(null);
@@ -379,9 +380,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     readonly #document = inject(DOCUMENT);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #errorHandler = inject(ErrorHandler);
-    readonly #i18n = inject(MonaI18nService);
     readonly #hasInitializedDefaultSelection = signal(false);
     readonly #hasInitializedDefaultViewport = signal(false);
+    readonly #i18n = inject(MonaI18nService);
     readonly #internalSelectedMarkIds = signal<readonly string[]>([]);
     readonly #isAnimating = signal(false);
     /** On the server the chart renders its empty host: no layout, scheduling, observers or measurement. */
@@ -418,10 +419,13 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     readonly #rootXField = computed(() =>
         guardChartCallback(this.xField(), "xField", (_, error) => this.#reportCallbackError("chart xField", error))
     );
+    readonly #sceneState = signal<ChartScene | null>(null);
     readonly #selection = signal<ChartSelectionRegistration | null>(null);
     readonly #styleResolver: ChartStyleResolver;
     readonly #synchronizationCoordinator = inject(ChartSynchronizationCoordinator);
     readonly #tooltip = signal<ChartTooltipRegistration | null>(null);
+    readonly #tooltipContextState = signal<ChartTooltipTemplateContext | null>(null);
+    readonly #tooltipPositionState = signal<ChartPoint | null>(null);
     readonly #uncontrolledViewportState = signal<InternalCartesianViewportState>({ x: new Map(), y: new Map() });
     readonly #warnedDiagnosticSignatures = new Set<string>();
     readonly #xAxes = signal<ChartXAxisRegistration[]>([]);
@@ -485,7 +489,6 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #synchronizationController: ChartSynchronizationController | null = null;
     #themeObserver: MutationObserver | null = null;
     #themeSignature = "";
-    protected readonly messages = this.#i18n.componentMessages("chart", CHART_DEFAULT_MESSAGES);
     protected readonly activeAccessibilityText = signal<string>("");
     protected readonly animationDurationCss = computed(() => `${this.normalizedAnimationOptions().duration}ms`);
     protected readonly animationEasingCss = computed(() => easingToCss(this.normalizedAnimationOptions().easing));
@@ -739,6 +742,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     protected readonly legendPlacement = computed(() =>
         resolveLegendPlacement(this.#legend()?.position() ?? "bottom", this.#direction())
     );
+    protected readonly messages = this.#i18n.componentMessages("chart", CHART_DEFAULT_MESSAGES);
     protected readonly noDataClasses = computed(() => chartNoDataBaseThemeVariants());
     protected readonly noDataTemplate = contentChild(ChartNoDataTemplateDirective);
     protected readonly normalizedAnimationOptions = computed(() => normalizeChartAnimationOptions(this.animation()));
@@ -846,6 +850,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const list = this.#registeredSeries();
         return (list.find(s => s.type === "waterfall") as ChartWaterfallSeriesRegistration) ?? null;
     });
+    /** @internal */
     public readonly angularAxisRegistration: Signal<ChartAngularAxisRegistration | null> =
         this.#angularAxis.asReadonly();
     /**
@@ -853,6 +858,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
      * @default true
      */
     public readonly animation = input<ChartAnimationInput>(true);
+    /** @internal */
     public readonly animationMode = this.#animationMode.asReadonly();
     /**
      * @description Detailed accessible description explaining the chart's purpose and trends.
@@ -884,8 +890,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
      * @default true
      */
     public readonly downsampling = input<ChartDownsamplingInput>(true);
+    /** @internal */
     public readonly isAnimating = this.#isAnimating.asReadonly();
+    /** @internal */
     public readonly isExitingData = this.#isExitingData.asReadonly();
+    /** @internal */
     public readonly isStructuralAnimation = this.#isStructuralAnimation.asReadonly();
     /**
      * @description Makes the chart a `region` landmark instead of an `application`. A landmark keeps screen readers in
@@ -918,6 +927,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
      * @description Emits when the keyboard focus moves to a new data point, spoke, or series.
      */
     public readonly pointFocusChange = output<ChartPointFocusEvent>();
+    /** @internal */
     public readonly radialAxisRegistration: Signal<ChartRadialAxisRegistration | null> = this.#radialAxis.asReadonly();
     /**
      * The rendering engine used to draw the chart surface.
@@ -926,8 +936,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
      * @default "canvas"
      */
     public readonly renderer = input<ChartRendererMode>("canvas");
+    /** @internal */
     public readonly rootData: Signal<readonly unknown[]> = this.data;
-    public readonly scene = signal<ChartScene | null>(null);
+    /** @internal */
+    public readonly scene = this.#sceneState.asReadonly();
     /**
      * @description Emits when a series visibility state is toggled via legend interaction.
      */
@@ -952,30 +964,40 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
      * @default "start"
      */
     public readonly titleAlign = input<ChartHeaderAlignment>("start");
-    public readonly tooltipContext = signal<ChartTooltipTemplateContext | null>(null);
-    public readonly tooltipPosition = signal<ChartPoint | null>(null);
+    /** @internal */
+    public readonly tooltipContext = this.#tooltipContextState.asReadonly();
+    /** @internal */
+    public readonly tooltipPosition = this.#tooltipPositionState.asReadonly();
     /**
      * @description Additional CSS classes applied to chart root container.
      * @default ""
      */
     public readonly userClass = input("", { alias: "class" });
     /**
-     * @description Active viewport window state for chart axes.
+     * @description Active viewport window state for chart axes. Bind `[(viewport)]` for two-way binding. While it is defined the parent owns the viewport: a change applies once the parent writes it back.
      * @default undefined
      */
     public readonly viewport = input<ChartViewportState | undefined>(undefined);
     /**
-     * @description Emits when the chart viewport changes via pan, zoom, fit, reset, or keyboard navigation.
+     * @description Emits the new viewport state when it changes via pan, zoom, fit, reset, or keyboard navigation.
      */
-    public readonly viewportChange = output<ChartViewportChangeEvent>();
+    public readonly viewportChange = output<ChartViewportState>();
+    /**
+     * @description Emits with each viewport change, along with the previous state, source, gesture phase and changed axes.
+     */
+    public readonly viewportChangeDetails = output<ChartViewportChangeEvent>();
+    /** @internal */
     public readonly xAxesRegistration: Signal<readonly ChartXAxisRegistration[]> = this.#xAxes.asReadonly();
+    /** @internal */
     public readonly xAxisRegistration: Signal<ChartXAxisRegistration | null> = computed(() => this.#xAxes()[0] ?? null);
     /**
      * @description Property key or accessor extracting the X-axis coordinate for each data item.
      * @default ""
      */
     public readonly xField = input<ChartField>("");
+    /** @internal */
     public readonly yAxesRegistration: Signal<readonly ChartYAxisRegistration[]> = this.#yAxes.asReadonly();
+    /** @internal */
     public readonly yAxisRegistration: Signal<ChartYAxisRegistration | null> = computed(() => this.#yAxes()[0] ?? null);
 
     public constructor() {
@@ -1054,8 +1076,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             untracked(() => {
                 this.#synchronizationController?.setOptions(syncOptions);
                 if (!syncOptions?.crosshair.showTooltip && this.crosshairState()?.source === "sync") {
-                    this.tooltipContext.set(null);
-                    this.tooltipPosition.set(null);
+                    this.#tooltipContextState.set(null);
+                    this.#tooltipPositionState.set(null);
                 }
             });
         });
@@ -1136,7 +1158,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 this.#renderBackend = null;
             }
             this.#renderScene = null;
-            this.scene.set(null);
+            this.#sceneState.set(null);
             for (const ctrl of this.#activeExportControllers) {
                 ctrl.abort();
             }
@@ -1474,7 +1496,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #applyGestureViewportEvent(nextState: InternalCartesianViewportState, event: ChartViewportChangeEvent): void {
         if (this.#isDestroyed) return;
         this.#retireTransientInteractionForViewportChange();
-        this.viewportChange.emit(event);
+        this.#emitViewportChange(event);
 
         const isControlled = this.viewport() !== undefined;
         if (!isControlled && event.phase === "update") {
@@ -1524,19 +1546,19 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     sharedTooltip: this.#tooltip()?.shared() ?? false
                 });
                 if (res && res.primaryHit) {
-                    this.tooltipPosition.set(res.nearestAnchor);
-                    this.tooltipContext.set(
+                    this.#tooltipPositionState.set(res.nearestAnchor);
+                    this.#tooltipContextState.set(
                         this.#buildTooltipContext(res.sharedHits, this.#resolveSharedTooltip(sc), res.primaryHit)
                     );
                 } else {
-                    this.tooltipContext.set(null);
-                    this.tooltipPosition.set(null);
+                    this.#tooltipContextState.set(null);
+                    this.#tooltipPositionState.set(null);
                 }
             }
         } else if (state === null && !localActive) {
             if (this.tooltipContext()) {
-                this.tooltipContext.set(null);
-                this.tooltipPosition.set(null);
+                this.#tooltipContextState.set(null);
+                this.#tooltipPositionState.set(null);
             }
         }
     }
@@ -1555,7 +1577,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         this.#retireTransientInteractionForViewportChange();
         this.#uncontrolledViewportState.set(state);
-        this.viewportChange.emit({
+        this.#emitViewportChange({
             changedAxes,
             phase,
             previousViewport: toPublicViewportState(previousState, resolvedAxisMap),
@@ -1582,7 +1604,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         const isControlled = this.viewport() !== undefined;
 
-        this.viewportChange.emit({
+        this.#emitViewportChange({
             changedAxes: changedAxes ?? [],
             phase,
             previousViewport: prevPublicState,
@@ -1795,8 +1817,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#interactionState = null;
         this.#interactionOwner = null;
         this.crosshairState.set(null);
-        this.tooltipContext.set(null);
-        this.tooltipPosition.set(null);
+        this.#tooltipContextState.set(null);
+        this.#tooltipPositionState.set(null);
     }
 
     #clearTransientInteractionOwnedBy(owner: Exclude<ChartTransientInteractionOwner, null>): boolean {
@@ -1841,7 +1863,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const previousState = this.#effectiveViewportState();
         const resolvedAxisMap = sc.coordinateSpace.toResolvedAxisInfoMap();
 
-        this.viewportChange.emit({
+        this.#emitViewportChange({
             changedAxes,
             phase,
             previousViewport: toPublicViewportState(previousState, resolvedAxisMap),
@@ -2335,6 +2357,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         return signature;
     }
 
+    #emitViewportChange(event: ChartViewportChangeEvent): void {
+        this.viewportChangeDetails.emit(event);
+        this.viewportChange.emit(event.viewport);
+    }
+
     #guardCallbacks(registration: object, owner: () => string): void {
         guardRegistrationCallbacks(registration, owner, (name, error) => this.#reportCallbackError(name, error));
     }
@@ -2544,7 +2571,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             );
 
             if (reconciliationEvent) {
-                this.viewportChange.emit(reconciliationEvent);
+                this.#emitViewportChange(reconciliationEvent);
             }
 
             const projectedComp = CartesianLayoutEngine.projectRuntime(
@@ -2589,7 +2616,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 );
 
                 if (reconciliationEvent) {
-                    this.viewportChange.emit(reconciliationEvent);
+                    this.#emitViewportChange(reconciliationEvent);
                 }
 
                 const projectedComp = CartesianLayoutEngine.projectRuntime(
@@ -2627,7 +2654,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
 
         // Commit semantic target scene immediately
-        this.scene.set(newScene);
+        this.#sceneState.set(newScene);
         this.#updateGestureController();
 
         const isWaitingForInitialPolarSvgMeasurement =
@@ -2836,11 +2863,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         if (!tooltipEnabled) {
             if (this.tooltipPosition() !== null) {
-                this.tooltipPosition.set(null);
+                this.#tooltipPositionState.set(null);
                 changed = true;
             }
             if (this.tooltipContext() !== null) {
-                this.tooltipContext.set(null);
+                this.#tooltipContextState.set(null);
                 changed = true;
             }
             if (this.#clearTransientInteractionOwnedBy("tooltip")) {
@@ -2941,8 +2968,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     x: clampedX,
                     y: clampedY
                 };
-                this.tooltipPosition.set(tooltipPos);
-                this.tooltipContext.set(
+                this.#tooltipPositionState.set(tooltipPos);
+                this.#tooltipContextState.set(
                     this.#buildTooltipContext(
                         hitState.activeHits.length > 0 ? hitState.activeHits : [primaryHit],
                         shared,
@@ -2967,13 +2994,13 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 },
                 "crosshair"
             );
-            this.tooltipPosition.set(null);
-            this.tooltipContext.set(null);
+            this.#tooltipPositionState.set(null);
+            this.#tooltipContextState.set(null);
             hasAnyState = true;
         } else {
             this.#setTransientInteraction(null, null);
-            this.tooltipPosition.set(null);
-            this.tooltipContext.set(null);
+            this.#tooltipPositionState.set(null);
+            this.#tooltipContextState.set(null);
         }
 
         if (hasAnyState || changed) {
@@ -3233,8 +3260,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             "keyboard"
         );
 
-        this.tooltipPosition.set(pointPos);
-        this.tooltipContext.set(this.#buildTooltipContext(activeHits, shared, matchingHit));
+        this.#tooltipPositionState.set(pointPos);
+        this.#tooltipContextState.set(this.#buildTooltipContext(activeHits, shared, matchingHit));
 
         this.pointFocusChange.emit(this.#toPointFocusEvent(matchingHit));
 
@@ -3810,6 +3837,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
     }
 
+    /** @internal */
     public flushPendingRender(): void {
         this.#cancelPendingPointerInteraction();
         this.#flushPendingBrushFrameNow();
@@ -3828,6 +3856,12 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         return toPublicViewportState(this.#effectiveViewportState(), xyScene.coordinateSpace.toResolvedAxisInfoMap());
     }
 
+    /**
+     * @description Schedules a new layout and paint, for changes the chart can't see, such as a mutated data array.
+     */
+    public invalidate(): void;
+    /** @internal */
+    public invalidate(reason: ChartInvalidationReason): void;
     public invalidate(reason: ChartInvalidationReason = ChartInvalidationReason.Layout): void {
         if (this.#isDestroyed || !this.#isBrowser) {
             return;
@@ -3864,6 +3898,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#renderScheduler.flushStructural();
     }
 
+    /** @internal */
     public observeDataLabelElement(element: HTMLElement, labelId: string): void {
         if (!labelId || typeof ResizeObserver === "undefined") {
             return;
@@ -3895,6 +3930,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#dataLabelResizeObserver.observe(element);
     }
 
+    /** @internal */
     public observeLabelElement(element: HTMLElement, labelId: string): void {
         if (!labelId || typeof ResizeObserver === "undefined") {
             return;
@@ -3956,6 +3992,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#labelResizeObserver.observe(element);
     }
 
+    /** @internal */
     public observeOverlayLabelElement(element: HTMLElement, labelId: string): void {
         if (!labelId || typeof ResizeObserver === "undefined") {
             return;
@@ -4036,6 +4073,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#overlayLabelResizeObserver.observe(element);
     }
 
+    /** @internal */
     public onCanvasClick(event: MouseEvent): void {
         if (this.#isAnimating() && !this.#isStructuralAnimation()) {
             return;
@@ -4115,6 +4153,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
     }
 
+    /** @internal */
     public onFocusOut(event: FocusEvent): void {
         const related = event.relatedTarget as Node | null;
         if (!related || !this.#elementRef.nativeElement.contains(related)) {
@@ -4128,6 +4167,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
     }
 
+    /** @internal */
     public onKeyDown(event: KeyboardEvent): void {
         // Keys pressed in the legend, a tooltip or projected content belong to that content.
         if (event.target !== this.#elementRef.nativeElement) {
@@ -4304,6 +4344,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
     }
 
+    /** @internal */
     public onLostPointerCapture(event: PointerEvent): void {
         if (this.#brushGestureController.activeSession?.pointerId === event.pointerId) {
             this.#cancelBrushAuthority("lost-pointer-capture");
@@ -4311,11 +4352,13 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#gestureController?.handleLostPointerCapture(event);
     }
 
+    /** @internal */
     public onPointerCancel(event: PointerEvent): void {
         this.#cancelBrushAuthority("pointer-cancel");
         this.#gestureController?.handlePointerCancel(event);
     }
 
+    /** @internal */
     public onPointerDown(event: PointerEvent): void {
         const brushReg = this.#brush();
         const currentScene = this.scene();
@@ -4359,6 +4402,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#gestureController?.handlePointerDown(event, pointer, event.currentTarget as Element);
     }
 
+    /** @internal */
     public onPointerLeave(event?: PointerEvent): void {
         this.#cancelPendingPointerInteraction();
         if (event) {
@@ -4376,6 +4420,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
     }
 
+    /** @internal */
     public onPointerMove(event: PointerEvent): void {
         const brushReg = this.#brush();
         const currentScene = this.scene();
@@ -4430,6 +4475,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
     }
 
+    /** @internal */
     public onPointerUp(event: PointerEvent): void {
         const brushReg = this.#brush();
         const currentScene = this.scene();
@@ -4496,6 +4542,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#gestureController?.handlePointerUp(event);
     }
 
+    /** @internal */
     public onWheel(event: WheelEvent): void {
         const pointer = this.#normalizePointer(event);
         if (!pointer) return;
@@ -4542,6 +4589,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
     }
 
+    /** @internal */
     public recomputeScene(reason: ChartInvalidationReason = ChartInvalidationReason.Layout): void {
         if (this.#isDestroyed || !this.#isBrowser) {
             return;
@@ -4557,6 +4605,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#recomputeAndPaint(reason);
     }
 
+    /** @internal */
     public registerAngularAxis(registration: ChartAngularAxisRegistration): () => void {
         this.#guardCallbacks(registration, () => "angular axis");
         this.#angularAxis.set(registration);
@@ -4569,6 +4618,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerAnnotation(registration: ChartAnnotationRegistration): () => void {
         this.#annotations.update(list => [...list, registration]);
         this.invalidate(ChartInvalidationReason.Interaction);
@@ -4578,6 +4628,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerBrush(registration: ChartBrushRegistration): () => void {
         if (this.#brush() !== null) {
             if (!this.#hasWarnedMultiBrush && typeof ngDevMode !== "undefined" && ngDevMode) {
@@ -4599,6 +4650,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerCrosshair(registration: ChartCrosshairRegistration): () => void {
         this.#crosshair.set(registration);
         return () => {
@@ -4608,6 +4660,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerLegend(registration: ChartLegendRegistration): () => void {
         this.#legend.set(registration);
         this.invalidate(ChartInvalidationReason.Data);
@@ -4619,6 +4672,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerRadialAxis(registration: ChartRadialAxisRegistration): () => void {
         this.#guardCallbacks(registration, () => "radial axis");
         this.#radialAxis.set(registration);
@@ -4631,6 +4685,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerReferenceBand(registration: ChartReferenceBandRegistration): () => void {
         this.#referenceBands.update(list => [...list, registration]);
         this.invalidate(ChartInvalidationReason.Interaction);
@@ -4640,6 +4695,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerReferenceLine(registration: ChartReferenceLineRegistration): () => void {
         this.#referenceLines.update(list => [...list, registration]);
         this.invalidate(ChartInvalidationReason.Interaction);
@@ -4649,6 +4705,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerSelection(registration: ChartSelectionRegistration): () => void {
         if (this.#selection() !== null) {
             if (!this.#hasWarnedMultiSelection && typeof ngDevMode !== "undefined" && ngDevMode) {
@@ -4681,6 +4738,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerSeries(registration: ChartSeriesRegistration): () => void {
         this.#guardCallbacks(registration, () => {
             const name = "name" in registration && typeof registration.name === "function" ? registration.name() : "";
@@ -4695,6 +4753,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerTooltip(registration: ChartTooltipRegistration): () => void {
         this.#tooltip.set(registration);
         return () => {
@@ -4704,6 +4763,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerXAxis(registration: ChartXAxisRegistration): () => void {
         this.#guardCallbacks(registration, () => `X axis "${registration.axisId?.() ?? "x"}"`);
         this.#xAxes.update(list => [...list, registration]);
@@ -4714,6 +4774,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         };
     }
 
+    /** @internal */
     public registerYAxis(registration: ChartYAxisRegistration): () => void {
         this.#guardCallbacks(registration, () => `Y axis "${registration.axisId?.() ?? "y"}"`);
         this.#yAxes.update(list => [...list, registration]);
@@ -4799,6 +4860,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
     }
 
+    /** @internal */
     public toggleLegendItem(item: ChartLegendItem): void {
         if (item.kind === "semantic" || item.interactive === false) {
             return;
@@ -4878,13 +4940,14 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     if (this.#interactionOwner === "tooltip" || this.#interactionOwner === "keyboard") {
                         const currentScene = this.#renderScene ?? this.scene();
                         const shared = currentScene ? this.#resolveSharedTooltip(currentScene) : false;
-                        this.tooltipContext.set(this.#buildTooltipContext(activeHits, shared, primary));
+                        this.#tooltipContextState.set(this.#buildTooltipContext(activeHits, shared, primary));
                     }
                 }
             }
         }
     }
 
+    /** @internal */
     public unobserveDataLabelElement(element: HTMLElement, _labelId: string): void {
         if (this.#dataLabelResizeObserver) {
             this.#dataLabelResizeObserver.unobserve(element);
@@ -4892,6 +4955,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#observedDataLabelElements.delete(element);
     }
 
+    /** @internal */
     public unobserveLabelElement(element: HTMLElement, _labelId: string): void {
         if (this.#labelResizeObserver) {
             this.#labelResizeObserver.unobserve(element);
@@ -4899,6 +4963,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#observedLabelElements.delete(element);
     }
 
+    /** @internal */
     public unobserveOverlayLabelElement(element: HTMLElement, labelId: string): void {
         if (this.#overlayLabelResizeObserver) {
             this.#overlayLabelResizeObserver.unobserve(element);

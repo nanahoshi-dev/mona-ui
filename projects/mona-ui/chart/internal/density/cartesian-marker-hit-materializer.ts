@@ -201,7 +201,7 @@ export function resolveCartesianMarkerDatum(
         formattedValue: formatYValue(
             yVal,
             sourceIndex,
-            context.yAxisFormatter ?? (context.valueFormatter as ChartAxisFormatter<unknown> | undefined)
+            (context.valueFormatter as ChartAxisFormatter<unknown> | undefined) ?? context.yAxisFormatter
         ),
         index: sourceIndex,
         markerInteractionOrder: {

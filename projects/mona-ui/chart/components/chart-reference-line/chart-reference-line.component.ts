@@ -1,5 +1,5 @@
 import { Component, contentChild, DestroyRef, effect, ElementRef, inject, input } from "@angular/core";
-import { v4 as uuidv4 } from "uuid";
+import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import {
     ChartInvalidationReason,
@@ -27,7 +27,7 @@ export class ChartReferenceLineComponent {
     readonly #context = inject<ChartRegistrationContext | null>(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
-    readonly #id = uuidv4();
+    readonly #id = createElementControlId();
 
     /**
      * @description Target Cartesian axis dimension: 'x' or 'y'.

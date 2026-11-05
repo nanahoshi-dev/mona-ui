@@ -121,6 +121,12 @@ export class BubbleSeriesComponent implements OnInit {
     public readonly userClass = input("", { alias: "class" });
 
     /**
+     * @description Formats this series' values in tooltips, data labels and announcements, without changing the axis ticks. Takes precedence over the axis formatter.
+     * @default undefined
+     */
+    public readonly valueFormatter = input<ChartValueFormatter | undefined>(undefined);
+
+    /**
      * @description Whether the series is currently visible on the chart and in calculations.
      * @default true
      */
@@ -158,6 +164,7 @@ export class BubbleSeriesComponent implements OnInit {
             this.field();
             this.keyField();
             this.seriesKey();
+            this.valueFormatter();
             this.sizeField();
             this.xField();
             if (this.#registered) {
@@ -230,6 +237,7 @@ export class BubbleSeriesComponent implements OnInit {
             },
             type: "bubble",
             userClass: this.userClass,
+            valueFormatter: this.valueFormatter,
             visible: this.visible,
             xAxisId: this.xAxisId,
             xField: this.xField,
