@@ -11,7 +11,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Subject, tap } from "rxjs";
-import { v4 } from "uuid";
+import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import {
     PopupMenuConfig,
     PopupMenuItemType,
@@ -41,6 +41,8 @@ import { PopupMenuItemClickEvent } from "../../models/PopupMenuItemClickEvent";
 export class PopupMenuRadioItemComponent implements PopupMenuConfig, OnInit {
     readonly #click$ = new Subject<PopupMenuItemClickEvent>();
     readonly #destroyRef = inject(DestroyRef);
+    // One id per item for its lifetime, so the menu keeps track of it when the items are rebuilt.
+    readonly #uid = createElementControlId();
     protected readonly shortcutTemplateConfig = contentChild(PopupMenuShortcutTemplateToken, {
         descendants: false
     });
@@ -84,7 +86,7 @@ export class PopupMenuRadioItemComponent implements PopupMenuConfig, OnInit {
                 radio: true,
                 shortcutTemplate: computed(() => this.shortcutTemplateConfig()?.template ?? null),
                 textTemplate: computed(() => this.textTemplateConfig()?.template ?? null),
-                uid: v4(),
+                uid: this.#uid,
                 value: computed(() => this.value())
             }
         ];

@@ -12276,6 +12276,20 @@
         "type": "ConnectionPoint | null"
       },
       {
+        "description": "The accessible name of the root menu. Takes precedence over `ariaLabelledBy`.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The ids of the elements that name the root menu. When neither this nor `ariaLabel` is set, the\nmenu is named by the target element if it has an id.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "The event that is emitted when the popup menu is closed.",
         "kind": "output",
         "name": "close",
@@ -12368,17 +12382,17 @@
         "defaultValue": "\"click\""
       },
       {
-        "description": "Sets the width of the popup menu.\nThis will be applied to the root menu and all submenus.",
-        "kind": "input",
-        "name": "width",
-        "type": "string | number"
-      },
-      {
         "description": "",
         "kind": "input",
         "name": "userClass",
         "type": "string",
         "alias": "class"
+      },
+      {
+        "description": "Sets the width of the popup menu.\nThis will be applied to the root menu and all submenus.",
+        "kind": "input",
+        "name": "width",
+        "type": "string | number"
       }
     ]
   },

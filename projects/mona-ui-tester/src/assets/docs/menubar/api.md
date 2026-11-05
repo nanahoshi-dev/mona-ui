@@ -245,6 +245,7 @@ Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or
 | `End`                             | Highlights the last item                                                                                                            |
 | `Enter` / `Space`                 | Activates the highlighted item, or opens its submenu if it has nested items                                                         |
 | `Escape`                          | Closes the open submenu, or the menu itself at the root level                                                                       |
+| `Tab`                             | Closes the open menus; focus moves on from the menubar                                                                              |
 | Letter, digit, space, `-`, or `_` | Jumps to (cycles through) items whose label starts with the typed text                                                              |
 
 ### ARIA
@@ -271,7 +272,7 @@ Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or
 
 **Popup menu container** (`role="menu"`), **item** (`role="menuitem"`), and **group** (`role="group"`): same attributes as `ContextMenuComponent`'s popup — see its documentation for the full table. In summary: the container carries `aria-orientation="vertical"` and `aria-activedescendant` while an item is highlighted; checkbox and radio items are `menuitemcheckbox` and `menuitemradio` with `aria-checked`; each item carries `aria-disabled`, `aria-haspopup`/`aria-expanded` when it has nested items, and `aria-label` when its `label` is non-empty; groups wrap their header and items and carry `aria-labelledby`.
 
-**Focus behavior:** on the menubar itself, exactly one top-level menu is a Tab stop at a time (roving tabindex) and Arrow keys move it. Once a popup opens, focus moves into its `role="menu"` container the same way as `ContextMenuComponent`; the highlighted item is communicated through `aria-activedescendant` rather than DOM focus. When a popup opened via keyboard closes, focus returns to its triggering top-level menu.
+**Focus behavior:** on the menubar itself, exactly one top-level menu is a Tab stop at a time (roving tabindex) and Arrow keys move it. Once a popup opens, focus moves into its `role="menu"` container the same way as `ContextMenuComponent`; the highlighted item is communicated through `aria-activedescendant` rather than DOM focus. When a popup closes (Escape, choosing an item, or a click outside that doesn't move focus elsewhere), focus returns to its top-level menu. `Tab` closes the popup and moves focus out of the menubar. A submenu opened by the pointer leaves focus in its parent menu.
 
 **Consumer responsibilities:**
 
@@ -478,7 +479,7 @@ TODO(owner-review): `PopupMenuItem` and `MenuItem` (used by `MenuComponent.items
 - [x] Keyboard map (popup level) verified against PopupMenuListComponent's handle*Key methods, shared with ContextMenuComponent
 - [x] Cross-popup ArrowLeft/ArrowRight-moves-between-top-level-menus behavior verified against MenubarComponent.setNavigationSubscription and PopupMenuListComponent.handleNavigationKey's level===0 branches
 - [x] Pointer hover-switch-between-open-menus behavior, including disabled guard, verified against onMenuPointerEnter
-- [x] Focus-restoration-on-close behavior verified against PopupMenuComponent's #shouldRestoreFocus handling
+- [x] Focus-restoration-on-close behavior verified against PopupMenuComponent's open-menu state (`restoreFocus`, `returnFocusTo`)
 - [x] MenuComponent.items type documented as Iterable<MenuItem>; MenuItem shape (label required, optional checkable/checked/disabled/group/items/separator) taken from common/popup-menu/models/PopupMenuItem.ts
 - [x] PopupMenuItem and MenuItem confirmed not exported from lib/index.ts
 - [x] No internal or unexported APIs exposed beyond the documented TODOs

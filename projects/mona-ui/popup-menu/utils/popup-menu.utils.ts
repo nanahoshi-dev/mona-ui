@@ -2,7 +2,6 @@ import { isSignal, signal, type WritableSignal } from "@angular/core";
 import { forEach, select } from "@mirei/ts-collections";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { Subject } from "rxjs";
-import { v4 } from "uuid";
 import {
     PopupMenuConfig,
     PopupMenuItemType,
@@ -64,6 +63,18 @@ export const ensurePopupTemplateTypes = (params: {
     });
 };
 
+// One id per `MenuItem` object, so a menu rebuilt from the same objects keeps track of its items.
+const menuItemUids = new WeakMap<MenuItem, string>();
+
+const menuItemUid = (item: MenuItem): string => {
+    let uid = menuItemUids.get(item);
+    if (!uid) {
+        uid = createElementControlId();
+        menuItemUids.set(item, uid);
+    }
+    return uid;
+};
+
 export const preparePopupMenuItems = (items: Iterable<MenuItem>): PopupMenuItem[] => {
     return select(items, item => {
         const popupItem: PopupMenuItem = {
@@ -80,7 +91,7 @@ export const preparePopupMenuItems = (items: Iterable<MenuItem>): PopupMenuItem[
             separator: item.separator ?? false,
             shortcutTemplate: null,
             textTemplate: null,
-            uid: v4(),
+            uid: menuItemUid(item),
             value: signal(item.value)
         };
         return popupItem;

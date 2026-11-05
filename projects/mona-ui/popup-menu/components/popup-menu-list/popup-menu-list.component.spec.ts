@@ -27,8 +27,10 @@ const createItem = (overrides: Partial<PopupMenuItem> & { label: string; uid: st
 
 const createConfig = (menuItems: PopupMenuItem[]): PopupMenuListConfig => ({
     childCloseRequest$: new Subject(),
+    closeMenu: () => undefined,
     isRoot: true,
-    items: groupPopupMenuItems(menuItems),
+    items: signal(groupPopupMenuItems(menuItems)),
+    labelledBy: null,
     level: 0,
     menuId: "menu-1",
     menuItemClick$: new Subject(),

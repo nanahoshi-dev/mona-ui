@@ -201,6 +201,7 @@ protected readonly sortField = signal("name");
 | `End`                             | Highlights the last item                                                                                    |
 | `Enter` / `Space`                 | Activates the highlighted item, or opens its submenu if it has nested items                                 |
 | `Escape`                          | Closes the open submenu                                                                                     |
+| `Tab`                             | Closes the menu and its submenus; focus moves on from the target                                            |
 | Letter, digit, space, `-`, or `_` | Jumps to (cycles through) items whose label starts with the typed text                                      |
 
 ### ARIA
@@ -215,11 +216,12 @@ protected readonly sortField = signal("name");
 
 **Menu container** (`role="menu"`):
 
-| Attribute               | When present                                         | Value                     |
-|-------------------------|------------------------------------------------------|---------------------------|
-| `role`                  | Always                                               | `"menu"`                  |
-| `aria-orientation`      | Always                                               | `"vertical"`              |
-| `aria-activedescendant` | While an item is highlighted via keyboard or pointer | The highlighted item's ID |
+| Attribute               | When present                                          | Value                                                |
+|-------------------------|-------------------------------------------------------|------------------------------------------------------|
+| `role`                  | Always                                                | `"menu"`                                             |
+| `aria-orientation`      | Always                                                | `"vertical"`                                         |
+| `aria-activedescendant` | While an item is highlighted via keyboard or pointer  | The highlighted item's ID                            |
+| `aria-labelledby`       | Root menu, when the target has an `id`; every submenu | The target's ID; for a submenu, its parent item's ID |
 
 **Item** (`role="menuitem"`, `"menuitemcheckbox"` or `"menuitemradio"`):
 
@@ -229,12 +231,13 @@ protected readonly sortField = signal("name");
 | `aria-checked`  | Checkbox and radio items             | `"true"` while checked or selected, otherwise `"false"`                                  |
 | `aria-disabled` | Always                               | Reflects the item's `disabled` input                                                     |
 | `aria-haspopup` | When the item has nested items       | `"menu"`                                                                                 |
-| `aria-expanded` | When the item has nested items       | `"true"` while its submenu is open                                                       |
+| `aria-expanded` | When the item has nested items       | `"true"` while its submenu is open, otherwise `"false"`                                  |
+| `aria-controls` | While the item's submenu is open     | The submenu's ID                                                                         |
 | `aria-label`    | When the item's `label` is non-empty | The item's `label` text                                                                  |
 
 **Group** (`role="group"`): wraps a titled group's header and its items, with `aria-labelledby` pointing at the header. **Separator:** `role="separator"`.
 
-**Focus behavior:** focus stays on the `role="menu"` container rather than moving to individual items; the highlighted item is communicated through `aria-activedescendant`. When the menu is opened via keyboard, focus returns to the target element after the menu closes.
+**Focus behavior:** focus stays on the `role="menu"` container rather than moving to individual items; the highlighted item is communicated through `aria-activedescendant`. When the menu closes (Escape, choosing an item, or a click outside that doesn't move focus elsewhere), focus returns to the element that had it when the menu opened, or to the target if it can take focus. `Tab` closes every open menu and moves focus on from there, and focus that leaves the menus for another element closes them too. A submenu opened by the pointer leaves focus in its parent menu; one opened from the keyboard takes focus and highlights its first item.
 
 **Consumer responsibilities:**
 
@@ -406,7 +409,7 @@ TODO(owner-review): `PopupMenuItem` (used by `ContextMenuComponent.items` and by
 - [x] preventDefault-suppresses-checked/selection verified against PopupMenuCheckboxItemComponent and PopupMenuRadioGroupComponent setSubscription(s)
 - [x] ARIA table verified against popup-menu-list.component.html (post-fix: item id binding, aria-label fallback, aria-current removed) and context-menu.component.ts target attribute handling
 - [x] Keyboard map verified against PopupMenuListComponent's handle*Key methods and isNavigationKey/isTypeaheadKey
-- [x] Focus-restoration-on-close behavior verified against PopupMenuComponent's #shouldRestoreFocus handling
+- [x] Focus-restoration-on-close behavior verified against PopupMenuComponent's open-menu state (`restoreFocus`, `returnFocusTo`)
 - [x] No open/close output on ContextMenuComponent confirmed — only menuClick is defined in context-menu.component.ts
 - [x] PopupMenuItem confirmed not exported from lib/index.ts; MenuItem (common/popup-menu/models/PopupMenuItem.ts) also confirmed not exported
 - [x] No internal or unexported APIs exposed beyond the documented TODOs

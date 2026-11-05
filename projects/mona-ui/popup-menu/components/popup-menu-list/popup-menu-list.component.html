@@ -3,6 +3,8 @@
     [attr.tabindex]="0"
     [attr.aria-orientation]="'vertical'"
     [attr.aria-activedescendant]="activeMenuItem()?.uid"
+    [attr.aria-label]="ariaLabel"
+    [attr.aria-labelledby]="labelledBy"
     [attr.id]="menuId()"
     [class]="containerClasses()">
     @for (group of menuItems(); track $index) {
@@ -42,14 +44,14 @@
                 [attr.role]="item.checkable ? 'menuitemcheckbox' : item.radio ? 'menuitemradio' : 'menuitem'"
                 [attr.aria-checked]="item.checkable ? !!item.checked?.() : item.radio ? !!item.selected?.() : null"
                 [id]="item.uid"
-                (pointerenter)="pointerEnter$.next({ event: $event, item: item })"
-                (pointerleave)="pointerLeave$.next({ event: $event, item: item })"
+                (pointerenter)="onItemPointerEnter($event, item)"
                 (click)="onItemClick($event, item)"
                 [attr.data-active]="item === activeMenuItem()"
                 [attr.aria-disabled]="item.disabled"
-                [attr.aria-expanded]="item.items.length > 0 && item === activeMenuItem() && !!popupRef"
+                [attr.aria-expanded]="item.items.length > 0 ? item === openSubmenuItem() : null"
+                [attr.aria-controls]="item === openSubmenuItem() ? submenuId() : null"
                 [attr.aria-haspopup]="item.items.length > 0 ? 'menu' : null"
-                [attr.aria-label]="item.label || null"
+                [attr.aria-label]="textTemplate ? null : item.label || null"
                 [attr.data-disabled]="item.disabled"
                 [class]="menuItemClasses()">
                 @if (iconAreaVisible()) {
