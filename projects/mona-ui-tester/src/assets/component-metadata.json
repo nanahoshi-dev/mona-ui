@@ -738,6 +738,20 @@
       }
     ]
   },
+  "EditorPressedDirective": {
+    "name": "EditorPressedDirective",
+    "selector": "\"button[monaEditorPressed]\"",
+    "inputs": [
+      {
+        "description": "",
+        "kind": "input",
+        "name": "pressed",
+        "type": "boolean",
+        "alias": "monaEditorPressed",
+        "required": true
+      }
+    ]
+  },
   "GridCellDirective": {
     "name": "GridCellDirective",
     "selector": "\"td[monaGridCell]\"",
@@ -9460,6 +9474,30 @@
     "selector": "\"mona-editor\"",
     "inputs": [
       {
+        "description": "The id of an element that describes the content, such as a hint or an error message.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "alias": "aria-describedby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The accessible name of the content. Without it or `aria-labelledby`, the content is named \"Rich\ntext editor\" (translated).",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The id of a visible label for the content, such as a `<label>` next to the editor.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Emits when the editor loses focus.",
         "kind": "output",
         "name": "blur",
@@ -9502,6 +9540,13 @@
         "name": "invalid",
         "type": "boolean",
         "defaultValue": "false"
+      },
+      {
+        "description": "Text shown in the empty editor, and given to assistive technology as `aria-placeholder`. It is not\na name: use a label or `aria-label` too.",
+        "kind": "input",
+        "name": "placeholder",
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Makes the content read-only and hides the toolbar. When bound to a signal form field via\n`[formField]`, the form sets it.",
@@ -9572,14 +9617,14 @@
       {
         "description": "",
         "kind": "output",
-        "name": "cancel",
-        "type": "void"
+        "name": "insert",
+        "type": "EditorImageInsertEvent"
       },
       {
         "description": "",
         "kind": "output",
-        "name": "insert",
-        "type": "EditorImageInsertEvent"
+        "name": "insertCancel",
+        "type": "void"
       }
     ]
   },

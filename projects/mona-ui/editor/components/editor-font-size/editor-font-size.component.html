@@ -1,6 +1,7 @@
 <mona-dropdown-list
     [data]="editorService.fontSizes()"
     [placeholder]="messages().fontSize"
+    [aria-label]="messages().selectFontSize"
     [value]="selectedFontSize()"
     (valueChange)="onFontSizeChange($event)"
     [size]="'small'"

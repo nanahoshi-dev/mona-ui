@@ -44,9 +44,9 @@ const TR_LOCALE: MonaLocale = {
     direction: "ltr",
     messages: {
         editor: {
-            alignLeft: "Sola hizala",
             alignCenter: "Ortala",
-            alignRight: "Sağa hizala",
+            alignEnd: "Metni sona hizala",
+            alignStart: "Metni başa hizala",
             justify: "İki yana yasla",
             insertTaskList: "Görev listesi ekle",
             imageUrl: "Görsel URL",
@@ -68,15 +68,15 @@ describe("Editor Components i18n", () => {
         const hostEl = fixture.nativeElement as HTMLElement;
 
         // Verify default English titles
-        const alignLeftBtn = hostEl.querySelector("button[title='Align text left']");
-        expect(alignLeftBtn).toBeTruthy();
+        const alignStartBtn = hostEl.querySelector("button[title='Align text to the start']");
+        expect(alignStartBtn).toBeTruthy();
 
         const taskListBtn = hostEl.querySelector("button[title='Insert task list']");
         expect(taskListBtn).toBeTruthy();
 
         // Verify default English image inserter labels
         expect(hostEl.textContent).toContain("Image URL");
-        expect(hostEl.textContent).toContain("Alt Text");
+        expect(hostEl.textContent).toContain("Alt text");
         expect(hostEl.textContent).toContain("Width (px)");
         expect(hostEl.textContent).toContain("Height (px)");
 
@@ -85,8 +85,8 @@ describe("Editor Components i18n", () => {
         fixture.detectChanges();
 
         // Verify Turkish titles
-        const trAlignLeftBtn = hostEl.querySelector("button[title='Sola hizala']");
-        expect(trAlignLeftBtn).toBeTruthy();
+        const trAlignStartBtn = hostEl.querySelector("button[title='Metni başa hizala']");
+        expect(trAlignStartBtn).toBeTruthy();
 
         const trTaskListBtn = hostEl.querySelector("button[title='Görev listesi ekle']");
         expect(trTaskListBtn).toBeTruthy();

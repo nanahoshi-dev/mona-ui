@@ -295,6 +295,8 @@ export class WindowContentComponent implements WindowContentVariantInput {
             return;
         }
         const windowElement = this.#hostElementRef.nativeElement;
-        focusElement(windowElement, element);
+        // The focus trap moves focus to its first tabbable element after this runs; marking the target makes it
+        // land here instead.
+        focusElement(windowElement, element)?.setAttribute("cdkFocusInitial", "");
     }
 }

@@ -13,11 +13,11 @@ import { EditorService } from "../../services/editor.service";
 export class EditorIndentComponent {
     readonly #editorService: EditorService = inject(EditorService);
     readonly #i18n = inject(MonaI18nService);
-    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
     protected readonly indentDisabled = computed(() => {
         this.#editorService.state();
         return !this.#editorService.editor.can().indent();
     });
+    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
     protected readonly outdentDisabled = computed(() => {
         this.#editorService.state();
         return !this.#editorService.editor.can().outdent();

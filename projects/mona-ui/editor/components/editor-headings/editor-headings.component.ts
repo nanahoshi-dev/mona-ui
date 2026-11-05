@@ -17,11 +17,10 @@ import { editorHeadingsDropdownListThemeVariants } from "../../styles/editor.sty
 export class EditorHeadingsComponent {
     readonly #editorService: EditorService = inject(EditorService);
     readonly #i18n = inject(MonaI18nService);
-    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
-    protected readonly HeadingType = HeadingType;
     protected readonly dropdownListClass = computed(() => {
         return editorHeadingsDropdownListThemeVariants();
     });
+    protected readonly headingType = HeadingType;
     protected readonly headingsDropdownListData = computed<HeadingsDropdownListDataItem[]>(() => {
         const msgs = this.messages();
         return [
@@ -34,6 +33,7 @@ export class EditorHeadingsComponent {
                 .toArray()
         ];
     });
+    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
     protected readonly selectedHeadingsDropdownItem = computed(() => {
         const state = this.#editorService.state();
         const node = state?.selection.$from.node();

@@ -4,10 +4,11 @@ import { ButtonGroupComponent } from "@nanahoshi/mona-ui/button-group";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { EDITOR_DEFAULT_MESSAGES } from "../../i18n/editor.default-messages";
 import { EditorService } from "../../services/editor.service";
+import { EditorPressedDirective } from "../../directives/editor-pressed.directive";
 
 @Component({
     selector: "mona-editor-list",
-    imports: [ButtonGroupComponent, ButtonDirective],
+    imports: [ButtonGroupComponent, ButtonDirective, EditorPressedDirective],
     templateUrl: "./editor-list.component.html"
 })
 export class EditorListComponent {

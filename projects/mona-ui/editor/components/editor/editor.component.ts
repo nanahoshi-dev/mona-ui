@@ -1,4 +1,5 @@
 import {
+    afterEveryRender,
     afterNextRender,
     booleanAttribute,
     Component,
@@ -16,14 +17,18 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { RovingToolbar } from "@nanahoshi/mona-ui/internal";
 import type { JSONContent } from "@tiptap/core";
 import { twMerge } from "tailwind-merge";
+import { EDITOR_DEFAULT_MESSAGES } from "../../i18n/editor.default-messages";
 import type { ContentChangeEvent } from "../../models/ContentChangeEvent";
 import type { EditorSettings } from "../../models/EditorSettings";
 import { EditorService } from "../../services/editor.service";
 import {
     editorBaseThemeVariants,
     editorContainerThemeVariants,
+    editorPlaceholderThemeVariants,
     editorToolbarThemeVariants
 } from "../../styles/editor.styles";
 import { EditorBasicTextStylesComponent } from "../editor-basic-text-styles/editor-basic-text-styles.component";
@@ -71,6 +76,9 @@ const EMPTY_DOCUMENT: JSONContent = { type: "doc", content: [] };
     providers: [EditorService],
     host: {
         "[class]": "baseClass()",
+        "[attr.aria-describedby]": "null",
+        "[attr.aria-label]": "null",
+        "[attr.aria-labelledby]": "null",
         "[attr.data-disabled]": "disabled() || null",
         "[attr.data-invalid]": "invalidState() || null",
         "[attr.data-readonly]": "readonly() || null",
@@ -79,7 +87,24 @@ const EMPTY_DOCUMENT: JSONContent = { type: "doc", content: [] };
 })
 export class EditorComponent implements FormValueControl<string> {
     readonly #contentAttributes = computed(() => {
-        const attributes: Record<string, string> = {};
+        // Tiptap adds the role when it creates the view, but later attribute updates replace the whole set.
+        const attributes: Record<string, string> = {
+            "aria-multiline": "true",
+            dir: this.#direction(),
+            role: "textbox"
+        };
+        const ariaLabelledBy = this.ariaLabelledBy();
+        if (ariaLabelledBy) {
+            attributes["aria-labelledby"] = ariaLabelledBy;
+        } else {
+            attributes["aria-label"] = this.ariaLabel() || this.messages().contentLabel;
+        }
+        if (this.ariaDescribedBy()) {
+            attributes["aria-describedby"] = this.ariaDescribedBy();
+        }
+        if (this.placeholder()) {
+            attributes["aria-placeholder"] = this.placeholder();
+        }
         if (this.disabled()) {
             attributes["aria-disabled"] = "true";
         }
@@ -95,14 +120,20 @@ export class EditorComponent implements FormValueControl<string> {
         return attributes;
     });
     readonly #destroyRef = inject(DestroyRef);
+    readonly #direction = injectComponentDirection();
     readonly #editable = computed(() => !this.disabled() && !this.readonly());
+    readonly #i18n = inject(MonaI18nService);
     readonly #rendered = signal(false);
+    readonly #toolbar = new RovingToolbar(() => this.toolbarElement()?.nativeElement);
 
     /** The last `content` applied, so a binding that echoes the editor's own output isn't applied again. */
     #appliedContent: string | JSONContent | undefined = undefined;
 
     /** The last value the editor emitted or was given, so a value echoed back isn't applied again. */
     #lastValue: string | null = null;
+
+    /** Set by Escape in the content: the next Tab leaves the editor instead of nesting a list item. */
+    #tabLeaves = false;
     protected readonly baseClass = computed(() => {
         const userClass = this.userClass();
         const variantClass = editorBaseThemeVariants();
@@ -116,9 +147,28 @@ export class EditorComponent implements FormValueControl<string> {
     protected readonly invalidState = computed(
         () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
+    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
+    protected readonly placeholderClass = computed(() => editorPlaceholderThemeVariants());
     protected readonly toolbarClass = computed(() => {
         return editorToolbarThemeVariants({ disabled: this.disabled() });
     });
+    protected readonly toolbarElement = viewChild<ElementRef<HTMLDivElement>>("toolbar");
+
+    /**
+     * @description The id of an element that describes the content, such as a hint or an error message.
+     */
+    public readonly ariaDescribedBy = input("", { alias: "aria-describedby" });
+
+    /**
+     * @description The accessible name of the content. Without it or `aria-labelledby`, the content is named "Rich
+     * text editor" (translated).
+     */
+    public readonly ariaLabel = input("", { alias: "aria-label" });
+
+    /**
+     * @description The id of a visible label for the content, such as a `<label>` next to the editor.
+     */
+    public readonly ariaLabelledBy = input("", { alias: "aria-labelledby" });
 
     /**
      * @description Emits when the editor loses focus.
@@ -162,6 +212,12 @@ export class EditorComponent implements FormValueControl<string> {
      * `[formField]`, the form sets it.
      */
     public readonly invalid = input(false, { transform: booleanAttribute });
+
+    /**
+     * @description Text shown in the empty editor, and given to assistive technology as `aria-placeholder`. It is not
+     * a name: use a label or `aria-label` too.
+     */
+    public readonly placeholder = input("");
 
     /**
      * @description Makes the content read-only and hides the toolbar. When bound to a signal form field via
@@ -211,7 +267,14 @@ export class EditorComponent implements FormValueControl<string> {
 
     public constructor() {
         afterNextRender({
-            write: () => this.#rendered.set(true)
+            write: () => {
+                this.#listenForEscapeThenTab();
+                this.#rendered.set(true);
+            }
+        });
+        // Every render: toolbar controls that settings or state add later join its single Tab stop.
+        afterEveryRender({
+            write: () => this.#toolbar.sync()
         });
         effect(() => {
             const settings = this.settings();
@@ -272,6 +335,14 @@ export class EditorComponent implements FormValueControl<string> {
         }
     }
 
+    protected onToolbarFocusIn(event: FocusEvent): void {
+        this.#toolbar.onFocusIn(event);
+    }
+
+    protected onToolbarKeydown(event: KeyboardEvent): void {
+        this.#toolbar.onKeydown(event);
+    }
+
     #applyContent(content: string | JSONContent | undefined): void {
         if (content === this.#appliedContent) {
             return;
@@ -305,6 +376,28 @@ export class EditorComponent implements FormValueControl<string> {
             return content === editor.getHTML() || content === this.#currentValue();
         }
         return JSON.stringify(content) === JSON.stringify(editor.getJSON());
+    }
+
+    /**
+     * Tab inside a list nests the item, so the keyboard could be stuck in a long list. Escape, then Tab, leaves the
+     * editor: the Tab is kept from ProseMirror and the browser moves focus.
+     */
+    #listenForEscapeThenTab(): void {
+        const container = this.editorContainer().nativeElement;
+        const listener = (event: KeyboardEvent): void => {
+            if (event.key === "Escape") {
+                this.#tabLeaves = true;
+                return;
+            }
+            if (event.key === "Tab" && this.#tabLeaves) {
+                event.stopPropagation();
+            }
+            if (event.key !== "Shift") {
+                this.#tabLeaves = false;
+            }
+        };
+        container.addEventListener("keydown", listener, { capture: true });
+        this.#destroyRef.onDestroy(() => container.removeEventListener("keydown", listener, { capture: true }));
     }
 
     #setupEditor(settings: Partial<EditorSettings>): void {

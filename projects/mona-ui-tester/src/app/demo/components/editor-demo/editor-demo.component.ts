@@ -212,6 +212,7 @@ class EditorWrapperComponent implements ComponentInputsAsSignal<EditorComponent>
                     ? (["Arial", "Helvetica", "Times New Roman", "Verdana", "Courier New"] as const)
                     : [],
             fontSize: features["fontSize"]?.active ?? false,
+            fontSizeList: [],
             headings: features["headings"]?.active ?? false,
             history: features["history"]?.active ?? false,
             horizontalRule: features["horizontalRule"]?.active ?? false,

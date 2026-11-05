@@ -1,3 +1,4 @@
+import { InteractivityChecker } from "@angular/cdk/a11y";
 import { OverlayContainer } from "@angular/cdk/overlay";
 import { ApplicationRef, Component, InjectionToken, Injector, inject, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
@@ -22,6 +23,12 @@ class DialogBodyComponent {
     public readonly dialogRef = inject(DialogRef);
     public readonly greeting = inject(GREETING);
 }
+
+@Component({
+    selector: "mona-test-dialog-form",
+    template: `<input id="first-field" aria-label="First" /><input id="second-field" aria-label="Second" />`
+})
+class DialogFormComponent {}
 
 @Component({
     imports: [DialogComponent],
@@ -58,6 +65,7 @@ describe("Dialog close contract", () => {
         overlayContainer.replaceChildren();
         page.remove();
         document.documentElement.classList.remove("cdk-global-scrollblock");
+        vi.restoreAllMocks();
     });
 
     function captureSettings(): PopupSettings[] {
@@ -446,5 +454,20 @@ describe("Dialog close contract", () => {
         expect(fixture.componentInstance.closeCount).toBe(1);
         expect(fixture.componentInstance.closedCount).toBe(1);
         fixture.destroy();
+    });
+
+    it("focuses the element it is given when it opens, ahead of its first tabbable element", () => {
+        // jsdom has no layout, so the focus trap sees nothing as visible and never moves focus on its own.
+        vi.spyOn(TestBed.inject(InteractivityChecker), "isVisible").mockReturnValue(true);
+        const dialogRef = service.show({
+            content: DialogFormComponent,
+            focusedElement: "#second-field",
+            title: "Focus"
+        });
+        settle();
+
+        expect(document.activeElement).toBe(dialogElement().querySelector("#second-field"));
+        dialogRef.close();
+        finishLeaveAnimation();
     });
 });

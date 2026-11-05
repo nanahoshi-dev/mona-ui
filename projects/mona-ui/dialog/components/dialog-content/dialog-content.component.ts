@@ -260,7 +260,9 @@ export class DialogContentComponent {
             return;
         }
         const dialogElement = this.#hostElementRef.nativeElement;
-        focusElement(dialogElement, element);
+        // The focus trap moves focus to its first tabbable element after this runs; marking the target makes it
+        // land here instead.
+        focusElement(dialogElement, element)?.setAttribute("cdkFocusInitial", "");
     }
 
     private getDefaultActions(type: DialogVariantProps["type"] | undefined): DialogAction[] {

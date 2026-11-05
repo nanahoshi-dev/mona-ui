@@ -14,6 +14,7 @@ declare module "@tiptap/core" {
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/naming-convention -- Tiptap extensions are named in PascalCase.
 export const FontSize = Extension.create<FontSizeOptions>({
     name: "fontSize",
     addOptions(): FontSizeOptions {

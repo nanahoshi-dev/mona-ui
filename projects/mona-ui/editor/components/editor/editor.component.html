@@ -1,5 +1,12 @@
 @if (editorService.ready() && !readonly()) {
-    <div [class]="toolbarClass()" [attr.inert]="disabled() || null">
+    <div
+        role="toolbar"
+        [class]="toolbarClass()"
+        [attr.aria-label]="messages().toolbar"
+        [attr.inert]="disabled() || null"
+        (focusin)="onToolbarFocusIn($event)"
+        (keydown)="onToolbarKeydown($event)"
+        #toolbar>
         <mona-editor-basic-text-styles></mona-editor-basic-text-styles>
         @if (editorService.settings().headings) {
             <mona-editor-headings></mona-editor-headings>
@@ -51,4 +58,9 @@
         }
     </div>
 }
-<div [class]="containerClass()" #editorContainer></div>
+<div class="relative min-h-0 w-full flex-1">
+    <div [class]="containerClass()" #editorContainer></div>
+    @if (placeholder() && editorService.isEmpty()) {
+        <div [class]="placeholderClass()" aria-hidden="true">{{ placeholder() }}</div>
+    }
+</div>

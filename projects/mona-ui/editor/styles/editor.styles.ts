@@ -188,6 +188,13 @@ export const editorImageInserterRowThemeVariants = cva(
     `
 );
 
+export const editorPlaceholderThemeVariants = cva(
+    `
+        pointer-events-none absolute top-0 start-0 px-1.5 py-2.5
+        text-muted-foreground select-none
+    `
+);
+
 export const editorTableCreatorThemeVariants = cva(
     `
         grid grid-cols-8 gap-0.5 p-1
@@ -196,8 +203,10 @@ export const editorTableCreatorThemeVariants = cva(
 
 export const editorTableCreatorCellThemeVariants = cva(
     `
-        flex h-6 w-6
-        bg-input-background border border-input-border
+        flex h-6 w-6 p-0 cursor-pointer
+        bg-surface-muted border border-input-border
+        data-[highlighted]:bg-primary data-[highlighted]:border-primary
+        focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus-indicator
     `
 );
 

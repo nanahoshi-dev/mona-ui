@@ -14,11 +14,11 @@ import { editorFontFamilyDropdownListThemeVariants } from "../../styles/editor.s
 })
 export class EditorFontFamilyComponent {
     readonly #i18n = inject(MonaI18nService);
-    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
     protected readonly dropdownListClass = computed(() => {
         return editorFontFamilyDropdownListThemeVariants();
     });
     protected readonly editorService: EditorService = inject(EditorService);
+    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
     protected readonly selectedFontFamily = computed(() => {
         this.editorService.state();
         return (

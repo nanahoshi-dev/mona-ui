@@ -60,7 +60,7 @@ import {
         "[attr.data-required]": "required() || null",
         "[attr.role]": "'combobox'",
         "[attr.aria-controls]": "popupId",
-        "[attr.aria-expanded]": "expanded() || null",
+        "[attr.aria-expanded]": "expanded() ? 'true' : 'false'",
         "[attr.aria-haspopup]": "'dialog'",
         "[attr.aria-label]": "ariaLabel() || messages().colorPicker",
         "[attr.aria-disabled]": "disabled()",

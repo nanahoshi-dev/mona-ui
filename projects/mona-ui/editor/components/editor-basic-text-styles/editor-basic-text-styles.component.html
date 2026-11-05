@@ -1,9 +1,10 @@
 @if (anyToolVisible()) {
-    <mona-button-group selection="multiple" [size]="'small'">
+    <mona-button-group selection="multiple" [size]="'small'" [aria-label]="messages().textStyleGroup">
         @if (boldVisible()) {
             <button
                 monaButton
                 [selected]="boldSelected()"
+                [monaEditorPressed]="boldSelected()"
                 [toggleable]="false"
                 (click)="onBoldToggle()"
                 [title]="messages().bold">
@@ -14,6 +15,7 @@
             <button
                 monaButton
                 [selected]="italicSelected()"
+                [monaEditorPressed]="italicSelected()"
                 [toggleable]="false"
                 (click)="onItalicToggle()"
                 [title]="messages().italic">
@@ -24,6 +26,7 @@
             <button
                 monaButton
                 [selected]="underlineSelected()"
+                [monaEditorPressed]="underlineSelected()"
                 [toggleable]="false"
                 (click)="onUnderlineToggle()"
                 [title]="messages().underline">
@@ -34,6 +37,7 @@
             <button
                 monaButton
                 [selected]="strikeThroughSelected()"
+                [monaEditorPressed]="strikeThroughSelected()"
                 [toggleable]="false"
                 (click)="onStrikeThroughToggle()"
                 [title]="messages().strikethrough">
@@ -44,6 +48,7 @@
             <button
                 monaButton
                 [selected]="subscriptSelected()"
+                [monaEditorPressed]="subscriptSelected()"
                 [toggleable]="false"
                 (click)="onSubscriptToggle()"
                 [title]="messages().subscript">
@@ -54,6 +59,7 @@
             <button
                 monaButton
                 [selected]="superscriptSelected()"
+                [monaEditorPressed]="superscriptSelected()"
                 [toggleable]="false"
                 (click)="onSuperscriptToggle()"
                 [title]="messages().superscript">

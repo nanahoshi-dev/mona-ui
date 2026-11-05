@@ -1,8 +1,18 @@
-<mona-button-group selection="single" [size]="'small'">
-    <button monaButton [disabled]="undoDisabled()" (click)="onUndoClick()" [title]="messages().undo">
+<mona-button-group selection="single" [size]="'small'" [aria-label]="messages().historyGroup">
+    <button
+        monaButton
+        [toggleable]="false"
+        [disabled]="undoDisabled()"
+        (click)="onUndoClick()"
+        [title]="messages().undo">
         <i class="ri-arrow-go-back-line"></i>
     </button>
-    <button monaButton [disabled]="redoDisabled()" (click)="onRedoClick()" [title]="messages().redo">
+    <button
+        monaButton
+        [toggleable]="false"
+        [disabled]="redoDisabled()"
+        (click)="onRedoClick()"
+        [title]="messages().redo">
         <i class="ri-arrow-go-forward-line"></i>
     </button>
 </mona-button-group>

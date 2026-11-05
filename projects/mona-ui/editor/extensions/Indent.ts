@@ -8,21 +8,20 @@ import { AllSelection, TextSelection, Transaction } from "@tiptap/pm/state";
 
 export interface IndentOptions {
     /**
-     * Node types that should support the `indent` attribute.
-     * Typically: ['paragraph', 'heading']
+     * Default indent value in pixels.
      */
-    types: string[];
+    defaultIndentLevel: number;
 
     /**
-     * Allowed indent levels in pixels.
-     * The extension will clamp to min/max of this list.
+     * Allowed indent levels in pixels. Indent and outdent step to the next and previous level.
      */
     indentLevels: number[];
 
     /**
-     * Default indent value in pixels.
+     * Node types that should support the `indent` attribute.
+     * Typically: ['paragraph', 'heading']
      */
-    defaultIndentLevel: number;
+    types: string[];
 }
 
 declare module "@tiptap/core" {
@@ -41,18 +40,13 @@ declare module "@tiptap/core" {
     }
 }
 
-const clamp = (val: number, min: number, max: number): number => {
-    if (val < min) return min;
-    if (val > max) return max;
-    return val;
+/**
+ * The level after `current` in `direction`, or `current` when there is none.
+ */
+const stepIndentLevel = (current: number, direction: 1 | -1, levels: readonly number[]): number => {
+    const sorted = [...levels].sort((a, b) => (a - b) * direction);
+    return sorted.find(level => (level - current) * direction > 0) ?? current;
 };
-
-enum IndentProps {
-    min = 0,
-    max = 210,
-    more = 30,
-    less = -30
-}
 
 /**
  * Helpers for list detection (kept simple here).
@@ -66,20 +60,18 @@ const isListNodeName = (name: string): boolean =>
     isBulletListNode(name) || isOrderedListNode(name) || isTaskListNode(name);
 
 /**
- * Update the `indent` attribute of the node at `pos` by `delta` pixels.
+ * Move the `indent` attribute of the node at `pos` one level in `direction`.
  */
-const setNodeIndentMarkup = (tr: Transaction, pos: number, delta: number): Transaction => {
+const setNodeIndentMarkup = (tr: Transaction, pos: number, direction: 1 | -1, options: IndentOptions): Transaction => {
     const doc = tr.doc;
     if (!doc) return tr;
 
     const node = doc.nodeAt(pos);
     if (!node) return tr;
 
-    const minIndent = IndentProps.min;
-    const maxIndent = IndentProps.max;
-
-    const currentIndent = (node.attrs as any).indent ?? 0;
-    const indent = clamp(currentIndent + delta, minIndent, maxIndent);
+    const attrs = node.attrs as { indent?: number };
+    const currentIndent = attrs.indent ?? 0;
+    const indent = stepIndentLevel(currentIndent, direction, options.indentLevels);
 
     if (indent === currentIndent) return tr;
 
@@ -92,9 +84,9 @@ const setNodeIndentMarkup = (tr: Transaction, pos: number, delta: number): Trans
 };
 
 /**
- * Apply indent delta to all matching blocks in the current selection.
+ * Move all matching blocks in the current selection one level in `direction`.
  */
-const updateIndentLevel = (tr: Transaction, delta: number, options: IndentOptions): Transaction => {
+const updateIndentLevel = (tr: Transaction, direction: 1 | -1, options: IndentOptions): Transaction => {
     const { doc, selection } = tr;
 
     if (!doc || !selection) return tr;
@@ -109,7 +101,7 @@ const updateIndentLevel = (tr: Transaction, delta: number, options: IndentOption
 
         // Only apply to configured types (typically paragraph + heading)
         if (options.types.includes(nodeName)) {
-            tr = setNodeIndentMarkup(tr, pos, delta);
+            tr = setNodeIndentMarkup(tr, pos, direction, options);
             return false;
         }
 
@@ -124,6 +116,7 @@ const updateIndentLevel = (tr: Transaction, delta: number, options: IndentOption
     return tr;
 };
 
+// eslint-disable-next-line @typescript-eslint/naming-convention -- Tiptap extensions are named in PascalCase.
 export const Indent = Extension.create<IndentOptions>({
     name: "indent",
 
@@ -132,9 +125,9 @@ export const Indent = Extension.create<IndentOptions>({
      */
     addOptions() {
         return {
-            types: ["paragraph", "heading"],
+            defaultIndentLevel: 0,
             indentLevels: [0, 30, 60, 90, 120, 150, 180, 210],
-            defaultIndentLevel: 0
+            types: ["paragraph", "heading"]
         };
     },
 
@@ -180,14 +173,14 @@ export const Indent = Extension.create<IndentOptions>({
 
                     // Keep current selection intact
                     tr = tr.setSelection(selection);
-                    tr = updateIndentLevel(tr, IndentProps.more, this.options);
+                    tr = updateIndentLevel(tr, 1, this.options);
 
-                    if (tr.docChanged && dispatch) {
-                        dispatch(tr);
-                        return true;
+                    // `can()` runs commands without `dispatch`: it only asks whether they would change anything.
+                    if (!tr.docChanged) {
+                        return false;
                     }
-
-                    return false;
+                    dispatch?.(tr);
+                    return true;
                 },
 
             outdent:
@@ -196,30 +189,34 @@ export const Indent = Extension.create<IndentOptions>({
                     const { selection } = state;
 
                     tr = tr.setSelection(selection);
-                    tr = updateIndentLevel(tr, IndentProps.less, this.options);
+                    tr = updateIndentLevel(tr, -1, this.options);
 
-                    if (tr.docChanged && dispatch) {
-                        dispatch(tr);
-                        return true;
+                    // `can()` runs commands without `dispatch`: it only asks whether they would change anything.
+                    if (!tr.docChanged) {
+                        return false;
                     }
-
-                    return false;
+                    dispatch?.(tr);
+                    return true;
                 }
         };
     },
 
     /**
-     * Default keyboard shortcuts:
-     *  - Tab       → indent()
-     *  - Shift-Tab → outdent()
+     * Keyboard shortcuts:
+     *  - Mod-] → indent()
+     *  - Mod-[ → outdent()
+     *
+     * Tab is left to lists (where it nests the item) and to the browser, so the keyboard can leave the editor.
      */
     addKeyboardShortcuts() {
         const indentCommand: KeyboardShortcutCommand = () => this.editor.commands.indent();
         const outdentCommand: KeyboardShortcutCommand = () => this.editor.commands.outdent();
 
         return {
-            Tab: indentCommand,
-            "Shift-Tab": outdentCommand
+            // eslint-disable-next-line @typescript-eslint/naming-convention -- ProseMirror key names.
+            "Mod-]": indentCommand,
+            // eslint-disable-next-line @typescript-eslint/naming-convention -- ProseMirror key names.
+            "Mod-[": outdentCommand
         };
     }
 });

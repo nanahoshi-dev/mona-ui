@@ -16,30 +16,29 @@ import { EditorTableCreatorComponent } from "../editor-table-creator/editor-tabl
 export class EditorTableComponent {
     readonly #editorService: EditorService = inject(EditorService);
     readonly #i18n = inject(MonaI18nService);
-    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
-    protected readonly addColumnBeforeDisabled = computed(() => {
-        this.#editorService.state();
-        const isTable = this.#editorService.editor.isActive("table");
-        const canAddColumnBefore = this.#editorService.editor.can().addColumnBefore();
-        return !isTable || !canAddColumnBefore;
-    });
     protected readonly addColumnAfterDisabled = computed(() => {
         this.#editorService.state();
         const isTable = this.#editorService.editor.isActive("table");
         const canAddColumnAfter = this.#editorService.editor.can().addColumnAfter();
         return !isTable || !canAddColumnAfter;
     });
-    protected readonly addRowBeforeDisabled = computed(() => {
+    protected readonly addColumnBeforeDisabled = computed(() => {
         this.#editorService.state();
         const isTable = this.#editorService.editor.isActive("table");
-        const canAddRowBefore = this.#editorService.editor.can().addRowBefore();
-        return !isTable || !canAddRowBefore;
+        const canAddColumnBefore = this.#editorService.editor.can().addColumnBefore();
+        return !isTable || !canAddColumnBefore;
     });
     protected readonly addRowAfterDisabled = computed(() => {
         this.#editorService.state();
         const isTable = this.#editorService.editor.isActive("table");
         const canAddRowAfter = this.#editorService.editor.can().addRowAfter();
         return !isTable || !canAddRowAfter;
+    });
+    protected readonly addRowBeforeDisabled = computed(() => {
+        this.#editorService.state();
+        const isTable = this.#editorService.editor.isActive("table");
+        const canAddRowBefore = this.#editorService.editor.can().addRowBefore();
+        return !isTable || !canAddRowBefore;
     });
     protected readonly deleteColumnDisabled = computed(() => {
         this.#editorService.state();
@@ -65,6 +64,7 @@ export class EditorTableComponent {
         const canMergeCells = this.#editorService.editor.can().mergeCells();
         return !isTable || !canMergeCells;
     });
+    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
     protected readonly popover = viewChild<PopoverComponent>("popoverComponent");
     protected readonly splitCellDisabled = computed(() => {
         this.#editorService.state();
@@ -79,20 +79,20 @@ export class EditorTableComponent {
         return !isTable || !canToggleHeaderRow;
     });
 
-    public onAddColumnBeforeClick(): void {
-        this.#editorService.editor.chain().focus().addColumnBefore().run();
-    }
-
     public onAddColumnAfterClick(): void {
         this.#editorService.editor.chain().focus().addColumnAfter().run();
     }
 
-    public onAddRowBeforeClick(): void {
-        this.#editorService.editor.chain().focus().addRowBefore().run();
+    public onAddColumnBeforeClick(): void {
+        this.#editorService.editor.chain().focus().addColumnBefore().run();
     }
 
     public onAddRowAfterClick(): void {
         this.#editorService.editor.chain().focus().addRowAfter().run();
+    }
+
+    public onAddRowBeforeClick(): void {
+        this.#editorService.editor.chain().focus().addRowBefore().run();
     }
 
     public onDeleteColumnClick(): void {

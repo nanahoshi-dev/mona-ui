@@ -15,8 +15,8 @@ import { EditorImageInserterComponent } from "../editor-image-inserter/editor-im
 export class EditorImageComponent {
     readonly #editorService: EditorService = inject(EditorService);
     readonly #i18n = inject(MonaI18nService);
-    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
     protected readonly inserterVisible = signal(false);
+    protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
 
     public onDisplayInserterClick(): void {
         this.inserterVisible.set(true);

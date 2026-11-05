@@ -1,15 +1,17 @@
-<mona-button-group selection="single" [size]="'small'">
+<mona-button-group selection="single" [size]="'small'" [aria-label]="messages().alignmentGroup">
     <button
         monaButton
-        [selected]="alignLeftSelected()"
+        [selected]="alignStartSelected()"
+        [monaEditorPressed]="alignStartSelected()"
         [toggleable]="false"
-        (click)="onAlignLeft()"
-        [title]="messages().alignLeft">
-        <i class="ri-align-left"></i>
+        (click)="onAlignStart()"
+        [title]="messages().alignStart">
+        <i [class]="startIcon()"></i>
     </button>
     <button
         monaButton
         [selected]="alignCenterSelected()"
+        [monaEditorPressed]="alignCenterSelected()"
         [toggleable]="false"
         (click)="onAlignCenter()"
         [title]="messages().alignCenter">
@@ -17,15 +19,17 @@
     </button>
     <button
         monaButton
-        [selected]="alignRightSelected()"
+        [selected]="alignEndSelected()"
+        [monaEditorPressed]="alignEndSelected()"
         [toggleable]="false"
-        (click)="onAlignRight()"
-        [title]="messages().alignRight">
-        <i class="ri-align-right"></i>
+        (click)="onAlignEnd()"
+        [title]="messages().alignEnd">
+        <i [class]="endIcon()"></i>
     </button>
     <button
         monaButton
         [selected]="alignJustifySelected()"
+        [monaEditorPressed]="alignJustifySelected()"
         [toggleable]="false"
         (click)="onAlignJustify()"
         [title]="messages().justify">

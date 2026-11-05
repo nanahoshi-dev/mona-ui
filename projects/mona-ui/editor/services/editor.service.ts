@@ -1,4 +1,4 @@
-import { Injectable, signal } from "@angular/core";
+import { computed, Injectable, signal } from "@angular/core";
 import { any, ImmutableSet, List } from "@mirei/ts-collections";
 import { type Content, Editor, type Extension, type JSONContent, type Mark, type Node } from "@tiptap/core";
 import { Color } from "@tiptap/extension-color";
@@ -52,6 +52,21 @@ const DEFAULT_FONTS = [
     "Verdana"
 ];
 
+const DEFAULT_FONT_SIZES = [
+    "10px",
+    "12px",
+    "14px",
+    "16px",
+    "18px",
+    "20px",
+    "24px",
+    "32px",
+    "36px",
+    "48px",
+    "60px",
+    "72px"
+];
+
 const DEFAULT_SETTINGS: EditorSettings = {
     alignment: true,
     blockquote: true,
@@ -62,6 +77,7 @@ const DEFAULT_SETTINGS: EditorSettings = {
     fontHighlight: true,
     fontList: [],
     fontSize: true,
+    fontSizeList: [],
     headings: true,
     history: true,
     horizontalRule: true,
@@ -96,23 +112,16 @@ export class EditorService {
     public readonly blur$ = new Subject<void>();
     public readonly create$ = new Subject<void>();
     public readonly focus$ = new Subject<void>();
-    public readonly fontSizes = signal(
-        ImmutableSet.create([
-            "10px",
-            "12px",
-            "14px",
-            "16px",
-            "18px",
-            "20px",
-            "24px",
-            "32px",
-            "36px",
-            "48px",
-            "60px",
-            "72px"
-        ])
-    );
+    public readonly fontSizes = signal(ImmutableSet.create(DEFAULT_FONT_SIZES));
     public readonly fonts = signal(ImmutableSet.create(DEFAULT_FONTS));
+
+    /**
+     * True while the document has no content; false before the editor exists too, so nothing shows over it.
+     */
+    public readonly isEmpty = computed(() => {
+        this.#state();
+        return this.#editor?.isEmpty ?? false;
+    });
 
     /**
      * True while an editor exists. The toolbar renders only then, so its components can use {@link editor}.
@@ -167,7 +176,9 @@ export class EditorService {
 
         const editorSettings: EditorSettings = { ...DEFAULT_SETTINGS, ...settings };
         const fontList = editorSettings.fontList;
+        const fontSizeList = editorSettings.fontSizeList;
         this.fonts.set(ImmutableSet.create(any(fontList) ? fontList : DEFAULT_FONTS));
+        this.fontSizes.set(ImmutableSet.create(any(fontSizeList) ? fontSizeList : DEFAULT_FONT_SIZES));
         this.settings.set(editorSettings);
 
         const editor = new Editor({
@@ -206,6 +217,9 @@ export class EditorService {
         if (settings.alignment) {
             extensions.add(
                 TextAlign.configure({
+                    // start and end follow the text direction; left and right are kept so older HTML keeps its
+                    // alignment.
+                    alignments: ["start", "center", "end", "justify", "left", "right"],
                     types: ["paragraph", "heading"]
                 })
             );
