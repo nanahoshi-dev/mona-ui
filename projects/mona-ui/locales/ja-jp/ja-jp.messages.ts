@@ -367,6 +367,7 @@ export const JA_JP_MESSAGES = {
     },
     splitButton: {
         menuButtonAriaLabel: "メニューオプションを表示",
+        menuButtonWithText: (text: string) => `${text}のその他のオプション`,
         splitButton: (text: string) => (text ? `${text}、分割ボタン` : "分割ボタン")
     },
     splitter: {

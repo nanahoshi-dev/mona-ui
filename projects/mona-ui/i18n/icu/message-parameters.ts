@@ -412,6 +412,7 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
     },
     splitButton: {
         menuButtonAriaLabel: null,
+        menuButtonWithText: [{ name: "text", type: "string" }],
         splitButton: [{ name: "text", type: "string" }]
     },
     splitter: {

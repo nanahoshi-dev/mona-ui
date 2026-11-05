@@ -366,6 +366,7 @@ export const ZH_CN_MESSAGES = {
     },
     splitButton: {
         menuButtonAriaLabel: "显示菜单选项",
+        menuButtonWithText: (text: string) => `更多${text}选项`,
         splitButton: (text: string) => (text ? `${text}，拆分按钮` : "拆分按钮")
     },
     splitter: {

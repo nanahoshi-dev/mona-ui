@@ -399,6 +399,7 @@ export const RU_RU_MESSAGES = {
     },
     splitButton: {
         menuButtonAriaLabel: "Показать параметры меню",
+        menuButtonWithText: (text: string) => `Другие параметры: ${text}`,
         splitButton: (text: string) => (text ? `${text}, разделённая кнопка` : "Разделённая кнопка")
     },
     splitter: {

@@ -347,6 +347,7 @@
     },
     "splitButton": {
         "menuButtonAriaLabel": "عرض خيارات القائمة",
+        "menuButtonWithText": "مزيد من خيارات {text}",
         "splitButton": "{text, select, undefined {زر تقسيم} other {{text}، زر تقسيم}}"
     },
     "splitter": {

@@ -480,8 +480,11 @@ describe("MONA_ZH_CN_LOCALE Integration with MonaI18nService", () => {
         fixture.detectChanges();
 
         const hostEl = fixture.nativeElement as HTMLElement;
-        const mainBtn = hostEl.querySelector("button[aria-label='保存，拆分按钮']");
-        expect(mainBtn).not.toBeNull();
+        const [mainBtn, menuBtn] = Array.from(hostEl.querySelectorAll("button"));
+        expect(mainBtn.textContent?.trim()).toBe("保存");
+        // The main button is named by its text; the arrow is named after it.
+        expect(mainBtn.hasAttribute("aria-label")).toBe(false);
+        expect(menuBtn.getAttribute("aria-label")).toBe("更多保存选项");
     });
 
     it("renders connected ListBox components with self-contained Chinese transfer accessible names", () => {

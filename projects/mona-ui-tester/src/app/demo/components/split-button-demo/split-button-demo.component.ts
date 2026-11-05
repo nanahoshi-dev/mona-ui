@@ -205,6 +205,8 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
             [aria-labelledby]="ariaLabelledby()"
             (buttonClick)="onButtonClick()"
             [disabled]="disabled()"
+            [iconOnly]="iconOnly()"
+            [loading]="loading()"
             [look]="look()"
             [menuButtonAriaLabel]="menuButtonAriaLabel()"
             (menuItemClick)="onMenuItemClick($event)"
@@ -332,8 +334,10 @@ export class SplitButtonWrapperComponent implements ComponentInputsAsSignal<Spli
     public readonly ariaLabel = input("");
     public readonly ariaLabelledby = input("");
     public readonly disabled = input(false);
+    public readonly iconOnly = input(false);
+    public readonly loading = input(false);
     public readonly look = input<ReturnType<SplitButtonComponent["look"]>>("default");
-    public readonly menuButtonAriaLabel = input("Show menu options");
+    public readonly menuButtonAriaLabel = input("");
     public readonly popupWidth = input(0);
     public readonly rounded = input<ReturnType<SplitButtonComponent["rounded"]>>("medium");
     public readonly size = input<ReturnType<SplitButtonComponent["size"]>>("medium");

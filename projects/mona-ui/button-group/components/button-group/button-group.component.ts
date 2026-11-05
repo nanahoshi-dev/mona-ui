@@ -11,7 +11,7 @@ import {
     untracked
 } from "@angular/core";
 import { outputFromObservable, takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
-import { ButtonDirective, ButtonService } from "@nanahoshi/mona-ui/button";
+import { BUTTON_GROUP_MEMBER, ButtonDirective, ButtonService } from "@nanahoshi/mona-ui/button";
 import { SelectionMode } from "@nanahoshi/mona-ui/common";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 
@@ -46,9 +46,21 @@ export class ButtonGroupComponent implements ButtonGroupVariantsInput {
         const userClass = this.userClass();
         return twMerge(variantClasses, userClass);
     });
+    /**
+     * The group's own buttons: they follow its look, size, rounding and disabled state, and its selection.
+     */
     protected readonly buttons = contentChildren(ButtonDirective);
-    protected readonly messages = this.#i18n.componentMessages("buttonGroup", BUTTON_GROUP_DEFAULT_MESSAGES);
+    /**
+     * Dropdown and split buttons placed in the group. Their buttons follow the group's look, size, rounding and
+     * disabled state, but not its selection.
+     */
+    protected readonly components = contentChildren(BUTTON_GROUP_MEMBER);
     protected readonly effectiveAriaLabel = computed(() => this.ariaLabel() ?? this.messages().buttonGroup);
+    protected readonly members = computed(() => [
+        ...this.buttons(),
+        ...this.components().flatMap(component => component.groupButtons())
+    ]);
+    protected readonly messages = this.#i18n.componentMessages("buttonGroup", BUTTON_GROUP_DEFAULT_MESSAGES);
 
     /**
      * @description When `false` and `selection` is `"single"`, at least one button must remain selected;
@@ -113,7 +125,7 @@ export class ButtonGroupComponent implements ButtonGroupVariantsInput {
     public readonly userClass = input<string>("", { alias: "class" });
 
     public constructor() {
-        this.#buttonService.setMembers(this.buttons);
+        this.#buttonService.setMembers(this.members);
         effect(() => {
             const disabled = this.disabled();
             untracked(() => this.#buttonService.groupDisabled.set(disabled));

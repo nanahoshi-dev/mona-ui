@@ -347,6 +347,7 @@
     },
     "splitButton": {
         "menuButtonAriaLabel": "メニューオプションを表示",
+        "menuButtonWithText": "{text}のその他のオプション",
         "splitButton": "{text, select, undefined {分割ボタン} other {{text}、分割ボタン}}"
     },
     "splitter": {

@@ -829,16 +829,12 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
         fixture.detectChanges();
         await fixture.whenStable();
 
-        const root = fixture.nativeElement as HTMLElement;
-        const buttons = root.querySelectorAll("button");
-        expect(buttons.length).toBe(2);
-
-        const mainBtn = buttons[0];
+        const hostEl = fixture.nativeElement as HTMLElement;
+        const [mainBtn, menuBtn] = Array.from(hostEl.querySelectorAll("button"));
         expect(mainBtn.textContent?.trim()).toBe("حفظ");
-        expect(mainBtn.getAttribute("aria-label")).toBe("حفظ، زر تقسيم");
-
-        const menuBtn = buttons[1];
-        expect(menuBtn.getAttribute("aria-label")).toBe("عرض خيارات القائمة");
+        // The main button is named by its text; the arrow is named after it.
+        expect(mainBtn.hasAttribute("aria-label")).toBe(false);
+        expect(menuBtn.getAttribute("aria-label")).toBe("مزيد من خيارات حفظ");
     });
 
     it("integrates with ListBox for transfer toolbar accessible names", async () => {

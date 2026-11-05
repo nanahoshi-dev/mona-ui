@@ -152,7 +152,7 @@ Each child button's `aria-pressed` attribute is managed by `ButtonDirective` and
 
 **Selector:** `mona-button-group`
 
-**Content projection:** accepts elements carrying the `monaButton` attribute (`<ng-content select="[monaButton]">`).
+**Content projection:** accepts `monaButton` buttons, `mona-dropdown-button` and `mona-split-button` (`<ng-content select="[monaButton], mona-dropdown-button, mona-split-button">`). The buttons inside dropdown and split buttons take the group's look, size, rounding and disabled state, but they aren't toggles and take no part in its selection.
 
 #### Inputs
 

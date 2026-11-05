@@ -8987,7 +8987,7 @@
     "selector": "\"mona-dropdown-button\"",
     "inputs": [
       {
-        "description": "Accessible name for the dropdown button.\r\nFalls back to `\"{text} dropdown button\"` when empty; provide an explicit value when no visible text is present.",
+        "description": "Accessible name for the dropdown button. Leave it empty when the button shows its name as text;\nset it (or `aria-labelledby`) when the button shows only an icon.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
@@ -8995,7 +8995,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "ID of an external element that provides the accessible name for the dropdown button.\r\nTakes precedence over `ariaLabel` when both are set.",
+        "description": "ID of an external element that provides the accessible name for the dropdown button.\nTakes precedence over `aria-label` when both are set.",
         "kind": "input",
         "name": "ariaLabelledby",
         "type": "string",
@@ -9003,21 +9003,21 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Renders the button as a square for icon-only usage, removing horizontal text padding.\r\nSet `ariaLabel` when no visible text is present to ensure an accessible name.",
-        "kind": "input",
-        "name": "iconOnly",
-        "type": "boolean",
-        "defaultValue": "false"
-      },
-      {
-        "description": "Renders the button with reduced visual emphasis and removes pointer interaction.",
+        "description": "Renders the button with reduced visual emphasis and removes pointer interaction. Disabling the\nbutton closes its open menu.",
         "kind": "input",
         "name": "disabled",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Displays a loading indicator and prevents interaction while an operation is in progress.",
+        "description": "Renders the button as a square for icon-only usage, removing horizontal text padding and the arrow.\nSet `aria-label` when no visible text is present to ensure an accessible name.",
+        "kind": "input",
+        "name": "iconOnly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Displays a loading indicator and prevents interaction while an operation is in progress. Starting\nto load closes the open menu.",
         "kind": "input",
         "name": "loading",
         "type": "boolean",
@@ -9037,11 +9037,25 @@
         "type": "PopupMenuItemClickEvent"
       },
       {
-        "description": "Border-radius preset applied to the button.",
+        "description": "Minimum width of the popup menu in pixels. A value of `0` makes the menu at least as wide as the\nbutton.",
+        "kind": "input",
+        "name": "popupWidth",
+        "type": "number",
+        "defaultValue": "0"
+      },
+      {
+        "description": "Border-radius preset applied to the button. The menu follows it (`\"full\"` gives it large corners).",
         "kind": "input",
         "name": "rounded",
         "type": "ButtonVariantProps[\"rounded\"]",
         "defaultValue": "\"medium\""
+      },
+      {
+        "description": "Shows a down arrow after the text, so the button reads as one that opens a menu. Icon-only buttons\nnever show it.",
+        "kind": "input",
+        "name": "showArrow",
+        "type": "boolean",
+        "defaultValue": "true"
       },
       {
         "description": "Size preset controlling the button's dimensions.",
@@ -13961,7 +13975,7 @@
     "selector": "\"mona-split-button\"",
     "inputs": [
       {
-        "description": "Accessible name for the main action button.\nFalls back to `\"{text} splitbutton\"` when empty.",
+        "description": "Accessible name for the main action button. Leave it empty when the button shows its name as\ntext; set it (or `aria-labelledby`) when it shows only an icon. The pair of buttons is a group named by the\nmain button.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
@@ -13983,9 +13997,23 @@
         "type": "MouseEvent"
       },
       {
-        "description": "Renders the component with reduced visual emphasis\nand removes pointer interaction from both the main button and the menu toggle button.",
+        "description": "Renders the component with reduced visual emphasis\nand removes pointer interaction from both the main button and the menu toggle button. Disabling it closes the\nopen menu.",
         "kind": "input",
         "name": "disabled",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Renders the main button as a square for icon-only content, removing horizontal text padding.\nSet `aria-label` so the main button has a name.",
+        "kind": "input",
+        "name": "iconOnly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Shows a loading indicator on the main button and keeps the menu from opening while an operation\nis in progress. Starting to load closes the open menu.",
+        "kind": "input",
+        "name": "loading",
         "type": "boolean",
         "defaultValue": "false"
       },
@@ -13997,7 +14025,7 @@
         "defaultValue": "\"default\""
       },
       {
-        "description": "Accessible name for the menu toggle button.\nIf not provided, falls back to the localized default message.",
+        "description": "Accessible name for the menu toggle button.\nIf not provided, it's the localized \"More {text} options\", or \"Show menu options\" when the main button has no\n`text` or `aria-label`.",
         "kind": "input",
         "name": "menuButtonAriaLabel",
         "type": "string",

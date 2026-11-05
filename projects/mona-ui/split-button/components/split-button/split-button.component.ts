@@ -6,26 +6,30 @@ import {
     contentChild,
     contentChildren,
     DestroyRef,
+    effect,
     ElementRef,
     inject,
     input,
     output,
     signal,
     TemplateRef,
-    viewChild
+    untracked,
+    viewChild,
+    viewChildren
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { LucideChevronDown } from "@lucide/angular";
-import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { BUTTON_GROUP_MEMBER, ButtonDirective } from "@nanahoshi/mona-ui/button";
+import type { ButtonGroupMember } from "@nanahoshi/mona-ui/button";
 import {
     PopupMenuComponent,
     PopupMenuGroupTemplateDirective,
     PopupMenuIconTemplateDirective,
-    PopupMenuItemClickEvent,
     PopupMenuShortcutTemplateDirective,
     PopupMenuTextTemplateDirective,
     PopupMenuToken
 } from "@nanahoshi/mona-ui/popup-menu";
+import type { PopupMenuItemClickEvent } from "@nanahoshi/mona-ui/popup-menu";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { fromEvent } from "rxjs";
@@ -42,6 +46,7 @@ import {
     SplitButtonVariantInputs,
     SplitButtonVariantProps
 } from "../../styles/split-button.styles";
+import { ensureSplitButtonComponentTypes } from "../../utils/split-button.utils";
 
 @Component({
     selector: "mona-split-button",
@@ -56,11 +61,16 @@ import {
         PopupMenuTextTemplateDirective,
         LucideChevronDown
     ],
+    providers: [{ provide: BUTTON_GROUP_MEMBER, useExisting: SplitButtonComponent }],
     host: {
-        "[class]": "classes()"
+        "[attr.aria-busy]": "loading() || null",
+        "[attr.aria-label]": "null",
+        "[attr.aria-labelledby]": "mainButtonId",
+        "[class]": "classes()",
+        role: "group"
     }
 })
-export class SplitButtonComponent implements SplitButtonVariantInputs {
+export class SplitButtonComponent implements ButtonGroupMember, SplitButtonVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
     readonly #i18n = inject(MonaI18nService);
     private readonly menuItemComponents = contentChildren(PopupMenuToken, { descendants: false });
@@ -77,7 +87,13 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
         return twMerge(classes, userClass);
     });
     protected readonly effectiveMenuButtonAriaLabel = computed(() => {
-        return this.menuButtonAriaLabel() || this.messages().menuButtonAriaLabel;
+        const label = this.menuButtonAriaLabel();
+        if (label) {
+            return label;
+        }
+        const messages = this.messages();
+        const name = this.text() || this.ariaLabel();
+        return name ? messages.menuButtonWithText(name) : messages.menuButtonAriaLabel;
     });
     protected readonly groupTemplate = contentChild(SplitButtonMenuGroupTemplateDirective, {
         read: TemplateRef,
@@ -87,6 +103,7 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
         read: TemplateRef,
         descendants: false
     });
+    protected readonly mainButtonId = createElementControlId();
     protected readonly mainButtonTextTemplate = contentChild(SplitButtonTextTemplateDirective, { read: TemplateRef });
     protected readonly menuButtonRef = viewChild<ElementRef<HTMLButtonElement>>("menuButton");
     protected readonly menuButtonTemplate = contentChild(SplitButtonMenuButtonTemplateDirective, { read: TemplateRef });
@@ -107,22 +124,15 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
         read: TemplateRef,
         descendants: false
     });
-    protected readonly splitButtonAriaLabel = computed(() => {
-        const ariaLabel = this.ariaLabel();
-        if (ariaLabel) {
-            return ariaLabel;
-        }
-        const text = this.text();
-        return this.messages().splitButton(text);
-    });
     protected readonly textTemplate = contentChild(SplitButtonMenuItemTextTemplateDirective, {
         read: TemplateRef,
         descendants: false
     });
 
     /**
-     * @description Accessible name for the main action button.
-     * Falls back to `"{text} splitbutton"` when empty.
+     * @description Accessible name for the main action button. Leave it empty when the button shows its name as
+     * text; set it (or `aria-labelledby`) when it shows only an icon. The pair of buttons is a group named by the
+     * main button.
      * @default ""
      */
     public readonly ariaLabel = input<string>("", { alias: "aria-label" });
@@ -141,10 +151,30 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
 
     /**
      * @description Renders the component with reduced visual emphasis
-     * and removes pointer interaction from both the main button and the menu toggle button.
+     * and removes pointer interaction from both the main button and the menu toggle button. Disabling it closes the
+     * open menu.
      * @default false
      */
     public readonly disabled = input(false);
+
+    /**
+     * The main and arrow buttons, which join a surrounding `mona-button-group`.
+     */
+    public readonly groupButtons = viewChildren(ButtonDirective);
+
+    /**
+     * @description Renders the main button as a square for icon-only content, removing horizontal text padding.
+     * Set `aria-label` so the main button has a name.
+     * @default false
+     */
+    public readonly iconOnly = input(false);
+
+    /**
+     * @description Shows a loading indicator on the main button and keeps the menu from opening while an operation
+     * is in progress. Starting to load closes the open menu.
+     * @default false
+     */
+    public readonly loading = input(false);
 
     /**
      * @description Visual style preset applied to the button.
@@ -154,7 +184,8 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
 
     /**
      * @description Accessible name for the menu toggle button.
-     * If not provided, falls back to the localized default message.
+     * If not provided, it's the localized "More {text} options", or "Show menu options" when the main button has no
+     * `text` or `aria-label`.
      * @default ""
      */
     public readonly menuButtonAriaLabel = input("");
@@ -197,9 +228,27 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
     public readonly userClass = input<string>("", { alias: "class" });
 
     public constructor() {
+        effect(() => ensureSplitButtonComponentTypes(this.menuItemComponents()));
+        effect(() => {
+            if (this.disabled() || this.loading()) {
+                untracked(() => this.popupMenuRef()?.closeMenu());
+            }
+        });
         afterNextRender({
             read: () => this.#setKeyboardEvents()
         });
+    }
+
+    protected onMainButtonClick(event: MouseEvent): void {
+        this.popupMenuRef()?.closeMenu();
+        this.buttonClick.emit(event);
+    }
+
+    protected onMainButtonKeydown(event: KeyboardEvent): void {
+        if (event.altKey && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
+            event.preventDefault();
+            this.#openMenuViaKeyboard(event.key === "ArrowUp" ? "last" : "first");
+        }
     }
 
     protected onMenuClose(): void {
@@ -222,10 +271,10 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
         }
     }
 
-    #openMenuViaKeyboard(): void {
+    #openMenuViaKeyboard(focus: "first" | "last"): void {
         const popupMenu = this.popupMenuRef();
-        if (popupMenu && !this.menuOpen()) {
-            popupMenu.openMenuViaKeyboard();
+        if (popupMenu && !this.menuOpen() && !this.disabled() && !this.loading()) {
+            popupMenu.openMenuViaKeyboard(false, focus);
         }
     }
 
@@ -239,11 +288,14 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
             .subscribe(event => {
                 switch (event.key) {
                     case "ArrowDown":
-                    case "ArrowUp":
                     case " ":
                     case "Enter":
                         event.preventDefault();
-                        this.#openMenuViaKeyboard();
+                        this.#openMenuViaKeyboard("first");
+                        break;
+                    case "ArrowUp":
+                        event.preventDefault();
+                        this.#openMenuViaKeyboard("last");
                         break;
                     case "Escape":
                         if (this.menuOpen()) {

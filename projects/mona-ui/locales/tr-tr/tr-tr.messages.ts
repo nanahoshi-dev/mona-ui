@@ -368,6 +368,7 @@ export const TR_TR_MESSAGES = {
     },
     splitButton: {
         menuButtonAriaLabel: "Menü seçeneklerini göster",
+        menuButtonWithText: (text: string) => `Diğer ${text} seçenekleri`,
         splitButton: (text: string) => (text ? `${text}, bölünmüş düğme` : "Bölünmüş düğme")
     },
     splitter: {

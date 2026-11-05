@@ -405,8 +405,10 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
         // Focus in another menu (a menubar moving to the next menu) leaves with that menu, so it can't come back there.
         const openerInMenu = hasOpener && !!opener.closest("mona-popup-menu-list");
         const targetFocusable = targetElement.tabIndex >= 0 || (openerInMenu && targetElement.hasAttribute("tabindex"));
+        // A menu opened from the keyboard goes back to the element the keys came from (a split button's main button).
+        const viaKeyboard = this.#pendingInitialFocus !== null;
         let returnFocusTo: HTMLElement | null = null;
-        if (hasOpener && !openerInMenu && targetElement.contains(opener)) {
+        if (hasOpener && !openerInMenu && (viaKeyboard || targetElement.contains(opener))) {
             returnFocusTo = opener;
         } else if (targetFocusable) {
             returnFocusTo = targetElement;

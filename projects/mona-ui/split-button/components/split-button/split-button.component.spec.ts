@@ -1,66 +1,20 @@
-import { CommonModule } from "@angular/common";
-import { ApplicationRef, Component } from "@angular/core";
-import { ComponentFixture, fakeAsync, TestBed, tick } from "@angular/core/testing";
-import { BrowserModule, By } from "@angular/platform-browser";
-import { MenuItemComponent } from "../../../menubar/components/menu-item/menu-item.component";
-import { ButtonDirective } from "../../../button/directives/button.directive";
+import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { beforeEach, describe, expect, it } from "vitest";
 import { SplitButtonComponent } from "./split-button.component";
-import { ContextMenuComponent } from "../../../contextmenu/components/contextmenu/context-menu.component";
-
-@Component({
-    template: `
-        <mona-split-button text="Split Button">
-            <mona-menu-item text="Item 1"></mona-menu-item>
-            <mona-menu-item text="Item 2" (menuClick)="onItemClick($event)"></mona-menu-item>
-            <mona-menu-item text="Item 3">
-                <mona-menu-item text="Item 3.1"></mona-menu-item>
-                <mona-menu-item text="Item 3.2" (menuClick)="onItemClick($event)"></mona-menu-item>
-                <mona-menu-item text="Item 3.3"></mona-menu-item>
-            </mona-menu-item>
-            @if (menuVisible) {
-                <mona-menu-item text="Item 4"></mona-menu-item>
-            }
-        </mona-split-button>
-    `,
-    imports: [SplitButtonComponent, MenuItemComponent, CommonModule]
-})
-class TestHostComponent {
-    public menuVisible: boolean = false;
-
-    public constructor(public readonly appRef: ApplicationRef) {}
-
-    public onItemClick(event: any): void {
-        console.log(event);
-    }
-}
 
 describe("SplitButtonComponent", () => {
     let component: SplitButtonComponent;
-    let hostComponent: TestHostComponent;
     let fixture: ComponentFixture<SplitButtonComponent>;
-    let hostFixture: ComponentFixture<TestHostComponent>;
-    let appRef: ApplicationRef;
+
+    function buttons(): HTMLButtonElement[] {
+        return Array.from((fixture.nativeElement as HTMLElement).querySelectorAll("button"));
+    }
 
     beforeEach(() => {
-        TestBed.configureTestingModule({
-            imports: [
-                SplitButtonComponent,
-                TestHostComponent,
-                CommonModule,
-                BrowserModule,
-                ContextMenuComponent,
-                ButtonDirective
-            ],
-            providers: [ApplicationRef]
-        });
         fixture = TestBed.createComponent(SplitButtonComponent);
-        hostFixture = TestBed.createComponent(TestHostComponent);
         component = fixture.componentInstance;
-        hostComponent = hostFixture.componentInstance;
-        appRef = TestBed.inject(ApplicationRef);
         fixture.detectChanges();
-        hostFixture.detectChanges();
     });
 
     it("should create", () => {
@@ -77,20 +31,22 @@ describe("SplitButtonComponent", () => {
     });
 
     it("applies logical border radiuses and border reset to inner buttons", () => {
-        const buttons = fixture.nativeElement.querySelectorAll("button");
-        expect(buttons[0].classList.contains("rounded-e-none")).toBe(true);
-        expect(buttons[1].classList.contains("rounded-s-none")).toBe(true);
-        expect(buttons[1].classList.contains("border-s-0")).toBe(true);
+        expect(buttons()[0].classList.contains("rounded-e-none")).toBe(true);
+        expect(buttons()[1].classList.contains("rounded-s-none")).toBe(true);
+        expect(buttons()[1].classList.contains("border-s-0")).toBe(true);
     });
 
     describe("i18n", () => {
-        it("renders default English aria labels for main and menu buttons", () => {
+        it("names the arrow after the main action, and leaves the main button to its text", () => {
             fixture.componentRef.setInput("text", "Save");
             fixture.detectChanges();
 
-            const buttons = fixture.nativeElement.querySelectorAll("button");
-            expect(buttons[0].getAttribute("aria-label")).toBe("Save splitbutton");
-            expect(buttons[1].getAttribute("aria-label")).toBe("Show menu options");
+            expect(buttons()[0].hasAttribute("aria-label")).toBe(false);
+            expect(buttons()[1].getAttribute("aria-label")).toBe("More Save options");
+        });
+
+        it("falls back to a general arrow name when the main button has no text", () => {
+            expect(buttons()[1].getAttribute("aria-label")).toBe("Show menu options");
         });
 
         it("allows consumer inputs to override default aria labels", () => {
@@ -99,9 +55,8 @@ describe("SplitButtonComponent", () => {
             fixture.componentRef.setInput("menuButtonAriaLabel", "Custom menu");
             fixture.detectChanges();
 
-            const buttons = fixture.nativeElement.querySelectorAll("button");
-            expect(buttons[0].getAttribute("aria-label")).toBe("Custom action");
-            expect(buttons[1].getAttribute("aria-label")).toBe("Custom menu");
+            expect(buttons()[0].getAttribute("aria-label")).toBe("Custom action");
+            expect(buttons()[1].getAttribute("aria-label")).toBe("Custom menu");
         });
 
         it("updates aria labels dynamically when locale changes", () => {
@@ -115,15 +70,15 @@ describe("SplitButtonComponent", () => {
                 messages: {
                     splitButton: {
                         menuButtonAriaLabel: "Menü seçeneklerini göster",
+                        menuButtonWithText: (text: string) => `Diğer ${text} seçenekleri`,
                         splitButton: (text: string) => `${text} ayrık düğme`
                     }
                 }
             });
             fixture.detectChanges();
 
-            const buttons = fixture.nativeElement.querySelectorAll("button");
-            expect(buttons[0].getAttribute("aria-label")).toBe("Kaydet ayrık düğme");
-            expect(buttons[1].getAttribute("aria-label")).toBe("Menü seçeneklerini göster");
+            expect(buttons()[0].hasAttribute("aria-label")).toBe(false);
+            expect(buttons()[1].getAttribute("aria-label")).toBe("Diğer Kaydet seçenekleri");
         });
     });
 });

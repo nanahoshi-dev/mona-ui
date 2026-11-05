@@ -347,6 +347,7 @@
     },
     "splitButton": {
         "menuButtonAriaLabel": "顯示選單選項",
+        "menuButtonWithText": "更多{text}選項",
         "splitButton": "{text, select, undefined {分割按鈕} other {{text}，分割按鈕}}"
     },
     "splitter": {

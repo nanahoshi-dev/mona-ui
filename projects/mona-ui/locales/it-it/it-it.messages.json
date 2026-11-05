@@ -347,6 +347,7 @@
     },
     "splitButton": {
         "menuButtonAriaLabel": "Mostra opzioni del menu",
+        "menuButtonWithText": "Altre opzioni per {text}",
         "splitButton": "{text, select, undefined {Pulsante con menu} other {{text}, pulsante con menu}}"
     },
     "splitter": {

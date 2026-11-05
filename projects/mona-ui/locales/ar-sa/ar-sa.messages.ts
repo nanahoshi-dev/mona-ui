@@ -378,6 +378,7 @@ export const AR_SA_MESSAGES = {
     },
     splitButton: {
         menuButtonAriaLabel: "عرض خيارات القائمة",
+        menuButtonWithText: (text: string) => `مزيد من خيارات ${text}`,
         splitButton: (text: string) => (text ? `${text}، زر تقسيم` : "زر تقسيم")
     },
     splitter: {

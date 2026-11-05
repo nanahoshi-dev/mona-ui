@@ -347,6 +347,7 @@
     },
     "splitButton": {
         "menuButtonAriaLabel": "Menü seçeneklerini göster",
+        "menuButtonWithText": "Diğer {text} seçenekleri",
         "splitButton": "{text, select, undefined {Bölünmüş düğme} other {{text}, bölünmüş düğme}}"
     },
     "splitter": {

@@ -543,35 +543,30 @@ describe("MONA_RU_RU_LOCALE Integration with MonaI18nService", () => {
         fixture.detectChanges();
 
         const hostEl = fixture.nativeElement as HTMLElement;
-        const mainBtn = hostEl.querySelector("button[aria-label='Сохранить, разделённая кнопка']");
-        expect(mainBtn).not.toBeNull();
-
-        const menuBtn = hostEl.querySelector("button[aria-label='Показать параметры меню']");
-        expect(menuBtn).not.toBeNull();
+        const [mainBtn, menuBtn] = Array.from(hostEl.querySelectorAll("button"));
+        // The main button is named by its text; the arrow is named after it.
+        expect(mainBtn.hasAttribute("aria-label")).toBe(false);
+        expect(menuBtn.getAttribute("aria-label")).toBe("Другие параметры: Сохранить");
 
         // Dynamic text update
         fixture.componentInstance.text.set("Поделиться");
         fixture.detectChanges();
-        const updatedMainBtn = hostEl.querySelector("button[aria-label='Поделиться, разделённая кнопка']");
-        expect(updatedMainBtn).not.toBeNull();
+        expect(menuBtn.getAttribute("aria-label")).toBe("Другие параметры: Поделиться");
 
         // Explicit application aria-label override takes precedence
         fixture.componentInstance.ariaLabel.set("Пользовательское действие");
         fixture.detectChanges();
-        const overrideMainBtn = hostEl.querySelector("button[aria-label='Пользовательское действие']");
-        expect(overrideMainBtn).not.toBeNull();
+        expect(mainBtn.getAttribute("aria-label")).toBe("Пользовательское действие");
 
-        // Clearing override restores localized Russian default with updated text
+        // Clearing the override leaves the main button to its text again
         fixture.componentInstance.ariaLabel.set("");
         fixture.detectChanges();
-        expect(hostEl.querySelector("button[aria-label='Поделиться, разделённая кнопка']")).not.toBeNull();
+        expect(mainBtn.hasAttribute("aria-label")).toBe(false);
 
-        // Empty text fallback
+        // Empty text falls back to the general arrow name
         fixture.componentInstance.text.set("");
         fixture.detectChanges();
-
-        const emptyMainBtn = hostEl.querySelector("button[aria-label='Разделённая кнопка']");
-        expect(emptyMainBtn).not.toBeNull();
+        expect(menuBtn.getAttribute("aria-label")).toBe("Показать параметры меню");
     });
 
     it("renders connected ListBox components with Russian transfer accessible names", () => {

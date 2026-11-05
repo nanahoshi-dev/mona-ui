@@ -367,6 +367,7 @@ export const ID_ID_MESSAGES = {
     },
     splitButton: {
         menuButtonAriaLabel: "Tampilkan opsi menu",
+        menuButtonWithText: (text: string) => `Opsi ${text} lainnya`,
         splitButton: (text: string) => (text ? `${text}, tombol pisah` : "Tombol pisah")
     },
     splitter: {

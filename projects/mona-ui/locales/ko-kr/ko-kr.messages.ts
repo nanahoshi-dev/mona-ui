@@ -368,6 +368,7 @@ export const KO_KR_MESSAGES = {
     },
     splitButton: {
         menuButtonAriaLabel: "메뉴 옵션 표시",
+        menuButtonWithText: (text: string) => `${text} 추가 옵션`,
         splitButton: (text: string) => (text ? `${text}, 분할 버튼` : "분할 버튼")
     },
     splitter: {

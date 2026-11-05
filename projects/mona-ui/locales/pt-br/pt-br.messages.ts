@@ -384,6 +384,7 @@ export const PT_BR_MESSAGES = {
     },
     splitButton: {
         menuButtonAriaLabel: "Mostrar opções do menu",
+        menuButtonWithText: (text: string) => `Mais opções de ${text}`,
         splitButton: (text: string) => (text ? `${text}, botão com menu` : "Botão com menu")
     },
     splitter: {

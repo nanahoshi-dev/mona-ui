@@ -224,43 +224,65 @@ Both the whole component and individual items can be disabled independently:
 
 ### Popup positioning
 
-The popup menu anchors to the left edge of the main button (`bottomleft` / `topleft`) with a 2px vertical offset. The `popupWidth` input sets the minimum width of the popup in pixels; `0` means no minimum width.
+The popup menu anchors to the left edge of the main button (`bottomleft` / `topleft`) with a 2px vertical offset. The `popupWidth` input sets the minimum width of the popup in pixels; `0` means no minimum width. Clicking the main button while the menu is open closes the menu, then emits `buttonClick`.
 
-### `aria-label` fallback
+### Naming
 
-When `[aria-label]` is empty, the main button's `aria-label` is computed as `"{text} splitbutton"`. Explicitly set `[aria-label]` when the button's text alone is not descriptive enough, or when the text is provided via `monaSplitButtonTextTemplate` rather than the `text` input.
+The two buttons form a group (`role="group"`) named by the main button. The main button is named by its content: the `text`, or what a `monaSplitButtonTextTemplate` renders. Set `aria-label` only when the content isn't a name, as with `iconOnly`. The arrow is named "More {text} options" from `text` (or `aria-label`), or "Show menu options" when the main button has neither; `menuButtonAriaLabel` overrides it. Both come from the `splitButton` messages (`menuButtonWithText`, `menuButtonAriaLabel`). The `splitButton.splitButton` message is deprecated and no longer rendered.
+
+### Loading, disabled and button groups
+
+`loading` shows a spinner on the main button, marks the group busy (`aria-busy`) and keeps the menu from opening. Starting to load, or becoming disabled, closes an open menu. Inside `mona-button-group`, both buttons take the group's look, size, rounding and disabled state; they aren't toggles and take no part in the group's selection.
 
 ### Handling menu item events
 
 `menuItemClick` on `SplitButtonComponent` fires for every item click in the popup (top-level aggregator). `menuClick` on individual `mona-split-button-item` / `mona-split-button-checkbox-item` / `mona-split-button-radio-item` fires only for that specific item. Use item-level `menuClick` when you need per-action handlers; use the top-level `menuItemClick` when you need a single entry point.
 
+### Identifying the clicked item
 
 The click event's `value` is the item's `value` input, so handlers don't need to compare label text. For checkbox and radio items, `checked` is the state the item has once the click is applied. Calling `event.preventDefault()` on a checkbox item's `menuClick` keeps its state, and on a radio item's keeps the group's value.
+
 ## Accessibility
 
 ### Keyboard navigation
 
-| Key                                         | Target                   | Action                                                 |
-|---------------------------------------------|--------------------------|--------------------------------------------------------|
-| `Tab`                                       | Any button               | Move focus between the main button and the menu toggle |
-| `Enter` / `Space`                           | Main button              | Trigger the primary action (`buttonClick`)             |
-| `ArrowDown` / `ArrowUp` / `Enter` / `Space` | Menu toggle              | Open the popup menu                                    |
-| `Escape`                                    | Menu toggle (while open) | Close the popup and return focus to the menu toggle    |
+| Key                             | Target            | Action                                                                                                |
+|---------------------------------|-------------------|-------------------------------------------------------------------------------------------------------|
+| `Tab`                           | Any button        | Move focus between the main button and the menu toggle                                                |
+| `Enter` / `Space`               | Main button       | Trigger the primary action (`buttonClick`)                                                            |
+| `Alt+ArrowDown` / `Alt+ArrowUp` | Main button       | Open the menu with its first / last item highlighted; focus returns to the main button when it closes |
+| `ArrowDown` / `Enter` / `Space` | Menu toggle       | Open the menu with its first item highlighted                                                         |
+| `ArrowUp`                       | Menu toggle       | Open the menu with its last item highlighted                                                          |
+| `Escape`                        | Menu (while open) | Close the menu and return focus to the button that opened it                                          |
 
-> TODO (owner-review): Document the keyboard map inside the popup menu (arrow key navigation, Enter to select, Escape to close inner submenus). Verify against runtime.
+Inside the menu:
+
+| Key               | Action                                                                                                      |
+|-------------------|-------------------------------------------------------------------------------------------------------------|
+| `ArrowDown`       | Highlights the next item, wrapping to the first. Disabled items are highlighted too, but can't be activated |
+| `ArrowUp`         | Highlights the previous item, wrapping to the last                                                          |
+| `ArrowRight`      | Opens the highlighted item's submenu, if it has nested items                                                |
+| `ArrowLeft`       | Closes the current submenu and returns to the parent level                                                  |
+| `Home`            | Highlights the first item                                                                                   |
+| `End`             | Highlights the last item                                                                                    |
+| `Enter` / `Space` | Activates the highlighted item, or opens its submenu if it has nested items                                 |
+| `Escape`          | Closes the open submenu, or the menu, returning focus to the button that opened it                          |
+| `Tab`             | Closes the menu and its submenus; focus moves on from the button that opened it                             |
 
 ### ARIA
+
+The host carries `role="group"` and `aria-labelledby` pointing at the main button, and `aria-busy` while loading.
 
 The menu toggle button carries:
 
 - `aria-haspopup="menu"` — tells AT that it controls a menu popup
 - `aria-expanded` — reflects the open/closed state of the popup
-- `aria-controls` — references the popup element by ID
-- `aria-label` — defaults to `"Show menu options"`; override with `[menuButtonAriaLabel]` to localize
+- `aria-controls` — references the menu by ID while it is open
+- `aria-label` — "More {text} options", or "Show menu options" without `text`; override with `[menuButtonAriaLabel]`
 
 The main button carries:
 
-- `aria-label` — computed from the `[aria-label]` input or falls back to `"{text} splitbutton"`
+- `aria-label` — only when the `[aria-label]` input is set; otherwise its content names it
 - `aria-labelledby` — forwarded from the `[aria-labelledby]` input; takes precedence over `aria-label` when set
 
 ## API
@@ -271,18 +293,20 @@ The main button carries:
 
 #### Inputs
 
-| Name                  | Type                                                                                                           | Default               | Description                                                                                                                                   |
-|-----------------------|----------------------------------------------------------------------------------------------------------------|-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| `aria-label`          | `string`                                                                                                       | `''`                  | Accessible name for the main action button. Falls back to `"{text} splitbutton"` when empty.                                                  |
-| `aria-labelledby`     | `string`                                                                                                       | `''`                  | ID of an external element that provides the accessible name for the main action button. Takes precedence over `aria-label` when both are set. |
-| `class`               | `string`                                                                                                       | `''`                  | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                     |
-| `disabled`            | `boolean`                                                                                                      | `false`               | Renders the component with reduced visual emphasis and removes pointer interaction from both the main button and the menu toggle button.      |
-| `look`                | `'default' \| 'error' \| 'ghost' \| 'info' \| 'outline' \| 'primary' \| 'secondary' \| 'success' \| 'warning'` | `'default'`           | Visual style preset applied to the button.                                                                                                    |
-| `menuButtonAriaLabel` | `string`                                                                                                       | `'Show menu options'` | Accessible name for the menu toggle button. Override to provide a localized label for non-English applications.                               |
-| `popupWidth`          | `number`                                                                                                       | `0`                   | Minimum width of the popup menu in pixels. A value of `0` means no minimum width is applied.                                                  |
-| `rounded`             | `'full' \| 'large' \| 'medium' \| 'none' \| 'small'`                                                           | `'medium'`            | Border-radius preset applied to the button.                                                                                                   |
-| `size`                | `'large' \| 'medium' \| 'small'`                                                                               | `'medium'`            | Size preset controlling the button's dimensions.                                                                                              |
-| `text`                | `string`                                                                                                       | `''`                  | Primary text content displayed in the main action button. Ignored when a `monaSplitButtonTextTemplate` is provided.                           |
+| Name                  | Type                                                                                                           | Default     | Description                                                                                                                                                                                                           |
+|-----------------------|----------------------------------------------------------------------------------------------------------------|-------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `aria-label`          | `string`                                                                                                       | `''`        | Accessible name for the main action button. Leave it empty when the button shows its name as text; set it (or `aria-labelledby`) when it shows only an icon. The pair of buttons is a group named by the main button. |
+| `aria-labelledby`     | `string`                                                                                                       | `''`        | ID of an external element that provides the accessible name for the main action button. Takes precedence over `aria-label` when both are set.                                                                         |
+| `class`               | `string`                                                                                                       | `''`        | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                                                             |
+| `disabled`            | `boolean`                                                                                                      | `false`     | Renders the component with reduced visual emphasis and removes pointer interaction from both the main button and the menu toggle button. Disabling it closes the open menu.                                           |
+| `iconOnly`            | `boolean`                                                                                                      | `false`     | Renders the main button as a square for icon-only content, removing horizontal text padding. Set `aria-label` so the main button has a name.                                                                          |
+| `loading`             | `boolean`                                                                                                      | `false`     | Shows a loading indicator on the main button and keeps the menu from opening while an operation is in progress. Starting to load closes the open menu.                                                                |
+| `look`                | `'default' \| 'error' \| 'ghost' \| 'info' \| 'outline' \| 'primary' \| 'secondary' \| 'success' \| 'warning'` | `'default'` | Visual style preset applied to the button.                                                                                                                                                                            |
+| `menuButtonAriaLabel` | `string`                                                                                                       | `''`        | Accessible name for the menu toggle button. If not provided, it's the localized "More {text} options", or "Show menu options" when the main button has no `text` or `aria-label`.                                     |
+| `popupWidth`          | `number`                                                                                                       | `0`         | Minimum width of the popup menu in pixels. A value of `0` means no minimum width is applied.                                                                                                                          |
+| `rounded`             | `'full' \| 'large' \| 'medium' \| 'none' \| 'small'`                                                           | `'medium'`  | Border-radius preset applied to the button.                                                                                                                                                                           |
+| `size`                | `'large' \| 'medium' \| 'small'`                                                                               | `'medium'`  | Size preset controlling the button's dimensions.                                                                                                                                                                      |
+| `text`                | `string`                                                                                                       | `''`        | Primary text content displayed in the main action button. Ignored when a `monaSplitButtonTextTemplate` is provided.                                                                                                   |
 
 #### Outputs
 
@@ -391,7 +415,7 @@ No inputs or outputs. Renders a horizontal visual divider between menu sections.
 <!-- verification-checklist
 - [x] API definitions and defaults verified against source and component-metadata.json
 - [x] @description and @default kept in sync with source JSDoc (updated to canonical vocabulary)
-- [x] ariaLabel input name corrected — consumers use [ariaLabel], not [aria-label] (no alias on this component)
+- [x] aria-label and aria-labelledby are the inputs' aliases on this component
 - [x] SplitButtonGroupComponent.title and SplitButtonRadioItemComponent.value marked Required (input.required<string>())
 - [x] SplitButtonRadioGroupComponent.value documented as two-way bindable model
 - [x] menuItemClick and buttonClick output type verified: MenuItemClickEvent is the public alias exported from @nanahoshi/mona-ui
@@ -399,5 +423,3 @@ No inputs or outputs. Renders a horizontal visual divider between menu sections.
 - [x] No internal or unexported APIs exposed
 - [x] ChangeDetectionStrategy.OnPush confirmed on all components
 -->
-
-<!-- TODO(owner-review): Verify the complete keyboard navigation map inside the popup menu (arrow key traversal, Enter to select, Escape to close submenus). Document once confirmed against runtime behavior. -->

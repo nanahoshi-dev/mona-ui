@@ -138,7 +138,12 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
                 }
                 @if (featureData && featureData["suffixTemplate"].active) {
                     <ng-template monaTextBoxSuffixTemplate>
-                        <mona-dropdown-button look="ghost" [iconOnly]="true" [rounded]="'none'" class="h-full">
+                        <mona-dropdown-button
+                            look="ghost"
+                            [iconOnly]="true"
+                            [rounded]="'none'"
+                            aria-label="Text options"
+                            class="h-full">
                             <ng-template monaDropdownButtonTextTemplate>
                                 <svg lucideList [size]="16"></svg>
                             </ng-template>
