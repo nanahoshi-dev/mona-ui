@@ -3548,7 +3548,7 @@
         "kind": "input",
         "name": "titleAlign",
         "type": "ChartHeaderAlignment",
-        "defaultValue": "\"left\""
+        "defaultValue": "\"start\""
       },
       {
         "description": "Additional CSS classes applied to chart root container.",
@@ -4006,10 +4006,10 @@
         "defaultValue": "\"auto\""
       },
       {
-        "description": "Layout position of the legend (`\"top\"`, `\"bottom\"`, `\"left\"`, or `\"right\"`).",
+        "description": "Layout position of the legend (`\"top\"`, `\"bottom\"`, `\"start\"`, `\"end\"`, `\"left\"`, or `\"right\"`). `start` and `end` follow the direction; `left` and `right` stay on that side.",
         "kind": "input",
         "name": "position",
-        "type": "\"bottom\" | \"left\" | \"right\" | \"top\"",
+        "type": "ChartLegendPosition",
         "defaultValue": "\"bottom\""
       },
       {
@@ -4708,11 +4708,11 @@
         "defaultValue": "true"
       },
       {
-        "description": "Position of the Y axis relative to the plot area.",
+        "description": "Position of the Y axis relative to the plot area. `start` and `end` follow the direction; `left` and `right` stay on that side.",
         "kind": "input",
         "name": "position",
         "type": "ChartYAxisPosition",
-        "defaultValue": "\"left\""
+        "defaultValue": "\"start\""
       },
       {
         "description": "Constant for symlog scale (`type=\"symlog\"`). Must be a positive finite number.",

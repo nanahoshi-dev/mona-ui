@@ -31,12 +31,13 @@ import type { ChartFunnelSeriesStyle } from "../scene/funnel-scene";
 import type { ChartWaterfallSeriesStyle } from "../scene/waterfall-scene";
 import { isFiniteNumber } from "../utils/number-utils";
 
+/** Used when `--color-chart-N` isn't set. Each reaches 3:1 on white and on near-black (WCAG 1.4.11). */
 const DEFAULT_CHART_COLORS = [
-    "#3b82f6", // Blue (shadcn Chart 1)
-    "#10b981", // Emerald (shadcn Chart 2)
-    "#f59e0b", // Amber (shadcn Chart 3)
-    "#8b5cf6", // Purple (shadcn Chart 4)
-    "#ec4899" // Pink (shadcn Chart 5)
+    "#3b82f6", // Blue
+    "#059669", // Emerald
+    "#d97706", // Amber
+    "#8b5cf6", // Purple
+    "#ec4899" // Pink
 ];
 
 const DEFAULT_CHART_PALETTE_VARIABLES = [
@@ -691,7 +692,7 @@ export class ChartStyleResolver {
             }
         }
 
-        const risingColor = this.resolveCssVariable(rawExplicitRising || cssRisingColor || "#22c55e", seriesEl);
+        const risingColor = this.resolveCssVariable(rawExplicitRising || cssRisingColor || "#16a34a", seriesEl);
         const fallingColor = this.resolveCssVariable(rawExplicitFalling || cssFallingColor || "#ef4444", seriesEl);
         const neutralColor = this.resolveCssVariable(rawExplicitNeutral || cssNeutralColor || "#6b7280", seriesEl);
         const wickColor =
@@ -728,7 +729,7 @@ export class ChartStyleResolver {
             hollowFillColor,
             neutralColor: neutralColor || "#6b7280",
             opacity,
-            risingColor: risingColor || "#22c55e",
+            risingColor: risingColor || "#16a34a",
             wickColor,
             wickWidth
         };
@@ -1954,9 +1955,9 @@ export class ChartStyleResolver {
         const seriesEl = series.element?.nativeElement ?? this.#rootElement;
 
         const defaultIncrease =
-            this.resolveCssVariable("--color-emerald-500", seriesEl) ||
-            this.resolveCssVariable("--color-green-500", seriesEl) ||
-            "#10b981";
+            this.resolveCssVariable("--color-emerald-600", seriesEl) ||
+            this.resolveCssVariable("--color-green-600", seriesEl) ||
+            "#059669";
 
         const defaultDecrease =
             this.resolveCssVariable("--color-red-500", seriesEl) ||

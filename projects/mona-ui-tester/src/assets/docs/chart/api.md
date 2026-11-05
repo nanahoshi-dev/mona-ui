@@ -49,6 +49,7 @@ Root visualization container coordinating coordinate layouts, canvas rendering, 
 | `aria-description` | `string` | `""` | Replaces the generated summary in the chart's description (`aria-describedby`); the keyboard help still follows. |
 | `landmark` | `boolean` | `false` | Makes the host a `region` landmark instead of `role="application"`. Give each landmark chart a unique name. |
 | `dataTable` | `boolean` | `false` | Adds a visually hidden table of the data (the first 100 rows) for screen readers. |
+| `titleAlign` | `ChartHeaderAlignment` | `"start"` | Alignment of the title and subtitle. `"start"` and `"end"` follow the direction; `"left"` and `"right"` stay on that side; or `"center"`. |
 | `pointClick` | `output<ChartPointEvent>` | - | Emitted when a data point, spoke, or slice is clicked. |
 | `pointFocusChange` | `output<ChartPointFocusEvent>` | - | Emitted when keyboard navigation moves between data points or slices. |
 | `seriesVisibilityChange` | `output<ChartSeriesVisibilityEvent>` | - | Emitted when series visibility is toggled via legend or API. |
@@ -305,7 +306,7 @@ Renders financial Japanese candlestick series with central high/low wicks, recta
 | `color` | `string` | `undefined` | Explicit unified color override for all candlesticks. |
 | `data` | `readonly unknown[]` | `undefined` | Series-specific dataset overriding root data. |
 | `fallingColor` | `string` | `"#ef4444"` | Color override for falling candles (Close < Open). |
-| `fillMode` | `ChartFinancialFillMode` | `"filled"` | Body fill styling: `"filled"` or `"hollow"`. |
+| `fillMode` | `ChartFinancialFillMode` | `"hollow"` | Body fill styling. `"hollow"` draws rising candles as outlines, so they differ from falling ones by more than color; `"filled"` draws solid bodies. |
 | `highField` | `ChartField` | `"high"` | Property key or accessor extracting highest price/value. |
 | `keyField` | `ChartField` | `undefined` | Property key or accessor extracting stable datum identity for animations. |
 | `lowField` | `ChartField` | `"low"` | Property key or accessor extracting lowest price/value. |
@@ -314,7 +315,7 @@ Renders financial Japanese candlestick series with central high/low wicks, recta
 | `neutralColor` | `string` | `"#6b7280"` | Color override for neutral candles (Close == Open). |
 | `opacity` | `number` | `undefined` | Fill and stroke opacity ratio (0 to 1). |
 | `openField` | `ChartField` | `"open"` | Property key or accessor extracting opening price/value. |
-| `risingColor` | `string` | `"#22c55e"` | Color override for rising candles (Close > Open). |
+| `risingColor` | `string` | `"#16a34a"` | Color override for rising candles (Close > Open). |
 | `valueFormatter` | `ChartValueFormatter` | `undefined` | Custom formatting function for prices/values in tooltips and live region. |
 | `visible` | `model(boolean)` | `true` | Two-way bindable series visibility. |
 | `wickColor` | `string` | `undefined` | Explicit color override for vertical wicks. Defaults to body color. |
@@ -672,6 +673,18 @@ Renders callouts, milestone badges, and outlier markers anchored to specific (X,
 | `Shift` + arrows | With `navigation`: pan along the arrow's direction (`+`/`-` zoom, `0` resets). With `mona-chart-brush` and a focused point: extend a brush from it; `Enter` commits, `Escape` cancels. |
 
 Keys pressed inside the legend or other projected content are left to that content.
+
+### Right-to-left
+
+The chart follows the direction of its host (`dir`, inherited, or CDK `Directionality`) and lays out again when it changes.
+
+| Part | In RTL |
+| :--- | :--- |
+| Y axis | The default `position="start"` is on the right. `"end"` is on the left. `"left"` and `"right"` stay on that side. |
+| Legend | Items run right to left. `position="start"` is on the right, `"end"` on the left; `"left"` and `"right"` stay on that side. |
+| Title | The default `titleAlign="start"` is on the right. |
+| Automatic data labels | A label beside a point prefers the left. Explicit positions stay as set. |
+| X axis | Stays left to right, so categories and time read the same in both directions. |
 
 ### Screen readers
 

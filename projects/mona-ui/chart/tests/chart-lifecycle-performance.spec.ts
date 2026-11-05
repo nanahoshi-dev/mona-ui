@@ -37,15 +37,21 @@ class ChartHostComponent {
     public readonly shown = signal(true);
 }
 
-/** Counts the MutationObservers that are observing and haven't been disconnected. */
+/** Counts the MutationObservers that are observing and haven't been disconnected, and those watching the theme. */
 class TrackedMutationObserver extends MutationObserver {
-    public static active = 0;
     #observing = false;
+    #watchesTheme = false;
+    public static active = 0;
+    public static theme = 0;
 
     public override disconnect(): void {
         if (this.#observing) {
             this.#observing = false;
             TrackedMutationObserver.active--;
+        }
+        if (this.#watchesTheme) {
+            this.#watchesTheme = false;
+            TrackedMutationObserver.theme--;
         }
         super.disconnect();
     }
@@ -54,6 +60,10 @@ class TrackedMutationObserver extends MutationObserver {
         if (!this.#observing) {
             this.#observing = true;
             TrackedMutationObserver.active++;
+        }
+        if (!this.#watchesTheme && options?.attributeFilter?.includes("data-theme")) {
+            this.#watchesTheme = true;
+            TrackedMutationObserver.theme++;
         }
         super.observe(target, options);
     }
@@ -143,6 +153,7 @@ describe("Chart lifecycle and performance", () => {
     it("keeps one pair of observers when recomputeScene() runs before the first render, and none once destroyed", () => {
         const restore = replaceGlobal("MutationObserver", TrackedMutationObserver);
         TrackedMutationObserver.active = 0;
+        TrackedMutationObserver.theme = 0;
         try {
             TestBed.configureTestingModule({ imports: [ChartHostComponent] });
             const fixture = TestBed.createComponent(ChartHostComponent);
@@ -151,8 +162,9 @@ describe("Chart lifecycle and performance", () => {
             chartOf(fixture).recomputeScene(ChartInvalidationReason.Data);
             TestBed.tick();
 
-            expect(TrackedMutationObserver.active).toBe(1);
+            expect(TrackedMutationObserver.theme).toBe(1);
             fixture.destroy();
+            expect(TrackedMutationObserver.theme).toBe(0);
             expect(TrackedMutationObserver.active).toBe(0);
         } finally {
             restore();

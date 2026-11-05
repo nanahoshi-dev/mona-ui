@@ -92,7 +92,7 @@ describe("ChartStyleResolver", () => {
         const style1 = resolver.resolveSeriesStyle(s1, 1);
 
         expect(style0.color).toBe("#3b82f6");
-        expect(style1.color).toBe("#10b981");
+        expect(style1.color).toBe("#059669");
         expect(style0.lineWidth).toBe(2);
         expect(style0.pointRadius).toBe(3);
     });

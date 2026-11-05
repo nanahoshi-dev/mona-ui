@@ -294,16 +294,22 @@ export class ChartExportDomCollector {
                 badges.push(badgeSnapshot);
                 primitives.push({ kind: "badge", ...badgeSnapshot });
             } else {
+                const isRtl = computed.direction === "rtl";
+                const inlineStart = isRtl ? "right" : "left";
+                const inlineEnd = isRtl ? "left" : "right";
                 let textAlign: "left" | "center" | "right" = "center";
-                if (computed.textAlign === "left" || computed.textAlign === "start") {
-                    textAlign = "left";
-                } else if (computed.textAlign === "right" || computed.textAlign === "end") {
-                    textAlign = "right";
+                if (computed.textAlign === "left" || computed.textAlign === "right") {
+                    textAlign = computed.textAlign;
+                } else if (computed.textAlign === "start") {
+                    textAlign = inlineStart;
+                } else if (computed.textAlign === "end") {
+                    textAlign = inlineEnd;
                 }
 
                 const vectorSnapshot: ChartExportVectorTextSnapshot = {
                     bounds,
                     color,
+                    ...(isRtl ? { direction: "rtl" as const } : {}),
                     documentOrder: docOrder,
                     fontFamily,
                     fontSize,

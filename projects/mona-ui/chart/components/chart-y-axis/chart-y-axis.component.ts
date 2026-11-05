@@ -112,10 +112,10 @@ export class ChartYAxisComponent implements OnInit {
     public readonly nice = input(true);
 
     /**
-     * @description Position of the Y axis relative to the plot area.
-     * @default "left"
+     * @description Position of the Y axis relative to the plot area. `start` and `end` follow the direction; `left` and `right` stay on that side.
+     * @default "start"
      */
-    public readonly position = input<ChartYAxisPosition>("left");
+    public readonly position = input<ChartYAxisPosition>("start");
 
     /**
      * @description Constant for symlog scale (`type="symlog"`). Must be a positive finite number.

@@ -77,6 +77,9 @@ export function isHierarchicalCoordinateFamily(family: ChartSeriesFamily): boole
 
 export type ChartLegendItemKind = "datum" | "semantic" | "series";
 
+/** Where a legend goes: `start` and `end` follow the direction, `left` and `right` don't. */
+export type ChartLegendPosition = "bottom" | "end" | "left" | "right" | "start" | "top";
+
 export interface ChartLegendItem {
     color: string;
     dataIndex?: number;

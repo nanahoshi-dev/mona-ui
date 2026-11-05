@@ -1,5 +1,5 @@
 @if (hasHeader()) {
-    <div [class]="headerClasses()" [style.text-align]="titleAlign()">
+    <div [class]="headerClasses()">
         @if (titleTemplate(); as tpl) {
             <div data-mona-chart-export-role="title-template">
                 <ng-container

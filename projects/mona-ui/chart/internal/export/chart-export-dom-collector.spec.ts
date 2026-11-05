@@ -171,4 +171,29 @@ describe("ChartExportDomCollector", () => {
         expect(layers.vectorTexts.length).toBe(1);
         expect(layers.vectorTexts[0].opacity).toBe(0); // Kept as 0 because no Mona suppression marker
     });
+
+    it.each<["end" | "start", "ltr" | "rtl", "left" | "right"]>([
+        ["start", "ltr", "left"],
+        ["end", "ltr", "right"],
+        ["start", "rtl", "right"],
+        ["end", "rtl", "left"]
+    ])("reads text-align %s in %s as %s", (textAlign, direction, expected) => {
+        const host = createMockHost();
+        const title = document.createElement("div");
+        title.setAttribute("data-mona-chart-export-role", "title");
+        title.textContent = "Sales";
+        title.style.direction = direction;
+        title.style.textAlign = textAlign;
+        Object.defineProperty(title, "getBoundingClientRect", {
+            value: () => ({ bottom: 80, height: 20, left: 120, right: 300, top: 60, width: 180, x: 120, y: 60 })
+        });
+        host.appendChild(title);
+        document.body.appendChild(host);
+
+        const [text] = ChartExportDomCollector.collect(host, host).vectorTexts;
+        host.remove();
+
+        expect(text.textAlign).toBe(expected);
+        expect(text.direction).toBe(direction === "rtl" ? "rtl" : undefined);
+    });
 });

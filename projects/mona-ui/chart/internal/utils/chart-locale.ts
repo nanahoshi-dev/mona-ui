@@ -1,22 +1,33 @@
-import type { MonaChartMessages } from "@nanahoshi/mona-ui/i18n";
+import type { MonaChartMessages, MonaTextDirection } from "@nanahoshi/mona-ui/i18n";
 import { getNumberFormatter, MONA_FALLBACK_LOCALE_ID } from "@nanahoshi/mona-ui/i18n";
 import { CHART_DEFAULT_MESSAGES } from "../../i18n/chart.default-messages";
 
 /**
- * The locale and messages the chart's layout formats with. The chart sets them before every layout and paint, from
- * `MonaI18nService`, so the layout engines, data resolvers and announcement builders format numbers, dates and
- * built-in text for the library locale instead of the browser's, without threading a formatter through every call.
+ * The locale, messages and direction the chart's layout works with. The chart sets them before every layout and
+ * paint, from `MonaI18nService` and its host's direction, so the layout engines, data resolvers and announcement
+ * builders format numbers, dates and built-in text for the library locale instead of the browser's, and place the
+ * frame for the direction, without threading them through every call.
  */
+let activeDirection: MonaTextDirection = "ltr";
 let activeLocale: string = MONA_FALLBACK_LOCALE_ID;
 let activeMessages: MonaChartMessages = CHART_DEFAULT_MESSAGES;
 
 const DATE_FORMATTER_LIMIT = 256;
 const dateFormatters = new Map<string, Intl.DateTimeFormat>();
 
-/** Sets the locale and messages the next layout or paint formats with. */
-export function setChartLocale(localeId: string, messages: MonaChartMessages): void {
+/** Sets the locale, messages and direction the next layout or paint works with. */
+export function setChartLocale(
+    localeId: string,
+    messages: MonaChartMessages,
+    direction: MonaTextDirection = "ltr"
+): void {
+    activeDirection = direction;
     activeLocale = localeId;
     activeMessages = messages;
+}
+
+export function chartDirection(): MonaTextDirection {
+    return activeDirection;
 }
 
 export function chartLocale(): string {

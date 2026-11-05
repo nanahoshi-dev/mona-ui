@@ -64,6 +64,7 @@ import type {
     ChartAreaFillMode,
     ChartCurve,
     ChartLegendItem,
+    ChartLegendPosition,
     ChartLineStyle,
     ChartSeriesType
 } from "../../models/chart-series.models";
@@ -164,7 +165,7 @@ export interface ChartRadialAxisRegistration {
 export interface ChartLegendRegistration {
     interactive: Signal<boolean>;
     itemTemplate: Signal<ChartLegendItemTemplateDirective | undefined>;
-    position: Signal<"bottom" | "left" | "right" | "top">;
+    position: Signal<ChartLegendPosition>;
 }
 
 export interface ChartTooltipRegistration {

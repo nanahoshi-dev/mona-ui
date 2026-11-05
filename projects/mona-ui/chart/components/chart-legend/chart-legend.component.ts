@@ -7,8 +7,9 @@ import { CHART_DEFAULT_MESSAGES } from "../../i18n/chart.default-messages";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { ChartColorLegendScale, ChartLegendMode } from "../../models/chart-heatmap.models";
-import type { ChartLegendItem } from "../../models/chart-series.models";
+import type { ChartLegendItem, ChartLegendPosition } from "../../models/chart-series.models";
 import { chartLegendBaseThemeVariants, chartLegendItemBaseThemeVariants } from "../../styles/chart.styles";
+import { resolveLegendPlacement } from "../../internal/utils/chart-direction";
 
 @Component({
     selector: "mona-chart-legend",
@@ -26,31 +27,31 @@ export class ChartLegendComponent implements OnInit {
     readonly #i18n = inject(MonaI18nService);
     protected readonly messages = this.#i18n.componentMessages("chart", CHART_DEFAULT_MESSAGES);
     protected readonly containerClasses = computed(() =>
-        twMerge(chartLegendBaseThemeVariants({ position: this.position() }), this.userClass())
+        twMerge(chartLegendBaseThemeVariants({ position: this.placement() }), this.userClass())
     );
     protected readonly gradientCss = computed(() => {
         const scale = this.legendScale();
         if (!scale || !scale.stops || scale.stops.length === 0) return "";
-        const isVertical = this.position() === "left" || this.position() === "right";
-        const dir = isVertical ? "to top" : this.#direction() === "rtl" ? "to left" : "to right";
+        const dir = this.isVertical() ? "to top" : this.#direction() === "rtl" ? "to left" : "to right";
         const stopStrs = scale.stops.map(s => `${s.color} ${Math.round(s.offset * 100)}%`).join(", ");
         return `linear-gradient(${dir}, ${stopStrs})`;
     });
-    protected readonly hostClasses = computed(() => {
-        const pos = this.position();
-        if (pos === "top" || pos === "bottom") return "block w-full flex-shrink-0";
-        if (pos === "left" || pos === "right") return "flex flex-col justify-center flex-shrink-0";
-        return "block w-full flex-shrink-0";
-    });
+    protected readonly hostClasses = computed(() =>
+        this.isVertical() ? "flex flex-col justify-center flex-shrink-0" : "block w-full flex-shrink-0"
+    );
     protected readonly hostOrder = computed(() => {
-        const pos = this.position();
-        return pos === "top" || pos === "left" ? 0 : 1;
+        const placement = this.placement();
+        return placement === "top" || placement === "start" ? 0 : 1;
     });
     protected readonly isColorScaleMode = computed(() => {
         const m = this.mode();
         if (m === "color") return true;
         if (m === "series") return false;
         return Boolean(this.legendScale());
+    });
+    protected readonly isVertical = computed(() => {
+        const placement = this.placement();
+        return placement === "start" || placement === "end";
     });
     protected readonly itemTemplate = contentChild(ChartLegendItemTemplateDirective);
     protected readonly legendAriaLabel = computed(() => {
@@ -72,6 +73,7 @@ export class ChartLegendComponent implements OnInit {
     protected readonly legendScale = computed<ChartColorLegendScale | null>(
         () => this.#chartContext?.legendScale?.() ?? null
     );
+    protected readonly placement = computed(() => resolveLegendPlacement(this.position(), this.#direction()));
     /**
      * @description Whether clicking or pressing Enter/Space on legend items toggles series visibility.
      * @default true
@@ -85,10 +87,10 @@ export class ChartLegendComponent implements OnInit {
     public readonly mode = input<ChartLegendMode>("auto");
 
     /**
-     * @description Layout position of the legend (`"top"`, `"bottom"`, `"left"`, or `"right"`).
+     * @description Layout position of the legend (`"top"`, `"bottom"`, `"start"`, `"end"`, `"left"`, or `"right"`). `start` and `end` follow the direction; `left` and `right` stay on that side.
      * @default "bottom"
      */
-    public readonly position = input<"bottom" | "left" | "right" | "top">("bottom");
+    public readonly position = input<ChartLegendPosition>("bottom");
 
     /**
      * @description Additional CSS classes applied to the legend container.

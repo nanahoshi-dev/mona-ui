@@ -12,7 +12,7 @@ import {
     signal,
     viewChild
 } from "@angular/core";
-import { formatNumber, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { formatNumber, injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { twMerge } from "tailwind-merge";
 import { ChartTooltipTemplateDirective } from "../../directives/chart-tooltip-template.directive";
 import { CHART_DEFAULT_MESSAGES } from "../../i18n/chart.default-messages";
@@ -37,13 +37,16 @@ export interface ChartTooltipPlacement {
 export class ChartTooltipComponent implements OnInit {
     readonly #chartContext = inject(CHART_CONTEXT, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
+    readonly #direction = injectComponentDirection();
     readonly #i18n = inject(MonaI18nService);
     readonly #measuredHeight = signal<number>(60);
     readonly #measuredWidth = signal<number>(180);
     #tooltipResizeObserver: ResizeObserver | null = null;
 
-    protected readonly messages = this.#i18n.componentMessages("chart", CHART_DEFAULT_MESSAGES);
+    /** Points from the value before to the value after; arrows don't mirror with the direction. */
+    protected readonly changeArrow = computed(() => (this.#direction() === "rtl" ? "←" : "→"));
     protected readonly customTemplate = contentChild(ChartTooltipTemplateDirective);
+    protected readonly messages = this.#i18n.componentMessages("chart", CHART_DEFAULT_MESSAGES);
     protected readonly placement = computed<ChartTooltipPlacement>(() => {
         const pos = this.tooltipPosition();
         if (!pos) {

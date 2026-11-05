@@ -1,6 +1,9 @@
 export type ChartXAxisPosition = "bottom" | "top";
-export type ChartYAxisPosition = "left" | "right";
-export type ChartAxisPosition = ChartXAxisPosition | ChartYAxisPosition;
+/** The physical side a Y axis is drawn on. */
+export type ChartYAxisSide = "left" | "right";
+/** Where a Y axis goes: `start` and `end` follow the direction, `left` and `right` don't. */
+export type ChartYAxisPosition = ChartYAxisSide | "end" | "start";
+export type ChartAxisPosition = ChartXAxisPosition | ChartYAxisSide;
 
 export type ChartNumericScaleType = "linear" | "log" | "symlog" | "pow" | "sqrt";
 
@@ -8,7 +11,8 @@ export type ChartXAxisType = "auto" | "category" | ChartNumericScaleType | "time
 export type ChartYAxisType = "auto" | "category" | ChartNumericScaleType;
 
 export type ChartAxisLabelRotation = "auto" | number;
-export type ChartHeaderAlignment = "center" | "left" | "right";
+/** How the title and subtitle align: `start` and `end` follow the direction, `left` and `right` don't. */
+export type ChartHeaderAlignment = "center" | "end" | "left" | "right" | "start";
 
 export type ChartAxisFormatter<T = unknown> = (value: T, index: number) => string;
 

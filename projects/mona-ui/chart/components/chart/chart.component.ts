@@ -19,7 +19,7 @@ import {
     untracked,
     viewChild
 } from "@angular/core";
-import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { ChartAxisLabelTemplateDirective } from "../../directives/chart-axis-label-template.directive";
@@ -259,6 +259,7 @@ import {
     joinChartAnnouncement,
     setChartLocale
 } from "../../internal/utils/chart-locale";
+import { resolveHeaderAlignment, resolveLegendPlacement } from "../../internal/utils/chart-direction";
 
 /** A sign at the start of a formatted number, after any bidi marks ("+5", "-3", "−" in some locales). */
 const LEADING_SIGN = /^[\u200e\u200f\u061c]*[+\-\u2212]/;
@@ -374,6 +375,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     readonly #dataLabelMeasurementRevision = signal(0);
     readonly #dataLabelMeasurements = new Map<string, ChartSize>();
     readonly #destroyRef = inject(DestroyRef);
+    readonly #direction = injectComponentDirection();
     readonly #document = inject(DOCUMENT);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #errorHandler = inject(ErrorHandler);
@@ -716,7 +718,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         return !sc.hasRenderableData;
     });
     protected readonly headerClasses = computed(() =>
-        twMerge(chartHeaderBaseThemeVariants({ align: this.titleAlign() }))
+        twMerge(chartHeaderBaseThemeVariants({ align: resolveHeaderAlignment(this.titleAlign(), this.#direction()) }))
     );
     protected readonly heatmapScene = computed<CartesianHeatmapChartScene | null>(() => {
         const sc = this.scene();
@@ -729,16 +731,14 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         return (list.find(s => s.type === "heatmap") as ChartHeatmapSeriesRegistration) ?? null;
     });
     protected readonly layoutClasses = computed(() => {
-        const pos = this.legendPosition();
-        if (pos === "top" || pos === "bottom") {
-            return "relative flex flex-col flex-1 min-h-0 min-w-0 w-full overflow-hidden";
-        }
-        if (pos === "left" || pos === "right") {
-            return "relative flex flex-row items-center flex-1 min-h-0 min-w-0 w-full overflow-hidden";
-        }
-        return "relative flex flex-col flex-1 min-h-0 min-w-0 w-full overflow-hidden";
+        const placement = this.legendPlacement();
+        return placement === "start" || placement === "end"
+            ? "relative flex flex-row items-center flex-1 min-h-0 min-w-0 w-full overflow-hidden"
+            : "relative flex flex-col flex-1 min-h-0 min-w-0 w-full overflow-hidden";
     });
-    protected readonly legendPosition = computed(() => this.#legend()?.position() ?? "bottom");
+    protected readonly legendPlacement = computed(() =>
+        resolveLegendPlacement(this.#legend()?.position() ?? "bottom", this.#direction())
+    );
     protected readonly noDataClasses = computed(() => chartNoDataBaseThemeVariants());
     protected readonly noDataTemplate = contentChild(ChartNoDataTemplateDirective);
     protected readonly normalizedAnimationOptions = computed(() => normalizeChartAnimationOptions(this.animation()));
@@ -748,8 +748,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         normalizeChartSynchronizationOptions(this.synchronization(), this.#warnedDiagnosticSignatures)
     );
     protected readonly plotOrder = computed(() => {
-        const pos = this.legendPosition();
-        return pos === "top" || pos === "left" ? 1 : 0;
+        const placement = this.legendPlacement();
+        return placement === "top" || placement === "start" ? 1 : 0;
     });
     protected readonly plotSurfaceElement = viewChild<ElementRef<HTMLElement>>("plotSurface");
     protected readonly polarArcScene = computed<PolarArcChartScene | null>(() => {
@@ -949,9 +949,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     public readonly title = input("");
     /**
      * @description Horizontal alignment of the title and subtitle ('center', 'left', or 'right').
-     * @default "left"
+     * @default "start"
      */
-    public readonly titleAlign = input<ChartHeaderAlignment>("left");
+    public readonly titleAlign = input<ChartHeaderAlignment>("start");
     public readonly tooltipContext = signal<ChartTooltipTemplateContext | null>(null);
     public readonly tooltipPosition = signal<ChartPoint | null>(null);
     /**
@@ -1144,13 +1144,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         });
 
         // Dynamic backend synchronization
-        // A locale change (MonaI18nService.load) or new messages reformat every label and restyle in place.
+        // A locale change (MonaI18nService.load), new messages or a new direction reformat every label and restyle in
+        // place.
         let isLocaleApplied = false;
         effect(() => {
+            const direction = this.#direction();
             const localeId = this.#i18n.localeId();
             const messages = this.messages();
             untracked(() => {
-                setChartLocale(localeId, messages);
+                setChartLocale(localeId, messages, direction);
                 if (isLocaleApplied) {
                     this.invalidate(ChartInvalidationReason.Style);
                 }
@@ -2318,9 +2320,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#announcementAfterLayout = text;
     }
 
-    /** Formats the layout, data labels and announcements that follow for this chart's locale and messages. */
+    /** Lays out and formats what follows for this chart's locale, messages and direction. */
     #applyLocale(): void {
-        setChartLocale(this.#i18n.localeId(), this.messages());
+        setChartLocale(this.#i18n.localeId(), this.messages(), this.#direction());
     }
 
     /** The styles the chart reads from its host, as one string to compare between mutations. */
