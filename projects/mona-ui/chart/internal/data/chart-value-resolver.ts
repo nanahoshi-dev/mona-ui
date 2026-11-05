@@ -30,6 +30,34 @@ export function resolveValue<T = unknown>(
     return undefined;
 }
 
+const NUMERIC_STRING = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i;
+
+/**
+ * Reads a decimal number written as text (`"10"`, `" -2.5 "`, `"1e3"`), as JSON from .NET or Postgres sends decimals.
+ * Anything else, `""`, `"Infinity"` and hex included, is `undefined`.
+ */
+export function parseNumericString(value: string): number | undefined {
+    const trimmed = value.trim();
+    if (!NUMERIC_STRING.test(trimmed)) {
+        return undefined;
+    }
+    const parsed = Number(trimmed);
+    return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+/**
+ * Resolves a value field (a Y value, a size, an open or close, a slice value): numeric strings become numbers, and
+ * everything else is returned as `resolveValue` returns it, so gaps, dates and invalid values keep their meaning.
+ */
+export function resolveNumericValue(
+    datum: unknown,
+    fieldOrAccessor: ChartField | undefined,
+    index: number = 0
+): unknown {
+    const value = resolveValue(datum, fieldOrAccessor, index);
+    return typeof value === "string" ? (parseNumericString(value) ?? value) : value;
+}
+
 export function resolveSeriesDisplayName(
     series: { field?: () => ChartField; name?: () => string },
     seriesIndex: number = 0

@@ -1,5 +1,5 @@
 import { serializeKeyPart } from "../animation/animation-identity";
-import { resolveValue } from "./chart-value-resolver";
+import { resolveNumericValue, resolveValue } from "./chart-value-resolver";
 import type { ChartField } from "../../models/chart.models";
 
 export type RadialDatumIdentitySource = "category" | "index" | "key";
@@ -119,7 +119,7 @@ export function extractRetainedRadialBarIdentities(
 
     for (let i = 0; i < data.length; i++) {
         const row = data[i];
-        const rawVal = resolveValue(row, seriesField, i);
+        const rawVal = resolveNumericValue(row, seriesField, i);
         if (typeof rawVal !== "number" || !Number.isFinite(rawVal) || rawVal < 0) {
             continue;
         }
@@ -208,7 +208,7 @@ export function extractRetainedRoseIdentities(
         }
 
         if (slot.validDatum === undefined) {
-            const rawVal = resolveValue(row, seriesField, i);
+            const rawVal = resolveNumericValue(row, seriesField, i);
             if (typeof rawVal === "number" && Number.isFinite(rawVal) && rawVal >= 0) {
                 slot.validDatum = row;
                 slot.validDataIndex = i;

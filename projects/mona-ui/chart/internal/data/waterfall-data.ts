@@ -5,7 +5,7 @@ import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import type { ChartWaterfallSeriesStyle } from "../scene/waterfall-scene";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import { serializeKeyPart } from "../animation/animation-identity";
-import { resolveValue } from "./chart-value-resolver";
+import { resolveNumericValue, resolveValue } from "./chart-value-resolver";
 
 export interface PreparedWaterfallPoint {
     readonly animationKey: string;
@@ -156,7 +156,7 @@ export class WaterfallDataProcessor {
             // 2. Validate value for change rows
             let numVal: number | undefined;
             if (kind === "change") {
-                const rawVal = resolveValue(datum, field, i);
+                const rawVal = resolveNumericValue(datum, field, i);
                 if (typeof rawVal === "number" && Number.isFinite(rawVal)) {
                     numVal = rawVal;
                 } else {

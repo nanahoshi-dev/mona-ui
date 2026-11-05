@@ -8,6 +8,7 @@ import {
     DestroyRef,
     effect,
     ElementRef,
+    ErrorHandler,
     inject,
     input,
     output,
@@ -32,6 +33,7 @@ import {
 import { ChartTransitionPlanner } from "../../internal/animation/chart-transition-planner";
 import type { ChartAnimationRenderFrame, ChartAnimationTrigger } from "../../internal/animation/chart-transition-types";
 import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
+import { guardChartCallback, guardRegistrationCallbacks } from "../../internal/utils/chart-callback-guard";
 import {
     ChartInvalidationReason,
     hasInvalidationReason,
@@ -302,6 +304,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     readonly #dataLabelMeasurements = new Map<string, ChartSize>();
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+    readonly #errorHandler = inject(ErrorHandler);
     readonly #i18n = inject(MonaI18nService);
     readonly #hasInitializedDefaultSelection = signal(false);
     readonly #hasInitializedDefaultViewport = signal(false);
@@ -335,6 +338,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     readonly #referenceLines = signal<ChartReferenceLineRegistration[]>([]);
     readonly #registeredSeries = signal<ChartSeriesRegistration[]>([]);
     readonly #renderScheduler: ChartRenderScheduler;
+    readonly #reportedCallbackErrors = new Set<string>();
+    readonly #rootXField = computed(() =>
+        guardChartCallback(this.xField(), "xField", (_, error) => this.#reportCallbackError("chart xField", error))
+    );
     readonly #selection = signal<ChartSelectionRegistration | null>(null);
     readonly #styleResolver: ChartStyleResolver;
     readonly #synchronizationCoordinator = inject(ChartSynchronizationCoordinator);
@@ -1930,6 +1937,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#synchronizationController?.onCommittedViewportChange(notification);
     }
 
+    #guardCallbacks(registration: object, owner: () => string): void {
+        guardRegistrationCallbacks(registration, owner, (name, error) => this.#reportCallbackError(name, error));
+    }
+
     #paint(): void {
         const currentScene = this.#renderScene ?? this.scene();
         if (!currentScene) {
@@ -2012,7 +2023,30 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         this.#reconcilePointerInteractionFeaturesFromRetainedPointer();
     }
 
+    /** Reports an error from the app's callbacks (or the layout) through `ErrorHandler`, once per callback and message. */
+    #reportCallbackError(source: string, error: unknown): void {
+        const message = error instanceof Error ? error.message : String(error);
+        const key = `${source}\u0000${message}`;
+        if (this.#reportedCallbackErrors.has(key)) {
+            return;
+        }
+        this.#reportedCallbackErrors.add(key);
+        this.#errorHandler.handleError(new Error(`[MonaChart] The ${source} threw: ${message}`, { cause: error }));
+    }
+
+    /**
+     * Recomputes and paints, keeping an error out of change detection: an error the guarded callbacks didn't catch is
+     * reported, and the chart keeps the scene it had.
+     */
     #recomputeAndPaint(reason: ChartInvalidationReason): void {
+        try {
+            this.#recomputeAndPaintUnguarded(reason);
+        } catch (error) {
+            this.#reportCallbackError("layout", error);
+        }
+    }
+
+    #recomputeAndPaintUnguarded(reason: ChartInvalidationReason): void {
         if (reason === ChartInvalidationReason.Interaction) {
             this.#paint();
             return;
@@ -2127,7 +2161,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 measurements: this.#labelMeasurements,
                 radialAxis: this.#radialAxis() ?? undefined,
                 rootData: this.data(),
-                rootXField: this.xField(),
+                rootXField: this.#rootXField(),
                 series: this.#registeredSeries(),
                 styleResolver: this.#styleResolver,
                 viewport: undefined,
@@ -4026,6 +4060,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     public registerAngularAxis(registration: ChartAngularAxisRegistration): () => void {
+        this.#guardCallbacks(registration, () => "angular axis");
         this.#angularAxis.set(registration);
         this.invalidate(ChartInvalidationReason.Data);
         return () => {
@@ -4087,6 +4122,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     public registerRadialAxis(registration: ChartRadialAxisRegistration): () => void {
+        this.#guardCallbacks(registration, () => "radial axis");
         this.#radialAxis.set(registration);
         this.invalidate(ChartInvalidationReason.Data);
         return () => {
@@ -4148,6 +4184,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     public registerSeries(registration: ChartSeriesRegistration): () => void {
+        this.#guardCallbacks(registration, () => {
+            const name = "name" in registration && typeof registration.name === "function" ? registration.name() : "";
+            return `${registration.type} series "${name || registration.id}"`;
+        });
         this.#registeredSeries.update(list => [...list, registration]);
         this.invalidate(ChartInvalidationReason.Data);
 
@@ -4167,6 +4207,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     public registerXAxis(registration: ChartXAxisRegistration): () => void {
+        this.#guardCallbacks(registration, () => `X axis "${registration.axisId?.() ?? "x"}"`);
         this.#xAxes.update(list => [...list, registration]);
         this.invalidate(ChartInvalidationReason.Layout);
         return () => {
@@ -4176,6 +4217,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     public registerYAxis(registration: ChartYAxisRegistration): () => void {
+        this.#guardCallbacks(registration, () => `Y axis "${registration.axisId?.() ?? "y"}"`);
         this.#yAxes.update(list => [...list, registration]);
         this.invalidate(ChartInvalidationReason.Layout);
         return () => {

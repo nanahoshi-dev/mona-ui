@@ -5,7 +5,7 @@ import type { ResolvedChartCartesianAxisType } from "../scale/chart-scale";
 import type { ChartInteractionXKey } from "../scene/scene-geometry";
 import { normalizeSeriesKey, serializeKeyPart } from "../animation/animation-identity";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
-import { resolveValue } from "./chart-value-resolver";
+import { resolveNumericValue, resolveValue } from "./chart-value-resolver";
 import { resolveCartesianTemporalValue } from "./cartesian-temporal-value-resolver";
 
 export interface ResolvedFinancialMark {
@@ -155,10 +155,10 @@ export class FinancialDataResolver {
 
         for (let i = 0; i < data.length; i++) {
             const row = data[i];
-            const rawOpen = resolveValue(row, openField, i);
-            const rawHigh = resolveValue(row, highField, i);
-            const rawLow = resolveValue(row, lowField, i);
-            const rawClose = resolveValue(row, closeField, i);
+            const rawOpen = resolveNumericValue(row, openField, i);
+            const rawHigh = resolveNumericValue(row, highField, i);
+            const rawLow = resolveNumericValue(row, lowField, i);
+            const rawClose = resolveNumericValue(row, closeField, i);
 
             if (
                 !isFiniteNumericValue(rawOpen) ||

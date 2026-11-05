@@ -1,6 +1,6 @@
 import type { ChartField } from "../../models/chart.models";
 import type { ChartValueFormatter } from "../../models/chart-polar.models";
-import { resolveData, resolveValue } from "./chart-value-resolver";
+import { resolveData, resolveNumericValue, resolveValue } from "./chart-value-resolver";
 import { deriveRadialDatumId, serializeRadialCategoryKey, serializeRadialExplicitKey } from "./radial-datum-identity";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
@@ -97,7 +97,7 @@ export class RadialBarDataProcessor {
 
         for (let i = 0; i < rawData.length; i++) {
             const row = rawData[i];
-            const rawVal = resolveValue(row, seriesField, i);
+            const rawVal = resolveNumericValue(row, seriesField, i);
 
             if (typeof rawVal === "number" && rawVal < 0) {
                 if (warnedDiagnosticSignatures) {

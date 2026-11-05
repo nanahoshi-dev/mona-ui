@@ -15,7 +15,7 @@ import type {
     ChartXAxisRegistration,
     ChartYAxisRegistration
 } from "../context/chart-registration-context";
-import { resolveData, resolveSeriesDisplayName, resolveValue } from "../data/chart-value-resolver";
+import { resolveData, resolveNumericValue, resolveSeriesDisplayName, resolveValue } from "../data/chart-value-resolver";
 import { resolveCartesianTemporalValue } from "../data/cartesian-temporal-value-resolver";
 import { ChartMarkKeyResolver } from "../animation/animation-identity";
 import { BandScale, CartesianScaleFactory, LinearScale, TimeScale, UtcScale } from "../scale/cartesian-scale-factory";
@@ -855,7 +855,7 @@ export class CartesianLayoutEngine {
                     for (let dIdx = 0; dIdx < sData.length; dIdx++) {
                         const datum = sData[dIdx];
                         const xVal = resolveValue(datum, sXField, dIdx);
-                        const yVal = resolveValue(datum, sField, dIdx);
+                        const yVal = resolveNumericValue(datum, sField, dIdx);
 
                         if (!isFiniteNumber(yVal)) {
                             continue;
@@ -1007,7 +1007,7 @@ export class CartesianLayoutEngine {
                 const visitDatum = (dIdx: number): void => {
                     const datum = sData[dIdx];
                     const xVal = resolveValue(datum, sXField, dIdx);
-                    const yVal = resolveValue(datum, sField, dIdx);
+                    const yVal = resolveNumericValue(datum, sField, dIdx);
 
                     let xPos = plotRect.x;
                     let isXValid = false;
@@ -1371,7 +1371,7 @@ export class CartesianLayoutEngine {
                     const visitAreaDatum = (dIdx: number): void => {
                         const datum = sData[dIdx];
                         const xVal = resolveValue(datum, sXField, dIdx);
-                        const yVal = resolveValue(datum, sField, dIdx);
+                        const yVal = resolveNumericValue(datum, sField, dIdx);
 
                         let xPos = plotRect.x;
                         let isXValid = false;

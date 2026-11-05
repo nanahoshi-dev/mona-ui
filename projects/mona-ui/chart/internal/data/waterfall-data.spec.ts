@@ -180,15 +180,15 @@ describe("WaterfallDataProcessor", () => {
         expect(res.maxY).toBe(1050);
     });
 
-    it("omits invalid change values (undefined, null, NaN, Infinity, numeric string) without creating zero change", () => {
+    it("omits invalid change values (undefined, null, NaN, Infinity, text) without creating zero change", () => {
         const data = [
             { category: "Valid 1", value: 100 },
             { category: "Invalid Undefined", value: undefined },
             { category: "Invalid Null", value: null },
             { category: "Invalid NaN", value: NaN },
             { category: "Invalid Infinity", value: Infinity },
-            { category: "Invalid String", value: "50" },
-            { category: "Valid 2", value: -20 }
+            { category: "Invalid String", value: "fifty" },
+            { category: "Valid 2", value: "-20" }
         ];
 
         const res = WaterfallDataProcessor.process({

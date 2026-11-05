@@ -1,6 +1,6 @@
 import type { ChartField, ChartValueFormatter } from "../../models/chart.models";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
-import { resolveValue } from "./chart-value-resolver";
+import { resolveNumericValue, resolveValue } from "./chart-value-resolver";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import { TreemapIdentity } from "./treemap-identity";
 
@@ -284,7 +284,7 @@ export class TreemapDataProcessor {
             let ownContribution = 0;
 
             if (children.length === 0 && !isCyclic) {
-                const val = resolveValue(datum, effectiveField, currentDataIndex);
+                const val = resolveNumericValue(datum, effectiveField, currentDataIndex);
                 if (typeof val === "number" && Number.isFinite(val)) {
                     rawValue = val;
                     if (val > 0) {

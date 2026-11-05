@@ -19,7 +19,7 @@ import {
     type ChartFunnelSeriesRegistration
 } from "../../internal/context/chart-registration-context";
 import { FunnelIdentity } from "../../internal/data/funnel-identity";
-import { resolveValue } from "../../internal/data/chart-value-resolver";
+import { resolveNumericValue, resolveValue } from "../../internal/data/chart-value-resolver";
 import type {
     ChartFunnelLabelContent,
     ChartFunnelOrientation,
@@ -214,7 +214,7 @@ export class FunnelSeriesComponent implements OnInit {
 
             for (let i = 0; i < arr.length; i++) {
                 const datum = arr[i];
-                const rawVal = resolveValue(datum, fieldF, i);
+                const rawVal = resolveNumericValue(datum, fieldF, i);
                 if (!FunnelIdentity.isValidFunnelValue(rawVal)) {
                     continue;
                 }

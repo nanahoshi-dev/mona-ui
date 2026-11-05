@@ -9,7 +9,7 @@ import type {
     ChartRangeBarSeriesRegistration
 } from "../context/chart-registration-context";
 import { resolveFiniteRangeValues } from "../data/chart-range-resolver";
-import { resolveData, resolveSeriesDisplayName, resolveValue } from "../data/chart-value-resolver";
+import { resolveData, resolveNumericValue, resolveSeriesDisplayName, resolveValue } from "../data/chart-value-resolver";
 import { CartesianScaleFactory, type BandScale } from "../scale/cartesian-scale-factory";
 import type { ChartSeriesScene } from "../scene/cartesian-scene";
 import type { CartesianXYChartScene } from "../scene/chart-scene";
@@ -305,7 +305,7 @@ export class CartesianHorizontalBarLayoutEngine {
                             xField ||
                             "value";
                         const yKey = resolveValue(datum, categoryField);
-                        const rawVal = resolveValue(datum, valueField);
+                        const rawVal = resolveNumericValue(datum, valueField);
 
                         if (
                             yKey === undefined ||

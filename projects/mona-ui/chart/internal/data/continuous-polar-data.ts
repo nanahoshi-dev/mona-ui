@@ -3,7 +3,7 @@ import type { ChartContinuousPolarSeriesRegistration } from "../context/chart-re
 import type { ChartAxisFormatter } from "../../models/chart-axis.models";
 import { canonicalPolarAngle, normalizeDegrees } from "../utils/angle-utils";
 import { isFiniteNumber } from "../utils/number-utils";
-import { resolveData, resolveValue } from "./chart-value-resolver";
+import { resolveData, resolveNumericValue, resolveValue } from "./chart-value-resolver";
 
 const warnedSignatures = new Set<string>();
 
@@ -81,7 +81,7 @@ export function prepareContinuousPolarData(
         for (let dataIndex = 0; dataIndex < rawData.length; dataIndex++) {
             const item = rawData[dataIndex];
             const rawAngleVal = resolveValue(item, angleField, dataIndex);
-            let rawNumVal = resolveValue(item, valueField, dataIndex);
+            let rawNumVal = resolveNumericValue(item, valueField, dataIndex);
 
             if (rawNumVal === undefined && isFiniteNumber(item)) {
                 rawNumVal = item;

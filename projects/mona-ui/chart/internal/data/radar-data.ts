@@ -2,7 +2,7 @@ import { isDevMode } from "@angular/core";
 import type { ChartRadarSeriesRegistration } from "../context/chart-registration-context";
 import type { ChartAxisFormatter } from "../../models/chart-axis.models";
 import { isFiniteNumber } from "../utils/number-utils";
-import { resolveData, resolveValue } from "./chart-value-resolver";
+import { resolveData, resolveNumericValue, resolveValue } from "./chart-value-resolver";
 
 const warnedSignatures = new Set<string>();
 
@@ -117,7 +117,7 @@ export function prepareRadarData(
             }
             const categoryKey = String(rawCat);
 
-            let val = resolveValue(item, valueField, dataIndex);
+            let val = resolveNumericValue(item, valueField, dataIndex);
             if (val === undefined && isFiniteNumber(item)) {
                 val = item;
             }

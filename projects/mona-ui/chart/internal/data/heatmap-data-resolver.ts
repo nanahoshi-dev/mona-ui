@@ -1,7 +1,7 @@
 import { isDevMode } from "@angular/core";
 import type { ChartField } from "../../models/chart.models";
 import type { ChartHeatmapCategory } from "../../models/chart-heatmap.models";
-import { resolveValue } from "./chart-value-resolver";
+import { resolveNumericValue, resolveValue } from "./chart-value-resolver";
 import { isFiniteNumber } from "../utils/number-utils";
 
 export type ChartCategoryKey = string;
@@ -184,7 +184,7 @@ export class HeatmapDataResolver {
                 continue;
             }
 
-            const rawVal = resolveValue(datum, field, i);
+            const rawVal = resolveNumericValue(datum, field, i);
             if (rawVal === undefined || rawVal === null || typeof rawVal !== "number" || !isFiniteNumber(rawVal)) {
                 continue;
             }

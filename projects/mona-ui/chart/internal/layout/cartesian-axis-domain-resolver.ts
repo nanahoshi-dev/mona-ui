@@ -1,7 +1,7 @@
 import type { ChartField } from "../../models/chart.models";
 import type { ChartSeriesRegistration } from "../context/chart-registration-context";
 import { calculateCategoryDomain } from "../data/chart-domain";
-import { resolveData, resolveValue } from "../data/chart-value-resolver";
+import { resolveData, resolveNumericValue, resolveValue } from "../data/chart-value-resolver";
 import type { ResolvedChartCartesianAxisType } from "../scale/chart-scale";
 import type { ResolvedCartesianAxisDescriptor } from "./cartesian-axis-registry-resolver";
 import type { CartesianStackAnalysis } from "../data/cartesian-stack-engine";
@@ -137,13 +137,13 @@ export class CartesianAxisDomainResolver {
                 if (isTemporalAxis) {
                     if (s.type === "bubble") {
                         const bReg = s as import("../context/chart-registration-context").ChartBubbleSeriesRegistration;
-                        const sz = resolveValue(item, bReg.sizeField?.(), i);
+                        const sz = resolveNumericValue(item, bReg.sizeField?.(), i);
                         if (typeof sz !== "number" || !Number.isFinite(sz) || sz <= 0) continue;
-                        const yv = resolveValue(item, bReg.field?.(), i);
+                        const yv = resolveNumericValue(item, bReg.field?.(), i);
                         if (typeof yv !== "number" || !Number.isFinite(yv)) continue;
                     } else if (s.type === "rangeBar" || s.type === "rangeArea") {
-                        const fv = resolveValue(item, (s as SeriesWithOptionalRangeAccessors).fromField?.(), i);
-                        const tv = resolveValue(item, (s as SeriesWithOptionalRangeAccessors).toField?.(), i);
+                        const fv = resolveNumericValue(item, (s as SeriesWithOptionalRangeAccessors).fromField?.(), i);
+                        const tv = resolveNumericValue(item, (s as SeriesWithOptionalRangeAccessors).toField?.(), i);
                         if (
                             typeof fv !== "number" ||
                             !Number.isFinite(fv) ||
@@ -154,10 +154,10 @@ export class CartesianAxisDomainResolver {
                     } else if (s.type === "candlestick" || s.type === "ohlc") {
                         const fReg =
                             s as import("../context/chart-registration-context").ChartFinancialSeriesRegistration;
-                        const ov = resolveValue(item, fReg.openField(), i);
-                        const cv = resolveValue(item, fReg.closeField(), i);
-                        const lv = resolveValue(item, fReg.lowField(), i);
-                        const hv = resolveValue(item, fReg.highField(), i);
+                        const ov = resolveNumericValue(item, fReg.openField(), i);
+                        const cv = resolveNumericValue(item, fReg.closeField(), i);
+                        const lv = resolveNumericValue(item, fReg.lowField(), i);
+                        const hv = resolveNumericValue(item, fReg.highField(), i);
                         if (
                             typeof ov !== "number" ||
                             !Number.isFinite(ov) ||
@@ -172,7 +172,7 @@ export class CartesianAxisDomainResolver {
                         )
                             continue;
                     } else if ("field" in s && typeof s.field === "function") {
-                        const yv = resolveValue(item, s.field(), i);
+                        const yv = resolveNumericValue(item, s.field(), i);
                         if (typeof yv !== "number" || !Number.isFinite(yv)) continue;
                     }
                 }
@@ -290,13 +290,13 @@ export class CartesianAxisDomainResolver {
                     // Verify paired value validity before expanding independent domain
                     if (s.type === "bubble") {
                         const bReg = s as import("../context/chart-registration-context").ChartBubbleSeriesRegistration;
-                        const sz = resolveValue(item, bReg.sizeField?.(), i);
+                        const sz = resolveNumericValue(item, bReg.sizeField?.(), i);
                         if (typeof sz !== "number" || !Number.isFinite(sz) || sz <= 0) continue;
-                        const yv = resolveValue(item, bReg.field?.(), i);
+                        const yv = resolveNumericValue(item, bReg.field?.(), i);
                         if (typeof yv !== "number" || !Number.isFinite(yv)) continue;
                     } else if (s.type === "rangeBar" || s.type === "rangeArea") {
-                        const fv = resolveValue(item, (s as SeriesWithOptionalRangeAccessors).fromField?.(), i);
-                        const tv = resolveValue(item, (s as SeriesWithOptionalRangeAccessors).toField?.(), i);
+                        const fv = resolveNumericValue(item, (s as SeriesWithOptionalRangeAccessors).fromField?.(), i);
+                        const tv = resolveNumericValue(item, (s as SeriesWithOptionalRangeAccessors).toField?.(), i);
                         if (
                             typeof fv !== "number" ||
                             !Number.isFinite(fv) ||
@@ -307,10 +307,10 @@ export class CartesianAxisDomainResolver {
                     } else if (s.type === "candlestick" || s.type === "ohlc") {
                         const fReg =
                             s as import("../context/chart-registration-context").ChartFinancialSeriesRegistration;
-                        const ov = resolveValue(item, fReg.openField(), i);
-                        const cv = resolveValue(item, fReg.closeField(), i);
-                        const lv = resolveValue(item, fReg.lowField(), i);
-                        const hv = resolveValue(item, fReg.highField(), i);
+                        const ov = resolveNumericValue(item, fReg.openField(), i);
+                        const cv = resolveNumericValue(item, fReg.closeField(), i);
+                        const lv = resolveNumericValue(item, fReg.lowField(), i);
+                        const hv = resolveNumericValue(item, fReg.highField(), i);
                         if (
                             typeof ov !== "number" ||
                             !Number.isFinite(ov) ||
@@ -325,7 +325,7 @@ export class CartesianAxisDomainResolver {
                         )
                             continue;
                     } else if ("field" in s && typeof s.field === "function") {
-                        const yv = resolveValue(item, s.field(), i);
+                        const yv = resolveNumericValue(item, s.field(), i);
                         if (typeof yv !== "number" || !Number.isFinite(yv)) continue;
                     }
 
@@ -343,12 +343,12 @@ export class CartesianAxisDomainResolver {
                     const f = bubbleReg.field?.();
                     for (let i = 0; i < data.length; i++) {
                         const item = data[i];
-                        const sizeVal = resolveValue(item, sizeField, i);
+                        const sizeVal = resolveNumericValue(item, sizeField, i);
                         const numSize = typeof sizeVal === "number" ? sizeVal : Number(sizeVal);
                         if (!Number.isFinite(numSize) || numSize <= 0) {
                             continue;
                         }
-                        const val = resolveValue(item, f, i);
+                        const val = resolveNumericValue(item, f, i);
                         if (typeof val === "number" && Number.isFinite(val)) {
                             rawValues.push(val);
                         }
@@ -363,8 +363,8 @@ export class CartesianAxisDomainResolver {
                     const tf = (s as SeriesWithOptionalRangeAccessors).toField!();
                     for (let i = 0; i < data.length; i++) {
                         const item = data[i];
-                        const fv = resolveValue(item, ff, i);
-                        const tv = resolveValue(item, tf, i);
+                        const fv = resolveNumericValue(item, ff, i);
+                        const tv = resolveNumericValue(item, tf, i);
                         if (
                             typeof fv === "number" &&
                             Number.isFinite(fv) &&
@@ -383,10 +383,10 @@ export class CartesianAxisDomainResolver {
                     const hf = finReg.highField();
                     for (let i = 0; i < data.length; i++) {
                         const item = data[i];
-                        const ov = resolveValue(item, of, i);
-                        const cv = resolveValue(item, cf, i);
-                        const lv = resolveValue(item, lf, i);
-                        const hv = resolveValue(item, hf, i);
+                        const ov = resolveNumericValue(item, of, i);
+                        const cv = resolveNumericValue(item, cf, i);
+                        const lv = resolveNumericValue(item, lf, i);
+                        const hv = resolveNumericValue(item, hf, i);
                         if (
                             typeof ov === "number" &&
                             Number.isFinite(ov) &&
@@ -406,7 +406,7 @@ export class CartesianAxisDomainResolver {
                     const f = s.field();
                     for (let i = 0; i < data.length; i++) {
                         const item = data[i];
-                        const val = resolveValue(item, f, i);
+                        const val = resolveNumericValue(item, f, i);
                         if (typeof val === "number" && Number.isFinite(val)) {
                             rawValues.push(val);
                         }

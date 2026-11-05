@@ -42,16 +42,16 @@ describe("FinancialDataResolver", () => {
         expect(result.marks[2].changePercentage).toBe(0);
     });
 
-    it("should reject numeric string OHLC values without coercing them", () => {
+    it("should read numeric string OHLC values as numbers and reject other text", () => {
         const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
         const signatures = new Set<string>();
 
         const data = [
-            { c: "110", h: 120, l: 95, o: 100 },
-            { c: 110, h: "120", l: 95, o: 100 },
-            { c: 110, h: 120, l: "95", o: 100 },
-            { c: 110, h: 120, l: 95, o: "100" },
-            { c: 105, h: 120, l: 90, o: 100 }
+            { c: "abc", h: 120, l: 95, o: 100 },
+            { c: 110, h: "", l: 95, o: 100 },
+            { c: 110, h: 120, l: "low", o: 100 },
+            { c: 110, h: 120, l: 95, o: "0x64" },
+            { c: "105", h: " 120 ", l: "90", o: "100" }
         ];
 
         const result = FinancialDataResolver.resolve({
