@@ -47,6 +47,48 @@ const DEFAULT_CHART_PALETTE_VARIABLES = [
     "--color-chart-5"
 ];
 
+const PROBED_COLOR_LIMIT = 512;
+/** Colors the span probe resolved, per document: a color string always computes to the same canvas color. */
+const PROBED_COLORS = new WeakMap<Document, Map<string, string>>();
+
+function probeColor(doc: Document, color: string): string | undefined {
+    let cache = PROBED_COLORS.get(doc);
+    const cached = cache?.get(color);
+    if (cached !== undefined) {
+        return cached;
+    }
+    const testEl = doc.createElement("span");
+    testEl.style.display = "none";
+    testEl.setAttribute("aria-hidden", "true");
+    testEl.style.color = color;
+    if (!testEl.style.color) {
+        return undefined;
+    }
+    doc.body.appendChild(testEl);
+    const computed = (doc.defaultView ?? window).getComputedStyle(testEl).color;
+    testEl.remove();
+    const usable =
+        computed &&
+        (computed.startsWith("rgb(") ||
+            computed.startsWith("rgba(") ||
+            computed.startsWith("#") ||
+            computed.startsWith("hsl(") ||
+            computed.startsWith("hsla("))
+            ? computed
+            : undefined;
+    if (usable) {
+        if (!cache) {
+            cache = new Map();
+            PROBED_COLORS.set(doc, cache);
+        }
+        if (cache.size >= PROBED_COLOR_LIMIT) {
+            cache.clear();
+        }
+        cache.set(color, usable);
+    }
+    return usable;
+}
+
 export function toCanvasColor(colorStr: string, documentRef?: Document | null): string {
     if (!colorStr) {
         return "";
@@ -76,24 +118,9 @@ export function toCanvasColor(colorStr: string, documentRef?: Document | null): 
     const doc = documentRef ?? (typeof document !== "undefined" ? document : null);
     if (doc && doc.body) {
         try {
-            const testEl = doc.createElement("span");
-            testEl.style.display = "none";
-            testEl.setAttribute("aria-hidden", "true");
-            testEl.style.color = trimmed;
-            if (testEl.style.color) {
-                doc.body.appendChild(testEl);
-                const computed = (doc.defaultView ?? window).getComputedStyle(testEl).color;
-                testEl.remove();
-                if (
-                    computed &&
-                    (computed.startsWith("rgb(") ||
-                        computed.startsWith("rgba(") ||
-                        computed.startsWith("#") ||
-                        computed.startsWith("hsl(") ||
-                        computed.startsWith("hsla("))
-                ) {
-                    return computed;
-                }
+            const probed = probeColor(doc, trimmed);
+            if (probed) {
+                return probed;
             }
         } catch {
             // Fall through to culori
@@ -115,9 +142,14 @@ export function toCanvasColor(colorStr: string, documentRef?: Document | null): 
     return "";
 }
 
+/** Stands in for "no target element" as a cache key. */
+const NO_ELEMENT = {};
+
 export class ChartStyleResolver {
     readonly #rootElement: HTMLElement | null;
     readonly #styleSnapshot: ReadonlyMap<string, string> | null;
+    #registrationStyles = new WeakMap<object, Map<string, unknown>>();
+    #variables = new WeakMap<object, Map<string, string | number | undefined>>();
 
     public constructor(
         rootElement: HTMLElement | null = null,
@@ -194,6 +226,15 @@ export class ChartStyleResolver {
         return snapshot;
     }
 
+    /**
+     * Forgets the styles read so far. The chart calls this before every layout, so pointer-driven repaints reuse the
+     * styles of the last layout instead of reading computed styles again on each move.
+     */
+    public clearCache(): void {
+        this.#registrationStyles = new WeakMap();
+        this.#variables = new WeakMap();
+    }
+
     public createSnapshotResolver(): ChartStyleResolver {
         const snapshot = this.#styleSnapshot ?? ChartStyleResolver.captureStyleSnapshot(this.#rootElement);
         return new ChartStyleResolver(null, snapshot);
@@ -218,6 +259,17 @@ export class ChartStyleResolver {
     }
 
     public resolveAnnotationStyle(registration: ChartAnnotationRegistration): {
+        readonly color: string;
+        readonly connectorWidth: number;
+        readonly markerRadius: number;
+        readonly markerStrokeWidth: number;
+    } {
+        return this.#cachedRegistrationStyle("resolveAnnotationStyle", registration ?? null, () =>
+            this.#resolveAnnotationStyleUncached(registration)
+        );
+    }
+
+    #resolveAnnotationStyleUncached(registration: ChartAnnotationRegistration): {
         readonly color: string;
         readonly connectorWidth: number;
         readonly markerRadius: number;
@@ -261,6 +313,18 @@ export class ChartStyleResolver {
     }
 
     public resolveBrushStyle(registration?: ChartBrushRegistration | null): {
+        readonly borderColor: string;
+        readonly borderWidth: number;
+        readonly fillColor: string;
+        readonly fillOpacity: number;
+        readonly lineStyle: ChartBrushLineStyle;
+    } {
+        return this.#cachedRegistrationStyle("resolveBrushStyle", registration ?? null, () =>
+            this.#resolveBrushStyleUncached(registration)
+        );
+    }
+
+    #resolveBrushStyleUncached(registration?: ChartBrushRegistration | null): {
         readonly borderColor: string;
         readonly borderWidth: number;
         readonly fillColor: string;
@@ -318,6 +382,16 @@ export class ChartStyleResolver {
         readonly opacity: number;
         readonly width: number;
     } {
+        return this.#cachedRegistrationStyle("resolveCrosshairStyle", registration ?? null, () =>
+            this.#resolveCrosshairStyleUncached(registration)
+        );
+    }
+
+    #resolveCrosshairStyleUncached(registration: ChartCrosshairRegistration): {
+        readonly color: string;
+        readonly opacity: number;
+        readonly width: number;
+    } {
         const el = registration.element?.nativeElement;
         const explicitColor = registration.color();
         const explicitWidth = registration.lineWidth();
@@ -357,6 +431,12 @@ export class ChartStyleResolver {
         if (!varNameOrColor) {
             return "";
         }
+        return this.#cachedVariable(`c:${varNameOrColor}`, targetElement, () =>
+            this.#resolveCssVariableUncached(varNameOrColor, targetElement)
+        ) as string;
+    }
+
+    #resolveCssVariableUncached(varNameOrColor: string, targetElement?: HTMLElement | null): string {
         const trimmed = varNameOrColor.trim();
         const isVariable = trimmed.startsWith("var(") || trimmed.startsWith("--");
         if (!isVariable) {
@@ -458,6 +538,15 @@ export class ChartStyleResolver {
     }
 
     public resolveDataLabelStyle(): {
+        readonly color: string;
+        readonly font: string;
+        readonly haloColor: string;
+        readonly haloWidth: number;
+    } {
+        return this.#cachedRegistrationStyle("resolveDataLabelStyle", null, () => this.#resolveDataLabelStyleUncached());
+    }
+
+    #resolveDataLabelStyleUncached(): {
         readonly color: string;
         readonly font: string;
         readonly haloColor: string;
@@ -1093,6 +1182,12 @@ export class ChartStyleResolver {
     }
 
     public resolveNumericCssVariable(varName: string, targetElement?: HTMLElement | null): number | undefined {
+        return this.#cachedVariable(`n:${varName}`, targetElement, () =>
+            this.#resolveNumericCssVariableUncached(varName, targetElement)
+        ) as number | undefined;
+    }
+
+    #resolveNumericCssVariableUncached(varName: string, targetElement?: HTMLElement | null): number | undefined {
         if (typeof window === "undefined") {
             return undefined;
         }
@@ -1367,6 +1462,17 @@ export class ChartStyleResolver {
         readonly fillColor: string;
         readonly fillOpacity: number;
     } {
+        return this.#cachedRegistrationStyle("resolveReferenceBandStyle", registration ?? null, () =>
+            this.#resolveReferenceBandStyleUncached(registration)
+        );
+    }
+
+    #resolveReferenceBandStyleUncached(registration: ChartReferenceBandRegistration): {
+        readonly borderColor?: string;
+        readonly borderWidth: number;
+        readonly fillColor: string;
+        readonly fillOpacity: number;
+    } {
         const el = registration.element?.nativeElement;
         const explicitFill = registration.fillColor();
         const explicitFillOpacity = registration.fillOpacity();
@@ -1416,6 +1522,16 @@ export class ChartStyleResolver {
         readonly opacity: number;
         readonly width: number;
     } {
+        return this.#cachedRegistrationStyle("resolveReferenceLineStyle", registration ?? null, () =>
+            this.#resolveReferenceLineStyleUncached(registration)
+        );
+    }
+
+    #resolveReferenceLineStyleUncached(registration: ChartReferenceLineRegistration): {
+        readonly color: string;
+        readonly opacity: number;
+        readonly width: number;
+    } {
         const el = registration.element?.nativeElement;
         const explicitColor = registration.color();
         const explicitWidth = registration.width();
@@ -1451,6 +1567,16 @@ export class ChartStyleResolver {
     }
 
     public resolveSelectionStyle(registration?: ChartSelectionRegistration | null): {
+        readonly color: string;
+        readonly fillOpacity: number;
+        readonly strokeWidth: number;
+    } {
+        return this.#cachedRegistrationStyle("resolveSelectionStyle", registration ?? null, () =>
+            this.#resolveSelectionStyleUncached(registration)
+        );
+    }
+
+    #resolveSelectionStyleUncached(registration?: ChartSelectionRegistration | null): {
         readonly color: string;
         readonly fillOpacity: number;
         readonly strokeWidth: number;
@@ -1939,5 +2065,39 @@ export class ChartStyleResolver {
             subtotalColor,
             totalColor
         };
+    }
+
+    #cachedRegistrationStyle<T>(method: string, registration: object | null, resolve: () => T): T {
+        const key = registration ?? NO_ELEMENT;
+        let styles = this.#registrationStyles.get(key);
+        if (!styles) {
+            styles = new Map();
+            this.#registrationStyles.set(key, styles);
+        }
+        if (styles.has(method)) {
+            return styles.get(method) as T;
+        }
+        const style = resolve();
+        styles.set(method, style);
+        return style;
+    }
+
+    #cachedVariable(
+        key: string,
+        targetElement: HTMLElement | null | undefined,
+        resolve: () => string | number | undefined
+    ): string | number | undefined {
+        const owner = targetElement ?? NO_ELEMENT;
+        let values = this.#variables.get(owner);
+        if (!values) {
+            values = new Map();
+            this.#variables.set(owner, values);
+        }
+        if (values.has(key)) {
+            return values.get(key);
+        }
+        const value = resolve();
+        values.set(key, value);
+        return value;
     }
 }

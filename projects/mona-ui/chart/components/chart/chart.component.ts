@@ -1,4 +1,4 @@
-import { NgTemplateOutlet } from "@angular/common";
+import { isPlatformBrowser, NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
     AfterContentChecked,
@@ -12,6 +12,7 @@ import {
     inject,
     input,
     output,
+    PLATFORM_ID,
     Signal,
     signal,
     untracked,
@@ -310,6 +311,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     readonly #hasInitializedDefaultViewport = signal(false);
     readonly #internalSelectedMarkIds = signal<readonly string[]>([]);
     readonly #isAnimating = signal(false);
+    /** On the server the chart renders its empty host: no layout, scheduling, observers or measurement. */
+    readonly #isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
     readonly #isExitingData = signal(false);
     readonly #isStructuralAnimation = signal(false);
     readonly #labelMeasurements = new Map<string, ChartLabelMeasurement>();
@@ -362,6 +365,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #currentHeight: number = 300;
     #currentWidth: number = 500;
     #dataLabelResizeObserver: ResizeObserver | null = null;
+    #devicePixelRatioListener: (() => void) | null = null;
+    #devicePixelRatioQuery: MediaQueryList | null = null;
     #gestureController: ChartViewportGestureController | null = null;
     #hasCommittedVisualScene: boolean = false;
     #hasEmittedBrushStart = false;
@@ -402,6 +407,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #suppressNextCanvasClick: boolean = false;
     #synchronizationController: ChartSynchronizationController | null = null;
     #themeObserver: MutationObserver | null = null;
+    #themeSignature = "";
     protected readonly messages = this.#i18n.componentMessages("chart", CHART_DEFAULT_MESSAGES);
     protected readonly activeAccessibilityText = signal<string>("");
     protected readonly animationDurationCss = computed(() => `${this.normalizedAnimationOptions().duration}ms`);
@@ -943,6 +949,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         this.#destroyRef.onDestroy(() => {
             this.#isDestroyed = true;
+            this.#canvasContext = null;
+            this.#unwatchDevicePixelRatio();
             releaseCartesianLayoutRuntime(this.#cartesianLayoutRuntime, "destroy");
             this.#cartesianLayoutRuntime = null;
             this.#synchronizationController?.destroy();
@@ -1305,6 +1313,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             const svg = this.svgElement()?.nativeElement ?? null;
             this.#setupRenderBackend(mode, canvas, svg);
             this.#canvasReady = true;
+            this.#watchDevicePixelRatio();
             if (!this.scene()) {
                 this.#renderScheduler.flushWithDefault(ChartInvalidationReason.Data | ChartInvalidationReason.Size);
             } else if (this.#currentWidth !== oldWidth || this.#currentHeight !== oldHeight) {
@@ -1878,6 +1887,13 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         const plotEl = this.#getPlotElement();
 
+        // recomputeScene() can run this before the first render; the second call replaces the observers.
+        this.#resizeObserver?.disconnect();
+        this.#resizeObserver = null;
+        this.#resizeObserverTarget = null;
+        this.#themeObserver?.disconnect();
+        this.#themeObserver = null;
+
         if (typeof ResizeObserver !== "undefined") {
             this.#resizeObserver = new ResizeObserver(entries => {
                 this.#syncResizeObserverTarget();
@@ -1892,7 +1908,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         }
 
         if (typeof MutationObserver !== "undefined") {
+            // A class or style change on <html> or <body> (a theme switch, or a dialog's scroll block) only
+            // restyles the chart when the styles it reads changed.
+            this.#themeSignature = this.#captureThemeSignature();
             this.#themeObserver = new MutationObserver(() => {
+                const signature = this.#captureThemeSignature();
+                if (signature === this.#themeSignature) {
+                    return;
+                }
+                this.#themeSignature = signature;
                 this.styleRevision.update(v => v + 1);
                 this.invalidate(ChartInvalidationReason.Style);
             });
@@ -1935,6 +1959,16 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #notifyCommittedViewport(notification: ViewportCommitNotification): void {
         if (this.#isDestroyed) return;
         this.#synchronizationController?.onCommittedViewportChange(notification);
+    }
+
+    /** The styles the chart reads from its host, as one string to compare between mutations. */
+    #captureThemeSignature(): string {
+        const snapshot = ChartStyleResolver.captureStyleSnapshot(this.#elementRef.nativeElement);
+        let signature = "";
+        for (const [name, value] of snapshot) {
+            signature += `${name}:${value};`;
+        }
+        return signature;
     }
 
     #guardCallbacks(registration: object, owner: () => string): void {
@@ -2039,6 +2073,12 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
      * reported, and the chart keeps the scene it had.
      */
     #recomputeAndPaint(reason: ChartInvalidationReason): void {
+        if (this.#isDestroyed || !this.#isBrowser) {
+            return;
+        }
+        if (reason !== ChartInvalidationReason.Interaction) {
+            this.#styleResolver.clearCache();
+        }
         try {
             this.#recomputeAndPaintUnguarded(reason);
         } catch (error) {
@@ -2315,7 +2355,12 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const mustCommitSizeImmediately =
             sizeChanged && hasInvalidationReason(reason, ChartInvalidationReason.Size) && previousScene !== null;
 
-        if (isAnimationDisabled || mustCommitSizeImmediately) {
+        // A restyle (a theme switch) repaints in place; only data, layout and visibility changes animate.
+        const isStyleOnly =
+            hasInvalidationReason(reason, ChartInvalidationReason.Style) &&
+            (reason & ~(ChartInvalidationReason.Style | ChartInvalidationReason.Interaction)) === 0;
+
+        if (isAnimationDisabled || mustCommitSizeImmediately || isStyleOnly) {
             this.#animationController.cancel("keep-current");
             this.#renderScene = newScene;
             this.#hasCommittedVisualScene = true;
@@ -3102,6 +3147,37 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         return this.#toPointEvent(target);
     }
 
+    /**
+     * Keeps the canvas sharp when the device pixel ratio changes (browser zoom, or a move to another monitor), which
+     * no resize reports: a resolution query for the current ratio fires once it stops matching, and is re-armed.
+     */
+    #watchDevicePixelRatio(): void {
+        this.#unwatchDevicePixelRatio();
+        if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+            return;
+        }
+        const query = window.matchMedia(`(resolution: ${window.devicePixelRatio || 1}dppx)`);
+        const listener = (): void => {
+            if (this.#isDestroyed) {
+                return;
+            }
+            this.#updateCanvasBackingStore(this.#currentWidth, this.#currentHeight);
+            this.#paint();
+            this.#watchDevicePixelRatio();
+        };
+        query.addEventListener("change", listener);
+        this.#devicePixelRatioQuery = query;
+        this.#devicePixelRatioListener = listener;
+    }
+
+    #unwatchDevicePixelRatio(): void {
+        if (this.#devicePixelRatioQuery && this.#devicePixelRatioListener) {
+            this.#devicePixelRatioQuery.removeEventListener("change", this.#devicePixelRatioListener);
+        }
+        this.#devicePixelRatioQuery = null;
+        this.#devicePixelRatioListener = null;
+    }
+
     #updateCanvasBackingStore(width: number, height: number): void {
         const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
         if (this.#renderBackend) {
@@ -3335,16 +3411,28 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     public invalidate(reason: ChartInvalidationReason = ChartInvalidationReason.Layout): void {
+        if (this.#isDestroyed || !this.#isBrowser) {
+            return;
+        }
+        // An input changed (a series color, the crosshair style): read styles afresh on the next paint.
+        this.#styleResolver.clearCache();
         this.#renderScheduler.schedule(reason);
     }
 
     public ngAfterContentChecked(): void {
+        if (!this.#isBrowser) {
+            return;
+        }
         this.#syncResizeObserverTarget();
+        // Once rendered, a chart waiting for a size (hidden in a tab or a closed panel) is measured by its
+        // ResizeObserver, not by forcing a layout on every change-detection pass.
+        const observedBySize = this.#canvasReady && this.#resizeObserver !== null;
         if (
-            !this.#canvasReady ||
-            this.#initialMeasurementPending ||
-            this.#currentWidth <= 0 ||
-            this.#currentHeight <= 0
+            !observedBySize &&
+            (!this.#canvasReady ||
+                this.#initialMeasurementPending ||
+                this.#currentWidth <= 0 ||
+                this.#currentHeight <= 0)
         ) {
             const measurement = this.#measurePlotElement(this.#getPlotElement());
             if (measurement) {
@@ -4048,6 +4136,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     public recomputeScene(reason: ChartInvalidationReason = ChartInvalidationReason.Layout): void {
+        if (this.#isDestroyed || !this.#isBrowser) {
+            return;
+        }
         this.#renderScheduler.cancel();
         if (!this.#canvasReady) {
             const surfaceRef = this.#getSurfaceElement();
