@@ -61,7 +61,7 @@ export class PopoverDemoComponent extends AbstractDemoComponent<PopoverComponent
         inputs: deriveInputConfig<PopoverComponent>(this.metadata(), {
             position: {
                 type: "dropdown",
-                value: ["top", "bottom", "left", "right"],
+                value: ["top", "bottom", "left", "right", "start", "end"],
                 defaultValue: "top"
             },
             rounded: {
@@ -71,6 +71,10 @@ export class PopoverDemoComponent extends AbstractDemoComponent<PopoverComponent
             },
             target: {
                 type: "object"
+            },
+            title: {
+                type: "string",
+                value: "Arashiyama, Japan"
             },
             trigger: {
                 type: "dropdown",
@@ -99,6 +103,10 @@ export class PopoverDemoComponent extends AbstractDemoComponent<PopoverComponent
         @let featureData = features();
         <button monaButton #anchor>Popover Anchor</button>
         <mona-popover
+            [ariaLabel]="ariaLabel()"
+            [autoFocus]="autoFocus()"
+            [closeOnEscape]="closeOnEscape()"
+            [closeOnOutsideClick]="closeOnOutsideClick()"
             [displayArrow]="displayArrow()"
             [position]="position()"
             [rounded]="rounded()"
@@ -147,6 +155,10 @@ export class PopoverDemoComponent extends AbstractDemoComponent<PopoverComponent
 class PopoverWrapperComponent implements ComponentInputsAsSignal<PopoverComponent> {
     readonly #document = inject(DOCUMENT);
     protected readonly features = inject(FeatureConfigHandler).data;
+    public readonly ariaLabel = input<ReturnType<PopoverComponent["ariaLabel"]>>();
+    public readonly autoFocus = input<ReturnType<PopoverComponent["autoFocus"]>>();
+    public readonly closeOnEscape = input<ReturnType<PopoverComponent["closeOnEscape"]>>(true);
+    public readonly closeOnOutsideClick = input<ReturnType<PopoverComponent["closeOnOutsideClick"]>>(true);
     public readonly displayArrow = input<ReturnType<PopoverComponent["displayArrow"]>>(false);
     public readonly position = input<ReturnType<PopoverComponent["position"]>>("top");
     public readonly rounded = input<ReturnType<PopoverComponent["rounded"]>>("medium");

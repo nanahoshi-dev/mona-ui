@@ -23,7 +23,7 @@ export class TooltipDirectiveDemoComponent extends AbstractDemoComponent<Tooltip
             },
             position: {
                 type: "dropdown",
-                value: ["top", "bottom", "left", "right"],
+                value: ["top", "bottom", "left", "right", "start", "end"],
                 defaultValue: "top"
             },
             rounded: {

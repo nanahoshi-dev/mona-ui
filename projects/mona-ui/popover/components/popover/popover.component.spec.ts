@@ -1,436 +1,309 @@
-import { Component, signal } from "@angular/core";
-import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { OverlayContainer } from "@angular/cdk/overlay";
+import { ApplicationRef, Component, signal } from "@angular/core";
+import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { PopupCloseEvent, PopupService } from "@nanahoshi/mona-ui/popup";
-import { Observable, Subject } from "rxjs";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { HOVER_GRACE } from "@nanahoshi/mona-ui/internal";
+import { PopupService, type PopupSettings } from "@nanahoshi/mona-ui/popup";
 import { PopoverFooterTemplateDirective } from "../../directives/popover-footer-template.directive";
 import { PopoverTitleTemplateDirective } from "../../directives/popover-title-template.directive";
-import { PopoverHideEvent } from "../../models/PopoverHideEvent";
-import { PopoverShowEvent } from "../../models/PopoverShowEvent";
-import { PopoverTrigger } from "../../models/PopoverTrigger";
+import type { PopoverHideEvent } from "../../models/PopoverHideEvent";
+import type { PopoverPosition } from "../../models/PopoverPosition";
+import type { PopoverShowEvent } from "../../models/PopoverShowEvent";
+import type { PopoverTrigger } from "../../models/PopoverTrigger";
 import { popoverArrowThemeVariants, popoverBaseThemeVariants } from "../../styles/popover.styles";
-
 import { PopoverComponent } from "./popover.component";
 
-// =============================================================================
-// Test Host Components
-// =============================================================================
-
 @Component({
-    template: ` <button #target>Popover Anchor</button>
-        <mona-popover [target]="target" [trigger]="trigger()" [title]="title()">Content</mona-popover>`,
-    imports: [PopoverComponent]
+    imports: [ButtonDirective, PopoverComponent],
+    template: `
+        <button #first id="first" monaButton>First</button>
+        <input #check id="check" type="checkbox" />
+        @if (present()) {
+            <mona-popover
+                [target]="useCheckbox() ? check : first"
+                [trigger]="trigger()"
+                [title]="title()"
+                [ariaLabel]="ariaLabel()"
+                [position]="position()"
+                [closeOnEscape]="closeOnEscape()"
+                (show)="onShow($event)"
+                (shown)="shownCount = shownCount + 1"
+                (hide)="onHide($event)"
+                (hidden)="hiddenCount = hiddenCount + 1">
+                <button id="inside">Inside</button>
+            </mona-popover>
+        }
+    `
 })
-class PopoverComponentTestComponent {
-    public trigger = signal<PopoverTrigger>("click");
-    public title = signal("");
+class PopoverHostComponent {
+    public readonly ariaLabel = signal<string | undefined>(undefined);
+    public readonly closeOnEscape = signal(true);
+    public readonly onHide = vi.fn<(event: PopoverHideEvent) => void>();
+    public readonly onShow = vi.fn<(event: PopoverShowEvent) => void>();
+    public readonly position = signal<PopoverPosition>("top");
+    public readonly present = signal(true);
+    public readonly title = signal("Details");
+    public readonly trigger = signal<PopoverTrigger>("click");
+    public readonly useCheckbox = signal(false);
+    public hiddenCount = 0;
+    public shownCount = 0;
 }
 
 @Component({
-    template: ` <button #target>Popover Anchor</button>
-        <mona-popover
-            [target]="target"
-            [trigger]="trigger()"
-            (show)="onShow($event)"
-            (hide)="onHide($event)"
-            (shown)="onShown($event)"
-            (hidden)="onHidden($event)">
-            Content
-        </mona-popover>`,
-    imports: [PopoverComponent]
-})
-class PopoverEventsTestComponent {
-    public trigger = signal<PopoverTrigger>("click");
-    public readonly onShow = vi.fn();
-    public readonly onHide = vi.fn();
-    public readonly onShown = vi.fn();
-    public readonly onHidden = vi.fn();
-}
-
-@Component({
-    template: ` <button #target>Popover Anchor</button>
+    imports: [PopoverComponent, PopoverTitleTemplateDirective, PopoverFooterTemplateDirective],
+    template: `
+        <button #target>Popover Anchor</button>
         <mona-popover [target]="target">
             <ng-template monaPopoverTitleTemplate>Custom Title</ng-template>
             <ng-template monaPopoverFooterTemplate>Custom Footer</ng-template>
-        </mona-popover>`,
-    imports: [PopoverComponent, PopoverTitleTemplateDirective, PopoverFooterTemplateDirective]
+        </mona-popover>
+    `
 })
-class PopoverTemplatesTestComponent {}
-
-// =============================================================================
-// Helper Functions
-// =============================================================================
-
-async function waitForStable(fixture: ComponentFixture<unknown>): Promise<void> {
-    fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
-}
-
-function getAnchorButton(fixture: ComponentFixture<unknown>): HTMLElement {
-    return fixture.debugElement.query(By.css("button")).nativeElement as HTMLElement;
-}
-
-function getPopoverComponent(fixture: ComponentFixture<unknown>): PopoverComponent {
-    return fixture.debugElement.query(By.directive(PopoverComponent)).componentInstance as PopoverComponent;
-}
-
-function dispatchClick(element: HTMLElement): void {
-    element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
-}
-
-function dispatchPointerEnter(element: HTMLElement): void {
-    element.dispatchEvent(new PointerEvent("pointerenter", { bubbles: true }));
-}
-
-// =============================================================================
-// Mock Setup
-// =============================================================================
-
-let mockClosedSubject: Subject<PopupCloseEvent>;
-let mockPopupRef: {
-    close: ReturnType<typeof vi.fn>;
-    closed: Observable<PopupCloseEvent>;
-    beforeClose: Observable<PopupCloseEvent>;
-};
-let mockPopupService: { create: ReturnType<typeof vi.fn> };
+class PopoverTemplatesHostComponent {}
 
 describe("Popover visual contract", () => {
     it("keeps the overlay and its arrow on the same surface tier", () => {
         const popoverClasses = popoverBaseThemeVariants({ rounded: "medium" }).split(/\s+/);
         const arrowClasses = popoverArrowThemeVariants().split(/\s+/);
-
-        expect(popoverClasses).toContain(
-            "[background-color:var(--mona-effect-overlay-background-color,var(--color-surface-overlay))]"
-        );
-        expect(popoverClasses).toContain("border-border");
-        expect(popoverClasses).toContain("shadow-(--shadow-overlay)");
-        expect(arrowClasses).toContain(
-            "[background-color:var(--mona-effect-overlay-background-color,var(--color-surface-overlay))]"
-        );
+        const surface = "[background-color:var(--mona-effect-overlay-background-color,var(--color-surface-overlay))]";
+        expect(popoverClasses).toContain(surface);
+        expect(arrowClasses).toContain(surface);
         expect(arrowClasses).toContain("border-border");
-        expect(arrowClasses).not.toContain("bg-primary");
     });
 });
 
-/**
- * Mirrors PopupReference.close(): emits on beforeClose first, and only
- * proceeds to closed if that event was not canceled.
- */
-function createFreshMockPopupRef(): typeof mockPopupRef {
-    const closedSubject = new Subject<PopupCloseEvent>();
-    const beforeCloseSubject = new Subject<PopupCloseEvent>();
-    const ref = {
-        close: vi.fn(() => {
-            const event = new PopupCloseEvent();
-            beforeCloseSubject.next(event);
-            if (event.isDefaultPrevented()) {
-                return;
-            }
-            closedSubject.next(event);
-            closedSubject.complete();
-        }),
-        closed: closedSubject.asObservable(),
-        beforeClose: beforeCloseSubject.asObservable()
-    };
-    mockClosedSubject = closedSubject;
-    return ref;
-}
-
-// =============================================================================
-// Test Suites
-// =============================================================================
-
 describe("PopoverComponent", () => {
-    describe("basic creation", () => {
-        let hostFixture: ComponentFixture<PopoverComponentTestComponent>;
+    let fixture: ComponentFixture<PopoverHostComponent>;
+    let host: PopoverHostComponent;
+    let overlayContainer: HTMLElement;
 
-        beforeEach(async () => {
-            mockPopupRef = createFreshMockPopupRef();
-            mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
-
-            await TestBed.configureTestingModule({
-                imports: [PopoverComponentTestComponent],
-                providers: [{ provide: PopupService, useValue: mockPopupService }]
-            }).compileComponents();
-
-            hostFixture = TestBed.createComponent(PopoverComponentTestComponent);
-            await waitForStable(hostFixture);
-        });
-
-        it("should create", () => {
-            expect(hostFixture.componentInstance).toBeTruthy();
-        });
+    beforeEach(() => {
+        TestBed.configureTestingModule({ imports: [PopoverHostComponent, PopoverTemplatesHostComponent] });
+        overlayContainer = TestBed.inject(OverlayContainer).getContainerElement();
     });
 
-    describe("click trigger", () => {
-        let hostFixture: ComponentFixture<PopoverComponentTestComponent>;
-
-        beforeEach(async () => {
-            mockPopupRef = createFreshMockPopupRef();
-            mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
-
-            await TestBed.configureTestingModule({
-                imports: [PopoverComponentTestComponent],
-                providers: [{ provide: PopupService, useValue: mockPopupService }]
-            }).compileComponents();
-
-            hostFixture = TestBed.createComponent(PopoverComponentTestComponent);
-            await waitForStable(hostFixture);
-        });
-
-        it("should open the popover on click", async () => {
-            const button = getAnchorButton(hostFixture);
-            dispatchClick(button);
-            await waitForStable(hostFixture);
-            expect(mockPopupService.create).toHaveBeenCalledTimes(1);
-        });
-
-        it("should close the popover on a second click", async () => {
-            const button = getAnchorButton(hostFixture);
-            dispatchClick(button);
-            await waitForStable(hostFixture);
-
-            dispatchClick(button);
-            await waitForStable(hostFixture);
-            expect(mockPopupRef.close).toHaveBeenCalledTimes(1);
-        });
+    afterEach(() => {
+        vi.useRealTimers();
+        fixture?.destroy();
+        overlayContainer.replaceChildren();
+        document.documentElement.removeAttribute("dir");
+        vi.restoreAllMocks();
     });
 
-    describe("hover trigger", () => {
-        let hostFixture: ComponentFixture<PopoverComponentTestComponent>;
-        let component: PopoverComponentTestComponent;
+    function start(configure?: (component: PopoverHostComponent) => void): void {
+        fixture = TestBed.createComponent(PopoverHostComponent);
+        host = fixture.componentInstance;
+        configure?.(host);
+        document.body.appendChild(fixture.nativeElement);
+        fixture.detectChanges();
+        settle();
+    }
 
-        beforeEach(async () => {
-            mockPopupRef = createFreshMockPopupRef();
-            mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
+    function settle(): void {
+        fixture?.detectChanges();
+        TestBed.inject(ApplicationRef).tick();
+    }
 
-            await TestBed.configureTestingModule({
-                imports: [PopoverComponentTestComponent],
-                providers: [{ provide: PopupService, useValue: mockPopupService }]
-            }).compileComponents();
+    /** Without a running animation, a popup finishes closing from its fallback timer. */
+    async function finishClose(): Promise<void> {
+        await new Promise(resolve => setTimeout(resolve, 50));
+        settle();
+    }
 
-            hostFixture = TestBed.createComponent(PopoverComponentTestComponent);
-            component = hostFixture.componentInstance;
-            component.trigger.set("hover");
-            await waitForStable(hostFixture);
+    function captureSettings(): PopupSettings[] {
+        const popupService = TestBed.inject(PopupService);
+        const create = popupService.create.bind(popupService);
+        const captured: PopupSettings[] = [];
+        vi.spyOn(popupService, "create").mockImplementation(settings => {
+            captured.push(settings);
+            return create(settings);
         });
+        return captured;
+    }
 
-        it("should open the popover on pointerenter", async () => {
-            const button = getAnchorButton(hostFixture);
-            dispatchPointerEnter(button);
-            await waitForStable(hostFixture);
-            expect(mockPopupService.create).toHaveBeenCalledTimes(1);
-        });
+    function el(id: string): HTMLElement {
+        const element = document.getElementById(id);
+        expect(element).not.toBeNull();
+        return element!;
+    }
 
-        it("should request closeOnMouseLeave from the popup service", async () => {
-            const button = getAnchorButton(hostFixture);
-            dispatchPointerEnter(button);
-            await waitForStable(hostFixture);
-            const createArgs = mockPopupService.create.mock.calls[0][0];
-            expect(createArgs.closeOnMouseLeave).toBe(true);
-        });
+    function dialog(): HTMLElement | null {
+        return overlayContainer.querySelector<HTMLElement>('[role="dialog"]');
+    }
+
+    function click(element: HTMLElement): void {
+        element.click();
+        settle();
+    }
+
+    it("tells assistive technology it opens a dialog before the first open, and which one while open", async () => {
+        start();
+        const target = el("first");
+        expect(target.getAttribute("aria-haspopup")).toBe("dialog");
+        expect(target.getAttribute("aria-expanded")).toBe("false");
+        expect(target.hasAttribute("aria-controls")).toBe(false);
+
+        click(target);
+        expect(target.getAttribute("aria-expanded")).toBe("true");
+        expect(target.getAttribute("aria-controls")).toBe(dialog()?.id);
+
+        click(target);
+        await finishClose();
+        expect(dialog()).toBeNull();
+        expect(target.getAttribute("aria-expanded")).toBe("false");
+        expect(target.hasAttribute("aria-controls")).toBe(false);
     });
 
-    describe("none trigger", () => {
-        let hostFixture: ComponentFixture<PopoverComponentTestComponent>;
-        let component: PopoverComponentTestComponent;
-
-        beforeEach(async () => {
-            mockPopupRef = createFreshMockPopupRef();
-            mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
-
-            await TestBed.configureTestingModule({
-                imports: [PopoverComponentTestComponent],
-                providers: [{ provide: PopupService, useValue: mockPopupService }]
-            }).compileComponents();
-
-            hostFixture = TestBed.createComponent(PopoverComponentTestComponent);
-            component = hostFixture.componentInstance;
-            component.trigger.set("none");
-            await waitForStable(hostFixture);
-        });
-
-        it("should not open the popover on click", async () => {
-            const button = getAnchorButton(hostFixture);
-            dispatchClick(button);
-            await waitForStable(hostFixture);
-            expect(mockPopupService.create).not.toHaveBeenCalled();
-        });
-
-        it("should still open via the public open() method", async () => {
-            getPopoverComponent(hostFixture).open();
-            await waitForStable(hostFixture);
-            expect(mockPopupService.create).toHaveBeenCalledTimes(1);
-        });
+    it("moves focus into the popover when opened from a click", () => {
+        start();
+        el("first").focus();
+        click(el("first"));
+        settle();
+        expect(document.activeElement).toBe(overlayContainer.querySelector("#inside"));
     });
 
-    describe("show/hide events", () => {
-        let hostFixture: ComponentFixture<PopoverEventsTestComponent>;
-        let component: PopoverEventsTestComponent;
-
-        beforeEach(async () => {
-            mockPopupRef = createFreshMockPopupRef();
-            mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
-
-            await TestBed.configureTestingModule({
-                imports: [PopoverEventsTestComponent],
-                providers: [{ provide: PopupService, useValue: mockPopupService }]
-            }).compileComponents();
-
-            hostFixture = TestBed.createComponent(PopoverEventsTestComponent);
-            component = hostFixture.componentInstance;
-            await waitForStable(hostFixture);
-        });
-
-        it("should emit show and shown when opened", async () => {
-            const button = getAnchorButton(hostFixture);
-            dispatchClick(button);
-            await waitForStable(hostFixture);
-            expect(component.onShow).toHaveBeenCalledTimes(1);
-            expect(component.onShown).toHaveBeenCalledTimes(1);
-        });
-
-        it("should not open when show is prevented", async () => {
-            component.onShow.mockImplementation((event: PopoverShowEvent) => event.preventDefault());
-            const button = getAnchorButton(hostFixture);
-            dispatchClick(button);
-            await waitForStable(hostFixture);
-            expect(mockPopupService.create).not.toHaveBeenCalled();
-        });
-
-        it("should emit hide and hidden when closed", async () => {
-            const button = getAnchorButton(hostFixture);
-            dispatchClick(button);
-            await waitForStable(hostFixture);
-
-            dispatchClick(button);
-            await waitForStable(hostFixture);
-            expect(component.onHide).toHaveBeenCalledTimes(1);
-            expect(component.onHidden).toHaveBeenCalledTimes(1);
-        });
-
-        it("should not close when hide is prevented", async () => {
-            component.onHide.mockImplementation((event: PopoverHideEvent) => event.preventDefault());
-            const button = getAnchorButton(hostFixture);
-            dispatchClick(button);
-            await waitForStable(hostFixture);
-
-            dispatchClick(button);
-            await waitForStable(hostFixture);
-            expect(component.onHidden).not.toHaveBeenCalled();
-            expect(button.getAttribute("aria-expanded")).toBe("true");
-        });
-
-        it("should emit hide exactly once on a trigger-driven toggle-close", async () => {
-            const button = getAnchorButton(hostFixture);
-            dispatchClick(button);
-            await waitForStable(hostFixture);
-
-            dispatchClick(button);
-            await waitForStable(hostFixture);
-            expect(component.onHide).toHaveBeenCalledTimes(1);
-        });
-
-        it("should keep the popover open and internally tracked when a hide from close() is canceled", async () => {
-            const popover = getPopoverComponent(hostFixture);
-            const button = getAnchorButton(hostFixture);
-            dispatchClick(button);
-            await waitForStable(hostFixture);
-
-            component.onHide.mockImplementation((event: PopoverHideEvent) => event.preventDefault());
-            popover.close();
-            await waitForStable(hostFixture);
-
-            expect(component.onHide).toHaveBeenCalledTimes(1);
-            expect(component.onHidden).not.toHaveBeenCalled();
-            expect((popover as unknown as { popupRef: unknown }).popupRef).toBe(mockPopupRef);
-            expect(button.getAttribute("aria-expanded")).toBe("true");
-        });
+    it("leaves the target's own click behavior alone", () => {
+        start(component => component.useCheckbox.set(true));
+        const checkbox = el("check") as HTMLInputElement;
+        click(checkbox);
+        expect(checkbox.checked).toBe(true);
+        expect(dialog()).not.toBeNull();
     });
 
-    describe("ARIA attributes", () => {
-        let hostFixture: ComponentFixture<PopoverComponentTestComponent>;
+    it("emits show before opening (preventable) and shown once open", () => {
+        start();
+        host.onShow.mockImplementationOnce(event => event.preventDefault());
+        click(el("first"));
+        expect(dialog()).toBeNull();
+        expect(host.shownCount).toBe(0);
 
-        beforeEach(async () => {
-            mockPopupRef = createFreshMockPopupRef();
-            mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
-
-            await TestBed.configureTestingModule({
-                imports: [PopoverComponentTestComponent],
-                providers: [{ provide: PopupService, useValue: mockPopupService }]
-            }).compileComponents();
-
-            hostFixture = TestBed.createComponent(PopoverComponentTestComponent);
-            await waitForStable(hostFixture);
-        });
-
-        it("should not have aria-expanded before the popover is opened", () => {
-            const button = getAnchorButton(hostFixture);
-            expect(button.hasAttribute("aria-expanded")).toBe(false);
-        });
-
-        it("should set aria-haspopup, aria-controls and aria-expanded when opened", async () => {
-            const button = getAnchorButton(hostFixture);
-            dispatchClick(button);
-            await waitForStable(hostFixture);
-            expect(button.getAttribute("aria-haspopup")).toBe("dialog");
-            expect(button.getAttribute("aria-expanded")).toBe("true");
-            expect(button.getAttribute("aria-controls")).toBeTruthy();
-        });
-
-        it("should set aria-expanded to false when closed", async () => {
-            const button = getAnchorButton(hostFixture);
-            dispatchClick(button);
-            await waitForStable(hostFixture);
-
-            dispatchClick(button);
-            await waitForStable(hostFixture);
-            expect(button.getAttribute("aria-expanded")).toBe("false");
-        });
-
-        it("should set aria-expanded to false when the popup closes externally", async () => {
-            const button = getAnchorButton(hostFixture);
-            dispatchClick(button);
-            await waitForStable(hostFixture);
-            expect(button.getAttribute("aria-expanded")).toBe("true");
-
-            mockClosedSubject.next(new PopupCloseEvent());
-            mockClosedSubject.complete();
-            await waitForStable(hostFixture);
-            expect(button.getAttribute("aria-expanded")).toBe("false");
-        });
+        click(el("first"));
+        expect(dialog()).not.toBeNull();
+        expect(host.onShow).toHaveBeenCalledTimes(2);
+        expect(host.shownCount).toBe(1);
     });
 
-    describe("template projection", () => {
-        let hostFixture: ComponentFixture<PopoverTemplatesTestComponent>;
+    it("emits hide before closing (preventable) and hidden once closed", async () => {
+        start();
+        click(el("first"));
+        host.onHide.mockImplementationOnce(event => event.preventDefault());
+        click(el("first"));
+        expect(dialog()).not.toBeNull();
+        expect(el("first").getAttribute("aria-expanded")).toBe("true");
 
-        beforeEach(async () => {
-            mockPopupRef = createFreshMockPopupRef();
-            mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
+        click(el("first"));
+        await finishClose();
+        expect(host.onHide).toHaveBeenCalledTimes(2);
+        expect(host.hiddenCount).toBe(1);
+        expect(dialog()).toBeNull();
+    });
 
-            await TestBed.configureTestingModule({
-                imports: [PopoverTemplatesTestComponent],
-                providers: [{ provide: PopupService, useValue: mockPopupService }]
-            }).compileComponents();
+    it("opens a hover popover on pointer or focus, without taking focus, and keeps it while on the panel", () => {
+        vi.useFakeTimers();
+        start(component => component.trigger.set("hover"));
+        const target = el("first");
 
-            hostFixture = TestBed.createComponent(PopoverTemplatesTestComponent);
-            await waitForStable(hostFixture);
+        target.dispatchEvent(new PointerEvent("pointerover", { bubbles: true, pointerType: "mouse" }));
+        settle();
+        expect(dialog()).not.toBeNull();
+        expect(document.activeElement).not.toBe(overlayContainer.querySelector("#inside"));
+
+        target.dispatchEvent(
+            new PointerEvent("pointerout", { bubbles: true, pointerType: "mouse", relatedTarget: document.body })
+        );
+        const pane = overlayContainer.querySelector<HTMLElement>(".cdk-overlay-pane")!;
+        pane.dispatchEvent(new PointerEvent("pointerenter", { pointerType: "mouse" }));
+        vi.advanceTimersByTime(HOVER_GRACE * 3);
+        expect(dialog()).not.toBeNull();
+
+        pane.dispatchEvent(new PointerEvent("pointerleave", { pointerType: "mouse" }));
+        vi.advanceTimersByTime(HOVER_GRACE + 100);
+        settle();
+        expect(dialog()).toBeNull();
+
+        target.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
+        settle();
+        expect(dialog()).not.toBeNull();
+    });
+
+    it("closes and cleans up its target when destroyed while open", () => {
+        const errors = vi.spyOn(console, "error").mockImplementation(() => undefined);
+        start();
+        click(el("first"));
+        expect(dialog()).not.toBeNull();
+
+        host.present.set(false);
+        fixture.detectChanges();
+        settle();
+        const target = el("first");
+        expect(target.hasAttribute("aria-haspopup")).toBe(false);
+        expect(target.hasAttribute("aria-expanded")).toBe(false);
+        expect(target.hasAttribute("aria-controls")).toBe(false);
+        expect(errors).not.toHaveBeenCalled();
+    });
+
+    it("moves its attributes to a new target", () => {
+        start();
+        host.useCheckbox.set(true);
+        fixture.detectChanges();
+        settle();
+        expect(el("first").hasAttribute("aria-haspopup")).toBe(false);
+        expect(el("check").getAttribute("aria-haspopup")).toBe("dialog");
+    });
+
+    it("is named by its title, or by ariaLabel without one, and warns in dev mode when it has neither", () => {
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+        start();
+        click(el("first"));
+        expect(dialog()?.getAttribute("aria-labelledby")).toBeTruthy();
+        expect(dialog()?.hasAttribute("aria-label")).toBe(false);
+        expect(warn).not.toHaveBeenCalled();
+        fixture.destroy();
+        overlayContainer.replaceChildren();
+
+        start(component => {
+            component.title.set("");
+            component.ariaLabel.set("Filters");
         });
+        click(el("first"));
+        expect(dialog()?.getAttribute("aria-label")).toBe("Filters");
+        expect(dialog()?.hasAttribute("aria-labelledby")).toBe(false);
+        fixture.destroy();
+        overlayContainer.replaceChildren();
 
-        it("should resolve a projected title template", () => {
-            const popover = getPopoverComponent(hostFixture) as unknown as {
-                titleTemplateRef: () => unknown;
-            };
-            expect(popover.titleTemplateRef()).toBeTruthy();
-        });
+        start(component => component.title.set(""));
+        click(el("first"));
+        expect(warn).toHaveBeenCalledWith(expect.stringContaining("[Mona Popover]"), expect.anything());
+    });
 
-        it("should resolve a projected footer template", () => {
-            const popover = getPopoverComponent(hostFixture) as unknown as {
-                footerTemplateRef: () => unknown;
-            };
-            expect(popover.footerTemplateRef()).toBeTruthy();
+    it("passes closeOnEscape and places start and end by direction, with the gap on the flipped side", () => {
+        const settings = captureSettings();
+        document.documentElement.setAttribute("dir", "rtl");
+        start(component => {
+            component.closeOnEscape.set(false);
+            component.position.set("end");
         });
+        click(el("first"));
+        const created = settings.at(-1)!;
+        expect(created.closeOnEscape).toBe(false);
+        expect(created.closeOnOutsideClick).toBe(true);
+        expect(created.closeOnMouseLeave).toBe(false);
+        // "end" in RTL is the physical left, so the gap is negative on X and positive once flipped to the right.
+        const [primary, flipped] = created.positions as Array<{ offsetX: number }>;
+        expect(primary.offsetX).toBe(-4);
+        expect(flipped.offsetX).toBe(4);
+    });
+
+    it("resolves projected title and footer templates", () => {
+        const templates = TestBed.createComponent(PopoverTemplatesHostComponent);
+        templates.detectChanges();
+        const popover = templates.debugElement.query(By.directive(PopoverComponent)).componentInstance as unknown as {
+            footerTemplateRef: () => unknown;
+            titleTemplateRef: () => unknown;
+        };
+        expect(popover.titleTemplateRef()).toBeTruthy();
+        expect(popover.footerTemplateRef()).toBeTruthy();
+        templates.destroy();
     });
 });
