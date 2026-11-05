@@ -50,16 +50,32 @@ export const AR_SA_MESSAGES = {
     },
     chart: {
         announcementSeparator: "، ",
+        brushApplied: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                zero: () => "تم تطبيق التحديد، بلا نقاط",
+                one: () => "تم تطبيق التحديد، نقطة واحدة",
+                two: () => "تم تطبيق التحديد، نقطتان",
+                few: () => `تم تطبيق التحديد، ${localizeNumber(count)} نقاط`,
+                many: () => `تم تطبيق التحديد، ${localizeNumber(count)} نقطة`,
+                other: () => `تم تطبيق التحديد، ${localizeNumber(count)} نقطة`
+            }),
+        brushCleared: "تم مسح التحديد",
+        brushRange: (from: string, to: string) => `التحديد من ${from} إلى ${to}`,
+        category: "الفئة",
         categoryFallbackName: (index: number) => `الفئة ${localizeNumber(index)}`,
+        categoryRange: (from: string, to: string) => `من ${from} إلى ${to}.`,
         change: "التغير",
         changeValue: (change: string) => `التغير ${change}`,
         chart: "مخطط",
         chartLegend: "وسيلة إيضاح المخطط",
+        chartRoleDescription: "مخطط",
         close: "الإغلاق",
         closeAbbreviation: "إ",
         colorScale: "مقياس الألوان",
         conversion: "التحويل",
         conversionOfPrevious: (rate: string) => `التحويل ${rate} من المرحلة السابقة`,
+        dataTableTruncated: (shown: number, total: number) =>
+            `عرض أول ${localizeNumber(shown)} من ${localizeNumber(total)} صف.`,
         decrease: "نقصان",
         decreaseAnnouncement: (delta: string, from: string, to: string) =>
             `نقصان ${delta}، المجموع التراكمي من ${from} إلى ${to}`,
@@ -77,6 +93,8 @@ export const AR_SA_MESSAGES = {
         itemDeselected: (item: string) => `${item}، تم إلغاء التحديد`,
         itemFallbackName: (index: number) => `العنصر ${localizeNumber(index)}`,
         itemSelected: (item: string) => `${item}، محدد`,
+        keyboardHelp:
+            "استخدم مفاتيح الأسهم للتنقل بين نقاط البيانات، وHome وEnd للانتقال إلى الأولى والأخيرة، وEnter أو المسافة للتفعيل، وEscape للمسح.",
         labelValueSeparator: ":",
         labeledValue: (label: string, value: string) => `${label}: ${value}`,
         low: "الأدنى",
@@ -95,12 +113,26 @@ export const AR_SA_MESSAGES = {
         pannedRight: "تم التحريك لليمين",
         pannedUp: "تم التحريك لأعلى",
         pathSeparator: " / ",
+        pointPosition: (position: number, total: number) => `${localizeNumber(position)} من ${localizeNumber(total)}`,
         range: "النطاق",
         rangeDescription: (title: string, minimum: string, maximum: string) => `${title}، ${minimum}–${maximum}`,
         rangeValue: (from: string, to: string) => `من ${from} إلى ${to}`,
         rising: "صعود",
         runningTotal: "المجموع التراكمي",
         seriesFallbackName: (index: number) => `السلسلة ${localizeNumber(index)}`,
+        seriesHidden: (series: string) => `تم إخفاء ${series}`,
+        seriesShown: (series: string) => `تم إظهار ${series}`,
+        seriesSummary: (count: number, names: string) =>
+            plural(PLURAL_RULES.select(count), {
+                zero: () => "لا توجد سلاسل.",
+                one: () => `سلسلة واحدة: ${names}.`,
+                two: () => `سلسلتان: ${names}.`,
+                few: () => `${localizeNumber(count)} سلاسل: ${names}.`,
+                many: () => `${localizeNumber(count)} سلسلة: ${names}.`,
+                other: () => `${localizeNumber(count)} سلسلة: ${names}.`
+            }),
+        seriesValueRange: (series: string, minimum: string, maximum: string) =>
+            `${series}: الأدنى ${minimum}، الأعلى ${maximum}.`,
         shareOfTotal: (share: string) => `${share} من الإجمالي`,
         size: "الحجم",
         sizeValue: (size: string) => `الحجم ${size}`,

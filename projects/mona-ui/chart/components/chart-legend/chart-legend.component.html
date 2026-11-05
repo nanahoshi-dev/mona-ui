@@ -2,7 +2,7 @@
     <div
         [class]="containerClasses()"
         [attr.aria-label]="legendAriaLabel()"
-        role="region"
+        role="group"
         data-mona-chart-export-role="legend-color-scale"
         data-mona-chart-export-mode="raster">
         @if (position() === "left" || position() === "right") {
@@ -57,7 +57,7 @@
         }
     </div>
 } @else {
-    <div [class]="containerClasses()">
+    <div [class]="containerClasses()" role="group" [attr.aria-label]="messages().chartLegend">
         @for (item of legendItems(); track item.itemId) {
             @if (itemTemplate(); as template) {
                 <div

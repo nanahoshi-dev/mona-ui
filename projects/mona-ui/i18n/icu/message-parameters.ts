@@ -47,16 +47,32 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
     },
     chart: {
         announcementSeparator: null,
+        brushApplied: [{ name: "count", type: "number" }],
+        brushCleared: null,
+        brushRange: [
+            { name: "from", type: "string" },
+            { name: "to", type: "string" }
+        ],
+        category: null,
         categoryFallbackName: [{ name: "index", type: "number" }],
+        categoryRange: [
+            { name: "from", type: "string" },
+            { name: "to", type: "string" }
+        ],
         change: null,
         changeValue: [{ name: "change", type: "string" }],
         chart: null,
         chartLegend: null,
+        chartRoleDescription: null,
         close: null,
         closeAbbreviation: null,
         colorScale: null,
         conversion: null,
         conversionOfPrevious: [{ name: "rate", type: "string" }],
+        dataTableTruncated: [
+            { name: "shown", type: "number" },
+            { name: "total", type: "number" }
+        ],
         decrease: null,
         decreaseAnnouncement: [
             { name: "delta", type: "string" },
@@ -87,6 +103,7 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         itemDeselected: [{ name: "item", type: "string" }],
         itemFallbackName: [{ name: "index", type: "number" }],
         itemSelected: [{ name: "item", type: "string" }],
+        keyboardHelp: null,
         labelValueSeparator: null,
         labeledValue: [
             { name: "label", type: "string" },
@@ -112,6 +129,10 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         pannedRight: null,
         pannedUp: null,
         pathSeparator: null,
+        pointPosition: [
+            { name: "position", type: "number" },
+            { name: "total", type: "number" }
+        ],
         range: null,
         rangeDescription: [
             { name: "title", type: "string" },
@@ -125,6 +146,17 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         rising: null,
         runningTotal: null,
         seriesFallbackName: [{ name: "index", type: "number" }],
+        seriesHidden: [{ name: "series", type: "string" }],
+        seriesShown: [{ name: "series", type: "string" }],
+        seriesSummary: [
+            { name: "count", type: "number" },
+            { name: "names", type: "string" }
+        ],
+        seriesValueRange: [
+            { name: "series", type: "string" },
+            { name: "minimum", type: "string" },
+            { name: "maximum", type: "string" }
+        ],
         shareOfTotal: [{ name: "share", type: "string" }],
         size: null,
         sizeValue: [{ name: "size", type: "string" }],

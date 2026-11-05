@@ -9,16 +9,27 @@ function localizeNumber(value: number, options?: Intl.NumberFormatOptions): stri
 
 export const CHART_DEFAULT_MESSAGES: MonaChartMessages = {
     announcementSeparator: ", ",
+    brushApplied: (count: number) =>
+        count === 1
+            ? `Brush applied, ${localizeNumber(count)} point`
+            : `Brush applied, ${localizeNumber(count)} points`,
+    brushCleared: "Brush cleared",
+    brushRange: (from: string, to: string) => `Brush from ${from} to ${to}`,
+    category: "Category",
     categoryFallbackName: (index: number) => `Category ${localizeNumber(index)}`,
+    categoryRange: (from: string, to: string) => `From ${from} to ${to}.`,
     change: "Change",
     changeValue: (change: string) => `change ${change}`,
     chart: "Chart",
     chartLegend: "Chart legend",
+    chartRoleDescription: "chart",
     close: "Close",
     closeAbbreviation: "C",
     colorScale: "Color scale",
     conversion: "Conversion",
     conversionOfPrevious: (rate: string) => `Conversion ${rate} of previous stage`,
+    dataTableTruncated: (shown: number, total: number) =>
+        `Showing the first ${localizeNumber(shown)} of ${localizeNumber(total)} rows.`,
     decrease: "Decrease",
     decreaseAnnouncement: (delta: string, from: string, to: string) =>
         `decrease ${delta}, running total ${from} to ${to}`,
@@ -36,6 +47,8 @@ export const CHART_DEFAULT_MESSAGES: MonaChartMessages = {
     itemDeselected: (item: string) => `${item}, deselected`,
     itemFallbackName: (index: number) => `Item ${localizeNumber(index)}`,
     itemSelected: (item: string) => `${item}, selected`,
+    keyboardHelp:
+        "Use the arrow keys to move between data points, Home and End to jump to the first and last, Enter or Space to activate, and Escape to clear.",
     labelValueSeparator: ":",
     labeledValue: (label: string, value: string) => `${label}: ${value}`,
     low: "Low",
@@ -54,12 +67,19 @@ export const CHART_DEFAULT_MESSAGES: MonaChartMessages = {
     pannedRight: "Panned right",
     pannedUp: "Panned up",
     pathSeparator: " / ",
+    pointPosition: (position: number, total: number) => `${localizeNumber(position)} of ${localizeNumber(total)}`,
     range: "Range",
     rangeDescription: (title: string, minimum: string, maximum: string) => `${title}, ${minimum} to ${maximum}`,
     rangeValue: (from: string, to: string) => `${from} to ${to}`,
     rising: "Rising",
     runningTotal: "Running Total",
     seriesFallbackName: (index: number) => `Series ${localizeNumber(index)}`,
+    seriesHidden: (series: string) => `${series} hidden`,
+    seriesShown: (series: string) => `${series} shown`,
+    seriesSummary: (count: number, names: string) =>
+        count === 1 ? `One series: ${names}.` : `${localizeNumber(count)} series: ${names}.`,
+    seriesValueRange: (series: string, minimum: string, maximum: string) =>
+        `${series}: lowest ${minimum}, highest ${maximum}.`,
     shareOfTotal: (share: string) => `${share} of total`,
     size: "size",
     sizeValue: (size: string) => `size ${size}`,

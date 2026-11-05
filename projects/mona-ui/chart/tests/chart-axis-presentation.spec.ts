@@ -28,8 +28,8 @@ import type { CartesianXYChartScene } from "../internal/scene/chart-scene";
                 [title]="title()"
                 [subtitle]="subtitle()"
                 [titleAlign]="titleAlign()"
-                [ariaLabel]="ariaLabel()"
-                [ariaDescription]="ariaDescription()">
+                [aria-label]="ariaLabel()"
+                [aria-description]="ariaDescription()">
                 <mona-chart-x-axis
                     [labels]="xLabels()"
                     [labelRotation]="xLabelRotation()"
@@ -128,7 +128,9 @@ describe("Chart Axis Presentation & Header Layout", () => {
     it("uses title and subtitle as accessible ARIA fallbacks when aria-label is omitted", () => {
         const chartEl = fixture.debugElement.query(By.directive(ChartComponent)).nativeElement as HTMLElement;
         expect(chartEl.getAttribute("aria-label")).toBe("Chart Main Title");
-        expect(chartEl.getAttribute("aria-description")).toBe("Chart Subtitle Description");
+        expect(
+            chartEl.ownerDocument.getElementById(chartEl.getAttribute("aria-describedby") ?? "")?.textContent ?? ""
+        ).toContain("Chart Subtitle Description");
     });
 
     it("prefers explicit aria-label and aria-description over title and subtitle", () => {
@@ -138,7 +140,12 @@ describe("Chart Axis Presentation & Header Layout", () => {
 
         const chartEl = fixture.debugElement.query(By.directive(ChartComponent)).nativeElement as HTMLElement;
         expect(chartEl.getAttribute("aria-label")).toBe("Explicit Label");
-        expect(chartEl.getAttribute("aria-description")).toBe("Explicit Description");
+        expect(
+            chartEl.ownerDocument.getElementById(chartEl.getAttribute("aria-describedby") ?? "")?.textContent ?? ""
+        ).toContain("Explicit Description");
+        expect(
+            chartEl.ownerDocument.getElementById(chartEl.getAttribute("aria-describedby") ?? "")?.textContent ?? ""
+        ).not.toContain("Chart Subtitle Description");
     });
 
     it("projects custom title and subtitle templates via directives", () => {

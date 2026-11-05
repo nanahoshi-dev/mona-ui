@@ -45,6 +45,10 @@ Root visualization container coordinating coordinate layouts, canvas rendering, 
 | `xField` | `ChartField` | `undefined` | Default X/Category field identifier or accessor function. |
 | `downsampling` | `ChartDownsamplingInput` | `true` | Chart-level render-sample policy for eligible dense continuous-X Cartesian series. Per-series values can disable reduction or provide a requested algorithm preference. |
 | `class` | `string` | `""` | CSS classes applied to chart container. |
+| `aria-label` | `string` | `""` | Accessible name; defaults to the title, then "Chart". |
+| `aria-description` | `string` | `""` | Replaces the generated summary in the chart's description (`aria-describedby`); the keyboard help still follows. |
+| `landmark` | `boolean` | `false` | Makes the host a `region` landmark instead of `role="application"`. Give each landmark chart a unique name. |
+| `dataTable` | `boolean` | `false` | Adds a visually hidden table of the data (the first 100 rows) for screen readers. |
 | `pointClick` | `output<ChartPointEvent>` | - | Emitted when a data point, spoke, or slice is clicked. |
 | `pointFocusChange` | `output<ChartPointFocusEvent>` | - | Emitted when keyboard navigation moves between data points or slices. |
 | `seriesVisibilityChange` | `output<ChartSeriesVisibilityEvent>` | - | Emitted when series visibility is toggled via legend or API. |
@@ -662,5 +666,13 @@ Renders callouts, milestone badges, and outlier markers anchored to specific (X,
 | `ArrowRight` / `ArrowLeft` | Navigate sequentially between angular spokes, buckets, or slices. |
 | `ArrowUp` / `ArrowDown` | Switch between series at the currently focused spoke/coordinate. |
 | `Home` / `End` | Jump to the first or last available spoke, bucket, or slice. |
-| `Enter` / `Space` | Trigger point selection and emit `pointClick`. |
-| `Escape` | Dismiss active crosshair, marker highlight, and tooltip. |
+| `Enter` | Emit `pointClick` for the focused point (and toggle its selection with `mona-chart-selection`). |
+| `Space` | Toggle the focused point's selection with `mona-chart-selection`; otherwise emit `pointClick`. |
+| `Escape` | Dismiss the crosshair, marker highlight and tooltip. With nothing to dismiss the key reaches the page. Escape anywhere hides a tooltip the pointer opened. |
+| `Shift` + arrows | With `navigation`: pan along the arrow's direction (`+`/`-` zoom, `0` resets). With `mona-chart-brush` and a focused point: extend a brush from it; `Enter` commits, `Escape` cancels. |
+
+Keys pressed inside the legend or other projected content are left to that content.
+
+### Screen readers
+
+The host is `role="application"` with `aria-roledescription="chart"`, so screen readers switch to focus mode and pass the arrow keys to the chart. Its description summarizes the series, the category range of a Cartesian chart and each series' lowest and highest value, then lists the keys. Announcements give the point's position ("2 of 12"), read the point again when a key doesn't move it, and report legend toggles. With `dataTable`, the table sits in a `role="document"` region that screen readers can browse.

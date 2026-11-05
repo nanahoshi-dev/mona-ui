@@ -51,16 +51,30 @@ export const RU_RU_MESSAGES = {
     },
     chart: {
         announcementSeparator: ", ",
+        brushApplied: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `Выделение применено, ${localizeNumber(count)} точка`,
+                few: () => `Выделение применено, ${localizeNumber(count)} точки`,
+                many: () => `Выделение применено, ${localizeNumber(count)} точек`,
+                other: () => `Выделение применено, ${localizeNumber(count)} точки`
+            }),
+        brushCleared: "Выделение снято",
+        brushRange: (from: string, to: string) => `Выделение от ${from} до ${to}`,
+        category: "Категория",
         categoryFallbackName: (index: number) => `Категория ${localizeNumber(index)}`,
+        categoryRange: (from: string, to: string) => `От ${from} до ${to}.`,
         change: "Изменение",
         changeValue: (change: string) => `изменение ${change}`,
         chart: "Диаграмма",
         chartLegend: "Легенда диаграммы",
+        chartRoleDescription: "диаграмма",
         close: "Закрытие",
         closeAbbreviation: "Закр.",
         colorScale: "Цветовая шкала",
         conversion: "Конверсия",
         conversionOfPrevious: (rate: string) => `Конверсия ${rate} от предыдущего этапа`,
+        dataTableTruncated: (shown: number, total: number) =>
+            `Показаны первые ${localizeNumber(shown)} строк из ${localizeNumber(total)}.`,
         decrease: "Уменьшение",
         decreaseAnnouncement: (delta: string, from: string, to: string) =>
             `уменьшение на ${delta}, накопительный итог с ${from} до ${to}`,
@@ -78,6 +92,8 @@ export const RU_RU_MESSAGES = {
         itemDeselected: (item: string) => `${item}, выбор снят`,
         itemFallbackName: (index: number) => `Элемент ${localizeNumber(index)}`,
         itemSelected: (item: string) => `${item}, выбрано`,
+        keyboardHelp:
+            "Используйте клавиши со стрелками для перехода между точками данных, Home и End — для перехода к первой и последней, Enter или Пробел — для активации, Escape — для сброса.",
         labelValueSeparator: ":",
         labeledValue: (label: string, value: string) => `${label}: ${value}`,
         low: "Минимум",
@@ -96,12 +112,24 @@ export const RU_RU_MESSAGES = {
         pannedRight: "Сдвинуто вправо",
         pannedUp: "Сдвинуто вверх",
         pathSeparator: " / ",
+        pointPosition: (position: number, total: number) => `${localizeNumber(position)} из ${localizeNumber(total)}`,
         range: "Диапазон",
         rangeDescription: (title: string, minimum: string, maximum: string) => `${title}, от ${minimum} до ${maximum}`,
         rangeValue: (from: string, to: string) => `от ${from} до ${to}`,
         rising: "Рост",
         runningTotal: "Накопительный итог",
         seriesFallbackName: (index: number) => `Ряд ${localizeNumber(index)}`,
+        seriesHidden: (series: string) => `${series}: скрыто`,
+        seriesShown: (series: string) => `${series}: показано`,
+        seriesSummary: (count: number, names: string) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} ряд: ${names}.`,
+                few: () => `${localizeNumber(count)} ряда: ${names}.`,
+                many: () => `${localizeNumber(count)} рядов: ${names}.`,
+                other: () => `${localizeNumber(count)} ряда: ${names}.`
+            }),
+        seriesValueRange: (series: string, minimum: string, maximum: string) =>
+            `${series}: минимум ${minimum}, максимум ${maximum}.`,
         shareOfTotal: (share: string) => `${share} от общего итога`,
         size: "размер",
         sizeValue: (size: string) => `размер ${size}`,

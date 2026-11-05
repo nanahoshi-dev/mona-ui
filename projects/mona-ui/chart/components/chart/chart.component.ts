@@ -1,7 +1,8 @@
-import { isPlatformBrowser, NgTemplateOutlet } from "@angular/common";
+import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
     AfterContentChecked,
+    booleanAttribute,
     Component,
     computed,
     contentChild,
@@ -19,6 +20,7 @@ import {
     viewChild
 } from "@angular/core";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { ChartAxisLabelTemplateDirective } from "../../directives/chart-axis-label-template.directive";
 import { ChartNoDataTemplateDirective } from "../../directives/chart-no-data-template.directive";
@@ -166,7 +168,20 @@ import { degreesToRadians } from "../../internal/utils/angle-utils";
 import { formatXValue, formatYValue } from "../../internal/utils/chart-formatter";
 import { clamp } from "../../internal/utils/number-utils";
 import type { ChartAnimationInput } from "../../models/chart-animation.models";
-import type { ChartBrushCancelReason, ChartBrushPhase } from "../../models/chart-brush.models";
+import type {
+    ChartBrushAxisRange,
+    ChartBrushCancelReason,
+    ChartBrushHitPolicy,
+    ChartBrushMode,
+    ChartBrushPhase,
+    ChartBrushSelectionBehavior
+} from "../../models/chart-brush.models";
+import {
+    buildChartDataTable,
+    type ChartDataTableModel,
+    describeChartData
+} from "../../internal/accessibility/chart-data-description";
+import { resolveSeriesDisplayName } from "../../internal/data/chart-value-resolver";
 import type { ChartSelectionMode } from "../../models/chart-selection.models";
 import type {
     ChartPointEvent,
@@ -248,6 +263,51 @@ import {
 /** A sign at the start of a formatted number, after any bidi marks ("+5", "-3", "−" in some locales). */
 const LEADING_SIGN = /^[\u200e\u200f\u061c]*[+\-\u2212]/;
 
+/** Keys that move between points; at an edge they read the focused point again. */
+const NAVIGATION_KEYS: ReadonlySet<string> = new Set([
+    "ArrowDown",
+    "ArrowLeft",
+    "ArrowRight",
+    "ArrowUp",
+    "End",
+    "Home",
+    "PageDown",
+    "PageUp"
+]);
+const ARROW_KEYS: ReadonlySet<string> = new Set(["ArrowDown", "ArrowLeft", "ArrowRight", "ArrowUp"]);
+
+/** A hit's box in plot pixels; a point has no size. */
+function hitBox(hit: SceneHitTarget): ChartRect {
+    if (hit.bounds) {
+        return hit.bounds;
+    }
+    return { height: 0, width: 0, x: hit.point?.x ?? 0, y: hit.point?.y ?? 0 };
+}
+
+/** The pixel bounds of a keyboard brush from one point to another, along the brush's dimensions. */
+function keyboardBrushBounds(
+    from: SceneHitTarget,
+    to: SceneHitTarget,
+    plot: ChartRect,
+    mode: ChartBrushMode
+): ChartRect {
+    const a = hitBox(from);
+    const b = hitBox(to);
+    // A pixel of padding so a point on the edge counts for both hit policies.
+    const pad = 1;
+    const left = Math.min(a.x, b.x) - pad;
+    const right = Math.max(a.x + a.width, b.x + b.width) + pad;
+    const top = Math.min(a.y, b.y) - pad;
+    const bottom = Math.max(a.y + a.height, b.y + b.height) + pad;
+    if (mode === "x") {
+        return { height: plot.height, width: right - left, x: left, y: plot.y };
+    }
+    if (mode === "y") {
+        return { height: bottom - top, width: plot.width, x: plot.x, y: top };
+    }
+    return { height: bottom - top, width: right - left, x: left, y: top };
+}
+
 function easingToCss(easing: string): string {
     switch (easing) {
         case "linear":
@@ -284,9 +344,10 @@ type ChartTransientInteractionOwner = "tooltip" | "crosshair" | "keyboard" | nul
     host: {
         "[class]": "baseClasses()",
         "[attr.tabindex]": "0",
-        role: "region",
+        "[attr.role]": "landmark() ? 'region' : 'application'",
+        "[attr.aria-roledescription]": "landmark() ? null : messages().chartRoleDescription",
         "[attr.aria-label]": "effectiveAriaLabel()",
-        "[attr.aria-description]": "effectiveAriaDescription()",
+        "[attr.aria-describedby]": "descriptionId",
         "[style.--mona-chart-animation-duration]": "animationDurationCss()",
         "[style.--mona-chart-animation-easing]": "animationEasingCss()",
         "(keydown)": "onKeyDown($event)",
@@ -313,6 +374,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     readonly #dataLabelMeasurementRevision = signal(0);
     readonly #dataLabelMeasurements = new Map<string, ChartSize>();
     readonly #destroyRef = inject(DestroyRef);
+    readonly #document = inject(DOCUMENT);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #errorHandler = inject(ErrorHandler);
     readonly #i18n = inject(MonaI18nService);
@@ -366,6 +428,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #activeKeyboardHitKey: string | null = null;
     #activeKeyboardNamespace: ChartKeyboardAxisNamespace | null = null;
     #activeKeyboardSeriesId: string | null = null;
+    /** Announced after the next structural layout, which clears the live region (a legend toggle's result). */
+    #announcementAfterLayout: string | null = null;
     #brushMarkIndex: CartesianBrushMarkIndex | null = null;
     #brushMarkIndexScene: ChartScene | null = null;
     #canvasContext: CanvasRenderingContext2D | null = null;
@@ -389,6 +453,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #interactionRevision: number = 0;
     #interactionState: ChartInteractionState | null = null;
     #isDestroyed = false;
+    /** The point a keyboard brush started from, while one is being extended. */
+    #keyboardBrushAnchor: SceneHitTarget | null = null;
     #labelResizeObserver: ResizeObserver | null = null;
     #lastControlledSelection: readonly string[] | undefined = undefined;
     #lastInteractionSource: "pointer" | "keyboard" | null = null;
@@ -545,6 +611,43 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     });
     protected readonly crosshairLabelClasses = computed(() => chartCrosshairLabelBaseThemeVariants());
     protected readonly crosshairState = signal<ChartCrosshairState | null>(null);
+    /** The visually hidden data table, when `dataTable` is on. */
+    protected readonly dataTableModel = computed<ChartDataTableModel | null>(() => {
+        const scene = this.scene();
+        if (!this.dataTable() || !scene) {
+            return null;
+        }
+        this.#i18n.localeId();
+        const xTitle = this.#xAxes()[0]?.title?.() ?? "";
+        return buildChartDataTable(scene, this.messages(), xTitle);
+    });
+    protected readonly descriptionId = createElementControlId();
+    /**
+     * The chart's description (`aria-describedby`): `ariaDescription` when set, else the subtitle and a summary of the
+     * data, followed by the keyboard instructions.
+     */
+    protected readonly descriptionText = computed<string>(() => {
+        const messages = this.messages();
+        this.#i18n.localeId();
+        const scene = this.scene();
+        const explicit = this.ariaDescription().trim();
+        const parts: string[] = [];
+        if (explicit) {
+            parts.push(explicit);
+        } else {
+            const subtitle = this.subtitle().trim();
+            if (subtitle) {
+                parts.push(subtitle);
+            }
+            if (scene) {
+                parts.push(...describeChartData(scene, messages));
+            }
+        }
+        if (scene?.hasRenderableData) {
+            parts.push(messages.keyboardHelp);
+        }
+        return parts.join(" ");
+    });
     protected readonly donutSeriesRegistration = computed<ChartDonutSeriesRegistration | null>(() => {
         const list = this.#registeredSeries();
         return (list.find(s => s.type === "donut") as ChartDonutSeriesRegistration) ?? null;
@@ -767,6 +870,11 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
      */
     public readonly data = input<readonly unknown[]>([]);
     /**
+     * @description Renders a visually hidden table of the chart's data (its first 100 rows) for screen readers.
+     * @default false
+     */
+    public readonly dataTable = input(false, { transform: booleanAttribute });
+    /**
      * @description Initial default viewport window state for chart axes.
      * @default undefined
      */
@@ -779,6 +887,12 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     public readonly isAnimating = this.#isAnimating.asReadonly();
     public readonly isExitingData = this.#isExitingData.asReadonly();
     public readonly isStructuralAnimation = this.#isStructuralAnimation.asReadonly();
+    /**
+     * @description Makes the chart a `region` landmark instead of an `application`. A landmark keeps screen readers in
+     * browse mode, so they read the arrow keys themselves; give each landmark chart a unique name.
+     * @default false
+     */
+    public readonly landmark = input(false, { transform: booleanAttribute });
     public readonly legendItems = computed<readonly ChartLegendItem[]>(() => {
         this.styleRevision();
         return this.scene()?.legendItems ?? [];
@@ -956,7 +1070,14 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             this.#mediaQueryList.addEventListener("change", this.#mediaQueryListener);
         }
 
+        // A hover tooltip can be dismissed with Escape without moving the pointer, wherever the focus is.
+        const onDocumentKeyDown = (event: KeyboardEvent): void => this.#dismissPointerTooltip(event);
+        if (this.#isBrowser) {
+            this.#document.addEventListener("keydown", onDocumentKeyDown);
+        }
+
         this.#destroyRef.onDestroy(() => {
+            this.#document.removeEventListener("keydown", onDocumentKeyDown);
             this.#isDestroyed = true;
             this.#canvasContext = null;
             this.#unwatchDevicePixelRatio();
@@ -1791,6 +1912,196 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         );
     }
 
+    /** Matches the marks inside a finished brush, applies its selection behavior and emits the `end` phase. */
+    #commitBrush(
+        xyScene: CartesianXYChartScene,
+        brushReg: ChartBrushRegistration,
+        bounds: ChartRect,
+        target: ResolvedCartesianBrushTarget,
+        hitPolicy: ChartBrushHitPolicy,
+        selectionBehavior: ChartBrushSelectionBehavior,
+        ranges: { xRange?: ChartBrushAxisRange; yRange?: ChartBrushAxisRange }
+    ): number {
+        const markIndex = this.#getOrCreateBrushMarkIndex(xyScene);
+        const ordinaryBrushHits = markIndex.query(
+            bounds,
+            hitPolicy,
+            target,
+            undefined,
+            undefined,
+            undefined,
+            xyScene.primaryXAxisId,
+            xyScene.primaryYAxisId
+        );
+        // Dense raw range providers keep exact brush semantics over
+        // unsampled source points (§68/§70). Explicit exact results
+        // may legitimately be O(M); they are never truncated.
+        const matchedHits = mergeBrushHitsByIdentity(
+            ordinaryBrushHits,
+            collectDenseBrushHits(xyScene, bounds, target),
+            {
+                seriesOrdinalById: new Map(xyScene.series.map((series, index) => [series.id, index]))
+            }
+        );
+        const matchedMarkIds = matchedHits.map(h => ChartMarkIdentityResolver.resolve(h));
+        const matchedPoints = matchedHits.map(h => toSelectedPoint(h, xyScene));
+
+        const selReg = this.#selection();
+        if (selectionBehavior !== "none" && selReg && selReg.enabled?.() !== false) {
+            const currentSelected = this.effectiveSelectedMarkIds();
+            const mode = selReg.mode?.() ?? "single";
+            const mutation = ChartSelectionController.applyBrush(
+                currentSelected,
+                matchedMarkIds,
+                selectionBehavior,
+                mode
+            );
+            if (mutation.added.length > 0 || mutation.removed.length > 0) {
+                if (selReg.selectedMarkIds?.() === undefined) {
+                    this.#internalSelectedMarkIds.set(mutation.next);
+                }
+                const changeEvt = ChartSelectionController.buildChangeEvent(
+                    "brush",
+                    mutation,
+                    currentSelected,
+                    this.visibleMarkIndex(),
+                    matchedHits,
+                    xyScene
+                );
+                selReg.emitSelectionChange?.(changeEvt);
+            }
+        }
+
+        brushReg.emitBrushChange?.({
+            matchedMarkIds,
+            matchedPoints,
+            mode: target.mode,
+            phase: "end",
+            pixelBounds: bounds,
+            xRange: ranges.xRange,
+            yRange: ranges.yRange
+        });
+        return matchedMarkIds.length;
+    }
+
+    /**
+     * With a brush, Shift+arrow from a focused point moves the focus and extends a brush from where it started; Enter
+     * commits the brush and Escape cancels it. Returns whether it handled the key.
+     */
+    #handleKeyboardBrush(event: KeyboardEvent, scene: ChartScene): boolean {
+        const brushReg = this.#brush();
+        if (
+            !brushReg ||
+            brushReg.enabled?.() === false ||
+            scene.coordinateSystem !== "cartesian" ||
+            scene.cartesianKind !== "xy"
+        ) {
+            this.#keyboardBrushAnchor = null;
+            return false;
+        }
+        const xyScene = scene as CartesianXYChartScene;
+        if (this.#keyboardBrushAnchor && this.#activeBrushBounds() === null) {
+            // A layout, viewport or pointer change canceled the brush.
+            this.#keyboardBrushAnchor = null;
+        }
+        const anchor = this.#keyboardBrushAnchor;
+        const messages = this.messages();
+
+        if (anchor && event.key === "Enter") {
+            event.preventDefault();
+            const bounds = this.#activeBrushBounds() as ChartRect;
+            const target = CartesianBrushTargetResolver.resolve(xyScene, brushReg);
+            const ranges = xyScene.coordinateSpace
+                ? CartesianBrushRangeResolver.resolve(bounds, xyScene.coordinateSpace, target)
+                : {};
+            this.#keyboardBrushAnchor = null;
+            this.#activeBrushBounds.set(null);
+            const count = this.#commitBrush(
+                xyScene,
+                brushReg,
+                bounds,
+                target,
+                brushReg.hitPolicy?.() ?? "intersect",
+                brushReg.selectionBehavior?.() ?? "none",
+                ranges
+            );
+            this.#announce(messages.brushApplied(count));
+            this.#paint();
+            return true;
+        }
+        if (anchor && event.key === "Escape") {
+            event.preventDefault();
+            this.#keyboardBrushAnchor = null;
+            this.#cancelBrushAuthority("escape");
+            this.#announce(messages.brushCleared);
+            return true;
+        }
+
+        const focused = this.#interactionState?.source === "keyboard" ? this.#interactionState.activeHitTarget : null;
+        if (!event.shiftKey || !ARROW_KEYS.has(event.key) || !focused) {
+            return false;
+        }
+        event.preventDefault();
+        const navResult = ChartKeyboardNavigation.handleKeyDown(
+            event,
+            scene,
+            this.#activeKeyboardBucketIndex,
+            this.#activeKeyboardSeriesId,
+            this.#activeKeyboardHitKey,
+            this.#activeKeyboardNamespace
+        );
+        if (navResult) {
+            this.#setKeyboardSelection(
+                navResult.bucketIndex,
+                navResult.seriesId,
+                navResult.hitKey,
+                navResult.namespace
+            );
+        }
+        const current = this.#interactionState?.activeHitTarget ?? focused;
+        const start = anchor ?? focused;
+        const target = CartesianBrushTargetResolver.resolve(xyScene, brushReg);
+        const bounds = keyboardBrushBounds(start, current, xyScene.plotRect, target.mode);
+        const ranges = xyScene.coordinateSpace
+            ? CartesianBrushRangeResolver.resolve(bounds, xyScene.coordinateSpace, target)
+            : {};
+        if (!anchor) {
+            this.#keyboardBrushAnchor = start;
+            brushReg.emitBrushChange?.({
+                mode: target.mode,
+                phase: "start",
+                pixelBounds: bounds,
+                xRange: ranges.xRange,
+                yRange: ranges.yRange
+            });
+        }
+        brushReg.emitBrushChange?.({
+            mode: target.mode,
+            phase: "update",
+            pixelBounds: bounds,
+            xRange: ranges.xRange,
+            yRange: ranges.yRange
+        });
+        this.#activeBrushBounds.set(bounds);
+        this.#paint();
+        const label = (hit: SceneHitTarget): string =>
+            hit.formattedCategory ?? hit.formattedXValue ?? String(hit.xValue ?? "");
+        this.#announce(messages.brushRange(label(start), label(current)));
+        return true;
+    }
+
+    /** Escape anywhere hides a tooltip the pointer opened, unless something else handled the key. */
+    #dismissPointerTooltip(event: KeyboardEvent): void {
+        if (event.key !== "Escape" || event.defaultPrevented) {
+            return;
+        }
+        if (this.#interactionState?.source !== "pointer" || this.tooltipContext() === null) {
+            return;
+        }
+        this.#cancelPendingPointerInteraction();
+        this.#clearInteraction();
+    }
+
     #getOrCreateBrushMarkIndex(scene: CartesianXYChartScene): CartesianBrushMarkIndex {
         if (this.#brushMarkIndexScene !== scene || !this.#brushMarkIndex) {
             this.#brushMarkIndex = new CartesianBrushMarkIndex();
@@ -1986,6 +2297,25 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     #notifyCommittedViewport(notification: ViewportCommitNotification): void {
         if (this.#isDestroyed) return;
         this.#synchronizationController?.onCommittedViewportChange(notification);
+    }
+
+    /**
+     * Updates the live region. The same text again (Home twice, an edge) gets a trailing no-break space toggled, so
+     * screen readers read it again instead of ignoring a region that didn't change.
+     */
+    #announce(text: string): void {
+        const current = this.activeAccessibilityText();
+        if (text && current.replace(/\u00a0$/, "") === text) {
+            this.activeAccessibilityText.set(current.endsWith("\u00a0") ? text : `${text}\u00a0`);
+            return;
+        }
+        this.activeAccessibilityText.set(text);
+    }
+
+    /** Announces a visibility toggle now and again after the layout it causes, which clears the live region. */
+    #announceToggle(text: string): void {
+        this.#announce(text);
+        this.#announcementAfterLayout = text;
     }
 
     /** Formats the layout, data labels and announcements that follow for this chart's locale and messages. */
@@ -2184,7 +2514,8 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
 
         if (isStructural) {
             this.#clearInteractionState();
-            this.activeAccessibilityText.set("");
+            this.activeAccessibilityText.set(this.#announcementAfterLayout ?? "");
+            this.#announcementAfterLayout = null;
         }
 
         let newScene: ChartScene;
@@ -2908,6 +3239,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         const messages = this.messages();
         const join = (parts: readonly (string | null | undefined | false)[]): string =>
             joinChartAnnouncement(parts, messages.announcementSeparator);
+        const positionStr =
+            resolvedBuckets && resolvedBuckets.length > 1
+                ? messages.pointPosition(this.#activeKeyboardBucketIndex + 1, resolvedBuckets.length)
+                : null;
         if (currentScene.coordinateSystem === "hierarchical" && currentScene.hierarchicalKind === "treemap") {
             const hit = matchingHit;
             if (hit.hierarchy) {
@@ -2919,9 +3254,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 const kindStr = hit.hierarchy.isLeaf
                     ? messages.treemapLeaf
                     : messages.treemapGroup(hit.hierarchy.childCount);
-                this.activeAccessibilityText.set(
-                    join([messages.labeledValue(pathStr, hit.hierarchy.formattedValue), shareStr, kindStr])
-                );
+                this.#announce(join([messages.labeledValue(pathStr, hit.hierarchy.formattedValue), shareStr, kindStr]));
             }
         } else if (currentScene.coordinateSystem === "polar") {
             if (matchingHit.seriesType === "gauge") {
@@ -2934,17 +3267,16 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     matchingHit.formattedRadialMax ??
                     (matchingHit.radialMax !== undefined ? String(matchingHit.radialMax) : "");
                 const rangeStr = minStr && maxStr ? messages.gaugeRange(minStr, maxStr) : null;
-                this.activeAccessibilityText.set(
-                    join([messages.labeledValue(matchingHit.seriesName, valStr), rangeStr, clampedStr])
-                );
+                this.#announce(join([messages.labeledValue(matchingHit.seriesName, valStr), rangeStr, clampedStr]));
             } else {
                 const valStr = matchingHit.formattedValue ?? String(matchingHit.yValue);
                 const catStr = matchingHit.formattedCategory ?? matchingHit.category ?? matchingHit.seriesName;
-                this.activeAccessibilityText.set(
+                this.#announce(
                     join([
                         matchingHit.seriesName,
                         messages.labeledValue(String(catStr), valStr),
-                        matchingHit.formattedPercentage
+                        matchingHit.formattedPercentage,
+                        positionStr
                     ])
                 );
             }
@@ -2956,13 +3288,13 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             const xStr = `${xTitle}${matchingHit.formattedXValue ?? matchingHit.formattedCategory ?? matchingHit.categoryX ?? matchingHit.xValue}`;
             const yStr = `${yTitle}${matchingHit.formattedYCategory ?? matchingHit.categoryY ?? matchingHit.category}`;
             const valStr = matchingHit.formattedValue ?? String(matchingHit.yValue);
-            this.activeAccessibilityText.set(messages.labeledValue(matchingHit.seriesName, join([xStr, yStr, valStr])));
+            this.#announce(messages.labeledValue(matchingHit.seriesName, join([xStr, yStr, valStr])));
         } else if (currentScene.coordinateSystem === "cartesian" && currentScene.cartesianKind === "funnel") {
             const totalStages = currentScene.hitTargets.length;
             const stageNum = (matchingHit.renderOrder ?? 0) + 1;
             const funnel = matchingHit.funnel;
             const stageStr = totalStages > 0 ? messages.stagePosition(stageNum, totalStages) : null;
-            this.activeAccessibilityText.set(
+            this.#announce(
                 join([
                     matchingHit.seriesName,
                     messages.labeledValue(
@@ -3004,7 +3336,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     detail = messages.noChangeAnnouncement(wf?.formattedCumulativeAfter ?? valueStr);
                 }
             }
-            this.activeAccessibilityText.set(
+            this.#announce(
                 join([
                     matchingHit.seriesName,
                     messages.labeledValue(join([matchingHit.formattedCategory, stepStr]), detail)
@@ -3059,29 +3391,39 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                           : direction === "neutral"
                             ? messages.unchanged
                             : null;
-                this.activeAccessibilityText.set(
+                this.#announce(
                     join([
                         matchingHit.seriesName,
                         xStr,
                         messages.ohlcValues(openStr, highStr, lowStr, closeStr),
                         directionStr,
-                        fin?.formattedChange && messages.changeValue(fin.formattedChange)
+                        fin?.formattedChange && messages.changeValue(fin.formattedChange),
+                        positionStr
                     ])
                 );
             } else if (isRange && fromStr && toStr) {
-                this.activeAccessibilityText.set(
-                    messages.labeledValue(matchingHit.seriesName, join([xStr, messages.rangeValue(fromStr, toStr)]))
+                this.#announce(
+                    join([
+                        messages.labeledValue(
+                            matchingHit.seriesName,
+                            join([xStr, messages.rangeValue(fromStr, toStr)])
+                        ),
+                        positionStr
+                    ])
                 );
             } else if (matchingHit.seriesType === "bubble" && sizeStr) {
-                this.activeAccessibilityText.set(
-                    messages.labeledValue(
-                        matchingHit.seriesName,
-                        join([xStr, yStr, messages.sizeValue(sizeStr), shareStr])
-                    )
+                this.#announce(
+                    join([
+                        messages.labeledValue(
+                            matchingHit.seriesName,
+                            join([xStr, yStr, messages.sizeValue(sizeStr), shareStr])
+                        ),
+                        positionStr
+                    ])
                 );
             } else {
-                this.activeAccessibilityText.set(
-                    messages.labeledValue(matchingHit.seriesName, join([xStr, yStr, shareStr]))
+                this.#announce(
+                    join([messages.labeledValue(matchingHit.seriesName, join([xStr, yStr, shareStr])), positionStr])
                 );
             }
         }
@@ -3774,6 +4116,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     public onFocusOut(event: FocusEvent): void {
         const related = event.relatedTarget as Node | null;
         if (!related || !this.#elementRef.nativeElement.contains(related)) {
+            if (this.#keyboardBrushAnchor) {
+                this.#keyboardBrushAnchor = null;
+                this.#cancelBrushAuthority("authority-change");
+            }
             this.#cancelPendingPointerInteraction();
             this.#clearInteraction();
             this.activeAccessibilityText.set("");
@@ -3781,8 +4127,13 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
     }
 
     public onKeyDown(event: KeyboardEvent): void {
-        if (this.#isAnimating() && !this.#isStructuralAnimation()) {
+        // Keys pressed in the legend, a tooltip or projected content belong to that content.
+        if (event.target !== this.#elementRef.nativeElement) {
             return;
+        }
+        if (this.#isAnimating() && !this.#isStructuralAnimation()) {
+            // Settle a restyle or data transition at once instead of dropping the key.
+            this.#animationController.finish();
         }
 
         let currentScene = this.#renderScene ?? this.scene();
@@ -3791,6 +4142,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             currentScene = this.#renderScene ?? this.scene();
         }
         if (!currentScene) {
+            return;
+        }
+
+        if (this.#handleKeyboardBrush(event, currentScene)) {
             return;
         }
 
@@ -3819,7 +4174,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     this.#applyViewportUpdate(kbResult.nextState, "keyboard", "end", kbResult.changedAxes);
                 }
                 if (kbResult.announcement) {
-                    this.activeAccessibilityText.set(kbResult.announcement);
+                    this.#announce(kbResult.announcement);
                 }
                 return;
             }
@@ -3851,8 +4206,19 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             return;
         }
 
-        if (event.key === "Enter" || event.key === " ") {
+        if (NAVIGATION_KEYS.has(event.key) && this.#activeKeyboardHitKey !== null) {
+            // At an edge the focused point stays; read it again so the key isn't silent.
             event.preventDefault();
+            this.#setKeyboardSelection(
+                this.#activeKeyboardBucketIndex,
+                this.#activeKeyboardSeriesId,
+                this.#activeKeyboardHitKey,
+                this.#activeKeyboardNamespace
+            );
+            return;
+        }
+
+        if (event.key === "Enter" || event.key === " ") {
             const activeHit = this.#interactionState?.activeHitTarget;
             let targetHit: SceneHitTarget | undefined = activeHit ?? undefined;
 
@@ -3874,18 +4240,20 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
             }
 
             if (targetHit) {
-                if (event.key === "Enter") {
-                    this.pointClick.emit(this.#toPointEvent(targetHit));
-                }
-
+                event.preventDefault();
                 const selReg = this.#selection();
-                if (
-                    selReg &&
+                const isSelectable =
+                    selReg !== null &&
                     selReg.enabled?.() !== false &&
                     selReg.keyboardSelection?.() !== false &&
                     currentScene.coordinateSystem === "cartesian" &&
-                    currentScene.cartesianKind === "xy"
-                ) {
+                    currentScene.cartesianKind === "xy";
+                // Enter activates the point; Space toggles its selection, or activates it where there is none.
+                if (event.key === "Enter" || !isSelectable) {
+                    this.pointClick.emit(this.#toPointEvent(targetHit));
+                }
+
+                if (isSelectable && selReg) {
                     const markId = ChartMarkIdentityResolver.resolve(targetHit);
                     const currentSelected = this.effectiveSelectedMarkIds();
                     const mode = selReg.mode?.() ?? "single";
@@ -3905,7 +4273,7 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                         selReg.emitSelectionChange?.(changeEvt);
                         const isSelected = mutation.added.includes(markId);
                         const pointLabel = this.#formatHitAnnouncement(targetHit);
-                        this.activeAccessibilityText.set(
+                        this.#announce(
                             isSelected
                                 ? this.messages().itemSelected(pointLabel)
                                 : this.messages().itemDeselected(pointLabel)
@@ -3915,6 +4283,16 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 }
             }
         } else if (event.key === "Escape") {
+            const hasInteraction =
+                this.#interactionState !== null ||
+                this.tooltipContext() !== null ||
+                this.#activeBrushBounds() !== null ||
+                this.#brushGestureController.isBrushing ||
+                this.activeAccessibilityText() !== "";
+            if (!hasInteraction) {
+                // Nothing to clear: let Escape reach the page, such as a dialog around the chart.
+                return;
+            }
             event.preventDefault();
             this.#cancelPendingPointerInteraction();
             this.#cancelBrushAuthority("escape");
@@ -4094,66 +4472,15 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                     });
                 }
 
-                const markIndex = this.#getOrCreateBrushMarkIndex(xyScene);
-                const ordinaryBrushHits = markIndex.query(
+                this.#commitBrush(
+                    xyScene,
+                    brushReg,
                     result.bounds,
-                    result.session.hitPolicy,
                     target,
-                    undefined,
-                    undefined,
-                    undefined,
-                    xyScene.primaryXAxisId,
-                    xyScene.primaryYAxisId
+                    result.session.hitPolicy,
+                    result.session.selectionBehavior,
+                    ranges
                 );
-                // Dense raw range providers keep exact brush semantics over
-                // unsampled source points (§68/§70). Explicit exact results
-                // may legitimately be O(M); they are never truncated.
-                const matchedHits = mergeBrushHitsByIdentity(
-                    ordinaryBrushHits,
-                    collectDenseBrushHits(xyScene, result.bounds, target),
-                    {
-                        seriesOrdinalById: new Map(xyScene.series.map((series, index) => [series.id, index]))
-                    }
-                );
-                const matchedMarkIds = matchedHits.map(h => ChartMarkIdentityResolver.resolve(h));
-                const matchedPoints = matchedHits.map(h => toSelectedPoint(h, xyScene));
-
-                const selectionBehavior = result.session.selectionBehavior;
-                const selReg = this.#selection();
-                if (selectionBehavior !== "none" && selReg && selReg.enabled?.() !== false) {
-                    const currentSelected = this.effectiveSelectedMarkIds();
-                    const mode = selReg.mode?.() ?? "single";
-                    const mutation = ChartSelectionController.applyBrush(
-                        currentSelected,
-                        matchedMarkIds,
-                        selectionBehavior,
-                        mode
-                    );
-                    if (mutation.added.length > 0 || mutation.removed.length > 0) {
-                        if (selReg.selectedMarkIds?.() === undefined) {
-                            this.#internalSelectedMarkIds.set(mutation.next);
-                        }
-                        const changeEvt = ChartSelectionController.buildChangeEvent(
-                            "brush",
-                            mutation,
-                            currentSelected,
-                            this.visibleMarkIndex(),
-                            matchedHits,
-                            xyScene
-                        );
-                        selReg.emitSelectionChange?.(changeEvt);
-                    }
-                }
-
-                brushReg.emitBrushChange?.({
-                    matchedMarkIds,
-                    matchedPoints,
-                    mode: target.mode,
-                    phase: "end",
-                    pixelBounds: result.bounds,
-                    xRange: ranges.xRange,
-                    yRange: ranges.yRange
-                });
 
                 this.#hasEmittedBrushStart = false;
                 this.#paint();
@@ -4477,6 +4804,9 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
         if (item.kind === "datum") {
             const series = this.#registeredSeries().find(s => s.id === item.seriesId);
             if (series) {
+                this.#announceToggle(
+                    item.visible ? this.messages().seriesHidden(item.name) : this.messages().seriesShown(item.name)
+                );
                 if (series.type === "pie" || series.type === "donut") {
                     const sec = series as ChartSectorSeriesRegistration;
                     if (item.dataIndex !== undefined) {
@@ -4518,6 +4848,10 @@ export class ChartComponent implements ChartRegistrationContext, AfterContentChe
                 seriesName: s.name(),
                 visible: nextVisibility
             });
+            const seriesName = resolveSeriesDisplayName(s);
+            this.#announceToggle(
+                nextVisibility ? this.messages().seriesShown(seriesName) : this.messages().seriesHidden(seriesName)
+            );
 
             if (this.#interactionState) {
                 const activeHits = this.#interactionState.activeHits.filter(

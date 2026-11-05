@@ -1,19 +1,33 @@
 export interface MonaChartMessages {
     /** Joins the parts of a screen reader announcement (", " in English). */
     readonly announcementSeparator: string;
+    /** Announced when a keyboard brush is committed. */
+    readonly brushApplied: (count: number) => string;
+    /** Announced when a keyboard brush is canceled. */
+    readonly brushCleared: string;
+    /** Announced while a keyboard brush is extended. */
+    readonly brushRange: (from: string, to: string) => string;
+    /** The data table's first column header when the X axis has no title. */
+    readonly category: string;
     /** The name of a radar category without a value. */
     readonly categoryFallbackName: (index: number) => string;
+    /** The category range of a Cartesian chart, in its description. */
+    readonly categoryRange: (from: string, to: string) => string;
     readonly change: string;
     /** The price change in a financial announcement. */
     readonly changeValue: (change: string) => string;
     readonly chart: string;
     readonly chartLegend: string;
+    /** What screen readers call the chart (`aria-roledescription`). */
+    readonly chartRoleDescription: string;
     readonly close: string;
     readonly closeAbbreviation: string;
     readonly colorScale: string;
     readonly conversion: string;
     /** A funnel stage's conversion from the previous stage, in an announcement. */
     readonly conversionOfPrevious: (rate: string) => string;
+    /** Below the data table when it shows only the first rows. */
+    readonly dataTableTruncated: (shown: number, total: number) => string;
     /** The waterfall legend's name for falling steps. */
     readonly decrease: string;
     readonly decreaseAnnouncement: (delta: string, from: string, to: string) => string;
@@ -37,6 +51,8 @@ export interface MonaChartMessages {
     /** The name of a pie, donut, rose or radial bar item without a category. */
     readonly itemFallbackName: (index: number) => string;
     readonly itemSelected: (item: string) => string;
+    /** The keyboard instructions at the end of the chart's description. */
+    readonly keyboardHelp: string;
     readonly labelValueSeparator: string;
     readonly labeledValue: (label: string, value: string) => string;
     readonly low: string;
@@ -57,6 +73,8 @@ export interface MonaChartMessages {
     readonly pannedUp: string;
     /** Joins a treemap node's path (" / " in English). */
     readonly pathSeparator: string;
+    /** A point's position among the points it is navigated with, in an announcement. */
+    readonly pointPosition: (position: number, total: number) => string;
     readonly range: string;
     readonly rangeDescription: (
         title: string,
@@ -69,6 +87,14 @@ export interface MonaChartMessages {
     readonly runningTotal: string;
     /** The name of a series without a name. */
     readonly seriesFallbackName: (index: number) => string;
+    /** Announced when a legend item hides a series or item. */
+    readonly seriesHidden: (series: string) => string;
+    /** Announced when a legend item shows a series or item. */
+    readonly seriesShown: (series: string) => string;
+    /** The series of the chart, in its description. */
+    readonly seriesSummary: (count: number, names: string) => string;
+    /** A series' lowest and highest value, in the chart's description. */
+    readonly seriesValueRange: (series: string, minimum: string, maximum: string) => string;
     /** A treemap node's share of the whole, in an announcement. */
     readonly shareOfTotal: (share: string) => string;
     readonly size: string;

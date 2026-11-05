@@ -57,6 +57,7 @@
                         ) {
                             @if (tick.labelVisible !== false) {
                                 <div
+                                    aria-hidden="true"
                                     [class]="axisLabelClasses()"
                                     [monaChartLabelMeasure]="tick.tickKey ?? ''"
                                     data-mona-chart-export-role="axis-label"
@@ -91,6 +92,7 @@
                     <!-- Axis Title -->
                     @if (axisScene.title) {
                         <div
+                            aria-hidden="true"
                             class="mona-chart-axis-title absolute text-xs font-medium text-muted-foreground select-none pointer-events-none whitespace-nowrap"
                             data-mona-chart-export-role="axis-title"
                             data-mona-chart-export-mode="vector"
@@ -608,6 +610,42 @@
         <div class="sr-only" aria-live="polite" aria-atomic="true">
             {{ activeAccessibilityText() }}
         </div>
+
+        <!-- The chart's description (aria-describedby): a summary of the data and the keyboard help -->
+        <div [id]="descriptionId" hidden>{{ descriptionText() }}</div>
+
+        @if (dataTableModel(); as table) {
+            <!-- role="document" lets screen readers browse the table inside the application -->
+            <div class="sr-only" [attr.role]="landmark() ? null : 'document'">
+                <table>
+                    <caption>
+                        {{
+                            effectiveAriaLabel()
+                        }}
+                    </caption>
+                    <thead>
+                        <tr>
+                            @for (column of table.columns; track $index) {
+                                <th scope="col">{{ column }}</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (row of table.rows; track $index) {
+                            <tr>
+                                <th scope="row">{{ row.label }}</th>
+                                @for (cell of row.cells; track $index) {
+                                    <td>{{ cell }}</td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                @if (table.totalRows > table.rows.length) {
+                    <p>{{ messages().dataTableTruncated(table.rows.length, table.totalRows) }}</p>
+                }
+            </div>
+        }
     </div>
 
     <!-- Projected Legend Outside Plot Container -->

@@ -22,9 +22,14 @@ The Mona UI Chart library combines declarative Angular template composition with
     - `ArrowRight` / `ArrowLeft`: Navigate through X-axis interaction buckets, polar slices, funnel stages, waterfall steps, or angular spokes.
     - `ArrowUp` / `ArrowDown`: Cycle through visible series at the focused data point or duplicate X coordinates, or navigate slices/levels.
     - `Home` / `End`: Jump to first or last data point/slice/stage.
-    - `Enter` / `Space`: Emit click events for the selected data point, spoke, stage, or slice.
-    - `Escape`: Dismiss active interaction and announcements.
-    - Live ARIA announcements and 100% AXE-compliant accessibility.
+    - `Enter`: Emit `pointClick` for the focused data point, spoke, stage, or slice (and toggle its selection when the chart has `mona-chart-selection`).
+    - `Space`: Toggle the focused point's selection when the chart has `mona-chart-selection`; otherwise emit `pointClick` like `Enter`.
+    - `Escape`: Dismiss the active interaction, tooltip and announcement. With nothing to dismiss, the key is left to the page (a dialog around the chart closes). `Escape` anywhere also hides a tooltip the pointer opened.
+    - `Shift` + arrows (with `navigation`): Pan the viewport along the arrow's direction. `+` / `-` zoom and `0` resets.
+    - `Shift` + arrows (with `mona-chart-brush`, from a focused point): Extend a brush from that point; `Enter` commits it and `Escape` cancels it.
+    - Keys pressed in the legend or other projected content are left to that content.
+    - The host is `role="application"` with `aria-roledescription="chart"`, so screen readers pass the arrow keys to the chart; set `landmark` for a `region` landmark instead (give each one a unique name). Its description (`aria-describedby`) summarizes the series, the category range and each series' lowest and highest value, and lists the keys; `aria-description` replaces the summary. `dataTable` adds a visually hidden table of the data (the first 100 rows).
+    - Announcements give the point's position ("2 of 12"), read the point again at an edge, and report legend toggles.
 - **Interactive Legend:** Clickable legend items that toggle series or individual slice/stage/ring visibility with stable palette coloring (and semantic presentation legend markers for Waterfall steps).
 - **Customizable Templates:** Custom Angular templates for tooltips (`monaChartTooltipTemplate`), axis tick labels (`monaChartAxisLabelTemplate`), legend items (`monaChartLegendItemTemplate`), slice data labels (`monaChartSliceLabelTemplate`), donut center content (`monaChartCenterTemplate`), gauge center content (`monaChartGaugeCenterTemplate`), treemap node labels (`monaChartTreemapLabelTemplate`), funnel stage labels (`monaChartFunnelLabelTemplate`), waterfall step labels (`monaChartWaterfallLabelTemplate`), and empty states (`monaChartNoDataTemplate`).
 

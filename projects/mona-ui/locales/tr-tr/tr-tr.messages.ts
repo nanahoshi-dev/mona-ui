@@ -50,16 +50,28 @@ export const TR_TR_MESSAGES = {
     },
     chart: {
         announcementSeparator: ", ",
+        brushApplied: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `Seçim uygulandı, ${localizeNumber(count)} nokta`,
+                other: () => `Seçim uygulandı, ${localizeNumber(count)} nokta`
+            }),
+        brushCleared: "Seçim temizlendi",
+        brushRange: (from: string, to: string) => `${from} ile ${to} arası seçim`,
+        category: "Kategori",
         categoryFallbackName: (index: number) => `Kategori ${localizeNumber(index)}`,
+        categoryRange: (from: string, to: string) => `${from} ile ${to} arası.`,
         change: "Değişim",
         changeValue: (change: string) => `değişim ${change}`,
         chart: "Grafik",
         chartLegend: "Grafik göstergesi",
+        chartRoleDescription: "grafik",
         close: "Kapanış",
         closeAbbreviation: "K",
         colorScale: "Renk ölçeği",
         conversion: "Dönüşüm",
         conversionOfPrevious: (rate: string) => `Önceki aşamaya göre dönüşüm ${rate}`,
+        dataTableTruncated: (shown: number, total: number) =>
+            `${localizeNumber(total)} satırın ilk ${localizeNumber(shown)} tanesi gösteriliyor.`,
         decrease: "Azalış",
         decreaseAnnouncement: (delta: string, from: string, to: string) =>
             `azalış ${delta}, kümülatif toplam ${from} değerinden ${to} değerine`,
@@ -77,6 +89,8 @@ export const TR_TR_MESSAGES = {
         itemDeselected: (item: string) => `${item}, seçim kaldırıldı`,
         itemFallbackName: (index: number) => `Öğe ${localizeNumber(index)}`,
         itemSelected: (item: string) => `${item}, seçildi`,
+        keyboardHelp:
+            "Veri noktaları arasında gezinmek için ok tuşlarını, ilk ve son noktaya gitmek için Home ve End tuşlarını, etkinleştirmek için Enter veya Boşluk tuşunu, temizlemek için Escape tuşunu kullanın.",
         labelValueSeparator: ":",
         labeledValue: (label: string, value: string) => `${label}: ${value}`,
         low: "En düşük",
@@ -95,6 +109,7 @@ export const TR_TR_MESSAGES = {
         pannedRight: "Sağa kaydırıldı",
         pannedUp: "Yukarı kaydırıldı",
         pathSeparator: " / ",
+        pointPosition: (position: number, total: number) => `${localizeNumber(position)}/${localizeNumber(total)}`,
         range: "Aralık",
         rangeDescription: (title: string, minimum: string, maximum: string) =>
             `${title}, ${minimum} ile ${maximum} arasında`,
@@ -102,6 +117,15 @@ export const TR_TR_MESSAGES = {
         rising: "Yükseliş",
         runningTotal: "Kümülatif toplam",
         seriesFallbackName: (index: number) => `Seri ${localizeNumber(index)}`,
+        seriesHidden: (series: string) => `${series} gizlendi`,
+        seriesShown: (series: string) => `${series} gösterildi`,
+        seriesSummary: (count: number, names: string) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} seri: ${names}.`,
+                other: () => `${localizeNumber(count)} seri: ${names}.`
+            }),
+        seriesValueRange: (series: string, minimum: string, maximum: string) =>
+            `${series}: en düşük ${minimum}, en yüksek ${maximum}.`,
         shareOfTotal: (share: string) => `toplamın ${share} kadarı`,
         size: "boyut",
         sizeValue: (size: string) => `boyut ${size}`,

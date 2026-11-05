@@ -103,11 +103,12 @@ describe("Pointer and Keyboard Interaction Payload Parity", () => {
             expect(host.clickedEvents.length).toBe(2);
             const enterPayload = host.clickedEvents[1];
 
-            // 3. Keyboard Space (does not emit pointClick per GDSB-R2-010)
+            // 3. Keyboard Space activates the point too where there is no selection to toggle
             container.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: " " }));
             fixture.detectChanges();
 
-            expect(host.clickedEvents.length).toBe(2);
+            expect(host.clickedEvents.length).toBe(3);
+            expect(host.clickedEvents[2]).toEqual(enterPayload);
 
             // Verify parity between pointer and enter
             expect(pointerPayload).toEqual(enterPayload);

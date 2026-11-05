@@ -3463,6 +3463,13 @@
         "defaultValue": "[]"
       },
       {
+        "description": "Renders a visually hidden table of the chart's data (its first 100 rows) for screen readers.",
+        "kind": "input",
+        "name": "dataTable",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
         "description": "Initial default viewport window state for chart axes.",
         "kind": "input",
         "name": "defaultViewport",
@@ -3475,6 +3482,13 @@
         "name": "downsampling",
         "type": "ChartDownsamplingInput",
         "defaultValue": "true"
+      },
+      {
+        "description": "Makes the chart a `region` landmark instead of an `application`. A landmark keeps screen readers in\nbrowse mode, so they read the arrow keys themselves; give each landmark chart a unique name.",
+        "kind": "input",
+        "name": "landmark",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Navigation, panning, and zooming options for the chart.",

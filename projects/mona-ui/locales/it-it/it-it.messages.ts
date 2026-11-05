@@ -51,16 +51,28 @@ export const IT_IT_MESSAGES = {
     },
     chart: {
         announcementSeparator: ", ",
+        brushApplied: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `Selezione applicata, ${localizeNumber(count)} punto`,
+                other: () => `Selezione applicata, ${localizeNumber(count)} punti`
+            }),
+        brushCleared: "Selezione cancellata",
+        brushRange: (from: string, to: string) => `Selezione da ${from} a ${to}`,
+        category: "Categoria",
         categoryFallbackName: (index: number) => `Categoria ${localizeNumber(index)}`,
+        categoryRange: (from: string, to: string) => `Da ${from} a ${to}.`,
         change: "Variazione",
         changeValue: (change: string) => `variazione ${change}`,
         chart: "Grafico",
         chartLegend: "Legenda del grafico",
+        chartRoleDescription: "grafico",
         close: "Chiusura",
         closeAbbreviation: "C",
         colorScale: "Scala colori",
         conversion: "Conversione",
         conversionOfPrevious: (rate: string) => `Conversione del ${rate} rispetto alla fase precedente`,
+        dataTableTruncated: (shown: number, total: number) =>
+            `Prime ${localizeNumber(shown)} righe su ${localizeNumber(total)}.`,
         decrease: "Diminuzione",
         decreaseAnnouncement: (delta: string, from: string, to: string) =>
             `diminuzione di ${delta}, totale progressivo da ${from} a ${to}`,
@@ -78,6 +90,8 @@ export const IT_IT_MESSAGES = {
         itemDeselected: (item: string) => `${item}, deselezionato`,
         itemFallbackName: (index: number) => `Elemento ${localizeNumber(index)}`,
         itemSelected: (item: string) => `${item}, selezionato`,
+        keyboardHelp:
+            "Usa le frecce per spostarti tra i punti dati, Home e Fine per andare al primo e all’ultimo, Invio o Spazio per attivare ed Esc per cancellare.",
         labelValueSeparator: ":",
         labeledValue: (label: string, value: string) => `${label}: ${value}`,
         low: "Minimo",
@@ -96,12 +110,22 @@ export const IT_IT_MESSAGES = {
         pannedRight: "Spostato a destra",
         pannedUp: "Spostato in alto",
         pathSeparator: " / ",
+        pointPosition: (position: number, total: number) => `${localizeNumber(position)} di ${localizeNumber(total)}`,
         range: "Intervallo",
         rangeDescription: (title: string, minimum: string, maximum: string) => `${title}, da ${minimum} a ${maximum}`,
         rangeValue: (from: string, to: string) => `da ${from} a ${to}`,
         rising: "In rialzo",
         runningTotal: "Totale progressivo",
         seriesFallbackName: (index: number) => `Serie ${localizeNumber(index)}`,
+        seriesHidden: (series: string) => `${series} nascosta`,
+        seriesShown: (series: string) => `${series} visibile`,
+        seriesSummary: (count: number, names: string) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `Una serie: ${names}.`,
+                other: () => `${localizeNumber(count)} serie: ${names}.`
+            }),
+        seriesValueRange: (series: string, minimum: string, maximum: string) =>
+            `${series}: minimo ${minimum}, massimo ${maximum}.`,
         shareOfTotal: (share: string) => `${share} del totale`,
         size: "dimensione",
         sizeValue: (size: string) => `dimensione ${size}`,

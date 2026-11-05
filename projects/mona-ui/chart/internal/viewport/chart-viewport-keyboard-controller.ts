@@ -69,12 +69,15 @@ export class ChartViewportKeyboardController {
             return { announcement: null, changedAxes: [], handled: false, nextState: null };
         }
 
-        const keyTarget: ChartNavigationAxisTarget | undefined = activeNamespace
-            ? [activeNamespace]
-            : isPanKey
-              ? event.key === "ArrowLeft" || event.key === "ArrowRight"
-                  ? "x"
-                  : "y"
+        // A pan goes along the key's direction: the focused point's axis only when it lies that way, so Shift+ArrowUp
+        // still pans Y after arrowing to a point on the X axis.
+        const panAxis = event.key === "ArrowLeft" || event.key === "ArrowRight" ? "x" : "y";
+        const keyTarget: ChartNavigationAxisTarget | undefined = isPanKey
+            ? activeNamespace && activeNamespace.axis === panAxis
+                ? [activeNamespace]
+                : panAxis
+            : activeNamespace
+              ? [activeNamespace]
               : isZoomKey
                 ? options.zoomAxes
                 : undefined;
