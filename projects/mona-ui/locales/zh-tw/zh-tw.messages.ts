@@ -435,6 +435,9 @@ export const ZH_TW_MESSAGES = {
         rangeStatus: (start: number, end: number, total: number) =>
             `第 ${localizeNumber(start)} - ${localizeNumber(end)} 項，共 ${localizeNumber(total)} 項`
     },
+    progressBar: {
+        label: "進度"
+    },
     rating: {
         notRated: "未評分",
         valueText: (value: number, max: number) => `第 ${localizeNumber(value)} 級，共 ${localizeNumber(max)} 級`
@@ -444,6 +447,7 @@ export const ZH_TW_MESSAGES = {
         nextPage: "下一頁",
         page: (current: number) => `第 ${localizeNumber(current)} 頁`,
         pageOf: (current: number, total: number) => `第 ${localizeNumber(current)} 頁，共 ${localizeNumber(total)} 頁`,
+        pages: "頁面",
         previousPage: "上一頁",
         scrollPagerNext: "向後捲動分頁器",
         scrollPagerPrevious: "向前捲動分頁器",

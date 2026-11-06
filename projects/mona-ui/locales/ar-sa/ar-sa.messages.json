@@ -410,6 +410,9 @@
         "previousPageLabel": "الصفحة السابقة",
         "rangeStatus": "{start}–{end} من {total}"
     },
+    "progressBar": {
+        "label": "التقدم"
+    },
     "rating": {
         "notRated": "غير مقيّم",
         "valueText": "{value} من {max}"
@@ -419,6 +422,7 @@
         "nextPage": "الصفحة التالية",
         "page": "الصفحة {current}",
         "pageOf": "الصفحة {current} من {total}",
+        "pages": "الصفحات",
         "previousPage": "الصفحة السابقة",
         "scrollPagerNext": "تمرير مؤشر الصفحات إلى التالي",
         "scrollPagerPrevious": "تمرير مؤشر الصفحات إلى السابق",

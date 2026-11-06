@@ -410,6 +410,9 @@
         "previousPageLabel": "Halaman sebelumnya",
         "rangeStatus": "{start} - {end} dari {total} item"
     },
+    "progressBar": {
+        "label": "Kemajuan"
+    },
     "rating": {
         "notRated": "Belum dinilai",
         "valueText": "{value} dari {max}"
@@ -419,6 +422,7 @@
         "nextPage": "Halaman berikutnya",
         "page": "Halaman {current}",
         "pageOf": "Halaman {current} dari {total}",
+        "pages": "Halaman",
         "previousPage": "Halaman sebelumnya",
         "scrollPagerNext": "Gulir opsi halaman ke depan",
         "scrollPagerPrevious": "Gulir opsi halaman ke belakang",

@@ -6,4 +6,11 @@ import type { LabelTemplateContext } from "../models/LabelTemplateContext";
 })
 export class ProgressBarLabelTemplateDirective {
     public readonly templateRef = inject<TemplateRef<LabelTemplateContext>>(TemplateRef);
+
+    public static ngTemplateContextGuard(
+        _dir: ProgressBarLabelTemplateDirective,
+        _ctx: unknown
+    ): _ctx is LabelTemplateContext {
+        return true;
+    }
 }

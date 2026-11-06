@@ -410,6 +410,9 @@
         "previousPageLabel": "Pagina precedente",
         "rangeStatus": "{total, plural, =1 {{start} - {end} di # elemento} other {{start} - {end} di # elementi}}"
     },
+    "progressBar": {
+        "label": "Avanzamento"
+    },
     "rating": {
         "notRated": "Nessuna valutazione",
         "valueText": "{value} di {max}"
@@ -419,6 +422,7 @@
         "nextPage": "Pagina successiva",
         "page": "Pagina {current}",
         "pageOf": "Pagina {current} di {total}",
+        "pages": "Pagine",
         "previousPage": "Pagina precedente",
         "scrollPagerNext": "Scorri in avanti le opzioni del paginatore",
         "scrollPagerPrevious": "Scorri indietro le opzioni del paginatore",

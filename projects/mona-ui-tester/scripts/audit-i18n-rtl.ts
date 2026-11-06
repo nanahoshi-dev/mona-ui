@@ -691,6 +691,18 @@ export const ALLOWLIST: AllowlistEntry[] = [
     },
     {
         category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/scroll-view/components/scroll-view/scroll-view.component.ts",
+        lineSnippet: "const offset = activeRect.left + activeRect.width / 2",
+        reason: "ScrollView pager centers the active dot from a physical distance between two rects, the same in LTR and RTL"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/scroll-view/components/scroll-view/scroll-view.component.ts",
+        lineSnippet: "list.scrollTo({ behavior, left: list.scrollLeft + offset })",
+        reason: "ScrollView pager moves scrollLeft by a physical distance, which holds with RTL's negative scrollLeft"
+    },
+    {
+        category: "rtl-manual-review",
         filePattern: "projects/mona-ui/segmented/components/segmented/segmented.component.ts",
         lineSnippet: "offsetLeft",
         reason: "Segmented pill offsetLeft calculation relative to parent container"

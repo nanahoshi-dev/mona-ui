@@ -1,16 +1,17 @@
-import { Component, computed, input } from "@angular/core";
+import { Component, computed, input, linkedSignal } from "@angular/core";
 
 @Component({
     selector: "mona-avatar",
     templateUrl: "./avatar.component.html",
     host: {
-        "[attr.aria-label]": "ariaLabel() || null",
-        "[attr.role]": "ariaLabel() && !image() ? 'img' : null",
+        "[attr.aria-label]": "hostName() || null",
+        "[attr.role]": "hostName() ? 'img' : null",
         "[class]": "userClass()",
         "[style]": "avatarStyles()"
     }
 })
 export class AvatarComponent {
+    readonly #imageFailed = linkedSignal({ source: () => this.image(), computation: () => false });
     protected readonly avatarLabelStyles = computed(() => {
         return {
             alignItems: "center",
@@ -24,8 +25,7 @@ export class AvatarComponent {
         };
     });
     protected readonly avatarStyles = computed(() => {
-        const image = this.image();
-        const backgroundColor = image ? "transparent" : this.backgroundColor();
+        const backgroundColor = this.imageVisible() ? "transparent" : this.backgroundColor();
         return {
             borderColor: this.borderColor(),
             borderWidth: this.borderWidth(),
@@ -38,6 +38,14 @@ export class AvatarComponent {
             ...this.customStyles()
         };
     });
+    protected readonly hostName = computed(() => {
+        if (this.imageVisible()) {
+            return "";
+        }
+        return this.ariaLabel() || (this.image() ? this.alt() : "");
+    });
+    protected readonly imageAlt = computed(() => this.alt() || this.ariaLabel());
+    protected readonly imageVisible = computed(() => !!this.image() && !this.#imageFailed());
 
     /**
      * @description Alternative text for the avatar image. Provide a meaningful description for non-decorative images;
@@ -47,8 +55,9 @@ export class AvatarComponent {
     public readonly alt = input("");
 
     /**
-     * @description Accessible name for the host element. Describe what the avatar represents.
-     * When non-empty, the host receives `role="img"` in label and projected-content modes.
+     * @description Accessible name of the avatar. Describe who or what it represents.
+     * In label and projected-content modes the host takes it with `role="img"`. While an image shows, it's the image's
+     * `alt` unless `alt` is set.
      * @default ""
      */
     public readonly ariaLabel = input("", { alias: "aria-label" });
@@ -114,23 +123,23 @@ export class AvatarComponent {
     });
 
     /**
-     * @description Image URL. When non-empty, renders an `<img>` and suppresses `label` and projected content.
+     * @description Image URL. When non-empty, renders an `<img>` and suppresses `label` and projected content, until it
+     * fails to load. Then the avatar falls back to them, and a new URL tries again.
      * @default ""
      */
-    // TODO(owner-review): migrate to NgOptimizedImage once width/height inputs are changed to number-only
     public readonly image = input("");
 
     /**
-     * @description Text label displayed inside the avatar when no image is provided. Ignored when `image` is non-empty.
+     * @description Text label displayed inside the avatar when there's no image, or the image failed to load.
      * @default ""
      */
     public readonly label = input("");
 
     /**
      * @description Color of the label text. Ignored in image mode.
-     * @default "var(--color-foreground)"
+     * @default "var(--color-primary-foreground)"
      */
-    public readonly labelColor = input("var(--color-foreground)");
+    public readonly labelColor = input("var(--color-primary-foreground)");
 
     /**
      * @description Font size of the label text. Ignored in image mode.
@@ -145,6 +154,12 @@ export class AvatarComponent {
     public readonly labelFontWeight = input("700");
 
     /**
+     * @description Additional CSS classes applied to the host element.
+     * @default ""
+     */
+    public readonly userClass = input("", { alias: "class" });
+
+    /**
      * @description Width of the host element. A string is used as-is; a number is converted to `px`.
      * @default "64px"
      */
@@ -157,9 +172,7 @@ export class AvatarComponent {
         }
     });
 
-    /**
-     * @description Additional CSS classes applied to the host element.
-     * @default ""
-     */
-    public readonly userClass = input("", { alias: "class" });
+    protected onImageError(): void {
+        this.#imageFailed.set(true);
+    }
 }

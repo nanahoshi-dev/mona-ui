@@ -1581,6 +1581,19 @@
       }
     ]
   },
+  "ScrollViewSlideDirective": {
+    "name": "ScrollViewSlideDirective",
+    "selector": "\"ng-template[monaScrollViewSlide]\"",
+    "inputs": [
+      {
+        "description": "",
+        "kind": "input",
+        "name": "monaScrollViewSlide",
+        "type": "Iterable<T> | \"\"",
+        "defaultValue": "\"\""
+      }
+    ]
+  },
   "SegmentedItemTemplateDirective": {
     "name": "SegmentedItemTemplateDirective",
     "selector": "\"ng-template[monaSegmentedItemTemplate]\"",
@@ -2448,7 +2461,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Accessible name for the host element. Describe what the avatar represents.\r\nWhen non-empty, the host receives `role=\"img\"` in label and projected-content modes.",
+        "description": "Accessible name of the avatar. Describe who or what it represents.\nIn label and projected-content modes the host takes it with `role=\"img\"`. While an image shows, it's the image's\n`alt` unless `alt` is set.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
@@ -2498,14 +2511,14 @@
         "defaultValue": "\"64px\""
       },
       {
-        "description": "Image URL. When non-empty, renders an `<img>` and suppresses `label` and projected content.",
+        "description": "Image URL. When non-empty, renders an `<img>` and suppresses `label` and projected content, until it\nfails to load. Then the avatar falls back to them, and a new URL tries again.",
         "kind": "input",
         "name": "image",
         "type": "string",
         "defaultValue": "\"\""
       },
       {
-        "description": "Text label displayed inside the avatar when no image is provided. Ignored when `image` is non-empty.",
+        "description": "Text label displayed inside the avatar when there's no image, or the image failed to load.",
         "kind": "input",
         "name": "label",
         "type": "string",
@@ -2516,7 +2529,7 @@
         "kind": "input",
         "name": "labelColor",
         "type": "string",
-        "defaultValue": "\"var(--color-foreground)\""
+        "defaultValue": "\"var(--color-primary-foreground)\""
       },
       {
         "description": "Font size of the label text. Ignored in image mode.",
@@ -2533,19 +2546,19 @@
         "defaultValue": "\"700\""
       },
       {
-        "description": "Width of the host element. A string is used as-is; a number is converted to `px`.",
-        "kind": "input",
-        "name": "width",
-        "type": "string | number",
-        "defaultValue": "\"64px\""
-      },
-      {
         "description": "Additional CSS classes applied to the host element.",
         "kind": "input",
         "name": "userClass",
         "type": "string",
         "alias": "class",
         "defaultValue": "\"\""
+      },
+      {
+        "description": "Width of the host element. A string is used as-is; a number is converted to `px`.",
+        "kind": "input",
+        "name": "width",
+        "type": "string | number",
+        "defaultValue": "\"64px\""
       }
     ]
   },
@@ -7873,7 +7886,7 @@
         "defaultValue": "true"
       },
       {
-        "description": "Accessible name for the host element. Describe what the component represents (e.g., \"Upload progress\").\r\nWhen empty, assistive technology announces the role without a label.",
+        "description": "Accessible name for the host element. Describe what the component represents (e.g., \"Upload progress\").\nWhen empty, falls back to the localized \"Progress\". An `aria-labelledby` on the host takes precedence over both.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
@@ -7903,14 +7916,21 @@
         "defaultValue": "false"
       },
       {
-        "description": "Activates indeterminate mode when the completion value is unknown.\r\nARIA value attributes are removed and `aria-busy` is set on the host element.",
+        "description": "Activates indeterminate mode when the completion value is unknown.\nARIA value attributes are removed.",
         "kind": "input",
         "name": "indeterminate",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Upper bound of the value range. Must be greater than `min`.",
+        "description": "Controls label visibility in determinate mode.\nHas no effect in indeterminate mode, where the label is always hidden.",
+        "kind": "input",
+        "name": "labelVisible",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Upper bound of the value range. Must be greater than `min`; with a range the wrong way round, the bar\nreports no values and a warning is logged in development.",
         "kind": "input",
         "name": "max",
         "type": "number",
@@ -7946,7 +7966,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Current progress value within `[min, max]`. Values outside the range are clamped before rendering; non-finite values are treated as `0`.",
+        "description": "Current progress value within `[min, max]`. Values outside the range are clamped, for the ring and\nfor `aria-valuenow`; non-finite values count as `min`.",
         "kind": "input",
         "name": "value",
         "type": "number",
@@ -13137,7 +13157,7 @@
         "defaultValue": "true"
       },
       {
-        "description": "Accessible label for the progress bar host element.\nUse to describe what is being measured (e.g., \"Upload progress\").\nWhen empty, assistive technology announces the role and numeric values only.",
+        "description": "Accessible label for the progress bar host element.\nUse to describe what is being measured (e.g., \"Upload progress\").\nWhen empty, falls back to the localized \"Progress\". An `aria-labelledby` on the host takes precedence over both.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
@@ -13160,14 +13180,14 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Renders the bar with reduced visual emphasis and removes pointer interaction.",
+        "description": "Renders the bar with reduced visual emphasis and removes pointer interaction. `color` doesn't apply\nwhile disabled.",
         "kind": "input",
         "name": "disabled",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Switches to indeterminate mode: plays a looping animation and hides the label.\nARIA value attributes are removed and `aria-busy` is set on the host element.",
+        "description": "Switches to indeterminate mode: plays a looping animation and hides the label.\nARIA value attributes are removed.",
         "kind": "input",
         "name": "indeterminate",
         "type": "boolean",
@@ -13195,7 +13215,7 @@
         "defaultValue": "true"
       },
       {
-        "description": "Upper bound of the value range. Must be greater than `min`.",
+        "description": "Upper bound of the value range. Must be greater than `min`; with a range the wrong way round, the bar\nreports no values and a warning is logged in development.",
         "kind": "input",
         "name": "max",
         "type": "number",
@@ -13224,7 +13244,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Current progress value within `[min, max]`.\nValues outside the range are clamped before rendering; non-finite values are treated as `0`.",
+        "description": "Current progress value within `[min, max]`.\nValues outside the range are clamped, for the bar and for `aria-valuenow`; non-finite values count as `min`.",
         "kind": "input",
         "name": "value",
         "type": "number",
@@ -13660,7 +13680,23 @@
         "defaultValue": "true"
       },
       {
-        "description": "Represents the state of arrows' visibility or activity.",
+        "description": "Accessible name of the carousel, saying what it shows. Use this or `aria-labelledby`; with neither,\nthe host is a plain group and a warning is logged in development.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The id of the element that names the carousel.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Shows the previous and next arrows. A swipe is a gesture, so give pointer users arrows or a pager too.",
         "kind": "input",
         "name": "arrows",
         "type": "boolean",
@@ -13695,7 +13731,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Sets whether the pager is visible.",
+        "description": "Shows the pager. A swipe is a gesture, so give pointer users arrows or a pager too.",
         "kind": "input",
         "name": "pageable",
         "type": "boolean",
@@ -14749,7 +14785,7 @@
         "defaultValue": "\"default\""
       },
       {
-        "description": "Accessible text announced by assistive technology when the spinner is not decorative.\nWhen not set, falls back to the localized loading text.",
+        "description": "Accessible name of the spinner when it is not decorative.\nWhen not set, falls back to the localized loading text.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | undefined",
@@ -14757,7 +14793,7 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "When `true`, removes the `status` role and hides the spinner from assistive technology with `aria-hidden=\"true\"`.\nUseful when a parent element already manages loading semantics (such as `aria-busy=\"true\"` on a button).",
+        "description": "When `true`, removes the `img` role and hides the spinner from assistive technology with `aria-hidden=\"true\"`.\nUseful when visible text says the same thing, or a parent element already manages loading semantics (such as\n`aria-busy=\"true\"` on a button).",
         "kind": "input",
         "name": "decorative",
         "type": "boolean",

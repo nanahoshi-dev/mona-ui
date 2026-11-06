@@ -18,7 +18,7 @@
         fill="transparent"
         [class.indeterminate]="indeterminate()" />
 </svg>
-@if (!indeterminate()) {
+@if (!indeterminate() && labelVisible()) {
     <div class="mona-circular-progress-bar-label">
         @if (labelTemplate()) {
             <ng-container
@@ -26,7 +26,7 @@
                 [ngTemplateOutletContext]="{ $implicit: value(), min: min(), max: max(), percent: progress() }">
             </ng-container>
         } @else {
-            {{ progress() }}
+            {{ formattedProgress() }}
         }
     </div>
 }

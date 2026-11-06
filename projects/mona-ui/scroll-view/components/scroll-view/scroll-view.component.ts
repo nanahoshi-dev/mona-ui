@@ -11,32 +11,24 @@ import {
     ElementRef,
     inject,
     input,
+    isDevMode,
     model,
     PLATFORM_ID,
     signal,
     Signal,
     TemplateRef,
+    untracked,
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed, toObservable, toSignal } from "@angular/core/rxjs-interop";
 import { ScrollDirection } from "@nanahoshi/mona-ui/common";
 import { toCssValue } from "@nanahoshi/mona-ui/internal";
 import { select } from "@mirei/ts-collections";
-import {
-    asyncScheduler,
-    filter,
-    fromEvent,
-    interval,
-    map,
-    pairwise,
-    startWith,
-    Subject,
-    takeUntil,
-    tap
-} from "rxjs";
+import { interval, map, pairwise, startWith, Subject, takeUntil } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { ScrollViewActivePageDirective } from "../../directives/scroll-view-active-page.directive";
+import { ScrollViewSlideDirective } from "../../directives/scroll-view-slide.directive";
 import { SCROLL_VIEW_DEFAULT_MESSAGES } from "../../i18n/scroll-view.default-messages";
 import { PagerOverlay } from "../../models/PagerOverlay";
 import { ScrollViewListItem } from "../../models/ScrollViewListItem";
@@ -44,11 +36,11 @@ import {
     scrollViewArrowThemeVariants,
     scrollViewBaseThemeVariants,
     scrollViewContentThemeVariants,
-    scrollViewListThemeVariants,
     scrollViewPagerArrowThemeVariants,
     scrollViewPagerListContainerThemeVariants,
     scrollViewPagerListThemeVariants,
     scrollViewPagerThemeVariants,
+    scrollViewSlideThemeVariants,
     ScrollViewVariantInput,
     ScrollViewVariantProps
 } from "../../styles/scroll-view.styles";
@@ -64,6 +56,18 @@ interface PagerScrollContext {
     readonly maxScroll: number;
     target: number;
 }
+
+interface ActiveSwipe {
+    readonly pointerId: number;
+    readonly startX: number;
+    readonly startY: number;
+}
+
+/** How far a touch has to travel, in pixels, to count as a swipe. */
+const SWIPE_DISTANCE = 40;
+
+/** Where a horizontal drag belongs to the control under it and not to the carousel. */
+const SWIPE_EXEMPT_SELECTOR = "input, select, textarea, [contenteditable], [role='slider'], [role='scrollbar']";
 
 function normalizeScrollViewIndex(rawIndex: number, itemCount: number, infinite: boolean): number {
     if (itemCount <= 0) {
@@ -147,12 +151,14 @@ function normalizeScrollViewIndex(rawIndex: number, itemCount: number, infinite:
     `,
     host: {
         "[class]": "baseClass()",
-        "[attr.tabindex]": "0",
+        "[attr.tabindex]": "itemCount() > 0 ? 0 : null",
         "[style.height]": "scrollViewHeight()",
         "[style.width]": "scrollViewWidth()",
-        "[attr.role]": "'region'",
-        "[attr.aria-roledescription]": "messages().carousel",
-        "[attr.aria-label]": "ariaLabel()"
+        "[attr.role]": "hostRole()",
+        "[attr.aria-roledescription]": "itemCount() > 0 ? messages().carousel : null",
+        "[attr.aria-label]": "ariaLabel() || null",
+        "[attr.aria-labelledby]": "ariaLabelledBy() || null",
+        "(keydown)": "onKeydown($event)"
     }
 })
 export class ScrollViewComponent implements ScrollViewVariantInput {
@@ -168,13 +174,18 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     readonly #prefersReducedMotion = signal(false);
     readonly #rejectedPagerPointers = new Map<number, RejectedPagerPointer>();
     readonly #scroll$ = new Subject<void>();
+    readonly #swipeCancelHandler = (event: PointerEvent): void => this.#endSwipe(event, false);
+    readonly #swipeEndHandler = (event: PointerEvent): void => this.#endSwipe(event, true);
     readonly #suppressedPagerClickPointerIds = new Set<number>();
     readonly #viewIndex = computed(() => {
         return normalizeScrollViewIndex(this.index(), this.itemCount(), this.infinite());
     });
     #activePagerPointerControl: HTMLElement | null = null;
     #activePagerPointerId: number | null = null;
+    #activeSwipe: ActiveSwipe | null = null;
     #continuousTicked = false;
+    #navigationIntent: ScrollDirection | null = null;
+    #pagerCentered = false;
     #pagerScrollCompletionCleanup: (() => void) | null = null;
     #pagerScrollContext: PagerScrollContext | null = null;
     #resizeObserver: ResizeObserver | null = null;
@@ -183,11 +194,7 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         const animate = this.animate();
         return typeof animate === "boolean" ? (animate ? 500 : 0) : animate;
     });
-    protected readonly ariaLabel = computed(() => {
-        const index = this.viewIndex();
-        const count = this.itemCount();
-        return count > 0 ? this.messages().pageOf(index + 1, count) : undefined;
-    });
+    protected readonly bareTemplate = contentChild(TemplateRef);
     protected readonly baseClass = computed(() => {
         const rounded = this.rounded();
         const variantClass = scrollViewBaseThemeVariants({ rounded });
@@ -197,13 +204,15 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     protected readonly contentClass = computed(() => {
         return scrollViewContentThemeVariants();
     });
-    protected readonly contentTemplate = contentChild(TemplateRef);
+    protected readonly contentElementRef = viewChild<ElementRef<HTMLDivElement>>("contentElement");
+    protected readonly contentTemplate = computed(() => this.slideDirective()?.templateRef ?? this.bareTemplate());
     protected readonly enterAnimation = computed(() => {
         const isRtl = this.isRtl();
         const dir = this.#directionFromIndex();
         const effectiveDir = isRtl ? (dir === "right" ? "left" : "right") : dir;
         return effectiveDir === "right" ? "slide-in-from-right" : "slide-in-from-left";
     });
+    protected readonly hostRole = computed(() => (this.ariaLabel() || this.ariaLabelledBy() ? "region" : "group"));
     protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly itemCount = computed(() => this.viewData().length);
     protected readonly leaveAnimation = computed(() => {
@@ -213,15 +222,15 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         return effectiveDir === "right" ? "slide-out-to-left" : "slide-out-to-right";
     });
     protected readonly leftArrowClass = computed(() => {
-        const count = this.itemCount();
-        const hidden = !this.arrows() || count <= 1 || !(this.infinite() || this.viewIndex() !== 0);
         const side = this.isRtl() ? "right" : "left";
-        return scrollViewArrowThemeVariants({ hidden, side });
-    });
-    protected readonly listClass = computed(() => {
-        return scrollViewListThemeVariants();
+        return scrollViewArrowThemeVariants({ hidden: this.previousArrowHidden(), side });
     });
     protected readonly messages = this.#i18n.componentMessages("scrollView", SCROLL_VIEW_DEFAULT_MESSAGES);
+    protected readonly nextArrowHidden = computed(() => {
+        const count = this.itemCount();
+        return !this.arrows() || count <= 1 || !(this.infinite() || this.viewIndex() !== count - 1);
+    });
+    protected readonly nextArrowRef = viewChild<ElementRef<HTMLButtonElement>>("nextArrow");
     protected readonly pagerArrowClass = computed(() => {
         return scrollViewPagerArrowThemeVariants();
     });
@@ -238,11 +247,13 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         return scrollViewPagerListContainerThemeVariants();
     });
     protected readonly pagerListElementRef = viewChild<ElementRef<HTMLUListElement>>("pagerListElement");
+    protected readonly previousArrowHidden = computed(() => {
+        return !this.arrows() || this.itemCount() <= 1 || !(this.infinite() || this.viewIndex() !== 0);
+    });
+    protected readonly previousArrowRef = viewChild<ElementRef<HTMLButtonElement>>("previousArrow");
     protected readonly rightArrowClass = computed(() => {
-        const count = this.itemCount();
-        const hidden = !this.arrows() || count <= 1 || !(this.infinite() || this.viewIndex() !== count - 1);
         const side = this.isRtl() ? "left" : "right";
-        return scrollViewArrowThemeVariants({ hidden, side });
+        return scrollViewArrowThemeVariants({ hidden: this.nextArrowHidden(), side });
     });
     protected readonly scrollBehavior = computed<ScrollBehavior>(() =>
         this.#prefersReducedMotion() ? "instant" : "smooth"
@@ -255,6 +266,11 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         const width = this.width();
         return toCssValue(width);
     });
+    protected readonly slideClass = computed(() => {
+        return scrollViewSlideThemeVariants();
+    });
+    protected readonly slideDirective = contentChild(ScrollViewSlideDirective);
+    protected readonly slideSize = signal({ height: 0, width: 0 });
     protected readonly viewData = computed(() => {
         const data = this.data();
         return select(data, d => ({ data: d }) as ScrollViewListItem).toImmutableSet();
@@ -269,7 +285,20 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     public readonly animate = input<boolean | number>(true);
 
     /**
-     * @description Represents the state of arrows' visibility or activity.
+     * @description Accessible name of the carousel, saying what it shows. Use this or `aria-labelledby`; with neither,
+     * the host is a plain group and a warning is logged in development.
+     * @default ""
+     */
+    public readonly ariaLabel = input("", { alias: "aria-label" });
+
+    /**
+     * @description The id of the element that names the carousel.
+     * @default ""
+     */
+    public readonly ariaLabelledBy = input("", { alias: "aria-labelledby" });
+
+    /**
+     * @description Shows the previous and next arrows. A swipe is a gesture, so give pointer users arrows or a pager too.
      * @default false
      */
     public readonly arrows = input(false);
@@ -298,7 +327,8 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     public readonly infinite = input(false);
 
     /**
-     * @description Sets whether the pager is visible.
+     * @description Shows the pager. A swipe is a gesture, so give pointer users arrows or a pager too.
+     * @default false
      */
     public readonly pageable = input(false);
 
@@ -353,9 +383,15 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
                 startWith(0),
                 pairwise(),
                 map(([prevIndex, index]) => {
+                    const intent = this.#navigationIntent;
+                    this.#navigationIntent = null;
+                    if (intent) {
+                        return intent;
+                    }
                     const infinite = this.infinite();
                     const totalItems = this.itemCount();
-                    if (infinite && totalItems > 1) {
+                    // With two slides a wrap and a plain step are the same move, so only an intent can tell them apart.
+                    if (infinite && totalItems > 2) {
                         const lastIndex = totalItems - 1;
                         if (prevIndex === lastIndex && index === 0) {
                             return "right";
@@ -382,7 +418,18 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
             mediaQuery.addEventListener("change", onPreferenceChange);
             this.#destroyRef.onDestroy(() => mediaQuery.removeEventListener("change", onPreferenceChange));
         }
+        // A slide is rendered one at a time, so focus inside the one that's leaving would otherwise fall to the body.
+        effect(() => {
+            this.#viewIndex();
+            untracked(() => {
+                const content = this.contentElementRef()?.nativeElement;
+                if (content?.contains(this.#document.activeElement)) {
+                    this.#hostElementRef.nativeElement.focus({ preventScroll: true });
+                }
+            });
+        });
         this.#destroyRef.onDestroy(() => {
+            this.#removeSwipeListeners();
             this.#stopContinuousScroll();
             this.#resetPagerScrollState();
             this.#scroll$.complete();
@@ -431,20 +478,104 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
                 }
             }
         });
+        afterRenderEffect(() => {
+            const index = this.#viewIndex();
+            const list = this.pagerListElementRef()?.nativeElement;
+            this.itemCount();
+            untracked(() => {
+                if (!list) {
+                    this.#pagerCentered = false;
+                    return;
+                }
+                const firstRun = !this.#pagerCentered;
+                this.#pagerCentered = true;
+                if (!firstRun || index !== 0) {
+                    this.#centerActivePage(list, firstRun ? "instant" : this.scrollBehavior());
+                }
+            });
+        });
+        afterRenderEffect(() => {
+            const previousHidden = this.previousArrowHidden();
+            const nextHidden = this.nextArrowHidden();
+            untracked(() => {
+                const previous = this.previousArrowRef()?.nativeElement;
+                const next = this.nextArrowRef()?.nativeElement;
+                const active = this.#document.activeElement;
+                if (active === previous && previousHidden) {
+                    (nextHidden ? this.#hostElementRef.nativeElement : next)?.focus({ preventScroll: true });
+                } else if (active === next && nextHidden) {
+                    (previousHidden ? this.#hostElementRef.nativeElement : previous)?.focus({ preventScroll: true });
+                }
+            });
+        });
         afterNextRender(() => {
-            this.setSubscriptions();
-            this.scrollActivePageIntoView();
+            const content = this.contentElementRef()?.nativeElement;
+            if (!content) {
+                return;
+            }
+            const measure = (): void => {
+                const { clientHeight: height, clientWidth: width } = content;
+                const current = this.slideSize();
+                if (current.height !== height || current.width !== width) {
+                    this.slideSize.set({ height, width });
+                }
+            };
+            measure();
+            if (typeof ResizeObserver !== "undefined") {
+                const observer = new ResizeObserver(measure);
+                observer.observe(content);
+                this.#destroyRef.onDestroy(() => observer.disconnect());
+            }
+            if (
+                isDevMode() &&
+                this.itemCount() > 0 &&
+                !this.#hostElementRef.nativeElement.hasAttribute("aria-label") &&
+                !this.#hostElementRef.nativeElement.hasAttribute("aria-labelledby")
+            ) {
+                console.warn("mona-scroll-view: a carousel needs a name. Set aria-label or aria-labelledby.");
+            }
         });
     }
 
     protected onArrowClick(direction: ScrollDirection): void {
-        this.navigate(direction, this.infinite());
+        this.#navigate(direction);
     }
 
-    protected onPageClick(index: number, element: HTMLButtonElement): void {
-        this.#resetPagerScrollState();
+    protected onKeydown(event: KeyboardEvent): void {
+        const count = this.itemCount();
+        if (
+            count === 0 ||
+            event.defaultPrevented ||
+            event.altKey ||
+            event.ctrlKey ||
+            event.metaKey ||
+            event.shiftKey ||
+            this.contentElementRef()?.nativeElement.contains(event.target as Node)
+        ) {
+            return;
+        }
+        const isRtl = this.isRtl();
+        switch (event.key) {
+            case "ArrowLeft":
+                this.#navigate(isRtl ? "right" : "left");
+                break;
+            case "ArrowRight":
+                this.#navigate(isRtl ? "left" : "right");
+                break;
+            case "Home":
+                this.index.set(0);
+                break;
+            case "End":
+                this.index.set(count - 1);
+                break;
+            default:
+                return;
+        }
+        event.preventDefault();
+    }
+
+    protected onPageClick(index: number): void {
         this.index.set(index);
-        element.scrollIntoView({ behavior: this.scrollBehavior(), block: "nearest", inline: "center" });
     }
 
     protected onPagerClick(event: MouseEvent | PointerEvent, element: HTMLUListElement, direction: ScrollDirection): void {
@@ -525,6 +656,22 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
             });
     }
 
+    protected onSwipeStart(event: PointerEvent): void {
+        this.#removeSwipeListeners();
+        if (
+            !event.isPrimary ||
+            event.pointerType === "mouse" ||
+            event.button !== 0 ||
+            this.itemCount() <= 1 ||
+            (event.target as Element).closest(SWIPE_EXEMPT_SELECTOR)
+        ) {
+            return;
+        }
+        this.#activeSwipe = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY };
+        this.#document.addEventListener("pointerup", this.#swipeEndHandler);
+        this.#document.addEventListener("pointercancel", this.#swipeCancelHandler);
+    }
+
     #armPagerScrollCompletion(element: HTMLUListElement): void {
         if (this.#pagerScrollCompletionCleanup) {
             this.#pagerScrollCompletionCleanup();
@@ -577,6 +724,19 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         }
     }
 
+    #centerActivePage(list: HTMLUListElement, behavior: ScrollBehavior): void {
+        this.#resetPagerScrollState();
+        const active = list.querySelector("button[data-active-page='true']");
+        if (!active || typeof list.scrollTo !== "function") {
+            return;
+        }
+        const listRect = list.getBoundingClientRect();
+        const activeRect = active.getBoundingClientRect();
+        const offset = activeRect.left + activeRect.width / 2 - (listRect.left + listRect.width / 2);
+        // Only the pager list moves, unlike scrollIntoView, which would also scroll the page to the carousel.
+        list.scrollTo({ behavior, left: list.scrollLeft + offset });
+    }
+
     #cleanupDocumentPointerListenersIfNeeded(): void {
         let hasDownRejected = false;
         for (const p of this.#rejectedPagerPointers.values()) {
@@ -589,6 +749,24 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
             this.#document.removeEventListener("pointerup", this.#pointerUpHandler);
             this.#document.removeEventListener("pointercancel", this.#pointerCancelHandler);
         }
+    }
+
+    #endSwipe(event: PointerEvent, completed: boolean): void {
+        const swipe = this.#activeSwipe;
+        if (swipe?.pointerId !== event.pointerId) {
+            return;
+        }
+        this.#removeSwipeListeners();
+        if (!completed) {
+            return;
+        }
+        const deltaX = event.clientX - swipe.startX;
+        const deltaY = event.clientY - swipe.startY;
+        if (Math.abs(deltaX) < SWIPE_DISTANCE || Math.abs(deltaX) <= Math.abs(deltaY)) {
+            return;
+        }
+        const towardsNext = this.isRtl() ? deltaX > 0 : deltaX < 0;
+        this.#navigate(towardsNext ? "right" : "left");
     }
 
     #ensureDocumentPointerListeners(): void {
@@ -644,6 +822,20 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         );
     }
 
+    #navigate(direction: ScrollDirection): void {
+        const count = this.itemCount();
+        if (count === 0) {
+            return;
+        }
+        const current = this.#viewIndex();
+        const step = direction === "left" ? -1 : 1;
+        const next = this.infinite() ? (current + step + count) % count : Math.max(0, Math.min(count - 1, current + step));
+        if (next !== current) {
+            this.#navigationIntent = direction;
+            this.index.set(next);
+        }
+    }
+
     #releasePagerPointerCapture(control: HTMLElement | null, pointerId: number): void {
         if (
             control == null ||
@@ -660,6 +852,12 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         } catch {
             // Do not let an implementation-specific capture race break pager interaction.
         }
+    }
+
+    #removeSwipeListeners(): void {
+        this.#activeSwipe = null;
+        this.#document.removeEventListener("pointerup", this.#swipeEndHandler);
+        this.#document.removeEventListener("pointercancel", this.#swipeCancelHandler);
     }
 
     #resetPagerScrollState(): void {
@@ -733,70 +931,5 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         const arrowFreeAvailableWidth = pager.clientWidth;
 
         this.pagerArrowVisible.set(requiredWidth > arrowFreeAvailableWidth);
-    }
-
-    private navigate(direction: ScrollDirection, infinite: boolean): void {
-        if (direction === "left") {
-            this.navigateLeft(infinite);
-        } else {
-            this.navigateRight(infinite);
-        }
-        this.scrollActivePageIntoView();
-    }
-
-    private navigateLeft(infinite: boolean): void {
-        const currentIndex = this.#viewIndex();
-        const dataLength = this.itemCount();
-        if (dataLength === 0) {
-            return;
-        }
-        if (infinite) {
-            this.index.set((currentIndex - 1 + dataLength) % dataLength);
-        } else {
-            this.index.set(Math.max(0, currentIndex - 1));
-        }
-    }
-
-    private navigateRight(infinite: boolean): void {
-        const currentIndex = this.#viewIndex();
-        const dataLength = this.itemCount();
-        if (dataLength === 0) {
-            return;
-        }
-        if (infinite) {
-            this.index.set((currentIndex + 1) % dataLength);
-        } else {
-            this.index.set(Math.min(dataLength - 1, currentIndex + 1));
-        }
-    }
-
-    private scrollActivePageIntoView(): void {
-        this.#resetPagerScrollState();
-        asyncScheduler.schedule(() => {
-            const element = this.#hostElementRef.nativeElement.querySelector("button[data-active-page='true']");
-            if (element) {
-                element.scrollIntoView({ behavior: this.scrollBehavior(), block: "nearest", inline: "center" });
-            }
-        });
-    }
-
-
-    private setSubscriptions(): void {
-        fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
-            .pipe(
-                takeUntilDestroyed(this.#destroyRef),
-                filter(event => event.key === "ArrowLeft" || event.key === "ArrowRight"),
-                tap(event => {
-                    const isRtl = this.isRtl();
-                    let direction: ScrollDirection;
-                    if (event.key === "ArrowLeft") {
-                        direction = isRtl ? "right" : "left";
-                    } else {
-                        direction = isRtl ? "left" : "right";
-                    }
-                    this.navigate(direction, this.infinite());
-                })
-            )
-            .subscribe();
     }
 }

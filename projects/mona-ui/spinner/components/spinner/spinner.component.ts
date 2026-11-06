@@ -1,4 +1,4 @@
-import { Component, computed, inject, input } from "@angular/core";
+import { booleanAttribute, Component, computed, inject, input } from "@angular/core";
 import { LucideDynamicIcon, LucideLoader } from "@lucide/angular";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
@@ -11,7 +11,8 @@ import { spinnerThemeVariants, type SpinnerVariantInput } from "../../styles/spi
 /**
  * @description
  * An indeterminate loading indicator primitive for communicating ongoing activity.
- * Supports multiple appearances, standard sizes, and accessible status announcements.
+ * Supports multiple appearances and standard sizes. It's a named image, so it's found when a screen reader reaches it,
+ * not announced. To announce loading, use `SpinnerService` or a live region that's already on the page.
  */
 @Component({
     selector: "mona-spinner",
@@ -21,7 +22,7 @@ import { spinnerThemeVariants, type SpinnerVariantInput } from "../../styles/spi
     host: {
         "[attr.aria-hidden]": "decorative() ? 'true' : null",
         "[attr.aria-label]": "decorative() ? null : (ariaLabel() || messages().loading)",
-        "[attr.role]": "decorative() ? null : 'status'",
+        "[attr.role]": "decorative() ? null : 'img'",
         "[class]": "baseClass()"
     }
 })
@@ -52,7 +53,7 @@ export class SpinnerComponent implements SpinnerVariantInput {
     public readonly appearance = input<SpinnerAppearance>("default");
 
     /**
-     * @description Accessible text announced by assistive technology when the spinner is not decorative.
+     * @description Accessible name of the spinner when it is not decorative.
      * When not set, falls back to the localized loading text.
      * @default undefined
      */
@@ -60,11 +61,12 @@ export class SpinnerComponent implements SpinnerVariantInput {
 
 
     /**
-     * @description When `true`, removes the `status` role and hides the spinner from assistive technology with `aria-hidden="true"`.
-     * Useful when a parent element already manages loading semantics (such as `aria-busy="true"` on a button).
+     * @description When `true`, removes the `img` role and hides the spinner from assistive technology with `aria-hidden="true"`.
+     * Useful when visible text says the same thing, or a parent element already manages loading semantics (such as
+     * `aria-busy="true"` on a button).
      * @default false
      */
-    public readonly decorative = input<boolean>(false);
+    public readonly decorative = input(false, { transform: booleanAttribute });
 
     /**
      * @description Size preset controlling the dimensions of the indicator.

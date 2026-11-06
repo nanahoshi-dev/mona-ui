@@ -70,11 +70,13 @@ Pass additional Tailwind or custom classes to the host element via the `class` i
 
 ## Examples
 
-**Reserving space for a loading region:**
+**An empty region:**
 
 ```html
-<mona-placeholder text="Loading..." class="h-40"></mona-placeholder>
+<mona-placeholder text="No items yet" class="h-40"></mona-placeholder>
 ```
+
+For a region that's loading, use `mona-skeleton`. A placeholder's text is static and isn't announced when it appears.
 
 ## Accessibility Notes
 

@@ -489,6 +489,9 @@ export const RU_RU_MESSAGES = {
         rangeStatus: (start: number, end: number, total: number) =>
             `${localizeNumber(start)}–${localizeNumber(end)} из ${localizeNumber(total)}`
     },
+    progressBar: {
+        label: "Ход выполнения"
+    },
     rating: {
         notRated: "Без оценки",
         valueText: (value: number, max: number) => `${localizeNumber(value)} из ${localizeNumber(max)}`
@@ -498,6 +501,7 @@ export const RU_RU_MESSAGES = {
         nextPage: "Следующая страница",
         page: (current: number) => `Страница ${localizeNumber(current)}`,
         pageOf: (current: number, total: number) => `Страница ${localizeNumber(current)} из ${localizeNumber(total)}`,
+        pages: "Страницы",
         previousPage: "Предыдущая страница",
         scrollPagerNext: "Прокрутить список страниц вперёд",
         scrollPagerPrevious: "Прокрутить список страниц назад",

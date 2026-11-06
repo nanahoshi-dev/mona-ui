@@ -410,6 +410,9 @@
         "previousPageLabel": "前のページ",
         "rangeStatus": "全{total}件中{start}～{end}件"
     },
+    "progressBar": {
+        "label": "進行状況"
+    },
     "rating": {
         "notRated": "未評価",
         "valueText": "{max}段階中{value}"
@@ -419,6 +422,7 @@
         "nextPage": "次のページ",
         "page": "{current}ページ",
         "pageOf": "{total}ページ中{current}ページ",
+        "pages": "ページ",
         "previousPage": "前のページ",
         "scrollPagerNext": "ページャーを次へスクロール",
         "scrollPagerPrevious": "ページャーを前へスクロール",

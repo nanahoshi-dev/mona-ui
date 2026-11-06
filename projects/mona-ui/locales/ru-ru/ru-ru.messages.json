@@ -410,6 +410,9 @@
         "previousPageLabel": "Предыдущая страница",
         "rangeStatus": "{start}–{end} из {total}"
     },
+    "progressBar": {
+        "label": "Ход выполнения"
+    },
     "rating": {
         "notRated": "Без оценки",
         "valueText": "{value} из {max}"
@@ -419,6 +422,7 @@
         "nextPage": "Следующая страница",
         "page": "Страница {current}",
         "pageOf": "Страница {current} из {total}",
+        "pages": "Страницы",
         "previousPage": "Предыдущая страница",
         "scrollPagerNext": "Прокрутить список страниц вперёд",
         "scrollPagerPrevious": "Прокрутить список страниц назад",

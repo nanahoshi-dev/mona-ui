@@ -435,6 +435,9 @@ export const JA_JP_MESSAGES = {
         rangeStatus: (start: number, end: number, total: number) =>
             `全${localizeNumber(total)}件中${localizeNumber(start)}～${localizeNumber(end)}件`
     },
+    progressBar: {
+        label: "進行状況"
+    },
     rating: {
         notRated: "未評価",
         valueText: (value: number, max: number) => `${localizeNumber(max)}段階中${localizeNumber(value)}`
@@ -444,6 +447,7 @@ export const JA_JP_MESSAGES = {
         nextPage: "次のページ",
         page: (current: number) => `${localizeNumber(current)}ページ`,
         pageOf: (current: number, total: number) => `${localizeNumber(total)}ページ中${localizeNumber(current)}ページ`,
+        pages: "ページ",
         previousPage: "前のページ",
         scrollPagerNext: "ページャーを次へスクロール",
         scrollPagerPrevious: "ページャーを前へスクロール",

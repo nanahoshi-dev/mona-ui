@@ -17,9 +17,9 @@ import { PlaceholderComponent } from "./placeholder.component";
     imports: [PlaceholderComponent]
 })
 class TestPlaceholderHostComponent {
+    projectedContent = signal("Projected Content");
     text = signal("");
     userClass = signal("");
-    projectedContent = signal("Projected Content");
 }
 
 // =============================================================================

@@ -1,19 +1,19 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { Component, computed, contentChild, inject, input } from "@angular/core";
-import { getPercentage } from "@nanahoshi/mona-ui/common";
+import { Component, computed, contentChild, effect, inject, input, isDevMode } from "@angular/core";
+import { getPercentage, normalizeProgressRange } from "@nanahoshi/mona-ui/common";
 import { formatNumber, injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { Action } from "@nanahoshi/mona-ui/internal";
-
+import type { Action } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { ProgressBarLabelTemplateDirective } from "../../directives/progress-bar-label-template.directive";
-import { LabelPosition } from "../../models/LabelPosition";
+import { PROGRESS_BAR_DEFAULT_MESSAGES } from "../../i18n/progress-bar.default-messages";
+import type { LabelPosition } from "../../models/LabelPosition";
 import {
     progressBarBaseThemeVariants,
     progressBarIndeterminateThemeVariants,
     progressBarLabelThemeVariants,
     progressBarTrackThemeVariants,
-    ProgressBarVariantInput,
-    ProgressBarVariantProps
+    type ProgressBarVariantInput,
+    type ProgressBarVariantProps
 } from "../../styles/progress-bar.styles";
 
 @Component({
@@ -31,15 +31,19 @@ import {
                 background-position: 100% 0;
             }
         }
+        @media (prefers-reduced-motion: reduce) {
+            .indeterminate {
+                animation: none;
+            }
+        }
     `,
     imports: [NgTemplateOutlet],
     host: {
         "[class]": "baseClasses()",
-        "[attr.aria-busy]": "indeterminate() || null",
-        "[attr.aria-label]": "ariaLabel() || null",
-        "[attr.aria-valuemin]": "indeterminate() ? null : min()",
-        "[attr.aria-valuemax]": "indeterminate() ? null : max()",
-        "[attr.aria-valuenow]": "indeterminate() ? null : value()",
+        "[attr.aria-label]": "ariaLabel() || messages().label",
+        "[attr.aria-valuemin]": "ariaRange()?.min",
+        "[attr.aria-valuemax]": "ariaRange()?.max",
+        "[attr.aria-valuenow]": "ariaRange()?.now",
         "[attr.aria-valuetext]": "ariaValueText() || null",
         "[attr.aria-disabled]": "disabled() || null",
         "[attr.data-disabled]": "disabled()",
@@ -48,19 +52,17 @@ import {
 })
 export class ProgressBarComponent implements ProgressBarVariantInput {
     readonly #color = computed(() => {
+        if (this.disabled()) {
+            return "";
+        }
         const color = this.color();
         const progress = this.progress();
         return typeof color === "string" ? color : color?.(progress);
     });
     readonly #direction = injectComponentDirection();
     readonly #i18n = inject(MonaI18nService);
-    protected readonly isRtl = computed(() => this.#direction() === "rtl");
-    protected readonly formattedProgress = computed(() => {
-        return formatNumber(this.progress(), this.#i18n.localeId(), {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 2,
-            useGrouping: false
-        });
+    protected readonly ariaRange = computed(() => {
+        return this.indeterminate() ? null : normalizeProgressRange(this.value(), this.min(), this.max());
     });
     protected readonly baseClasses = computed(() => {
         const rounded = this.rounded();
@@ -68,13 +70,23 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
+    protected readonly formattedProgress = computed(() => {
+        return formatNumber(this.progress() / 100, this.#i18n.localeId(), {
+            maximumFractionDigits: 2,
+            minimumFractionDigits: 0,
+            style: "percent",
+            useGrouping: false
+        });
+    });
     protected readonly indeterminateClasses = computed(() => {
         return progressBarIndeterminateThemeVariants();
     });
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly labelClasses = computed(() => {
         return progressBarLabelThemeVariants();
     });
     protected readonly labelTemplate = contentChild(ProgressBarLabelTemplateDirective);
+    protected readonly messages = this.#i18n.componentMessages("progressBar", PROGRESS_BAR_DEFAULT_MESSAGES);
     protected readonly nextTrackClipPath = computed(() => {
         const progress = this.progress();
         const isRtl = this.isRtl();
@@ -114,7 +126,7 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
     /**
      * @description Accessible label for the progress bar host element.
      * Use to describe what is being measured (e.g., "Upload progress").
-     * When empty, assistive technology announces the role and numeric values only.
+     * When empty, falls back to the localized "Progress". An `aria-labelledby` on the host takes precedence over both.
      * @default ""
      */
     public readonly ariaLabel = input("", { alias: "aria-label" });
@@ -137,14 +149,15 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
     public readonly color = input<string | Action<number, string>>("");
 
     /**
-     * @description Renders the bar with reduced visual emphasis and removes pointer interaction.
+     * @description Renders the bar with reduced visual emphasis and removes pointer interaction. `color` doesn't apply
+     * while disabled.
      * @default false
      */
     public readonly disabled = input(false);
 
     /**
      * @description Switches to indeterminate mode: plays a looping animation and hides the label.
-     * ARIA value attributes are removed and `aria-busy` is set on the host element.
+     * ARIA value attributes are removed.
      * @default false
      */
     public readonly indeterminate = input(false);
@@ -170,7 +183,8 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
     public readonly labelVisible = input(true);
 
     /**
-     * @description Upper bound of the value range. Must be greater than `min`.
+     * @description Upper bound of the value range. Must be greater than `min`; with a range the wrong way round, the bar
+     * reports no values and a warning is logged in development.
      * @default 100
      */
     public readonly max = input(100);
@@ -195,8 +209,18 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
 
     /**
      * @description Current progress value within `[min, max]`.
-     * Values outside the range are clamped before rendering; non-finite values are treated as `0`.
+     * Values outside the range are clamped, for the bar and for `aria-valuenow`; non-finite values count as `min`.
      * @default 0
      */
     public readonly value = input(0);
+
+    public constructor() {
+        if (isDevMode()) {
+            effect(() => {
+                if (!this.indeterminate() && this.ariaRange() === null) {
+                    console.warn(`mona-progress-bar: [${this.min()}, ${this.max()}] isn't a valid range.`);
+                }
+            });
+        }
+    }
 }

@@ -439,6 +439,9 @@ export const ID_ID_MESSAGES = {
         rangeStatus: (start: number, end: number, total: number) =>
             `${localizeNumber(start)} - ${localizeNumber(end)} dari ${localizeNumber(total)} item`
     },
+    progressBar: {
+        label: "Kemajuan"
+    },
     rating: {
         notRated: "Belum dinilai",
         valueText: (value: number, max: number) => `${localizeNumber(value)} dari ${localizeNumber(max)}`
@@ -448,6 +451,7 @@ export const ID_ID_MESSAGES = {
         nextPage: "Halaman berikutnya",
         page: (current: number) => `Halaman ${localizeNumber(current)}`,
         pageOf: (current: number, total: number) => `Halaman ${localizeNumber(current)} dari ${localizeNumber(total)}`,
+        pages: "Halaman",
         previousPage: "Halaman sebelumnya",
         scrollPagerNext: "Gulir opsi halaman ke depan",
         scrollPagerPrevious: "Gulir opsi halaman ke belakang",

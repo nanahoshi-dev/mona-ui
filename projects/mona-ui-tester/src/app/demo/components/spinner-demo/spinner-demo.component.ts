@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { Component, computed, ElementRef, inject, input, viewChild } from "@angular/core";
+import { booleanAttribute, Component, computed, ElementRef, inject, input, viewChild } from "@angular/core";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
 import {
@@ -94,7 +94,7 @@ class SpinnerWrapperComponent implements ComponentInputsAsSignal<SpinnerComponen
 
     public readonly appearance = input<ReturnType<SpinnerComponent["appearance"]>>("default");
     public readonly ariaLabel = input<ReturnType<SpinnerComponent["ariaLabel"]>>("Loading");
-    public readonly decorative = input<ReturnType<SpinnerComponent["decorative"]>>(false);
+    public readonly decorative = input(false, { transform: booleanAttribute });
     public readonly size = input<ReturnType<SpinnerComponent["size"]>>("medium");
     public readonly userClass = input<string, ClassInputType>("", {
         transform: value => classInputToClass(value)

@@ -22,4 +22,5 @@ export * from "./utils/PreventableEvent";
 export * from "./utils/deepMerge";
 export { classInputToClass } from "./utils/classInputToClass";
 export { getPercentage } from "./utils/getPercentage";
+export { normalizeProgressRange, type ProgressRange } from "./utils/normalizeProgressRange";
 export { moveIndices } from "./utils/moveIndices";

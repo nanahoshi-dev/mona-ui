@@ -1,7 +1,9 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { Component, computed, contentChild, input } from "@angular/core";
-import { getPercentage } from "@nanahoshi/mona-ui/common";
+import { Component, computed, contentChild, effect, inject, input, isDevMode } from "@angular/core";
+import { getPercentage, normalizeProgressRange } from "@nanahoshi/mona-ui/common";
+import { formatNumber, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import type { Action } from "@nanahoshi/mona-ui/internal";
+import { PROGRESS_BAR_DEFAULT_MESSAGES } from "@nanahoshi/mona-ui/progress-bar";
 import { twMerge } from "tailwind-merge";
 import { CircularProgressBarLabelTemplateDirective } from "../../directives/circular-progress-bar-label-template.directive";
 import {
@@ -28,24 +30,40 @@ import {
                 transform: rotate(360deg);
             }
         }
+
+        @keyframes fade {
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        /* A partial arc that stands still looks like a value, so fade it instead. */
+        @media (prefers-reduced-motion: reduce) {
+            .indeterminate {
+                animation: fade 2s ease-in-out infinite;
+            }
+        }
     `,
     imports: [NgTemplateOutlet],
     host: {
         "[class]": "baseClasses()",
-        "[attr.aria-busy]": "indeterminate() || null",
-        "[attr.aria-label]": "ariaLabel() || null",
-        "[attr.aria-valuemin]": "indeterminate() ? null : min()",
-        "[attr.aria-valuemax]": "indeterminate() ? null : max()",
-        "[attr.aria-valuenow]": "indeterminate() ? null : value()",
+        "[attr.aria-label]": "ariaLabel() || messages().label",
+        "[attr.aria-valuemin]": "ariaRange()?.min",
+        "[attr.aria-valuemax]": "ariaRange()?.max",
+        "[attr.aria-valuenow]": "ariaRange()?.now",
         "[attr.aria-valuetext]": "ariaValueText() || null",
         "[attr.aria-disabled]": "disabled() || null",
-        "[attr.data-disabled]": "disabled() || null",
+        "[attr.data-disabled]": "disabled()",
         role: "progressbar",
         "[style.width]": "pixelSize()",
         "[style.height]": "pixelSize()"
     }
 })
 export class CircularProgressBarComponent implements CircularProgressBarVariantInput {
+    readonly #i18n = inject(MonaI18nService);
+    protected readonly ariaRange = computed(() => {
+        return this.indeterminate() ? null : normalizeProgressRange(this.value(), this.min(), this.max());
+    });
     protected readonly baseClasses = computed(() => {
         const disabled = this.disabled();
         const classes = circularProgressBarBaseThemeVariants({ disabled });
@@ -56,11 +74,20 @@ export class CircularProgressBarComponent implements CircularProgressBarVariantI
         x: this.size() / 2,
         y: this.size() / 2
     }));
-    protected readonly circumference = computed(() => 2 * Math.PI * (this.size() / 2 - this.thickness()));
+    protected readonly circumference = computed(() => 2 * Math.PI * this.radius());
+    protected readonly formattedProgress = computed(() => {
+        return formatNumber(this.progress() / 100, this.#i18n.localeId(), {
+            maximumFractionDigits: 2,
+            minimumFractionDigits: 0,
+            style: "percent",
+            useGrouping: false
+        });
+    });
     protected readonly labelTemplate = contentChild(CircularProgressBarLabelTemplateDirective);
+    protected readonly messages = this.#i18n.componentMessages("progressBar", PROGRESS_BAR_DEFAULT_MESSAGES);
     protected readonly pixelSize = computed(() => `${this.size()}px`);
     protected readonly progress = computed(() => getPercentage(this.value(), this.min(), this.max()));
-    protected readonly radius = computed(() => this.size() / 2 - this.thickness());
+    protected readonly radius = computed(() => Math.max(0, this.size() / 2 - this.thickness() / 2));
     protected readonly strokeColor = computed(() => {
         if (typeof this.color() === "string") {
             return this.color() || "var(--color-primary)";
@@ -83,7 +110,7 @@ export class CircularProgressBarComponent implements CircularProgressBarVariantI
 
     /**
      * @description Accessible name for the host element. Describe what the component represents (e.g., "Upload progress").
-     * When empty, assistive technology announces the role without a label.
+     * When empty, falls back to the localized "Progress". An `aria-labelledby` on the host takes precedence over both.
      * @default ""
      */
     public readonly ariaLabel = input("", { alias: "aria-label" });
@@ -112,13 +139,21 @@ export class CircularProgressBarComponent implements CircularProgressBarVariantI
 
     /**
      * @description Activates indeterminate mode when the completion value is unknown.
-     * ARIA value attributes are removed and `aria-busy` is set on the host element.
+     * ARIA value attributes are removed.
      * @default false
      */
     public readonly indeterminate = input(false);
 
     /**
-     * @description Upper bound of the value range. Must be greater than `min`.
+     * @description Controls label visibility in determinate mode.
+     * Has no effect in indeterminate mode, where the label is always hidden.
+     * @default true
+     */
+    public readonly labelVisible = input(true);
+
+    /**
+     * @description Upper bound of the value range. Must be greater than `min`; with a range the wrong way round, the bar
+     * reports no values and a warning is logged in development.
      * @default 100
      */
     public readonly max = input(100);
@@ -148,8 +183,19 @@ export class CircularProgressBarComponent implements CircularProgressBarVariantI
     public readonly userClass = input("", { alias: "class" });
 
     /**
-     * @description Current progress value within `[min, max]`. Values outside the range are clamped before rendering; non-finite values are treated as `0`.
+     * @description Current progress value within `[min, max]`. Values outside the range are clamped, for the ring and
+     * for `aria-valuenow`; non-finite values count as `min`.
      * @default 0
      */
     public readonly value = input(0);
+
+    public constructor() {
+        if (isDevMode()) {
+            effect(() => {
+                if (!this.indeterminate() && this.ariaRange() === null) {
+                    console.warn(`mona-circular-progress-bar: [${this.min()}, ${this.max()}] isn't a valid range.`);
+                }
+            });
+        }
+    }
 }

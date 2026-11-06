@@ -29,7 +29,7 @@ describe("SpinnerOverlayComponent", () => {
 
         expect(host.classList.contains("fixed")).toBe(true);
         expect(host.classList.contains("inset-0")).toBe(true);
-        expect(host.style.zIndex).toBe("50");
+        expect(host.style.zIndex).toBe("1001");
     });
 
     it("should respect custom zIndex input", () => {

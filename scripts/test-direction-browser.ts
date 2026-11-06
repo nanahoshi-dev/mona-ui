@@ -311,7 +311,7 @@ async function runTests(): Promise<void> {
                 }
 
                 // Ticks and labels geometry
-                const ticks = slider.locator("span[monaSliderTick]");
+                const ticks = slider.locator("[data-slider-tick]");
                 const tickCount = await ticks.count();
                 assert(tickCount >= 5, `Slider has at least 5 ticks rendered (found ${tickCount})`);
                 const firstTickBox = await ticks.first().boundingBox();
@@ -379,7 +379,7 @@ async function runTests(): Promise<void> {
                 const clickY = sliderBox.y + sliderBox.height / 2;
 
                 await page.mouse.click(click20X, clickY);
-                await page.waitForTimeout(50);
+                await page.waitForTimeout(300);
                 const valAfter20Click = Number(await handle.getAttribute("aria-valuenow"));
                 if (!isRtl) {
                     assert(
@@ -394,7 +394,7 @@ async function runTests(): Promise<void> {
                 }
 
                 await page.mouse.click(click50X, clickY);
-                await page.waitForTimeout(50);
+                await page.waitForTimeout(300);
                 const valAfter50Click = Number(await handle.getAttribute("aria-valuenow"));
                 assert(
                     Math.abs(valAfter50Click - 50) <= 6,
@@ -402,7 +402,7 @@ async function runTests(): Promise<void> {
                 );
 
                 await page.mouse.click(click80X, clickY);
-                await page.waitForTimeout(50);
+                await page.waitForTimeout(300);
                 const valAfter80Click = Number(await handle.getAttribute("aria-valuenow"));
                 if (!isRtl) {
                     assert(
@@ -652,7 +652,7 @@ async function runTests(): Promise<void> {
                 }
 
                 // Ticks and labels
-                const rTicks = rangeSlider.locator("span[monaSliderTick]");
+                const rTicks = rangeSlider.locator("[data-slider-tick]");
                 const rLabels = rangeSlider.locator("div[data-label-position] > span");
                 const rFirstTick = await rTicks.first().boundingBox();
                 const rLastTick = await rTicks.last().boundingBox();
@@ -1006,7 +1006,7 @@ async function runTests(): Promise<void> {
                 }
 
                 // Pager list and overflowing verification
-                const pagerList = scrollView.locator("ul").nth(1);
+                const pagerList = scrollView.locator("ul");
                 const pagerMetrics = await pagerList.evaluate(el => ({
                     scrollWidth: el.scrollWidth,
                     clientWidth: el.clientWidth,
@@ -1312,7 +1312,7 @@ async function runTests(): Promise<void> {
 
                 // Main carousel forward/backward slide navigation with in-flight enter/leave animation verification
                 await page.waitForTimeout(400); // ensure previous animations fully settled
-                const activeSlideInitial = scrollView.locator('li[role="group"]');
+                const activeSlideInitial = scrollView.locator('[data-scroll-view-slide]');
                 const initialSlideText = (await activeSlideInitial.first().textContent())?.trim();
 
                 // Expected animation classes and @keyframes for logical Next:
@@ -1325,8 +1325,8 @@ async function runTests(): Promise<void> {
 
                 await nextBtn.click();
 
-                const nextEntering = scrollView.locator(`li[role="group"].${nextEnterClass}`);
-                const nextLeaving = scrollView.locator(`li[role="group"].${nextLeaveClass}`);
+                const nextEntering = scrollView.locator(`[data-scroll-view-slide].${nextEnterClass}`);
+                const nextLeaving = scrollView.locator(`[data-scroll-view-slide].${nextLeaveClass}`);
 
                 await nextEntering.waitFor({ state: "attached", timeout: 2000 });
                 await nextLeaving.waitFor({ state: "attached", timeout: 2000 });
@@ -1369,7 +1369,7 @@ async function runTests(): Promise<void> {
                 // Await completion of the 500ms animation and subsequent DOM detachment
                 await nextLeaving.waitFor({ state: "detached", timeout: 2000 });
 
-                const activeSlideNext = scrollView.locator('li[role="group"]');
+                const activeSlideNext = scrollView.locator('[data-scroll-view-slide]');
                 const nextSlideText = (await activeSlideNext.first().textContent())?.trim();
                 assert(
                     nextSlideText !== initialSlideText,
@@ -1386,8 +1386,8 @@ async function runTests(): Promise<void> {
 
                 await prevBtn.click();
 
-                const prevEntering = scrollView.locator(`li[role="group"].${prevEnterClass}`);
-                const prevLeaving = scrollView.locator(`li[role="group"].${prevLeaveClass}`);
+                const prevEntering = scrollView.locator(`[data-scroll-view-slide].${prevEnterClass}`);
+                const prevLeaving = scrollView.locator(`[data-scroll-view-slide].${prevLeaveClass}`);
 
                 await prevEntering.waitFor({ state: "attached", timeout: 2000 });
                 await prevLeaving.waitFor({ state: "attached", timeout: 2000 });
@@ -1430,7 +1430,7 @@ async function runTests(): Promise<void> {
                 // Await completion of the 500ms animation and subsequent DOM detachment
                 await prevLeaving.waitFor({ state: "detached", timeout: 2000 });
 
-                const activeSlideBack = scrollView.locator('li[role="group"]');
+                const activeSlideBack = scrollView.locator('[data-scroll-view-slide]');
                 const backSlideText = (await activeSlideBack.first().textContent())?.trim();
                 assert(
                     backSlideText === initialSlideText,
@@ -1677,32 +1677,32 @@ async function runTests(): Promise<void> {
             // 2. Set active index to 30 (out of 40 pages: 0-39)
             await page.click('[data-testid="set-dynamic-index-30"]');
             await page.waitForFunction(() => {
-                const slides = document.querySelectorAll('[data-testid="scroll-view-dynamic"] li[role="group"]');
+                const slides = document.querySelectorAll('[data-testid="scroll-view-dynamic"] [data-scroll-view-slide]');
                 return slides.length === 1;
             });
 
             // Verify active slide exists and displays Page 31
-            let activeSlide = dynScrollView.locator("li[role='group']");
+            let activeSlide = dynScrollView.locator("[data-scroll-view-slide]");
             assert((await activeSlide.count()) > 0, `[${dirName}] Non-infinite active slide exists at index 30`);
             let slideText = (await activeSlide.innerText()).trim();
             assert(slideText === "Page 31", `[${dirName}] Non-infinite active slide text is 'Page 31' (got '${slideText}')`);
-            let hostAriaLabel = await dynScrollView.getAttribute("aria-label");
-            assert(hostAriaLabel === "Page 31 of 40", `[${dirName}] Non-infinite host aria-label is 'Page 31 of 40' (got '${hostAriaLabel}')`);
+            let slideAriaLabel = await activeSlide.getAttribute("aria-label");
+            assert(slideAriaLabel === "Page 31 of 40", `[${dirName}] Non-infinite slide aria-label is 'Page 31 of 40' (got '${slideAriaLabel}')`);
 
             // 3. Shrink data to 8 items (indices 0-7)
             await page.click('[data-testid="set-dynamic-pages-8"]');
             await page.waitForFunction(() => {
-                const slides = document.querySelectorAll('[data-testid="scroll-view-dynamic"] li[role="group"]');
+                const slides = document.querySelectorAll('[data-testid="scroll-view-dynamic"] [data-scroll-view-slide]');
                 return slides.length === 1;
             });
 
             // Verify carousel is NOT blank: normalized to index 7 (Page 8)
-            activeSlide = dynScrollView.locator("li[role='group']");
+            activeSlide = dynScrollView.locator("[data-scroll-view-slide]");
             assert((await activeSlide.count()) > 0, `[${dirName}] Active slide exists after non-infinite data shrink (not blank)`);
             slideText = (await activeSlide.innerText()).trim();
             assert(slideText === "Page 8", `[${dirName}] Active slide normalized to 'Page 8' after shrink to 8 items (got '${slideText}')`);
-            hostAriaLabel = await dynScrollView.getAttribute("aria-label");
-            assert(hostAriaLabel === "Page 8 of 8", `[${dirName}] Host aria-label normalized to 'Page 8 of 8' (got '${hostAriaLabel}')`);
+            slideAriaLabel = await activeSlide.getAttribute("aria-label");
+            assert(slideAriaLabel === "Page 8 of 8", `[${dirName}] Slide aria-label normalized to 'Page 8 of 8' (got '${slideAriaLabel}')`);
 
             // Verify navigation arrow boundaries at last page (index 7 of 8):
             // Next arrow must be hidden, Prev arrow must be visible
@@ -1720,18 +1720,18 @@ async function runTests(): Promise<void> {
             // 4. Expand back to 40 items and verify stable behavior
             await page.click('[data-testid="set-dynamic-pages-40"]');
             await page.waitForFunction(() => {
-                const slides = document.querySelectorAll('[data-testid="scroll-view-dynamic"] li[role="group"]');
+                const slides = document.querySelectorAll('[data-testid="scroll-view-dynamic"] [data-scroll-view-slide]');
                 return slides.length === 1;
             });
-            activeSlide = dynScrollView.locator("li[role='group']");
+            activeSlide = dynScrollView.locator("[data-scroll-view-slide]");
             assert((await activeSlide.count()) > 0, `[${dirName}] Active slide remains rendered after re-expansion to 40`);
-            hostAriaLabel = await dynScrollView.getAttribute("aria-label");
-            assert(hostAriaLabel === "Page 8 of 40", `[${dirName}] Host aria-label after expansion is 'Page 8 of 40' (got '${hostAriaLabel}')`);
+            slideAriaLabel = await activeSlide.getAttribute("aria-label");
+            assert(slideAriaLabel === "Page 8 of 40", `[${dirName}] Slide aria-label after expansion is 'Page 8 of 40' (got '${slideAriaLabel}')`);
 
             // Reset index to 0 before next test
             await page.click('[data-testid="set-dynamic-index-0"]');
             await page.waitForFunction(() => {
-                const slides = document.querySelectorAll('[data-testid="scroll-view-dynamic"] li[role="group"]');
+                const slides = document.querySelectorAll('[data-testid="scroll-view-dynamic"] [data-scroll-view-slide]');
                 return slides.length === 1;
             });
         };
@@ -1909,8 +1909,8 @@ async function runTests(): Promise<void> {
         const customNextBtn = customScrollView.locator('button[data-navigate-next="true"]');
         const disabledNextBtn = disabledScrollView.locator('button[data-navigate-next="true"]');
 
-        // Instrument stdScrollView pager scrollBy and scrollTo, and Element.prototype.scrollIntoView
-        const stdPagerList = stdScrollView.locator("ul").nth(1);
+        // Instrument stdScrollView pager scrollBy and scrollTo, and fail on Element.prototype.scrollIntoView
+        const stdPagerList = stdScrollView.locator("ul");
         await stdPagerList.evaluate(el => {
             const list = el as HTMLElement & {
                 __scrollByCalls?: Array<{ left: number; behavior?: string; type?: string }>;
@@ -2006,7 +2006,7 @@ async function runTests(): Promise<void> {
         // - animate=true -> ~500ms
         // - animate=false -> 0ms
         // - pager scrollBy -> behavior="smooth"
-        // - scrollIntoView -> behavior="smooth"
+        // - centering the active dot -> scrollTo on the pager list, behavior="smooth", and no scrollIntoView
         await page.emulateMedia({ reducedMotion: "no-preference" });
         const stdControl = await captureAnimationDuration(async () => {
             await stdNextBtn.click();
@@ -2021,7 +2021,7 @@ async function runTests(): Promise<void> {
         await disabledNextBtn.click();
         await page.waitForTimeout(100);
         const disabledDurationNoPref = await disabledScrollView.evaluate(host => {
-            const slide = host.querySelector("li[role='group']") as HTMLElement;
+            const slide = host.querySelector("[data-scroll-view-slide]") as HTMLElement;
             const dur = window.getComputedStyle(slide).animationDuration;
             return dur.endsWith("ms") ? parseFloat(dur) : parseFloat(dur) * 1000;
         });
@@ -2039,13 +2039,19 @@ async function runTests(): Promise<void> {
             `[Control: no-preference] Pager scrollBy requests behavior='smooth' (got '${noPrefScrollBy[noPrefScrollBy.length - 1]?.behavior}')`
         );
 
+        await stdPagerList.evaluate(el => { (el as any).__scrollCalls = []; });
         const dot5 = stdScrollView.locator('li[data-page-index="5"] button');
         await dot5.click();
         await page.waitForTimeout(200);
+        const noPrefCenter = await stdPagerList.evaluate(el => (el as any).__scrollCalls || []);
+        assert(
+            noPrefCenter.length > 0 && noPrefCenter[noPrefCenter.length - 1].behavior === "smooth",
+            `[Control: no-preference] Centering the dot scrolls the pager list with behavior='smooth' (got '${noPrefCenter[noPrefCenter.length - 1]?.behavior}')`
+        );
         const noPrefIntoView = await page.evaluate(() => (window as any).__scrollIntoViewCalls || []);
         assert(
-            noPrefIntoView.length > 0 && noPrefIntoView[noPrefIntoView.length - 1].behavior === "smooth",
-            `[Control: no-preference] scrollIntoView requests behavior='smooth' (got '${noPrefIntoView[noPrefIntoView.length - 1]?.behavior}')`
+            noPrefIntoView.length === 0,
+            `[Control: no-preference] Centering the dot doesn't call scrollIntoView (got ${noPrefIntoView.length} calls)`
         );
 
         // Test 2: reduce:
@@ -2053,7 +2059,7 @@ async function runTests(): Promise<void> {
         // - animate=1200 -> ~1ms
         // - animate=false -> 0ms (capped at min(0ms, 1ms))
         // - pager scrollBy -> behavior="auto"
-        // - scrollIntoView -> behavior="auto"
+        // - centering the active dot -> scrollTo on the pager list, behavior="instant", and no scrollIntoView
         await page.emulateMedia({ reducedMotion: "reduce" });
         const stdReduced = await captureAnimationDuration(async () => {
             await stdNextBtn.click();
@@ -2077,7 +2083,7 @@ async function runTests(): Promise<void> {
         await disabledNextBtn.click();
         await page.waitForTimeout(100);
         const disabledDurationReduce = await disabledScrollView.evaluate(host => {
-            const slide = host.querySelector("li[role='group']") as HTMLElement;
+            const slide = host.querySelector("[data-scroll-view-slide]") as HTMLElement;
             const dur = window.getComputedStyle(slide).animationDuration;
             return dur.endsWith("ms") ? parseFloat(dur) : parseFloat(dur) * 1000;
         });
@@ -2101,13 +2107,19 @@ async function runTests(): Promise<void> {
             `[Reduced Motion] Pager scroll requests behavior='instant' under conflicting CSS scroll-behavior: smooth (got '${reduceScrollBy[reduceScrollBy.length - 1]?.behavior}')`
         );
 
+        await stdPagerList.evaluate(el => { (el as any).__scrollCalls = []; });
         const dot12 = stdScrollView.locator('li[data-page-index="12"] button');
         await dot12.click();
         await page.waitForTimeout(200);
+        const reduceCenter = await stdPagerList.evaluate(el => (el as any).__scrollCalls || []);
+        assert(
+            reduceCenter.length > 0 && reduceCenter[reduceCenter.length - 1].behavior === "instant",
+            `[Reduced Motion] Centering the dot scrolls the pager list with behavior='instant' (got '${reduceCenter[reduceCenter.length - 1]?.behavior}')`
+        );
         const reduceIntoView = await page.evaluate(() => (window as any).__scrollIntoViewCalls || []);
         assert(
-            reduceIntoView.length > 0 && reduceIntoView[reduceIntoView.length - 1].behavior === "instant",
-            `[Reduced Motion] scrollIntoView requests behavior='instant' (got '${reduceIntoView[reduceIntoView.length - 1]?.behavior}')`
+            reduceIntoView.length === 0,
+            `[Reduced Motion] Centering the dot doesn't call scrollIntoView (got ${reduceIntoView.length} calls)`
         );
 
         // Test 3: Restore no-preference on custom fixture -> ~1200ms control

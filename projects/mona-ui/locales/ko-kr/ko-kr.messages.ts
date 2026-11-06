@@ -439,6 +439,9 @@ export const KO_KR_MESSAGES = {
         rangeStatus: (start: number, end: number, total: number) =>
             `전체 ${localizeNumber(total)}개 중 ${localizeNumber(start)}~${localizeNumber(end)}`
     },
+    progressBar: {
+        label: "진행률"
+    },
     rating: {
         notRated: "평가되지 않음",
         valueText: (value: number, max: number) => `${localizeNumber(max)}점 만점에 ${localizeNumber(value)}점`
@@ -449,6 +452,7 @@ export const KO_KR_MESSAGES = {
         page: (current: number) => `${localizeNumber(current)}페이지`,
         pageOf: (current: number, total: number) =>
             `전체 ${localizeNumber(total)}페이지 중 ${localizeNumber(current)}페이지`,
+        pages: "페이지",
         previousPage: "이전 페이지",
         scrollPagerNext: "페이지 표시기 다음으로 스크롤",
         scrollPagerPrevious: "페이지 표시기 이전으로 스크롤",

@@ -525,6 +525,9 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
             { name: "total", type: "number" }
         ]
     },
+    progressBar: {
+        label: null
+    },
     rating: {
         notRated: null,
         valueText: [
@@ -540,6 +543,7 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
             { name: "current", type: "number" },
             { name: "total", type: "number" }
         ],
+        pages: null,
         previousPage: null,
         scrollPagerNext: null,
         scrollPagerPrevious: null,

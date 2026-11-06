@@ -1,25 +1,34 @@
-<div [class]="contentClass()" #contentElement>
-    <ul [class]="listClass()">
-        @for (item of viewData(); track $index) {
-            @if ($index === viewIndex()) {
-                <li
-                    role="group"
-                    [attr.aria-roledescription]="messages().slide"
-                    [attr.aria-label]="messages().pageOf($index + 1, itemCount())"
-                    [animate.enter]="enterAnimation()"
-                    [animate.leave]="leaveAnimation()"
-                    [style.--mona-scroll-view-animation-duration]="animationDuration() + 'ms'">
-                    @let width = contentElement.clientWidth;
-                    @let height = contentElement.clientHeight;
-                    <ng-container
-                        [ngTemplateOutlet]="contentTemplate()"
-                        [ngTemplateOutletContext]="{ $implicit: item.data, width, height }"></ng-container>
-                </li>
-            }
+<div
+    [class]="contentClass()"
+    aria-live="polite"
+    aria-atomic="false"
+    data-scroll-view-content="true"
+    (pointerdown)="onSwipeStart($event)"
+    #contentElement>
+    @for (item of viewData(); track $index) {
+        @if ($index === viewIndex()) {
+            <div
+                role="group"
+                data-scroll-view-slide="true"
+                [class]="slideClass()"
+                [attr.aria-roledescription]="messages().slide"
+                [attr.aria-label]="messages().pageOf($index + 1, itemCount())"
+                [animate.enter]="enterAnimation()"
+                [animate.leave]="leaveAnimation()"
+                [style.--mona-scroll-view-animation-duration]="animationDuration() + 'ms'">
+                <ng-container
+                    [ngTemplateOutlet]="contentTemplate()"
+                    [ngTemplateOutletContext]="{
+                        $implicit: item.data,
+                        width: slideSize().width,
+                        height: slideSize().height
+                    }"></ng-container>
+            </div>
         }
-    </ul>
+    }
 </div>
 <button
+    #previousArrow
     type="button"
     [class]="leftArrowClass()"
     (click)="onArrowClick('left')"
@@ -41,6 +50,7 @@
     </svg>
 </button>
 <button
+    #nextArrow
     type="button"
     [class]="rightArrowClass()"
     (click)="onArrowClick('right')"
@@ -93,7 +103,7 @@
             </button>
         }
         <div [class]="pagerListContainerClass()">
-            <ul [class]="pagerListClass()" #pagerListElement>
+            <ul [class]="pagerListClass()" [attr.aria-label]="messages().pages" #pagerListElement>
                 @for (_ of viewData(); track $index) {
                     <li [attr.data-page-index]="$index" [attr.data-page-item]="true">
                         <button
@@ -104,8 +114,7 @@
                             [attr.data-active-page]="$index === viewIndex()"
                             [attr.aria-current]="$index === viewIndex() ? true : null"
                             [attr.aria-label]="messages().page($index + 1)"
-                            (click)="onPageClick($index, pagerItemElement)"
-                            #pagerItemElement></button>
+                            (click)="onPageClick($index)"></button>
                     </li>
                 }
             </ul>

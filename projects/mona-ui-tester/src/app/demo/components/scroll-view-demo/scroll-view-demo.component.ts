@@ -1,6 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, model } from "@angular/core";
-import { ScrollViewComponent } from "@nanahoshi/mona-ui/scroll-view";
+import { ScrollViewComponent, ScrollViewSlideDirective } from "@nanahoshi/mona-ui/scroll-view";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
@@ -20,6 +20,12 @@ export class ScrollViewDemoComponent extends AbstractDemoComponent<ScrollViewCom
                 type: "dropdown",
                 value: [true, false, 500, 1000, 2000],
                 defaultValue: true
+            },
+            // A carousel should say what it shows, so the demo names its own.
+            ariaLabel: {
+                alias: "aria-label",
+                type: "string",
+                value: "Demo slides"
             },
             // The demo has always shown arrows; preserve that instead of the library's false default.
             arrows: {
@@ -86,10 +92,12 @@ export class ScrollViewDemoComponent extends AbstractDemoComponent<ScrollViewCom
 }
 
 @Component({
-    imports: [ScrollViewComponent],
+    imports: [ScrollViewComponent, ScrollViewSlideDirective],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <mona-scroll-view
+            [aria-label]="ariaLabel()"
+            [aria-labelledby]="ariaLabelledBy()"
             [animate]="animate()"
             [arrows]="arrows()"
             [data]="data()"
@@ -103,7 +111,7 @@ export class ScrollViewDemoComponent extends AbstractDemoComponent<ScrollViewCom
             [rounded]="rounded()"
             [width]="width()"
             [class]="userClass()">
-            <ng-template let-item>
+            <ng-template [monaScrollViewSlide]="data()" let-item>
                 <img [src]="item" alt="" />
             </ng-template>
         </mona-scroll-view>
@@ -112,6 +120,8 @@ export class ScrollViewDemoComponent extends AbstractDemoComponent<ScrollViewCom
 class ScrollViewWrapperComponent implements ComponentInputsAsSignal<ScrollViewComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
     public readonly animate = input<ReturnType<ScrollViewComponent["animate"]>>(true);
+    public readonly ariaLabel = input<ReturnType<ScrollViewComponent["ariaLabel"]>>("Demo slides");
+    public readonly ariaLabelledBy = input<ReturnType<ScrollViewComponent["ariaLabelledBy"]>>("");
     public readonly arrows = input<ReturnType<ScrollViewComponent["arrows"]>>(true);
     public readonly data = input<ReturnType<ScrollViewComponent["data"]>>([]);
     public readonly height = input.required<ReturnType<ScrollViewComponent["height"]>>();

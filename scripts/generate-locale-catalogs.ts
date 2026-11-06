@@ -233,6 +233,13 @@ export const DEFAULT_CATALOG_TARGETS: readonly DefaultCatalogTarget[] = [
         typeName: "MonaPagerMessages"
     },
     {
+        constName: "PROGRESS_BAR_DEFAULT_MESSAGES",
+        file: "progress-bar/i18n/progress-bar.default-messages.ts",
+        namespace: "progressBar",
+        style: "type",
+        typeName: "MonaProgressBarMessages"
+    },
+    {
         constName: "RATING_DEFAULT_MESSAGES",
         file: "rating/i18n/rating.default-messages.ts",
         namespace: "rating",

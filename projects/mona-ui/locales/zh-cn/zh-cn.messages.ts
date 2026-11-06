@@ -435,6 +435,9 @@ export const ZH_CN_MESSAGES = {
         rangeStatus: (start: number, end: number, total: number) =>
             `第 ${localizeNumber(start)} - ${localizeNumber(end)} 项，共 ${localizeNumber(total)} 项`
     },
+    progressBar: {
+        label: "进度"
+    },
     rating: {
         notRated: "未评分",
         valueText: (value: number, max: number) => `第 ${localizeNumber(value)} 级，共 ${localizeNumber(max)} 级`
@@ -444,6 +447,7 @@ export const ZH_CN_MESSAGES = {
         nextPage: "下一页",
         page: (current: number) => `第 ${localizeNumber(current)} 页`,
         pageOf: (current: number, total: number) => `第 ${localizeNumber(current)} 页，共 ${localizeNumber(total)} 页`,
+        pages: "页面",
         previousPage: "上一页",
         scrollPagerNext: "向后滚动分页器",
         scrollPagerPrevious: "向前滚动分页器",

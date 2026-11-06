@@ -5,9 +5,9 @@ import { VariantInputs } from "@nanahoshi/mona-ui/internal";
 export const scrollViewBaseThemeVariants = cva(
     `
         relative block h-full w-full overflow-hidden
-        bg-surface outline-none
+        bg-surface
         border border-border-subtle
-        focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator/35
+        focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus-indicator
     `,
     {
         variants: {
@@ -24,15 +24,13 @@ export const scrollViewBaseThemeVariants = cva(
 export const scrollViewContentThemeVariants = cva(
     `
         absolute inset-0 overflow-hidden
+        touch-pan-y touch-pinch-zoom
     `
 );
 
-export const scrollViewListThemeVariants = cva(
+export const scrollViewSlideThemeVariants = cva(
     `
-        relative h-full list-none
-        [&_li]:absolute
-        [&_li]:inset-0
-        [&_li]:outline-none
+        absolute inset-0
     `
 );
 
@@ -44,7 +42,7 @@ export const scrollViewArrowThemeVariants = cva(
         bg-surface-overlay/65 text-foreground
         transition-colors duration-(--mona-motion-standard) ease-out
         hover:bg-hover/90 active:bg-active/90
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator/35
+        focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus-indicator
         [&_svg]:stroke-current
     `,
     {
@@ -94,16 +92,16 @@ export const scrollViewPagerListItemThemeVariants = cva(
     `
         h-3 w-3 flex-none basis-3
         cursor-pointer
-        bg-muted-foreground/40 border border-border-subtle
+        bg-transparent border border-muted-foreground
         transition-colors
         not-last:me-3
         hover:bg-muted-foreground/60 active:bg-foreground
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-indicator/35
+        focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-indicator
     `,
     {
         variants: {
             active: {
-                true: "!bg-foreground hover:!bg-foreground",
+                true: "!bg-foreground hover:!bg-foreground !border-foreground forced-color-adjust-none forced-colors:!bg-[CanvasText] forced-colors:!border-[CanvasText]",
                 false: ""
             },
             pagerRounded: {
@@ -125,7 +123,7 @@ export const scrollViewPagerArrowThemeVariants = cva(
         font-medium text-muted-foreground
         transition-colors duration-(--mona-motion-standard) ease-out
         hover:bg-hover hover:text-foreground active:bg-active
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator/35
+        focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus-indicator
         [&_svg]:stroke-current
     `
 );
@@ -137,10 +135,6 @@ type ScrollViewBaseVariantInput = VariantInputs<ScrollViewBaseVariantProps>;
 type ScrollViewContentVariantProps = VariantProps<typeof scrollViewContentThemeVariants>;
 
 type ScrollViewContentVariantInput = VariantInputs<ScrollViewContentVariantProps>;
-
-type ScrollViewListVariantProps = VariantProps<typeof scrollViewListThemeVariants>;
-
-type ScrollViewListVariantInput = VariantInputs<ScrollViewListVariantProps>;
 
 type ScrollViewPagerVariantProps = VariantProps<typeof scrollViewPagerThemeVariants>;
 
@@ -168,7 +162,6 @@ type ScrollViewPagerArrowVariantInput = VariantInputs<ScrollViewPagerArrowVarian
 
 export type ScrollViewVariantProps = ScrollViewBaseVariantProps &
     ScrollViewContentVariantProps &
-    ScrollViewListVariantProps &
     ScrollViewArrowVariantProps &
     ScrollViewPagerVariantProps &
     ScrollViewPagerListContainerVariantProps &
@@ -178,7 +171,6 @@ export type ScrollViewVariantProps = ScrollViewBaseVariantProps &
 
 export type ScrollViewVariantInput = ScrollViewBaseVariantInput &
     ScrollViewContentVariantInput &
-    ScrollViewListVariantInput &
     Omit<ScrollViewArrowVariantInput, "hidden" | "side"> &
     ScrollViewPagerVariantInput &
     ScrollViewPagerListContainerVariantInput &

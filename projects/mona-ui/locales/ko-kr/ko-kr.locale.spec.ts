@@ -66,7 +66,7 @@ describe("MONA_KO_KR_LOCALE", () => {
             "window"
         ] as const;
 
-        it("defines all 41 canonical message namespaces", () => {
+        it("defines all 42 canonical message namespaces", () => {
             for (const ns of expectedNamespaces) {
                 expect(MONA_KO_KR_LOCALE.messages[ns], `Namespace ${ns} must be defined`).toBeDefined();
             }

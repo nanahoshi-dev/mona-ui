@@ -1,3 +1,4 @@
+import { LiveAnnouncer } from "@angular/cdk/a11y";
 import {
     ApplicationRef,
     ComponentRef,
@@ -7,29 +8,37 @@ import {
     inject,
     Injectable,
     Injector,
+    isDevMode,
     OnDestroy,
     OutputRefSubscription,
     RendererFactory2
 } from "@angular/core";
-import { defer, finalize, Observable, Subject } from "rxjs";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { defer, finalize, Observable, Subject, takeUntil } from "rxjs";
 import { v4 } from "uuid";
 import { SpinnerOverlayComponent } from "../components/spinner-overlay/spinner-overlay.component";
+import { SPINNER_DEFAULT_MESSAGES } from "../i18n/spinner.default-messages";
 import type { SpinnerAppearance } from "../models/SpinnerAppearance";
 import type { SpinnerOptions } from "../models/SpinnerOptions";
 import type { SpinnerRef } from "../models/SpinnerRef";
 import type { SpinnerSize } from "../models/SpinnerSize";
 import type { SpinnerUpdate } from "../models/SpinnerUpdate";
 
+/** The most often a request's changing text is read out, so a progress loop doesn't queue up behind itself. */
+const ANNOUNCE_INTERVAL = 5000;
+
 interface SpinnerRequestState {
     activatedAt: number;
+    announceTimer: ReturnType<typeof setTimeout> | null;
+    announcedAt: number | null;
+    announcedText: string | null;
     appearance: SpinnerAppearance;
-    readonly cancelText: string;
+    readonly cancelText: string | undefined;
     readonly cancellable: boolean;
     cancellationHandled: boolean;
     readonly cancelledSubject: Subject<void>;
     delayTimer: ReturnType<typeof setTimeout> | null;
     readonly id: string;
-    readonly isFullPage: boolean;
     readonly onCancel?: () => void;
     readonly options: SpinnerOptions;
     readonly registeredAt: number;
@@ -46,6 +55,7 @@ interface SpinnerTargetState {
     componentRef: ComponentRef<SpinnerOverlayComponent> | null;
     readonly isFullPage: boolean;
     minDurationTimer: ReturnType<typeof setTimeout> | null;
+    minimumVisibleDuration: number;
     originalAriaBusy: string | null;
     originalInlinePosition: string;
     readonly pendingRequestIds: Set<string>;
@@ -59,7 +69,10 @@ interface SpinnerTargetState {
 export class SpinnerService implements OnDestroy {
     readonly #appRef = inject(ApplicationRef);
     readonly #document = inject(DOCUMENT);
+    readonly #i18n = inject(MonaI18nService);
     readonly #injector = inject(Injector);
+    readonly #liveAnnouncer = inject(LiveAnnouncer);
+    readonly #messages = this.#i18n.componentMessages("spinner", SPINNER_DEFAULT_MESSAGES);
     readonly #renderer = inject(RendererFactory2).createRenderer(null, null);
 
     readonly #requests = new Map<string, SpinnerRequestState>();
@@ -80,32 +93,16 @@ export class SpinnerService implements OnDestroy {
      */
     public ngOnDestroy(): void {
         for (const request of this.#requests.values()) {
-            if (request.delayTimer != null) {
-                clearTimeout(request.delayTimer);
-                request.delayTimer = null;
-            }
+            this.#clearRequestTimers(request);
             if (!request.cancellationHandled) {
                 request.cancelledSubject.complete();
             }
         }
         this.#requests.clear();
 
-        for (const targetState of this.#targetStates) {
-            if (targetState.minDurationTimer != null) {
-                clearTimeout(targetState.minDurationTimer);
-                targetState.minDurationTimer = null;
-            }
-
-            targetState.cancelSubscription?.unsubscribe();
-            targetState.cancelSubscription = null;
-
-            if (targetState.componentRef != null) {
-                this.#appRef.detachView(targetState.componentRef.hostView);
-                targetState.componentRef.destroy();
-                targetState.componentRef = null;
-            }
+        for (const targetState of [...this.#targetStates]) {
+            this.#teardownTarget(targetState);
         }
-        this.#targetStates.clear();
     }
 
     /**
@@ -120,26 +117,29 @@ export class SpinnerService implements OnDestroy {
             this.#closeRequest(id);
         }
 
-        const targets = this.#normalizeTargets(options?.target);
-        const isFullPage = !options?.target || targets.length === 0;
-        const resolvedTargets = isFullPage ? [this.#document.body] : targets;
+        // Only leaving the key out means the whole page. A target that hasn't resolved yet, such as a viewChild before
+        // its first render, must not cover the page instead of the panel it was meant for.
+        const resolvedTargets =
+            options && "target" in options ? this.#normalizeTargets(options.target) : [this.#document.body];
 
         const cancellableOpt = options?.cancellable;
         const isCancellable = !!cancellableOpt;
-        const cancelText = typeof cancellableOpt === "object" && cancellableOpt.text ? cancellableOpt.text : "Cancel";
+        const cancelText = typeof cancellableOpt === "object" && cancellableOpt.text ? cancellableOpt.text : undefined;
         const onCancel = typeof cancellableOpt === "object" ? cancellableOpt.onCancel : undefined;
 
         const cancelledSubject = new Subject<void>();
 
         const request: SpinnerRequestState = {
             activatedAt: Date.now(),
+            announceTimer: null,
+            announcedAt: null,
+            announcedText: null,
             appearance: options?.appearance ?? "default",
             cancellationHandled: false,
             cancellable: isCancellable,
             cancelText,
             delayTimer: null,
             id,
-            isFullPage,
             onCancel,
             options: options ?? {},
             registeredAt: Date.now(),
@@ -157,7 +157,7 @@ export class SpinnerService implements OnDestroy {
         const immediateTargets: HTMLElement[] = [];
         const delayedTargets: HTMLElement[] = [];
         for (const target of resolvedTargets) {
-            const targetState = this.#getOrCreateTargetState(target, isFullPage);
+            const targetState = this.#getOrCreateTargetState(target);
             targetState.pendingRequestIds.add(id);
 
             if (targetState.componentRef != null) {
@@ -196,11 +196,16 @@ export class SpinnerService implements OnDestroy {
     /**
      * Wraps an Observable operation with a Spinner lifecycle.
      * Shows the spinner on subscription and closes it when the observable completes, errors, or is unsubscribed.
+     * Cancelling a `cancellable` spinner completes the returned observable and unsubscribes from the source, which also
+     * aborts an HTTP request.
      */
     public track<T>(source: Observable<T>, options?: SpinnerOptions): Observable<T> {
         return defer(() => {
             const ref = this.show(options);
-            return source.pipe(finalize(() => ref.close()));
+            return source.pipe(
+                takeUntil(ref.cancelled$),
+                finalize(() => ref.close())
+            );
         });
     }
 
@@ -213,9 +218,41 @@ export class SpinnerService implements OnDestroy {
         request.activatedAt = Date.now();
 
         for (const target of targets) {
-            const targetState = this.#getOrCreateTargetState(target, request.isFullPage);
+            const targetState = this.#getOrCreateTargetState(target);
             targetState.activeRequestIds.add(request.id);
+            targetState.minimumVisibleDuration = Math.max(
+                targetState.minimumVisibleDuration,
+                request.options.minimumVisibleDuration ?? 0
+            );
             this.#updateTargetOverlay(targetState);
+        }
+
+        if (request.announcedAt === null) {
+            this.#announce(request);
+        }
+    }
+
+    #announce(request: SpinnerRequestState): void {
+        const text = request.text || this.#messages().loading;
+        if (text !== request.announcedText) {
+            request.announcedAt = Date.now();
+            request.announcedText = text;
+            void this.#liveAnnouncer.announce(text, "polite");
+        }
+    }
+
+    #announceUpdate(request: SpinnerRequestState): void {
+        if (request.announcedAt === null || request.announceTimer != null) {
+            return;
+        }
+        const wait = request.announcedAt + ANNOUNCE_INTERVAL - Date.now();
+        if (wait <= 0) {
+            this.#announce(request);
+        } else {
+            request.announceTimer = setTimeout(() => {
+                request.announceTimer = null;
+                this.#announce(request);
+            }, wait);
         }
     }
 
@@ -238,6 +275,17 @@ export class SpinnerService implements OnDestroy {
         }
     }
 
+    #clearRequestTimers(request: SpinnerRequestState): void {
+        if (request.delayTimer != null) {
+            clearTimeout(request.delayTimer);
+            request.delayTimer = null;
+        }
+        if (request.announceTimer != null) {
+            clearTimeout(request.announceTimer);
+            request.announceTimer = null;
+        }
+    }
+
     #closeRequest(requestId: string): void {
         const request = this.#requests.get(requestId);
         if (!request || request.status === "CLOSED") {
@@ -245,11 +293,7 @@ export class SpinnerService implements OnDestroy {
         }
 
         request.status = "CLOSED";
-
-        if (request.delayTimer != null) {
-            clearTimeout(request.delayTimer);
-            request.delayTimer = null;
-        }
+        this.#clearRequestTimers(request);
 
         if (!request.cancellationHandled) {
             request.cancelledSubject.complete();
@@ -271,7 +315,7 @@ export class SpinnerService implements OnDestroy {
                 this.#updateTargetOverlay(targetState);
             } else if (targetState.pendingRequestIds.size === 0) {
                 // No active or pending requests remain on this target
-                const minDuration = request.options.minimumVisibleDuration ?? 0;
+                const minDuration = targetState.minimumVisibleDuration;
                 if (minDuration > 0 && targetState.visibleSince != null && targetState.componentRef != null) {
                     const elapsed = Date.now() - targetState.visibleSince;
                     const remaining = minDuration - elapsed;
@@ -280,6 +324,10 @@ export class SpinnerService implements OnDestroy {
                         if (targetState.minDurationTimer != null) {
                             clearTimeout(targetState.minDurationTimer);
                         }
+                        // Nothing is left to cancel while the overlay is only being held.
+                        targetState.componentRef.instance.returnFocus();
+                        targetState.componentRef.setInput("cancellable", false);
+                        targetState.componentRef.changeDetectorRef.detectChanges();
                         targetState.minDurationTimer = setTimeout(() => {
                             targetState.minDurationTimer = null;
                             if (targetState.activeRequestIds.size === 0 && targetState.pendingRequestIds.size === 0) {
@@ -292,11 +340,21 @@ export class SpinnerService implements OnDestroy {
                 } else {
                     this.#teardownTarget(targetState);
                 }
+            } else if (targetState.componentRef != null) {
+                // Only requests still in their delay remain. A new request on a visible overlay shows at once, and
+                // these get the same, rather than leaving the closed request's text and a dead Cancel on screen.
+                for (const pendingId of targetState.pendingRequestIds) {
+                    const pending = this.#requests.get(pendingId);
+                    if (pending) {
+                        this.#activateRequestOnTargets(pending, [target]);
+                    }
+                }
             }
         }
     }
 
-    #getOrCreateTargetState(target: HTMLElement, isFullPage: boolean): SpinnerTargetState {
+    #getOrCreateTargetState(target: HTMLElement): SpinnerTargetState {
+        const isFullPage = target === this.#document.body;
         let state = this.#targets.get(target);
         if (!state) {
             const originalAriaBusy = target.getAttribute("aria-busy");
@@ -309,6 +367,7 @@ export class SpinnerService implements OnDestroy {
                 componentRef: null,
                 isFullPage,
                 minDurationTimer: null,
+                minimumVisibleDuration: 0,
                 originalAriaBusy,
                 originalInlinePosition,
                 pendingRequestIds: new Set<string>(),
@@ -318,8 +377,11 @@ export class SpinnerService implements OnDestroy {
             this.#targetStates.add(state);
         }
 
-        // Apply aria-busy immediately while logically busy
-        this.#renderer.setAttribute(target, "aria-busy", "true");
+        // Apply aria-busy immediately while logically busy. Not on the body: it would mark the whole page, this
+        // overlay's own text and Cancel button included, as something assistive technology can skip until it clears.
+        if (!isFullPage) {
+            this.#renderer.setAttribute(target, "aria-busy", "true");
+        }
 
         // If a delayed teardown was pending, cancel it since new activity arrived
         if (state.minDurationTimer != null) {
@@ -346,19 +408,21 @@ export class SpinnerService implements OnDestroy {
     #normalizeTargets(
         target?: HTMLElement | ElementRef<HTMLElement> | readonly (HTMLElement | ElementRef<HTMLElement>)[]
     ): HTMLElement[] {
-        if (!target) {
-            return [];
-        }
-
-        const rawList = Array.isArray(target) ? target : [target];
+        const rawList: readonly unknown[] = Array.isArray(target) ? target : [target];
         const result: HTMLElement[] = [];
 
         for (const item of rawList) {
-            if (item instanceof HTMLElement) {
-                result.push(item);
-            } else if (item && typeof item === "object" && "nativeElement" in item && item.nativeElement instanceof HTMLElement) {
-                result.push(item.nativeElement);
+            const element = this.#toElement(item);
+            if (element) {
+                result.push(element);
             }
+        }
+
+        if (isDevMode() && (result.length === 0 || result.length !== rawList.length)) {
+            console.error(
+                "SpinnerService: a target didn't resolve to an element, so no overlay shows on it. " +
+                    "Leave target out for a full-page spinner."
+            );
         }
 
         return result;
@@ -374,18 +438,23 @@ export class SpinnerService implements OnDestroy {
         targetState.cancelSubscription = null;
 
         if (targetState.componentRef != null) {
+            targetState.componentRef.instance.returnFocus();
             this.#appRef.detachView(targetState.componentRef.hostView);
             targetState.componentRef.destroy();
             targetState.componentRef = null;
         }
 
-        targetState.visibleSince = undefined;
+        // Forget the target, so it isn't kept alive and the next request reads its attributes afresh.
+        this.#targets.delete(targetState.target);
+        this.#targetStates.delete(targetState);
 
-        // Restore aria-busy attribute exactly
-        if (targetState.originalAriaBusy === null) {
-            this.#renderer.removeAttribute(targetState.target, "aria-busy");
-        } else {
-            this.#renderer.setAttribute(targetState.target, "aria-busy", targetState.originalAriaBusy);
+        if (!targetState.isFullPage) {
+            // Restore aria-busy attribute exactly
+            if (targetState.originalAriaBusy === null) {
+                this.#renderer.removeAttribute(targetState.target, "aria-busy");
+            } else {
+                this.#renderer.setAttribute(targetState.target, "aria-busy", targetState.originalAriaBusy);
+            }
         }
 
         // Restore target positioning safely
@@ -399,6 +468,15 @@ export class SpinnerService implements OnDestroy {
             }
             targetState.changedPosition = false;
         }
+    }
+
+    #toElement(item: unknown): HTMLElement | null {
+        const isElement = (value: unknown): value is HTMLElement => (value as Node | null | undefined)?.nodeType === 1;
+        if (isElement(item)) {
+            return item;
+        }
+        const nativeElement = (item as ElementRef<unknown> | null | undefined)?.nativeElement;
+        return isElement(nativeElement) ? nativeElement : null;
     }
 
     #updateRequest(requestId: string, update: SpinnerUpdate): void {
@@ -423,6 +501,24 @@ export class SpinnerService implements OnDestroy {
                 this.#updateTargetOverlay(targetState);
             }
         }
+
+        if (update.text !== undefined) {
+            this.#announceUpdate(request);
+        }
+    }
+
+    #updateOverlayInputs(
+        componentRef: ComponentRef<SpinnerOverlayComponent>,
+        winner: SpinnerRequestState,
+        targetState: SpinnerTargetState
+    ): void {
+        componentRef.setInput("appearance", winner.appearance);
+        componentRef.setInput("size", winner.size);
+        componentRef.setInput("text", winner.text);
+        componentRef.setInput("cancellable", winner.cancellable);
+        componentRef.setInput("cancelText", winner.cancelText);
+        componentRef.setInput("fullPage", targetState.isFullPage);
+        componentRef.setInput("zIndex", winner.options.zIndex);
     }
 
     #updateTargetOverlay(targetState: SpinnerTargetState): void {
@@ -448,15 +544,7 @@ export class SpinnerService implements OnDestroy {
                 elementInjector: this.#injector
             });
 
-            compRef.setInput("appearance", winner.appearance);
-            compRef.setInput("size", winner.size);
-            compRef.setInput("text", winner.text);
-            compRef.setInput("cancellable", winner.cancellable);
-            compRef.setInput("cancelText", winner.cancelText);
-            compRef.setInput("fullPage", targetState.isFullPage);
-            if (winner.options.zIndex !== undefined) {
-                compRef.setInput("zIndex", winner.options.zIndex);
-            }
+            this.#updateOverlayInputs(compRef, winner, targetState);
 
             targetState.cancelSubscription = compRef.instance.cancel.subscribe(() => {
                 const currentWinner = this.#getWinningRequestForTarget(targetState);
@@ -474,15 +562,7 @@ export class SpinnerService implements OnDestroy {
         } else {
             // Physical overlay already exists: update its inputs dynamically
             const compRef = targetState.componentRef;
-            compRef.setInput("appearance", winner.appearance);
-            compRef.setInput("size", winner.size);
-            compRef.setInput("text", winner.text);
-            compRef.setInput("cancellable", winner.cancellable);
-            compRef.setInput("cancelText", winner.cancelText);
-            compRef.setInput("fullPage", targetState.isFullPage);
-            if (winner.options.zIndex !== undefined) {
-                compRef.setInput("zIndex", winner.options.zIndex);
-            }
+            this.#updateOverlayInputs(compRef, winner, targetState);
             compRef.changeDetectorRef.detectChanges();
         }
     }

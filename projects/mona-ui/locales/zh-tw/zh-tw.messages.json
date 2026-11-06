@@ -410,6 +410,9 @@
         "previousPageLabel": "上一頁",
         "rangeStatus": "第 {start} - {end} 項，共 {total} 項"
     },
+    "progressBar": {
+        "label": "進度"
+    },
     "rating": {
         "notRated": "未評分",
         "valueText": "第 {value} 級，共 {max} 級"
@@ -419,6 +422,7 @@
         "nextPage": "下一頁",
         "page": "第 {current} 頁",
         "pageOf": "第 {current} 頁，共 {total} 頁",
+        "pages": "頁面",
         "previousPage": "上一頁",
         "scrollPagerNext": "向後捲動分頁器",
         "scrollPagerPrevious": "向前捲動分頁器",

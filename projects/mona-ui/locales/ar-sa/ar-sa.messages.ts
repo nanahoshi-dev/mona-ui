@@ -474,6 +474,9 @@ export const AR_SA_MESSAGES = {
         rangeStatus: (start: number, end: number, total: number) =>
             `${localizeNumber(start)}–${localizeNumber(end)} من ${localizeNumber(total)}`
     },
+    progressBar: {
+        label: "التقدم"
+    },
     rating: {
         notRated: "غير مقيّم",
         valueText: (value: number, max: number) => `${localizeNumber(value)} من ${localizeNumber(max)}`
@@ -483,6 +486,7 @@ export const AR_SA_MESSAGES = {
         nextPage: "الصفحة التالية",
         page: (current: number) => `الصفحة ${localizeNumber(current)}`,
         pageOf: (current: number, total: number) => `الصفحة ${localizeNumber(current)} من ${localizeNumber(total)}`,
+        pages: "الصفحات",
         previousPage: "الصفحة السابقة",
         scrollPagerNext: "تمرير مؤشر الصفحات إلى التالي",
         scrollPagerPrevious: "تمرير مؤشر الصفحات إلى السابق",

@@ -63,7 +63,7 @@ describe("ScrollViewComponent", () => {
 
         expect(prevArrow.classList.contains("bg-surface-overlay/65")).toBe(true);
         expect(prevArrow.classList.contains("hover:bg-hover/90")).toBe(true);
-        expect(prevArrow.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
+        expect(prevArrow.classList.contains("focus-visible:outline-focus-indicator")).toBe(true);
         expect(activePage.classList.contains("!bg-foreground")).toBe(true);
         expect(activePage.classList.contains("hover:!bg-foreground")).toBe(true);
         expect(activePage.classList.contains("!bg-primary")).toBe(false);
@@ -78,14 +78,14 @@ describe("ScrollViewComponent", () => {
         fixture.detectChanges();
 
         const host = fixture.nativeElement as HTMLElement;
-        expect(host.getAttribute("aria-label")).toBe("Page 1 of 3");
+        expect(host.querySelector("[data-scroll-view-slide]")?.getAttribute("aria-label")).toBe("Page 1 of 3");
 
         const prevArrow = host.querySelector("[data-navigate-prev]") as HTMLButtonElement;
         const nextArrow = host.querySelector("[data-navigate-next]") as HTMLButtonElement;
         expect(prevArrow.getAttribute("aria-label")).toBe("Previous page");
         expect(nextArrow.getAttribute("aria-label")).toBe("Next page");
 
-        const slide = host.querySelector("li[role='group']") as HTMLLIElement;
+        const slide = host.querySelector("[data-scroll-view-slide]") as HTMLElement;
         expect(slide.getAttribute("aria-label")).toBe("Page 1 of 3");
 
         const pageButtons = host.querySelectorAll("button[monascrollviewactivepage]");
@@ -120,7 +120,7 @@ describe("ScrollViewComponent", () => {
         fixture.detectChanges();
 
         const host = fixture.nativeElement as HTMLElement;
-        expect(host.getAttribute("aria-label")).toBe("Seite 1 von 2");
+        expect(host.querySelector("[data-scroll-view-slide]")?.getAttribute("aria-label")).toBe("Seite 1 von 2");
 
         const prevArrow = host.querySelector("[data-navigate-prev]") as HTMLButtonElement;
         const nextArrow = host.querySelector("[data-navigate-next]") as HTMLButtonElement;
@@ -398,7 +398,7 @@ describe("ScrollViewComponent", () => {
             fixture.detectChanges();
 
             const host = fixture.nativeElement as HTMLElement;
-            const slide = host.querySelector("li[role='group']") as HTMLLIElement;
+            const slide = host.querySelector("[data-scroll-view-slide]") as HTMLElement;
             expect(slide.style.getPropertyValue("--mona-scroll-view-animation-duration")).toBe("500ms");
             expect(component["animationDuration"]()).toBe(500);
 
@@ -2105,20 +2105,12 @@ describe("ScrollViewComponent", () => {
                 scrollLeft: 0,
                 scrollWidth: 1000
             } as unknown as HTMLUListElement;
-            const mockButton = { scrollIntoView: vi.fn() } as unknown as HTMLButtonElement;
 
             vi.useFakeTimers();
             try {
                 component["onPagerClick"](new MouseEvent("click", { detail: 1, button: 0 }), mockList, "right");
                 vi.advanceTimersByTime(60);
                 expect(mockList.scrollBy).toHaveBeenCalledWith({ behavior: "smooth", left: 100 });
-
-                component["onPageClick"](1, mockButton);
-                expect(mockButton.scrollIntoView).toHaveBeenCalledWith({
-                    behavior: "smooth",
-                    block: "nearest",
-                    inline: "center"
-                });
             } finally {
                 vi.useRealTimers();
             }
@@ -2150,20 +2142,12 @@ describe("ScrollViewComponent", () => {
                     scrollLeft: 0,
                     scrollWidth: 1000
                 } as unknown as HTMLUListElement;
-                const mockButton = { scrollIntoView: vi.fn() } as unknown as HTMLButtonElement;
 
                 vi.useFakeTimers();
                 try {
                     localComp["onPagerClick"](new MouseEvent("click", { detail: 1, button: 0 }), mockList, "right");
                     vi.advanceTimersByTime(60);
                     expect(mockList.scrollBy).toHaveBeenCalledWith({ behavior: "instant", left: 100 });
-
-                    localComp["onPageClick"](1, mockButton);
-                    expect(mockButton.scrollIntoView).toHaveBeenCalledWith({
-                        behavior: "instant",
-                        block: "nearest",
-                        inline: "center"
-                    });
                 } finally {
                     vi.useRealTimers();
                     localFixture.destroy();
@@ -2229,6 +2213,12 @@ describe("ScrollViewComponent", () => {
             observe: ReturnType<typeof vi.fn>;
             unobserve: ReturnType<typeof vi.fn>;
         }> = [];
+
+        // The slide area has an observer of its own.
+        const pagerObservers = (): typeof observerInstances =>
+            observerInstances.filter(observer =>
+                (observer.observe as ReturnType<typeof vi.fn>).mock.calls.some(([element]) => element instanceof HTMLUListElement)
+            );
 
         beforeEach(() => {
             originalResizeObserver = globalThis.ResizeObserver;
@@ -2338,8 +2328,8 @@ describe("ScrollViewComponent", () => {
             localFixture.detectChanges();
 
             const localComp = localFixture.componentInstance;
-            expect(observerInstances.length).toBe(1);
-            const firstObserver = observerInstances[0];
+            expect(pagerObservers().length).toBe(1);
+            const firstObserver = pagerObservers()[0];
             const firstList = localComp["pagerListElementRef"]()?.nativeElement;
             expect(firstList).toBeInstanceOf(HTMLUListElement);
             expect(firstObserver.observe).toHaveBeenCalledWith(firstList);
@@ -2356,8 +2346,8 @@ describe("ScrollViewComponent", () => {
             localFixture.componentRef.setInput("pageable", true);
             localFixture.detectChanges();
 
-            expect(observerInstances.length).toBe(2);
-            const secondObserver = observerInstances[1];
+            expect(pagerObservers().length).toBe(2);
+            const secondObserver = pagerObservers()[1];
             const secondList = localComp["pagerListElementRef"]()?.nativeElement;
             expect(secondList).toBeInstanceOf(HTMLUListElement);
             expect(secondObserver.observe).toHaveBeenCalledWith(secondList);
@@ -2411,8 +2401,8 @@ describe("ScrollViewComponent", () => {
 
             const localComp = localFixture.componentInstance;
             expect(localComp["pagerArrowVisible"]()).toBe(false);
-            expect(observerInstances.length).toBe(1);
-            const observer = observerInstances[0];
+            expect(pagerObservers().length).toBe(1);
+            const observer = pagerObservers()[0];
 
             // Resize smaller: clientWidth drops to 100 -> scrollWidth 200 > clientWidth 100
             mockClientWidth = 100;
@@ -2502,8 +2492,8 @@ describe("ScrollViewComponent", () => {
 
             const localComp = localFixture.componentInstance;
             expect(localComp["pagerArrowVisible"]()).toBe(true);
-            expect(observerInstances.length).toBe(1);
-            const observer = observerInstances[0];
+            expect(pagerObservers().length).toBe(1);
+            const observer = pagerObservers()[0];
 
             // Widen pager to 320: content 280 <= 320 -> arrows hidden
             mockPagerClientWidth = 320;
@@ -2533,8 +2523,8 @@ describe("ScrollViewComponent", () => {
             localFixture.detectChanges();
 
             const localComp = localFixture.componentInstance;
-            expect(observerInstances.length).toBe(1);
-            const observer = observerInstances[0];
+            expect(pagerObservers().length).toBe(1);
+            const observer = pagerObservers()[0];
 
             const list = localComp["pagerListElementRef"]()?.nativeElement;
             const pager = localComp["pagerElementRef"]()?.nativeElement;
@@ -2562,8 +2552,8 @@ describe("ScrollViewComponent", () => {
             expect(component.index()).toBe(30);
 
             const host = fixture.nativeElement as HTMLElement;
-            expect(host.getAttribute("aria-label")).toBe("Page 31 of 40");
-            let activeSlide = host.querySelector("li[role='group']") as HTMLLIElement;
+            expect(host.querySelector("[data-scroll-view-slide]")?.getAttribute("aria-label")).toBe("Page 31 of 40");
+            let activeSlide = host.querySelector("[data-scroll-view-slide]") as HTMLElement;
             expect(activeSlide).not.toBeNull();
             expect(activeSlide.getAttribute("aria-label")).toBe("Page 31 of 40");
 
@@ -2578,11 +2568,11 @@ describe("ScrollViewComponent", () => {
             // 2. model index() is reconciled to 7
             expect(component.index()).toBe(7);
             // 3. One active slide exists and is not blank
-            activeSlide = host.querySelector("li[role='group']") as HTMLLIElement;
+            activeSlide = host.querySelector("[data-scroll-view-slide]") as HTMLElement;
             expect(activeSlide).not.toBeNull();
             expect(activeSlide.getAttribute("aria-label")).toBe("Page 8 of 8");
-            // 4. Host aria-label is updated
-            expect(host.getAttribute("aria-label")).toBe("Page 8 of 8");
+            // 4. The slide is named from the new data
+            expect(host.querySelector("[data-scroll-view-slide]")?.getAttribute("aria-label")).toBe("Page 8 of 8");
             // 5. Exactly one pager item has aria-current=true
             const currentPagerButtons = host.querySelectorAll("button[aria-current='true']");
             expect(currentPagerButtons.length).toBe(1);
@@ -2611,8 +2601,8 @@ describe("ScrollViewComponent", () => {
             expect(component.index()).toBe(0);
 
             const host = fixture.nativeElement as HTMLElement;
-            expect(host.getAttribute("aria-label")).toBe("Page 1 of 1");
-            const activeSlide = host.querySelector("li[role='group']") as HTMLLIElement;
+            expect(host.querySelector("[data-scroll-view-slide]")?.getAttribute("aria-label")).toBe("Page 1 of 1");
+            const activeSlide = host.querySelector("[data-scroll-view-slide]") as HTMLElement;
             expect(activeSlide).not.toBeNull();
             expect(activeSlide.getAttribute("aria-label")).toBe("Page 1 of 1");
 
@@ -2623,9 +2613,9 @@ describe("ScrollViewComponent", () => {
             expect(nextArrow.classList.contains("hidden")).toBe(true);
 
             // Navigation is inert
-            component["navigateLeft"](false);
+            component["onArrowClick"]("left");
             expect(component.index()).toBe(0);
-            component["navigateRight"](false);
+            component["onArrowClick"]("right");
             expect(component.index()).toBe(0);
         });
 
@@ -2644,7 +2634,7 @@ describe("ScrollViewComponent", () => {
             expect(component["viewIndex"]()).toBe(0);
             const host = fixture.nativeElement as HTMLElement;
             expect(host.getAttribute("aria-label")).toBeNull();
-            const activeSlides = host.querySelectorAll("li[role='group']");
+            const activeSlides = host.querySelectorAll("[data-scroll-view-slide]");
             expect(activeSlides.length).toBe(0);
             const currentPagerButtons = host.querySelectorAll("button[aria-current='true']");
             expect(currentPagerButtons.length).toBe(0);
@@ -2656,8 +2646,8 @@ describe("ScrollViewComponent", () => {
             expect(nextArrow.classList.contains("hidden")).toBe(true);
 
             // Navigation methods are inert
-            component["navigateLeft"](false);
-            component["navigateRight"](false);
+            component["onArrowClick"]("left");
+            component["onArrowClick"]("right");
         });
 
         it("clamps invalid initial finite index and reconciles model", () => {
@@ -2716,12 +2706,12 @@ describe("ScrollViewComponent", () => {
             expect(component.index()).toBe(2);
 
             // Navigate left moves to 1 (not 9)
-            component["navigateLeft"](false);
+            component["onArrowClick"]("left");
             expect(component.index()).toBe(1);
             expect(component["viewIndex"]()).toBe(1);
 
             // Navigate right moves back to 2
-            component["navigateRight"](false);
+            component["onArrowClick"]("right");
             expect(component.index()).toBe(2);
             expect(component["viewIndex"]()).toBe(2);
         });

@@ -10,15 +10,21 @@ Use `ScrollViewComponent` when you need to display a sequence of items — image
 import { ScrollViewComponent } from "@nanahoshi/mona-ui/scroll-view";
 ```
 
-A slide template projected inside `<mona-scroll-view>` is required. Without it, no content is rendered inside each slide.
+A slide template projected inside `<mona-scroll-view>` is required. Without it, no content is rendered inside each slide. Mark it with `monaScrollViewSlide`, and bind the directive to the same data so `let-item` takes its type from it. Name the carousel with `aria-label` or `aria-labelledby`.
+
+```typescript
+import { ScrollViewComponent, ScrollViewSlideDirective } from "@nanahoshi/mona-ui/scroll-view";
+```
 
 ```html
-<mona-scroll-view [data]="images" width="640px" height="360px">
-  <ng-template let-src>
-    <img [src]="src" alt="" class="w-full h-full object-cover" />
+<mona-scroll-view aria-label="Product photos" [data]="images" width="640px" height="360px" [pageable]="true">
+  <ng-template [monaScrollViewSlide]="images" let-image>
+    <img [src]="image.url" [alt]="image.description" class="w-full h-full object-cover" />
   </ng-template>
 </mona-scroll-view>
 ```
+
+A bare `ng-template` still works, with `let-item` untyped. It takes the first template in the content, so it's better to mark the one you mean.
 
 ### Slide template context
 
@@ -27,8 +33,8 @@ Each slide renders the projected template with the following context variables:
 | Variable                       | Type      | Description                                          |
 |--------------------------------|-----------|------------------------------------------------------|
 | `$implicit` (e.g., `let-item`) | `unknown` | The current data item from the `data` collection.    |
-| `width`                        | `number`  | Width of the content area in pixels at render time.  |
-| `height`                       | `number`  | Height of the content area in pixels at render time. |
+| `width`                        | `number`  | Width of the content area in pixels. Follows resizes, and is `0` until the first measurement. |
+| `height`                       | `number`  | Height of the content area in pixels. Follows resizes, and is `0` until the first measurement. |
 
 ```html
 <mona-scroll-view [data]="panels" width="100%" height="400px">
@@ -48,7 +54,11 @@ Each slide renders the projected template with the following context variables:
 </mona-scroll-view>
 ```
 
-In finite mode, the left arrow is hidden on the first page and the right arrow is hidden on the last page. In infinite mode, both arrows remain visible at all times.
+In finite mode, the left arrow is hidden on the first page and the right arrow is hidden on the last page. If the arrow that hides has focus, focus moves to the other arrow. In infinite mode, both arrows remain visible at all times.
+
+### Swipe
+
+A touch or pen swipe of 40 px or more changes the slide, reversed in RTL. Vertical scrolling and pinch zoom stay with the browser, a mouse drag stays text selection, and a drag that starts on a text field or a slider stays with that control. Swipes are always on, but `arrows` and `pageable` are off by default, and WCAG needs a way to change the slide without a gesture, so turn on at least one of them.
 
 ### Dot pager
 
@@ -64,7 +74,9 @@ In finite mode, the left arrow is hidden on the first page and the right arrow i
 </mona-scroll-view>
 ```
 
-When the number of dots exceeds the pager bar width, scroll arrows appear automatically on the pager bar to let the user scroll the dot list horizontally.
+When the number of dots exceeds the pager bar width, scroll arrows appear automatically on the pager bar to let the user scroll the dot list horizontally. The active dot is kept centered in the list, however the page changed. Only the list scrolls, so the pager doesn't move the page to itself.
+
+`pagerOverlay="dark"` uses the theme's canvas color, which isn't dark in a light theme.
 
 ### Infinite loop
 
@@ -131,10 +143,17 @@ Users who enable `prefers-reduced-motion` in their OS settings will see animatio
 
 | Attribute              | Value                                         |
 |------------------------|-----------------------------------------------|
-| `role`                 | `"region"`                                    |
-| `aria-roledescription` | `"carousel"`                                  |
-| `aria-label`           | `"Page N of M"` — updated on every navigation |
-| `tabindex`             | `0`                                           |
+| `role`                 | `"region"` when named, otherwise `"group"`    |
+| `aria-roledescription` | `"carousel"`, while it has slides             |
+| `aria-label`           | From the `aria-label` input                   |
+| `aria-labelledby`      | From the `aria-labelledby` input              |
+| `tabindex`             | `0`, while it has slides                      |
+
+Give every carousel a name that says what it shows. Two regions on a page need different names, and a warning is logged in development when there's no name at all.
+
+**Slide container**
+
+`aria-live="polite"` and `aria-atomic="false"`, so a new slide is read out when it appears.
 
 **Each slide**
 
@@ -142,7 +161,7 @@ Users who enable `prefers-reduced-motion` in their OS settings will see animatio
 |------------------------|------------|
 | `role`                 | `"group"`  |
 | `aria-roledescription` | `"slide"`  |
-| `aria-label`           | `"N of M"` |
+| `aria-label`           | `"Page N of M"` |
 
 **Navigation arrow buttons**
 
@@ -150,20 +169,23 @@ Each arrow button carries a static `aria-label` of `"Previous page"` or `"Next p
 
 **Pager dot buttons**
 
-Each pager dot carries `aria-label="Page N"` and `aria-current="true"` when it is the currently active page.
+The dots are a list labelled `"Pages"`. Each carries `aria-label="Page N"`, and `aria-current="true"` when it is the currently active page.
 
 ### Keyboard interaction
 
 | Key          | Action                        |
 |--------------|-------------------------------|
-| `ArrowLeft`  | Navigate to the previous page |
-| `ArrowRight` | Navigate to the next page     |
+| `ArrowLeft`  | Navigate to the previous page, or the next in RTL |
+| `ArrowRight` | Navigate to the next page, or the previous in RTL |
+| `Home`       | Navigate to the first page    |
+| `End`        | Navigate to the last page     |
 
-The host element must be focused before keyboard navigation is active. It receives focus via `tabindex="0"` and is part of the natural tab order.
+Keys work when focus is on the host, an arrow or a pager control. It receives focus via `tabindex="0"` and is part of the natural tab order. Keys inside a slide stay with the slide's content, so a text field or a slider there works normally, and a key with a modifier isn't taken. If a slide is replaced from outside while it holds focus, focus moves to the host.
 
 ### Consumer responsibilities
 
-- The `aria-label` on the host reflects only the current page counter. If the carousel serves a specific purpose (e.g., "Featured products"), wrap it in a labelled landmark or place a visible heading adjacent to it.
+- Name the carousel with `aria-label` or `aria-labelledby`.
+- Turn on `arrows` or `pageable`, because a swipe is a gesture and some users can't make one.
 - Slide content is consumer-controlled through the projected template. Provide appropriate accessible labels on projected content (e.g., `alt` on `<img>` elements).
 
 ## API
@@ -177,6 +199,8 @@ The host element must be focused before keyboard navigation is active. It receiv
 | Name           | Type                                                 | Default    | Description                                                                                                                                                                   |
 |----------------|------------------------------------------------------|------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `animate`      | `boolean \| number`                                  | `true`     | Controls slide transition animation. `true` uses the default 500 ms duration. `false` disables animation. A number sets a custom duration in milliseconds.                    |
+| `aria-label`      | `string`                                             | `""`       | Accessible name of the carousel, saying what it shows. Use this or `aria-labelledby`. |
+| `aria-labelledby` | `string`                                             | `""`       | The id of the element that names the carousel. |
 | `arrows`       | `boolean`                                            | `false`    | Shows previous/next navigation arrows on the left and right edges. In finite mode, the left arrow is hidden on the first page and the right arrow is hidden on the last page. |
 | `class`        | `string`                                             | `""`       | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                     |
 | `data`         | `Iterable<unknown>`                                  | `[]`       | The collection of items to display. Each item is passed as the implicit variable to the slide template.                                                                       |
@@ -196,7 +220,7 @@ The host element must be focused before keyboard navigation is active. It receiv
 
 ### Content projection
 
-Project a single `ng-template` inside `<mona-scroll-view>` to control how each slide is rendered.
+Project an `ng-template`, marked with `monaScrollViewSlide`, inside `<mona-scroll-view>` to control how each slide is rendered.
 
 | Template variable | Type      | Description                    |
 |-------------------|-----------|--------------------------------|
@@ -206,14 +230,23 @@ Project a single `ng-template` inside `<mona-scroll-view>` to control how each s
 
 ---
 
+### `ScrollViewSlideDirective`
+
+**Selector:** `ng-template[monaScrollViewSlide]`
+
+Marks the slide template and types its context. Bind `[monaScrollViewSlide]` to the same data as the scroll view for a typed `let-item`, or use the bare attribute and get `unknown`.
+
+---
+
 ### Exported types
 
-| Type           | Description                                                                |
-|----------------|----------------------------------------------------------------------------|
-| `PagerOverlay` | `'dark' \| 'light' \| 'none'` — valid values for the `pagerOverlay` input. |
+| Type                        | Description                                                                |
+|-----------------------------|----------------------------------------------------------------------------|
+| `PagerOverlay`              | `'dark' \| 'light' \| 'none'` — valid values for the `pagerOverlay` input. |
+| `ScrollViewSlideContext<T>` | The slide template's context: `$implicit`, `width` and `height`.           |
 
 ```typescript
-import type { PagerOverlay } from "@nanahoshi/mona-ui/scroll-view";
+import type { PagerOverlay, ScrollViewSlideContext } from "@nanahoshi/mona-ui/scroll-view";
 ```
 
 ---
@@ -226,7 +259,7 @@ import type { PagerOverlay } from "@nanahoshi/mona-ui/scroll-view";
 - [x] No outputs table (component has no outputs)
 - [x] Template context ($implicit, width, height) verified from component template
 - [x] Form integration omitted (not a form control)
-- [x] Keyboard handling (ArrowLeft/ArrowRight) verified from setSubscriptions() in source
+- [x] Keyboard handling (ArrowLeft/ArrowRight/Home/End) verified from onKeydown() in source
 - [x] ARIA attributes verified from host bindings, component template, and updated source
 - [x] prefers-reduced-motion CSS support verified in component styles
 - [x] PagerOverlay exported type documented

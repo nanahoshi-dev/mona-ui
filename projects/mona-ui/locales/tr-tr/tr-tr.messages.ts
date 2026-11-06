@@ -460,6 +460,9 @@ export const TR_TR_MESSAGES = {
         rangeStatus: (start: number, end: number, total: number) =>
             `${localizeNumber(start)} - ${localizeNumber(end)} / ${localizeNumber(total)} öğe`
     },
+    progressBar: {
+        label: "İlerleme"
+    },
     rating: {
         notRated: "Değerlendirilmedi",
         valueText: (value: number, max: number) => `${localizeNumber(max)} üzerinden ${localizeNumber(value)}`
@@ -469,6 +472,7 @@ export const TR_TR_MESSAGES = {
         nextPage: "Sonraki sayfa",
         page: (current: number) => `${localizeNumber(current)}. sayfa`,
         pageOf: (current: number, total: number) => `Sayfa ${localizeNumber(current)} / ${localizeNumber(total)}`,
+        pages: "Sayfalar",
         previousPage: "Önceki sayfa",
         scrollPagerNext: "Sayfalama seçeneklerini ileri kaydır",
         scrollPagerPrevious: "Sayfalama seçeneklerini geri kaydır",

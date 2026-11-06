@@ -477,6 +477,9 @@ export const PT_BR_MESSAGES = {
                 ? `${localizeNumber(start)} - ${localizeNumber(end)} de ${localizeNumber(total)} item`
                 : `${localizeNumber(start)} - ${localizeNumber(end)} de ${localizeNumber(total)} itens`
     },
+    progressBar: {
+        label: "Progresso"
+    },
     rating: {
         notRated: "Não avaliado",
         valueText: (value: number, max: number) => `${localizeNumber(value)} de ${localizeNumber(max)}`
@@ -486,6 +489,7 @@ export const PT_BR_MESSAGES = {
         nextPage: "Próxima página",
         page: (current: number) => `Página ${localizeNumber(current)}`,
         pageOf: (current: number, total: number) => `Página ${localizeNumber(current)} de ${localizeNumber(total)}`,
+        pages: "Páginas",
         previousPage: "Página anterior",
         scrollPagerNext: "Rolar opções do paginador para a frente",
         scrollPagerPrevious: "Rolar opções do paginador para trás",

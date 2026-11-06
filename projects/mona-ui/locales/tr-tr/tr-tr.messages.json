@@ -410,6 +410,9 @@
         "previousPageLabel": "Önceki sayfa",
         "rangeStatus": "{start} - {end} / {total} öğe"
     },
+    "progressBar": {
+        "label": "İlerleme"
+    },
     "rating": {
         "notRated": "Değerlendirilmedi",
         "valueText": "{max} üzerinden {value}"
@@ -419,6 +422,7 @@
         "nextPage": "Sonraki sayfa",
         "page": "{current}. sayfa",
         "pageOf": "Sayfa {current} / {total}",
+        "pages": "Sayfalar",
         "previousPage": "Önceki sayfa",
         "scrollPagerNext": "Sayfalama seçeneklerini ileri kaydır",
         "scrollPagerPrevious": "Sayfalama seçeneklerini geri kaydır",

@@ -11,8 +11,8 @@ export const spinnerOverlayThemeVariants = cva(
     {
         variants: {
             fullPage: {
-                true: "fixed inset-0 z-50",
-                false: "absolute inset-0 z-1"
+                true: "fixed inset-0",
+                false: "absolute inset-0"
             }
         },
         defaultVariants: {
