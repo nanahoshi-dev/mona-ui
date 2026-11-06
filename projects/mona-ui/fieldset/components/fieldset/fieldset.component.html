@@ -1,4 +1,9 @@
-<fieldset [class]="fieldsetClass()" [disabled]="disabled()" [attr.name]="name()">
+<fieldset
+    [class]="fieldsetClass()"
+    [disabled]="disabled()"
+    [attr.aria-label]="ariaLabel() || null"
+    [attr.aria-labelledby]="ariaLabelledBy() || null"
+    [attr.name]="name()">
     @if (legendVisible()) {
         <legend [class]="legendClass()">
             @if (legendTemplate()) {

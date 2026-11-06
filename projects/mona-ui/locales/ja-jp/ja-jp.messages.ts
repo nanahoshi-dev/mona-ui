@@ -349,6 +349,9 @@ export const JA_JP_MESSAGES = {
         sortOrder: (position: number) => `並べ替え順 ${localizeNumber(position)}`,
         toolbar: "表のツールバー"
     },
+    label: {
+        optional: "任意"
+    },
     list: {
         filterList: "リストをフィルター",
         loading: "読み込み中",

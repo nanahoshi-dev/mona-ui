@@ -17,6 +17,9 @@ import {
     imports: [NgTemplateOutlet],
     providers: [{ provide: MONA_FIELDSET_DISABLED, useFactory: () => inject(FieldsetComponent).effectiveDisabled }],
     host: {
+        // The ARIA inputs below are applied to the native fieldset, so the host must not keep the static attributes.
+        "[attr.aria-label]": "null",
+        "[attr.aria-labelledby]": "null",
         "[class]": "baseClass()"
     }
 })
@@ -40,6 +43,18 @@ export class FieldsetComponent implements FieldsetVariantInput {
     protected readonly legendVisible = computed(() => {
         return !!this.legend() || !!this.legendTemplate();
     });
+
+    /**
+     * @description Accessible name of the fieldset when it has no legend.
+     * @default ""
+     */
+    public readonly ariaLabel = input("", { alias: "aria-label" });
+
+    /**
+     * @description Id of the element that labels the fieldset when it has no legend.
+     * @default ""
+     */
+    public readonly ariaLabelledBy = input("", { alias: "aria-labelledby" });
 
     /**
      * @description Whether the fieldset and the Mona UI form controls inside it are disabled, including nested fieldsets.

@@ -2,6 +2,20 @@ import { cva } from "class-variance-authority";
 import { themeControlSurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
 
+export const radioGroupThemeVariants = cva("flex", {
+    variants: {
+        orientation: {
+            horizontal: "flex-row flex-wrap gap-4",
+            vertical: "flex-col gap-2"
+        }
+    },
+    defaultVariants: {
+        orientation: "vertical"
+    }
+});
+
+export type RadioGroupVariantProps = VariantProps<typeof radioGroupThemeVariants>;
+
 export const radioButtonThemeVariants = cva(
     `
         peer absolute inset-0 z-10 h-full w-full

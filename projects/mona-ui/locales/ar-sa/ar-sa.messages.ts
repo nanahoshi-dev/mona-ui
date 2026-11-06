@@ -385,6 +385,9 @@ export const AR_SA_MESSAGES = {
         sortOrder: (position: number) => `ترتيب الفرز ${localizeNumber(position)}`,
         toolbar: "شريط أدوات الجدول"
     },
+    label: {
+        optional: "اختياري"
+    },
     list: {
         filterList: "تصفية القائمة",
         loading: "جارٍ التحميل",

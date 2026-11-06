@@ -27,7 +27,7 @@ import {
     SwitchVariantInputs,
     SwitchVariantProps
 } from "../../styles/switch.styles";
-import { injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
+import { injectEffectiveDisabled, injectLabelAssociation } from "@nanahoshi/mona-ui/internal";
 
 @Component({
     selector: "mona-switch",
@@ -76,7 +76,7 @@ import { injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
         "[attr.aria-checked]": "checked()",
         "[attr.aria-disabled]": "effectiveDisabled() || undefined",
         "[attr.aria-label]": "ariaLabel()",
-        "[attr.aria-labelledby]": "ariaLabelledBy()",
+        "[attr.aria-labelledby]": "labelledBy()",
         "[attr.aria-readonly]": "readonly() || null",
         "[attr.aria-required]": "required() || null",
         "[attr.data-readonly]": "readonly() || null",
@@ -92,6 +92,11 @@ import { injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
 export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl {
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    readonly #label = injectLabelAssociation({
+        activate: () => this.activateFromLabel(),
+        ariaLabel: () => this.ariaLabel(),
+        ariaLabelledBy: () => this.ariaLabelledBy()
+    });
     protected readonly classes = computed(() => {
         const rounded = this.rounded();
         const size = this.size();
@@ -115,6 +120,7 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
         const classes = switchLabelThemeVariants();
         return twMerge(classes);
     });
+    protected readonly labelledBy = this.#label.labelledBy;
     protected readonly offLabelTemplate = contentChild(SwitchOffLabelTemplateDirective, { read: TemplateRef });
     protected readonly onLabelTemplate = contentChild(SwitchOnLabelTemplateDirective, { read: TemplateRef });
 
@@ -212,11 +218,27 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
     }
 
     /**
+     * Toggles the switch when a label for it is clicked, as a native label does for a checkbox.
+     * @internal
+     */
+    public activateFromLabel(): void {
+        this.focus();
+        this.#toggleState();
+    }
+
+    /**
      * @description Moves focus to the switch.
      * @param options Options passed to the native `focus()` call, such as `preventScroll`.
      */
     public focus(options?: FocusOptions): void {
         this.#hostElementRef.nativeElement.focus(options);
+    }
+
+    /**
+     * @internal
+     */
+    public setLabelledBy(id: string | null): void {
+        this.#label.setLabelledBy(id);
     }
 
     protected onBlur(): void {

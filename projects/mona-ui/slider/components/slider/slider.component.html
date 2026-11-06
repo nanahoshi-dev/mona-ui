@@ -73,7 +73,7 @@
     [attr.aria-readonly]="readonly() || null"
     [attr.data-invalid]="invalidState() || null"
     [attr.aria-label]="computedAriaLabel()"
-    [attr.aria-labelledby]="ariaLabelledBy()"
+    [attr.aria-labelledby]="labelledBy()"
     #sliderHandle>
     @if (handleTemplate()) {
         <ng-container

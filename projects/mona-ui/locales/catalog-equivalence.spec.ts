@@ -28,6 +28,7 @@ import { FILTER_DEFAULT_MESSAGES } from "../filter/i18n/filter.default-messages"
 import { GRID_DEFAULT_MESSAGES } from "../grid/i18n/grid.default-messages";
 import { LIST_BOX_DEFAULT_MESSAGES } from "../list-box/i18n/list-box.default-messages";
 import { LIST_DEFAULT_MESSAGES } from "../internal/list/i18n/list.default-messages";
+import { LABEL_DEFAULT_MESSAGES } from "../label/i18n/label.default-messages";
 import { MULTI_SELECT_DEFAULT_MESSAGES } from "../multi-select/i18n/multi-select.default-messages";
 import { NOTIFICATION_DEFAULT_MESSAGES } from "../notification/i18n/notification.default-messages";
 import { NUMERIC_TEXT_BOX_DEFAULT_MESSAGES } from "../numeric-text-box/i18n/numeric-text-box.default-messages";
@@ -110,6 +111,7 @@ const ENGLISH_DEFAULTS = {
     filter: FILTER_DEFAULT_MESSAGES,
     grid: GRID_DEFAULT_MESSAGES,
     listBox: LIST_BOX_DEFAULT_MESSAGES,
+    label: LABEL_DEFAULT_MESSAGES,
     list: LIST_DEFAULT_MESSAGES,
     multiSelect: MULTI_SELECT_DEFAULT_MESSAGES,
     notification: NOTIFICATION_DEFAULT_MESSAGES,

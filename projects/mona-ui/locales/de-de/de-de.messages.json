@@ -327,6 +327,9 @@
         "sortOrder": "Sortierreihenfolge {position}",
         "toolbar": "Tabellen-Symbolleiste"
     },
+    "label": {
+        "optional": "Optional"
+    },
     "list": {
         "filterList": "Liste filtern",
         "loading": "Wird geladen",

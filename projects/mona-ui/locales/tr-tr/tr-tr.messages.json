@@ -327,6 +327,9 @@
         "sortOrder": "Sıralama düzeni {position}",
         "toolbar": "Tablo araç çubuğu"
     },
+    "label": {
+        "optional": "İsteğe bağlı"
+    },
     "list": {
         "filterList": "Listeyi filtrele",
         "loading": "Yükleniyor",

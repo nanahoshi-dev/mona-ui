@@ -20,7 +20,8 @@ import {
     AttributeBinderDirective,
     type AttributeConfig,
     createElementControlId,
-    injectEffectiveDisabled
+    injectEffectiveDisabled,
+    injectLabelAssociation
 } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { TextBoxPrefixTemplateDirective } from "../../directives/text-box-prefix-template.directive";
@@ -52,6 +53,10 @@ const selectableInputTypes: ReadonlySet<string> = new Set(["password", "search",
 export class TextBoxComponent implements TextBoxVariantInput, FormValueControl<string> {
     readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #i18n = inject(MonaI18nService);
+    readonly #label = injectLabelAssociation({
+        ariaLabel: () => this.ariaLabel(),
+        ariaLabelledBy: () => this.ariaLabelledBy()
+    });
     protected readonly classes = computed(() => {
         const rounded = this.rounded();
         const size = this.size();
@@ -64,6 +69,7 @@ export class TextBoxComponent implements TextBoxVariantInput, FormValueControl<s
     protected readonly invalidInput = computed(
         () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
+    protected readonly labelledBy = this.#label.labelledBy;
     protected readonly messages = this.#i18n.componentMessages("textBox", TEXT_BOX_DEFAULT_MESSAGES);
     protected readonly prefixTemplateList = contentChildren(TextBoxPrefixTemplateDirective, { read: TemplateRef });
     protected readonly showClearButton = computed(
@@ -254,6 +260,13 @@ export class TextBoxComponent implements TextBoxVariantInput, FormValueControl<s
 
     public onValueChange(value: string): void {
         this.value.set(value);
+    }
+
+    /**
+     * @internal
+     */
+    public setLabelledBy(id: string | null): void {
+        this.#label.setLabelledBy(id);
     }
 
     protected onFocusOut(event: FocusEvent): void {

@@ -1,7 +1,7 @@
 <label
     [class]="containerLabelClasses()"
     [attr.data-disabled]="effectiveDisabled()"
-    [attr.data-readonly]="readonly() || null">
+    [attr.data-readonly]="effectiveReadonly() || null">
     @if (labelPosition() === "before") {
         <ng-container [ngTemplateOutlet]="labelTemplate"></ng-container>
     }
@@ -9,22 +9,22 @@
         #input
         type="radio"
         [id]="inputId()"
-        [required]="required()"
+        [required]="effectiveRequired()"
         [disabled]="effectiveDisabled()"
-        [name]="name()"
+        [name]="effectiveName()"
         [value]="radioValue()"
         [class]="radioButtonClasses()"
-        [checked]="radioValue() === value()"
-        [attr.aria-invalid]="invalidState() ? 'true' : null"
+        [checked]="selected()"
+        [attr.aria-invalid]="inputInvalid() ? 'true' : null"
         [attr.aria-label]="ariaLabel() || null"
-        [attr.aria-labelledby]="ariaLabelledBy() || null"
+        [attr.aria-labelledby]="labelledBy()"
         [attr.aria-describedby]="ariaDescribedBy() || null"
         (blur)="onBlur($event)"
         (click)="onInputClick($event)"
         (focus)="inputFocus.emit($event)"
         (change)="onSelectionChange()" />
     <span [class]="radioButtonCircleClasses()" [attr.data-invalid]="invalidState() || null">
-        @if (radioValue() === value()) {
+        @if (selected()) {
             <span [class]="radioButtonIndicatorClasses()"></span>
         }
     </span>

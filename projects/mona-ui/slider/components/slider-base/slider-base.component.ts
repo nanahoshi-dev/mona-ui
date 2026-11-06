@@ -1,6 +1,6 @@
 import { afterNextRender, booleanAttribute, computed, contentChild, DestroyRef, Directive, ElementRef, inject, input, NgZone, output, signal, Signal, TemplateRef, viewChildren } from "@angular/core";
 import { Orientation } from "@nanahoshi/mona-ui/common";
-import { injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
+import { injectEffectiveDisabled, injectLabelAssociation } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { SliderHandleTemplateDirective } from "../../directives/slider-handle-template.directive";
@@ -26,6 +26,11 @@ import { valueToPosition } from "../../utils/valueToPosition";
 
 @Directive()
 export abstract class SliderBaseComponent implements SliderVariantInputs {
+    readonly #label = injectLabelAssociation({
+        activate: () => this.focus(),
+        ariaLabel: () => this.ariaLabel(),
+        ariaLabelledBy: () => this.ariaLabelledBy()
+    });
     protected readonly baseClasses = computed(() => sliderBaseThemeVariants());
     protected readonly destroyRef = inject(DestroyRef);
     protected readonly direction = injectComponentDirection();
@@ -90,6 +95,7 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         }
         return labels;
     });
+    protected readonly labelledBy = this.#label.labelledBy;
     protected readonly renderTicks = computed(() => {
         const ticks = this.ticks();
         if (this.orientation() === "vertical") {
@@ -167,6 +173,19 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         return sliderTrackThemeVariants({ rounded });
     });
     protected readonly zone: NgZone = inject(NgZone);
+
+    /**
+     * @description Accessible name of the control. On a range slider it names the group holding both handles.
+     * @default null
+     */
+    public readonly ariaLabel = input<string | null>(null, { alias: "aria-label" });
+
+    /**
+     * @description Id of the element that labels the control. On a range slider each handle reads it before its own
+     * name.
+     * @default null
+     */
+    public readonly ariaLabelledBy = input<string | null>(null, { alias: "aria-labelledby" });
 
     /**
      * @description Human-readable override for the `aria-valuenow` announcement. Pass a function that receives the current value and returns the string to announce.
@@ -321,6 +340,13 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         });
     }
 
+    /**
+     * @internal
+     */
+    public setLabelledBy(id: string | null): void {
+        this.#label.setLabelledBy(id);
+    }
+
     protected calculateNewValue(currentValue: number, event: KeyboardEvent): number {
         const min = this.effectiveMin();
         const max = this.effectiveMax();
@@ -443,4 +469,6 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
     }
 
     protected abstract setSubscriptions(): void;
+
+    public abstract focus(options?: FocusOptions): void;
 }

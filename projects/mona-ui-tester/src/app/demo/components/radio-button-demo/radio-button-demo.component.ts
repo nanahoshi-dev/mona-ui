@@ -2,7 +2,7 @@ import { NgComponentOutlet } from "@angular/common";
 import { booleanAttribute, ChangeDetectionStrategy, Component, computed, input, model, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
-import { RadioButtonComponent, RadioButtonDirective } from "@nanahoshi/mona-ui/radio-button";
+import { RadioButtonComponent, RadioButtonDirective, RadioGroupComponent } from "@nanahoshi/mona-ui/radio-button";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -59,7 +59,7 @@ export class RadioButtonDemoComponent extends AbstractDemoComponent<RadioButtonC
 }
 
 @Component({
-    imports: [RadioButtonComponent, FormsModule, RadioButtonDirective, FormField],
+    imports: [RadioButtonComponent, RadioGroupComponent, FormsModule, RadioButtonDirective, FormField],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <div class="flex flex-col gap-4">
@@ -157,13 +157,25 @@ export class RadioButtonDemoComponent extends AbstractDemoComponent<RadioButtonC
                 </label>
             </form>
         </div>
+
+        <div class="flex flex-col gap-4 mt-4">
+            <span>Radio group, current size: {{ form.size().value() }}</span>
+            <mona-radio-group aria-label="Size" orientation="horizontal" [formField]="form.size">
+                <mona-radio-button label="Small" radioValue="Small" [rounded]="rounded()" />
+                <mona-radio-button label="Medium" radioValue="Medium" [rounded]="rounded()" />
+                <mona-radio-button label="Large" radioValue="Large" [rounded]="rounded()" />
+            </mona-radio-group>
+        </div>
     `
 })
 export class RadioButtonWrapperComponent implements ComponentInputsAsSignal<RadioButtonComponent> {
-    readonly #formModel = signal<FormModel>({ season: "Autumn", direction: "West" });
+    readonly #formModel = signal<FormModel>({ season: "Autumn", direction: "West", size: "Medium" });
     protected readonly form = form(this.#formModel, schema => {
         disabled(schema.season, { when: () => this.disabled() });
         disabled(schema.direction, { when: () => this.disabled() });
+        disabled(schema.size, { when: () => this.disabled() });
+        readonly(schema.size, { when: () => this.readonly() });
+        required(schema.size, { when: () => this.required() });
         readonly(schema.season, { when: () => this.readonly() });
         required(schema.season, { when: () => this.required() });
     });
@@ -199,4 +211,5 @@ export class RadioButtonWrapperComponent implements ComponentInputsAsSignal<Radi
 interface FormModel {
     direction: string;
     season: string;
+    size: string;
 }

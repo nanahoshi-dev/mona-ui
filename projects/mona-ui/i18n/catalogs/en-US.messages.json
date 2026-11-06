@@ -327,6 +327,9 @@
         "sortOrder": "Sort order {position}",
         "toolbar": "Grid toolbar"
     },
+    "label": {
+        "optional": "Optional"
+    },
     "list": {
         "filterList": "Filter list",
         "loading": "Loading",

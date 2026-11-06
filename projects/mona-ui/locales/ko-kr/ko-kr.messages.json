@@ -327,6 +327,9 @@
         "sortOrder": "정렬 순서 {position}",
         "toolbar": "표 도구 모음"
     },
+    "label": {
+        "optional": "선택 사항"
+    },
     "list": {
         "filterList": "목록 필터",
         "loading": "로드 중",

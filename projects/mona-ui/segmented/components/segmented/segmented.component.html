@@ -24,6 +24,7 @@
             [checked]="selected"
             [disabled]="optionDisabled"
             [class]="inputClasses()"
+            [attr.aria-label]="itemTemplate() ? option.label : null"
             (change)="onOptionChange(option)"
             (click)="onOptionClick($event)" />
 

@@ -349,6 +349,9 @@ export const ZH_CN_MESSAGES = {
         sortOrder: (position: number) => `排序顺序 ${localizeNumber(position)}`,
         toolbar: "表格工具栏"
     },
+    label: {
+        optional: "可选"
+    },
     list: {
         filterList: "筛选列表",
         loading: "正在加载",

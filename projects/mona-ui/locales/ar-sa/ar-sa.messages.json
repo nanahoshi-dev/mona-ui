@@ -327,6 +327,9 @@
         "sortOrder": "ترتيب الفرز {position}",
         "toolbar": "شريط أدوات الجدول"
     },
+    "label": {
+        "optional": "اختياري"
+    },
     "list": {
         "filterList": "تصفية القائمة",
         "loading": "جارٍ التحميل",

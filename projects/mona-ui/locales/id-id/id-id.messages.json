@@ -327,6 +327,9 @@
         "sortOrder": "Urutan pengurutan {position}",
         "toolbar": "Bilah alat tabel"
     },
+    "label": {
+        "optional": "Opsional"
+    },
     "list": {
         "filterList": "Saring daftar",
         "loading": "Memuat",

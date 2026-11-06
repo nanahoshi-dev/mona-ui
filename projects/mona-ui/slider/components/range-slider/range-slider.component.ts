@@ -2,6 +2,7 @@ import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, ElementRef, input, model, Signal, signal, viewChild } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
+import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { filter, fromEvent, switchMap, takeUntil, tap } from "rxjs";
 import { SliderTickDirective } from "../../directives/slider-tick.directive";
 import { LabelStylePipe } from "../../pipes/label-style.pipe";
@@ -19,12 +20,21 @@ import { SliderBaseComponent } from "../slider-base/slider-base.component";
         "[attr.data-disabled]": "effectiveDisabled()",
         "[attr.data-orientation]": "orientation()",
         "[attr.data-readonly]": "readonly() || null",
+        "[attr.aria-label]": "ariaLabel()",
+        "[attr.aria-labelledby]": "labelledBy()",
+        "[attr.role]": "'group'",
         "(focus)": "focus()"
     }
 })
 export class RangeSliderComponent extends SliderBaseComponent implements FormValueControl<[number, number]> {
     protected readonly computedAriaLabelEnd = computed(() => this.ariaLabelEnd() ?? this.messages().maximumValue);
     protected readonly computedAriaLabelStart = computed(() => this.ariaLabelStart() ?? this.messages().minimumValue);
+    protected readonly endHandleId = createElementControlId();
+    // Each handle reads the group's label and then its own, so two range sliders on a page sound different.
+    protected readonly endLabelledBy = computed(() => {
+        const labelledBy = this.labelledBy();
+        return labelledBy ? `${labelledBy} ${this.endHandleId}` : null;
+    });
     protected readonly handlePositions = computed<[number, number]>(() => [
         this.positionFromValue(this.normalizedValue()[0]),
         this.positionFromValue(this.normalizedValue()[1])
@@ -64,6 +74,11 @@ export class RangeSliderComponent extends SliderBaseComponent implements FormVal
     protected readonly selectionLeft = computed(() => this.handlePositions()[0]);
     protected readonly selectionRight = computed(() => this.handlePositions()[1]);
     protected readonly sliderHandle: Signal<ElementRef<HTMLDivElement>> = viewChild.required("sliderHandle");
+    protected readonly startHandleId = createElementControlId();
+    protected readonly startLabelledBy = computed(() => {
+        const labelledBy = this.labelledBy();
+        return labelledBy ? `${labelledBy} ${this.startHandleId}` : null;
+    });
 
     /**
      * @description Accessible name for the upper-value (secondary) handle.

@@ -23,7 +23,7 @@ import {
     LucideStar,
     type LucideIcon
 } from "@lucide/angular";
-import { createElementControlId, injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
+import { createElementControlId, injectEffectiveDisabled, injectLabelAssociation } from "@nanahoshi/mona-ui/internal";
 import { range } from "@mirei/ts-collections";
 import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { RATING_DEFAULT_MESSAGES } from "../../i18n/rating.default-messages";
@@ -80,6 +80,11 @@ const ratingIcons = {
 export class RatingComponent implements RatingVariantInput, FormValueControl<number> {
     readonly #direction = injectComponentDirection();
     readonly #i18n = inject(MonaI18nService);
+    readonly #label = injectLabelAssociation({
+        activate: () => this.focus(),
+        ariaLabel: () => this.ariaLabel(),
+        ariaLabelledBy: () => this.ariaLabelledBy()
+    });
 
     protected readonly activeState = computed<"hovered" | "selected">(() =>
         this.previewActive() ? "hovered" : "selected"
@@ -89,8 +94,9 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
     protected readonly controlElement = viewChild.required<ElementRef<HTMLElement>>("ratingControl");
     protected readonly displayValue = computed(() => this.previewValue() ?? this.normalizedValue());
     protected readonly effectiveAriaLabelledBy = computed(() => {
-        if (this.ariaLabelledBy()) {
-            return this.ariaLabelledBy();
+        const labelledBy = this.#label.labelledBy();
+        if (labelledBy) {
+            return labelledBy;
         }
         if (!this.ariaLabel() && this.label()) {
             return this.labelId;
@@ -299,6 +305,13 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
         if (!this.effectiveDisabled()) {
             this.controlElement().nativeElement.focus(options);
         }
+    }
+
+    /**
+     * @internal
+     */
+    public setLabelledBy(id: string | null): void {
+        this.#label.setLabelledBy(id);
     }
 
     protected createItemContext(item: RatingItemDescriptor): RatingItemTemplateContext {

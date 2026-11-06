@@ -327,6 +327,9 @@
         "sortOrder": "並べ替え順 {position}",
         "toolbar": "表のツールバー"
     },
+    "label": {
+        "optional": "任意"
+    },
     "list": {
         "filterList": "リストをフィルター",
         "loading": "読み込み中",

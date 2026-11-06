@@ -353,6 +353,9 @@ export const KO_KR_MESSAGES = {
         sortOrder: (position: number) => `정렬 순서 ${localizeNumber(position)}`,
         toolbar: "표 도구 모음"
     },
+    label: {
+        optional: "선택 사항"
+    },
     list: {
         filterList: "목록 필터",
         loading: "로드 중",

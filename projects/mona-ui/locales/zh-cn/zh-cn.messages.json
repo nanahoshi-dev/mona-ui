@@ -327,6 +327,9 @@
         "sortOrder": "排序顺序 {position}",
         "toolbar": "表格工具栏"
     },
+    "label": {
+        "optional": "可选"
+    },
     "list": {
         "filterList": "筛选列表",
         "loading": "正在加载",

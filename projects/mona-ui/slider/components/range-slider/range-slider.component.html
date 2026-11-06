@@ -73,6 +73,8 @@
     [attr.aria-readonly]="readonly() || null"
     [attr.data-invalid]="invalidState() || null"
     [attr.aria-label]="computedAriaLabelStart()"
+    [attr.aria-labelledby]="startLabelledBy()"
+    [attr.id]="startHandleId"
     #sliderHandle>
     @if (handleTemplate()) {
         <ng-container
@@ -100,6 +102,8 @@
     [attr.aria-readonly]="readonly() || null"
     [attr.data-invalid]="invalidState() || null"
     [attr.aria-label]="computedAriaLabelEnd()"
+    [attr.aria-labelledby]="endLabelledBy()"
+    [attr.id]="endHandleId"
     #secondarySliderHandle>
     @if (handleTemplate()) {
         <ng-container

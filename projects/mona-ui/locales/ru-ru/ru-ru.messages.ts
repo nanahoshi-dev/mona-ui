@@ -381,6 +381,9 @@ export const RU_RU_MESSAGES = {
         sortOrder: (position: number) => `Порядок сортировки ${localizeNumber(position)}`,
         toolbar: "Панель инструментов таблицы"
     },
+    label: {
+        optional: "Необязательно"
+    },
     list: {
         filterList: "Фильтр списка",
         loading: "Загрузка",

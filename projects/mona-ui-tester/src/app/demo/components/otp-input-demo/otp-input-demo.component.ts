@@ -33,6 +33,8 @@ export class OtpInputDemoComponent extends AbstractDemoComponent<OtpInputCompone
             // Angular forbids binding them directly, so exclude them rather than expose a dead control.
             invalid: undefined,
             name: undefined,
+            // The id is generated per instance; a knob would replace it with an empty string.
+            inputId: undefined,
             touched: undefined,
             groupLength: {
                 max: 6,
@@ -98,7 +100,7 @@ export class OtpInputDemoComponent extends AbstractDemoComponent<OtpInputCompone
                 >
             </div>
             <mona-otp-input
-                [ariaLabel]="ariaLabel()"
+                [aria-label]="ariaLabel()"
                 [groupLength]="groupLength()"
                 [length]="length()"
                 [placeholder]="placeholder()"

@@ -47,7 +47,7 @@ export class LabelDemoComponent extends AbstractDemoComponent<LabelComponent> {
 })
 class LabelWrapperComponent implements ComponentInputsAsSignal<LabelComponent> {
     public readonly optional = input(false, { transform: booleanAttribute });
-    public readonly optionalText = input<ReturnType<LabelComponent["optionalText"]>>("Optional");
+    public readonly optionalText = input<ReturnType<LabelComponent["optionalText"]>>("");
     public readonly text = input<ReturnType<LabelComponent["text"]>>("Email address");
     public readonly userClass = input<ReturnType<LabelComponent["userClass"]>>("");
 }

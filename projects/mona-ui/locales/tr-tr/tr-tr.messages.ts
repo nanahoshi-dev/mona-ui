@@ -374,6 +374,9 @@ export const TR_TR_MESSAGES = {
         sortOrder: (position: number) => `Sıralama düzeni ${localizeNumber(position)}`,
         toolbar: "Tablo araç çubuğu"
     },
+    label: {
+        optional: "İsteğe bağlı"
+    },
     list: {
         filterList: "Listeyi filtrele",
         loading: "Yükleniyor",

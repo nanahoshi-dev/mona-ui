@@ -1,5 +1,16 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { booleanAttribute, Component, computed, ElementRef, input, model, output, viewChild } from "@angular/core";
+import {
+    afterRenderEffect,
+    booleanAttribute,
+    Component,
+    computed,
+    ElementRef,
+    inject,
+    input,
+    model,
+    output,
+    viewChild
+} from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import type { FormValueControl } from "@angular/forms/signals";
 import { twMerge } from "tailwind-merge";
@@ -11,7 +22,8 @@ import {
     RadioButtonVariantInput,
     RadioButtonVariantProps
 } from "../../styles/radio.styles";
-import { createElementControlId, injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
+import { createElementControlId, injectEffectiveDisabled, injectLabelAssociation } from "@nanahoshi/mona-ui/internal";
+import { MONA_RADIO_GROUP } from "../../models/RadioGroupContext";
 
 @Component({
     selector: "mona-radio-button",
@@ -22,21 +34,35 @@ import { createElementControlId, injectEffectiveDisabled } from "@nanahoshi/mona
         "[attr.aria-describedby]": "null",
         "[attr.aria-label]": "null",
         "[attr.aria-labelledby]": "null",
-        "[attr.data-readonly]": "readonly() || null",
-        "[attr.data-selected]": "radioValue()===value()",
+        "[attr.data-readonly]": "effectiveReadonly() || null",
+        "[attr.data-selected]": "selected()",
         "[attr.data-disabled]": "effectiveDisabled()"
     }
 })
 export class RadioButtonComponent implements RadioButtonVariantInput, FormValueControl<unknown> {
+    readonly #group = inject(MONA_RADIO_GROUP, { optional: true });
+    readonly #label = injectLabelAssociation({
+        ariaLabel: () => this.ariaLabel(),
+        ariaLabelledBy: () => this.ariaLabelledBy(),
+        wrapped: false
+    });
     protected readonly containerLabelClasses = computed(() => {
         const labelSize = this.labelSize();
         const userClasses = this.userClass();
         const variantClasses = radioButtonContainerLabelThemeVariants({ labelSize });
         return twMerge(variantClasses, userClasses);
     });
-    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
+    protected readonly effectiveDisabled = injectEffectiveDisabled(
+        () => this.disabled() || (this.#group?.disabled() ?? false)
+    );
+    protected readonly effectiveName = computed(() => this.#group?.name() ?? this.name());
+    protected readonly effectiveReadonly = computed(() => this.readonly() || (this.#group?.readonly() ?? false));
+    protected readonly effectiveRequired = computed(() => this.required() || (this.#group?.required() ?? false));
+    protected readonly inputInvalid = computed(() => !this.#group && this.touched() && this.invalid());
     protected readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>("input");
-    protected readonly invalidState = computed(() => this.touched() && this.invalid());
+    // Inside a group the group carries aria-invalid, and the radios only paint it.
+    protected readonly invalidState = computed(() => this.#group?.invalid() ?? (this.touched() && this.invalid()));
+    protected readonly labelledBy = this.#label.labelledBy;
     protected readonly radioButtonCircleClasses = computed(() => {
         const rounded = this.rounded();
         return radioButtonCircleThemeVariants({ rounded });
@@ -46,6 +72,9 @@ export class RadioButtonComponent implements RadioButtonVariantInput, FormValueC
         const rounded = this.rounded();
         return radioButtonIndicatorThemeVariants({ rounded });
     });
+    protected readonly selected = computed(
+        () => this.radioValue() === (this.#group ? this.#group.value() : this.value())
+    );
 
     /**
      * @description Id of an element that describes the radio button, such as an error message.
@@ -179,12 +208,41 @@ export class RadioButtonComponent implements RadioButtonVariantInput, FormValueC
      */
     public readonly value = model<any>(undefined);
 
+    public constructor() {
+        const group = this.#group;
+        if (group) {
+            afterRenderEffect({
+                write: () => {
+                    group.selectionVersion();
+                    this.inputRef().nativeElement.checked = this.selected();
+                }
+            });
+        }
+    }
+
+    /**
+     * Selects the radio button when a label pointing at it through `[for]` is clicked.
+     * @internal
+     */
+    public activateFromLabel(): void {
+        const input = this.inputRef().nativeElement;
+        input.focus();
+        input.click();
+    }
+
     /**
      * @description Moves focus to the native radio input.
      * @param options Options passed to the native `focus()` call, such as `preventScroll`.
      */
     public focus(options?: FocusOptions): void {
         this.inputRef().nativeElement.focus(options);
+    }
+
+    /**
+     * @internal
+     */
+    public setLabelledBy(id: string | null): void {
+        this.#label.setLabelledBy(id);
     }
 
     protected onBlur(event: FocusEvent): void {
@@ -194,13 +252,17 @@ export class RadioButtonComponent implements RadioButtonVariantInput, FormValueC
 
     protected onInputClick(event: MouseEvent): void {
         // Canceling the click makes the browser restore the previously checked radio.
-        if (this.readonly()) {
+        if (this.effectiveReadonly()) {
             event.preventDefault();
         }
         this.inputClick.emit(event);
     }
 
     protected onSelectionChange(): void {
+        if (this.#group) {
+            this.#group.select(this.radioValue());
+            return;
+        }
         this.value.set(this.radioValue());
         this.touch.emit();
     }

@@ -127,6 +127,7 @@ export class RangeSliderDemoComponent extends AbstractDemoComponent<RangeSliderC
         <div class="flex flex-col gap-4">
             <span>Range: {{ form.value().value()[0] }} - {{ form.value().value()[1] }}</span>
             <mona-range-slider
+                aria-label="Hour range"
                 [aria-label-start]="ariaLabelStart()"
                 [aria-label-end]="ariaLabelEnd()"
                 [labelPosition]="labelPosition()"

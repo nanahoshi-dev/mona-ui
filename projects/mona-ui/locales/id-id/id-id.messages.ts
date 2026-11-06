@@ -353,6 +353,9 @@ export const ID_ID_MESSAGES = {
         sortOrder: (position: number) => `Urutan pengurutan ${localizeNumber(position)}`,
         toolbar: "Bilah alat tabel"
     },
+    label: {
+        optional: "Opsional"
+    },
     list: {
         filterList: "Saring daftar",
         loading: "Memuat",

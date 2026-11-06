@@ -19,7 +19,7 @@
         [attr.aria-checked]="indeterminate() ? 'mixed' : null"
         [attr.aria-invalid]="invalidState() ? 'true' : null"
         [attr.aria-label]="ariaLabel() || label() || null"
-        [attr.aria-labelledby]="ariaLabelledBy() || null"
+        [attr.aria-labelledby]="labelledBy()"
         [attr.aria-describedby]="ariaDescribedBy() || null"
         [attr.aria-readonly]="readonly() ? 'true' : null"
         (click)="onInputClick($event)"

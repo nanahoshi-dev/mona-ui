@@ -327,6 +327,9 @@
         "sortOrder": "Ordre de tri {position}",
         "toolbar": "Barre d’outils du tableau"
     },
+    "label": {
+        "optional": "Facultatif"
+    },
     "list": {
         "filterList": "Filtrer la liste",
         "loading": "Chargement",

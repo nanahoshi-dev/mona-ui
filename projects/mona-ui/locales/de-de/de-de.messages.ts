@@ -378,6 +378,9 @@ export const DE_DE_MESSAGES = {
         sortOrder: (position: number) => `Sortierreihenfolge ${localizeNumber(position)}`,
         toolbar: "Tabellen-Symbolleiste"
     },
+    label: {
+        optional: "Optional"
+    },
     list: {
         filterList: "Liste filtern",
         loading: "Wird geladen",

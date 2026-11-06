@@ -426,6 +426,9 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         sortOrder: [{ name: "position", type: "number" }],
         toolbar: null
     },
+    label: {
+        optional: null
+    },
     list: {
         filterList: null,
         loading: null,

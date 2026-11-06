@@ -23,7 +23,9 @@ import { SliderBaseComponent } from "../slider-base/slider-base.component";
     }
 })
 export class SliderComponent extends SliderBaseComponent implements FormValueControl<number> {
-    protected readonly computedAriaLabel = computed(() => this.ariaLabel() ?? this.messages().sliderValue);
+    protected readonly computedAriaLabel = computed(
+        () => this.ariaLabel() ?? (this.labelledBy() ? null : this.messages().sliderValue)
+    );
     protected readonly handleFocused = signal(false);
     protected readonly handlePosition = computed(() => this.positionFromValue(this.normalizedValue()));
     protected readonly handleStyle = computed<Partial<CSSStyleDeclaration>>(() => ({
@@ -35,19 +37,6 @@ export class SliderComponent extends SliderBaseComponent implements FormValueCon
     protected readonly selectionLeft = computed(() => 0);
     protected readonly selectionRight = computed(() => this.handlePosition());
     protected readonly sliderHandle: Signal<ElementRef<HTMLDivElement>> = viewChild.required("sliderHandle");
-
-    /**
-     * @description Accessible name for the host element. Describe what the component represents.
-     * When empty, assistive technology announces the role without a label.
-     * @default null
-     */
-    public readonly ariaLabel = input<string | null>(null, { alias: "aria-label" });
-
-    /**
-     * @description ID of an external element that provides the accessible name for the host element.
-     * @default null
-     */
-    public readonly ariaLabelledBy = input<string | null>(null, { alias: "aria-labelledby" });
 
     /**
      * @description Upper bound that wins over `maxValue`. When bound to a signal form field via `[formField]`, this is

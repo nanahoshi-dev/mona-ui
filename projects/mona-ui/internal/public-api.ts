@@ -17,6 +17,7 @@ export * from "./utils/core/Action";
 export * from "./utils/core/ariaReferences";
 export * from "./utils/core/createElementControlId";
 export * from "./utils/core/fieldsetDisabled";
+export * from "./utils/core/labelAssociation";
 export * from "./utils/core/focusCanReturn";
 export * from "./utils/core/focusElement";
 export * from "./utils/core/inertOutside";

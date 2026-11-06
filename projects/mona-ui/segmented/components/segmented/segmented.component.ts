@@ -10,6 +10,7 @@ import {
     ElementRef,
     inject,
     input,
+    isDevMode,
     model,
     output,
     signal,
@@ -17,7 +18,7 @@ import {
     viewChildren
 } from "@angular/core";
 import type { FormValueControl } from "@angular/forms/signals";
-import { createElementControlId, injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
+import { createElementControlId, injectEffectiveDisabled, injectLabelAssociation } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { SegmentedItemTemplateDirective } from "../../directives/segmented-item-template.directive";
 import type { SegmentedIndicatorGeometry } from "../../models/SegmentedIndicatorGeometry";
@@ -41,7 +42,7 @@ import {
         "[attr.aria-disabled]": "effectiveDisabled() || undefined",
         "[attr.aria-invalid]": "invalidState() ? 'true' : null",
         "[attr.aria-label]": "ariaLabel()",
-        "[attr.aria-labelledby]": "ariaLabelledBy()",
+        "[attr.aria-labelledby]": "labelledBy()",
         "[attr.aria-readonly]": "readonly() || null",
         "[attr.aria-required]": "required() || null",
         "[attr.data-disabled]": "effectiveDisabled()",
@@ -57,6 +58,11 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
 {
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+    readonly #label = injectLabelAssociation({
+        activate: () => this.focus(),
+        ariaLabel: () => this.ariaLabel(),
+        ariaLabelledBy: () => this.ariaLabelledBy()
+    });
     #lastAnimatedIndex: number | null = null;
     #lastOptions: readonly SegmentedOption<T>[] | null = null;
     #lastSize: SegmentedVariantProps["size"] | null = null;
@@ -80,6 +86,7 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
     protected readonly inputClasses = computed(() => segmentedInputThemeVariants());
     protected readonly invalidState = computed(() => this.touched() && this.invalid());
     protected readonly itemTemplate = contentChild(SegmentedItemTemplateDirective, { read: TemplateRef });
+    protected readonly labelledBy = this.#label.labelledBy;
     protected readonly optionClasses = computed(() => {
         const alignment = this.alignment();
         const rounded = this.rounded();
@@ -195,6 +202,15 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
     public readonly value = model<T | null>(null);
 
     public constructor() {
+        afterNextRender(() => {
+            if (isDevMode() && !this.#label.labelledBy() && !this.ariaLabel()) {
+                console.warn(
+                    "[Mona Segmented] A segmented control needs an accessible name. Set aria-label, aria-labelledby " +
+                        "or use a mona-label.",
+                    this.#hostElementRef.nativeElement
+                );
+            }
+        });
         afterRenderEffect({
             read: () => {
                 this.selectedIndex();
@@ -237,6 +253,13 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
             host.querySelector<HTMLInputElement>("input:checked:not(:disabled)") ??
             host.querySelector<HTMLInputElement>("input:not(:disabled)");
         target?.focus(options);
+    }
+
+    /**
+     * @internal
+     */
+    public setLabelledBy(id: string | null): void {
+        this.#label.setLabelledBy(id);
     }
 
     protected createOptionContext(option: SegmentedOption<T>, index: number): SegmentedItemTemplateContext<T> {

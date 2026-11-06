@@ -379,6 +379,9 @@ export const IT_IT_MESSAGES = {
         sortOrder: (position: number) => `Ordine di ordinamento ${localizeNumber(position)}`,
         toolbar: "Barra degli strumenti della tabella"
     },
+    label: {
+        optional: "Facoltativo"
+    },
     list: {
         filterList: "Filtra elenco",
         loading: "Caricamento",

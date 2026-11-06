@@ -100,6 +100,13 @@ export const DEFAULT_CATALOG_TARGETS: readonly DefaultCatalogTarget[] = [
         typeName: "MonaColorGradientMessages"
     },
     {
+        constName: "LABEL_DEFAULT_MESSAGES",
+        file: "label/i18n/label.default-messages.ts",
+        namespace: "label",
+        style: "type",
+        typeName: "MonaLabelMessages"
+    },
+    {
         constName: "COLOR_PALETTE_DEFAULT_MESSAGES",
         file: "color-palette/i18n/color-palette.default-messages.ts",
         namespace: "colorPalette",

@@ -327,6 +327,9 @@
         "sortOrder": "Ordem de classificação {position}",
         "toolbar": "Barra de ferramentas da tabela"
     },
+    "label": {
+        "optional": "Opcional"
+    },
     "list": {
         "filterList": "Filtrar lista",
         "loading": "Carregando",

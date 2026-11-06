@@ -1,7 +1,7 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { booleanAttribute, Component, computed, contentChild, effect, ElementRef, inject, input, model, output, signal, TemplateRef, viewChild } from "@angular/core";
+import { afterNextRender, booleanAttribute, Component, computed, contentChild, effect, ElementRef, inject, input, model, output, signal, TemplateRef, viewChild } from "@angular/core";
 import { type FormValueControl } from "@angular/forms/signals";
-import { AttributeBinderDirective, AttributeConfig, injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
+import { AttributeBinderDirective, AttributeConfig, createElementControlId, injectEffectiveDisabled, injectLabelAssociation } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { OtpInputSeparatorTemplateDirective } from "../../directives/otp-input-separator-template.directive";
@@ -45,6 +45,10 @@ interface OtpGroupViewModel {
     imports: [NgTemplateOutlet, AttributeBinderDirective],
     host: {
         dir: "ltr",
+        // The ARIA inputs are applied to the inner input, so the host must not keep the static attributes.
+        "[attr.aria-describedby]": "null",
+        "[attr.aria-label]": "null",
+        "[attr.aria-labelledby]": "null",
         "[attr.dir]": "'ltr'",
         "[attr.data-disabled]": "effectiveDisabled() || null",
         "[attr.data-readonly]": "readonly() || null",
@@ -56,7 +60,12 @@ interface OtpGroupViewModel {
     }
 })
 export class OtpInputComponent implements OtpInputVariantInput, FormValueControl<string> {
+    readonly #hasNativeLabel = signal(false);
     readonly #i18n = inject(MonaI18nService);
+    readonly #label = injectLabelAssociation({
+        ariaLabel: () => this.ariaLabel(),
+        ariaLabelledBy: () => this.ariaLabelledBy()
+    });
 
     protected readonly activeSlotIndex = computed(() => {
         if (!this.hasFocus()) {
@@ -78,6 +87,10 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         const baseClasses = otpInputHostThemeVariants();
         return twMerge(baseClasses, this.userClass());
     });
+    protected readonly computedAriaDescribedby = computed(() => {
+        const raw = findUsableAttribute(this.inputAttributes(), "aria-describedby");
+        return toNonEmptyString(raw) ?? toNonEmptyString(this.ariaDescribedBy());
+    });
     protected readonly computedAriaLabel = computed(() => {
         const labelledby = this.computedAriaLabelledby();
         if (labelledby != null) {
@@ -89,13 +102,17 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         if (customAttrLabel != null) {
             return customAttrLabel;
         }
-        const fallback = toNonEmptyString(this.ariaLabel());
-        return fallback ?? this.messages().verificationCode;
+        const explicit = toNonEmptyString(this.ariaLabel());
+        if (explicit != null) {
+            return explicit;
+        }
+        // A real <label> names the input, so the generic name would only hide it.
+        return this.#hasNativeLabel() ? null : this.messages().verificationCode;
     });
     protected readonly computedAriaLabelledby = computed(() => {
         const attrs = this.inputAttributes();
         const raw = findUsableAttribute(attrs, "aria-labelledby");
-        return toNonEmptyString(raw);
+        return toNonEmptyString(raw) ?? this.#label.labelledBy();
     });
     protected readonly derivedAutocomplete = computed(() => {
         const attrs = this.inputAttributes();
@@ -218,10 +235,23 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     });
 
     /**
-     * @description Accessible name for the inner `<input>` element.
+     * @description Id of an element that describes the inner `<input>`, such as an error message.
      * @default null
      */
-    public readonly ariaLabel = input<string | null>(null);
+    public readonly ariaDescribedBy = input<string | null>(null, { alias: "aria-describedby" });
+
+    /**
+     * @description Accessible name for the inner `<input>` element. A `<label>` or `mona-label` names it too, and the
+     * generic "Verification code" name only applies when there is neither.
+     * @default null
+     */
+    public readonly ariaLabel = input<string | null>(null, { alias: "aria-label" });
+
+    /**
+     * @description Id of the element that labels the inner `<input>`.
+     * @default null
+     */
+    public readonly ariaLabelledBy = input<string | null>(null, { alias: "aria-labelledby" });
 
     /**
      * @description Regular expression used to determine whether each individual OTP character is allowed.
@@ -253,6 +283,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
      */
     public readonly inputAttributes = input<AttributeConfig>({});
 
+
     /**
      * @description Emitted when the inner input loses focus.
      */
@@ -263,6 +294,12 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
      */
     public readonly inputFocus = output<FocusEvent>();
 
+    /**
+     * @description Id of the inner `<input>` element. Point a `<label for>` or `<mona-label for>` at it to label the
+     * control. A unique id is generated when it isn't set.
+     * @default generated
+     */
+    public readonly inputId = input(createElementControlId());
     /**
      * @description Marks the OTP input as invalid. When bound to a signal form field via `[formField]`,
      * this is written by the `FormField` directive.
@@ -371,6 +408,9 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     public readonly value = model("");
 
     public constructor() {
+        afterNextRender(() => {
+            this.#hasNativeLabel.set((this.inputRef().nativeElement.labels?.length ?? 0) > 0);
+        });
         effect(() => {
             const val = this.value();
             const inputType = this.type();
@@ -420,6 +460,13 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
             }
         }
         this.syncSelection();
+    }
+
+    /**
+     * @internal
+     */
+    public setLabelledBy(id: string | null): void {
+        this.#label.setLabelledBy(id);
     }
 
     protected onBeforeInput(event: InputEvent): void {

@@ -62,7 +62,13 @@ export class FieldsetDemoComponent extends AbstractDemoComponent<FieldsetCompone
     ],
     template: `
         @let featureData = features();
-        <mona-fieldset [legend]="legend()" [rounded]="rounded()" [disabled]="disabled()" [class]="userClass()">
+        <mona-fieldset
+            [aria-label]="ariaLabel()"
+            [aria-labelledby]="ariaLabelledBy()"
+            [legend]="legend()"
+            [rounded]="rounded()"
+            [disabled]="disabled()"
+            [class]="userClass()">
             <div class="flex flex-col gap-3 p-2">
                 <p>Turning on disabled disables every control inside.</p>
                 <mona-switch aria-label="Notifications" />
@@ -86,6 +92,8 @@ export class FieldsetDemoComponent extends AbstractDemoComponent<FieldsetCompone
 class FieldsetWrapperComponent implements ComponentInputsAsSignal<FieldsetComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly seasons = ["Spring", "Summer", "Autumn", "Winter"];
+    public readonly ariaLabel = input("");
+    public readonly ariaLabelledBy = input("");
     public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly legend = input<ReturnType<FieldsetComponent["legend"]>>("");
     public readonly rounded = input<ReturnType<FieldsetComponent["rounded"]>>("medium");

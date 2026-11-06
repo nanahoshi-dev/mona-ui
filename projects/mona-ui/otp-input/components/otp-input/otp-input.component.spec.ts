@@ -30,7 +30,7 @@ import { OtpInputComponent } from "./otp-input.component";
                 [required]="required()"
                 [invalid]="invalid()"
                 [touched]="touched()"
-                [ariaLabel]="ariaLabel()"
+                [aria-label]="ariaLabel()"
                 [inputAttributes]="inputAttributes()"
                 [slotClass]="slotClass()"
                 [separatorClass]="separatorClass()"

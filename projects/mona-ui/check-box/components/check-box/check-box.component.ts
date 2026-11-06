@@ -11,7 +11,7 @@ import {
     CheckmarkVariantInput,
     CheckmarkVariantProps
 } from "../../styles/checkbox.styles";
-import { createElementControlId, injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
+import { createElementControlId, injectEffectiveDisabled, injectLabelAssociation } from "@nanahoshi/mona-ui/internal";
 
 @Component({
     selector: "mona-check-box",
@@ -30,6 +30,11 @@ import { createElementControlId, injectEffectiveDisabled } from "@nanahoshi/mona
     }
 })
 export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariantInput, FormCheckboxControl {
+    readonly #label = injectLabelAssociation({
+        ariaLabel: () => this.ariaLabel(),
+        ariaLabelledBy: () => this.ariaLabelledBy(),
+        wrapped: false
+    });
     protected readonly checkBoxClasses = computed(() => {
         return checkboxInputThemeVariants();
     });
@@ -48,6 +53,7 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
     protected readonly invalidState = computed(
         () => this.touched() && (this.invalid() || (this.required() && !this.checked()))
     );
+    protected readonly labelledBy = this.#label.labelledBy;
 
     /**
      * @description Id of an element that describes the check box, such as an error message.
@@ -183,11 +189,28 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
     public readonly userClass = input<string>("", { alias: "class" });
 
     /**
+     * Toggles the check box when a label pointing at it through `[for]` is clicked.
+     * @internal
+     */
+    public activateFromLabel(): void {
+        const input = this.inputRef().nativeElement;
+        input.focus();
+        input.click();
+    }
+
+    /**
      * @description Moves focus to the native checkbox input.
      * @param options Options passed to the native `focus()` call, such as `preventScroll`.
      */
     public focus(options?: FocusOptions): void {
         this.inputRef().nativeElement.focus(options);
+    }
+
+    /**
+     * @internal
+     */
+    public setLabelledBy(id: string | null): void {
+        this.#label.setLabelledBy(id);
     }
 
     protected onInputBlur(event: FocusEvent): void {
