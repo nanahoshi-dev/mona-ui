@@ -81,12 +81,14 @@ Use a native `button` or `a` element for the trigger when possible. The trigger 
 | Attribute | Behavior |
 |-----------|----------|
 | `aria-expanded` | Reflects the root's current `expanded` state. |
-| `aria-controls` | References the generated `id` on the content element. |
+| `aria-controls` | References the `id` on the content element, generated unless you gave it one. |
 | `aria-disabled` | Set to `"true"` when the root is disabled. |
 
-Native button triggers receive `type="button"` and use the browser's native role, focusability, and disabled behavior. Other trigger elements receive `role="button"` and `tabindex="0"`; `Enter` and `Space` toggle the root and prevent their default action. A non-native trigger becomes unfocusable (`tabindex="-1"`) while disabled.
+Native button triggers receive `type="button"` and use the browser's native role, focusability, and disabled behavior. Other trigger elements receive `role="button"` and `tabindex="0"`; `Enter` and `Space` toggle the root and prevent their default action. A non-native trigger, or an `a`, becomes unfocusable (`tabindex="-1"`) while disabled, and a disabled `a` doesn't follow its `href`.
 
-The content element is marked `inert` while collapsed, preventing focus from entering content that is not currently available. Give every trigger an accessible name through visible text or an appropriate ARIA naming attribute.
+A control inside a trigger, such as a button or an input in a `div` used as one, keeps its own clicks and keys, and doesn't toggle the root.
+
+The content element is marked `inert` while collapsed, preventing focus from entering content that is not currently available. Its collapsed height is set in the first pass, so server-rendered content doesn't paint open. Give every trigger an accessible name through visible text or an appropriate ARIA naming attribute.
 
 ## API
 
@@ -108,7 +110,7 @@ Headless root directive. It adds `data-state="open"` or `data-state="closed"` to
 
 | Name | Type | Description |
 |------|------|-------------|
-| `contentId` | `string` | Generated ID assigned to the content element and referenced from the trigger's `aria-controls`. |
+| `contentId` | `string` | ID of the content element, referenced from the trigger's `aria-controls`. Generated, unless the content element has its own. |
 | `expand()` | `void` | Sets `expanded` to `true`. |
 | `collapse()` | `void` | Sets `expanded` to `false`. |
 | `toggle()` | `void` | Toggles `expanded` unless the root is disabled. |
@@ -123,11 +125,19 @@ Toggles the nearest `CollapsibleDirective` on click and supported keyboard activ
 
 **Selector:** `[monaCollapsibleContent]`
 
-Marks the content element with the root's generated ID, `data-state`, and collapsed `inert` state. It has no public inputs or outputs.
+Marks the content element with its ID, `data-state`, and collapsed `inert` state.
 
-### `CollapsibleConfig`
+Padding and borders can go on this element. While closed, its block padding and border are set to `0` inline, along with its height, so that nothing shows. Any padding you set inline on it won't survive a toggle, so put that on an inner element.
 
-Public interface describing the state and control methods exposed by a collapsible root to paired directives. Most consumers can use the directives directly and do not need to implement or inject this interface.
+#### Inputs
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `id` | `string \| null` | `null` | The content's ID, for when it has to be something in particular. Generated if not given. |
+
+### `CollapsibleConfig` and `COLLAPSIBLE_CONFIG`
+
+Public interface describing the state and control methods exposed by a collapsible root to paired directives, and the token that provides it. Most consumers can use the directives directly and do not need to implement or inject either.
 
 ---
 

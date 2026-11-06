@@ -1,5 +1,5 @@
 import { computed, Directive, effect, inject, input, untracked } from "@angular/core";
-import { CollapsibleToken } from "@nanahoshi/mona-ui/collapsible";
+import { COLLAPSIBLE_CONFIG } from "@nanahoshi/mona-ui/collapsible";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
 import { twMerge } from "tailwind-merge";
 import { SidebarService } from "../services/sidebar.service";
@@ -15,7 +15,7 @@ import { sidebarMenuItemThemeVariants } from "../styles/sidebar.styles";
 export class SidebarMenuItemDirective {
     // Applying `monaCollapsible` to the same element turns the item into a disclosure row, so it has to
     // stack its trigger and submenu instead of laying them out side-by-side.
-    readonly #collapsible = inject(CollapsibleToken, { optional: true, self: true });
+    readonly #collapsible = inject(COLLAPSIBLE_CONFIG, { optional: true, self: true });
     readonly #sidebarService = inject(SidebarService, { optional: true });
     #expandedBeforeRail = false;
     protected readonly baseClass = computed(() => {

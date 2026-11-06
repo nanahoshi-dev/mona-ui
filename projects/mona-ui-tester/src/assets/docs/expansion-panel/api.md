@@ -1,13 +1,13 @@
 ## Overview
 
-`ExpansionPanelComponent` renders a header bar and a collapsible content region. Clicking the header (or pressing `Enter` / `Space` when it has focus) toggles the `expanded` state. The expand/collapse animation is driven by a CSS grid-row transition with no JavaScript involvement at runtime.
+`ExpansionPanelComponent` renders a header bar and a collapsible content region. The header's title and icon are a native button that fills the row, so clicking it, or pressing `Enter` or `Space` on it, toggles the `expanded` state. Controls from the actions template sit beside that button, not inside it. The expand/collapse animation is driven by a CSS grid-row transition with no JavaScript involvement at runtime.
 
-When multiple panels are stacked directly adjacent to one another, the component's border styles stitch the group into a visually continuous block: non-last panels suppress their bottom border and bottom radius, and non-first panels suppress their top radius. No wrapper component is required.
+When multiple panels are stacked directly adjacent to one another, the component's border styles stitch the group into a visually continuous block: non-last panels suppress their bottom border and bottom radius, and non-first panels suppress their top radius. That's only how they look: each panel still opens on its own. For one panel open at a time and arrow keys between the headers, wrap them in `AccordionComponent`.
 
 **Use `ExpansionPanelComponent` when you need to:**
 
 - Collapse optional detail content inside a form, settings page, or record view
-- Build a vertical accordion-style list where items expand in place
+- Build an accordion, with `mona-accordion`, where items expand in place
 - Group and hide a block of secondary information behind a labelled header
 
 ## Import & Basic Usage
@@ -34,12 +34,27 @@ Add `ExpansionPanelComponent` to your standalone component's `imports` array.
 </mona-expansion-panel>
 ```
 
-**Stacked accordion** — place panels directly adjacent with no wrapper; the border and radius stitching is automatic:
+**Accordion** — `mona-accordion` keeps one panel open at a time, and `Up`, `Down`, `Home` and `End` move between the headers. Add `multiple` to let several stay open:
+
+```typescript
+import { AccordionComponent, ExpansionPanelComponent } from "@nanahoshi/mona-ui/expansion-panel";
+```
 
 ```html
-<mona-expansion-panel title="Section A">...</mona-expansion-panel>
-<mona-expansion-panel title="Section B">...</mona-expansion-panel>
-<mona-expansion-panel title="Section C">...</mona-expansion-panel>
+<mona-accordion>
+    <mona-expansion-panel title="Section A">...</mona-expansion-panel>
+    <mona-expansion-panel title="Section B">...</mona-expansion-panel>
+    <mona-expansion-panel title="Section C">...</mona-expansion-panel>
+</mona-accordion>
+```
+
+**Stacked panels** — placed directly adjacent with no wrapper, panels look like one block, with the border and radius stitching applied automatically, and each one opens independently.
+
+**Heading level** — each header is a heading, level 3 by default. Set `headingLevel` to fit the page's outline, or to `null` for no heading:
+
+```html
+<h2>Settings</h2>
+<mona-expansion-panel title="Notifications" [headingLevel]="3">...</mona-expansion-panel>
 ```
 
 ## Appearance & Styling
@@ -57,15 +72,15 @@ When panels are stacked, border-radius is only visible on the first panel's top 
 
 ### Disabled state
 
-Set `disabled` to suppress click and keyboard toggling on the header. The header renders with reduced visual emphasis and no longer participates in tab order.
+Set `disabled` to disable the header's button. The header renders with reduced visual emphasis and leaves the tab order, and the controls in the actions template are made inert along with it.
 
 ### Content animation
 
-The content region uses `grid-rows-[0fr]` (collapsed) → `grid-rows-[1fr]` (expanded) with a 300 ms ease-out CSS transition. No JavaScript is involved in the animation.
+The content region uses `grid-rows-[0fr]` (collapsed) → `grid-rows-[1fr]` (expanded) with a 300 ms ease-out CSS transition. No JavaScript is involved in the animation, and it's switched off for `prefers-reduced-motion`.
 
 ### Custom classes
 
-Pass `userClass` to merge additional CSS classes onto the host element.
+Pass `class` to merge additional CSS classes onto the host element through `tailwind-merge`.
 
 ### Template slots
 
@@ -73,11 +88,11 @@ Three `ng-template` directives customize the header:
 
 | Slot             | Selector                                         | Replaces                                        |
 |------------------|--------------------------------------------------|-------------------------------------------------|
-| Title template   | `ng-template[monaExpansionPanelTitleTemplate]`   | The string `title` inside the header title area |
-| Actions template | `ng-template[monaExpansionPanelActionsTemplate]` | Injected into the header between title and icon |
+| Title template   | `ng-template[monaExpansionPanelTitleTemplate]`   | The string `title` inside the header's button   |
+| Actions template | `ng-template[monaExpansionPanelActionsTemplate]` | Injected beside the button, between title and icon |
 | Icon template    | `ng-template[monaExpansionPanelIconTemplate]`    | The default plus/minus icon                     |
 
-**Title template** — replace the string title with any content:
+**Title template** — replace the string title. It renders inside the button, so it can hold text, icons and images, but not controls: put those in the actions template.
 
 ```html
 <mona-expansion-panel>
@@ -88,13 +103,13 @@ Three `ng-template` directives customize the header:
 </mona-expansion-panel>
 ```
 
-**Actions template** — inject controls into the header. Actions are rendered inside the clickable header region, so any interactive control must call `$event.stopPropagation()` to prevent its click from toggling the panel:
+**Actions template** — inject controls into the header. They sit beside the toggle button, so their clicks and keys are their own, and nothing has to stop them from reaching it:
 
 ```html
 <mona-expansion-panel title="Settings">
     <ng-template monaExpansionPanelActionsTemplate>
-        <button monaButton look="ghost" [iconOnly]="true" [size]="'small'"
-                (click)="$event.stopPropagation(); openSettings()">
+        <button monaButton look="ghost" [iconOnly]="true" [size]="'small'" aria-label="Settings"
+                (click)="openSettings()">
             <svg lucideSettings [size]="14"></svg>
         </button>
     </ng-template>
@@ -121,21 +136,42 @@ Three `ng-template` directives customize the header:
 
 ## Accessibility Notes
 
-The header toggles via mouse click and via `Enter` or `Space` while it has focus; both keys call `preventDefault()` so `Space` does not scroll the page.
+The header's button is native, so a click, `Enter` and `Space` all work as a button's do, and it follows the [WAI-ARIA accordion pattern](https://www.w3.org/WAI/ARIA/apg/patterns/accordion/). A panel needs a `title` or a title template with text, or its button has no name, which is warned about in development.
 
-| Attribute       | When present                          | Value                                            |
-|-----------------|---------------------------------------|--------------------------------------------------|
-| `role`          | Always                                | `"button"`                                       |
-| `tabindex`      | Always                                | `0`, or `-1` when `disabled` is `true`           |
-| `aria-expanded` | Always                                | Reflects the current `expanded` state            |
-| `aria-controls` | Always                                | The content region's generated `id`              |
-| `aria-disabled` | When `disabled` is `true`             | `"true"`                                         |
-| `aria-hidden`   | On the content region, always         | `"true"` when collapsed, `"false"` when expanded |
-| `inert`         | On the content region, when collapsed | Present (blocks focus from entering)             |
+| Element        | Attribute         | When present              | Value                                            |
+|----------------|-------------------|---------------------------|--------------------------------------------------|
+| Heading        | `role`            | Unless `headingLevel` is `null` | `"heading"`                                |
+| Heading        | `aria-level`      | Unless `headingLevel` is `null` | `headingLevel`, 3 by default               |
+| Button         | `aria-expanded`   | Always                    | Reflects the current `expanded` state            |
+| Button         | `aria-controls`   | Always                    | The content region's generated `id`              |
+| Button         | `disabled`        | When `disabled` is `true` | Present                                          |
+| Actions        | `inert`           | When `disabled` is `true` | Present                                          |
+| Content region | `role`            | Always                    | `"region"`                                       |
+| Content region | `aria-labelledby` | Always                    | The button's `id`                                |
+| Content region | `aria-hidden`     | Always                    | `"true"` when collapsed, `"false"` when expanded |
+| Content region | `inert`           | When collapsed            | Present (blocks focus from entering)             |
 
-TODO(owner-review): confirm whether the header should remain a `role="button"` `<div>` or move to a native `<button>` element; the current implementation supports the ARIA disclosure pattern either way.
+**Keyboard in `mona-accordion`** (when a header has focus):
+
+| Key                 | Action                                                    |
+|---------------------|-----------------------------------------------------------|
+| `ArrowDown` / `ArrowUp` | Move focus to the next or previous enabled header, wrapping around. Doesn't toggle. |
+| `Home` / `End`      | Move focus to the first or last enabled header.           |
+| `Enter` / `Space`   | Toggle the panel, as without the accordion.               |
 
 ## API
+
+### `AccordionComponent`
+
+**Selector:** `mona-accordion`
+
+Groups the `mona-expansion-panel` elements inside it, however deep, except those in an accordion of their own. It renders no element or role of its own. With only one open at a time, the panel opened last stays open, whether it was opened by a click, a binding or `expand()`. That includes panels that start open, and a disabled panel can be closed by it.
+
+#### Inputs
+
+| Name       | Type      | Default | Description                      |
+|------------|-----------|---------|----------------------------------|
+| `multiple` | `boolean` | `false` | Lets several panels stay open.   |
 
 ### `ExpansionPanelComponent`
 
@@ -145,27 +181,35 @@ TODO(owner-review): confirm whether the header should remain a `role="button"` `
 
 | Name        | Type                                       | Default    | Description                                                                                                                                                                               |
 |-------------|--------------------------------------------|------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `disabled`  | `boolean`                                  | `false`    | Suppresses click and keyboard toggling on the header.                                                                                                                                     |
+| `class`     | `string`                                   | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                                 |
+| `disabled`  | `boolean`                                  | `false`    | Disables the header: toggling by click or key, and the actions in it.                                                                                                                     |
 | `expanded`  | `boolean`                                  | `false`    | Two-way bindable. Controls whether the panel is expanded. Use `[(expanded)]` for two-way binding or `[expanded]` for one-way. Changing this programmatically animates the content region. |
+| `headingLevel` | `number \| null`                        | `3`        | The level of the heading around the header's button, from 1 to 6, or `null` for no heading. Anything else counts as the default.                                                           |
 | `rounded`   | `'none' \| 'small' \| 'medium' \| 'large'` | `'medium'` | Border-radius preset. When stacking panels, use the same value for all panels in the group.                                                                                               |
-| `title`     | `string`                                   | `''`       | Text shown in the header title area. Ignored when `monaExpansionPanelTitleTemplate` is provided.                                                                                          |
-| `userClass` | `string`                                   | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                                 |
+| `title`     | `string`                                   | `''`       | Text shown in the header's button, which also names it and the region. Ignored when `monaExpansionPanelTitleTemplate` is provided.                                                        |
 
 `ExpansionPanelComponent` has no event outputs. Observe `[(expanded)]` to react to state changes.
+
+#### Methods
+
+| Method       | Description                                                                 |
+|--------------|-----------------------------------------------------------------------------|
+| `collapse()` | Collapses the panel, even when `disabled`.                                  |
+| `expand()`   | Expands the panel, even when `disabled`.                                    |
+| `focus()`    | Moves focus to the header's button.                                         |
+| `toggle()`   | Toggles the panel, unless it's `disabled`.                                  |
 
 ### `ExpansionPanelTitleTemplateDirective`
 
 **Selector:** `ng-template[monaExpansionPanelTitleTemplate]`
 
-Replaces the string `title` in the header title area with projected content. The template has no context variables.
+Replaces the string `title` in the header's button with projected content. It can't hold controls, since it's inside a button. The template has no context variables.
 
 ### `ExpansionPanelActionsTemplateDirective`
 
 **Selector:** `ng-template[monaExpansionPanelActionsTemplate]`
 
-Injects content between the title area and the toggle icon. The template has no context variables.
-
-> **Click propagation:** the actions area is inside the clickable header. Any interactive control inside an actions template must call `$event.stopPropagation()` on its click handler to prevent it from toggling the panel.
+Injects content beside the header's button, between the title and the toggle icon. Its controls are the application's own: their clicks and keys don't reach the button, and they need their own accessible names. The template has no context variables.
 
 ### `ExpansionPanelIconTemplateDirective`
 
@@ -180,7 +224,7 @@ Replaces the default plus/minus toggle icon. The template context exposes one va
 Import all template directives alongside the component:
 
 ```typescript
-import { ExpansionPanelActionsTemplateDirective, ExpansionPanelComponent, ExpansionPanelIconTemplateDirective, ExpansionPanelTitleTemplateDirective } from "@nanahoshi/mona-ui/expansion-panel";
+import { AccordionComponent, ExpansionPanelActionsTemplateDirective, ExpansionPanelComponent, ExpansionPanelIconTemplateDirective, ExpansionPanelTitleTemplateDirective } from "@nanahoshi/mona-ui/expansion-panel";
 ```
 
 ---
@@ -189,11 +233,12 @@ import { ExpansionPanelActionsTemplateDirective, ExpansionPanelComponent, Expans
 - [x] API definitions and defaults verified against source and component-metadata.json
 - [x] standalone: true removed from ActionsTemplateDirective and TitleTemplateDirective
 - [x] Icon template context ($implicit: expanded()) verified in template source
-- [x] Actions click-propagation caveat verified in demo source
+- [x] Actions as a sibling of the button, with no click-propagation caveat, verified in template source and spec
+- [x] AccordionComponent single-open and keys verified against source and spec
 - [x] Stacking border stitching verified in CVA base styles (not-last / not-first selectors)
 - [x] disabled and userClass inputs verified against source and component-metadata.json
-- [x] Accessibility attribute table verified against template source (role, tabindex, aria-expanded, aria-controls, aria-disabled, aria-hidden, inert)
-- [x] Keyboard activation (Enter/Space + preventDefault) verified against component source and spec
+- [x] Accessibility attribute table verified against template source (heading, aria-level, aria-expanded, aria-controls, disabled, region, aria-labelledby, aria-hidden, inert)
+- [x] Keyboard activation comes from the native button
 - [x] No internal or unexported APIs exposed
 -->
 

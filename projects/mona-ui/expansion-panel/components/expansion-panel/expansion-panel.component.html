@@ -1,33 +1,45 @@
-<div monaCollapsibleTrigger [class]="headerClass()">
-    <div [class]="headerTitleClass()">
-        @if (titleTemplate()) {
-            <ng-container [ngTemplateOutlet]="titleTemplate()"></ng-container>
-        } @else {
-            {{ title() }}
-        }
+<div [class]="headerClass()">
+    <!-- The button fills the row, so all of it toggles. The actions sit over it as its sibling, never inside it. -->
+    <div
+        [class]="headingClass()"
+        [attr.role]="headingLevel() === null ? null : 'heading'"
+        [attr.aria-level]="headingLevel()">
+        <button #trigger monaCollapsibleTrigger [id]="triggerId" [class]="triggerClass()">
+            <span [class]="headerTitleClass()">
+                @if (titleTemplate()) {
+                    <ng-container [ngTemplateOutlet]="titleTemplate()"></ng-container>
+                } @else {
+                    {{ title() }}
+                }
+            </span>
+            <span [class]="iconContainerClass()">
+                @if (iconTemplate()) {
+                    <ng-container
+                        [ngTemplateOutlet]="iconTemplate()"
+                        [ngTemplateOutletContext]="{ $implicit: expanded() }"></ng-container>
+                } @else {
+                    @if (expanded()) {
+                        <svg lucideMinus [size]="14" aria-hidden="true"></svg>
+                    } @else {
+                        <svg lucidePlus [size]="14" aria-hidden="true"></svg>
+                    }
+                }
+            </span>
+        </button>
     </div>
-    <div>
-        @for (action of actionsTemplateList(); track $index) {
-            <ng-container [ngTemplateOutlet]="action"></ng-container>
-        }
-    </div>
-    <div [class]="iconContainerClass()">
-        @if (iconTemplate()) {
-            <ng-container
-                [ngTemplateOutlet]="iconTemplate()"
-                [ngTemplateOutletContext]="{ $implicit: expanded() }"></ng-container>
-        } @else {
-            @if (expanded()) {
-                <svg lucideMinus [size]="14"></svg>
-            } @else {
-                <svg lucidePlus [size]="14"></svg>
+    @if (actionsTemplateList().length > 0) {
+        <div [class]="actionsClass()" [attr.inert]="disabled() ? true : null">
+            @for (action of actionsTemplateList(); track $index) {
+                <ng-container [ngTemplateOutlet]="action"></ng-container>
             }
-        }
-    </div>
+        </div>
+    }
 </div>
 <div
     [id]="contentId"
+    role="region"
     [class]="contentClass()"
+    [attr.aria-labelledby]="triggerId"
     [attr.aria-hidden]="!expanded()"
     [attr.inert]="!expanded() ? true : undefined">
     <div>

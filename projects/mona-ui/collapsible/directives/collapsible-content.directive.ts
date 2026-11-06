@@ -1,7 +1,15 @@
-import { afterNextRender, computed, DestroyRef, Directive, effect, ElementRef, inject, signal, untracked } from "@angular/core";
-import { CollapsibleToken } from "../models/CollapsibleConfig";
+import { afterNextRender, computed, DestroyRef, Directive, effect, ElementRef, inject, input, signal, untracked } from "@angular/core";
+import { COLLAPSIBLE_CONFIG } from "../models/CollapsibleConfig";
 
 const CONTENT_HEIGHT_VARIABLE = "--mona-collapsible-content-height";
+
+/** A box can't get below its padding and border, so a height of 0 needs these at 0 as well. */
+const BOX_PROPERTIES = [
+    "padding-block-start",
+    "padding-block-end",
+    "border-block-start-width",
+    "border-block-end-width"
+] as const;
 
 /**
  * @description
@@ -24,9 +32,14 @@ export class CollapsibleContentDirective {
     readonly #initialized = signal(false);
     readonly #reducedMotion = signal(false);
     #fallbackId: ReturnType<typeof setTimeout> | null = null;
-    protected readonly collapsible = inject(CollapsibleToken);
+    protected readonly collapsible = inject(COLLAPSIBLE_CONFIG);
     protected readonly inert = computed(() => (this.collapsible.expanded() ? null : true));
     protected readonly state = computed(() => (this.collapsible.expanded() ? "open" : "closed"));
+
+    /**
+     * @description The content's id, for when it has to be something in particular. Generated if not given.
+     */
+    public readonly id = input<string | null>(null);
 
     public constructor() {
         const destroyRef = inject(DestroyRef);
@@ -60,10 +73,17 @@ export class CollapsibleContentDirective {
             const expanded = this.collapsible.expanded();
             untracked(() => {
                 if (!this.#initialized()) {
+                    // This also runs on the server, so collapsed content isn't sent out open.
+                    this.#settle();
                     return;
                 }
                 this.#animateTo(expanded);
             });
+        });
+
+        effect(() => {
+            const id = this.id();
+            untracked(() => this.collapsible.setContentId?.(id));
         });
     }
 
@@ -76,19 +96,24 @@ export class CollapsibleContentDirective {
         }
 
         const element = this.#element;
-        const contentHeight = element.scrollHeight;
+        const computed = getComputedStyle(element);
+        // Not the resting shape: a toggle mid-animation carries on from where it got to.
+        const startHeight = element.offsetHeight;
+        const startBox = BOX_PROPERTIES.map(property => computed.getPropertyValue(property));
+
+        this.#setTransitionEnabled(false);
+        const contentHeight = this.#measure();
         element.style.setProperty(CONTENT_HEIGHT_VARIABLE, `${contentHeight}px`);
         this.#clip();
-        this.#setTransitionEnabled(true);
 
+        element.style.height = `${startHeight}px`;
+        BOX_PROPERTIES.forEach((property, index) => element.style.setProperty(property, startBox[index]));
+        void element.offsetHeight; // force a reflow so the browser has a start value to animate from
+
+        this.#setTransitionEnabled(true);
+        this.#rest(expanded);
         if (expanded) {
-            element.style.height = "0px";
-            void element.offsetHeight; // force a reflow so the browser has a start value to animate from
             element.style.height = `${contentHeight}px`;
-        } else {
-            element.style.height = `${element.offsetHeight}px`;
-            void element.offsetHeight;
-            element.style.height = "0px";
         }
 
         this.#scheduleFallback();
@@ -114,14 +139,39 @@ export class CollapsibleContentDirective {
     #getTransitionDuration(): number {
         const declared = getComputedStyle(this.#element).transitionDuration;
         const durations = declared.split(",").map(part => {
-            const trimmed = part.trim();
-            const parsed = Number.parseFloat(trimmed);
-            if (!Number.isFinite(parsed)) {
+            // Only a resolved time counts. Where nothing resolves `var()`, as in jsdom, its fallback isn't one.
+            const match = /^([\d.]+)(ms|s)$/.exec(part.trim());
+            if (!match) {
                 return 0;
             }
-            return trimmed.endsWith("ms") ? parsed : parsed * 1000;
+            return match[2] === "ms" ? Number(match[1]) : Number(match[1]) * 1000;
         });
         return Math.max(0, ...durations);
+    }
+
+    /** Measures the element open, since closed it has no padding or border to count. */
+    #measure(): number {
+        this.#rest(true);
+        // No layout on the server, where this also runs, and perhaps no `getComputedStyle` either.
+        if (typeof getComputedStyle !== "function") {
+            return 0;
+        }
+        const computed = getComputedStyle(this.#element);
+        const border = BOX_PROPERTIES.slice(2).map(property => parseFloat(computed.getPropertyValue(property)) || 0);
+        return this.#element.scrollHeight + border[0] + border[1] || 0;
+    }
+
+    /** Sets what makes the element open or closed. */
+    #rest(expanded: boolean): void {
+        const { style } = this.#element;
+        style.height = expanded ? "" : "0px";
+        for (const property of BOX_PROPERTIES) {
+            if (expanded) {
+                style.removeProperty(property);
+            } else {
+                style.setProperty(property, "0px");
+            }
+        }
     }
 
     /** Guards against a `transitionend` that never arrives, e.g. when an ancestor hides the element mid-flight. */
@@ -132,12 +182,15 @@ export class CollapsibleContentDirective {
     #setTransitionEnabled(enabled: boolean): void {
         const style = this.#element.style;
         if (!enabled) {
+            // Just clearing it would leave what's running to finish, since the property's initial value is `all`.
+            style.transitionProperty = "none";
+            void this.#element.offsetHeight;
             style.transitionProperty = "";
             style.transitionDuration = "";
             style.transitionTimingFunction = "";
             return;
         }
-        style.transitionProperty = "height";
+        style.transitionProperty = ["height", ...BOX_PROPERTIES].join(", ");
         style.transitionDuration = `var(--mona-motion-standard, 300ms)`;
         style.transitionTimingFunction = "ease-out";
     }
@@ -148,14 +201,14 @@ export class CollapsibleContentDirective {
         this.#setTransitionEnabled(false);
 
         const element = this.#element;
+        const contentHeight = this.#measure();
         if (this.collapsible.expanded()) {
-            element.style.height = "";
             element.style.overflow = "";
             element.style.minHeight = "";
         } else {
-            element.style.height = "0px";
+            this.#rest(false);
             this.#clip();
         }
-        element.style.setProperty(CONTENT_HEIGHT_VARIABLE, `${element.scrollHeight}px`);
+        element.style.setProperty(CONTENT_HEIGHT_VARIABLE, `${contentHeight}px`);
     }
 }

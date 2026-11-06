@@ -1,12 +1,15 @@
 import { computed, Directive, input } from "@angular/core";
 import { where } from "@mirei/ts-collections";
-import { SplitterPaneComponent } from "../components/splitter-pane/splitter-pane.component";
+import type { SplitterPaneComponent } from "../components/splitter-pane/splitter-pane.component";
+import type { SplitterVariantProps } from "../styles/splitter.styles";
+import { parsePaneSizeLimit } from "../utils/pane-size";
 
 @Directive({
     selector: "div[monaSplitterPaneStyle]",
     host: {
         "[style]": "styles()",
-        "[aria-hidden]": "pane().collapsible() && pane().collapsed()"
+        "[attr.aria-hidden]": "isCollapsed() ? true : null",
+        "[attr.inert]": "isCollapsed() ? true : null"
     }
 })
 export class SplitterPaneStyleDirective {
@@ -18,14 +21,16 @@ export class SplitterPaneStyleDirective {
         }
         return panes.firstOrDefault(pane => pane.size() === "") ?? panes.last();
     });
+    protected readonly isCollapsed = computed(() => this.pane().collapsible() && this.pane().collapsed());
     protected readonly styles = computed(() => {
         const pane = this.pane();
         const flexBasis = this.getPaneFlexBasis(pane);
         const flexGrow = this.getPaneFlexGrow(pane);
         const flexShrink = this.getPaneFlexShrink(pane);
-        const styles: Partial<CSSStyleDeclaration> = { flexGrow, flexShrink, flexBasis };
+        const styles: Partial<CSSStyleDeclaration> = { flexGrow, flexShrink, flexBasis, ...this.getPaneLimits(pane) };
         return styles;
     });
+    public readonly orientation = input<SplitterVariantProps["orientation"]>("horizontal");
     public readonly pane = input.required<SplitterPaneComponent>();
     public readonly paneList = input.required<Iterable<SplitterPaneComponent>>();
 
@@ -69,6 +74,20 @@ export class SplitterPaneStyleDirective {
             return "1";
         }
         return size === null ? "1" : "0";
+    }
+
+    /** So the limits hold for first sizes and window resizes too, and not only for a drag. A collapsed pane has none. */
+    private getPaneLimits(pane: SplitterPaneComponent): Partial<CSSStyleDeclaration> {
+        if (pane.collapsible() && pane.collapsed()) {
+            return {};
+        }
+        const min = parsePaneSizeLimit(pane.min());
+        const max = parsePaneSizeLimit(pane.max());
+        const minValue = min === null ? undefined : `${Math.max(0, min)}px`;
+        const maxValue = max === null ? undefined : `${Math.max(0, max)}px`;
+        return this.orientation() === "vertical"
+            ? { minHeight: minValue, maxHeight: maxValue }
+            : { minWidth: minValue, maxWidth: maxValue };
     }
 
     private getPaneSize(pane: SplitterPaneComponent): string | null {

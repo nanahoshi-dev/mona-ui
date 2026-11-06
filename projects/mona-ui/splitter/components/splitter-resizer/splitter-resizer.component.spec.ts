@@ -45,19 +45,19 @@ describe("SplitterResizerComponent", () => {
     });
 
     it("uses a quiet neutral separator with a semantic keyboard focus indicator", () => {
-        const resizer = hostFixture.nativeElement.querySelector("mona-splitter-resizer") as HTMLElement;
+        const resizer = hostFixture.nativeElement.querySelector("[role='separator']") as HTMLElement;
 
         expect(resizer.classList.contains("bg-border-subtle")).toBe(true);
         expect(resizer.classList.contains("hover:bg-border-control")).toBe(true);
         expect(resizer.classList.contains("active:bg-border-control-hover")).toBe(true);
-        expect(resizer.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
+        expect(resizer.classList.contains("focus-visible:outline-focus-indicator")).toBe(true);
         expect(resizer.classList.contains("bg-accent")).toBe(false);
         expect(resizer.classList.contains("focus-visible:bg-primary")).toBe(false);
     });
 
     describe("i18n and RTL", () => {
         it("renders default English aria-label on separator", () => {
-            const resizer = hostFixture.nativeElement.querySelector("mona-splitter-resizer") as HTMLElement;
+            const resizer = hostFixture.nativeElement.querySelector("[role='separator']") as HTMLElement;
             expect(resizer.getAttribute("aria-label")).toBe("Resizer");
         });
 
@@ -78,7 +78,7 @@ describe("SplitterResizerComponent", () => {
             });
             hostFixture.detectChanges();
 
-            const resizer = hostFixture.nativeElement.querySelector("mona-splitter-resizer") as HTMLElement;
+            const resizer = hostFixture.nativeElement.querySelector("[role='separator']") as HTMLElement;
             expect(resizer.getAttribute("aria-label")).toBe("فاصل المقسم");
         });
 
@@ -120,7 +120,10 @@ describe("SplitterResizerComponent", () => {
             hostFixture.detectChanges();
 
             // Case 2: RTL locale + LTR DOM -> ArrowLeft nudges splitter leftwards, shrinking prev pane in LTR
-            resizer.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true, cancelable: true }));
+            const separator = resizer.querySelector("[role='separator']") as HTMLElement;
+            separator.dispatchEvent(
+                new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true, cancelable: true })
+            );
             hostFixture.detectChanges();
             const prevPane = hostComponent.panes()[0];
             expect(prevPane.size()).toBe("190px");
@@ -129,7 +132,9 @@ describe("SplitterResizerComponent", () => {
             hostFixture.nativeElement.setAttribute("dir", "rtl");
             await hostFixture.whenStable();
             hostFixture.detectChanges();
-            resizer.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true, cancelable: true }));
+            separator.dispatchEvent(
+                new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true, cancelable: true })
+            );
             hostFixture.detectChanges();
             expect(prevPane.size()).toBe("210px");
         });
@@ -177,7 +182,7 @@ describe("SplitterResizerComponent", () => {
             await hostFixture.whenStable();
 
             // In RTL, Alt+ArrowLeft collapses "next" pane (to the left)
-            resizer.dispatchEvent(
+            (resizer.querySelector("[role='separator']") as HTMLElement).dispatchEvent(
                 new KeyboardEvent("keydown", { key: "ArrowLeft", altKey: true, bubbles: true, cancelable: true })
             );
             hostFixture.detectChanges();

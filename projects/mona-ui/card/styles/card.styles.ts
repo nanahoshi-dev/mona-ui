@@ -70,7 +70,7 @@ export const cardFooterThemeVariants = cva(
 
 export const cardHeaderThemeVariants = cva(
     `
-        grid grid-cols-[1fr_auto] grid-rows-2
+        grid grid-cols-[1fr_auto] grid-rows-[auto_auto]
         p-4 pb-0
     `,
     {

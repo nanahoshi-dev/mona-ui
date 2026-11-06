@@ -1,7 +1,7 @@
 import { Directive, inject, TemplateRef } from "@angular/core";
 
 @Directive({
-    selector: "[monaCardAction]"
+    selector: "ng-template[monaCardAction]"
 })
 export class CardActionDirective {
     public readonly templateRef = inject(TemplateRef);

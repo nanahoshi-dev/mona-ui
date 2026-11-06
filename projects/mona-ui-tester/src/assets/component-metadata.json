@@ -656,6 +656,19 @@
       }
     ]
   },
+  "CollapsibleContentDirective": {
+    "name": "CollapsibleContentDirective",
+    "selector": "\"[monaCollapsibleContent]\"",
+    "inputs": [
+      {
+        "description": "The content's id, for when it has to be something in particular. Generated if not given.",
+        "kind": "input",
+        "name": "id",
+        "type": "string | null",
+        "defaultValue": "null"
+      }
+    ]
+  },
   "CollapsibleDirective": {
     "name": "CollapsibleDirective",
     "selector": "\"[monaCollapsible]\"",
@@ -1762,6 +1775,13 @@
       {
         "description": "",
         "kind": "input",
+        "name": "orientation",
+        "type": "SplitterVariantProps[\"orientation\"]",
+        "defaultValue": "\"horizontal\""
+      },
+      {
+        "description": "",
+        "kind": "input",
         "name": "pane",
         "type": "SplitterPaneComponent",
         "required": true
@@ -2815,6 +2835,13 @@
     "name": "CardComponent",
     "selector": "\"mona-card\"",
     "inputs": [
+      {
+        "description": "The role the card takes when it has a title, which then names it. Use `article` for self-contained\ncontent or `region` for a landmark.",
+        "kind": "input",
+        "name": "role",
+        "type": "\"article\" | \"group\" | \"region\"",
+        "defaultValue": "\"group\""
+      },
       {
         "description": "Controls the border radius applied to the card and its header/footer regions.",
         "kind": "input",
@@ -9948,12 +9975,25 @@
       }
     ]
   },
+  "AccordionComponent": {
+    "name": "AccordionComponent",
+    "selector": "\"mona-accordion\"",
+    "inputs": [
+      {
+        "description": "Lets several panels stay open. Without it, opening a panel closes the others, however it was opened.",
+        "kind": "input",
+        "name": "multiple",
+        "type": "boolean",
+        "defaultValue": "false"
+      }
+    ]
+  },
   "ExpansionPanelComponent": {
     "name": "ExpansionPanelComponent",
     "selector": "\"mona-expansion-panel\"",
     "inputs": [
       {
-        "description": "Disables header interaction, suppressing click and keyboard toggling.",
+        "description": "Disables the header: toggling by click or key, and the actions in it.",
         "kind": "input",
         "name": "disabled",
         "type": "boolean",
@@ -9967,6 +10007,13 @@
         "defaultValue": "false"
       },
       {
+        "description": "The level of the heading around the header's button, from 1 to 6. Set it to fit the page's outline, or\nto `null` for no heading.",
+        "kind": "input",
+        "name": "headingLevel",
+        "type": "number | null",
+        "defaultValue": "3"
+      },
+      {
         "description": "Sets the border radius of the expansion panel.",
         "kind": "input",
         "name": "rounded",
@@ -9974,7 +10021,7 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Sets the title of the expansion panel.",
+        "description": "Sets the title of the expansion panel, which also names its button and region.",
         "kind": "input",
         "name": "title",
         "type": "string",
@@ -9985,6 +10032,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -15039,11 +15087,24 @@
     "selector": "\"mona-splitter\"",
     "inputs": [
       {
+        "description": "How far an arrow key moves a separator, in pixels.",
+        "kind": "input",
+        "name": "keyboardStep",
+        "type": "number",
+        "defaultValue": "10"
+      },
+      {
         "description": "The layout direction of the splitter panes.",
         "kind": "input",
         "name": "orientation",
         "type": "SplitterVariantProps[\"orientation\"]",
         "defaultValue": "\"horizontal\""
+      },
+      {
+        "description": "Emitted with every pane's `size`, in order, once a drag ends and after each key that resizes. Use it to\nsave a layout: `sizeChange` on a pane fires on every move, and these values can go straight back into `size`.",
+        "kind": "output",
+        "name": "resizeEnd",
+        "type": "readonly (string | number)[]"
       }
     ]
   },
@@ -15066,21 +15127,28 @@
         "defaultValue": "false"
       },
       {
-        "description": "The maximum size of the pane.",
+        "description": "Names the separator after this pane, for assistive technology. Without it, the separator has a generic\nname, which can't tell one from another when a splitter has several.",
+        "kind": "input",
+        "name": "label",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The maximum size of the pane, in pixels. A number or a string like `\"200px\"`. Percentages aren't\nsupported, and are ignored with a warning in development.",
         "kind": "input",
         "name": "max",
         "type": "string | number | null",
         "defaultValue": "null"
       },
       {
-        "description": "The minimum size of the pane.",
+        "description": "The minimum size of the pane, in pixels. A number or a string like `\"200px\"`. Percentages aren't\nsupported, and are ignored with a warning in development.",
         "kind": "input",
         "name": "min",
         "type": "string | number | null",
         "defaultValue": "null"
       },
       {
-        "description": "Whether the pane is resizable.",
+        "description": "Whether the pane is resizable. A separator only moves, by pointer or key, when the panes on both of its\nsides are.",
         "kind": "input",
         "name": "resizable",
         "type": "boolean",
@@ -15099,14 +15167,6 @@
     "name": "SplitterResizerComponent",
     "selector": "\"mona-splitter-resizer\"",
     "inputs": [
-      {
-        "description": "Accessible label for the separator element.",
-        "kind": "input",
-        "name": "ariaLabel",
-        "type": "string",
-        "alias": "aria-label",
-        "defaultValue": "\"\""
-      },
       {
         "description": "",
         "kind": "input",
@@ -15138,13 +15198,13 @@
         "description": "",
         "kind": "output",
         "name": "collapseNext",
-        "type": "MouseEvent"
+        "type": "void"
       },
       {
         "description": "",
         "kind": "output",
         "name": "collapsePrevious",
-        "type": "MouseEvent"
+        "type": "void"
       },
       {
         "description": "",

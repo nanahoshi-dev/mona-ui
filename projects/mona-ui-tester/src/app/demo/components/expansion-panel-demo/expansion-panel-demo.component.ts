@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, model } from "@angular/core";
+import { booleanAttribute, ChangeDetectionStrategy, Component, computed, inject, input, model } from "@angular/core";
 import { LucideArrowDown, LucideArrowUp, LucideSettings } from "@lucide/angular";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import {
+    AccordionComponent,
     ExpansionPanelActionsTemplateDirective,
     ExpansionPanelComponent,
     ExpansionPanelIconTemplateDirective,
@@ -34,10 +35,16 @@ const ACTIONS_TEMPLATE_CODE = `<ng-template monaExpansionPanelActionsTemplate>
         look="ghost"
         [size]="'small'"
         [iconOnly]="true"
-        (click)="$event.stopPropagation()">
+        aria-label="Settings"
+        (click)="openSettings()">
         <svg lucideSettings [size]="14"></svg>
     </button>
 </ng-template>`;
+
+const ACCORDION_CODE = `<mona-accordion>
+    <mona-expansion-panel title="Japan">...</mona-expansion-panel>
+    <mona-expansion-panel title="China">...</mona-expansion-panel>
+</mona-accordion>`;
 
 @Component({
     selector: "app-expansion-panel-demo",
@@ -47,6 +54,18 @@ const ACTIONS_TEMPLATE_CODE = `<ng-template monaExpansionPanelActionsTemplate>
 })
 export class ExpansionPanelDemoComponent extends AbstractDemoComponent<ExpansionPanelComponent> {
     readonly #injector = createFeatureInjector({
+        accordion: {
+            active: false,
+            code: ACCORDION_CODE,
+            name: "Accordion",
+            description: "Wrap the panels in mona-accordion: one open at a time, and arrow keys between the headers."
+        },
+        multiple: {
+            active: false,
+            code: `<mona-accordion multiple>...</mona-accordion>`,
+            name: "Multiple",
+            description: "Let several panels in the accordion stay open."
+        },
         actionsTemplate: {
             active: false,
             code: ACTIONS_TEMPLATE_CODE,
@@ -68,10 +87,22 @@ export class ExpansionPanelDemoComponent extends AbstractDemoComponent<Expansion
     });
     protected readonly config = computed<ComponentConfig<ExpansionPanelComponent>>(() => ({
         inputs: deriveInputConfig<ExpansionPanelComponent>(this.metadata(), {
+            headingLevel: {
+                type: "number",
+                value: 3,
+                nullable: true,
+                min: 1,
+                max: 6
+            },
             rounded: {
                 type: "dropdown",
                 value: ["small", "medium", "large", "none"],
                 defaultValue: "medium"
+            },
+            userClass: {
+                alias: "class",
+                type: "string",
+                value: ""
             }
         }),
         featureHandler: this.#injector.get(FeatureConfigHandler)
@@ -83,6 +114,7 @@ export class ExpansionPanelDemoComponent extends AbstractDemoComponent<Expansion
 
 @Component({
     imports: [
+        AccordionComponent,
         ExpansionPanelComponent,
         ExpansionPanelTitleTemplateDirective,
         ExpansionPanelActionsTemplateDirective,
@@ -94,43 +126,60 @@ export class ExpansionPanelDemoComponent extends AbstractDemoComponent<Expansion
     ],
     template: `
         @let featureData = features();
-        @for (country of countryData; track $index) {
-            <mona-expansion-panel
-                [disabled]="disabled()"
-                [expanded]="expanded()"
-                [rounded]="rounded()"
-                [title]="title() || country.name"
-                [userClass]="userClass()">
-                <p class="w-full h-full p-2 text-justify">{{ country.description }}</p>
-                @if (featureData["titleTemplate"].active) {
-                    <ng-template monaExpansionPanelTitleTemplate>
-                        <span class="text-sm uppercase" [style.color]="country.color">{{ country.name }}</span>
-                    </ng-template>
+        @if (featureData["accordion"].active) {
+            <mona-accordion [multiple]="featureData['multiple'].active">
+                @for (country of countryData; track $index) {
+                    <mona-expansion-panel
+                        [class]="userClass()"
+                        [disabled]="disabled()"
+                        [headingLevel]="headingLevel()"
+                        [rounded]="rounded()"
+                        [title]="title() || country.name">
+                        <p class="w-full h-full p-2 text-justify">{{ country.description }}</p>
+                    </mona-expansion-panel>
                 }
-                @if (featureData["iconTemplate"].active) {
-                    <ng-template monaExpansionPanelIconTemplate let-expanded>
-                        <div class="px-2">
-                            @if (expanded) {
-                                <svg lucideArrowUp [size]="14"></svg>
-                            } @else {
-                                <svg lucideArrowDown [size]="14"></svg>
-                            }
-                        </div>
-                    </ng-template>
-                }
-                @if (featureData["actionsTemplate"].active) {
-                    <ng-template monaExpansionPanelActionsTemplate>
-                        <button
-                            monaButton
-                            look="ghost"
-                            [size]="'small'"
-                            [iconOnly]="true"
-                            (click)="$event.stopPropagation()">
-                            <svg lucideSettings [size]="14"></svg>
-                        </button>
-                    </ng-template>
-                }
-            </mona-expansion-panel>
+            </mona-accordion>
+        } @else {
+            @for (country of countryData; track $index) {
+                <mona-expansion-panel
+                    [class]="userClass()"
+                    [disabled]="disabled()"
+                    [expanded]="expanded()"
+                    [headingLevel]="headingLevel()"
+                    [rounded]="rounded()"
+                    [title]="title() || country.name">
+                    <p class="w-full h-full p-2 text-justify">{{ country.description }}</p>
+                    @if (featureData["titleTemplate"].active) {
+                        <ng-template monaExpansionPanelTitleTemplate>
+                            <span class="text-sm uppercase" [style.color]="country.color">{{ country.name }}</span>
+                        </ng-template>
+                    }
+                    @if (featureData["iconTemplate"].active) {
+                        <ng-template monaExpansionPanelIconTemplate let-expanded>
+                            <div class="px-2">
+                                @if (expanded) {
+                                    <svg lucideArrowUp [size]="14"></svg>
+                                } @else {
+                                    <svg lucideArrowDown [size]="14"></svg>
+                                }
+                            </div>
+                        </ng-template>
+                    }
+                    @if (featureData["actionsTemplate"].active) {
+                        <ng-template monaExpansionPanelActionsTemplate>
+                            <button
+                                monaButton
+                                look="ghost"
+                                [size]="'small'"
+                                [iconOnly]="true"
+                                aria-label="Settings"
+                                type="button">
+                                <svg lucideSettings [size]="14"></svg>
+                            </button>
+                        </ng-template>
+                    }
+                </mona-expansion-panel>
+            }
         }
     `,
     changeDetection: ChangeDetectionStrategy.Eager,
@@ -178,8 +227,9 @@ class ExpansionPanelWrapperComponent implements ComponentInputsAsSignal<Expansio
     ];
     protected readonly features = inject(FeatureConfigHandler).data;
 
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly expanded = model(false);
+    public readonly headingLevel = input<number | null, unknown>(3, { transform: value => value as number | null });
     public readonly rounded = input<ReturnType<ExpansionPanelComponent["rounded"]>>("medium");
     public readonly title = input("");
     public readonly userClass = input("");

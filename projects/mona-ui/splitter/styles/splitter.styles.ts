@@ -1,6 +1,6 @@
+import type { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
-import { VariantProps } from "class-variance-authority";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
 
 export const splitterBaseThemeVariants = cva(
     `
@@ -19,24 +19,42 @@ export const splitterBaseThemeVariants = cva(
     }
 );
 
-export const splitterResizerThemeVariants = cva(
+/** The bar's place in the layout. Above the panes, because its hit area and focus outline reach over them. */
+export const splitterResizerThemeVariants = cva(`relative z-10 flex shrink-0 items-center justify-center`, {
+    variants: {
+        orientation: {
+            horizontal: "w-0.5 flex-col",
+            vertical: "h-0.5 flex-row"
+        }
+    },
+    defaultVariants: {
+        orientation: "horizontal"
+    }
+});
+
+/**
+ * The bar itself. It's 2 pixels wide, so the hit area reaches past it: 12 pixels, or 24 for a coarse pointer, where more
+ * of the pane can be given up. `touch-none`, or the browser takes a touch drag as a scroll and cancels the pointer.
+ */
+export const splitterSeparatorThemeVariants = cva(
     `
-        relative flex shrink-0 items-center justify-center
-        bg-border-subtle outline-none
+        absolute inset-0 touch-none
         transition-colors
         hover:bg-border-control active:bg-border-control-hover
         focus-visible:bg-border-control
-        focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator/35
+        focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus-indicator
+        forced-color-adjust-none forced-colors:bg-[CanvasText]
+        before:absolute before:content-['']
     `,
     {
         variants: {
             orientation: {
-                horizontal: "w-0.5 flex-col ",
-                vertical: "h-0.5 flex-row"
+                horizontal: "before:inset-y-0 before:-inset-x-[5px] pointer-coarse:before:-inset-x-[11px]",
+                vertical: "before:inset-x-0 before:-inset-y-[5px] pointer-coarse:before:-inset-y-[11px]"
             },
             resizing: {
                 true: "bg-border-control-hover",
-                false: ""
+                false: "bg-border-subtle"
             }
         },
         defaultVariants: {
@@ -46,16 +64,18 @@ export const splitterResizerThemeVariants = cva(
     }
 );
 
+/** Sits over the bar without taking its pointer, except for the buttons, which are 24 pixels so a finger can hit them. */
 export const splitterResizerHandleThemeVariants = cva(
     `
+        pointer-events-none
         flex items-center justify-center
-        [&_button]:p-0
+        [&_button]:pointer-events-auto [&_button]:size-6 [&_button]:p-0
     `,
     {
         variants: {
             orientation: {
-                horizontal: "flex-row [&_button]:w-3.5 [&_button]:h-6",
-                vertical: "flex-col [&_button]:h-3.5 [&_button]:w-6"
+                horizontal: "flex-row",
+                vertical: "flex-col"
             }
         },
         defaultVariants: {
@@ -81,5 +101,5 @@ export type SplitterVariantProps = SplitterBaseVariantProps &
     SplitterResizerHandleVariantProps;
 
 export type SplitterVariantInput = SplitterBaseVariantInput &
-    Omit<SplitterResizerVariantInput, "resizing"> &
+    SplitterResizerVariantInput &
     SplitterResizerHandleVariantInput;

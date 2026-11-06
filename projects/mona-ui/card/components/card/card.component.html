@@ -1,12 +1,12 @@
 @if (headerTemplate()) {
     <div [class]="headerClass()">
         @if (titleTemplate()) {
-            <div [class]="titleCellClass">
+            <div [class]="titleCellClass" [attr.id]="titleCellId()">
                 <ng-container [ngTemplateOutlet]="titleTemplate()" [ngTemplateOutletContext]="{ $implicit: titleId() }" />
             </div>
         }
         @if (descriptionTemplate()) {
-            <div [class]="descriptionCellClass">
+            <div [class]="descriptionCellClass" [attr.id]="descriptionCellId()">
                 <ng-container
                     [ngTemplateOutlet]="descriptionTemplate()"
                     [ngTemplateOutletContext]="{ $implicit: descriptionId() }"

@@ -3,7 +3,9 @@
         class="overflow-hidden min-w-0 min-h-0"
         [attr.data-pid]="pane.uid"
         [attr.data-px]="$index"
+        [id]="pane.uid"
         monaSplitterPaneStyle
+        [orientation]="orientation()"
         [pane]="pane"
         [paneList]="paneList()">
         <ng-container [ngTemplateOutlet]="pane.template()"></ng-container>

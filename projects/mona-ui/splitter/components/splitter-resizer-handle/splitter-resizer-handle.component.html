@@ -2,11 +2,11 @@
     @if (previousControlsVisible()) {
         <button
             monaButton
+            type="button"
             look="secondary"
             [rounded]="'none'"
             [attr.aria-label]="messages().collapsePrevious"
-            (click)="collapsePrevious.emit($event)"
-            (pointerdown)="onPointerDown($event)">
+            (click)="collapsePrevious.emit()">
             <svg lucideChevronLeft [size]="12" class="rtl:rotate-180"></svg>
         </button>
     }
@@ -16,11 +16,11 @@
     @if (nextControlsVisible()) {
         <button
             monaButton
+            type="button"
             look="secondary"
             [rounded]="'none'"
             [attr.aria-label]="messages().collapseNext"
-            (click)="collapseNext.emit($event)"
-            (pointerdown)="onPointerDown($event)">
+            (click)="collapseNext.emit()">
             <svg lucideChevronRight [size]="12" class="rtl:rotate-180"></svg>
         </button>
     }
@@ -28,11 +28,11 @@
     @if (previousControlsVisible()) {
         <button
             monaButton
+            type="button"
             look="secondary"
             [rounded]="'none'"
             [attr.aria-label]="messages().collapseUp"
-            (click)="collapsePrevious.emit($event)"
-            (pointerdown)="onPointerDown($event)">
+            (click)="collapsePrevious.emit()">
             <svg lucideChevronUp [size]="12"></svg>
         </button>
     }
@@ -42,11 +42,11 @@
     @if (nextControlsVisible()) {
         <button
             monaButton
+            type="button"
             look="secondary"
             [rounded]="'none'"
             [attr.aria-label]="messages().collapseDown"
-            (click)="collapseNext.emit($event)"
-            (pointerdown)="onPointerDown($event)">
+            (click)="collapseNext.emit()">
             <svg lucideChevronDown [size]="12"></svg>
         </button>
     }

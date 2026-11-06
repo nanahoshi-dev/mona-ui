@@ -1,6 +1,6 @@
-import { computed, Directive, forwardRef, input, model } from "@angular/core";
+import { booleanAttribute, computed, Directive, forwardRef, input, model, signal } from "@angular/core";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
-import { type CollapsibleConfig, CollapsibleToken } from "../models/CollapsibleConfig";
+import { COLLAPSIBLE_CONFIG, type CollapsibleConfig } from "../models/CollapsibleConfig";
 
 /**
  * @description
@@ -13,27 +13,24 @@ import { type CollapsibleConfig, CollapsibleToken } from "../models/CollapsibleC
     host: {
         "[attr.data-state]": "state()"
     },
-    providers: [{ provide: CollapsibleToken, useExisting: forwardRef(() => CollapsibleDirective) }]
+    providers: [{ provide: COLLAPSIBLE_CONFIG, useExisting: forwardRef(() => CollapsibleDirective) }]
 })
 export class CollapsibleDirective implements CollapsibleConfig {
+    readonly #contentIdFromContent = signal<string | null>(null);
+    readonly #generatedContentId = createElementControlId();
     protected readonly state = computed(() => (this.expanded() ? "open" : "closed"));
 
     /**
      * @description Enables the height transition applied to the collapsible content.
      * @default true
      */
-    public readonly animate = input(true);
-
-    /**
-     * @description Id assigned to the content element and referenced by the trigger through `aria-controls`.
-     */
-    public readonly contentId = createElementControlId();
+    public readonly animate = input(true, { transform: booleanAttribute });
 
     /**
      * @description Suppresses toggling through the trigger. `expand()` and `collapse()` still apply.
      * @default false
      */
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
      * @description Sets whether the content is expanded. Supports two-way binding.
@@ -41,12 +38,24 @@ export class CollapsibleDirective implements CollapsibleConfig {
      */
     public readonly expanded = model(false);
 
+    /**
+     * @description Id of the content element, which the trigger references through `aria-controls`. Generated, unless the
+     * content element has its own `id`.
+     */
+    public get contentId(): string {
+        return this.#contentIdFromContent() ?? this.#generatedContentId;
+    }
+
     public collapse(): void {
         this.expanded.set(false);
     }
 
     public expand(): void {
         this.expanded.set(true);
+    }
+
+    public setContentId(id: string | null): void {
+        this.#contentIdFromContent.set(id);
     }
 
     public toggle(): void {

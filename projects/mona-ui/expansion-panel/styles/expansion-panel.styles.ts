@@ -1,6 +1,6 @@
+import type { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { VariantProps } from "class-variance-authority";
 
 export const expansionPanelBaseThemeVariants = cva(
     `
@@ -20,36 +20,55 @@ export const expansionPanelBaseThemeVariants = cva(
     }
 );
 
+/**
+ * Three columns: title, actions, icon. The heading and its button span them all through subgrid and put the title and
+ * icon in the outer two, so the button fills the row while the actions, its sibling, sit in the middle one above it.
+ */
 export const expansionPanelHeaderThemeVariants = cva(
     `
-        relative flex w-full items-center justify-between
-        px-2 py-2
-        cursor-pointer
-        select-none
-        font-medium text-foreground
+        relative grid w-full grid-cols-[minmax(0,1fr)_auto_auto] items-stretch
         bg-surface-muted
-        transition-colors duration-(--mona-motion-fast)
-        hover:bg-hover active:bg-active
-        focus-visible:z-10 focus-visible:outline-none
-        focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator/35
     `,
     {
         variants: {
             collapsed: {
                 true: "border-b-transparent",
                 false: "border-0 border-b border-border-subtle"
-            },
-            disabled: {
-                true: "pointer-events-none cursor-not-allowed select-none bg-disabled-background text-disabled-foreground",
-                false: ""
             }
         }
     }
 );
 
-export const expansionPanelHeaderTitleThemeVariants = cva(`flex-1`);
+export const expansionPanelHeadingThemeVariants = cva(`col-span-full row-start-1 grid grid-cols-subgrid`);
 
-export const expansionPanelIconContainerThemeVariants = cva(``, {
+/** Inset focus, because the panel clips anything outside it. */
+export const expansionPanelTriggerThemeVariants = cva(
+    `
+        col-span-full grid grid-cols-subgrid items-center
+        px-2 py-2
+        text-start font-medium
+        select-none
+        bg-transparent
+        transition-colors duration-(--mona-motion-fast) motion-reduce:transition-none
+        focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus-indicator
+    `,
+    {
+        variants: {
+            disabled: {
+                true: "cursor-not-allowed bg-disabled-background text-disabled-foreground",
+                false: "cursor-pointer text-foreground hover:bg-hover active:bg-active"
+            }
+        }
+    }
+);
+
+export const expansionPanelActionsThemeVariants = cva(
+    `relative z-10 col-start-2 row-start-1 flex items-center self-center`
+);
+
+export const expansionPanelHeaderTitleThemeVariants = cva(`col-start-1 row-start-1 min-w-0`);
+
+export const expansionPanelIconContainerThemeVariants = cva(`col-start-3 row-start-1`, {
     variants: {
         hasTemplate: {
             true: "",
@@ -62,7 +81,7 @@ export const expansionPanelContentThemeVariants = cva(
     `
         text-foreground
         grid
-        transition-[grid-template-rows] duration-(--mona-motion-standard) ease-out
+        transition-[grid-template-rows] duration-(--mona-motion-standard) ease-out motion-reduce:transition-none
         [&>div]:overflow-hidden
     `,
     {
@@ -83,6 +102,10 @@ type ExpansionPanelHeaderVariantProps = VariantProps<typeof expansionPanelHeader
 
 type ExpansionPanelHeaderVariantInput = VariantInputs<ExpansionPanelHeaderVariantProps>;
 
+type ExpansionPanelTriggerVariantProps = VariantProps<typeof expansionPanelTriggerThemeVariants>;
+
+type ExpansionPanelTriggerVariantInput = VariantInputs<ExpansionPanelTriggerVariantProps>;
+
 type ExpansionPanelContentVariantProps = VariantProps<typeof expansionPanelContentThemeVariants>;
 
 type ExpansionPanelContentVariantInput = VariantInputs<ExpansionPanelContentVariantProps>;
@@ -93,10 +116,12 @@ type ExpansionPanelIconContainerVariantInput = VariantInputs<ExpansionPanelIconC
 
 export type ExpansionPanelVariantProps = ExpansionPanelBaseVariantProps &
     ExpansionPanelHeaderVariantProps &
+    ExpansionPanelTriggerVariantProps &
     ExpansionPanelContentVariantProps &
     ExpansionPanelIconContainerVariantProps;
 
 export type ExpansionPanelVariantInput = ExpansionPanelBaseVariantInput &
     Omit<ExpansionPanelHeaderVariantInput, "collapsed"> &
+    ExpansionPanelTriggerVariantInput &
     ExpansionPanelContentVariantInput &
     Omit<ExpansionPanelIconContainerVariantInput, "hasTemplate">;

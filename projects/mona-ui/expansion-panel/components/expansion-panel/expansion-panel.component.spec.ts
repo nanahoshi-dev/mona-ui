@@ -1,6 +1,5 @@
 import { Component, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { vi } from "vitest";
 
 import { ExpansionPanelComponent } from "./expansion-panel.component";
 import { ExpansionPanelActionsTemplateDirective } from "../../directives/expansion-panel-actions-template.directive";
@@ -11,7 +10,7 @@ describe("ExpansionPanelComponent", () => {
     let component: ExpansionPanelComponent;
     let fixture: ComponentFixture<ExpansionPanelComponent>;
 
-    const getHeader = (): HTMLElement => fixture.nativeElement.querySelector('[role="button"]');
+    const getHeader = (): HTMLButtonElement => fixture.nativeElement.querySelector("button[aria-controls]");
     const getContent = (): HTMLElement => {
         const header = getHeader();
         const contentId = header.getAttribute("aria-controls")!;
@@ -36,10 +35,10 @@ describe("ExpansionPanelComponent", () => {
         const header = getHeader();
 
         expect(host.classList.contains("bg-surface")).toBe(true);
-        expect(header.classList.contains("bg-surface-muted")).toBe(true);
+        expect(header.parentElement?.parentElement?.classList.contains("bg-surface-muted")).toBe(true);
         expect(header.classList.contains("hover:bg-hover")).toBe(true);
         expect(header.classList.contains("active:bg-active")).toBe(true);
-        expect(header.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
+        expect(header.classList.contains("focus-visible:outline-focus-indicator")).toBe(true);
         expect(header.classList.contains("ring-primary/40")).toBe(false);
     });
 
@@ -58,30 +57,13 @@ describe("ExpansionPanelComponent", () => {
         expect(component.expanded()).toBe(false);
     });
 
-    it("should toggle expanded and prevent default on Enter keydown", () => {
-        const event = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true });
-        const preventDefaultSpy = vi.spyOn(event, "preventDefault");
-        getHeader().dispatchEvent(event);
-        fixture.detectChanges();
-        expect(component.expanded()).toBe(true);
-        expect(preventDefaultSpy).toHaveBeenCalled();
-    });
-
-    it("should toggle expanded and prevent default on Space keydown", () => {
-        const event = new KeyboardEvent("keydown", { key: " ", bubbles: true, cancelable: true });
-        const preventDefaultSpy = vi.spyOn(event, "preventDefault");
-        getHeader().dispatchEvent(event);
-        fixture.detectChanges();
-        expect(component.expanded()).toBe(true);
-        expect(preventDefaultSpy).toHaveBeenCalled();
-    });
-
-    it("should not toggle on keydown when disabled", () => {
-        fixture.componentRef.setInput("disabled", true);
-        fixture.detectChanges();
-        const event = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true });
-        getHeader().dispatchEvent(event);
-        expect(component.expanded()).toBe(false);
+    it("should leave Enter and Space to the native button, which turns them into a click", () => {
+        const enter = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true });
+        const space = new KeyboardEvent("keydown", { key: " ", bubbles: true, cancelable: true });
+        getHeader().dispatchEvent(enter);
+        getHeader().dispatchEvent(space);
+        expect(enter.defaultPrevented).toBe(false);
+        expect(space.defaultPrevented).toBe(false);
     });
 
     it("should reflect expanded state via aria-expanded, aria-hidden and inert", () => {
@@ -99,25 +81,24 @@ describe("ExpansionPanelComponent", () => {
         expect(content.hasAttribute("inert")).toBe(false);
     });
 
-    it("should set aria-disabled and tabindex -1 when disabled", () => {
+    it("should disable the native button when disabled", () => {
         fixture.componentRef.setInput("disabled", true);
         fixture.detectChanges();
         const header = getHeader();
-        expect(header.getAttribute("aria-disabled")).toBe("true");
-        expect(header.getAttribute("tabindex")).toBe("-1");
+        expect(header.disabled).toBe(true);
         expect(header.classList.contains("bg-disabled-background")).toBe(true);
         expect(header.classList.contains("text-disabled-foreground")).toBe(true);
         expect(header.classList.contains("opacity-50")).toBe(false);
     });
 
-    it("should leave aria-disabled unset and tabindex 0 when not disabled", () => {
+    it("should leave aria-disabled and tabindex unset when not disabled", () => {
         const header = getHeader();
         expect(header.hasAttribute("aria-disabled")).toBe(false);
-        expect(header.getAttribute("tabindex")).toBe("0");
+        expect(header.hasAttribute("tabindex")).toBe(false);
     });
 
-    it("should merge userClass onto the host element", () => {
-        fixture.componentRef.setInput("userClass", "custom-test-class");
+    it("should merge class onto the host element", () => {
+        fixture.componentRef.setInput("class", "custom-test-class");
         fixture.detectChanges();
         expect((fixture.nativeElement as HTMLElement).classList.contains("custom-test-class")).toBe(true);
     });
@@ -170,7 +151,7 @@ describe("ExpansionPanelComponent templates", () => {
     });
 
     it("should render the title template instead of the string title", () => {
-        const titleEl: HTMLElement = fixture.nativeElement.querySelector('[role="button"]');
+        const titleEl: HTMLElement = fixture.nativeElement.querySelector("button[aria-controls]");
         expect(titleEl.textContent).toContain("Custom title");
         expect(titleEl.textContent).not.toContain("Default title");
     });

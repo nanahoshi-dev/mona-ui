@@ -76,8 +76,8 @@ export class CardDemoComponent extends AbstractDemoComponent<CardComponent> {
         <mona-card [rounded]="rounded()" [class]="'w-96 ' + userClass()">
             @if (featureData["header"].active) {
                 <mona-card-header>
-                    <h3 class="font-semibold text-sm" *monaCardTitle="let id" [id]="id">Login to your account</h3>
-                    <p class="text-sm text-foreground/70" *monaCardDescription="let id" [id]="id">
+                    <h3 class="font-semibold text-sm" *monaCardTitle>Login to your account</h3>
+                    <p class="text-sm text-foreground/70" *monaCardDescription>
                         Enter your username below to login to your account
                     </p>
                     <button monaButton look="link" size="small" *monaCardAction>Sign up</button>

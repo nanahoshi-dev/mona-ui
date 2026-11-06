@@ -89,8 +89,8 @@ describe("CardComponent", () => {
         const titleElement: HTMLElement = fixture.nativeElement.querySelector("h3");
         const descriptionElement: HTMLElement = fixture.nativeElement.querySelector("p");
 
-        expect(element.getAttribute("aria-labelledby")).toBe(titleElement.id);
-        expect(element.getAttribute("aria-describedby")).toBe(descriptionElement.id);
+        expect(document.getElementById(element.getAttribute("aria-labelledby")!)?.contains(titleElement)).toBe(true);
+        expect(document.getElementById(element.getAttribute("aria-describedby")!)?.contains(descriptionElement)).toBe(true);
     });
 
     it("omits aria-labelledby/aria-describedby when there is no header", async () => {
@@ -105,14 +105,14 @@ describe("CardComponent", () => {
     });
 
     it("groups header actions with role=group and an aria-label", () => {
-        const group: HTMLElement = fixture.nativeElement.querySelector('[role="group"]');
+        const group: HTMLElement = fixture.nativeElement.querySelector('[role="group"] [role="group"]');
         expect(group).toBeTruthy();
         expect(group.getAttribute("aria-label")).toBe("Card actions");
     });
 
     it("dynamically updates the card actions aria-label on locale change", () => {
         const i18n = TestBed.inject(MonaI18nService);
-        let group: HTMLElement = fixture.nativeElement.querySelector('[role="group"]');
+        let group: HTMLElement = fixture.nativeElement.querySelector('[role="group"] [role="group"]');
         expect(group.getAttribute("aria-label")).toBe("Card actions");
 
         i18n.use({
@@ -126,7 +126,7 @@ describe("CardComponent", () => {
         });
         fixture.detectChanges();
 
-        group = fixture.nativeElement.querySelector('[role="group"]');
+        group = fixture.nativeElement.querySelector('[role="group"] [role="group"]');
         expect(group.getAttribute("aria-label")).toBe("Kart eylemleri");
     });
 });
