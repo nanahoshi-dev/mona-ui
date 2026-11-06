@@ -1,5 +1,15 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { booleanAttribute, Component, computed, ElementRef, input, model, output, viewChild } from "@angular/core";
+import {
+    booleanAttribute,
+    Component,
+    computed,
+    ElementRef,
+    input,
+    linkedSignal,
+    model,
+    output,
+    viewChild
+} from "@angular/core";
 import { type FormCheckboxControl } from "@angular/forms/signals";
 import { twMerge } from "tailwind-merge";
 import {
@@ -26,7 +36,7 @@ import { createElementControlId, injectEffectiveDisabled, injectLabelAssociation
         "[class]": "'flex'",
         "[attr.data-checked]": "checked()",
         "[attr.data-disabled]": "effectiveDisabled()",
-        "[attr.data-indeterminate]": "indeterminate()"
+        "[attr.data-indeterminate]": "indeterminateState()"
     }
 })
 export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariantInput, FormCheckboxControl {
@@ -49,6 +59,7 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
         return twMerge(variantClasses, classes);
     });
     protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
+    protected readonly indeterminateState = linkedSignal(() => this.indeterminate());
     protected readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>("checkBox");
     protected readonly invalidState = computed(
         () => this.touched() && (this.invalid() || (this.required() && !this.checked()))
@@ -86,10 +97,17 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
     public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
-     * @description Activates indeterminate mode, showing a dash instead of a checkmark.
+     * @description Activates indeterminate mode, showing a dash instead of a checkmark. A user change clears it, as it
+     * does on a native checkbox. Use `[(indeterminate)]` to follow that, because a one-way binding only writes again when
+     * the bound value changes.
      * @default false
      */
     public readonly indeterminate = input(false, { transform: booleanAttribute });
+
+    /**
+     * @description Emitted with `false` when a user change clears the indeterminate mode.
+     */
+    public readonly indeterminateChange = output<boolean>();
 
     /**
      * @description Emitted when the checkbox input loses focus.
@@ -114,8 +132,8 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
     public readonly inputId = input(createElementControlId());
 
     /**
-     * @description Marks the checkbox as invalid. When bound to a signal form field via `[field]`,
-     * this is written by the signal forms `Field` directive.
+     * @description Marks the checkbox as invalid. When bound to a signal form field via `[formField]`, this is written
+     * by the `FormField` directive.
      * @default false
      */
     public readonly invalid = input(false, { transform: booleanAttribute });
@@ -176,8 +194,8 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
     public readonly touch = output<void>();
 
     /**
-     * @description Marks the checkbox as touched. When bound to a signal form field via `[field]`,
-     * this is written by the signal forms `Field` directive.
+     * @description Marks the checkbox as touched. When bound to a signal form field via `[formField]`, this is written
+     * by the `FormField` directive.
      * @default false
      */
     public readonly touched = input(false, { transform: booleanAttribute });
@@ -220,6 +238,10 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
 
     protected onInputChange(event: Event): void {
         const checked = (event.target as HTMLInputElement).checked;
+        if (this.indeterminateState()) {
+            this.indeterminateState.set(false);
+            this.indeterminateChange.emit(false);
+        }
         this.checked.set(checked);
         this.inputChange.emit(event);
         this.touch.emit();

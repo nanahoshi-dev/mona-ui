@@ -25,7 +25,6 @@
         [attr.data-selection]="selection()"
         (keydown)="onKeydown($event)"
         (blur)="onBlur()"
-        (pointermove)="onPointerMove($event)"
         (pointerleave)="onPointerLeave()"
         (click)="onClick($event)">
         @for (item of items(); track item.itemValue) {

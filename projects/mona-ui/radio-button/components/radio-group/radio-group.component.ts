@@ -39,7 +39,7 @@ import type { RadioGroupVariantProps } from "../../styles/radio.styles";
         "(focusout)": "onFocusOut($event)"
     }
 })
-export class RadioGroupComponent implements FormValueControl<unknown> {
+export class RadioGroupComponent<T = unknown> implements FormValueControl<T> {
     readonly #generatedName = createElementControlId();
     readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #label = injectLabelAssociation({
@@ -82,7 +82,7 @@ export class RadioGroupComponent implements FormValueControl<unknown> {
         name: computed(() => this.name() || this.#generatedName),
         readonly: computed(() => this.readonly()),
         required: computed(() => this.required()),
-        select: value => this.#select(value),
+        select: value => this.#select(value as T),
         selectionVersion: this.#selectionVersion,
         value: computed(() => this.value())
     };
@@ -149,7 +149,7 @@ export class RadioGroupComponent implements FormValueControl<unknown> {
      * @description The `radioValue` of the selected radio button.
      * @default undefined
      */
-    public readonly value = model<unknown>(undefined);
+    public readonly value = model<T>(undefined as T);
 
     public constructor() {
         afterNextRender(() => {
@@ -182,7 +182,7 @@ export class RadioGroupComponent implements FormValueControl<unknown> {
         this.#label.setLabelledBy(id);
     }
 
-    #select(value: unknown): void {
+    #select(value: T): void {
         this.value.set(value);
         this.#selectionVersion.update(version => version + 1);
         this.touch.emit();

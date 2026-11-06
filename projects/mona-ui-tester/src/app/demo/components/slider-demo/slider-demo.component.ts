@@ -155,7 +155,7 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
             }
             @if (featureData && featureData["handleTemplate"].active) {
                 <ng-template monaSliderHandleTemplate let-value>
-                    <svg lucideStar [color]="'darkgoldenrod'" [title]="value"></svg>
+                    <svg lucideStar [color]="'darkgoldenrod'" [title]="value.toString()"></svg>
                 </ng-template>
             }
         </mona-slider>

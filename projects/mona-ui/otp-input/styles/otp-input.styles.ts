@@ -13,7 +13,7 @@ export const otpInputHostThemeVariants = cva(
 );
 
 export const otpInputFieldThemeVariants = cva(
-    `pointer-events-none absolute inset-0 size-full opacity-0 outline-none select-none -z-10`
+    `absolute inset-0 z-10 size-full cursor-text opacity-0 outline-none read-only:cursor-default`
 );
 
 export const otpInputSlotThemeVariants = cva(

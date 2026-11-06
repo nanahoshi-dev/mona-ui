@@ -11,12 +11,12 @@
         [id]="inputId()"
         [name]="name()"
         [disabled]="effectiveDisabled()"
-        [indeterminate]="indeterminate()"
+        [indeterminate]="indeterminateState()"
         [required]="required()"
         [checked]="checked()"
         [tabindex]="effectiveDisabled() ? -1 : tabIndex()"
         [class]="checkBoxClasses()"
-        [attr.aria-checked]="indeterminate() ? 'mixed' : null"
+        [attr.aria-checked]="indeterminateState() ? 'mixed' : null"
         [attr.aria-invalid]="invalidState() ? 'true' : null"
         [attr.aria-label]="ariaLabel() || label() || null"
         [attr.aria-labelledby]="labelledBy()"
@@ -29,7 +29,7 @@
         #checkBox />
 
     <span [class]="checkMarkClasses()" [attr.data-invalid]="invalidState() || null" aria-hidden="true">
-        @if (checked()) {
+        @if (checked() && !indeterminateState()) {
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"

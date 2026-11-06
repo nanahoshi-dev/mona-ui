@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { afterNextRender, booleanAttribute, Component, computed, contentChild, effect, ElementRef, inject, input, model, output, signal, TemplateRef, viewChild } from "@angular/core";
+import { afterNextRender, booleanAttribute, Component, computed, contentChild, effect, ElementRef, inject, input, model, numberAttribute, output, signal, TemplateRef, viewChild } from "@angular/core";
 import { type FormValueControl } from "@angular/forms/signals";
 import { AttributeBinderDirective, AttributeConfig, createElementControlId, injectEffectiveDisabled, injectLabelAssociation } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
@@ -14,10 +14,10 @@ import {
     OtpInputVariantProps
 } from "../../styles/otp-input.styles";
 import {
+    acceptCharacter,
     computeSlotClasses,
     filterCharacters,
     findUsableAttribute,
-    isValidCharacter,
     normalizeGroupLengths,
     normalizeLength,
     sanitizeInputAttributes,
@@ -44,11 +44,11 @@ interface OtpGroupViewModel {
     templateUrl: "./otp-input.component.html",
     imports: [NgTemplateOutlet, AttributeBinderDirective],
     host: {
-        dir: "ltr",
         // The ARIA inputs are applied to the inner input, so the host must not keep the static attributes.
         "[attr.aria-describedby]": "null",
         "[attr.aria-label]": "null",
         "[attr.aria-labelledby]": "null",
+        "[attr.tabindex]": "null",
         "[attr.dir]": "'ltr'",
         "[attr.data-disabled]": "effectiveDisabled() || null",
         "[attr.data-readonly]": "readonly() || null",
@@ -61,11 +61,13 @@ interface OtpGroupViewModel {
 })
 export class OtpInputComponent implements OtpInputVariantInput, FormValueControl<string> {
     readonly #hasNativeLabel = signal(false);
+    readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #i18n = inject(MonaI18nService);
     readonly #label = injectLabelAssociation({
         ariaLabel: () => this.ariaLabel(),
         ariaLabelledBy: () => this.ariaLabelledBy()
     });
+    #touchPress = false;
 
     protected readonly activeSlotIndex = computed(() => {
         if (!this.hasFocus()) {
@@ -260,7 +262,9 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     public readonly characterPattern = input<RegExp | null>(null);
 
     /**
-     * @description Emitted when a user interaction completes the verification code.
+     * @description Emitted when a user interaction completes the verification code. Pasting a different full code over
+     * a complete one emits again, so auto-submit sees the new code. Correcting a complete code one character at a time
+     * doesn't.
      */
     public readonly complete = output<string>();
 
@@ -300,6 +304,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
      * @default generated
      */
     public readonly inputId = input(createElementControlId());
+
     /**
      * @description Marks the OTP input as invalid. When bound to a signal form field via `[formField]`,
      * this is written by the `FormField` directive.
@@ -377,8 +382,16 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     public readonly spacing = input(true, { transform: booleanAttribute });
 
     /**
-     * @description Emitted when the OTP input is interacted with — on blur or user value change.
-     * The `FormField` directive listens to this to mark the field as touched.
+     * @description Tab index of the inner `<input>`.
+     * @default 0
+     */
+    public readonly tabindex = input<number, number | string>(0, {
+        transform: (value: number | string) => numberAttribute(value, 0)
+    });
+
+    /**
+     * @description Emitted when the inner input loses focus. The `FormField` directive listens to this to mark the field
+     * as touched.
      */
     public readonly touch = output<void>();
 
@@ -489,7 +502,8 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
                 return;
             }
             if (event.data.length === 1) {
-                if (!isValidCharacter(event.data, this.type(), this.characterPattern())) {
+                const accepted = acceptCharacter(event.data, this.type(), this.characterPattern());
+                if (accepted === null) {
                     event.preventDefault();
                     return;
                 }
@@ -499,7 +513,14 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
                     return;
                 }
 
-                if (start === end && start < val.length) {
+                const overwrites = start === end && start < val.length;
+                if (accepted !== event.data) {
+                    event.preventDefault();
+                    this.applyUserInsertion(accepted, start, overwrites ? start + 1 : end);
+                    return;
+                }
+
+                if (overwrites) {
                     inputEl.setSelectionRange(start, start + 1);
                 }
             } else {
@@ -559,6 +580,26 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         this.syncSelection();
     }
 
+    protected onInputClick(event: MouseEvent): void {
+        // A touch leaves the press to the browser, for its paste menu, and places the caret once it's a tap.
+        if (this.#touchPress && !this.effectiveDisabled()) {
+            this.focus(this.#slotIndexAt(event.clientX));
+        }
+    }
+
+    protected onInputMouseDown(event: MouseEvent): void {
+        // The secondary button is left alone as well, so it opens the browser's menu with Paste.
+        if (this.#touchPress || this.effectiveDisabled() || event.button !== 0 || event.ctrlKey) {
+            return;
+        }
+        event.preventDefault();
+        this.focus(this.#slotIndexAt(event.clientX));
+    }
+
+    protected onInputPointerDown(event: PointerEvent): void {
+        this.#touchPress = event.pointerType === "touch" || event.pointerType === "pen";
+    }
+
     protected onKeyDown(event: KeyboardEvent): void {
         if (this.effectiveDisabled() || this.readonly() || this.isComposing() || event.isComposing) {
             return;
@@ -576,7 +617,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         const val = this.value();
         const maxLen = this.normalizedLength();
 
-        if (!isValidCharacter(event.key, this.type(), this.characterPattern())) {
+        if (acceptCharacter(event.key, this.type(), this.characterPattern()) === null) {
             event.preventDefault();
             return;
         }
@@ -616,14 +657,6 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         this.syncSelection();
     }
 
-    protected onSlotPointerDown(event: PointerEvent, index: number): void {
-        if (this.effectiveDisabled()) {
-            return;
-        }
-        event.preventDefault();
-        this.focus(index);
-    }
-
     private applyUserInsertion(text: string, selectionStart: number, selectionEnd: number): void {
         if (this.effectiveDisabled() || this.readonly()) {
             return;
@@ -637,8 +670,10 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
             return;
         }
 
-        const start = Math.max(0, Math.min(selectionStart, currentVal.length));
-        const end = Math.max(start, Math.min(selectionEnd, currentVal.length));
+        // A full code replaces what's there, wherever the caret is, because merging would make up a code nobody entered.
+        const replacesAll = filtered.length >= maxLen;
+        const start = replacesAll ? 0 : Math.max(0, Math.min(selectionStart, currentVal.length));
+        const end = replacesAll ? currentVal.length : Math.max(start, Math.min(selectionEnd, currentVal.length));
 
         const before = currentVal.substring(0, start);
         const after = currentVal.substring(end);
@@ -648,7 +683,6 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         }
 
         const newCaretPos = Math.min(start + filtered.length, maxLen);
-        const wasIncomplete = currentVal.length < maxLen;
 
         inputEl.value = combined;
         this.value.set(combined);
@@ -656,9 +690,24 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         this.selectionStart.set(newCaretPos);
         this.selectionEnd.set(newCaretPos);
 
-        if (wasIncomplete && combined.length === maxLen) {
+        if (combined !== currentVal && combined.length === maxLen) {
             this.complete.emit(combined);
         }
+    }
+
+    #slotIndexAt(clientX: number): number {
+        const slots = this.#hostElementRef.nativeElement.querySelectorAll<HTMLElement>("[data-slot-index]");
+        let closest = 0;
+        let closestDistance = Number.POSITIVE_INFINITY;
+        slots.forEach((slot, index) => {
+            const { left, right } = slot.getBoundingClientRect();
+            const distance = clientX < left ? left - clientX : Math.max(0, clientX - right);
+            if (distance < closestDistance) {
+                closest = index;
+                closestDistance = distance;
+            }
+        });
+        return closest;
     }
 
     private syncSelection(): void {

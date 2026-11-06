@@ -22,7 +22,7 @@
                 [style]="tick | tickStyle: tickStyleArgs()"
                 [attr.data-orientation]="orientation()"
                 [attr.data-value]="tick.value"
-                monaSliderTick>
+                data-slider-tick>
             </span>
         }
     </div>
@@ -38,7 +38,7 @@
                 [attr.data-orientation]="orientation()"
                 [style]="tick | labelStyle: labelStyleArgs()">
                 @if (!tickValueTemplate()) {
-                    <span>{{ tick.value }}</span>
+                    <span>{{ tick.label }}</span>
                 } @else {
                     <span>
                         <ng-container
@@ -72,6 +72,7 @@
     [attr.aria-invalid]="invalidState() || null"
     [attr.aria-readonly]="readonly() || null"
     [attr.data-invalid]="invalidState() || null"
+    [attr.aria-describedby]="ariaDescribedBy()"
     [attr.aria-label]="computedAriaLabel()"
     [attr.aria-labelledby]="labelledBy()"
     #sliderHandle>

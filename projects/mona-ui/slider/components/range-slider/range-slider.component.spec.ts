@@ -463,7 +463,7 @@ describe("RangeSliderComponent", () => {
             await waitForStable(fixture);
 
             const handles = fixture.nativeElement.querySelectorAll("[role='slider']") as NodeListOf<HTMLElement>;
-            const ticks = fixture.nativeElement.querySelectorAll("span[monaSliderTick]") as NodeListOf<HTMLElement>;
+            const ticks = fixture.nativeElement.querySelectorAll("span[data-slider-tick]") as NodeListOf<HTMLElement>;
 
             // Primary handle (0) is at right: 0%, secondary handle (10) is at right: 100%
             expect(handles[0].style.right).toBe("0%");

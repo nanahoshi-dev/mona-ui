@@ -517,6 +517,12 @@ export const ALLOWLIST: AllowlistEntry[] = [
     },
     {
         category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/otp-input/components/otp-input/otp-input.component.ts",
+        lineSnippet: "const { left, right } = slot.getBoundingClientRect();",
+        reason: "OTP host forces dir=ltr, so physical slot coordinates follow the logical slot order"
+    },
+    {
+        category: "rtl-manual-review",
         filePattern: "projects/mona-ui/window/directives/window-drag-handler.directive.ts",
         lineSnippet: "rect.left",
         reason: "Desktop window drag handler operates in 2D viewport coordinates"

@@ -202,7 +202,7 @@ describe("SliderComponent", () => {
             component.step.set(5);
             await waitForStable(fixture);
 
-            expect(fixture.debugElement.queryAll(By.css("[monaSliderTick]")).length).toBe(3);
+            expect(fixture.debugElement.queryAll(By.css("[data-slider-tick]")).length).toBe(3);
             expect(fixture.debugElement.queryAll(By.css("[data-label-position]")).length).toBe(1);
         });
     });
@@ -426,7 +426,7 @@ describe("SliderComponent", () => {
             await waitForStable(fixture);
 
             const handle = fixture.nativeElement.querySelector("[role='slider']") as HTMLElement;
-            const ticks = fixture.nativeElement.querySelectorAll("span[monaSliderTick]") as NodeListOf<HTMLElement>;
+            const ticks = fixture.nativeElement.querySelectorAll("span[data-slider-tick]") as NodeListOf<HTMLElement>;
 
             // Min value (0) handle is at right: 0%
             expect(handle.style.right).toBe("0%");

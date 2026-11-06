@@ -206,6 +206,22 @@ describe("OtpInputComponent", () => {
             .map(de => de.nativeElement as HTMLElement);
     };
 
+    /** The input lies above the slots, so a press reaches it and is matched to a slot by where it lands. */
+    const pressSlot = (index: number, options: MouseEventInit = {}): MouseEvent => {
+        getSlots().forEach((slot, slotIndex) => {
+            slot.getBoundingClientRect = () => ({ left: slotIndex * 40, right: slotIndex * 40 + 36 }) as DOMRect;
+        });
+        const event = new MouseEvent("mousedown", {
+            bubbles: true,
+            button: 0,
+            cancelable: true,
+            clientX: index * 40 + 10,
+            ...options
+        });
+        getNativeInput().dispatchEvent(event);
+        return event;
+    };
+
     const getHostElement = (): HTMLElement => {
         const hostDebug = fixture.debugElement.query(By.css("mona-otp-input"));
         if (!hostDebug) {
@@ -495,10 +511,9 @@ describe("OtpInputComponent", () => {
             await fixture.whenStable();
 
             const input = getNativeInput();
-            const slots = getSlots();
 
             // Click first slot (0)
-            slots[0].dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true }));
+            pressSlot(0);
             fixture.detectChanges();
             expect(input.selectionStart).toBe(0);
             expect(input.selectionEnd).toBe(1);
@@ -631,7 +646,7 @@ describe("OtpInputComponent", () => {
             expect(host.completeEvents).toEqual(["5678"]);
         });
 
-        it("replaces already-complete value with full insertion without duplicate complete events", async () => {
+        it("replaces an already-complete value with a different full insertion and completes again", async () => {
             host.value.set("1234");
             fixture.detectChanges();
             await fixture.whenStable();
@@ -649,7 +664,7 @@ describe("OtpInputComponent", () => {
             fixture.detectChanges();
 
             expect(host.value()).toBe("9999");
-            expect(host.completeEvents.length).toBe(0);
+            expect(host.completeEvents).toEqual(["9999"]);
         });
     });
 
@@ -855,16 +870,200 @@ describe("OtpInputComponent", () => {
         });
     });
 
+    describe("Paste, digits and the browser's menu", () => {
+        const paste = (text: string): void => {
+            const event = new Event("paste", { bubbles: true, cancelable: true });
+            Object.defineProperty(event, "clipboardData", { value: { getData: () => text } });
+            getNativeInput().dispatchEvent(event);
+            fixture.detectChanges();
+        };
+
+        it("replaces partial input with a full code instead of merging them", async () => {
+            host.value.set("12");
+            fixture.detectChanges();
+            await fixture.whenStable();
+            getNativeInput().setSelectionRange(2, 2);
+
+            paste("9876");
+
+            expect(host.value()).toBe("9876");
+            expect(host.completeEvents).toEqual(["9876"]);
+            expect(getNativeInput().selectionStart).toBe(4);
+        });
+
+        it("replaces a full code with the caret at the end, as after an expired code", async () => {
+            host.value.set("1234");
+            fixture.detectChanges();
+            await fixture.whenStable();
+            getNativeInput().setSelectionRange(4, 4);
+
+            paste("5678");
+
+            expect(host.value()).toBe("5678");
+            expect(host.completeEvents).toEqual(["5678"]);
+        });
+
+        it("doesn't complete again when the same code is pasted", async () => {
+            host.value.set("1234");
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            paste("1234");
+
+            expect(host.completeEvents).toEqual([]);
+        });
+
+        it("still splices a partial paste at the caret", async () => {
+            host.value.set("14");
+            fixture.detectChanges();
+            await fixture.whenStable();
+            getNativeInput().setSelectionRange(1, 1);
+
+            paste("23");
+
+            expect(host.value()).toBe("1234");
+        });
+
+        it("doesn't complete again when a complete code is corrected by typing", async () => {
+            host.value.set("1234");
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const input = getNativeInput();
+            input.value = "1934";
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            fixture.detectChanges();
+
+            expect(host.value()).toBe("1934");
+            expect(host.completeEvents).toEqual([]);
+        });
+
+        it.each([
+            ["Eastern Arabic", "١٢٣٤"],
+            ["Persian", "۱۲۳۴"],
+            ["fullwidth", "１２３４"]
+        ])("converts pasted %s digits", (_name, digits) => {
+            paste(digits);
+
+            expect(host.value()).toBe("1234");
+        });
+
+        it("converts a typed Eastern Arabic digit, overwriting as any other character", async () => {
+            host.value.set("12");
+            fixture.detectChanges();
+            await fixture.whenStable();
+            const input = getNativeInput();
+            input.setSelectionRange(0, 0);
+
+            const keydown = new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "٩" });
+            input.dispatchEvent(keydown);
+            input.setSelectionRange(0, 0);
+            const beforeInput = new InputEvent("beforeinput", {
+                bubbles: true,
+                cancelable: true,
+                data: "٩",
+                inputType: "insertText"
+            });
+            input.dispatchEvent(beforeInput);
+            fixture.detectChanges();
+
+            expect(keydown.defaultPrevented).toBe(false);
+            expect(beforeInput.defaultPrevented).toBe(true);
+            expect(host.value()).toBe("92");
+        });
+
+        it("converts digits that arrive through an IME", () => {
+            const input = getNativeInput();
+            input.value = "٣٤";
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            fixture.detectChanges();
+
+            expect(host.value()).toBe("34");
+        });
+
+        it("still rejects what isn't a digit or a letter", () => {
+            paste("١-٢");
+
+            expect(host.value()).toBe("12");
+        });
+
+        it("lets a pattern accept the original character", () => {
+            host.characterPattern.set(/[١٢]/);
+            fixture.detectChanges();
+
+            paste("١٢");
+
+            expect(host.value()).toBe("١٢");
+        });
+
+        it("puts the input above the slots so the browser's menu has Paste", () => {
+            const classes = getNativeInput().classList;
+
+            expect(classes.contains("z-10")).toBe(true);
+            expect(classes.contains("pointer-events-none")).toBe(false);
+            expect(classes.contains("select-none")).toBe(false);
+        });
+
+        it.each([
+            ["the secondary button", { button: 2 }],
+            ["a control click on a Mac", { ctrlKey: true }]
+        ])("leaves %s to the browser", (_name, options) => {
+            const event = pressSlot(1, options);
+
+            expect(event.defaultPrevented).toBe(false);
+        });
+
+        it("leaves a touch press to the browser and places the caret on the tap", () => {
+            host.value.set("1234");
+            fixture.detectChanges();
+            const input = getNativeInput();
+
+            input.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerType: "touch" }));
+            const press = pressSlot(2);
+            expect(press.defaultPrevented).toBe(false);
+
+            input.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: 90 }));
+            fixture.detectChanges();
+
+            expect(input.selectionStart).toBe(2);
+            expect(input.selectionEnd).toBe(3);
+        });
+
+        it("doesn't move the caret on the click after a mouse press", () => {
+            host.value.set("1234");
+            fixture.detectChanges();
+            const input = getNativeInput();
+
+            input.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerType: "mouse" }));
+            pressSlot(1);
+            input.setSelectionRange(3, 3);
+            input.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: 10 }));
+
+            expect(input.selectionStart).toBe(3);
+        });
+
+        it("follows the caret on selectionchange, so the active slot keeps up with key repeat", () => {
+            host.value.set("1234");
+            fixture.detectChanges();
+            const input = getNativeInput();
+            input.focus();
+            input.setSelectionRange(1, 1);
+            input.dispatchEvent(new Event("selectionchange", { bubbles: true }));
+            fixture.detectChanges();
+
+            expect(getSlots()[1].getAttribute("data-active")).toBe("true");
+        });
+    });
+
     describe("Pointer Interaction and Focus", () => {
         it("clicking a filled slot selects that character and focuses input", () => {
             host.value.set("1234");
             fixture.detectChanges();
 
-            const slots = getSlots();
             const input = getNativeInput();
             const focusSpy = vi.spyOn(input, "focus");
 
-            slots[1].dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true }));
+            pressSlot(1);
             fixture.detectChanges();
 
             expect(focusSpy).toHaveBeenCalled();
@@ -876,10 +1075,9 @@ describe("OtpInputComponent", () => {
             host.value.set("12");
             fixture.detectChanges();
 
-            const slots = getSlots();
             const input = getNativeInput();
 
-            slots[3].dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true }));
+            pressSlot(3);
             fixture.detectChanges();
 
             expect(input.selectionStart).toBe(2);

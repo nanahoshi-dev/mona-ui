@@ -111,7 +111,8 @@ export const sliderHandleThemeVariants = cva(
     `
         absolute z-2 flex items-center justify-center
         h-4.25 w-4.25
-        cursor-pointer
+        cursor-pointer touch-none
+        before:absolute before:-inset-1 before:content-['']
         ${themeRaisedSurfaceClasses}
         border border-(--mona-slider-handle-border-color) shadow-(--shadow-control)
         outline-none

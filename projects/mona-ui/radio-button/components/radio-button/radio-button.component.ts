@@ -39,7 +39,7 @@ import { MONA_RADIO_GROUP } from "../../models/RadioGroupContext";
         "[attr.data-disabled]": "effectiveDisabled()"
     }
 })
-export class RadioButtonComponent implements RadioButtonVariantInput, FormValueControl<unknown> {
+export class RadioButtonComponent<T = unknown> implements RadioButtonVariantInput, FormValueControl<T> {
     readonly #group = inject(MONA_RADIO_GROUP, { optional: true });
     readonly #label = injectLabelAssociation({
         ariaLabel: () => this.ariaLabel(),
@@ -63,6 +63,11 @@ export class RadioButtonComponent implements RadioButtonVariantInput, FormValueC
     // Inside a group the group carries aria-invalid, and the radios only paint it.
     protected readonly invalidState = computed(() => this.#group?.invalid() ?? (this.touched() && this.invalid()));
     protected readonly labelledBy = this.#label.labelledBy;
+    // Only a primitive means anything to a native form. An object is still compared and written through the model.
+    protected readonly nativeValue = computed(() => {
+        const radioValue = this.radioValue();
+        return typeof radioValue === "object" ? null : radioValue;
+    });
     protected readonly radioButtonCircleClasses = computed(() => {
         const rounded = this.rounded();
         return radioButtonCircleThemeVariants({ rounded });
@@ -72,9 +77,10 @@ export class RadioButtonComponent implements RadioButtonVariantInput, FormValueC
         const rounded = this.rounded();
         return radioButtonIndicatorThemeVariants({ rounded });
     });
-    protected readonly selected = computed(
-        () => this.radioValue() === (this.#group ? this.#group.value() : this.value())
-    );
+    protected readonly selected = computed(() => {
+        const radioValue = this.radioValue();
+        return radioValue !== undefined && radioValue === (this.#group ? this.#group.value() : this.value());
+    });
 
     /**
      * @description Id of an element that describes the radio button, such as an error message.
@@ -123,8 +129,8 @@ export class RadioButtonComponent implements RadioButtonVariantInput, FormValueC
     public readonly inputId = input(createElementControlId());
 
     /**
-     * @description Marks the radio button as invalid. When bound to a signal form field via `[field]`,
-     * this is written by the signal forms `Field` directive.
+     * @description Marks the radio button as invalid. When bound to a signal form field via `[formField]`, this is
+     * written by the `FormField` directive.
      * @default false
      */
     public readonly invalid = input(false, { transform: booleanAttribute });
@@ -133,7 +139,7 @@ export class RadioButtonComponent implements RadioButtonVariantInput, FormValueC
      * @description Text label displayed alongside the radio button.
      * When provided, takes precedence over projected content.
      * When empty, projected content inside `<mona-radio-button>` is used.
-     * When both are absent, the radio button has no accessible name — always provide one.
+     * When both are absent, name the radio button with `aria-label` or `aria-labelledby`.
      * @default ""
      */
     public readonly label = input("");
@@ -161,9 +167,10 @@ export class RadioButtonComponent implements RadioButtonVariantInput, FormValueC
      * @description The identity value of this radio button within a group.
      * Compared against `value()` to determine whether this button is selected.
      * When this button is chosen, its `radioValue` is written to the form as the new group value.
+     * A radio button without one can't be selected.
      * @default undefined
      */
-    public readonly radioValue = input<any>(undefined);
+    public readonly radioValue = input<T>(undefined as T);
 
     /**
      * @description Prevents value changes while the control stays focusable and readable. When bound to a signal form
@@ -185,11 +192,14 @@ export class RadioButtonComponent implements RadioButtonVariantInput, FormValueC
      */
     public readonly rounded = input<RadioButtonVariantProps["rounded"]>("full");
 
+    /**
+     * @description Emits when the radio button loses focus or is selected.
+     */
     public readonly touch = output<void>();
 
     /**
      * @description Marks the radio button as touched. Error styling requires both `invalid` and `touched` to be `true`.
-     * When bound to a signal form field via `[field]`, this is written by the signal forms `Field` directive.
+     * When bound to a signal form field via `[formField]`, this is written by the `FormField` directive.
      * @default false
      */
     public readonly touched = input(false, { transform: booleanAttribute });
@@ -201,12 +211,11 @@ export class RadioButtonComponent implements RadioButtonVariantInput, FormValueC
     public readonly userClass = input<string>("", { alias: "class" });
 
     /**
-     * @description The currently selected value in the radio group.
-     * When bound via `[control]` (signal forms), the `Field` directive keeps this in sync with the form field.
-     * When bound via `[(ngModel)]` or `[formControl]`, the CVA layer manages this value.
+     * @description The currently selected value of a group of radio buttons that aren't in a `mona-radio-group`. When
+     * bound to a signal form field via `[formField]`, the `FormField` directive keeps it in sync.
      * @default undefined
      */
-    public readonly value = model<any>(undefined);
+    public readonly value = model<T>(undefined as T);
 
     public constructor() {
         const group = this.#group;

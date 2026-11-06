@@ -3,8 +3,7 @@ import { Component, computed, ElementRef, input, model, Signal, signal, viewChil
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
-import { filter, fromEvent, switchMap, takeUntil, tap } from "rxjs";
-import { SliderTickDirective } from "../../directives/slider-tick.directive";
+import { filter, fromEvent, tap } from "rxjs";
 import { LabelStylePipe } from "../../pipes/label-style.pipe";
 import { TickStylePipe } from "../../pipes/tick-style.pipe";
 import { SLIDER_DEFAULT_MESSAGES } from "../../i18n/slider.default-messages";
@@ -13,17 +12,18 @@ import { SliderBaseComponent } from "../slider-base/slider-base.component";
 @Component({
     selector: "mona-range-slider",
     templateUrl: "./range-slider.component.html",
-    imports: [NgTemplateOutlet, SliderTickDirective, LabelStylePipe, TickStylePipe],
+    imports: [NgTemplateOutlet, LabelStylePipe, TickStylePipe],
     host: {
+        // The description is applied to the handles, so the host must not keep the static attribute.
+        "[attr.aria-describedby]": "null",
         "[class]": "baseClasses()",
         "[class.mona-slider]": "true",
-        "[attr.data-disabled]": "effectiveDisabled()",
+        "[attr.data-disabled]": "effectiveDisabled() || null",
         "[attr.data-orientation]": "orientation()",
         "[attr.data-readonly]": "readonly() || null",
         "[attr.aria-label]": "ariaLabel()",
         "[attr.aria-labelledby]": "labelledBy()",
-        "[attr.role]": "'group'",
-        "(focus)": "focus()"
+        "[attr.role]": "'group'"
     }
 })
 export class RangeSliderComponent extends SliderBaseComponent implements FormValueControl<[number, number]> {
@@ -79,6 +79,11 @@ export class RangeSliderComponent extends SliderBaseComponent implements FormVal
         const labelledBy = this.labelledBy();
         return labelledBy ? `${labelledBy} ${this.startHandleId}` : null;
     });
+    protected readonly valueIsShown = computed(() => {
+        const [lower, upper] = this.normalizedValue();
+        const [first, second] = this.value();
+        return lower === first && upper === second;
+    });
 
     /**
      * @description Accessible name for the upper-value (secondary) handle.
@@ -94,7 +99,8 @@ export class RangeSliderComponent extends SliderBaseComponent implements FormVal
 
     /**
      * @description Selected range as `[minimum, maximum]`.
-     * Values outside `[minValue, maxValue]` are clamped; the tuple is always sorted, so index 0 ≤ index 1.
+     * A value out of range, off the step grid or unsorted is shown at the nearest valid values, and the model keeps its
+     * own until the user changes it. A development warning reports it.
      * @default [0, 10]
      */
     public readonly value = model<[number, number]>([0, 10]);
@@ -106,7 +112,7 @@ export class RangeSliderComponent extends SliderBaseComponent implements FormVal
     }
 
     protected handleHandleMove(event: PointerEvent, isSecondary = false): void {
-        this.updateRangedValue(this.getValueFromPointerEvent(event), isSecondary, true);
+        this.updateRangedValue(this.getValueFromPointerEvent(event), isSecondary);
     }
 
     protected override setSubscriptions(): void {
@@ -158,6 +164,14 @@ export class RangeSliderComponent extends SliderBaseComponent implements FormVal
                 filter(() => !this.interactionDisabled())
             )
             .subscribe((event: PointerEvent) => {
+                const target = event.target as Node;
+                // A drag ends with a click on the handle, and moving the closest handle would move the other one.
+                if (
+                    this.sliderHandle().nativeElement.contains(target) ||
+                    this.secondarySliderHandle().nativeElement.contains(target)
+                ) {
+                    return;
+                }
                 const isSecondary = this.getClosestHandle(event);
                 this.handleHandleMove(event, isSecondary);
                 const handle = isSecondary ? this.secondarySliderHandle() : this.sliderHandle();
@@ -216,7 +230,7 @@ export class RangeSliderComponent extends SliderBaseComponent implements FormVal
             )
             .subscribe(event => {
                 const newValue = this.calculateNewValue(this.normalizedValue()[0], event);
-                this.updateRangedValue(newValue, false, false);
+                this.updateRangedValue(newValue, false);
             });
 
         fromEvent<KeyboardEvent>(this.secondarySliderHandle().nativeElement, "keydown")
@@ -231,44 +245,34 @@ export class RangeSliderComponent extends SliderBaseComponent implements FormVal
             )
             .subscribe(event => {
                 const newValue = this.calculateNewValue(this.normalizedValue()[1], event);
-                this.updateRangedValue(newValue, true, false);
+                this.updateRangedValue(newValue, true);
             });
     }
 
     private setPointerMoveSubscription(): void {
-        const pointerMove$ = fromEvent<PointerEvent>(document, "pointermove");
-        const pointerUp$ = fromEvent<PointerEvent>(document, "pointerup");
-
-        fromEvent<PointerEvent>(this.sliderHandle().nativeElement, "pointerdown")
-            .pipe(
-                takeUntilDestroyed(this.destroyRef),
-                filter(() => !this.interactionDisabled()),
-                tap(() => this.dragging.set(true)),
-                switchMap(() =>
-                    pointerMove$.pipe(
-                        tap((event: PointerEvent) => this.handleHandleMove(event, false)),
-                        takeUntil(pointerUp$.pipe(tap(() => this.zone.run(() => this.dragging.set(false)))))
-                    )
-                )
-            )
-            .subscribe();
-
-        fromEvent<PointerEvent>(this.secondarySliderHandle().nativeElement, "pointerdown")
-            .pipe(
-                takeUntilDestroyed(this.destroyRef),
-                filter(() => !this.interactionDisabled()),
-                tap(() => this.dragging.set(true)),
-                switchMap(() =>
-                    pointerMove$.pipe(
-                        tap((event: PointerEvent) => this.handleHandleMove(event, true)),
-                        takeUntil(pointerUp$.pipe(tap(() => this.zone.run(() => this.dragging.set(false)))))
-                    )
-                )
-            )
-            .subscribe();
+        this.trackRangeHandle(this.sliderHandle().nativeElement, false);
+        this.trackRangeHandle(this.secondarySliderHandle().nativeElement, true);
     }
 
-    private updateRangedValue(value: number, isSecondary: boolean, isDragging = false): void {
+    private trackRangeHandle(handle: HTMLElement, startsSecondary: boolean): void {
+        this.trackHandleDrag(handle, () => {
+            let isSecondary = startsSecondary;
+            return event => {
+                const value = this.getValueFromPointerEvent(event);
+                const [lower, upper] = this.normalizedValue();
+                // Handles stop at each other, so stacked ones are told apart by the way the pointer moves. Otherwise
+                // the one on top could be stuck.
+                if (lower === upper && value !== lower && isSecondary !== value > lower) {
+                    isSecondary = value > lower;
+                    const active = isSecondary ? this.secondarySliderHandle() : this.sliderHandle();
+                    active.nativeElement.focus({ preventScroll: true });
+                }
+                this.updateRangedValue(value, isSecondary);
+            };
+        });
+    }
+
+    private updateRangedValue(value: number, isSecondary: boolean): void {
         const currentValues = this.normalizedValue();
         const currentMinValue = currentValues[0];
         const currentMaxValue = currentValues[1];
@@ -277,26 +281,14 @@ export class RangeSliderComponent extends SliderBaseComponent implements FormVal
         let newMaxValue = currentMaxValue;
 
         if (isSecondary) {
-            if (isDragging && value < currentMinValue) {
-                newMinValue = value;
-                newMaxValue = value;
+            newMaxValue = Math.max(value, currentMinValue);
+            if (newMaxValue === currentMinValue) {
                 this.secondaryHandleOnTop.set(true);
-            } else {
-                newMaxValue = Math.max(value, currentMinValue);
-                if (newMaxValue === currentMinValue) {
-                    this.secondaryHandleOnTop.set(true);
-                }
             }
         } else {
-            if (isDragging && value > currentMaxValue) {
-                newMinValue = value;
-                newMaxValue = value;
+            newMinValue = Math.min(value, currentMaxValue);
+            if (newMinValue === currentMaxValue) {
                 this.secondaryHandleOnTop.set(false);
-            } else {
-                newMinValue = Math.min(value, currentMaxValue);
-                if (newMinValue === currentMaxValue) {
-                    this.secondaryHandleOnTop.set(false);
-                }
             }
         }
 

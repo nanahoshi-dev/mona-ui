@@ -22,7 +22,7 @@
                 [style]="tick | tickStyle: tickStyleArgs()"
                 [attr.data-orientation]="orientation()"
                 [attr.data-value]="tick.value"
-                monaSliderTick>
+                data-slider-tick>
             </span>
         }
     </div>
@@ -38,7 +38,7 @@
                 [attr.data-orientation]="orientation()"
                 [style]="tick | labelStyle: labelStyleArgs()">
                 @if (!tickValueTemplate()) {
-                    <span>{{ tick.value }}</span>
+                    <span>{{ tick.label }}</span>
                 } @else {
                     <span>
                         <ng-container
@@ -64,7 +64,7 @@
     [attr.tabindex]="effectiveDisabled() ? -1 : 0"
     [attr.role]="'slider'"
     [attr.aria-valuemin]="effectiveMin()"
-    [attr.aria-valuemax]="effectiveMax()"
+    [attr.aria-valuemax]="normalizedValue()[1]"
     [attr.aria-valuenow]="normalizedValue()[0]"
     [attr.aria-valuetext]="ariaValueText() ? ariaValueText()!(normalizedValue()[0]) : null"
     [attr.aria-orientation]="orientation()"
@@ -72,6 +72,7 @@
     [attr.aria-invalid]="invalidState() || null"
     [attr.aria-readonly]="readonly() || null"
     [attr.data-invalid]="invalidState() || null"
+    [attr.aria-describedby]="ariaDescribedBy()"
     [attr.aria-label]="computedAriaLabelStart()"
     [attr.aria-labelledby]="startLabelledBy()"
     [attr.id]="startHandleId"
@@ -92,7 +93,7 @@
     [style.bottom.%]="orientation() === 'vertical' ? secondaryHandlePosition() : undefined"
     [attr.tabindex]="effectiveDisabled() ? -1 : 0"
     [attr.role]="'slider'"
-    [attr.aria-valuemin]="effectiveMin()"
+    [attr.aria-valuemin]="normalizedValue()[0]"
     [attr.aria-valuemax]="effectiveMax()"
     [attr.aria-valuenow]="normalizedValue()[1]"
     [attr.aria-valuetext]="ariaValueText() ? ariaValueText()!(normalizedValue()[1]) : null"
@@ -101,6 +102,7 @@
     [attr.aria-invalid]="invalidState() || null"
     [attr.aria-readonly]="readonly() || null"
     [attr.data-invalid]="invalidState() || null"
+    [attr.aria-describedby]="ariaDescribedBy()"
     [attr.aria-label]="computedAriaLabelEnd()"
     [attr.aria-labelledby]="endLabelledBy()"
     [attr.id]="endHandleId"

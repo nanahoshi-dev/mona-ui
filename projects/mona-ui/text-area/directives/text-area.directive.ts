@@ -24,6 +24,7 @@ export class TextAreaDirective implements TextAreaVariantInput {
      * @default false
      */
     public readonly invalid = input(false, { transform: booleanAttribute });
+
     /**
      * @description Sets the border radius of the textarea.
      * @default "medium"

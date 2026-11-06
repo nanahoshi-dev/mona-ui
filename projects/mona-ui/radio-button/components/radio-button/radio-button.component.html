@@ -12,7 +12,7 @@
         [required]="effectiveRequired()"
         [disabled]="effectiveDisabled()"
         [name]="effectiveName()"
-        [value]="radioValue()"
+        [attr.value]="nativeValue()"
         [class]="radioButtonClasses()"
         [checked]="selected()"
         [attr.aria-invalid]="inputInvalid() ? 'true' : null"

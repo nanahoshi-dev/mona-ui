@@ -43,7 +43,7 @@ export const switchThemeVariants = cva(
             size: {
                 large: "h-7.5 w-14 text-base",
                 medium: "h-6.5 w-12 text-sm",
-                small: "h-5.5 w-10 text-xs"
+                small: "h-5.5 w-10 text-xs before:absolute before:inset-x-0 before:-inset-y-px before:content-['']"
             }
         }
     }
@@ -57,8 +57,9 @@ export const switchHandleThemeVariants = cva(
         outline-none
         transition-[inset-inline-start,background] duration-(--mona-motion-standard) ease-in-out
         data-[active='true']:bg-primary-foreground
-        group-data-[disabled='true']:border-disabled-border
-        group-data-[disabled='true']:bg-disabled-background
+        group-data-[disabled='true']:border-disabled-foreground
+        group-data-[disabled='true']:bg-disabled-foreground
+        group-data-[disabled='true']:data-[active='true']:bg-disabled-foreground
     `,
     {
         variants: {

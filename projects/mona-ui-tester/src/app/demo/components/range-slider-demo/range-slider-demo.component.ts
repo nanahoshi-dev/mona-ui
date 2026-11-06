@@ -22,7 +22,7 @@ const LABEL_TEMPLATE_CODE = `<ng-template monaSliderTickValueTemplate let-value>
 </ng-template>`;
 
 const HANDLE_TEMPLATE_CODE = `<ng-template monaSliderHandleTemplate let-value>
-    <svg lucideStar [color]="'darkgoldenrod'" [title]="value"></svg>
+    <svg lucideStar [color]="'darkgoldenrod'" [title]="value.toString()"></svg>
 </ng-template>`;
 
 @Component({
@@ -158,7 +158,7 @@ export class RangeSliderDemoComponent extends AbstractDemoComponent<RangeSliderC
                 }
                 @if (featureData && featureData["handleTemplate"].active) {
                     <ng-template monaSliderHandleTemplate let-value>
-                        <svg lucideStar [color]="'darkgoldenrod'" [title]="value"></svg>
+                        <svg lucideStar [color]="'darkgoldenrod'" [title]="value.toString()"></svg>
                     </ng-template>
                 }
             </mona-range-slider>

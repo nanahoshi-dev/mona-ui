@@ -1,13 +1,18 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
+    afterNextRender,
     booleanAttribute,
     Component,
     computed,
     contentChild,
+    DestroyRef,
     ElementRef,
     inject,
     input,
+    isDevMode,
     model,
+    NgZone,
+    numberAttribute,
     output,
     signal,
     TemplateRef,
@@ -62,7 +67,7 @@ interface RatingItemDescriptor {
     readonly itemValue: number;
 }
 
-type RatingKeyAction = "decrease" | "end" | "home" | "increase";
+type RatingKeyAction = "decrease" | "end" | "home" | "increase" | "pageDecrease" | "pageIncrease";
 
 const ratingIcons = {
     circle: LucideCircle,
@@ -78,6 +83,7 @@ const ratingIcons = {
     imports: [NgTemplateOutlet, LucideDynamicIcon]
 })
 export class RatingComponent implements RatingVariantInput, FormValueControl<number> {
+    readonly #destroyRef = inject(DestroyRef);
     readonly #direction = injectComponentDirection();
     readonly #i18n = inject(MonaI18nService);
     readonly #label = injectLabelAssociation({
@@ -85,6 +91,7 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
         ariaLabel: () => this.ariaLabel(),
         ariaLabelledBy: () => this.ariaLabelledBy()
     });
+    readonly #zone = inject(NgZone);
 
     protected readonly activeState = computed<"hovered" | "selected">(() =>
         this.previewActive() ? "hovered" : "selected"
@@ -178,6 +185,13 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
     public readonly ariaValueText = input<((value: number, maximum: number) => string) | null>(null);
 
     /**
+     * @description Lets a click on the current value clear the rating, so pointer and touch users can undo one. The
+     * keyboard can always clear it with Home.
+     * @default false
+     */
+    public readonly clearable = input(false, { transform: booleanAttribute });
+
+    /**
      * @description CSS color for selected and hovered rating visuals. Empty, `null`, and `undefined` values use the
      * primary theme color.
      * @default undefined
@@ -269,7 +283,7 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
      * @default 0
      */
     public readonly tabindex = input<number, number | string>(0, {
-        transform: (value: number | string) => (typeof value === "string" ? parseInt(value, 10) : value)
+        transform: (value: number | string) => numberAttribute(value, 0)
     });
 
     /**
@@ -296,6 +310,24 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
      * @default 0
      */
     public readonly value = model(0);
+
+    public constructor() {
+        afterNextRender(() => {
+            const control = this.controlElement().nativeElement;
+            // Outside the template, so a pointer moving over the items doesn't check the view on every event.
+            const onPointerMove = (event: PointerEvent): void => this.onPointerMove(event);
+            this.#zone.runOutsideAngular(() => control.addEventListener("pointermove", onPointerMove));
+            this.#destroyRef.onDestroy(() => control.removeEventListener("pointermove", onPointerMove));
+
+            if (isDevMode() && !this.ariaLabel() && !this.effectiveAriaLabelledBy()) {
+                console.warn(
+                    "[Mona Rating] A rating needs an accessible name. Set aria-label, aria-labelledby or label, or " +
+                        "use a mona-label.",
+                    control
+                );
+            }
+        });
+    }
 
     public blur(): void {
         this.controlElement().nativeElement.blur();
@@ -349,6 +381,9 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
         const normalized = this.normalizeCandidate(candidate);
         if (normalized !== this.normalizedValue()) {
             this.value.set(normalized);
+        } else if (this.clearable()) {
+            this.previewValue.set(null);
+            this.value.set(0);
         }
         this.touch.emit();
     }
@@ -378,6 +413,12 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
             case "increase":
                 next = this.normalizeCandidate(current + this.interactionStep());
                 break;
+            case "pageDecrease":
+                next = this.normalizeCandidate(current - 1);
+                break;
+            case "pageIncrease":
+                next = this.normalizeCandidate(current + 1);
+                break;
         }
         if (next !== current) {
             this.value.set(next);
@@ -406,6 +447,10 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
             return null;
         }
         const itemValue = Number(itemElement.getAttribute("data-rating-value"));
+        // A whole-item rating doesn't depend on where in the item the pointer is, so it needs no layout read.
+        if (this.precision() === "item") {
+            return itemValue;
+        }
         const itemRect = itemElement.getBoundingClientRect();
         const direction = getComputedStyle(controlElement).direction === "rtl" ? "rtl" : "ltr";
         return getPointerRatingValue({
@@ -433,6 +478,10 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
                 return "home";
             case "End":
                 return "end";
+            case "PageDown":
+                return "pageDecrease";
+            case "PageUp":
+                return "pageIncrease";
             default:
                 return null;
         }

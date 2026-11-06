@@ -2,8 +2,7 @@ import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, ElementRef, input, model, Signal, signal, viewChild } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { type FormValueControl } from "@angular/forms/signals";
-import { filter, fromEvent, switchMap, takeUntil, tap } from "rxjs";
-import { SliderTickDirective } from "../../directives/slider-tick.directive";
+import { filter, fromEvent, tap } from "rxjs";
 import { LabelStylePipe } from "../../pipes/label-style.pipe";
 import { TickStylePipe } from "../../pipes/tick-style.pipe";
 import { SLIDER_DEFAULT_MESSAGES } from "../../i18n/slider.default-messages";
@@ -12,14 +11,17 @@ import { SliderBaseComponent } from "../slider-base/slider-base.component";
 @Component({
     selector: "mona-slider",
     templateUrl: "./slider.component.html",
-    imports: [NgTemplateOutlet, SliderTickDirective, LabelStylePipe, TickStylePipe],
+    imports: [NgTemplateOutlet, LabelStylePipe, TickStylePipe],
     host: {
+        // The ARIA inputs are applied to the handle, so the host must not keep the static attributes.
+        "[attr.aria-describedby]": "null",
+        "[attr.aria-label]": "null",
+        "[attr.aria-labelledby]": "null",
         "[class]": "baseClasses()",
         "[class.mona-slider]": "true",
         "[attr.data-disabled]": "effectiveDisabled() || null",
         "[attr.data-orientation]": "orientation()",
-        "[attr.data-readonly]": "readonly() || null",
-        "(focus)": "focus()"
+        "[attr.data-readonly]": "readonly() || null"
     }
 })
 export class SliderComponent extends SliderBaseComponent implements FormValueControl<number> {
@@ -37,6 +39,7 @@ export class SliderComponent extends SliderBaseComponent implements FormValueCon
     protected readonly selectionLeft = computed(() => 0);
     protected readonly selectionRight = computed(() => this.handlePosition());
     protected readonly sliderHandle: Signal<ElementRef<HTMLDivElement>> = viewChild.required("sliderHandle");
+    protected readonly valueIsShown = computed(() => this.normalizedValue() === this.value());
 
     /**
      * @description Upper bound that wins over `maxValue`. When bound to a signal form field via `[formField]`, this is
@@ -53,7 +56,9 @@ export class SliderComponent extends SliderBaseComponent implements FormValueCon
     public readonly min = input<number | undefined>(undefined);
 
     /**
-     * @description Current value. Values outside `[minValue, maxValue]` are clamped before rendering.
+     * @description Current value. A value out of range or off the step grid is shown at the nearest valid value, and
+     * the model keeps its own until the user changes it, so a `maxValue` that loads late can't overwrite saved data. A
+     * development warning reports it.
      * @default 0
      */
     public readonly value = model(0);
@@ -91,8 +96,12 @@ export class SliderComponent extends SliderBaseComponent implements FormValueCon
                 filter(() => !this.interactionDisabled())
             )
             .subscribe((event: PointerEvent) => {
-                this.handleHandleMove(event);
-                this.sliderHandle().nativeElement.focus({ preventScroll: true });
+                const handle = this.sliderHandle().nativeElement;
+                // A drag ends with a click on the handle, and the drag has already placed the value.
+                if (!handle.contains(event.target as Node)) {
+                    this.handleHandleMove(event);
+                }
+                handle.focus({ preventScroll: true });
             });
     }
 
@@ -126,22 +135,7 @@ export class SliderComponent extends SliderBaseComponent implements FormValueCon
     }
 
     private setPointerMoveSubscription(): void {
-        const pointerMove$ = fromEvent<PointerEvent>(document, "pointermove");
-        const pointerUp$ = fromEvent<PointerEvent>(document, "pointerup");
-
-        fromEvent<PointerEvent>(this.sliderHandle().nativeElement, "pointerdown")
-            .pipe(
-                takeUntilDestroyed(this.destroyRef),
-                filter(() => !this.interactionDisabled()),
-                tap(() => this.dragging.set(true)),
-                switchMap(() =>
-                    pointerMove$.pipe(
-                        tap((event: PointerEvent) => this.handleHandleMove(event)),
-                        takeUntil(pointerUp$.pipe(tap(() => this.zone.run(() => this.dragging.set(false)))))
-                    )
-                )
-            )
-            .subscribe();
+        this.trackHandleDrag(this.sliderHandle().nativeElement, () => event => this.handleHandleMove(event));
     }
 
     private updateValue(value: number): void {

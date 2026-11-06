@@ -25,6 +25,12 @@ const COMPONENT_MANAGED_ATTRIBUTES = new Set([
     "inputmode"
 ]);
 
+/** The zero of each decimal digit block a phone or IME commonly types: Arabic-Indic, Devanagari, Thai and so on. */
+const DECIMAL_DIGIT_ZEROES = [
+    0x0660, 0x06f0, 0x07c0, 0x0966, 0x09e6, 0x0a66, 0x0ae6, 0x0b66, 0x0be6, 0x0c66, 0x0ce6, 0x0d66, 0x0e50, 0x0ed0, 0x0f20,
+    0x1040, 0x17e0, 0x1810
+];
+
 export function findAttribute(attrs: AttributeConfig, name: string): unknown {
     const target = name.toLowerCase();
     for (const [key, value] of Object.entries(attrs)) {
@@ -76,6 +82,29 @@ export function isValidCharacter(
     return /^[a-zA-Z0-9]$/.test(char);
 }
 
+/**
+ * Returns the character as the control would keep it, or null when it isn't allowed. A character the rules reject is
+ * converted first, so fullwidth and Eastern Arabic digits count as the digits they are.
+ */
+export function acceptCharacter(
+    char: string,
+    type: OtpInputType,
+    characterPattern: RegExp | null | undefined
+): string | null {
+    if (isValidCharacter(char, type, characterPattern)) {
+        return char;
+    }
+    const converted = convertCharacter(char);
+    return isValidCharacter(converted, type, characterPattern) ? converted : null;
+}
+
+function convertCharacter(char: string): string {
+    const compatible = char.normalize("NFKC");
+    const codePoint = compatible.codePointAt(0) ?? 0;
+    const zero = DECIMAL_DIGIT_ZEROES.find(digitZero => codePoint >= digitZero && codePoint <= digitZero + 9);
+    return zero === undefined ? compatible : String(codePoint - zero);
+}
+
 export function filterCharacters(
     raw: string,
     type: OtpInputType,
@@ -87,8 +116,9 @@ export function filterCharacters(
     }
     let result = "";
     for (const char of raw) {
-        if (isValidCharacter(char, type, characterPattern)) {
-            result += char;
+        const accepted = acceptCharacter(char, type, characterPattern);
+        if (accepted !== null) {
+            result += accepted;
             if (result.length >= maxLength) {
                 break;
             }

@@ -10,8 +10,7 @@ import {
     host: {
         "[attr.aria-invalid]": "inputInvalid() || null",
         "[attr.data-invalid]": "inputInvalid() || null",
-        "[class]": "classes()",
-        "[attr.role]": "'radio'"
+        "[class]": "classes()"
     }
 })
 export class RadioButtonDirective implements RadioButtonDirectiveInput {
@@ -29,9 +28,9 @@ export class RadioButtonDirective implements RadioButtonDirectiveInput {
 
     /**
      * @description Sets the border radius of the radio button.
-     * @default "none"
+     * @default "full"
      */
-    public readonly rounded = input<RadioButtonDirectiveProps["rounded"]>("none");
+    public readonly rounded = input<RadioButtonDirectiveProps["rounded"]>("full");
 
     /**
      * @description Marks the radio button as touched. Error styling is only shown when both `invalid` and `touched` are `true`.

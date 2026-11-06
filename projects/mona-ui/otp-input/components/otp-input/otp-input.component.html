@@ -2,7 +2,7 @@
     #input
     [class]="inputClass()"
     [id]="inputId()"
-    tabindex="0"
+    [attr.tabindex]="tabindex()"
     [value]="value()"
     [disabled]="effectiveDisabled()"
     [readOnly]="readonly()"
@@ -24,9 +24,13 @@
     (keydown)="onKeyDown($event)"
     (input)="onInput($event)"
     (paste)="onPaste($event)"
+    (click)="onInputClick($event)"
+    (mousedown)="onInputMouseDown($event)"
+    (pointerdown)="onInputPointerDown($event)"
     (focus)="onFocus($event)"
     (blur)="onBlur($event)"
     (select)="onSelect()"
+    (selectionchange)="onSelect()"
     (keyup)="onKeyUp()"
     (compositionstart)="onCompositionStart()"
     (compositionend)="onCompositionEnd($event)" />
@@ -49,7 +53,6 @@
                 [attr.data-disabled]="effectiveDisabled() || null"
                 [attr.data-readonly]="readonly() || null"
                 [attr.data-invalid]="invalidState() || null"
-                (pointerdown)="onSlotPointerDown($event, slot.index)"
                 aria-hidden="true">
                 {{ slot.displayCharacter }}
                 @if (slot.active && !slot.filled && hasFocus() && !effectiveDisabled() && !readonly()) {

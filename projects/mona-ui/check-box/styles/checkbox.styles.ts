@@ -6,7 +6,7 @@ export const checkboxInputThemeVariants = cva(`sr-only appearance-none outline-n
 
 export const checkmarkThemeVariants = cva(
     `
-        flex items-center justify-center
+        relative flex items-center justify-center
         h-4.5 w-4.5 ps-0.25
         cursor-pointer overflow-hidden
         ${themeControlSurfaceClasses}
@@ -28,10 +28,11 @@ export const checkmarkThemeVariants = cva(
         data-[invalid='true']:peer-focus-visible:ring-error/35
 
         peer-indeterminate:after:absolute
-        peer-indeterminate:after:inset-[3px_0_3px_0]
+        peer-indeterminate:after:inset-0
         peer-indeterminate:after:content-['']
         peer-indeterminate:after:bg-current
         peer-indeterminate:after:[mask-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23FFFFFF'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M5%2012h14'%2F%3E%3C%2Fsvg%3E")]
+        peer-indeterminate:after:[mask-position:center]
         peer-indeterminate:after:[mask-repeat:no-repeat]
         peer-indeterminate:after:[mask-size:contain]
     `,
@@ -52,6 +53,7 @@ export const checkboxContainerLabelThemeVariants = cva(
     `
         relative inline-flex h-full w-full items-center gap-2
         select-none
+        isolate before:absolute before:-inset-[3px] before:-z-10 before:content-['']
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed
         data-[disabled='true']:text-disabled-foreground

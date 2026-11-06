@@ -186,7 +186,7 @@ export class RadioButtonWrapperComponent implements ComponentInputsAsSignal<Radi
     public readonly labelPosition = input<ReturnType<RadioButtonComponent["labelPosition"]>>("after");
     public readonly labelSize = input<ReturnType<RadioButtonComponent["labelSize"]>>("medium");
     public readonly name = input("seasons");
-    public readonly radioValue = model("Autumn");
+    public readonly radioValue = model<unknown>("Autumn");
     public readonly readonly = input(false, { transform: booleanAttribute });
     public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<RadioButtonComponent["rounded"]>>("full");

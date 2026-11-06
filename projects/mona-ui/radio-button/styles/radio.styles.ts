@@ -18,10 +18,7 @@ export type RadioGroupVariantProps = VariantProps<typeof radioGroupThemeVariants
 
 export const radioButtonThemeVariants = cva(
     `
-        peer absolute inset-0 z-10 h-full w-full
-        cursor-pointer appearance-none opacity-0
-        outline-none
-        disabled:cursor-not-allowed
+        peer sr-only appearance-none outline-none
     `
 );
 
@@ -80,6 +77,7 @@ export const radioButtonContainerLabelThemeVariants = cva(
     `
         relative flex h-full w-full items-center justify-center gap-1
         cursor-pointer
+        isolate before:absolute before:-inset-[3px] before:-z-10 before:content-['']
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed
         data-[disabled='true']:text-disabled-foreground

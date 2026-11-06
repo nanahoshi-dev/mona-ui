@@ -1,11 +1,12 @@
-import { afterNextRender, booleanAttribute, computed, contentChild, DestroyRef, Directive, ElementRef, inject, input, NgZone, output, signal, Signal, TemplateRef, viewChildren } from "@angular/core";
+import { afterNextRender, booleanAttribute, computed, contentChild, DestroyRef, Directive, DOCUMENT, effect, ElementRef, inject, input, isDevMode, NgZone, output, signal, Signal, TemplateRef } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Orientation } from "@nanahoshi/mona-ui/common";
 import { injectEffectiveDisabled, injectLabelAssociation } from "@nanahoshi/mona-ui/internal";
+import { filter, fromEvent, merge, switchMap, takeUntil, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { formatNumber, injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { SliderHandleTemplateDirective } from "../../directives/slider-handle-template.directive";
 import { SliderTickValueTemplateDirective } from "../../directives/slider-tick-value-template.directive";
-import { SliderTickDirective } from "../../directives/slider-tick.directive";
 import { LabelStyleArgs } from "../../models/LabelStyleArgs";
 import { SliderLabelPosition } from "../../models/SliderLabelPosition";
 import { SliderTick } from "../../models/SliderTick";
@@ -22,15 +23,18 @@ import {
     SliderVariantInputs,
     SliderVariantProps
 } from "../../styles/slider.styles";
+import { decimalPlaces, roundToPlaces } from "../../utils/stepPrecision";
 import { valueToPosition } from "../../utils/valueToPosition";
 
 @Directive()
 export abstract class SliderBaseComponent implements SliderVariantInputs {
+    readonly #document = inject(DOCUMENT);
     readonly #label = injectLabelAssociation({
         activate: () => this.focus(),
         ariaLabel: () => this.ariaLabel(),
         ariaLabelledBy: () => this.ariaLabelledBy()
     });
+    readonly #stepPlaces = computed(() => Math.max(decimalPlaces(this.step()), decimalPlaces(this.effectiveMin())));
     protected readonly baseClasses = computed(() => sliderBaseThemeVariants());
     protected readonly destroyRef = inject(DestroyRef);
     protected readonly direction = injectComponentDirection();
@@ -93,7 +97,11 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
                 labels.splice(labels.length - 2, 1);
             }
         }
-        return labels;
+        const localeId = this.i18n.localeId();
+        return labels.map(tick => ({
+            ...tick,
+            label: formatNumber(tick.value, localeId, { maximumFractionDigits: decimalPlaces(tick.value) })
+        }));
     });
     protected readonly labelledBy = this.#label.labelledBy;
     protected readonly renderTicks = computed(() => {
@@ -132,7 +140,6 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         return `${number}px`;
     });
     protected readonly tickClasses = computed(() => sliderTickThemeVariants());
-    protected readonly tickElements = viewChildren(SliderTickDirective);
     protected readonly tickLabelClasses = computed(() => sliderTickLabelThemeVariants());
     protected readonly tickLabelListClasses = computed(() => sliderTickLabelListThemeVariants());
     protected readonly tickListClasses = computed(() => sliderTickListThemeVariants());
@@ -151,10 +158,9 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         const max = this.effectiveMax();
         const step = this.step();
         const ticks: SliderTick[] = [];
-        const count = Math.floor((max - min) / step);
+        const count = this.#stepCount();
         for (let i = 0; i <= count; i++) {
-            const value = min + i * step;
-            ticks.push({ index: i, value });
+            ticks.push({ index: i, value: this.#roundToStep(min + i * step) });
         }
         if (ticks.length === 0 || ticks[ticks.length - 1].value < max) {
             ticks.push({ index: ticks.length, value: max });
@@ -173,6 +179,13 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         return sliderTrackThemeVariants({ rounded });
     });
     protected readonly zone: NgZone = inject(NgZone);
+
+    /**
+     * @description Id of an element that describes the control, such as an error message. On a range slider it describes
+     * each handle.
+     * @default null
+     */
+    public readonly ariaDescribedBy = input<string | null>(null, { alias: "aria-describedby" });
 
     /**
      * @description Accessible name of the control. On a range slider it names the group holding both handles.
@@ -300,7 +313,8 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
     });
 
     /**
-     * @description Increment applied when the value changes via keyboard navigation.
+     * @description Distance between the values the control can take. `maxValue` can always be reached, even when it
+     * isn't a whole number of steps from `minValue`.
      * @default 1
      */
     public readonly step = input(1, {
@@ -333,11 +347,15 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
 
     protected abstract readonly selectionLeft: Signal<number>;
     protected abstract readonly selectionRight: Signal<number>;
+    protected abstract readonly valueIsShown: Signal<boolean>;
 
     public constructor() {
         afterNextRender({
             read: () => this.zone.runOutsideAngular(() => this.setSubscriptions())
         });
+        if (isDevMode()) {
+            this.#warnWhenMisconfigured();
+        }
     }
 
     /**
@@ -352,6 +370,11 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         const max = this.effectiveMax();
         const step = this.step();
         const isRtl = this.isRtl();
+        const amount = event.shiftKey ? step * this.shiftMultiplier() : step;
+        const page = Math.max((max - min) * 0.1, step);
+        // Max can sit off the step grid, and stepping down from it lands on the last value of the grid.
+        const lastGridValue = this.#roundToStep(min + this.#stepCount() * step);
+        const decreaseFrom = currentValue > lastGridValue ? lastGridValue + step : currentValue;
         const decreaseKey = isRtl ? "ArrowRight" : "ArrowLeft";
         const increaseKey = isRtl ? "ArrowLeft" : "ArrowRight";
 
@@ -360,11 +383,11 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         switch (event.key) {
             case decreaseKey:
             case "ArrowDown":
-                newValue = currentValue - (event.shiftKey ? step * this.shiftMultiplier() : step);
+                newValue = decreaseFrom - amount;
                 break;
             case increaseKey:
             case "ArrowUp":
-                newValue = currentValue + (event.shiftKey ? step * this.shiftMultiplier() : step);
+                newValue = currentValue + amount;
                 break;
             case "Home":
                 newValue = min;
@@ -373,10 +396,10 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
                 newValue = max;
                 break;
             case "PageDown":
-                newValue = currentValue - (max - min) * 0.1;
+                newValue = decreaseFrom - page;
                 break;
             case "PageUp":
-                newValue = currentValue + (max - min) * 0.1;
+                newValue = currentValue + page;
                 break;
         }
 
@@ -385,21 +408,6 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
 
     protected clampValue(value: number): number {
         return Math.max(this.effectiveMin(), Math.min(this.effectiveMax(), value));
-    }
-
-    protected findClosestTickElement(event: PointerEvent): HTMLSpanElement {
-        const elements = this.tickElements().map(tick => tick.host.nativeElement);
-        let maxDistance = Number.MAX_VALUE;
-        let index = 0;
-        for (const [ex, element] of elements.entries()) {
-            const rect = element.getBoundingClientRect();
-            const distance = Math.sqrt(Math.pow(rect.left - event.clientX, 2) + Math.pow(rect.top - event.clientY, 2));
-            if (distance < maxDistance) {
-                maxDistance = distance;
-                index = ex;
-            }
-        }
-        return elements[index] as HTMLSpanElement;
     }
 
     protected getMaxOverride(): number | undefined {
@@ -411,12 +419,6 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
     }
 
     protected getValueFromPointerEvent(event: PointerEvent): number {
-        if (this.showTicks()) {
-            const tick = this.findClosestTickElement(event);
-            const valueStr = tick.getAttribute("data-value");
-            return valueStr ? Number(valueStr) : this.effectiveMin();
-        }
-
         const containerRect = this.hostElementRef.nativeElement.getBoundingClientRect();
         let normalizedHandlePos: number;
 
@@ -462,13 +464,82 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
 
     protected snapValue(value: number): number {
         const min = this.effectiveMin();
+        const max = this.effectiveMax();
+        if (Number.isNaN(value) || max <= min) {
+            return min;
+        }
         const step = this.step();
         const clampedValue = this.clampValue(value);
-        const snappedValue = Math.round((clampedValue - min) / step) * step + min;
-        return this.clampValue(snappedValue);
+        const snappedValue = this.clampValue(this.#roundToStep(Math.round((clampedValue - min) / step) * step + min));
+        // Max counts as a value of the grid even when it's off it, as the last tick does.
+        return max - clampedValue < Math.abs(clampedValue - snappedValue) ? max : snappedValue;
+    }
+
+    /**
+     * Moves a value while the given handle is dragged with the primary button, one finger or a pen. The pointer is
+     * captured, so a release outside the page still ends the drag.
+     */
+    protected trackHandleDrag(handle: HTMLElement, startDrag: () => (event: PointerEvent) => void): void {
+        fromEvent<PointerEvent>(handle, "pointerdown")
+            .pipe(
+                filter(event => event.button === 0 && event.isPrimary && !event.ctrlKey),
+                filter(() => !this.dragging() && !this.interactionDisabled()),
+                tap(event => {
+                    this.zone.run(() => this.dragging.set(true));
+                    handle.setPointerCapture?.(event.pointerId);
+                    // A touch doesn't focus the element by itself, and touch only fires when focus leaves.
+                    handle.focus({ preventScroll: true });
+                }),
+                switchMap(down => {
+                    const pointerEvents = (target: EventTarget, name: string) =>
+                        fromEvent<PointerEvent>(target, name).pipe(filter(event => event.pointerId === down.pointerId));
+                    const end$ = merge(
+                        pointerEvents(this.#document, "pointerup"),
+                        pointerEvents(this.#document, "pointercancel"),
+                        pointerEvents(handle, "lostpointercapture")
+                    ).pipe(tap(() => this.zone.run(() => this.dragging.set(false))));
+                    return pointerEvents(this.#document, "pointermove").pipe(tap(startDrag()), takeUntil(end$));
+                }),
+                takeUntilDestroyed(this.destroyRef)
+            )
+            .subscribe();
     }
 
     protected abstract setSubscriptions(): void;
+
+    #roundToStep(value: number): number {
+        return roundToPlaces(value, this.#stepPlaces());
+    }
+
+    #stepCount(): number {
+        return Math.floor((this.effectiveMax() - this.effectiveMin()) / this.step());
+    }
+
+    #warnWhenMisconfigured(): void {
+        const host = this.hostElementRef.nativeElement;
+        let warnedAboutBounds = false;
+        let warnedAboutValue = false;
+        effect(() => {
+            if (!warnedAboutBounds && this.effectiveMin() >= this.effectiveMax()) {
+                warnedAboutBounds = true;
+                console.warn(
+                    `[Mona Slider] The minimum (${this.effectiveMin()}) must be lower than the maximum ` +
+                        `(${this.effectiveMax()}).`,
+                    host
+                );
+            }
+        });
+        effect(() => {
+            if (!warnedAboutValue && !this.valueIsShown()) {
+                warnedAboutValue = true;
+                console.warn(
+                    "[Mona Slider] The value is out of range or off the step grid. The slider shows the nearest " +
+                        "valid value, and the model keeps its own until the user changes it.",
+                    host
+                );
+            }
+        });
+    }
 
     public abstract focus(options?: FocusOptions): void;
 }

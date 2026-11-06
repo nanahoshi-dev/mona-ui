@@ -1523,7 +1523,7 @@
         "kind": "input",
         "name": "rounded",
         "type": "RadioButtonDirectiveProps[\"rounded\"]",
-        "defaultValue": "\"none\""
+        "defaultValue": "\"full\""
       },
       {
         "description": "Marks the radio button as touched. Error styling is only shown when both `invalid` and `touched` are `true`.",
@@ -7628,11 +7628,17 @@
         "defaultValue": "false"
       },
       {
-        "description": "Activates indeterminate mode, showing a dash instead of a checkmark.",
+        "description": "Activates indeterminate mode, showing a dash instead of a checkmark. A user change clears it, as it\ndoes on a native checkbox. Use `[(indeterminate)]` to follow that, because a one-way binding only writes again when\nthe bound value changes.",
         "kind": "input",
         "name": "indeterminate",
         "type": "boolean",
         "defaultValue": "false"
+      },
+      {
+        "description": "Emitted with `false` when a user change clears the indeterminate mode.",
+        "kind": "output",
+        "name": "indeterminateChange",
+        "type": "boolean"
       },
       {
         "description": "Emitted when the checkbox input loses focus.",
@@ -7660,7 +7666,7 @@
         "defaultValue": "generated"
       },
       {
-        "description": "Marks the checkbox as invalid. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
+        "description": "Marks the checkbox as invalid. When bound to a signal form field via `[formField]`, this is written\nby the `FormField` directive.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
@@ -7729,7 +7735,7 @@
         "type": "void"
       },
       {
-        "description": "Marks the checkbox as touched. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
+        "description": "Marks the checkbox as touched. When bound to a signal form field via `[formField]`, this is written\nby the `FormField` directive.",
         "kind": "input",
         "name": "touched",
         "type": "boolean",
@@ -12006,7 +12012,7 @@
         "defaultValue": "null"
       },
       {
-        "description": "Emitted when a user interaction completes the verification code.",
+        "description": "Emitted when a user interaction completes the verification code. Pasting a different full code over\na complete one emits again, so auto-submit sees the new code. Correcting a complete code one character at a time\ndoesn't.",
         "kind": "output",
         "name": "complete",
         "type": "string"
@@ -12136,7 +12142,14 @@
         "defaultValue": "true"
       },
       {
-        "description": "Emitted when the OTP input is interacted with — on blur or user value change.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Tab index of the inner `<input>`.",
+        "kind": "input",
+        "name": "tabindex",
+        "type": "number",
+        "defaultValue": "0"
+      },
+      {
+        "description": "Emitted when the inner input loses focus. The `FormField` directive listens to this to mark the field\nas touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
@@ -13083,14 +13096,14 @@
         "defaultValue": "generated"
       },
       {
-        "description": "Marks the radio button as invalid. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
+        "description": "Marks the radio button as invalid. When bound to a signal form field via `[formField]`, this is\nwritten by the `FormField` directive.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Text label displayed alongside the radio button.\nWhen provided, takes precedence over projected content.\nWhen empty, projected content inside `<mona-radio-button>` is used.\nWhen both are absent, the radio button has no accessible name — always provide one.",
+        "description": "Text label displayed alongside the radio button.\nWhen provided, takes precedence over projected content.\nWhen empty, projected content inside `<mona-radio-button>` is used.\nWhen both are absent, name the radio button with `aria-label` or `aria-labelledby`.",
         "kind": "input",
         "name": "label",
         "type": "string",
@@ -13118,10 +13131,10 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "The identity value of this radio button within a group.\nCompared against `value()` to determine whether this button is selected.\nWhen this button is chosen, its `radioValue` is written to the form as the new group value.",
+        "description": "The identity value of this radio button within a group.\nCompared against `value()` to determine whether this button is selected.\nWhen this button is chosen, its `radioValue` is written to the form as the new group value.\nA radio button without one can't be selected.",
         "kind": "input",
         "name": "radioValue",
-        "type": "any",
+        "type": "T",
         "defaultValue": "undefined"
       },
       {
@@ -13146,13 +13159,13 @@
         "defaultValue": "\"full\""
       },
       {
-        "description": "",
+        "description": "Emits when the radio button loses focus or is selected.",
         "kind": "output",
         "name": "touch",
         "type": "void"
       },
       {
-        "description": "Marks the radio button as touched. Error styling requires both `invalid` and `touched` to be `true`.\nWhen bound to a signal form field via `[field]`, this is written by the signal forms `Field` directive.",
+        "description": "Marks the radio button as touched. Error styling requires both `invalid` and `touched` to be `true`.\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
         "kind": "input",
         "name": "touched",
         "type": "boolean",
@@ -13167,10 +13180,10 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "The currently selected value in the radio group.\nWhen bound via `[control]` (signal forms), the `Field` directive keeps this in sync with the form field.\nWhen bound via `[(ngModel)]` or `[formControl]`, the CVA layer manages this value.",
+        "description": "The currently selected value of a group of radio buttons that aren't in a `mona-radio-group`. When\nbound to a signal form field via `[formField]`, the `FormField` directive keeps it in sync.",
         "kind": "model",
         "name": "value",
-        "type": "any",
+        "type": "T",
         "defaultValue": "undefined"
       }
     ]
@@ -13270,7 +13283,7 @@
         "description": "The `radioValue` of the selected radio button.",
         "kind": "model",
         "name": "value",
-        "type": "unknown",
+        "type": "T",
         "defaultValue": "undefined"
       }
     ]
@@ -13309,6 +13322,13 @@
         "name": "ariaValueText",
         "type": "((value: number, maximum: number) => string) | null",
         "defaultValue": "null"
+      },
+      {
+        "description": "Lets a click on the current value clear the rating, so pointer and touch users can undo one. The\nkeyboard can always clear it with Home.",
+        "kind": "input",
+        "name": "clearable",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "CSS color for selected and hovered rating visuals. Empty, `null`, and `undefined` values use the\nprimary theme color.",
@@ -13920,11 +13940,19 @@
         "defaultValue": "null"
       },
       {
-        "description": "Selected range as `[minimum, maximum]`.\r\nValues outside `[minValue, maxValue]` are clamped; the tuple is always sorted, so index 0 ≤ index 1.",
+        "description": "Selected range as `[minimum, maximum]`.\nA value out of range, off the step grid or unsorted is shown at the nearest valid values, and the model keeps its\nown until the user changes it. A development warning reports it.",
         "kind": "model",
         "name": "value",
         "type": "[number, number]",
         "defaultValue": "[0, 10]"
+      },
+      {
+        "description": "Id of an element that describes the control, such as an error message. On a range slider it describes\neach handle.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string | null",
+        "alias": "aria-describedby",
+        "defaultValue": "null"
       },
       {
         "description": "Accessible name of the control. On a range slider it names the group holding both handles.",
@@ -14069,7 +14097,7 @@
         "defaultValue": "1"
       },
       {
-        "description": "Increment applied when the value changes via keyboard navigation.",
+        "description": "Distance between the values the control can take. `maxValue` can always be reached, even when it\nisn't a whole number of steps from `minValue`.",
         "kind": "input",
         "name": "step",
         "type": "number",
@@ -14123,11 +14151,19 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "Current value. Values outside `[minValue, maxValue]` are clamped before rendering.",
+        "description": "Current value. A value out of range or off the step grid is shown at the nearest valid value, and\nthe model keeps its own until the user changes it, so a `maxValue` that loads late can't overwrite saved data. A\ndevelopment warning reports it.",
         "kind": "model",
         "name": "value",
         "type": "number",
         "defaultValue": "0"
+      },
+      {
+        "description": "Id of an element that describes the control, such as an error message. On a range slider it describes\neach handle.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string | null",
+        "alias": "aria-describedby",
+        "defaultValue": "null"
       },
       {
         "description": "Accessible name of the control. On a range slider it names the group holding both handles.",
@@ -14272,7 +14308,7 @@
         "defaultValue": "1"
       },
       {
-        "description": "Increment applied when the value changes via keyboard navigation.",
+        "description": "Distance between the values the control can take. `maxValue` can always be reached, even when it\nisn't a whole number of steps from `minValue`.",
         "kind": "input",
         "name": "step",
         "type": "number",
@@ -14312,6 +14348,14 @@
     "selector": "",
     "inputs": [
       {
+        "description": "Id of an element that describes the control, such as an error message. On a range slider it describes\neach handle.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string | null",
+        "alias": "aria-describedby",
+        "defaultValue": "null"
+      },
+      {
         "description": "Accessible name of the control. On a range slider it names the group holding both handles.",
         "kind": "input",
         "name": "ariaLabel",
@@ -14454,7 +14498,7 @@
         "defaultValue": "1"
       },
       {
-        "description": "Increment applied when the value changes via keyboard navigation.",
+        "description": "Distance between the values the control can take. `maxValue` can always be reached, even when it\nisn't a whole number of steps from `minValue`.",
         "kind": "input",
         "name": "step",
         "type": "number",
@@ -15067,7 +15111,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Marks the switch as invalid. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
+        "description": "Marks the switch as invalid. When bound to a signal form field via `[formField]`, this is written by\nthe `FormField` directive.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
@@ -15116,13 +15160,20 @@
         "defaultValue": "\"medium\""
       },
       {
+        "description": "Tab index of the switch while it's enabled.",
+        "kind": "input",
+        "name": "tabindex",
+        "type": "number",
+        "defaultValue": "0"
+      },
+      {
         "description": "Emitted when the switch loses focus or its value changes.",
         "kind": "output",
         "name": "touch",
         "type": "void"
       },
       {
-        "description": "Marks the switch as touched. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
+        "description": "Marks the switch as touched. When bound to a signal form field via `[formField]`, this is written by\nthe `FormField` directive.",
         "kind": "input",
         "name": "touched",
         "type": "boolean",

@@ -10,4 +10,5 @@ export * from "./directives/slider-tick-value-template.directive";
 
 export * from "./i18n/slider.default-messages";
 
+export type { SliderLabelPosition } from "./models/SliderLabelPosition";
 export type { SliderVariantProps } from "./styles/slider.styles";

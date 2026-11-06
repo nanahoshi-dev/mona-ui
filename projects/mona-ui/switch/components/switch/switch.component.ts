@@ -10,6 +10,7 @@ import {
     inject,
     input,
     model,
+    numberAttribute,
     output,
     TemplateRef
 } from "@angular/core";
@@ -80,7 +81,7 @@ import { injectEffectiveDisabled, injectLabelAssociation } from "@nanahoshi/mona
         "[attr.aria-readonly]": "readonly() || null",
         "[attr.aria-required]": "required() || null",
         "[attr.data-readonly]": "readonly() || null",
-        "[attr.tabindex]": "effectiveDisabled() ? -1 : 0",
+        "[attr.tabindex]": "effectiveDisabled() ? -1 : tabindex()",
         "[attr.data-active]": "checked()",
         "[attr.data-disabled]": "effectiveDisabled()",
         "[attr.data-invalid]": "invalidState() || null",
@@ -150,8 +151,8 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
     public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
-     * @description Marks the switch as invalid. When bound to a signal form field via `[field]`,
-     * this is written by the signal forms `Field` directive.
+     * @description Marks the switch as invalid. When bound to a signal form field via `[formField]`, this is written by
+     * the `FormField` directive.
      * @default false
      */
     public readonly invalid = input(false, { transform: booleanAttribute });
@@ -194,13 +195,21 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
     public readonly size = input<SwitchVariantProps["size"]>("medium");
 
     /**
+     * @description Tab index of the switch while it's enabled.
+     * @default 0
+     */
+    public readonly tabindex = input<number, number | string>(0, {
+        transform: (value: number | string) => numberAttribute(value, 0)
+    });
+
+    /**
      * @description Emitted when the switch loses focus or its value changes.
      */
     public readonly touch = output();
 
     /**
-     * @description Marks the switch as touched. When bound to a signal form field via `[field]`,
-     * this is written by the signal forms `Field` directive.
+     * @description Marks the switch as touched. When bound to a signal form field via `[formField]`, this is written by
+     * the `FormField` directive.
      * @default false
      */
     public readonly touched = input(false, { transform: booleanAttribute });
@@ -249,8 +258,10 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
         const host = this.#hostElementRef.nativeElement;
         const click$ = fromEvent<MouseEvent>(host, "click");
         const keydown$ = fromEvent<KeyboardEvent>(host, "keydown").pipe(
-            filter(event => event.key === " " || event.key === "Enter"),
-            tap(event => event.preventDefault()) // Prevent page scroll on Space
+            // Keys pressed on a control inside a handle or label template are that control's.
+            filter(event => event.target === host && (event.key === " " || event.key === "Enter")),
+            tap(event => event.preventDefault()), // Prevent page scroll on Space
+            filter(event => !event.repeat)
         );
         merge(click$, keydown$)
             .pipe(takeUntilDestroyed(this.#destroyRef))
