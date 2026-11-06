@@ -40,7 +40,9 @@ protected viewMode: ViewMode = "list";
 
 ### Two-way value binding
 
-`value` is a two-way model. The consumer reads the current selection from it and writes to it to change the selection programmatically. When a programmatically supplied `value` matches no current option, no option is checked.
+`value` is a two-way model. The consumer reads the current selection from it and writes to it to change the selection programmatically. When a programmatically supplied `value` matches no current option, no option is checked, and `value` stays as it is, so the application has to notice an option it removed.
+
+To reject a choice, write the old value back after the current tick, for example once a confirmation resolves. A signal written and written back within one handler is the same value to Angular's binding, so the control never hears about it. Two options with the same `value` aren't supported; Angular warns about the duplicate `track` key in development.
 
 ```html
 <p>Current mode: {{ viewMode }}</p>
@@ -161,11 +163,13 @@ Tabs convey "one of several content panels is active"; Segmented conveys "one of
 | `aria-disabled`   | `"true"` when the group is disabled; omitted otherwise                      |
 | `aria-invalid`    | `"true"` when the control is both `touched` and `invalid`; `null` otherwise |
 
-Each option renders a native `<input type="radio">` sharing the same `name`, so assistive technology announces the option label and its checked state automatically. A focused radio receives a visible focus ring.
+Each option renders a native `<input type="radio">` sharing the same `name`, so assistive technology announces the option label and its checked state automatically. A focused radio shows a solid outline around its option. In forced colors, which drop backgrounds, the selected option keeps a highlighted border.
+
+Under `dir="rtl"`, options run from right to left and the arrows follow, and the indicator stays behind the selected option.
 
 ### Accessible name
 
-Provide either `aria-label` or `aria-labelledby`. `aria-labelledby` takes precedence when both are supplied. If neither is provided, the radio group has no accessible name — supply one to satisfy the AXE `aria-required-children` checks.
+Provide either `aria-label` or `aria-labelledby`. `aria-labelledby` takes precedence when both are supplied. A `mona-label` also names it. If none is provided, the radio group has no accessible name, which axe doesn't flag, so the component warns in development.
 
 ### Keyboard
 
@@ -179,7 +183,7 @@ Native radio behavior applies. Arrow keys move the selection within the group, a
 
 ## Templates
 
-Provide a `monaSegmentedItemTemplate` to replace the default label text with custom content, for example an icon paired with the label:
+Provide a `monaSegmentedItemTemplate` to replace the default label text with custom content, for example an icon paired with the label. `option.label` stays the radio's accessible name. Bind the options, as `[monaSegmentedItemTemplate]="viewModes"`, to type `let-option` from them.
 
 | Directive                   | Overrides                | Rendered when   |
 |------------------------------|---------------------------|-----------------|
@@ -229,6 +233,7 @@ The component still owns the radio input, selection, and disabled semantics; the
 | `class`          | `string`                                                   | `""`       | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                                                   |
 | `disabled`       | `boolean`                                                  | `false`    | Disables every option in the group and prevents value changes.                                                                                                                                              |
 | `invalid`        | `boolean`                                                  | `false`    | Marks the component as invalid. Error styling requires both `invalid` and `touched` to be `true`. When bound to a signal form field via `[formField]`, this is written by the signal forms `Field` directive. |
+| `name`           | `string`                                                   | `""`       | The name of the radios, for a native `<form>`. Generated when empty, so two groups don't interfere. A signal form field writes it.                                                                           |
 | `options`        | `readonly SegmentedOption<T>[]`                            | —          | **Required.** The list of selectable options. Exactly one option is selected at a time.                                                                                                                     |
 | `rounded`        | `"none" \| "small" \| "medium" \| "large" \| "full"` | `"medium"` | Border-radius preset applied to the segmented container and its options.                                                                                                                                     |
 | `size`           | `"small" \| "medium" \| "large"`                           | `"medium"` | Size preset controlling the height, horizontal padding, text size, and spacing of each option.                                                                                                              |
@@ -239,7 +244,7 @@ The component still owns the radio input, selection, and disabled semantics; the
 
 | Name    | Type       | Description                                                                      |
 |---------|------------|----------------------------------------------------------------------------------|
-| `touch` | `void`     | Emitted when the selected value changes or focus leaves a radio input.           |
+| `touch` | `void`     | Emitted when the selected value changes or focus leaves the group.               |
 
 ---
 

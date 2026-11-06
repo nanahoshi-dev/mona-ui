@@ -197,6 +197,12 @@ export const ALLOWLIST: AllowlistEntry[] = [
     },
     {
         category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/segmented/styles/segmented.styles.ts",
+        lineSnippet: "top-0 left-0",
+        reason: "Indicator moves by offsetLeft, which is measured from the left in every direction"
+    },
+    {
+        category: "rtl-physical-style",
         filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.html",
         lineSnippet: "[style.left.%]",
         reason: "Color gradient 2D coordinate space mapping handle position"

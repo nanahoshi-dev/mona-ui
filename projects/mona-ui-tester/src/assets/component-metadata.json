@@ -324,6 +324,13 @@
         "type": "string",
         "alias": "class",
         "defaultValue": "\"\""
+      },
+      {
+        "description": "What a `ButtonGroup`'s `value` holds while this button is selected. A button without one takes no part\nin the group's `value`.",
+        "kind": "input",
+        "name": "value",
+        "type": "unknown",
+        "defaultValue": "undefined"
       }
     ]
   },
@@ -529,7 +536,7 @@
     "selector": "\"mona-chip\"",
     "inputs": [
       {
-        "description": "Accessible name for the host element. Describe what the chip represents.\r\nWhen empty, assistive technology announces the role without a label.",
+        "description": "Accessible name of the chip, for one whose text doesn't describe it, such as an icon. On a chip with no\nother role, it makes the chip a named group.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
@@ -571,20 +578,20 @@
         "defaultValue": "false"
       },
       {
-        "description": "Emitted when the remove button is clicked. Only fires when `removable` is `true`.\r\nEmits the originating `Event`.",
+        "description": "Emitted when the remove button is clicked, or Delete or Backspace is pressed on the chip. Only fires\nwhen `removable` is `true`. Emits the originating `Event`. The chip can't keep focus once its parent destroys it, so\nmove focus to the next chip or the list here.",
         "kind": "output",
         "name": "remove",
         "type": "Event"
       },
       {
-        "description": "Accessible label for the remove button, overriding the auto-computed `\"Remove, <label>\"` fallback.\r\nUse when the chip shows only projected content and the default label is not descriptive enough.",
+        "description": "Accessible label for the remove button, overriding the auto-computed `\"Remove, <label>\"` fallback.\nA chip with only projected content needs this or `aria-label`, or it warns in development.",
         "kind": "input",
         "name": "removeLabel",
         "type": "string",
         "defaultValue": "undefined"
       },
       {
-        "description": "Tab index for the remove button, independent of the chip host's own tabindex.\r\nSet to `-1` to exclude the remove button from tab order when an equivalent keyboard path exists elsewhere.",
+        "description": "Tab index for the remove button, independent of the chip host's own tabindex.\nSet to `-1` to exclude the remove button from tab order, since Delete and Backspace on the chip also remove it.",
         "kind": "input",
         "name": "removeTabIndex",
         "type": "number | string",
@@ -598,7 +605,7 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Whether the chip is selected. When `toggleable` is `true`, each activation flips this value.\r\nSupports two-way binding via `[(selected)]`.",
+        "description": "Whether the chip is selected. When `toggleable` is `true`, each activation flips this value.\nSupports two-way binding via `[(selected)]`. Without `toggleable`, it's only a look, with no state for assistive\ntechnology.",
         "kind": "model",
         "name": "selected",
         "type": "boolean",
@@ -612,14 +619,14 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Tab index override for the chip host element. When not set, computed automatically:\r\n`0` when `toggleable` is `true` or functioning as a link, `-1` otherwise. Overridden to `-1` when `disabled` is `true`.",
+        "description": "Tab index override for the chip host element. When not set, computed automatically:\n`0` when `toggleable` is `true` or functioning as a link, not focusable otherwise. Overridden to `-1` when `disabled`\nis `true`.",
         "kind": "input",
         "name": "tabindex",
         "type": "number | string",
         "defaultValue": "undefined"
       },
       {
-        "description": "Enables toggle behavior. When `true`, each activation flips `selected`\r\nand the host receives `role=\"checkbox\"` with `aria-checked`.",
+        "description": "Enables toggle behavior. When `true`, each activation flips `selected`\nand the host receives `role=\"checkbox\"` with `aria-checked`. With `removable`, the host is a `group` instead, and an\ninner element is the checkbox, beside the remove button.",
         "kind": "input",
         "name": "toggleable",
         "type": "boolean",
@@ -634,7 +641,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Arbitrary value associated with this chip.\r\nUseful for identifying which chip was selected or removed in a collection.",
+        "description": "Arbitrary value associated with this chip. The chip doesn't use it or emit it, so to tell which chip was\nremoved, pass the item in your `(remove)` handler.",
         "kind": "input",
         "name": "value",
         "type": "unknown",
@@ -1551,6 +1558,19 @@
         "name": "rounded",
         "type": "ScrollViewVariantProps[\"pagerRounded\"]",
         "required": true
+      }
+    ]
+  },
+  "SegmentedItemTemplateDirective": {
+    "name": "SegmentedItemTemplateDirective",
+    "selector": "\"ng-template[monaSegmentedItemTemplate]\"",
+    "inputs": [
+      {
+        "description": "",
+        "kind": "input",
+        "name": "options",
+        "type": "readonly SegmentedOption<T>[] | \"\" | undefined",
+        "alias": "monaSegmentedItemTemplate"
       }
     ]
   },
@@ -2555,7 +2575,7 @@
     "selector": "\"mona-button-group\"",
     "inputs": [
       {
-        "description": "When `false` and `selection` is `\"single\"`, at least one button must remain selected;\r\nthe active button cannot be deselected. Has no effect in `\"multiple\"` mode.",
+        "description": "When `false` and `selection` is `\"single\"`, a selected button stays selected until another one takes\nover: the active button can't be deselected, and clearing every `selected` brings it back. It doesn't choose a\nfirst button, and a `value` of `null` still clears the group, so a form can reset it. Has no effect in `\"multiple\"`\nmode.",
         "kind": "input",
         "name": "allowEmpty",
         "type": "boolean",
@@ -2569,9 +2589,24 @@
         "alias": "aria-label"
       },
       {
-        "description": "Renders all child buttons with reduced visual emphasis and removes pointer interaction.",
-        "kind": "model",
+        "description": "Id of the element that names the group.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Renders all child buttons with reduced visual emphasis and removes pointer interaction. When bound to\na signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
         "name": "disabled",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Marks the group as invalid. Error styling requires both `invalid` and `touched` to be `true`. When\nbound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "invalid",
         "type": "boolean",
         "defaultValue": "false"
       },
@@ -2583,6 +2618,13 @@
         "defaultValue": "\"outline\""
       },
       {
+        "description": "Prevents selection changes while the buttons stay focusable. Buttons that aren't toggleable keep\nworking. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
         "description": "Border-radius preset applied to the container and the outer corners of the first and last child button.",
         "kind": "input",
         "name": "rounded",
@@ -2590,8 +2632,8 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Two-way bindable. Controls whether child buttons behave as a radio group (`\"single\"`)\r\nor toggle independently (`\"multiple\"`).",
-        "kind": "model",
+        "description": "Whether one button can be selected at a time (`\"single\"`) or each toggles on its own (`\"multiple\"`).\nThe buttons stay toggle buttons with `aria-pressed` in both. For a choice that must always hold one value, use\n`mona-segmented`, which is a radio group.",
+        "kind": "input",
         "name": "selection",
         "type": "SelectionMode",
         "defaultValue": "\"multiple\""
@@ -2604,12 +2646,32 @@
         "defaultValue": "\"medium\""
       },
       {
+        "description": "Emitted when a user changes the selection or focus leaves the group.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "kind": "output",
+        "name": "touch",
+        "type": "void"
+      },
+      {
+        "description": "Marks the group as touched. When bound to a signal form field via `[formField]`, this is written by\nthe `FormField` directive.",
+        "kind": "input",
+        "name": "touched",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
         "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input",
         "name": "userClass",
         "type": "string",
         "alias": "class",
         "defaultValue": "\"\""
+      },
+      {
+        "description": "The value of the selected button in `\"single\"` mode, or `null`, and an array of the selected buttons'\nvalues in `\"multiple\"` mode. Buttons take part by having a `value`. While `undefined`, it leaves each button's\n`selected` alone. A value with no button yet stays, so one that loads before its button isn't lost. Use either this\nor `[(selected)]` on the buttons, not both.",
+        "kind": "model",
+        "name": "value",
+        "type": "T | readonly T[] | null | undefined",
+        "defaultValue": "undefined"
       }
     ]
   },
@@ -13662,6 +13724,13 @@
         "name": "invalid",
         "type": "boolean",
         "defaultValue": "false"
+      },
+      {
+        "description": "The name of the radios, for a native `<form>`. Generated when empty, so two groups don't interfere.\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "name",
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The list of selectable options. Exactly one option is selected at a time.",

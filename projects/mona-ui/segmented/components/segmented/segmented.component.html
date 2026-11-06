@@ -16,10 +16,12 @@
         #optionElement
         [class]="optionClasses()"
         [attr.data-selected]="selected"
+        [attr.data-indicator]="geometryReady() || null"
         [attr.data-disabled]="optionDisabled">
         <input
+            #radioInput
             type="radio"
-            [name]="groupName"
+            [name]="name() || groupName"
             [value]="option.value"
             [checked]="selected"
             [disabled]="optionDisabled"
@@ -30,13 +32,11 @@
 
         <span
             class="pointer-events-none flex flex-1 items-center justify-center gap-1
-                   [border-radius:inherit]
-                   peer-focus-visible:ring-2
-                   peer-focus-visible:ring-focus-indicator/35">
+                   [border-radius:inherit]">
             @if (itemTemplate(); as template) {
                 <ng-container
                     [ngTemplateOutlet]="template"
-                    [ngTemplateOutletContext]="createOptionContext(option, $index)"></ng-container>
+                    [ngTemplateOutletContext]="optionContexts()[$index]"></ng-container>
             } @else {
                 {{ option.label }}
             }

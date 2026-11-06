@@ -18,6 +18,7 @@ import {
     viewChildren
 } from "@angular/core";
 import type { FormValueControl } from "@angular/forms/signals";
+import { injectComponentDirection } from "@nanahoshi/mona-ui/i18n";
 import { createElementControlId, injectEffectiveDisabled, injectLabelAssociation } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { SegmentedItemTemplateDirective } from "../../directives/segmented-item-template.directive";
@@ -57,6 +58,7 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
     implements SegmentedVariantInput, FormValueControl<T | null>
 {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #direction = injectComponentDirection();
     readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #label = injectLabelAssociation({
         activate: () => this.focus(),
@@ -74,6 +76,7 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
         return twMerge(classes, this.userClass());
     });
     protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
+    protected readonly geometryReady = computed(() => !!this.indicatorGeometry());
     protected readonly groupName = createElementControlId();
     protected readonly indicatorClasses = computed(() => {
         const animate = this.animate() && this.indicatorTransitionEnabled();
@@ -93,7 +96,19 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
         const size = this.size();
         return segmentedOptionThemeVariants({ alignment, rounded, size });
     });
+    protected readonly optionContexts = computed<SegmentedItemTemplateContext<T>[]>(() => {
+        const disabled = this.effectiveDisabled();
+        const value = this.value();
+        return this.options().map((option, index) => ({
+            $implicit: option,
+            disabled: disabled || !!option.disabled,
+            index,
+            option,
+            selected: option.value === value
+        }));
+    });
     protected readonly optionElements = viewChildren<ElementRef<HTMLLabelElement>>("optionElement");
+    protected readonly radioInputs = viewChildren<ElementRef<HTMLInputElement>>("radioInput");
     protected readonly selectedIndex = computed(() => {
         const value = this.value();
         return this.options().findIndex(option => option.value === value);
@@ -144,6 +159,13 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
      * @default false
      */
     public readonly invalid = input(false, { transform: booleanAttribute });
+
+    /**
+     * @description The name of the radios, for a native `<form>`. Generated when empty, so two groups don't interfere.
+     * When bound to a signal form field via `[formField]`, this is written by the `FormField` directive.
+     * @default ""
+     */
+    public readonly name = input<string>("");
 
     /**
      * @description The list of selectable options. Exactly one option is selected at a time.
@@ -211,9 +233,22 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
                 );
             }
         });
+        // A browser checks a clicked radio on its own, and `[checked]` writes only when its binding changes, so a value
+        // put back in the meantime would leave the rejected radio checked.
+        afterRenderEffect({
+            write: () => {
+                const value = this.value();
+                const options = this.options();
+                this.radioInputs().forEach(({ nativeElement }, index) => {
+                    nativeElement.checked = options[index]?.value === value;
+                });
+            }
+        });
         afterRenderEffect({
             read: () => {
                 this.selectedIndex();
+                // The options swap sides, with no change of size for the observer to report.
+                this.#direction();
                 const optionElements = this.optionElements();
                 this.alignment();
                 this.rounded();
@@ -260,16 +295,6 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
      */
     public setLabelledBy(id: string | null): void {
         this.#label.setLabelledBy(id);
-    }
-
-    protected createOptionContext(option: SegmentedOption<T>, index: number): SegmentedItemTemplateContext<T> {
-        return {
-            $implicit: option,
-            disabled: this.effectiveDisabled() || !!option.disabled,
-            index,
-            option,
-            selected: option.value === this.value()
-        };
     }
 
     protected onFocusOut(event: FocusEvent): void {

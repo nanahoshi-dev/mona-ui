@@ -361,12 +361,11 @@ describe("SegmentedComponent", () => {
             expect(indicator?.classList.contains("rounded-sm")).toBe(true);
         });
 
-        it("keeps the focus ring on the option label radius", () => {
+        it("keeps the focus outline on the option label radius", () => {
             const label = getLabels(fixture)[0];
             const span = label.querySelector("span") as HTMLSpanElement | null;
 
-            expect(span?.classList.contains("peer-focus-visible:ring-2")).toBe(true);
-            expect(span?.classList.contains("peer-focus-visible:ring-focus-indicator/35")).toBe(true);
+            expect(label.classList.contains("has-[input:focus-visible]:outline-2")).toBe(true);
             expect(span?.classList.contains("[border-radius:inherit]")).toBe(true);
         });
     });

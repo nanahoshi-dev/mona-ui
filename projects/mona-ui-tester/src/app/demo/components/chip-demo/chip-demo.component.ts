@@ -1,5 +1,14 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, model } from "@angular/core";
+import {
+    booleanAttribute,
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    inject,
+    input,
+    linkedSignal,
+    model
+} from "@angular/core";
 import { AvatarComponent } from "@nanahoshi/mona-ui/avatar";
 import { ChipComponent, ChipPrefixTemplateDirective } from "@nanahoshi/mona-ui/chip";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
@@ -105,15 +114,15 @@ export class ChipWrapperComponent implements ComponentInputsAsSignal<ChipCompone
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly isSelected = linkedSignal(() => this.selected());
     public readonly ariaLabel = input<ReturnType<ChipComponent["ariaLabel"]>>("");
-    public readonly disabled = input<ReturnType<ChipComponent["disabled"]>>(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly label = input<ReturnType<ChipComponent["label"]>>("Mona Chip");
     public readonly look = input<ReturnType<ChipComponent["look"]>>("default");
-    public readonly removable = input<ReturnType<ChipComponent["removable"]>>(false);
+    public readonly removable = input(false, { transform: booleanAttribute });
     public readonly removeLabel = input<ReturnType<ChipComponent["removeLabel"]>>("");
     public readonly rounded = input<ReturnType<ChipComponent["rounded"]>>("medium");
     public readonly selected = model<ReturnType<ChipComponent["selected"]>>(false);
     public readonly size = input<ReturnType<ChipComponent["size"]>>("medium");
-    public readonly toggleable = input<ReturnType<ChipComponent["toggleable"]>>(false);
+    public readonly toggleable = input(false, { transform: booleanAttribute });
     public readonly userClass = input<ReturnType<ChipComponent["userClass"]>>("");
 
     protected onRemove(event: Event): void {

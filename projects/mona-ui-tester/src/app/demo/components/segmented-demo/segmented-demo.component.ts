@@ -87,6 +87,7 @@ export class SegmentedDemoComponent extends AbstractDemoComponent<SegmentedCompo
             <mona-segmented
                 [aria-label]="ariaLabel()"
                 [aria-labelledby]="ariaLabelledBy()"
+                [name]="name()"
                 [alignment]="alignment()"
                 [animate]="animate()"
                 [disabled]="disabled()"
@@ -128,6 +129,7 @@ class SegmentedWrapperComponent implements ComponentInputsAsSignal<SegmentedComp
     public readonly ariaLabelledBy = input<ReturnType<SegmentedComponent["ariaLabelledBy"]>>("");
     public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly invalid = input(false, { transform: booleanAttribute });
+    public readonly name = input("");
     public readonly options = input<readonly SegmentedOption[]>([
         { label: "Personal", value: "personal" },
         { label: "Premium Features", value: "premium", disabled: true },

@@ -230,7 +230,7 @@ export class SplitButtonComponent implements ButtonGroupMember, SplitButtonVaria
     public constructor() {
         effect(() => ensureSplitButtonComponentTypes(this.menuItemComponents()));
         effect(() => {
-            if (this.disabled() || this.loading()) {
+            if (this.disabled() || this.loading() || this.groupButtons().some(button => button.effectiveDisabled())) {
                 untracked(() => this.popupMenuRef()?.closeMenu());
             }
         });

@@ -677,14 +677,6 @@ export class GridComponent<T> implements GridVariantInput {
     }
 
     /** Delete or Backspace on a group chip, or on its remove button, removes the group. */
-    protected onGroupChipKeydown(event: KeyboardEvent, column: Column): void {
-        if (event.key !== "Delete" && event.key !== "Backspace") {
-            return;
-        }
-        event.preventDefault();
-        this.onGroupingColumnRemove(event, column);
-    }
-
     protected onGroupColumnReorder(column: Column, moveAs: "prev" | "next"): void {
         this.gridService.moveGroupColumn(column, moveAs);
     }

@@ -31,7 +31,7 @@ import { buttonThemeVariants, ButtonVariantProps, ButtonVariantsInput } from "..
     selector: "button[monaButton]",
     host: {
         "[attr.aria-busy]": "loading() ? 'true' : undefined",
-        "[attr.aria-disabled]": "effectiveDisabled() || loading() ? 'true' : undefined",
+        "[attr.aria-disabled]": "effectiveDisabled() || loading() || groupReadonly() ? 'true' : undefined",
         "[attr.aria-haspopup]": "ariaHasPopup() !== 'false' ? ariaHasPopup() : null",
         "[attr.aria-pressed]": "effectiveToggleable() ? (selected() ? 'true' : 'false') : undefined",
         "[attr.data-look]": "effectiveLook()",
@@ -69,11 +69,13 @@ export class ButtonDirective implements ButtonVariantsInput {
         const variantClasses = buttonThemeVariants({ disabled, iconOnly, loading, look, rounded, selected, size });
         return twMerge(variantClasses, userClass);
     });
-    protected readonly effectiveDisabled = computed(() => this.#group()?.groupDisabled() || this.disabled());
     protected readonly effectiveLook = computed(() => this.#group()?.groupLook() ?? this.look());
     protected readonly effectiveRounded = computed(() => this.#group()?.groupRounded() ?? this.rounded());
     protected readonly effectiveSize = computed(() => this.#group()?.groupSize() ?? this.size());
-    protected readonly effectiveToggleable = computed(() => this.toggleable() ?? !!this.#group());
+    /**
+     * A read-only group's toggle buttons keep focus, so they can't be natively disabled.
+     */
+    protected readonly groupReadonly = computed(() => !!this.#group()?.groupReadonly() && this.effectiveToggleable());
     protected readonly loadingSize = computed(() => {
         const size = this.effectiveSize();
         switch (size) {
@@ -101,6 +103,18 @@ export class ButtonDirective implements ButtonVariantsInput {
      * @default false
      */
     public readonly disabled = input(false, { transform: booleanAttribute });
+
+    /**
+     * Whether the button is disabled, by its own input or its group's. A dropdown or split button reads this to close
+     * its menu.
+     */
+    public readonly effectiveDisabled = computed(() => this.#group()?.groupDisabled() || this.disabled());
+
+    /**
+     * Whether a click toggles the button: buttons in a group do unless `toggleable` is `false`. The group reads this to
+     * know which buttons take part in its selection.
+     */
+    public readonly effectiveToggleable = computed(() => this.toggleable() ?? !!this.#group());
 
     /**
      * @description Removes horizontal padding and fixes a square aspect ratio sized to match `size`.
@@ -177,6 +191,13 @@ export class ButtonDirective implements ButtonVariantsInput {
      * @default ""
      */
     public readonly userClass = input<string>("", { alias: "class" });
+
+    /**
+     * @description What a `ButtonGroup`'s `value` holds while this button is selected. A button without one takes no part
+     * in the group's `value`.
+     * @default undefined
+     */
+    public readonly value = input<unknown>();
 
     public constructor() {
         effect(() => {
@@ -262,6 +283,14 @@ export class ButtonDirective implements ButtonVariantsInput {
                 this.selected.set(selected);
             }
         });
+        const host = this.#hostElementRef.nativeElement;
+        fromEvent<MouseEvent>(host, "click")
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(() => {
+                if (!this.effectiveToggleable()) {
+                    this.#group()?.memberClick$.next([this, host]);
+                }
+            });
     }
 
     #hasAccessibleName(): boolean {
@@ -285,6 +314,7 @@ export class ButtonDirective implements ButtonVariantsInput {
                 const group = this.#group();
                 if (group) {
                     group.buttonClick$.next([this, wasSelected]);
+                    group.memberClick$.next([this, this.#hostElementRef.nativeElement]);
                 } else {
                     this.selected.set(!this.selected());
                 }
