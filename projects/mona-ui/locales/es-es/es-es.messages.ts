@@ -21,7 +21,8 @@ export const ES_ES_MESSAGES = {
         clear: "Limpiar"
     },
     breadcrumb: {
-        breadcrumb: "Ruta de navegación"
+        breadcrumb: "Ruta de navegación",
+        showFullPath: "Mostrar la ruta completa"
     },
     buttonGroup: {
         buttonGroup: "Grupo de botones"
@@ -517,6 +518,9 @@ export const ES_ES_MESSAGES = {
         resizer: "Separador de paneles"
     },
     stepper: {
+        stepCompleted: "Completado",
+        stepInvalid: "Tiene errores",
+        stepPosition: (current: number, total: number) => `Paso ${localizeNumber(current)} de ${localizeNumber(total)}`,
         stepProgress: "Progreso del paso",
         stepper: "Progreso"
     },

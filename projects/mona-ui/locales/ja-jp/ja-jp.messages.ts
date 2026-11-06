@@ -12,7 +12,8 @@ export const JA_JP_MESSAGES = {
         clear: "クリア"
     },
     breadcrumb: {
-        breadcrumb: "パンくずリスト"
+        breadcrumb: "パンくずリスト",
+        showFullPath: "パス全体を表示"
     },
     buttonGroup: {
         buttonGroup: "ボタングループ"
@@ -473,6 +474,10 @@ export const JA_JP_MESSAGES = {
         resizer: "サイズ変更ハンドル"
     },
     stepper: {
+        stepCompleted: "完了",
+        stepInvalid: "エラーあり",
+        stepPosition: (current: number, total: number) =>
+            `ステップ ${localizeNumber(current)}/${localizeNumber(total)}`,
         stepProgress: "ステップの進行状況",
         stepper: "ステップ表示"
     },

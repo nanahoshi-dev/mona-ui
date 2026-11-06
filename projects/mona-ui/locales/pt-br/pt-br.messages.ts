@@ -21,7 +21,8 @@ export const PT_BR_MESSAGES = {
         clear: "Limpar"
     },
     breadcrumb: {
-        breadcrumb: "Trilha de navegação"
+        breadcrumb: "Trilha de navegação",
+        showFullPath: "Mostrar caminho completo"
     },
     buttonGroup: {
         buttonGroup: "Grupo de botões"
@@ -515,6 +516,10 @@ export const PT_BR_MESSAGES = {
         resizer: "Separador de painéis"
     },
     stepper: {
+        stepCompleted: "Concluída",
+        stepInvalid: "Contém erros",
+        stepPosition: (current: number, total: number) =>
+            `Etapa ${localizeNumber(current)} de ${localizeNumber(total)}`,
         stepProgress: "Progresso das etapas",
         stepper: "Progresso"
     },

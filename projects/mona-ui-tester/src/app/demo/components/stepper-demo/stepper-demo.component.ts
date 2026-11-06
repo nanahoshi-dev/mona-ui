@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input, model } from "@angular/core";
+import { booleanAttribute, ChangeDetectionStrategy, Component, computed, inject, input, model } from "@angular/core";
 import {
     LucideCheck,
     LucideCreditCard,
@@ -8,6 +8,7 @@ import {
     LucideShoppingCart,
     LucideTruck
 } from "@lucide/angular";
+import type { StepOptions, StepSelectEvent } from "@nanahoshi/mona-ui/stepper";
 import {
     StepperComponent,
     StepperIndicatorTemplateDirective,
@@ -103,6 +104,20 @@ export class StepperDemoComponent extends AbstractDemoComponent<StepperComponent
             code: STEP_TEMPLATE_CODE,
             name: "Step Template",
             description: "Use a custom template for the step content."
+        },
+        stepStates: {
+            active: false,
+            code: ``,
+            hasCode: false,
+            name: "Step States",
+            description: "Mark Address as having errors and Payment as disabled."
+        },
+        vetoNext: {
+            active: false,
+            code: ``,
+            hasCode: false,
+            name: "Veto Step Changes",
+            description: "Call preventDefault() on every stepSelect, so clicks and keys can't change the step."
         }
     });
     protected readonly config = computed<ComponentConfig<StepperComponent>>(() => ({
@@ -166,7 +181,8 @@ export class StepperDemoComponent extends AbstractDemoComponent<StepperComponent
             [rounded]="rounded()"
             [step]="step()"
             (stepChange)="onStepChange($event)"
-            [steps]="steps()">
+            (stepSelect)="onStepSelect($event)"
+            [steps]="viewSteps()">
             @if (featureData["indicatorTemplate"].active) {
                 <ng-template
                     monaStepperIndicatorTemplate
@@ -238,8 +254,18 @@ export class StepperDemoComponent extends AbstractDemoComponent<StepperComponent
 })
 export class StepperWrapperComponent implements ComponentInputsAsSignal<StepperComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly viewSteps = computed<Iterable<StepOptions>>(() => {
+        if (!this.features()["stepStates"].active) {
+            return this.steps();
+        }
+        return Array.from(this.steps(), step => ({
+            ...step,
+            disabled: step.label === "Payment",
+            invalid: step.label === "Address"
+        }));
+    });
     public readonly ariaLabel = input("Progress");
-    public readonly linear = input<ReturnType<StepperComponent["linear"]>>(true);
+    public readonly linear = input(true, { transform: booleanAttribute });
     public readonly orientation = input<ReturnType<StepperComponent["orientation"]>>("horizontal");
     public readonly progressAriaLabel = input("Step progress");
     public readonly rounded = input<ReturnType<StepperComponent["rounded"]>>("full");
@@ -248,5 +274,11 @@ export class StepperWrapperComponent implements ComponentInputsAsSignal<StepperC
 
     protected onStepChange(step: number) {
         console.log(`Step changed to ${step}`);
+    }
+
+    protected onStepSelect(event: StepSelectEvent): void {
+        if (this.features()["vetoNext"].active) {
+            event.preventDefault();
+        }
     }
 }

@@ -3,7 +3,8 @@
         "clear": "Leeren"
     },
     "breadcrumb": {
-        "breadcrumb": "Breadcrumb-Navigation"
+        "breadcrumb": "Breadcrumb-Navigation",
+        "showFullPath": "Vollständigen Pfad anzeigen"
     },
     "buttonGroup": {
         "buttonGroup": "Schaltflächengruppe"
@@ -448,6 +449,9 @@
         "resizer": "Trennleiste"
     },
     "stepper": {
+        "stepCompleted": "Abgeschlossen",
+        "stepInvalid": "Enthält Fehler",
+        "stepPosition": "Schritt {current} von {total}",
         "stepProgress": "Schrittfortschritt",
         "stepper": "Schrittanzeige"
     },

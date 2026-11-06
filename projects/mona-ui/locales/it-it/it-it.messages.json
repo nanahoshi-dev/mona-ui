@@ -3,7 +3,8 @@
         "clear": "Cancella"
     },
     "breadcrumb": {
-        "breadcrumb": "Percorso di navigazione"
+        "breadcrumb": "Percorso di navigazione",
+        "showFullPath": "Mostra il percorso completo"
     },
     "buttonGroup": {
         "buttonGroup": "Gruppo di pulsanti"
@@ -448,6 +449,9 @@
         "resizer": "Divisore pannelli"
     },
     "stepper": {
+        "stepCompleted": "Completato",
+        "stepInvalid": "Contiene errori",
+        "stepPosition": "Passaggio {current} di {total}",
         "stepProgress": "Avanzamento dei passaggi",
         "stepper": "Avanzamento"
     },

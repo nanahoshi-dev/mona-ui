@@ -1,4 +1,6 @@
 <mona-tab-list
+    [ariaLabel]="ariaLabel()"
+    [ariaLabelledBy]="ariaLabelledBy()"
     [closable]="closable()"
     [disabled]="disabled()"
     [position]="position()"
@@ -9,13 +11,13 @@
     (tabClose)="tabClose.emit($event)"
     (tabSelect)="tabSelect.emit($event)"></mona-tab-list>
 <div [class]="contentClass()">
-    @for (tab of tabList(); track tab) {
+    @for (tab of tabList(); track tab.id) {
         @let selected = tab.id === selectedTabId();
         @let tabLoaded = keepTabContent() || selected;
         @let tabHidden = keepTabContent() && !selected;
         @if (tabLoaded) {
             <div
-                class="w-full h-full outline-none rounded-sm focus-visible:outline-2 focus-visible:outline-focus-indicator focus-visible:outline-offset-2"
+                class="w-full h-full rounded-sm focus-visible:outline-2 focus-visible:outline-focus-indicator focus-visible:-outline-offset-2"
                 [class.hidden]="tabHidden"
                 role="tabpanel"
                 [id]="tab.id + '-panel'"

@@ -3,7 +3,8 @@
         "clear": "清除"
     },
     "breadcrumb": {
-        "breadcrumb": "階層連結導航"
+        "breadcrumb": "階層連結導航",
+        "showFullPath": "顯示完整路徑"
     },
     "buttonGroup": {
         "buttonGroup": "按鈕群組"
@@ -448,6 +449,9 @@
         "resizer": "調整大小控點"
     },
     "stepper": {
+        "stepCompleted": "已完成",
+        "stepInvalid": "有錯誤",
+        "stepPosition": "第 {current} 步，共 {total} 步",
         "stepProgress": "步驟進度",
         "stepper": "步驟指示器"
     },

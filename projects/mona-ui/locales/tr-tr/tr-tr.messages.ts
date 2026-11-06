@@ -21,7 +21,8 @@ export const TR_TR_MESSAGES = {
         clear: "Temizle"
     },
     breadcrumb: {
-        breadcrumb: "İçerik haritası"
+        breadcrumb: "İçerik haritası",
+        showFullPath: "Tam yolu göster"
     },
     buttonGroup: {
         buttonGroup: "Düğme grubu"
@@ -498,6 +499,9 @@ export const TR_TR_MESSAGES = {
         resizer: "Panel ayırıcı"
     },
     stepper: {
+        stepCompleted: "Tamamlandı",
+        stepInvalid: "Hata içeriyor",
+        stepPosition: (current: number, total: number) => `Adım ${localizeNumber(current)}/${localizeNumber(total)}`,
         stepProgress: "Adım ilerlemesi",
         stepper: "Adımlar"
     },

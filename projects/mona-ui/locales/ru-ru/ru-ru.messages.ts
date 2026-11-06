@@ -21,7 +21,8 @@ export const RU_RU_MESSAGES = {
         clear: "Очистить"
     },
     breadcrumb: {
-        breadcrumb: "Навигационная цепочка"
+        breadcrumb: "Навигационная цепочка",
+        showFullPath: "Показать полный путь"
     },
     buttonGroup: {
         buttonGroup: "Группа кнопок"
@@ -527,6 +528,9 @@ export const RU_RU_MESSAGES = {
         resizer: "Разделитель панелей"
     },
     stepper: {
+        stepCompleted: "Завершён",
+        stepInvalid: "Содержит ошибки",
+        stepPosition: (current: number, total: number) => `Шаг ${localizeNumber(current)} из ${localizeNumber(total)}`,
         stepProgress: "Ход выполнения шагов",
         stepper: "Шаги"
     },

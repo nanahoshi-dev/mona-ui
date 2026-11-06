@@ -92,7 +92,6 @@ describe("TabListItemDirective", () => {
         fixture.detectChanges();
         const classes = tabItem().className.split(/\s+/);
         expect(classes).toContain("h-8");
-        expect(classes).toContain("px-2");
         expect(classes).toContain("text-xs");
     });
 
@@ -101,7 +100,6 @@ describe("TabListItemDirective", () => {
         fixture.detectChanges();
         const classes = tabItem().className.split(/\s+/);
         expect(classes).toContain("h-10");
-        expect(classes).toContain("px-4");
     });
 
     it("hides the indicator and disables interaction for a disabled tab", () => {

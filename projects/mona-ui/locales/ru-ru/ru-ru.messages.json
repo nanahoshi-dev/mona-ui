@@ -3,7 +3,8 @@
         "clear": "Очистить"
     },
     "breadcrumb": {
-        "breadcrumb": "Навигационная цепочка"
+        "breadcrumb": "Навигационная цепочка",
+        "showFullPath": "Показать полный путь"
     },
     "buttonGroup": {
         "buttonGroup": "Группа кнопок"
@@ -448,6 +449,9 @@
         "resizer": "Разделитель панелей"
     },
     "stepper": {
+        "stepCompleted": "Завершён",
+        "stepInvalid": "Содержит ошибки",
+        "stepPosition": "Шаг {current} из {total}",
         "stepProgress": "Ход выполнения шагов",
         "stepper": "Шаги"
     },

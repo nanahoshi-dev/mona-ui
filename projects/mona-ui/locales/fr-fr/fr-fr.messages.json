@@ -3,7 +3,8 @@
         "clear": "Effacer"
     },
     "breadcrumb": {
-        "breadcrumb": "Fil d’Ariane"
+        "breadcrumb": "Fil d’Ariane",
+        "showFullPath": "Afficher le chemin complet"
     },
     "buttonGroup": {
         "buttonGroup": "Groupe de boutons"
@@ -448,6 +449,9 @@
         "resizer": "Séparateur"
     },
     "stepper": {
+        "stepCompleted": "Terminée",
+        "stepInvalid": "Contient des erreurs",
+        "stepPosition": "Étape {current} sur {total}",
         "stepProgress": "Progression de l’étape",
         "stepper": "Indicateur d’étapes"
     },

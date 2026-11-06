@@ -12,7 +12,8 @@ export const KO_KR_MESSAGES = {
         clear: "지우기"
     },
     breadcrumb: {
-        breadcrumb: "이동 경로"
+        breadcrumb: "이동 경로",
+        showFullPath: "전체 경로 표시"
     },
     buttonGroup: {
         buttonGroup: "버튼 그룹"
@@ -478,6 +479,10 @@ export const KO_KR_MESSAGES = {
         resizer: "크기 조정 핸들"
     },
     stepper: {
+        stepCompleted: "완료됨",
+        stepInvalid: "오류 있음",
+        stepPosition: (current: number, total: number) =>
+            `${localizeNumber(total)}단계 중 ${localizeNumber(current)}단계`,
         stepProgress: "단계 진행률",
         stepper: "단계 표시기"
     },

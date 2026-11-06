@@ -1,34 +1,22 @@
-import { afterRenderEffect, computed, Directive, ElementRef, inject, input } from "@angular/core";
-import { stepperStepIndicatorThemeVariants, StepperVariantProps } from "../styles/stepper.styles";
+import { computed, Directive, input } from "@angular/core";
+import type { StepState } from "../models/Step";
+import type { StepperVariantProps } from "../styles/stepper.styles";
+import { stepperStepIndicatorThemeVariants } from "../styles/stepper.styles";
 
 @Directive({
-    selector: "span[monaStepperIndicator]",
+    selector: "button[monaStepperIndicator]",
     host: {
         "[class]": "stepIndicatorClass()"
     }
 })
 export class StepperIndicatorDirective {
-    readonly #host = inject(ElementRef);
-    #wasFocused = false;
     protected readonly stepIndicatorClass = computed(() => {
-        const active = this.active();
-        const focused = this.focused();
+        const invalid = this.invalid();
         const rounded = this.rounded();
-        return stepperStepIndicatorThemeVariants({ active, focused, rounded });
+        const state = this.state();
+        return stepperStepIndicatorThemeVariants({ invalid, rounded, state });
     });
-    public readonly active = input.required<boolean>();
-    public readonly focused = input.required<boolean>();
+    public readonly invalid = input.required<boolean>();
     public readonly rounded = input.required<StepperVariantProps["rounded"]>();
-
-    public constructor() {
-        afterRenderEffect({
-            read: () => {
-                const focused = this.focused();
-                if (focused && !this.#wasFocused) {
-                    this.#host.nativeElement.focus();
-                }
-                this.#wasFocused = focused;
-            }
-        });
-    }
+    public readonly state = input.required<StepState>();
 }

@@ -3,7 +3,8 @@
         "clear": "Bersihkan"
     },
     "breadcrumb": {
-        "breadcrumb": "Navigasi remah roti"
+        "breadcrumb": "Navigasi remah roti",
+        "showFullPath": "Tampilkan jalur lengkap"
     },
     "buttonGroup": {
         "buttonGroup": "Grup tombol"
@@ -448,6 +449,9 @@
         "resizer": "Pemisah panel"
     },
     "stepper": {
+        "stepCompleted": "Selesai",
+        "stepInvalid": "Ada kesalahan",
+        "stepPosition": "Langkah {current} dari {total}",
         "stepProgress": "Progres langkah",
         "stepper": "Langkah"
     },

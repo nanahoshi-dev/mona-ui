@@ -12,7 +12,8 @@ export const ZH_TW_MESSAGES = {
         clear: "清除"
     },
     breadcrumb: {
-        breadcrumb: "階層連結導航"
+        breadcrumb: "階層連結導航",
+        showFullPath: "顯示完整路徑"
     },
     buttonGroup: {
         buttonGroup: "按鈕群組"
@@ -473,6 +474,10 @@ export const ZH_TW_MESSAGES = {
         resizer: "調整大小控點"
     },
     stepper: {
+        stepCompleted: "已完成",
+        stepInvalid: "有錯誤",
+        stepPosition: (current: number, total: number) =>
+            `第 ${localizeNumber(current)} 步，共 ${localizeNumber(total)} 步`,
         stepProgress: "步驟進度",
         stepper: "步驟指示器"
     },

@@ -12,7 +12,8 @@ export const ID_ID_MESSAGES = {
         clear: "Bersihkan"
     },
     breadcrumb: {
-        breadcrumb: "Navigasi remah roti"
+        breadcrumb: "Navigasi remah roti",
+        showFullPath: "Tampilkan jalur lengkap"
     },
     buttonGroup: {
         buttonGroup: "Grup tombol"
@@ -477,6 +478,10 @@ export const ID_ID_MESSAGES = {
         resizer: "Pemisah panel"
     },
     stepper: {
+        stepCompleted: "Selesai",
+        stepInvalid: "Ada kesalahan",
+        stepPosition: (current: number, total: number) =>
+            `Langkah ${localizeNumber(current)} dari ${localizeNumber(total)}`,
         stepProgress: "Progres langkah",
         stepper: "Langkah"
     },

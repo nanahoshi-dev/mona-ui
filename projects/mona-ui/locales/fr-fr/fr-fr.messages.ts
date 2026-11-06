@@ -21,7 +21,8 @@ export const FR_FR_MESSAGES = {
         clear: "Effacer"
     },
     breadcrumb: {
-        breadcrumb: "Fil d’Ariane"
+        breadcrumb: "Fil d’Ariane",
+        showFullPath: "Afficher le chemin complet"
     },
     buttonGroup: {
         buttonGroup: "Groupe de boutons"
@@ -518,6 +519,10 @@ export const FR_FR_MESSAGES = {
         resizer: "Séparateur"
     },
     stepper: {
+        stepCompleted: "Terminée",
+        stepInvalid: "Contient des erreurs",
+        stepPosition: (current: number, total: number) =>
+            `Étape ${localizeNumber(current)} sur ${localizeNumber(total)}`,
         stepProgress: "Progression de l’étape",
         stepper: "Indicateur d’étapes"
     },

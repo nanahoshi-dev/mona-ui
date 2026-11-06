@@ -21,7 +21,8 @@ export const IT_IT_MESSAGES = {
         clear: "Cancella"
     },
     breadcrumb: {
-        breadcrumb: "Percorso di navigazione"
+        breadcrumb: "Percorso di navigazione",
+        showFullPath: "Mostra il percorso completo"
     },
     buttonGroup: {
         buttonGroup: "Gruppo di pulsanti"
@@ -515,6 +516,10 @@ export const IT_IT_MESSAGES = {
         resizer: "Divisore pannelli"
     },
     stepper: {
+        stepCompleted: "Completato",
+        stepInvalid: "Contiene errori",
+        stepPosition: (current: number, total: number) =>
+            `Passaggio ${localizeNumber(current)} di ${localizeNumber(total)}`,
         stepProgress: "Avanzamento dei passaggi",
         stepper: "Avanzamento"
     },

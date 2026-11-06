@@ -1,11 +1,10 @@
+import type { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
-import { VariantProps } from "class-variance-authority";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
 
 export const breadcrumbListThemeVariants = cva(
     `
         flex list-none items-center gap-1 overflow-hidden px-2 py-1
-        select-none
     `,
     {
         variants: {
@@ -17,38 +16,78 @@ export const breadcrumbListThemeVariants = cva(
     }
 );
 
+/**
+ * `min-w-0`, or a flex item never gets narrower than its text, and nothing inside it ever truncates. The other items
+ * shrink faster than the current page, so it's the one that stays readable. The current page keeps a factor of 1 rather
+ * than a fraction, because flexbox only takes that fraction of the overflow once it's the last item left to shrink.
+ */
+export const breadcrumbListItemWrapperThemeVariants = cva(`flex min-w-0 items-center`, {
+    variants: {
+        current: {
+            true: "",
+            false: "shrink-[10]"
+        }
+    }
+});
+
+/** Inset focus, because the list clips anything outside it. */
 export const breadcrumbListItemThemeVariants = cva(
     `
-        flex h-full items-center truncate px-1
+        flex h-full max-w-full min-w-0 items-center px-1
         cursor-pointer
-        text-muted-foreground
-        bg-transparent border-0 rounded-sm outline-none
+        bg-transparent border-0 rounded-sm
         transition-colors duration-100 ease-in-out
-        hover:bg-hover hover:text-foreground
-        active:bg-active active:text-foreground
-        focus-visible:ring-2 focus-visible:ring-focus-indicator/35
+        focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus-indicator
     `,
     {
         variants: {
             disabled: {
                 true: "pointer-events-none cursor-not-allowed text-disabled-foreground",
+                false: "text-muted-foreground hover:bg-hover hover:text-foreground active:bg-active active:text-foreground"
+            }
+        },
+        defaultVariants: {
+            disabled: false
+        }
+    }
+);
+
+/** Text in a flex item only truncates from a block of its own, and an icon beside it has to stay on the same line. */
+export const breadcrumbItemContentThemeVariants = cva(`min-w-0 truncate [&_svg]:inline`);
+
+export const breadcrumbLinkThemeVariants = cva(
+    `
+        block max-w-full min-w-0 truncate rounded-sm px-1 [&_svg]:inline
+        transition-colors duration-100 ease-in-out
+        focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus-indicator
+    `,
+    {
+        variants: {
+            current: {
+                true: "font-medium text-foreground",
                 false: ""
             },
-            listDisabled: {
-                true: "",
+            disabled: {
+                true: "pointer-events-none cursor-not-allowed text-disabled-foreground",
                 false: ""
             }
         },
-        compoundVariants: [{ disabled: true, listDisabled: false, class: "text-disabled-foreground" }],
+        compoundVariants: [
+            {
+                current: false,
+                disabled: false,
+                class: "text-muted-foreground hover:bg-hover hover:text-foreground active:bg-active active:text-foreground"
+            }
+        ],
         defaultVariants: {
-            disabled: false,
-            listDisabled: false
+            current: false,
+            disabled: false
         }
     }
 );
 
 export const breadcrumbCurrentItemThemeVariants = cva(
-    `flex cursor-default items-center truncate font-medium text-foreground`
+    `block min-w-0 cursor-default truncate font-medium text-foreground [&_svg]:inline`
 );
 
 type BreadcrumbListVariantProps = VariantProps<typeof breadcrumbListThemeVariants>;
@@ -61,4 +100,4 @@ export type BreadcrumbListItemVariantInput = VariantInputs<BreadcrumbListItemVar
 
 export type BreadcrumbVariantProps = BreadcrumbListVariantProps & BreadcrumbListItemVariantProps;
 
-export type BreadcrumbVariantInput = BreadcrumbListVariantInput & Omit<BreadcrumbListItemVariantInput, "listDisabled">;
+export type BreadcrumbVariantInput = BreadcrumbListVariantInput & BreadcrumbListItemVariantInput;

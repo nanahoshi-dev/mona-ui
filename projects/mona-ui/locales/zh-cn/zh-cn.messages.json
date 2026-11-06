@@ -3,7 +3,8 @@
         "clear": "清除"
     },
     "breadcrumb": {
-        "breadcrumb": "面包屑导航"
+        "breadcrumb": "面包屑导航",
+        "showFullPath": "显示完整路径"
     },
     "buttonGroup": {
         "buttonGroup": "按钮组"
@@ -448,6 +449,9 @@
         "resizer": "调整大小手柄"
     },
     "stepper": {
+        "stepCompleted": "已完成",
+        "stepInvalid": "有错误",
+        "stepPosition": "第 {current} 步，共 {total} 步",
         "stepProgress": "步骤进度",
         "stepper": "步骤指示器"
     },

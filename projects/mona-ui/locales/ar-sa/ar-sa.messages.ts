@@ -21,7 +21,8 @@ export const AR_SA_MESSAGES = {
         clear: "مسح"
     },
     breadcrumb: {
-        breadcrumb: "مسار التنقل"
+        breadcrumb: "مسار التنقل",
+        showFullPath: "إظهار المسار الكامل"
     },
     buttonGroup: {
         buttonGroup: "مجموعة أزرار"
@@ -512,6 +513,10 @@ export const AR_SA_MESSAGES = {
         resizer: "مقبض تغيير الحجم"
     },
     stepper: {
+        stepCompleted: "مكتملة",
+        stepInvalid: "بها أخطاء",
+        stepPosition: (current: number, total: number) =>
+            `الخطوة ${localizeNumber(current)} من ${localizeNumber(total)}`,
         stepProgress: "تقدم الخطوات",
         stepper: "مؤشر الخطوات"
     },

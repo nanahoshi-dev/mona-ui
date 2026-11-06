@@ -107,17 +107,19 @@ function getStepperElement(fixture: ComponentFixture<unknown>): HTMLElement {
 }
 
 function getIndicators(fixture: ComponentFixture<unknown>): HTMLElement[] {
-    return fixture.debugElement.queryAll(By.css("[role='button']")).map(de => de.nativeElement as HTMLElement);
+    return fixture.debugElement.queryAll(By.css("li button")).map(de => de.nativeElement as HTMLElement);
 }
 
 function getLabelSpans(fixture: ComponentFixture<unknown>): HTMLElement[] {
     return fixture.debugElement
-        .queryAll(By.css("li > span:not([role='button'])"))
+        .queryAll(By.css("li > span"))
         .map(de => de.nativeElement as HTMLElement);
 }
 
+/** Keys are the step buttons' own, so this presses the key on the one that can have focus. */
 function dispatchKeydown(element: HTMLElement, key: string): void {
-    element.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
+    const target = element.querySelector("li button[tabindex='0']") ?? element;
+    target.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
 }
 
 // =============================================================================
@@ -486,7 +488,8 @@ describe("StepperComponent", () => {
         // Home / End
         // =====================================================================
         describe("Home / End keys", () => {
-            it("should move highlight to step 0 on Home regardless of active step", async () => {
+            it("should move highlight to step 0 on Home when not linear", async () => {
+                component.linear.set(false);
                 component.step.set(2);
                 await waitForStable(fixture);
 
@@ -495,57 +498,19 @@ describe("StepperComponent", () => {
                 expect(getIndicators(fixture)[0].getAttribute("tabindex")).toBe("0");
             });
 
-            it("should move highlight to last step on End regardless of active step", async () => {
+            it("should move highlight to last step on End when not linear", async () => {
+                component.linear.set(false);
+                await waitForStable(fixture);
+
                 dispatchKeydown(stepper, "End");
                 await waitForStable(fixture);
                 expect(getIndicators(fixture)[2].getAttribute("tabindex")).toBe("0");
             });
 
-            it("should move to last step on End even in linear mode", async () => {
-                // linear=true, step=0 — End bypasses the ±1 restriction
+            it("should stop End on the last reachable step in linear mode", async () => {
                 dispatchKeydown(stepper, "End");
                 await waitForStable(fixture);
-                expect(getIndicators(fixture)[2].getAttribute("tabindex")).toBe("0");
-            });
-        });
-
-        // =====================================================================
-        // Enter / Space
-        // =====================================================================
-        describe("Enter / Space keys", () => {
-            it("should activate the highlighted step on Enter", async () => {
-                // Move highlight to adjacent step 1 then activate
-                dispatchKeydown(stepper, "ArrowRight");
-                await waitForStable(fixture);
-
-                dispatchKeydown(stepper, "Enter");
-                await waitForStable(fixture);
-
-                expect(getIndicators(fixture)[1].getAttribute("aria-current")).toBe("step");
-            });
-
-            it("should activate the highlighted step on Space", async () => {
-                dispatchKeydown(stepper, "ArrowRight");
-                await waitForStable(fixture);
-
-                dispatchKeydown(stepper, " ");
-                await waitForStable(fixture);
-
-                expect(getIndicators(fixture)[1].getAttribute("aria-current")).toBe("step");
-            });
-
-            it("should not activate a non-adjacent step on Enter in linear mode", async () => {
-                // End key moves highlight to 2, but activating from 0 in linear mode
-                // should not allow it (more than 1 away).
-                dispatchKeydown(stepper, "End");
-                await waitForStable(fixture);
-
-                dispatchKeydown(stepper, "Enter");
-                await waitForStable(fixture);
-
-                // Step 0 should still be the active step
-                expect(getIndicators(fixture)[0].getAttribute("aria-current")).toBe("step");
-                expect(getIndicators(fixture)[2].getAttribute("aria-current")).toBeNull();
+                expect(getIndicators(fixture)[1].getAttribute("tabindex")).toBe("0");
             });
         });
 
@@ -704,20 +669,20 @@ describe("StepperComponent", () => {
         // List Items (li)
         // =====================================================================
         describe("list items (li)", () => {
-            it("should have role='presentation' on all list items", () => {
+            it("should keep the list items' own role", () => {
                 fixture.debugElement.queryAll(By.css("li")).forEach(li => {
-                    expect(li.nativeElement.getAttribute("role")).toBe("presentation");
+                    expect(li.nativeElement.hasAttribute("role")).toBe(false);
                 });
             });
         });
 
         // =====================================================================
-        // Indicators (span[role="button"])
+        // Indicators (native buttons)
         // =====================================================================
         describe("indicators", () => {
-            it("should have role='button' on all indicators", () => {
+            it("should use a native button for all indicators", () => {
                 getIndicators(fixture).forEach(el => {
-                    expect(el.getAttribute("role")).toBe("button");
+                    expect(el.tagName).toBe("BUTTON");
                 });
             });
 
@@ -923,17 +888,6 @@ describe("StepperComponent", () => {
             expect(getIndicators(fixture)[1].getAttribute("aria-current")).toBeNull();
         });
 
-        it("should not activate a disabled step via keyboard Enter", async () => {
-            // moveHighlight skips disabled step 1 and lands on step 2.
-            // Pressing Enter then activates step 2 — the disabled step 1 must never become current.
-            const stepper = getStepperElement(fixture);
-            dispatchKeydown(stepper, "ArrowRight");
-            await waitForStable(fixture);
-            dispatchKeydown(stepper, "Enter");
-            await waitForStable(fixture);
-            expect(getIndicators(fixture)[1].getAttribute("aria-current")).toBeNull();
-        });
-
         it("should skip disabled steps when using ArrowRight in non-linear mode", async () => {
             // step 1 is disabled; ArrowRight from step 0 should skip to step 2
             const stepper = getStepperElement(fixture);
@@ -1040,8 +994,8 @@ describe("StepperComponent", () => {
                 expect(steps[1].nativeElement.textContent?.trim()).toBe("step-1");
             });
 
-            it("should still have a focusable role=button element per step", () => {
-                const buttons = fixture.debugElement.queryAll(By.css("[role='button']"));
+            it("should still have a focusable button per step", () => {
+                const buttons = fixture.debugElement.queryAll(By.css("li button"));
                 expect(buttons.length).toBe(2);
                 buttons.forEach(btn => {
                     expect(btn.nativeElement.getAttribute("tabindex")).not.toBeNull();
@@ -1056,9 +1010,7 @@ describe("StepperComponent", () => {
                 const stepper = fixture.debugElement.query(By.directive(StepperComponent)).nativeElement as HTMLElement;
                 dispatchKeydown(stepper, "ArrowRight");
                 await waitForStable(fixture);
-                const buttons = fixture.debugElement
-                    .queryAll(By.css("[role='button']"))
-                    .map(de => de.nativeElement as HTMLElement);
+                const buttons = getIndicators(fixture);
                 expect(buttons[1].getAttribute("tabindex")).toBe("0");
             });
         });

@@ -7,7 +7,7 @@ Tabs organizes related content into named panels and shows one panel at a time. 
 - Content naturally divides into a small, fixed set of named sections that share the same context (for example, "Login" and "Register" panels in the same card).
 - Only one section needs to be visible at a time, and switching between them should not navigate to a different route.
 
-Tabs is not a routing mechanism. Switching tabs does not change the URL, and there is no built-in way to deep-link to a specific tab.
+Tabs is not a routing mechanism. Switching tabs does not change the URL. To deep-link to a tab, read the route yourself and bind `selectedIndex`, or `selected` on the tab.
 
 ## Import & Quick Start
 
@@ -16,8 +16,8 @@ import { TabComponent, TabContentTemplateDirective, TabsComponent } from "@nanah
 ```
 
 ```html
-<mona-tabs>
-    <mona-tab title="Profile" [selected]="true">
+<mona-tabs aria-label="Account">
+    <mona-tab title="Profile">
         <ng-template monaTabContentTemplate>
             <p>Profile content.</p>
         </ng-template>
@@ -55,9 +55,27 @@ Each structural directive below is an `ng-template` placed as projected content 
 
 ## Feature Examples
 
+### Setting the selected tab
+
+`selectedIndex` is the zero-based index of the selected tab, and works two-way. Writing it selects that tab. A disabled or out-of-range index is refused, and the value goes back to the selected tab's index. If the tabs haven't arrived yet, the index waits for them.
+
+```html
+<mona-tabs [(selectedIndex)]="activeTab">
+    <mona-tab title="Account"><ng-template monaTabContentTemplate>...</ng-template></mona-tab>
+    <mona-tab title="Security"><ng-template monaTabContentTemplate>...</ng-template></mona-tab>
+</mona-tabs>
+<button monaButton (click)="activeTab.set(1)">Review security</button>
+```
+
+`selected` on a `mona-tab` does the same from the tab's side, which suits tabs added conditionally, where the index isn't known. `[(selected)]` follows the selection. Setting it to `true` selects the tab unless it's disabled. Setting it to `false` is refused, because the group always keeps one tab selected, and the value goes back to `true`. If several tabs are flagged at once, the first wins. Use one or the other: when both are set at the start, `selected` wins.
+
+With nothing set, the first enabled tab is selected. When every tab is disabled, none is.
+
+`selectedIndexChange` fires for every change, including the ones the component makes itself. `tabSelect` fires only before a click or key selects a tab.
+
 ### Closable tabs
 
-`closable` on `mona-tabs` shows a close button on every tab. A tab's own `closable` input, when `true`, shows a close button for that tab even if the parent's `closable` is `false` — see [`closable` precedence](#closable-precedence).
+`closable` on `mona-tabs` shows a close button on every tab. A tab's own `closable` input, when `true`, shows a close button for that tab even if the parent's `closable` is `false` — see [`closable` and `disabled` on a tab and its parent](#closable-and-disabled-on-a-tab-and-its-parent).
 
 ```html
 <mona-tabs closable (tabClose)="onTabClose($event)">
@@ -80,11 +98,11 @@ Closing a tab is entirely the consumer's responsibility — see [Tabs are remove
 
 ### Disabled tabs
 
-`disabled` on `mona-tabs` disables every tab. `disabled` on an individual `mona-tab` disables only that tab, even if the parent's `disabled` is `false`. A disabled tab cannot be selected or closed by pointer or keyboard.
+`disabled` on `mona-tabs` disables every tab. `disabled` on an individual `mona-tab` disables only that tab, even if the parent's `disabled` is `false`. A disabled tab cannot be selected or closed by pointer or keyboard. A tab that becomes disabled while it's selected stays selected until something else is chosen, so its panel doesn't disappear from under the user.
 
 ```html
 <mona-tabs>
-    <mona-tab title="Available" [selected]="true">
+    <mona-tab title="Available">
         <ng-template monaTabContentTemplate>Available content.</ng-template>
     </mona-tab>
     <mona-tab title="Locked" [disabled]="true">
@@ -153,7 +171,7 @@ For compact value selection that does not switch panels — `List | Grid`, `Day 
 
 ### Reacting to and canceling tab selection
 
-`tabSelect` emits before the newly clicked or keyboard-activated tab becomes active. Calling `preventDefault()` on the emitted `TabSelectEvent` keeps the current tab selected.
+`tabSelect` emits before the newly clicked or keyboard-activated tab becomes active. Calling `preventDefault()` on the emitted `TabSelectEvent` keeps the current tab selected. Arrow keys still move focus to a tab you veto, so the keyboard can reach the tabs after it.
 
 ```html
 <mona-tabs (tabSelect)="onTabSelect($event)">
@@ -174,23 +192,31 @@ protected onTabSelect(event: TabSelectEvent): void {
 
 ### Tabs are removed by the consumer, not by `TabsComponent`
 
-`TabsComponent` does not remove a `<mona-tab>` from the DOM when it is closed. `tabClose` only notifies the consumer that a close was requested (by clicking the close button or pressing Delete/Backspace on the selected tab); the consumer is responsible for removing the corresponding tab from whatever collection drives the projected `<mona-tab>` elements (typically an `@for` loop).
+`TabsComponent` does not remove a `<mona-tab>` from the DOM when it is closed. `tabClose` only notifies the consumer that a close was requested (by clicking the close button or pressing Delete/Backspace on a tab); the consumer is responsible for removing the corresponding tab from whatever collection drives the projected `<mona-tab>` elements (typically an `@for` loop).
 
-### `tabClose` is not currently preventable
+### What happens when the selected tab goes away
 
-`TabCloseEvent` extends `PreventableEvent` and exposes `preventDefault()`/`isDefaultPrevented()`, but no code path in `TabsComponent` or the internal tab list reads `isDefaultPrevented()` for close events. Calling `preventDefault()` in a `tabClose` handler has no effect on the component's own behavior. `TODO(owner-review): confirm whether tabClose is intended to be preventable, and either wire it up or update TabCloseEvent's documented contract.`
+The next enabled tab is selected, or the nearest enabled one before it when there's none after. `selectedIndexChange` reports it, and `tabSelect` doesn't fire. If focus was on the removed tab or its close button, it moves to the selected tab. If it had already left the tab strip, it stays where it is.
 
-### `selected` does not currently drive the active tab
+### `tabClose` has nothing to prevent
 
-Each `mona-tab` accepts a two-way `selected` model. `TabsComponent` selects the first tab by default and does not read `selected` when determining which tab starts active or when reacting to later changes. There is currently no public API to set the active tab programmatically from outside the component; the active tab changes only through the widget's own click and keyboard handling. `TODO(owner-review): confirm the intended purpose of selected, or expose a supported way to set the active tab programmatically.`
+`TabCloseEvent` extends `PreventableEvent`, like the other events, but since the component never removes a tab, there's no default action. Calling `preventDefault()` in a `tabClose` handler has no effect. To refuse a close, don't remove the tab.
 
-### `closable` precedence
+### `closable` and `disabled` on a tab and its parent
 
-A tab's own `closable` input always wins when it disagrees with the parent `mona-tabs`'s `closable`: setting a tab's `closable` to `true` shows its close button even if the parent's `closable` is `false`. There is no equivalent per-tab override to hide the close button on one tab when the parent's `closable` is `true`.
+A tab shows a close button when either its own `closable` or the parent's is on, and is disabled when either `disabled` is on. A tab can't opt out of what its parent turns on: there is no way to hide the close button on one tab when the parent's `closable` is `true`.
+
+### Panels are kept by tab, not by value
+
+Changing a tab's `title`, `disabled` or `closable` leaves its panel and everything in it alone, including what's been typed there. Only removing the `mona-tab` itself destroys the panel.
+
+### Lazy content
+
+`keepTabContent` is all or nothing: `true` creates every panel's content at the start, and `false` destroys content on each switch. There's no mode that renders on first visit and then keeps it. For heavy content in a tab, use `@if` inside the template with your own "has been visited" flag.
 
 ### Scrolling is automatic and pointer-only
 
-When the tab strip overflows its container, scroll buttons appear automatically — this is not controlled by a public input. Top and bottom strips overflow horizontally (left/right scroll buttons); left and right strips overflow vertically (up/down scroll buttons). The scroll buttons are hidden from assistive technology and are not a Tab stop. Keyboard users can still reach tabs outside the visible area because moving focus with the arrow keys scrolls the newly focused tab into view.
+When the tab strip overflows its container, scroll buttons appear automatically — this is not controlled by a public input. Top and bottom strips overflow horizontally (left/right scroll buttons); left and right strips overflow vertically (up/down scroll buttons). The scroll buttons are hidden from assistive technology and are not a Tab stop. Keyboard users can still reach tabs outside the visible area because moving focus with the arrow keys scrolls the newly focused tab into view. A tab selected by code is scrolled into view within the strip, without scrolling the page. Scroll buttons don't animate when the user asks for reduced motion.
 
 ### Vertical layout constraints
 
@@ -205,31 +231,40 @@ A left or right tab strip needs a constrained available height. If the strip is 
 | `ArrowLeft` / `ArrowRight` (top/bottom)        | Select the previous/next enabled tab, wrapping around at the ends. Disabled tabs are skipped. |
 | `ArrowUp` / `ArrowDown` (left/right)           | Select the previous/next enabled tab, wrapping around at the ends. Disabled tabs are skipped. |
 | `Home` / `End`                                 | Select the first/last enabled tab.                                                            |
-| `Delete` / `Backspace`                         | Close the selected tab, if it is closable and not disabled.                                   |
-| `Tab`                                          | Moves focus from the selected tab into its panel.                                             |
+| `Delete` / `Backspace`                         | Close the tab that has focus, if it is closable and not disabled.                             |
+| `Tab`                                          | Moves focus from the tab strip into the selected tab's panel.                                 |
 | `Shift+Tab` (while the panel itself has focus) | Moves focus back to the selected tab.                                                         |
 
-The close button on each tab is not a Tab stop; keyboard users close the active tab with `Delete`/`Backspace` instead of activating the close button directly.
+These keys are left to the browser when `Alt`, `Ctrl` or `Meta` is held, so `Alt+ArrowLeft` still goes back, and when `Shift` is held on the arrows.
+
+The close button on each tab is not a Tab stop; keyboard users close a tab with `Delete`/`Backspace` instead of activating the close button directly.
+
+A vetoed tab can have focus without being selected. `Tab` still goes to the selected tab's panel, and coming back lands on the selected tab.
 
 ### Focus
 
-The selected tab is the only tab in the Tab order (`tabindex="0"`); all other tabs have `tabindex="-1"` (roving tabindex). The active panel has `tabindex="0"` and becomes a Tab stop while visible.
+The selected tab is the only tab in the Tab order (`tabindex="0"`); all other tabs have `tabindex="-1"` (roving tabindex). The active panel has `tabindex="0"` and becomes a Tab stop while visible. Both show a solid outline when focused from the keyboard, drawn inside their edges because the strip and the content area clip anything outside them.
 
 ### ARIA
 
 | Element  | Attribute          | When present                                                   | Value                                                                                    |
 |----------|--------------------|----------------------------------------------------------------|------------------------------------------------------------------------------------------|
 | Tab list | `role`             | Always                                                         | `"tablist"`                                                                              |
+| Tab list | `aria-label`       | When the `aria-label` input is set                             | The input's value                                                                        |
+| Tab list | `aria-labelledby`  | When the `aria-labelledby` input is set                        | The input's value                                                                        |
 | Tab list | `aria-orientation` | Always                                                         | `"horizontal"` for top/bottom positions, `"vertical"` for left/right                     |
 | Tab      | `role`             | Always                                                         | `"tab"`                                                                                  |
 | Tab      | `aria-selected`   | Always                                                         | Reflects whether the tab is the active tab                                               |
 | Tab      | `aria-disabled`   | Always                                                         | Reflects the tab's effective disabled state (own `disabled`, or the parent's `disabled`) |
 | Tab      | `aria-controls`   | Always                                                         | The corresponding panel's element id                                                     |
+| Tab      | `aria-keyshortcuts` | The tab can close and isn't disabled                         | `"Delete Backspace"`                                                                     |
 | Panel    | `role`            | Always                                                         | `"tabpanel"`                                                                             |
 | Panel    | `aria-hidden`     | `keepTabContent` is `true` and the panel is not the active one | `"true"`                                                                                 |
 | Panel    | `aria-labelledby` | Always                                                         | The corresponding tab's element id                                                       |
 
-The close button on each tab is icon-only and does not currently expose an accessible name via `aria-label` or visually hidden text. `TabsComponent` does not expose an `aria-label`/`aria-labelledby` input for labeling the tab list itself. `TODO(owner-review): confirm whether the close button needs an accessible name, and whether the tab list should expose a label input.`
+Give the tab list a name with `aria-label` or `aria-labelledby` on `mona-tabs` when the page has more than one set of tabs, or when nothing nearby says what they're for. The inputs go to the tab list, not the host.
+
+A tab list may only contain tabs, and a tab's content is presentational, so a close button can't be exposed in either place. The visible close button sits beside the tab, for the pointer, and is hidden from assistive technology. Each closable tab also gets a visually hidden button after the tab list, named "Close tab" plus the tab's title, which screen readers can reach and activate, including on touch devices. Its text comes from `closeTab` in the `tabs` messages.
 
 ### Form Interaction
 
@@ -245,19 +280,23 @@ Not applicable. `TabsComponent` and `TabComponent` are not form controls and do 
 
 | Name             | Type                                                 | Default    | Description                                                                                                                                                                     |
 |------------------|------------------------------------------------------|------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `aria-label`     | `string`                                             | `""`       | Accessible name for the tab list.                                                                                                                                               |
+| `aria-labelledby` | `string`                                            | `""`       | The id of an element that names the tab list. Takes precedence over `aria-label`.                                                                                               |
 | `class`          | `string`                                             | `""`       | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                       |
-| `closable`       | `boolean`                                            | `false`    | Displays a close button on each tab, unless overridden per tab — see [`closable` precedence](#closable-precedence).                                                             |
+| `closable`       | `boolean`                                            | `false`    | Displays a close button on each tab — see [`closable` and `disabled` on a tab and its parent](#closable-and-disabled-on-a-tab-and-its-parent).                                  |
 | `disabled`       | `boolean`                                            | `false`    | Renders every tab with reduced visual emphasis and removes pointer and keyboard interaction.                                                                                    |
 | `keepTabContent` | `boolean`                                            | `true`     | Keeps a tab's content in the DOM after it is deselected instead of removing it — see [Preserving tab content when switching tabs](#preserving-tab-content-when-switching-tabs). |
 | `position`       | `"top" \| "bottom" \| "left" \| "right"`             | `"top"`    | Placement of the tab list relative to the tab content — see [Position](#position).                                                                                              |
+| `selectedIndex`  | `number`                                             | `0`        | Two-way bindable. The index of the selected tab — see [Setting the selected tab](#setting-the-selected-tab).                                                                    |
 | `size`           | `"small" \| "medium" \| "large"`                     | `"medium"` | Size preset controlling the tabs' dimensions.                                                                                                                                   |
 
 #### Outputs
 
-| Name        | Type             | Description                                                                                                                                                                                                                                           |
-|-------------|------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `tabClose`  | `TabCloseEvent`  | Emitted when a tab close is requested — see [Tabs are removed by the consumer, not by `TabsComponent`](#tabs-are-removed-by-the-consumer-not-by-tabscomponent) and [`tabClose` is not currently preventable](#tabclose-is-not-currently-preventable). |
-| `tabSelect` | `TabSelectEvent` | Emitted before a tab becomes active. Cancelable — see [Reacting to and canceling tab selection](#reacting-to-and-canceling-tab-selection).                                                                                                            |
+| Name                  | Type             | Description                                                                                                                                                                                                                       |
+|-----------------------|------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `selectedIndexChange` | `number`         | Emitted for every change of the selected tab, including the ones the component makes itself.                                                                                                                                     |
+| `tabClose`            | `TabCloseEvent`  | Emitted when a tab close is requested — see [Tabs are removed by the consumer, not by `TabsComponent`](#tabs-are-removed-by-the-consumer-not-by-tabscomponent) and [`tabClose` has nothing to prevent](#tabclose-has-nothing-to-prevent). |
+| `tabSelect`           | `TabSelectEvent` | Emitted before a click or key selects a tab. Cancelable — see [Reacting to and canceling tab selection](#reacting-to-and-canceling-tab-selection).                                                                                |
 
 ---
 
@@ -269,12 +308,16 @@ Not applicable. `TabsComponent` and `TabComponent` are not form controls and do 
 
 | Name       | Type      | Default | Description                                                                                                                                                  |
 |------------|-----------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `closable` | `boolean` | `false` | Displays a close button on this tab. Overrides the parent `mona-tabs` component's `closable` input.                                                          |
-| `disabled` | `boolean` | `false` | Renders this tab with reduced visual emphasis and removes pointer and keyboard interaction. Overrides the parent `mona-tabs` component's `disabled` input.   |
-| `selected` | `boolean` | `false` | Two-way bindable. Whether the tab is selected — see [`selected` does not currently drive the active tab](#selected-does-not-currently-drive-the-active-tab). |
+| `closable` | `boolean` | `false` | Displays a close button on this tab, even when the parent's `closable` is off.                                                                               |
+| `disabled` | `boolean` | `false` | Renders this tab with reduced visual emphasis and removes pointer and keyboard interaction, even when the parent's `disabled` is off.                        |
+| `selected` | `boolean` | `false` | Two-way bindable. Whether the tab is selected — see [Setting the selected tab](#setting-the-selected-tab).                                                   |
 | `title`    | `string`  | `""`    | Title text displayed on the tab. Ignored when a `monaTabTitleTemplate` is provided.                                                                          |
 
-No outputs.
+#### Outputs
+
+| Name             | Type      | Description                                             |
+|------------------|-----------|---------------------------------------------------------|
+| `selectedChange` | `boolean` | Emitted when the tab becomes selected or stops being it. |
 
 ---
 
@@ -327,10 +370,10 @@ Extends `PreventableEvent`.
 - [x] Keyboard map verified against tab-list.component.ts's handleKeyboardEvents (ArrowLeft/ArrowRight/ArrowUp/ArrowDown via getNavigationDirection based on orientation, Home/End filtered to enabled tabs, Delete/Backspace guarded by disabled/closable) and tabs.component.ts's handlePanelKeyDown (Shift+Tab only when event.target === event.currentTarget)
 - [x] Roving tabindex and panel tabindex verified against tab-list.component.html ([tabindex]="selected ? 0 : -1") and tabs.component.html (tabindex="0" on the panel)
 - [x] ARIA table verified against tab-list.component.html (role="tablist" on the <ul>, [attr.aria-orientation]="orientation()", role="tab", aria-selected, aria-disabled, aria-controls) and tabs.component.html (role="tabpanel", aria-hidden, aria-labelledby, id); getTabOrientation maps top/bottom to horizontal and left/right to vertical
-- [x] Close button icon-only/no accessible name verified: no aria-label or visually hidden text in the close <button> in tab-list.component.html; flagged as owner-review rather than asserted as intentional
-- [x] "tabClose is not preventable" verified: emitTabClose's return value (tabCloseEvent.isDefaultPrevented()) is discarded by both call sites (onTabClose, and the Delete/Backspace branch of handleKeyboardEvents) in tab-list.component.ts
-- [x] "selected does not drive the active tab" verified: grepped all reads of `.selected` in projects/mona-ui/src/lib/layout/tabs — the only read is inside tab.component.ts's own #tabItem computed; selectedTabId's linkedSignal computation in tabs.component.ts does not reference tab.selected
-- [x] "closable precedence" verified against tab-list.component.html's close button *ngIf-equivalent condition (tab.closable || closable()) and the Delete/Backspace guard in tab-list.component.ts
+- [x] Close buttons verified against tab-list.component.html: the visible one is aria-hidden beside the tab, the hidden one sits outside the tablist with aria-labelledby; axe runs in tabs-behavior.spec.ts
+- [x] "tabClose has nothing to prevent" verified: the component never removes a tab, and tab-list.component.ts doesn't read isDefaultPrevented() on the close event
+- [x] Selection verified against tabs-behavior.spec.ts: selectedIndex and selected both ways, neighbor on removal, focus after removal
+- [x] closable and disabled verified against tab-list.component.html's (tab.closable || closable()) and (tab.disabled || disabled())
 - [x] Automatic scrolling (horizontal for top/bottom, vertical for left/right) and scroll button aria-hidden/tabindex=-1 verified against tab-list.component.ts's ResizeObserver-driven overflowControlsVisible signal, updateScrollVisibility (scrollWidth/scrollHeight), performScroll (scrollBy left/top), and tab-list.component.html's scroll button markup
 - [x] Vertical layout constraints verified against tabs.styles.ts position recipes and the left/right overflow detection path (scrollHeight > clientHeight)
 - [x] Form interaction "not applicable" verified: no ControlValueAccessor, NG_VALUE_ACCESSOR provider, formField input, or signal-forms control interface implemented by TabsComponent or TabComponent

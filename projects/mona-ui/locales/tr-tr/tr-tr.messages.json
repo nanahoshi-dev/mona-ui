@@ -3,7 +3,8 @@
         "clear": "Temizle"
     },
     "breadcrumb": {
-        "breadcrumb": "İçerik haritası"
+        "breadcrumb": "İçerik haritası",
+        "showFullPath": "Tam yolu göster"
     },
     "buttonGroup": {
         "buttonGroup": "Düğme grubu"
@@ -448,6 +449,9 @@
         "resizer": "Panel ayırıcı"
     },
     "stepper": {
+        "stepCompleted": "Tamamlandı",
+        "stepInvalid": "Hata içeriyor",
+        "stepPosition": "Adım {current}/{total}",
         "stepProgress": "Adım ilerlemesi",
         "stepper": "Adımlar"
     },

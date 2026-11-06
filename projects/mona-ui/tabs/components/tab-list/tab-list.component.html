@@ -1,6 +1,7 @@
 @if (overflowControlsVisible()) {
     <button
         monaButton
+        type="button"
         look="link"
         size="small"
         [class]="scrollButtonClass()"
@@ -19,40 +20,57 @@
     </button>
 }
 <div [class]="listWrapperClass()">
-    <ul [class]="listClass()" #tabListElement role="tablist" [attr.aria-orientation]="orientation()">
-        @for (tab of tabList(); track tab) {
+    <ul
+        [class]="listClass()"
+        #tabListElement
+        role="tablist"
+        [attr.aria-label]="ariaLabel() || null"
+        [attr.aria-labelledby]="ariaLabelledBy() || null"
+        [attr.aria-orientation]="orientation()">
+        @for (tab of tabList(); track tab.id) {
             @let selected = tab.id === selectedTabId();
             @let itemDisabled = tab.disabled || disabled();
+            @let tabClosable = tab.closable || closable();
             <li
                 monaTabListItem
-                [id]="tab.id + '-tab'"
                 [active]="selected"
                 [disabled]="itemDisabled"
                 [position]="position()"
                 [size]="size()"
-                role="tab"
-                [tabindex]="selected ? 0 : -1"
-                [attr.aria-selected]="selected"
-                [attr.aria-disabled]="itemDisabled"
-                [attr.aria-controls]="tab.id + '-panel'"
+                role="presentation"
                 [attr.data-selected]="selected"
-                [attr.data-tab-id]="tab.id"
-                (click)="onTabClick(tab, tabListElement, $event)">
-                <div>
-                    @if (tab.titleTemplate) {
-                        <ng-container [ngTemplateOutlet]="tab.titleTemplate"></ng-container>
-                    } @else {
-                        <span>{{ tab.title }}</span>
-                    }
+                [attr.data-tab-id]="tab.id">
+                <div
+                    #tabElement
+                    [class]="tabClass()"
+                    [id]="tab.id + '-tab'"
+                    role="tab"
+                    [tabindex]="selected ? 0 : -1"
+                    [attr.aria-selected]="selected"
+                    [attr.aria-disabled]="itemDisabled"
+                    [attr.aria-controls]="tab.id + '-panel'"
+                    [attr.aria-keyshortcuts]="tabClosable && !itemDisabled ? 'Delete Backspace' : null"
+                    (click)="onTabClick(tab, $event)">
+                    <div>
+                        @if (tab.titleTemplate) {
+                            <ng-container [ngTemplateOutlet]="tab.titleTemplate"></ng-container>
+                        } @else {
+                            <span>{{ tab.title }}</span>
+                        }
+                    </div>
                 </div>
-                @if (tab.closable || closable()) {
+                @if (tabClosable) {
+                    <!-- For the pointer. A button assistive technology can see isn't allowed inside a tablist. -->
                     <button
                         monaButton
+                        type="button"
                         look="link"
+                        data-tab-close
                         [disabled]="itemDisabled"
+                        [attr.aria-hidden]="true"
                         [attr.aria-label]="messages().closeTab"
                         (click)="onTabClose(tab, $event)"
-                        class="px-0 h-fit ms-1 w-min"
+                        [class]="closeButtonClass()"
                         tabindex="-1">
                         <svg lucideX [size]="16"></svg>
                     </button>
@@ -61,9 +79,28 @@
         }
     </ul>
 </div>
+@if (hasClosableTabs()) {
+    <!-- The same action for assistive technology, outside the tablist. The keyboard's route is Delete. -->
+    <div class="sr-only">
+        @for (tab of tabList(); track tab.id) {
+            @if (tab.closable || closable()) {
+                <button
+                    type="button"
+                    tabindex="-1"
+                    [id]="tab.id + '-close'"
+                    [disabled]="tab.disabled || disabled()"
+                    [attr.aria-label]="messages().closeTab"
+                    [attr.aria-labelledby]="tab.id + '-close ' + tab.id + '-tab'"
+                    [attr.data-tab-id]="tab.id"
+                    (click)="onTabClose(tab, $event)"></button>
+            }
+        }
+    </div>
+}
 @if (overflowControlsVisible()) {
     <button
         monaButton
+        type="button"
         look="link"
         size="small"
         [class]="scrollButtonClass()"

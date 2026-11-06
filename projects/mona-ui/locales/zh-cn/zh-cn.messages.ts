@@ -12,7 +12,8 @@ export const ZH_CN_MESSAGES = {
         clear: "清除"
     },
     breadcrumb: {
-        breadcrumb: "面包屑导航"
+        breadcrumb: "面包屑导航",
+        showFullPath: "显示完整路径"
     },
     buttonGroup: {
         buttonGroup: "按钮组"
@@ -473,6 +474,10 @@ export const ZH_CN_MESSAGES = {
         resizer: "调整大小手柄"
     },
     stepper: {
+        stepCompleted: "已完成",
+        stepInvalid: "有错误",
+        stepPosition: (current: number, total: number) =>
+            `第 ${localizeNumber(current)} 步，共 ${localizeNumber(total)} 步`,
         stepProgress: "步骤进度",
         stepper: "步骤指示器"
     },

@@ -463,6 +463,12 @@ export const ALLOWLIST: AllowlistEntry[] = [
     // Manual review exemptions for directional gradients, translate transforms, and DOM/coordinate operations
     {
         category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/tabs/components/tab-list/tab-list.component.ts",
+        lineSnippet: "tabRect.left - listRect.left",
+        reason: "Compares on-screen edges to get the on-screen delta scrollBy takes, which holds in either direction"
+    },
+    {
+        category: "rtl-manual-review",
         filePattern: "projects/mona-ui/color-gradient/styles/color-gradient.styles.ts",
         lineSnippet: "linear-gradient(to_right",
         reason: "Color picker gradient coordinate space is physical 2D hue/saturation mapping"

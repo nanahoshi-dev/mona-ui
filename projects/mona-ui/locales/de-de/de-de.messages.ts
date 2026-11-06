@@ -21,7 +21,8 @@ export const DE_DE_MESSAGES = {
         clear: "Leeren"
     },
     breadcrumb: {
-        breadcrumb: "Breadcrumb-Navigation"
+        breadcrumb: "Breadcrumb-Navigation",
+        showFullPath: "Vollständigen Pfad anzeigen"
     },
     buttonGroup: {
         buttonGroup: "Schaltflächengruppe"
@@ -517,6 +518,10 @@ export const DE_DE_MESSAGES = {
         resizer: "Trennleiste"
     },
     stepper: {
+        stepCompleted: "Abgeschlossen",
+        stepInvalid: "Enthält Fehler",
+        stepPosition: (current: number, total: number) =>
+            `Schritt ${localizeNumber(current)} von ${localizeNumber(total)}`,
         stepProgress: "Schrittfortschritt",
         stepper: "Schrittanzeige"
     },

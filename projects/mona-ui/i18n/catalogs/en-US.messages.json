@@ -3,7 +3,8 @@
         "clear": "Clear"
     },
     "breadcrumb": {
-        "breadcrumb": "Breadcrumb"
+        "breadcrumb": "Breadcrumb",
+        "showFullPath": "Show full path"
     },
     "buttonGroup": {
         "buttonGroup": "Button group"
@@ -448,6 +449,9 @@
         "resizer": "Resizer"
     },
     "stepper": {
+        "stepCompleted": "Completed",
+        "stepInvalid": "Has errors",
+        "stepPosition": "Step {current} of {total}",
         "stepProgress": "Step progress",
         "stepper": "Progress"
     },

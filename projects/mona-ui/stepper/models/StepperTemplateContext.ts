@@ -1,4 +1,4 @@
-import type { StepOptions } from "./Step";
+import type { StepOptions, StepState } from "./Step";
 
 export interface StepperTemplateContext<T = unknown> {
     /** @description The step's options object (also available as the implicit binding). */
@@ -15,4 +15,10 @@ export interface StepperTemplateContext<T = unknown> {
 
     /** @description Zero-based index of this step. */
     index: number;
+
+    /** @description Whether this step has errors. */
+    invalid: boolean;
+
+    /** @description Where this step stands: `current`, `completed`, `upcoming` or `disabled`. */
+    state: StepState;
 }

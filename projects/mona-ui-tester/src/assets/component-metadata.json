@@ -219,14 +219,21 @@
         "defaultValue": "false"
       },
       {
-        "description": "Reflects whether the parent breadcrumb is disabled. Controls compound disabled styling when only individual items are disabled.",
-        "kind": "input",
-        "name": "listDisabled",
-        "type": "boolean",
-        "defaultValue": "false"
-      },
-      {
         "description": "Additional CSS classes merged onto the breadcrumb item via `tailwind-merge`.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "alias": "class",
+        "defaultValue": "\"\""
+      }
+    ]
+  },
+  "BreadcrumbLinkDirective": {
+    "name": "BreadcrumbLinkDirective",
+    "selector": "\"a[monaBreadcrumbLink]\"",
+    "inputs": [
+      {
+        "description": "Additional CSS classes merged onto the link via `tailwind-merge`.",
         "kind": "input",
         "name": "userClass",
         "type": "string",
@@ -1770,19 +1777,12 @@
   },
   "StepperIndicatorDirective": {
     "name": "StepperIndicatorDirective",
-    "selector": "\"span[monaStepperIndicator]\"",
+    "selector": "\"button[monaStepperIndicator]\"",
     "inputs": [
       {
         "description": "",
         "kind": "input",
-        "name": "active",
-        "type": "boolean",
-        "required": true
-      },
-      {
-        "description": "",
-        "kind": "input",
-        "name": "focused",
+        "name": "invalid",
         "type": "boolean",
         "required": true
       },
@@ -1791,6 +1791,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "StepperVariantProps[\"rounded\"]",
+        "required": true
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "state",
+        "type": "StepState",
         "required": true
       }
     ]
@@ -2542,6 +2549,20 @@
         "defaultValue": "false"
       },
       {
+        "description": "Treats the last item as the current page: not a button, and marked `aria-current=\"page\"`. Turn it off\nfor a trail that ends before the page you're on.",
+        "kind": "input",
+        "name": "lastItemCurrent",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "The most items to show before the middle of the trail collapses behind a button that shows it again.\nThe first and last items always stay, so anything below 2 counts as 2. `null` never collapses.",
+        "kind": "input",
+        "name": "maxItems",
+        "type": "number | null",
+        "defaultValue": "null"
+      },
+      {
         "description": "Additional CSS classes merged onto the breadcrumb list via `tailwind-merge`.",
         "kind": "input",
         "name": "userClass",
@@ -2563,10 +2584,10 @@
         "defaultValue": "false"
       },
       {
-        "description": "Emitted when the item is clicked or activated via keyboard.\r\nNot emitted when this is the last (current-page) item or when the item is disabled.",
+        "description": "Emitted with the click when the item is clicked or activated via keyboard.\nNot emitted when this is the current-page item or when the item is disabled.",
         "kind": "output",
         "name": "itemClick",
-        "type": "void"
+        "type": "MouseEvent"
       }
     ]
   },
@@ -15203,6 +15224,12 @@
         "defaultValue": "0"
       },
       {
+        "description": "Emitted before a click or key changes the step. Call `preventDefault()` to stay on the current step,\nfor example while its form is invalid. It doesn't fire when `step` is written from outside.",
+        "kind": "output",
+        "name": "stepSelect",
+        "type": "StepSelectEvent"
+      },
+      {
         "description": "Sets the steps of the stepper.",
         "kind": "input",
         "name": "steps",
@@ -15329,21 +15356,21 @@
     "selector": "\"mona-tab\"",
     "inputs": [
       {
-        "description": "Displays a close button on this tab. Overrides the parent `mona-tabs` component's `closable` input.",
+        "description": "Displays a close button on this tab. Turning it on here shows the button even when the parent\n`mona-tabs` has `closable` off; turning it off here doesn't hide a button the parent asked for.",
         "kind": "input",
         "name": "closable",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Renders this tab with reduced visual emphasis and removes pointer and keyboard interaction.\r\nOverrides the parent `mona-tabs` component's `disabled` input.",
+        "description": "Renders this tab with reduced visual emphasis and removes pointer and keyboard interaction. A tab is\ndisabled when this or the parent `mona-tabs` component's `disabled` input is on.",
         "kind": "input",
         "name": "disabled",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Whether the tab is selected.",
+        "description": "Whether the tab is selected. Setting it to `true` selects the tab unless it's disabled, and it\nfollows the selection, so `[(selected)]` stays current. Setting it to `false` doesn't clear the selection, because\na group of tabs always keeps one selected.",
         "kind": "model",
         "name": "selected",
         "type": "boolean",
@@ -15362,6 +15389,20 @@
     "name": "TabListComponent",
     "selector": "\"mona-tab-list\"",
     "inputs": [
+      {
+        "description": "",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
       {
         "description": "",
         "kind": "input",
@@ -15425,7 +15466,23 @@
     "selector": "\"mona-tabs\"",
     "inputs": [
       {
-        "description": "Displays a close button on each tab, unless overridden per tab.",
+        "description": "Accessible name for the tab list.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The id of an element that names the tab list. Takes precedence over `aria-label`.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Displays a close button on each tab. A tab's own `closable` can add a button, not remove this one.",
         "kind": "input",
         "name": "closable",
         "type": "boolean",
@@ -15453,6 +15510,13 @@
         "defaultValue": "\"top\""
       },
       {
+        "description": "The zero-based index of the selected tab. Writing it selects that tab, unless it's disabled or out of\nrange, in which case the value goes back to the selected tab's index. It also changes when the component moves the\nselection itself, such as when the selected tab is removed.",
+        "kind": "model",
+        "name": "selectedIndex",
+        "type": "number",
+        "defaultValue": "0"
+      },
+      {
         "description": "Size preset controlling the tabs' dimensions.",
         "kind": "input",
         "name": "size",
@@ -15460,13 +15524,13 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Emitted with a {@link TabCloseEvent} when a tab is closed.",
+        "description": "Emitted with a {@link TabCloseEvent} when a close is requested. The component doesn't remove the tab:\nremove it from whatever renders the `mona-tab` elements.",
         "kind": "output",
         "name": "tabClose",
         "type": "TabCloseEvent"
       },
       {
-        "description": "Emitted with a {@link TabSelectEvent} when a tab is selected. This event is preventable.",
+        "description": "Emitted with a {@link TabSelectEvent} before a click or key selects a tab. This event is preventable.\nIt doesn't fire for selections made through `selectedIndex` or `selected`, or when the selected tab is removed.",
         "kind": "output",
         "name": "tabSelect",
         "type": "TabSelectEvent"

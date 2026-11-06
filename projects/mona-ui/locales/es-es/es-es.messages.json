@@ -3,7 +3,8 @@
         "clear": "Limpiar"
     },
     "breadcrumb": {
-        "breadcrumb": "Ruta de navegación"
+        "breadcrumb": "Ruta de navegación",
+        "showFullPath": "Mostrar la ruta completa"
     },
     "buttonGroup": {
         "buttonGroup": "Grupo de botones"
@@ -448,6 +449,9 @@
         "resizer": "Separador de paneles"
     },
     "stepper": {
+        "stepCompleted": "Completado",
+        "stepInvalid": "Tiene errores",
+        "stepPosition": "Paso {current} de {total}",
         "stepProgress": "Progreso del paso",
         "stepper": "Progreso"
     },

@@ -14,7 +14,8 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         clear: null
     },
     breadcrumb: {
-        breadcrumb: null
+        breadcrumb: null,
+        showFullPath: null
     },
     buttonGroup: {
         buttonGroup: null
@@ -569,6 +570,12 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         resizer: null
     },
     stepper: {
+        stepCompleted: null,
+        stepInvalid: null,
+        stepPosition: [
+            { name: "current", type: "number" },
+            { name: "total", type: "number" }
+        ],
         stepProgress: null,
         stepper: null
     },

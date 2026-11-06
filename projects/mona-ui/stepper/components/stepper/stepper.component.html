@@ -1,26 +1,30 @@
-<ol [class]="listClass()">
+<ol role="list" [class]="listClass()">
     @for (step of viewSteps(); track step.index) {
         @let active = isStepActive(step);
         @let locked = isStepLocked(step);
-        @let focused = step.index === highlightedStep();
+        @let state = stepState(step);
+        @let invalid = !!step.options.invalid;
         @let options = step.options;
         @let index = step.index;
         @let currentIndex = activeStep()?.index ?? -1;
         @let disabled = !!options.disabled;
+        @let focusable = step.index === highlightedStep();
         <li
             [class]="listItemClass()"
             [class.cursor-pointer]="!locked"
             [class.cursor-not-allowed]="locked"
             [style]="trackItemStyles()"
-            role="presentation"
-            (click)="onStepClick(step)">
+            (click)="onStepClick(step, $event)">
             @if (stepTemplate()) {
-                <span
-                    role="button"
-                    [attr.aria-current]="step.index === activeStep()?.index ? 'step' : undefined"
+                <button
+                    #stepButton
+                    type="button"
+                    [class]="stepButtonClass()"
+                    [attr.aria-current]="state === 'current' ? 'step' : undefined"
+                    [attr.aria-describedby]="descriptionId(step)"
                     [attr.aria-disabled]="locked ? true : undefined"
                     [attr.aria-label]="options.label"
-                    [attr.tabindex]="focused ? 0 : -1"
+                    [attr.tabindex]="focusable ? 0 : -1"
                     (focus)="onIndicatorFocus(step)">
                     <ng-container
                         [ngTemplateOutlet]="stepTemplate()"
@@ -29,20 +33,24 @@
                             index,
                             active,
                             currentIndex,
-                            disabled
+                            disabled,
+                            invalid,
+                            state
                         }"></ng-container>
-                </span>
+                </button>
             } @else {
-                <span
+                <button
+                    #stepButton
                     monaStepperIndicator
+                    type="button"
+                    [invalid]="invalid"
                     [rounded]="rounded()"
-                    [active]="active"
-                    [focused]="focused"
-                    role="button"
-                    [attr.aria-current]="step.index === activeStep()?.index ? 'step' : undefined"
+                    [state]="state"
+                    [attr.aria-current]="state === 'current' ? 'step' : undefined"
+                    [attr.aria-describedby]="descriptionId(step)"
                     [attr.aria-disabled]="locked ? true : undefined"
                     [attr.aria-label]="options.label"
-                    [attr.tabindex]="focused ? 0 : -1"
+                    [attr.tabindex]="focusable ? 0 : -1"
                     (focus)="onIndicatorFocus(step)">
                     @if (indicatorTemplate()) {
                         <ng-container
@@ -52,12 +60,18 @@
                                 index,
                                 active,
                                 currentIndex,
-                                disabled
+                                disabled,
+                                invalid,
+                                state
                             }"></ng-container>
+                    } @else if (invalid) {
+                        <svg lucideCircleAlert [size]="16" aria-hidden="true"></svg>
+                    } @else if (state === "completed") {
+                        <svg lucideCheck [size]="16" aria-hidden="true"></svg>
                     } @else {
                         {{ formatStepNumber(step.index + 1) }}
                     }
-                </span>
+                </button>
             }
             @if (labelTemplate()) {
                 <ng-container
@@ -67,21 +81,38 @@
                         index,
                         active,
                         currentIndex,
-                        disabled
+                        disabled,
+                        invalid,
+                        state
                     }"></ng-container>
             } @else {
-                <span aria-hidden="true">{{ options.label }}</span>
+                <span [class]="labelClass(state)" aria-hidden="true">{{ options.label }}</span>
             }
         </li>
     }
 </ol>
+<!-- Read through aria-describedby, which also works on hidden text. Nothing here is shown or read twice. -->
+<div hidden>
+    @for (step of viewSteps(); track step.index) {
+        <span [id]="descriptionId(step)">
+            <span>{{ positionText(step.index + 1) }}</span>
+            @if (stepState(step) === "completed") {
+                <span> {{ messages().stepCompleted }}</span>
+            }
+            @if (step.options.invalid) {
+                <span> {{ messages().stepInvalid }}</span>
+            }
+        </span>
+    }
+</div>
 <div
     [class]="trackClass()"
     [style]="trackStyles()"
     role="progressbar"
-    [attr.aria-valuenow]="step()"
+    [attr.aria-valuenow]="activeStep()?.index ?? 0"
     [attr.aria-valuemin]="0"
     [attr.aria-valuemax]="progressMax()"
+    [attr.aria-valuetext]="progressText()"
     [attr.aria-label]="progressAriaLabel() || messages().stepProgress">
     <div [class]="trackLineClass()" [style]="trackInnerStyles()"></div>
 </div>
