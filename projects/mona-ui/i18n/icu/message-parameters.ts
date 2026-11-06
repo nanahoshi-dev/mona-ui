@@ -193,30 +193,47 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         removeLabel: [{ name: "label", optional: true, type: "string" }]
     },
     colorGradient: {
+        alpha: null,
+        alphaText: [{ name: "opacity", type: "number" }],
         apply: null,
+        blue: null,
         cancel: null,
         clearColor: null,
+        colorCopied: null,
+        colorGradient: null,
         copyAsHex: null,
         copyAsRgb: null,
         copyColor: null,
+        copyFailed: null,
         currentColor: null,
+        green: null,
+        hexColor: null,
+        hue: null,
         previousColor: null,
+        red: null,
+        saturation: null,
         saturationAndValue: null,
         saturationAndValueText: [
             { name: "saturation", type: "number" },
             { name: "value", type: "number" }
         ],
-        switchColorMode: null
+        switchColorMode: null,
+        value: null
     },
     colorPalette: {
         color: [{ name: "color", type: "string" }],
-        colorPalette: null
+        colorPalette: null,
+        namedColor: [
+            { name: "name", type: "string" },
+            { name: "color", type: "string" }
+        ]
     },
     colorPicker: {
         clearColor: null,
         colorGradientPicker: null,
         colorPalettePicker: null,
-        colorPicker: null
+        colorPicker: null,
+        noColor: null
     },
     comboBox: {
         clear: null

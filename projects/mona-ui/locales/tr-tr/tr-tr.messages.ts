@@ -158,28 +158,42 @@ export const TR_TR_MESSAGES = {
         removeLabel: (label?: string) => (label ? `${label} öğesini kaldır` : "Öğeyi kaldır")
     },
     colorGradient: {
+        alpha: "Alfa kanalı",
+        alphaText: (opacity: number) => `Opaklık %${localizeNumber(opacity)}`,
         apply: "Uygula",
+        blue: "Mavi",
         cancel: "İptal",
         clearColor: "Rengi temizle",
+        colorCopied: "Renk kopyalandı",
+        colorGradient: "Renk gradyanı",
         copyAsHex: "HEX olarak kopyala",
         copyAsRgb: "RGB olarak kopyala",
         copyColor: "Rengi kopyala",
+        copyFailed: "Renk kopyalanamadı",
         currentColor: "Geçerli renk",
+        green: "Yeşil",
+        hexColor: "Onaltılık renk",
+        hue: "Ton",
         previousColor: "Önceki renk",
+        red: "Kırmızı",
+        saturation: "Doygunluk",
         saturationAndValue: "Renk doygunluğu ve değeri",
         saturationAndValueText: (saturation: number, value: number) =>
             `Doygunluk %${localizeNumber(saturation)}, değer %${localizeNumber(value)}`,
-        switchColorMode: "Renk modunu değiştir"
+        switchColorMode: "Renk modunu değiştir",
+        value: "Değer"
     },
     colorPalette: {
         color: (color: string) => `Renk: ${color}`,
-        colorPalette: "Renk paleti"
+        colorPalette: "Renk paleti",
+        namedColor: (name: string, color: string) => `${name}, ${color}`
     },
     colorPicker: {
         clearColor: "Rengi temizle",
         colorGradientPicker: "Renk geçişi seçici",
         colorPalettePicker: "Renk paleti seçici",
-        colorPicker: "Renk seçici"
+        colorPicker: "Renk seçici",
+        noColor: "Renk yok"
     },
     comboBox: {
         clear: "Temizle"

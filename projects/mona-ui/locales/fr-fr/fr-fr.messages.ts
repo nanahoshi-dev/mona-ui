@@ -159,28 +159,42 @@ export const FR_FR_MESSAGES = {
         removeLabel: (label?: string) => (label ? `Retirer ${label}` : "Retirer l’élément")
     },
     colorGradient: {
+        alpha: "Canal alpha",
+        alphaText: (opacity: number) => `Opacité ${localizeNumber(opacity)}\u00A0%`,
         apply: "Appliquer",
+        blue: "Bleu",
         cancel: "Annuler",
         clearColor: "Effacer la couleur",
+        colorCopied: "Couleur copiée",
+        colorGradient: "Dégradé de couleur",
         copyAsHex: "Copier en HEX",
         copyAsRgb: "Copier en RVB",
         copyColor: "Copier la couleur",
+        copyFailed: "Impossible de copier la couleur",
         currentColor: "Couleur actuelle",
+        green: "Vert",
+        hexColor: "Couleur hexadécimale",
+        hue: "Teinte",
         previousColor: "Couleur précédente",
+        red: "Rouge",
+        saturation: "Saturation",
         saturationAndValue: "Saturation et luminosité",
         saturationAndValueText: (saturation: number, value: number) =>
             `Saturation ${localizeNumber(saturation)}\u00A0%, luminosité ${localizeNumber(value)}\u00A0%`,
-        switchColorMode: "Changer de mode colorimétrique"
+        switchColorMode: "Changer de mode colorimétrique",
+        value: "Luminosité"
     },
     colorPalette: {
         color: (color: string) => `Couleur ${color}`,
-        colorPalette: "Palette de couleurs"
+        colorPalette: "Palette de couleurs",
+        namedColor: (name: string, color: string) => `${name}, ${color}`
     },
     colorPicker: {
         clearColor: "Effacer la couleur",
         colorGradientPicker: "Sélecteur de dégradé de couleurs",
         colorPalettePicker: "Sélecteur de palette de couleurs",
-        colorPicker: "Sélecteur de couleur"
+        colorPicker: "Sélecteur de couleur",
+        noColor: "Aucune couleur"
     },
     comboBox: {
         clear: "Effacer"

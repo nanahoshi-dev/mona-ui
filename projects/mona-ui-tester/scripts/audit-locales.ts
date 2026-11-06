@@ -80,6 +80,7 @@ export const LOCALE_COPY_EXCEPTIONS: readonly LocaleCopyException[] = [
     { localeId: "fr-FR", messagePath: "chart.conversion", value: "Conversion" },
     { localeId: "fr-FR", messagePath: "chart.highAbbreviation", value: "H" },
     { localeId: "fr-FR", messagePath: "chart.openAbbreviation", value: "O" },
+    { localeId: "fr-FR", messagePath: "colorGradient.saturation", value: "Saturation" },
     { localeId: "fr-FR", messagePath: "colorGradient.saturationAndValueText", value: "Saturation" },
     { localeId: "fr-FR", messagePath: "dateTimePicker.date", value: "Date" },
     { localeId: "fr-FR", messagePath: "dialog.ok", value: "OK" },

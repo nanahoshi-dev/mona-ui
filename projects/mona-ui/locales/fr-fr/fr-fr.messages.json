@@ -117,27 +117,41 @@
         "removeLabel": "{label, select, undefined {Retirer l’élément} other {Retirer {label}}}"
     },
     "colorGradient": {
+        "alpha": "Canal alpha",
+        "alphaText": "Opacité {opacity} %",
         "apply": "Appliquer",
+        "blue": "Bleu",
         "cancel": "Annuler",
         "clearColor": "Effacer la couleur",
+        "colorCopied": "Couleur copiée",
+        "colorGradient": "Dégradé de couleur",
         "copyAsHex": "Copier en HEX",
         "copyAsRgb": "Copier en RVB",
         "copyColor": "Copier la couleur",
+        "copyFailed": "Impossible de copier la couleur",
         "currentColor": "Couleur actuelle",
+        "green": "Vert",
+        "hexColor": "Couleur hexadécimale",
+        "hue": "Teinte",
         "previousColor": "Couleur précédente",
+        "red": "Rouge",
+        "saturation": "Saturation",
         "saturationAndValue": "Saturation et luminosité",
         "saturationAndValueText": "Saturation {saturation} %, luminosité {value} %",
-        "switchColorMode": "Changer de mode colorimétrique"
+        "switchColorMode": "Changer de mode colorimétrique",
+        "value": "Luminosité"
     },
     "colorPalette": {
         "color": "Couleur {color}",
-        "colorPalette": "Palette de couleurs"
+        "colorPalette": "Palette de couleurs",
+        "namedColor": "{name}, {color}"
     },
     "colorPicker": {
         "clearColor": "Effacer la couleur",
         "colorGradientPicker": "Sélecteur de dégradé de couleurs",
         "colorPalettePicker": "Sélecteur de palette de couleurs",
-        "colorPicker": "Sélecteur de couleur"
+        "colorPicker": "Sélecteur de couleur",
+        "noColor": "Aucune couleur"
     },
     "comboBox": {
         "clear": "Effacer"

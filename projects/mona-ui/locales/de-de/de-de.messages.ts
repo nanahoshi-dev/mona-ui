@@ -159,28 +159,42 @@ export const DE_DE_MESSAGES = {
         removeLabel: (label?: string) => (label ? `${label} entfernen` : "Element entfernen")
     },
     colorGradient: {
+        alpha: "Alphakanal",
+        alphaText: (opacity: number) => `Deckkraft ${localizeNumber(opacity)} %`,
         apply: "Anwenden",
+        blue: "Blau",
         cancel: "Abbrechen",
         clearColor: "Farbe leeren",
+        colorCopied: "Farbe kopiert",
+        colorGradient: "Farbverlauf",
         copyAsHex: "Als HEX kopieren",
         copyAsRgb: "Als RGB kopieren",
         copyColor: "Farbe kopieren",
+        copyFailed: "Farbe konnte nicht kopiert werden",
         currentColor: "Aktuelle Farbe",
+        green: "Grün",
+        hexColor: "Hex-Farbe",
+        hue: "Farbton",
         previousColor: "Vorherige Farbe",
+        red: "Rot",
+        saturation: "Sättigung",
         saturationAndValue: "Sättigung und Helligkeit",
         saturationAndValueText: (saturation: number, value: number) =>
             `Sättigung ${localizeNumber(saturation)} %, Helligkeit ${localizeNumber(value)} %`,
-        switchColorMode: "Farbmodus wechseln"
+        switchColorMode: "Farbmodus wechseln",
+        value: "Helligkeit"
     },
     colorPalette: {
         color: (color: string) => `Farbe ${color}`,
-        colorPalette: "Farbpalette"
+        colorPalette: "Farbpalette",
+        namedColor: (name: string, color: string) => `${name}, ${color}`
     },
     colorPicker: {
         clearColor: "Farbe leeren",
         colorGradientPicker: "Farbverlaufsauswahl",
         colorPalettePicker: "Farbpalettenauswahl",
-        colorPicker: "Farbauswahl"
+        colorPicker: "Farbauswahl",
+        noColor: "Keine Farbe"
     },
     comboBox: {
         clear: "Leeren"

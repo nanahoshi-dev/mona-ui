@@ -1,20 +1,22 @@
 @for (row of colorRows(); track $index; let rowIndex = $index) {
     <div class="contents" role="row">
-        @for (color of row; track $index; let colIndex = $index) {
-            @let i = rowIndex * colorScheme().columns + colIndex;
+        @for (item of row; track $index; let colIndex = $index) {
+            @let i = rowIndex * grid().columns + colIndex;
+            @let label = item.name ? messages().namedColor(item.name, item.color) : messages().color(item.color);
             <div
                 [class]="paletteItemClasses()"
-                [attr.data-selected]="color === value()"
+                [attr.data-selected]="i === selectedIndex()"
                 [attr.data-color-index]="i"
                 [attr.data-readonly]="readonly()"
                 [attr.tabindex]="effectiveDisabled() ? -1 : i === activeColorIndex() ? 0 : -1"
                 [attr.role]="'gridcell'"
-                [attr.aria-label]="messages().color(color)"
+                [attr.title]="label"
+                [attr.aria-label]="label"
                 [attr.aria-disabled]="effectiveDisabled()"
                 [attr.aria-readonly]="readonly()"
-                [attr.aria-selected]="color === value()"
-                [style.background-color]="color"
-                (click)="onColorSelect(color)"
+                [attr.aria-selected]="i === selectedIndex()"
+                [style.background-color]="item.color"
+                (click)="onColorSelect(i)"
                 (keydown)="onKeyDown($event, i)"
                 (focus)="onColorFocus(i)"></div>
         }

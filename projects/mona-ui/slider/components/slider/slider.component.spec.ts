@@ -380,11 +380,12 @@ describe("SliderComponent", () => {
 
             expect(handle.matches(":dir(rtl)")).toBe(true);
             expect(handle.matches(":dir(ltr)")).toBe(false);
+            expect(handle.getAttribute("data-rtl")).toBe("true");
             expect(handle.style.right).toBe("50%");
             expect(handle.style.left).toBe("");
             expect(selection.style.right).toBe("0%");
             expect(selection.style.left).toBe("50%");
-            expect(handle.classList.contains("rtl:data-[orientation=\"horizontal\"]:translate-x-[50%]")).toBe(true);
+            expect(handle.classList.contains("data-[rtl=\"true\"]:data-[orientation=\"horizontal\"]:translate-x-[50%]")).toBe(true);
 
             // ArrowRight decreases value in RTL
             dispatchKeydown(handle, "ArrowRight");

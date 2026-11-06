@@ -62,12 +62,10 @@ async function settle<T>(fixture: ComponentFixture<T>): Promise<void> {
     fixture.detectChanges();
 }
 
-/** The color gradient's inputs have no names yet, which is outside this contract. */
 async function axeViolations(element: Element): Promise<string[]> {
-    const result = await axe.run(
-        { exclude: [["mona-color-gradient"]], include: [element] },
-        { rules: { "color-contrast": { enabled: false }, region: { enabled: false } } }
-    );
+    const result = await axe.run(element, {
+        rules: { "color-contrast": { enabled: false }, region: { enabled: false } }
+    });
     return result.violations.map(violation => violation.id);
 }
 

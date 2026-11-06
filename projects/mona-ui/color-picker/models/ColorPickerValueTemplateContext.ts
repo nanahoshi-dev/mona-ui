@@ -1,3 +1,3 @@
 export interface ColorPickerValueTemplateContext {
-    $implicit: string;
+    $implicit: string | null;
 }

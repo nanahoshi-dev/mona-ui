@@ -61,6 +61,7 @@ export const colorPickerColorThemeVariants = cva(
     `
         flex items-center justify-center
         mx-1
+        forced-color-adjust-none
     `,
     {
         variants: {

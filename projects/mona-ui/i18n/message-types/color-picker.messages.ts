@@ -3,5 +3,6 @@ export interface MonaColorPickerMessages {
     readonly colorGradientPicker: string;
     readonly colorPalettePicker: string;
     readonly colorPicker: string;
+    readonly noColor: string;
 }
 

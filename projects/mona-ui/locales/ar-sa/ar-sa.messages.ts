@@ -170,28 +170,42 @@ export const AR_SA_MESSAGES = {
         removeLabel: (label?: string) => (label ? `حذف ${label}` : "حذف العنصر")
     },
     colorGradient: {
+        alpha: "قناة ألفا",
+        alphaText: (opacity: number) => `العتامة ${localizeNumber(opacity)}٪`,
         apply: "تطبيق",
+        blue: "الأزرق",
         cancel: "إلغاء",
         clearColor: "مسح اللون",
+        colorCopied: "تم نسخ اللون",
+        colorGradient: "تدرج الألوان",
         copyAsHex: "نسخ بصيغة HEX",
         copyAsRgb: "نسخ بصيغة RGB",
         copyColor: "نسخ اللون",
+        copyFailed: "تعذر نسخ اللون",
         currentColor: "اللون الحالي",
+        green: "الأخضر",
+        hexColor: "اللون بالنظام الست عشري",
+        hue: "درجة اللون",
         previousColor: "اللون السابق",
+        red: "الأحمر",
+        saturation: "التشبع",
         saturationAndValue: "التشبع والقيمة",
         saturationAndValueText: (saturation: number, value: number) =>
             `التشبع ${localizeNumber(saturation)}٪، القيمة ${localizeNumber(value)}٪`,
-        switchColorMode: "تبديل وضع اللون"
+        switchColorMode: "تبديل وضع اللون",
+        value: "القيمة"
     },
     colorPalette: {
         color: (color: string) => `اللون: ${color}`,
-        colorPalette: "لوحة الألوان"
+        colorPalette: "لوحة الألوان",
+        namedColor: (name: string, color: string) => `${name}، ${color}`
     },
     colorPicker: {
         clearColor: "مسح اللون",
         colorGradientPicker: "منتقي تدرج الألوان",
         colorPalettePicker: "منتقي لوحة الألوان",
-        colorPicker: "منتقي الألوان"
+        colorPicker: "منتقي الألوان",
+        noColor: "بلا لون"
     },
     comboBox: {
         clear: "مسح"

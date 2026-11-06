@@ -117,27 +117,41 @@
         "removeLabel": "{label, select, undefined {Öğeyi kaldır} other {{label} öğesini kaldır}}"
     },
     "colorGradient": {
+        "alpha": "Alfa kanalı",
+        "alphaText": "Opaklık %{opacity}",
         "apply": "Uygula",
+        "blue": "Mavi",
         "cancel": "İptal",
         "clearColor": "Rengi temizle",
+        "colorCopied": "Renk kopyalandı",
+        "colorGradient": "Renk gradyanı",
         "copyAsHex": "HEX olarak kopyala",
         "copyAsRgb": "RGB olarak kopyala",
         "copyColor": "Rengi kopyala",
+        "copyFailed": "Renk kopyalanamadı",
         "currentColor": "Geçerli renk",
+        "green": "Yeşil",
+        "hexColor": "Onaltılık renk",
+        "hue": "Ton",
         "previousColor": "Önceki renk",
+        "red": "Kırmızı",
+        "saturation": "Doygunluk",
         "saturationAndValue": "Renk doygunluğu ve değeri",
         "saturationAndValueText": "Doygunluk %{saturation}, değer %{value}",
-        "switchColorMode": "Renk modunu değiştir"
+        "switchColorMode": "Renk modunu değiştir",
+        "value": "Değer"
     },
     "colorPalette": {
         "color": "Renk: {color}",
-        "colorPalette": "Renk paleti"
+        "colorPalette": "Renk paleti",
+        "namedColor": "{name}, {color}"
     },
     "colorPicker": {
         "clearColor": "Rengi temizle",
         "colorGradientPicker": "Renk geçişi seçici",
         "colorPalettePicker": "Renk paleti seçici",
-        "colorPicker": "Renk seçici"
+        "colorPicker": "Renk seçici",
+        "noColor": "Renk yok"
     },
     "comboBox": {
         "clear": "Temizle"

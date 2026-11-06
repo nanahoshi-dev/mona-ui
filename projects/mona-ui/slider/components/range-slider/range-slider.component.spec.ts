@@ -400,6 +400,8 @@ describe("RangeSliderComponent", () => {
             expect(primaryHandle.matches(":dir(ltr)")).toBe(false);
             expect(secondaryHandle.matches(":dir(rtl)")).toBe(true);
             expect(secondaryHandle.matches(":dir(ltr)")).toBe(false);
+            expect(primaryHandle.getAttribute("data-rtl")).toBe("true");
+            expect(secondaryHandle.getAttribute("data-rtl")).toBe("true");
 
             // Initial positions for value [2, 8] with min 0, max 10
             expect(primaryHandle.style.right).toBe("20%");

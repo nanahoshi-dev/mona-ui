@@ -5,6 +5,8 @@ import {
     computed,
     contentChild,
     DestroyRef,
+    DOCUMENT,
+    effect,
     ElementRef,
     inject,
     input,
@@ -14,6 +16,7 @@ import {
     signal,
     Signal,
     TemplateRef,
+    untracked,
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
@@ -22,10 +25,12 @@ import { LucideCircleX, LucideDropletOff } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ColorGradientComponent } from "@nanahoshi/mona-ui/color-gradient";
 import { ColorPaletteComponent } from "@nanahoshi/mona-ui/color-palette";
-import { PaletteType } from "@nanahoshi/mona-ui/common";
+import type { ColorOutputFormat, ColorPaletteItem, PaletteType } from "@nanahoshi/mona-ui/common";
 import {
+    colorKey,
     createElementControlId,
     injectEffectiveDisabled,
+    injectLabelAssociation,
     themeOverlaySurfaceClasses
 } from "@nanahoshi/mona-ui/internal";
 import { IndicatorIconComponent } from "@nanahoshi/mona-ui/internal/indicator-icon";
@@ -42,6 +47,9 @@ import {
     ColorPickerVariantInput,
     ColorPickerVariantProps
 } from "../../styles/color-picker.styles";
+
+const TABBABLE_SELECTOR =
+    "a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), [tabindex]";
 
 @Component({
     selector: "mona-color-picker",
@@ -64,10 +72,11 @@ import {
         "[attr.data-readonly]": "readonly()",
         "[attr.data-required]": "required() || null",
         "[attr.role]": "'combobox'",
-        "[attr.aria-controls]": "popupId",
+        "[attr.aria-controls]": "expanded() ? popupId : null",
         "[attr.aria-expanded]": "expanded() ? 'true' : 'false'",
         "[attr.aria-haspopup]": "'dialog'",
-        "[attr.aria-label]": "ariaLabel() || messages().colorPicker",
+        "[attr.aria-label]": "labelledBy() ? null : ariaLabel() || messages().colorPicker",
+        "[attr.aria-labelledby]": "labelledBy()",
         "[attr.aria-disabled]": "effectiveDisabled()",
         "[attr.aria-invalid]": "invalidState() ? 'true' : null",
         "[attr.aria-readonly]": "readonly()",
@@ -76,10 +85,22 @@ import {
 })
 export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, FormValueControl<string | null> {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
+    readonly #document = inject(DOCUMENT);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
+    readonly #label = injectLabelAssociation({
+        activate: () => this.focus(),
+        ariaLabel: () => this.ariaLabel(),
+        ariaLabelledBy: () => this.ariaLabelledBy()
+    });
+    /** Read once, so a generator can be used as the palette. */
+    readonly #paletteItems = computed<ReadonlyArray<string | ColorPaletteItem>>(() => {
+        const palette = this.palette();
+        return typeof palette === "string" ? [] : Array.from(palette);
+    });
     readonly #popupRef = signal<PopupRef | null>(null);
     readonly #popupService: PopupService = inject(PopupService);
+    #destroyed = false;
     protected readonly baseClasses = computed(() => {
         const expanded = this.expanded();
         const rounded = this.rounded();
@@ -93,21 +114,46 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
     });
     protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly expanded = computed(() => this.#popupRef() !== null);
-    protected readonly gradientPopupClasses = `${themeOverlaySurfaceClasses} border border-border shadow-(--shadow-overlay)`;
+    protected readonly gradientPopupClasses = `${themeOverlaySurfaceClasses} border border-border shadow-(--shadow-overlay) outline-none`;
     protected readonly invalidState = computed(
         () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
+    protected readonly labelledBy = this.#label.labelledBy;
     protected readonly messages = this.#i18n.componentMessages("colorPicker", COLOR_PICKER_DEFAULT_MESSAGES);
-    protected readonly palettePopupClasses = `flex flex-col p-0.5 ${themeOverlaySurfaceClasses} border border-border shadow-(--shadow-overlay) outline-none`;
+    protected readonly paletteOption = computed(() => {
+        const palette = this.palette();
+        return typeof palette === "string" ? palette : this.#paletteItems();
+    });
+    protected readonly palettePopupClasses = `flex flex-col p-0.5 max-w-[calc(100vw-1rem)] overflow-auto ${themeOverlaySurfaceClasses} border border-border shadow-(--shadow-overlay) outline-none`;
     protected readonly popupId = createElementControlId();
     protected readonly popupTemplate: Signal<TemplateRef<void>> = viewChild.required("popupTemplate");
     protected readonly valueTemplate = contentChild(ColorPickerValueTemplateDirective, { read: TemplateRef });
+    /** What assistive technology reads as the current color: its name when the palette has one, or the value itself. */
+    protected readonly valueText = computed(() => {
+        const value = this.value();
+        if (!value) {
+            return this.messages().noColor;
+        }
+        const key = colorKey(value, this.#document);
+        for (const item of this.#paletteItems()) {
+            if (typeof item !== "string" && item.name && colorKey(item.color, this.#document) === key) {
+                return item.name;
+            }
+        }
+        return value;
+    });
 
     /**
      * @description Accessible label for the color picker combobox.
      * @default ""
      */
     public readonly ariaLabel = input<string>("", { alias: "aria-label" });
+
+    /**
+     * @description Id of the element that names the color picker.
+     * @default ""
+     */
+    public readonly ariaLabelledBy = input<string>("", { alias: "aria-labelledby" });
 
     /**
      * @description Whether to close the color picker when a color is selected.
@@ -130,6 +176,12 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
     public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
+     * @description The format of the value the gradient view writes. Only applies when the view is set to "gradient".
+     * @default "hex"
+     */
+    public readonly format = input<ColorOutputFormat>("hex");
+
+    /**
      * @description Marks the color picker as invalid. When bound to a signal form field via `[formField]`,
      * this is written by the `FormField` directive.
      * @default false
@@ -146,10 +198,10 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
     /**
      * @description The type of color palette to use.
      * This can be a predefined palette type like "flat", "material", or "websafe",
-     * or a custom iterable of colors.
+     * or a custom iterable of CSS color strings or `{ color, name }` items.
      * @default "flat"
      */
-    public readonly palette = input<Iterable<string> | PaletteType>("flat");
+    public readonly palette = input<Iterable<string | ColorPaletteItem> | PaletteType>("flat");
 
     /**
      * @description Prevents value changes while preserving the component's visual state. When bound to a signal
@@ -172,6 +224,13 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
     public readonly rounded = input<ColorPickerVariantProps["rounded"]>("medium");
 
     /**
+     * @description Whether the gradient view has Apply and Cancel buttons. Without them, each change writes the value
+     * at once. Only applies when the view is set to "gradient".
+     * @default true
+     */
+    public readonly showButtons = input(true, { transform: booleanAttribute });
+
+    /**
      * @description Whether to show the clear button to reset the color.
      * This is only applicable when the view is set to "palette".
      * @default false
@@ -183,6 +242,13 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
      * @default "medium"
      */
     public readonly size = input<ColorPickerVariantProps["size"]>("medium");
+
+    /**
+     * @description The size of each palette tile, in pixels. Only applies when the view is set to "palette". Below 24,
+     * tiles miss the minimum target size of WCAG 2.5.8.
+     * @default 24
+     */
+    public readonly tileSize = input(24);
 
     /**
      * @description Emitted when focus leaves the color picker, its popup closes or a color is selected.
@@ -210,9 +276,36 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
      */
     public readonly view = input<ColorPickerView>("gradient");
 
+    public constructor() {
+        this.#destroyRef.onDestroy(() => {
+            this.#destroyed = true;
+            this.close();
+        });
+        effect(() => {
+            if (this.effectiveDisabled() || this.readonly()) {
+                untracked(() => this.close());
+            }
+        });
+    }
+
+    /**
+     * @description Moves focus to the color picker.
+     * @param options Options passed to the native `focus()` call, such as `preventScroll`.
+     */
+    public focus(options?: FocusOptions): void {
+        this.#hostElementRef.nativeElement.focus(options);
+    }
+
     public ngOnInit(): void {
         this.setEventListeners();
         this.setKeyboardEventListeners();
+    }
+
+    /**
+     * @internal
+     */
+    public setLabelledBy(id: string | null): void {
+        this.#label.setLabelledBy(id);
     }
 
     protected onClearClick(): void {
@@ -228,11 +321,11 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
     }
 
     protected onColorGradientApply(): void {
-        this.#popupRef()?.close();
+        this.close();
     }
 
     protected onColorGradientCancel(): void {
-        this.#popupRef()?.close();
+        this.close();
     }
 
     protected onColorGradientValueChange(value: string | null | undefined): void {
@@ -252,35 +345,11 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
         }
 
         this.value.set(value);
-        if (this.closeOnSelect()) {
-            this.#popupRef()?.close();
-        }
     }
 
-    protected onPaletteContainerKeyDown(event: KeyboardEvent): void {
-        switch (event.key) {
-            case "ArrowDown":
-            case "ArrowRight":
-            case "ArrowUp":
-            case "ArrowLeft":
-            case "Enter":
-            case " ":
-            case "Home":
-            case "End":
-                // Focus on the first color tile when the user starts navigating
-                event.preventDefault();
-                event.stopPropagation();
-                this.focusFirstColorTile();
-                break;
-            case "Escape":
-                event.preventDefault();
-                event.stopPropagation();
-                this.close();
-                break;
-            case "Tab":
-                // Close popup when tabbing out
-                this.close();
-                break;
+    protected onPaletteColorSelect(): void {
+        if (this.closeOnSelect()) {
+            this.close();
         }
     }
 
@@ -298,6 +367,8 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
             hasBackdrop: false,
             offset: { horizontal: -1, vertical: 2 },
             popupConnectionPoint: "topleft",
+            // Returns to the picker, unless the user moved focus elsewhere, such as by clicking another field.
+            restoreFocus: true,
             withPush: false
         });
 
@@ -313,56 +384,24 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
         this.#popupRef.set(popupRef);
         popupRef.closed.pipe(take(1)).subscribe(() => {
             this.#popupRef.set(null);
-            this.touch.emit();
-            this.#hostElementRef.nativeElement.focus();
+            if (!this.#destroyed) {
+                this.touch.emit();
+            }
         });
     }
 
     private close(): void {
-        if (this.#popupRef()) {
-            this.#popupRef()?.close();
-        }
+        this.#popupRef()?.close();
     }
 
-    private focusFirstColorTile(): void {
-        if (!this.#popupRef()) {
-            return;
-        }
-
-        const overlayElement = this.#popupRef()?.overlayRef.overlayElement;
-        if (!overlayElement) {
-            return;
-        }
-
-        const firstColorTile = overlayElement.querySelector('[data-color-index="0"]') as HTMLElement;
-        if (firstColorTile) {
-            firstColorTile.focus();
-        }
-    }
-
+    /**
+     * Opens on the selected swatch, or the first one, in the palette view, and on the saturation and value handle in the
+     * gradient view.
+     */
     private focusPopupContent(): void {
-        if (!this.#popupRef()) {
-            return;
-        }
-
         const overlayElement = this.#popupRef()?.overlayRef.overlayElement;
-        if (!overlayElement) {
-            return;
-        }
-
-        if (this.view() === "palette") {
-            // Focus the palette container, not individual colors
-            const paletteContainer = overlayElement.querySelector("[data-palette-container]") as HTMLElement;
-            if (paletteContainer) {
-                paletteContainer.focus();
-            }
-        } else if (this.view() === "gradient") {
-            // Focus the HSV handle in the gradient picker
-            const hsvHandle = overlayElement.querySelector('[role="slider"]') as HTMLElement;
-            if (hsvHandle) {
-                hsvHandle.focus();
-            }
-        }
+        const selector = this.view() === "palette" ? '[data-color-index][tabindex="0"]' : '[role="slider"]';
+        overlayElement?.querySelector<HTMLElement>(selector)?.focus();
     }
 
     private setEventListeners(): void {
@@ -399,13 +438,6 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
                             this.open();
                         }
                         break;
-                    case "Escape":
-                        event.preventDefault();
-                        event.stopPropagation();
-                        if (this.#popupRef()) {
-                            this.close();
-                        }
-                        break;
                     case "Tab":
                         if (this.#popupRef()) {
                             this.close();
@@ -439,14 +471,22 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
         fromEvent<KeyboardEvent>(overlayElement, "keydown")
             .pipe(takeUntil(popupRef.closed), takeUntilDestroyed(this.#destroyRef))
             .subscribe(event => {
-                const keyEvent = event as KeyboardEvent;
-                if (keyEvent.key === "Tab") {
-                    this.close();
-                } else if (keyEvent.key === "Escape") {
-                    keyEvent.preventDefault();
-                    keyEvent.stopPropagation();
+                if (event.key === "Tab" && this.tabLeavesPopup(event, overlayElement)) {
+                    event.preventDefault();
                     this.close();
                 }
             });
+    }
+
+    /**
+     * The popup isn't modal, so Tab walks through its controls, and going past either end closes it. Focus then returns
+     * to the picker, and the next Tab continues down the page.
+     */
+    private tabLeavesPopup(event: KeyboardEvent, overlayElement: HTMLElement): boolean {
+        const tabbable = Array.from(overlayElement.querySelectorAll<HTMLElement>(TABBABLE_SELECTOR)).filter(
+            element => element.tabIndex >= 0
+        );
+        const index = tabbable.indexOf(this.#document.activeElement as HTMLElement);
+        return event.shiftKey ? index <= 0 : index === tabbable.length - 1;
     }
 }

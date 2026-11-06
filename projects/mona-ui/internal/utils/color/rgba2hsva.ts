@@ -1,5 +1,9 @@
 import { HSVA } from "../../models/ColorSpaces";
 
+/**
+ * Hue, saturation and value are left unrounded, so converting to RGB and back returns the same color. Round them for
+ * display only.
+ */
 export const rgba2hsva = (r: number | null, g: number | null, b: number | null, a: number | null): HSVA => {
     if (r == null || g == null || b == null) {
         return { h: 0, s: 0, v: 0, a: 255 };
@@ -25,9 +29,9 @@ export const rgba2hsva = (r: number | null, g: number | null, b: number | null, 
         h /= 6;
     }
     return {
-        h: Math.round(h * 360),
-        s: Math.round(s * 100),
-        v: Math.round(v * 100),
+        h: h * 360,
+        s: s * 100,
+        v: v * 100,
         a: a ?? 255
     };
 };

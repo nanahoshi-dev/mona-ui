@@ -7855,7 +7855,23 @@
         "type": "void"
       },
       {
-        "description": "Emits when the Cancel button is clicked.\nThe `Cancel` button is only displayed when `showButtons` is set to true.",
+        "description": "Accessible name of the group of controls.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Id of the element that names the group of controls.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Emits when the Cancel button is clicked, after the controls go back to the current value.\nThe `Cancel` button is only displayed when `showButtons` is set to true.",
         "kind": "output",
         "name": "cancel",
         "type": "void"
@@ -7875,7 +7891,7 @@
         "defaultValue": "\"hex\""
       },
       {
-        "description": "Marks the color gradient as invalid. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
+        "description": "Marks the color gradient as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
@@ -7937,7 +7953,7 @@
         "type": "void"
       },
       {
-        "description": "Marks the color gradient as touched. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
+        "description": "Marks the color gradient as touched. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "touched",
         "type": "boolean",
@@ -7965,7 +7981,28 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "The number of columns in the color palette grid.\nOnly applicable when using a custom palette.",
+        "description": "Id of the element that names the color palette grid.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Whether activating the selected tile clears the value. A required palette never clears.",
+        "kind": "input",
+        "name": "clearable",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Emitted with the tile's color each time a tile is activated, also when it's already selected, which\ndoesn't change `value`.",
+        "kind": "output",
+        "name": "colorSelect",
+        "type": "string"
+      },
+      {
+        "description": "The number of columns in the color palette grid. Only applicable when using a custom palette. A\nvalue below 1 shows one column.",
         "kind": "input",
         "name": "columns",
         "type": "number",
@@ -7986,10 +8023,10 @@
         "defaultValue": "false"
       },
       {
-        "description": "The palette to display — one of the built-in `\"flat\"`, `\"material\"`, or `\"websafe\"` schemes, or a\ncustom iterable of color strings. An empty custom palette falls back to the flat scheme.",
+        "description": "The palette to display — one of the built-in `\"flat\"`, `\"material\"`, or `\"websafe\"` schemes, or a\ncustom iterable of colors. A custom color is a CSS color string, or a `{ color, name }` item when it has a name\nof its own. An empty custom palette falls back to the flat scheme.",
         "kind": "input",
         "name": "palette",
-        "type": "PaletteType | Iterable<string>",
+        "type": "PaletteType | Iterable<string | ColorPaletteItem>",
         "defaultValue": "[]"
       },
       {
@@ -8014,14 +8051,14 @@
         "defaultValue": "\"none\""
       },
       {
-        "description": "The size of each tile in the color palette grid.",
+        "description": "The size of each tile in the color palette grid, in pixels. Below 24, tiles miss the minimum target\nsize of WCAG 2.5.8.",
         "kind": "input",
         "name": "tileSize",
         "type": "number",
-        "defaultValue": "18"
+        "defaultValue": "24"
       },
       {
-        "description": "Emitted when the color palette is interacted with on blur or color selection.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when focus leaves the color palette or a color is selected.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
@@ -8055,6 +8092,14 @@
         "defaultValue": "\"\""
       },
       {
+        "description": "Id of the element that names the color picker.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Whether to close the color picker when a color is selected.\nOnly applies when the view is set to \"palette\".",
         "kind": "input",
         "name": "closeOnSelect",
@@ -8076,6 +8121,13 @@
         "defaultValue": "false"
       },
       {
+        "description": "The format of the value the gradient view writes. Only applies when the view is set to \"gradient\".",
+        "kind": "input",
+        "name": "format",
+        "type": "ColorOutputFormat",
+        "defaultValue": "\"hex\""
+      },
+      {
         "description": "Marks the color picker as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "invalid",
@@ -8090,10 +8142,10 @@
         "defaultValue": "true"
       },
       {
-        "description": "The type of color palette to use.\nThis can be a predefined palette type like \"flat\", \"material\", or \"websafe\",\nor a custom iterable of colors.",
+        "description": "The type of color palette to use.\nThis can be a predefined palette type like \"flat\", \"material\", or \"websafe\",\nor a custom iterable of CSS color strings or `{ color, name }` items.",
         "kind": "input",
         "name": "palette",
-        "type": "Iterable<string> | PaletteType",
+        "type": "Iterable<string | ColorPaletteItem> | PaletteType",
         "defaultValue": "\"flat\""
       },
       {
@@ -8118,6 +8170,13 @@
         "defaultValue": "\"medium\""
       },
       {
+        "description": "Whether the gradient view has Apply and Cancel buttons. Without them, each change writes the value\nat once. Only applies when the view is set to \"gradient\".",
+        "kind": "input",
+        "name": "showButtons",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
         "description": "Whether to show the clear button to reset the color.\nThis is only applicable when the view is set to \"palette\".",
         "kind": "input",
         "name": "showClearButton",
@@ -8130,6 +8189,13 @@
         "name": "size",
         "type": "ColorPickerVariantProps[\"size\"]",
         "defaultValue": "\"medium\""
+      },
+      {
+        "description": "The size of each palette tile, in pixels. Only applies when the view is set to \"palette\". Below 24,\ntiles miss the minimum target size of WCAG 2.5.8.",
+        "kind": "input",
+        "name": "tileSize",
+        "type": "number",
+        "defaultValue": "24"
       },
       {
         "description": "Emitted when focus leaves the color picker, its popup closes or a color is selected.\nThe `FormField` directive listens to this to mark the field as touched.",

@@ -165,28 +165,42 @@ export const RU_RU_MESSAGES = {
         removeLabel: (label?: string) => (label ? `Удалить ${label}` : "Удалить элемент")
     },
     colorGradient: {
+        alpha: "Альфа-канал",
+        alphaText: (opacity: number) => `Непрозрачность ${localizeNumber(opacity)}%`,
         apply: "Применить",
+        blue: "Синий",
         cancel: "Отмена",
         clearColor: "Очистить цвет",
+        colorCopied: "Цвет скопирован",
+        colorGradient: "Цветовой градиент",
         copyAsHex: "Копировать как HEX",
         copyAsRgb: "Копировать как RGB",
         copyColor: "Копировать цвет",
+        copyFailed: "Не удалось скопировать цвет",
         currentColor: "Текущий цвет",
+        green: "Зелёный",
+        hexColor: "Шестнадцатеричный цвет",
+        hue: "Оттенок",
         previousColor: "Предыдущий цвет",
+        red: "Красный",
+        saturation: "Насыщенность",
         saturationAndValue: "Насыщенность и значение",
         saturationAndValueText: (saturation: number, value: number) =>
             `Насыщенность ${localizeNumber(saturation)}%, значение ${localizeNumber(value)}%`,
-        switchColorMode: "Переключить цветовой режим"
+        switchColorMode: "Переключить цветовой режим",
+        value: "Значение"
     },
     colorPalette: {
         color: (color: string) => `Цвет: ${color}`,
-        colorPalette: "Цветовая палитра"
+        colorPalette: "Цветовая палитра",
+        namedColor: (name: string, color: string) => `${name}, ${color}`
     },
     colorPicker: {
         clearColor: "Очистить цвет",
         colorGradientPicker: "Выбор градиента цвета",
         colorPalettePicker: "Выбор цвета из палитры",
-        colorPicker: "Выбор цвета"
+        colorPicker: "Выбор цвета",
+        noColor: "Без цвета"
     },
     comboBox: {
         clear: "Очистить"

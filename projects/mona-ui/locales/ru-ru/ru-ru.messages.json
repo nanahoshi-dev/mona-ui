@@ -117,27 +117,41 @@
         "removeLabel": "{label, select, undefined {Удалить элемент} other {Удалить {label}}}"
     },
     "colorGradient": {
+        "alpha": "Альфа-канал",
+        "alphaText": "Непрозрачность {opacity}%",
         "apply": "Применить",
+        "blue": "Синий",
         "cancel": "Отмена",
         "clearColor": "Очистить цвет",
+        "colorCopied": "Цвет скопирован",
+        "colorGradient": "Цветовой градиент",
         "copyAsHex": "Копировать как HEX",
         "copyAsRgb": "Копировать как RGB",
         "copyColor": "Копировать цвет",
+        "copyFailed": "Не удалось скопировать цвет",
         "currentColor": "Текущий цвет",
+        "green": "Зелёный",
+        "hexColor": "Шестнадцатеричный цвет",
+        "hue": "Оттенок",
         "previousColor": "Предыдущий цвет",
+        "red": "Красный",
+        "saturation": "Насыщенность",
         "saturationAndValue": "Насыщенность и значение",
         "saturationAndValueText": "Насыщенность {saturation}%, значение {value}%",
-        "switchColorMode": "Переключить цветовой режим"
+        "switchColorMode": "Переключить цветовой режим",
+        "value": "Значение"
     },
     "colorPalette": {
         "color": "Цвет: {color}",
-        "colorPalette": "Цветовая палитра"
+        "colorPalette": "Цветовая палитра",
+        "namedColor": "{name}, {color}"
     },
     "colorPicker": {
         "clearColor": "Очистить цвет",
         "colorGradientPicker": "Выбор градиента цвета",
         "colorPalettePicker": "Выбор цвета из палитры",
-        "colorPicker": "Выбор цвета"
+        "colorPicker": "Выбор цвета",
+        "noColor": "Без цвета"
     },
     "comboBox": {
         "clear": "Очистить"

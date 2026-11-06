@@ -135,28 +135,42 @@ export const ZH_CN_MESSAGES = {
         removeLabel: (label?: string) => (label ? `删除${label}` : "删除项目")
     },
     colorGradient: {
+        alpha: "透明通道",
+        alphaText: (opacity: number) => `不透明度${localizeNumber(opacity)}%`,
         apply: "应用",
+        blue: "蓝色",
         cancel: "取消",
         clearColor: "清除颜色",
+        colorCopied: "已复制颜色",
+        colorGradient: "颜色渐变",
         copyAsHex: "复制为 HEX",
         copyAsRgb: "复制为 RGB",
         copyColor: "复制颜色",
+        copyFailed: "无法复制颜色",
         currentColor: "当前颜色",
+        green: "绿色",
+        hexColor: "十六进制颜色",
+        hue: "色相",
         previousColor: "先前颜色",
+        red: "红色",
+        saturation: "饱和度",
         saturationAndValue: "饱和度与明度",
         saturationAndValueText: (saturation: number, value: number) =>
             `饱和度${localizeNumber(saturation)}%，明度${localizeNumber(value)}%`,
-        switchColorMode: "切换颜色模式"
+        switchColorMode: "切换颜色模式",
+        value: "明度"
     },
     colorPalette: {
         color: (color: string) => `颜色: ${color}`,
-        colorPalette: "调色板"
+        colorPalette: "调色板",
+        namedColor: (name: string, color: string) => `${name}，${color}`
     },
     colorPicker: {
         clearColor: "清除颜色",
         colorGradientPicker: "渐变颜色选择器",
         colorPalettePicker: "调色板选择器",
-        colorPicker: "颜色选择器"
+        colorPicker: "颜色选择器",
+        noColor: "无颜色"
     },
     comboBox: {
         clear: "清除"

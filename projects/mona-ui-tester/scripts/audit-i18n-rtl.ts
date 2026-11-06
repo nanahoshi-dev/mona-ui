@@ -198,7 +198,7 @@ export const ALLOWLIST: AllowlistEntry[] = [
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.html",
-        lineSnippet: "[style.left.px]",
+        lineSnippet: "[style.left.%]",
         reason: "Color gradient 2D coordinate space mapping handle position"
     },
     {
@@ -470,8 +470,14 @@ export const ALLOWLIST: AllowlistEntry[] = [
     {
         category: "rtl-manual-review",
         filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.ts",
-        lineSnippet: "containerRect.left",
+        lineSnippet: "{ height, left, top, width }",
         reason: "Color gradient 2D coordinate space mapping"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/color-gradient/styles/color-gradient.styles.ts",
+        lineSnippet: "-translate-x-1/2",
+        reason: "Centers the handle on its physical position in the 2D coordinate space"
     },
     {
         category: "rtl-manual-review",

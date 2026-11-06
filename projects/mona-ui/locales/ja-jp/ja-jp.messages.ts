@@ -134,28 +134,42 @@ export const JA_JP_MESSAGES = {
         removeLabel: (label?: string) => (label ? `${label}を削除` : "項目を削除")
     },
     colorGradient: {
+        alpha: "アルファ",
+        alphaText: (opacity: number) => `不透明度${localizeNumber(opacity)}%`,
         apply: "適用",
+        blue: "青",
         cancel: "キャンセル",
         clearColor: "色をクリア",
+        colorCopied: "色をコピーしました",
+        colorGradient: "カラーグラデーション",
         copyAsHex: "HEXとしてコピー",
         copyAsRgb: "RGBとしてコピー",
         copyColor: "色をコピー",
+        copyFailed: "色をコピーできませんでした",
         currentColor: "現在の色",
+        green: "緑",
+        hexColor: "16進カラー",
+        hue: "色相",
         previousColor: "前の色",
+        red: "赤",
+        saturation: "彩度",
         saturationAndValue: "彩度と明度",
         saturationAndValueText: (saturation: number, value: number) =>
             `彩度${localizeNumber(saturation)}%、明度${localizeNumber(value)}%`,
-        switchColorMode: "カラーモードを切り替え"
+        switchColorMode: "カラーモードを切り替え",
+        value: "明度"
     },
     colorPalette: {
         color: (color: string) => `色: ${color}`,
-        colorPalette: "カラーパレット"
+        colorPalette: "カラーパレット",
+        namedColor: (name: string, color: string) => `${name}、${color}`
     },
     colorPicker: {
         clearColor: "色をクリア",
         colorGradientPicker: "カラーグラデーションピッカー",
         colorPalettePicker: "カラーパレットピッカー",
-        colorPicker: "カラーピッカー"
+        colorPicker: "カラーピッカー",
+        noColor: "色なし"
     },
     comboBox: {
         clear: "クリア"

@@ -295,12 +295,13 @@ describe("ColorPickerComponent keyboard interaction", () => {
         expect(document.activeElement).toBe(picker);
     });
 
-    it("closes the popup when Tab is pressed inside it", async () => {
+    it("closes the popup when Tab goes past its only stop", async () => {
         const fixture = await createValueBindingFixture();
         await openPicker(fixture);
 
-        const dialog = document.body.querySelector('[role="dialog"]') as HTMLElement;
-        dispatchKeyDown(dialog, "Tab");
+        const tile = getOverlayTile(1);
+        tile.focus();
+        dispatchKeyDown(tile, "Tab");
         await waitForStable(fixture);
 
         expect(document.body.querySelector("mona-color-palette")).toBeNull();
@@ -418,7 +419,7 @@ describe("ColorPickerComponent gradient state propagation", () => {
         document.querySelectorAll(".cdk-overlay-container").forEach(element => element.remove());
     });
 
-    it("propagates disabled to the color gradient once the popup is already open", async () => {
+    it("closes the popup when disabled arrives while it's open", async () => {
         const fixture = await createValueBindingFixture();
         fixture.componentInstance.view.set("gradient");
         await waitForStable(fixture);
@@ -427,8 +428,7 @@ describe("ColorPickerComponent gradient state propagation", () => {
         fixture.componentInstance.disabled.set(true);
         await waitForStable(fixture);
 
-        const gradient = document.body.querySelector("mona-color-gradient") as HTMLElement;
-        expect(gradient.getAttribute("data-disabled")).toBe("true");
+        expect(document.body.querySelector("mona-color-gradient")).toBeNull();
     });
 });
 

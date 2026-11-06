@@ -137,28 +137,42 @@ export const ID_ID_MESSAGES = {
         removeLabel: (label?: string) => (label ? `Hapus ${label}` : "Hapus item")
     },
     colorGradient: {
+        alpha: "Saluran alfa",
+        alphaText: (opacity: number) => `Opasitas ${localizeNumber(opacity)}%`,
         apply: "Terapkan",
+        blue: "Biru",
         cancel: "Batal",
         clearColor: "Hapus warna",
+        colorCopied: "Warna disalin",
+        colorGradient: "Gradien warna",
         copyAsHex: "Salin sebagai HEX",
         copyAsRgb: "Salin sebagai RGB",
         copyColor: "Salin warna",
+        copyFailed: "Tidak dapat menyalin warna",
         currentColor: "Warna saat ini",
+        green: "Hijau",
+        hexColor: "Warna heksadesimal",
+        hue: "Rona",
         previousColor: "Warna sebelumnya",
+        red: "Merah",
+        saturation: "Saturasi",
         saturationAndValue: "Saturasi dan nilai warna",
         saturationAndValueText: (saturation: number, value: number) =>
             `Saturasi ${localizeNumber(saturation)}%, nilai ${localizeNumber(value)}%`,
-        switchColorMode: "Ganti mode warna"
+        switchColorMode: "Ganti mode warna",
+        value: "Nilai"
     },
     colorPalette: {
         color: (color: string) => `Warna: ${color}`,
-        colorPalette: "Palet warna"
+        colorPalette: "Palet warna",
+        namedColor: (name: string, color: string) => `${name}, ${color}`
     },
     colorPicker: {
         clearColor: "Hapus warna",
         colorGradientPicker: "Pemilih gradien warna",
         colorPalettePicker: "Pemilih palet warna",
-        colorPicker: "Pemilih warna"
+        colorPicker: "Pemilih warna",
+        noColor: "Tanpa warna"
     },
     comboBox: {
         clear: "Bersihkan"

@@ -4,7 +4,7 @@ import { disabled, form, FormField, readonly, required } from "@angular/forms/si
 import { ColorPaletteComponent } from "@nanahoshi/mona-ui/color-palette";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
-import { customColorPalette } from "../../utils/customColorPalette";
+import { customColorPalette, namedColorPalette } from "../../utils/customColorPalette";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -20,6 +20,11 @@ export class ColorPaletteDemoComponent extends AbstractDemoComponent<ColorPalett
             active: false,
             description: `A custom color palette that can be used to test the color palette component with a different set of colors.`,
             name: "Custom Palette"
+        },
+        namedPalette: {
+            active: false,
+            description: `Colors with names of their own, which assistive technology reads and tooltips show.`,
+            name: "Named Colors"
         }
     });
     protected readonly config = computed<ComponentConfig<ColorPaletteComponent>>(() => ({
@@ -38,7 +43,6 @@ export class ColorPaletteDemoComponent extends AbstractDemoComponent<ColorPalett
                 value: ["none", "small", "medium", "large", "full"],
                 defaultValue: "none"
             },
-            // The demo curates a tile size of 24 instead of the library's default of 18.
             tileSize: {
                 type: "number",
                 value: 24
@@ -55,13 +59,16 @@ export class ColorPaletteDemoComponent extends AbstractDemoComponent<ColorPalett
     imports: [ColorPaletteComponent, FormField],
     template: `
         @let customPaletteActive = features()["customPalette"] && features()["customPalette"].active;
+        @let namedPaletteActive = features()["namedPalette"] && features()["namedPalette"].active;
         <div class="flex flex-col gap-4">
             <span>Color: {{ form.color().value() }}</span>
             <mona-color-palette
                 [aria-label]="ariaLabel()"
+                [aria-labelledby]="ariaLabelledBy()"
+                [clearable]="clearable()"
                 [columns]="columns()"
                 [formField]="form.color"
-                [palette]="customPaletteActive ? customPalette : palette()"
+                [palette]="namedPaletteActive ? namedPalette : customPaletteActive ? customPalette : palette()"
                 [rounded]="rounded()"
                 [tileSize]="tileSize()"></mona-color-palette>
         </div>
@@ -76,7 +83,10 @@ export class ColorPaletteWrapperComponent implements ComponentInputsAsSignal<Col
         required(schema.color, { when: () => this.required() });
     });
     protected readonly customPalette = customColorPalette;
+    protected readonly namedPalette = namedColorPalette;
     public readonly ariaLabel = input<ReturnType<ColorPaletteComponent["ariaLabel"]>>("");
+    public readonly ariaLabelledBy = input("");
+    public readonly clearable = input(true, { transform: booleanAttribute });
     public readonly columns = input<ReturnType<ColorPaletteComponent["columns"]>>(10);
     public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly palette = input<ReturnType<ColorPaletteComponent["palette"]>>("flat");

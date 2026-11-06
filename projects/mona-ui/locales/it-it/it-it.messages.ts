@@ -159,28 +159,42 @@ export const IT_IT_MESSAGES = {
         removeLabel: (label?: string) => (label ? `Rimuovi ${label}` : "Rimuovi elemento")
     },
     colorGradient: {
+        alpha: "Canale alfa",
+        alphaText: (opacity: number) => `Opacità ${localizeNumber(opacity)}%`,
         apply: "Applica",
+        blue: "Blu",
         cancel: "Annulla",
         clearColor: "Cancella colore",
+        colorCopied: "Colore copiato",
+        colorGradient: "Sfumatura di colore",
         copyAsHex: "Copia come HEX",
         copyAsRgb: "Copia come RGB",
         copyColor: "Copia colore",
+        copyFailed: "Impossibile copiare il colore",
         currentColor: "Colore corrente",
+        green: "Verde",
+        hexColor: "Colore esadecimale",
+        hue: "Tonalità",
         previousColor: "Colore precedente",
+        red: "Rosso",
+        saturation: "Saturazione",
         saturationAndValue: "Saturazione e valore del colore",
         saturationAndValueText: (saturation: number, value: number) =>
             `Saturazione ${localizeNumber(saturation)}%, valore ${localizeNumber(value)}%`,
-        switchColorMode: "Cambia modalità colore"
+        switchColorMode: "Cambia modalità colore",
+        value: "Valore"
     },
     colorPalette: {
         color: (color: string) => `Colore: ${color}`,
-        colorPalette: "Tavolozza colori"
+        colorPalette: "Tavolozza colori",
+        namedColor: (name: string, color: string) => `${name}, ${color}`
     },
     colorPicker: {
         clearColor: "Cancella colore",
         colorGradientPicker: "Selettore gradiente di colore",
         colorPalettePicker: "Selettore tavolozza colori",
-        colorPicker: "Selettore colore"
+        colorPicker: "Selettore colore",
+        noColor: "Nessun colore"
     },
     comboBox: {
         clear: "Cancella"

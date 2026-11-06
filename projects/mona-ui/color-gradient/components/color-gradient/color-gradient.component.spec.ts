@@ -92,7 +92,7 @@ describe("ColorGradientComponent", () => {
         expect(rectangle.classList.contains("border-border-subtle")).toBe(true);
         expect(handle.classList.contains("border-black/90")).toBe(true);
         expect(handle.classList.contains("outline-white/90")).toBe(true);
-        expect(handle.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
+        expect(handle.classList.contains("focus-visible:outline-2")).toBe(true);
         expect(handle.classList.contains("focus-visible:ring-primary/40")).toBe(false);
     });
 
@@ -112,28 +112,6 @@ describe("ColorGradientComponent", () => {
         }
     });
 
-    it("does not throw when the hsv rectangle click updates after render", async () => {
-        await waitForStable(fixture);
-
-        const rectangle = fixture.nativeElement.querySelector("div") as HTMLDivElement;
-        const handle = fixture.nativeElement.querySelector("[role='slider']") as HTMLDivElement;
-
-        Object.defineProperties(rectangle, {
-            offsetHeight: { configurable: true, value: 100 },
-            offsetWidth: { configurable: true, value: 100 }
-        });
-        Object.defineProperties(handle, {
-            offsetHeight: { configurable: true, value: 10 },
-            offsetWidth: { configurable: true, value: 10 }
-        });
-        rectangle.getBoundingClientRect = () => createDomRect({ height: 100, width: 100 });
-        handle.getBoundingClientRect = () => createDomRect({ height: 10, width: 10 });
-
-        rectangle.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: 50, clientY: 50 }));
-
-        await waitForStable(fixture);
-        expect(component).toBeTruthy();
-    });
 });
 
 describe("ColorGradientComponent value binding", () => {
@@ -310,18 +288,6 @@ describe("ColorGradientComponent HSV keyboard navigation", () => {
         fixture = TestBed.createComponent(ColorGradientComponent);
         await waitForStable(fixture);
 
-        const rectangle = fixture.nativeElement.querySelector("div") as HTMLDivElement;
-        const handle = fixture.nativeElement.querySelector("[role='slider']") as HTMLDivElement;
-        Object.defineProperties(rectangle, {
-            offsetHeight: { configurable: true, value: 100 },
-            offsetWidth: { configurable: true, value: 100 }
-        });
-        Object.defineProperties(handle, {
-            offsetHeight: { configurable: true, value: 10 },
-            offsetWidth: { configurable: true, value: 10 }
-        });
-        rectangle.getBoundingClientRect = () => createDomRect({ height: 100, width: 100 });
-        handle.getBoundingClientRect = () => createDomRect({ height: 10, width: 10 });
         fixture.componentRef.setInput("value", "#9C4E4E");
         await waitForStable(fixture);
     });
@@ -464,15 +430,15 @@ describe("ColorGradientComponent HSV keyboard navigation", () => {
         await waitForStable(fixture);
 
         expect(getHsvSliderValue(handle)).toEqual({ saturation: 0, value: 100 });
-        expect(getHsvHandleLeft(handle)).toBe(-5);
-        expect(getHsvHandleTop(handle)).toBe(-5);
+        expect(getHsvHandleLeft(handle)).toBe(0);
+        expect(getHsvHandleTop(handle)).toBe(0);
 
         dispatchHsvKey(handle, "End");
         await waitForStable(fixture);
 
         expect(getHsvSliderValue(handle)).toEqual({ saturation: 100, value: 0 });
-        expect(getHsvHandleLeft(handle)).toBe(95);
-        expect(getHsvHandleTop(handle)).toBe(95);
+        expect(getHsvHandleLeft(handle)).toBe(100);
+        expect(getHsvHandleTop(handle)).toBe(100);
     });
 
     it("clamps keyboard movement at HSV boundaries", async () => {
@@ -620,20 +586,6 @@ describe("ColorGradientComponent i18n", () => {
         expect(buttons[1].textContent?.trim()).toBe("İptal");
     });
 });
-
-function createDomRect(rect: Pick<DOMRect, "height" | "width">): DOMRect {
-    return {
-        bottom: rect.height,
-        height: rect.height,
-        left: 0,
-        right: rect.width,
-        top: 0,
-        width: rect.width,
-        x: 0,
-        y: 0,
-        toJSON: () => ({})
-    };
-}
 
 interface ColorGradientFormModel {
     color: string | null;

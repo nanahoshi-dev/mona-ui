@@ -103,8 +103,12 @@ Supported `size` values are `small`, `medium`, and `large`. Supported `rounded` 
 
 - The popup opens anchored below the host, left-aligned, with no backdrop. Clicking outside the popup closes it.
 - The popup does not automatically reposition to stay within the viewport near screen edges.
-- `disabled` and `readonly` prevent the popup from opening. If either becomes `true` while the popup is already open, the embedded palette or gradient control reflects the new state immediately (selection/interaction becomes blocked), but the popup does not auto-close.
-- Closing the popup (via selection, Escape, Tab, or an outside click) restores keyboard focus to the host element.
+- `disabled` and `readonly` prevent the popup from opening, and close it if either becomes `true` while it's open.
+- The popup closes when the picker is destroyed.
+- Closing the popup returns focus to the host, unless the user moved it elsewhere, for example by clicking another field.
+- In the gradient view, closing the popup by any means other than Apply discards what wasn't applied.
+- Apply writes a value only after an edit, so a color the gradient can't read stays as it was written.
+- Choosing the color that's already selected keeps it and closes the popup. To clear, use `showClearButton`.
 
 ## Accessibility & Forms Integration
 
@@ -115,14 +119,13 @@ Supported `size` values are `small`, `medium`, and `large`. Supported `rounded` 
 | Key | Action |
 |---|---|
 | `Enter` / `Space` / `ArrowDown` / `ArrowUp` | Opens the popup (when not `disabled` or `readonly`). |
-| `Escape` | Closes the popup if it is open. |
 
 **Inside the open popup:**
 
 | Key | Action |
 |---|---|
 | `Escape` | Closes the popup and returns focus to the host. |
-| `Tab` | Closes the popup. The popup does not trap focus — it is a light-dismiss popup, not a modal dialog. |
+| `Tab` / `Shift+Tab` | Moves through the popup's controls. Going past the last or first one closes the popup and returns focus to the host, so the next `Tab` continues down the page. The popup isn't modal and doesn't trap focus. |
 
 Once focus moves into the popup content, the embedded component's own keyboard map applies: see the palette-view grid navigation in the [Color Palette](../color-palette) documentation, or the gradient-view handle navigation in the Color Gradient documentation.
 
@@ -132,9 +135,9 @@ Once focus moves into the popup content, the embedded component's own keyboard m
 |---|---|---|
 | `role` | Host | `"combobox"` |
 | `aria-haspopup` | Host | `"dialog"` |
-| `aria-expanded` | Host | `"true"` while the popup is open, otherwise absent |
-| `aria-controls` | Host | The popup content element's `id` |
-| `aria-label` | Host | `"Color picker"` (fixed, not configurable) |
+| `aria-expanded` | Host | `"true"` while the popup is open, otherwise `"false"` |
+| `aria-controls` | Host | The popup content element's `id`, only while it's open |
+| `aria-label` | Host | The `aria-label` input, or `"Color picker"`. Absent when a label or `aria-labelledby` names the picker. |
 | `aria-disabled` | Host | Reflects `disabled` |
 | `aria-invalid` | Host | `"true"` when invalid, otherwise absent |
 | `aria-readonly` | Host | Reflects `readonly` |
@@ -143,13 +146,15 @@ Once focus moves into the popup content, the embedded component's own keyboard m
 | `aria-label` | Popup content | `"Color palette picker"` or `"Color gradient picker"`, matching `view` |
 | `id` | Popup content | Matches the host's `aria-controls` |
 
+The host also holds visually hidden text with the current color: its name when the palette gives it one, its value otherwise, or a translated "No color".
+
 **Consumer responsibilities**
 
-- The host's accessible name is fixed to the literal text `"Color picker"` and is not exposed through a public input. If a page shows multiple color pickers, screen reader users cannot distinguish between them by name alone.
+- Name each picker with `aria-label`, `aria-labelledby` or a `mona-label`, so screen reader users can tell them apart.
 
 ### Focus Behavior
 
-Opening the popup moves focus into its content: the palette container (palette view) or the saturation/value handle (gradient view). Closing the popup — by selection, Escape, Tab, or an outside click — restores focus to the host element. The popup does not implement a focus trap.
+Opening the popup moves focus into its content: the selected color, or the first one, in the palette view, and the saturation/value handle in the gradient view. Closing the popup returns focus to the host unless the user moved it elsewhere. The popup does not implement a focus trap.
 
 ### Form Interaction
 
@@ -167,7 +172,7 @@ protected readonly form = form({ color: "#3498db" }, schema => {
 <mona-color-picker [formField]="form.color" view="palette"></mona-color-picker>
 ```
 
-The `touch` output fires when the host loses focus, or when a palette/gradient selection is made. The signal forms `FormField` directive listens to this output to mark the field as touched.
+The `touch` output fires when the host loses focus with the popup closed, when a palette color is selected, and when the popup closes. Focus moving into the popup doesn't fire it. The signal forms `FormField` directive listens to this output to mark the field as touched.
 
 ## API
 
@@ -181,17 +186,22 @@ Implements `FormValueControl<string | null>` from `@angular/forms/signals`.
 
 | Name | Type | Default | Description |
 |---|---|---|---|
+| `aria-label` | `string` | `""` | Accessible name of the picker. |
+| `aria-labelledby` | `string` | `""` | Id of the element that names the picker. |
 | `closeOnSelect` | `boolean` | `true` | Closes the popup when a color is selected. Only applies to the palette view. |
 | `columns` | `number` | `10` | Number of columns in the color palette grid. Only applies to the palette view with a custom `palette` array. |
 | `disabled` | `boolean` | `false` | Renders the component with reduced visual emphasis and removes pointer interaction. |
+| `format` | `"hex" \| "rgb" \| "hsl"` | `"hex"` | The format of the value the gradient view writes. Only applies to the gradient view. |
 | `invalid` | `boolean` | `false` | Marks the color picker as invalid. When bound via `[formField]`, this is written by the `FormField` directive. |
 | `opacity` | `boolean` | `true` | Shows the opacity slider. Only applies to the gradient view. |
-| `palette` | `"flat" \| "material" \| "websafe" \| Iterable<string>` | `"flat"` | The palette to display in palette view — a built-in scheme name, or a custom iterable of CSS color strings. |
+| `palette` | `"flat" \| "material" \| "websafe" \| Iterable<string \| ColorPaletteItem>` | `"flat"` | The palette to display in palette view — a built-in scheme name, or a custom iterable of CSS color strings or `{ color, name }` items. |
 | `readonly` | `boolean` | `false` | Prevents value changes while preserving the component's visual state. When bound via `[formField]`, this is written by the `FormField` directive. |
 | `required` | `boolean` | `false` | Marks the color picker as required. When bound via `[formField]`, this is written by the `FormField` directive. |
 | `rounded` | `"none" \| "small" \| "medium" \| "large" \| "full"` | `"medium"` | Border-radius preset applied to the color picker. |
+| `showButtons` | `boolean` | `true` | Shows Apply and Cancel. Without them, each change writes the value at once. Only applies to the gradient view. |
 | `showClearButton` | `boolean` | `false` | Shows a button in the popup that resets `value` to `null`. Only applies to the palette view. |
 | `size` | `"small" \| "medium" \| "large"` | `"medium"` | Size preset controlling the color picker's dimensions. |
+| `tileSize` | `number` | `24` | Size, in pixels, of each palette tile. Below 24, tiles miss the minimum target size of WCAG 2.5.8. Only applies to the palette view. |
 | `touched` | `boolean` | `false` | Marks the color picker as touched. When bound via `[formField]`, this is written by the `FormField` directive. |
 | `value` | `string \| null` | `null` | Two-way bindable current color value. Implements `FormValueControl<string \| null>`, enabling the signal forms `[formField]` binding. |
 | `view` | `"gradient" \| "palette"` | `"gradient"` | Which editor the popup shows: the color palette grid, or the color gradient editor. |
@@ -200,7 +210,7 @@ Implements `FormValueControl<string | null>` from `@angular/forms/signals`.
 
 | Name | Type | Description |
 |---|---|---|
-| `touch` | `void` | Emitted when the color picker is interacted with on blur or color selection. Consumed by the signal forms `FormField` directive to mark the field as touched. |
+| `touch` | `void` | Emitted when the host loses focus with the popup closed, a palette color is selected or the popup closes. Consumed by the signal forms `FormField` directive to mark the field as touched. |
 
 ### Public Directives
 
@@ -213,7 +223,7 @@ Implements `FormValueControl<string | null>` from `@angular/forms/signals`.
 | Name | Shape | Description |
 |---|---|---|
 | `ColorPickerView` | `"gradient" \| "palette"` | The literal union accepted by `view`. |
-| `ColorPickerValueTemplateContext` | `{ $implicit: string }` | Template context type for `monaColorPickerValueTemplate`. See the TODO above regarding its accuracy against the runtime `string \| null` value. |
+| `ColorPickerValueTemplateContext` | `{ $implicit: string \| null }` | Template context type for `monaColorPickerValueTemplate`. `let-color` is typed from it. |
 | `ColorPickerVariantProps` / `ColorPickerVariantInput` | — | Variant prop types backing the `rounded` and `size` inputs' literal unions, exported for advanced typing scenarios. |
 
 ---

@@ -135,28 +135,42 @@ export const ZH_TW_MESSAGES = {
         removeLabel: (label?: string) => (label ? `移除${label}` : "移除項目")
     },
     colorGradient: {
+        alpha: "透明通道",
+        alphaText: (opacity: number) => `不透明度${localizeNumber(opacity)}%`,
         apply: "套用",
+        blue: "藍色",
         cancel: "取消",
         clearColor: "清除顏色",
+        colorCopied: "已複製顏色",
+        colorGradient: "色彩漸層",
         copyAsHex: "複製為 HEX",
         copyAsRgb: "複製為 RGB",
         copyColor: "複製顏色",
+        copyFailed: "無法複製顏色",
         currentColor: "目前顏色",
+        green: "綠色",
+        hexColor: "十六進位色彩",
+        hue: "色相",
         previousColor: "先前顏色",
+        red: "紅色",
+        saturation: "飽和度",
         saturationAndValue: "飽和度與明度",
         saturationAndValueText: (saturation: number, value: number) =>
             `飽和度${localizeNumber(saturation)}%，明度${localizeNumber(value)}%`,
-        switchColorMode: "切換色彩模式"
+        switchColorMode: "切換色彩模式",
+        value: "明度"
     },
     colorPalette: {
         color: (color: string) => `顏色: ${color}`,
-        colorPalette: "調色盤"
+        colorPalette: "調色盤",
+        namedColor: (name: string, color: string) => `${name}，${color}`
     },
     colorPicker: {
         clearColor: "清除顏色",
         colorGradientPicker: "漸層色彩選取器",
         colorPalettePicker: "調色盤選取器",
-        colorPicker: "色彩選取器"
+        colorPicker: "色彩選取器",
+        noColor: "無色彩"
     },
     comboBox: {
         clear: "清除"

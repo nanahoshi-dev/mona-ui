@@ -1,3 +1,5 @@
+import type { ColorPaletteItem } from "@nanahoshi/mona-ui/common";
+
 export const customColorPalette: string[] = [
     "#000814",
     "#001d3d",
@@ -29,4 +31,13 @@ export const customColorPalette: string[] = [
     "#f77f00",
     "#fcbf49",
     "#eae2b7"
+];
+
+export const namedColorPalette: ColorPaletteItem[] = [
+    { color: "#1A73E8", name: "Brand blue" },
+    { color: "#0F3460", name: "Deep navy" },
+    { color: "#E94560", name: "Alert" },
+    { color: "#FFC300", name: "Warning" },
+    { color: "#2E7D32", name: "Success" },
+    { color: "#6C757D", name: "Neutral" }
 ];

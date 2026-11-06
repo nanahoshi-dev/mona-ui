@@ -7,6 +7,7 @@ export * from "./models/DataType";
 export * from "./models/FilterChangeEvent";
 export * from "./models/FilterableOptions";
 export * from "./models/Orientation";
+export * from "./models/ColorPaletteItem";
 export * from "./models/PaletteType";
 export * from "./models/Position";
 export * from "./models/VirtualScrollOptions";

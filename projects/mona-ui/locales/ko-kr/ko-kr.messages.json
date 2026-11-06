@@ -117,27 +117,41 @@
         "removeLabel": "{label, select, undefined {항목 삭제} other {{label} 삭제}}"
     },
     "colorGradient": {
+        "alpha": "알파",
+        "alphaText": "불투명도 {opacity}%",
         "apply": "적용",
+        "blue": "파랑",
         "cancel": "취소",
         "clearColor": "색상 지우기",
+        "colorCopied": "색상을 복사했습니다",
+        "colorGradient": "색상 그라데이션",
         "copyAsHex": "HEX로 복사",
         "copyAsRgb": "RGB로 복사",
         "copyColor": "색상 복사",
+        "copyFailed": "색상을 복사할 수 없습니다",
         "currentColor": "현재 색상",
+        "green": "초록",
+        "hexColor": "16진수 색상",
+        "hue": "색조",
         "previousColor": "이전 색상",
+        "red": "빨강",
+        "saturation": "채도",
         "saturationAndValue": "채도 및 명도",
         "saturationAndValueText": "채도 {saturation}%, 명도 {value}%",
-        "switchColorMode": "색상 모드 전환"
+        "switchColorMode": "색상 모드 전환",
+        "value": "명도"
     },
     "colorPalette": {
         "color": "색상: {color}",
-        "colorPalette": "색상표"
+        "colorPalette": "색상표",
+        "namedColor": "{name}, {color}"
     },
     "colorPicker": {
         "clearColor": "색상 지우기",
         "colorGradientPicker": "그라데이션 색상 선택기",
         "colorPalettePicker": "색상표 선택기",
-        "colorPicker": "색상 선택기"
+        "colorPicker": "색상 선택기",
+        "noColor": "색상 없음"
     },
     "comboBox": {
         "clear": "지우기"

@@ -90,19 +90,28 @@ Supported rounded values are `none`, `small`, `medium`, `large`, and `full`.
 
 The `value` model accepts `undefined`, `null`, and color strings. When `value` is `undefined`, the component keeps its default internal color state. When `value` is `null`, the component clears its internal color channels.
 
-The source validates and parses these string shapes:
+It reads what the browser can paint:
 
-| Input shape | Example                                          |
-|-------------|--------------------------------------------------|
-| Hex         | `#336699`, `#369`, `#336699cc`                   |
-| RGB/RGBA    | `rgb(51, 102, 153)`, `rgba(51, 102, 153, 0.8)`   |
-| HSL/HSLA    | `hsl(210, 50%, 40%)`, `hsla(210, 50%, 40%, 0.8)` |
+| Input shape   | Example                                                                   |
+|---------------|---------------------------------------------------------------------------|
+| Hex           | `#336699`, `#369`, `#336699cc`                                            |
+| RGB/RGBA      | `rgb(51, 102, 153)`, `rgba(51, 102, 153, 0.8)`, `rgb(51 102 153 / 80%)`   |
+| HSL/HSLA      | `hsl(210, 50%, 40%)`, `hsla(210.5, 50%, 40%, 0.8)`, `hsl(210 50% 40%)`    |
+| Anything else | `red`, `transparent`, `oklch(50% 0.1 200)`, through the browser's canvas  |
 
-When the component emits a value, the emitted string follows the `format` input. Alpha is included where the selected format supports it.
+A value it still can't read, such as `var(--brand)`, shows as no color and warns in development. Apply only writes after an edit, so that value and any other stay exactly as written until a user changes the color. A color outside sRGB comes back as its closest sRGB color once edited.
+
+When the component emits a value, the emitted string follows the `format` input. Alpha is included where the selected format supports it. It's written with as few decimals as read back the same, so a saved `0.5` stays `0.5`, and HSL has one decimal.
+
+Cancel puts the controls back on `value`. Clear only empties the controls until Apply, and the previous color stays available until then.
+
+## Right to Left
+
+The hue and alpha sliders stay left to right on an RTL page, like the saturation and value area, so each handle sits over the color it selects, and the right arrow moves up the scale.
 
 ## Keyboard Interaction
 
-The saturation/value handle is focusable when the component is enabled.
+The saturation/value handle is focusable when the component is enabled. Pressing anywhere in the area starts a drag with the primary button.
 
 | Key                 | Action                          |
 |---------------------|---------------------------------|
@@ -120,7 +129,7 @@ The previous-color swatch is keyboard-activatable with `Enter` and `Space`.
 
 ## Accessibility Notes
 
-The saturation/value handle renders a focusable slider with an accessible name and exposes the current saturation and value.
+The host is a `role="group"` named by the `aria-label` input, `aria-labelledby` or a `mona-label`, or `"Color gradient"` otherwise. Every slider and input has a name of its own, and the alpha slider reads as a percentage. The saturation/value handle renders a focusable slider and exposes the current saturation and value.
 
 | Attribute        | When present                          | Value                                |
 |------------------|---------------------------------------|--------------------------------------|
@@ -128,7 +137,7 @@ The saturation/value handle renders a focusable slider with an accessible name a
 | `aria-label`     | Always on the saturation/value handle | `"Color saturation and value"`       |
 | `aria-valuemin`  | Always on the saturation/value handle | `0`                                  |
 | `aria-valuemax`  | Always on the saturation/value handle | `100`                                |
-| `aria-valuenow`  | Always on the saturation/value handle | Current saturation                   |
+| `aria-valuenow`  | Always on the saturation/value handle | Current saturation, `0` with no color |
 | `aria-valuetext` | Always on the saturation/value handle | `"Saturation n%, Value n%"`          |
 | `aria-disabled`  | When disabled                         | `true`                               |
 | `tabindex`       | Always on the saturation/value handle | `0` when enabled, `-1` when disabled |
@@ -170,6 +179,8 @@ Implements `FormValueControl<string | null | undefined>` from `@angular/forms/si
 
 | Name              | Type                                                 | Default     | Description                                                                                                                                                    |
 |-------------------|------------------------------------------------------|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `aria-label`      | `string`                                             | `""`        | Accessible name of the group of controls.                                                                                                                      |
+| `aria-labelledby` | `string`                                             | `""`        | Id of the element that names the group of controls.                                                                                                            |
 | `disabled`        | `boolean`                                            | `false`     | Sets the disabled state of the color gradient.                                                                                                                 |
 | `format`          | `'hex' \| 'rgb' \| 'hsl'`                            | `'hex'`     | Output format used when the component emits a color value.                                                                                                     |
 | `opacity`         | `boolean`                                            | `true`      | Shows or hides the alpha slider.                                                                                                                               |
@@ -184,7 +195,7 @@ Implements `FormValueControl<string | null | undefined>` from `@angular/forms/si
 | Name     | Type   | Description                                                                                                                                                      |
 |----------|--------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `apply`  | `void` | Emitted when the Apply button is clicked. The button is only displayed when `showButtons` is `true`.                                                             |
-| `cancel` | `void` | Emitted when the Cancel button is clicked. The button is only displayed when `showButtons` is `true`.                                                            |
+| `cancel` | `void` | Emitted when the Cancel button is clicked, after the controls go back to `value`. The button is only displayed when `showButtons` is `true`.                     |
 | `touch`  | `void` | Emitted when the color gradient is interacted with on blur or value adjustment. Consumed by the signal forms `FormField` directive to mark the field as touched. |
 
 ---

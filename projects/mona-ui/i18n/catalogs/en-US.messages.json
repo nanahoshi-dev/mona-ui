@@ -117,27 +117,41 @@
         "removeLabel": "{label, select, undefined {Remove, item} other {Remove, {label}}}"
     },
     "colorGradient": {
+        "alpha": "Alpha",
+        "alphaText": "Opacity {opacity}%",
         "apply": "Apply",
+        "blue": "Blue",
         "cancel": "Cancel",
         "clearColor": "Clear color",
+        "colorCopied": "Color copied",
+        "colorGradient": "Color gradient",
         "copyAsHex": "Copy as HEX",
         "copyAsRgb": "Copy as RGB",
         "copyColor": "Copy color",
+        "copyFailed": "Couldn't copy the color",
         "currentColor": "Current color",
+        "green": "Green",
+        "hexColor": "Hex color",
+        "hue": "Hue",
         "previousColor": "Previous color",
+        "red": "Red",
+        "saturation": "Saturation",
         "saturationAndValue": "Color saturation and value",
         "saturationAndValueText": "Saturation {saturation}%, Value {value}%",
-        "switchColorMode": "Switch color mode"
+        "switchColorMode": "Switch color mode",
+        "value": "Value"
     },
     "colorPalette": {
         "color": "Color {color}",
-        "colorPalette": "Color palette"
+        "colorPalette": "Color palette",
+        "namedColor": "{name}, {color}"
     },
     "colorPicker": {
         "clearColor": "Clear color",
         "colorGradientPicker": "Color gradient picker",
         "colorPalettePicker": "Color palette picker",
-        "colorPicker": "Color picker"
+        "colorPicker": "Color picker",
+        "noColor": "No color"
     },
     "comboBox": {
         "clear": "Clear"

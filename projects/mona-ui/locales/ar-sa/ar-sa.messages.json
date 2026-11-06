@@ -117,27 +117,41 @@
         "removeLabel": "{label, select, undefined {حذف العنصر} other {حذف {label}}}"
     },
     "colorGradient": {
+        "alpha": "قناة ألفا",
+        "alphaText": "العتامة {opacity}٪",
         "apply": "تطبيق",
+        "blue": "الأزرق",
         "cancel": "إلغاء",
         "clearColor": "مسح اللون",
+        "colorCopied": "تم نسخ اللون",
+        "colorGradient": "تدرج الألوان",
         "copyAsHex": "نسخ بصيغة HEX",
         "copyAsRgb": "نسخ بصيغة RGB",
         "copyColor": "نسخ اللون",
+        "copyFailed": "تعذر نسخ اللون",
         "currentColor": "اللون الحالي",
+        "green": "الأخضر",
+        "hexColor": "اللون بالنظام الست عشري",
+        "hue": "درجة اللون",
         "previousColor": "اللون السابق",
+        "red": "الأحمر",
+        "saturation": "التشبع",
         "saturationAndValue": "التشبع والقيمة",
         "saturationAndValueText": "التشبع {saturation}٪، القيمة {value}٪",
-        "switchColorMode": "تبديل وضع اللون"
+        "switchColorMode": "تبديل وضع اللون",
+        "value": "القيمة"
     },
     "colorPalette": {
         "color": "اللون: {color}",
-        "colorPalette": "لوحة الألوان"
+        "colorPalette": "لوحة الألوان",
+        "namedColor": "{name}، {color}"
     },
     "colorPicker": {
         "clearColor": "مسح اللون",
         "colorGradientPicker": "منتقي تدرج الألوان",
         "colorPalettePicker": "منتقي لوحة الألوان",
-        "colorPicker": "منتقي الألوان"
+        "colorPicker": "منتقي الألوان",
+        "noColor": "بلا لون"
     },
     "comboBox": {
         "clear": "مسح"

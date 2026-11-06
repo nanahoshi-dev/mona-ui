@@ -19,7 +19,8 @@ export const colorPaletteBaseThemeVariants = cva(
 export const colorPaletteItemThemeVariants = cva(
     `
         cursor-pointer
-        transition-transform
+        forced-color-adjust-none
+        transition-transform motion-reduce:transition-none
         data-[readonly='true']:cursor-default
         data-[selected='true']:scale-90
         data-[selected='true']:border-2 data-[selected='true']:border-black/90
@@ -27,11 +28,9 @@ export const colorPaletteItemThemeVariants = cva(
         hover:scale-95
 
         focus-visible:z-1
-        focus-visible:not-data-[selected='true']:border-2
-        focus-visible:not-data-[selected='true']:border-black/90
-        focus-visible:not-data-[selected='true']:outline
-        focus-visible:not-data-[selected='true']:outline-2
-        focus-visible:not-data-[selected='true']:outline-white/90
+        focus-visible:border-2 focus-visible:border-black/90
+        focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/90!
+        focus-visible:shadow-[0_0_0_4px_rgb(0_0_0/0.9)]
     `,
     {
         variants: {

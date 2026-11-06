@@ -118,7 +118,7 @@ export const sliderHandleThemeVariants = cva(
         outline-none
         transition duration-(--mona-motion-fast) ease-out
 
-        data-[orientation="horizontal"]:translate-x-[-50%] rtl:data-[orientation="horizontal"]:translate-x-[50%]
+        data-[orientation="horizontal"]:translate-x-[-50%] data-[rtl="true"]:data-[orientation="horizontal"]:translate-x-[50%]
         data-[orientation="horizontal"]:transition-[left,right]
         data-[orientation="horizontal"]:data-[dragging="true"]:transition-none
 
