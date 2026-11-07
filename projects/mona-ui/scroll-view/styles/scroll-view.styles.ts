@@ -39,11 +39,15 @@ export const scrollViewArrowThemeVariants = cva(
         absolute top-0 bottom-0 flex items-center justify-center
         px-1
         cursor-pointer select-none
-        bg-surface-overlay/65 text-foreground
-        transition-colors duration-(--mona-motion-standard) ease-out
-        hover:bg-hover/90 active:bg-active/90
+        bg-transparent text-foreground
+        forced-colors:bg-[Canvas]
         focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus-indicator
         [&_svg]:stroke-current
+        [&_svg]:drop-shadow-[0_0_1px_var(--color-surface),0_0_4px_var(--color-surface)]
+        [&_svg]:opacity-70
+        [&_svg]:transition-opacity [&_svg]:duration-(--mona-motion-standard) [&_svg]:ease-out
+        hover:[&_svg]:opacity-100 active:[&_svg]:opacity-100 focus-visible:[&_svg]:opacity-100
+        contrast-more:[&_svg]:opacity-100 forced-colors:[&_svg]:opacity-100
     `,
     {
         variants: {
