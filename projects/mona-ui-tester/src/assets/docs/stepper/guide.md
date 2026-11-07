@@ -98,12 +98,22 @@ Replaces the entire visual step unit. The component wraps the projected content 
 </mona-stepper>
 ```
 
-## Feature Examples
+## Examples
 
-### Non-linear mode
+### Back and Next buttons
 
-```html
-<mona-stepper [steps]="steps" [(step)]="currentStep" [linear]="false"></mona-stepper>
+`step` is a two-way model, so your own buttons can move it while the stepper shows where the user is.
+
+```example
+stepper/wizard
+```
+
+### Non-linear mode with step states
+
+With `[linear]="false"` any enabled step can be chosen. The first step is `invalid`, the third is `disabled`, and the fourth is `completed` ahead of the current step.
+
+```example
+stepper/step-states
 ```
 
 ### Disabled steps
@@ -122,16 +132,8 @@ protected readonly steps: StepOptions[] = [
 
 `stepSelect` fires before a click or key changes the step, and the keys that change it are `Enter` and `Space`, since the arrows only move focus. Call `preventDefault()` to stay where you are, for example while the current step's form is invalid. It's a veto rather than a correction, so there's no flicker to undo. It doesn't fire when `step` is written from outside, so it can't veto your own Next and Back buttons, or for a click on the current or a locked step.
 
-```html
-<mona-stepper [steps]="steps" [(step)]="currentStep" (stepSelect)="onStepSelect($event)"></mona-stepper>
-```
-
-```typescript
-protected onStepSelect(event: StepSelectEvent): void {
-    if (event.index > event.previousIndex && this.form().invalid()) {
-        event.preventDefault();
-    }
-}
+```example
+stepper/veto
 ```
 
 ### Step states
@@ -166,11 +168,11 @@ The stepper moves focus only in response to its own keys. Rendering it, or chang
 
 ### Vertical orientation
 
-```html
-<mona-stepper [steps]="steps" [(step)]="currentStep" orientation="vertical"></mona-stepper>
-```
+In vertical mode, `ArrowUp` and `ArrowDown` replace `ArrowLeft` and `ArrowRight`. Set a fixed height on the host or a containing element. This one also uses an indicator template to show an icon for each step.
 
-In vertical mode, `ArrowUp` and `ArrowDown` replace `ArrowLeft` and `ArrowRight`. Set a fixed height on the host or a containing element.
+```example
+stepper/vertical
+```
 
 ### Rounded presets
 

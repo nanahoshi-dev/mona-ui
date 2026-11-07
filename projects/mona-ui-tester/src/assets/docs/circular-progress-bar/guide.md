@@ -29,42 +29,31 @@ Add `CircularProgressBarComponent` to your standalone component's `imports` arra
 </mona-circular-progress-bar>
 ```
 
-**Indeterminate** — use when the completion percentage is unknown:
+## Examples
 
-```html
-<mona-circular-progress-bar
-    [indeterminate]="true"
-    aria-label="Loading">
-</mona-circular-progress-bar>
+### Size, thickness and color
+
+`color` takes a string, or a function that maps the current percentage to a color. Arrow functions cannot be defined inline in Angular templates, so assign the function to a class member and reference it by name.
+
+```example
+circular-progress-bar/sizes
 ```
 
-**Custom range** — `min` and `max` default to 0 / 100 but accept any numeric range:
+### Indeterminate
 
-```html
-<mona-circular-progress-bar
-    [value]="completedSteps"
-    [min]="0"
-    [max]="totalSteps"
-    aria-label="Step completion">
-</mona-circular-progress-bar>
+Use it when the completion percentage is unknown. Set `aria-valuetext` so screen readers announce a state.
+
+```example
+circular-progress-bar/indeterminate
 ```
 
-**Dynamic color** — pass a string or a function that maps the current percentage to a color:
+### Custom range and label
 
-```html
-<!-- Fixed color -->
-<mona-circular-progress-bar [value]="75" color="#6366f1" aria-label="Quota used"></mona-circular-progress-bar>
+`min` and `max` default to 0 / 100 but accept any numeric range. `ng-template[monaCircularProgressBarLabelTemplate]` replaces the percentage inside the circle.
 
-<!-- Function — green when complete, amber otherwise -->
-<mona-circular-progress-bar [value]="progress" [color]="getColor" aria-label="Upload progress"></mona-circular-progress-bar>
+```example
+circular-progress-bar/label
 ```
-
-```typescript
-protected getColor = (percent: number): string =>
-    percent >= 100 ? "#22c55e" : "#f59e0b";
-```
-
-> Note: arrow functions cannot be defined inline in Angular templates. Assign the function to a class member and reference it by name.
 
 ## Appearance & Styling
 
@@ -108,19 +97,7 @@ Merge additional Tailwind or custom classes onto the host element via the `class
 
 ### Custom label template
 
-By default the component renders the percentage inside the circle, formatted for the locale, such as `40%`, `33,33 %` in German or `%40` in Turkish. Hide it with `[labelVisible]="false"`, or replace it with `ng-template[monaCircularProgressBarLabelTemplate]` for full control:
-
-```html
-<mona-circular-progress-bar [value]="steps" [max]="totalSteps" aria-label="Steps">
-    <ng-template monaCircularProgressBarLabelTemplate
-                 let-value
-                 let-min="min"
-                 let-max="max"
-                 let-percent="percent">
-        <span class="text-xs font-semibold">{{ value }} / {{ max }}</span>
-    </ng-template>
-</mona-circular-progress-bar>
-```
+By default the component renders the percentage inside the circle, formatted for the locale, such as `40%`, `33,33 %` in German or `%40` in Turkish. Hide it with `[labelVisible]="false"`, or replace it with `ng-template[monaCircularProgressBarLabelTemplate]` for full control, as in the custom label example.
 
 The template context exposes four variables:
 

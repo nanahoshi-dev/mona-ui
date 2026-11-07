@@ -30,46 +30,36 @@ Add both to your standalone component's `imports` array.
 
 The second pane has no `size`, so it absorbs the remaining space.
 
-**Vertical orientation:**
+## Examples
 
-```html
-<mona-splitter orientation="vertical" class="h-96 w-full">
-    <mona-splitter-pane [size]="120">
-        <div class="p-4">Top</div>
-    </mona-splitter-pane>
-    <mona-splitter-pane>
-        <div class="p-4">Bottom</div>
-    </mona-splitter-pane>
-</mona-splitter>
+### Vertical
+
+```example
+splitter/vertical
 ```
 
-**Collapsible pane with two-way state:**
+### Collapsible pane
 
-```html
-<mona-splitter class="h-64 w-full">
-    <mona-splitter-pane [collapsible]="true" [(collapsed)]="sidebarCollapsed" [(size)]="sidebarSize" [min]="80" [max]="320">
-        <div class="p-4">Sidebar</div>
-    </mona-splitter-pane>
-    <mona-splitter-pane>
-        <div class="p-4">Main content</div>
-    </mona-splitter-pane>
-</mona-splitter>
+`collapsed` and `size` are two-way models, so the page can read and change both.
+
+```example
+splitter/collapsible
 ```
 
-**Proportional ("fr") sizing** — mix a fixed pane with two flexible panes sharing the remaining space at a 1:2 ratio:
+### Proportional sizing
 
-```html
-<mona-splitter class="h-64 w-full">
-    <mona-splitter-pane [size]="200">
-        <div class="p-4">Fixed</div>
-    </mona-splitter-pane>
-    <mona-splitter-pane size="1fr">
-        <div class="p-4">Flexible (1x)</div>
-    </mona-splitter-pane>
-    <mona-splitter-pane size="2fr">
-        <div class="p-4">Flexible (2x)</div>
-    </mona-splitter-pane>
-</mona-splitter>
+A fixed pane next to two `fr` panes, which share the remaining space at a 1:2 ratio.
+
+```example
+splitter/proportional
+```
+
+### Saving a layout
+
+`resizeEnd` gives every pane's `size` in order, ready to pass back in.
+
+```example
+splitter/save-layout
 ```
 
 ## Pane Sizing
@@ -85,16 +75,9 @@ If no pane is left with an empty `size`, the last non-collapsed pane absorbs rem
 
 `min` and `max` take numbers and pixels only, such as `120` or `"120px"`, because a drag works in pixels. Anything else, such as a percentage, `fr` or `rem`, is ignored, with a warning in development. They hold for the layout as well as for a drag, so a first size or a window resize can't take a pane past them. A collapsed pane doesn't keep its `min`, since it has to be able to close.
 
-### Saving a layout
+### When the layout is reported
 
-`sizeChange` fires on every move of a drag. `resizeEnd` on `mona-splitter` fires once when a drag ends, after each key that resizes, and when the separator collapses or expands a pane, with every pane's `size` in order, ready to pass back in:
-
-```html
-<mona-splitter class="h-64 w-full" (resizeEnd)="saveLayout($event)">
-    <mona-splitter-pane [size]="layout()[0]">...</mona-splitter-pane>
-    <mona-splitter-pane [size]="layout()[1]">...</mona-splitter-pane>
-</mona-splitter>
-```
+`sizeChange` fires on every move of a drag. `resizeEnd` on `mona-splitter` fires once when a drag ends, after each key that resizes, and when the separator collapses or expands a pane, with every pane's `size` in order, ready to pass back in, as in the [Saving a layout](#saving-a-layout) example.
 
 A press that moved nothing doesn't fire it. Neither does collapsing or expanding with a double-click, a collapse button, `Enter` or `Alt` + arrow, so bind `collapsed` too if the layout should remember that.
 

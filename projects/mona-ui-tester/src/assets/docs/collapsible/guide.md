@@ -41,38 +41,29 @@ export class ProjectDetailsComponent {
 
 The trigger and content directives find their nearest `[monaCollapsible]` root through the directive context. A root can be applied to a `div`, `section`, `li`, or another suitable container.
 
-## State & Behavior
+## Examples
 
 ### Two-way state
 
-Use `[(expanded)]` when the consumer needs to observe and control the open state:
+Use `[(expanded)]` when the consumer needs to observe and control the open state. Here it also turns the chevron.
 
-```html
-<section monaCollapsible [(expanded)]="isOpen">
-    <button monaCollapsibleTrigger type="button">Advanced options</button>
-    <div monaCollapsibleContent>Optional settings</div>
-</section>
+```example
+collapsible/two-way
 ```
 
 ### Programmatic control
 
-The root is exported as `monaCollapsible`, so `expand()`, `collapse()`, and `toggle()` can be called from a template reference:
+The root is exported as `monaCollapsible`, so `expand()`, `collapse()`, and `toggle()` can be called from a template reference. `disabled` prevents trigger interaction and makes `toggle()` do nothing, but `expand()` and `collapse()` still work.
 
-```html
-<section monaCollapsible #details="monaCollapsible">
-    <button monaCollapsibleTrigger type="button">Details</button>
-    <div monaCollapsibleContent>More information</div>
-</section>
-
-<button type="button" (click)="details.expand()">Show details</button>
-<button type="button" (click)="details.collapse()">Hide details</button>
+```example
+collapsible/programmatic
 ```
 
-`disabled` prevents trigger interaction and makes `toggle()` do nothing, but `expand()` and `collapse()` still work. Set `animate` to `false` when the consumer wants to provide its own content transition.
+## State & Behavior
 
 ### Content height
 
-The content directive publishes its measured height as the `--mona-collapsible-content-height` custom property. Pair `[animate]="false"` with a consumer-owned transition when the built-in height transition is not suitable. The built-in one is also skipped when the user asks for reduced motion.
+Set `animate` to `false` when the consumer wants to provide its own content transition. The content directive publishes its measured height as the `--mona-collapsible-content-height` custom property. Pair `[animate]="false"` with a consumer-owned transition when the built-in height transition is not suitable. The built-in one is also skipped when the user asks for reduced motion.
 
 ### Padded content
 

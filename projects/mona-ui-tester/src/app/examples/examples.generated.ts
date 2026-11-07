@@ -10,6 +10,71 @@ export interface ExampleEntry {
 }
 
 export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
+    "auto-complete/filtering": {
+        files: ["filtering-example.component.ts", "filtering-example.component.html"],
+        load: () => import("./auto-complete/filtering/filtering-example.component").then(module => module.AutoCompleteFilteringExampleComponent),
+        mainFile: "filtering-example.component.ts"
+    },
+    "auto-complete/forms": {
+        files: ["forms-example.component.ts", "forms-example.component.html"],
+        load: () => import("./auto-complete/forms/forms-example.component").then(module => module.AutoCompleteFormsExampleComponent),
+        mainFile: "forms-example.component.ts"
+    },
+    "auto-complete/grouping": {
+        files: ["grouping-example.component.ts", "grouping-example.component.html"],
+        load: () => import("./auto-complete/grouping/grouping-example.component").then(module => module.AutoCompleteGroupingExampleComponent),
+        mainFile: "grouping-example.component.ts"
+    },
+    "auto-complete/templates": {
+        files: ["templates-example.component.ts", "templates-example.component.html"],
+        load: () => import("./auto-complete/templates/templates-example.component").then(module => module.AutoCompleteTemplatesExampleComponent),
+        mainFile: "templates-example.component.ts"
+    },
+    "avatar/icon": {
+        files: ["icon-example.component.ts", "icon-example.component.html"],
+        load: () => import("./avatar/icon/icon-example.component").then(module => module.AvatarIconExampleComponent),
+        mainFile: "icon-example.component.ts"
+    },
+    "avatar/initials": {
+        files: ["initials-example.component.ts", "initials-example.component.html"],
+        load: () => import("./avatar/initials/initials-example.component").then(module => module.AvatarInitialsExampleComponent),
+        mainFile: "initials-example.component.ts"
+    },
+    "breadcrumb/buttons": {
+        files: ["buttons-example.component.ts", "buttons-example.component.html"],
+        load: () => import("./breadcrumb/buttons/buttons-example.component").then(module => module.BreadcrumbButtonsExampleComponent),
+        mainFile: "buttons-example.component.ts"
+    },
+    "breadcrumb/collapsed": {
+        files: ["collapsed-example.component.ts", "collapsed-example.component.html"],
+        load: () => import("./breadcrumb/collapsed/collapsed-example.component").then(module => module.BreadcrumbCollapsedExampleComponent),
+        mainFile: "collapsed-example.component.ts"
+    },
+    "breadcrumb/separator": {
+        files: ["separator-example.component.ts", "separator-example.component.html"],
+        load: () => import("./breadcrumb/separator/separator-example.component").then(module => module.BreadcrumbSeparatorExampleComponent),
+        mainFile: "separator-example.component.ts"
+    },
+    "button-group/actions": {
+        files: ["actions-example.component.ts", "actions-example.component.html"],
+        load: () => import("./button-group/actions/actions-example.component").then(module => module.ButtonGroupActionsExampleComponent),
+        mainFile: "actions-example.component.ts"
+    },
+    "button-group/forms": {
+        files: ["forms-example.component.ts", "forms-example.component.html"],
+        load: () => import("./button-group/forms/forms-example.component").then(module => module.ButtonGroupFormsExampleComponent),
+        mainFile: "forms-example.component.ts"
+    },
+    "button-group/multiple": {
+        files: ["multiple-example.component.ts", "multiple-example.component.html"],
+        load: () => import("./button-group/multiple/multiple-example.component").then(module => module.ButtonGroupMultipleExampleComponent),
+        mainFile: "multiple-example.component.ts"
+    },
+    "button-group/with-menus": {
+        files: ["with-menus-example.component.ts", "with-menus-example.component.html"],
+        load: () => import("./button-group/with-menus/with-menus-example.component").then(module => module.ButtonGroupWithMenusExampleComponent),
+        mainFile: "with-menus-example.component.ts"
+    },
     "button/icons": {
         files: ["icons-example.component.ts", "icons-example.component.html"],
         load: () => import("./button/icons/icons-example.component").then(module => module.ButtonIconsExampleComponent),
@@ -19,6 +84,181 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         files: ["looks-example.component.ts", "looks-example.component.html"],
         load: () => import("./button/looks/looks-example.component").then(module => module.ButtonLooksExampleComponent),
         mainFile: "looks-example.component.ts"
+    },
+    "calendar/constraints": {
+        files: ["constraints-example.component.ts", "constraints-example.component.html"],
+        load: () => import("./calendar/constraints/constraints-example.component").then(module => module.CalendarConstraintsExampleComponent),
+        mainFile: "constraints-example.component.ts"
+    },
+    "calendar/forms": {
+        files: ["forms-example.component.ts", "forms-example.component.html"],
+        load: () => import("./calendar/forms/forms-example.component").then(module => module.CalendarFormsExampleComponent),
+        mainFile: "forms-example.component.ts"
+    },
+    "calendar/multiple": {
+        files: ["multiple-example.component.ts", "multiple-example.component.html"],
+        load: () => import("./calendar/multiple/multiple-example.component").then(module => module.CalendarMultipleExampleComponent),
+        mainFile: "multiple-example.component.ts"
+    },
+    "calendar/range": {
+        files: ["range-example.component.ts", "range-example.component.html"],
+        load: () => import("./calendar/range/range-example.component").then(module => module.CalendarRangeExampleComponent),
+        mainFile: "range-example.component.ts"
+    },
+    "card/article": {
+        files: ["article-example.component.ts", "article-example.component.html"],
+        load: () => import("./card/article/article-example.component").then(module => module.CardArticleExampleComponent),
+        mainFile: "article-example.component.ts"
+    },
+    "card/form": {
+        files: ["form-example.component.ts", "form-example.component.html"],
+        load: () => import("./card/form/form-example.component").then(module => module.CardFormExampleComponent),
+        mainFile: "form-example.component.ts"
+    },
+    "chart/bar": {
+        files: ["bar-example.component.ts", "bar-example.component.html"],
+        load: () => import("./chart/bar/bar-example.component").then(module => module.ChartBarExampleComponent),
+        mainFile: "bar-example.component.ts"
+    },
+    "chart/donut": {
+        files: ["donut-example.component.ts", "donut-example.component.html"],
+        load: () => import("./chart/donut/donut-example.component").then(module => module.ChartDonutExampleComponent),
+        mainFile: "donut-example.component.ts"
+    },
+    "chart/line": {
+        files: ["line-example.component.ts", "line-example.component.html"],
+        load: () => import("./chart/line/line-example.component").then(module => module.ChartLineExampleComponent),
+        mainFile: "line-example.component.ts"
+    },
+    "chart/tooltip": {
+        files: ["tooltip-example.component.ts", "tooltip-example.component.html"],
+        load: () => import("./chart/tooltip/tooltip-example.component").then(module => module.ChartTooltipExampleComponent),
+        mainFile: "tooltip-example.component.ts"
+    },
+    "checkbox/directive": {
+        files: ["directive-example.component.ts", "directive-example.component.html"],
+        load: () => import("./checkbox/directive/directive-example.component").then(module => module.CheckboxDirectiveExampleComponent),
+        mainFile: "directive-example.component.ts"
+    },
+    "checkbox/forms": {
+        files: ["forms-example.component.ts", "forms-example.component.html"],
+        load: () => import("./checkbox/forms/forms-example.component").then(module => module.CheckboxFormsExampleComponent),
+        mainFile: "forms-example.component.ts"
+    },
+    "checkbox/indeterminate": {
+        files: ["indeterminate-example.component.ts", "indeterminate-example.component.html"],
+        load: () => import("./checkbox/indeterminate/indeterminate-example.component").then(module => module.CheckboxIndeterminateExampleComponent),
+        mainFile: "indeterminate-example.component.ts"
+    },
+    "checkbox/labels": {
+        files: ["labels-example.component.ts", "labels-example.component.html"],
+        load: () => import("./checkbox/labels/labels-example.component").then(module => module.CheckboxLabelsExampleComponent),
+        mainFile: "labels-example.component.ts"
+    },
+    "chip/filters": {
+        files: ["filters-example.component.ts", "filters-example.component.html"],
+        load: () => import("./chip/filters/filters-example.component").then(module => module.ChipFiltersExampleComponent),
+        mainFile: "filters-example.component.ts"
+    },
+    "chip/prefix": {
+        files: ["prefix-example.component.ts", "prefix-example.component.html"],
+        load: () => import("./chip/prefix/prefix-example.component").then(module => module.ChipPrefixExampleComponent),
+        mainFile: "prefix-example.component.ts"
+    },
+    "chip/removable": {
+        files: ["removable-example.component.ts", "removable-example.component.html"],
+        load: () => import("./chip/removable/removable-example.component").then(module => module.ChipRemovableExampleComponent),
+        mainFile: "removable-example.component.ts"
+    },
+    "circular-progress-bar/indeterminate": {
+        files: ["indeterminate-example.component.ts", "indeterminate-example.component.html"],
+        load: () => import("./circular-progress-bar/indeterminate/indeterminate-example.component").then(module => module.CircularProgressBarIndeterminateExampleComponent),
+        mainFile: "indeterminate-example.component.ts"
+    },
+    "circular-progress-bar/label": {
+        files: ["label-example.component.ts", "label-example.component.html"],
+        load: () => import("./circular-progress-bar/label/label-example.component").then(module => module.CircularProgressBarLabelExampleComponent),
+        mainFile: "label-example.component.ts"
+    },
+    "circular-progress-bar/sizes": {
+        files: ["sizes-example.component.ts", "sizes-example.component.html"],
+        load: () => import("./circular-progress-bar/sizes/sizes-example.component").then(module => module.CircularProgressBarSizesExampleComponent),
+        mainFile: "sizes-example.component.ts"
+    },
+    "collapsible/programmatic": {
+        files: ["programmatic-example.component.ts", "programmatic-example.component.html"],
+        load: () => import("./collapsible/programmatic/programmatic-example.component").then(module => module.CollapsibleProgrammaticExampleComponent),
+        mainFile: "programmatic-example.component.ts"
+    },
+    "collapsible/two-way": {
+        files: ["two-way-example.component.ts", "two-way-example.component.html"],
+        load: () => import("./collapsible/two-way/two-way-example.component").then(module => module.CollapsibleTwoWayExampleComponent),
+        mainFile: "two-way-example.component.ts"
+    },
+    "color-gradient/buttons": {
+        files: ["buttons-example.component.ts", "buttons-example.component.html"],
+        load: () => import("./color-gradient/buttons/buttons-example.component").then(module => module.ColorGradientButtonsExampleComponent),
+        mainFile: "buttons-example.component.ts"
+    },
+    "color-gradient/compact": {
+        files: ["compact-example.component.ts", "compact-example.component.html"],
+        load: () => import("./color-gradient/compact/compact-example.component").then(module => module.ColorGradientCompactExampleComponent),
+        mainFile: "compact-example.component.ts"
+    },
+    "color-gradient/immediate": {
+        files: ["immediate-example.component.ts", "immediate-example.component.html"],
+        load: () => import("./color-gradient/immediate/immediate-example.component").then(module => module.ColorGradientImmediateExampleComponent),
+        mainFile: "immediate-example.component.ts"
+    },
+    "color-palette/built-in": {
+        files: ["built-in-example.component.ts", "built-in-example.component.html"],
+        load: () => import("./color-palette/built-in/built-in-example.component").then(module => module.ColorPaletteBuiltInExampleComponent),
+        mainFile: "built-in-example.component.ts"
+    },
+    "color-palette/custom": {
+        files: ["custom-example.component.ts", "custom-example.component.html"],
+        load: () => import("./color-palette/custom/custom-example.component").then(module => module.ColorPaletteCustomExampleComponent),
+        mainFile: "custom-example.component.ts"
+    },
+    "color-palette/named": {
+        files: ["named-example.component.ts", "named-example.component.html"],
+        load: () => import("./color-palette/named/named-example.component").then(module => module.ColorPaletteNamedExampleComponent),
+        mainFile: "named-example.component.ts"
+    },
+    "color-picker/gradient": {
+        files: ["gradient-example.component.ts", "gradient-example.component.html"],
+        load: () => import("./color-picker/gradient/gradient-example.component").then(module => module.ColorPickerGradientExampleComponent),
+        mainFile: "gradient-example.component.ts"
+    },
+    "color-picker/palette": {
+        files: ["palette-example.component.ts", "palette-example.component.html"],
+        load: () => import("./color-picker/palette/palette-example.component").then(module => module.ColorPickerPaletteExampleComponent),
+        mainFile: "palette-example.component.ts"
+    },
+    "color-picker/value-template": {
+        files: ["value-template-example.component.ts", "value-template-example.component.html"],
+        load: () => import("./color-picker/value-template/value-template-example.component").then(module => module.ColorPickerValueTemplateExampleComponent),
+        mainFile: "value-template-example.component.ts"
+    },
+    "combo-box/custom-values": {
+        files: ["custom-values-example.component.ts", "custom-values-example.component.html"],
+        load: () => import("./combo-box/custom-values/custom-values-example.component").then(module => module.ComboBoxCustomValuesExampleComponent),
+        mainFile: "custom-values-example.component.ts"
+    },
+    "combo-box/filtering": {
+        files: ["filtering-example.component.ts", "filtering-example.component.html"],
+        load: () => import("./combo-box/filtering/filtering-example.component").then(module => module.ComboBoxFilteringExampleComponent),
+        mainFile: "filtering-example.component.ts"
+    },
+    "combo-box/forms": {
+        files: ["forms-example.component.ts", "forms-example.component.html"],
+        load: () => import("./combo-box/forms/forms-example.component").then(module => module.ComboBoxFormsExampleComponent),
+        mainFile: "forms-example.component.ts"
+    },
+    "combo-box/primitive": {
+        files: ["primitive-example.component.ts", "primitive-example.component.html"],
+        load: () => import("./combo-box/primitive/primitive-example.component").then(module => module.ComboBoxPrimitiveExampleComponent),
+        mainFile: "primitive-example.component.ts"
     },
     "command/dialog": {
         files: ["dialog-example.component.ts", "dialog-example.component.html"],
@@ -34,5 +274,750 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         files: ["server-example.component.ts", "server-example.component.html"],
         load: () => import("./command/server/server-example.component").then(module => module.CommandServerExampleComponent),
         mainFile: "server-example.component.ts"
+    },
+    "contextmenu/basic": {
+        files: ["basic-example.component.ts", "basic-example.component.html"],
+        load: () => import("./contextmenu/basic/basic-example.component").then(module => module.ContextMenuBasicExampleComponent),
+        mainFile: "basic-example.component.ts"
+    },
+    "contextmenu/checkable": {
+        files: ["checkable-example.component.ts", "checkable-example.component.html"],
+        load: () => import("./contextmenu/checkable/checkable-example.component").then(module => module.ContextMenuCheckableExampleComponent),
+        mainFile: "checkable-example.component.ts"
+    },
+    "contextmenu/icons": {
+        files: ["icons-example.component.ts", "icons-example.component.html"],
+        load: () => import("./contextmenu/icons/icons-example.component").then(module => module.ContextMenuIconsExampleComponent),
+        mainFile: "icons-example.component.ts"
+    },
+    "decimal-textbox/bounds": {
+        files: ["bounds-example.component.ts", "bounds-example.component.html"],
+        load: () => import("./decimal-textbox/bounds/bounds-example.component").then(module => module.DecimalTextboxBoundsExampleComponent),
+        mainFile: "bounds-example.component.ts"
+    },
+    "decimal-textbox/formatter": {
+        files: ["formatter-example.component.ts", "formatter-example.component.html"],
+        load: () => import("./decimal-textbox/formatter/formatter-example.component").then(module => module.DecimalTextboxFormatterExampleComponent),
+        mainFile: "formatter-example.component.ts"
+    },
+    "decimal-textbox/forms": {
+        files: ["forms-example.component.ts", "forms-example.component.html"],
+        load: () => import("./decimal-textbox/forms/forms-example.component").then(module => module.DecimalTextboxFormsExampleComponent),
+        mainFile: "forms-example.component.ts"
+    },
+    "dialog/basic": {
+        files: ["basic-example.component.ts", "basic-example.component.html"],
+        load: () => import("./dialog/basic/basic-example.component").then(module => module.DialogBasicExampleComponent),
+        mainFile: "basic-example.component.ts"
+    },
+    "dialog/content": {
+        files: ["content-example.component.ts", "content-example.component.html"],
+        load: () => import("./dialog/content/content-example.component").then(module => module.DialogContentExampleComponent),
+        mainFile: "content-example.component.ts"
+    },
+    "dialog/service": {
+        files: ["service-example.component.ts", "service-example.component.html"],
+        load: () => import("./dialog/service/service-example.component").then(module => module.DialogServiceExampleComponent),
+        mainFile: "service-example.component.ts"
+    },
+    "dropdown-button/checkable": {
+        files: ["checkable-example.component.ts", "checkable-example.component.html"],
+        load: () => import("./dropdown-button/checkable/checkable-example.component").then(module => module.DropdownButtonCheckableExampleComponent),
+        mainFile: "checkable-example.component.ts"
+    },
+    "dropdown-button/groups": {
+        files: ["groups-example.component.ts", "groups-example.component.html"],
+        load: () => import("./dropdown-button/groups/groups-example.component").then(module => module.DropdownButtonGroupsExampleComponent),
+        mainFile: "groups-example.component.ts"
+    },
+    "dropdown-button/icon-only": {
+        files: ["icon-only-example.component.ts", "icon-only-example.component.html"],
+        load: () => import("./dropdown-button/icon-only/icon-only-example.component").then(module => module.DropdownButtonIconOnlyExampleComponent),
+        mainFile: "icon-only-example.component.ts"
+    },
+    "dropdown-button/loading": {
+        files: ["loading-example.component.ts", "loading-example.component.html"],
+        load: () => import("./dropdown-button/loading/loading-example.component").then(module => module.DropdownButtonLoadingExampleComponent),
+        mainFile: "loading-example.component.ts"
+    },
+    "dropdown-list/filtering": {
+        files: ["filtering-example.component.ts", "filtering-example.component.html"],
+        load: () => import("./dropdown-list/filtering/filtering-example.component").then(module => module.DropdownListFilteringExampleComponent),
+        mainFile: "filtering-example.component.ts"
+    },
+    "dropdown-list/forms": {
+        files: ["forms-example.component.ts", "forms-example.component.html"],
+        load: () => import("./dropdown-list/forms/forms-example.component").then(module => module.DropdownListFormsExampleComponent),
+        mainFile: "forms-example.component.ts"
+    },
+    "dropdown-list/primitive": {
+        files: ["primitive-example.component.ts", "primitive-example.component.html"],
+        load: () => import("./dropdown-list/primitive/primitive-example.component").then(module => module.DropdownListPrimitiveExampleComponent),
+        mainFile: "primitive-example.component.ts"
+    },
+    "dropdown-list/templates": {
+        files: ["templates-example.component.ts", "templates-example.component.html"],
+        load: () => import("./dropdown-list/templates/templates-example.component").then(module => module.DropdownListTemplatesExampleComponent),
+        mainFile: "templates-example.component.ts"
+    },
+    "editor/basic": {
+        files: ["basic-example.component.ts", "basic-example.component.html"],
+        load: () => import("./editor/basic/basic-example.component").then(module => module.EditorBasicExampleComponent),
+        mainFile: "basic-example.component.ts"
+    },
+    "editor/forms": {
+        files: ["forms-example.component.ts", "forms-example.component.html"],
+        load: () => import("./editor/forms/forms-example.component").then(module => module.EditorFormsExampleComponent),
+        mainFile: "forms-example.component.ts"
+    },
+    "editor/toolbar": {
+        files: ["toolbar-example.component.ts", "toolbar-example.component.html"],
+        load: () => import("./editor/toolbar/toolbar-example.component").then(module => module.EditorToolbarExampleComponent),
+        mainFile: "toolbar-example.component.ts"
+    },
+    "expansion-panel/accordion": {
+        files: ["accordion-example.component.ts", "accordion-example.component.html"],
+        load: () => import("./expansion-panel/accordion/accordion-example.component").then(module => module.ExpansionPanelAccordionExampleComponent),
+        mainFile: "accordion-example.component.ts"
+    },
+    "expansion-panel/controlled": {
+        files: ["controlled-example.component.ts", "controlled-example.component.html"],
+        load: () => import("./expansion-panel/controlled/controlled-example.component").then(module => module.ExpansionPanelControlledExampleComponent),
+        mainFile: "controlled-example.component.ts"
+    },
+    "expansion-panel/header-templates": {
+        files: ["header-templates-example.component.ts", "header-templates-example.component.html"],
+        load: () => import("./expansion-panel/header-templates/header-templates-example.component").then(module => module.ExpansionPanelHeaderTemplatesExampleComponent),
+        mainFile: "header-templates-example.component.ts"
+    },
+    "fieldset/disabled": {
+        files: ["disabled-example.component.ts", "disabled-example.component.html"],
+        load: () => import("./fieldset/disabled/disabled-example.component").then(module => module.FieldsetDisabledExampleComponent),
+        mainFile: "disabled-example.component.ts"
+    },
+    "fieldset/legend-template": {
+        files: ["legend-template-example.component.ts", "legend-template-example.component.html"],
+        load: () => import("./fieldset/legend-template/legend-template-example.component").then(module => module.FieldsetLegendTemplateExampleComponent),
+        mainFile: "legend-template-example.component.ts"
+    },
+    "grid/editing": {
+        files: ["editing-example.component.ts", "editing-example.component.html"],
+        load: () => import("./grid/editing/editing-example.component").then(module => module.GridEditingExampleComponent),
+        mainFile: "editing-example.component.ts"
+    },
+    "grid/selection": {
+        files: ["selection-example.component.ts", "selection-example.component.html"],
+        load: () => import("./grid/selection/selection-example.component").then(module => module.GridSelectionExampleComponent),
+        mainFile: "selection-example.component.ts"
+    },
+    "grid/server": {
+        files: ["server-example.component.ts", "server-example.component.html"],
+        load: () => import("./grid/server/server-example.component").then(module => module.GridServerExampleComponent),
+        mainFile: "server-example.component.ts"
+    },
+    "grid/sorting-filtering": {
+        files: ["sorting-filtering-example.component.ts", "sorting-filtering-example.component.html"],
+        load: () => import("./grid/sorting-filtering/sorting-filtering-example.component").then(module => module.GridSortingFilteringExampleComponent),
+        mainFile: "sorting-filtering-example.component.ts"
+    },
+    "input/sizes": {
+        files: ["sizes-example.component.ts", "sizes-example.component.html"],
+        load: () => import("./input/sizes/sizes-example.component").then(module => module.InputSizesExampleComponent),
+        mainFile: "sizes-example.component.ts"
+    },
+    "input/types": {
+        files: ["types-example.component.ts", "types-example.component.html"],
+        load: () => import("./input/types/types-example.component").then(module => module.InputTypesExampleComponent),
+        mainFile: "types-example.component.ts"
+    },
+    "label/for": {
+        files: ["for-example.component.ts", "for-example.component.html"],
+        load: () => import("./label/for/for-example.component").then(module => module.LabelForExampleComponent),
+        mainFile: "for-example.component.ts"
+    },
+    "label/optional": {
+        files: ["optional-example.component.ts", "optional-example.component.html"],
+        load: () => import("./label/optional/optional-example.component").then(module => module.LabelOptionalExampleComponent),
+        mainFile: "optional-example.component.ts"
+    },
+    "label/wrapping": {
+        files: ["wrapping-example.component.ts", "wrapping-example.component.html"],
+        load: () => import("./label/wrapping/wrapping-example.component").then(module => module.LabelWrappingExampleComponent),
+        mainFile: "wrapping-example.component.ts"
+    },
+    "list-box/reorder": {
+        files: ["reorder-example.component.ts", "reorder-example.component.html"],
+        load: () => import("./list-box/reorder/reorder-example.component").then(module => module.ListBoxReorderExampleComponent),
+        mainFile: "reorder-example.component.ts"
+    },
+    "list-box/selection": {
+        files: ["selection-example.component.ts", "selection-example.component.html"],
+        load: () => import("./list-box/selection/selection-example.component").then(module => module.ListBoxSelectionExampleComponent),
+        mainFile: "selection-example.component.ts"
+    },
+    "list-box/transfer": {
+        files: ["transfer-example.component.ts", "transfer-example.component.html"],
+        load: () => import("./list-box/transfer/transfer-example.component").then(module => module.ListBoxTransferExampleComponent),
+        mainFile: "transfer-example.component.ts"
+    },
+    "list-view/grouping": {
+        files: ["grouping-example.component.ts", "grouping-example.component.html"],
+        load: () => import("./list-view/grouping/grouping-example.component").then(module => module.ListViewGroupingExampleComponent),
+        mainFile: "grouping-example.component.ts"
+    },
+    "list-view/infinite-scroll": {
+        files: ["infinite-scroll-example.component.ts", "infinite-scroll-example.component.html"],
+        load: () => import("./list-view/infinite-scroll/infinite-scroll-example.component").then(module => module.ListViewInfiniteScrollExampleComponent),
+        mainFile: "infinite-scroll-example.component.ts"
+    },
+    "list-view/paging": {
+        files: ["paging-example.component.ts", "paging-example.component.html"],
+        load: () => import("./list-view/paging/paging-example.component").then(module => module.ListViewPagingExampleComponent),
+        mainFile: "paging-example.component.ts"
+    },
+    "list-view/selection": {
+        files: ["selection-example.component.ts", "selection-example.component.html"],
+        load: () => import("./list-view/selection/selection-example.component").then(module => module.ListViewSelectionExampleComponent),
+        mainFile: "selection-example.component.ts"
+    },
+    "menubar/basic": {
+        files: ["basic-example.component.ts", "basic-example.component.html"],
+        load: () => import("./menubar/basic/basic-example.component").then(module => module.MenubarBasicExampleComponent),
+        mainFile: "basic-example.component.ts"
+    },
+    "menubar/checkable": {
+        files: ["checkable-example.component.ts", "checkable-example.component.html"],
+        load: () => import("./menubar/checkable/checkable-example.component").then(module => module.MenubarCheckableExampleComponent),
+        mainFile: "checkable-example.component.ts"
+    },
+    "menubar/disabled": {
+        files: ["disabled-example.component.ts", "disabled-example.component.html"],
+        load: () => import("./menubar/disabled/disabled-example.component").then(module => module.MenubarDisabledExampleComponent),
+        mainFile: "disabled-example.component.ts"
+    },
+    "multi-select/checkboxes": {
+        files: ["checkboxes-example.component.ts", "checkboxes-example.component.html"],
+        load: () => import("./multi-select/checkboxes/checkboxes-example.component").then(module => module.MultiSelectCheckboxesExampleComponent),
+        mainFile: "checkboxes-example.component.ts"
+    },
+    "multi-select/forms": {
+        files: ["forms-example.component.ts", "forms-example.component.html"],
+        load: () => import("./multi-select/forms/forms-example.component").then(module => module.MultiSelectFormsExampleComponent),
+        mainFile: "forms-example.component.ts"
+    },
+    "multi-select/primitive": {
+        files: ["primitive-example.component.ts", "primitive-example.component.html"],
+        load: () => import("./multi-select/primitive/primitive-example.component").then(module => module.MultiSelectPrimitiveExampleComponent),
+        mainFile: "primitive-example.component.ts"
+    },
+    "multi-select/summary": {
+        files: ["summary-example.component.ts", "summary-example.component.html"],
+        load: () => import("./multi-select/summary/summary-example.component").then(module => module.MultiSelectSummaryExampleComponent),
+        mainFile: "summary-example.component.ts"
+    },
+    "notification/template": {
+        files: ["template-example.component.ts", "template-example.component.html"],
+        load: () => import("./notification/template/template-example.component").then(module => module.NotificationTemplateExampleComponent),
+        mainFile: "template-example.component.ts"
+    },
+    "notification/types": {
+        files: ["types-example.component.ts", "types-example.component.html"],
+        load: () => import("./notification/types/types-example.component").then(module => module.NotificationTypesExampleComponent),
+        mainFile: "types-example.component.ts"
+    },
+    "notification/update": {
+        files: ["update-example.component.ts", "update-example.component.html"],
+        load: () => import("./notification/update/update-example.component").then(module => module.NotificationUpdateExampleComponent),
+        mainFile: "update-example.component.ts"
+    },
+    "numeric-textbox/decimals": {
+        files: ["decimals-example.component.ts", "decimals-example.component.html"],
+        load: () => import("./numeric-textbox/decimals/decimals-example.component").then(module => module.NumericTextboxDecimalsExampleComponent),
+        mainFile: "decimals-example.component.ts"
+    },
+    "numeric-textbox/formatter": {
+        files: ["formatter-example.component.ts", "formatter-example.component.html"],
+        load: () => import("./numeric-textbox/formatter/formatter-example.component").then(module => module.NumericTextboxFormatterExampleComponent),
+        mainFile: "formatter-example.component.ts"
+    },
+    "numeric-textbox/forms": {
+        files: ["forms-example.component.ts", "forms-example.component.html"],
+        load: () => import("./numeric-textbox/forms/forms-example.component").then(module => module.NumericTextboxFormsExampleComponent),
+        mainFile: "forms-example.component.ts"
+    },
+    "numeric-textbox/step": {
+        files: ["step-example.component.ts", "step-example.component.html"],
+        load: () => import("./numeric-textbox/step/step-example.component").then(module => module.NumericTextboxStepExampleComponent),
+        mainFile: "step-example.component.ts"
+    },
+    "otp-input/complete": {
+        files: ["complete-example.component.ts", "complete-example.component.html"],
+        load: () => import("./otp-input/complete/complete-example.component").then(module => module.OtpInputCompleteExampleComponent),
+        mainFile: "complete-example.component.ts"
+    },
+    "otp-input/forms": {
+        files: ["forms-example.component.ts", "forms-example.component.html"],
+        load: () => import("./otp-input/forms/forms-example.component").then(module => module.OtpInputFormsExampleComponent),
+        mainFile: "forms-example.component.ts"
+    },
+    "otp-input/grouped": {
+        files: ["grouped-example.component.ts", "grouped-example.component.html"],
+        load: () => import("./otp-input/grouped/grouped-example.component").then(module => module.OtpInputGroupedExampleComponent),
+        mainFile: "grouped-example.component.ts"
+    },
+    "otp-input/masked": {
+        files: ["masked-example.component.ts", "masked-example.component.html"],
+        load: () => import("./otp-input/masked/masked-example.component").then(module => module.OtpInputMaskedExampleComponent),
+        mainFile: "masked-example.component.ts"
+    },
+    "pager/custom-buttons": {
+        files: ["custom-buttons-example.component.ts", "custom-buttons-example.component.html"],
+        load: () => import("./pager/custom-buttons/custom-buttons-example.component").then(module => module.PagerCustomButtonsExampleComponent),
+        mainFile: "custom-buttons-example.component.ts"
+    },
+    "pager/input": {
+        files: ["input-example.component.ts", "input-example.component.html"],
+        load: () => import("./pager/input/input-example.component").then(module => module.PagerInputExampleComponent),
+        mainFile: "input-example.component.ts"
+    },
+    "pager/page-sizes": {
+        files: ["page-sizes-example.component.ts", "page-sizes-example.component.html"],
+        load: () => import("./pager/page-sizes/page-sizes-example.component").then(module => module.PagerPageSizesExampleComponent),
+        mainFile: "page-sizes-example.component.ts"
+    },
+    "pager/paging": {
+        files: ["paging-example.component.ts", "paging-example.component.html"],
+        load: () => import("./pager/paging/paging-example.component").then(module => module.PagerPagingExampleComponent),
+        mainFile: "paging-example.component.ts"
+    },
+    "placeholder/empty-state": {
+        files: ["empty-state-example.component.ts", "empty-state-example.component.html"],
+        load: () => import("./placeholder/empty-state/empty-state-example.component").then(module => module.PlaceholderEmptyStateExampleComponent),
+        mainFile: "empty-state-example.component.ts"
+    },
+    "placeholder/no-results": {
+        files: ["no-results-example.component.ts", "no-results-example.component.html"],
+        load: () => import("./placeholder/no-results/no-results-example.component").then(module => module.PlaceholderNoResultsExampleComponent),
+        mainFile: "no-results-example.component.ts"
+    },
+    "popover/basic": {
+        files: ["basic-example.component.ts", "basic-example.component.html"],
+        load: () => import("./popover/basic/basic-example.component").then(module => module.PopoverBasicExampleComponent),
+        mainFile: "basic-example.component.ts"
+    },
+    "popover/hover": {
+        files: ["hover-example.component.ts", "hover-example.component.html"],
+        load: () => import("./popover/hover/hover-example.component").then(module => module.PopoverHoverExampleComponent),
+        mainFile: "hover-example.component.ts"
+    },
+    "popover/no-title": {
+        files: ["no-title-example.component.ts", "no-title-example.component.html"],
+        load: () => import("./popover/no-title/no-title-example.component").then(module => module.PopoverNoTitleExampleComponent),
+        mainFile: "no-title-example.component.ts"
+    },
+    "popup-menu/checkable": {
+        files: ["checkable-example.component.ts", "checkable-example.component.html"],
+        load: () => import("./popup-menu/checkable/checkable-example.component").then(module => module.PopupMenuCheckableExampleComponent),
+        mainFile: "checkable-example.component.ts"
+    },
+    "popup-menu/data": {
+        files: ["data-example.component.ts", "data-example.component.html"],
+        load: () => import("./popup-menu/data/data-example.component").then(module => module.PopupMenuDataExampleComponent),
+        mainFile: "data-example.component.ts"
+    },
+    "popup-menu/icons": {
+        files: ["icons-example.component.ts", "icons-example.component.html"],
+        load: () => import("./popup-menu/icons/icons-example.component").then(module => module.PopupMenuIconsExampleComponent),
+        mainFile: "icons-example.component.ts"
+    },
+    "popup-menu/submenus": {
+        files: ["submenus-example.component.ts", "submenus-example.component.html"],
+        load: () => import("./popup-menu/submenus/submenus-example.component").then(module => module.PopupMenuSubmenusExampleComponent),
+        mainFile: "submenus-example.component.ts"
+    },
+    "popup/backdrop": {
+        files: ["backdrop-example.component.ts", "backdrop-example.component.html"],
+        load: () => import("./popup/backdrop/backdrop-example.component").then(module => module.PopupBackdropExampleComponent),
+        mainFile: "backdrop-example.component.ts"
+    },
+    "popup/positioning": {
+        files: ["positioning-example.component.ts", "positioning-example.component.html"],
+        load: () => import("./popup/positioning/positioning-example.component").then(module => module.PopupPositioningExampleComponent),
+        mainFile: "positioning-example.component.ts"
+    },
+    "popup/service": {
+        files: ["service-example.component.ts", "service-example.component.html"],
+        load: () => import("./popup/service/service-example.component").then(module => module.PopupServiceExampleComponent),
+        mainFile: "service-example.component.ts"
+    },
+    "progress-bar/indeterminate": {
+        files: ["indeterminate-example.component.ts", "indeterminate-example.component.html"],
+        load: () => import("./progress-bar/indeterminate/indeterminate-example.component").then(module => module.ProgressBarIndeterminateExampleComponent),
+        mainFile: "indeterminate-example.component.ts"
+    },
+    "progress-bar/labels": {
+        files: ["labels-example.component.ts", "labels-example.component.html"],
+        load: () => import("./progress-bar/labels/labels-example.component").then(module => module.ProgressBarLabelsExampleComponent),
+        mainFile: "labels-example.component.ts"
+    },
+    "progress-bar/steps": {
+        files: ["steps-example.component.ts", "steps-example.component.html"],
+        load: () => import("./progress-bar/steps/steps-example.component").then(module => module.ProgressBarStepsExampleComponent),
+        mainFile: "steps-example.component.ts"
+    },
+    "progress-bar/upload": {
+        files: ["upload-example.component.ts", "upload-example.component.html"],
+        load: () => import("./progress-bar/upload/upload-example.component").then(module => module.ProgressBarUploadExampleComponent),
+        mainFile: "upload-example.component.ts"
+    },
+    "radio-button/directive": {
+        files: ["directive-example.component.ts", "directive-example.component.html"],
+        load: () => import("./radio-button/directive/directive-example.component").then(module => module.RadioButtonDirectiveExampleComponent),
+        mainFile: "directive-example.component.ts"
+    },
+    "radio-button/forms": {
+        files: ["forms-example.component.ts", "forms-example.component.html"],
+        load: () => import("./radio-button/forms/forms-example.component").then(module => module.RadioButtonFormsExampleComponent),
+        mainFile: "forms-example.component.ts"
+    },
+    "radio-button/group": {
+        files: ["group-example.component.ts", "group-example.component.html"],
+        load: () => import("./radio-button/group/group-example.component").then(module => module.RadioButtonGroupExampleComponent),
+        mainFile: "group-example.component.ts"
+    },
+    "range-slider/forms": {
+        files: ["forms-example.component.ts", "forms-example.component.html"],
+        load: () => import("./range-slider/forms/forms-example.component").then(module => module.RangeSliderFormsExampleComponent),
+        mainFile: "forms-example.component.ts"
+    },
+    "range-slider/ticks": {
+        files: ["ticks-example.component.ts", "ticks-example.component.html"],
+        load: () => import("./range-slider/ticks/ticks-example.component").then(module => module.RangeSliderTicksExampleComponent),
+        mainFile: "ticks-example.component.ts"
+    },
+    "range-slider/vertical": {
+        files: ["vertical-example.component.ts", "vertical-example.component.html"],
+        load: () => import("./range-slider/vertical/vertical-example.component").then(module => module.RangeSliderVerticalExampleComponent),
+        mainFile: "vertical-example.component.ts"
+    },
+    "rating/clearable": {
+        files: ["clearable-example.component.ts", "clearable-example.component.html"],
+        load: () => import("./rating/clearable/clearable-example.component").then(module => module.RatingClearableExampleComponent),
+        mainFile: "clearable-example.component.ts"
+    },
+    "rating/forms": {
+        files: ["forms-example.component.ts", "forms-example.component.html"],
+        load: () => import("./rating/forms/forms-example.component").then(module => module.RatingFormsExampleComponent),
+        mainFile: "forms-example.component.ts"
+    },
+    "rating/half": {
+        files: ["half-example.component.ts", "half-example.component.html"],
+        load: () => import("./rating/half/half-example.component").then(module => module.RatingHalfExampleComponent),
+        mainFile: "half-example.component.ts"
+    },
+    "rating/icons": {
+        files: ["icons-example.component.ts", "icons-example.component.html"],
+        load: () => import("./rating/icons/icons-example.component").then(module => module.RatingIconsExampleComponent),
+        mainFile: "icons-example.component.ts"
+    },
+    "scroll-view/arrows-pager": {
+        files: ["arrows-pager-example.component.ts", "arrows-pager-example.component.html"],
+        load: () => import("./scroll-view/arrows-pager/arrows-pager-example.component").then(module => module.ScrollViewArrowsPagerExampleComponent),
+        mainFile: "arrows-pager-example.component.ts"
+    },
+    "scroll-view/infinite": {
+        files: ["infinite-example.component.ts", "infinite-example.component.html"],
+        load: () => import("./scroll-view/infinite/infinite-example.component").then(module => module.ScrollViewInfiniteExampleComponent),
+        mainFile: "infinite-example.component.ts"
+    },
+    "scroll-view/two-way": {
+        files: ["two-way-example.component.ts", "two-way-example.component.html"],
+        load: () => import("./scroll-view/two-way/two-way-example.component").then(module => module.ScrollViewTwoWayExampleComponent),
+        mainFile: "two-way-example.component.ts"
+    },
+    "segmented/disabled": {
+        files: ["disabled-example.component.ts", "disabled-example.component.html"],
+        load: () => import("./segmented/disabled/disabled-example.component").then(module => module.SegmentedDisabledExampleComponent),
+        mainFile: "disabled-example.component.ts"
+    },
+    "segmented/forms": {
+        files: ["forms-example.component.ts", "forms-example.component.html"],
+        load: () => import("./segmented/forms/forms-example.component").then(module => module.SegmentedFormsExampleComponent),
+        mainFile: "forms-example.component.ts"
+    },
+    "segmented/with-icons": {
+        files: ["with-icons-example.component.ts", "with-icons-example.component.html"],
+        load: () => import("./segmented/with-icons/with-icons-example.component").then(module => module.SegmentedWithIconsExampleComponent),
+        mainFile: "with-icons-example.component.ts"
+    },
+    "sheet/bottom": {
+        files: ["bottom-example.component.ts", "bottom-example.component.html"],
+        load: () => import("./sheet/bottom/bottom-example.component").then(module => module.SheetBottomExampleComponent),
+        mainFile: "bottom-example.component.ts"
+    },
+    "sheet/form": {
+        files: ["form-example.component.ts", "form-example.component.html"],
+        load: () => import("./sheet/form/form-example.component").then(module => module.SheetFormExampleComponent),
+        mainFile: "form-example.component.ts"
+    },
+    "sheet/navigation": {
+        files: ["navigation-example.component.ts", "navigation-example.component.html"],
+        load: () => import("./sheet/navigation/navigation-example.component").then(module => module.SheetNavigationExampleComponent),
+        mainFile: "navigation-example.component.ts"
+    },
+    "sidebar/icon-rail": {
+        files: ["icon-rail-example.component.ts", "icon-rail-example.component.html"],
+        load: () => import("./sidebar/icon-rail/icon-rail-example.component").then(module => module.SidebarIconRailExampleComponent),
+        mainFile: "icon-rail-example.component.ts"
+    },
+    "sidebar/submenus": {
+        files: ["submenus-example.component.ts", "submenus-example.component.html"],
+        load: () => import("./sidebar/submenus/submenus-example.component").then(module => module.SidebarSubmenusExampleComponent),
+        mainFile: "submenus-example.component.ts"
+    },
+    "sidebar/two-sidebars": {
+        files: ["two-sidebars-example.component.ts", "two-sidebars-example.component.html"],
+        load: () => import("./sidebar/two-sidebars/two-sidebars-example.component").then(module => module.SidebarTwoSidebarsExampleComponent),
+        mainFile: "two-sidebars-example.component.ts"
+    },
+    "skeleton/card": {
+        files: ["card-example.component.ts", "card-example.component.html"],
+        load: () => import("./skeleton/card/card-example.component").then(module => module.SkeletonCardExampleComponent),
+        mainFile: "card-example.component.ts"
+    },
+    "skeleton/list": {
+        files: ["list-example.component.ts", "list-example.component.html"],
+        load: () => import("./skeleton/list/list-example.component").then(module => module.SkeletonListExampleComponent),
+        mainFile: "list-example.component.ts"
+    },
+    "slider/forms": {
+        files: ["forms-example.component.ts", "forms-example.component.html"],
+        load: () => import("./slider/forms/forms-example.component").then(module => module.SliderFormsExampleComponent),
+        mainFile: "forms-example.component.ts"
+    },
+    "slider/ticks": {
+        files: ["ticks-example.component.ts", "ticks-example.component.html"],
+        load: () => import("./slider/ticks/ticks-example.component").then(module => module.SliderTicksExampleComponent),
+        mainFile: "ticks-example.component.ts"
+    },
+    "slider/value-text": {
+        files: ["value-text-example.component.ts", "value-text-example.component.html"],
+        load: () => import("./slider/value-text/value-text-example.component").then(module => module.SliderValueTextExampleComponent),
+        mainFile: "value-text-example.component.ts"
+    },
+    "slider/vertical": {
+        files: ["vertical-example.component.ts", "vertical-example.component.html"],
+        load: () => import("./slider/vertical/vertical-example.component").then(module => module.SliderVerticalExampleComponent),
+        mainFile: "vertical-example.component.ts"
+    },
+    "spinner/inline": {
+        files: ["inline-example.component.ts", "inline-example.component.html"],
+        load: () => import("./spinner/inline/inline-example.component").then(module => module.SpinnerInlineExampleComponent),
+        mainFile: "inline-example.component.ts"
+    },
+    "spinner/overlay": {
+        files: ["overlay-example.component.ts", "overlay-example.component.html"],
+        load: () => import("./spinner/overlay/overlay-example.component").then(module => module.SpinnerOverlayExampleComponent),
+        mainFile: "overlay-example.component.ts"
+    },
+    "spinner/track": {
+        files: ["track-example.component.ts", "track-example.component.html"],
+        load: () => import("./spinner/track/track-example.component").then(module => module.SpinnerTrackExampleComponent),
+        mainFile: "track-example.component.ts"
+    },
+    "split-button/basic": {
+        files: ["basic-example.component.ts", "basic-example.component.html"],
+        load: () => import("./split-button/basic/basic-example.component").then(module => module.SplitButtonBasicExampleComponent),
+        mainFile: "basic-example.component.ts"
+    },
+    "split-button/checkable": {
+        files: ["checkable-example.component.ts", "checkable-example.component.html"],
+        load: () => import("./split-button/checkable/checkable-example.component").then(module => module.SplitButtonCheckableExampleComponent),
+        mainFile: "checkable-example.component.ts"
+    },
+    "split-button/loading": {
+        files: ["loading-example.component.ts", "loading-example.component.html"],
+        load: () => import("./split-button/loading/loading-example.component").then(module => module.SplitButtonLoadingExampleComponent),
+        mainFile: "loading-example.component.ts"
+    },
+    "splitter/collapsible": {
+        files: ["collapsible-example.component.ts", "collapsible-example.component.html"],
+        load: () => import("./splitter/collapsible/collapsible-example.component").then(module => module.SplitterCollapsibleExampleComponent),
+        mainFile: "collapsible-example.component.ts"
+    },
+    "splitter/proportional": {
+        files: ["proportional-example.component.ts", "proportional-example.component.html"],
+        load: () => import("./splitter/proportional/proportional-example.component").then(module => module.SplitterProportionalExampleComponent),
+        mainFile: "proportional-example.component.ts"
+    },
+    "splitter/save-layout": {
+        files: ["save-layout-example.component.ts", "save-layout-example.component.html"],
+        load: () => import("./splitter/save-layout/save-layout-example.component").then(module => module.SplitterSaveLayoutExampleComponent),
+        mainFile: "save-layout-example.component.ts"
+    },
+    "splitter/vertical": {
+        files: ["vertical-example.component.ts", "vertical-example.component.html"],
+        load: () => import("./splitter/vertical/vertical-example.component").then(module => module.SplitterVerticalExampleComponent),
+        mainFile: "vertical-example.component.ts"
+    },
+    "stepper/step-states": {
+        files: ["step-states-example.component.ts", "step-states-example.component.html"],
+        load: () => import("./stepper/step-states/step-states-example.component").then(module => module.StepperStepStatesExampleComponent),
+        mainFile: "step-states-example.component.ts"
+    },
+    "stepper/vertical": {
+        files: ["vertical-example.component.ts", "vertical-example.component.html"],
+        load: () => import("./stepper/vertical/vertical-example.component").then(module => module.StepperVerticalExampleComponent),
+        mainFile: "vertical-example.component.ts"
+    },
+    "stepper/veto": {
+        files: ["veto-example.component.ts", "veto-example.component.html"],
+        load: () => import("./stepper/veto/veto-example.component").then(module => module.StepperVetoExampleComponent),
+        mainFile: "veto-example.component.ts"
+    },
+    "stepper/wizard": {
+        files: ["wizard-example.component.ts", "wizard-example.component.html"],
+        load: () => import("./stepper/wizard/wizard-example.component").then(module => module.StepperWizardExampleComponent),
+        mainFile: "wizard-example.component.ts"
+    },
+    "switch/forms": {
+        files: ["forms-example.component.ts", "forms-example.component.html"],
+        load: () => import("./switch/forms/forms-example.component").then(module => module.SwitchFormsExampleComponent),
+        mainFile: "forms-example.component.ts"
+    },
+    "switch/icons": {
+        files: ["icons-example.component.ts", "icons-example.component.html"],
+        load: () => import("./switch/icons/icons-example.component").then(module => module.SwitchIconsExampleComponent),
+        mainFile: "icons-example.component.ts"
+    },
+    "switch/labels": {
+        files: ["labels-example.component.ts", "labels-example.component.html"],
+        load: () => import("./switch/labels/labels-example.component").then(module => module.SwitchLabelsExampleComponent),
+        mainFile: "labels-example.component.ts"
+    },
+    "tabs/cancel-select": {
+        files: ["cancel-select-example.component.ts", "cancel-select-example.component.html"],
+        load: () => import("./tabs/cancel-select/cancel-select-example.component").then(module => module.TabsCancelSelectExampleComponent),
+        mainFile: "cancel-select-example.component.ts"
+    },
+    "tabs/closable": {
+        files: ["closable-example.component.ts", "closable-example.component.html"],
+        load: () => import("./tabs/closable/closable-example.component").then(module => module.TabsClosableExampleComponent),
+        mainFile: "closable-example.component.ts"
+    },
+    "tabs/selected-index": {
+        files: ["selected-index-example.component.ts", "selected-index-example.component.html"],
+        load: () => import("./tabs/selected-index/selected-index-example.component").then(module => module.TabsSelectedIndexExampleComponent),
+        mainFile: "selected-index-example.component.ts"
+    },
+    "tabs/vertical": {
+        files: ["vertical-example.component.ts", "vertical-example.component.html"],
+        load: () => import("./tabs/vertical/vertical-example.component").then(module => module.TabsVerticalExampleComponent),
+        mainFile: "vertical-example.component.ts"
+    },
+    "textarea/basic": {
+        files: ["basic-example.component.ts", "basic-example.component.html"],
+        load: () => import("./textarea/basic/basic-example.component").then(module => module.TextareaBasicExampleComponent),
+        mainFile: "basic-example.component.ts"
+    },
+    "textarea/forms": {
+        files: ["forms-example.component.ts", "forms-example.component.html"],
+        load: () => import("./textarea/forms/forms-example.component").then(module => module.TextareaFormsExampleComponent),
+        mainFile: "forms-example.component.ts"
+    },
+    "textbox/clear-button": {
+        files: ["clear-button-example.component.ts", "clear-button-example.component.html"],
+        load: () => import("./textbox/clear-button/clear-button-example.component").then(module => module.TextboxClearButtonExampleComponent),
+        mainFile: "clear-button-example.component.ts"
+    },
+    "textbox/forms": {
+        files: ["forms-example.component.ts", "forms-example.component.html"],
+        load: () => import("./textbox/forms/forms-example.component").then(module => module.TextboxFormsExampleComponent),
+        mainFile: "forms-example.component.ts"
+    },
+    "textbox/slots": {
+        files: ["slots-example.component.ts", "slots-example.component.html"],
+        load: () => import("./textbox/slots/slots-example.component").then(module => module.TextboxSlotsExampleComponent),
+        mainFile: "slots-example.component.ts"
+    },
+    "tooltip-directive/content-mode": {
+        files: ["content-mode-example.component.ts", "content-mode-example.component.html"],
+        load: () => import("./tooltip-directive/content-mode/content-mode-example.component").then(module => module.TooltipDirectiveContentModeExampleComponent),
+        mainFile: "content-mode-example.component.ts"
+    },
+    "tooltip-directive/disabled": {
+        files: ["disabled-example.component.ts", "disabled-example.component.html"],
+        load: () => import("./tooltip-directive/disabled/disabled-example.component").then(module => module.TooltipDirectiveDisabledExampleComponent),
+        mainFile: "disabled-example.component.ts"
+    },
+    "tooltip-directive/position": {
+        files: ["position-example.component.ts", "position-example.component.html"],
+        load: () => import("./tooltip-directive/position/position-example.component").then(module => module.TooltipDirectivePositionExampleComponent),
+        mainFile: "position-example.component.ts"
+    },
+    "tooltip-directive/template": {
+        files: ["template-example.component.ts", "template-example.component.html"],
+        load: () => import("./tooltip-directive/template/template-example.component").then(module => module.TooltipDirectiveTemplateExampleComponent),
+        mainFile: "template-example.component.ts"
+    },
+    "tooltip/delay": {
+        files: ["delay-example.component.ts", "delay-example.component.html"],
+        load: () => import("./tooltip/delay/delay-example.component").then(module => module.TooltipDelayExampleComponent),
+        mainFile: "delay-example.component.ts"
+    },
+    "tooltip/disabled": {
+        files: ["disabled-example.component.ts", "disabled-example.component.html"],
+        load: () => import("./tooltip/disabled/disabled-example.component").then(module => module.TooltipDisabledExampleComponent),
+        mainFile: "disabled-example.component.ts"
+    },
+    "tooltip/position": {
+        files: ["position-example.component.ts", "position-example.component.html"],
+        load: () => import("./tooltip/position/position-example.component").then(module => module.TooltipPositionExampleComponent),
+        mainFile: "position-example.component.ts"
+    },
+    "tooltip/rich-content": {
+        files: ["rich-content-example.component.ts", "rich-content-example.component.html"],
+        load: () => import("./tooltip/rich-content/rich-content-example.component").then(module => module.TooltipRichContentExampleComponent),
+        mainFile: "rich-content-example.component.ts"
+    },
+    "tree-view/checking": {
+        files: ["checking-example.component.ts", "checking-example.component.html"],
+        load: () => import("./tree-view/checking/checking-example.component").then(module => module.TreeViewCheckingExampleComponent),
+        mainFile: "checking-example.component.ts"
+    },
+    "tree-view/drag-and-drop": {
+        files: ["drag-and-drop-example.component.ts", "drag-and-drop-example.component.html"],
+        load: () => import("./tree-view/drag-and-drop/drag-and-drop-example.component").then(module => module.TreeViewDragAndDropExampleComponent),
+        mainFile: "drag-and-drop-example.component.ts"
+    },
+    "tree-view/lazy-loading": {
+        files: ["lazy-loading-example.component.ts", "lazy-loading-example.component.html"],
+        load: () => import("./tree-view/lazy-loading/lazy-loading-example.component").then(module => module.TreeViewLazyLoadingExampleComponent),
+        mainFile: "lazy-loading-example.component.ts"
+    },
+    "tree-view/selection": {
+        files: ["selection-example.component.ts", "selection-example.component.html"],
+        load: () => import("./tree-view/selection/selection-example.component").then(module => module.TreeViewSelectionExampleComponent),
+        mainFile: "selection-example.component.ts"
+    },
+    "window/basic": {
+        files: ["basic-example.component.ts", "basic-example.component.html"],
+        load: () => import("./window/basic/basic-example.component").then(module => module.WindowBasicExampleComponent),
+        mainFile: "basic-example.component.ts"
+    },
+    "window/position": {
+        files: ["position-example.component.ts", "position-example.component.html"],
+        load: () => import("./window/position/position-example.component").then(module => module.WindowPositionExampleComponent),
+        mainFile: "position-example.component.ts"
+    },
+    "window/prevent-close": {
+        files: ["prevent-close-example.component.ts", "prevent-close-example.component.html"],
+        load: () => import("./window/prevent-close/prevent-close-example.component").then(module => module.WindowPreventCloseExampleComponent),
+        mainFile: "prevent-close-example.component.ts"
+    },
+    "window/service": {
+        files: ["service-example.component.ts", "service-example.component.html"],
+        load: () => import("./window/service/service-example.component").then(module => module.WindowServiceExampleComponent),
+        mainFile: "service-example.component.ts"
     }
 };

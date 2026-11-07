@@ -27,20 +27,20 @@ Numbers passed to `width` or `height` are interpreted as pixels. Strings can con
 
 ## Examples
 
-**Loading card layout:**
+### Loading card
 
-```html
-<section aria-busy="true" aria-label="Loading profile">
-    <mona-skeleton width="8rem" height="8rem" rounded="full"></mona-skeleton>
-    <mona-skeleton width="12rem" height="1.25rem" class="mt-4"></mona-skeleton>
-    <mona-skeleton width="100%" height="1rem" class="mt-2"></mona-skeleton>
-</section>
+The card is marked `aria-busy` while it loads, and the skeleton is replaced with the content when it's done.
+
+```example
+skeleton/card
 ```
 
-**Pixel dimensions:**
+### List rows
 
-```html
-<mona-skeleton [width]="320" [height]="64"></mona-skeleton>
+Repeat a row of skeletons in the shape of the items that will load.
+
+```example
+skeleton/list
 ```
 
 ## Appearance & Styling

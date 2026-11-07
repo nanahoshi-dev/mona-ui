@@ -24,38 +24,31 @@ import { PlaceholderComponent } from "@nanahoshi/mona-ui/placeholder";
 
 Add `PlaceholderComponent` to your standalone component's `imports` array.
 
-**Text mode** — a muted, uppercase label:
-
 ```html
 <div class="h-40 border border-border rounded-md">
     <mona-placeholder text="No items"></mona-placeholder>
 </div>
-```
-
-**Projected content mode** — any content when `text` is empty:
-
-```html
-<div class="h-40 border border-border rounded-md">
-    <mona-placeholder>
-        <div class="flex flex-col items-center gap-2 text-muted-foreground">
-            <svg lucideInbox [size]="32"></svg>
-            <span>Nothing here yet</span>
-        </div>
-    </mona-placeholder>
-</div>
-```
-
-**Conditional placeholder** — swap between placeholder and real content:
-
-```html
-@if (items().length > 0) {
-    <app-item-list [items]="items()"></app-item-list>
-} @else {
-    <mona-placeholder text="No items"></mona-placeholder>
-}
 ```
 
 > **Sizing:** `PlaceholderComponent` fills its parent with `w-full h-full`. The parent element must have an explicit height for the placeholder to be visible. Setting height via a `class` on the parent or via the component's `class` input both work.
+
+## Examples
+
+### Text and projected content
+
+Set `text` for a muted, uppercase label, or leave it empty and project any content.
+
+```example
+placeholder/empty-state
+```
+
+### No results
+
+Swap between the placeholder and the real content. A placeholder's text is static and isn't announced when it appears, so a live region around it reads it out. For a region that's loading, use `mona-skeleton`.
+
+```example
+placeholder/no-results
+```
 
 ## Public Customization
 
@@ -70,16 +63,6 @@ Pass additional Tailwind or custom classes to the host element via the `class` i
 ```
 
 `PlaceholderComponent` does not expose a label template or other structural customization point. To render anything beyond a single text label, use projected content mode instead of the `text` input.
-
-## Examples
-
-**An empty region:**
-
-```html
-<mona-placeholder text="No items yet" class="h-40"></mona-placeholder>
-```
-
-For a region that's loading, use `mona-skeleton`. A placeholder's text is static and isn't announced when it appears.
 
 ## Accessibility Notes
 

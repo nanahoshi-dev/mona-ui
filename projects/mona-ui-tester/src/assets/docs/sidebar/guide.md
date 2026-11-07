@@ -83,6 +83,32 @@ import {
 </mona-sidebar-layout>
 ```
 
+## Examples
+
+### Collapsing to icons
+
+With `collapsible="icon"` the panel narrows to a rail of icons. Each row's `tooltip` names it there, and the rail along the edge and the trigger both toggle it.
+
+```example
+sidebar/icon-rail
+```
+
+### With a submenu
+
+A submenu is a `monaCollapsible` item whose content is a `monaSidebarMenuSub` list.
+
+```example
+sidebar/submenus
+```
+
+### Two sidebars
+
+Each sidebar has an `id`, and each trigger names the one it toggles with `for`.
+
+```example
+sidebar/two-sidebars
+```
+
 ## Accessibility Requirements
 
 These are requirements, not suggestions. The component supplies what it can and relies on you for the rest.
@@ -161,18 +187,7 @@ While collapsed to icons the labels are clipped away. Set `tooltip` on every row
 
 ### More than one sidebar
 
-A layout can hold more than one sidebar — a navigation column on one edge and an inspector on the other. Each keeps its own state on its own binding, and each needs an `id` so a trigger can name it:
-
-```html
-<mona-sidebar-layout>
-    <mona-sidebar id="nav" side="start" [(expanded)]="navOpen">…</mona-sidebar>
-    <main monaSidebarInset>
-        <button monaSidebarTrigger for="nav" aria-label="Toggle navigation">Menu</button>
-        <button monaSidebarTrigger for="inspector" aria-label="Toggle inspector">Details</button>
-    </main>
-    <mona-sidebar id="inspector" side="end" [(expanded)]="inspectorOpen">…</mona-sidebar>
-</mona-sidebar-layout>
-```
+A layout can hold more than one sidebar — a navigation column on one edge and an inspector on the other. Each keeps its own state on its own binding, and each needs an `id` so a trigger can name it, as in the [Two sidebars](#two-sidebars) example.
 
 A trigger with no `for` drives the sidebar it is written inside, falling back to the first sidebar in the layout — which is all a layout with a single sidebar ever needs. A `for` naming no sidebar leaves the trigger inert rather than throwing.
 
@@ -258,20 +273,7 @@ If focus is on something that collapsing takes away, it moves to a trigger for t
 
 ### Submenus
 
-A submenu is an ordinary `monaCollapsible` on an ordinary item — the sidebar adds no disclosure of its own. Apply `monaCollapsible` to the item, `monaCollapsibleTrigger` to its control, and `monaCollapsibleContent` to a `monaSidebarMenuSub` list:
-
-```html
-<li monaSidebarMenuItem monaCollapsible>
-    <button monaSidebarMenuButton monaCollapsibleTrigger tooltip="Components">
-        <span>Components</span>
-    </button>
-    <ul monaSidebarMenuSub monaCollapsibleContent>
-        <li monaSidebarMenuItem>
-            <a monaSidebarMenuButton routerLink="/components/button">Button</a>
-        </li>
-    </ul>
-</li>
-```
+A submenu is an ordinary `monaCollapsible` on an ordinary item — the sidebar adds no disclosure of its own. Apply `monaCollapsible` to the item, `monaCollapsibleTrigger` to its control, and `monaCollapsibleContent` to a `monaSidebarMenuSub` list, as in the [With a submenu](#with-a-submenu) example.
 
 Nesting is not limited to one level: a `monaSidebarMenuSub` can hold another collapsible item, as deep as the navigation needs. Each level is a disclosure in its own right, with its own trigger and its own open state.
 

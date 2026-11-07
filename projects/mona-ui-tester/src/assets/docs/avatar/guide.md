@@ -33,31 +33,29 @@ Add `AvatarComponent` to your standalone component's `imports` array.
 </mona-avatar>
 ```
 
-**Label mode** — omit `image`, set `label` to the visible initials. Use `aria-label` to give assistive technology the full name:
-
-```html
-
-<mona-avatar
-    label="JD"
-    aria-label="Jane Smith"
-    borderRadius="50%"
-    backgroundColor="#6366f1"
-    labelColor="#ffffff">
-</mona-avatar>
-```
-
-**Projected content mode** — omit both `image` and `label`, project any content, and set `aria-label` to describe it:
-
-```html
-
-<mona-avatar aria-label="User profile" borderRadius="50%">
-    <svg lucideUser [size]="20"></svg>
-</mona-avatar>
-```
+**Label mode** — omit `image`, set `label` to the visible initials. **Projected content mode** — omit both `image` and `label` and project any content. Both are shown under Examples.
 
 > **Display priority:** `image` takes priority over `label`; `label` takes priority over projected content. Setting both `image` and `label` shows only the image, until it fails to load. Then the avatar shows the label or projected content, and a new URL tries again.
 
-A photo that isn't square is cropped to fill the avatar. Images load lazily, which matters in long lists. `labelColor` defaults to the foreground meant for the default `backgroundColor`, so if you change one, check the other.
+A photo that isn't square is cropped to fill the avatar. Images load lazily, which matters in long lists.
+
+## Examples
+
+### Initials
+
+Set `label` to the visible initials and `aria-label` to the full name. `labelColor` defaults to the foreground meant for the default `backgroundColor`, so if you change one, check the other.
+
+```example
+avatar/initials
+```
+
+### Icon
+
+Leave out `image` and `label` to project content, such as an icon, and set `aria-label` to describe it. The avatar doesn't center projected content, so wrap it in an element that does.
+
+```example
+avatar/icon
+```
 
 ## Appearance & Styling
 

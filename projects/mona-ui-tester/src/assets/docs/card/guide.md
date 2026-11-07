@@ -50,6 +50,22 @@ Everything is optional except the content, which only shows if it's on `monaCard
 
 The header and footer can be written in any order, because the card always renders header, content, then footer.
 
+## Examples
+
+### Article
+
+A self-contained item takes `role="article"`, and its title names it.
+
+```example
+card/article
+```
+
+### Form in a card
+
+```example
+card/form
+```
+
 ## Accessibility Notes
 
 - **Name:** a card with a title takes `role` (`group` by default) and is named by the title, with the description as its `aria-describedby`. Use `article` for self-contained content, or `region` for a landmark.

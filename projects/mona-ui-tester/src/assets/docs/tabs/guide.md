@@ -55,18 +55,14 @@ Each structural directive below is an `ng-template` placed as projected content 
 
 A title template renders inside the tab, whose content is presentational to assistive technology, so it can hold text and icons but not links or other controls.
 
-## Feature Examples
+## Examples
 
 ### Setting the selected tab
 
 `selectedIndex` is the zero-based index of the selected tab, and works two-way. Writing it selects that tab. A disabled or out-of-range index is refused, and the value goes back to the selected tab's index. If the tabs haven't arrived yet, the index waits for them.
 
-```html
-<mona-tabs [(selectedIndex)]="activeTab">
-    <mona-tab title="Account"><ng-template monaTabContentTemplate>...</ng-template></mona-tab>
-    <mona-tab title="Security"><ng-template monaTabContentTemplate>...</ng-template></mona-tab>
-</mona-tabs>
-<button monaButton (click)="activeTab.set(1)">Review security</button>
+```example
+tabs/selected-index
 ```
 
 `selected` on a `mona-tab` does the same from the tab's side, which suits tabs added conditionally, where the index isn't known. The two stay in sync: `[(selected)]` follows the selection, and `selectedIndex` follows `selected`. Setting `selected` to `true` selects the tab unless it's disabled. A newly flagged tab takes the selection from the tab that has it, and if several are flagged at once, the first wins. Setting `selected` to `false` is refused, because the group always keeps one tab selected, and the value goes back to `true`. Use one or the other: when both are set at the start, `selected` wins.
@@ -79,21 +75,8 @@ With nothing set, the first enabled tab is selected. When every `mona-tab` is di
 
 `closable` on `mona-tabs` shows a close button on every tab. A tab's own `closable` input, when `true`, shows a close button for that tab even if the parent's `closable` is `false` — see [`closable` and `disabled` on a tab and its parent](#closable-and-disabled-on-a-tab-and-its-parent).
 
-```html
-<mona-tabs closable (tabClose)="onTabClose($event)">
-    <mona-tab title="Report 1">
-        <ng-template monaTabContentTemplate>Report 1 content.</ng-template>
-    </mona-tab>
-    <mona-tab title="Report 2">
-        <ng-template monaTabContentTemplate>Report 2 content.</ng-template>
-    </mona-tab>
-</mona-tabs>
-```
-
-```typescript
-protected onTabClose(event: TabCloseEvent): void {
-    // Remove the corresponding tab from the data driving the @for loop.
-}
+```example
+tabs/closable
 ```
 
 Closing a tab is entirely the consumer's responsibility — see [Tabs are removed by the consumer](#tabs-are-removed-by-the-consumer).
@@ -126,20 +109,10 @@ Closing a tab is entirely the consumer's responsibility — see [Tabs are remove
 
 ### Position
 
-`position` places the tab strip on one of the four edges of the tab content. Top and bottom strips lay out horizontally; left and right strips lay out vertically.
+`position` places the tab strip on one of the four edges of the tab content. Top and bottom strips lay out horizontally; left and right strips lay out vertically. This strip is on the left, and its titles use a `monaTabTitleTemplate` to add icons.
 
-```html
-<mona-tabs position="top">
-    <mona-tab title="A"><ng-template monaTabContentTemplate>A</ng-template></mona-tab>
-    <mona-tab title="B"><ng-template monaTabContentTemplate>B</ng-template></mona-tab>
-</mona-tabs>
-```
-
-```html
-<mona-tabs position="left" class="h-96">
-    <mona-tab title="A"><ng-template monaTabContentTemplate>A</ng-template></mona-tab>
-    <mona-tab title="B"><ng-template monaTabContentTemplate>B</ng-template></mona-tab>
-</mona-tabs>
+```example
+tabs/vertical
 ```
 
 A left or right strip requires a constrained available height so its tabs can scroll vertically when they overflow — see [Vertical layout constraints](#vertical-layout-constraints).
@@ -175,19 +148,8 @@ For compact value selection that does not switch panels — `List | Grid`, `Day 
 
 `tabSelect` emits before the newly clicked or keyboard-activated tab becomes active. Calling `preventDefault()` on the emitted `TabSelectEvent` keeps the current tab selected. Arrow keys still move focus to a tab you veto, so the keyboard can reach the tabs after it.
 
-```html
-<mona-tabs (tabSelect)="onTabSelect($event)">
-    <mona-tab title="Free"><ng-template monaTabContentTemplate>Free content.</ng-template></mona-tab>
-    <mona-tab title="Pro"><ng-template monaTabContentTemplate>Pro content.</ng-template></mona-tab>
-</mona-tabs>
-```
-
-```typescript
-protected onTabSelect(event: TabSelectEvent): void {
-    if (event.index === 1 && !this.hasProAccess()) {
-        event.preventDefault();
-    }
-}
+```example
+tabs/cancel-select
 ```
 
 ## Technical & Behavior Notes

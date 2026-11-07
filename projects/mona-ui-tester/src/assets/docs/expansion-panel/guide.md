@@ -26,26 +26,10 @@ Add `ExpansionPanelComponent` to your standalone component's `imports` array.
 </mona-expansion-panel>
 ```
 
-**Two-way expanded binding:**
-
-```html
-<mona-expansion-panel title="Settings" [(expanded)]="isOpen">
-    <p>Content</p>
-</mona-expansion-panel>
-```
-
-**Accordion** — `mona-accordion` keeps one panel open at a time, and `Up`, `Down`, `Home` and `End` move between the headers. Add `multiple` to let several stay open:
+**Accordion** — `mona-accordion` keeps one panel open at a time, and `Up`, `Down`, `Home` and `End` move between the headers. Add `multiple` to let several stay open. It comes from the same entry point:
 
 ```typescript
 import { AccordionComponent, ExpansionPanelComponent } from "@nanahoshi/mona-ui/expansion-panel";
-```
-
-```html
-<mona-accordion>
-    <mona-expansion-panel title="Section A">...</mona-expansion-panel>
-    <mona-expansion-panel title="Section B">...</mona-expansion-panel>
-    <mona-expansion-panel title="Section C">...</mona-expansion-panel>
-</mona-accordion>
 ```
 
 **Stacked panels** — placed directly adjacent with no wrapper, panels look like one block, with the border and radius stitching applied automatically, and each one opens independently.
@@ -65,6 +49,32 @@ import { AccordionComponent, ExpansionPanelComponent } from "@nanahoshi/mona-ui/
 ```html
 <h2>Settings</h2>
 <mona-expansion-panel title="Notifications" [headingLevel]="3">...</mona-expansion-panel>
+```
+
+## Examples
+
+### Accordion
+
+Opening one panel closes the one that was open.
+
+```example
+expansion-panel/accordion
+```
+
+### Opening from code
+
+`expanded` is a two-way model, so a control outside the panel can open and close it.
+
+```example
+expansion-panel/controlled
+```
+
+### Header actions and icon
+
+A button in the actions template sits beside the header's toggle, so clicking it doesn't open the panel. The icon template gets the expanded state as `let-expanded`.
+
+```example
+expansion-panel/header-templates
 ```
 
 ## Appearance & Styling
@@ -113,36 +123,9 @@ Three `ng-template` directives customize the header:
 </mona-expansion-panel>
 ```
 
-**Actions template** — inject controls into the header. They sit beside the toggle button, so their clicks and keys are their own, and nothing has to stop them from reaching it:
+**Actions template** — inject controls into the header. They sit beside the toggle button, so their clicks and keys are their own, and nothing has to stop them from reaching it. See [Header actions and icon](#header-actions-and-icon).
 
-```html
-<mona-expansion-panel title="Settings">
-    <ng-template monaExpansionPanelActionsTemplate>
-        <button monaButton look="ghost" [iconOnly]="true" [size]="'small'" aria-label="Settings"
-                (click)="openSettings()">
-            <svg lucideSettings [size]="14"></svg>
-        </button>
-    </ng-template>
-    <p>Panel content.</p>
-</mona-expansion-panel>
-```
-
-**Icon template** — replace the default plus/minus toggle icon. The template context exposes `$implicit` as the current boolean expanded state (`let-expanded`):
-
-```html
-<mona-expansion-panel title="Documents">
-    <ng-template monaExpansionPanelIconTemplate let-expanded>
-        <div class="px-2">
-            @if (expanded) {
-                <svg lucideChevronUp [size]="14"></svg>
-            } @else {
-                <svg lucideChevronDown [size]="14"></svg>
-            }
-        </div>
-    </ng-template>
-    <p>Panel content.</p>
-</mona-expansion-panel>
-```
+**Icon template** — replace the default plus/minus toggle icon. The template context exposes `$implicit` as the current boolean expanded state (`let-expanded`), as in the same example.
 
 ## Accessibility Notes
 

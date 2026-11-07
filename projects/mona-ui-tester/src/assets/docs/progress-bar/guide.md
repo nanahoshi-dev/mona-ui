@@ -28,50 +28,38 @@ Add `ProgressBarComponent` to your standalone component's `imports` array.
 <mona-progress-bar [value]="uploadPercent" aria-label="Upload progress"></mona-progress-bar>
 ```
 
-**Indeterminate** — use when the completion value is unknown:
+## Examples
 
-```html
-<mona-progress-bar [indeterminate]="true" aria-label="Loading"></mona-progress-bar>
-```
+### Upload with a dynamic color
 
-**Custom range:**
-
-```html
-<mona-progress-bar
-    [value]="completedSteps"
-    [min]="0"
-    [max]="totalSteps"
-    aria-label="Step completion">
-</mona-progress-bar>
-```
-
-**Dynamic color** — pass a CSS string or a function that maps the current percentage to a color:
-
-```html
-<!-- Fixed -->
-<mona-progress-bar [value]="75" color="#6366f1" aria-label="Quota used"></mona-progress-bar>
-
-<!-- Dynamic -->
-<mona-progress-bar [value]="progress" [color]="getColor" aria-label="Upload progress"></mona-progress-bar>
-```
-
-```typescript
-protected getColor = (percent: number): string =>
-    percent >= 100 ? "#22c55e" : "#6366f1";
-```
-
-> Arrow functions cannot be defined inline in Angular templates. Assign the function to a class member and reference it by name.
+`color` takes a CSS string, or a function that maps the current percentage to a color. Arrow functions cannot be defined inline in Angular templates, so assign the function to a class member and reference it by name.
 
 `color` sets the fill only. The label keeps its own color, so set `labelStyles` if your fill needs a different one. `color` doesn't apply while disabled.
 
-**Label visibility and position:**
+```example
+progress-bar/upload
+```
 
-```html
-<!-- Hide the label -->
-<mona-progress-bar [value]="50" [labelVisible]="false" aria-label="Upload progress"></mona-progress-bar>
+### Indeterminate
 
-<!-- Label at the start -->
-<mona-progress-bar [value]="50" labelPosition="start" aria-label="Upload progress"></mona-progress-bar>
+Use it when the completion value is unknown. Set `aria-valuetext` so screen readers announce a state.
+
+```example
+progress-bar/indeterminate
+```
+
+### Steps with a custom label
+
+`min` and `max` set the range, and `ng-template[monaProgressBarLabelTemplate]` replaces the percentage label.
+
+```example
+progress-bar/steps
+```
+
+### Label position and visibility
+
+```example
+progress-bar/labels
 ```
 
 ## Appearance & Styling
@@ -109,19 +97,7 @@ When `animate` is `true` (the default), the progress track transitions its fill 
 
 ### Custom label template
 
-The default label is the percentage, formatted for the locale, such as `40%`, `33,33 %` in German or `%40` in Turkish. Replace it with any content using `ng-template[monaProgressBarLabelTemplate]`:
-
-```html
-<mona-progress-bar [value]="steps" [max]="totalSteps" aria-label="Steps">
-    <ng-template monaProgressBarLabelTemplate
-                 let-value
-                 let-min="min"
-                 let-max="max"
-                 let-percent="percent">
-        <span class="text-xs font-medium">{{ value }} / {{ max }}</span>
-    </ng-template>
-</mona-progress-bar>
-```
+The default label is the percentage, formatted for the locale, such as `40%`, `33,33 %` in German or `%40` in Turkish. Replace it with any content using `ng-template[monaProgressBarLabelTemplate]`, as in the steps example.
 
 The template context exposes four variables:
 

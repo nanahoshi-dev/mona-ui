@@ -44,19 +44,35 @@ export class MyComponent {
 
 ---
 
-## Service Examples
+## Examples
 
-### Element Overlay
+### Appearances
 
-```typescript
-const spinner = this.spinnerService.show({
-    target: this.containerRef.nativeElement,
-    text: "Saving changes..."
-});
+Every appearance inherits its color through `currentColor`. Use `decorative` when visible text says the same thing.
 
-// In async completion:
-spinner.close();
+```example
+spinner/inline
 ```
+
+### Element overlay
+
+`show()` with a `target` covers that element until you call `close()` on the returned `SpinnerRef`.
+
+```example
+spinner/overlay
+```
+
+### Tracking an observable
+
+`track()` starts the spinner upon subscription and closes it upon completion, error, or unsubscription. With `cancellable`, Cancel unsubscribes from the source, which aborts an HTTP request, and completes the returned observable without its result. An `onCancel` you gave still runs.
+
+```example
+spinner/track
+```
+
+---
+
+## Service Examples
 
 ### Full-Page Overlay
 
@@ -116,23 +132,6 @@ spinner.cancelled$.subscribe(() => {
 ```
 
 The button text is localized unless you give your own. While `minimumVisibleDuration` keeps a closed spinner on screen, the button is gone, because there's nothing left to cancel.
-
-### RxJS `track()` Integration
-
-Automatically starts the spinner upon subscription and closes it upon completion, error, or unsubscription:
-
-```typescript
-this.spinnerService
-    .track(this.http.get("/api/items"), {
-        target: this.containerRef,
-        text: "Loading items..."
-    })
-    .subscribe(data => {
-        this.items = data;
-    });
-```
-
-With `cancellable`, Cancel unsubscribes from the source, which aborts an HTTP request, and completes the returned observable without its result. An `onCancel` you gave still runs.
 
 ### Concurrency Guarantees
 
