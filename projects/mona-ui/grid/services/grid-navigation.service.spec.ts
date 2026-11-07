@@ -241,6 +241,38 @@ describe("GridNavigationService", () => {
             expect(first.element.focus).toHaveBeenCalledTimes(1);
         });
 
+        it("puts the Tab stop on the first body cell, though the header registers first", () => {
+            const headerKey = service.registerCell(
+                createData({ rowIndex: -1, colIndex: 0, cellKind: "header", section: "header" })
+            );
+            expect(service.isFocused(headerKey)).toBe(true);
+
+            const secondKey = service.registerCell(createData({ rowIndex: 0, colIndex: 1, columnId: "b" }));
+            const firstKey = service.registerCell(createData({ rowIndex: 0, colIndex: 0, columnId: "a" }));
+
+            expect(service.isFocused(headerKey)).toBe(false);
+            expect(service.isFocused(secondKey)).toBe(false);
+            expect(service.isFocused(firstKey)).toBe(true);
+        });
+
+        it("keeps the Tab stop on a header when there are no rows", () => {
+            const headerKey = service.registerCell(
+                createData({ rowIndex: -1, colIndex: 0, cellKind: "header", section: "header" })
+            );
+
+            expect(service.isFocused(headerKey)).toBe(true);
+        });
+
+        it("leaves a cell the user picked as the Tab stop when more cells register", () => {
+            const headerKey = service.registerCell(
+                createData({ rowIndex: -1, colIndex: 0, cellKind: "header", section: "header" })
+            );
+            service.setLastFocusedCellKey(headerKey);
+            service.registerCell(createData({ rowIndex: 0, colIndex: 0 }));
+
+            expect(service.isFocused(headerKey)).toBe(true);
+        });
+
         it("tracks the last focused cell via setLastFocusedCellKey/isFocused", () => {
             const first = createData({ rowIndex: 0, colIndex: 0 });
             const second = createData({ rowIndex: 0, colIndex: 1 });
