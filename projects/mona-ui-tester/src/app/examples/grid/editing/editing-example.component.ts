@@ -7,27 +7,22 @@ import {
     GridCommandColumnComponent,
     GridComponent,
     GridEditableDirective,
-    type GridEditFormContext,
     type GridEditSchemaFactory,
     type GridRemoveEvent,
     type GridSaveEvent,
     GridToolbarTemplateDirective
 } from "@nanahoshi/mona-ui/grid";
 
-/** A grid row: typed fields, plus the open shape the grid passes rows around in. */
-interface Product extends Record<PropertyKey, unknown> {
+interface Product {
     id: number;
     inStock: boolean;
     name: string;
     price: number;
 }
 
-/**
- * Validates the row being edited. A failed save keeps the editor open and announces the error. The grid hands rows over
- * untyped, so the typed schema is cast where it's passed in.
- */
-const productSchema =
-    (_context: GridEditFormContext) =>
+/** Validates the row being edited. A failed save keeps the editor open and announces the error. */
+const productSchema: GridEditSchemaFactory<Product> =
+    () =>
     (row: SchemaPathTree<Product>): void => {
         validate(row.name, ({ value }) =>
             value().trim() !== "" ? undefined : { kind: "required", message: "Enter a name." }
@@ -52,13 +47,13 @@ const productSchema =
 })
 export class GridEditingExampleComponent {
     #nextId = 4;
-    protected readonly productSchema = productSchema as GridEditSchemaFactory;
+    protected readonly productSchema = productSchema;
     protected readonly products = signal<Product[]>([
         { id: 1, name: "Desk lamp", price: 39, inStock: true },
         { id: 2, name: "Notebook", price: 6.5, inStock: true },
         { id: 3, name: "Standing desk", price: 420, inStock: false }
     ]);
-    protected readonly createProduct = (): Record<PropertyKey, unknown> => ({
+    protected readonly createProduct = (): Product => ({
         id: this.#nextId++,
         name: "",
         price: 0,
@@ -70,9 +65,9 @@ export class GridEditingExampleComponent {
     }
 
     /** The grid never changes `data` itself: write the saved row back. */
-    protected onSave(event: GridSaveEvent): void {
-        const saved = event.rowData as Product;
-        const id = event.originalRowData?.["id"];
+    protected onSave(event: GridSaveEvent<Product>): void {
+        const saved = event.rowData;
+        const id = event.originalRowData?.id;
         if (event.operation === "create") {
             this.products.update(products => [...products, saved]);
         } else {
