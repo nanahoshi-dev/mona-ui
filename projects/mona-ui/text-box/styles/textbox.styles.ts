@@ -7,7 +7,7 @@ export const textBoxThemeVariants = cva(
         overflow-hidden
         ${themeControlSurfaceClasses} text-foreground
         border border-input-border shadow-(--shadow-control)
-        outline-none
+        outline-none focus-visible:outline-hidden
         selection:bg-primary selection:text-primary-foreground
         transition-[color,box-shadow,border] duration-(--mona-motion-standard) ease-in-out
 
@@ -30,7 +30,7 @@ export const textBoxThemeVariants = cva(
         [&>input]:h-full [&>input]:w-full
         [&>input]:px-2
         [&>input]:bg-transparent
-        [&>input]:border-0 [&>input]:outline-none
+        [&>input]:border-0 [&>input]:outline-none [&>input:focus-visible]:outline-hidden
         [&>input]:placeholder:text-muted-foreground
     `,
     {
@@ -56,7 +56,7 @@ export const inputThemeVariants = cva(
         px-2
         ${themeControlSurfaceClasses} text-foreground
         border border-input-border shadow-(--shadow-control)
-        outline-none
+        outline-none focus-visible:outline-hidden
         selection:bg-primary selection:text-primary-foreground
         transition-[color,box-shadow,border] duration-(--mona-motion-standard) ease-in-out
 

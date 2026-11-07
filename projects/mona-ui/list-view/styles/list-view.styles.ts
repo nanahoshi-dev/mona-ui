@@ -6,7 +6,7 @@ export const listViewBaseThemeVariants = cva(
         flex h-full flex-col overflow-hidden
         bg-surface text-foreground
         border border-border
-        outline-none
+        outline-none focus-visible:outline-hidden
     `,
     {
         variants: {

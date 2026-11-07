@@ -332,7 +332,7 @@ export const sidebarThemeVariants = cva(
             drawer: {
                 true: `
                     absolute inset-y-0 z-50 h-full m-0
-                    max-w-[calc(100%-3rem)] outline-none
+                    max-w-[calc(100%-3rem)] outline-none focus-visible:outline-hidden
                     shadow-(--shadow-overlay)
                     transition-[translate] duration-(--mona-motion-standard) ease-out
                     motion-reduce:transition-none

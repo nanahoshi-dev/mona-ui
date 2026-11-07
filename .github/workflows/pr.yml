@@ -85,3 +85,5 @@ jobs:
 
       - name: Test Browser Direction Geometry
         run: npm run test:browser:geometry:no-build
+      - name: Test Browser Forced Colors Focus
+        run: npm run test:browser:forced-colors:no-build

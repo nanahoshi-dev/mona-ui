@@ -478,7 +478,7 @@ describe("ChipComponent", () => {
         it("should apply outline look with a control boundary and no passive hover", () => {
             component.look.set("outline");
             fixture.detectChanges();
-            expect(chipElement.classList.contains("border-input-border")).toBe(true);
+            expect(chipElement.classList.contains("border-border")).toBe(true);
             expect(chipElement.classList.contains("hover:bg-hover")).toBe(false);
         });
 

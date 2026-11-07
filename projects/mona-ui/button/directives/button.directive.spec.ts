@@ -105,7 +105,7 @@ describe("ButtonDirective", () => {
                     "[background-color:var(--mona-effect-control-background-color,var(--color-input-background))]"
                 )
             ).toBe(true);
-            expect(buttonElement.classList.contains("border-input-border")).toBe(true);
+            expect(buttonElement.classList.contains("border-border")).toBe(true);
             expect(buttonElement.classList.contains("hover:bg-hover")).toBe(true);
             expect(buttonElement.classList.contains("active:bg-active")).toBe(true);
             expect(buttonElement.classList.contains("focus-visible:outline-focus-indicator")).toBe(true);

@@ -53,7 +53,7 @@ export const calendarMonthViewDayThemeVariants = cva(
                 true: "pointer-events-none cursor-not-allowed text-disabled-foreground"
             },
             focused: {
-                true: "bg-hover outline-none ring-2 ring-inset ring-focus-indicator/35"
+                true: "bg-hover outline-none focus-visible:outline-hidden ring-2 ring-inset ring-focus-indicator/35"
             },
             outside: {
                 true: "text-muted-foreground"
@@ -69,7 +69,7 @@ export const calendarMonthViewDayThemeVariants = cva(
                 full: "rounded-full"
             },
             selected: {
-                true: "bg-primary text-primary-foreground hover:bg-primary-hover"
+                true: "bg-primary text-primary-foreground hover:bg-primary-hover forced-color-adjust-none forced-colors:bg-[Highlight]! forced-colors:text-[HighlightText]"
             },
             today: {
                 true: "font-bold text-foreground"
@@ -123,7 +123,7 @@ export const calendarYearViewCellThemeVariants = cva(
     {
         variants: {
             focused: {
-                true: "bg-hover outline-none ring-2 ring-inset ring-focus-indicator/35"
+                true: "bg-hover outline-none focus-visible:outline-hidden ring-2 ring-inset ring-focus-indicator/35"
             },
             rounded: {
                 none: "rounded-none",
@@ -152,7 +152,7 @@ export const calendarDecadeViewCellThemeVariants = cva(
     {
         variants: {
             focused: {
-                true: "bg-hover outline-none ring-2 ring-inset ring-focus-indicator/35"
+                true: "bg-hover outline-none focus-visible:outline-hidden ring-2 ring-inset ring-focus-indicator/35"
             },
             rounded: {
                 none: "rounded-none",

@@ -1,5 +1,5 @@
 import { cva } from "class-variance-authority";
-import { themeOverlaySurfaceClasses } from "@nanahoshi/mona-ui/internal";
+import { themeOverlaySurfaceClasses, themeSelectionBarClasses } from "@nanahoshi/mona-ui/internal";
 
 export const subTreeListThemeVariants = cva(
     `
@@ -9,14 +9,14 @@ export const subTreeListThemeVariants = cva(
 
 export const subTreeListItemThemeVariants = cva(
     `
-        relative overflow-hidden outline-none
+        relative overflow-hidden outline-none focus-visible:outline-hidden
         ps-6
     `
 );
 
 export const treeBaseThemeVariants = cva(
     `
-        relative outline-none select-none
+        relative outline-none focus-visible:outline-hidden select-none
         text-base
     `,
     {
@@ -34,7 +34,7 @@ export const treeDropHintBaseThemeVariants = cva(
     `
         fixed z-1 h-0.5 w-10
         pointer-events-none
-        bg-primary opacity-80
+        bg-[var(--mona-indicator-color,var(--color-primary))] opacity-80
     `
 );
 
@@ -47,7 +47,7 @@ export const treeDropHintIconThemeVariants = cva(
 
 export const treeNodeBaseThemeVariants = cva(
     `
-        cursor-default px-2 py-1 text-foreground
+        relative cursor-default px-2 py-1 text-foreground
     `,
     {
         variants: {
@@ -60,7 +60,7 @@ export const treeNodeBaseThemeVariants = cva(
                 false: ""
             },
             selected: {
-                true: "bg-active text-foreground",
+                true: `bg-active text-foreground ${themeSelectionBarClasses}`,
                 false: ""
             }
         },

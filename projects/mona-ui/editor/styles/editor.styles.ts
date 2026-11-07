@@ -98,7 +98,7 @@ export const editorContainerThemeVariants = cva(
         [&>.ProseMirror]:p-1.5
         [&>.ProseMirror]:text-foreground
         [&>.ProseMirror]:border-none
-        [&>.ProseMirror]:outline-none
+        [&>.ProseMirror]:outline-none [&>.ProseMirror:focus-visible]:outline-hidden
         [&>.ProseMirror]:w-full
         [&>.ProseMirror]:h-full
         [&>.ProseMirror]:overflow-auto

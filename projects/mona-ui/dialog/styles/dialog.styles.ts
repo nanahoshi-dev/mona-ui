@@ -6,7 +6,7 @@ export const dialogBaseThemeVariants = cva(
     `
         flex h-full max-h-[inherit] min-h-0 w-full flex-col gap-0.5 overflow-hidden
         ${themeOverlaySurfaceClasses} text-foreground
-        border border-border shadow-(--shadow-overlay) outline-none
+        border border-border shadow-(--shadow-overlay) outline-none focus-visible:outline-hidden
     `,
     {
         variants: {

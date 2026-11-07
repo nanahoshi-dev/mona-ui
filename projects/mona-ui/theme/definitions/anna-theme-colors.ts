@@ -21,14 +21,14 @@ const dark: ThemeColors = Object.freeze({
     "--color-card-foreground": "var(--color-foreground)",
 
     "--color-foreground": "#D6D6D8",
-    "--color-muted-foreground": "#A8A8AD",
+    "--color-muted-foreground": "#B4B4B9",
 
     "--color-input-background": "#1D1E20",
     "--color-input-foreground": "var(--color-foreground)",
     "--color-border-subtle": "#0F0F10",
     "--color-border": "#131416",
-    "--color-border-control": "#0F0F10",
-    "--color-border-control-hover": "#17181A",
+    "--color-border-control": "#6F7077",
+    "--color-border-control-hover": "#818289",
 
     "--color-hover": "#242528",
     "--color-active": "#2A2B2E",
@@ -70,9 +70,9 @@ const dark: ThemeColors = Object.freeze({
     "--color-selected-active-foreground": "var(--color-foreground)",
     "--color-selected-focus": "var(--color-primary)",
     "--color-selected-focus-foreground": "var(--color-primary-foreground)",
-    "--color-selected-border": "var(--color-border-subtle)",
+    "--color-selected-border": "var(--color-focus-indicator)",
     "--color-focus-surface": "var(--color-surface)",
-    "--color-focus-indicator": "#A174C2",
+    "--color-focus-indicator": "#BC94DB",
 
     "--color-background": "var(--color-surface)",
     "--color-background-dark": "var(--color-surface-muted)",
@@ -94,14 +94,14 @@ const dark: ThemeColors = Object.freeze({
     ...createSidebarColorRoles({ background: "var(--color-surface-muted)" }),
 
     "--color-chart-1": "#A174C2",
-    "--color-chart-2": "#6F4A8A",
+    "--color-chart-2": "#C39BDF",
     "--color-chart-3": "#4DA3FF",
     "--color-chart-4": "#32BEA6",
     "--color-chart-5": "#FFDA6B",
 
-    "--color-scrollbar-thumb": "#34353A",
-    "--color-scrollbar-thumb-hover": "#4A4B51",
-    "--color-scrollbar-thumb-active": "#62636A",
+    "--color-scrollbar-thumb": "#686970",
+    "--color-scrollbar-thumb-hover": "#7B7C83",
+    "--color-scrollbar-thumb-active": "#94959C",
     "--color-scrollbar-thumb-focus": "var(--color-focus-indicator)",
     "--color-scrollbar-track": "#161718",
     "--color-scrollbar-track-hover": "#1D1E20",

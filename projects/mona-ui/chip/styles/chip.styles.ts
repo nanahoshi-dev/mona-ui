@@ -42,7 +42,7 @@ export const chipThemeVariants = cva(
                 error: "bg-error text-error-foreground",
                 warning: "bg-warning text-warning-foreground",
                 info: "bg-info text-info-foreground",
-                outline: "bg-transparent text-foreground border border-input-border",
+                outline: "bg-transparent text-foreground border border-border",
                 secondary: "bg-secondary text-secondary-foreground",
                 ghost: "bg-transparent text-foreground shadow-none"
             },

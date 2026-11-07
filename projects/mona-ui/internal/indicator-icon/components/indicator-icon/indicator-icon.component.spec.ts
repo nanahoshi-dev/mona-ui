@@ -23,9 +23,9 @@ import { IndicatorIconComponent, type IndicatorIconPreset } from "./indicator-ic
 })
 class IndicatorIconHostComponent {
     protected readonly icon = LucideSearch;
-    public readonly onActivate = vi.fn();
     public readonly interactive = signal(false);
     public readonly label = signal("");
+    public readonly onActivate = vi.fn();
     public readonly preset = signal<IndicatorIconPreset | null>(null);
     public readonly projected = signal(false);
     public readonly size = signal(16);

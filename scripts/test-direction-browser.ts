@@ -285,7 +285,7 @@ async function runTests(): Promise<void> {
                     );
 
                     // Selected fill bar
-                    const selection = slider.locator("div.bg-primary");
+                    const selection = slider.locator("div[class*='--mona-indicator-color']");
                     const selBox = await selection.boundingBox();
                     assert(selBox !== null, "Slider selection box available");
 
@@ -474,7 +474,7 @@ async function runTests(): Promise<void> {
                 const h1 = handles.nth(1);
                 const isRtl = scenario.semanticDir === "rtl";
 
-                const selection = rangeSlider.locator("div.bg-primary");
+                const selection = rangeSlider.locator("div[class*='--mona-indicator-color']");
 
                 // Test representative intervals: [20, 80], [0, 100], [40, 60]
                 const intervals = [
@@ -1589,6 +1589,9 @@ async function runTests(): Promise<void> {
             scrollEndCountRtl === 0,
             `Dynamic ScrollView RTL in-flight target was still actively scrolling when direction switched back to LTR (scrollend count: ${scrollEndCountRtl})`
         );
+
+        // Wait for in-flight motion to settle before issuing the LTR step
+        await page.waitForTimeout(400);
 
         // In LTR, click Next arrow:
         // Must calculate from actual current position rather than stale RTL target.

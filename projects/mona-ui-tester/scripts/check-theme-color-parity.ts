@@ -124,7 +124,8 @@ if (forbiddenRecipeStrategies.length > 0) {
 }
 
 const styleOnlyThemeServiceInjections = librarySources.filter(path => {
-    if (path.endsWith("theme.service.ts")) {
+    // The theme entry point has the service, and its providers create it. It's anything else that shouldn't need it.
+    if (path.replaceAll("\\", "/").startsWith("projects/mona-ui/theme/")) {
         return false;
     }
     return /(?:inject\(ThemeService\)|ThemeService)/.test(readFileSync(path, "utf8"));

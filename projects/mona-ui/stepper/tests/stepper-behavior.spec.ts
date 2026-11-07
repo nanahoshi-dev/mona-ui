@@ -397,7 +397,7 @@ describe("mona-stepper behavior", () => {
 
         it("separates current, completed, upcoming and disabled", async () => {
             await setup([{ label: "A" }, { label: "B" }, { label: "C" }, { label: "D", disabled: true }], 1);
-            expect(indicatorClasses(0)).toContain("bg-primary");
+            expect(indicatorClasses(0)).toContain("bg-[var(--mona-indicator-color,var(--color-primary))]");
             expect(indicatorClasses(0)).not.toContain("ring-2");
             expect(indicatorClasses(1)).toContain("ring-2");
             expect(indicatorClasses(2)).toContain("bg-surface-raised");

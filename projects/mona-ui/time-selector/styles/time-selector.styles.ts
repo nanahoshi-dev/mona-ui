@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 import type { VariantProps } from "class-variance-authority";
-import type { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeSelectionBarClasses, type VariantInputs } from "@nanahoshi/mona-ui/internal";
 
 export const timeSelectorBaseThemeVariants = cva(
     `
@@ -63,7 +63,7 @@ export const timeSelectorListThemeVariants = cva(
         scrollbar-hide scroll-smooth
         snap-y snap-mandatory
         scrollbar-width:none
-        select-none outline-none
+        select-none outline-none focus-visible:outline-hidden
         [&::-webkit-scrollbar]:hidden
         focus-visible:bg-(--color-focus-surface)
         focus-within:bg-(--color-focus-surface)
@@ -88,7 +88,7 @@ export const timeSelectorListItemThemeVariants = cva(
     {
         variants: {
             selected: {
-                true: "bg-active font-medium text-foreground hover:bg-active",
+                true: `bg-active font-medium text-foreground hover:bg-active ${themeSelectionBarClasses}`,
                 false: ""
             },
             size: {

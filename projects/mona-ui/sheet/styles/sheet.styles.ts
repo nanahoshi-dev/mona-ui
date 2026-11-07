@@ -13,7 +13,7 @@ export const sheetBaseVariants = cva(
         pb-[env(safe-area-inset-bottom)] ps-[env(safe-area-inset-left)]
         rtl:pe-[env(safe-area-inset-left)] rtl:ps-[env(safe-area-inset-right)]
         ${themeOverlaySurfaceClasses} text-foreground
-        shadow-(--shadow-overlay) outline-none
+        shadow-(--shadow-overlay) outline-none focus-visible:outline-hidden
     `,
     {
         variants: {

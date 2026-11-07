@@ -29,6 +29,7 @@ export const sliderTrackThemeVariants = cva(
         relative z-2 cursor-pointer
         overflow-hidden
         bg-surface-muted text-foreground
+        border border-input-border
 
         data-[orientation="horizontal"]:w-full
         data-[orientation="horizontal"]:h-1.5
@@ -53,7 +54,8 @@ export const sliderTrackThemeVariants = cva(
 export const sliderSelectionThemeVariants = cva(
     `
         absolute
-        bg-primary
+        bg-[var(--mona-indicator-color,var(--color-primary))]
+        forced-color-adjust-none forced-colors:bg-[Highlight]
         border-none
         transition duration-(--mona-motion-fast) ease-out
 
@@ -115,7 +117,7 @@ export const sliderHandleThemeVariants = cva(
         before:absolute before:-inset-1 before:content-['']
         ${themeRaisedSurfaceClasses}
         border border-(--mona-slider-handle-border-color) shadow-(--shadow-control)
-        outline-none
+        outline-none focus-visible:outline-hidden
         transition duration-(--mona-motion-fast) ease-out
 
         data-[orientation="horizontal"]:translate-x-[-50%] data-[rtl="true"]:data-[orientation="horizontal"]:translate-x-[50%]

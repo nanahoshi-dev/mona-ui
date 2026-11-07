@@ -6,7 +6,7 @@ export const segmentedContainerThemeVariants = cva(
     `
         relative inline-flex items-center gap-0.5
         ${themeControlSurfaceClasses}
-        border border-input-border
+        border border-border
         p-1
         data-[invalid='true']:border-error
         data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
@@ -118,7 +118,7 @@ export const segmentedInputThemeVariants = cva(
     `
         peer absolute inset-0 z-10 h-full w-full
         cursor-pointer appearance-none opacity-0
-        outline-none
+        outline-none focus-visible:outline-hidden
         disabled:cursor-not-allowed
     `
 );

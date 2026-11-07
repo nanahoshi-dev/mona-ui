@@ -142,13 +142,13 @@ describe("Luna theme", () => {
         expect(lunaTheme.variants.light.colors).toMatchObject({
             "--color-border-subtle": "#eeeeef",
             "--color-border": "#e4e4e6",
-            "--color-border-control": "#d5d6d9",
+            "--color-border-control": "#8a8b90",
             "--color-selected-border": "#3f6be2"
         });
         expect(lunaTheme.variants.dark.colors).toMatchObject({
             "--color-border-subtle": "#303033",
             "--color-border": "#39393d",
-            "--color-border-control": "#494a4f"
+            "--color-border-control": "#74757a"
         });
     });
 

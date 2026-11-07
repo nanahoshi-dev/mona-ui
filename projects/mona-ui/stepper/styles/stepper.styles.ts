@@ -74,9 +74,14 @@ export const stepperStepIndicatorThemeVariants = cva(
                 false: ""
             },
             state: {
-                completed: "bg-primary text-primary-foreground forced-colors:border-[Highlight]",
+                completed: `
+                    bg-[var(--mona-indicator-color,var(--color-primary))]
+                    text-[var(--mona-indicator-foreground,var(--color-primary-foreground))]
+                    forced-colors:border-[Highlight]
+                `,
                 current: `
-                    bg-primary text-primary-foreground
+                    bg-[var(--mona-indicator-color,var(--color-primary))]
+                    text-[var(--mona-indicator-foreground,var(--color-primary-foreground))]
                     ring-2 ring-primary ring-offset-2 ring-offset-surface
                     forced-colors:border-2 forced-colors:border-[Highlight]
                 `,
@@ -134,7 +139,7 @@ export const stepperTrackThemeVariants = cva(
 
 export const stepperTrackLineThemeVariants = cva(
     `
-        absolute start-0 top-0 bg-primary
+        absolute start-0 top-0 bg-[var(--mona-indicator-color,var(--color-primary))]
     `,
     {
         variants: {

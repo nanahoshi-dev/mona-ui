@@ -22,7 +22,7 @@ Mona's colors describe intent instead of a specific component:
 
 - `canvas` is the application backdrop; `surface` is the normal content plane.
 - `surface-raised` contains controls and elevated regions; `surface-overlay` is reserved for menus, popups, and dialogs.
-- `input-background` and the control-border tokens give form fields a quiet resting boundary; hover strengthens the border, while focus and invalid states provide the high-contrast cue.
+- `input-background` and the control-border tokens give form fields a boundary of at least 3:1 on every surface, as WCAG 1.4.11 asks. Buttons and other controls whose text identifies them use the quieter `border`. Hover strengthens a field's border, and focus and invalid states add their own cue.
 - `hover` and `active` are neutral, temporary interaction feedback.
 - `accent` is persistent selection and keyboard highlighting. Mona's built-in accent is a quiet zinc tone rather than a competing hue.
 - `primary` is the stronger action color used by prominent buttons, links, and focus indicators. It is near-black in Mona Light and near-white in Mona Dark.

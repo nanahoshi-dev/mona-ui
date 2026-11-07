@@ -18,7 +18,7 @@ export type RadioGroupVariantProps = VariantProps<typeof radioGroupThemeVariants
 
 export const radioButtonThemeVariants = cva(
     `
-        peer sr-only appearance-none outline-none
+        peer sr-only appearance-none outline-none focus-visible:outline-hidden
     `
 );
 
@@ -35,6 +35,7 @@ export const radioButtonCircleThemeVariants = cva(
 
         peer-focus-visible:border-focus-indicator
         peer-focus-visible:ring-2 peer-focus-visible:ring-focus-indicator/35
+        peer-focus-visible:outline-hidden
 
         data-[invalid='true']:border-error
         data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
@@ -57,7 +58,8 @@ export const radioButtonCircleThemeVariants = cva(
 export const radioButtonIndicatorThemeVariants = cva(
     `
         flex h-3 w-3
-        bg-primary
+        bg-[var(--mona-indicator-color,var(--color-primary))]
+        forced-color-adjust-none forced-colors:bg-[Highlight]
         transition-all duration-(--mona-motion-fast)
     `,
     {
@@ -104,7 +106,7 @@ export const radioButtonDirectiveThemeVariants = cva(
         cursor-pointer appearance-none
         ${themeControlSurfaceClasses}
         border border-input-border
-        outline-none
+        outline-none focus-visible:outline-hidden
 
         disabled:pointer-events-none disabled:cursor-not-allowed
         disabled:border-disabled-border disabled:bg-disabled-background disabled:text-disabled-foreground

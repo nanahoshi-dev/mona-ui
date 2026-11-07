@@ -7,7 +7,7 @@ export const multiSelectBaseThemeVariants = cva(
         flex items-center justify-between
         cursor-pointer
         ${themeControlSurfaceClasses} text-foreground
-        border border-input-border shadow-(--shadow-control) outline-none
+        border border-input-border shadow-(--shadow-control) outline-none focus-visible:outline-hidden
         transition-[color,box-shadow,border] duration-(--mona-motion-standard) ease-in-out
         data-[readonly='true']:cursor-default
         focus-within:border-focus-indicator focus-within:ring-2 focus-within:ring-focus-indicator/35

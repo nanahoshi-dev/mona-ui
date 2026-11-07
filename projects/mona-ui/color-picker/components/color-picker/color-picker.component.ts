@@ -114,7 +114,7 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
     });
     protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly expanded = computed(() => this.#popupRef() !== null);
-    protected readonly gradientPopupClasses = `${themeOverlaySurfaceClasses} border border-border shadow-(--shadow-overlay) outline-none`;
+    protected readonly gradientPopupClasses = `${themeOverlaySurfaceClasses} border border-border shadow-(--shadow-overlay) outline-none focus-visible:outline-hidden`;
     protected readonly invalidState = computed(
         () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
@@ -124,7 +124,7 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
         const palette = this.palette();
         return typeof palette === "string" ? palette : this.#paletteItems();
     });
-    protected readonly palettePopupClasses = `flex flex-col p-0.5 max-w-[calc(100vw-1rem)] overflow-auto ${themeOverlaySurfaceClasses} border border-border shadow-(--shadow-overlay) outline-none`;
+    protected readonly palettePopupClasses = `flex flex-col p-0.5 max-w-[calc(100vw-1rem)] overflow-auto ${themeOverlaySurfaceClasses} border border-border shadow-(--shadow-overlay) outline-none focus-visible:outline-hidden`;
     protected readonly popupId = createElementControlId();
     protected readonly popupTemplate: Signal<TemplateRef<void>> = viewChild.required("popupTemplate");
     protected readonly valueTemplate = contentChild(ColorPickerValueTemplateDirective, { read: TemplateRef });

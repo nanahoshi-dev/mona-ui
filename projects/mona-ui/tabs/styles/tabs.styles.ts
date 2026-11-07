@@ -54,7 +54,7 @@ export const tabListListItemThemeVariants = cva(
             active: {
                 true: `
                     text-foreground font-semibold
-                    after:absolute after:content-[''] after:bg-primary
+                    after:absolute after:content-[''] after:bg-[var(--mona-indicator-color,var(--color-primary))]
                     after:forced-color-adjust-none forced-colors:after:bg-[Highlight]
                 `,
                 false: "text-muted-foreground hover:bg-hover hover:text-foreground"

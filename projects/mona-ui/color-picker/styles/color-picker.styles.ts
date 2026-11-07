@@ -8,7 +8,7 @@ export const colorPickerBaseThemeVariants = cva(
         cursor-pointer
         ${themeControlSurfaceClasses} text-foreground
         border border-input-border
-        shadow-(--shadow-control) outline-none
+        shadow-(--shadow-control) outline-none focus-visible:outline-hidden
         transition-[color,box-shadow,border] duration-(--mona-motion-standard) ease-in-out
 
         data-[disabled='true']:pointer-events-none

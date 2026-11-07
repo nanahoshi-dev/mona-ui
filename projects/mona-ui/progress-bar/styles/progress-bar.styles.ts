@@ -45,7 +45,8 @@ export const progressBarTrackThemeVariants = cva(
     `
         relative flex h-full w-full items-center justify-center
         text-xs font-medium
-        bg-primary text-primary-foreground
+        bg-[var(--mona-indicator-color,var(--color-primary))]
+        text-[var(--mona-indicator-foreground,var(--color-primary-foreground))]
         data-[prev='true']:transition-[background-color]
         data-[prev='true']:duration-(--mona-motion-fast)
         data-[prev='true']:ease-in

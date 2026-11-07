@@ -12,8 +12,8 @@ export enum NavigationKeys {
     Space = " "
 }
 
-export const NavigationKeysList: readonly string[] = Object.values(NavigationKeys);
+export const navigationKeysList: readonly string[] = Object.values(NavigationKeys);
 
 export const isNavigationKey = (key: string): boolean => {
-    return NavigationKeysList.includes(key);
+    return navigationKeysList.includes(key);
 };

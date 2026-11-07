@@ -2293,6 +2293,11 @@ export class ChartComponent implements AfterContentChecked {
                         attributes: true
                     });
                 }
+                // A theme applied to part of the page isn't on either of those.
+                const themeRoot = plotEl.closest("[data-mona-theme]");
+                if (themeRoot && themeRoot !== document.documentElement && themeRoot !== document.body) {
+                    this.#themeObserver.observe(themeRoot, { attributeFilter: ["style"], attributes: true });
+                }
             }
         }
 

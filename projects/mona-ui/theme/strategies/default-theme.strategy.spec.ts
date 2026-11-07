@@ -2,6 +2,112 @@ import { monaTheme } from "../definitions/mona-theme";
 import type { ThemeFamilyRegistration, ThemeProfile } from "../models/ThemeDefinition";
 import { DefaultThemeStrategy } from "./default-theme.strategy";
 
+describe("checking a custom theme", () => {
+    const family = (colors: Record<string, string>, name = "custom"): ThemeFamilyRegistration => ({
+        name,
+        variants: {
+            light: {
+                ...monaTheme.variants.light,
+                colors: { ...monaTheme.variants.light.colors, ...colors }
+            }
+        }
+    });
+
+    afterEach(() => vi.restoreAllMocks());
+
+    it.each(["bad theme", "bad\ttheme", " padded"])("rejects %j as a name", name => {
+        expect(() => new DefaultThemeStrategy([family({}, name)], [])).toThrow("cannot contain whitespace");
+    });
+
+    it("warns about a value that isn't a color", () => {
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+        new DefaultThemeStrategy([family({ "--color-foreground": "banana" })], []);
+
+        expect(warn.mock.calls.flat().join()).toContain('--color-foreground: "banana"');
+    });
+
+    it("warns about a pair below what WCAG AA needs", () => {
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+        new DefaultThemeStrategy([family({ "--color-focus-indicator": "#ffffff", "--color-surface": "#ffffff" })], []);
+
+        expect(warn.mock.calls.flat().join()).toContain("--color-focus-indicator on --color-surface is 1.00:1");
+    });
+
+    it("follows aliases to read a pair", () => {
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+        new DefaultThemeStrategy(
+            [
+                family({
+                    "--color-border-control": "var(--color-border-subtle)",
+                    "--color-border-subtle": "#ffffff",
+                    "--color-input-background": "#ffffff"
+                })
+            ],
+            []
+        );
+
+        expect(warn.mock.calls.flat().join()).toContain("--color-border-control on --color-input-background is 1.00:1");
+    });
+
+    it("warns about a custom variable that can't be applied", () => {
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+        const registration: ThemeFamilyRegistration = {
+            name: "custom",
+            variants: { light: { ...monaTheme.variants.light, custom: { "not-a-variable": "1px" } as never } }
+        };
+
+        new DefaultThemeStrategy([registration], []);
+
+        expect(warn.mock.calls.flat().join()).toContain('custom variables without "--": not-a-variable');
+    });
+
+    it("checks an override's colors too", () => {
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+        new DefaultThemeStrategy(
+            [],
+            [
+                {
+                    theme: "mona",
+                    light: { colors: { "--color-primary-foreground": "#18181b", "--color-primary": "#18181b" } }
+                }
+            ]
+        );
+
+        expect(warn.mock.calls.flat().join()).toContain(
+            'Theme "mona" (light): --color-primary-foreground on --color-primary'
+        );
+    });
+
+    it("leaves alone what it can't read", () => {
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+        new DefaultThemeStrategy(
+            [
+                family({
+                    "--color-hover": "color-mix(in oklch, red, blue)",
+                    "--color-active": "currentColor",
+                    "--color-accent": "var(--brand)"
+                })
+            ],
+            []
+        );
+
+        expect(warn).not.toHaveBeenCalled();
+    });
+
+    it("says nothing about the built-in themes", () => {
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+        new DefaultThemeStrategy([], []);
+
+        expect(warn).not.toHaveBeenCalled();
+    });
+});
+
 describe("DefaultThemeStrategy", () => {
     it("resolves complete independent built-in profiles", () => {
         const strategy = new DefaultThemeStrategy([], []);

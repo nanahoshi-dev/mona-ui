@@ -1,9 +1,10 @@
 import { cva } from "class-variance-authority";
+import { themeSelectionBarClasses } from "@nanahoshi/mona-ui/internal";
 
-export const listThemeVariants = cva(`flex h-full flex-col overflow-hidden outline-none`);
+export const listThemeVariants = cva(`flex h-full flex-col overflow-hidden outline-none focus-visible:outline-hidden`);
 
 export const listInnerListThemeVariants = cva(
-    `m-0 h-full list-none overflow-x-hidden overflow-y-auto p-0 outline-none [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]`
+    `m-0 h-full list-none overflow-x-hidden overflow-y-auto p-0 outline-none focus-visible:outline-hidden [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]`
 );
 
 export const listGroupHeaderThemeVariants = cva(``, {
@@ -25,7 +26,7 @@ export const listItemBaseThemeVariants = cva(`flex h-full w-full items-center ga
 
 // Focus and the active option share the grid's ring: solid 2px, inset, at full strength.
 export const listItemContentThemeVariants = cva(
-    `relative flex cursor-default select-none items-center px-3 py-1 text-foreground outline-none focus-visible:inset-ring-2 focus-visible:inset-ring-focus-indicator`,
+    `relative flex cursor-default select-none items-center px-3 py-1 text-foreground outline-none focus-visible:outline-hidden focus-visible:inset-ring-2 focus-visible:inset-ring-focus-indicator`,
     {
         variants: {
             checkboxes: { true: "gap-2", false: "" },
@@ -49,7 +50,7 @@ export const listItemContentThemeVariants = cva(
             {
                 selected: true,
                 checkboxes: false,
-                class: "bg-(--color-selected) text-(--color-selected-foreground) hover:bg-(--color-selected-hover) hover:text-(--color-selected-hover-foreground) focus:bg-(--color-selected-focus) focus:text-(--color-selected-focus-foreground)"
+                class: `bg-(--color-selected) text-(--color-selected-foreground) hover:bg-(--color-selected-hover) hover:text-(--color-selected-hover-foreground) focus:bg-(--color-selected-focus) focus:text-(--color-selected-focus-foreground) ${themeSelectionBarClasses}`
             },
             {
                 highlighted: true,

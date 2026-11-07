@@ -223,7 +223,7 @@ export class SvgWaterfallRenderer {
         // 3. Axes
         const axisLineColor =
             styleResolver.resolveCssVariable("--mona-chart-axis-line-color") ||
-            styleResolver.resolveCssVariable("--color-border-control") ||
+            styleResolver.resolveCssVariable("--color-border") ||
             "rgba(148, 163, 184, 0.45)";
 
         const axisSegments: string[] = [];
@@ -291,7 +291,7 @@ export class SvgWaterfallRenderer {
                 } else {
                     const hoverColor =
                         styleResolver.resolveCssVariable("--mona-chart-waterfall-hover-outline-color") ||
-                        styleResolver.resolveCssVariable("--color-border-control") ||
+                        styleResolver.resolveCssVariable("--color-border") ||
                         "rgba(255, 255, 255, 0.85)";
                     setSvgAttribute(highlightEl, "fill", "none");
                     setSvgAttribute(highlightEl, "stroke", hoverColor);

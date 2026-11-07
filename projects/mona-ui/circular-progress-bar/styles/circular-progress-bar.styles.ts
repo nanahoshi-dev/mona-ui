@@ -14,6 +14,8 @@ export const circularProgressBarBaseThemeVariants = cva(
         [&_svg_circle]:duration-(--mona-motion-fast)
         [&_svg_circle]:ease-in
         [&_svg_circle]:data-[stroke-trail='true']:stroke-surface-muted
+        forced-colors:[&_svg_circle]:stroke-[Highlight]
+        forced-colors:[&_svg_circle]:data-[stroke-trail='true']:stroke-[GrayText]
     `,
     {
         variants: {

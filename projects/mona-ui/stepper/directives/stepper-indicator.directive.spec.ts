@@ -50,15 +50,15 @@ describe("StepperIndicatorDirective", () => {
 
         expect(inactive).toContain("bg-surface-raised");
         expect(inactive).toContain("text-foreground");
-        expect(inactive).not.toContain("bg-primary");
-        expect(inactive).not.toContain("text-primary-foreground");
-        expect(active).toContain("bg-primary");
-        expect(active).toContain("text-primary-foreground");
+        expect(inactive).not.toContain("bg-[var(--mona-indicator-color,var(--color-primary))]");
+        expect(inactive).not.toContain("text-[var(--mona-indicator-foreground,var(--color-primary-foreground))]");
+        expect(active).toContain("bg-[var(--mona-indicator-color,var(--color-primary))]");
+        expect(active).toContain("text-[var(--mona-indicator-foreground,var(--color-primary-foreground))]");
         expect(active).not.toContain("bg-surface-raised");
         expect(active).not.toContain("text-foreground");
         expect(active).toContain("focus-visible:outline-focus-indicator");
         expect(track).toContain("bg-surface-muted");
         expect(track).toContain("border-border-subtle");
-        expect(progress).toContain("bg-primary");
+        expect(progress).toContain("bg-[var(--mona-indicator-color,var(--color-primary))]");
     });
 });

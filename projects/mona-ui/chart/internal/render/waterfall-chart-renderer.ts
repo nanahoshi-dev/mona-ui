@@ -74,7 +74,7 @@ export class WaterfallChartRenderer {
 
                 const hoverColor =
                     styleResolver.resolveCssVariable("--mona-chart-waterfall-hover-outline-color") ||
-                    styleResolver.resolveCssVariable("--color-border-control") ||
+                    styleResolver.resolveCssVariable("--color-border") ||
                     "rgba(255, 255, 255, 0.85)";
 
                 context.strokeStyle = isKeyboard ? focusColor : hoverColor;
@@ -89,7 +89,7 @@ export class WaterfallChartRenderer {
         // 4. Draw Axis baseline lines
         const axisLineColor =
             styleResolver.resolveCssVariable("--mona-chart-axis-line-color") ||
-            styleResolver.resolveCssVariable("--color-border-control") ||
+            styleResolver.resolveCssVariable("--color-border") ||
             "rgba(148, 163, 184, 0.45)";
 
         for (const axisScene of axes) {

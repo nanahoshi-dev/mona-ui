@@ -90,7 +90,7 @@ export class CircularProgressBarComponent implements CircularProgressBarVariantI
     protected readonly radius = computed(() => Math.max(0, this.size() / 2 - this.thickness() / 2));
     protected readonly strokeColor = computed(() => {
         if (typeof this.color() === "string") {
-            return this.color() || "var(--color-primary)";
+            return this.color() || "var(--mona-indicator-color, var(--color-primary))";
         }
         const colorize = this.color() as Action<number, string>;
         return colorize(this.progress());
