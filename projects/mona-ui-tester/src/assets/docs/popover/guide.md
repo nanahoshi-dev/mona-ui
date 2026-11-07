@@ -1,4 +1,4 @@
-## Overview & Component Selection
+## Overview
 
 `PopoverComponent` (`mona-popover`) anchors a floating panel — with an optional title, footer, and projected body content — to a `target` element, and opens it via a configurable trigger. It is built on `PopupService` internally.
 
@@ -13,7 +13,7 @@
 - You only need a short hint shown on hover/focus — use `Tooltip`. Popover requires an explicit trigger configuration and renders a title/footer structure that Tooltip does not have.
 - You need a list of actionable menu items — use `PopupMenu` or `ContextMenu`. Popover has no item model, keyboard item navigation, or selection state; its body is arbitrary projected content.
 - You need a modal experience with a focus trap — use `Dialog` or `Window`. Popover moves focus into itself when it opens, but doesn't trap it, and is dismissed by outside click or Escape by default.
-- You need full control over positioning, backdrop, animation, or a popup that is not built from a fixed template — use `Popup` directly. Popover fixes several of `Popup`'s settings (see Technical & Behavior Notes).
+- You need full control over positioning, backdrop, animation, or a popup that is not built from a fixed template — use `Popup` directly. Popover fixes several of `Popup`'s settings (see [Behavior](#behavior)).
 
 ## Import & Quick Start
 
@@ -40,7 +40,7 @@ To call `open()` / `close()` from the template, capture a reference with `export
 <button type="button" (click)="p.close()">Close</button>
 ```
 
-## Anatomy & Public Structural Templates
+## Anatomy
 
 Content placed inside `<mona-popover>...</mona-popover>` — other than the template directives below — becomes the panel's body content.
 
@@ -126,7 +126,7 @@ protected onHide(event: PopoverHideEvent): void {
 
 `preventDefault()` on the `hide` event cancels the close regardless of what triggered it — a second click on the target, a direct `close()` call, an outside click, or Escape. The popover stays open and its internal open/closed tracking remains consistent in every case.
 
-## Technical & Behavior Notes
+## Behavior
 
 **The triggering DOM event keeps its default action.** A link, a checkbox or a submit button can be the target, and still navigates, toggles or submits. The one exception is `trigger="contextmenu"`, whose default (the browser's own menu) would cover the popover.
 
@@ -148,7 +148,7 @@ protected onHide(event: PopoverHideEvent): void {
 
 - `"click"`, `"hover"`, and `"none"` get autocomplete; any other string is also accepted and used as a raw DOM event name (see Technical & Behavior Notes).
 
-## Accessibility & Forms Integration
+## Accessibility
 
 ### Keyboard
 

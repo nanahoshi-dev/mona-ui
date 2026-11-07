@@ -14,7 +14,7 @@
 - The avatar needs to be interactive — wrap it in a `<button>` or `<a>` yourself; the component provides no built-in interaction
 - You need a stacked avatar group — compose individual `<mona-avatar>` elements manually; there is no built-in group component
 
-## Import & Basic Usage
+## Import & Quick Start
 
 ```typescript
 import { AvatarComponent } from "@nanahoshi/mona-ui/avatar";
@@ -106,7 +106,7 @@ The `customStyles` input accepts a `Partial<CSSStyleDeclaration>` object applied
 </mona-avatar>
 ```
 
-## Accessibility Notes
+## Accessibility
 
 The avatar has no built-in keyboard behavior and no interactive role. Accessibility responsibility depends on the active display mode:
 

@@ -1,10 +1,10 @@
-## Overview & Usage Guidelines
+## Overview
 
 Use `SkeletonComponent` to reserve space for content while it loads. It renders a non-interactive placeholder surface with a subtle pulse animation that respects the user's motion preferences.
 
 The component has no projected content, model inputs, or event outputs. It is a decorative visual only; the region that contains it should communicate loading state to assistive technology when needed.
 
-## Import & Basic Usage
+## Import & Quick Start
 
 ```typescript
 import { Component } from "@angular/core";
@@ -57,7 +57,7 @@ skeleton/list
 
 Use the public `class` input to add classes or other consumer styling to the host element. Classes are merged with the component's generated classes through `tailwind-merge`.
 
-## Accessibility Notes
+## Accessibility
 
 The skeleton host always has `aria-hidden="true"` because the placeholder itself is decorative and does not convey content. Mark the surrounding loading region with `aria-busy="true"` and give that region an accessible name or description when the loading state needs to be announced.
 

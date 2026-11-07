@@ -38,7 +38,7 @@ protected readonly filterForm = form(signal({ price: [0, 100] as [number, number
 <mona-range-slider [formField]="filterForm.price" aria-labelledby="price-label"></mona-range-slider>
 ```
 
-## Template Hooks
+## Anatomy
 
 `RangeSliderComponent` shares the same structural template directives as `SliderComponent`.
 
@@ -114,7 +114,9 @@ The primary (lower) handle defaults to the localized `"Minimum value"` and the s
 </mona-range-slider>
 ```
 
-## Values Out of Range
+## Behavior
+
+### Values Out of Range
 
 The range slider never writes a corrected value on its own. A value that is out of range, off the step grid or unsorted is shown at the nearest valid values, and the model keeps its own until the user changes it. The next user change saves a valid tuple. This way a `maxValue` that loads late can't overwrite saved data.
 
@@ -122,24 +124,15 @@ In development, the range slider warns once per instance when this happens, incl
 
 `maxValue` can always be reached, even when it isn't a whole number of steps from `minValue`.
 
-## Keyboard Interaction
+## Forms Integration
 
-Each handle is independently focusable. Tab to switch between handles; the same key bindings apply to whichever handle has focus. A handle stops at the other one.
+`RangeSliderComponent` implements `FormValueControl<[number, number]>` from `@angular/forms/signals`. Connect it using the `[formField]` binding, as in [Signal forms](#signal-forms).
 
-| Key                               | Action                                                 |
-|-----------------------------------|--------------------------------------------------------|
-| `ArrowRight` / `ArrowUp`          | Increase focused handle value by `step`                |
-| `ArrowLeft` / `ArrowDown`         | Decrease focused handle value by `step`                |
-| `Shift` + `ArrowRight`/`ArrowUp`  | Increase by `step × shiftMultiplier`                   |
-| `Shift` + `ArrowLeft`/`ArrowDown` | Decrease by `step × shiftMultiplier`                   |
-| `Home`                            | Move focused handle toward `minValue`                  |
-| `End`                             | Move focused handle toward `maxValue`                  |
-| `PageUp`                          | Increase by 10% of the total range, at least `step`    |
-| `PageDown`                        | Decrease by 10% of the total range, at least `step`    |
+`FormField` writes `value`, `disabled`, `invalid`, `readonly` and `touched`. Don't set those on the same element, because Angular rejects the template. The `touch` output fires when either handle loses focus, marking the field as touched.
 
-In RTL, `ArrowLeft` increases and `ArrowRight` decreases.
+`RangeSliderComponent` doesn't implement `ControlValueAccessor`. `[(ngModel)]` binds to its `value` model through Angular's support for custom controls. Prefer `[formField]`.
 
-## Accessibility Notes
+## Accessibility
 
 `RangeSliderComponent` has role `group` and renders two focusable `div` elements each with `role="slider"`. Each handle's range ends at the other handle.
 
@@ -168,10 +161,19 @@ Each handle has its own name, from `aria-label-start` and `aria-label-end` (defa
 
 A string `for` can't work, because the range slider has no native input.
 
-## Forms Integration
+### Keyboard Interaction
 
-`RangeSliderComponent` implements `FormValueControl<[number, number]>` from `@angular/forms/signals`. Connect it using the `[formField]` binding, as in [Signal forms](#signal-forms).
+Each handle is independently focusable. Tab to switch between handles; the same key bindings apply to whichever handle has focus. A handle stops at the other one.
 
-`FormField` writes `value`, `disabled`, `invalid`, `readonly` and `touched`. Don't set those on the same element, because Angular rejects the template. The `touch` output fires when either handle loses focus, marking the field as touched.
+| Key                               | Action                                                 |
+|-----------------------------------|--------------------------------------------------------|
+| `ArrowRight` / `ArrowUp`          | Increase focused handle value by `step`                |
+| `ArrowLeft` / `ArrowDown`         | Decrease focused handle value by `step`                |
+| `Shift` + `ArrowRight`/`ArrowUp`  | Increase by `step × shiftMultiplier`                   |
+| `Shift` + `ArrowLeft`/`ArrowDown` | Decrease by `step × shiftMultiplier`                   |
+| `Home`                            | Move focused handle toward `minValue`                  |
+| `End`                             | Move focused handle toward `maxValue`                  |
+| `PageUp`                          | Increase by 10% of the total range, at least `step`    |
+| `PageDown`                        | Decrease by 10% of the total range, at least `step`    |
 
-`RangeSliderComponent` doesn't implement `ControlValueAccessor`. `[(ngModel)]` binds to its `value` model through Angular's support for custom controls. Prefer `[formField]`.
+In RTL, `ArrowLeft` increases and `ArrowRight` decreases.

@@ -1,4 +1,4 @@
-## Overview & Component Selection
+## Overview
 
 Window displays a floating panel that the user can drag by its title bar, resize from its edges and corners, and minimize or maximize, with projected content and an optional footer/title/action bar. It is built on `PopupService` internally, like every other Mona UI overlay.
 
@@ -55,7 +55,7 @@ open(): void {
 }
 ```
 
-## Anatomy & Public Structural Templates
+## Anatomy
 
 Window has four structural template directives, each an `ng-template` placed as projected content inside `<mona-window>...</mona-window>`.
 
@@ -166,7 +166,7 @@ window/service
 
 `closed$` emits a `WindowResult` once the window has closed: `value` is what was passed to `close(value)`, and `via` says what closed it.
 
-## Technical & Behavior Notes
+## Behavior
 
 ### Live vs. one-shot inputs
 
@@ -198,7 +198,11 @@ Pressing or focusing a window raises it above the other open windows. Focus stay
 
 `closed` (and `WindowRef.closed$`) emits once the leave animation has finished. `closed$` carries a `WindowResult` and replays it to late subscribers. When the window closes, `close$`, `closed$`, `drag$`, `dragStart$`, `dragEnd$` and `resize$` all complete.
 
-## Accessibility & Forms Integration
+## Forms Integration
+
+Window is a container, not a form control, so it has no form integration.
+
+## Accessibility
 
 ### Keyboard
 
@@ -227,8 +231,6 @@ Window only traps focus while `modal` is `true`. When it opens, focus moves auto
 Each generated header button (`Minimize`/`Restore`, `Maximize`/`Restore`, `Close window`) has its own `aria-label`. When the window can be dragged or resized, the title bar is a `group` named after the keys it takes (`moveWindow`, `resizeWindow` or `moveOrResizeWindow`, e.g. `"Move window. Use arrow keys to move."`). The resize handles are `aria-hidden`.
 
 A window without a `title`, a title template or an `ariaLabel` has no accessible name. In development mode, such a window logs a warning.
-
-Form integration is not applicable — Window is a container, not a form control.
 
 <!-- verification-checklist
 - [x] WindowComponent inputs and defaults verified against window.component.ts source, including the two effect()s covering top/left and height/width, and the one-shot #openWindow() body for every other input

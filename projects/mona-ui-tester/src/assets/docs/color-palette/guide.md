@@ -87,31 +87,34 @@ color-palette/named
 
 Supported `rounded` values are `none`, `small`, `medium`, `large`, and `full`.
 
-## Value Behavior
+## Behavior
+
+### Value Behavior
 
 Selecting the currently selected color deselects it, setting `value` back to `null`, unless `clearable` is `false` or the palette is required. Clicking or activating any other tile sets `value` to that tile's color string.
 
 Two spellings of a color count as the same one when finding the selected tile, so `#abcdef`, `#ABCDEF` and `rgb(171, 205, 239)` all select the same tile. A repeated color marks only its first tile.
 
-## Keyboard Interaction
+## Forms Integration
 
-Keyboard navigation targets the currently focused tile and is disabled entirely when `disabled` is `true`.
+`ColorPaletteComponent` implements `FormValueControl<string | null>` from `@angular/forms/signals`.
 
-| Key | Action |
-|---|---|
-| `ArrowLeft` | Move focus one tile left (stops at the first tile). |
-| `ArrowRight` | Move focus one tile right (stops at the last tile). |
-| `ArrowUp` | Move focus one row up. Stays put on the first row. |
-| `ArrowDown` | Move focus one row down. Stays put when there's no tile below. |
-| `Home` | Move focus to the start of the row. |
-| `End` | Move focus to the end of the row. |
-| `Ctrl+Home` | Move focus to the first tile. |
-| `Ctrl+End` | Move focus to the last tile. |
-| `Enter` / `Space` | Select the focused tile. Ignored when `readonly` is `true` (focus still moves normally). |
+```typescript
+import { signal } from "@angular/core";
+import { FormField, disabled, form } from "@angular/forms/signals";
 
-Under `dir="rtl"`, `ArrowLeft` and `ArrowRight` swap, so each moves in the direction it points.
+protected readonly form = form(signal<{ color: string | null }>({ color: "#3498db" }), schema => {
+    disabled(schema.color, { when: () => this.locked() });
+});
+```
 
-## Accessibility Notes
+```html
+<mona-color-palette [formField]="form.color"></mona-color-palette>
+```
+
+The `touch` output fires when focus leaves the palette or a color is selected. Moving between tiles doesn't fire it. The signal forms `FormField` directive listens to this output to mark the field as touched.
+
+## Accessibility
 
 The host renders `role="grid"`. Each visual row is wrapped in an element with `role="row"`, and each swatch renders `role="gridcell"` with a roving `tabindex`: only the active tile is tab-reachable, and arrow keys move both focus and the active tile. Before any tile has focus, and again after focus leaves, the active tile is the selected one, or the first.
 
@@ -136,24 +139,23 @@ The host renders `role="grid"`. Each visual row is wrapped in an element with `r
 - Built-in palettes have no color names, so each tile reads its hex value. Use `{ color, name }` items where names matter.
 - When using signal forms, bind through `[formField]` so the form field receives `value` and listens to `touch`.
 
-## Forms Integration
+### Keyboard Interaction
 
-`ColorPaletteComponent` implements `FormValueControl<string | null>` from `@angular/forms/signals`.
+Keyboard navigation targets the currently focused tile and is disabled entirely when `disabled` is `true`.
 
-```typescript
-import { signal } from "@angular/core";
-import { FormField, disabled, form } from "@angular/forms/signals";
+| Key | Action |
+|---|---|
+| `ArrowLeft` | Move focus one tile left (stops at the first tile). |
+| `ArrowRight` | Move focus one tile right (stops at the last tile). |
+| `ArrowUp` | Move focus one row up. Stays put on the first row. |
+| `ArrowDown` | Move focus one row down. Stays put when there's no tile below. |
+| `Home` | Move focus to the start of the row. |
+| `End` | Move focus to the end of the row. |
+| `Ctrl+Home` | Move focus to the first tile. |
+| `Ctrl+End` | Move focus to the last tile. |
+| `Enter` / `Space` | Select the focused tile. Ignored when `readonly` is `true` (focus still moves normally). |
 
-protected readonly form = form(signal<{ color: string | null }>({ color: "#3498db" }), schema => {
-    disabled(schema.color, { when: () => this.locked() });
-});
-```
-
-```html
-<mona-color-palette [formField]="form.color"></mona-color-palette>
-```
-
-The `touch` output fires when focus leaves the palette or a color is selected. Moving between tiles doesn't fire it. The signal forms `FormField` directive listens to this output to mark the field as touched.
+Under `dir="rtl"`, `ArrowLeft` and `ArrowRight` swap, so each moves in the direction it points.
 
 <!-- verification-checklist
 - [x] API definitions and defaults verified against source (color-palette.component.ts)

@@ -11,6 +11,18 @@
 
 - Each option reveals its own content panel, for example `Account | Security | Notifications`. Use `TabsComponent` for that pattern — see [Segmented vs. Tabs](#segmented-vs-tabs).
 
+### Segmented vs. Tabs
+
+| Concern                 | Segmented                                                                  | Tabs                                                                          |
+|-------------------------|----------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| Selection model         | Exactly one value, bound via `[(value)]`                                   | One active tab; panels switch automatically                                   |
+| Content                 | Options have no content; the value is read by the consumer                 | Each tab owns a content panel rendered inside `<mona-tabs>`                   |
+| Semantic role           | `radiogroup` with native radio inputs                                      | `tablist` / `tab` / `tabpanel` pattern                                        |
+| Typical use             | `List | Grid`, `Day | Week | Month`, `Discover | My courses`               | `Account | Security | Notifications`                                          |
+| Routing                 | Not a routing mechanism                                                    | Not a routing mechanism                                                       |
+
+Tabs convey "one of several content panels is active"; Segmented conveys "one of several values is selected."
+
 ## Import & Quick Start
 
 ```typescript
@@ -48,6 +60,31 @@ To reject a choice, write the old value back after the current tick, for example
 ```html
 <p>Current mode: {{ viewMode }}</p>
 ```
+
+## Anatomy
+
+### Templates
+
+Provide a `monaSegmentedItemTemplate` to replace the default label text with custom content, for example an icon paired with the label. `option.label` stays the radio's accessible name. Bind the options, as `[monaSegmentedItemTemplate]="viewModes"`, to type `let-option` from them.
+
+| Directive                   | Overrides                | Rendered when   |
+|------------------------------|---------------------------|-----------------|
+| `monaSegmentedItemTemplate` | The default label text   | Every option    |
+
+[With icons](#with-icons) shows one. When no template is projected, the option renders its plain `label` text, exactly as before.
+
+#### Template Context
+
+The template receives a `SegmentedItemTemplateContext<T>`:
+
+| Property             | Type                | Description                                             |
+|-----------------------|---------------------|-----------------------------------------------------------|
+| `$implicit` / `option` | `SegmentedOption<T>` | The option rendered by this item.                        |
+| `index`               | `number`            | Zero-based option index.                                 |
+| `selected`            | `boolean`           | Whether this option is currently selected.                |
+| `disabled`            | `boolean`           | Whether this option is disabled, individually or via the group. |
+
+The component still owns the radio input, selection, and disabled semantics; the template only supplies the visual content inside the label span.
 
 ## Examples
 
@@ -142,19 +179,15 @@ The control is as wide as its options by default. Use the `class` input to give 
 </mona-segmented>
 ```
 
-## Segmented vs. Tabs
+## Forms Integration
 
-| Concern                 | Segmented                                                                  | Tabs                                                                          |
-|-------------------------|----------------------------------------------------------------------------|-------------------------------------------------------------------------------|
-| Selection model         | Exactly one value, bound via `[(value)]`                                   | One active tab; panels switch automatically                                   |
-| Content                 | Options have no content; the value is read by the consumer                 | Each tab owns a content panel rendered inside `<mona-tabs>`                   |
-| Semantic role           | `radiogroup` with native radio inputs                                      | `tablist` / `tab` / `tabpanel` pattern                                        |
-| Typical use             | `List | Grid`, `Day | Week | Month`, `Discover | My courses`               | `Account | Security | Notifications`                                          |
-| Routing                 | Not a routing mechanism                                                    | Not a routing mechanism                                                       |
+`SegmentedComponent` implements the signal forms `FormValueControl<T | null>` interface, so it can be bound with `[formField]`, as in [In a form](#in-a-form).
 
-Tabs convey "one of several content panels is active"; Segmented conveys "one of several values is selected."
+When bound to a field, the `FormField` directive writes `invalid`, `touched`, `disabled`, `readonly`, `required` and `name` through the corresponding inputs and reads the selection from the `value` model.
 
-## Accessibility Notes
+It has no `ControlValueAccessor`, but `[(ngModel)]`, `[formControl]` and `formControlName` work too, because Angular binds a control's `value` and `touch` directly when it has no accessor.
+
+## Accessibility
 
 ### ARIA
 
@@ -187,37 +220,6 @@ Native radio behavior applies. Arrow keys move the selection within the group, a
 - Provide an accessible name via `aria-label` or `aria-labelledby`.
 - Keep option labels concise. Long labels crowd the group and overflow its container.
 - `value` may be initialized to `null`, but no option will be checked until a matching option value is selected.
-
-## Templates
-
-Provide a `monaSegmentedItemTemplate` to replace the default label text with custom content, for example an icon paired with the label. `option.label` stays the radio's accessible name. Bind the options, as `[monaSegmentedItemTemplate]="viewModes"`, to type `let-option` from them.
-
-| Directive                   | Overrides                | Rendered when   |
-|------------------------------|---------------------------|-----------------|
-| `monaSegmentedItemTemplate` | The default label text   | Every option    |
-
-[With icons](#with-icons) shows one. When no template is projected, the option renders its plain `label` text, exactly as before.
-
-### Template Context
-
-The template receives a `SegmentedItemTemplateContext<T>`:
-
-| Property             | Type                | Description                                             |
-|-----------------------|---------------------|-----------------------------------------------------------|
-| `$implicit` / `option` | `SegmentedOption<T>` | The option rendered by this item.                        |
-| `index`               | `number`            | Zero-based option index.                                 |
-| `selected`            | `boolean`           | Whether this option is currently selected.                |
-| `disabled`            | `boolean`           | Whether this option is disabled, individually or via the group. |
-
-The component still owns the radio input, selection, and disabled semantics; the template only supplies the visual content inside the label span.
-
-## Forms Integration
-
-`SegmentedComponent` implements the signal forms `FormValueControl<T | null>` interface, so it can be bound with `[formField]`, as in [In a form](#in-a-form).
-
-When bound to a field, the `FormField` directive writes `invalid`, `touched`, `disabled`, `readonly`, `required` and `name` through the corresponding inputs and reads the selection from the `value` model.
-
-It has no `ControlValueAccessor`, but `[(ngModel)]`, `[formControl]` and `formControlName` work too, because Angular binds a control's `value` and `touch` directly when it has no accessor.
 
 <!-- verification-checklist
 - [x] SegmentedComponent inputs/outputs/defaults verified against segmented.component.ts source (alignment, animate, ariaLabel, ariaLabelledBy, class, disabled, invalid, name, options, readonly, required, rounded, size, touched, value, touch)

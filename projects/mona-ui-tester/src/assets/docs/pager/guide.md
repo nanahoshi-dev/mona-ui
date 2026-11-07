@@ -1,4 +1,4 @@
-## Overview & Component Selection
+## Overview
 
 Use Pager when a consumer needs to page through a collection that is too large to display in full — grids, lists, or search results. Pager does not fetch, slice, or hold the paged data itself. It tracks `skip`, `total`, and `pageSize`, and emits `pageChange` when the user moves to another page or changes the page size; the consumer loads or slices data in response.
 
@@ -29,7 +29,7 @@ protected onPageChange(event: PageChangeEvent): void {
 }
 ```
 
-## Anatomy & Public Structural Templates
+## Anatomy
 
 Pager's default first/previous/next/last buttons, numeric page buttons, page-size control, and info summary can each be replaced with a matching `ng-template` directive projected into `<mona-pager>`. Every context includes the pager's state and actions (`PagerContext`): `currentPage`, `start`, `end`, `pageSize`, `pageSizes`, `skip`, `total`, `totalPages`, `goToPage(page)` and `setPageSize(size)`. The directives have context guards, so `let-` variables are typed.
 
@@ -90,7 +90,7 @@ Each template replaces one button, named by its `type`. Your button needs its ow
 pager/custom-buttons
 ```
 
-## Technical & Behavior Notes
+## Behavior
 
 - `pageChange` is emitted synchronously for user actions (a button, the page input, the page dropdown, a page-size change, keyboard shortcuts) and when Pager corrects an invalid `skip`. It is not emitted on creation or when `skip` is set from code to a valid page.
 - An invalid `skip` is corrected to the start of the page that holds it: a skip past the last page (the total shrank, a stale server skip) moves to the last page, and a skip between page boundaries (the host changed `pageSize`) moves to the start of its page. The correction updates `[(skip)]` and is reported through `pageChange`.
@@ -100,7 +100,11 @@ pager/custom-buttons
 
 - Boolean inputs accept bare attributes (`<mona-pager pageInput>`).
 
-## Accessibility & Forms Integration
+## Forms Integration
+
+Pager is not a form control. It does not implement `FormValueControl`/`FormCheckboxControl` or `ControlValueAccessor`, and cannot be bound with `[(ngModel)]`, `[formControl]`, or `formControlName`.
+
+## Accessibility
 
 ### Keyboard Map
 
@@ -137,10 +141,6 @@ These labels are rendered by Pager's default markup only. If a consumer replaces
 ### Focus Behavior
 
 When the focused button becomes disabled or is removed (Next on the last page, a jump button that is no longer needed), focus moves to the current page button instead of being lost. Page buttons are tracked by page number, so a focused page button keeps focus when the window of visible pages moves.
-
-### Form Interaction
-
-Pager is not a form control. It does not implement `FormValueControl`/`FormCheckboxControl` or `ControlValueAccessor`, and cannot be bound with `[(ngModel)]`, `[formControl]`, or `formControlName`.
 
 <!-- verification-checklist
 - [x] All API tables cross-checked against pager.component.ts, the context models and component-metadata.json

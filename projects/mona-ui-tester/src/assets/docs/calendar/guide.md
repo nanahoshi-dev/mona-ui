@@ -22,7 +22,7 @@ Add `CalendarComponent` to your standalone component's `imports` array.
 protected readonly selectedDate = signal<Date | null>(null);
 ```
 
-## Anatomy & Public Structural Templates
+## Anatomy
 
 Three template directives customize the rendered cell content in each calendar view.
 
@@ -127,7 +127,7 @@ Displays ISO week numbers in a left column of the month grid.
 <mona-calendar [(value)]="date" firstDay="sunday"></mona-calendar>
 ```
 
-`firstDay` defaults to `"monday"`. Set to `"sunday"` for locales where weeks start on Sunday.
+Without `firstDay`, the week starts on the day the active locale uses, such as Sunday for `en-US` and Monday for `de-DE`. Set it to override the locale.
 
 ### Signal forms integration
 
@@ -137,9 +137,9 @@ Displays ISO week numbers in a left column of the month grid.
 calendar/forms
 ```
 
-> **Signal forms only.** `CalendarComponent` does **not** implement `ControlValueAccessor`. It cannot be used with `[(ngModel)]`, `[formControl]`, or `formControlName`.
+It has no `ControlValueAccessor`, but `[(ngModel)]`, `[formControl]` and `formControlName` work too, because Angular binds a control's `value` and `touch` directly when it has no accessor.
 
-## Behavior Notes
+## Behavior
 
 **View navigation:** The calendar starts in the month view. Clicking the month/year header button cycles upward: month → year → decade. Clicking a cell in the year or decade view drills down.
 
@@ -148,91 +148,6 @@ calendar/forms
 **Disabled dates and navigation:** When `minDate` or `maxDate` changes so that the currently focused date falls outside the allowed range, the calendar automatically moves focus to the nearest bound.
 
 **Readonly state:** Navigation and view switching remain active while `readonly` is `true`. Date selection is prevented.
-
-## Keyboard Interaction
-
-All keyboard actions are active when the calendar host has focus.
-
-### Month view
-
-| Key                     | Action                               |
-|-------------------------|--------------------------------------|
-| `ArrowLeft`             | Move focus one day back              |
-| `ArrowRight`            | Move focus one day forward           |
-| `ArrowUp`               | Move focus one week back             |
-| `ArrowDown`             | Move focus one week forward          |
-| `Ctrl/Cmd + ArrowLeft`  | Navigate to previous month           |
-| `Ctrl/Cmd + ArrowRight` | Navigate to next month               |
-| `Ctrl/Cmd + ArrowUp`    | Switch to year view                  |
-| `Home`                  | Move focus to first day of the month |
-| `End`                   | Move focus to last day of the month  |
-| `PageUp`                | Navigate to previous month           |
-| `PageDown`              | Navigate to next month               |
-| `Enter` / `Space`       | Select focused date                  |
-| `T`                     | Navigate to today                    |
-
-### Multiple selection additions (month view only)
-
-| Key                       | Action                                                      |
-|---------------------------|-------------------------------------------------------------|
-| `Shift + ArrowLeft/Right` | Extend selection by one day                                 |
-| `Shift + ArrowUp/Down`    | Extend selection by one week                                |
-| `Ctrl/Cmd + Enter`        | Toggle focused date in the selection                        |
-| `Shift + Enter`           | Select all dates from the last selected to the focused date |
-
-### Year view (month selection)
-
-| Key                        | Action                                |
-|----------------------------|---------------------------------------|
-| `ArrowLeft` / `ArrowRight` | Move focus one month                  |
-| `ArrowUp` / `ArrowDown`    | Move focus three months (one row)     |
-| `Ctrl/Cmd + ArrowLeft`     | Navigate to previous year             |
-| `Ctrl/Cmd + ArrowRight`    | Navigate to next year                 |
-| `Ctrl/Cmd + ArrowDown`     | Switch to month view                  |
-| `Home`                     | Move focus to January                 |
-| `End`                      | Move focus to December                |
-| `PageUp`                   | Navigate to previous year             |
-| `PageDown`                 | Navigate to next year                 |
-| `Enter` / `Space`          | Select month and switch to month view |
-
-### Decade view (year selection)
-
-| Key                        | Action                              |
-|----------------------------|-------------------------------------|
-| `ArrowLeft` / `ArrowRight` | Move focus one year                 |
-| `ArrowUp` / `ArrowDown`    | Move focus four years (one row)     |
-| `Ctrl/Cmd + ArrowLeft`     | Navigate to previous decade         |
-| `Ctrl/Cmd + ArrowRight`    | Navigate to next decade             |
-| `Ctrl/Cmd + ArrowDown`     | Switch to year view                 |
-| `Home`                     | Move focus to first year of decade  |
-| `End`                      | Move focus to last year of decade   |
-| `PageUp`                   | Navigate to previous decade         |
-| `PageDown`                 | Navigate to next decade             |
-| `Enter` / `Space`          | Select year and switch to year view |
-
-## Accessibility Notes
-
-The host element carries `role="application"` and a dynamic `aria-label` that describes the current view and position (e.g., `"Calendar, June 2025"`, `"Year view, 2025"`, `"Decade view, 2020–2029"`). An `aria-live="polite"` region announces view changes for screen readers.
-
-| Attribute       | When present                                        | Value                                |
-|-----------------|-----------------------------------------------------|--------------------------------------|
-| `role`          | Always (host)                                       | `"application"`                      |
-| `aria-label`    | Always (host)                                       | Current view description             |
-| `aria-invalid`  | When `invalid` is `true`                            | `"true"`                             |
-| `tabindex`      | Always (host)                                       | `0` when enabled, `-1` when disabled |
-| `aria-selected` | On each day, month, and year cell when selected     | `"true"`                             |
-| `aria-disabled` | On month-view day cells when the date is disabled   | `"true"`                             |
-| `aria-current`  | On the current day (month view)                     | `"date"`                             |
-| `aria-current`  | On the current month (year view)                    | `"date"`                             |
-| `aria-label`    | On year cells, decade cells, and navigation buttons | Descriptive text                     |
-
-**Known gaps — TODO(owner-review):**
-
-- Month day cells (`[monaMonthDay]`) have no `role="gridcell"`.
-- The month grid container has no `role="grid"` (year and decade grid containers also lack this).
-- Weekday column headers render abbreviated names only (`Mon`, `Tue`, ...) with no `role="columnheader"` and no `aria-label` for the full day name.
-
-**Consumer responsibilities:** No additional `aria-label` is required unless the calendar is embedded in a larger composite that must override the accessible name.
 
 ## Forms Integration
 
@@ -250,13 +165,95 @@ The `FormField` directive writes the following inputs automatically when a `[for
 
 The `touch` output fires each time the user completes a date selection. `FormField` listens to this output to mark the field as touched.
 
-> `CalendarComponent` does **not** implement `ControlValueAccessor`. Use `[formField]` for signal forms integration. For selection modes other than `"single"`, declare the form model field with the appropriate type (`Date[] | null`).
+> For selection modes other than `"single"`, declare the form model field with the matching type (`Date[] | null`).
+
+## Accessibility
+
+Each view renders a `role="grid"` with rows of `role="gridcell"` cells, labelled by the heading above it. Day cells are named by their full date, and the month grid's column headers carry the full weekday name for screen readers. A polite live region announces the current view and position when it changes, such as "Calendar, June 2025" or "Year view, 2025".
+
+| Attribute       | Where                                          | Value                                    |
+|-----------------|------------------------------------------------|------------------------------------------|
+| `role`          | Each view's container                          | `"grid"`                                 |
+| `role`          | Each day, month, and year cell                 | `"gridcell"`                             |
+| `role`          | Each weekday header (month view)               | `"columnheader"`                         |
+| `aria-label`    | Each cell, and the navigation buttons          | Descriptive text                         |
+| `aria-selected` | A selected cell                                | `"true"`                                 |
+| `aria-current`  | Today, or the current month or year            | `"date"`                                 |
+| `aria-disabled` | A disabled day, or the grid when disabled      | `"true"`                                 |
+| `aria-invalid`  | The month grid, when invalid                   | `"true"`                                 |
+| `aria-readonly` | The month grid, when `readonly`                | `"true"`                                 |
+| `tabindex`      | Each cell                                      | `0` on the focused cell, `-1` on the rest |
+
+A grid may not carry `aria-required`, so `required` shows only as `data-required` on the host and through the invalid state.
+
+**Consumer responsibilities:** None. The grids are named by the calendar's own heading.
+
+### Keyboard Interaction
+
+All keyboard actions apply to the focused cell of the grid. The grid is one Tab stop, and arrow keys move focus between its cells.
+
+#### Month view
+
+| Key                     | Action                               |
+|-------------------------|--------------------------------------|
+| `ArrowLeft`             | Move focus one day back              |
+| `ArrowRight`            | Move focus one day forward           |
+| `ArrowUp`               | Move focus one week back             |
+| `ArrowDown`             | Move focus one week forward          |
+| `Ctrl/Cmd + ArrowLeft`  | Navigate to previous month           |
+| `Ctrl/Cmd + ArrowRight` | Navigate to next month               |
+| `Ctrl/Cmd + ArrowUp`    | Switch to year view                  |
+| `Home`                  | Move focus to first day of the month |
+| `End`                   | Move focus to last day of the month  |
+| `PageUp`                | Navigate to previous month           |
+| `PageDown`              | Navigate to next month               |
+| `Enter` / `Space`       | Select focused date                  |
+| `T`                     | Navigate to today                    |
+
+#### Multiple selection additions (month view only)
+
+| Key                       | Action                                                      |
+|---------------------------|-------------------------------------------------------------|
+| `Shift + ArrowLeft/Right` | Extend selection by one day                                 |
+| `Shift + ArrowUp/Down`    | Extend selection by one week                                |
+| `Ctrl/Cmd + Enter`        | Toggle focused date in the selection                        |
+| `Shift + Enter`           | Select all dates from the last selected to the focused date |
+
+#### Year view (month selection)
+
+| Key                        | Action                                |
+|----------------------------|---------------------------------------|
+| `ArrowLeft` / `ArrowRight` | Move focus one month                  |
+| `ArrowUp` / `ArrowDown`    | Move focus three months (one row)     |
+| `Ctrl/Cmd + ArrowLeft`     | Navigate to previous year             |
+| `Ctrl/Cmd + ArrowRight`    | Navigate to next year                 |
+| `Ctrl/Cmd + ArrowDown`     | Switch to month view                  |
+| `Home`                     | Move focus to January                 |
+| `End`                      | Move focus to December                |
+| `PageUp`                   | Navigate to previous year             |
+| `PageDown`                 | Navigate to next year                 |
+| `Enter` / `Space`          | Select month and switch to month view |
+
+#### Decade view (year selection)
+
+| Key                        | Action                              |
+|----------------------------|-------------------------------------|
+| `ArrowLeft` / `ArrowRight` | Move focus one year                 |
+| `ArrowUp` / `ArrowDown`    | Move focus four years (one row)     |
+| `Ctrl/Cmd + ArrowLeft`     | Navigate to previous decade         |
+| `Ctrl/Cmd + ArrowRight`    | Navigate to next decade             |
+| `Ctrl/Cmd + ArrowDown`     | Switch to year view                 |
+| `Home`                     | Move focus to first year of decade  |
+| `End`                      | Move focus to last year of decade   |
+| `PageUp`                   | Navigate to previous decade         |
+| `PageDown`                 | Navigate to next decade             |
+| `Enter` / `Space`          | Select year and switch to year view |
 
 <!-- verification-checklist
 - [x] API definitions and defaults verified against source
 - [x] Template context variables verified against calendar.component.html ngTemplateOutletContext bindings
 - [x] YearCellTemplateContext.$implicit: documented as month number (1–12) matching actual template binding, not the incorrect JSDoc "year of a decade"
-- [x] Signal forms verified: implements FormValueControl, no ControlValueAccessor
+- [x] Forms verified: implements FormValueControl; ngModel and formControl work without an accessor (tests/forms-interop.spec.ts)
 - [x] Value shape per selection mode verified against #outputValue computed
 - [x] Range selection two-click flow verified against #rangeChange$ pipe
 - [x] Multiple selection keyboard verified against handleMultipleSelectionKeyboard

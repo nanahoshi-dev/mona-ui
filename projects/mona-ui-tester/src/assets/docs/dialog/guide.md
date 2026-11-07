@@ -1,4 +1,4 @@
-## Overview & Component Selection
+## Overview
 
 Dialog displays a modal (or non-modal) message centered in the viewport, with an optional icon, title, description, free-form content, and a row of action buttons. It is built on `PopupService` internally, like every other Mona UI overlay.
 
@@ -74,7 +74,7 @@ this.dialogService.confirm({ title: "Discard changes?", text: "Your changes have
 });
 ```
 
-## Anatomy & Public Structural Templates
+## Anatomy
 
 Dialog has five structural template directives, each an `ng-template` placed as projected content inside `<mona-dialog>...</mona-dialog>`. Only the content template receives a context (see [Content from a template or a component](#content-from-a-template-or-a-component)).
 
@@ -129,7 +129,7 @@ Pressing Enter inside the dialog triggers the action marked `default: true`, as 
 <mona-dialog type="error" title="Something went wrong" text="The file could not be saved."> </mona-dialog>
 ```
 
-`type` accepts `"info" | "success" | "warning" | "error" | "confirm"`, each with a built-in icon, or `null` to render no icon at all. `"confirm"`, `"error"`, and `"warning"` also switch the rendered ARIA role — see [Accessibility & Forms Integration](#accessibility-forms-integration).
+`type` accepts `"info" | "success" | "warning" | "error" | "confirm"`, each with a built-in icon, or `null` to render no icon at all. `"confirm"`, `"error"`, and `"warning"` also switch the rendered ARIA role — see [Accessibility](#accessibility).
 
 ### Custom content instead of plain text
 
@@ -221,7 +221,7 @@ dialogRef.result.subscribe(result => {
 dialogRef.close(42);
 ```
 
-## Technical & Behavior Notes
+## Behavior
 
 ### Live vs. one-shot inputs
 
@@ -255,7 +255,11 @@ A non-modal dialog (`modal: false`) does none of that: Tab can leave it, and the
 
 - `DialogPromptSettings` is `DialogSettings` without `actions`, `content`, `data`, and `footerTemplate`. The buttons are labelled with the `ok` and `cancel` dialog messages (override them through `messages`) and carry `data` values `DIALOG_OK` (`"ok"`) and `DIALOG_CANCEL` (`"cancel"`). `confirm()` defaults `type` to `"confirm"`, `alert()` to `"info"`.
 
-## Accessibility & Forms Integration
+## Forms Integration
+
+Dialog is a container, not a form control, so it has no form integration.
+
+## Accessibility
 
 ### Keyboard
 
@@ -276,8 +280,6 @@ A modal dialog keeps focus inside itself for as long as it is open — Tab and S
 | `aria-modal`       | When `modal` is `true`                                                  | `"true"`                                                                                    |
 
 Every dialog needs an accessible name: a `title`, a title template, or `ariaLabel`. In development mode, a dialog without one logs a warning.
-
-Form integration is not applicable — Dialog is a container, not a form control.
 
 <!-- verification-checklist
 - [x] Batch 5 (module 11): close contract (action$/close$/result/closed$), confirm/alert, DIALOG_DATA, injector, component content, ariaLabel, aria-modal, default action, inert, non-modal focus, strategy positioning and viewport caps verified against dialog sources and dialog/tests/dialog-close-contract.spec.ts

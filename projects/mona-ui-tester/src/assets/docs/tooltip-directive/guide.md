@@ -6,7 +6,7 @@ The directive moves each `title` it uses to a `data-mona-title` attribute, so th
 
 Use `TooltipDirective` when you want a styled, positioned tooltip without adding markup. Use `TooltipComponent` when one tooltip's content should live in its own element, or apply to every element matching a selector across the page.
 
-## Import & Basic Usage
+## Import & Quick Start
 
 ```typescript
 import { TooltipDirective } from "@nanahoshi/mona-ui/tooltip";
@@ -32,13 +32,6 @@ Set `mode="content"` to apply the directive once to a container and have it mana
 ```
 
 Elements matching `filter` that are added to or removed from the container after initial render are picked up automatically: one listener on the container handles them all.
-
-## Public Customization
-
-- **`position`** — `"top"` (default), `"bottom"`, `"left"`, `"right"`, `"start"`, or `"end"`. The side of the target the tooltip opens on. `left` and `right` are physical sides in both directions; `start` and `end` follow the text direction (in RTL, `start` is the right). When there isn't room, the tooltip flips to the opposite side, and its arrow follows.
-- **`rounded`** (aliased as `tooltipRounded`) — `'none'`, `'small'`, `'medium'` (default), `'large'`, or `'full'`. Controls the tooltip panel's border radius.
-- **`showDelay`** / **`hideDelay`** — milliseconds to wait before showing the tooltip, or before hiding it once the pointer or focus has left. Both default to `0`. A pointer that leaves always gets a grace of about 100 ms, so it can move onto the tooltip.
-- **`monaTooltip`** — in `host` mode, the tooltip's content: text, or a `TemplateRef`. Without it, the host's `title` is shown. In `content` mode, each element's `title` is shown.
 
 ## Examples
 
@@ -68,7 +61,7 @@ tooltip-directive/content-mode
 
 ### Turning it off
 
-While `disabled` is `true`, the tooltip doesn't open. On a `monaButton` host, `[disabled]` would also disable the button, so the example puts the directive on a container in `content` mode.
+While `disabled` is `true`, the tooltip doesn't open, and an open one closes. On a button or another control, `[disabled]` also reaches the control and disables it, so use `[tooltipDisabled]` there. It turns off only the tooltip.
 
 ```example
 tooltip-directive/disabled
@@ -92,7 +85,14 @@ tooltip-directive/disabled
 </button>
 ```
 
-## Accessibility Notes
+## Appearance & Styling
+
+- **`position`** — `"top"` (default), `"bottom"`, `"left"`, `"right"`, `"start"`, or `"end"`. The side of the target the tooltip opens on. `left` and `right` are physical sides in both directions; `start` and `end` follow the text direction (in RTL, `start` is the right). When there isn't room, the tooltip flips to the opposite side, and its arrow follows.
+- **`rounded`** (aliased as `tooltipRounded`) — `'none'`, `'small'`, `'medium'` (default), `'large'`, or `'full'`. Controls the tooltip panel's border radius.
+- **`showDelay`** / **`hideDelay`** — milliseconds to wait before showing the tooltip, or before hiding it once the pointer or focus has left. Both default to `0`. A pointer that leaves always gets a grace of about 100 ms, so it can move onto the tooltip.
+- **`monaTooltip`** — in `host` mode, the tooltip's content: text, or a `TemplateRef`. Without it, the host's `title` is shown. In `content` mode, each element's `title` is shown.
+
+## Accessibility
 
 The tooltip opens when the pointer moves onto the anchor or keyboard focus enters it, and closes when both have left. Touch pointers don't open it, since a tap would show it and hide it again at once.
 

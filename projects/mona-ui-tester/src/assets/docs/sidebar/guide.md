@@ -1,4 +1,4 @@
-## Overview & Usage Guidelines
+## Overview
 
 The sidebar is split into a small number of structural pieces and a set of content directives.
 
@@ -46,7 +46,7 @@ A row is an item plus a control, and optionally something trailing:
 </li>
 ```
 
-## Import & Basic Usage
+## Import & Quick Start
 
 ```typescript
 import {
@@ -109,71 +109,23 @@ Each sidebar has an `id`, and each trigger names the one it toggles with `for`.
 sidebar/two-sidebars
 ```
 
-## Accessibility Requirements
+## Theming
 
-These are requirements, not suggestions. The component supplies what it can and relies on you for the rest.
+The sidebar draws from its own colour roles, so it can sit apart from the page content without restyling every part: `--color-sidebar`, `--color-sidebar-foreground`, `--color-sidebar-primary`, `--color-sidebar-primary-foreground`, `--color-sidebar-accent`, `--color-sidebar-accent-foreground`, `--color-sidebar-border` and `--color-sidebar-ring`.
 
-### Provide a landmark
+Every built-in theme defines them for each of its variants. A custom theme can build the whole set from one background with `createSidebarColorRoles()` from `@nanahoshi/mona-ui/theme`.
 
-`mona-sidebar` deliberately carries no ARIA role. A sidebar usually holds more than navigation — a team switcher, a search box, a profile menu — so labelling the whole region `navigation` would over-describe it.
+### Variants
 
-Wrap the menus in a labelled `nav` instead:
+| Variant | Treatment |
+| --- | --- |
+| `sidebar` (default) | Flush against the edge with a single border |
+| `floating` | Detached on its own rounded, shadowed surface |
+| `inset` | Transparent; the raised surface moves onto the inset region instead |
 
-```html
-<nav monaSidebarContent aria-label="Main">…</nav>
-```
+`width`, `iconWidth` and `mobileWidth` are the width the sidebar's *contents* receive. The variant's border is added on top, so a `3rem` icon rail always leaves exactly one `2rem` icon square whatever border the variant draws. The `sidebar` variant has no border as a drawer, so `mobileWidth` is its whole width.
 
-If the entire region really is navigation, set the role on the panel and give it a name:
-
-```html
-<mona-sidebar role="navigation" aria-label="Main">…</mona-sidebar>
-```
-
-Label every landmark. Two unlabelled `nav` elements on a page are indistinguishable to a screen reader user.
-
-### Provide a trigger
-
-`monaSidebarRail` is deliberately outside the tab order: it is a pointer shortcut, and a tab stop onto a 4px strip would be noise. It is **not** a substitute for a trigger. Always render a `monaSidebarTrigger` as well, or the sidebar cannot be opened from the keyboard at all. That includes small viewports, where the rail is hidden: below `640px`, and inside a drawer at any width.
-
-Give the trigger an accessible name. The rail has a localized one by default, and takes an `aria-label` if you want another. The rail goes inside the sidebar, which positions it, and the trigger can go anywhere in the layout:
-
-```html
-<mona-sidebar>
-    …
-    <button monaSidebarRail></button>
-</mona-sidebar>
-<main monaSidebarInset>
-    <button monaSidebarTrigger aria-label="Toggle sidebar">…</button>
-</main>
-```
-
-A `button` host needs nothing further. On any other element, including an `a` without `href`, the trigger supplies `role`, a tab stop, and Enter/Space activation itself.
-
-On a sidebar that can't collapse (`collapsible="none"`) a trigger has nothing to do on a wide viewport, so it reports `aria-disabled` there rather than an open disclosure. A `for` that finds no sidebar leaves the trigger inert and warns in development. `for` only reaches sidebars in the trigger's own layout.
-
-### Use anchors for destinations
-
-`monaSidebarMenuButton` applies to both `a` and `button`. Use an anchor for anything that navigates:
-
-```html
-<a monaSidebarMenuButton routerLink="/billing" tooltip="Billing">…</a>
-```
-
-A button cannot be opened in a new tab, middle-clicked, previewed in the status bar, or followed when JavaScript fails. Reserve `button` for actions — a disclosure trigger, a sign-out.
-
-Mark the current destination on the **item**, which owns the row's highlight. The row's control picks up `aria-current="page"` from it:
-
-```html
-<li monaSidebarMenuItem [active]="isCurrent()">…</li>
-```
-
-### Label the icon rail
-
-While collapsed to icons the labels are clipped away. Set `tooltip` on every row, and the row shows it as a tooltip on hover and on keyboard focus, on the rail only. Keep a label inside the row as well: that's its accessible name, in both states.
-
-`mona-sidebar` shows these itself, and they open toward the content. There's nothing to import, and it isn't a `title`: the browser adds no tooltip of its own, and a `monaTooltip` in `content` mode around the sidebar doesn't pick the row up. A `title` you put on a row yourself stays there, so use one or the other.
-
-## State & Behavior
+## Behavior
 
 ### Controlled state
 
@@ -334,18 +286,66 @@ Where `matchMedia` is unavailable — a server render, a test environment — th
 
 - Call it in an injection context. It throws when there's no sidebar or layout around the caller, unless `optional` is set.
 
-## Theming
+## Accessibility
 
-The sidebar draws from its own colour roles, so it can sit apart from the page content without restyling every part: `--color-sidebar`, `--color-sidebar-foreground`, `--color-sidebar-primary`, `--color-sidebar-primary-foreground`, `--color-sidebar-accent`, `--color-sidebar-accent-foreground`, `--color-sidebar-border` and `--color-sidebar-ring`.
+These are requirements, not suggestions. The component supplies what it can and relies on you for the rest.
 
-Every built-in theme defines them for each of its variants. A custom theme can build the whole set from one background with `createSidebarColorRoles()` from `@nanahoshi/mona-ui/theme`.
+### Provide a landmark
 
-### Variants
+`mona-sidebar` deliberately carries no ARIA role. A sidebar usually holds more than navigation — a team switcher, a search box, a profile menu — so labelling the whole region `navigation` would over-describe it.
 
-| Variant | Treatment |
-| --- | --- |
-| `sidebar` (default) | Flush against the edge with a single border |
-| `floating` | Detached on its own rounded, shadowed surface |
-| `inset` | Transparent; the raised surface moves onto the inset region instead |
+Wrap the menus in a labelled `nav` instead:
 
-`width`, `iconWidth` and `mobileWidth` are the width the sidebar's *contents* receive. The variant's border is added on top, so a `3rem` icon rail always leaves exactly one `2rem` icon square whatever border the variant draws. The `sidebar` variant has no border as a drawer, so `mobileWidth` is its whole width.
+```html
+<nav monaSidebarContent aria-label="Main">…</nav>
+```
+
+If the entire region really is navigation, set the role on the panel and give it a name:
+
+```html
+<mona-sidebar role="navigation" aria-label="Main">…</mona-sidebar>
+```
+
+Label every landmark. Two unlabelled `nav` elements on a page are indistinguishable to a screen reader user.
+
+### Provide a trigger
+
+`monaSidebarRail` is deliberately outside the tab order: it is a pointer shortcut, and a tab stop onto a 4px strip would be noise. It is **not** a substitute for a trigger. Always render a `monaSidebarTrigger` as well, or the sidebar cannot be opened from the keyboard at all. That includes small viewports, where the rail is hidden: below `640px`, and inside a drawer at any width.
+
+Give the trigger an accessible name. The rail has a localized one by default, and takes an `aria-label` if you want another. The rail goes inside the sidebar, which positions it, and the trigger can go anywhere in the layout:
+
+```html
+<mona-sidebar>
+    …
+    <button monaSidebarRail></button>
+</mona-sidebar>
+<main monaSidebarInset>
+    <button monaSidebarTrigger aria-label="Toggle sidebar">…</button>
+</main>
+```
+
+A `button` host needs nothing further. On any other element, including an `a` without `href`, the trigger supplies `role`, a tab stop, and Enter/Space activation itself.
+
+On a sidebar that can't collapse (`collapsible="none"`) a trigger has nothing to do on a wide viewport, so it reports `aria-disabled` there rather than an open disclosure. A `for` that finds no sidebar leaves the trigger inert and warns in development. `for` only reaches sidebars in the trigger's own layout.
+
+### Use anchors for destinations
+
+`monaSidebarMenuButton` applies to both `a` and `button`. Use an anchor for anything that navigates:
+
+```html
+<a monaSidebarMenuButton routerLink="/billing" tooltip="Billing">…</a>
+```
+
+A button cannot be opened in a new tab, middle-clicked, previewed in the status bar, or followed when JavaScript fails. Reserve `button` for actions — a disclosure trigger, a sign-out.
+
+Mark the current destination on the **item**, which owns the row's highlight. The row's control picks up `aria-current="page"` from it:
+
+```html
+<li monaSidebarMenuItem [active]="isCurrent()">…</li>
+```
+
+### Label the icon rail
+
+While collapsed to icons the labels are clipped away. Set `tooltip` on every row, and the row shows it as a tooltip on hover and on keyboard focus, on the rail only. Keep a label inside the row as well: that's its accessible name, in both states.
+
+`mona-sidebar` shows these itself, and they open toward the content. There's nothing to import, and it isn't a `title`: the browser adds no tooltip of its own, and a `monaTooltip` in `content` mode around the sidebar doesn't pick the row up. A `title` you put on a row yourself stays there, so use one or the other.

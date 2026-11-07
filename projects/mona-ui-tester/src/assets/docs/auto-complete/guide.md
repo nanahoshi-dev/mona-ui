@@ -1,4 +1,4 @@
-## Overview & Component Selection
+## Overview
 
 Auto Complete renders a real text input. The consumer can type anything; matching options from `data` appear in a popup below the input as suggestions, but the typed text does not have to match one of them. `value` always holds the current text of the input, not a reference to a selected data item.
 
@@ -47,7 +47,7 @@ protected readonly countryText = signal<string | null>(null);
 
 `textField` accepts a property name or an accessor function used both to render each suggestion's text and to determine what typed text an option "matches." When omitted, the data item itself is used as the display text.
 
-## Anatomy & Public Structural Templates
+## Anatomy
 
 Each structural directive below is an `ng-template` placed as projected content inside `<mona-auto-complete>...</mona-auto-complete>`. Unlike Dropdown List, there is no value-template directive — the value area is a plain text input, not a rendered data item.
 
@@ -134,7 +134,7 @@ auto-complete/forms
 </mona-auto-complete>
 ```
 
-## Technical & Behavior Notes
+## Behavior
 
 ### `value` is always the typed text, not a data item
 
@@ -161,7 +161,11 @@ Blurring the input while the popup is closed commits the typed text as `value`, 
 `textField`, `valueField`, `itemDisabled`, `popupHeight`, and `popupWidth` are typed with these generic aliases internally, but none of the three types are re-exported from `@nanahoshi/mona-ui`. Inline values (as in the examples above) still type-check structurally; only a standalone typed variable would require an import.
 `TODO(owner-review): confirm whether these types should be added to the public barrel export.`
 
-## Accessibility & Forms Integration
+## Forms Integration
+
+`AutoCompleteComponent` implements the signal forms `FormValueControl<string | null>` interface and synchronizes with a field bound through `[formField]` (see [Signal Forms integration](#signal-forms-integration)). It does not implement `ControlValueAccessor` — there is no `NG_VALUE_ACCESSOR` provider and no `writeValue`/`registerOnChange`/`registerOnTouched` methods — so it cannot be used with `[(ngModel)]`, `[formControl]`, or `formControlName`.
+
+## Accessibility
 
 ### Keyboard
 
@@ -203,10 +207,6 @@ The host element itself is not a Tab stop (`tabindex="-1"`); the inner `<input>`
 Provide `ariaLabel` or `ariaLabelledBy` when `placeholder` does not already identify the input's purpose. Provide `ariaDescribedBy` to associate error messages or help text with the input.
 
 The control also renders a visually hidden live region that announces the highlighted option's text and position to screen reader users as the consumer types.
-
-### Form Interaction
-
-`AutoCompleteComponent` implements the signal forms `FormValueControl<string | null>` interface and synchronizes with a field bound through `[formField]` (see [Signal Forms integration](#signal-forms-integration)). It does not implement `ControlValueAccessor` — there is no `NG_VALUE_ACCESSOR` provider and no `writeValue`/`registerOnChange`/`registerOnTouched` methods — so it cannot be used with `[(ngModel)]`, `[formControl]`, or `formControlName`.
 
 <!-- verification-checklist
 - [x] AutoCompleteComponent inputs/outputs/defaults verified against auto-complete.component.ts source and cross-checked against component-metadata.json's AutoCompleteComponent entry (all 26 members matched, including showClearButton defaulting to true, unlike DropdownList's false)

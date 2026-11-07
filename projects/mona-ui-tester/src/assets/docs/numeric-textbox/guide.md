@@ -4,7 +4,7 @@ Use `NumericTextBoxComponent` when the user must enter a numeric value and the c
 
 Use `TextBoxComponent` when the user needs freeform text. `NumericTextBoxComponent` formats the value for display and keeps the underlying value numeric.
 
-> **Signal forms only.** `NumericTextBoxComponent` implements `FormValueControl<number | null>` from `@angular/forms/signals`. It does not implement `ControlValueAccessor`, so `[(ngModel)]`, `[formControl]`, and `formControlName` are not supported.
+> **Forms.** `NumericTextBoxComponent` implements `FormValueControl<number | null>` from `@angular/forms/signals`, so use `[formField]` with signal forms. It has no `ControlValueAccessor`, but `[(ngModel)]`, `[formControl]` and `formControlName` work too, because Angular binds a control's `value` and `touch` directly when it has no accessor.
 
 ## Import & Quick Start
 
@@ -62,7 +62,19 @@ numeric-textbox/forms
 
 A JavaScript `number` holds integers exactly only up to `9007199254740991` (`Number.MAX_SAFE_INTEGER`), and decimals only up to 15 significant digits. Rather than round a value silently, the control refuses the keystroke or paste that would go past that limit, and the spinner buttons stop at `±Number.MAX_SAFE_INTEGER`. For amounts that need more digits, such as money stored as a decimal type, use [`DecimalTextBoxComponent`](/decimal-textbox), whose value is a decimal string with no precision limit.
 
-## Accessibility Notes
+## Forms Integration
+
+`NumericTextBoxComponent` implements `FormValueControl<number | null>` from `@angular/forms/signals` and is intended for signal forms use via `[formField]`.
+
+```typescript
+import { disabled, form, FormField, required } from "@angular/forms/signals";
+```
+
+The `touch` output fires when the value changes, when the control blurs, and when the spinner buttons update the value.
+
+The `invalid` and `touched` inputs are written by `FormField` when the control is used with signal forms. `required` contributes to the invalid state when the value is empty and the control has been touched.
+
+## Accessibility
 
 `NumericTextBoxComponent` renders `role="spinbutton"` on the inner input element and keeps the following ARIA attributes in sync with state:
 
@@ -82,22 +94,10 @@ A JavaScript `number` holds integers exactly only up to `9007199254740991` (`Num
 
 - Provide an accessible name through `aria-label`. The component does not generate one automatically.
 
-## Forms Integration
-
-`NumericTextBoxComponent` implements `FormValueControl<number | null>` from `@angular/forms/signals` and is intended for signal forms use via `[formField]`.
-
-```typescript
-import { disabled, form, FormField, required } from "@angular/forms/signals";
-```
-
-The `touch` output fires when the value changes, when the control blurs, and when the spinner buttons update the value.
-
-The `invalid` and `touched` inputs are written by `FormField` when the control is used with signal forms. `required` contributes to the invalid state when the value is empty and the control has been touched.
-
-## Verification Checklist
-
+<!-- verification-checklist
 - [ ] API definitions and defaults verified against source and component metadata
 - [ ] Basic example compiles successfully
 - [ ] No internal or unexported APIs exposed
 - [ ] Accessibility claims verified against source or marked for owner review
 - [ ] Styling section includes only public customization points
+-->

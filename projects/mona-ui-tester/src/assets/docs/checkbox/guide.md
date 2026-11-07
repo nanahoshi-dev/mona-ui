@@ -18,7 +18,7 @@ Mona UI provides two ways to render a styled checkbox:
 - You want to use `[formControl]` or `formControlName` (Angular's standard forms work on the native input directly)
 - You want native browser checkbox behavior with Mona UI styling
 
-## Import & Basic Usage
+## Import & Quick Start
 
 ```typescript
 import { CheckBoxComponent } from "@nanahoshi/mona-ui/check-box";   // component
@@ -80,12 +80,6 @@ The directive leaves all label composition and form wiring to the consumer. The 
 checkbox/directive
 ```
 
-## Read-only
-
-`readonly` cancels the click, so the value and the indeterminate state don't change. The control stays focusable and readable, and the native input gets `aria-readonly="true"`. With `[formField]`, the signal forms `readonly` rule writes it.
-
-`CheckboxDirective` has no `readonly` input, and the HTML `readonly` attribute has no effect on a native checkbox.
-
 ## Appearance & Styling
 
 ### Rounded presets
@@ -132,7 +126,15 @@ Use the `class` input to extend styles. On `CheckBoxComponent` it targets the ou
 <input type="checkbox" monaCheckbox class="my-2" />
 ```
 
-## Accessibility Notes
+## Behavior
+
+### Read-only
+
+`readonly` cancels the click, so the value and the indeterminate state don't change. The control stays focusable and readable, and the native input gets `aria-readonly="true"`. With `[formField]`, the signal forms `readonly` rule writes it.
+
+`CheckboxDirective` has no `readonly` input, and the HTML `readonly` attribute has no effect on a native checkbox.
+
+## Accessibility
 
 `CheckBoxComponent` renders the native `<input type="checkbox">` as visually hidden but accessible to screen readers. The native input's `aria-label` is the `aria-label` input, or else the `label` text. When both are empty, the accessible name comes from the wrapping `<label>` element, which includes any projected content. Always provide a `label`, meaningful projected content, `aria-label` or `aria-labelledby`.
 

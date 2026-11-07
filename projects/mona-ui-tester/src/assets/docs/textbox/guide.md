@@ -11,9 +11,9 @@ Choose `TextBoxComponent` over `TextBoxDirective` when you need:
 
 For a plain styled `<input>` without a wrapper element, use `TextBoxDirective` (`input[monaTextBox]`) instead.
 
-> **Signal forms only.** `TextBoxComponent` implements `FormValueControl<string>` from `@angular/forms/signals`. It does **not** implement `ControlValueAccessor` and cannot be used with `[(ngModel)]`, `[formControl]`, or `formControlName`.
+> **Forms.** `TextBoxComponent` implements `FormValueControl<string>` from `@angular/forms/signals`, so use `[formField]` with signal forms. It has no `ControlValueAccessor`, but `[(ngModel)]`, `[formControl]` and `formControlName` work too, because Angular binds a control's `value` and `touch` directly when it has no accessor.
 
-## Import & Basic Usage
+## Import & Quick Start
 
 ```typescript
 import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
@@ -102,21 +102,21 @@ Use `class` to extend the outer container, `inputClass` to target only the inner
 </mona-text-box>
 ```
 
-## Accessibility Notes
+## Accessibility
 
 `TextBoxComponent` sets `aria-invalid="true"` on the inner `<input>` when the text box is in an invalid state.
 
-The component does not set an accessible name automatically. Use `inputAttributes` to forward ARIA attributes to the inner `<input>`:
+Name the text box with `aria-label` or `aria-labelledby` on `mona-text-box`. Both go to the inner `<input>`, and the host keeps neither. The placeholder is not a name.
 
 ```html
-<mona-text-box [inputAttributes]="{ 'aria-label': 'Search products' }"></mona-text-box>
+<mona-text-box aria-label="Search products"></mona-text-box>
 ```
 
-Or reference an external label element:
+Or point a label at the inner input through `inputId`:
 
 ```html
-<label id="search-label">Search products</label>
-<mona-text-box [inputAttributes]="{ 'aria-labelledby': 'search-label' }"></mona-text-box>
+<label for="search">Search products</label>
+<mona-text-box inputId="search"></mona-text-box>
 ```
 
 | Attribute      | When present                          | Value    |
@@ -125,12 +125,11 @@ Or reference an external label element:
 
 **Consumer responsibilities:**
 
-- Provide an accessible name via `inputAttributes` (`aria-label` or `aria-labelledby`). Alternatively, forward an `id` to the inner input and link it to a `<label for>` element.
+- Provide an accessible name: `aria-label`, `aria-labelledby`, or a `<label for>` that matches `inputId`.
 
 <!-- verification-checklist
 - [x] API definitions and defaults verified against source and component-metadata.json
-- [x] ControlValueAccessor claim removed — TextBoxComponent implements FormValueControl<string> only
-- [x] [(ngModel)], [formControl], formControlName examples removed (not supported by this component)
+- [x] No ControlValueAccessor; ngModel and formControl work through Angular's binding of accessor-less controls (tests/forms-interop.spec.ts)
 - [x] Signal forms ([formField]) documented correctly
 - [x] invalid, touched, touch added to API tables
 - [x] Tailwind class names removed from rounded, size, and visual states tables

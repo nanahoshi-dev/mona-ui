@@ -14,7 +14,7 @@
 - Multiple boolean options are listed together
 - An indeterminate "select all" state is needed
 
-## Import & Basic Usage
+## Import & Quick Start
 
 ```typescript
 import { SwitchComponent } from "@nanahoshi/mona-ui/switch";
@@ -53,20 +53,6 @@ switch/forms
 ```
 
 The signal forms `disabled` rule disables the digest switch while email notifications are off.
-
-## Forms Integration
-
-`SwitchComponent` implements `FormCheckboxControl` from `@angular/forms/signals`. Connect it to a signal form field using the `[formField]` binding provided by the signal forms `FormField` directive, as in the signal forms example.
-
-`FormField` writes `checked`, `disabled`, `invalid`, `readonly`, `required` and `touched`. Don't set those on the same element, because Angular rejects the template. The `touch` output fires when the switch is toggled or loses focus, marking the field as touched. The signal forms `required` rule treats a switch that's off as empty.
-
-The switch has no `name` input, because it has no native input.
-
-`SwitchComponent` doesn't implement `ControlValueAccessor`. `[(ngModel)]` binds to its `checked` model through Angular's support for custom controls, the same way it does for `CheckBoxComponent`. Import `FormsModule` for it.
-
-## Read-only
-
-`readonly` blocks toggling by pointer, keyboard and label, while the switch stays focusable and readable. It sets `aria-readonly="true"`. With `[formField]`, the signal forms `readonly` rule writes it.
 
 ## Appearance & Styling
 
@@ -107,7 +93,23 @@ Pass additional CSS classes via the `class` attribute. They are merged onto the 
 <mona-switch [(checked)]="enabled" class="my-2" aria-label="Enable feature"></mona-switch>
 ```
 
-## Accessibility Notes
+## Behavior
+
+### Read-only
+
+`readonly` blocks toggling by pointer, keyboard and label, while the switch stays focusable and readable. It sets `aria-readonly="true"`. With `[formField]`, the signal forms `readonly` rule writes it.
+
+## Forms Integration
+
+`SwitchComponent` implements `FormCheckboxControl` from `@angular/forms/signals`. Connect it to a signal form field using the `[formField]` binding provided by the signal forms `FormField` directive, as in the signal forms example.
+
+`FormField` writes `checked`, `disabled`, `invalid`, `readonly`, `required` and `touched`. Don't set those on the same element, because Angular rejects the template. The `touch` output fires when the switch is toggled or loses focus, marking the field as touched. The signal forms `required` rule treats a switch that's off as empty.
+
+The switch has no `name` input, because it has no native input.
+
+`SwitchComponent` doesn't implement `ControlValueAccessor`. `[(ngModel)]` binds to its `checked` model through Angular's support for custom controls, the same way it does for `CheckBoxComponent`. Import `FormsModule` for it.
+
+## Accessibility
 
 `SwitchComponent` manages the following on its host element:
 

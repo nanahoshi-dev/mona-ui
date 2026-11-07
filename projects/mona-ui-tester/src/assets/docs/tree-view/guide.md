@@ -1,4 +1,4 @@
-## Overview & Component Selection
+## Overview
 
 Use Tree View to let a consumer browse or act on data that has parent-child relationships, such as a file system, a category tree, or an org chart. The data can be shaped as nested items (hierarchical mode) or as a flat list linked by an id and a parent id (flat mode).
 
@@ -55,7 +55,7 @@ protected readonly data: FileItem[] = [
 
 Give every tree a name with `ariaLabel` or `ariaLabelledBy` — see [ARIA](#aria).
 
-## Anatomy & Public Structural Templates
+## Anatomy
 
 Consumers interact with the following selectors directly:
 
@@ -183,7 +183,7 @@ tree-view/lazy-loading
 
 To handle a failed load, listen to `childrenLoadError`: the node is collapsed again and expanding it retries, so log or report `event.error` there.
 
-## Technical & Behavior Notes
+## Behavior
 
 ### Cancelable events
 
@@ -209,7 +209,11 @@ Every `mona-tree-view` provides its own tree state, so several trees on a page, 
 
 Keys pressed in a control placed in a node template (an input, a button, a nested tree) are left to that control: the tree only handles keys pressed while it has focus itself. The control still isn't a Tab stop of its own unless you make it one, and a click on it also activates its node.
 
-## Accessibility & Forms Integration
+## Forms Integration
+
+Tree View does not implement `ControlValueAccessor` or the signal forms `FormValueControl` / `FormCheckboxControl` interfaces. It cannot be bound with `[(ngModel)]`, `[formControl]`, `formControlName`, or `[formField]`. Track selection or check state through the `selectedKeys` / `checkedKeys` inputs and their `selectedKeysChange` / `checkedKeysChange` outputs, or the `selectionChange` / `nodeSelect` / `nodeCheck` outputs, exposed by the selectable and checkable directives.
+
+## Accessibility
 
 ### Keyboard
 
@@ -263,7 +267,3 @@ The tree element is the `mona-tree` element inside `mona-tree-view`; the `mona-t
 | Filter input    | `aria-label`, `aria-controls`                 | When filterable                                                                                                               | "Filter {name}" from the tree's name (or "Filter tree"), and the tree's id     |
 
 Name every tree with `ariaLabel` or `ariaLabelledBy`; in development, an unnamed tree logs a warning. A plain `aria-label` attribute on `mona-tree-view` doesn't name the tree. The filter input's name is built from `ariaLabel`, or else from the text of the `ariaLabelledBy` elements. After the user types in the filter, the number of matching nodes is announced ("3 results", or "No matching items"); a filter set from code isn't announced. A keyboard move is announced once it's applied ("Apple moved into Fruits"). Each node's checkbox is hidden from assistive technology, because the node itself reports `aria-checked`. Announcements and labels are translated messages (`treeView` namespace); `TREE_VIEW_DEFAULT_MESSAGES` holds the English defaults.
-
-### Form Interaction
-
-Tree View does not implement `ControlValueAccessor` or the signal forms `FormValueControl` / `FormCheckboxControl` interfaces. It cannot be bound with `[(ngModel)]`, `[formControl]`, `formControlName`, or `[formField]`. Track selection or check state through the `selectedKeys` / `checkedKeys` inputs and their `selectedKeysChange` / `checkedKeysChange` outputs, or the `selectionChange` / `nodeSelect` / `nodeCheck` outputs, exposed by the selectable and checkable directives.

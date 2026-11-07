@@ -1,4 +1,4 @@
-## Overview & Component Selection
+## Overview
 
 List Box renders a `role="listbox"` list of items, built on top of List View, with two additional capabilities: in-place selection toggling and an optional action toolbar for moving, clearing, removing, and transferring items to and from a second, connected list box.
 
@@ -29,7 +29,7 @@ import { ListBoxComponent } from "@nanahoshi/mona-ui/list-box";
 
 `items` accepts any `Iterable<T>`. `selectBy` derives the key used by `selectedKeys`/`selectedKeysChange`; when omitted, the data item itself is used as the key. The toolbar is shown by default with Move Up, Move Down, Clear Selection and Remove; the transfer actions join it once a `connectedList` is set — see [Connected list boxes with a transfer toolbar](#connected-list-boxes-with-a-transfer-toolbar). Pass `[toolbar]="false"` for a list without one.
 
-## Anatomy & Public Structural Templates
+## Anatomy
 
 Each structural directive below is an `ng-template` placed as projected content inside `<mona-list-box>...</mona-list-box>`.
 
@@ -114,7 +114,7 @@ Once the consumer has moved the items, they are selected in the list box they mo
 
 `position` is logical: `"right"` puts the toolbar after the list in the writing direction, so it appears on the left in RTL, and `"left"` before it. `"top"` and `"bottom"` place it above or below the list and lay its buttons out in a row. The transfer icons point along the reading direction (towards the connected list at the inline end, mirrored in RTL) in every position: up and down icons would read as Move Up and Move Down.
 
-## Technical & Behavior Notes
+## Behavior
 
 ### The component does not mutate `items` itself
 
@@ -145,7 +145,11 @@ Both accept a string property name or a function `(item: T) => K`/`(item: T) => 
 
 - `ListBoxClearEvent<T> | ListBoxMoveEvent<T> | ListBoxRemoveEvent<T> | ListBoxTransferEvent<T>` — narrow on the `action` field to determine which one was emitted.
 
-## Accessibility & Forms Integration
+## Forms Integration
+
+Form integration is not applicable. List Box is a display and selection widget, not a form control.
+
+## Accessibility
 
 ### Keyboard
 
@@ -204,8 +208,6 @@ Each toolbar button carries its own `aria-label` matching its tooltip. The trans
 After each action, a polite announcement reports what happened once the consumer's change has rendered: "2 items moved to Chosen foods", "Moved to position 1 of 4", "1 item removed" or "Selection cleared". Nothing is announced when the consumer didn't carry out the action (for example, the items didn't arrive in the target). The announcements and labels are translated messages (`listBox` namespace).
 
 When connecting two list boxes, set a distinct `aria-label` on each so assistive technology can tell them apart — the component does not label them for you, and the toolbar's name and the transfer labels are built from them.
-
-Form integration is not applicable — List Box is a display/selection widget, not a form control.
 
 <!-- verification-checklist
 - [x] Inputs, outputs, defaults and public methods checked against list-box/components/list-box/list-box.component.ts and component-metadata.json, including `aria-labelledby` and the name built from it (#name)

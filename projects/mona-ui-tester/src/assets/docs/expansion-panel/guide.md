@@ -10,7 +10,7 @@ When multiple panels are stacked directly adjacent to one another, the component
 - Build an accordion, with `mona-accordion`, where items expand in place
 - Group and hide a block of secondary information behind a labelled header
 
-## Import & Basic Usage
+## Import & Quick Start
 
 ```typescript
 import { ExpansionPanelComponent } from "@nanahoshi/mona-ui/expansion-panel";
@@ -127,7 +127,7 @@ Three `ng-template` directives customize the header:
 
 **Icon template** — replace the default plus/minus toggle icon. The template context exposes `$implicit` as the current boolean expanded state (`let-expanded`), as in the same example.
 
-## Accessibility Notes
+## Accessibility
 
 The header's button is native, so a click, `Enter` and `Space` all work as a button's do, and it follows the [WAI-ARIA accordion pattern](https://www.w3.org/WAI/ARIA/apg/patterns/accordion/). A panel needs a `title` or a title template with text, or its button has no name, which is warned about in development.
 

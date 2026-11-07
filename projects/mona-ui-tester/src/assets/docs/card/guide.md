@@ -1,4 +1,16 @@
-## Import & Basic Usage
+## Overview
+
+**Use Card when:**
+
+- Related content and its actions belong on one raised surface, such as a login form or a summary.
+- The content needs a header with a title, a description and actions, or a footer.
+
+**Use something else when:**
+
+- The section opens and closes: use Expansion Panel.
+- You are grouping form controls under a label: use Fieldset, which renders a native `<fieldset>` and `<legend>`.
+
+## Import & Quick Start
 
 ```typescript
 import { Component } from "@angular/core";
@@ -66,7 +78,13 @@ card/article
 card/form
 ```
 
-## Accessibility Notes
+## Appearance & Styling
+
+`rounded` sets the corners of the card and of its header and footer. `class` on `<mona-card>`, `<mona-card-header>` and `<mona-card-footer>` is merged through `tailwind-merge`.
+
+A card's colors come from `--color-card` and `--color-card-foreground`, and its shadow from `--shadow-raised`, so a theme can change all three.
+
+## Accessibility
 
 - **Name:** a card with a title takes `role` (`group` by default) and is named by the title, with the description as its `aria-describedby`. Use `article` for self-contained content, or `region` for a landmark.
 - **No title, no role:** a name only counts on an element with a role, so a card without a title has none. If it needs a name, give it a title.
@@ -74,9 +92,3 @@ card/form
 - **Headings:** `monaCardTitle` doesn't make a heading for you. Use the level that fits the page, as the `h3` above does.
 - **Actions:** the actions are in a group named by the `card.actionsLabel` message, "Card actions" in English. Each action still needs its own name.
 - **Keyboard:** a card isn't interactive and takes no focus. Only what you put in it does.
-
-## Appearance & Styling
-
-`rounded` sets the corners of the card and of its header and footer. `class` on `<mona-card>`, `<mona-card-header>` and `<mona-card-footer>` is merged through `tailwind-merge`.
-
-A card's colors come from `--color-card` and `--color-card-foreground`, and its shadow from `--shadow-raised`, so a theme can change all three.

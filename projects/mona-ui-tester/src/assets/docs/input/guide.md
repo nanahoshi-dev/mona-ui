@@ -15,7 +15,7 @@
 - You need `disabled`, `readonly`, or `placeholder` managed through Angular inputs
 - You prefer Angular forms integration with a managed `value` model
 
-## Import & Basic Usage
+## Import & Quick Start
 
 ```typescript
 import { TextBoxDirective } from "@nanahoshi/mona-ui/text-box";
@@ -94,7 +94,7 @@ Use the `class` input to extend styles. Classes are merged predictably, so Tailw
 <input type="text" monaTextBox class="w-full" />
 ```
 
-## Accessibility Notes
+## Accessibility
 
 The directive applies to a native `<input>` element, so browser keyboard interaction, tab order, and form semantics are preserved by default.
 

@@ -4,7 +4,7 @@ Apply `monaTextArea` directly to a `<textarea>` element. The directive adds a co
 
 Use `TextAreaDirective` when you need a styled multi-line input and want full control over the `<textarea>`'s attributes, dimensions, and form binding.
 
-## Import & Basic Usage
+## Import & Quick Start
 
 ```typescript
 import { TextAreaDirective } from "@nanahoshi/mona-ui/text-area";
@@ -67,7 +67,7 @@ Pass additional CSS classes via the `class` attribute. Classes are merged using 
 <textarea monaTextArea class="w-full h-48 resize-y" rows="6"></textarea>
 ```
 
-## Accessibility Notes
+## Accessibility
 
 The directive sets `aria-invalid="true"` on the host element when both `invalid` and `touched` are `true`.
 

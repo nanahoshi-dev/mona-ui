@@ -19,7 +19,7 @@ Buttons in a group are toggle buttons, unless `[toggleable]="false"` makes one a
 - A dropdown or split action is needed on its own — use `DropdownButton` or `SplitButton`
 - One option must always be chosen, such as a view mode — use `mona-segmented`, which is a radio group with arrow keys
 
-## Import & Basic Usage
+## Import & Quick Start
 
 ```typescript
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
@@ -165,7 +165,7 @@ Override container styles with the `class` input. When multiple groups appear on
 - **Content projection:** accepts `monaButton` buttons, `mona-dropdown-button` and `mona-split-button` (`<ng-content select="[monaButton], mona-dropdown-button, mona-split-button">`). The buttons inside dropdown and split buttons take the group's look, size, rounding and disabled state, but they aren't toggles and take no part in its selection.
 - The `value` input on `button[monaButton]` is what the group's `value` holds while that button is selected.
 
-## Accessibility Notes
+## Accessibility
 
 The group host receives `role="group"` and an `aria-label` that defaults to `"Button group"`. A `mona-label` or `aria-labelledby` names it instead.
 

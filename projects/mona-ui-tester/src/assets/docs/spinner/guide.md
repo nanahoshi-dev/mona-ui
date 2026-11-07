@@ -1,4 +1,4 @@
-## Overview & Usage Guidelines
+## Overview
 
 Use `SpinnerComponent` for inline indeterminate loading indicators, or `SpinnerService` to show loading overlays over specific elements or the entire page.
 
@@ -8,7 +8,7 @@ Use `SpinnerComponent` for inline indeterminate loading indicators, or `SpinnerS
 
 ---
 
-## Import & Basic Usage
+## Import & Quick Start
 
 ```typescript
 import { Component, inject } from "@angular/core";
@@ -69,10 +69,6 @@ spinner/overlay
 ```example
 spinner/track
 ```
-
----
-
-## Service Examples
 
 ### Full-Page Overlay
 
@@ -143,7 +139,7 @@ When multiple independent operations target the same element:
 
 ---
 
-## Accessibility Notes
+## Accessibility
 
 ### Inline spinner
 

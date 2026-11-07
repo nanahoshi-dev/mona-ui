@@ -27,7 +27,7 @@ protected readonly currentStep = signal(0);
 <mona-stepper [steps]="steps" [(step)]="currentStep"></mona-stepper>
 ```
 
-## Anatomy & Structural Templates
+## Anatomy
 
 Each step renders an **indicator** (the numbered circle, which shows a check when the step is completed and an alert when it has errors) and a **label** (the text below or beside it). Three `ng-template` directives let you replace either part, or replace the entire step unit:
 
@@ -199,7 +199,7 @@ protected readonly steps: StepOptions<{ icon: string }>[] = [
 
 - `"completed" | "current" | "disabled" | "upcoming"`. `current` outranks the others, and `disabled` outranks `completed` and `upcoming`.
 
-## Keyboard & Accessibility
+## Accessibility
 
 ### Keyboard map
 

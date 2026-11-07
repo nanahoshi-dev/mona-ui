@@ -43,7 +43,7 @@ protected onMenuClick(event: MenuItemClickEvent): void { /* ... */ }
 
 `target` accepts a template reference (as above), an `ElementRef<HTMLElement>`, or a plain `HTMLElement`.
 
-## Anatomy & Public Structural Templates
+## Anatomy
 
 ### Content projection
 
@@ -133,7 +133,7 @@ contextmenu/icons
 
 `size`, `rounded`, `minWidth`, and `width` apply to the root menu and every submenu.
 
-## Technical & Behavior Notes
+## Behavior
 
 **Positioning is fixed.** The menu opens at the pointer position for a real right-click, or at the target's center when opened via keyboard. `ContextMenuComponent` does not expose a way to anchor the menu elsewhere or to use a different trigger event; use `PopupMenuComponent` directly for that.
 

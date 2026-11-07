@@ -9,7 +9,7 @@ Each pane controls its own sizing through `size`, `min`, and `max`, and can opt 
 - Let users adjust the relative width or height of adjacent content regions (e.g. a sidebar and a main panel)
 - Provide a panel users can collapse to reclaim space, with controls to bring it back
 
-## Import & Basic Usage
+## Import & Quick Start
 
 ```typescript
 import { SplitterComponent, SplitterPaneComponent } from "@nanahoshi/mona-ui/splitter";
@@ -62,7 +62,22 @@ splitter/proportional
 splitter/save-layout
 ```
 
-## Pane Sizing
+## Appearance & Styling
+
+### Orientation
+
+| `orientation`          | Layout                                                    |
+|------------------------|-----------------------------------------------------------|
+| `horizontal` (default) | Panes arranged in a row, draggable bars are vertical      |
+| `vertical`             | Panes arranged in a column, draggable bars are horizontal |
+
+### Custom classes
+
+`SplitterComponent` and `SplitterPaneComponent` have no dedicated `class` input. Apply a `class` attribute directly to `<mona-splitter>` or `<mona-splitter-pane>`; Angular merges it with the component's own classes. Unlike most other Mona UI components, this merge does not go through `tailwind-merge`, so conflicting Tailwind utility classes are not deduplicated.
+
+## Behavior
+
+### Pane sizing
 
 Each `mona-splitter-pane`'s `size` accepts:
 
@@ -81,7 +96,7 @@ If no pane is left with an empty `size`, the last non-collapsed pane absorbs rem
 
 A press that moved nothing doesn't fire it. Neither does collapsing or expanding with a double-click, a collapse button, `Enter` or `Alt` + arrow, so bind `collapsed` too if the layout should remember that.
 
-## Resizing & Collapsing
+### Resizing and collapsing
 
 Dragging the bar between two panes resizes both of them, clamped to their `min`/`max`, with the primary button or by touch. A pane's `resizable` input is `true` by default. Setting it to `false` stops both bars beside that pane from moving, by pointer or key. The bar still renders.
 
@@ -91,24 +106,11 @@ A pane's `collapsible` input is `false` by default. When `true`, the pane can be
 
 - Double-clicking the adjacent resizer bar
 - Collapse buttons that appear when the bar is hovered or has focus, which also covers touch, since a tap focuses it (rendered only while the relevant neighbor is collapsible and not already collapsed)
-- Keyboard — see Accessibility Notes below
+- The keyboard, as listed under [Accessibility](#accessibility)
 
 A collapsed pane's content is hidden, can't take focus, and its size is reduced to zero. Expanding it restores its previous size where space allows.
 
-## Appearance & Styling
-
-### Orientation
-
-| `orientation`          | Layout                                                    |
-|------------------------|-----------------------------------------------------------|
-| `horizontal` (default) | Panes arranged in a row, draggable bars are vertical      |
-| `vertical`             | Panes arranged in a column, draggable bars are horizontal |
-
-### Custom classes
-
-`SplitterComponent` and `SplitterPaneComponent` have no dedicated `class` input. Apply a `class` attribute directly to `<mona-splitter>` or `<mona-splitter-pane>`; Angular merges it with the component's own classes. Unlike most other Mona UI components, this merge does not go through `tailwind-merge`, so conflicting Tailwind utility classes are not deduplicated.
-
-## Accessibility Notes
+## Accessibility
 
 The bar between two panes contains an element with `role="separator"`, with these managed attributes. The collapse buttons sit beside it, not inside it, so they stay reachable.
 

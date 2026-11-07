@@ -38,7 +38,7 @@ import type { PopupMenuItemClickEvent } from "@nanahoshi/mona-ui/popup-menu";
 protected onAction(event: PopupMenuItemClickEvent): void { /* ... */ }
 ```
 
-## Anatomy & Structural Templates
+## Anatomy
 
 ### Content projection
 
@@ -123,7 +123,7 @@ When `loading` is `true`, the button displays a spinner and ignores click intera
 dropdown-button/loading
 ```
 
-## Technical & Behavior Notes
+## Behavior
 
 ### Popup positioning
 

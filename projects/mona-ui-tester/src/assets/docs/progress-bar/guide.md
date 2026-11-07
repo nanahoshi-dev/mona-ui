@@ -14,7 +14,7 @@ An indeterminate mode is available for tasks where the total duration is unknown
 
 - A compact, self-contained round indicator suits the layout better (e.g., a dashboard card)
 
-## Import & Basic Usage
+## Import & Quick Start
 
 ```typescript
 import { ProgressBarComponent } from "@nanahoshi/mona-ui/progress-bar";
@@ -127,7 +127,7 @@ Merge additional Tailwind or custom classes onto the host element via the `class
 <mona-progress-bar [value]="80" class="h-3" aria-label="Upload progress"></mona-progress-bar>
 ```
 
-## Accessibility Notes
+## Accessibility
 
 The host element carries `role="progressbar"`. The component manages the following ARIA attributes automatically:
 

@@ -72,7 +72,9 @@ color-gradient/compact
 
 Supported rounded values are `none`, `small`, `medium`, `large`, and `full`.
 
-## Value Parsing & Output
+## Behavior
+
+### Value Parsing & Output
 
 The `value` model accepts `undefined`, `null`, and color strings. When `value` is `undefined`, the controls stay as they are, white to begin with. When `value` is `null`, the controls show no color.
 
@@ -99,29 +101,30 @@ Alpha is written with as few decimals as read back the same, so a saved `0.5` st
 
 Cancel puts the controls back on `value`. With the buttons shown, Clear only empties the controls until Apply, and the previous color stays available until then. With `showButtons` off, Clear writes `null` at once.
 
-## Right to Left
+### Right to Left
 
 The hue and alpha sliders stay left to right on an RTL page, like the saturation and value area, so each handle sits over the color it selects, and the right arrow moves up the scale.
 
-## Keyboard Interaction
+## Forms Integration
 
-The saturation/value handle is focusable when the component is enabled. Pressing anywhere in the area starts a drag with the primary button.
+`ColorGradientComponent` implements `FormValueControl<string | null | undefined>` from `@angular/forms/signals`.
 
-| Key                 | Action                          |
-|---------------------|---------------------------------|
-| `ArrowLeft`         | Decrease saturation by 1        |
-| `ArrowRight`        | Increase saturation by 1        |
-| `ArrowUp`           | Increase value by 1             |
-| `ArrowDown`         | Decrease value by 1             |
-| `Shift` + arrow key | Adjust by 10 instead of 1       |
-| `PageUp`            | Increase value by 25            |
-| `PageDown`          | Decrease value by 25            |
-| `Home`              | Move to saturation 0, value 100 |
-| `End`               | Move to saturation 100, value 0 |
+```typescript
+import { signal } from "@angular/core";
+import { FormField, disabled, form } from "@angular/forms/signals";
 
-The previous-color swatch is keyboard-activatable with `Enter` and `Space`.
+protected readonly form = form(signal<{ color: string | null }>({ color: "#336699" }), schema => {
+    disabled(schema.color, { when: () => this.locked() });
+});
+```
 
-## Accessibility Notes
+```html
+<mona-color-gradient [formField]="form.color" [showButtons]="false"></mona-color-gradient>
+```
+
+The `touch` output fires when focus leaves the component. Moving between its controls doesn't fire it. The signal forms `FormField` directive listens to this output to mark the field as touched.
+
+## Accessibility
 
 The host is a `role="group"` named by the `aria-label` input, `aria-labelledby` or a `mona-label`, or `"Color gradient"` otherwise. It has `aria-invalid="true"` once `touched` and either `invalid`, or `required` with no color. Every slider and input has a name of its own, and the alpha slider reads as a percentage. The saturation/value handle renders a focusable slider and exposes the current saturation and value.
 
@@ -144,24 +147,23 @@ The previous-color swatch has `role="button"`. The current-color preview is mark
 - Provide nearby text or form labeling that explains what color the control edits.
 - When using signal forms, use `[formField]` so the form field can receive `value` and listen to `touch`.
 
-## Forms Integration
+### Keyboard Interaction
 
-`ColorGradientComponent` implements `FormValueControl<string | null | undefined>` from `@angular/forms/signals`.
+The saturation/value handle is focusable when the component is enabled. Pressing anywhere in the area starts a drag with the primary button.
 
-```typescript
-import { signal } from "@angular/core";
-import { FormField, disabled, form } from "@angular/forms/signals";
+| Key                 | Action                          |
+|---------------------|---------------------------------|
+| `ArrowLeft`         | Decrease saturation by 1        |
+| `ArrowRight`        | Increase saturation by 1        |
+| `ArrowUp`           | Increase value by 1             |
+| `ArrowDown`         | Decrease value by 1             |
+| `Shift` + arrow key | Adjust by 10 instead of 1       |
+| `PageUp`            | Increase value by 25            |
+| `PageDown`          | Decrease value by 25            |
+| `Home`              | Move to saturation 0, value 100 |
+| `End`               | Move to saturation 100, value 0 |
 
-protected readonly form = form(signal<{ color: string | null }>({ color: "#336699" }), schema => {
-    disabled(schema.color, { when: () => this.locked() });
-});
-```
-
-```html
-<mona-color-gradient [formField]="form.color" [showButtons]="false"></mona-color-gradient>
-```
-
-The `touch` output fires when focus leaves the component. Moving between its controls doesn't fire it. The signal forms `FormField` directive listens to this output to mark the field as touched.
+The previous-color swatch is keyboard-activatable with `Enter` and `Space`.
 
 <!-- verification-checklist
 - [x] API definitions and defaults verified against source

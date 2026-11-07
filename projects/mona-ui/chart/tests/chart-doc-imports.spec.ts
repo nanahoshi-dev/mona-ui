@@ -293,7 +293,6 @@ describe("Chart documentation", () => {
             "projects/mona-ui-tester/src/assets/docs/chart/api.md",
             "projects/mona-ui-tester/src/assets/docs/chart/guide.md",
             "projects/mona-ui-tester/src/assets/docs/chart/intro.md",
-            "projects/mona-ui-tester/src/assets/docs/chart/sync-density.md",
             "projects/mona-ui/chart/README.md",
             "docs/charts.md"
         ]) {

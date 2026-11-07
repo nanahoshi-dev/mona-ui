@@ -19,7 +19,7 @@ When used inside a `ButtonGroup`, the group's look, size, and rounded values tak
 - Multiple related buttons need shared look, size, or coordinated selection — use `ButtonGroup`
 - A button opens a dropdown menu — use `DropdownButton` or `SplitButton`
 
-## Import & Basic Usage
+## Import & Quick Start
 
 ```typescript
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
@@ -107,7 +107,7 @@ Button colors are derived from Mona UI theme design tokens. Override them at `:r
 
 <!-- TODO(owner-review): Confirm exact CSS custom property names (--color-primary vs --primary etc.) for the theme tokens table -->
 
-## Accessibility Notes
+## Accessibility
 
 The directive sets `type="button"` on the host, preventing accidental form submission when placed inside a `<form>`.
 

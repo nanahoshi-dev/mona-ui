@@ -1,4 +1,4 @@
-## Overview & Component Selection
+## Overview
 
 Popup is the positioning and lifecycle primitive that other Mona UI overlay components are built on. `Tooltip`, `Popover`, the color picker, the drop-down tree, the grid filter menu, `Dialog`, and `Window` all create their overlays through `PopupService` internally. Reach for Popup directly when you need a custom anchored overlay that none of those higher-level components already cover.
 
@@ -39,7 +39,7 @@ import { PopupComponent } from "@nanahoshi/mona-ui/popup";
 
 `anchor` accepts a raw `Element`, an `ElementRef`, or a `{ x, y }` point — `#anchor` above resolves to the native `<button>` element. The default `trigger` is `"click"` on that anchor.
 
-## Anatomy & Public Structural Templates
+## Anatomy
 
 Popup has a single content-projection slot. Everything placed inside `<mona-popup>...</mona-popup>` becomes the popup body, rendered the moment the popup opens. There is no structural template system or template context — for per-item template customization inside an overlay, use a higher-level component such as a drop-down list.
 
@@ -179,7 +179,7 @@ Every element matching the selector at the time `create()` runs gets its own pop
 
 Focus capture and restoration only apply to element or point anchors, not to CSS-selector multi-element popups.
 
-## Technical & Behavior Notes
+## Behavior
 
 ### Toggle behavior
 
@@ -206,7 +206,7 @@ Popups created with a CSS-selector `anchor` always open on `pointerenter` and cl
 
 - `Element | ElementRef<Element> | Point | string`. A CSS selector string is only meaningful when passed to `PopupService.create()`.
 
-## Accessibility Notes
+## Accessibility
 
 ### Keyboard
 

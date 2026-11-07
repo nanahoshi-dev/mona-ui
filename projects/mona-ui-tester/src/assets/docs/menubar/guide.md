@@ -46,7 +46,7 @@ import type { MenuItemClickEvent } from "@nanahoshi/mona-ui/menubar";
 protected onMenuClick(event: MenuItemClickEvent): void { /* ... */ }
 ```
 
-## Anatomy & Public Structural Templates
+## Anatomy
 
 ### Content projection
 
@@ -159,7 +159,7 @@ Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or
 
 `size` and `rounded` apply to the menubar itself and to every menu's popup.
 
-## Technical & Behavior Notes
+## Behavior
 
 **`items` takes precedence over projected content.** When a `mona-menu`'s `items` input is a non-empty iterable, it is rendered instead of any projected `mona-menu-item` (and related) components.
 

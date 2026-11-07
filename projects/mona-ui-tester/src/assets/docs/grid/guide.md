@@ -1,4 +1,4 @@
-## Overview & Component Selection
+## Overview
 
 The grid renders `data` as rows against a set of `mona-grid-column` (and optionally `mona-grid-command-column`) definitions projected as content into `<mona-grid>`. Paging is always active; every other behavior — sorting, filtering, grouping, row selection, inline editing, column resizing, column reordering, virtualization, state persistence, and CSV export — is opt-in through a companion attribute directive applied to the same `mona-grid` host element (for example `monaGridSortable`, `monaGridEditable`). `mona-grid` reports only paging and detail-row changes (`pageChange`, `skipChange`, `pageSizeChange`, `expandedKeysChange`); every feature event (`columnSort`, `cellEdit`, `columnResize`, and so on) is emitted by the directive that enables the feature.
 
@@ -40,7 +40,7 @@ protected readonly orders = signal([
 
 Without any behavior directive applied, the grid above only paginates; see [Examples](#examples) for sorting, filtering, grouping, selection, editing, and the other opt-in behaviors.
 
-## Anatomy & Public Structural Templates
+## Anatomy
 
 Each directive below is an `ng-template` (or, for `monaGridColumnTitleTemplate`, an inline template) placed as projected content inside `<mona-grid-column>`, `<mona-grid-command-column>`, or `<mona-grid>` itself.
 
@@ -209,7 +209,7 @@ While virtual scrolling is on, the grid shows no pager and no aggregate footer, 
 
 ### Editing
 
-`monaGridEditable` turns on inline editing, backed exclusively by Angular Signal Forms — see [Form Interaction](#form-interaction). `mode` chooses whether editing commits per cell or per row; `schema` validates the row being edited.
+`monaGridEditable` turns on inline editing, backed exclusively by Angular Signal Forms — see [Forms Integration](#forms-integration). `mode` chooses whether editing commits per cell or per row; `schema` validates the row being edited.
 
 ```example
 grid/editing
@@ -348,7 +348,7 @@ Aggregates cover the whole view (every filtered row, not only the current page),
 <mona-grid-column field="freight" title="Freight" type="number" aggregate="avg"></mona-grid-column>
 ```
 
-## Technical & Behavior Notes
+## Behavior
 
 ### `GridComponent` has no outputs of its own
 
@@ -374,11 +374,15 @@ The grid renders a built-in "Columns" toolbar button backed by an internal `Grid
 - All properties are readonly. Each emission contains independent descriptor snapshots, including nested filter values. The Query descriptor types are exported by `@nanahoshi/mona-ui/query`.
 - `VirtualScrollOptions.height` defaults to **36px** and must be finite and greater than zero. The configured height controls both rendering and virtual item size, including group headers and footers. Virtual templates are clipped to it; expanded detail rows and server page binding are unsupported.
 
-## Accessibility & Forms Integration
+## Forms Integration
+
+Inline editing is built exclusively on Angular Signal Forms: the built-in editors and the `GridEditTemplateContext` passed to `monaGridEditTemplate` both operate on a `FieldTree` from `@angular/forms/signals`. No grid component implements `ControlValueAccessor`, `FormValueControl`, or `FormCheckboxControl` — there is no `[(ngModel)]`, `[formControl]`, or `formControlName` integration at the cell-editor level. Provide a `schema` function on `monaGridEditable`'s options to validate the row being edited; validation errors surface through `GridEditTemplateContext.errors`/`invalid`/`touched` in custom edit templates.
+
+## Accessibility
 
 ### Keyboard
 
-The grid is one Tab stop: `Tab` moves into the grid at the cell that last had focus, and the next `Tab` leaves it. Inside, the keys below move between cells; the header, the filter row, the add row and the body rows are one column of rows.
+The grid is one Tab stop. `Tab` moves into the grid at the cell that last had focus. The first time, that is the first body cell, or the first header cell when there are no rows. The next `Tab` leaves the grid. Inside, the keys below move between cells; the header, the filter row, the add row and the body rows are one column of rows.
 
 | Key                                  | Action                                                                                                                                                                      |
 | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -445,10 +449,6 @@ Grid cells use a roving `tabindex`: the cell that last had focus has `tabindex="
 
 Moving a column or grouping by one from the keyboard is announced through a polite live region (`columnMoved` and `columnGrouped` messages). The grid element has no name of its own: set `ariaLabel` or `ariaLabelledBy`.
 
-### Form Interaction
-
-Inline editing is built exclusively on Angular Signal Forms: the built-in editors and the `GridEditTemplateContext` passed to `monaGridEditTemplate` both operate on a `FieldTree` from `@angular/forms/signals`. No grid component implements `ControlValueAccessor`, `FormValueControl`, or `FormCheckboxControl` — there is no `[(ngModel)]`, `[formControl]`, or `formControlName` integration at the cell-editor level. Provide a `schema` function on `monaGridEditable`'s options to validate the row being edited; validation errors surface through `GridEditTemplateContext.errors`/`invalid`/`touched` in custom edit templates.
-
 <!-- verification-checklist
 - [x] GridComponent inputs verified against grid.component.ts source (data, pageSize, pageSizeValues, resizeMethod, responsivePager, rounded, class/userClass); confirmed the component defines no outputs (all "grid events" live on companion directives)
 - [x] GridColumnComponent (12 inputs) and GridCommandColumnComponent (9 inputs) verified against grid-column.component.ts and grid-command-column.component.ts source; both have empty templates and provide GRID_COLUMN_DEFINITION
@@ -460,7 +460,6 @@ Inline editing is built exclusively on Angular Signal Forms: the built-in editor
 - [x] Exported types cross-checked against grid/public-api.ts; GridService, GridNavigationService, GridRowFlattenerService, GridExportService, Row, GridColumnChooserComponent, GridFilterMenuComponent, GridEditorComponent, and the cell/row structural directives (GridRowDirective, GridCellDirective, GridLockedCellDirective, GridLogicalCellDirective, etc.) confirmed NOT exported and omitted from API tables
 - [x] component-metadata.json's GridComponent entry confirmed stale (missing an outputs key, missing several documented inputs) — not used as the source of truth for this page; npm run build:metadata should be re-run and the entry spot-checked against this page after the JSDoc changes in this pass
 - [x] GridColumnChooserComponent (built-in "Columns" toolbar button) confirmed present in grid.component.html template but not in the public barrel — flagged as TODO(owner-review) instead of documented as a public feature
--->
-
 - [x] Server binding contract, external synchronization, loading, persistence, and compatibility verified against grid-server-binding.directive.ts, grid.service.ts, grid-server-binding.spec.ts, and the mock server demo.
 - [x] Natural row sizing, fixed virtual geometry, drag placeholders, LTR/RTL locked cells, editing, and WCAG AA AXE checks verified in scripts/test-grid-browser.ts.
+-->

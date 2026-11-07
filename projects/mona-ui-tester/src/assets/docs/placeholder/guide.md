@@ -1,4 +1,4 @@
-## Overview & Usage Guidelines
+## Overview
 
 `PlaceholderComponent` fills its parent container and centers its content. It has two display modes:
 
@@ -16,7 +16,7 @@ When both are provided, `text` takes precedence and projected content is not ren
 
 - A region is still loading
 
-## Import & Basic Usage
+## Import & Quick Start
 
 ```typescript
 import { PlaceholderComponent } from "@nanahoshi/mona-ui/placeholder";
@@ -50,7 +50,7 @@ Swap between the placeholder and the real content. A placeholder's text is stati
 placeholder/no-results
 ```
 
-## Public Customization
+## Appearance & Styling
 
 The `text` label renders in a muted theme color and in uppercase. It is not interactive and is not announced as a heading.
 
@@ -64,7 +64,7 @@ Pass additional Tailwind or custom classes to the host element via the `class` i
 
 `PlaceholderComponent` does not expose a label template or other structural customization point. To render anything beyond a single text label, use projected content mode instead of the `text` input.
 
-## Accessibility Notes
+## Accessibility
 
 `PlaceholderComponent` does not render any ARIA roles or attributes, and the text label is not focusable. It is appropriate for static, non-urgent presentational content.
 

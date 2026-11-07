@@ -1,4 +1,4 @@
-## Overview & Component Selection
+## Overview
 
 Combo Box renders a real text input backed by a popup of matching options, similar to Auto Complete. Unlike Auto Complete, `value` is typed `TData | null` and normally only becomes non-null when the typed or navigated text resolves to one of the items in `data` — free text that doesn't match anything is discarded on commit, unless `allowCustomValue` is enabled.
 
@@ -52,7 +52,7 @@ protected readonly selectedCountry = signal<{ id: number; name: string } | null>
 
 `textField` and `valueField` each accept a property name or an accessor function. `valueField` identifies each item for selection matching and, when `valuePrimitive` is enabled, is also what gets read from and written into `value` instead of the full item — see [Primitive value binding](#primitive-value-binding).
 
-## Anatomy & Public Structural Templates
+## Anatomy
 
 Each structural directive below is an `ng-template` placed as projected content inside `<mona-combo-box>...</mona-combo-box>`. As with Auto Complete, there is no value-template directive — the value area is a plain text input.
 
@@ -152,7 +152,7 @@ combo-box/forms
 </mona-combo-box>
 ```
 
-## Technical & Behavior Notes
+## Behavior
 
 ### Enter key resolution
 
@@ -185,7 +185,11 @@ While the popup is open, `Escape` reverts the displayed text to the currently se
 `textField`, `valueField`, `itemDisabled`, `popupHeight`, and `popupWidth` are typed with these generic aliases internally, but none of the three types are re-exported from `@nanahoshi/mona-ui`. Inline values (as in the examples above) still type-check structurally; only a standalone typed variable would require an import.
 `TODO(owner-review): confirm whether these types should be added to the public barrel export.`
 
-## Accessibility & Forms Integration
+## Forms Integration
+
+`ComboBoxComponent` implements the signal forms `FormValueControl<TValue | null>` interface (`TValue` defaults to `TData`, or the `valueField` type when `valuePrimitive` is `true`) and synchronizes with a field bound through `[formField]` (see [Signal Forms integration](#signal-forms-integration)). It does not implement `ControlValueAccessor` — there is no `NG_VALUE_ACCESSOR` provider and no `writeValue`/`registerOnChange`/`registerOnTouched` methods — so it cannot be used with `[(ngModel)]`, `[formControl]`, or `formControlName`.
+
+## Accessibility
 
 ### Keyboard
 
@@ -226,10 +230,6 @@ The input also carries the native HTML `required` attribute (not just `aria-requ
 Provide `ariaLabel` or `ariaLabelledBy` when `placeholder` does not already identify the input's purpose. Provide `ariaDescribedBy` to associate error messages or help text with the input.
 
 The control also renders a visually hidden live region that announces the highlighted option's text and position to screen reader users as the consumer types.
-
-### Form Interaction
-
-`ComboBoxComponent` implements the signal forms `FormValueControl<TValue | null>` interface (`TValue` defaults to `TData`, or the `valueField` type when `valuePrimitive` is `true`) and synchronizes with a field bound through `[formField]` (see [Signal Forms integration](#signal-forms-integration)). It does not implement `ControlValueAccessor` — there is no `NG_VALUE_ACCESSOR` provider and no `writeValue`/`registerOnChange`/`registerOnTouched` methods — so it cannot be used with `[(ngModel)]`, `[formControl]`, or `formControlName`.
 
 <!-- verification-checklist
 - [x] ComboBoxComponent inputs/outputs/defaults verified against combo-box.component.ts source and cross-checked against component-metadata.json's ComboBoxComponent entry (all 30 members matched, including showClearButton defaulting to false, matching DropdownList)

@@ -1,4 +1,4 @@
-## Overview & Component Selection
+## Overview
 
 Use `ColorPickerComponent` when screen space is limited and the color editor should stay collapsed until the user opens it. It wraps a preview swatch and dropdown trigger; activating it opens a popup containing either a `ColorPaletteComponent` grid (`view="palette"`) or a `ColorGradientComponent` editor (`view="gradient"`).
 
@@ -36,7 +36,7 @@ protected readonly form = form(signal<{ color: string | null }>({ color: "#3498d
 <mona-color-picker [formField]="form.color" view="palette"></mona-color-picker>
 ```
 
-## Anatomy & Public Structural Templates
+## Anatomy
 
 The host renders a preview swatch (the currently selected color, or a "no color" icon when `value` is `null`) followed by a dropdown chevron button. Activating the host opens a popup with the view selected by the `view` input.
 
@@ -100,7 +100,7 @@ color-picker/value-template
 
 Supported `size` values are `small`, `medium`, and `large`. Supported `rounded` values are `none`, `small`, `medium`, `large`, and `full`.
 
-## Technical & Behavior Notes
+## Behavior
 
 - The popup opens anchored below the host, left-aligned, with no backdrop.
 - Clicking outside the popup closes it. Focus stays on what the click focused, such as another field. If the click focused nothing, focus returns to the host.
@@ -112,7 +112,26 @@ Supported `size` values are `small`, `medium`, and `large`. Supported `rounded` 
 - A color the gradient can't read, such as `var(--brand)`, shows as no color in the gradient view and warns in development. Apply writes a value only after an edit, so that color stays as it was written. A color outside sRGB comes back as its closest sRGB color once edited.
 - Choosing the color that's already selected keeps it and closes the popup. To clear, use `showClearButton`.
 
-## Accessibility & Forms Integration
+## Forms Integration
+
+`ColorPickerComponent` implements `FormValueControl<string | null>` from `@angular/forms/signals`.
+
+```typescript
+import { signal } from "@angular/core";
+import { FormField, disabled, form } from "@angular/forms/signals";
+
+protected readonly form = form(signal<{ color: string | null }>({ color: "#3498db" }), schema => {
+    disabled(schema.color, { when: () => this.locked() });
+});
+```
+
+```html
+<mona-color-picker [formField]="form.color" view="palette"></mona-color-picker>
+```
+
+The `touch` output fires when the host loses focus with the popup closed, when the clear button is used, and when the popup closes. Selecting a palette color counts through that close, so with `[closeOnSelect]="false"` it waits until the popup closes. Focus moving into the popup doesn't fire it. The signal forms `FormField` directive listens to this output to mark the field as touched.
+
+## Accessibility
 
 ### Keyboard Map
 
@@ -159,25 +178,6 @@ The host also holds visually hidden text with the current color: its name when t
 ### Focus Behavior
 
 Opening the popup moves focus into its content: the selected color, or the first one, in the palette view, and the saturation/value handle in the gradient view. Closing the popup returns focus to the host unless the user moved it elsewhere. The popup does not implement a focus trap.
-
-### Form Interaction
-
-`ColorPickerComponent` implements `FormValueControl<string | null>` from `@angular/forms/signals`.
-
-```typescript
-import { signal } from "@angular/core";
-import { FormField, disabled, form } from "@angular/forms/signals";
-
-protected readonly form = form(signal<{ color: string | null }>({ color: "#3498db" }), schema => {
-    disabled(schema.color, { when: () => this.locked() });
-});
-```
-
-```html
-<mona-color-picker [formField]="form.color" view="palette"></mona-color-picker>
-```
-
-The `touch` output fires when the host loses focus with the popup closed, when the clear button is used, and when the popup closes. Selecting a palette color counts through that close, so with `[closeOnSelect]="false"` it waits until the popup closes. Focus moving into the popup doesn't fire it. The signal forms `FormField` directive listens to this output to mark the field as touched.
 
 <!-- verification-checklist
 - [x] API definitions and defaults verified against source (color-picker.component.ts)

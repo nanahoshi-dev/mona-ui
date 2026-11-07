@@ -38,7 +38,7 @@ protected readonly myForm = form(signal({ volume: 5 }));
 <mona-slider [formField]="myForm.volume" aria-label="Volume"></mona-slider>
 ```
 
-## Template Hooks
+## Anatomy
 
 Two structural directives allow customising the handle and tick labels.
 
@@ -126,7 +126,9 @@ The field's `min` and `max` rules set the slider's bounds.
 slider/forms
 ```
 
-## Values Out of Range
+## Behavior
+
+### Values Out of Range
 
 The slider never writes a corrected value on its own. A value that is out of range or off the step grid is shown at the nearest valid value, and the model keeps its own until the user changes it. The next user change saves a valid value. This way a `maxValue` that loads late can't overwrite saved data.
 
@@ -134,22 +136,15 @@ In development, the slider warns once per instance when this happens. That inclu
 
 `maxValue` can always be reached, even when it isn't a whole number of steps from `minValue`.
 
-## Keyboard Interaction
+## Forms Integration
 
-| Key                               | Action                                                  |
-|-----------------------------------|---------------------------------------------------------|
-| `ArrowRight` / `ArrowUp`          | Increase value by `step`                                |
-| `ArrowLeft` / `ArrowDown`         | Decrease value by `step`                                |
-| `Shift` + `ArrowRight`/`ArrowUp`  | Increase value by `step × shiftMultiplier`              |
-| `Shift` + `ArrowLeft`/`ArrowDown` | Decrease value by `step × shiftMultiplier`              |
-| `Home`                            | Jump to the lower bound                                 |
-| `End`                             | Jump to the upper bound                                 |
-| `PageUp`                          | Increase value by 10% of the total range, at least `step` |
-| `PageDown`                        | Decrease value by 10% of the total range, at least `step` |
+`SliderComponent` implements `FormValueControl<number>` from `@angular/forms/signals`. Connect it to a signal form field using the `[formField]` binding, as in [Signal forms](#signal-forms).
 
-In RTL, `ArrowLeft` increases and `ArrowRight` decreases.
+`FormField` writes `value`, `disabled`, `invalid`, `readonly`, `touched`, and, from the field's `min` and `max` rules, the `min` and `max` inputs, which win over `minValue` and `maxValue`. Don't set those on the same element, because Angular rejects the template. `minValue` and `maxValue` are still allowed. The `touch` output fires when the handle loses focus, marking the field as touched. A click on the track moves focus to the handle first.
 
-## Accessibility Notes
+`SliderComponent` doesn't implement `ControlValueAccessor`. `[(ngModel)]` binds to its `value` model through Angular's support for custom controls. Prefer `[formField]`.
+
+## Accessibility
 
 `SliderComponent` renders a focusable `div` with `role="slider"` and manages the following ARIA attributes on that element:
 
@@ -180,10 +175,17 @@ The slider has no visible text label of its own. Provide a name using one of:
 
 Without any of these, it falls back to the generic localized name "Slider value".
 
-## Forms Integration
+### Keyboard Interaction
 
-`SliderComponent` implements `FormValueControl<number>` from `@angular/forms/signals`. Connect it to a signal form field using the `[formField]` binding, as in [Signal forms](#signal-forms).
+| Key                               | Action                                                  |
+|-----------------------------------|---------------------------------------------------------|
+| `ArrowRight` / `ArrowUp`          | Increase value by `step`                                |
+| `ArrowLeft` / `ArrowDown`         | Decrease value by `step`                                |
+| `Shift` + `ArrowRight`/`ArrowUp`  | Increase value by `step × shiftMultiplier`              |
+| `Shift` + `ArrowLeft`/`ArrowDown` | Decrease value by `step × shiftMultiplier`              |
+| `Home`                            | Jump to the lower bound                                 |
+| `End`                             | Jump to the upper bound                                 |
+| `PageUp`                          | Increase value by 10% of the total range, at least `step` |
+| `PageDown`                        | Decrease value by 10% of the total range, at least `step` |
 
-`FormField` writes `value`, `disabled`, `invalid`, `readonly`, `touched`, and, from the field's `min` and `max` rules, the `min` and `max` inputs, which win over `minValue` and `maxValue`. Don't set those on the same element, because Angular rejects the template. `minValue` and `maxValue` are still allowed. The `touch` output fires when the handle loses focus, marking the field as touched. A click on the track moves focus to the handle first.
-
-`SliderComponent` doesn't implement `ControlValueAccessor`. `[(ngModel)]` binds to its `value` model through Angular's support for custom controls. Prefer `[formField]`.
+In RTL, `ArrowLeft` increases and `ArrowRight` decreases.

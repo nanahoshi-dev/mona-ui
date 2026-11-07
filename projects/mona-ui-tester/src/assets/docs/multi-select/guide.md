@@ -1,6 +1,6 @@
-## Overview & Component Selection
+## Overview
 
-Multi Select renders every selected item as a removable chip inside the host element, and opens a listbox popup for the consumer to add or remove selections. Unlike Combo Box or Auto Complete, the value area is not a text input — there is no free-text entry and no `placeholder` input; the host either shows selected tags or is empty.
+Multi Select renders every selected item as a removable chip inside the host element, and opens a listbox popup for the consumer to add or remove selections. Unlike Combo Box or Auto Complete, the value area is not a text input — there is no free-text entry. The host shows the selected tags, or the `placeholder` when nothing is selected.
 
 Filtering, grouping, and virtual scrolling are opt-in through companion attribute directives applied to the `<mona-multi-select>` host element, the same pattern used by Dropdown List:
 
@@ -47,7 +47,7 @@ protected readonly selectedCountries = signal<{ id: number; name: string }[]>([]
 
 `textField` and `valueField` each accept a property name or an accessor function. `valueField` identifies each item for selection matching and, when `valuePrimitive` is enabled, is also what gets read from and written into `value` instead of the full items — see [Primitive value binding](#primitive-value-binding).
 
-## Anatomy & Public Structural Templates
+## Anatomy
 
 Each structural directive below is an `ng-template` placed as projected content inside `<mona-multi-select>...</mona-multi-select>`, or (for the summary tag directives) applied alongside `monaMultiSelectSummaryTag` on the host element itself. There is no value-template directive — each selected item renders as a `mona-chip`, not a rendered data item you fully control.
 
@@ -161,11 +161,11 @@ Set `autoClose` to `true` to close the popup after each selection instead of kee
 </mona-multi-select>
 ```
 
-## Technical & Behavior Notes
+## Behavior
 
-### No placeholder input
+### Placeholder
 
-Unlike Dropdown List, Combo Box, and Auto Complete, `MultiSelectComponent` has no `placeholder` input. When nothing is selected, the host element renders no tags and no placeholder text.
+`placeholder` shows while nothing is selected. It also names the control when neither `aria-label` nor `aria-labelledby` is set.
 
 ### `showClearButton` clears every selection
 
@@ -180,7 +180,11 @@ Unlike Dropdown List, Combo Box, and Auto Complete, `MultiSelectComponent` has n
 `textField`, `valueField`, `itemDisabled`, `popupHeight`, and `popupWidth` are typed with these generic aliases internally, but none of the three types are re-exported from `@nanahoshi/mona-ui`. Inline values (as in the examples above) still type-check structurally; only a standalone typed variable would require an import.
 `TODO(owner-review): confirm whether these types should be added to the public barrel export.`
 
-## Accessibility & Forms Integration
+## Forms Integration
+
+`MultiSelectComponent` implements the signal forms `FormValueControl<Iterable<TValue>>` interface (`TValue` defaults to `TData`, or the `valueField` type when `valuePrimitive` is `true`) and synchronizes with a field bound through `[formField]` (see [Signal Forms integration](#signal-forms-integration)). It has no `ControlValueAccessor`, but `[(ngModel)]`, `[formControl]` and `formControlName` work too, because Angular binds a control's `value` and `touch` directly when it has no accessor. A `null` value, which NgModel writes first and a cleared form control holds, means nothing is selected.
+
+## Accessibility
 
 ### Keyboard
 
@@ -207,25 +211,21 @@ The host element is the only Tab stop; DOM focus does not move into the popup's 
 | `aria-expanded`         | Always                                                                                           | Reflects the popup's open state                                                                                        |
 | `aria-activedescendant` | While an option is highlighted                                                                   | The highlighted option's element id                                                                                    |
 | `aria-controls`         | Always                                                                                           | The popup listbox's element id                                                                                         |
-| `aria-label`            | Always                                                                                           | The `ariaLabel` value (empty string by default — no fallback to any other text, since there is no `placeholder` input) |
-| `aria-labelledby`       | Always                                                                                           | The `ariaLabelledBy` value                                                                                             |
+| `aria-label`            | A name is set                                                                                    | `aria-label`, or else `placeholder` when `aria-labelledby` isn't set                                                    |
+| `aria-labelledby`       | `aria-labelledby` is set                                                                         | The `aria-labelledby` value                                                                                            |
 | `aria-disabled`         | `disabled` is `true`                                                                             | `"true"`                                                                                                               |
 | `aria-readonly`         | `readonly` is `true`                                                                             | `"true"`                                                                                                               |
 | `aria-required`         | `required` is `true`                                                                             | `"true"`                                                                                                               |
 | `aria-invalid`          | `invalid` is `true`, or `required` is `true` and the control is `touched` with no items selected | `"true"`                                                                                                               |
 | `aria-busy`             | `loading` is `true`                                                                              | `"true"`                                                                                                               |
 
-Provide `ariaLabel` or `ariaLabelledBy` to identify the control's purpose — unlike the other dropdown components, there is no `placeholder` fallback.
+Name the control with `aria-label` or `aria-labelledby`. A `placeholder` names it when neither is set, but it disappears once something is selected, so a visible label is better.
 
 The control also renders a visually hidden live region that announces the highlighted or selected option's text and position to screen reader users as the consumer navigates the popup.
 
-### Form Interaction
-
-`MultiSelectComponent` implements the signal forms `FormValueControl<Iterable<TValue>>` interface (`TValue` defaults to `TData`, or the `valueField` type when `valuePrimitive` is `true`) and synchronizes with a field bound through `[formField]` (see [Signal Forms integration](#signal-forms-integration)). It does not implement `ControlValueAccessor` — there is no `NG_VALUE_ACCESSOR` provider and no `writeValue`/`registerOnChange`/`registerOnTouched` methods — so it cannot be used with `[(ngModel)]`, `[formControl]`, or `formControlName`.
-
 <!-- verification-checklist
 - [x] MultiSelectComponent inputs/outputs/defaults verified against multi-select.component.ts source and cross-checked against component-metadata.json's MultiSelectComponent entry (all 28 members matched, including the valuePrimitive input added alongside value/valueField)
-- [x] Confirmed no placeholder input exists (absent from both the source's public input list and component-metadata.json), and that aria-label has no fallback (bound directly to ariaLabel(), unlike DropdownList/ComboBox/AutoComplete's effectiveAriaLabel computed)
+- [x] placeholder input verified; aria-label falls back to it when aria-labelledby isn't set (effectiveAriaLabel)
 - [x] MultiSelectSummaryTagDirective and its tagCount input/monaMultiSelectSummaryTagTemplate contentChild verified against multi-select-summary-tag.directive.ts; template context { $implicit, tagCount } verified against multi-select.component.html's ngTemplateOutletContext binding
 - [x] MultiSelectTagTemplateDirective verified against multi-select-tag-template.directive.ts and its usage/context in multi-select.component.html
 - [x] valuePrimitive and TValue-generic value binding verified against multi-select.component.ts's getSelectedControlValues() (maps each selected item through getDataItemValue when valuePrimitive() else uses item.data) and synchronizeSelection() (setSelectedKeys(value) when valuePrimitive() else setSelectedDataItems(value)); confirmed value-restoration by primitive field array only takes effect when valuePrimitive is true; multi-select.component.spec.ts's dedicated PrimitiveMultiSelectFormModel host ([valuePrimitive]="true", form model { value: [2] }) tests this separately from the default object-mode host ({ value: [FOOD_ITEMS[1]] })

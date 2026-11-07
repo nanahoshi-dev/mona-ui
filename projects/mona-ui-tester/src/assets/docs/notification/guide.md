@@ -1,4 +1,4 @@
-## Overview & Component Selection
+## Overview
 
 Notifications are shown imperatively through `NotificationService`, not by placing `<mona-notification>` directly in a template. The service dynamically creates a `mona-notification-container` (one per screen `position`) and mounts each notification inside it.
 
@@ -36,7 +36,7 @@ export class MyComponent {
 }
 ```
 
-## NotificationService
+### NotificationService
 
 `NotificationService` is the entire public surface consumers interact with directly — there is no notification component to place in a template. It is a root-provided (`providedIn: "root"`) singleton, so a single instance manages every notification across the application, grouped by screen `position`.
 
@@ -46,9 +46,9 @@ export class MyComponent {
 | `hideAll(): void`                                     | Closes every currently visible notification, across all positions.                                                                                                                                                   |
 | `show(options: NotificationOptions): NotificationRef` | Creates a notification and returns a `NotificationRef`. If a notification with the same `id` already exists at the resolved `position`, returns a ref to that existing notification instead of creating a duplicate. |
 
-See [Anatomy & Options Resolution](#anatomy--options-resolution) for how `show()` fills in defaults, and [API](#api) for the full `NotificationOptions` / `NotificationRef` shapes.
+See [Anatomy & Options Resolution](#anatomy) for how `show()` fills in defaults, and [API](#api) for the full `NotificationOptions` / `NotificationRef` shapes.
 
-## Anatomy & Options Resolution
+## Anatomy
 
 `show()` resolves defaults before creating the notification:
 
@@ -87,8 +87,6 @@ notification/template
 ```example
 notification/update
 ```
-
-## Feature Examples
 
 ### Dismissal
 
@@ -178,7 +176,7 @@ ref.hide();
 
 Calling `show()` again with the same `id` (at the same `position`) returns the existing `NotificationRef` instead of creating a duplicate notification. Use `NotificationService.hide(id)` or `NotificationService.hideAll()` to close notifications without holding onto a `NotificationRef`.
 
-## Technical & Behavior Notes
+## Behavior
 
 **`closable: false` with no `duration` can't be dismissed by the user.** Close it yourself with `ref.hide()` or `hide(id)`.
 
@@ -190,7 +188,11 @@ Calling `show()` again with the same `id` (at the same `position`) returns the e
 
 **The countdown bar is drawn in the type's theme color**, through its CSS variable, so it follows a theme switch. Reduced motion turns the enter and leave animations off.
 
-## Accessibility & Forms Integration
+## Forms Integration
+
+Not applicable. Notification does not accept or emit user input and has no form control integration.
+
+## Accessibility
 
 ### Keyboard
 
@@ -212,10 +214,6 @@ Each notification is announced through the CDK `LiveAnnouncer` once it has rende
 - The close button's accessible name defaults to `"Close"`; set `closeTitle` to override it.
 - When using a custom component or `TemplateRef` as `content`, the consumer is responsible for that content's own accessibility (labels, focus order, etc.). Its rendered text is what gets announced.
 - Give users enough time: keep a close button on timed notifications, and consider `provideNotificationDefaults({ autoHide: false })` or a `durationScale` as a user setting.
-
-### Forms
-
-Not applicable — Notification does not accept or emit user input and has no form control integration.
 
 <!-- verification-checklist
 - [x] API definitions and defaults verified against notification.service.ts, NotificationOptions.ts, NotificationRef.ts, NotificationDefaults.ts, notification.tokens.ts and notification.component.html/ts

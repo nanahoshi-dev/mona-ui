@@ -14,7 +14,7 @@ The legend is hidden entirely when neither `legend` nor `monaFieldsetLegendTempl
 
 - The grouping is purely visual with no form controls — a plain `<div>` or a card component is more appropriate; `<fieldset>` carries form semantics AT will announce
 
-## Import & Basic Usage
+## Import & Quick Start
 
 ```typescript
 import { FieldsetComponent } from "@nanahoshi/mona-ui/fieldset";
@@ -95,3 +95,14 @@ It has these limits:
 - **The form model:** a signal form field inside stays enabled in the form model, so its validation keeps running. Use the signal forms `disabled` rule when the field itself should be disabled.
 - **The first legend:** the browser leaves native controls in a fieldset's first `<legend>` enabled. Mona UI controls get no such exemption, so one in `monaFieldsetLegendTemplate` is disabled too.
 - **A plain `<fieldset>`:** a native `<fieldset disabled>` you write yourself only reaches native controls. Mona UI controls that draw their own focusable element stay enabled inside it. Use `mona-fieldset` for those.
+
+## Accessibility
+
+The component renders a native `<fieldset>`, which has the implicit `group` role. When `legend` or `monaFieldsetLegendTemplate` is set, a native `<legend>` names the group, and screen readers announce it with the controls inside. With no legend, no `<legend>` is rendered, and the `aria-label` and `aria-labelledby` inputs are set on the `<fieldset>` instead of the host.
+
+`disabled` sets the native `disabled` attribute on the `<fieldset>`. The component adds no keyboard handling: focus moves through the projected controls in document order.
+
+**Consumer responsibilities**
+
+- Name the group with `legend`, `monaFieldsetLegendTemplate`, `aria-label` or `aria-labelledby`.
+- Give each control inside its own label. The legend names the group, not the fields.

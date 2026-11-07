@@ -4,7 +4,7 @@ Use `ScrollViewComponent` when you need to display a sequence of items — image
 
 > `ScrollViewComponent` is not a form control. It does not implement `ControlValueAccessor` or any signal forms interface.
 
-## Import & Basic Usage
+## Import & Quick Start
 
 ```typescript
 import { ScrollViewComponent } from "@nanahoshi/mona-ui/scroll-view";
@@ -99,7 +99,7 @@ scroll-view/two-way
 
 Users who enable `prefers-reduced-motion` in their OS settings will see animation duration reduced to 1 ms regardless of the configured value.
 
-## Accessibility Notes
+## Accessibility
 
 ### ARIA roles and attributes
 

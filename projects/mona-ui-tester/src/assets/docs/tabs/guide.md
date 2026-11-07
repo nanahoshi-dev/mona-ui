@@ -1,4 +1,4 @@
-## Overview & Component Selection
+## Overview
 
 Tabs organizes related content into named panels and shows one panel at a time. Each panel is declared as a `<mona-tab>` projected inside `<mona-tabs>`; `TabsComponent` renders the clickable tab strip and swaps the visible panel when the consumer selects a different tab.
 
@@ -32,7 +32,7 @@ import { TabComponent, TabContentTemplateDirective, TabsComponent } from "@nanah
 
 A `<mona-tab>` renders no content of its own — content must be provided through a `monaTabContentTemplate` template, as shown above. A tab with no `monaTabContentTemplate` renders an empty panel.
 
-## Anatomy & Public Structural Templates
+## Anatomy
 
 Each structural directive below is an `ng-template` placed as projected content inside `<mona-tab>...</mona-tab>`. Neither template exposes a template context.
 
@@ -152,7 +152,7 @@ For compact value selection that does not switch panels — `List | Grid`, `Day 
 tabs/cancel-select
 ```
 
-## Technical & Behavior Notes
+## Behavior
 
 ### Tabs are removed by the consumer
 
@@ -188,7 +188,11 @@ A left or right tab strip needs a constrained available height. If the strip is 
 
 - `"top" | "bottom" | "left" | "right"`. The values of the `position` input.
 
-## Accessibility & Forms Integration
+## Forms Integration
+
+Not applicable. `TabsComponent` and `TabComponent` are not form controls and do not implement `ControlValueAccessor` or the signal forms control interfaces.
+
+## Accessibility
 
 ### Keyboard
 
@@ -233,10 +237,6 @@ The selected tab is the only tab in the Tab order (`tabindex="0"`); all other ta
 Give the tab list a name with `aria-label` or `aria-labelledby` on `mona-tabs` when the page has more than one set of tabs, or when nothing nearby says what they're for. The inputs go to the tab list, not the host.
 
 A tab list may only contain tabs, and a tab's content is presentational, so a close button can't be exposed in either place. Axe rejects one anywhere inside the tab list, even beside the tab. That's why the visible close button, which is there for the pointer, is hidden from assistive technology with `aria-hidden` and `tabindex="-1"`. Each closable tab also gets a visually hidden button after the tab list, named "Close tab" plus the tab's title, which screen readers can reach and activate, including on touch devices. It's out of the Tab order too, since the keyboard's route is `Delete` or `Backspace`. Its text comes from `closeTab` in the `tabs` messages.
-
-### Form Interaction
-
-Not applicable. `TabsComponent` and `TabComponent` are not form controls and do not implement `ControlValueAccessor` or the signal forms control interfaces.
 
 <!-- verification-checklist
 - [x] TabsComponent inputs/outputs/defaults verified against tabs.component.ts source and cross-checked against component-metadata.json's TabsComponent entry (class, closable, disabled, keepTabContent, position, size, tabClose, tabSelect); rounded input confirmed removed from source and metadata

@@ -12,7 +12,7 @@ The circular progress bar communicates a quantified progress value within an exp
 
 - A horizontal bar fits the layout better
 
-## Import & Basic Usage
+## Import & Quick Start
 
 ```typescript
 import { CircularProgressBarComponent } from "@nanahoshi/mona-ui/circular-progress-bar";
@@ -114,7 +114,7 @@ The label is hidden in indeterminate mode. Importing the context type:
 import type { LabelTemplateContext } from "@nanahoshi/mona-ui/circular-progress-bar";
 ```
 
-## Accessibility Notes
+## Accessibility
 
 The host element carries `role="progressbar"`. The component manages the following ARIA attributes automatically:
 

@@ -38,7 +38,7 @@ protected onSaveAs(event: PopupMenuItemClickEvent): void { /* ... */ }
 protected onExport(event: PopupMenuItemClickEvent): void { /* ... */ }
 ```
 
-## Anatomy & Structural Templates
+## Anatomy
 
 ### Content projection slots
 
@@ -144,7 +144,7 @@ split-button/checkable
 split-button/loading
 ```
 
-## Technical & Behavior Notes
+## Behavior
 
 ### Popup positioning
 

@@ -1,4 +1,4 @@
-## Overview & Component Selection
+## Overview
 
 Dropdown List renders a single-value combobox: the host element shows the current selection (or a placeholder) and opens a listbox popup on click, `Enter`, `Space`, or `Alt+ArrowDown`. The value area is not an editable text input — typing only happens inside the popup's filter box, and only once filtering is explicitly enabled.
 
@@ -54,7 +54,7 @@ protected readonly selectedCountry = signal<{ id: number; name: string } | null>
 
 `textField` and `valueField` each accept a property name or an accessor function; when either is omitted, the data item itself is used as the display text or the value, respectively. `valueField` also identifies each item for selection matching and, when `valuePrimitive` is enabled, is what gets read from and written into `value` instead of the full item — see [Primitive value binding](#primitive-value-binding). Without any behavior directive applied, the popup renders the full `data` collection with no filter box — see [Examples](#examples) for filtering, grouping, and virtual scrolling.
 
-## Anatomy & Public Structural Templates
+## Anatomy
 
 Each structural directive below is an `ng-template` placed as projected content inside `<mona-dropdown-list>...</mona-dropdown-list>`.
 
@@ -114,7 +114,7 @@ dropdown-list/filtering
 
 ### Signal Forms integration
 
-Binding `[formField]` synchronizes `value`, `disabled`, `readonly`, `required`, `invalid`, and `touched` with a signal forms field automatically — see [Form Interaction](#form-interaction).
+Binding `[formField]` synchronizes `value`, `disabled`, `readonly`, `required`, `invalid`, and `touched` with a signal forms field automatically — see [Forms Integration](#forms-integration).
 
 ```example
 dropdown-list/forms
@@ -122,7 +122,7 @@ dropdown-list/forms
 
 ### Disabled, readonly, loading, and required states
 
-`disabled` renders the control with reduced visual emphasis and removes pointer interaction. `readonly` prevents value changes while preserving the visual state. `loading` shows a loading indicator in place of the clear button and prevents interaction while an operation is in progress. `required` marks the field for form validation and affects the invalid state once the control is touched.
+`disabled` renders the control with reduced visual emphasis and removes pointer interaction. `readonly` prevents value changes while preserving the visual state. `loading` shows a loading indicator in place of the clear button and marks the field busy. It doesn't block interaction: the field stays usable while data loads. `required` marks the field for form validation and affects the invalid state once the control is touched.
 
 ```html
 
@@ -153,7 +153,7 @@ dropdown-list/forms
 </mona-dropdown-list>
 ```
 
-## Technical & Behavior Notes
+## Behavior
 
 ### Staged navigation while the popup is open
 
@@ -176,7 +176,11 @@ These three directives are independent — applying more than one to the same `m
 `textField`, `valueField`, `itemDisabled`, `popupHeight`, and `popupWidth` are typed with these generic aliases internally, but none of the three types are re-exported from `@nanahoshi/mona-ui`. Inline values (as in the examples above) still type-check structurally; only a standalone typed variable would require an import.
 `TODO(owner-review): confirm whether these types should be added to the public barrel export.`
 
-## Accessibility & Forms Integration
+## Forms Integration
+
+`DropdownListComponent` implements the signal forms `FormValueControl<TValue | null>` interface (`TValue` defaults to `TData`, or the `valueField` type when `valuePrimitive` is `true`) and synchronizes with a field bound through `[formField]` (see [Signal Forms integration](#signal-forms-integration)). It does not implement `ControlValueAccessor` — there is no `NG_VALUE_ACCESSOR` provider and no `writeValue`/`registerOnChange`/`registerOnTouched` methods — so it cannot be used with `[(ngModel)]`, `[formControl]`, or `formControlName`.
+
+## Accessibility
 
 ### Keyboard
 
@@ -216,10 +220,6 @@ The host element is the only Tab stop; DOM focus does not move into the popup's 
 Provide `ariaLabel` or `ariaLabelledBy` when `placeholder` does not already identify the control's purpose — `placeholder` only supplies a fallback accessible name, and disappears once a value is selected.
 
 The control also renders a visually hidden live region that announces the highlighted or selected option's text and position to screen reader users as the consumer navigates the popup.
-
-### Form Interaction
-
-`DropdownListComponent` implements the signal forms `FormValueControl<TValue | null>` interface (`TValue` defaults to `TData`, or the `valueField` type when `valuePrimitive` is `true`) and synchronizes with a field bound through `[formField]` (see [Signal Forms integration](#signal-forms-integration)). It does not implement `ControlValueAccessor` — there is no `NG_VALUE_ACCESSOR` provider and no `writeValue`/`registerOnChange`/`registerOnTouched` methods — so it cannot be used with `[(ngModel)]`, `[formControl]`, or `formControlName`.
 
 <!-- verification-checklist
 - [x] DropdownListComponent inputs/outputs/defaults verified against dropdown-list.component.ts source and cross-checked against component-metadata.json's DropdownListComponent entry (all 27 members matched: ariaLabel, ariaLabelledBy, data, disabled(model), invalid, itemDisabled, loading, placeholder, popupClass, popupHeight, popupWidth, readonly, required, rounded, showClearButton, size, textField, touched, userClass(class), value(model), valueField, valuePrimitive, close, closed, open, opened, touch)

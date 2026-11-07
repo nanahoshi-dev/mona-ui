@@ -1,4 +1,4 @@
-## Overview & Component Selection
+## Overview
 
 Sheet displays a modal panel attached to an edge of the viewport, with an optional title, description, and close button, plus projected content. It is built on `PopupService` internally, like every other Mona UI overlay.
 
@@ -83,7 +83,7 @@ protected onSheetClose(event: PopupCloseEvent): void {
 <mona-sheet (close)="onSheetClose($event)"> </mona-sheet>
 ```
 
-## Technical & Behavior Notes
+## Behavior
 
 ### `side` is fixed once the sheet opens
 
@@ -99,7 +99,11 @@ Every other input is live: `title`, `description`, `ariaLabel`, and `closable` r
 
 Sheet blocks scrolling of the page behind it for as long as it is open, regardless of `side`. The rest of the page is also `inert` until the sheet starts closing, so a pointer, Tab, or a screen reader can't reach it; popups opened from inside the sheet stay usable.
 
-## Accessibility & Forms Integration
+## Forms Integration
+
+Sheet is a container, not a form control, so it has no form integration.
+
+## Accessibility
 
 ### Keyboard
 
@@ -120,8 +124,6 @@ Sheet traps focus inside itself for as long as it is open — Tab and Shift+Tab 
 | `aria-label`       | Only when `title` is absent    | The `ariaLabel` input         |
 
 Sheet content must have either a `title` or an `ariaLabel` so that the modal has an accessible name. In development mode, a sheet without one logs a warning.
-
-Form integration is not applicable — Sheet is a container, not a form control.
 
 <!-- verification-checklist
 - [x] SheetComponent inputs and defaults verified against sheet.component.ts source, including the horizontal-vs-vertical width/height defaults resolved in #open()

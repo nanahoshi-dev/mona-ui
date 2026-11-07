@@ -7,19 +7,7 @@ A JavaScript `number` holds integers exactly only up to `9007199254740991` (`Num
 
 Use `NumericTextBoxComponent` when a `number` is enough, such as for counts or percentages. Use `DecimalTextBoxComponent` when the value is sent to a backend as a decimal type (for example `DECIMAL`, `BigDecimal` or `decimal`), or when its digits must survive unchanged.
 
-> **Signal forms only.** `DecimalTextBoxComponent` implements `FormValueControl<string | null>` from `@angular/forms/signals`. It does not implement `ControlValueAccessor`, so `[(ngModel)]`, `[formControl]`, and `formControlName` are not supported.
-
-## The value format
-
-The value is a **canonical decimal string**: an optional `-`, ASCII digits, and an optional `.` followed by digits. It never contains grouping, an exponent, leading zeros or trailing fraction zeros, so equal amounts always have equal strings:
-
-| User types (`de-DE`) | `value`          |
-|----------------------|------------------|
-| `1.234,50`           | `"1234.5"`       |
-| `-0,0`               | `"0"`            |
-| `0012`               | `"12"`           |
-
-The displayed text is localized; the value is not. `decimals` controls how many fraction digits are shown and accepted, not the value's format. Set a value the same way, as a canonical decimal string. A value that is not a decimal string (for example `"1,5"` or `"1e3"`) logs a dev-mode warning.
+> **Forms.** `DecimalTextBoxComponent` implements `FormValueControl<string | null>` from `@angular/forms/signals`, so use `[formField]` with signal forms. It has no `ControlValueAccessor`, but `[(ngModel)]`, `[formControl]` and `formControlName` work too, because Angular binds a control's `value` and `touch` directly when it has no accessor.
 
 ## Import & Quick Start
 
@@ -37,6 +25,18 @@ import { DecimalTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
     aria-label="Amount">
 </mona-decimal-text-box>
 ```
+
+### The value format
+
+The value is a **canonical decimal string**: an optional `-`, ASCII digits, and an optional `.` followed by digits. It never contains grouping, an exponent, leading zeros or trailing fraction zeros, so equal amounts always have equal strings:
+
+| User types (`de-DE`) | `value`          |
+|----------------------|------------------|
+| `1.234,50`           | `"1234.5"`       |
+| `-0,0`               | `"0"`            |
+| `0012`               | `"12"`           |
+
+The displayed text is localized; the value is not. `decimals` controls how many fraction digits are shown and accepted, not the value's format. Set a value the same way, as a canonical decimal string. A value that is not a decimal string (for example `"1,5"` or `"1e3"`) logs a dev-mode warning.
 
 ## Examples
 
@@ -77,7 +77,7 @@ decimal-textbox/forms
 | `validateLocalizedDecimalEdit` | Validates text while it is typed.                                                          |
 | `formatNumber`                 | Accepts a decimal string and formats it exactly.                                           |
 
-## Accessibility Notes
+## Accessibility
 
 `DecimalTextBoxComponent` renders the same markup as `NumericTextBoxComponent`: `role="spinbutton"` on the inner input, with `aria-valuenow`, `aria-valuemin` and `aria-valuemax` set to the decimal strings and `aria-valuetext` set to the formatted display value.
 

@@ -1,4 +1,4 @@
-## Overview & Component Selection
+## Overview
 
 Use Editor when people write formatted text: headings, lists, links, images and tables. For plain text, use `mona-text-area`.
 
@@ -42,7 +42,12 @@ Bound with `[formField]`, the editor gets `disabled`, `invalid`, `readonly`, `re
 editor/forms
 ```
 
-## Toolbar Settings
+## Behavior
+
+- The form inputs (`disabled`, `invalid`, `readonly`, `required`, `touched`) are set by the form when the editor is bound with `[formField]`.
+- The editor is created in the browser after the first render, so `html` and `json` have no content on the server. Wait for `create` before reading them at startup.
+
+### Toolbar Settings
 
 Every tool is on by default. Pass only what you want to change, as in the toolbar example.
 
@@ -57,13 +62,21 @@ If you remove a tool, content that used it stays as text.
 
 The text color and highlight pickers show the color of the selection. They show none when the selected text has no color or several, so any color you pick applies to all of it.
 
-## Content and Safety
+### Content and Safety
 
 The editor reads HTML through its schema, so tags and attributes it doesn't know are dropped. Links typed in the link dialog keep `http:`, `https:`, `mailto:`, `tel:` and relative URLs, get `https://` when they are a bare host, and are refused with any other scheme, such as `javascript:`.
 
 These checks protect the editor, not your application. The value is user-written HTML: sanitize it on the server before you store it, and again before you render it anywhere else.
 
-## Keyboard Navigation
+### Localization and Direction
+
+Toolbar labels and the default content name come from the `editor` messages (`EDITOR_DEFAULT_MESSAGES`), and follow the library locale. In right-to-left, the toolbar order mirrors and start and end alignment follow the direction.
+
+## Accessibility
+
+The content has `role="textbox"` with `aria-multiline`, its name, and `aria-disabled`, `aria-readonly`, `aria-required` and `aria-invalid` when they apply. Link an error message or hint with `aria-describedby`. The toolbar is named and its toggle buttons report `aria-pressed`.
+
+### Keyboard Navigation
 
 The toolbar is one Tab stop.
 
@@ -76,16 +89,3 @@ The toolbar is one Tab stop.
 | `Tab`                       | Elsewhere in the content | Leaves the editor.                                               |
 | `Ctrl` + `]` / `Ctrl` + `[` | Content                  | Indents or outdents. Use `Cmd` on macOS.                         |
 | `Escape`, then `Tab`        | List in the content      | Leaves the editor, so the keyboard isn't stuck in a long list.   |
-
-## Behavior
-
-- The form inputs (`disabled`, `invalid`, `readonly`, `required`, `touched`) are set by the form when the editor is bound with `[formField]`.
-- The editor is created in the browser after the first render, so `html` and `json` have no content on the server. Wait for `create` before reading them at startup.
-
-## Accessibility
-
-The content has `role="textbox"` with `aria-multiline`, its name, and `aria-disabled`, `aria-readonly`, `aria-required` and `aria-invalid` when they apply. Link an error message or hint with `aria-describedby`. The toolbar is named and its toggle buttons report `aria-pressed`.
-
-## Localization and Direction
-
-Toolbar labels and the default content name come from the `editor` messages (`EDITOR_DEFAULT_MESSAGES`), and follow the library locale. In right-to-left, the toolbar order mirrors and start and end alignment follow the direction.

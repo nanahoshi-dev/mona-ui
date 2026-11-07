@@ -4,7 +4,7 @@
 
 Use `TooltipComponent` when the tooltip needs more than plain text. Use `TooltipDirective` (`monaTooltip`) when a `title` attribute is enough and you want to avoid adding a separate element.
 
-## Import & Basic Usage
+## Import & Quick Start
 
 ```typescript
 import { TooltipComponent } from "@nanahoshi/mona-ui/tooltip";
@@ -28,14 +28,6 @@ A selector target attaches the same tooltip behavior to every matching element i
 </div>
 <mona-tooltip target=".action">Action button</mona-tooltip>
 ```
-
-## Public Customization
-
-- **`position`** — `"top"` (default), `"bottom"`, `"left"`, `"right"`, `"start"`, or `"end"`. The side of the target the tooltip opens on. `left` and `right` are physical sides in both directions; `start` and `end` follow the text direction (in RTL, `start` is the right). When there isn't room, the tooltip flips to the opposite side, and its arrow follows.
-- **`rounded`** — `'none'`, `'small'`, `'medium'` (default), `'large'`, or `'full'`. Controls the tooltip panel's border radius.
-- **`showDelay`** / **`hideDelay`** — milliseconds to wait before showing the tooltip, or before hiding it once the pointer or focus has left. Both default to `0`. A pointer that leaves always gets a grace of about 100 ms, so it can move onto the tooltip.
-- **Projected content** — anything placed between the `<mona-tooltip>` tags is rendered inside the tooltip panel, including markup and other components.
-- **`contentOf`** — on `TooltipDirective`, a function from the element to its text, for when the text isn't in a `title`, as with `mode="content"` over rows that keep theirs elsewhere. The element's own `title` isn't touched, and an empty result shows nothing.
 
 ## Examples
 
@@ -80,7 +72,15 @@ tooltip/rich-content
 </mona-tooltip>
 ```
 
-## Accessibility Notes
+## Appearance & Styling
+
+- **`position`** — `"top"` (default), `"bottom"`, `"left"`, `"right"`, `"start"`, or `"end"`. The side of the target the tooltip opens on. `left` and `right` are physical sides in both directions; `start` and `end` follow the text direction (in RTL, `start` is the right). When there isn't room, the tooltip flips to the opposite side, and its arrow follows.
+- **`rounded`** — `'none'`, `'small'`, `'medium'` (default), `'large'`, or `'full'`. Controls the tooltip panel's border radius.
+- **`showDelay`** / **`hideDelay`** — milliseconds to wait before showing the tooltip, or before hiding it once the pointer or focus has left. Both default to `0`. A pointer that leaves always gets a grace of about 100 ms, so it can move onto the tooltip.
+- **Projected content** — anything placed between the `<mona-tooltip>` tags is rendered inside the tooltip panel, including markup and other components.
+- **`contentOf`** — on `TooltipDirective`, a function from the element to its text, for when the text isn't in a `title`, as with `mode="content"` over rows that keep theirs elsewhere. The element's own `title` isn't touched, and an empty result shows nothing.
+
+## Accessibility
 
 The tooltip opens when the pointer moves onto the target or keyboard focus enters it, and closes when both have left. Touch pointers don't open it, since a tap would show it and hide it again at once; touch users get the target's own name and description.
 

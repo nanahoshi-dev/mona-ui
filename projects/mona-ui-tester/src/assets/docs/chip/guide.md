@@ -16,7 +16,7 @@ When `toggleable` is `true`, each activation flips the `selected` model. When `r
 
 - A standalone action button is needed — use `<button monaButton>` instead
 
-## Import & Basic Usage
+## Import & Quick Start
 
 ```typescript
 import { ChipComponent } from "@nanahoshi/mona-ui/chip";
@@ -129,7 +129,7 @@ Classes passed via `class` are merged with variant classes using `tailwind-merge
 
 - **Content projection:** default slot for chip body content; use `<ng-template monaChipPrefixTemplate>` for prefix content rendered before the label.
 
-## Accessibility Notes
+## Accessibility
 
 The following attributes are managed automatically on the host element:
 

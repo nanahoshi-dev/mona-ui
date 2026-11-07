@@ -15,7 +15,7 @@ Separators between items default to a `ChevronRight` icon and are hidden from as
 - The navigation is flat with no hierarchy — use tabs or a nav bar instead
 - Only a single item would be shown — a single-item breadcrumb adds no navigational value
 
-## Import & Basic Usage
+## Import & Quick Start
 
 ```typescript
 import { BreadcrumbComponent, BreadcrumbItemComponent } from "@nanahoshi/mona-ui/breadcrumb";
@@ -131,7 +131,7 @@ The host is a block with `max-width: 100%` and `min-width: 0`, and in a flex par
 
 - **Content projection:** accepts `<mona-breadcrumb-item>` children and an optional `<ng-template monaBreadcrumbSeparatorTemplate>`.
 
-## Accessibility Notes
+## Accessibility
 
 `BreadcrumbComponent` renders `role="navigation"` on the host, making it a landmark that screen reader users can navigate to directly. The `aria-label` input sets the landmark's accessible name. Left empty, the name comes from the `breadcrumb` message, which is "Breadcrumb" in English. A breadcrumb with no items renders no landmark and no list.
 

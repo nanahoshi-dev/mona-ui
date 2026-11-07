@@ -1,4 +1,4 @@
-## Overview & Component Selection
+## Overview
 
 List View renders a collection of items: a `role="list"` of `listitem`s, or, once you can select from it, a `role="listbox"` of `option`s. Keyboard navigation is on by default; the other behaviors are opt-in through a companion attribute directive applied to the same `<mona-list-view>` host element:
 
@@ -33,7 +33,7 @@ import { ListViewComponent } from "@nanahoshi/mona-ui/list-view";
 
 `items` accepts any `Iterable<T>`, and `textField` accepts either a property name or a function `(item: T) => string` used to render each item's default text. Without any behavior directive, the list is a `list` you can move through with the arrow keys; add `monaListViewSelectable` for selection (see [Examples](#examples)). Name every list view with `aria-label` or `aria-labelledby`.
 
-## Anatomy & Public Structural Templates
+## Anatomy
 
 Each structural directive below is an `ng-template` placed as projected content inside `<mona-list-view>...</mona-list-view>`.
 
@@ -114,7 +114,7 @@ list-view/infinite-scroll
 
 `scrollBottom` emits once each time the list arrives within roughly 3px of its bottom edge (scrolling away and back emits again, as does reaching the new end after more items load), whichever of the plain list or the virtual scroll viewport is active. Combine it with slicing a larger source collection, and `loading` while the next batch arrives, to implement infinite loading — see [`scrollBottom` and `monaListViewPageable`](#scrollbottom-and-monalistviewpageable).
 
-## Technical & Behavior Notes
+## Behavior
 
 ### Pagination and virtualization don't combine
 
@@ -136,7 +136,11 @@ A list view keeps its items, selection and paging to itself, so a list view insi
 
 `monaListViewGroupable`'s generic key parameter defaults to the item type itself rather than `unknown`. In practice, always pass an explicit `groupBy` selector (a property name or a function returning the group key) — grouping without one produces a single, unlabeled group.
 
-## Accessibility & Forms Integration
+## Forms Integration
+
+Form integration is not applicable. List View is a display and selection widget, not a form control.
+
+## Accessibility
 
 ### Keyboard
 
@@ -177,8 +181,6 @@ A list view you can select from (`monaListViewSelectable`) is a `listbox` of `op
 | `role="status"`                  | A visually hidden element after the list  | "Loading" while `loading`, "No data" when there are no items           |
 
 Give every list view a name with `aria-label` or `aria-labelledby`. A paged list view names its pager "{name} pagination" (the `list.pagerLabel` message), or `pagerAriaLabel`, so several paged lists on a page have different landmarks.
-
-Form integration is not applicable — List View is a display/selection widget, not a form control.
 
 <!-- verification-checklist
 - [x] Inputs, outputs and defaults checked against list-view/components/list-view/list-view.component.ts, the directives in list-view/directives, and component-metadata.json
