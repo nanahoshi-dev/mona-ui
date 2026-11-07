@@ -1,6 +1,6 @@
 # Mona UI Menus
 
-Four components open menus: `ContextMenuComponent` (right-click), `MenubarComponent` (an application menu bar), `DropdownButtonComponent` and `SplitButtonComponent`. All four are built on one engine in `@nanahoshi/mona-ui/popup-menu`, so they share their item types, events, keyboard handling, focus rules and ARIA. This guide covers what they share; each component's page in the tester lists its full API.
+Five components open menus: `ContextMenuComponent` (right-click), `MenubarComponent` (an application menu bar), `DropdownButtonComponent`, `SplitButtonComponent`, and `PopupMenuComponent` (from an element of your own). The first four are built on the last, so they share their item types, events, keyboard handling, focus rules and ARIA. This guide covers what they share; each component's page in the tester lists its full API.
 
 | Component                    | Entry point                          | Opens from                                                        | Item prefix             |
 | ---------------------------- | ------------------------------------ | ----------------------------------------------------------------- | ----------------------- |
@@ -8,6 +8,7 @@ Four components open menus: `ContextMenuComponent` (right-click), `MenubarCompon
 | `mona-menubar` / `mona-menu` | `@nanahoshi/mona-ui/menubar`         | Each top-level `mona-menu` in the bar                             | `mona-menu-`            |
 | `mona-dropdown-button`       | `@nanahoshi/mona-ui/dropdown-button` | The button                                                        | `mona-dropdown-button-` |
 | `mona-split-button`          | `@nanahoshi/mona-ui/split-button`    | The arrow button; the main button runs its own action             | `mona-split-button-`    |
+| `mona-popup-menu`            | `@nanahoshi/mona-ui/popup-menu`      | A click or right-click on your `target`, or `openMenu()`          | `mona-popup-menu-`      |
 
 ---
 
@@ -39,7 +40,7 @@ Each component projects the same kinds of items, named with its own prefix (show
 </mona-contextmenu>
 ```
 
-`ContextMenuComponent` and `MenuComponent` also take plain objects through `items` (`PopupMenuItem` and `MenuItem`, from `@nanahoshi/mona-ui/popup-menu`). Each component accepts only its own item elements; projecting another component's items throws.
+`ContextMenuComponent`, `MenuComponent` and `PopupMenuComponent` also take plain objects through `items` (`PopupMenuItem` and `MenuItem`, from `@nanahoshi/mona-ui/popup-menu`). Each component accepts only its own item elements; projecting another component's items throws.
 
 Disabled items stay in the arrow-key order and are highlighted, so screen reader users learn they exist, but they can't be activated.
 
@@ -64,7 +65,7 @@ An item with a submenu opens it instead, and emits nothing.
 
 ## 3. Keyboard
 
-Inside an open menu, all four behave the same:
+Inside an open menu, all five behave the same:
 
 | Key                               | Action                                                                 |
 | --------------------------------- | ---------------------------------------------------------------------- |
@@ -85,6 +86,7 @@ Opening differs by component:
 | Menubar         | `ArrowLeft`/`ArrowRight`, `Home`/`End` and a letter move between top-level menus (one Tab stop); `Enter`, `Space` or `ArrowDown` opens with the first item highlighted, `ArrowUp` with the last. With a menu open, `ArrowLeft`/`ArrowRight` switch menus. |
 | Dropdown button | `Enter`, `Space` or `ArrowDown` opens with the first item highlighted, `ArrowUp` with the last.                                                                                                                                                           |
 | Split button    | The arrow button as the dropdown button does; `Alt+ArrowDown` / `Alt+ArrowUp` from the main button.                                                                                                                                                       |
+| Popup menu      | `Enter` or `Space` on a native button target, through its click. For other keys, call `openMenuViaKeyboard()` from your own handler.                                                                                                                      |
 
 ---
 
@@ -98,8 +100,8 @@ When a menu closes (Escape, an item, or a click outside that doesn't move focus 
 
 ## 5. Names and ARIA
 
-- **The menu** is labelled by its trigger: the target's `id` (a context menu), the top-level item (a menubar menu), or the button. A submenu is labelled by its parent item. `ariaLabel` on `mona-contextmenu` names it explicitly.
-- **Triggers** say they open a menu: `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` while open. A context menu sets these only on targets whose role allows them (a button, a link, or a `button`, `gridcell`, `link`, `menuitem`, `tab` or `treeitem` role); a plain `div` target gets none, and its menu is still reached through the `ContextMenu` key.
+- **The menu** is labelled by its trigger: the target's `id` (a context menu), the top-level item (a menubar menu), or the button. A submenu is labelled by its parent item. `ariaLabel` on `mona-contextmenu`, or `aria-label` on `mona-popup-menu`, names it explicitly.
+- **Triggers** say they open a menu: `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` while open. A context menu sets these only on targets whose role allows them (a button, a link, or a `button`, `gridcell`, `link`, `menuitem`, `tab` or `treeitem` role); a plain `div` target gets none, and its menu is still reached through the `ContextMenu` key. `mona-popup-menu` doesn't change your target, so these attributes are yours to set.
 - **Buttons** are named by their content: the `text`, or what a text template renders. Set `aria-label` only when the content isn't a name, as with `iconOnly`. The split button's arrow is named from the main button's text ("More Save options", translated), and the pair is a `role="group"`.
 - **Items** are named by their `label`. With a text template and no `label`, the template's text is the name.
 - **Groups** with a title are a `role="group"` labelled by their header.
