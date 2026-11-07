@@ -20,6 +20,7 @@ import { DocsNavigationService } from "../../services/docs-navigation.service";
 import { PageService } from "../../services/page.service";
 import { SidebarService } from "../../services/sidebar.service";
 import { DocsPagerComponent } from "../docs-pager/docs-pager.component";
+import { DocsSearchComponent } from "../docs-search/docs-search.component";
 import { PageNavigationComponent } from "../page-navigation/page-navigation.component";
 import { SidebarComponent } from "../sidebar/sidebar.component";
 
@@ -32,6 +33,7 @@ import { SidebarComponent } from "../sidebar/sidebar.component";
         BreadcrumbComponent,
         BreadcrumbItemComponent,
         DocsPagerComponent,
+        DocsSearchComponent,
         LucideDynamicIcon,
         LucideX,
         DropdownListComponent,
