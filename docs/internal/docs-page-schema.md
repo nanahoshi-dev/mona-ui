@@ -100,4 +100,4 @@ Measured on 2026-11-07, with every route and entry point matching the manifest:
 2. Restructure the 26 pages, and write the 3 missing ones.
 3. Add `check:docs-schema --strict` to `pr.yml` once all pages pass.
 
-The planned command menu gets a manifest entry under Navigation when its route exists.
+The command menu's page is under Navigation.

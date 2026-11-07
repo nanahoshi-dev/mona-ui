@@ -32,6 +32,7 @@ const ROUTES = [
     "color-palette",
     "color-picker",
     "combo-box",
+    "command",
     "date-picker",
     "datetime-picker",
     "decimal-textbox",

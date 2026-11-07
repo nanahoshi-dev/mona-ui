@@ -68,6 +68,7 @@ const coveredEntryPoints: readonly (readonly [entry: string, docs: readonly stri
     ["color-gradient", ["color-gradient"]],
     ["color-palette", ["color-palette"]],
     ["color-picker", ["color-picker"]],
+    ["command", ["command"]],
     ["expansion-panel", ["expansion-panel"]],
     ["fieldset", ["fieldset"]],
     ["label", ["label"]],

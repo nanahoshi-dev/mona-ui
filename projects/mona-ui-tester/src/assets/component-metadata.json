@@ -8598,6 +8598,194 @@
       }
     ]
   },
+  "CommandComponent": {
+    "name": "CommandComponent",
+    "selector": "\"mona-command\"",
+    "inputs": [
+      {
+        "description": "What counts as a match while `filterMode` is `\"auto\"`.",
+        "kind": "input",
+        "name": "filter",
+        "type": "CommandFilter",
+        "defaultValue": "defaultCommandFilter"
+      },
+      {
+        "description": "Whether the component filters the items, or the consumer supplies only the matching ones.",
+        "kind": "input",
+        "name": "filterMode",
+        "type": "CommandFilterMode",
+        "defaultValue": "\"auto\""
+      },
+      {
+        "description": "Emits when any item is chosen, with the pointer or with Enter.",
+        "kind": "output",
+        "name": "itemSelect",
+        "type": "CommandSelectEvent"
+      },
+      {
+        "description": "Whether results are on their way. Shows `mona-command-loading` and holds back the empty state.",
+        "kind": "input",
+        "name": "loading",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Whether the arrow keys wrap around at the ends of the list.",
+        "kind": "input",
+        "name": "loop",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "The text in the input.",
+        "kind": "model",
+        "name": "query",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The corner radius.",
+        "kind": "input",
+        "name": "rounded",
+        "type": "CommandVariantProps[\"rounded\"]",
+        "defaultValue": "\"medium\""
+      }
+    ]
+  },
+  "CommandDialogComponent": {
+    "name": "CommandDialogComponent",
+    "selector": "\"mona-command-dialog\"",
+    "inputs": [
+      {
+        "description": "The accessible name of the dialog.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string"
+      },
+      {
+        "description": "Whether the dialog is open.",
+        "kind": "model",
+        "name": "open",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "A key combination that opens and closes the dialog from anywhere on the page, such as `mod+k`.\n`mod` is Command on Apple devices and Ctrl elsewhere. Nothing is bound unless this is set.",
+        "kind": "input",
+        "name": "shortcut",
+        "type": "string | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "The dialog's width. It never gets wider than the viewport.",
+        "kind": "input",
+        "name": "width",
+        "type": "number | string",
+        "defaultValue": "\"36rem\""
+      }
+    ]
+  },
+  "CommandGroupComponent": {
+    "name": "CommandGroupComponent",
+    "selector": "\"mona-command-group\"",
+    "inputs": [
+      {
+        "description": "The title above the group's items.",
+        "kind": "input",
+        "name": "heading",
+        "type": "string"
+      }
+    ]
+  },
+  "CommandHighlightComponent": {
+    "name": "CommandHighlightComponent",
+    "selector": "\"mona-command-highlight\"",
+    "inputs": [
+      {
+        "description": "The text to show.",
+        "kind": "input",
+        "name": "text",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  "CommandInputComponent": {
+    "name": "CommandInputComponent",
+    "selector": "\"mona-command-input\"",
+    "inputs": [
+      {
+        "description": "The accessible name of the field.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string"
+      },
+      {
+        "description": "The text shown while the field is empty.",
+        "kind": "input",
+        "name": "placeholder",
+        "type": "string"
+      }
+    ]
+  },
+  "CommandItemComponent": {
+    "name": "CommandItemComponent",
+    "selector": "\"mona-command-item\"",
+    "inputs": [
+      {
+        "description": "Whether the item shows but can't be chosen.",
+        "kind": "input",
+        "name": "disabled",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Emits when this item is chosen, with the pointer or with Enter.",
+        "kind": "output",
+        "name": "itemSelect",
+        "type": "CommandSelectEvent"
+      },
+      {
+        "description": "Other words the item should be found by, such as synonyms.",
+        "kind": "input",
+        "name": "keywords",
+        "type": "readonly string[]",
+        "defaultValue": "[]"
+      },
+      {
+        "description": "What the item is found by, and what the select event carries.",
+        "kind": "input",
+        "name": "value",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  "CommandListComponent": {
+    "name": "CommandListComponent",
+    "selector": "\"mona-command-list\"",
+    "inputs": [
+      {
+        "description": "The accessible name of the list.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string"
+      }
+    ]
+  },
+  "CommandShortcutComponent": {
+    "name": "CommandShortcutComponent",
+    "selector": "\"mona-command-shortcut\"",
+    "inputs": [
+      {
+        "description": "The keys, joined with `+`, such as `mod+k`. `mod` is Command on Apple devices and Ctrl elsewhere.",
+        "kind": "input",
+        "name": "keys",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
   "ContextMenuComponent": {
     "name": "ContextMenuComponent",
     "selector": "\"mona-contextmenu\"",

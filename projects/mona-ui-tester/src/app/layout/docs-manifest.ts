@@ -138,6 +138,7 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
         title: "Navigation",
         pages: [
             component("breadcrumb", "Breadcrumb", "breadcrumb", "A navigation trail showing where the current page sits in a hierarchy."),
+            component("command", "Command Menu", "command", "A searchable list of actions or options, operated from one input, inline or in a dialog."),
             component("contextmenu", "Context Menu", "contextmenu", "A popup menu attached to an element, opened by right-click or keyboard."),
             component("menubar", "Menubar", "menubar", "A persistent horizontal bar of top-level menus."),
             component("popup-menu", "Popup Menu", "popup-menu", "Opens a menu from an element you already have, such as an icon button or a row action."),
