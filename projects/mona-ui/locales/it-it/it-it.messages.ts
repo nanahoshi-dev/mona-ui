@@ -498,6 +498,10 @@ export const IT_IT_MESSAGES = {
     sheet: {
         closeSheet: "Chiudi pannello"
     },
+    sidebar: {
+        drawerLabel: "Barra laterale",
+        rail: "Mostra o nascondi la barra laterale"
+    },
     slider: {
         maximumValue: "Valore massimo",
         minimumValue: "Valore minimo",

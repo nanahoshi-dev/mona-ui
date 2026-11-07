@@ -205,7 +205,7 @@ describe("Sidebar accessibility", () => {
             expect(query(".sub-menu").style.display).toBe("");
         });
 
-        it("should refuse to open a submenu that has nowhere to render", () => {
+        it("should expand the sidebar to open a submenu that has nowhere to render", () => {
             component.collapsible.set("icon");
             fixture.detectChanges();
             collapse();
@@ -213,7 +213,8 @@ describe("Sidebar accessibility", () => {
             query(".disclosure").click();
             fixture.detectChanges();
 
-            expect(query(".disclosure").getAttribute("aria-expanded")).toBe("false");
+            expect(query("mona-sidebar").getAttribute("data-state")).toBe("expanded");
+            expect(query(".disclosure").getAttribute("aria-expanded")).toBe("true");
         });
 
         it("should restore a submenu that was open before the rail", () => {
@@ -229,8 +230,6 @@ describe("Sidebar accessibility", () => {
             component.collapsible.set("icon");
             fixture.detectChanges();
             collapse();
-            query(".disclosure").click();
-            fixture.detectChanges();
 
             query(".trigger").click();
             fixture.detectChanges();

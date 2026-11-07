@@ -54,7 +54,9 @@ export class SidebarMenuItemDirective {
      *
      * Closing the disclosure for real keeps the trigger's own state truthful and lets the collapsible
      * content directive apply the `inert` it already applies when closed. The prior state is restored
-     * on the way back out, so collapsing and expanding the sidebar does not quietly discard it.
+     * on the way back out, so collapsing and expanding the sidebar does not quietly discard it. The row
+     * itself expands the sidebar when it's activated on the rail, so that closing only meets a submenu
+     * opened from code.
      */
     #keepSubmenuClosedOnRail(): void {
         const collapsible = this.#collapsible;

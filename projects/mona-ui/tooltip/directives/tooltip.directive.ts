@@ -71,6 +71,13 @@ export class TooltipDirective implements TooltipVariantInputs {
     #popupRef: PopupRef | null = null;
 
     /**
+     * @description Reads the tooltip's text from the matched element, in place of its `title`, which then stays where
+     * it is. An empty result shows nothing.
+     * @default null
+     */
+    public readonly contentOf = input<((element: HTMLElement) => string) | null>(null);
+
+    /**
      * @description Whether the tooltip is disabled. When disabled, the tooltip will not be shown, and an open one
      * closes.
      * @default false
@@ -179,6 +186,14 @@ export class TooltipDirective implements TooltipVariantInputs {
         });
     }
 
+    #contentFor(anchor: HTMLElement): string | TemplateRef<unknown> {
+        const contentOf = this.contentOf();
+        if (contentOf) {
+            return contentOf(anchor);
+        }
+        return this.mode() === "host" ? this.monaTooltip() || this.#textOf(anchor) : this.#textOf(anchor);
+    }
+
     #listen(mode: "host" | "content", filter: string): () => void {
         const host = this.#host.nativeElement;
         if (mode === "host") {
@@ -200,7 +215,7 @@ export class TooltipDirective implements TooltipVariantInputs {
         if (this.disabled() || this.#destroyed) {
             return;
         }
-        const content = this.mode() === "host" ? this.monaTooltip() || this.#textOf(anchor) : this.#textOf(anchor);
+        const content = this.#contentFor(anchor);
         if (!content) {
             return;
         }

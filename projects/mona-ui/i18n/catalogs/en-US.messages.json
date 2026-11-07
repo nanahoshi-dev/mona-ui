@@ -431,6 +431,10 @@
     "sheet": {
         "closeSheet": "Close sheet"
     },
+    "sidebar": {
+        "drawerLabel": "Sidebar",
+        "rail": "Toggle sidebar"
+    },
     "slider": {
         "maximumValue": "Maximum value",
         "minimumValue": "Minimum value",

@@ -20,9 +20,6 @@ import { sidebarInsetThemeVariants } from "../styles/sidebar.styles";
         // The drawer is modal, so everything behind it leaves the tab order and the accessibility
         // tree. `inert` covers both, and unlike `aria-hidden` it also stops pointer interaction.
         "[attr.inert]": "behindDrawer() ? '' : null"
-        // The scoped equivalent of locking body scroll. The layout already clips its own overflow, so
-        // this region is the only thing behind the drawer that scrolls; suppressing it here avoids
-        // reaching out to mutate `document.body`, which a library has no business owning.
     }
 })
 export class SidebarInsetDirective {
@@ -34,6 +31,7 @@ export class SidebarInsetDirective {
         });
         return twMerge(variantClass, this.userClass());
     });
+    // Also what stops this region scrolling behind the drawer, as the layout clips its own overflow.
     protected readonly behindDrawer = computed(() => this.#layoutService?.anyMobileOpen() ?? false);
 
     /**

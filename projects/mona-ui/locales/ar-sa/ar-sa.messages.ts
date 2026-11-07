@@ -495,6 +495,10 @@ export const AR_SA_MESSAGES = {
     sheet: {
         closeSheet: "إغلاق اللوحة"
     },
+    sidebar: {
+        drawerLabel: "الشريط الجانبي",
+        rail: "إظهار الشريط الجانبي أو إخفاؤه"
+    },
     slider: {
         maximumValue: "الحد الأقصى",
         minimumValue: "الحد الأدنى",

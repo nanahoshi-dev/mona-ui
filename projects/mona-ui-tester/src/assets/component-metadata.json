@@ -1668,14 +1668,14 @@
     "selector": "\"a[monaSidebarMenuButton], button[monaSidebarMenuButton]\"",
     "inputs": [
       {
-        "description": "Closes the overlay drawer after this row is activated. Only applies on compact\nviewports, where the drawer covers the destination being navigated to. Set to `false` for rows\nthat do not navigate, such as a disclosure trigger.",
+        "description": "Closes the overlay drawer after this row is activated. Only applies on compact\nviewports, where the drawer covers the destination being navigated to. Set to `false` for rows\nthat do not navigate. Leave it unset on a `monaCollapsibleTrigger`, which keeps the drawer open.",
         "kind": "input",
         "name": "closeOnSelect",
-        "type": "boolean",
-        "defaultValue": "true"
+        "type": "boolean | undefined",
+        "defaultValue": "true, or false on a `monaCollapsibleTrigger`"
       },
       {
-        "description": "Renders the row as unavailable and suppresses activation.",
+        "description": "Renders the row as unavailable and suppresses activation, including a `routerLink` and any `click`\nhandler on it. A disabled anchor gives up its `href`.",
         "kind": "input",
         "name": "disabled",
         "type": "boolean",
@@ -1689,7 +1689,7 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Text identifying this item while the sidebar is collapsed to its icon rail, where the\nlabel is clipped away. Applied as the host's `title`, so the browser surfaces it on hover, and an\nancestor carrying `monaTooltip` with `mode=\"content\"` renders it as a styled tooltip instead.",
+        "description": "Text identifying this item while the sidebar is collapsed to its icon rail, where the\nlabel is clipped away. Shown as a tooltip on hover and on keyboard focus, on the rail only.",
         "kind": "input",
         "name": "tooltip",
         "type": "string",
@@ -1750,6 +1750,20 @@
         "name": "userClass",
         "type": "string",
         "alias": "class",
+        "defaultValue": "\"\""
+      }
+    ]
+  },
+  "SidebarRailDirective": {
+    "name": "SidebarRailDirective",
+    "selector": "\"button[monaSidebarRail]\"",
+    "inputs": [
+      {
+        "description": "Accessible name of the rail, which otherwise has a localized default.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       }
     ]
@@ -2004,6 +2018,13 @@
     "name": "TooltipDirective",
     "selector": "\"[monaTooltip]\"",
     "inputs": [
+      {
+        "description": "Reads the tooltip's text from the matched element, in place of its `title`, which then stays where\nit is. An empty result shows nothing.",
+        "kind": "input",
+        "name": "contentOf",
+        "type": "((element: HTMLElement) => string) | null",
+        "defaultValue": "null"
+      },
       {
         "description": "Whether the tooltip is disabled. When disabled, the tooltip will not be shown, and an open one\ncloses.",
         "kind": "input",
@@ -13996,11 +14017,19 @@
     "selector": "\"mona-sidebar\"",
     "inputs": [
       {
-        "description": "Accessible name for the sidebar region. Required when `role` is set, and used as the\ndrawer's name on compact viewports.",
+        "description": "Accessible name for the sidebar region. Required when `role` is set, and used as the\ndrawer's name on compact viewports, which otherwise has a localized default.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
         "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The id of the element that names the sidebar region, in place of `aria-label`.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -14011,7 +14040,7 @@
         "defaultValue": "\"offcanvas\""
       },
       {
-        "description": "Sets whether this sidebar is open. Supports two-way binding. While the viewport is\ncompact this reflects the drawer, so one binding drives both presentations.",
+        "description": "Sets whether this sidebar is open. Supports two-way binding. While the viewport is\ncompact this reflects the drawer, so one binding drives both presentations, and it reads `false` on\na phone from the start. To remember the docked state, use `persistKey` rather than saving this.",
         "kind": "model",
         "name": "expanded",
         "type": "boolean",
@@ -14093,6 +14122,13 @@
         "name": "mobileBreakpoint",
         "type": "number",
         "defaultValue": "768"
+      },
+      {
+        "description": "How far an open drawer's modality reaches. `\"page\"` makes everything outside the drawer inert and\nlocks the page's scroll. Use `\"layout\"` for a sidebar embedded in part of a page: what's around the layout stays\nusable, so the drawer isn't `aria-modal`.",
+        "kind": "input",
+        "name": "modalScope",
+        "type": "SidebarModalScope",
+        "defaultValue": "\"page\""
       },
       {
         "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",

@@ -29,10 +29,12 @@ export * from "./directives/sidebar-trigger.directive";
 export type { SidebarCollapsibleMode } from "./models/SidebarCollapsibleMode";
 export type { SidebarController } from "./models/SidebarController";
 export type { SidebarMenuButtonSize } from "./models/SidebarMenuButtonSize";
+export type { SidebarModalScope } from "./models/SidebarModalScope";
 export type { SidebarLogicalSide, SidebarSide } from "./models/SidebarSide";
 export type { SidebarStorage } from "./models/SidebarStorage";
 export type { SidebarVariant } from "./models/SidebarVariant";
 
+export { SIDEBAR_DEFAULT_MESSAGES } from "./i18n/sidebar.default-messages";
 export { provideSidebarStorage } from "./providers/sidebar.providers";
 export { LocalStorageSidebarStorage } from "./strategies/local-storage-sidebar.strategy";
 export { SIDEBAR_STORAGE } from "./tokens/sidebar.tokens";
@@ -43,4 +45,4 @@ export { SIDEBAR_STORAGE } from "./tokens/sidebar.tokens";
  * disagreeing about the same sidebar until the next change detection pass. `injectSidebar()` returns
  * the reads and the commands that are safe from anywhere.
  */
-export { injectSidebar } from "./utils/inject-sidebar";
+export { injectSidebar, type InjectSidebarOptions } from "./utils/inject-sidebar";

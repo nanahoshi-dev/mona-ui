@@ -35,6 +35,7 @@ import { NUMERIC_TEXT_BOX_DEFAULT_MESSAGES } from "../numeric-text-box/i18n/nume
 import { OTP_INPUT_DEFAULT_MESSAGES } from "../otp-input/i18n/otp-input.default-messages";
 import { PAGER_DEFAULT_MESSAGES } from "../pager/i18n/pager.default-messages";
 import { PROGRESS_BAR_DEFAULT_MESSAGES } from "../progress-bar/i18n/progress-bar.default-messages";
+import { SIDEBAR_DEFAULT_MESSAGES } from "../sidebar/i18n/sidebar.default-messages";
 import { RATING_DEFAULT_MESSAGES } from "../rating/i18n/rating.default-messages";
 import { SCROLL_VIEW_DEFAULT_MESSAGES } from "../scroll-view/i18n/scroll-view.default-messages";
 import { SHEET_DEFAULT_MESSAGES } from "../sheet/i18n/sheet.default-messages";
@@ -120,6 +121,7 @@ const ENGLISH_DEFAULTS = {
     otpInput: OTP_INPUT_DEFAULT_MESSAGES,
     pager: PAGER_DEFAULT_MESSAGES,
     progressBar: PROGRESS_BAR_DEFAULT_MESSAGES,
+    sidebar: SIDEBAR_DEFAULT_MESSAGES,
     rating: RATING_DEFAULT_MESSAGES,
     scrollView: SCROLL_VIEW_DEFAULT_MESSAGES,
     sheet: SHEET_DEFAULT_MESSAGES,

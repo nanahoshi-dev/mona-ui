@@ -500,6 +500,10 @@ export const DE_DE_MESSAGES = {
     sheet: {
         closeSheet: "Bereich schließen"
     },
+    sidebar: {
+        drawerLabel: "Seitenleiste",
+        rail: "Seitenleiste ein- oder ausblenden"
+    },
     slider: {
         maximumValue: "Maximalwert",
         minimumValue: "Minimalwert",

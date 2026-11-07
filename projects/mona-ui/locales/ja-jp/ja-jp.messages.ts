@@ -456,6 +456,10 @@ export const JA_JP_MESSAGES = {
     sheet: {
         closeSheet: "シートを閉じる"
     },
+    sidebar: {
+        drawerLabel: "サイドバー",
+        rail: "サイドバーの表示を切り替え"
+    },
     slider: {
         maximumValue: "最大値",
         minimumValue: "最小値",

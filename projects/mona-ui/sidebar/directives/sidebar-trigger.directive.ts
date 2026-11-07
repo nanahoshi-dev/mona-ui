@@ -1,4 +1,4 @@
-import { computed, Directive, ElementRef, inject, input } from "@angular/core";
+import { afterNextRender, computed, Directive, ElementRef, inject, input, isDevMode, signal } from "@angular/core";
 import type { SidebarController } from "../models/SidebarController";
 import { SidebarLayoutService } from "../services/sidebar-layout.service";
 import { SidebarService } from "../services/sidebar.service";
@@ -11,20 +11,24 @@ import { SidebarService } from "../services/sidebar.service";
  * By default it drives the sidebar it is written inside. Set `for` to the id of a `mona-sidebar` to
  * drive that one instead, which is what a trigger in a shared header needs when the layout holds more
  * than one sidebar. A `for` that matches no sidebar leaves the trigger inert rather than throwing, so
- * a sidebar that has not rendered yet does not take the page down with it.
+ * a sidebar that has not rendered yet does not take the page down with it, and warns in development.
  *
  * A `button` is the right host and needs nothing further. On any other element the directive supplies
- * the rest of the button contract — `role`, a tab stop, and Enter/Space activation — so a `div` or
- * `span` trigger is still operable by keyboard rather than silently mouse-only.
+ * the rest of the button contract — `role`, a tab stop, and Enter/Space activation — so a `div`, a
+ * `span` or an `a` without `href` is still operable by keyboard rather than silently mouse-only.
+ *
+ * A sidebar that can't collapse has nothing for a trigger to do on a wide viewport, so the trigger
+ * reports itself as disabled there rather than as an open disclosure.
  */
 @Directive({
     selector: "[monaSidebarTrigger]",
     exportAs: "monaSidebarTrigger",
     host: {
         "[attr.aria-controls]": "sidebarId()",
+        "[attr.aria-disabled]": "fixed() ? 'true' : null",
         "[attr.aria-expanded]": "expanded()",
-        "[attr.role]": "role",
-        "[attr.tabindex]": "tabIndex",
+        "[attr.role]": "role()",
+        "[attr.tabindex]": "tabIndex()",
         // Without this a trigger inside a form submits it, because `submit` is a button's default type.
         "[attr.type]": "type",
         "(click)": "onClick()",
@@ -35,7 +39,8 @@ import { SidebarService } from "../services/sidebar.service";
 export class SidebarTriggerDirective {
     readonly #element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
     readonly #layoutService = inject(SidebarLayoutService, { optional: true });
-    readonly #nativeAnchor = this.#element.tagName === "A";
+    // A binding such as `routerLink` sets `href` after this directive is created, so it's read after the first render.
+    readonly #nativeAnchor = signal(false);
     readonly #nativeButton =
         this.#element.tagName === "BUTTON" || this.#element.tagName === "INPUT" || this.#element.tagName === "SUMMARY";
     // Optional, because a trigger aimed at a sidebar by id is usually written outside every sidebar.
@@ -56,10 +61,16 @@ export class SidebarTriggerDirective {
 
     // Null rather than false when nothing is targeted: a trigger that controls nothing has no
     // expanded state to report, and claiming one would announce a control that does not exist.
-    protected readonly expanded = computed(() => this.#targetController()?.expanded() ?? null);
-    protected readonly role = this.#nativeButton || this.#nativeAnchor ? null : "button";
+    protected readonly expanded = computed(() =>
+        this.fixed() ? null : (this.#targetController()?.expanded() ?? null)
+    );
+    protected readonly fixed = computed(() => {
+        const target = this.#targetController();
+        return target?.collapsible() === "none" && !target.compact();
+    });
+    protected readonly role = computed(() => (this.#nativeButton || this.#nativeAnchor() ? null : "button"));
     protected readonly sidebarId = computed(() => this.#targetController()?.sidebarId() ?? null);
-    protected readonly tabIndex = this.#nativeButton || this.#nativeAnchor ? null : 0;
+    protected readonly tabIndex = computed(() => (this.#nativeButton || this.#nativeAnchor() ? null : 0));
     protected readonly type = this.#element.tagName === "BUTTON" ? "button" : null;
 
     /**
@@ -69,13 +80,26 @@ export class SidebarTriggerDirective {
      */
     public readonly for = input("");
 
+    public constructor() {
+        this.#nativeAnchor.set(this.#element.tagName === "A" && this.#element.hasAttribute("href"));
+        afterNextRender(() => {
+            this.#nativeAnchor.set(this.#element.tagName === "A" && this.#element.hasAttribute("href"));
+            if (isDevMode() && this.for() && !this.#targetController()) {
+                console.warn(
+                    `monaSidebarTrigger: no sidebar with the id "${this.for()}" in this layout. A trigger can only reach ` +
+                        "a sidebar in its own mona-sidebar-layout."
+                );
+            }
+        });
+    }
+
     protected onClick(): void {
         this.#targetController()?.toggle();
     }
 
     protected onEnterKeydown(event: Event): void {
-        // Buttons and anchors already synthesize a click for Enter.
-        if (this.#nativeButton || this.#nativeAnchor) {
+        // Buttons and links already synthesize a click for Enter.
+        if (this.#nativeButton || this.#nativeAnchor()) {
             return;
         }
         event.preventDefault();

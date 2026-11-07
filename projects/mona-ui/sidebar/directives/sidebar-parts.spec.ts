@@ -210,24 +210,25 @@ describe("Sidebar parts", () => {
             expect(query(".menu-button").hasAttribute("title")).toBe(false);
         });
 
-        it("should identify the icon with a title on the rail", () => {
+        it("should identify the icon with a tooltip on the rail", () => {
             collapse();
-            expect(query(".menu-button").getAttribute("title")).toBe("Introduction");
-        });
-
-        it("should drop the title again once expanded", () => {
-            collapse();
-            collapse();
+            expect(query(".menu-button").getAttribute("data-sidebar-tooltip")).toBe("Introduction");
             expect(query(".menu-button").hasAttribute("title")).toBe(false);
         });
 
-        it("should never set a title when no tooltip was supplied", () => {
+        it("should drop the tooltip again once expanded", () => {
+            collapse();
+            collapse();
+            expect(query(".menu-button").hasAttribute("data-sidebar-tooltip")).toBe(false);
+        });
+
+        it("should never set a tooltip when no text was supplied", () => {
             TestBed.resetTestingModule();
             TestBed.configureTestingModule({ imports: [SidebarPartsHostComponent] });
             const bare = TestBed.createComponent(SidebarPartsHostComponent);
             bare.detectChanges();
             const button: HTMLElement = bare.nativeElement.querySelector(".menu-button");
-            expect(button.hasAttribute("title")).toBe(false);
+            expect(button.hasAttribute("data-sidebar-tooltip")).toBe(false);
         });
     });
 

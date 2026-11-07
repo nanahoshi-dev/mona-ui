@@ -172,7 +172,7 @@ export class ArabicCalendarFixtureComponent {
                             <button type="button" data-testid="open-sidebar-end-ltr" (click)="sidebarEndOpenLtr.set(true)">Open End</button>
                             <button type="button" data-testid="close-sidebar-end-ltr" (click)="sidebarEndOpenLtr.set(false)">Close End</button>
                         </div>
-                        <mona-sidebar-layout [mobileBreakpoint]="5000" style="width: 100%; height: 160px;">
+                        <mona-sidebar-layout [mobileBreakpoint]="5000" modalScope="layout" style="width: 100%; height: 160px;">
                             <mona-sidebar
                                 data-testid="sidebar-start-ltr"
                                 side="start"
@@ -307,7 +307,7 @@ export class ArabicCalendarFixtureComponent {
                             <button type="button" data-testid="open-sidebar-end-rtl" (click)="sidebarEndOpenRtl.set(true)">Open End</button>
                             <button type="button" data-testid="close-sidebar-end-rtl" (click)="sidebarEndOpenRtl.set(false)">Close End</button>
                         </div>
-                        <mona-sidebar-layout [mobileBreakpoint]="5000" style="width: 100%; height: 160px;">
+                        <mona-sidebar-layout [mobileBreakpoint]="5000" modalScope="layout" style="width: 100%; height: 160px;">
                             <mona-sidebar
                                 data-testid="sidebar-start-rtl"
                                 side="start"
@@ -442,7 +442,7 @@ export class ArabicCalendarFixtureComponent {
                             <button type="button" data-testid="open-sidebar-end-split-ltr" (click)="sidebarEndOpenSplitLtr.set(true)">Open End</button>
                             <button type="button" data-testid="close-sidebar-end-split-ltr" (click)="sidebarEndOpenSplitLtr.set(false)">Close End</button>
                         </div>
-                        <mona-sidebar-layout [mobileBreakpoint]="5000" style="width: 100%; height: 160px;">
+                        <mona-sidebar-layout [mobileBreakpoint]="5000" modalScope="layout" style="width: 100%; height: 160px;">
                             <mona-sidebar
                                 data-testid="sidebar-start-split-ltr"
                                 side="start"
@@ -577,7 +577,7 @@ export class ArabicCalendarFixtureComponent {
                             <button type="button" data-testid="open-sidebar-end-split-rtl" (click)="sidebarEndOpenSplitRtl.set(true)">Open End</button>
                             <button type="button" data-testid="close-sidebar-end-split-rtl" (click)="sidebarEndOpenSplitRtl.set(false)">Close End</button>
                         </div>
-                        <mona-sidebar-layout [mobileBreakpoint]="5000" style="width: 100%; height: 160px;">
+                        <mona-sidebar-layout [mobileBreakpoint]="5000" modalScope="layout" style="width: 100%; height: 160px;">
                             <mona-sidebar
                                 data-testid="sidebar-start-split-rtl"
                                 side="start"

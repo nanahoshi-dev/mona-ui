@@ -552,6 +552,10 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
     sheet: {
         closeSheet: null
     },
+    sidebar: {
+        drawerLabel: null,
+        rail: null
+    },
     slider: {
         maximumValue: null,
         minimumValue: null,

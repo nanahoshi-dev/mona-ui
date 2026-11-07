@@ -431,6 +431,10 @@
     "sheet": {
         "closeSheet": "시트 닫기"
     },
+    "sidebar": {
+        "drawerLabel": "사이드바",
+        "rail": "사이드바 표시 또는 숨기기"
+    },
     "slider": {
         "maximumValue": "최댓값",
         "minimumValue": "최솟값",

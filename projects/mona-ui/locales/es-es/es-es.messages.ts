@@ -500,6 +500,10 @@ export const ES_ES_MESSAGES = {
     sheet: {
         closeSheet: "Cerrar panel"
     },
+    sidebar: {
+        drawerLabel: "Barra lateral",
+        rail: "Mostrar u ocultar la barra lateral"
+    },
     slider: {
         maximumValue: "Valor máximo",
         minimumValue: "Valor mínimo",

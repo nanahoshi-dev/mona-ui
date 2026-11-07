@@ -35,6 +35,7 @@ A selector target attaches the same tooltip behavior to every matching element i
 - **`rounded`** — `'none'`, `'small'`, `'medium'` (default), `'large'`, or `'full'`. Controls the tooltip panel's border radius.
 - **`showDelay`** / **`hideDelay`** — milliseconds to wait before showing the tooltip, or before hiding it once the pointer or focus has left. Both default to `0`. A pointer that leaves always gets a grace of about 100 ms, so it can move onto the tooltip.
 - **Projected content** — anything placed between the `<mona-tooltip>` tags is rendered inside the tooltip panel, including markup and other components.
+- **`contentOf`** — on `TooltipDirective`, a function from the element to its text, for when the text isn't in a `title`, as with `mode="content"` over rows that keep theirs elsewhere. The element's own `title` isn't touched, and an empty result shows nothing.
 
 ## Examples
 

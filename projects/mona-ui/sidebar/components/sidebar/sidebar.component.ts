@@ -1,20 +1,29 @@
 import { CdkTrapFocus } from "@angular/cdk/a11y";
+import { createBlockScrollStrategy } from "@angular/cdk/overlay";
 import {
     afterNextRender,
-    ChangeDetectionStrategy,
+    afterRenderEffect,
+    ApplicationRef,
     Component,
     computed,
+    DestroyRef,
+    DOCUMENT,
     effect,
     ElementRef,
     inject,
     Injector,
     input,
+    isDevMode,
     model,
     untracked
 } from "@angular/core";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
-import { injectComponentDirection } from "@nanahoshi/mona-ui/i18n";
+import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { inertOutside } from "@nanahoshi/mona-ui/internal";
+import { TooltipDirective } from "@nanahoshi/mona-ui/tooltip";
 import { twMerge } from "tailwind-merge";
+import { SIDEBAR_DEFAULT_MESSAGES } from "../../i18n/sidebar.default-messages";
+import { resolvePhysicalSide } from "../../internal/resolve-physical-side";
 import type { SidebarCollapsibleMode } from "../../models/SidebarCollapsibleMode";
 import type { SidebarSide } from "../../models/SidebarSide";
 import type { SidebarVariant } from "../../models/SidebarVariant";
@@ -22,25 +31,50 @@ import { SidebarLayoutService } from "../../services/sidebar-layout.service";
 import { SidebarService } from "../../services/sidebar.service";
 import { sidebarBorderAllowance, sidebarThemeVariants } from "../../styles/sidebar.styles";
 
+/** What stays usable or looks after itself beside an open drawer: the backdrop, other sidebars and the focus trap's stops. */
+const keepBesideDrawer = (element: Element): boolean =>
+    element.localName === "mona-sidebar" ||
+    element.hasAttribute("data-sidebar-backdrop") ||
+    element.classList.contains("cdk-focus-trap-anchor");
+
+const railTooltipTextOf = (element: HTMLElement): string => element.getAttribute("data-sidebar-tooltip") ?? "";
+
+/** Where a part of the sidebar has gone out of reach while it collapses. */
+const OUT_OF_REACH_SELECTOR = "[inert], [data-hidden='true']";
+
 /**
  * @description
  * The sidebar region itself. Content is projected in author order, so header, content and footer
  * parts appear exactly where they are written.
  *
  * Below the layout's `mobileBreakpoint` it presents as a modal overlay drawer: focus is trapped
- * inside it while open, restored to whatever opened it on close, and the rest of the layout is made
- * inert. It is not a navigation landmark by itself — wrap the menus in a labelled `nav`, or set
- * `role` and `ariaLabel` if the whole region is navigation.
+ * inside it while open, restored to whatever opened it on close, and everything outside it is made
+ * inert, as far as the layout's `modalScope` says. It is not a navigation landmark by itself — wrap
+ * the menus in a labelled `nav`, or set `role` and `aria-label` if the whole region is navigation.
  */
 @Component({
     selector: "mona-sidebar",
-    template: `<ng-content></ng-content>`,
-    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TooltipDirective],
+    // One tooltip for every row on the rail, and off the rail it isn't listening for anything. `contents` keeps the
+    // parts laid out by the panel, as if this element weren't here.
+    template: `
+        <div
+            class="contents"
+            monaTooltip
+            mode="content"
+            filter="[data-sidebar-tooltip]"
+            [contentOf]="railTooltipText"
+            [disabled]="!iconOnly()"
+            [position]="railOpensToward()">
+            <ng-content></ng-content>
+        </div>
+    `,
     hostDirectives: [CdkTrapFocus],
     host: {
         "[attr.aria-hidden]": "hidden() ? 'true' : null",
-        "[attr.aria-label]": "ariaLabel() || null",
-        "[attr.aria-modal]": "drawer() ? 'true' : null",
+        "[attr.aria-label]": "accessibleName()",
+        "[attr.aria-labelledby]": "ariaLabelledBy() || null",
+        "[attr.aria-modal]": "modal() ? 'true' : null",
         "[attr.data-collapsible]": "collapsible()",
         "[attr.data-side]": "logicalSide()",
         "[attr.data-state]": "state()",
@@ -51,6 +85,8 @@ import { sidebarBorderAllowance, sidebarThemeVariants } from "../../styles/sideb
         // collapsed panel reachable by keyboard and readable by assistive technology.
         "[attr.inert]": "hidden() ? '' : null",
         "[attr.role]": "resolvedRole()",
+        // Something for focus to land on when the drawer has no controls, or a press lands on blank space in it.
+        "[attr.tabindex]": "drawer() ? -1 : null",
         "[class]": "baseClass()",
         "[style.width]": "widthString()"
     },
@@ -59,23 +95,26 @@ import { sidebarBorderAllowance, sidebarThemeVariants } from "../../styles/sideb
     providers: [SidebarService]
 })
 export class SidebarComponent {
+    readonly #appRef = inject(ApplicationRef);
+    readonly #destroyRef = inject(DestroyRef);
     readonly #direction = injectComponentDirection();
+    readonly #document = inject(DOCUMENT);
     readonly #focusTrap = inject(CdkTrapFocus);
     readonly #host = inject<ElementRef<HTMLElement>>(ElementRef);
+    readonly #i18n = inject(MonaI18nService);
     readonly #injector = inject(Injector);
     readonly #layoutService = inject(SidebarLayoutService, { optional: true });
+    readonly #messages = this.#i18n.componentMessages("sidebar", SIDEBAR_DEFAULT_MESSAGES);
     readonly #sidebarService = inject(SidebarService);
-    #restoreFocusTo: HTMLElement | null = null;
+    #focusTrapped = false;
 
-    protected readonly physicalSide = computed<"left" | "right">(() => {
-        const isRtl = this.#direction() === "rtl";
-        const side = this.#sidebarService.side();
-        if (side === "start") {
-            return isRtl ? "right" : "left";
+    /** Only while there's a role to name. On a plain element a label means nothing, and axe reports it. */
+    protected readonly accessibleName = computed(() => {
+        if (!this.resolvedRole()) {
+            return null;
         }
-        return isRtl ? "left" : "right";
+        return this.ariaLabel() || (this.drawer() && !this.ariaLabelledBy() ? this.#messages().drawerLabel : null);
     });
-    protected readonly drawerPhysicalSide = this.physicalSide;
 
     protected readonly baseClass = computed(() => {
         const variantClass = sidebarThemeVariants({
@@ -91,9 +130,6 @@ export class SidebarComponent {
     /** The compact presentation: an overlay pinned to one edge rather than a column in the flow. */
     protected readonly drawer = this.#sidebarService.compact;
 
-    /** Published rather than the raw input, so a `left`/`right` alias still reports as `start`/`end`. */
-    protected readonly logicalSide = this.#sidebarService.side;
-
     /**
      * Whether the panel is out of view entirely. The icon rail does not count — it is still on screen
      * and still operable — but a closed drawer and a fully collapsed off-canvas sidebar both do.
@@ -105,9 +141,27 @@ export class SidebarComponent {
         return this.offCanvasClosed();
     });
 
+    protected readonly iconOnly = this.#sidebarService.iconOnly;
+
+    /** Published rather than the raw input, so a `left`/`right` alias still reports as `start`/`end`. */
+    protected readonly logicalSide = this.#sidebarService.side;
+
+    /** A drawer scoped to its layout leaves what's around that usable, so it can't claim to be modal. */
+    protected readonly modal = computed(
+        () => this.drawer() && (this.#layoutService?.modalScope() ?? "page") === "page"
+    );
+
     protected readonly offCanvasClosed = computed(
         () => !this.drawer() && !this.#sidebarService.expanded() && this.collapsible() === "offcanvas"
     );
+
+    protected readonly physicalSide = computed(() =>
+        resolvePhysicalSide(this.#direction(), this.#sidebarService.side())
+    );
+
+    protected readonly railOpensToward = computed(() => (this.#sidebarService.side() === "start" ? "end" : "start"));
+
+    protected readonly railTooltipText = railTooltipTextOf;
 
     /** A drawer is a modal surface; a docked sidebar keeps whatever role the consumer gave it. */
     protected readonly resolvedRole = computed(() => (this.drawer() ? "dialog" : this.role() || null));
@@ -135,10 +189,16 @@ export class SidebarComponent {
 
     /**
      * @description Accessible name for the sidebar region. Required when `role` is set, and used as the
-     * drawer's name on compact viewports.
+     * drawer's name on compact viewports, which otherwise has a localized default.
      * @default ""
      */
     public readonly ariaLabel = input("", { alias: "aria-label" });
+
+    /**
+     * @description The id of the element that names the sidebar region, in place of `aria-label`.
+     * @default ""
+     */
+    public readonly ariaLabelledBy = input("", { alias: "aria-labelledby" });
 
     /**
      * @description How the sidebar behaves when collapsed. `"icon"` keeps a narrow rail of icons visible,
@@ -149,7 +209,8 @@ export class SidebarComponent {
 
     /**
      * @description Sets whether this sidebar is open. Supports two-way binding. While the viewport is
-     * compact this reflects the drawer, so one binding drives both presentations.
+     * compact this reflects the drawer, so one binding drives both presentations, and it reads `false` on
+     * a phone from the start. To remember the docked state, use `persistKey` rather than saving this.
      * @default true
      */
     public readonly expanded = model(true);
@@ -262,35 +323,81 @@ export class SidebarComponent {
                 return;
             }
             const id = this.#sidebarService.sidebarId();
-            onCleanup(layoutService.register(id, this.#sidebarService.controller));
+            onCleanup(layoutService.register(id, this.#sidebarService.controller, this.#host.nativeElement));
         });
 
         effect(() => {
             const trapped = this.drawer() && this.#sidebarService.mobileOpen();
             untracked(() => this.#setFocusTrapped(trapped));
         });
+
+        effect(onCleanup => {
+            if (!this.drawer() || !this.#sidebarService.mobileOpen()) {
+                return;
+            }
+            const modal = this.modal();
+            onCleanup(untracked(() => this.#holdOutside(modal)));
+        });
+
+        // After the render that takes the part away, and before the browser moves focus to the body because of it.
+        afterRenderEffect(() => {
+            const expanded = this.#sidebarService.expanded();
+            untracked(() => {
+                if (!expanded && !this.drawer()) {
+                    this.#moveFocusOutOfCollapsedPart();
+                }
+            });
+        });
+
+        afterNextRender(() => this.#warnWithoutName());
+
+        this.#destroyRef.onDestroy(() => {
+            if (this.#focusTrapped) {
+                const restoreTo = this.#layoutService?.releaseReturnFocus(this.#sidebarService.sidebarId());
+                if (restoreTo) {
+                    this.#returnFocus(restoreTo, this.#appRef.injector);
+                }
+            }
+        });
+    }
+
+    /** Makes everything outside the open drawer inert, up to the layout or across the page, and returns the undo. */
+    #holdOutside(modal: boolean): () => void {
+        const host = this.#host.nativeElement;
+        const release = inertOutside(host, {
+            keep: keepBesideDrawer,
+            stopAt: modal ? null : host.closest("mona-sidebar-layout")
+        });
+        if (!modal) {
+            return release;
+        }
+        const scroll = createBlockScrollStrategy(this.#injector);
+        scroll.enable();
+        return () => {
+            release();
+            scroll.disable();
+        };
     }
 
     /**
-     * The trap is only armed for the drawer. A docked sidebar sits in the page beside its content, and
-     * holding focus inside it would leave the keyboard unable to reach the rest of the layout at all.
+     * Collapsing takes the panel, or a part of it that doesn't fit the rail, away from under focus. It goes to a
+     * trigger for this sidebar, or to the rail, rather than falling to the body.
      */
-    #setFocusTrapped(trapped: boolean): void {
-        this.#focusTrap.enabled = trapped;
-        if (trapped) {
-            const active = document.activeElement;
-            this.#restoreFocusTo = active instanceof HTMLElement ? active : null;
-            this.#focusTrap.focusTrap.focusInitialElementWhenReady();
+    #moveFocusOutOfCollapsedPart(): void {
+        const host = this.#host.nativeElement;
+        const active = this.#document.activeElement;
+        if (!active || !host.contains(active) || !active.closest(OUT_OF_REACH_SELECTOR)) {
             return;
         }
+        const id = this.#sidebarService.sidebarId();
+        const candidates = Array.from(this.#document.querySelectorAll<HTMLElement>("[aria-controls]")).filter(
+            element => element.getAttribute("aria-controls") === id && !element.closest(OUT_OF_REACH_SELECTOR)
+        );
+        const target = candidates.find(element => !element.hasAttribute("monaSidebarRail")) ?? candidates[0];
+        target?.focus({ preventScroll: true });
+    }
 
-        const restoreTo = this.#restoreFocusTo;
-        this.#restoreFocusTo = null;
-        // Only pull focus back if it is still inside the panel that is closing. Moving it otherwise
-        // would yank the caret away from wherever the user has since gone.
-        if (!restoreTo || !this.#host.nativeElement.contains(document.activeElement)) {
-            return;
-        }
+    #returnFocus(element: HTMLElement, injector: Injector): void {
         /*
          * Deferred to the next render, not called here. Whatever opened the drawer is almost always
          * behind it, and the region behind it is still `inert` at this point in the change detection
@@ -299,12 +406,53 @@ export class SidebarComponent {
          */
         afterNextRender(
             () => {
-                if (restoreTo.isConnected) {
-                    restoreTo.focus();
+                if (element.isConnected) {
+                    element.focus();
                 }
             },
-            { injector: this.#injector }
+            { injector }
         );
+    }
+
+    /**
+     * The trap is only armed for the drawer. A docked sidebar sits in the page beside its content, and
+     * holding focus inside it would leave the keyboard unable to reach the rest of the layout at all.
+     */
+    #setFocusTrapped(trapped: boolean): void {
+        const wasTrapped = this.#focusTrapped;
+        this.#focusTrapped = trapped;
+        this.#focusTrap.enabled = trapped;
+        const host = this.#host.nativeElement;
+        if (trapped) {
+            const active = this.#document.activeElement;
+            this.#layoutService?.holdReturnFocus(active instanceof HTMLElement ? active : null);
+            void this.#focusTrap.focusTrap.focusInitialElementWhenReady().then(found => {
+                const current = this.#document.activeElement;
+                const unmoved = current === active || !current || current === this.#document.body;
+                if (!found && unmoved && this.#focusTrapped) {
+                    host.focus({ preventScroll: true });
+                }
+            });
+            return;
+        }
+        if (!wasTrapped) {
+            return;
+        }
+
+        const restoreTo = this.#layoutService?.releaseReturnFocus(this.#sidebarService.sidebarId());
+        const active = this.#document.activeElement;
+        // A press on the backdrop leaves focus on the body, which is focus lost rather than focus moved. Pulling it
+        // back from anywhere else would yank the caret away from wherever the user has since gone.
+        const lost = !active || active === this.#document.body;
+        if (restoreTo && (lost || host.contains(active))) {
+            this.#returnFocus(restoreTo, this.#injector);
+        }
+    }
+
+    #warnWithoutName(): void {
+        if (isDevMode() && this.role() && !this.ariaLabel() && !this.ariaLabelledBy()) {
+            console.warn(`mona-sidebar: role="${this.role()}" needs a name. Set aria-label or aria-labelledby.`);
+        }
     }
 
     #withBorderAllowance(width: string): string {

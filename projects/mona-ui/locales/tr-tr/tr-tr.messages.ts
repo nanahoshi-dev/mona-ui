@@ -481,6 +481,10 @@ export const TR_TR_MESSAGES = {
     sheet: {
         closeSheet: "Paneli kapat"
     },
+    sidebar: {
+        drawerLabel: "Kenar çubuğu",
+        rail: "Kenar çubuğunu göster veya gizle"
+    },
     slider: {
         maximumValue: "Maksimum değer",
         minimumValue: "Minimum değer",

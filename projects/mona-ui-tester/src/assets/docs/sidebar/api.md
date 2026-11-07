@@ -20,7 +20,7 @@ Everything below is a directive applied to your own element. None of them are re
 | `[monaSidebarFooter]` | any | Pinned region at the bottom |
 | `[monaSidebarGroup]` | any | A titled section; stack as many as you need |
 | `[monaSidebarGroupHeader]` | any | The row holding a group's label and action; collapses away on the rail |
-| `[monaSidebarGroupLabel]` | any | The group's name; fades out on the rail |
+| `[monaSidebarGroupLabel]` | any | The group's name, which the group is labelled by; fades out on the rail |
 | `[monaSidebarGroupAction]` | `button` | A control in the group header's corner; needs an `aria-label` |
 | `[monaSidebarGroupContent]` | any | The group's body, wrapping its menu |
 | `[monaSidebarMenu]` | `ul` | A list of rows |
@@ -109,14 +109,16 @@ Label every landmark. Two unlabelled `nav` elements on a page are indistinguisha
 
 `monaSidebarRail` is deliberately outside the tab order: it is a pointer shortcut, and a tab stop onto a 4px strip would be noise. It is **not** a substitute for a trigger. Always render a `monaSidebarTrigger` as well, or the sidebar cannot be opened from the keyboard at all.
 
-Give both an accessible name:
+Give the trigger an accessible name. The rail has a localized one by default, and takes an `aria-label` if you want another:
 
 ```html
 <button monaSidebarTrigger aria-label="Toggle sidebar">…</button>
-<button monaSidebarRail aria-label="Toggle sidebar"></button>
+<button monaSidebarRail></button>
 ```
 
-A `button` host needs nothing further. On any other element the trigger supplies `role`, a tab stop, and Enter/Space activation itself.
+A `button` host needs nothing further. On any other element, including an `a` without `href`, the trigger supplies `role`, a tab stop, and Enter/Space activation itself.
+
+On a sidebar that can't collapse (`collapsible="none"`) a trigger has nothing to do on a wide viewport, so it reports `aria-disabled` there rather than an open disclosure. A `for` that finds no sidebar leaves the trigger inert and warns in development. `for` only reaches sidebars in the trigger's own layout.
 
 ### Use anchors for destinations
 
@@ -136,7 +138,7 @@ Mark the current destination on the **item**, which owns the row's highlight. Th
 
 ### Label the icon rail
 
-While collapsed to icons the labels are clipped away. Set `tooltip` on every row so the icon keeps an accessible name — it is applied as `title`, and an ancestor carrying `monaTooltip` with `mode="content"` renders it as a styled tooltip instead.
+While collapsed to icons the labels are clipped away. Set `tooltip` on every row, and the row shows it as a tooltip on hover and on keyboard focus, on the rail only. Keep a label inside the row as well: that's its accessible name, in both states.
 
 ## State & Behavior
 
@@ -200,7 +202,15 @@ bootstrapApplication(AppComponent, {
 });
 ```
 
-`read` returns `null` when it has nothing for that key, which leaves the sidebar on its input's state.
+`read` returns `null` when it has nothing for that key, which leaves the sidebar on its input's state. A storage that throws is reported in development and otherwise treated the same way.
+
+`provideSidebarStorage()` also takes a factory, which runs in an injection context, for storage that needs something from the current request:
+
+```typescript
+provideSidebarStorage(() => new CookieStorage(inject(REQUEST)))
+```
+
+A value the default storage doesn't recognize, such as another feature's entry under the same key, counts as nothing stored, and stays there until the sidebar's state changes. Nothing is written until then. Storage isn't watched, so tabs don't follow each other.
 
 ### Reading the sidebar from a descendant
 
@@ -225,7 +235,9 @@ The controller exposes `expanded`, `state`, `iconOnly`, `compact`, `mobileOpen`,
 
 Structural facts are readable but not settable. `side`, `variant` and `collapsible` are authored as inputs on `mona-sidebar`; writing them from a descendant would leave the component and the shared state disagreeing until the next change detection pass. Bind the inputs instead.
 
-Pass `{ optional: true }` for a component that may be used outside a sidebar.
+Inside a `mona-sidebar` it reads that sidebar. Elsewhere in a `mona-sidebar-layout`, such as a toolbar in the inset, it reads the layout's first sidebar in author order, or the one you name with `injectSidebar({ for: "inspector" })`. A sidebar that hasn't rendered yet reads as closed, and commands to it do nothing.
+
+Pass `{ optional: true }` for a component that may be used outside a layout.
 
 ### Collapsible modes
 
@@ -256,19 +268,32 @@ Nesting is not limited to one level: a `monaSidebarMenuSub` can hold another col
 
 #### On the icon rail
 
-A submenu cannot render in a rail one icon wide. While on the rail every item keeps its disclosure closed, at every depth, so each trigger's `aria-expanded` stays truthful and the content stays `inert`. Whatever was open before collapsing is restored when the sidebar expands again — level by level, so a submenu that was closed stays closed, and one opened while on the rail is not carried back out.
+A submenu cannot render in a rail one icon wide. While on the rail every item keeps its disclosure closed, at every depth, so each trigger's `aria-expanded` stays truthful and the content stays `inert`. Activating a submenu's row on the rail expands the sidebar and opens that submenu, so its pages can always be reached. Whatever was open before collapsing is restored when the sidebar expands again — level by level, so a submenu that was closed stays closed.
 
 ### Responsive behaviour
 
 Below `mobileBreakpoint` (default `768`) the sidebar becomes a modal drawer:
 
-- Slides in from its docked edge; the rest of the layout goes `inert` and stops scrolling
-- Focus is trapped inside it and restored to the trigger on close
-- Escape and backdrop clicks close it; a docked sidebar ignores Escape
+- Slides in from its docked edge; everything outside it goes `inert` and the page stops scrolling
+- It's a `dialog` named by `aria-label` or `aria-labelledby`, with a localized default
+- Focus is trapped inside it, on the panel itself if it has no controls, and restored to whatever opened it on close, however it closed
+- Escape and backdrop clicks close it, wherever focus is; a docked sidebar ignores Escape, and a control that uses the key itself keeps it
 - Drawer state is separate from the desktop state and resets whenever the viewport crosses the breakpoint
-- Activating a row closes the drawer, since the destination is underneath it — opt out with `[closeOnSelect]="false"`
+- Activating a row closes the drawer, since the destination is underneath it — opt out with `[closeOnSelect]="false"`. A row that opens a submenu leaves it open
+
+While the viewport is compact, `[(expanded)]` reports the drawer, so it reads `false` on a phone from the start. To remember the docked state, use `persistKey` rather than saving that value.
 
 Set `mobileBreakpoint` to `0` to keep the docked presentation at every size.
+
+#### How far the drawer's modality reaches
+
+By default an open drawer makes the whole page inert and locks its scroll, so an app header above the layout can't be reached behind it. A sidebar embedded in part of a page can keep that to its layout. What's around the layout stays usable, so the drawer isn't `aria-modal` then:
+
+```html
+<mona-sidebar-layout modalScope="layout">…</mona-sidebar-layout>
+```
+
+The backdrop covers the layout either way.
 
 ```html
 <mona-sidebar-layout [mobileBreakpoint]="1024">
@@ -278,7 +303,7 @@ Set `mobileBreakpoint` to `0` to keep the docked presentation at every size.
 
 ### Direction
 
-Prefer `side="start"` and `side="end"`, which follow the document's writing direction. `"left"` and `"right"` are retained as aliases of them — they were always a poor description, since the layout orders the sidebar with flexbox and `side="left"` already rendered on the right under RTL. All borders and rail positioning use logical properties.
+Prefer `side="start"` and `side="end"`, which follow the document's writing direction. `"left"` and `"right"` are retained as aliases of them — they were always a poor description, since the layout orders the sidebar with flexbox and `side="left"` already rendered on the right under RTL. Borders and the rail resolve to a physical side from the direction, so they follow it too.
 
 ### Server rendering
 

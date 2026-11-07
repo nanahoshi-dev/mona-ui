@@ -456,6 +456,10 @@ export const ZH_TW_MESSAGES = {
     sheet: {
         closeSheet: "關閉面板"
     },
+    sidebar: {
+        drawerLabel: "側邊欄",
+        rail: "顯示或隱藏側邊欄"
+    },
     slider: {
         maximumValue: "最大值",
         minimumValue: "最小值",

@@ -228,8 +228,7 @@ export const sidebarMenuButtonThemeVariants = cva(
         flex w-full items-center justify-start overflow-hidden
         rounded-md border-0 bg-transparent
         text-start text-sm font-normal whitespace-nowrap no-underline
-        outline-none
-        focus-visible:ring-2 focus-visible:ring-(--color-sidebar-ring)/60
+        focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--color-sidebar-ring)
         [&>*:first-child]:shrink-0 [&>svg]:shrink-0
         [transition:gap_var(--mona-motion-standard)_ease-out,height_var(--mona-motion-standard)_ease-out,padding_var(--mona-motion-standard)_ease-out,background-color_100ms_ease-in-out,color_100ms_ease-in-out]
         motion-reduce:[transition:none]
@@ -237,14 +236,20 @@ export const sidebarMenuButtonThemeVariants = cva(
     {
         variants: {
             active: {
-                true: "text-(--color-sidebar-primary-foreground)",
+                // The bar and the weight say it without color, as the fill is faint against the sidebar and
+                // forced colors drop it altogether.
+                true: `
+                    relative font-medium text-(--color-sidebar-primary-foreground)
+                    before:absolute before:inset-y-1 before:start-0 before:w-0.5 before:rounded-full before:bg-current
+                    forced-colors:before:forced-color-adjust-none forced-colors:before:bg-[Highlight]
+                `,
                 false: `
                     text-(--color-sidebar-foreground)
                     hover:bg-(--color-sidebar-accent) hover:text-(--color-sidebar-accent-foreground)
                 `
             },
             disabled: {
-                true: "opacity-50 pointer-events-none cursor-default",
+                true: "opacity-50 pointer-events-none cursor-default forced-colors:text-[GrayText]",
                 false: "cursor-pointer"
             },
             iconOnly: {
@@ -327,6 +332,7 @@ export const sidebarThemeVariants = cva(
             drawer: {
                 true: `
                     absolute inset-y-0 z-50 h-full m-0
+                    max-w-[calc(100%-3rem)] outline-none
                     shadow-(--shadow-overlay)
                     transition-[translate] duration-(--mona-motion-standard) ease-out
                     motion-reduce:transition-none
@@ -401,12 +407,16 @@ export const sidebarRailThemeVariants = cva(
     `
         absolute inset-y-0 z-20 hidden w-1
         cursor-pointer
-        transition-colors hover:bg-(--color-sidebar-border)
+        transition-colors motion-reduce:transition-none hover:bg-(--color-sidebar-border)
         focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-(--color-sidebar-ring)
-        sm:flex
     `,
     {
         variants: {
+            // The breakpoint that makes a drawer is the layout's to set, so `sm` alone can't keep it out of one.
+            compact: {
+                true: "",
+                false: "sm:flex"
+            },
             // The rail sits on the sidebar's inner edge, which is the opposite one to the physical side it is
             // docked against.
             physicalSide: {
@@ -415,6 +425,7 @@ export const sidebarRailThemeVariants = cva(
             }
         },
         defaultVariants: {
+            compact: false,
             physicalSide: "left"
         }
     }

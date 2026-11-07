@@ -55,6 +55,7 @@ describe("MONA_PT_BR_LOCALE", () => {
             "otpInput",
             "pager",
             "progressBar",
+            "sidebar",
             "rating",
             "scrollView",
             "sheet",
@@ -71,8 +72,8 @@ describe("MONA_PT_BR_LOCALE", () => {
             "window"
         ] as const;
 
-        it("defines all 42 canonical message namespaces", () => {
-            expect(Object.keys(MONA_PT_BR_LOCALE.messages)).toHaveLength(42);
+        it("defines all 43 canonical message namespaces", () => {
+            expect(Object.keys(MONA_PT_BR_LOCALE.messages)).toHaveLength(43);
             expect(Object.keys(MONA_PT_BR_LOCALE.messages).sort()).toEqual([...expectedNamespaces].sort());
             for (const ns of expectedNamespaces) {
                 expect(MONA_PT_BR_LOCALE.messages[ns], `Namespace ${ns} must be defined`).toBeDefined();

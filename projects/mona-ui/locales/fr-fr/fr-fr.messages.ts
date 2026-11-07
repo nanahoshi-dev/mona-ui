@@ -501,6 +501,10 @@ export const FR_FR_MESSAGES = {
     sheet: {
         closeSheet: "Fermer le panneau"
     },
+    sidebar: {
+        drawerLabel: "Barre latérale",
+        rail: "Afficher ou masquer la barre latérale"
+    },
     slider: {
         maximumValue: "Valeur maximale",
         minimumValue: "Valeur minimale",

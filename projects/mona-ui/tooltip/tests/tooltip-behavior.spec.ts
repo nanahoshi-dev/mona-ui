@@ -74,6 +74,8 @@ class ComponentHostComponent {
     public readonly position = signal<TooltipPosition>("top");
 }
 
+const readDataTip = (element: HTMLElement): string => element.getAttribute("data-tip") ?? "";
+
 describe("Tooltip behavior", () => {
     let overlayContainer: HTMLElement;
 
@@ -340,6 +342,50 @@ describe("Tooltip behavior", () => {
             expect(bottom.offsetY).toBe(12);
             fixture.destroy();
             finishLeaveAnimation();
+        });
+    });
+
+    describe("directive reading its text with contentOf", () => {
+        @Component({
+            imports: [TooltipDirective],
+            template: `
+                <ul monaTooltip mode="content" filter="[data-tip]" [contentOf]="contentOf">
+                    <li id="tipped" data-tip="From the attribute" title="Left alone">Tipped</li>
+                    <li id="empty" data-tip="" title="Not shown">Empty</li>
+                    <li id="titled" title="Not matched">Titled</li>
+                </ul>
+            `
+        })
+        class ContentOfComponent {
+            public readonly contentOf = readDataTip;
+        }
+
+        it("shows what it returns, and leaves the title where it is", () => {
+            const fixture = create(ContentOfComponent);
+            over(el("tipped"));
+            settle();
+            expect(tooltips().map(tip => tip.textContent?.trim())).toEqual(["From the attribute"]);
+            expect(el("tipped").getAttribute("title")).toBe("Left alone");
+            expect(el("tipped").hasAttribute("data-mona-title")).toBe(false);
+            fixture.destroy();
+        });
+
+        it("shows nothing for an empty result", () => {
+            const fixture = create(ContentOfComponent);
+            over(el("empty"));
+            settle();
+            expect(tooltips()).toHaveLength(0);
+            expect(el("empty").getAttribute("title")).toBe("Not shown");
+            fixture.destroy();
+        });
+
+        it("leaves what the filter doesn't match alone", () => {
+            const fixture = create(ContentOfComponent);
+            over(el("titled"));
+            settle();
+            expect(tooltips()).toHaveLength(0);
+            expect(el("titled").getAttribute("title")).toBe("Not matched");
+            fixture.destroy();
         });
     });
 

@@ -510,6 +510,10 @@ export const RU_RU_MESSAGES = {
     sheet: {
         closeSheet: "Закрыть панель"
     },
+    sidebar: {
+        drawerLabel: "Боковая панель",
+        rail: "Показать или скрыть боковую панель"
+    },
     slider: {
         maximumValue: "Максимальное значение",
         minimumValue: "Минимальное значение",

@@ -460,6 +460,10 @@ export const ID_ID_MESSAGES = {
     sheet: {
         closeSheet: "Tutup panel"
     },
+    sidebar: {
+        drawerLabel: "Bilah sisi",
+        rail: "Tampilkan atau sembunyikan bilah sisi"
+    },
     slider: {
         maximumValue: "Nilai maksimum",
         minimumValue: "Nilai minimum",

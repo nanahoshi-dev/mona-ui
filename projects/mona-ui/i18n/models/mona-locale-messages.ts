@@ -26,6 +26,7 @@ import type { MonaNumericTextBoxMessages } from "../message-types/numeric-text-b
 import type { MonaOtpInputMessages } from "../message-types/otp-input.messages";
 import type { MonaPagerMessages } from "../message-types/pager.messages";
 import type { MonaProgressBarMessages } from "../message-types/progress-bar.messages";
+import type { MonaSidebarMessages } from "../message-types/sidebar.messages";
 import type { MonaRatingMessages } from "../message-types/rating.messages";
 import type { MonaScrollViewMessages } from "../message-types/scroll-view.messages";
 import type { MonaSheetMessages } from "../message-types/sheet.messages";
@@ -70,6 +71,7 @@ export interface MonaLocaleMessages {
     otpInput: MonaOtpInputMessages;
     pager: MonaPagerMessages;
     progressBar: MonaProgressBarMessages;
+    sidebar: MonaSidebarMessages;
     rating: MonaRatingMessages;
     scrollView: MonaScrollViewMessages;
     sheet: MonaSheetMessages;

@@ -27,7 +27,11 @@ export class LocalStorageSidebarStorage implements SidebarStorage {
         }
         try {
             const stored = localStorage.getItem(key);
-            return stored === null ? null : stored === "true";
+            // Anything else isn't this sidebar's, such as another feature's entry under the same key.
+            if (stored === "true") {
+                return true;
+            }
+            return stored === "false" ? false : null;
         } catch {
             return null;
         }

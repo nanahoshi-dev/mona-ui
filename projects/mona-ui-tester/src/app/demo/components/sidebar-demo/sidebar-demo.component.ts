@@ -61,7 +61,6 @@ import {
     SidebarSeparatorDirective,
     SidebarTriggerDirective
 } from "@nanahoshi/mona-ui/sidebar";
-import { TooltipDirective } from "@nanahoshi/mona-ui/tooltip";
 import type { ComponentConfig } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -135,18 +134,11 @@ export class SidebarDemoComponent extends AbstractDemoComponent<SidebarLayoutCom
         LucideChevronRight,
         LucideCommand,
         LucideList,
-        TooltipDirective,
         SidebarMenuSkeletonComponent
     ],
     template: `
-        <mona-sidebar-layout class="h-150 border border-border">
-            <mona-sidebar
-                collapsible="icon"
-                variant="sidebar"
-                [side]="'left'"
-                monaTooltip
-                mode="content"
-                position="right">
+        <mona-sidebar-layout class="h-150 border border-border" modalScope="layout">
+            <mona-sidebar collapsible="icon" variant="sidebar" [side]="'left'">
                 <header monaSidebarHeader>
                     <ul monaSidebarMenu>
                         <li monaSidebarMenuItem #headerMenu>
