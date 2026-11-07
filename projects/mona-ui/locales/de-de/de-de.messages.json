@@ -311,6 +311,7 @@
         "filterOperator": "Filteroperator für {column}: {operator}",
         "filterPlaceholder": "Filtern...",
         "group": "Gruppe",
+        "groupOptions": "Gruppenoptionen für {column}",
         "loading": "Wird geladen",
         "modified": "Geändert",
         "moveAsNext": "Als Nächstes verschieben",

@@ -311,6 +311,7 @@
         "filterOperator": "عامل تصفية {column}: {operator}",
         "filterPlaceholder": "تصفية…",
         "group": "مجموعة",
+        "groupOptions": "خيارات مجموعة {column}",
         "loading": "جارٍ التحميل",
         "modified": "تم التعديل",
         "moveAsNext": "نقل كعنصر تالٍ",

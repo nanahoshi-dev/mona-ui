@@ -34,6 +34,7 @@ export const GRID_DEFAULT_MESSAGES = {
     filterOperator: (column: string, operator: string) => `Filter operator for ${column}: ${operator}`,
     filterPlaceholder: "Filter...",
     group: "Group",
+    groupOptions: (column: string) => `Group options for ${column}`,
     loading: "Loading",
     modified: "Modified",
     moveAsNext: "Move as next",

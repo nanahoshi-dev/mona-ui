@@ -311,6 +311,7 @@
         "filterOperator": "Operator saringan kolom {column}: {operator}",
         "filterPlaceholder": "Saring...",
         "group": "Grup",
+        "groupOptions": "Opsi grup {column}",
         "loading": "Memuat",
         "modified": "Diubah",
         "moveAsNext": "Pindahkan setelahnya",

@@ -335,6 +335,7 @@ export const ID_ID_MESSAGES = {
         filterOperator: (column: string, operator: string) => `Operator saringan kolom ${column}: ${operator}`,
         filterPlaceholder: "Saring...",
         group: "Grup",
+        groupOptions: (column: string) => `Opsi grup ${column}`,
         loading: "Memuat",
         modified: "Diubah",
         moveAsNext: "Pindahkan setelahnya",

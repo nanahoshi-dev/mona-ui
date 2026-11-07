@@ -562,6 +562,7 @@ provideMonaI18n({
 | `commandColumnTitle`                                 | the command column's header when it has no `title`             |
 | `filterByColumn`, `filterByColumnFiltered`           | filter menu buttons, the filter dialog and filter-row boxes    |
 | `filterOperator`, `clearFilter`, `filterPlaceholder` | the filter row's operator button, Clear button and placeholder |
+| `groupOptions`, `moveAsNext`, `moveAsPrevious` | a group chip's options button and its menu |
 | `editRow`, `saveRow`, `cancelRowEdit`, `removeRow`   | row command buttons                                            |
 | `saveNewRow`, `cancelNewRow`                         | the add row's buttons                                          |
 | `deleteRowTitle`, `deleteRowConfirmation`            | the remove confirmation (`removeConfirmation`)                 |

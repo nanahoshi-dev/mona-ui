@@ -331,6 +331,7 @@ export const JA_JP_MESSAGES = {
         filterOperator: (column: string, operator: string) => `${column}のフィルター演算子: ${operator}`,
         filterPlaceholder: "フィルター...",
         group: "グループ",
+        groupOptions: (column: string) => `${column} のグループオプション`,
         loading: "読み込み中",
         modified: "変更済み",
         moveAsNext: "次へ移動",

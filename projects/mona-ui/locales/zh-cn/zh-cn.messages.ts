@@ -331,6 +331,7 @@ export const ZH_CN_MESSAGES = {
         filterOperator: (column: string, operator: string) => `${column} 的筛选运算符：${operator}`,
         filterPlaceholder: "筛选…",
         group: "分组",
+        groupOptions: (column: string) => `${column} 分组选项`,
         loading: "正在加载",
         modified: "已修改",
         moveAsNext: "移至下一项",

@@ -363,6 +363,7 @@ export const RU_RU_MESSAGES = {
         filterOperator: (column: string, operator: string) => `Оператор фильтра столбца ${column}: ${operator}`,
         filterPlaceholder: "Фильтр…",
         group: "Группа",
+        groupOptions: (column: string) => `Параметры группы ${column}`,
         loading: "Загрузка",
         modified: "Изменено",
         moveAsNext: "Переместить после",

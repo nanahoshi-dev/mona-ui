@@ -367,6 +367,7 @@ export const AR_SA_MESSAGES = {
         filterOperator: (column: string, operator: string) => `عامل تصفية ${column}: ${operator}`,
         filterPlaceholder: "تصفية…",
         group: "مجموعة",
+        groupOptions: (column: string) => `خيارات مجموعة ${column}`,
         loading: "جارٍ التحميل",
         modified: "تم التعديل",
         moveAsNext: "نقل كعنصر تالٍ",

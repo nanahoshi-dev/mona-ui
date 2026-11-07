@@ -335,6 +335,7 @@ export const KO_KR_MESSAGES = {
         filterOperator: (column: string, operator: string) => `${column} 필터 연산자: ${operator}`,
         filterPlaceholder: "필터…",
         group: "그룹",
+        groupOptions: (column: string) => `${column} 그룹 옵션`,
         loading: "로드 중",
         modified: "수정됨",
         moveAsNext: "다음 항목으로 이동",

@@ -311,6 +311,7 @@
         "filterOperator": "Оператор фильтра столбца {column}: {operator}",
         "filterPlaceholder": "Фильтр…",
         "group": "Группа",
+        "groupOptions": "Параметры группы {column}",
         "loading": "Загрузка",
         "modified": "Изменено",
         "moveAsNext": "Переместить после",

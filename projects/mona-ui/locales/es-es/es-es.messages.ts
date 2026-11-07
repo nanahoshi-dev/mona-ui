@@ -359,6 +359,7 @@ export const ES_ES_MESSAGES = {
         filterOperator: (column: string, operator: string) => `Operador de filtro de ${column}: ${operator}`,
         filterPlaceholder: "Filtrar...",
         group: "Grupo",
+        groupOptions: (column: string) => `Opciones de grupo de ${column}`,
         loading: "Cargando",
         modified: "Modificado",
         moveAsNext: "Mover como siguiente",

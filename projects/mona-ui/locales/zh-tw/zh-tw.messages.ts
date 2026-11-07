@@ -331,6 +331,7 @@ export const ZH_TW_MESSAGES = {
         filterOperator: (column: string, operator: string) => `${column} 的篩選運算子：${operator}`,
         filterPlaceholder: "篩選…",
         group: "群組",
+        groupOptions: (column: string) => `${column} 群組選項`,
         loading: "載入中",
         modified: "已修改",
         moveAsNext: "移至下一項",

@@ -360,6 +360,7 @@ export const IT_IT_MESSAGES = {
         filterOperator: (column: string, operator: string) => `Operatore di filtro di ${column}: ${operator}`,
         filterPlaceholder: "Filtra...",
         group: "Gruppo",
+        groupOptions: (column: string) => `Opzioni del gruppo ${column}`,
         loading: "Caricamento",
         modified: "Modificato",
         moveAsNext: "Sposta dopo",

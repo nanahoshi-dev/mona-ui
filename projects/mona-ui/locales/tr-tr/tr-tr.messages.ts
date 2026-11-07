@@ -356,6 +356,7 @@ export const TR_TR_MESSAGES = {
         filterOperator: (column: string, operator: string) => `${column} sütunu filtre işleci: ${operator}`,
         filterPlaceholder: "Filtrele...",
         group: "Grup",
+        groupOptions: (column: string) => `${column} grup seçenekleri`,
         loading: "Yükleniyor",
         modified: "Değiştirildi",
         moveAsNext: "Sonrasına taşı",

@@ -406,6 +406,7 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         ],
         filterPlaceholder: null,
         group: null,
+        groupOptions: [{ name: "column", type: "string" }],
         loading: null,
         modified: null,
         moveAsNext: null,
