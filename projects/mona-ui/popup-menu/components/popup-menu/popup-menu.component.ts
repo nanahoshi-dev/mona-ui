@@ -32,10 +32,12 @@ import {
     PopupMenuIconTemplateToken,
     PopupMenuShortcutTemplateToken,
     PopupMenuTextTemplateToken,
-    PopupMenuToken
-} from "../../models/PopupMenuConfig";
-import { MenuItem, PopupMenuItem } from "../../models/PopupMenuItem";
-import { PopupMenuItemClickEvent } from "../../models/PopupMenuItemClickEvent";
+    PopupMenuToken,
+    MenuItem,
+    PopupMenuItem,
+    PopupMenuItemClickEvent,
+    preparePopupMenuItems
+} from "@nanahoshi/mona-ui/internal/popup-menu";
 import type {
     PopupMenuCloseRequest,
     PopupMenuInitialFocus,
@@ -43,7 +45,7 @@ import type {
 } from "../../models/PopupMenuListConfig";
 import { PopupMenuNavigationEvent } from "../../models/PopupMenuNavigationEvent";
 import { PopupMenuVariantInput, PopupMenuVariantProps } from "../../styles/popup-menu.styles";
-import { groupPopupMenuItems, isMenuOwnedCheckState, preparePopupMenuItems } from "../../utils/popup-menu.utils";
+import { groupPopupMenuItems, isMenuOwnedCheckState } from "../../utils/popup-menu.utils";
 import { PopupMenuListComponent } from "../popup-menu-list/popup-menu-list.component";
 
 /** What the component keeps about the menu it has open. */

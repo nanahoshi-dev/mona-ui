@@ -53,6 +53,7 @@
             "@nanahoshi/mona-ui/internal/filter-input": ["./projects/mona-ui/internal/filter-input/public-api.ts"],
             "@nanahoshi/mona-ui/internal/indicator-icon": ["./projects/mona-ui/internal/indicator-icon/public-api.ts"],
             "@nanahoshi/mona-ui/internal/list": ["./projects/mona-ui/internal/list/public-api.ts"],
+            "@nanahoshi/mona-ui/internal/popup-menu": ["./projects/mona-ui/internal/popup-menu/public-api.ts"],
             "@nanahoshi/mona-ui/internal/tree": ["./projects/mona-ui/internal/tree/public-api.ts"],
             "@nanahoshi/mona-ui/filter": ["./projects/mona-ui/filter/public-api.ts"],
             "@nanahoshi/mona-ui/grid": ["./projects/mona-ui/grid/public-api.ts"],

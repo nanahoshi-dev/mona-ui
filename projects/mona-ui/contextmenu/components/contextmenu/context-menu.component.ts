@@ -23,9 +23,9 @@ import {
     PopupMenuItem,
     PopupMenuItemClickEvent,
     PopupMenuShortcutTemplateDirective,
-    PopupMenuTextTemplateDirective,
-    PopupMenuToken
+    PopupMenuTextTemplateDirective
 } from "@nanahoshi/mona-ui/popup-menu";
+import { PopupMenuToken } from "@nanahoshi/mona-ui/internal/popup-menu";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { any } from "@mirei/ts-collections";
 import { ContextMenuGroupTemplateDirective } from "../../directives/context-menu-group-template.directive";

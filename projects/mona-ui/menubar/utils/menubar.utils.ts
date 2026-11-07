@@ -7,7 +7,7 @@ import {
     PopupMenuTemplateOrigin,
     PopupMenuTemplateType,
     PopupTemplateConfig
-} from "@nanahoshi/mona-ui/popup-menu";
+} from "@nanahoshi/mona-ui/internal/popup-menu";
 
 const componentTypeMap: Record<PopupMenuItemType, string> = {
     [PopupMenuItemType.CheckboxMenuItem]: "mona-menu-checkbox-item",

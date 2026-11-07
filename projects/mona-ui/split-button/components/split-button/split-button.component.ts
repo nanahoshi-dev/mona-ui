@@ -26,9 +26,9 @@ import {
     PopupMenuGroupTemplateDirective,
     PopupMenuIconTemplateDirective,
     PopupMenuShortcutTemplateDirective,
-    PopupMenuTextTemplateDirective,
-    PopupMenuToken
+    PopupMenuTextTemplateDirective
 } from "@nanahoshi/mona-ui/popup-menu";
+import { PopupMenuToken } from "@nanahoshi/mona-ui/internal/popup-menu";
 import type { PopupMenuItemClickEvent } from "@nanahoshi/mona-ui/popup-menu";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";

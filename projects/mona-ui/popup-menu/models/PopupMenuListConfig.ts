@@ -1,7 +1,7 @@
 import type { Signal, TemplateRef } from "@angular/core";
 import type { Subject } from "rxjs";
 import type { PopupMenuVariantProps } from "../styles/popup-menu.styles";
-import type { PopupMenuItemClickEvent } from "./PopupMenuItemClickEvent";
+import type { PopupMenuItemClickEvent } from "@nanahoshi/mona-ui/internal/popup-menu";
 import type { PopupMenuItemGroup } from "./PopupMenuItemGroup";
 import type { PopupMenuNavigationEvent } from "./PopupMenuNavigationEvent";
 

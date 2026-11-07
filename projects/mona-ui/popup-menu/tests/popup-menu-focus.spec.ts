@@ -3,7 +3,7 @@ import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { PopupMenuComponent } from "../components/popup-menu/popup-menu.component";
 import { PopupMenuItemComponent } from "../components/popup-menu-item/popup-menu-item.component";
-import type { PopupMenuItemClickEvent } from "../models/PopupMenuItemClickEvent";
+import type { PopupMenuItemClickEvent } from "@nanahoshi/mona-ui/internal/popup-menu";
 
 @Component({
     imports: [PopupMenuComponent, PopupMenuItemComponent],

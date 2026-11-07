@@ -8,8 +8,7 @@ import { PopupMenuGroupComponent } from "../components/popup-menu-group/popup-me
 import { PopupMenuItemComponent } from "../components/popup-menu-item/popup-menu-item.component";
 import { PopupMenuRadioGroupComponent } from "../components/popup-menu-radio-group/popup-menu-radio-group.component";
 import { PopupMenuRadioItemComponent } from "../components/popup-menu-radio-item/popup-menu-radio-item.component";
-import type { MenuItem } from "../models/PopupMenuItem";
-import type { PopupMenuItemClickEvent } from "../models/PopupMenuItemClickEvent";
+import type { MenuItem, PopupMenuItemClickEvent } from "@nanahoshi/mona-ui/internal/popup-menu";
 
 @Component({
     imports: [

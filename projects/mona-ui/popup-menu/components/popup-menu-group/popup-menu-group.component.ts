@@ -5,9 +5,9 @@ import {
     PopupMenuGroupTemplateToken,
     PopupMenuItemType,
     PopupMenuOrigin,
-    PopupMenuToken
-} from "../../models/PopupMenuConfig";
-import { PopupMenuItem } from "../../models/PopupMenuItem";
+    PopupMenuToken,
+    PopupMenuItem
+} from "@nanahoshi/mona-ui/internal/popup-menu";
 
 @Component({
     selector: "mona-popup-menu-group",

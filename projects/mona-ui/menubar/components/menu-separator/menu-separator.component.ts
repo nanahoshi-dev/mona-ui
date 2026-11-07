@@ -1,5 +1,6 @@
 import { Component, forwardRef } from "@angular/core";
-import { PopupMenuOrigin, PopupMenuSeparatorComponent, PopupMenuToken } from "@nanahoshi/mona-ui/popup-menu";
+import { PopupMenuSeparatorComponent } from "@nanahoshi/mona-ui/popup-menu";
+import { PopupMenuOrigin, PopupMenuToken } from "@nanahoshi/mona-ui/internal/popup-menu";
 
 @Component({
     selector: "mona-menu-separator",
