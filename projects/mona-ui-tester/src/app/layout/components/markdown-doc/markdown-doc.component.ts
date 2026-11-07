@@ -1,5 +1,6 @@
 import { Component, DestroyRef, ElementRef, computed, inject, input, signal } from "@angular/core";
 import { MarkdownComponent } from "ngx-markdown";
+import { createUniqueHeadingId } from "../../docs-heading-id";
 import type { SectionItem } from "../../models/SectionItem";
 import { PageService } from "../../services/page.service";
 
@@ -49,7 +50,7 @@ export class MarkdownDocComponent {
         const items: SectionItem[] = headings.map((el, i) => {
             const level = parseInt(el.tagName[1], 10);
             const text = el.textContent?.trim() ?? `heading-${i}`;
-            const id = this.#createUniqueId(text, existingIds);
+            const id = createUniqueHeadingId(text, existingIds);
             el.id = id;
 
             const isH1 = level === 1;
@@ -73,20 +74,6 @@ export class MarkdownDocComponent {
         this.#pageService.setSections(items);
     }
 
-    #createUniqueId(text: string, existingIds: Set<string>): string {
-        const baseId = this.#slugify(text);
-        let candidateId = baseId;
-        let suffix = 2;
-
-        while (existingIds.has(candidateId)) {
-            candidateId = `${baseId}-${suffix}`;
-            suffix++;
-        }
-
-        existingIds.add(candidateId);
-        return candidateId;
-    }
-
     /**
      * Rewrites same-page anchor links (e.g. `<a href="#some-heading">`) to include the current
      * pathname. Without this, a bare `#fragment` href resolves against the document's `<base href>`
@@ -101,16 +88,5 @@ export class MarkdownDocComponent {
             const hash = link.getAttribute("href") ?? "";
             link.setAttribute("href", `${pathname}${hash}`);
         });
-    }
-
-    #slugify(text: string): string {
-        const slug = text
-            .toLowerCase()
-            .trim()
-            .replace(/[^\w\s-]/g, "")
-            .replace(/[\s_-]+/g, "-")
-            .replace(/^-+|-+$/g, "");
-
-        return slug.length > 0 ? slug : "section";
     }
 }

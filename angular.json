@@ -74,7 +74,8 @@
                         "assets": [
                             "projects/mona-ui-tester/src/favicon.ico",
                             "projects/mona-ui-tester/src/assets",
-                            { "glob": "{forms,theming}.md", "input": "docs", "output": "assets/docs/guides" }
+                            { "glob": "{forms,theming}.md", "input": "docs", "output": "assets/docs/guides" },
+                            { "glob": "**/*", "input": "dist/docs-search", "output": "pagefind" }
                         ],
                         "stylePreprocessorOptions": {
                             "includePaths": [""]

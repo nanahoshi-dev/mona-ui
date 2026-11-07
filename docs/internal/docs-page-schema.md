@@ -80,6 +80,12 @@ Add `children` only when a topic has its own examples and is worth linking to di
 
 Keep nesting to two levels. Use links with disclosure buttons, not `role="tree"`.
 
+## Search
+
+`npm run build:search-index` builds the search index from the manifest and the markdown each page's component shows, and `build:tester` and `serve:tester` run it first. The index goes to `dist/docs-search` and is served at `/pagefind`. It's rebuilt only when one of those starts, so a dev server keeps searching the text it started with.
+
+A new page needs nothing extra, as long as its component names its markdown with `src="docs/…"`. The script fails if it finds no markdown for a page, except the ones listed in `PAGES_WITHOUT_MARKDOWN`. A heading's link in the results relies on `docs-heading-id.ts`, which the site and the script share.
+
 ## Where the pages stand
 
 Measured on 2026-11-07, with every route and entry point matching the manifest:
