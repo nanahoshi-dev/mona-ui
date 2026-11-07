@@ -1,0 +1,10 @@
+<ng-content select="mona-command-empty, mona-command-loading" />
+<div
+    role="listbox"
+    [attr.aria-busy]="root.loading() || null"
+    [attr.aria-label]="ariaLabel() || root.messages().listLabel"
+    [class]="listClass()"
+    [class.hidden]="root.resultCount() === 0"
+    [id]="root.listId">
+    <ng-content />
+</div>

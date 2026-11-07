@@ -17,6 +17,7 @@ import { CHIP_DEFAULT_MESSAGES } from "../chip/i18n/chip.default-messages";
 import { COLOR_GRADIENT_DEFAULT_MESSAGES } from "../color-gradient/i18n/color-gradient.default-messages";
 import { COLOR_PALETTE_DEFAULT_MESSAGES } from "../color-palette/i18n/color-palette.default-messages";
 import { COLOR_PICKER_DEFAULT_MESSAGES } from "../color-picker/i18n/color-picker.default-messages";
+import { COMMAND_DEFAULT_MESSAGES } from "@nanahoshi/mona-ui/command";
 import { COMBO_BOX_DEFAULT_MESSAGES } from "../combo-box/i18n/combo-box.default-messages";
 import { DATE_PICKER_DEFAULT_MESSAGES } from "../date-picker/i18n/date-picker.default-messages";
 import { DATETIME_PICKER_DEFAULT_MESSAGES } from "../datetime-picker/i18n/datetime-picker.default-messages";
@@ -123,6 +124,7 @@ const ENGLISH_DEFAULTS = {
     progressBar: PROGRESS_BAR_DEFAULT_MESSAGES,
     sidebar: SIDEBAR_DEFAULT_MESSAGES,
     rating: RATING_DEFAULT_MESSAGES,
+    command: COMMAND_DEFAULT_MESSAGES,
     scrollView: SCROLL_VIEW_DEFAULT_MESSAGES,
     sheet: SHEET_DEFAULT_MESSAGES,
     slider: SLIDER_DEFAULT_MESSAGES,

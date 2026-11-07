@@ -1,0 +1,5 @@
+@if (root.isEmpty()) {
+    <div [class]="statusClass()">
+        <ng-content>{{ root.messages().noResults }}</ng-content>
+    </div>
+}

@@ -34,6 +34,7 @@
             "@nanahoshi/mona-ui/color-gradient": ["./projects/mona-ui/color-gradient/public-api.ts"],
             "@nanahoshi/mona-ui/color-palette": ["./projects/mona-ui/color-palette/public-api.ts"],
             "@nanahoshi/mona-ui/color-picker": ["./projects/mona-ui/color-picker/public-api.ts"],
+            "@nanahoshi/mona-ui/command": ["./projects/mona-ui/command/public-api.ts"],
             "@nanahoshi/mona-ui/combo-box": ["./projects/mona-ui/combo-box/public-api.ts"],
             "@nanahoshi/mona-ui/common": ["./projects/mona-ui/common/public-api.ts"],
             "@nanahoshi/mona-ui/contextmenu": ["./projects/mona-ui/contextmenu/public-api.ts"],

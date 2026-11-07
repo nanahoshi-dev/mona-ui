@@ -1,0 +1,4 @@
+@for (key of parts(); track $index) {
+    <kbd aria-hidden="true" [class]="keyClass()">{{ key.symbol }}</kbd>
+    <span class="sr-only">{{ key.name }}</span>
+}

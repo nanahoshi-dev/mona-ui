@@ -1,0 +1,5 @@
+@if (root.loading()) {
+    <div [class]="statusClass()">
+        <ng-content>{{ root.messages().loading }}</ng-content>
+    </div>
+}
