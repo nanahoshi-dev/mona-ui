@@ -70,5 +70,20 @@ describe("generate-examples", () => {
         expect(project["src/main.ts"]).toContain('import { ButtonLooksExampleComponent } from "./app/looks-example.component";');
         expect(project["src/index.html"]).toContain("<app-button-looks-example></app-button-looks-example>");
         expect(JSON.parse(project["package.json"]).dependencies["@nanahoshi/mona-ui"]).toBe("latest");
+        expect(project["src/styles.css"]).not.toContain("typography");
+    });
+
+    it("adds what the editor needs only to a project that uses it", () => {
+        const editorSource = source('import { EditorComponent } from "@nanahoshi/mona-ui/editor";');
+        const project = createExampleProject({
+            files: { "looks-example.component.ts": editorSource },
+            mainFile: "looks-example.component.ts",
+            title: "Editor"
+        });
+        const manifest = JSON.parse(project["package.json"]);
+
+        expect(manifest.dependencies.remixicon).toBeDefined();
+        expect(manifest.devDependencies["@tailwindcss/typography"]).toBeDefined();
+        expect(project["src/styles.css"]).toContain('@plugin "@tailwindcss/typography";');
     });
 });

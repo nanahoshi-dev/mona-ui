@@ -42,9 +42,17 @@ const DEV_DEPENDENCIES = {
     typescript: ">=5.9.0 <6.1.0"
 };
 
-const STYLES = `@import "tailwindcss";
-@import "@nanahoshi/mona-ui/styles.css";
+/** What the rich text editor needs on top, as its installation notes say. */
+const EDITOR_ENTRY = "@nanahoshi/mona-ui/editor";
+const EDITOR_DEPENDENCIES = { remixicon: "^4.9.1" };
+const EDITOR_DEV_DEPENDENCIES = { "@tailwindcss/typography": "^0.5.20" };
+const EDITOR_STYLES = `@import "remixicon/fonts/remixicon.css";
+@plugin "@tailwindcss/typography";
+`;
 
+const styles = (editor: boolean): string => `@import "tailwindcss";
+@import "@nanahoshi/mona-ui/styles.css";
+${editor ? EDITOR_STYLES : ""}
 body {
     background-color: var(--color-canvas);
     color: var(--color-foreground);
@@ -67,6 +75,7 @@ export function readExampleComponent(source: string): { className: string; selec
 export function createExampleProject({ files, mainFile, title }: ExampleProjectInput): Record<string, string> {
     const { className, selector } = readExampleComponent(files[mainFile]);
     const appFiles = Object.fromEntries(Object.entries(files).map(([name, content]) => [`src/app/${name}`, content]));
+    const editor = Object.values(files).some(content => content.includes(`"${EDITOR_ENTRY}"`));
     return {
         ...appFiles,
         ".postcssrc.json": toJson({ plugins: { "@tailwindcss/postcss": {} } }),
@@ -103,8 +112,8 @@ export function createExampleProject({ files, mainFile, title }: ExampleProjectI
             version: "0.0.0",
             private: true,
             scripts: { build: "ng build", start: "ng serve" },
-            dependencies: DEPENDENCIES,
-            devDependencies: DEV_DEPENDENCIES
+            dependencies: editor ? { ...DEPENDENCIES, ...EDITOR_DEPENDENCIES } : DEPENDENCIES,
+            devDependencies: editor ? { ...DEV_DEPENDENCIES, ...EDITOR_DEV_DEPENDENCIES } : DEV_DEPENDENCIES
         }),
         "src/index.html": `<!doctype html>
 <html lang="en">
@@ -124,7 +133,7 @@ import { ${className} } from "./app/${mainFile.replace(/\.ts$/, "")}";
 
 bootstrapApplication(${className}).catch(error => console.error(error));
 `,
-        "src/styles.css": STYLES,
+        "src/styles.css": styles(editor),
         "tsconfig.json": toJson({
             compileOnSave: false,
             compilerOptions: {
