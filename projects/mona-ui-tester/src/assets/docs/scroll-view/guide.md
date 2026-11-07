@@ -44,70 +44,36 @@ Each slide renders the projected template with the following context variables:
 </mona-scroll-view>
 ```
 
-## Feature Examples
+## Examples
 
-### Navigation arrows
+### Arrows and dot pager
 
-```html
-<mona-scroll-view [data]="items" width="640px" height="360px" [arrows]="true">
-  <ng-template let-item>{{ item }}</ng-template>
-</mona-scroll-view>
+```example
+scroll-view/arrows-pager
 ```
 
 In finite mode, the left arrow is hidden on the first page and the right arrow is hidden on the last page. If the arrow that hides has focus, focus moves to the other arrow. In infinite mode, both arrows remain visible at all times.
-
-### Swipe
-
-A touch or pen swipe of 40 px or more, mostly sideways, changes the slide, reversed in RTL. Vertical scrolling and pinch zoom stay with the browser, a mouse drag stays text selection, and a drag that starts on a text field or a slider stays with that control. Swipes are always on, but `arrows` and `pageable` are off by default, and WCAG needs a way to change the slide without a gesture (2.5.1 Pointer Gestures), so turn on at least one of them.
-
-### Dot pager
-
-```html
-<mona-scroll-view
-  [data]="items"
-  width="640px"
-  height="360px"
-  [pageable]="true"
-  pagerOverlay="dark"
-  pagerRounded="full">
-  <ng-template let-item>{{ item }}</ng-template>
-</mona-scroll-view>
-```
 
 When the number of dots exceeds the pager bar width, scroll arrows appear automatically on the pager bar to let the user scroll the dot list horizontally. The active dot is kept centered in the list, however the page changed. Only the list scrolls, so the pager doesn't move the page to itself.
 
 `pagerOverlay="dark"` uses the theme's canvas color, which isn't dark in a light theme, and `"light"` uses its overlay surface color. So the names don't promise a shade. Check the strip against your slides in each theme you ship.
 
-### Infinite loop
+### Swipe
 
-```html
-<mona-scroll-view
-  [data]="items"
-  width="640px"
-  height="360px"
-  [infinite]="true"
-  [arrows]="true">
-  <ng-template let-item>{{ item }}</ng-template>
-</mona-scroll-view>
-```
+A touch or pen swipe of 40 px or more, mostly sideways, changes the slide, reversed in RTL. Vertical scrolling and pinch zoom stay with the browser, a mouse drag stays text selection, and a drag that starts on a text field or a slider stays with that control. Swipes are always on, but `arrows` and `pageable` are off by default, and WCAG needs a way to change the slide without a gesture (2.5.1 Pointer Gestures), so turn on at least one of them.
+
+### Infinite loop
 
 In infinite mode, navigating past the last item wraps to the first, and navigating before the first wraps to the last.
 
-### Two-way page binding
-
-```typescript
-protected currentPage = 0;
+```example
+scroll-view/infinite
 ```
 
-```html
-<mona-scroll-view
-  [data]="items"
-  width="640px"
-  height="360px"
-  [(index)]="currentPage">
-  <ng-template let-item>{{ item }}</ng-template>
-</mona-scroll-view>
-<p>Page {{ currentPage + 1 }} of {{ items.length }}</p>
+### Two-way page binding
+
+```example
+scroll-view/two-way
 ```
 
 `index` is a two-way model. Setting it programmatically navigates to that zero-based page index. A value outside the range is brought back to the first or last page, or wrapped in infinite mode, and the corrected value comes back through `indexChange`.

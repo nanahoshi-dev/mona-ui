@@ -40,24 +40,28 @@ Pager's default first/previous/next/last buttons, numeric page buttons, page-siz
 | `PagerPageSizeTemplateDirective`          | `ng-template[monaPagerPageSizeTemplate]`          | `PageSizeTemplateContext`: `PagerContext`, with the page-size options as `$implicit`.                                                                                                                                               |
 | `PagerInfoTemplateDirective`              | `ng-template[monaPagerInfoTemplate]`              | `InfoTemplateContext`: `PagerContext`.                                                                                                                                                                                              |
 
-## Feature Examples
+## Examples
 
 ### Numeric pagination with external state
 
-```html
-<mona-pager [total]="total()" [pageSize]="10" [(skip)]="skip" (pageChange)="onPageChange($event)"></mona-pager>
+Pager only tracks the position. Slice or load the items yourself from `skip` and `pageSize`.
+
+```example
+pager/paging
 ```
 
 ### "Page N of M" input mode
 
-```html
-<mona-pager [type]="'input'" [total]="100" [pageSize]="10"></mona-pager>
+`pageChange` carries `skip` and `take` for the page to load.
+
+```example
+pager/input
 ```
 
 ### Custom page-size options and page-jump input
 
-```html
-<mona-pager [total]="100" [pageSize]="10" [pageSizeValues]="[10, 25, 50, 100]" [pageInput]="true"></mona-pager>
+```example
+pager/page-sizes
 ```
 
 Set `pageSizeValues` to `false` or `[]` to hide the page-size dropdown entirely, or to `true` for the default options.
@@ -80,12 +84,10 @@ protected onPageSizeSelect(event: PageSizeChangeEvent): void {
 
 ### Custom navigation button
 
-```html
-<mona-pager [total]="100" [pageSize]="10">
-    <ng-template monaPagerNavigationButtonsTemplate type="first" let-disabled="disabled" let-navigate="navigate">
-        <button monaButton [disabled]="disabled" (click)="navigate()">First</button>
-    </ng-template>
-</mona-pager>
+Each template replaces one button, named by its `type`. Your button needs its own accessible name, since the default label isn't applied to it.
+
+```example
+pager/custom-buttons
 ```
 
 ## Technical & Behavior Notes

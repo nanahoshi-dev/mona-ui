@@ -34,6 +34,40 @@ import type { ChartField, ChartValueFormatter, ChartViewportState } from "@nanah
 </mona-chart>
 ```
 
+## Examples
+
+### Line
+
+Series read their values from the chart's `data`, using `field` for the value and the chart's `xField` for the category.
+
+```example
+chart/line
+```
+
+### Stacked bars
+
+Bar series with the same `stack` name stack together. `valueFormatter` formats the values in tooltips and announcements, without changing the axis ticks.
+
+```example
+chart/bar
+```
+
+### Donut
+
+A donut reads `category` and `value` by default. `ng-template[monaChartCenterTemplate]` fills its center, and legend items show or hide slices.
+
+```example
+chart/donut
+```
+
+### Custom tooltip
+
+A shared tooltip shows every visible series at the active category. `ng-template[monaChartTooltipTemplate]` replaces its content.
+
+```example
+chart/tooltip
+```
+
 ## Shared Options
 
 ### Data labels

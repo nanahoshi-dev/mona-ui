@@ -77,7 +77,7 @@ Consumers interact with the following selectors directly:
 
 Bind the tree's data to `[monaTreeViewNodeTemplateOf]` to type `$implicit` in the template; without it, the data item is `any`. The context type, `TreeViewNodeTemplateContext<T>`, is exported for annotating a `TemplateRef`. The node's name is its template content, so keep it short: it is what screen readers read for the node. See [Keys inside node templates](#keys-inside-node-templates) before placing controls in a node template.
 
-## Feature Examples
+## Examples
 
 ### Flat data
 
@@ -91,30 +91,14 @@ protected readonly data = [
 ];
 ```
 
-```html
-<mona-tree-view
-    ariaLabel="Categories"
-    [data]="data"
-    mode="flat"
-    idField="id"
-    parentIdField="parentId"
-    textField="text"></mona-tree-view>
-```
+The [checking example](#checking) uses flat data.
 
 ### Selection
 
 Apply `monaTreeViewSelectable` to track which nodes are selected. Single mode is the default; pass `{ mode: 'multiple' }` to allow multiple selected nodes. In single mode, `toggleable: true` lets the user deselect the selected node by clicking it (or pressing Enter) again; `childrenOnly: true` makes only nodes without children selectable.
 
-```html
-<mona-tree-view
-    ariaLabel="Documents"
-    [data]="data"
-    children="items"
-    textField="text"
-    [monaTreeViewSelectable]="{ mode: 'multiple' }"
-    selectBy="id"
-    [selectedKeys]="selectedKeys()"
-    (selectedKeysChange)="selectedKeys.set($event)"></mona-tree-view>
+```example
+tree-view/selection
 ```
 
 `selectBy` derives the key used for `selectedKeys`/`selectedKeysChange`; when omitted, the data item itself is the key. The same holds for `checkBy`, `disableBy` and `expandBy` below.
@@ -123,16 +107,8 @@ Apply `monaTreeViewSelectable` to track which nodes are selected. Single mode is
 
 Apply `monaTreeViewCheckable` to render checkboxes on nodes. Checking a parent also checks its children, checking all of a parent's children checks the parent, and a parent shows an indeterminate state when only some of its children are checked, unless configured otherwise through the directive's options (`checkChildren`, `checkParents`, `mode: "single"`). Use `hasCheckbox` to show checkboxes on some nodes only.
 
-```html
-<mona-tree-view
-    ariaLabel="Documents"
-    [data]="data"
-    children="items"
-    textField="text"
-    monaTreeViewCheckable
-    checkBy="id"
-    [checkedKeys]="checkedKeys()"
-    (checkedKeysChange)="checkedKeys.set($event)"></mona-tree-view>
+```example
+tree-view/checking
 ```
 
 ### Disabling nodes
@@ -187,24 +163,8 @@ Apply `monaTreeViewDragAndDrop` to let the consumer reorder or reparent nodes by
 
 A drop changes nothing by itself: the tree emits `nodeDrop`, and the consumer applies the move. Use the exported `moveTreeNode` (hierarchical data) or `moveFlatTreeNode` (flat data) helper inside the `nodeDrop` handler to compute an updated array and pass it back through `data`. `moveTreeNode` returns a new top-level array and updates nested children arrays in place, so untouched data items keep their identity and their tree state; `moveFlatTreeNode` returns a new array in which the moved item is replaced by a copy with its parent id updated, so key the flat tree's state with `selectBy`, `checkBy` and `expandBy` rather than by data item.
 
-```html
-<mona-tree-view
-    ariaLabel="Documents"
-    [data]="data()"
-    children="items"
-    textField="text"
-    monaTreeViewDragAndDrop
-    (nodeDrop)="onNodeDrop($event)"></mona-tree-view>
-```
-
-```typescript
-import { moveTreeNode, type NodeDropEvent } from "@nanahoshi/mona-ui/tree-view";
-
-protected readonly data = signal<FileItem[]>([]);
-
-protected onNodeDrop(event: NodeDropEvent<FileItem>): void {
-    this.data.set(moveTreeNode(this.data(), event, "id", "items"));
-}
+```example
+tree-view/drag-and-drop
 ```
 
 For flat data, call `moveFlatTreeNode(this.data(), event, "id", "parentId")` instead.
@@ -217,40 +177,11 @@ Pass a function returning an `Observable` as `children` to load a node's childre
 
 While children load, the node is expanded and `aria-busy`, its expander reads "Loading {node}", and a load that takes more than a moment (400 ms) is announced. If the observable errors, `childrenLoadError` emits with the node and the error, the failure is announced, and the node is collapsed again and described as failed ("Couldn't load the items in {node}"); its expander reads "Retry loading {node}", and expanding it loads again.
 
-```html
-<mona-tree-view
-    ariaLabel="Folders"
-    [data]="data"
-    [children]="loadChildren"
-    [hasChildren]="hasChildren"
-    textField="text"
-    monaTreeViewExpandable
-    expandBy="id"
-    (childrenLoadError)="onLoadError($event)"></mona-tree-view>
+```example
+tree-view/lazy-loading
 ```
 
-```typescript
-import { type ChildrenLoadErrorEvent } from "@nanahoshi/mona-ui/tree-view";
-
-interface FolderItem {
-    id: string;
-    text: string;
-    hasChildren: boolean;
-}
-
-readonly #api = inject(FolderApi);
-
-protected readonly data: FolderItem[] = [{ id: "1", text: "Documents", hasChildren: true }];
-
-protected readonly loadChildren = (item: FolderItem): Observable<FolderItem[]> => this.#api.getChildren(item.id);
-
-protected readonly hasChildren = (item: FolderItem): boolean => item.hasChildren;
-
-protected onLoadError(event: ChildrenLoadErrorEvent<FolderItem>): void {
-    // The node is collapsed again and expanding it retries; log or report the error here.
-    console.error(event.error);
-}
-```
+To handle a failed load, listen to `childrenLoadError`: the node is collapsed again and expanding it retries, so log or report `event.error` there.
 
 ## Technical & Behavior Notes
 

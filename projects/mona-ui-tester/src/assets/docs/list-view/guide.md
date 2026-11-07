@@ -31,7 +31,7 @@ import { ListViewComponent } from "@nanahoshi/mona-ui/list-view";
 <mona-list-view aria-label="Foods" [items]="items" textField="name" [height]="'300px'"></mona-list-view>
 ```
 
-`items` accepts any `Iterable<T>`, and `textField` accepts either a property name or a function `(item: T) => string` used to render each item's default text. Without any behavior directive, the list is a `list` you can move through with the arrow keys; add `monaListViewSelectable` for selection (see [Feature Examples](#feature-examples)). Name every list view with `aria-label` or `aria-labelledby`.
+`items` accepts any `Iterable<T>`, and `textField` accepts either a property name or a function `(item: T) => string` used to render each item's default text. Without any behavior directive, the list is a `list` you can move through with the arrow keys; add `monaListViewSelectable` for selection (see [Examples](#examples)). Name every list view with `aria-label` or `aria-labelledby`.
 
 ## Anatomy & Public Structural Templates
 
@@ -62,20 +62,12 @@ Each structural directive below is an `ng-template` placed as projected content 
 
 Bind the list view's items to `[monaListViewItemTemplateOf]` to type `let-item` in the template; without it, the item is `any`. The group header template's value isn't type-checked. Both context types are exported.
 
-## Feature Examples
+## Examples
 
 ### Single and multiple selection
 
-```html
-<mona-list-view
-    aria-label="Foods"
-    [items]="items"
-    textField="name"
-    [monaListViewSelectable]="{ mode: 'single', toggleable: true }"
-    selectBy="id"
-    [selectedKeys]="selectedIds"
-    (selectedKeysChange)="onSelectedIdsChange($event)">
-</mona-list-view>
+```example
+list-view/selection
 ```
 
 `selectBy` derives the key used for `selectedKeys`/`selectedKeysChange`; when omitted, the data item itself is used as the key. `selectedKeysChange` fires for the user's selections, not for keys set through `selectedKeys`, so `[(selectedKeys)]` works. `mode: "multiple"` allows selecting more than one item; `toggleable` (single mode only) lets the user deselect the current item by clicking it again. Set `checkboxes: true` on the options object to render a checkbox per item instead of relying on background color alone.
@@ -91,25 +83,19 @@ Arrow-key/Home/End/typeahead navigation is on without the directive — see [Key
 
 ### Grouping
 
-```html
-<mona-list-view
-    aria-label="Foods"
-    [items]="items"
-    textField="name"
-    [monaListViewGroupable]="{ enabled: true, headerOrder: 'asc', orderBy: 'name' }"
-    groupBy="category">
-</mona-list-view>
+```example
+list-view/grouping
 ```
 
 `groupBy` selects the field (or a function) used to bucket items; each distinct value renders as a group header row. `orderBy`/`orderByDirection` sort items within each group; `headerOrder` sorts the groups themselves by their key. Dates group by their time, so two `Date` objects for the same moment share a group and date groups sort chronologically. Headers show dates in the locale's medium date format and numbers in the locale's digits; set `headerText` to format them yourself. The group header template receives the group's value (a `Date` stays a `Date`). If `groupBy` is omitted while grouping is enabled, every item falls into a single, unlabeled group — always provide `groupBy` together with `monaListViewGroupable`.
 
 ### Pagination
 
-```html
-<mona-list-view aria-label="Foods" [items]="items" textField="name" [monaListViewPageable]="{ pageSizeValues: [10, 25, 50] }"> </mona-list-view>
+```example
+list-view/paging
 ```
 
-Adds a pager below the list. Pagination and virtualization are mutually exclusive: if `monaListViewVirtualScroll` is also enabled, the pager is hidden regardless of `monaListViewPageable`'s state — see [Pagination and virtualization don't combine](#pagination-and-virtualization-dont-combine).
+Adds a pager below the list. `[(page)]` and `[(pageSize)]` on the directive follow the user's paging. Pagination and virtualization are mutually exclusive: if `monaListViewVirtualScroll` is also enabled, the pager is hidden regardless of `monaListViewPageable`'s state — see [Pagination and virtualization don't combine](#pagination-and-virtualization-dont-combine).
 
 ### Virtual scrolling
 
@@ -122,18 +108,11 @@ Renders only the items currently scrolled into view, for large collections. `hei
 
 ### Infinite scroll
 
-```typescript
-protected onScrollBottom(): void {
-    this.visibleCount.update(count => count + 20);
-}
+```example
+list-view/infinite-scroll
 ```
 
-```html
-<mona-list-view aria-label="Foods" [items]="items | slice: 0 : visibleCount()" textField="name" [height]="'300px'" (scrollBottom)="onScrollBottom()">
-</mona-list-view>
-```
-
-`scrollBottom` emits once each time the list arrives within roughly 3px of its bottom edge (scrolling away and back emits again, as does reaching the new end after more items load), whichever of the plain list or the virtual scroll viewport is active. Combine it with slicing a larger source collection to implement infinite loading — see [`scrollBottom` and `monaListViewPageable`](#scrollbottom-and-monalistviewpageable).
+`scrollBottom` emits once each time the list arrives within roughly 3px of its bottom edge (scrolling away and back emits again, as does reaching the new end after more items load), whichever of the plain list or the virtual scroll viewport is active. Combine it with slicing a larger source collection, and `loading` while the next batch arrives, to implement infinite loading — see [`scrollBottom` and `monaListViewPageable`](#scrollbottom-and-monalistviewpageable).
 
 ## Technical & Behavior Notes
 

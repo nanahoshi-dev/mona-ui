@@ -1,4 +1,4 @@
-import { Component, signal } from "@angular/core";
+import { Component, computed, signal } from "@angular/core";
 import {
     TreeViewCheckableDirective,
     TreeViewComponent,
@@ -21,4 +21,7 @@ export class TreeViewCheckingExampleComponent {
         { id: 7, text: "Lighting", parentId: 4 }
     ];
     protected readonly checkedKeys = signal<number[]>([3]);
+    protected readonly checkedNames = computed(() =>
+        this.categories.filter(category => this.checkedKeys().includes(category.id)).map(category => category.text)
+    );
 }

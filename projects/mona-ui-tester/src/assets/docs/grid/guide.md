@@ -38,7 +38,7 @@ protected readonly orders = signal([
 </mona-grid>
 ```
 
-Without any behavior directive applied, the grid above only paginates; see [Feature Examples](#feature-examples) for sorting, filtering, grouping, selection, editing, and the other opt-in behaviors.
+Without any behavior directive applied, the grid above only paginates; see [Examples](#examples) for sorting, filtering, grouping, selection, editing, and the other opt-in behaviors.
 
 ## Anatomy & Public Structural Templates
 
@@ -69,74 +69,19 @@ Each directive below is an `ng-template` (or, for `monaGridColumnTitleTemplate`,
 </mona-grid>
 ```
 
-## Feature Examples
+## Examples
 
 ### Server Paging, Sorting, and Filtering
 
 Import `GridServerBindingDirective` and `GridDataState` from `@nanahoshi/mona-ui/grid`. Apply `monaGridServerBinding` when `data` contains only the page returned by your server. Bind the server's matching record count to `total`, the page's zero-based offset to `skip`, and its size to the Grid's existing `pageSize` input.
 
-```html
-<mona-grid
-    class="h-96"
-    [data]="result().data"
-    monaGridServerBinding
-    [total]="result().total"
-    [skip]="requestState().skip"
-    [pageSize]="requestState().take"
-    [loading]="loading()"
-    monaGridSortable
-    [(sort)]="sort"
-    [monaGridFilterable]="{ enabled: true, type: 'menu, row' }"
-    [(filter)]="filter"
-    (dataStateChange)="load($event)">
-    <mona-grid-column field="id" title="ID" type="number" />
-    <mona-grid-column field="name" title="User" />
-</mona-grid>
+```example
+grid/server
 ```
 
 `dataStateChange` supplies `{ skip, take, sort, filter }` once for a user page, page-size, sort, or filter action. Sort and filter actions start at `skip: 0`; a page-size change keeps the first row of the page in view. Sort order follows multi-column sort priority. Bindings from the parent synchronize silently, and ordinary directive creation does not emit an initial request: load the initial page yourself.
 
-The application owns HTTP requests, errors, and stale-response handling. For example, inject your repository and ignore responses from an older request:
-
-```typescript
-// repository.list(state) returns Promise<{ data: User[]; total: number }>.
-readonly #repository = inject(UserRepository);
-readonly #destroyRef = inject(DestroyRef);
-#requestId = 0;
-protected readonly requestState = signal<GridDataState>({ skip: 0, take: 10, sort: [], filter: [] });
-protected readonly sort = signal<SortDescriptor[]>([]);
-protected readonly filter = signal<CompositeFilterDescriptor[]>([]);
-protected readonly result = signal<{ data: User[]; total: number }>({ data: [], total: 0 });
-protected readonly loading = signal(false);
-protected readonly error = signal<unknown>(null);
-
-public ngOnInit(): void {
-    void this.load(this.requestState());
-}
-
-protected async load(state: GridDataState): Promise<void> {
-    const requestId = ++this.#requestId;
-    this.requestState.set(state);
-    this.loading.set(true);
-    this.error.set(null);
-    try {
-        const result = await this.#repository.list(state);
-        if (!this.#destroyRef.destroyed && requestId === this.#requestId) {
-            this.result.set(result);
-        }
-    } catch (error: unknown) {
-        if (!this.#destroyRef.destroyed && requestId === this.#requestId) {
-            this.error.set(error);
-        }
-    } finally {
-        if (!this.#destroyRef.destroyed && requestId === this.#requestId) {
-            this.loading.set(false);
-        }
-    }
-}
-```
-
-Import `DestroyRef`, `inject`, and `signal` from `@angular/core`, `GridDataState` from `@nanahoshi/mona-ui/grid`, and `SortDescriptor` and `CompositeFilterDescriptor` from `@nanahoshi/mona-ui/query`. `User` and `UserRepository` are application types; the Grid has no endpoint or transport dependency.
+The application owns HTTP requests, errors, and stale-response handling. The example ignores a response that arrives after a newer request started. `SortDescriptor` and `CompositeFilterDescriptor` come from `@nanahoshi/mona-ui/query`; the Grid has no endpoint or transport dependency.
 
 The server must apply the descriptors to the whole matching dataset before paging. The Grid preserves returned row order and displays every supplied row, even when `skip` is nonzero. For example, ten supplied rows at `skip: 40`, `pageSize: 10`, and `total: 137` show page five and retain all ten rows.
 
@@ -194,48 +139,21 @@ Virtualization uses a fixed height in pixels for every rendered item and the scr
 
 `monaGridSortable` enables column-header sorting; `sort` is a two-way bindable model of the current sort descriptors, and a restored grid state updates it. Descriptors are kept even when no column shows their field (a column added later shows the sort), and a repeated field keeps its last descriptor. A column's `sortComparator`, or the descriptor's own `sort` function, is kept when the user clicks the header.
 
-```typescript
-protected readonly sort = signal<SortDescriptor[]>([]);
+```example
+grid/sorting-filtering
 ```
 
-```html
-<mona-grid [data]="orders()" monaGridSortable [(sort)]="sort">
-    <mona-grid-column field="freight" title="Freight" type="number"></mona-grid-column>
-</mona-grid>
-```
-
-Pass an object to `monaGridSortable` to configure sort mode, unsorting, or index display:
-
-```html
-<mona-grid
-    [data]="orders()"
-    [monaGridSortable]="{ mode: 'multiple', allowUnsort: true, showIndices: true }"></mona-grid>
-```
+Pass an object to `monaGridSortable` to configure sort mode, unsorting, or index display, as the example does with `{ mode: 'multiple', allowUnsort: true }`.
 
 In multiple mode, sorted headers show their one-based priority next to the direction icon by default: the first sorted column is `1`, the next is `2`. Changing direction retains priority; unsorting a column renumbers the remaining columns. Set `showIndices: false` to hide the numbers. Single mode shows only the direction icon.
 
-Set `[sortable]="false"` on a column to disable sorting through its header. Columns default to `sortable: true`, and grid-level sorting must also be enabled. This setting controls header interaction; existing or externally supplied `sort` descriptors remain applied.
-
-```html
-<mona-grid [data]="orders()" [monaGridSortable]="{ mode: 'multiple' }" [(sort)]="sort">
-    <mona-grid-column field="id" title="Order ID" [sortable]="false" />
-    <mona-grid-column field="freight" title="Freight" type="number" />
-    <mona-grid-column field="shipName" title="Ship name" />
-</mona-grid>
-```
+Set `[sortable]="false"` on a column to disable sorting through its header. Columns default to `sortable: true`, and grid-level sorting must also be enabled. This setting controls header interaction; existing or externally supplied `sort` descriptors remain applied. The example turns it off for the Order column.
 
 ### Filtering
 
 `monaGridFilterable` renders filter UI either in the column header menu, a dedicated filter row, or both, per `type`. `filter` is a two-way bindable model of the applied `CompositeFilterDescriptor[]`, applied before the first render. Conditions on one field become that column's filter, and an `and` across fields is split per column; filters on the same field are combined with `and`. Filters that span columns (an `or` of two fields) are still applied, reported and sent to the server, without marking a column. Conditions with an unknown operator are ignored.
 
-```typescript
-protected readonly filter = signal<CompositeFilterDescriptor[]>([]);
-```
-
-```html
-<mona-grid [data]="orders()" [monaGridFilterable]="{ enabled: true, type: 'menu, row' }" [(filter)]="filter">
-</mona-grid>
-```
+The [sorting example](#sorting) shows both the header menu and the filter row.
 
 The header menu is a dialog named after its column (`filterByColumn`). It opens at the column type's first operator, keeps focus inside until it closes, and returns focus to its funnel button. `Enter` in a value applies the filter, and text that is only spaces is no value; text is trimmed before it is applied. A date column's menu and filter row use the column's string `format`, or the locale's date format without one. While a column is filtered, its funnel shows a dot as well as a colour, and its name says so (`filterByColumnFiltered`).
 
@@ -258,31 +176,11 @@ In the filter row, typing filters after a 300 ms pause; choosing an operator, pi
 
 `monaGridSelectable` enables single or multiple row selection. `selectedKeys` binds the currently selected keys; `selectBy` (a field name or a function) chooses what identifies a row. Without `selectBy`, rows are selected by the grid's `rowKey` value, so the selection survives a refetch; without either, by the data item. `selectedKeysChange` reports user changes only.
 
-```html
-<mona-grid
-    [data]="orders()"
-    [monaGridSelectable]="{ mode: 'multiple' }"
-    selectBy="orderId"
-    [selectedKeys]="selectedKeys()"
-    (selectedKeysChange)="selectedKeys.set($event)">
-</mona-grid>
+```example
+grid/selection
 ```
 
-Set `showCheckboxes: true` to render a built-in checkbox selection column. The column is fixed at the left of the grid, is locked while horizontally scrolling, and never participates in sorting, filtering, grouping, resizing, reordering, or the column chooser.
-
-```html
-<mona-grid
-    [data]="orders()"
-    [monaGridSelectable]="{
-        mode: 'multiple',
-        showCheckboxes: true,
-        selectOnRowClick: false
-    }"
-    selectBy="orderId"
-    [selectedKeys]="selectedKeys()"
-    (selectedKeysChange)="selectedKeys.set($event)">
-</mona-grid>
-```
+Set `showCheckboxes: true` to render a built-in checkbox selection column. The column is fixed at the left of the grid, is locked while horizontally scrolling, and never participates in sorting, filtering, grouping, resizing, reordering, or the column chooser. `rowAriaLabel` names each checkbox after its row.
 
 Options:
 
@@ -313,21 +211,11 @@ While virtual scrolling is on, the grid shows no pager and no aggregate footer, 
 
 `monaGridEditable` turns on inline editing, backed exclusively by Angular Signal Forms — see [Form Interaction](#form-interaction). `mode` chooses whether editing commits per cell or per row; `schema` validates the row being edited.
 
-```html
-<mona-grid
-    [data]="orders()"
-    [monaGridEditable]="{ mode: 'row', schema: createOrderEditSchema }"
-    [newRowFactory]="createNewOrder"
-    rowKey="orderId"
-    (cellEdit)="onCellEdit($event)"
-    (rowEdit)="onRowEdit($event)"
-    (save)="onSave($event)"
-    (remove)="onRemove($event)"
-    (cancel)="onCancel($event)"
-    (add)="onAdd($event)">
-    <mona-grid-column field="freight" title="Freight" type="number" [editable]="true"></mona-grid-column>
-</mona-grid>
+```example
+grid/editing
 ```
+
+A `mona-grid-command-column` without content shows the built-in Edit and Remove buttons, and `monaGridAddCommand` on a toolbar button opens the add row.
 
 Each column's `type` (`"string"`, `"number"`, `"date"`, or `"boolean"`) selects the built-in editor rendered for that cell — a text box, numeric text box, date picker, or checkbox, respectively — unless the column provides its own `monaGridEditTemplate`. Every column is editable except the one whose `field` is the `rowKey`; set `[editable]` on a `mona-grid-column` to change that, for example `[editable]="true"` to type the key of a new row.
 

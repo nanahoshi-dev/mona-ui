@@ -12,5 +12,5 @@
         [data]="categories"
         [expandedKeys]="[1, 4]"
         [(checkedKeys)]="checkedKeys" />
-    <span aria-live="polite" class="text-sm">Checked ids: {{ checkedKeys().join(", ") || "none" }}</span>
+    <span aria-live="polite" class="text-sm">Checked: {{ checkedNames().join(", ") || "nothing" }}</span>
 </div>
