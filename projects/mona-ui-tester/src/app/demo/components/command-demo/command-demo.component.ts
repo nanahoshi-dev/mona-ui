@@ -21,14 +21,14 @@ const CITIES = ["Ankara", "Berlin", "Buenos Aires", "Cairo", "Kyoto", "Lagos", "
 
 /** Stands in for a server: answers slowly, and more slowly for short queries, so answers can arrive out of order. */
 const searchCities = (query: string, signal: AbortSignal): Promise<string[]> =>
-    new Promise((resolve, reject) => {
+    new Promise(resolve => {
         const timer = setTimeout(
             () => resolve(CITIES.filter(city => city.toLowerCase().includes(query.toLowerCase()))),
             1200 / Math.max(query.length, 1) + 200
         );
         signal.addEventListener("abort", () => {
             clearTimeout(timer);
-            reject(signal.reason);
+            resolve([]);
         });
     });
 
