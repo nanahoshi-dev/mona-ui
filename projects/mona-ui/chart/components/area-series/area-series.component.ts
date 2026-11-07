@@ -10,6 +10,10 @@ import type { ChartStackMode } from "../../models/chart-stack.models";
 
 let nextSeriesId = 0;
 
+/**
+ * Renders a continuous Cartesian area series supporting gradient fades, solid fills, cumulative stacking, and 100%
+ * normalized bands.
+ */
 @Component({
     selector: "mona-area-series",
     template: "",

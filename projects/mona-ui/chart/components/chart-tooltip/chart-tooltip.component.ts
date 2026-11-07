@@ -26,6 +26,9 @@ export interface ChartTooltipPlacement {
     readonly top: number;
 }
 
+/**
+ * Adds a tooltip for pointer and keyboard interaction. Use `ng-template[monaChartTooltipTemplate]` for custom content.
+ */
 @Component({
     selector: "mona-chart-tooltip",
     templateUrl: "./chart-tooltip.component.html",

@@ -418,6 +418,7 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
      */
     public readonly touched = input(false, { transform: booleanAttribute });
 
+    /** @description Extra classes for the input's container. */
     public readonly userClass = input("", { alias: "class" });
 
     /**

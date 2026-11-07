@@ -329,10 +329,12 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
         });
     }
 
+    /** Blurs the inner slider control if focused. */
     public blur(): void {
         this.controlElement().nativeElement.blur();
     }
 
+    /** Focuses the inner slider control. Does nothing while disabled. */
     public focus(options?: FocusOptions): void {
         if (!this.effectiveDisabled()) {
             this.controlElement().nativeElement.focus(options);

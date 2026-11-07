@@ -32,6 +32,7 @@ export class WindowRef<R = unknown> implements WindowRefParams<R> {
         this.#options.close(result);
     }
 
+    /** Closes the window after the given delay, in milliseconds. */
     public closeWithDelay(delay: number, result?: R): void {
         this.#options.closeWithDelay(delay, result);
     }
@@ -66,6 +67,7 @@ export class WindowRef<R = unknown> implements WindowRefParams<R> {
         return this.#options.closed$;
     }
 
+    /** The hosted component, when `content` is a component rather than a `TemplateRef`. */
     public get component(): ComponentRef<unknown> | null {
         return this.#options.component;
     }
@@ -85,14 +87,17 @@ export class WindowRef<R = unknown> implements WindowRefParams<R> {
         return this.#options.dragStart$;
     }
 
+    /** The window's overlay element. */
     public get element(): HTMLElement {
         return this.#options.element;
     }
 
+    /** The window's current rendered height, in pixels. */
     public get height(): number {
         return this.#options.height;
     }
 
+    /** The underlying `PopupRef`, for advanced overlay access. */
     public get popupRef(): PopupRef {
         return this.#options.popupRef;
     }
@@ -102,6 +107,7 @@ export class WindowRef<R = unknown> implements WindowRefParams<R> {
         return this.#options.resize$;
     }
 
+    /** The window's current rendered width, in pixels. */
     public get width(): number {
         return this.#options.width;
     }

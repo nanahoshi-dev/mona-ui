@@ -11,10 +11,12 @@ export class ListBoxClearEvent<T = any> extends PreventableEvent {
         this.#selectedItems = [...selectedItems];
     }
 
+    /** Discriminant matching the `ListBoxActionEvent` union. */
     public get action(): Extract<ToolbarAction, "clear"> {
         return this.#action;
     }
 
+    /** The items that were selected when Clear Selection was clicked. */
     public get selectedItems(): T[] {
         return this.#selectedItems;
     }

@@ -4,6 +4,12 @@ import type { DialogVariantProps } from "../styles/dialog.styles";
 import type { ActionsLayout } from "./ActionsLayout";
 import type { DialogAction } from "./DialogAction";
 
+/**
+ * The settings object accepted by `DialogService.show()`. Fields mirror the `DialogComponent` inputs of the same name
+ * (`actions`, `actionsLayout`, `ariaLabel`, `closable`, `closeOnEscape`, `description`, `focusedElement`, `height`,
+ * `left`, `maxHeight`, `maxWidth`, `minHeight`, `minWidth`, `modal`, `rounded`, `text`, `title`, `top`, `type`,
+ * `width`), plus these service-only fields:
+ */
 export interface DialogSettings<D = unknown> {
     actions?: Iterable<DialogAction>;
     actionsLayout?: ActionsLayout;
@@ -19,10 +25,13 @@ export interface DialogSettings<D = unknown> {
     /** Data for the content: `DIALOG_DATA` in a component, `$implicit` in a template. */
     data?: D;
     description?: string;
+    /** Template rendered in place of `description`. */
     descriptionTemplate?: TemplateRef<unknown>;
     focusedElement?: HTMLElement | ElementRef<HTMLElement> | string | null;
+    /** Template rendered in place of the generated action-button row. */
     footerTemplate?: TemplateRef<unknown>;
     height?: number;
+    /** Template rendered in place of the built-in `type` icon. */
     iconTemplate?: TemplateRef<unknown>;
     /**
      * Parent injector for the dialog's content, so a component given as `content` can inject what the opener
@@ -35,6 +44,7 @@ export interface DialogSettings<D = unknown> {
     maxHeight?: number;
     /** Maximum width in pixels. When omitted, the dialog stays 1rem inside the viewport. */
     maxWidth?: number;
+    /** Overrides for the dialog's messages (close button label, OK, Cancel). */
     messages?: Partial<DialogMessages>;
     minHeight?: number;
     minWidth?: number;
@@ -52,6 +62,7 @@ export interface DialogSettings<D = unknown> {
     rounded?: DialogVariantProps["rounded"];
     text?: string;
     title?: string;
+    /** Template rendered in place of `title`. */
     titleTemplate?: TemplateRef<unknown>;
     /** Distance from the viewport's top edge in pixels. When omitted, the dialog is centered vertically. */
     top?: number;

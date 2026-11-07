@@ -7,6 +7,10 @@ import { ListService } from "@nanahoshi/mona-ui/internal/list";
 })
 export class ListViewVirtualScrollDirective<T> {
     readonly #listService = inject(ListService<T>);
+    /**
+     * @description Enables virtual scrolling. `height` is the fixed row height, in pixels, used to measure the
+     * viewport; when omitted, a `28`px row height is assumed.
+     */
     public readonly options = input.required<VirtualScrollOptions>({
         alias: "monaListViewVirtualScroll"
     });

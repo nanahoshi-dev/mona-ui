@@ -29,12 +29,19 @@ export interface GridColumnState {
 }
 
 export interface GridState {
+    /** Persisted per-column hidden/order/width state. */
     columns: readonly GridColumnState[];
+    /** Persisted filter descriptors. */
     filter: readonly GridStateCompositeFilterDescriptor[];
+    /** Persisted group descriptors. */
     group: readonly GroupDescriptor[];
+    /** Persisted page size, unless `persistPageSize` is `false`. */
     pageSize?: number;
+    /** Consumer-defined version tag used to reject stale persisted state. */
     schemaVersion?: number | string;
+    /** Persisted sort descriptors. */
     sort: readonly GridStateSortDescriptor[];
+    /** The state schema version produced by this version of the library. */
     version: GridStateVersion;
 }
 

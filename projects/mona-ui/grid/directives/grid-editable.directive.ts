@@ -46,6 +46,10 @@ export class GridEditableDirective {
      */
     public readonly newRowFactory = input<() => Record<PropertyKey, unknown>>(() => ({}));
 
+    /**
+     * @description Enables inline editing. An empty string enables cell-mode editing with default settings; pass an
+     * object to choose `"cell"` or `"row"` mode and an optional validation `schema`.
+     */
     public readonly options = input<EditableOptions | "">("", {
         alias: "monaGridEditable"
     });

@@ -11,6 +11,7 @@ import type { ChartLegendItem, ChartLegendPosition } from "../../models/chart-se
 import { chartLegendBaseThemeVariants, chartLegendItemBaseThemeVariants } from "../../styles/chart.styles";
 import { resolveLegendPlacement } from "../../internal/utils/chart-direction";
 
+/** Adds a legend. Items toggle what they represent unless `interactive` is off. */
 @Component({
     selector: "mona-chart-legend",
     templateUrl: "./chart-legend.component.html",

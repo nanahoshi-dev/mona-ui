@@ -14,10 +14,15 @@ export class ListBoxTransferEvent<T = any> extends PreventableEvent {
         this.#selectedItems = Array.from(selectedItems);
     }
 
+    /** Discriminant matching the `ListBoxActionEvent` union. */
     public get action(): ActionType {
         return this.#action;
     }
 
+    /**
+     * The items to transfer, in list order: the source's selection, or all of the source's items for the "All"
+     * variants. See Which list box's `actionClick` fires.
+     */
     public get selectedItems(): T[] {
         return this.#selectedItems;
     }

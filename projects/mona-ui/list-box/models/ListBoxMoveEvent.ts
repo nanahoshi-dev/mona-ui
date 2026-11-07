@@ -25,22 +25,27 @@ export class ListBoxMoveEvent<T = any> extends PreventableEvent {
         this.#selectedItems = Array.from(selectedItems);
     }
 
+    /** Discriminant matching the `ListBoxActionEvent` union. */
     public get action(): Extract<ToolbarAction, "moveDown" | "moveUp"> {
         return this.#action;
     }
 
+    /** For Move Up, the index above the first selected item; for Move Down, the index below the last one. */
     public get newIndex(): number {
         return this.#newIndex;
     }
 
+    /** The index of the first selected item (in list order) before the move. */
     public get oldIndex(): number {
         return this.#oldIndex;
     }
 
+    /** Indices of all selected items before the move, ascending. */
     public get selectedIndices(): number[] {
         return this.#selectedIndices;
     }
 
+    /** The items that were selected when the move was requested. */
     public get selectedItems(): T[] {
         return this.#selectedItems;
     }

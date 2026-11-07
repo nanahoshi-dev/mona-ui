@@ -45,12 +45,17 @@ export class NotificationService {
         });
     }
 
+    /**
+     * Closes the notification with the given `id`, wherever its container is positioned. No-op if no notification with
+     * that `id` is currently shown.
+     */
     public hide(id: string): void {
         for (const container of this.#containers.values()) {
             container.notifications.get(id)?.close();
         }
     }
 
+    /** Closes every currently visible notification, across all positions. */
     public hideAll(): void {
         for (const container of [...this.#containers.values()]) {
             for (const notification of [...container.notifications.values()]) {
@@ -59,6 +64,10 @@ export class NotificationService {
         }
     }
 
+    /**
+     * Creates a notification and returns a `NotificationRef`. If a notification with the same `id` already exists at
+     * the resolved `position`, returns a ref to that existing notification instead of creating a duplicate.
+     */
     public show(options: NotificationOptions): NotificationRef {
         const position = options.position ?? "topright";
         const id = options.id ?? createElementControlId();

@@ -11,6 +11,10 @@ import type { ChartValueFormatter } from "../../models/chart-polar.models";
 
 let nextGaugeSeriesId = 0;
 
+/**
+ * Renders circular or semi-circular gauge meters with value progress arcs, tapered needles, central hubs, and centered
+ * value projection.
+ */
 @Component({
     selector: "mona-gauge-series",
     template: "",

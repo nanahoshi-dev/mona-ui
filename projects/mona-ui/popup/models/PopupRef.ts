@@ -4,6 +4,7 @@ import { asapScheduler, type Observable } from "rxjs";
 import { type PopupCloseEvent } from "./PopupCloseEvent";
 import { type PopupRefParams } from "./PopupRefParams";
 
+/** Returned by `PopupService.create()` and emitted via `PopupComponent`'s `open` output. */
 export class PopupRef {
     #options: PopupRefParams;
 

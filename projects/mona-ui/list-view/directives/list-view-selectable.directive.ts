@@ -13,11 +13,24 @@ export class ListViewSelectableDirective<T, K = unknown> {
     };
     readonly #listService = inject<ListService<T>>(ListService);
 
+    /**
+     * @description Enables selection. An empty string enables single selection with default settings; pass an object to
+     * configure `mode` (`"single"` or `"multiple"`), `toggleable`, and `checkboxes`.
+     */
     public readonly options = input<Partial<SelectableOptions> | "">("", {
         alias: "monaListViewSelectable"
     });
+    /**
+     * @description Property name or accessor used to derive the selection key from a data item. When omitted, the data
+     * item itself is used as the key.
+     */
     public readonly selectBy = input<ListKeySelector<T, K> | undefined>("");
+    /** @description The selection, expressed as keys rather than items. Bind `[(selectedKeys)]` to keep it in sync. */
     public readonly selectedKeys = input<Iterable<K>>([]);
+    /**
+     * @description Emitted with the selected keys when the user selects or deselects an item. Not emitted for keys set
+     * through `selectedKeys`.
+     */
     public readonly selectedKeysChange = output<Array<K>>();
 
     public constructor() {

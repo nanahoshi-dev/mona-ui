@@ -63,6 +63,7 @@ export class SliderComponent extends SliderBaseComponent implements FormValueCon
      */
     public readonly value = model(0);
 
+    /** Moves focus to the handle. Does nothing while disabled. */
     public focus(options?: FocusOptions): void {
         if (!this.effectiveDisabled()) {
             this.sliderHandle().nativeElement.focus(options);

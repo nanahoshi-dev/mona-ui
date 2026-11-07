@@ -10,7 +10,12 @@ export class ListViewGroupableDirective<T, K = T> {
     };
     readonly #listService = inject(ListService<T>);
 
+    /** @description Property name or accessor used to derive the group key from a data item. */
     public readonly groupBy = input<ListKeySelector<T, K> | undefined>("");
+    /**
+     * @description Enables grouping. An empty string enables grouping with default settings; pass an object to
+     * configure `headerOrder`, `headerText`, `orderBy`, and `orderByDirection`.
+     */
     public readonly options = input<GroupableOptions<T, K> | "">("", {
         alias: "monaListViewGroupable"
     });

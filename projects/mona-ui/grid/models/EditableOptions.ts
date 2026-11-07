@@ -14,7 +14,10 @@ export interface EditableOptions {
         rowData: Record<PropertyKey, unknown>,
         absoluteIndex: number
     ) => string;
+    /** Whether editing is active. On unless set to `false`; options replace earlier ones. */
     enabled?: boolean;
+    /** Whether editing commits per cell or per row. */
     mode: "cell" | "row";
+    /** Builds a Signal Forms validation schema for the row being edited. */
     schema?: GridEditSchemaFactory;
 }

@@ -10,6 +10,9 @@ import type {
     ChartBrushSelectionBehavior
 } from "../../models/chart-brush.models";
 
+/**
+ * Selects a region of a Cartesian plot by dragging, or from the keyboard with `Shift` + arrows from a focused point.
+ */
 @Component({
     selector: "mona-chart-brush",
     template: "",

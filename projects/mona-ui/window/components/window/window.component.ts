@@ -201,6 +201,7 @@ export class WindowComponent implements WindowVariantInput {
         });
     }
 
+    /** Closes the window. */
     public closeWindow(): void {
         this.#windowRef?.close();
     }

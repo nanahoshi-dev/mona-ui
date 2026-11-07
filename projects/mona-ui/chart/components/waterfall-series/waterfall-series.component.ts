@@ -9,6 +9,10 @@ import type { ChartField, ChartValueFormatter } from "../../models/chart.models"
 
 let nextWaterfallSeriesId = 0;
 
+/**
+ * Renders financial cash-flow and contribution movements with positive delta increases, negative delta decreases,
+ * zero-change neutral bars, intermediate subtotals, and cumulative grand totals.
+ */
 @Component({
     selector: "mona-waterfall-series",
     template: "",

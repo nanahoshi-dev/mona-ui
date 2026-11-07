@@ -9,6 +9,10 @@ import type { ChartStackMode } from "../../models/chart-stack.models";
 
 let nextSeriesId = 0;
 
+/**
+ * Renders a Cartesian bar series supporting standalone bars, grouped slots, stacked segments, and 100% normalized
+ * stacks.
+ */
 @Component({
     selector: "mona-bar-series",
     template: "",

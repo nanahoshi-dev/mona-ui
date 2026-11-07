@@ -487,6 +487,7 @@ export class GridComponent<T> implements GridVariantInput {
      */
     public readonly skip = model(0);
 
+    /** @description Additional CSS classes merged onto the host element via `tailwind-merge`. */
     public readonly userClass = input<string>("", { alias: "class" });
 
     public constructor() {

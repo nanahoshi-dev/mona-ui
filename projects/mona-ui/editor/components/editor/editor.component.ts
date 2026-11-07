@@ -258,6 +258,7 @@ export class EditorComponent implements FormValueControl<string> {
      */
     public readonly update = output<ContentChangeEvent>();
 
+    /** @description CSS classes applied to the host element. */
     public readonly userClass = input<string>("", { alias: "class" });
 
     /**

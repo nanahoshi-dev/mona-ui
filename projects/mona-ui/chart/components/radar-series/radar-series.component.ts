@@ -6,6 +6,7 @@ import type { ChartField } from "../../models/chart.models";
 
 let nextRadarSeriesId = 0;
 
+/** Renders closed polygonal radar series comparing categorical metrics across angular spokes. */
 @Component({
     selector: "mona-radar-series",
     template: "",

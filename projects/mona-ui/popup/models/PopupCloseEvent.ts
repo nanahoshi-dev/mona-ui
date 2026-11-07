@@ -7,10 +7,12 @@ export class PopupCloseEvent<R = unknown> extends PreventableEvent {
         this.#options = options;
     }
 
+    /** The result value passed to `close()`, if any. */
     public get result(): R | undefined {
         return this.#options?.result;
     }
 
+    /** The source of the close. */
     public get via(): PopupCloseSource | undefined {
         return this.#options?.via;
     }

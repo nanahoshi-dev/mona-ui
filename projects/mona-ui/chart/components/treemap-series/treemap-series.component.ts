@@ -29,6 +29,7 @@ import { createChartHiddenItems } from "../../internal/utils/chart-hidden-items"
 
 let nextTreemapSeriesId = 0;
 
+/** Renders hierarchical treemap visualizations using nested squarified, binary, dice, or slice-dice rectangles. */
 @Component({
     selector: "mona-treemap-series",
     template: "",
@@ -380,6 +381,7 @@ export class TreemapSeriesComponent implements OnInit {
         this.#destroyRef.onDestroy(unregister);
     }
 
+    /** Shows or hides the node with this id, and returns whether it's now visible. */
     public toggleNode(nodeId: string): boolean {
         const isNowVisible = this.#hidden.toggle(nodeId);
 

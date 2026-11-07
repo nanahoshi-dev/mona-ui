@@ -105,6 +105,7 @@ export class RangeSliderComponent extends SliderBaseComponent implements FormVal
      */
     public readonly value = model<[number, number]>([0, 10]);
 
+    /** Moves focus to the lower handle. Does nothing while disabled. */
     public focus(options?: FocusOptions): void {
         if (!this.effectiveDisabled()) {
             this.sliderHandle().nativeElement.focus(options);

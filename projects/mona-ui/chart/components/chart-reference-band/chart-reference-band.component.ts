@@ -13,6 +13,7 @@ import type {
     ChartReferenceLabelPosition
 } from "../../models/chart-annotation.models";
 
+/** Renders highlighted threshold intervals and target regions in Cartesian XY charts. */
 @Component({
     selector: "mona-chart-reference-band",
     template: "",

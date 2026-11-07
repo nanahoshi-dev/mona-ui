@@ -701,27 +701,27 @@
     "selector": "",
     "inputs": [
       {
-        "description": "",
+        "description": "Current filter text used to narrow the visible options.",
         "kind": "input",
         "name": "filter",
         "type": "string",
         "defaultValue": "\"\""
       },
       {
-        "description": "",
+        "description": "Emitted when the filter value changes. Cancelable.",
         "kind": "output",
         "name": "filterChange",
         "type": "FilterChangeEvent"
       },
       {
-        "description": "",
+        "description": "No effect on Auto Complete — the popup's own filter row is disabled for this component, since the\nmain input already serves as the filter box.",
         "kind": "input",
         "name": "filterPlaceholder",
         "type": "string",
         "defaultValue": "\"\""
       },
       {
-        "description": "",
+        "description": "Filter operator, case sensitivity, and debounce delay. An empty string enables filtering with\ndefault settings (`operator: \"contains\"`, `caseSensitive: false`, `debounce: 0`); pass an object to override any\nfield.",
         "kind": "input",
         "name": "options",
         "type": "Partial<FilterableOptions> | \"\"",
@@ -735,14 +735,14 @@
     "selector": "",
     "inputs": [
       {
-        "description": "",
+        "description": "Property name, or accessor, used to derive an option's group.",
         "kind": "input",
         "name": "groupBy",
         "type": "string | Selector<TData, unknown> | null | undefined",
         "defaultValue": "\"\""
       },
       {
-        "description": "",
+        "description": "Group header order, and optional per-group item ordering. An empty string enables grouping with\ndefault settings (`headerOrder: \"asc\"`); pass an object to override any field.",
         "kind": "input",
         "name": "options",
         "type": "GroupableOptions<TData, unknown> | \"\"",
@@ -756,7 +756,7 @@
     "selector": "",
     "inputs": [
       {
-        "description": "",
+        "description": "Whether virtual scrolling is enabled and the pixel height of a single option row. An empty string\nenables virtual scrolling with default settings (`height: 28`); pass an object to override either field.",
         "kind": "input",
         "name": "options",
         "type": "Partial<VirtualScrollOptions> | \"\"",
@@ -894,7 +894,7 @@
         "type": "() => Record<PropertyKey, unknown>"
       },
       {
-        "description": "",
+        "description": "Enables inline editing. An empty string enables cell-mode editing with default settings; pass an\nobject to choose `\"cell\"` or `\"row\"` mode and an optional validation `schema`.",
         "kind": "input",
         "name": "options",
         "type": "EditableOptions | \"\"",
@@ -1382,14 +1382,14 @@
     "selector": "\"mona-list-view[monaListViewGroupable]\"",
     "inputs": [
       {
-        "description": "",
+        "description": "Property name or accessor used to derive the group key from a data item.",
         "kind": "input",
         "name": "groupBy",
         "type": "ListKeySelector<T, K> | undefined",
         "defaultValue": "\"\""
       },
       {
-        "description": "",
+        "description": "Enables grouping. An empty string enables grouping with default settings; pass an object to\nconfigure `headerOrder`, `headerText`, `orderBy`, and `orderByDirection`.",
         "kind": "input",
         "name": "options",
         "type": "GroupableOptions<T, K> | \"\"",
@@ -1416,7 +1416,7 @@
     "selector": "\"mona-list-view[monaListViewNavigable]\"",
     "inputs": [
       {
-        "description": "",
+        "description": "Configures keyboard navigation, which is on without the directive. An empty string keeps the\ndefaults (`enabled: true`, `mode: \"select\"`, `wrap: false`); pass an object to override any field.",
         "kind": "input",
         "name": "options",
         "type": "Partial<NavigableOptions> | \"\"",
@@ -1430,7 +1430,7 @@
     "selector": "\"mona-list-view[monaListViewPageable]\"",
     "inputs": [
       {
-        "description": "",
+        "description": "Enables pagination. An empty string enables pagination with default settings (`type: \"numeric\"`,\n`previousNext: true`, `pageSize: 10`, `pageSizeValues: [5, 10, 20, 25, 50, 100]`, `visiblePages: 5`); pass an\nobject to override any field. Has no visible effect while `monaListViewVirtualScroll` is enabled — see Pagination\nand virtualization don't combine.",
         "kind": "input",
         "name": "options",
         "type": "Partial<PagerSettings> | \"\"",
@@ -1464,7 +1464,7 @@
     "selector": "\"mona-list-view[monaListViewSelectable]\"",
     "inputs": [
       {
-        "description": "",
+        "description": "Enables selection. An empty string enables single selection with default settings; pass an object to\nconfigure `mode` (`\"single\"` or `\"multiple\"`), `toggleable`, and `checkboxes`.",
         "kind": "input",
         "name": "options",
         "type": "Partial<SelectableOptions> | \"\"",
@@ -1472,21 +1472,21 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "",
+        "description": "Property name or accessor used to derive the selection key from a data item. When omitted, the data\nitem itself is used as the key.",
         "kind": "input",
         "name": "selectBy",
         "type": "ListKeySelector<T, K> | undefined",
         "defaultValue": "\"\""
       },
       {
-        "description": "",
+        "description": "The selection, expressed as keys rather than items. Bind `[(selectedKeys)]` to keep it in sync.",
         "kind": "input",
         "name": "selectedKeys",
         "type": "Iterable<K>",
         "defaultValue": "[]"
       },
       {
-        "description": "",
+        "description": "Emitted with the selected keys when the user selects or deselects an item. Not emitted for keys set\nthrough `selectedKeys`.",
         "kind": "output",
         "name": "selectedKeysChange",
         "type": "Array<K>"
@@ -1498,7 +1498,7 @@
     "selector": "\"mona-list-view[monaListViewVirtualScroll]\"",
     "inputs": [
       {
-        "description": "",
+        "description": "Enables virtual scrolling. `height` is the fixed row height, in pixels, used to measure the\nviewport; when omitted, a `28`px row height is assumed.",
         "kind": "input",
         "name": "options",
         "type": "VirtualScrollOptions",
@@ -1526,7 +1526,7 @@
     "selector": "\"ng-template[monaPagerNavigationButtonsTemplate]\"",
     "inputs": [
       {
-        "description": "",
+        "description": "Which navigation button the template replaces.",
         "kind": "input",
         "name": "type",
         "type": "\"first\" | \"last\" | \"next\" | \"previous\"",
@@ -1599,7 +1599,7 @@
     "selector": "\"ng-template[monaSegmentedItemTemplate]\"",
     "inputs": [
       {
-        "description": "",
+        "description": "The options, to type `let-option` from them. It changes nothing else.",
         "kind": "input",
         "name": "options",
         "type": "readonly SegmentedOption<T>[] | \"\" | undefined",
@@ -8982,7 +8982,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "",
+        "description": "Extra classes for the input's container.",
         "kind": "input",
         "name": "userClass",
         "type": "string",
@@ -9229,7 +9229,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "",
+        "description": "Extra classes for the input's container.",
         "kind": "input",
         "name": "userClass",
         "type": "string",
@@ -9970,7 +9970,7 @@
         "type": "ContentChangeEvent"
       },
       {
-        "description": "",
+        "description": "CSS classes applied to the host element.",
         "kind": "input",
         "name": "userClass",
         "type": "string",
@@ -10290,7 +10290,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input",
         "name": "userClass",
         "type": "string",
@@ -16074,7 +16074,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "",
+        "description": "Extra classes for the input's container.",
         "kind": "input",
         "name": "userClass",
         "type": "string",

@@ -66,14 +66,17 @@ export class DialogRef<R = unknown> implements DialogRefParams<R> {
         return this.#options.component;
     }
 
+    /** The dialog's overlay element. */
     public get element(): HTMLElement {
         return this.#options.element;
     }
 
+    /** The dialog's current rendered height, in pixels. */
     public get height(): number {
         return this.#options.height;
     }
 
+    /** The underlying `PopupRef`, for advanced overlay access. */
     public get popupRef(): PopupRef {
         return this.#options.popupRef;
     }
@@ -87,6 +90,7 @@ export class DialogRef<R = unknown> implements DialogRefParams<R> {
         return this.#options.result;
     }
 
+    /** The dialog's current rendered width, in pixels. */
     public get width(): number {
         return this.#options.width;
     }

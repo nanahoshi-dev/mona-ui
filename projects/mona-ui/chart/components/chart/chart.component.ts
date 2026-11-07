@@ -327,6 +327,7 @@ function easingToCss(easing: string): string {
 
 type ChartTransientInteractionOwner = "tooltip" | "crosshair" | "keyboard" | null;
 
+/** Root visualization container coordinating coordinate layouts, canvas rendering, theme styles, and interactions. */
 @Component({
     selector: "mona-chart",
     templateUrl: "./chart.component.html",
@@ -3867,6 +3868,7 @@ export class ChartComponent implements AfterContentChecked {
     public invalidate(): void;
     /** @internal */
     public invalidate(reason: ChartInvalidationReason): void;
+    /** Asks for a new layout, for changes the chart can't observe, such as a data array mutated in place. */
     public invalidate(reason: ChartInvalidationReason = ChartInvalidationReason.Layout): void {
         if (this.#isDestroyed || !this.#isBrowser) {
             return;
@@ -4900,6 +4902,7 @@ export class ChartComponent implements AfterContentChecked {
         }
     }
 
+    /** Toggles the visibility of a series. */
     public toggleSeriesVisibility(seriesId: string): void {
         const s = this.#registeredSeries().find(item => item.id === seriesId);
         if (s) {

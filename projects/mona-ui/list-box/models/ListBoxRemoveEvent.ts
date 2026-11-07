@@ -11,10 +11,12 @@ export class ListBoxRemoveEvent<T = any> extends PreventableEvent {
         this.#selectedItems = [...selectedItems];
     }
 
+    /** Discriminant matching the `ListBoxActionEvent` union. */
     public get action(): Extract<ToolbarAction, "remove"> {
         return this.#action;
     }
 
+    /** The items that were selected when Remove was clicked. */
     public get selectedItems(): T[] {
         return this.#selectedItems;
     }

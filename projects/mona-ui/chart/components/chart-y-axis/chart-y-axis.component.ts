@@ -11,6 +11,7 @@ import type {
 
 let nextYAxisId = 0;
 
+/** Configures a Y axis in Cartesian charts. Add more than one with distinct `axisId` values for multiple axes. */
 @Component({
     selector: "mona-chart-y-axis",
     template: "",

@@ -42,6 +42,11 @@ export class PopupService {
     #escapeSubscription: Subscription | null = null;
     #escapeTarget: { event: KeyboardEvent; popup: OpenPopup | null } | null = null;
 
+    /**
+     * Opens a popup and returns its `PopupRef`. If `settings.anchor` is a CSS selector string, creates a
+     * hover-triggered popup for every matching element (see Multi-element popups); otherwise creates a single popup
+     * attached to the given element, `ElementRef`, or point.
+     */
     public create(settings: PopupSettings): PopupRef {
         if (typeof settings.anchor === "string") {
             return this.createMultiElementPopup(settings);

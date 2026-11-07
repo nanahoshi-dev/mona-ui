@@ -12,6 +12,7 @@ import type { ChartField } from "../../models/chart.models";
 
 let nextXAxisId = 0;
 
+/** Configures an X axis in Cartesian charts. Add more than one with distinct `axisId` values for multiple axes. */
 @Component({
     selector: "mona-chart-x-axis",
     template: "",

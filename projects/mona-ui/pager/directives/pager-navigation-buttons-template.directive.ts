@@ -6,6 +6,7 @@ import type { NavigationButtonsTemplateContext } from "../models/NavigationButto
 })
 export class PagerNavigationButtonsTemplateDirective {
     public readonly templateRef = inject<TemplateRef<NavigationButtonsTemplateContext>>(TemplateRef);
+    /** @description Which navigation button the template replaces. */
     public readonly type = input.required<"first" | "last" | "next" | "previous">();
 
     public static ngTemplateContextGuard(

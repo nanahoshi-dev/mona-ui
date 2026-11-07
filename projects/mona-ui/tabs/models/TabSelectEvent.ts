@@ -8,6 +8,7 @@ export class TabSelectEvent extends PreventableEvent {
         this.#index = index;
     }
 
+    /** Index of the tab being selected. */
     public get index(): number {
         return this.#index;
     }

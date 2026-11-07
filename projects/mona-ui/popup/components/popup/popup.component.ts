@@ -215,6 +215,7 @@ export class PopupComponent<T = unknown> implements OnDestroy {
         effect(() => this.setupEventListeners());
     }
 
+    /** Closes the popup if one is currently open. */
     public closePopup(): void {
         this.popupRef?.close();
     }

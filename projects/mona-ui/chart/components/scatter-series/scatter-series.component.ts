@@ -8,6 +8,7 @@ import type { ChartField, ChartValueFormatter } from "../../models/chart.models"
 
 let nextSeriesId = 0;
 
+/** Renders individual point markers across continuous numeric (linear) or temporal (time/utc) Cartesian coordinates. */
 @Component({
     selector: "mona-scatter-series",
     template: "",

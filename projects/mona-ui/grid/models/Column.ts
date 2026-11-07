@@ -53,12 +53,19 @@ export interface ColumnConfig {
     readonly width: number | null;
 }
 
+/**
+ * Set `locked` and `lockedPosition` on a `mona-grid-column` (or `mona-grid-command-column`) to keep it fixed while the
+ * grid scrolls horizontally.
+ */
 export interface Column extends ColumnConfig {
+    /** The column's currently rendered width. */
     readonly calculatedWidth: number | null;
     readonly columnSortDirection: SortDirection | null;
     readonly configuredHidden: boolean;
+    /** Whether a filter is currently applied to this column. */
     readonly filtered: boolean;
     readonly groupSortDirection: SortDirection | null;
+    /** Whether the column is hidden. */
     readonly hidden: boolean;
     readonly index: number;
     readonly sortIndex: number | null;

@@ -222,10 +222,15 @@ export class PopoverComponent implements PopoverVariantInputs {
         });
     }
 
+    /**
+     * Closes the popover if one is currently open. Emits `hide` and respects `preventDefault()` — if canceled, the
+     * popup stays open and the component's internal state remains consistent with that.
+     */
     public close(): void {
         this.#popupRef?.close();
     }
 
+    /** Opens the popover directly. No-op if it is already open. Does not emit `show`; emits `shown` once open. */
     public open(): void {
         if (this.#popupRef) {
             return;

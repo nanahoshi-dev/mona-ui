@@ -12,6 +12,10 @@ export class ListViewNavigableDirective<T> {
     };
     readonly #listService = inject<ListService<T>>(ListService);
 
+    /**
+     * @description Configures keyboard navigation, which is on without the directive. An empty string keeps the
+     * defaults (`enabled: true`, `mode: "select"`, `wrap: false`); pass an object to override any field.
+     */
     public readonly options = input<Partial<NavigableOptions> | "">("", {
         alias: "monaListViewNavigable"
     });

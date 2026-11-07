@@ -7,6 +7,10 @@ import { MenuIconTemplateDirective } from "../../directives/menu-icon-template.d
 import { MenuTextTemplateDirective } from "../../directives/menu-text-template.directive";
 import { ensureMenubarComponentTypes } from "../../utils/menubar.utils";
 
+/**
+ * A top-level menu. Its `text` is displayed on the menubar; its projected items (or `items` input) become the popup
+ * content.
+ */
 @Component({
     selector: "mona-menu",
     template: ""

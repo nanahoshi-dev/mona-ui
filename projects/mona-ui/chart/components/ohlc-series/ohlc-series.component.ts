@@ -22,6 +22,10 @@ import type { ChartField } from "../../models/chart.models";
 
 let nextSeriesId = 0;
 
+/**
+ * Renders traditional financial OHLC (Open-High-Low-Close) bar series with vertical high/low price spans, left-facing
+ * open ticks, right-facing close ticks, and directional color coding.
+ */
 @Component({
     selector: "mona-ohlc-series",
     template: "",

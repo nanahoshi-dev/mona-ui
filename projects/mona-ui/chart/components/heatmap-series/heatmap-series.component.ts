@@ -6,6 +6,7 @@ import type { ChartField, ChartValueFormatter } from "../../models/chart.models"
 
 let nextSeriesId = 0;
 
+/** Renders a matrix of cells colored by value, with a color scale in the legend. */
 @Component({
     selector: "mona-heatmap-series",
     template: "",

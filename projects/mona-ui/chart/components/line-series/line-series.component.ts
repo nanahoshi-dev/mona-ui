@@ -10,6 +10,10 @@ import type { ChartField, ChartValueFormatter } from "../../models/chart.models"
 
 let nextSeriesId = 0;
 
+/**
+ * Renders a continuous Cartesian line series with configurable interpolation, optional null-gap joining, point markers,
+ * data labels, and multi-axis binding.
+ */
 @Component({
     selector: "mona-line-series",
     template: "",

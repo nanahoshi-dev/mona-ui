@@ -16,6 +16,10 @@ export class DropdownVirtualScrollDirective {
         height: 28
     };
     readonly #listService = inject(ListService);
+    /**
+     * @description Whether virtual scrolling is enabled and the pixel height of a single option row. An empty string
+     * enables virtual scrolling with default settings (`height: 28`); pass an object to override either field.
+     */
     public readonly options = input<Partial<VirtualScrollOptions> | "">("", {
         alias: "monaDropDownVirtualScroll"
     });

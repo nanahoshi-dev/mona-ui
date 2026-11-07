@@ -32,14 +32,19 @@ export interface MenuItem {
      * items if they can be replaced.
      */
     checkable?: boolean;
+    /** The item's initial checked state. */
     checked?: boolean;
+    /** Keeps the item from being activated. */
     disabled?: boolean;
     /**
      * The title of the group the item belongs to. Consecutive items with the same group form one group.
      */
     group?: string;
+    /** The items of its submenu. */
     items?: MenuItem[];
+    /** Required. The item's text. */
     label: string;
+    /** Renders the item as a divider. */
     separator?: boolean;
     /**
      * A value that identifies the item in `menuClick` (the event's `value`).

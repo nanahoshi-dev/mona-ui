@@ -1,6 +1,10 @@
 import { Directive, inject, TemplateRef } from "@angular/core";
 import { LabelTemplateContext } from "../models/LabelTemplateContext";
 
+/**
+ * Structural template directive that replaces the default percentage label inside the circle. The template is hidden
+ * when `indeterminate` is `true`.
+ */
 @Directive({
     selector: "ng-template[monaCircularProgressBarLabelTemplate]"
 })

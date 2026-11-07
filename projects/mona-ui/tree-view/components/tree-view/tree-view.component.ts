@@ -241,6 +241,7 @@ export class TreeViewComponent<T> implements ITreeView<T> {
         return { originalParentUid, originalIndex, sourceNodeUid: sourceNode.uid };
     }
 
+    /** Reverts a move previously performed by `moveNode`. */
     public undoMoveNode(snapshot: NodeMoveSnapshot): void {
         const sourceNode = this.treeService.getNodeByUid(snapshot.sourceNodeUid);
         if (!sourceNode) {

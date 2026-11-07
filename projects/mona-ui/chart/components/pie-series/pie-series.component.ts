@@ -30,6 +30,7 @@ import { createChartHiddenItems } from "../../internal/utils/chart-hidden-items"
 
 let nextPieSeriesId = 0;
 
+/** Renders a full or partial pie. */
 @Component({
     selector: "mona-pie-series",
     template: "",
@@ -311,6 +312,7 @@ export class PieSeriesComponent implements OnInit {
         this.#destroyRef.onDestroy(unregister);
     }
 
+    /** Shows or hides the slice at `dataIndex`, and returns whether it's now visible. */
     public toggleSlice(dataIndex: number): boolean {
         const isNowVisible = this.#hidden.toggle(dataIndex);
 
