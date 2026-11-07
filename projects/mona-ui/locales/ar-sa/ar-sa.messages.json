@@ -157,6 +157,15 @@
     "comboBox": {
         "clear": "مسح"
     },
+    "command": {
+        "dialogLabel": "قائمة الأوامر",
+        "inputLabel": "البحث في الأوامر",
+        "listLabel": "النتائج",
+        "loading": "جارٍ التحميل",
+        "noResults": "لم يتم العثور على نتائج",
+        "placeholder": "اكتب أمرًا أو ابحث…",
+        "resultsAvailable": "عدد النتائج المتاحة: {count}"
+    },
     "datePicker": {
         "datePicker": "منتقي التاريخ",
         "openCalendar": "فتح التقويم"

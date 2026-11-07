@@ -200,6 +200,16 @@ export const DE_DE_MESSAGES = {
     comboBox: {
         clear: "Leeren"
     },
+    command: {
+        dialogLabel: "Befehlsmenü",
+        inputLabel: "Befehle suchen",
+        listLabel: "Ergebnisse",
+        loading: "Wird geladen",
+        noResults: "Keine Ergebnisse gefunden",
+        placeholder: "Befehl eingeben oder suchen…",
+        resultsAvailable: (count: number) =>
+            count === 1 ? "1 Ergebnis verfügbar" : `${localizeNumber(count)} Ergebnisse verfügbar`
+    },
     datePicker: {
         datePicker: "Datumsauswahl",
         openCalendar: "Kalender öffnen"

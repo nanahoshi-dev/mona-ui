@@ -239,6 +239,15 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
     comboBox: {
         clear: null
     },
+    command: {
+        dialogLabel: null,
+        inputLabel: null,
+        listLabel: null,
+        loading: null,
+        noResults: null,
+        placeholder: null,
+        resultsAvailable: [{ name: "count", type: "number" }]
+    },
     datePicker: {
         datePicker: null,
         openCalendar: null

@@ -157,6 +157,15 @@
     "comboBox": {
         "clear": "Очистить"
     },
+    "command": {
+        "dialogLabel": "Меню команд",
+        "inputLabel": "Поиск команд",
+        "listLabel": "Результаты",
+        "loading": "Загрузка",
+        "noResults": "Результаты не найдены",
+        "placeholder": "Введите команду или выполните поиск…",
+        "resultsAvailable": "Доступно результатов: {count}"
+    },
     "datePicker": {
         "datePicker": "Выбор даты",
         "openCalendar": "Открыть календарь"

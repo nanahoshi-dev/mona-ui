@@ -157,6 +157,15 @@
     "comboBox": {
         "clear": "清除"
     },
+    "command": {
+        "dialogLabel": "命令菜单",
+        "inputLabel": "搜索命令",
+        "listLabel": "结果",
+        "loading": "正在加载",
+        "noResults": "未找到结果",
+        "placeholder": "输入命令或搜索…",
+        "resultsAvailable": "有 {count} 条可用结果"
+    },
     "datePicker": {
         "datePicker": "日期选择器",
         "openCalendar": "打开日历"

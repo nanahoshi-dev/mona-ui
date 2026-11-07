@@ -199,6 +199,15 @@ export const TR_TR_MESSAGES = {
     comboBox: {
         clear: "Temizle"
     },
+    command: {
+        dialogLabel: "Komut menüsü",
+        inputLabel: "Komutlarda ara",
+        listLabel: "Sonuçlar",
+        loading: "Yükleniyor",
+        noResults: "Sonuç bulunamadı",
+        placeholder: "Bir komut yazın veya arayın…",
+        resultsAvailable: (count: number) => `${localizeNumber(count)} sonuç bulundu`
+    },
     datePicker: {
         datePicker: "Tarih seçici",
         openCalendar: "Takvimi aç"

@@ -201,6 +201,16 @@ export const PT_BR_MESSAGES = {
     comboBox: {
         clear: "Limpar"
     },
+    command: {
+        dialogLabel: "Menu de comandos",
+        inputLabel: "Pesquisar comandos",
+        listLabel: "Resultados",
+        loading: "Carregando",
+        noResults: "Nenhum resultado encontrado",
+        placeholder: "Digite um comando ou pesquise…",
+        resultsAvailable: (count: number) =>
+            count === 1 ? "1 resultado disponível" : `${localizeNumber(count)} resultados disponíveis`
+    },
     datePicker: {
         datePicker: "Seletor de data",
         openCalendar: "Abrir calendário"

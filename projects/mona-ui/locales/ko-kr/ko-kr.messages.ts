@@ -179,6 +179,15 @@ export const KO_KR_MESSAGES = {
     comboBox: {
         clear: "지우기"
     },
+    command: {
+        dialogLabel: "명령 메뉴",
+        inputLabel: "명령 검색",
+        listLabel: "결과",
+        loading: "로드 중",
+        noResults: "결과를 찾을 수 없습니다",
+        placeholder: "명령을 입력하거나 검색하세요…",
+        resultsAvailable: (count: number) => `사용 가능한 결과 ${localizeNumber(count)}개`
+    },
     datePicker: {
         datePicker: "날짜 선택기",
         openCalendar: "달력 열기"

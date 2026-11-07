@@ -157,6 +157,15 @@
     "comboBox": {
         "clear": "Clear"
     },
+    "command": {
+        "dialogLabel": "Command menu",
+        "inputLabel": "Search commands",
+        "listLabel": "Results",
+        "loading": "Loading",
+        "noResults": "No results found",
+        "placeholder": "Type a command or search…",
+        "resultsAvailable": "{count, plural, =1 {# result available} other {# results available}}"
+    },
     "datePicker": {
         "datePicker": "Date picker",
         "openCalendar": "Open calendar"

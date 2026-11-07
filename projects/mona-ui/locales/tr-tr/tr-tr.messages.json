@@ -157,6 +157,15 @@
     "comboBox": {
         "clear": "Temizle"
     },
+    "command": {
+        "dialogLabel": "Komut menüsü",
+        "inputLabel": "Komutlarda ara",
+        "listLabel": "Sonuçlar",
+        "loading": "Yükleniyor",
+        "noResults": "Sonuç bulunamadı",
+        "placeholder": "Bir komut yazın veya arayın…",
+        "resultsAvailable": "{count} sonuç bulundu"
+    },
     "datePicker": {
         "datePicker": "Tarih seçici",
         "openCalendar": "Takvimi aç"

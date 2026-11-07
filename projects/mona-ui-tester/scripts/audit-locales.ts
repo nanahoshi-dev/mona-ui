@@ -156,6 +156,7 @@ export const MONA_MESSAGE_NAMESPACES = [
     "colorPalette",
     "colorPicker",
     "comboBox",
+    "command",
     "datePicker",
     "dateTimePicker",
     "dialog",
