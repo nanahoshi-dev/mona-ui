@@ -66,6 +66,7 @@ export class TooltipDirective implements TooltipVariantInputs {
     readonly #labelled = new Set<HTMLElement>();
     readonly #popupService = inject(PopupService);
     readonly #stripped = new Set<HTMLElement>();
+    readonly #suppressed = computed(() => this.disabled() || this.tooltipDisabled());
     readonly #tooltipId = createElementControlId();
     #destroyed = false;
     #popupRef: PopupRef | null = null;
@@ -79,7 +80,8 @@ export class TooltipDirective implements TooltipVariantInputs {
 
     /**
      * @description Whether the tooltip is disabled. When disabled, the tooltip will not be shown, and an open one
-     * closes.
+     * closes. On a button or another control, `[disabled]` also reaches the control, so use {@link tooltipDisabled}
+     * there.
      * @default false
      */
     public readonly disabled = input<boolean>(false);
@@ -143,6 +145,13 @@ export class TooltipDirective implements TooltipVariantInputs {
      */
     public readonly shown = output<void>();
 
+    /**
+     * @description Disables only the tooltip, like {@link disabled}, on an element whose own `disabled` would take the
+     * same binding, such as a `monaButton` or a native control.
+     * @default false
+     */
+    public readonly tooltipDisabled = input<boolean>(false);
+
     public constructor() {
         effect(onCleanup => {
             const mode = this.mode();
@@ -155,7 +164,7 @@ export class TooltipDirective implements TooltipVariantInputs {
             });
         });
         effect(() => {
-            if (this.disabled()) {
+            if (this.#suppressed()) {
                 untracked(() => this.#intent.hideNow());
             }
         });
@@ -212,7 +221,7 @@ export class TooltipDirective implements TooltipVariantInputs {
     }
 
     #open(anchor: HTMLElement): void {
-        if (this.disabled() || this.#destroyed) {
+        if (this.#suppressed() || this.#destroyed) {
             return;
         }
         const content = this.#contentFor(anchor);
