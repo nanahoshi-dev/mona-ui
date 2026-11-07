@@ -132,6 +132,18 @@ function readSections(markdown: string): Map<string, string> {
     return sections;
 }
 
+/** Each component's section of the generated reference, by selector, holding only its inputs and outputs. */
+function readApiSections(markdown: string): Map<string, string> {
+    const sections = new Map<string, string>();
+    for (const part of markdown.replace(/\r\n/g, "\n").split(/^### /m).slice(1)) {
+        const selector = /^\*\*Selector:\*\* `(mona-[\w-]+)`/m.exec(part)?.[1];
+        if (selector) {
+            sections.set(selector, part.split(/^#### (?:Template context|Properties|Methods)$/m)[0]);
+        }
+    }
+    return sections;
+}
+
 function readRows(section: string): DocumentedRow[] {
     const rows: DocumentedRow[] = [];
     for (const line of section.split("\n")) {
@@ -279,6 +291,7 @@ describe("Chart documentation", () => {
 
         for (const name of [
             "projects/mona-ui-tester/src/assets/docs/chart/api.md",
+            "projects/mona-ui-tester/src/assets/docs/chart/guide.md",
             "projects/mona-ui-tester/src/assets/docs/chart/intro.md",
             "projects/mona-ui-tester/src/assets/docs/chart/sync-density.md",
             "projects/mona-ui/chart/README.md",
@@ -440,7 +453,7 @@ describe("Chart documentation", () => {
         });
 
         it("has an api.md section for every exported component and names each in the README", () => {
-            const sections = readSections(readDoc("chart/api.md"));
+            const sections = readApiSections(readDoc("chart/api.md"));
             const readme = readDoc("chart/README.md");
             const exported = components.filter(
                 component => component.selector.startsWith("mona-") && component.className in PublicApi
@@ -452,8 +465,8 @@ describe("Chart documentation", () => {
             }
         });
 
-        it("names every exported template directive and its context members in api.md", () => {
-            const lines = readDoc("chart/api.md").split("\n");
+        it("names every exported template directive and its context members in the guide", () => {
+            const lines = readDoc("chart/guide.md").split("\n");
             const directives = components.filter(
                 component => component.selector.startsWith("ng-template") && component.className in PublicApi
             );
@@ -461,7 +474,7 @@ describe("Chart documentation", () => {
             for (const { contextType, selector } of directives) {
                 const primary = /monaChart\w+/.exec(selector)?.[0];
                 const line = lines.find(text => text.startsWith(`- \`ng-template[${primary}]`));
-                expect(line, `api.md does not list ${primary}`).toBeTruthy();
+                expect(line, `guide.md does not list ${primary}`).toBeTruthy();
                 if (contextType && contextType !== "void") {
                     const documented = /with `\{ ([^}]*) \}`/.exec(line ?? "")?.[1].split(", ") ?? [];
                     expect([...documented].sort(), `Context of ${primary}`).toEqual(
@@ -474,15 +487,33 @@ describe("Chart documentation", () => {
 
     describe("tables", () => {
         it("lists exactly the inputs and outputs of each component in api.md", () => {
-            const sections = readSections(readDoc("chart/api.md"));
+            const sections = readApiSections(readDoc("chart/api.md"));
             for (const [selector, section] of sections) {
-                const rows = readRows(section);
-                expectRowsToBeReal("api.md", selector, rows);
-                for (const member of componentFor(selector).members) {
-                    const row = rows.find(candidate => candidate.name === member.name);
-                    expect(row, `api.md <${selector}> omits ${member.name}`).toBeTruthy();
+                const { members } = componentFor(selector);
+                const rows = [...section.matchAll(/^\| `([\w-]+)`( \([^)]*\))? \| (.*) \|$/gm)];
+                for (const [, name] of rows) {
+                    const known = members.some(
+                        member => member.name === name || (member.isModel && `${member.name}Change` === name)
+                    );
+                    expect(known, `api.md <${selector}> ${name} does not exist`).toBe(true);
+                }
+                for (const member of members) {
+                    const row = rows.find(candidate => candidate[1] === member.name);
+                    const label = `api.md <${selector}> ${member.name}`;
+                    expect(row, `${label} is missing`).toBeTruthy();
+                    const flags = row?.[2] ?? "";
+                    if (member.required) {
+                        expect(flags, `${label} is required`).toContain("required");
+                    }
                     if (member.isModel) {
-                        expect(row?.typeCell, `api.md <${selector}> ${member.name} is a model`).toMatch(/^`model\(/);
+                        expect(flags, `${label} is a model`).toContain("two-way");
+                    }
+                    if (member.deprecated) {
+                        expect(row?.[3], `${label} is deprecated`).toContain("**Deprecated.**");
+                    }
+                    if (!member.required && member.defaultText !== undefined && isLiteralDefault(member.defaultText)) {
+                        const cells = (row?.[3] ?? "").split(/(?<!\\)\|/).map(cell => cell.trim());
+                        expect(cells[1], `Default of ${label}`).toBe(`\`${member.defaultText}\``);
                     }
                 }
             }
@@ -497,7 +528,8 @@ describe("Chart documentation", () => {
         });
 
         it("lists only public methods in the api.md method table", () => {
-            const section = readDoc("chart/api.md").replace(/\r\n/g, "\n").split("### Methods\n")[1] ?? "";
+            const chart = readDoc("chart/api.md").replace(/\r\n/g, "\n").split("### `ChartComponent`\n")[1] ?? "";
+            const section = chart.split(/^### /m)[0].split("#### Methods\n")[1] ?? "";
             const methods = [...section.split(/^#{2,4} /m)[0].matchAll(/^\|\s*`(\w+)\(/gm)].map(match => match[1]);
             expect(methods.length).toBeGreaterThan(8);
             const prototype = PublicApi.ChartComponent.prototype as unknown as Record<string, unknown>;

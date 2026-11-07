@@ -48,6 +48,8 @@ interface DocumentedRow {
     readonly description: string;
     readonly isOutputTable: boolean;
     readonly name: string;
+    /** The name column, where the generated tables say a member is required or two-way. */
+    readonly nameCell: string;
     readonly typeCell: string;
 }
 
@@ -84,7 +86,7 @@ const coveredEntryPoints: readonly (readonly [entry: string, docs: readonly stri
     ["stepper", ["stepper"]],
     ["switch", ["switch"]],
     ["tabs", ["tabs"]],
-    ["text-area", ["text-area"]],
+    ["text-area", ["textarea"]],
     ["theme", ["theme"]]
 ];
 
@@ -175,6 +177,7 @@ function readRows(section: string): DocumentedRow[] {
                 description: at("description"),
                 isOutputTable: /output/i.test(nameColumn) || /outputs/i.test(subheading),
                 name,
+                nameCell: cells[0],
                 typeCell: at("type")
             });
         }
@@ -390,7 +393,7 @@ describe("Leaf component documentation", () => {
 
         for (const [, docs] of coveredEntryPoints) {
             for (const doc of docs) {
-                for (const name of ["api.md", "intro.md"]) {
+                for (const name of ["api.md", "guide.md", "intro.md"]) {
                     const file = path.resolve(root, docsRoot, doc, name);
                     if (fs.existsSync(file)) {
                         documents.set(`${doc}/${name}`, fs.readFileSync(file, "utf-8").replace(/\r\n/g, "\n"));
@@ -577,7 +580,7 @@ function checkRow(
         return;
     }
     if (member.required) {
-        if (!/required/i.test(`${row.defaultCell} ${row.description}`)) {
+        if (!/required/i.test(`${row.nameCell} ${row.defaultCell} ${row.description}`)) {
             problems.push(`${label} is required, and the table doesn't say so`);
         }
     } else if (
@@ -587,7 +590,7 @@ function checkRow(
     ) {
         problems.push(`${label} defaults to ${member.defaultText}, and the table says ${row.defaultCell}`);
     }
-    if (member.isModel && !/model|two-way/i.test(`${row.typeCell} ${row.description}`)) {
+    if (member.isModel && !/model|two-way/i.test(`${row.nameCell} ${row.typeCell} ${row.description}`)) {
         problems.push(`${label} is a model, and the table doesn't say it's two-way`);
     }
 }

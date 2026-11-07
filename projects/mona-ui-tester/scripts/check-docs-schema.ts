@@ -220,6 +220,7 @@ function main(): void {
 
     const componentPages = pages.filter(page => page.kind === "component" && routes.has(page.path));
     const counts = new Map<FindingKind, number>();
+    const generatedApi = (path: string): string => `docs/${path}/api.md`;
     let conforming = 0;
 
     for (const page of componentPages) {
@@ -233,6 +234,9 @@ function main(): void {
             .filter(file => existsSync(file))
             .flatMap(file => extractH2Headings(readFileSync(file, "utf8")));
         const findings = checkComponentPage(headings, /<app-[a-z0-9-]+-demo\b/.test(template));
+        if (!template.includes(generatedApi(page.path))) {
+            problems.push(`Page "${page.path}" doesn't render its generated ${generatedApi(page.path)}.`);
+        }
 
         if (findings.length === 0) {
             conforming++;

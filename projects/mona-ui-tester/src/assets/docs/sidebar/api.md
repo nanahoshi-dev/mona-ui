@@ -1,374 +1,18 @@
-## Overview & Usage Guidelines
-
-The sidebar is split into a small number of structural pieces and a set of content directives.
-
-- `SidebarLayoutComponent` (`mona-sidebar-layout`) provides the row layout and what the panels share — the breakpoint, and the one backdrop behind whichever drawer is open. It is the only piece that must wrap the others.
-- `SidebarComponent` (`mona-sidebar`) is the panel, and owns its own state. It takes `width`, `collapsible`, `variant`, `side` and `expanded`, and switches itself to a modal drawer on compact viewports. A layout can hold more than one.
-- `SidebarInsetDirective` (`[monaSidebarInset]`) marks the main region beside the panel. It fills the remaining width, scrolls independently, and goes inert behind an open drawer.
-- `SidebarTriggerDirective` (`[monaSidebarTrigger]`) toggles a sidebar from anywhere inside the layout, naming one with `for` where there is more than one.
-
-Content is projected in author order, so a header, content region and footer appear exactly where you write them. None of the directives add wrapper elements.
-
-### The parts
-
-Apart from the skeleton, everything below is a directive applied to your own element. None of them are required, and none add markup of their own. The [API](#api) section lists their inputs.
-
-| Part | Host | Purpose |
-| --- | --- | --- |
-| `[monaSidebarHeader]` | any | Pinned region at the top, above the scrolling content |
-| `[monaSidebarContent]` | any | The scrolling region between header and footer |
-| `[monaSidebarFooter]` | any | Pinned region at the bottom |
-| `[monaSidebarGroup]` | any | A titled section; stack as many as you need |
-| `[monaSidebarGroupHeader]` | any | The row holding a group's label and action; collapses away on the rail |
-| `[monaSidebarGroupLabel]` | any | The group's name, which the group is labelled by; fades out on the rail |
-| `[monaSidebarGroupAction]` | `button` | A control in the group header's corner; needs an `aria-label` |
-| `[monaSidebarGroupContent]` | any | The group's body, wrapping its menu |
-| `[monaSidebarMenu]` | `ul` | A list of rows |
-| `[monaSidebarMenuItem]` | `li` | One row; owns the highlight and `active` |
-| `[monaSidebarMenuButton]` | `a` / `button` | The row's control; takes `tooltip`, `size`, `disabled`, `closeOnSelect` |
-| `[monaSidebarMenuAction]` | `button` | A trailing control inside the row; needs an `aria-label` |
-| `[monaSidebarMenuBadge]` | any | A trailing count or status; stands down on the rail |
-| `[monaSidebarMenuSub]` | `ul` | An indented submenu inside a collapsible item |
-| `[monaSidebarInput]` | `input` | A text input sized for the sidebar; stands down on the rail |
-| `[monaSidebarSeparator]` | any | A rule between regions |
-| `[monaSidebarRail]` | `button` | A pointer shortcut along the panel's edge; not a keyboard control — see below |
-| `mona-sidebar-menu-skeleton` | element | A loading placeholder row |
-
-A row is an item plus a control, and optionally something trailing:
-
-```html
-<li monaSidebarMenuItem [active]="isCurrent()">
-    <a monaSidebarMenuButton routerLink="/inbox" tooltip="Inbox">
-        <svg lucideInbox [size]="16"></svg>
-        <span>Inbox</span>
-    </a>
-    <span monaSidebarMenuBadge>12</span>
-</li>
-```
-
-## Import & Basic Usage
-
-```typescript
-import {
-    SidebarComponent,
-    SidebarContentDirective,
-    SidebarInsetDirective,
-    SidebarLayoutComponent,
-    SidebarMenuButtonDirective,
-    SidebarMenuDirective,
-    SidebarMenuItemDirective,
-    SidebarTriggerDirective
-} from "@nanahoshi/mona-ui/sidebar";
-```
-
-```html
-<mona-sidebar-layout>
-    <mona-sidebar collapsible="icon">
-        <nav monaSidebarContent aria-label="Main">
-            <ul monaSidebarMenu>
-                <li monaSidebarMenuItem [active]="true">
-                    <a monaSidebarMenuButton href="/inbox" tooltip="Inbox">
-                        <svg lucideInbox [size]="16"></svg>
-                        <span>Inbox</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </mona-sidebar>
-
-    <main monaSidebarInset>
-        <button monaSidebarTrigger aria-label="Toggle sidebar">Menu</button>
-        <router-outlet></router-outlet>
-    </main>
-</mona-sidebar-layout>
-```
-
-## Accessibility Requirements
-
-These are requirements, not suggestions. The component supplies what it can and relies on you for the rest.
-
-### Provide a landmark
-
-`mona-sidebar` deliberately carries no ARIA role. A sidebar usually holds more than navigation — a team switcher, a search box, a profile menu — so labelling the whole region `navigation` would over-describe it.
-
-Wrap the menus in a labelled `nav` instead:
-
-```html
-<nav monaSidebarContent aria-label="Main">…</nav>
-```
-
-If the entire region really is navigation, set the role on the panel and give it a name:
-
-```html
-<mona-sidebar role="navigation" aria-label="Main">…</mona-sidebar>
-```
-
-Label every landmark. Two unlabelled `nav` elements on a page are indistinguishable to a screen reader user.
-
-### Provide a trigger
-
-`monaSidebarRail` is deliberately outside the tab order: it is a pointer shortcut, and a tab stop onto a 4px strip would be noise. It is **not** a substitute for a trigger. Always render a `monaSidebarTrigger` as well, or the sidebar cannot be opened from the keyboard at all. That includes small viewports, where the rail is hidden: below `640px`, and inside a drawer at any width.
-
-Give the trigger an accessible name. The rail has a localized one by default, and takes an `aria-label` if you want another. The rail goes inside the sidebar, which positions it, and the trigger can go anywhere in the layout:
-
-```html
-<mona-sidebar>
-    …
-    <button monaSidebarRail></button>
-</mona-sidebar>
-<main monaSidebarInset>
-    <button monaSidebarTrigger aria-label="Toggle sidebar">…</button>
-</main>
-```
-
-A `button` host needs nothing further. On any other element, including an `a` without `href`, the trigger supplies `role`, a tab stop, and Enter/Space activation itself.
-
-On a sidebar that can't collapse (`collapsible="none"`) a trigger has nothing to do on a wide viewport, so it reports `aria-disabled` there rather than an open disclosure. A `for` that finds no sidebar leaves the trigger inert and warns in development. `for` only reaches sidebars in the trigger's own layout.
-
-### Use anchors for destinations
-
-`monaSidebarMenuButton` applies to both `a` and `button`. Use an anchor for anything that navigates:
-
-```html
-<a monaSidebarMenuButton routerLink="/billing" tooltip="Billing">…</a>
-```
-
-A button cannot be opened in a new tab, middle-clicked, previewed in the status bar, or followed when JavaScript fails. Reserve `button` for actions — a disclosure trigger, a sign-out.
-
-Mark the current destination on the **item**, which owns the row's highlight. The row's control picks up `aria-current="page"` from it:
-
-```html
-<li monaSidebarMenuItem [active]="isCurrent()">…</li>
-```
-
-### Label the icon rail
-
-While collapsed to icons the labels are clipped away. Set `tooltip` on every row, and the row shows it as a tooltip on hover and on keyboard focus, on the rail only. Keep a label inside the row as well: that's its accessible name, in both states.
-
-`mona-sidebar` shows these itself, and they open toward the content. There's nothing to import, and it isn't a `title`: the browser adds no tooltip of its own, and a `monaTooltip` in `content` mode around the sidebar doesn't pick the row up. A `title` you put on a row yourself stays there, so use one or the other.
-
-## State & Behavior
-
-### Controlled state
-
-`expanded` is a two-way model on `mona-sidebar`. On a compact viewport it reflects the drawer, so one binding drives both presentations:
-
-```html
-<mona-sidebar-layout>
-    <mona-sidebar [(expanded)]="sidebarOpen">…</mona-sidebar>
-</mona-sidebar-layout>
-```
-
-### More than one sidebar
-
-A layout can hold more than one sidebar — a navigation column on one edge and an inspector on the other. Each keeps its own state on its own binding, and each needs an `id` so a trigger can name it:
-
-```html
-<mona-sidebar-layout>
-    <mona-sidebar id="nav" side="start" [(expanded)]="navOpen">…</mona-sidebar>
-    <main monaSidebarInset>
-        <button monaSidebarTrigger for="nav" aria-label="Toggle navigation">Menu</button>
-        <button monaSidebarTrigger for="inspector" aria-label="Toggle inspector">Details</button>
-    </main>
-    <mona-sidebar id="inspector" side="end" [(expanded)]="inspectorOpen">…</mona-sidebar>
-</mona-sidebar-layout>
-```
-
-A trigger with no `for` drives the sidebar it is written inside, falling back to the first sidebar in the layout — which is all a layout with a single sidebar ever needs. A `for` naming no sidebar leaves the trigger inert rather than throwing.
-
-On a compact viewport only one drawer is open at a time: opening one closes the other, and they share the single backdrop the layout paints behind them. When one drawer opens another, closing it sends focus back to whatever opened the first. The inset steps out of the way for whichever drawer is open, and takes its surface from the first sidebar in author order.
-
-### Remembering the state across reloads
-
-Set `persistKey` and the sidebar comes back the way it was left:
-
-```html
-<mona-sidebar persistKey="nav">…</mona-sidebar>
-```
-
-Nothing is stored without a key — the sidebar never writes to storage on its own. Give each sidebar in a layout its own key.
-
-Only the docked state is kept. A drawer is never restored open, because on the viewport that makes one it would cover the page on load, and opening a drawer never overwrites the state the desktop comes back to. A stored value wins over `expanded` and is pushed back out through that binding, so do not set a key on a sidebar whose state is already restored elsewhere.
-
-#### Where it is kept
-
-The default is `localStorage`, under exactly the key given, with no prefix, so pick one nothing else in the application writes to. Storage that is unavailable — a server, private browsing, a full quota — is not an error: the sidebar just opens the way its `expanded` input says.
-
-**A server-rendered application will flash.** `localStorage` cannot be read on the server, so the markup is rendered with the default state and corrected on hydration. To avoid it, supply storage the server can read too — a cookie, or state transferred from the request:
-
-```typescript
-import { provideSidebarStorage, type SidebarStorage } from "@nanahoshi/mona-ui/sidebar";
-
-const cookieStorage: SidebarStorage = {
-    read: key => { … },  // null when nothing is stored
-    write: (key, expanded) => { … }
-};
-
-bootstrapApplication(AppComponent, {
-    providers: [provideSidebarStorage(cookieStorage)]
-});
-```
-
-`read` returns `null` when it has nothing for that key, which leaves the sidebar on its input's state. A storage that throws is reported in development and otherwise treated the same way.
-
-`provideSidebarStorage()` also takes a factory, which runs in an injection context, for storage that needs something from the current request:
-
-```typescript
-provideSidebarStorage(() => new CookieStorage(inject(REQUEST)))
-```
-
-A value the default storage doesn't recognize, such as another feature's entry under the same key, counts as nothing stored, and stays there until the sidebar's state changes. Nothing is written until then. Storage isn't watched, so tabs don't follow each other.
-
-### Reading the sidebar from a descendant
-
-`injectSidebar()` returns the sidebar's state and the commands that are safe to issue from anywhere:
-
-```typescript
-import { injectSidebar } from "@nanahoshi/mona-ui/sidebar";
-
-@Component({ … })
-export class WorkspaceSwitcherComponent {
-    protected readonly sidebar = injectSidebar();
-
-    protected onSelect(): void {
-        if (this.sidebar.compact()) {
-            this.sidebar.collapse();
-        }
-    }
-}
-```
-
-The controller exposes `expanded`, `state`, `iconOnly`, `compact`, `mobileOpen`, `side`, `variant`, `collapsible` and `sidebarId` as signals, plus `expand()`, `collapse()` and `toggle()`. The [API](#api) section describes each one.
-
-Structural facts are readable but not settable. `side`, `variant` and `collapsible` are authored as inputs on `mona-sidebar`; writing them from a descendant would leave the component and the shared state disagreeing until the next change detection pass. Bind the inputs instead.
-
-Inside a `mona-sidebar` it reads that sidebar. Elsewhere in a `mona-sidebar-layout`, such as a toolbar in the inset, it reads the layout's first sidebar in author order, or the one you name with `injectSidebar({ for: "inspector" })`. A sidebar that hasn't rendered yet reads as closed, and commands to it do nothing.
-
-Pass `{ optional: true }` for a component that may be used outside a layout.
-
-### Collapsible modes
-
-| Mode | Collapsed behaviour |
-| --- | --- |
-| `offcanvas` (default) | Panel shrinks to nothing and is made `inert`, so nothing inside stays focusable |
-| `icon` | Panel narrows to `iconWidth`; labels, badges, trailing actions and submenus stand aside |
-| `none` | Collapsing is disabled; the panel stays at full width. Below `mobileBreakpoint` it's still a drawer that opens and closes |
-
-If focus is on something that collapsing takes away, it moves to a trigger for that sidebar, or to its rail when there's no trigger, rather than falling to the page.
-
-### Submenus
-
-A submenu is an ordinary `monaCollapsible` on an ordinary item — the sidebar adds no disclosure of its own. Apply `monaCollapsible` to the item, `monaCollapsibleTrigger` to its control, and `monaCollapsibleContent` to a `monaSidebarMenuSub` list:
-
-```html
-<li monaSidebarMenuItem monaCollapsible>
-    <button monaSidebarMenuButton monaCollapsibleTrigger tooltip="Components">
-        <span>Components</span>
-    </button>
-    <ul monaSidebarMenuSub monaCollapsibleContent>
-        <li monaSidebarMenuItem>
-            <a monaSidebarMenuButton routerLink="/components/button">Button</a>
-        </li>
-    </ul>
-</li>
-```
-
-Nesting is not limited to one level: a `monaSidebarMenuSub` can hold another collapsible item, as deep as the navigation needs. Each level is a disclosure in its own right, with its own trigger and its own open state.
-
-#### On the icon rail
-
-A submenu cannot render in a rail one icon wide, and there's no flyout. While on the rail every item keeps its disclosure closed, at every depth, so each trigger's `aria-expanded` stays truthful and the content stays `inert`. Activating a submenu's row on the rail expands the sidebar and opens that submenu, so its pages can always be reached. A row with no submenu leaves the rail as it is. Whatever was open before collapsing is restored when the sidebar expands again — level by level, so a submenu that was closed stays closed.
-
-### Responsive behaviour
-
-Below `mobileBreakpoint` (default `768`) the sidebar becomes a modal drawer:
-
-- Slides in from its docked edge; everything outside it goes `inert` and the page stops scrolling
-- It's a `dialog` named by `aria-label` or `aria-labelledby`, with a localized default
-- Focus is trapped inside it, on the panel itself if it has no controls. On close, however it closed, focus returns to whatever opened it, unless it has already moved somewhere else
-- Escape and backdrop clicks close it, wherever focus is. A docked sidebar ignores Escape. A control that calls `preventDefault()` on the key keeps it, and so does a popup opened from the drawer. In nested layouts, it closes only the inner drawer
-- Drawer state is separate from the desktop state and resets whenever the viewport crosses the breakpoint
-- Activating a row closes the drawer, since the destination is underneath it — opt out with `[closeOnSelect]="false"`. A row that opens a submenu leaves it open without that binding
-
-While the viewport is compact, `[(expanded)]` reports the drawer, so it reads `false` on a phone from the start. To remember the docked state, use `persistKey` rather than saving that value.
-
-Set `mobileBreakpoint` to `0` to keep the docked presentation at every size.
-
-```html
-<mona-sidebar-layout [mobileBreakpoint]="1024">
-    <mona-sidebar mobileWidth="20rem">…</mona-sidebar>
-</mona-sidebar-layout>
-```
-
-#### How far the drawer's modality reaches
-
-By default an open drawer makes the whole page inert and locks its scroll, so an app header above the layout can't be reached behind it. Popups opened from the drawer, such as a menu or a tooltip, stay usable. The lock only acts when the page itself scrolls: in an app whose root doesn't, there's nothing for it to lock. The inset stops scrolling behind the drawer either way.
-
-A sidebar embedded in part of a page can keep this to its layout, with `modalScope`. Anything beside the layout that has to stay usable while a drawer is open, such as a toolbar or a Close button, needs this too. What's around the layout stays usable and the page keeps scrolling, so the drawer isn't `aria-modal` then:
-
-```html
-<mona-sidebar-layout modalScope="layout">…</mona-sidebar-layout>
-```
-
-The backdrop covers the layout either way, and never more than that.
-
-### Direction
-
-Prefer `side="start"` and `side="end"`, which follow the document's writing direction. `"left"` and `"right"` are aliases of them rather than physical sides, so `side="left"` sits on the right under RTL.
-
-The panel's border, the drawer's edge and the rail don't use logical properties. Each resolves to a physical left or right from the direction, so they follow it too. To override that border through `class`, name the physical side, such as `border-r-0`. `tailwind-merge` treats `border-e-0` as a different class, so it doesn't replace the border.
-
-### Server rendering
-
-Supply a stable `id` on `mona-sidebar` so the client does not hydrate onto a different generated id:
-
-```html
-<mona-sidebar id="app-sidebar">…</mona-sidebar>
-```
-
-Where `matchMedia` is unavailable — a server render, a test environment — the sidebar keeps its docked presentation, which is the one that degrades gracefully.
-
-`persistKey` needs storage the server can read, or the remembered state arrives a frame late. See [Where it is kept](#where-it-is-kept).
-
-## Theming
-
-The sidebar draws from its own colour roles, so it can sit apart from the page content without restyling every part: `--color-sidebar`, `--color-sidebar-foreground`, `--color-sidebar-primary`, `--color-sidebar-primary-foreground`, `--color-sidebar-accent`, `--color-sidebar-accent-foreground`, `--color-sidebar-border` and `--color-sidebar-ring`.
-
-Every built-in theme defines them for each of its variants. A custom theme can build the whole set from one background with `createSidebarColorRoles()` from `@nanahoshi/mona-ui/theme`.
-
-### Variants
-
-| Variant | Treatment |
-| --- | --- |
-| `sidebar` (default) | Flush against the edge with a single border |
-| `floating` | Detached on its own rounded, shadowed surface |
-| `inset` | Transparent; the raised surface moves onto the inset region instead |
-
-`width`, `iconWidth` and `mobileWidth` are the width the sidebar's *contents* receive. The variant's border is added on top, so a `3rem` icon rail always leaves exactly one `2rem` icon square whatever border the variant draws. The `sidebar` variant has no border as a drawer, so `mobileWidth` is its whole width.
+<!-- Generated by npm run generate:api-docs from the library's JSDoc. Do not edit. -->
 
 ## API
 
-Everything below comes from `@nanahoshi/mona-ui/sidebar`.
-
-### `SidebarLayoutComponent`
-
-**Selector:** `mona-sidebar-layout`
-
-Lays out the sidebars and the inset, and owns what they share. The drawer and its backdrop are positioned against it.
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `mobileBreakpoint` | `number` | `768` | Viewport width, in pixels, below which sidebars present as drawers. `0` or less keeps them docked at every size. |
-| `modalScope` | `"page" \| "layout"` | `"page"` | How far an open drawer's modality reaches. `"page"` makes everything outside the drawer inert, locks the page's scroll and sets `aria-modal`. `"layout"` keeps the inert part to this layout, with no scroll lock and no `aria-modal`. |
-
-#### Outputs
-
-None.
+Everything below is imported from `@nanahoshi/mona-ui/sidebar`.
 
 ### `SidebarComponent`
+
+The sidebar region itself. Content is projected in author order, so header, content and footer
+parts appear exactly where they are written.
+
+Below the layout's `mobileBreakpoint` it presents as a modal overlay drawer: focus is trapped
+inside it while open, restored to whatever opened it on close, and everything outside it is made
+inert, as far as the layout's `modalScope` says. It is not a navigation landmark by itself — wrap
+the menus in a labelled `nav`, or set `role` and `aria-label` if the whole region is navigation.
 
 **Selector:** `mona-sidebar`
 
@@ -376,108 +20,100 @@ None.
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `aria-label` | `string` | `""` | The sidebar's accessible name. Needed with `role`. A docked sidebar with no `role` ignores it. A drawer with neither this nor `aria-labelledby` falls back to a localized "Sidebar". |
-| `aria-labelledby` | `string` | `""` | The id of the element that names the sidebar, in place of `aria-label`. A docked sidebar with no `role` ignores it. |
+| `aria-label` | `string` | `""` | Accessible name for the sidebar region. Required when `role` is set, and used as the drawer's name on compact viewports, which otherwise has a localized default. |
+| `aria-labelledby` | `string` | `""` | The id of the element that names the sidebar region, in place of `aria-label`. A docked sidebar with no `role` ignores it. |
 | `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `collapsible` | `"offcanvas" \| "icon" \| "none"` | `"offcanvas"` | How the sidebar behaves when collapsed. See [Collapsible modes](#collapsible-modes). |
-| `expanded` | `boolean` | `true` | Two-way. Whether this sidebar is open. On a compact viewport it reflects the drawer, so it reads `false` on a phone from the start. With `collapsible="none"` on a wide viewport it's always `true`. A value stored under `persistKey` wins over it. |
-| `iconWidth` | `string \| number` | `"3rem"` | Width of the icon rail while collapsed. Only applies when `collapsible` is `"icon"`. Numbers are pixels. |
-| `id` | `string` | `""` | The id of the sidebar element, which a trigger's `for` names. Left empty, a generated id is used. Set a stable one when the markup is server rendered. |
-| `mobileWidth` | `string \| number` | `"18rem"` | Width of the drawer. Numbers are pixels. It's capped at the layout's width less `3rem`, so there's always backdrop left to tap. |
-| `persistKey` | `string` | `""` | Remembers the docked state under this key. Left empty, nothing is stored. See [Remembering the state across reloads](#remembering-the-state-across-reloads). |
-| `role` | `string` | `""` | ARIA role of the docked sidebar. Give it a name too, or it warns in development. Ignored on a drawer, which is always a `dialog`. |
-| `side` | `"start" \| "end" \| "left" \| "right"` | `"start"` | Which edge the sidebar sits on. `"left"` and `"right"` are aliases of `"start"` and `"end"`. See [Direction](#direction). |
-| `variant` | `"sidebar" \| "floating" \| "inset"` | `"sidebar"` | The visual treatment. See [Variants](#variants). |
-| `width` | `string \| number` | `"16rem"` | Width while expanded. Numbers are pixels. |
+| `collapsible` | `SidebarCollapsibleMode` | `"offcanvas"` | How the sidebar behaves when collapsed. `"icon"` keeps a narrow rail of icons visible, `"offcanvas"` removes it from the layout entirely, and `"none"` disables collapsing altogether. |
+| `expanded` (two-way) | `boolean` | `true` | Sets whether this sidebar is open. Supports two-way binding. While the viewport is compact this reflects the drawer, so one binding drives both presentations, and it reads `false` on a phone from the start. To remember the docked state, use `persistKey` rather than saving this. |
+| `iconWidth` | `string \| number` | `"3rem"` | Width of the icon rail while collapsed. Only applies when `collapsible` is `"icon"`. Numbers are treated as pixels. |
+| `id` | `string` | `""` | Id for the sidebar element, referenced by triggers through `aria-controls`. Supply a stable value when the markup is server rendered, so the client does not hydrate onto a different generated id. Falls back to a generated id. |
+| `mobileWidth` | `string \| number` | `"18rem"` | Width of the overlay drawer on compact viewports. Numbers are treated as pixels. |
+| `persistKey` | `string` | `""` | Remembers whether this sidebar was left open, under this key. Unset means nothing is stored — no key, no storage written. Only the docked state is kept. A drawer is never restored open: on the viewport that makes one, it would cover the page on load. A stored value wins over `expanded`, and is pushed back out through that binding, so do not set a key on a sidebar whose state is already restored elsewhere. Where it is kept is `SIDEBAR_STORAGE`, which defaults to `localStorage`. A server-rendered application cannot read that until hydration and so flashes the default first; supply storage the server can read through `provideSidebarStorage()`. |
+| `role` | `string` | `""` | ARIA role for the sidebar region. Leave unset and wrap the menus in a labelled `nav` when the sidebar holds more than navigation; set `"navigation"` with an `aria-label` when it does not. Ignored on compact viewports, where the drawer is a `dialog`. |
+| `side` | `SidebarSide` | `"start"` | Which edge the sidebar sits on. Prefer `"start"` and `"end"`, which follow the document's writing direction; `"left"` and `"right"` are aliases of them. |
+| `variant` | `SidebarVariant` | `"sidebar"` | The visual treatment of the sidebar. `"floating"` detaches it from the edge on its own surface, and `"inset"` moves that raised surface onto the region beside it instead. |
+| `width` | `string \| number` | `"16rem"` | Width of the sidebar while expanded. Numbers are treated as pixels. |
 
 #### Outputs
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `expandedChange` | `boolean` | Two-way, with `expanded`. Emits when the sidebar opens or closes, on either presentation. |
+| `expandedChange` | `boolean` | Emitted when `expanded` changes. |
+
+### `SidebarLayoutComponent`
+
+Lays its children out in a row and owns what they share. Project one or more `mona-sidebar`
+elements and an element marked with `monaSidebarInset` into it. Each sidebar keeps its own open
+state, on its own `[(expanded)]` binding, so a layout can hold a navigation column on one edge and
+an inspector on the other.
+
+Below `mobileBreakpoint` sidebars present as overlay drawers instead of columns. A drawer has its
+own open state, so a sidebar collapsed on a desktop does not come back open on a phone, and it is
+reset whenever the viewport crosses the breakpoint. Only one drawer is open at a time: opening one
+closes any other, and they share the single backdrop this layout paints behind them.
+
+**Selector:** `mona-sidebar-layout`
+
+#### Inputs
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
+| `mobileBreakpoint` | `number` | `768` | Viewport width, in pixels, below which the sidebar presents as an overlay drawer. Set to `0` to keep the docked presentation at every size. |
+| `modalScope` | `SidebarModalScope` | `"page"` | How far an open drawer's modality reaches. `"page"` makes everything outside the drawer inert and locks the page's scroll. Use `"layout"` for a sidebar embedded in part of a page: what's around the layout stays usable, so the drawer isn't `aria-modal`. |
 
 ### `SidebarMenuSkeletonComponent`
 
+A loading placeholder shaped like a menu item. Its label bar is clipped on the icon rail, where the
+real labels are not visible either.
+
 **Selector:** `mona-sidebar-menu-skeleton`
 
-A loading placeholder laid out like a menu row. On the rail its label bar is clipped away, as a real row's label is.
-
 #### Inputs
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `labelWidth` | `string \| number` | `"60%"` | Width of the label bar. Vary it across a list so the placeholder doesn't look like a grid. Numbers are pixels. |
-| `showIcon` | `boolean` | `true` | Renders a square standing in for the row's icon. |
+| `labelWidth` | `string \| number` | `"60%"` | Width of the label bar. Varying it across a list keeps the placeholder from looking like a rigid grid. Numbers are treated as pixels. |
+| `showIcon` | `boolean` | `true` | Renders a square standing in for the item's icon. |
 
-#### Outputs
+### `SidebarMenuButtonDirective`
 
-None.
+A row in a sidebar menu. Applies to a `button` for an action and to an `a` for a destination —
+an anchor keeps `href`, `routerLink`, middle-click, open-in-new-tab and the browser's own status
+bar preview, none of which a button can offer.
 
-### `SidebarInsetDirective`
+On a compact viewport, following a link closes the drawer, since the destination it navigates to is
+underneath it. A row that opens a submenu leaves the drawer open, and on the icon rail it expands the
+sidebar, since that's the only place the submenu can open.
 
-**Selector:** `[monaSidebarInset]`
-
-The main region beside the sidebars. It goes inert and stops scrolling while a drawer is open, and takes its surface from the layout's first sidebar.
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-
-#### Outputs
-
-None.
-
-### `SidebarTriggerDirective`
-
-**Selector:** `[monaSidebarTrigger]`
-
-**Exported as:** `monaSidebarTrigger`
-
-Toggles a sidebar, and adds no styling. It sets `aria-controls` and `aria-expanded`, and `aria-disabled` where the sidebar can't collapse.
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `for` | `string` | `""` | The id of the `mona-sidebar` to toggle, in this trigger's own layout. Left empty, it toggles the sidebar it's written inside, or else the layout's first. An id that matches nothing leaves the trigger inert and warns in development. |
-
-#### Outputs
-
-None.
-
-### `SidebarRailDirective`
-
-**Selector:** `button[monaSidebarRail]`
-
-A strip along the sidebar's inner edge that toggles it. It has to be inside a `mona-sidebar`, which is where it gets its state from. It's outside the tab order, and it's hidden below `640px` and inside a drawer.
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string` | `""` | The rail's accessible name. Left empty, it uses a localized "Toggle sidebar". |
-
-#### Outputs
-
-None.
-
-### `SidebarHeaderDirective`
-
-**Selector:** `[monaSidebarHeader]`
+**Selector:** `a[monaSidebarMenuButton], button[monaSidebarMenuButton]`  
+**Exported as:** `monaSidebarMenuButton`
 
 #### Inputs
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
+| `closeOnSelect` | `boolean \| undefined` | `undefined` | Closes the overlay drawer after this row is activated. Only applies on compact viewports, where the drawer covers the destination being navigated to. Set to `false` for rows that do not navigate. Leave it unset on a `monaCollapsibleTrigger`, which keeps the drawer open. |
+| `disabled` | `boolean` | `false` | Renders the row as unavailable and suppresses activation, including a `routerLink` and any `click` handler on it. A disabled anchor gives up its `href`. |
+| `size` | `SidebarMenuButtonSize` | `"medium"` | How much room this row's leading visual needs. Use `"large"` when it opens with something avatar sized, so the icon rail lets it fill the square instead of insetting and clipping it. |
+| `tooltip` | `string` | `""` | Text identifying this item while the sidebar is collapsed to its icon rail, where the label is clipped away. Shown as a tooltip on hover and on keyboard focus, on the rail only. |
 
-#### Outputs
+### `SidebarMenuItemDirective`
 
-None.
+**Selector:** `li[monaSidebarMenuItem]`
+
+#### Inputs
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `active` | `boolean` | `false` | Marks this row as the current sidebar destination. The row owns the selected surface so trailing badges and actions remain inside one continuous highlight. |
+| `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
 
 ### `SidebarFooterDirective`
+
+The region at the bottom of the sidebar, below its content. Holds what stays put while the content
+scrolls — a profile menu, a sign-out.
 
 **Selector:** `[monaSidebarFooter]`
 
@@ -487,9 +123,48 @@ None.
 | --- | --- | --- | --- |
 | `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
 
-#### Outputs
+### `SidebarHeaderDirective`
 
-None.
+The region at the top of the sidebar, above its content. Holds what stays put while the content
+scrolls — a workspace switcher, a search box.
+
+**Selector:** `[monaSidebarHeader]`
+
+#### Inputs
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
+
+### `SidebarInsetDirective`
+
+Marks the main region beside the sidebar. Fills the remaining width and scrolls independently.
+Takes on the raised surface when the sidebar uses the `inset` variant.
+
+It sits beside the sidebars rather than inside one, so it answers to the layout as a whole: it steps
+out of the way for whichever drawer is open, and where a layout holds more than one sidebar it takes
+its surface from the first one in author order.
+
+**Selector:** `[monaSidebarInset]`
+
+#### Inputs
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
+
+### `SidebarMenuBadgeDirective`
+
+A trailing count or status badge on a menu item. Stands down on the icon rail, where it would
+crowd out the icon it belongs to.
+
+**Selector:** `[monaSidebarMenuBadge]`
+
+#### Inputs
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
 
 ### `SidebarMenuDirective`
 
@@ -501,60 +176,14 @@ None.
 | --- | --- | --- | --- |
 | `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
 
-#### Outputs
-
-None.
-
-### `SidebarMenuItemDirective`
-
-**Selector:** `li[monaSidebarMenuItem]`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `active` | `boolean` | `false` | Marks this row as the current destination. The row's control gets `aria-current="page"`. |
-| `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-
-#### Outputs
-
-None.
-
-### `SidebarMenuButtonDirective`
-
-**Selector:** `a[monaSidebarMenuButton], button[monaSidebarMenuButton]`
-
-**Exported as:** `monaSidebarMenuButton`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `closeOnSelect` | `boolean \| undefined` | `undefined` | Whether activating this row closes an open drawer. Left unset, it counts as `true`, or as `false` on a `monaCollapsibleTrigger`. So a row that opens a submenu needs no binding, and only `[closeOnSelect]="true"` makes one close the drawer. |
-| `disabled` | `boolean` | `false` | Renders the row as unavailable and stops activation, including a `routerLink` and any `click` handler on it. A disabled anchor gives up its `href`, and stays in the tab order, announced as a link. |
-| `size` | `"medium" \| "large"` | `"medium"` | How much room the row's leading visual needs. Use `"large"` for something avatar sized: the row is taller, and on the rail the visual fills the square. |
-| `tooltip` | `string` | `""` | Text for a tooltip on hover and keyboard focus, on the icon rail only. See [Label the icon rail](#label-the-icon-rail). |
-
-#### Outputs
-
-None.
-
-### `SidebarMenuBadgeDirective`
-
-**Selector:** `[monaSidebarMenuBadge]`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-
-#### Outputs
-
-None.
-
 ### `SidebarMenuSubDirective`
+
+An indented submenu inside a `monaSidebarMenuItem` that is also a `monaCollapsible`.
+
+It carries no hiding of its own on the icon rail. `SidebarMenuItemDirective` closes the disclosure
+there instead, which leaves the trigger's `aria-expanded` truthful and lets the collapsible content
+directive apply its own `inert`. Hiding it here as well used to produce the opposite: a submenu the
+trigger still described as expanded, with focusable items, that nobody could see.
 
 **Selector:** `ul[monaSidebarMenuSub]`
 
@@ -564,15 +193,28 @@ None.
 | --- | --- | --- | --- |
 | `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
 
-#### Outputs
+### `SidebarRailDirective`
 
-None.
+A thin strip along the sidebar's inner edge that toggles it. Place it inside `mona-sidebar`,
+which positions it. Hidden on narrow viewports, where the edge is too easy to hit by accident.
+
+Deliberately outside the tab order: it is a pointer shortcut for what `monaSidebarTrigger` already
+does, and a second tab stop onto a 4px strip would be noise for keyboard users. Provide a
+`monaSidebarTrigger` as well — the rail is not a substitute for it.
+
+**Selector:** `button[monaSidebarRail]`
+
+#### Inputs
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `aria-label` | `string` | `""` | Accessible name of the rail, which otherwise has a localized default. |
 
 ### `SidebarSeparatorDirective`
 
-**Selector:** `[monaSidebarSeparator]`
+A horizontal rule between sidebar regions. Tightens its inset on the icon rail.
 
-It gets `role="separator"`, unless the host is an `hr`, which already is one.
+**Selector:** `[monaSidebarSeparator]`
 
 #### Inputs
 
@@ -580,89 +222,287 @@ It gets `role="separator"`, unless the host is an `hr`, which already is one.
 | --- | --- | --- | --- |
 | `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
 
-#### Outputs
+### `SidebarTriggerDirective`
 
-None.
+Toggles a sidebar. Can be placed anywhere inside a `mona-sidebar-layout`, including in the inset,
+and adds no styling of its own.
 
-### Directives with no inputs or outputs
+By default it drives the sidebar it is written inside. Set `for` to the id of a `mona-sidebar` to
+drive that one instead, which is what a trigger in a shared header needs when the layout holds more
+than one sidebar. A `for` that matches no sidebar leaves the trigger inert rather than throwing, so
+a sidebar that has not rendered yet does not take the page down with it, and warns in development.
 
-| Directive | Selector | What it does |
-| --- | --- | --- |
-| `SidebarContentDirective` | `[monaSidebarContent]` | The scrolling region between header and footer. On the rail it clips instead of scrolling. |
-| `SidebarGroupDirective` | `[monaSidebarGroup]` | A section, with `role="group"`, labelled by the `monaSidebarGroupLabel` inside it. |
-| `SidebarGroupActionDirective` | `button[monaSidebarGroupAction]` | A control in the group header's corner. It stands down on the rail. Give it an `aria-label`. |
-| `SidebarGroupContentDirective` | `[monaSidebarGroupContent]` | The group's body. |
-| `SidebarGroupHeaderDirective` | `[monaSidebarGroupHeader]` | The row holding the label and action. It closes on the rail. |
-| `SidebarGroupLabelDirective` | `[monaSidebarGroupLabel]` | The group's name. It keeps an `id` you set, and fades out on the rail. |
-| `SidebarInputDirective` | `input[monaSidebarInput]` | A `monaTextBox` sized for the sidebar, which doesn't pass on that directive's inputs. It stands down on the rail. |
-| `SidebarMenuActionDirective` | `button[monaSidebarMenuAction]` | A trailing `monaButton` with the ghost look, which doesn't pass on that directive's inputs. It stands down on the rail. Give it an `aria-label`. |
+A `button` is the right host and needs nothing further. On any other element the directive supplies
+the rest of the button contract — `role`, a tab stop, and Enter/Space activation — so a `div`, a
+`span` or an `a` without `href` is still operable by keyboard rather than silently mouse-only.
 
-### `injectSidebar()`
+A sidebar that can't collapse has nothing for a trigger to do on a wide viewport, so the trigger
+reports itself as disabled there rather than as an open disclosure.
+
+**Selector:** `[monaSidebarTrigger]`  
+**Exported as:** `monaSidebarTrigger`
+
+#### Inputs
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `for` | `string` | `""` | Id of the `mona-sidebar` to toggle. Leave unset to toggle the sidebar this trigger is written inside. |
+
+### `SidebarContentDirective`
+
+**Selector:** `[monaSidebarContent]`
+
+### `SidebarGroupActionDirective`
+
+A control in the corner of a group header — an add or overflow button. Stands down on the icon
+rail, where there is no header row left to sit in. Give it an `aria-label`: it is icon-only.
+
+**Selector:** `button[monaSidebarGroupAction]`
+
+### `SidebarGroupContentDirective`
+
+The body of a `monaSidebarGroup`, below its header. Wraps the menu itself.
+
+**Selector:** `[monaSidebarGroupContent]`
+
+### `SidebarGroupDirective`
+
+A titled section of the sidebar, grouping a label and its menu. Stack as many as the sidebar
+needs; each is an ordinary block, so a `monaSidebarSeparator` between them is optional. A
+`monaSidebarGroupLabel` inside it names the group.
+
+**Selector:** `[monaSidebarGroup]`
+
+### `SidebarGroupHeaderDirective`
+
+The row above a group's content, holding its label and any group action. Collapses to nothing on
+the icon rail rather than leaving an empty gap where the label used to be.
+
+**Selector:** `[monaSidebarGroupHeader]`
+
+### `SidebarGroupLabelDirective`
+
+The name of a group, which the enclosing `monaSidebarGroup` is labelled by. Fades out on the icon
+rail, where there is no width to read it in.
+
+**Selector:** `[monaSidebarGroupLabel]`
+
+### `SidebarInputDirective`
+
+A text input sized for the sidebar, composing `monaTextBox`. Stands down on the icon rail,
+where there is no room to type.
+
+**Selector:** `input[monaSidebarInput]`
+
+### `SidebarMenuActionDirective`
+
+A trailing control on a menu item — an overflow menu, a pin. Sits inside the row's highlight and
+stands down on the icon rail. Give it an `aria-label`: it is icon-only.
+
+**Selector:** `button[monaSidebarMenuAction]`
+
+### `LocalStorageSidebarStorage`
+
+The default `SidebarStorage`: `localStorage`, under the sidebar's `persistKey`.
+
+Reads report `null` anywhere `localStorage` cannot answer, and writes are dropped there. That
+covers the server, where there is no such thing, and a browser that refuses it — Safari's private
+mode throws on access rather than returning empty, and a full quota throws on write. None of that
+is worth taking an application down over: the sidebar simply opens the way its input says.
+
+A server-rendered application gets the default state in its markup and the remembered one on
+hydration, which shows as a flash. Storage that the server can read too — a cookie, or state
+transferred from the request — avoids it; supply it through `provideSidebarStorage()`.
+
+#### Methods
+
+| Signature |
+| --- |
+| `read(key: string): boolean \| null` |
+| `write(key: string, expanded: boolean): void` |
+
+### `injectSidebar`
+
+Reads a sidebar from an injection context: the one that encloses the caller, or from elsewhere in a
+`mona-sidebar-layout`, such as a toolbar in the inset, the layout's first sidebar. Name another one with `for`.
+
+Returns the sidebar's state and the commands that are safe to issue from anywhere — opening,
+closing and toggling, each routed to whichever presentation is current. Structural facts such as
+the side, variant and collapsible mode are readable but not settable; those are authored as inputs
+on `mona-sidebar`, and writing them from a descendant would only desynchronise the two.
+
+In a layout it follows the sidebar rather than holding it, because the caller may be created first. Until there is
+one, it reads as closed and its commands do nothing.
 
 ```typescript
 function injectSidebar(options: InjectSidebarOptions & { optional: true }): SidebarController | null;
 function injectSidebar(options?: InjectSidebarOptions): SidebarController;
 ```
 
-Call it in an injection context. It throws when there's no sidebar or layout around the caller, unless `optional` is set.
+### `provideSidebarStorage`
 
-| Option | Type | Description |
-| --- | --- | --- |
-| `for` | `string` | The id of the `mona-sidebar` to read, in the enclosing layout, rather than the nearest one. Without a layout it throws, or returns `null` with `optional`, even inside a sidebar. |
-| `optional` | `boolean` | Returns `null` instead of throwing. |
+Replaces where sidebars remember whether they were left open. The default is `localStorage`, which
+the server cannot read; supply a cookie- or request-backed storage here to have a server-rendered
+application render the remembered state rather than correcting it on hydration.
 
-### `SidebarController`
-
-What `injectSidebar()` returns.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `collapse()` | `() => void` | Closes the sidebar, or the drawer on a compact viewport. |
-| `collapsible` | `Signal<"offcanvas" \| "icon" \| "none">` | The `collapsible` input. |
-| `compact` | `Signal<boolean>` | Whether the sidebar presents as a drawer. |
-| `expand()` | `() => void` | Opens the sidebar, or the drawer on a compact viewport. |
-| `expanded` | `Signal<boolean>` | Whether the sidebar is open at full width. On a compact viewport, whether the drawer is open. |
-| `iconOnly` | `Signal<boolean>` | Whether the sidebar is on its icon rail. Never `true` on a compact viewport. |
-| `mobileOpen` | `Signal<boolean>` | Whether the drawer is open. Always `false` while docked. |
-| `side` | `Signal<"start" \| "end">` | The edge it sits on, with `"left"` and `"right"` already folded in. |
-| `sidebarId` | `Signal<string>` | The id of the sidebar element, for `aria-controls` on a custom trigger. |
-| `state` | `Signal<"expanded" \| "collapsed">` | `expanded` as a string, as in the sidebar's `data-state`. |
-| `toggle()` | `() => void` | Flips the sidebar between open and closed, on whichever presentation is current. |
-| `variant` | `Signal<"sidebar" \| "floating" \| "inset">` | The `variant` input. |
-
-### Storage
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `SIDEBAR_STORAGE` | `InjectionToken<SidebarStorage>` | Where sidebars with a `persistKey` remember their state. Defaults to a `LocalStorageSidebarStorage`, in the root injector. |
-| `provideSidebarStorage(storage)` | `(storage: SidebarStorage \| (() => SidebarStorage)) => EnvironmentProviders` | Replaces that storage. Takes an instance, or a factory that runs in an injection context. It goes in application or route providers. To replace it in a component's `providers`, provide `SIDEBAR_STORAGE` directly. |
-| `LocalStorageSidebarStorage` | `class` | The default: `localStorage`, with the key used as given. `new LocalStorageSidebarStorage(platformId)` takes the value of `PLATFORM_ID`. |
-
-`SidebarStorage` is the interface a custom storage implements:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `read(key)` | `(key: string) => boolean \| null` | The remembered state for `key`, or `null` when nothing is stored or the storage can't answer. |
-| `write(key, expanded)` | `(key: string, expanded: boolean) => void` | Records the docked state for `key`. A drawer's state is never passed to it. |
-
-### Messages
-
-`SIDEBAR_DEFAULT_MESSAGES` holds the English defaults, which are localized under `sidebar` like the library's other messages.
-
-| Key | Default | Used for |
-| --- | --- | --- |
-| `drawerLabel` | `"Sidebar"` | A drawer's name, when it has no `aria-label` or `aria-labelledby` |
-| `rail` | `"Toggle sidebar"` | The rail's name, when it has no `aria-label` |
+```typescript
+function provideSidebarStorage(storage: SidebarStorage | (() => SidebarStorage)): EnvironmentProviders;
+```
 
 ### Types
 
-| Type | Values |
-| --- | --- |
-| `SidebarCollapsibleMode` | `"offcanvas" \| "icon" \| "none"` |
-| `SidebarLogicalSide` | `"start" \| "end"` |
-| `SidebarMenuButtonSize` | `"medium" \| "large"` |
-| `SidebarModalScope` | `"page" \| "layout"` |
-| `SidebarSide` | `"start" \| "end" \| "left" \| "right"` |
-| `SidebarVariant` | `"sidebar" \| "floating" \| "inset"` |
+#### `SIDEBAR_DEFAULT_MESSAGES`
 
-`ClassInputType`, from `@nanahoshi/mona-ui/common`, is `string | string[] | Record<string, unknown> | null | undefined`.
+```typescript
+const SIDEBAR_DEFAULT_MESSAGES: MonaSidebarMessages;
+```
+
+#### `SIDEBAR_STORAGE`
+
+Where sidebars given a `persistKey` remember whether they were left open. Defaults to
+`localStorage`. Replace it with `provideSidebarStorage()` — with something the server can read too,
+for an application that renders there.
+
+```typescript
+const SIDEBAR_STORAGE: InjectionToken<SidebarStorage>;
+```
+
+#### `SidebarController`
+
+The safe, read-and-command view of one sidebar, returned by `injectSidebar()`.
+
+Structural facts — side, variant, collapsible mode — are readable but not settable. They are
+authored as inputs on `mona-sidebar`, and letting a descendant write them would leave the service
+and the component disagreeing about the same sidebar, with the component winning on the next
+change detection pass. Consumers who need them to change should bind the inputs.
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `collapsible` (read-only) | `Signal<SidebarCollapsibleMode>` | How the sidebar behaves when collapsed, as authored on `mona-sidebar`. |
+| `compact` (read-only) | `Signal<boolean>` | Whether the viewport is narrow enough that the sidebar presents as an overlay drawer rather than as a column in the layout. |
+| `expanded` (read-only) | `Signal<boolean>` | Whether the sidebar is showing at full width. On a compact viewport this reports the drawer's state, so a single binding drives both presentations. |
+| `iconOnly` (read-only) | `Signal<boolean>` | Whether the sidebar is currently reduced to its icon rail, meaning parts that only make sense at full width — labels, trailing actions, submenus — should step aside. Never true while compact, where the drawer always presents at full width. |
+| `mobileOpen` (read-only) | `Signal<boolean>` | Whether the overlay drawer is open. Only meaningful while `compact` is true. |
+| `side` (read-only) | `Signal<SidebarLogicalSide>` | Which edge the sidebar sits on, resolved to a direction-relative side. |
+| `sidebarId` (read-only) | `Signal<string>` | The id of the sidebar element, for `aria-controls` on a custom trigger. |
+| `state` (read-only) | `Signal<"expanded" \| "collapsed">` | The expanded state as a string, for `data-state` bindings and styling hooks. |
+| `variant` (read-only) | `Signal<SidebarVariant>` | The visual treatment of the sidebar, as authored on `mona-sidebar`. |
+
+**Methods**
+
+| Signature | Description |
+| --- | --- |
+| `collapse(): void` | Closes the sidebar. On a compact viewport this closes the drawer instead. |
+| `expand(): void` | Opens the sidebar. On a compact viewport this opens the drawer instead. |
+| `toggle(): void` | Flips the sidebar between open and closed, on whichever presentation is current. |
+
+#### `SidebarStorage`
+
+Where a sidebar remembers whether it was left open. Supplied through `SIDEBAR_STORAGE`, and only
+ever consulted for a sidebar that was given a `persistKey`.
+
+Only the docked state is ever handed to it. A drawer on a compact viewport is deliberately never
+persisted: restoring one open would cover the page on load, in front of the content the reader
+asked for.
+
+**Methods**
+
+| Signature | Description |
+| --- | --- |
+| `read(key: string): boolean \| null` | The remembered state for `key`, or `null` when nothing has been stored under it — including when this storage cannot answer, such as on the server. A `null` leaves the sidebar on whatever its `expanded` input says. |
+| `write(key: string, expanded: boolean): void` | Records the docked state for `key`. Failing to store it must not throw. |
+
+#### `InjectSidebarOptions`
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `for?` (read-only) | `string` | Reads the sidebar with this id in the enclosing layout, rather than the nearest one. Needs a layout. |
+| `optional?` (read-only) | `boolean` | Returns `null` instead of throwing when there is no enclosing sidebar or layout. |
+
+#### `SidebarCollapsibleMode`
+
+How the sidebar behaves when it is collapsed.
+
+- `offcanvas` — the sidebar collapses to zero width and leaves the layout.
+- `icon` — the sidebar shrinks to a narrow rail that keeps icons visible.
+- `none` — the sidebar cannot be collapsed and stays at its full width.
+
+```typescript
+type SidebarCollapsibleMode = "offcanvas" | "icon" | "none";
+```
+
+#### `SidebarLogicalSide`
+
+The direction-relative side, once the `left`/`right` aliases have been folded in.
+
+```typescript
+type SidebarLogicalSide = "start" | "end";
+```
+
+#### `SidebarMenuButtonSize`
+
+How much room the button's leading visual needs.
+
+- `medium` — sized for an icon, which the icon rail insets so it sits centred in the square.
+- `large` — sized for a full-height visual such as an avatar, which fills the rail square edge to
+  edge, and which is given a taller row while the sidebar is expanded.
+
+```typescript
+type SidebarMenuButtonSize = "medium" | "large";
+```
+
+#### `SidebarModalScope`
+
+How far an open drawer's modality reaches.
+- `"page"` makes everything outside the drawer inert and locks the page's scroll, and the drawer is `aria-modal`.
+- `"layout"` does that within `mona-sidebar-layout` only, for a sidebar embedded in part of a page. What's around the
+  layout stays usable, so the drawer isn't `aria-modal`.
+
+```typescript
+type SidebarModalScope = "page" | "layout";
+```
+
+#### `SidebarSide`
+
+Which edge of the layout the sidebar sits on. Also determines its order within the layout
+and which side its rail and border are drawn on.
+
+`start` and `end` are the preferred values: they follow the document's writing direction, so a
+`start` sidebar sits on the left in LTR and on the right in RTL without the consumer branching.
+
+`left` and `right` are retained as aliases of `start` and `end`. They were always a poor
+description of the behaviour — the layout orders the sidebar with flexbox, which is
+direction-relative, so `side="left"` already rendered on the right under RTL.
+
+```typescript
+type SidebarSide = "start" | "end" | "left" | "right";
+```
+
+#### `SidebarVariant`
+
+The visual treatment of the sidebar region.
+
+- `sidebar` — flush against the edge of the layout, separated by a single border.
+- `floating` — detached from the edge, with its own rounded, bordered surface.
+- `inset` — the sidebar itself is plain, and the inset region beside it becomes the raised surface.
+
+```typescript
+type SidebarVariant = "sidebar" | "floating" | "inset";
+```
+
+#### `ClassInputType`
+
+From `@nanahoshi/mona-ui/common`.
+
+```typescript
+type ClassInputType = string | string[] | Record<string, unknown> | null | undefined;
+```
+
+#### `MonaSidebarMessages`
+
+From `@nanahoshi/mona-ui/i18n`.
+
+| Name | Type |
+| --- | --- |
+| `drawerLabel` (read-only) | `string` |
+| `rail` (read-only) | `string` |

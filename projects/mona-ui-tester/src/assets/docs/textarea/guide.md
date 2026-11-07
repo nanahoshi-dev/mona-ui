@@ -105,22 +105,3 @@ The directive does not manage an accessible name. Associate a label using one of
 **Consumer responsibilities:**
 
 - Provide an accessible name via a `<label>` element (`for`/`id` association or wrapping), `aria-label`, or `aria-labelledby` on the `<textarea>`.
-
-## API
-
-### `TextAreaDirective`
-
-**Selector:** `textarea[monaTextArea]`
-
-#### Inputs
-
-| Name      | Type                                       | Default    | Description                                                                                                                                                               |
-|-----------|--------------------------------------------|------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `class`   | `string`                                   | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                 |
-| `invalid` | `boolean`                                  | `false`    | Marks the textarea as invalid, triggering error border and ring styling. When using `[formField]`, `FormField` writes this automatically.                                 |
-| `rounded` | `'large' \| 'medium' \| 'none' \| 'small'` | `'medium'` | Border-radius preset applied to the component.                                                                                                                            |
-| `touched` | `boolean`                                  | `false`    | Marks the textarea as touched. Error styling is only shown when both `invalid` and `touched` are `true`. When using `[formField]`, `FormField` writes this automatically. |
-
-#### Outputs
-
-`TextAreaDirective` has no outputs. All native `<textarea>` events (`input`, `change`, `blur`, `focus`, etc.) are available directly on the host element.

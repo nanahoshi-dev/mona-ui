@@ -57,6 +57,9 @@ jobs:
       - name: Check generated message parameters
         run: npm run check:message-parameters
 
+      - name: Check generated API docs
+        run: npm run check:api-docs
+
       - name: Build Library
         run: npm run build:prod
 
