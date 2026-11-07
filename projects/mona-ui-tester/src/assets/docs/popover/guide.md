@@ -67,24 +67,20 @@ Neither directive exposes a template context (no `let-` variables).
 
 The header row — and the rounded top corners that go with it — only renders when `title` is non-empty or a title template is projected. The footer region only renders when a footer template is projected.
 
-## Feature Examples
+## Examples
 
 ### Click trigger (default)
 
-```html
-<mona-popover [target]="anchor" title="Details">
-    <p class="p-2">Click the target again, or click outside, to close.</p>
-</mona-popover>
-```
+Clicking the target toggles the popover — a second click on the same target closes it instead of opening a duplicate. The footer's button closes it through the `monaPopover` reference.
 
-Clicking the target toggles the popover — a second click on the same target closes it instead of opening a duplicate.
+```example
+popover/basic
+```
 
 ### Hover trigger
 
-```html
-<mona-popover [target]="anchor" trigger="hover" title="Preview">
-    <p class="p-2">Opens on pointer enter or focus, and stays open while the pointer is on it.</p>
-</mona-popover>
+```example
+popover/hover
 ```
 
 A hover popover opens when the pointer moves onto the target or keyboard focus enters it. It closes once both have left the target and the panel, after a grace of about 100 ms that lets the pointer move onto the panel. Touch pointers don't open it. A hover popover doesn't take focus when it opens, unless `autoFocus` is set.
@@ -100,20 +96,12 @@ A hover popover opens when the pointer moves onto the target or keyboard focus e
 
 ### Position and arrow
 
-```html
-<mona-popover [target]="anchor" position="end" [displayArrow]="true" title="Details">
-    <p class="p-2">After the target in the reading direction, with a pointing arrow.</p>
-</mona-popover>
-```
-
-`position` is `"top"` (default), `"bottom"`, `"left"`, `"right"`, `"start"` or `"end"`. `left` and `right` are physical sides in both directions; `start` and `end` follow the text direction. When there isn't room, the popover flips to the opposite side, and its arrow follows.
+The hover example above opens after its target in the reading direction (`position="end"`), with `[displayArrow]="true"`. `position` is `"top"` (default), `"bottom"`, `"left"`, `"right"`, `"start"` or `"end"`. `left` and `right` are physical sides in both directions; `start` and `end` follow the text direction. When there isn't room, the popover flips to the opposite side, and its arrow follows.
 
 ### Popover without a visible title
 
-```html
-<mona-popover [target]="filterButton" ariaLabel="Filters">
-    <form class="p-2">…</form>
-</mona-popover>
+```example
+popover/no-title
 ```
 
 A popover is a dialog, and needs a name: a `title`, a title template, or `ariaLabel`. In dev mode, a popover that opens without one logs a warning.

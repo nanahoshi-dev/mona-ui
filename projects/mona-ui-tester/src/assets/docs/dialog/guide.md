@@ -102,26 +102,12 @@ Dialog has five structural template directives, each an `ng-template` placed as 
 
 When a footer template is provided, it replaces the built-in action-button row entirely — `actions` and `actionsLayout` no longer render anything, and Enter no longer triggers a default action.
 
-## Feature Examples
+## Examples
 
 ### Action buttons and results
 
-```typescript
-protected readonly actions: DialogAction[] = [
-    { text: "Cancel" },
-    { text: "Save", look: "primary" }
-];
-
-protected onAction(event: DialogActionEvent): void {
-    if (event.action.text === "Save") {
-        this.save();
-    }
-}
-```
-
-```html
-<mona-dialog title="Save changes?" [actions]="actions" (action)="onAction($event)" (close)="dialogVisible.set(false)">
-</mona-dialog>
+```example
+dialog/basic
 ```
 
 Each `DialogAction` renders as a `monaButton` with that action's `text`, `look`, `rounded`, `iconOnly`, and `cssClass`. Clicking one emits `action` (and `DialogRef.action$`); unless a subscriber calls `event.preventDefault()`, the dialog then closes on its own, for `<mona-dialog>` and `DialogService.show()` alike. Give actions a `data` value to tell them apart without comparing their (translated) text.
@@ -147,12 +133,18 @@ Pressing Enter inside the dialog triggers the action marked `default: true`, as 
 
 ### Custom content instead of plain text
 
-```html
-<mona-dialog title="Edit profile">
-    <ng-template monaDialogContentTemplate>
-        <mona-text-box placeholder="Display name"></mona-text-box>
-    </ng-template>
-</mona-dialog>
+A content template replaces `text`. Here Enter in the text box triggers the default Save action.
+
+```example
+dialog/content
+```
+
+### A confirmation from code
+
+`confirm()` opens a dialog with OK and Cancel, and emits `true` only for OK.
+
+```example
+dialog/service
 ```
 
 ### Content from a template or a component

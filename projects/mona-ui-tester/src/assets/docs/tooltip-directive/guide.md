@@ -42,13 +42,39 @@ Elements matching `filter` that are added to or removed from the container after
 
 ## Examples
 
-**Custom position:**
+### Position
 
-```html
-<button monaButton monaTooltip title="More info" position="right">Info</button>
+`start` and `end` follow the text direction. Without room, a tooltip flips to the opposite side.
+
+```example
+tooltip-directive/position
 ```
 
-**Show/hide delay:**
+### Template content
+
+Pass a template to `monaTooltip` for content that isn't plain text. The icon-only button still needs its own `aria-label`.
+
+```example
+tooltip-directive/template
+```
+
+### Content mode with a custom filter
+
+One directive on the container shows a tooltip for every descendant that matches `filter`, including ones rendered later.
+
+```example
+tooltip-directive/content-mode
+```
+
+### Turning it off
+
+While `disabled` is `true`, the tooltip doesn't open. On a `monaButton` host, `[disabled]` would also disable the button, so the example puts the directive on a container in `content` mode.
+
+```example
+tooltip-directive/disabled
+```
+
+### Show and hide delay
 
 ```html
 <button monaButton monaTooltip title="Delete this item" [showDelay]="300" [hideDelay]="150">
@@ -56,39 +82,14 @@ Elements matching `filter` that are added to or removed from the container after
 </button>
 ```
 
-**Disabling the tooltip conditionally:**
+### Visibility events
 
-```html
-<button monaButton monaTooltip title="Submit the form" [disabled]="formPending()">
-    Submit
-</button>
-```
-
-**Reacting to visibility changes:**
+`shown` emits once the tooltip has opened, and `hidden` once it has closed.
 
 ```html
 <button monaButton monaTooltip title="Export data" (shown)="onTooltipShown()" (hidden)="onTooltipHidden()">
     Export
 </button>
-```
-
-**Template content:**
-
-```html
-<button monaButton [monaTooltip]="shortcut" aria-label="Save">
-    <svg aria-hidden="true"><!-- save icon --></svg>
-</button>
-<ng-template #shortcut>Save <kbd>Ctrl</kbd>+<kbd>S</kbd></ng-template>
-```
-
-**Content mode with a custom filter:**
-
-```html
-<div monaTooltip mode="content" filter="button[title]">
-    @for (action of actions(); track action.id) {
-        <button monaButton [title]="action.label">{{ action.icon }}</button>
-    }
-</div>
 ```
 
 ## Accessibility Notes

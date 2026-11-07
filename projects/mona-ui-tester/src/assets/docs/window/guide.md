@@ -84,12 +84,12 @@ Window has four structural template directives, each an `ng-template` placed as 
 
 Content placed directly inside `<mona-window>`, outside these templates, is the window's content. A `monaWindowContentTemplate` takes its place when given; use it when the content should only be created once the window opens. `WindowService.open()` instead takes `content` as a `TemplateRef` or a component type directly on `WindowSettings`.
 
-## Feature Examples
+## Examples
 
 ### Draggable and resizable
 
-```html
-<mona-window title="Details" [draggable]="true" [resizable]="true"> </mona-window>
+```example
+window/basic
 ```
 
 On `<mona-window>`, `draggable` defaults to `true` and `resizable` to `false`. Through `WindowService.open()`, both default to `false`. The pointer drags the window by its title bar and resizes it from eight edge and corner handles. A drag starts once the pointer has moved a few pixels with the primary button pressed, and never from the title bar's buttons or the controls of an action template. A dragged window keeps its size past the viewport's edges, and its title bar stays below the top edge. The keyboard does both from the title bar — see [Keyboard](#keyboard).
@@ -107,16 +107,8 @@ Both default to `true` — set either to `false` to hide that button.
 
 ### Two-way position and size binding
 
-```typescript
-protected readonly top = model<number>();
-protected readonly left = model<number>();
-protected readonly width = model<number>(400);
-protected readonly height = model<number>(300);
-```
-
-```html
-<mona-window [(top)]="top" [(left)]="left" [(width)]="width" [(height)]="height" [draggable]="true" [resizable]="true">
-</mona-window>
+```example
+window/position
 ```
 
 `top`, `left`, `width`, and `height` are two-way models: dragging or resizing updates them, and setting them programmatically moves or resizes the open window — see [Live vs. one-shot inputs](#live-vs-one-shot-inputs).
@@ -156,30 +148,20 @@ open(): void {
 
 ### Preventing a close
 
-```typescript
-protected onClose(event: PopupCloseEvent): void {
-    if (this.hasUnsavedChanges()) {
-        event.preventDefault();
-    }
-}
-```
+Change the name and try to close the window: `preventDefault()` in the `close` handler keeps it open until the change is saved or undone.
 
-```html
-<mona-window (close)="onClose($event)" (closed)="windowVisible.set(false)"> </mona-window>
+```example
+window/prevent-close
 ```
 
 This works for both declarative and imperative usage (`WindowRef.close$`). `WindowSettings.preventClose` is an alternative available only through `WindowService.open()` — see [`preventClose` is service-only](#preventclose-is-service-only).
 
 ### Reading how a window closed
 
-```typescript
-const windowRef = this.windowService.open<string>({ title: "Rename", content: this.renameTemplate() });
-windowRef.closed$.subscribe(({ value, via }) => {
-    if (value) {
-        this.rename(value);
-    }
-});
-// From the content: windowRef.close(newName)
+This window is opened with `WindowService`, and its content calls `windowRef.close(value)`.
+
+```example
+window/service
 ```
 
 `closed$` emits a `WindowResult` once the window has closed: `value` is what was passed to `close(value)`, and `via` says what closed it.

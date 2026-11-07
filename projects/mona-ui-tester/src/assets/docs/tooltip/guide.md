@@ -39,48 +39,44 @@ A selector target attaches the same tooltip behavior to every matching element i
 
 ## Examples
 
-**Custom position:**
+### Position
 
-```html
-<button #infoButton>Info</button>
-<mona-tooltip [target]="infoButton" position="right">More information</mona-tooltip>
+`start` and `end` follow the text direction. Without room, a tooltip flips to the opposite side.
+
+```example
+tooltip/position
 ```
 
-**Show/hide delay:**
+### Show and hide delay
 
-```html
-<button #deleteButton>Delete</button>
-<mona-tooltip [target]="deleteButton" [showDelay]="300" [hideDelay]="150">
-    This cannot be undone
-</mona-tooltip>
+```example
+tooltip/delay
 ```
 
-**Disabling the tooltip conditionally:**
+### Turning it off
 
-```html
-<button #submitButton>Submit</button>
-<mona-tooltip [target]="submitButton" [disabled]="formPending()">
-    Submit the form
-</mona-tooltip>
+While `disabled` is `true`, the tooltip doesn't open.
+
+```example
+tooltip/disabled
 ```
 
-**Reacting to visibility changes:**
+### Rich content
+
+The icon is decorative, so it gets `aria-hidden="true"`. Keep links and buttons out of a tooltip.
+
+```example
+tooltip/rich-content
+```
+
+### Visibility events
+
+`shown` emits once the tooltip has opened, and `hidden` once it has closed.
 
 ```html
 <button #exportButton>Export</button>
 <mona-tooltip [target]="exportButton" (shown)="onTooltipShown()" (hidden)="onTooltipHidden()">
     Export the current view
-</mona-tooltip>
-```
-
-**Rich projected content:**
-
-```html
-<button #statusButton>Status</button>
-<mona-tooltip [target]="statusButton">
-    <div class="flex items-center gap-1">
-        <strong>Build:</strong> <span class="text-green-600">Passing</span>
-    </div>
 </mona-tooltip>
 ```
 

@@ -43,16 +43,14 @@ import { PopupComponent } from "@nanahoshi/mona-ui/popup";
 
 Popup has a single content-projection slot. Everything placed inside `<mona-popup>...</mona-popup>` becomes the popup body, rendered the moment the popup opens. There is no structural template system or template context — for per-item template customization inside an overlay, use a higher-level component such as a drop-down list.
 
-## Feature Examples
+## Examples
 
 ### Custom positioning
 
-`anchorConnectionPoint` is the point on the anchor the popup attaches to; `popupConnectionPoint` is the point on the popup that touches the anchor. Both accept the same nine-position keyword set (see the [API](#api) table below).
+`anchorConnectionPoint` is the point on the anchor the popup attaches to; `popupConnectionPoint` is the point on the popup that touches the anchor. Both accept the same nine-position keyword set (see the [API](#api) table below). Popup adds no ARIA, so the example sets the role, the name and `aria-expanded` itself.
 
-```html
-<mona-popup [anchor]="anchor" anchorConnectionPoint="topright" popupConnectionPoint="bottomleft">
-    <div class="p-4">Popup content</div>
-</mona-popup>
+```example
+popup/positioning
 ```
 
 If the resulting position would overflow the viewport, the popup automatically tries alternate positions, then pushes itself back into view (see `withPush`). To take full control, supply an explicit CDK `positions` array — when provided and non-empty, it replaces the connection-point-based positions entirely.
@@ -75,10 +73,8 @@ protected readonly positions: ConnectedPosition[] = [
 
 `closeOnOutsideClick` (default `true`) and `closeOnEscape` (default `true`) close the popup without a backdrop. Add a backdrop when you want to dim or block the rest of the page; `closeOnBackdropClick` only has an effect once `hasBackdrop` is `true`.
 
-```html
-<mona-popup [anchor]="anchor" [hasBackdrop]="true" [closeOnBackdropClick]="true">
-    <div class="p-4">Popup content</div>
-</mona-popup>
+```example
+popup/backdrop
 ```
 
 ### Hover-triggered popup
@@ -119,21 +115,11 @@ protected readonly animation = { enter: "my-enter-class", leave: "my-leave-class
 
 ### Imperative usage with `PopupService`
 
-```typescript
-import { inject, TemplateRef } from "@angular/core";
-import { PopupService } from "@nanahoshi/mona-ui/popup";
+`create()` returns a `PopupRef` synchronously; the popup is already opening by the time it returns. A template gets no context, so the example keeps the `PopupRef` to close it with the answer, and moves focus into the popup once it has opened, since the overlay sits at the end of the page, far from the anchor in Tab order.
 
-protected readonly popupService = inject(PopupService);
-
-open(anchor: HTMLElement, content: TemplateRef<unknown>): void {
-    const popupRef = this.popupService.create({ anchor, content });
-    popupRef.closed.subscribe(event => {
-        console.log(event.result, event.via);
-    });
-}
+```example
+popup/service
 ```
-
-`create()` returns a `PopupRef` synchronously; the popup is already opening by the time it returns.
 
 ### Closing programmatically and passing a result
 

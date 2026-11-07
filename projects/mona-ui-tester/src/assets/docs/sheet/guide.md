@@ -39,44 +39,35 @@ import { SheetComponent } from "@nanahoshi/mona-ui/sheet";
 
 `SheetComponent` opens automatically once its host renders; there is no explicit `open()` call.
 
-## Feature Examples
+## Examples
+
+### Editing in a sheet
+
+The field is copied when the sheet opens, and only saved back when the user saves.
+
+```example
+sheet/form
+```
 
 ### Side
-
-```html
-<mona-sheet side="bottom" title="Filters"> </mona-sheet>
-```
 
 `side` accepts `"top" | "right" | "bottom" | "left" | "start" | "end"` and defaults to `"right"`. `left` and `right` are physical edges in every direction; `start` and `end` follow the text direction, so `start` opens from the left in left-to-right pages and from the right in right-to-left ones. The border always faces the page. Left and right sheets default to `min(100dvw, 24rem)` wide and `100dvh` high; top and bottom sheets default to `100dvw` wide with automatic height capped at `90dvh`.
 
 ### Mobile bottom sheet
 
-```html
-@if (filtersOpen()) {
-    <mona-sheet
-        side="bottom"
-        title="Filters"
-        description="Narrow the displayed results."
-        height="min(90dvh, 36rem)"
-        (closed)="filtersOpen.set(false)">
-        <app-product-filters />
-    </mona-sheet>
-}
+```example
+sheet/bottom
 ```
 
 Large projected content scrolls inside the Sheet while its header and close button remain in place. The page behind it cannot scroll while the sheet is open. Width and height values based on `dvw`/`dvh` adapt when mobile browser chrome or device orientation changes.
 
 ### Custom projected content
 
-```html
-@if (navigationOpen()) {
-    <mona-sheet side="left" ariaLabel="Main navigation" [closable]="false" (closed)="navigationOpen.set(false)">
-        <app-mobile-navigation />
-    </mona-sheet>
-}
-```
+Any Angular content can be projected. If a visible title is not appropriate, provide `ariaLabel` so the sheet still has an accessible name — Sheet content must have either a `title` or an `ariaLabel`. This sheet has no close button, so it closes on Escape, a backdrop click, or choosing a page.
 
-Any Angular content can be projected. If a visible title is not appropriate, provide `ariaLabel` so the sheet still has an accessible name — Sheet content must have either a `title` or an `ariaLabel`.
+```example
+sheet/navigation
+```
 
 ### Preventing a close
 

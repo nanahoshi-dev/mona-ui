@@ -62,6 +62,32 @@ See [Anatomy & Options Resolution](#anatomy--options-resolution) for how `show()
 
 `show()` does not mutate the `options` object passed to it.
 
+## Examples
+
+### Types
+
+`type` sets the icon, the color and how urgently the notification is announced. These close after 5 seconds and show a countdown bar.
+
+```example
+notification/types
+```
+
+### Template content
+
+A template gets the `NotificationRef` as its implicit context and the `data` as `data`.
+
+```example
+notification/template
+```
+
+### Updating a notification
+
+`update()` changes the content, title, type or close button of a notification that is already shown, and announces the new message.
+
+```example
+notification/update
+```
+
 ## Feature Examples
 
 ### Dismissal
@@ -112,16 +138,7 @@ this.#notificationService.show({ content: this.undoTemplate, data: { file: "repo
 this.#notificationService.show({ content: UploadNotificationComponent, data: { fileName: "report.pdf" } });
 ```
 
-A template gets the `NotificationRef` as its implicit context and the `data` as `data`:
-
-```html
-<ng-template #undoTemplate let-ref let-data="data">
-    <p class="p-2">Moved {{ data.file }} to the bin.</p>
-    <button monaButton look="link" (click)="undo(); ref.hide()">Undo</button>
-</ng-template>
-```
-
-A component injects them:
+A template gets the `NotificationRef` as its implicit context and the `data` as `data` (see the template example above). A component injects them:
 
 ```typescript
 @Component({ template: `<p class="p-2">Uploading {{ data.fileName }}…</p>` })
