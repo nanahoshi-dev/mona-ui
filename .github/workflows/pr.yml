@@ -63,6 +63,9 @@ jobs:
       - name: Check generated examples
         run: npm run check:examples
 
+      - name: Check docs page schema
+        run: npm run check:docs-schema -- --strict
+
       - name: Build Library
         run: npm run build:prod
 
