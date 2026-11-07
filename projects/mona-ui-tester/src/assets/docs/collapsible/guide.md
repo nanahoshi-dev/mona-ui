@@ -1,4 +1,4 @@
-## Overview & Usage Guidelines
+## Overview
 
 The Collapsible API is split into three directives:
 
@@ -8,7 +8,7 @@ The Collapsible API is split into three directives:
 
 The directives add no wrapper elements. Apply them directly to the elements that should act as the root, trigger, and content region.
 
-## Import & Basic Usage
+## Import & Quick Start
 
 ```typescript
 import { Component, signal } from "@angular/core";
@@ -59,11 +59,17 @@ The root is exported as `monaCollapsible`, so `expand()`, `collapse()`, and `tog
 collapsible/programmatic
 ```
 
-## State & Behavior
+## Behavior
 
 ### Content height
 
-Set `animate` to `false` when the consumer wants to provide its own content transition. The content directive publishes its measured height as the `--mona-collapsible-content-height` custom property. Pair `[animate]="false"` with a consumer-owned transition when the built-in height transition is not suitable. The built-in one is also skipped when the user asks for reduced motion.
+The built-in height transition is skipped when the user asks for reduced motion. Set `animate` to `false` to provide your own transition instead.
+
+Either way, the directive keeps closed content at an inline `height: 0` and removes it on opening, so a transition of your own has to animate `height`. The content's measured height is published as the `--mona-collapsible-content-height` custom property: give the open state that height, and the element grows to it. Clip the overflow yourself, since content spills out while it grows.
+
+```example
+collapsible/custom-transition
+```
 
 ### Padded content
 
@@ -80,7 +86,7 @@ The directive sets the content element's height, block padding and block border 
 
 - While closed, its block padding and border are set to `0` inline, along with its height, so that nothing shows. Padding you set inline on it won't survive a toggle, so put that on an inner element. See [Padded content](#padded-content).
 
-## Accessibility Notes
+## Accessibility
 
 Use a native `button` or `a` element for the trigger when possible. The trigger directive automatically manages the disclosure relationship:
 

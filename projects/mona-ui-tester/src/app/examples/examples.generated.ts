@@ -185,6 +185,11 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./circular-progress-bar/sizes/sizes-example.component").then(module => module.CircularProgressBarSizesExampleComponent),
         mainFile: "sizes-example.component.ts"
     },
+    "collapsible/custom-transition": {
+        files: ["custom-transition-example.component.ts", "custom-transition-example.component.html"],
+        load: () => import("./collapsible/custom-transition/custom-transition-example.component").then(module => module.CollapsibleCustomTransitionExampleComponent),
+        mainFile: "custom-transition-example.component.ts"
+    },
     "collapsible/programmatic": {
         files: ["programmatic-example.component.ts", "programmatic-example.component.html"],
         load: () => import("./collapsible/programmatic/programmatic-example.component").then(module => module.CollapsibleProgrammaticExampleComponent),

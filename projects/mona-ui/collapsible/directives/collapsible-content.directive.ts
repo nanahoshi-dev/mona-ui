@@ -149,9 +149,15 @@ export class CollapsibleContentDirective {
         return Math.max(0, ...durations);
     }
 
-    /** Measures the element open, since closed it has no padding or border to count. */
+    /**
+     * Measures the element open, since closed it has no padding or border to count. The height stays as it is:
+     * `scrollHeight` counts clipped content, and laying the element out open would be where a transition of the
+     * consumer's own starts from.
+     */
     #measure(): number {
-        this.#rest(true);
+        for (const property of BOX_PROPERTIES) {
+            this.#element.style.removeProperty(property);
+        }
         // No layout on the server, where this also runs, and perhaps no `getComputedStyle` either.
         if (typeof getComputedStyle !== "function") {
             return 0;
@@ -203,6 +209,7 @@ export class CollapsibleContentDirective {
         const element = this.#element;
         const contentHeight = this.#measure();
         if (this.collapsible.expanded()) {
+            this.#rest(true);
             element.style.overflow = "";
             element.style.minHeight = "";
         } else {
