@@ -11,6 +11,12 @@ import {
 import type { ThemeStrategy } from "./theme.strategy";
 import { findThemeProblems } from "./theme-validation";
 
+/** A theme without these keeps its own border when the user asks for more contrast. */
+const optionalTokens: ReadonlySet<string> = new Set([
+    "--color-border-control-contrast",
+    "--color-border-control-contrast-hover"
+]);
+
 export class DefaultThemeStrategy implements ThemeStrategy {
     readonly #overrides: readonly ThemeOverrideRegistration[];
     readonly #themes = new Map<string, ThemeFamilyRegistration>();
@@ -155,9 +161,8 @@ function validateProfile(name: string, variant: ThemeVariant, profile: ThemeProf
     const reference = builtInThemes.mona.variants.light;
     for (const section of ["colors", "shadows", "motion", "effects", "shape", "components"] as const) {
         const values = profile[section];
-        const missing = values
-            ? Object.keys(reference[section]).filter(key => !(key in values))
-            : Object.keys(reference[section]);
+        const required = Object.keys(reference[section]).filter(key => !optionalTokens.has(key));
+        const missing = values ? required.filter(key => !(key in values)) : required;
         if (missing.length > 0) {
             throw new Error(
                 `Mona UI theme "${name}" is missing ${section} tokens for the "${variant}" variant: ${missing.join(", ")}.`

@@ -184,7 +184,7 @@ export class SvgTreemapRenderer {
                 } else {
                     const hoverColor =
                         styleResolver.resolveCssVariable("--mona-chart-treemap-hover-outline-color") ||
-                        styleResolver.resolveCssVariable("--color-border") ||
+                        styleResolver.resolveCssVariable("--color-border-control") ||
                         "rgba(255, 255, 255, 0.85)";
                     setSvgAttribute(highlightEl, "fill", "none");
                     setSvgAttribute(highlightEl, "stroke", hoverColor);

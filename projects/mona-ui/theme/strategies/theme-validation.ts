@@ -8,7 +8,8 @@ const contrastPairs: readonly (readonly [`--color-${string}`, `--color-${string}
     ["--color-muted-foreground", "--color-surface", 4.5],
     ["--color-input-foreground", "--color-input-background", 4.5],
     ["--color-primary-foreground", "--color-primary", 4.5],
-    ["--color-border-control", "--color-input-background", 3],
+    ["--color-border-control-contrast", "--color-input-background", 3],
+    ["--color-border-control-contrast-hover", "--color-input-background", 3],
     ["--color-focus-indicator", "--color-surface", 3],
     ["--color-selected-border", "--color-surface", 3]
 ];

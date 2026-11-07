@@ -6,7 +6,7 @@ export const segmentedContainerThemeVariants = cva(
     `
         relative inline-flex items-center gap-0.5
         ${themeControlSurfaceClasses}
-        border border-border
+        border border-input-border
         p-1
         data-[invalid='true']:border-error
         data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35

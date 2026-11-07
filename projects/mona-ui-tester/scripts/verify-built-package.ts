@@ -650,7 +650,7 @@ const { css } = await postcss([tailwind({ base: ${JSON.stringify(tempDir)} })]).
     '@import "tailwindcss" source(none);\\n@import "@nanahoshi/mona-ui/styles.css";\\n',
     { from: ${JSON.stringify(join(tempDir, "styles.css"))} }
 );
-for (const expected of [".bg-primary", ".border-input-border", "--color-primary:"]) {
+for (const expected of [".bg-primary", ".border-input-border", "--color-primary:", "--color-border-control-contrast:", "prefers-contrast: more"]) {
     if (!css.includes(expected)) {
         console.error("The compiled stylesheet has no " + expected);
         process.exit(1);

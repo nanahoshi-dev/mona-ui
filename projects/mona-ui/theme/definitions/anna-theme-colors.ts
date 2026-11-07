@@ -27,8 +27,10 @@ const dark: ThemeColors = Object.freeze({
     "--color-input-foreground": "var(--color-foreground)",
     "--color-border-subtle": "#0F0F10",
     "--color-border": "#131416",
-    "--color-border-control": "#6F7077",
-    "--color-border-control-hover": "#818289",
+    "--color-border-control": "#0F0F10",
+    "--color-border-control-hover": "#17181A",
+    "--color-border-control-contrast": "#6F7077",
+    "--color-border-control-contrast-hover": "#818289",
 
     "--color-hover": "#242528",
     "--color-active": "#2A2B2E",

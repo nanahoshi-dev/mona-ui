@@ -33,7 +33,7 @@ export const buttonThemeVariants = cva(
             look: {
                 default: `
                     ${themeControlSurfaceClasses} text-foreground
-                    border border-border
+                    border border-input-border
                     hover:bg-hover active:bg-active
                     focus-visible:border-focus-indicator
                 `,
@@ -63,7 +63,7 @@ export const buttonThemeVariants = cva(
                 `,
                 outline: `
                     ${themeControlSurfaceClasses} text-foreground
-                    border border-border
+                    border border-input-border
                     hover:bg-hover active:bg-active
                     focus-visible:border-focus-indicator
                 `,

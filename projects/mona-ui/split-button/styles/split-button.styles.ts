@@ -15,7 +15,7 @@ export const splitButtonThemeVariants = cva(
                 error: "",
                 ghost: "border-transparent",
                 info: "",
-                outline: "[&>button:not(:last-child)]:border-e [&>button:not(:last-child)]:border-border",
+                outline: "[&>button:not(:last-child)]:border-e [&>button:not(:last-child)]:border-input-border",
                 primary: "",
                 secondary: "",
                 success: "",

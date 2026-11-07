@@ -97,28 +97,27 @@ describe("what's drawn by a fill alone", () => {
     });
 });
 
-describe("a border that says a field is there", () => {
+describe("a control's border", () => {
     it.each([
         ["a text box", textBoxThemeVariants()],
-        ["a slider's track", sliderTrackThemeVariants()]
-    ])("stays on the strong token for %s", (_label, classes) => {
-        expect(classes).toContain("border-input-border");
-    });
-
-    it.each([
         ["a default button", buttonThemeVariants({ look: "default" })],
         ["an outline button", buttonThemeVariants({ look: "outline" })],
         ["a button group", buttonGroupThemeVariants()],
         ["segmented", segmentedContainerThemeVariants()],
         ["an outline chip", chipThemeVariants({ look: "outline" })]
-    ])("stays quiet for %s, whose text identifies it", (_label, classes) => {
-        expect(classes).toContain("border-border");
-        expect(classes).not.toContain("border-input-border");
+    ])("shares the field border for %s, so they match side by side", (_label, classes) => {
+        expect(classes).toContain("border-input-border");
     });
 
-    it("stays quiet between an outline split button's parts", () => {
+    it("shares the field border between an outline split button's parts", () => {
         const classes = splitButtonThemeVariants({ look: "outline" });
-        expect(classes).toContain("[&>button:not(:last-child)]:border-border");
+        expect(classes).toContain("[&>button:not(:last-child)]:border-input-border");
+    });
+
+    it("gives a slider's track one only for more contrast", () => {
+        const classes = sliderTrackThemeVariants().split(/\s+/);
+        expect(classes).not.toContain("border-input-border");
+        expect(classes).toContain("contrast-more:border-input-border");
     });
 });
 

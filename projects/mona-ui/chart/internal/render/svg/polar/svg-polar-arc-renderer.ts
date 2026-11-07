@@ -539,7 +539,7 @@ export class SvgPolarArcRenderer {
         const { angularAxis, center, innerRadius, outerRadius, radialAxis } = scene;
         const gridColor =
             styleResolver.resolveCssVariable("--mona-chart-grid-color") ||
-            styleResolver.resolveCssVariable("--color-border") ||
+            styleResolver.resolveCssVariable("--color-border-control") ||
             "rgba(150, 150, 150, 0.2)";
 
         // Radial Grid Rings
@@ -625,7 +625,7 @@ export class SvgPolarArcRenderer {
         const { angularAxis, center, outerRadius } = scene;
         const axisLineColor =
             styleResolver.resolveCssVariable("--mona-chart-axis-line-color") ||
-            styleResolver.resolveCssVariable("--color-border") ||
+            styleResolver.resolveCssVariable("--color-border-control") ||
             "rgba(150, 150, 150, 0.5)";
 
         // Outer Boundary Arc

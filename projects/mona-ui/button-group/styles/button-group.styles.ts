@@ -5,7 +5,7 @@ import { VariantInputs } from "@nanahoshi/mona-ui/internal";
 export const buttonGroupThemeVariants = cva(
     `
         inline-flex items-center justify-center
-        border border-border
+        border border-input-border
         data-[invalid='true']:border-error
         data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
         data-[readonly='true']:[&_button[aria-pressed]]:cursor-default

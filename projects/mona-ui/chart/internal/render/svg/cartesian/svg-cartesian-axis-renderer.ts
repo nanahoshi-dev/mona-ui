@@ -32,7 +32,7 @@ export class SvgCartesianAxisRenderer {
 
         const axisLineColor =
             styleResolver.resolveCssVariable("--mona-chart-axis-line-color") ||
-            styleResolver.resolveCssVariable("--color-border") ||
+            styleResolver.resolveCssVariable("--color-border-control") ||
             "rgba(148, 163, 184, 0.5)";
 
         const items: AxisPathItem[] = [];

@@ -47,7 +47,7 @@ export class TreemapChartRenderer {
                 } else {
                     const hoverColor =
                         styleResolver.resolveCssVariable("--mona-chart-treemap-hover-outline-color") ||
-                        styleResolver.resolveCssVariable("--color-border") ||
+                        styleResolver.resolveCssVariable("--color-border-control") ||
                         "rgba(255, 255, 255, 0.85)";
                     context.strokeStyle = hoverColor;
                     context.lineWidth = 1.5;

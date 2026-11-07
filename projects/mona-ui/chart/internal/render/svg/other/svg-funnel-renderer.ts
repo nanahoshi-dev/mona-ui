@@ -138,7 +138,7 @@ export class SvgFunnelRenderer {
                     } else {
                         const hoverColor =
                             styleResolver.resolveCssVariable("--mona-chart-funnel-hover-outline-color") ||
-                            styleResolver.resolveCssVariable("--color-border") ||
+                            styleResolver.resolveCssVariable("--color-border-control") ||
                             "rgba(255, 255, 255, 0.85)";
                         setSvgAttribute(highlightPath, "stroke", hoverColor);
                         setSvgAttribute(highlightPath, "stroke-width", 1.5);

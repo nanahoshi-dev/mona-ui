@@ -405,7 +405,8 @@ describe("Leaf component documentation", () => {
             }
         }
         themeGuide = documents.get("guides/theming.md") ?? "";
-    });
+        // Loading TypeScript and parsing the source took 7s on CI against the default 10s, and the time follows the runner.
+    }, 60_000);
 
     describe("pages", () => {
         it("has an intro and an API page for every covered entry point", () => {
