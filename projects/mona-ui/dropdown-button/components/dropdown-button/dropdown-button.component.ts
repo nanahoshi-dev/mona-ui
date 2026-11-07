@@ -64,6 +64,8 @@ export class DropdownButtonComponent implements ButtonGroupMember, DropdownButto
     readonly #destroyRef = inject(DestroyRef);
     readonly #triggerWidth = signal(0);
     private readonly menuItemComponents = contentChildren(PopupMenuToken, { descendants: false });
+    /** The menu is named by the element it opens from, through this id. */
+    protected readonly buttonId = createElementControlId();
     protected readonly buttonRef = viewChild<ElementRef<HTMLButtonElement>>("dropdownButton");
     protected readonly groupTemplate = contentChild(DropdownButtonMenuGroupTemplateDirective, {
         read: TemplateRef,

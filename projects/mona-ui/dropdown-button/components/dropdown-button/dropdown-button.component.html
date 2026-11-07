@@ -8,6 +8,7 @@
     [disabled]="disabled()"
     [toggleable]="false"
     aria-haspopup="menu"
+    [id]="buttonId"
     [attr.aria-label]="ariaLabelledby() ? null : ariaLabel() || null"
     [attr.aria-labelledby]="ariaLabelledby() || null"
     [attr.aria-expanded]="isMenuOpen()"

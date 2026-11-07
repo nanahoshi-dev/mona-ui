@@ -93,6 +93,14 @@ describe("split button menu", () => {
         expect(arrow.getAttribute("aria-label")).toBe("Show menu options");
     });
 
+    it("names its menu with the arrow button", async () => {
+        arrow.click();
+        await settle();
+
+        expect(arrow.id).not.toBe("");
+        expect(menus()[0].getAttribute("aria-labelledby")).toBe(arrow.id);
+    });
+
     it("closes the menu when the main button is clicked, and runs the action", async () => {
         arrow.click();
         await settle();

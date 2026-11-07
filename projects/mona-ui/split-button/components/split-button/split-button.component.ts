@@ -105,6 +105,8 @@ export class SplitButtonComponent implements ButtonGroupMember, SplitButtonVaria
     });
     protected readonly mainButtonId = createElementControlId();
     protected readonly mainButtonTextTemplate = contentChild(SplitButtonTextTemplateDirective, { read: TemplateRef });
+    /** The menu is named by the element it opens from, through this id. */
+    protected readonly menuButtonId = createElementControlId();
     protected readonly menuButtonRef = viewChild<ElementRef<HTMLButtonElement>>("menuButton");
     protected readonly menuButtonTemplate = contentChild(SplitButtonMenuButtonTemplateDirective, { read: TemplateRef });
     protected readonly menuId = createElementControlId();

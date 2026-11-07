@@ -102,6 +102,14 @@ describe("dropdown button menu", () => {
         expect(button.getAttribute("aria-controls")).toBe(menus()[0].id);
     });
 
+    it("names its menu with the button", async () => {
+        button.click();
+        await settle();
+
+        expect(button.id).not.toBe("");
+        expect(menus()[0].getAttribute("aria-labelledby")).toBe(button.id);
+    });
+
     it("is named by its content unless aria-label is given", async () => {
         expect(button.hasAttribute("aria-label")).toBe(false);
         expect(button.textContent?.trim()).toBe("Actions");

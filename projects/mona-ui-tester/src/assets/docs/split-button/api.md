@@ -270,6 +270,7 @@ The menu toggle button carries:
 - `aria-haspopup="menu"` — tells AT that it controls a menu popup
 - `aria-expanded` — reflects the open/closed state of the popup
 - `aria-controls` — references the menu by ID while it is open
+- `id` — names the menu, through the menu's `aria-labelledby`
 - `aria-label` — "More {text} options", or "Show menu options" without `text`; override with `[menuButtonAriaLabel]`
 
 The main button carries:

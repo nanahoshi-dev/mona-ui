@@ -30,6 +30,7 @@
     [toggleable]="false"
     class="rounded-s-none border-s-0"
     aria-haspopup="menu"
+    [id]="menuButtonId"
     [attr.aria-expanded]="menuOpen()"
     [attr.aria-controls]="menuOpen() ? menuId : null"
     [attr.aria-label]="effectiveMenuButtonAriaLabel()"

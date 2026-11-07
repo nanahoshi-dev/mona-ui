@@ -230,6 +230,8 @@ The button element carries the following attributes:
 | `aria-label`      | When `aria-label` is set and `aria-labelledby` isn't | The `aria-label` input                                          |
 | `aria-labelledby` | When `aria-labelledby` is set                        | The `aria-labelledby` input; takes precedence over `aria-label` |
 
+The menu is named by the button, through `aria-labelledby`.
+
 **Consumer responsibilities:**
 
 - When using `iconOnly` mode with no visible `text`, always provide `aria-label` with a description of the button's purpose.
