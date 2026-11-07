@@ -62,7 +62,12 @@ const handledContextMenuEvents = new WeakSet<Event>();
 
 @Component({
     selector: "mona-popup-menu",
-    template: ""
+    template: "",
+    host: {
+        // The name goes to the menu when it opens. The host has no role, which may not carry one.
+        "[attr.aria-label]": "null",
+        "[attr.aria-labelledby]": "null"
+    }
 })
 export class PopupMenuComponent implements PopupMenuVariantInput {
     readonly #destroyRef = inject(DestroyRef);
