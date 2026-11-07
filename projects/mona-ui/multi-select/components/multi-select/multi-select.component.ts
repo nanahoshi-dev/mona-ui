@@ -185,7 +185,9 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
         return multiSelectIndicatorContainerThemeVariants({ size });
     });
     protected readonly invalidState = computed(
-        () => this.touched() && (this.invalid() || (this.required() && none(this.value())))
+        () =>
+            this.touched() &&
+            (this.invalid() || (this.required() && none((this.value() as Iterable<TValue> | null) ?? [])))
     );
     protected readonly itemContainerClass = computed(() => {
         const rounded = this.rounded();
@@ -450,7 +452,9 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
             this.valuePrimitive();
             untracked(() => {
                 this.#listService.setValueField(valueField ?? "");
-                this.synchronizeSelection(value);
+                // NgModel writes null before its first value, and so does a reset form control. Both mean nothing
+                // is selected.
+                this.synchronizeSelection((value as Iterable<TValue> | null) ?? []);
             });
         });
         effect(() => {

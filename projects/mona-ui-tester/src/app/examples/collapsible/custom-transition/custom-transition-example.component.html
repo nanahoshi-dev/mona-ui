@@ -1,0 +1,12 @@
+<section class="max-w-md rounded-md border border-border" monaCollapsible [animate]="false" [(expanded)]="expanded">
+    <button class="flex w-full items-center justify-between px-4 py-3 text-left font-medium" monaCollapsibleTrigger type="button">
+        Shipping details
+        <svg class="transition-transform" lucideChevronDown aria-hidden="true" [class.rotate-180]="expanded()" [size]="16"></svg>
+    </button>
+    <!-- The directive keeps the height at 0 while closed. Open, this rule gives it the measured height to grow to. -->
+    <div
+        class="overflow-hidden opacity-0 transition-[height,opacity] duration-500 ease-in-out motion-reduce:transition-none data-[state=open]:h-(--mona-collapsible-content-height) data-[state=open]:opacity-100"
+        monaCollapsibleContent>
+        <p class="border-t border-border px-4 py-3 text-sm">Orders placed before noon leave the warehouse the same day.</p>
+    </div>
+</section>
