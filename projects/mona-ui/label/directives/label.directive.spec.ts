@@ -1,5 +1,6 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
 import axe from "axe-core";
 import type { LabelFocusable, LabelTarget } from "../models/LabelTarget";
 
@@ -20,9 +21,9 @@ describe("LabelDirective", () => {
     let fixture: ComponentFixture<LabelDirectiveHostComponent>;
 
     beforeEach(() => {
-        directive = TestBed.runInInjectionContext(() => new LabelDirective());
         fixture = TestBed.createComponent(LabelDirectiveHostComponent);
         fixture.detectChanges();
+        directive = fixture.debugElement.query(By.directive(LabelDirective)).injector.get(LabelDirective);
     });
 
     function getLabel(): HTMLLabelElement {

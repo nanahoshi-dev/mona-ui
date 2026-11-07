@@ -2,8 +2,7 @@ import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, ElementRef, input, model, Signal, signal, viewChild } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { type FormValueControl } from "@angular/forms/signals";
-import { filter, fromEvent, switchMap, takeUntil, tap } from "rxjs";
-import { SliderTickDirective } from "../../directives/slider-tick.directive";
+import { filter, fromEvent, tap } from "rxjs";
 import { LabelStylePipe } from "../../pipes/label-style.pipe";
 import { TickStylePipe } from "../../pipes/tick-style.pipe";
 import { SLIDER_DEFAULT_MESSAGES } from "../../i18n/slider.default-messages";
@@ -12,17 +11,23 @@ import { SliderBaseComponent } from "../slider-base/slider-base.component";
 @Component({
     selector: "mona-slider",
     templateUrl: "./slider.component.html",
-    imports: [NgTemplateOutlet, SliderTickDirective, LabelStylePipe, TickStylePipe],
+    imports: [NgTemplateOutlet, LabelStylePipe, TickStylePipe],
     host: {
+        // The ARIA inputs are applied to the handle, so the host must not keep the static attributes.
+        "[attr.aria-describedby]": "null",
+        "[attr.aria-label]": "null",
+        "[attr.aria-labelledby]": "null",
         "[class]": "baseClasses()",
         "[class.mona-slider]": "true",
         "[attr.data-disabled]": "effectiveDisabled() || null",
         "[attr.data-orientation]": "orientation()",
-        "(focus)": "focus()"
+        "[attr.data-readonly]": "readonly() || null"
     }
 })
 export class SliderComponent extends SliderBaseComponent implements FormValueControl<number> {
-    protected readonly computedAriaLabel = computed(() => this.ariaLabel() ?? this.messages().sliderValue);
+    protected readonly computedAriaLabel = computed(
+        () => this.ariaLabel() ?? (this.labelledBy() ? null : this.messages().sliderValue)
+    );
     protected readonly handleFocused = signal(false);
     protected readonly handlePosition = computed(() => this.positionFromValue(this.normalizedValue()));
     protected readonly handleStyle = computed<Partial<CSSStyleDeclaration>>(() => ({
@@ -34,22 +39,26 @@ export class SliderComponent extends SliderBaseComponent implements FormValueCon
     protected readonly selectionLeft = computed(() => 0);
     protected readonly selectionRight = computed(() => this.handlePosition());
     protected readonly sliderHandle: Signal<ElementRef<HTMLDivElement>> = viewChild.required("sliderHandle");
+    protected readonly valueIsShown = computed(() => this.normalizedValue() === this.value());
 
     /**
-     * @description Accessible name for the host element. Describe what the component represents.
-     * When empty, assistive technology announces the role without a label.
-     * @default null
+     * @description Upper bound that wins over `maxValue`. When bound to a signal form field via `[formField]`, this is
+     * written from the field's `max` rule.
+     * @default undefined
      */
-    public readonly ariaLabel = input<string | null>(null, { alias: "aria-label" });
+    public readonly max = input<number | undefined>(undefined);
 
     /**
-     * @description ID of an external element that provides the accessible name for the host element.
-     * @default null
+     * @description Lower bound that wins over `minValue`. When bound to a signal form field via `[formField]`, this is
+     * written from the field's `min` rule.
+     * @default undefined
      */
-    public readonly ariaLabelledBy = input<string | null>(null, { alias: "aria-labelledby" });
+    public readonly min = input<number | undefined>(undefined);
 
     /**
-     * @description Current value. Values outside `[minValue, maxValue]` are clamped before rendering.
+     * @description Current value. A value out of range or off the step grid is shown at the nearest valid value, and
+     * the model keeps its own until the user changes it, so a `maxValue` that loads late can't overwrite saved data. A
+     * development warning reports it.
      * @default 0
      */
     public readonly value = model(0);
@@ -58,6 +67,14 @@ export class SliderComponent extends SliderBaseComponent implements FormValueCon
         if (!this.effectiveDisabled()) {
             this.sliderHandle().nativeElement.focus(options);
         }
+    }
+
+    protected override getMaxOverride(): number | undefined {
+        return this.max();
+    }
+
+    protected override getMinOverride(): number | undefined {
+        return this.min();
     }
 
     protected handleHandleMove(event: PointerEvent): void {
@@ -76,9 +93,16 @@ export class SliderComponent extends SliderBaseComponent implements FormValueCon
             .pipe(
                 takeUntilDestroyed(this.destroyRef),
                 tap(() => this.dragging.set(false)),
-                filter(() => !this.effectiveDisabled())
+                filter(() => !this.interactionDisabled())
             )
-            .subscribe((event: PointerEvent) => this.handleHandleMove(event));
+            .subscribe((event: PointerEvent) => {
+                const handle = this.sliderHandle().nativeElement;
+                // A drag ends with a click on the handle, and the drag has already placed the value.
+                if (!handle.contains(event.target as Node)) {
+                    this.handleHandleMove(event);
+                }
+                handle.focus({ preventScroll: true });
+            });
     }
 
     private setFocusSubscription(): void {
@@ -100,7 +124,7 @@ export class SliderComponent extends SliderBaseComponent implements FormValueCon
         fromEvent<KeyboardEvent>(this.sliderHandle().nativeElement, "keydown")
             .pipe(
                 takeUntilDestroyed(this.destroyRef),
-                filter(() => !this.effectiveDisabled()),
+                filter(() => !this.interactionDisabled()),
                 filter(event => this.isNavigationKey(event)),
                 tap(event => {
                     event.preventDefault();
@@ -111,22 +135,7 @@ export class SliderComponent extends SliderBaseComponent implements FormValueCon
     }
 
     private setPointerMoveSubscription(): void {
-        const pointerMove$ = fromEvent<PointerEvent>(document, "pointermove");
-        const pointerUp$ = fromEvent<PointerEvent>(document, "pointerup");
-
-        fromEvent<PointerEvent>(this.sliderHandle().nativeElement, "pointerdown")
-            .pipe(
-                takeUntilDestroyed(this.destroyRef),
-                filter(() => !this.effectiveDisabled()),
-                tap(() => this.dragging.set(true)),
-                switchMap(() =>
-                    pointerMove$.pipe(
-                        tap((event: PointerEvent) => this.handleHandleMove(event)),
-                        takeUntil(pointerUp$.pipe(tap(() => this.zone.run(() => this.dragging.set(false)))))
-                    )
-                )
-            )
-            .subscribe();
+        this.trackHandleDrag(this.sliderHandle().nativeElement, () => event => this.handleHandleMove(event));
     }
 
     private updateValue(value: number): void {
@@ -134,9 +143,6 @@ export class SliderComponent extends SliderBaseComponent implements FormValueCon
         if (nextValue === this.normalizedValue()) {
             return;
         }
-        this.zone.run(() => {
-            this.value.set(nextValue);
-            this.touch.emit();
-        });
+        this.zone.run(() => this.value.set(nextValue));
     }
 }

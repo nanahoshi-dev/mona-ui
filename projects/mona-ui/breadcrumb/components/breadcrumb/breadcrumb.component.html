@@ -1,31 +1,53 @@
-<ol role="list" [class]="listClass()">
-    @for (item of itemComponents(); track item) {
-        <li>
-            @if ($last) {
-                <span aria-current="page" [class]="currentItemClass()">
-                    <ng-container [ngTemplateOutlet]="item.templateRef()"></ng-container>
-                </span>
+@if (itemComponents().length > 0) {
+    <ol #list role="list" [class]="listClass()">
+        @for (entry of entries(); track entry.key) {
+            @let item = entry.item;
+            @if (item) {
+                <li [class]="listItemClass(item.current())" [attr.data-item-index]="entry.index">
+                    @if (item.link()) {
+                        <!-- The anchor is the item, with its own classes and aria-current. -->
+                        <ng-container [ngTemplateOutlet]="item.templateRef()"></ng-container>
+                    } @else if (item.current()) {
+                        <span aria-current="page" [class]="currentItemClass()">
+                            <ng-container [ngTemplateOutlet]="item.templateRef()"></ng-container>
+                        </span>
+                    } @else {
+                        <button
+                            type="button"
+                            monaBreadcrumbItem
+                            [disabled]="item.effectiveDisabled()"
+                            (click)="onItemClick(item, $event)">
+                            <span [class]="itemContentClass()">
+                                <ng-container [ngTemplateOutlet]="item.templateRef()"></ng-container>
+                            </span>
+                        </button>
+                    }
+                </li>
             } @else {
-                <button
-                    type="button"
-                    monaBreadcrumbItem
-                    [disabled]="disabled() || item.disabled()"
-                    (click)="onItemClick(item)">
-                    <ng-container [ngTemplateOutlet]="item.templateRef()"></ng-container>
-                </button>
+                <li class="shrink-0">
+                    <button
+                        type="button"
+                        monaBreadcrumbItem
+                        data-breadcrumb-expand
+                        [disabled]="disabled()"
+                        [attr.aria-label]="messages().showFullPath"
+                        (click)="expand()">
+                        <svg lucideEllipsis [size]="18" aria-hidden="true"></svg>
+                    </button>
+                </li>
             }
-        </li>
 
-        @if (!$last) {
-            <li aria-hidden="true" role="presentation">
-                @if (separatorTemplate()) {
-                    <ng-container
-                        [ngTemplateOutlet]="separatorTemplate()"
-                        [ngTemplateOutletContext]="{ $implicit: $index }"></ng-container>
-                } @else {
-                    <svg lucideChevronRight [size]="18" class="rtl:rotate-180"></svg>
-                }
-            </li>
+            @if (!$last) {
+                <li class="shrink-0" aria-hidden="true" role="presentation">
+                    @if (separatorTemplate()) {
+                        <ng-container
+                            [ngTemplateOutlet]="separatorTemplate()"
+                            [ngTemplateOutletContext]="{ $implicit: entry.index }"></ng-container>
+                    } @else {
+                        <svg lucideChevronRight [size]="18" class="rtl:rotate-180"></svg>
+                    }
+                </li>
+            }
         }
-    }
-</ol>
+    </ol>
+}

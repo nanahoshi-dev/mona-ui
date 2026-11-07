@@ -219,14 +219,21 @@
         "defaultValue": "false"
       },
       {
-        "description": "Reflects whether the parent breadcrumb is disabled. Controls compound disabled styling when only individual items are disabled.",
-        "kind": "input",
-        "name": "listDisabled",
-        "type": "boolean",
-        "defaultValue": "false"
-      },
-      {
         "description": "Additional CSS classes merged onto the breadcrumb item via `tailwind-merge`.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "alias": "class",
+        "defaultValue": "\"\""
+      }
+    ]
+  },
+  "BreadcrumbLinkDirective": {
+    "name": "BreadcrumbLinkDirective",
+    "selector": "\"a[monaBreadcrumbLink]\"",
+    "inputs": [
+      {
+        "description": "Additional CSS classes merged onto the link via `tailwind-merge`.",
         "kind": "input",
         "name": "userClass",
         "type": "string",
@@ -324,6 +331,13 @@
         "type": "string",
         "alias": "class",
         "defaultValue": "\"\""
+      },
+      {
+        "description": "What a `ButtonGroup`'s `value` holds while this button is selected. A button without one takes no part\nin the group's `value`.",
+        "kind": "input",
+        "name": "value",
+        "type": "unknown",
+        "defaultValue": "undefined"
       }
     ]
   },
@@ -529,7 +543,7 @@
     "selector": "\"mona-chip\"",
     "inputs": [
       {
-        "description": "Accessible name for the host element. Describe what the chip represents.\r\nWhen empty, assistive technology announces the role without a label.",
+        "description": "Accessible name of the chip, for one whose text doesn't describe it, such as an icon. On a chip with no\nother role, it makes the chip a named group.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
@@ -571,20 +585,20 @@
         "defaultValue": "false"
       },
       {
-        "description": "Emitted when the remove button is clicked. Only fires when `removable` is `true`.\r\nEmits the originating `Event`.",
+        "description": "Emitted when the remove button is clicked, or Delete or Backspace is pressed on the chip. Only fires\nwhen `removable` is `true`. Emits the originating `Event`. The chip can't keep focus once its parent destroys it, so\nmove focus to the next chip or the list here.",
         "kind": "output",
         "name": "remove",
         "type": "Event"
       },
       {
-        "description": "Accessible label for the remove button, overriding the auto-computed `\"Remove, <label>\"` fallback.\r\nUse when the chip shows only projected content and the default label is not descriptive enough.",
+        "description": "Accessible label for the remove button, overriding the auto-computed `\"Remove, <label>\"` fallback.\nA chip with only projected content needs this or `aria-label`, or it warns in development.",
         "kind": "input",
         "name": "removeLabel",
         "type": "string",
         "defaultValue": "undefined"
       },
       {
-        "description": "Tab index for the remove button, independent of the chip host's own tabindex.\r\nSet to `-1` to exclude the remove button from tab order when an equivalent keyboard path exists elsewhere.",
+        "description": "Tab index for the remove button, independent of the chip host's own tabindex.\nSet to `-1` to exclude the remove button from tab order, since Delete and Backspace on the chip also remove it.",
         "kind": "input",
         "name": "removeTabIndex",
         "type": "number | string",
@@ -598,7 +612,7 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Whether the chip is selected. When `toggleable` is `true`, each activation flips this value.\r\nSupports two-way binding via `[(selected)]`.",
+        "description": "Whether the chip is selected. When `toggleable` is `true`, each activation flips this value.\nSupports two-way binding via `[(selected)]`. Without `toggleable`, it's only a look, with no state for assistive\ntechnology.",
         "kind": "model",
         "name": "selected",
         "type": "boolean",
@@ -612,14 +626,14 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Tab index override for the chip host element. When not set, computed automatically:\r\n`0` when `toggleable` is `true` or functioning as a link, `-1` otherwise. Overridden to `-1` when `disabled` is `true`.",
+        "description": "Tab index override for the chip host element. When not set, computed automatically:\n`0` when `toggleable` is `true` or functioning as a link, not focusable otherwise. Overridden to `-1` when `disabled`\nis `true`.",
         "kind": "input",
         "name": "tabindex",
         "type": "number | string",
         "defaultValue": "undefined"
       },
       {
-        "description": "Enables toggle behavior. When `true`, each activation flips `selected`\r\nand the host receives `role=\"checkbox\"` with `aria-checked`.",
+        "description": "Enables toggle behavior. When `true`, each activation flips `selected`\nand the host receives `role=\"checkbox\"` with `aria-checked`. With `removable`, the host is a `group` instead, and an\ninner element is the checkbox, beside the remove button.",
         "kind": "input",
         "name": "toggleable",
         "type": "boolean",
@@ -634,11 +648,24 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Arbitrary value associated with this chip.\r\nUseful for identifying which chip was selected or removed in a collection.",
+        "description": "Arbitrary value associated with this chip. The chip doesn't use it or emit it, so to tell which chip was\nremoved, pass the item in your `(remove)` handler.",
         "kind": "input",
         "name": "value",
         "type": "unknown",
         "defaultValue": "undefined"
+      }
+    ]
+  },
+  "CollapsibleContentDirective": {
+    "name": "CollapsibleContentDirective",
+    "selector": "\"[monaCollapsibleContent]\"",
+    "inputs": [
+      {
+        "description": "The content's id, for when it has to be something in particular. Generated if not given.",
+        "kind": "input",
+        "name": "id",
+        "type": "string | null",
+        "defaultValue": "null"
       }
     ]
   },
@@ -1523,7 +1550,7 @@
         "kind": "input",
         "name": "rounded",
         "type": "RadioButtonDirectiveProps[\"rounded\"]",
-        "defaultValue": "\"none\""
+        "defaultValue": "\"full\""
       },
       {
         "description": "Marks the radio button as touched. Error styling is only shown when both `invalid` and `touched` are `true`.",
@@ -1551,6 +1578,32 @@
         "name": "rounded",
         "type": "ScrollViewVariantProps[\"pagerRounded\"]",
         "required": true
+      }
+    ]
+  },
+  "ScrollViewSlideDirective": {
+    "name": "ScrollViewSlideDirective",
+    "selector": "\"ng-template[monaScrollViewSlide]\"",
+    "inputs": [
+      {
+        "description": "The scroll view's data, bound only so that `let-item` takes its type from it. Leave it empty for\n`unknown`.",
+        "kind": "input",
+        "name": "monaScrollViewSlide",
+        "type": "Iterable<T> | \"\"",
+        "defaultValue": "\"\""
+      }
+    ]
+  },
+  "SegmentedItemTemplateDirective": {
+    "name": "SegmentedItemTemplateDirective",
+    "selector": "\"ng-template[monaSegmentedItemTemplate]\"",
+    "inputs": [
+      {
+        "description": "",
+        "kind": "input",
+        "name": "options",
+        "type": "readonly SegmentedOption<T>[] | \"\" | undefined",
+        "alias": "monaSegmentedItemTemplate"
       }
     ]
   },
@@ -1615,14 +1668,14 @@
     "selector": "\"a[monaSidebarMenuButton], button[monaSidebarMenuButton]\"",
     "inputs": [
       {
-        "description": "Closes the overlay drawer after this row is activated. Only applies on compact\nviewports, where the drawer covers the destination being navigated to. Set to `false` for rows\nthat do not navigate, such as a disclosure trigger.",
+        "description": "Closes the overlay drawer after this row is activated. Only applies on compact\nviewports, where the drawer covers the destination being navigated to. Set to `false` for rows\nthat do not navigate. Leave it unset on a `monaCollapsibleTrigger`, which keeps the drawer open.",
         "kind": "input",
         "name": "closeOnSelect",
-        "type": "boolean",
-        "defaultValue": "true"
+        "type": "boolean | undefined",
+        "defaultValue": "true, or false on a `monaCollapsibleTrigger`"
       },
       {
-        "description": "Renders the row as unavailable and suppresses activation.",
+        "description": "Renders the row as unavailable and suppresses activation, including a `routerLink` and any `click`\nhandler on it. A disabled anchor gives up its `href`.",
         "kind": "input",
         "name": "disabled",
         "type": "boolean",
@@ -1636,7 +1689,7 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Text identifying this item while the sidebar is collapsed to its icon rail, where the\nlabel is clipped away. Applied as the host's `title`, so the browser surfaces it on hover, and an\nancestor carrying `monaTooltip` with `mode=\"content\"` renders it as a styled tooltip instead.",
+        "description": "Text identifying this item while the sidebar is collapsed to its icon rail, where the\nlabel is clipped away. Shown as a tooltip on hover and on keyboard focus, on the rail only.",
         "kind": "input",
         "name": "tooltip",
         "type": "string",
@@ -1701,6 +1754,20 @@
       }
     ]
   },
+  "SidebarRailDirective": {
+    "name": "SidebarRailDirective",
+    "selector": "\"button[monaSidebarRail]\"",
+    "inputs": [
+      {
+        "description": "Accessible name of the rail, which otherwise has a localized default.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      }
+    ]
+  },
   "SidebarSeparatorDirective": {
     "name": "SidebarSeparatorDirective",
     "selector": "\"[monaSidebarSeparator]\"",
@@ -1735,6 +1802,13 @@
       {
         "description": "",
         "kind": "input",
+        "name": "orientation",
+        "type": "SplitterVariantProps[\"orientation\"]",
+        "defaultValue": "\"horizontal\""
+      },
+      {
+        "description": "",
+        "kind": "input",
         "name": "pane",
         "type": "SplitterPaneComponent",
         "required": true
@@ -1750,19 +1824,12 @@
   },
   "StepperIndicatorDirective": {
     "name": "StepperIndicatorDirective",
-    "selector": "\"span[monaStepperIndicator]\"",
+    "selector": "\"button[monaStepperIndicator]\"",
     "inputs": [
       {
         "description": "",
         "kind": "input",
-        "name": "active",
-        "type": "boolean",
-        "required": true
-      },
-      {
-        "description": "",
-        "kind": "input",
-        "name": "focused",
+        "name": "invalid",
         "type": "boolean",
         "required": true
       },
@@ -1771,6 +1838,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "StepperVariantProps[\"rounded\"]",
+        "required": true
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "state",
+        "type": "StepState",
         "required": true
       }
     ]
@@ -1814,18 +1888,18 @@
     "selector": "\"textarea[monaTextArea]\"",
     "inputs": [
       {
-        "description": "Sets the border radius of the textarea.",
-        "kind": "input",
-        "name": "rounded",
-        "type": "TextAreaVariantProps[\"rounded\"]",
-        "defaultValue": "\"medium\""
-      },
-      {
         "description": "Marks the textarea as invalid, triggering error border and ring styling.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
         "defaultValue": "false"
+      },
+      {
+        "description": "Sets the border radius of the textarea.",
+        "kind": "input",
+        "name": "rounded",
+        "type": "TextAreaVariantProps[\"rounded\"]",
+        "defaultValue": "\"medium\""
       },
       {
         "description": "Marks the textarea as touched. Error styling is only shown when both `invalid` and `touched` are `true`.",
@@ -1944,6 +2018,13 @@
     "name": "TooltipDirective",
     "selector": "\"[monaTooltip]\"",
     "inputs": [
+      {
+        "description": "Reads the tooltip's text from the matched element, in place of its `title`, which then stays where\nit is. An empty result shows nothing.",
+        "kind": "input",
+        "name": "contentOf",
+        "type": "((element: HTMLElement) => string) | null",
+        "defaultValue": "null"
+      },
       {
         "description": "Whether the tooltip is disabled. When disabled, the tooltip will not be shown, and an open one\ncloses.",
         "kind": "input",
@@ -2401,7 +2482,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Accessible name for the host element. Describe what the avatar represents.\r\nWhen non-empty, the host receives `role=\"img\"` in label and projected-content modes.",
+        "description": "Accessible name of the avatar. Describe who or what it represents.\nIn label and projected-content modes the host takes it with `role=\"img\"`. While an image shows, it's the image's\n`alt` unless `alt` is set.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
@@ -2451,14 +2532,14 @@
         "defaultValue": "\"64px\""
       },
       {
-        "description": "Image URL. When non-empty, renders an `<img>` and suppresses `label` and projected content.",
+        "description": "Image URL. When non-empty, renders an `<img>` and suppresses `label` and projected content, until it\nfails to load. Then the avatar falls back to them, and a new URL tries again.",
         "kind": "input",
         "name": "image",
         "type": "string",
         "defaultValue": "\"\""
       },
       {
-        "description": "Text label displayed inside the avatar when no image is provided. Ignored when `image` is non-empty.",
+        "description": "Text label displayed inside the avatar when there's no image, or the image failed to load.",
         "kind": "input",
         "name": "label",
         "type": "string",
@@ -2469,7 +2550,7 @@
         "kind": "input",
         "name": "labelColor",
         "type": "string",
-        "defaultValue": "\"var(--color-foreground)\""
+        "defaultValue": "\"var(--color-primary-foreground)\""
       },
       {
         "description": "Font size of the label text. Ignored in image mode.",
@@ -2486,19 +2567,19 @@
         "defaultValue": "\"700\""
       },
       {
-        "description": "Width of the host element. A string is used as-is; a number is converted to `px`.",
-        "kind": "input",
-        "name": "width",
-        "type": "string | number",
-        "defaultValue": "\"64px\""
-      },
-      {
         "description": "Additional CSS classes applied to the host element.",
         "kind": "input",
         "name": "userClass",
         "type": "string",
         "alias": "class",
         "defaultValue": "\"\""
+      },
+      {
+        "description": "Width of the host element. A string is used as-is; a number is converted to `px`.",
+        "kind": "input",
+        "name": "width",
+        "type": "string | number",
+        "defaultValue": "\"64px\""
       }
     ]
   },
@@ -2522,6 +2603,20 @@
         "defaultValue": "false"
       },
       {
+        "description": "Treats the last item as the current page: not a button, and marked `aria-current=\"page\"`. Turn it off\nfor a trail that ends before the page you're on.",
+        "kind": "input",
+        "name": "lastItemCurrent",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "The most items to show before the middle of the trail collapses behind a button that shows it again.\nThe first and last items always stay, so anything below 2 counts as 2. `null` never collapses.",
+        "kind": "input",
+        "name": "maxItems",
+        "type": "number | null",
+        "defaultValue": "null"
+      },
+      {
         "description": "Additional CSS classes merged onto the breadcrumb list via `tailwind-merge`.",
         "kind": "input",
         "name": "userClass",
@@ -2543,10 +2638,10 @@
         "defaultValue": "false"
       },
       {
-        "description": "Emitted when the item is clicked or activated via keyboard.\r\nNot emitted when this is the last (current-page) item or when the item is disabled.",
+        "description": "Emitted with the click when the item is clicked or activated via keyboard.\nNot emitted when this is the current-page item or when the item is disabled.",
         "kind": "output",
         "name": "itemClick",
-        "type": "void"
+        "type": "MouseEvent"
       }
     ]
   },
@@ -2555,7 +2650,7 @@
     "selector": "\"mona-button-group\"",
     "inputs": [
       {
-        "description": "When `false` and `selection` is `\"single\"`, at least one button must remain selected;\r\nthe active button cannot be deselected. Has no effect in `\"multiple\"` mode.",
+        "description": "When `false` and `selection` is `\"single\"`, a selected button stays selected until another one takes\nover: the active button can't be deselected, and clearing every `selected` brings it back. It doesn't choose a\nfirst button, and a `value` of `null` still clears the group, so a form can reset it. Has no effect in `\"multiple\"`\nmode.",
         "kind": "input",
         "name": "allowEmpty",
         "type": "boolean",
@@ -2569,9 +2664,24 @@
         "alias": "aria-label"
       },
       {
-        "description": "Renders all child buttons with reduced visual emphasis and removes pointer interaction.",
-        "kind": "model",
+        "description": "Id of the element that names the group.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Renders all child buttons with reduced visual emphasis and removes pointer interaction. When bound to\na signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
         "name": "disabled",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Marks the group as invalid. Error styling requires both `invalid` and `touched` to be `true`. When\nbound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "invalid",
         "type": "boolean",
         "defaultValue": "false"
       },
@@ -2583,6 +2693,13 @@
         "defaultValue": "\"outline\""
       },
       {
+        "description": "Prevents selection changes while the buttons stay focusable. Buttons that aren't toggleable keep\nworking. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
         "description": "Border-radius preset applied to the container and the outer corners of the first and last child button.",
         "kind": "input",
         "name": "rounded",
@@ -2590,8 +2707,8 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Two-way bindable. Controls whether child buttons behave as a radio group (`\"single\"`)\r\nor toggle independently (`\"multiple\"`).",
-        "kind": "model",
+        "description": "Whether one button can be selected at a time (`\"single\"`) or each toggles on its own (`\"multiple\"`).\nThe buttons stay toggle buttons with `aria-pressed` in both. For a choice that must always hold one value, use\n`mona-segmented`, which is a radio group.",
+        "kind": "input",
         "name": "selection",
         "type": "SelectionMode",
         "defaultValue": "\"multiple\""
@@ -2604,12 +2721,32 @@
         "defaultValue": "\"medium\""
       },
       {
+        "description": "Emitted when a user changes the selection or focus leaves the group.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "kind": "output",
+        "name": "touch",
+        "type": "void"
+      },
+      {
+        "description": "Marks the group as touched. When bound to a signal form field via `[formField]`, this is written by\nthe `FormField` directive.",
+        "kind": "input",
+        "name": "touched",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
         "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input",
         "name": "userClass",
         "type": "string",
         "alias": "class",
         "defaultValue": "\"\""
+      },
+      {
+        "description": "The value of the selected button in `\"single\"` mode, or `null`, and an array of the selected buttons'\nvalues in `\"multiple\"` mode. Buttons take part by having a `value`. While `undefined`, it leaves each button's\n`selected` alone. A value with no button yet stays, so one that loads before its button isn't lost. Use either this\nor `[(selected)]` on the buttons, not both.",
+        "kind": "model",
+        "name": "value",
+        "type": "T | readonly T[] | null | undefined",
+        "defaultValue": "undefined"
       }
     ]
   },
@@ -2732,6 +2869,13 @@
     "name": "CardComponent",
     "selector": "\"mona-card\"",
     "inputs": [
+      {
+        "description": "The role the card takes when it has a title, which then names it. Use `article` for self-contained\ncontent or `region` for a landmark.",
+        "kind": "input",
+        "name": "role",
+        "type": "\"article\" | \"group\" | \"region\"",
+        "defaultValue": "\"group\""
+      },
       {
         "description": "Controls the border radius applied to the card and its header/footer regions.",
         "kind": "input",
@@ -7606,6 +7750,14 @@
         "defaultValue": "\"\""
       },
       {
+        "description": "Id of the element that labels the check box.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Whether the control is checked.",
         "kind": "model",
         "name": "checked",
@@ -7620,11 +7772,17 @@
         "defaultValue": "false"
       },
       {
-        "description": "Activates indeterminate mode, showing a dash instead of a checkmark.",
+        "description": "Activates indeterminate mode, showing a dash instead of a checkmark. A user change clears it, as it\ndoes on a native checkbox. Use `[(indeterminate)]` to follow that, because a one-way binding only writes again when\nthe bound value changes.",
         "kind": "input",
         "name": "indeterminate",
         "type": "boolean",
         "defaultValue": "false"
+      },
+      {
+        "description": "Emitted with `false` when a user change clears the indeterminate mode.",
+        "kind": "output",
+        "name": "indeterminateChange",
+        "type": "boolean"
       },
       {
         "description": "Emitted when the checkbox input loses focus.",
@@ -7645,7 +7803,14 @@
         "type": "FocusEvent"
       },
       {
-        "description": "Marks the checkbox as invalid. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
+        "description": "Id of the native checkbox input. Point a `<label for>` at it to label the check box from outside.\nA unique id is generated when it isn't set.",
+        "kind": "input",
+        "name": "inputId",
+        "type": "string",
+        "defaultValue": "generated"
+      },
+      {
+        "description": "Marks the checkbox as invalid. When bound to a signal form field via `[formField]`, this is written\nby the `FormField` directive.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
@@ -7671,6 +7836,20 @@
         "name": "labelSize",
         "type": "CheckboxVariantProps[\"labelSize\"]",
         "defaultValue": "\"medium\""
+      },
+      {
+        "description": "Name of the native checkbox input, used in native form submission. When bound to a signal form field\nvia `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "name",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Prevents value changes while the control stays focusable and readable. When bound to a signal form\nfield via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Marks the control as required for form validation.",
@@ -7700,7 +7879,7 @@
         "type": "void"
       },
       {
-        "description": "Marks the checkbox as touched. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
+        "description": "Marks the checkbox as touched. When bound to a signal form field via `[formField]`, this is written\nby the `FormField` directive.",
         "kind": "input",
         "name": "touched",
         "type": "boolean",
@@ -7728,7 +7907,7 @@
         "defaultValue": "true"
       },
       {
-        "description": "Accessible name for the host element. Describe what the component represents (e.g., \"Upload progress\").\r\nWhen empty, assistive technology announces the role without a label.",
+        "description": "Accessible name for the host element. Describe what the component represents (e.g., \"Upload progress\").\nWhen empty, falls back to the localized \"Progress\". An `aria-labelledby` on the host takes precedence over both.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
@@ -7758,14 +7937,21 @@
         "defaultValue": "false"
       },
       {
-        "description": "Activates indeterminate mode when the completion value is unknown.\r\nARIA value attributes are removed and `aria-busy` is set on the host element.",
+        "description": "Activates indeterminate mode when the completion value is unknown.\nARIA value attributes are removed.",
         "kind": "input",
         "name": "indeterminate",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Upper bound of the value range. Must be greater than `min`.",
+        "description": "Controls label visibility in determinate mode.\nHas no effect in indeterminate mode, where the label is always hidden.",
+        "kind": "input",
+        "name": "labelVisible",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Upper bound of the value range. Must be greater than `min`; otherwise the bar reports no values and a\nwarning is logged in development.",
         "kind": "input",
         "name": "max",
         "type": "number",
@@ -7801,7 +7987,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Current progress value within `[min, max]`. Values outside the range are clamped before rendering; non-finite values are treated as `0`.",
+        "description": "Current progress value within `[min, max]`. Values outside the range are clamped, for the ring and\nfor `aria-valuenow`; non-finite values count as `min`.",
         "kind": "input",
         "name": "value",
         "type": "number",
@@ -7820,7 +8006,23 @@
         "type": "void"
       },
       {
-        "description": "Emits when the Cancel button is clicked.\nThe `Cancel` button is only displayed when `showButtons` is set to true.",
+        "description": "Accessible name of the group of controls.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Id of the element that names the group of controls.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Emits when the Cancel button is clicked, after the controls go back to the current value.\nThe `Cancel` button is only displayed when `showButtons` is set to true.",
         "kind": "output",
         "name": "cancel",
         "type": "void"
@@ -7840,7 +8042,7 @@
         "defaultValue": "\"hex\""
       },
       {
-        "description": "Marks the color gradient as invalid. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
+        "description": "Marks the color gradient as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
@@ -7852,6 +8054,13 @@
         "name": "opacity",
         "type": "boolean",
         "defaultValue": "true"
+      },
+      {
+        "description": "Prevents value changes while the control stays focusable and readable. When bound to a signal form\nfield via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Marks the color gradient as required for form validation.",
@@ -7875,13 +8084,6 @@
         "defaultValue": "true"
       },
       {
-        "description": "Specifies whether the color picker should display the hex input.",
-        "kind": "input",
-        "name": "showHexInput",
-        "type": "boolean",
-        "defaultValue": "true"
-      },
-      {
         "description": "Specifies whether the color picker should display the channel inputs (RGB or HSV).",
         "kind": "input",
         "name": "showColorInputs",
@@ -7889,13 +8091,20 @@
         "defaultValue": "true"
       },
       {
-        "description": "Emitted when the color gradient is interacted with on blur or value adjustment.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Specifies whether the color picker should display the hex input.",
+        "kind": "input",
+        "name": "showHexInput",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Emitted when focus leaves the color gradient. Moving between its own parts doesn't count.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
       },
       {
-        "description": "Marks the color gradient as touched. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
+        "description": "Marks the color gradient as touched. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "touched",
         "type": "boolean",
@@ -7923,7 +8132,28 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "The number of columns in the color palette grid.\nOnly applicable when using a custom palette.",
+        "description": "Id of the element that names the color palette grid.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Whether activating the selected tile clears the value. A required palette never clears.",
+        "kind": "input",
+        "name": "clearable",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Emitted with the tile's color each time a tile is activated, also when it's already selected, which\ndoesn't change `value`.",
+        "kind": "output",
+        "name": "colorSelect",
+        "type": "string"
+      },
+      {
+        "description": "The number of columns in the color palette grid. Only applicable when using a custom palette. A\nvalue below 1 shows one column.",
         "kind": "input",
         "name": "columns",
         "type": "number",
@@ -7944,10 +8174,10 @@
         "defaultValue": "false"
       },
       {
-        "description": "The palette to display — one of the built-in `\"flat\"`, `\"material\"`, or `\"websafe\"` schemes, or a\ncustom iterable of color strings. An empty custom palette falls back to the flat scheme.",
+        "description": "The palette to display — one of the built-in `\"flat\"`, `\"material\"`, or `\"websafe\"` schemes, or a\ncustom iterable of colors. A custom color is a CSS color string, or a `{ color, name }` item when it has a name\nof its own. An empty custom palette falls back to the flat scheme.",
         "kind": "input",
         "name": "palette",
-        "type": "PaletteType | Iterable<string>",
+        "type": "PaletteType | Iterable<string | ColorPaletteItem>",
         "defaultValue": "[]"
       },
       {
@@ -7972,14 +8202,14 @@
         "defaultValue": "\"none\""
       },
       {
-        "description": "The size of each tile in the color palette grid.",
+        "description": "The size of each tile in the color palette grid, in pixels. Below 24, tiles miss the minimum target\nsize of WCAG 2.5.8.",
         "kind": "input",
         "name": "tileSize",
         "type": "number",
-        "defaultValue": "18"
+        "defaultValue": "24"
       },
       {
-        "description": "Emitted when the color palette is interacted with on blur or color selection.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when focus leaves the color palette or a color is selected.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
@@ -8013,6 +8243,14 @@
         "defaultValue": "\"\""
       },
       {
+        "description": "Id of the element that names the color picker.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Whether to close the color picker when a color is selected.\nOnly applies when the view is set to \"palette\".",
         "kind": "input",
         "name": "closeOnSelect",
@@ -8034,6 +8272,13 @@
         "defaultValue": "false"
       },
       {
+        "description": "The format of the value the gradient view writes. Only applies when the view is set to \"gradient\".",
+        "kind": "input",
+        "name": "format",
+        "type": "ColorOutputFormat",
+        "defaultValue": "\"hex\""
+      },
+      {
         "description": "Marks the color picker as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "invalid",
@@ -8048,10 +8293,10 @@
         "defaultValue": "true"
       },
       {
-        "description": "The type of color palette to use.\nThis can be a predefined palette type like \"flat\", \"material\", or \"websafe\",\nor a custom iterable of colors.",
+        "description": "The type of color palette to use.\nThis can be a predefined palette type like \"flat\", \"material\", or \"websafe\",\nor a custom iterable of CSS color strings or `{ color, name }` items.",
         "kind": "input",
         "name": "palette",
-        "type": "Iterable<string> | PaletteType",
+        "type": "Iterable<string | ColorPaletteItem> | PaletteType",
         "defaultValue": "\"flat\""
       },
       {
@@ -8076,6 +8321,13 @@
         "defaultValue": "\"medium\""
       },
       {
+        "description": "Whether the gradient view has Apply and Cancel buttons. Without them, each change writes the value\nat once. Only applies when the view is set to \"gradient\".",
+        "kind": "input",
+        "name": "showButtons",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
         "description": "Whether to show the clear button to reset the color.\nThis is only applicable when the view is set to \"palette\".",
         "kind": "input",
         "name": "showClearButton",
@@ -8090,7 +8342,14 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Emitted when the color picker is interacted with on blur or color selection.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "The size of each palette tile, in pixels. Only applies when the view is set to \"palette\". Below 24,\ntiles miss the minimum target size of WCAG 2.5.8.",
+        "kind": "input",
+        "name": "tileSize",
+        "type": "number",
+        "defaultValue": "24"
+      },
+      {
+        "description": "Emitted when focus leaves the color picker or its popup closes. A color selected with\n`closeOnSelect` off doesn't emit it until then.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
@@ -9757,12 +10016,25 @@
       }
     ]
   },
+  "AccordionComponent": {
+    "name": "AccordionComponent",
+    "selector": "\"mona-accordion\"",
+    "inputs": [
+      {
+        "description": "Lets several panels stay open. Without it, opening a panel closes the others, however it was opened.",
+        "kind": "input",
+        "name": "multiple",
+        "type": "boolean",
+        "defaultValue": "false"
+      }
+    ]
+  },
   "ExpansionPanelComponent": {
     "name": "ExpansionPanelComponent",
     "selector": "\"mona-expansion-panel\"",
     "inputs": [
       {
-        "description": "Disables header interaction, suppressing click and keyboard toggling.",
+        "description": "Disables the header: toggling by click or key, and the actions in it.",
         "kind": "input",
         "name": "disabled",
         "type": "boolean",
@@ -9776,6 +10048,13 @@
         "defaultValue": "false"
       },
       {
+        "description": "The level of the heading around the header's button, from 1 to 6. Set it to fit the page's outline, or\nto `null` for no heading.",
+        "kind": "input",
+        "name": "headingLevel",
+        "type": "number | null",
+        "defaultValue": "3"
+      },
+      {
         "description": "Sets the border radius of the expansion panel.",
         "kind": "input",
         "name": "rounded",
@@ -9783,7 +10062,7 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Sets the title of the expansion panel.",
+        "description": "Sets the title of the expansion panel, which also names its button and region.",
         "kind": "input",
         "name": "title",
         "type": "string",
@@ -9794,6 +10073,7 @@
         "kind": "input",
         "name": "userClass",
         "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]
@@ -9803,7 +10083,23 @@
     "selector": "\"mona-fieldset\"",
     "inputs": [
       {
-        "description": "Whether the fieldset and its projected form controls are disabled.\nReflected as the native `disabled` attribute on the rendered `<fieldset>`.",
+        "description": "Accessible name of the fieldset when it has no legend.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Id of the element that labels the fieldset when it has no legend.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Whether the fieldset and the Mona UI form controls inside it are disabled, including nested fieldsets.\nReflected as the native `disabled` attribute on the rendered `<fieldset>`, which also covers native controls.\nA signal form field inside stays enabled in the form model, so its validation keeps running.",
         "kind": "input",
         "name": "disabled",
         "type": "boolean",
@@ -10633,7 +10929,7 @@
         "kind": "input",
         "name": "optionalText",
         "type": "string",
-        "defaultValue": "\"Optional\""
+        "defaultValue": "the `label.optional` message"
       },
       {
         "description": "Visible label caption text.",
@@ -11923,10 +12219,27 @@
     "selector": "\"mona-otp-input\"",
     "inputs": [
       {
-        "description": "Accessible name for the inner `<input>` element.",
+        "description": "Id of an element that describes the inner `<input>`, such as an error message.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string | null",
+        "alias": "aria-describedby",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Accessible name for the inner `<input>` element. A `<label>` or `mona-label` names it too, and the\ngeneric \"Verification code\" name only applies when there is neither.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
+        "alias": "aria-label",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Id of the element that labels the inner `<input>`.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string | null",
+        "alias": "aria-labelledby",
         "defaultValue": "null"
       },
       {
@@ -11937,7 +12250,7 @@
         "defaultValue": "null"
       },
       {
-        "description": "Emitted when a user interaction completes the verification code.",
+        "description": "Emitted when a user interaction completes the verification code. Pasting a different full code over\na complete one emits again, so auto-submit sees the new code. Correcting a complete code one character at a time\ndoesn't.",
         "kind": "output",
         "name": "complete",
         "type": "string"
@@ -11976,6 +12289,13 @@
         "type": "FocusEvent"
       },
       {
+        "description": "Id of the inner `<input>` element. Point a `<label for>` or `<mona-label for>` at it to label the\ncontrol. A unique id is generated when it isn't set.",
+        "kind": "input",
+        "name": "inputId",
+        "type": "string",
+        "defaultValue": "generated"
+      },
+      {
         "description": "Marks the OTP input as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input",
         "name": "invalid",
@@ -11988,6 +12308,13 @@
         "name": "length",
         "type": "number",
         "defaultValue": "4"
+      },
+      {
+        "description": "Name of the native input, used in native form submission and by browsers for autofill. When bound to\na signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "name",
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Hint character displayed in empty visual slots.",
@@ -12053,7 +12380,14 @@
         "defaultValue": "true"
       },
       {
-        "description": "Emitted when the OTP input is interacted with — on blur or user value change.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Tab index of the inner `<input>`.",
+        "kind": "input",
+        "name": "tabindex",
+        "type": "number",
+        "defaultValue": "0"
+      },
+      {
+        "description": "Emitted when the inner input loses focus. The `FormField` directive listens to this to mark the field\nas touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
@@ -12844,7 +13178,7 @@
         "defaultValue": "true"
       },
       {
-        "description": "Accessible label for the progress bar host element.\nUse to describe what is being measured (e.g., \"Upload progress\").\nWhen empty, assistive technology announces the role and numeric values only.",
+        "description": "Accessible label for the progress bar host element.\nUse to describe what is being measured (e.g., \"Upload progress\").\nWhen empty, falls back to the localized \"Progress\". An `aria-labelledby` on the host takes precedence over both.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
@@ -12867,14 +13201,14 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Renders the bar with reduced visual emphasis and removes pointer interaction.",
+        "description": "Renders the bar with reduced visual emphasis and removes pointer interaction. `color` doesn't apply\nwhile disabled.",
         "kind": "input",
         "name": "disabled",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Switches to indeterminate mode: plays a looping animation and hides the label.\nARIA value attributes are removed and `aria-busy` is set on the host element.",
+        "description": "Switches to indeterminate mode: plays a looping animation and hides the label.\nARIA value attributes are removed.",
         "kind": "input",
         "name": "indeterminate",
         "type": "boolean",
@@ -12902,7 +13236,7 @@
         "defaultValue": "true"
       },
       {
-        "description": "Upper bound of the value range. Must be greater than `min`.",
+        "description": "Upper bound of the value range. Must be greater than `min`; otherwise the bar reports no values and a\nwarning is logged in development.",
         "kind": "input",
         "name": "max",
         "type": "number",
@@ -12931,7 +13265,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Current progress value within `[min, max]`.\nValues outside the range are clamped before rendering; non-finite values are treated as `0`.",
+        "description": "Current progress value within `[min, max]`.\nValues outside the range are clamped, for the bar and for `aria-valuenow`; non-finite values count as `min`.",
         "kind": "input",
         "name": "value",
         "type": "number",
@@ -12943,6 +13277,30 @@
     "name": "RadioButtonComponent",
     "selector": "\"mona-radio-button\"",
     "inputs": [
+      {
+        "description": "Id of an element that describes the radio button, such as an error message.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "alias": "aria-describedby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Accessible name of the radio button when it has no visible label.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Id of the element that labels the radio button.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
       {
         "description": "Sets the disabled state of the radio button.",
         "kind": "input",
@@ -12969,14 +13327,21 @@
         "type": "FocusEvent"
       },
       {
-        "description": "Marks the radio button as invalid. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
+        "description": "Id of the native radio input. Point a `<label for>` at it to label the radio button from outside.\nA unique id is generated when it isn't set.",
+        "kind": "input",
+        "name": "inputId",
+        "type": "string",
+        "defaultValue": "generated"
+      },
+      {
+        "description": "Marks the radio button as invalid. When bound to a signal form field via `[formField]`, this is\nwritten by the `FormField` directive.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Text label displayed alongside the radio button.\nWhen provided, takes precedence over projected content.\nWhen empty, projected content inside `<mona-radio-button>` is used.\nWhen both are absent, the radio button has no accessible name — always provide one.",
+        "description": "Text label displayed alongside the radio button.\nWhen provided, takes precedence over projected content.\nWhen empty, projected content inside `<mona-radio-button>` is used.\nWhen both are absent, name the radio button with `aria-label` or `aria-labelledby`.",
         "kind": "input",
         "name": "label",
         "type": "string",
@@ -13004,11 +13369,25 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "The identity value of this radio button within a group.\nCompared against `value()` to determine whether this button is selected.\nWhen this button is chosen, its `radioValue` is written to the form as the new group value.",
+        "description": "The identity value of this radio button within a group.\nCompared against `value()` to determine whether this button is selected.\nWhen this button is chosen, its `radioValue` is written to the form as the new group value.\nA radio button without one can't be selected.",
         "kind": "input",
         "name": "radioValue",
-        "type": "any",
+        "type": "T",
         "defaultValue": "undefined"
+      },
+      {
+        "description": "Prevents value changes while the control stays focusable and readable. When bound to a signal form\nfield via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Marks the radio button as required, as the native `required` attribute. When bound to a signal form\nfield via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "required",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Sets the border radius of the radio button circle and indicator.",
@@ -13018,13 +13397,13 @@
         "defaultValue": "\"full\""
       },
       {
-        "description": "",
+        "description": "Emits when the radio button loses focus or is selected.",
         "kind": "output",
         "name": "touch",
         "type": "void"
       },
       {
-        "description": "Marks the radio button as touched. Error styling requires both `invalid` and `touched` to be `true`.\nWhen bound to a signal form field via `[field]`, this is written by the signal forms `Field` directive.",
+        "description": "Marks the radio button as touched. Error styling requires both `invalid` and `touched` to be `true`.\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
         "kind": "input",
         "name": "touched",
         "type": "boolean",
@@ -13039,10 +13418,110 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "The currently selected value in the radio group.\nWhen bound via `[control]` (signal forms), the `Field` directive keeps this in sync with the form field.\nWhen bound via `[(ngModel)]` or `[formControl]`, the CVA layer manages this value.",
+        "description": "The currently selected value of a group of radio buttons that aren't in a `mona-radio-group`. When\nbound to a signal form field via `[formField]`, the `FormField` directive keeps it in sync.",
         "kind": "model",
         "name": "value",
-        "type": "any",
+        "type": "T",
+        "defaultValue": "undefined"
+      }
+    ]
+  },
+  "RadioGroupComponent": {
+    "name": "RadioGroupComponent",
+    "selector": "\"mona-radio-group\"",
+    "inputs": [
+      {
+        "description": "Id of an element that describes the group, such as an error message.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "alias": "aria-describedby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Accessible name of the group. A group needs a name from this, `aria-labelledby` or a `mona-label`.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Id of the element that labels the group.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Disables every radio button in the group. When bound to a signal form field via `[formField]`, this\nis written by the `FormField` directive.",
+        "kind": "input",
+        "name": "disabled",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Marks the group as invalid. It shows once `touched` is also true. When bound to a signal form field\nvia `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "invalid",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "The native `name` shared by the radio buttons in the group. A unique name is generated when it isn't\nset. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "name",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The direction the radio buttons are laid out and announced in.",
+        "kind": "input",
+        "name": "orientation",
+        "type": "RadioGroupVariantProps[\"orientation\"]",
+        "defaultValue": "\"vertical\""
+      },
+      {
+        "description": "Prevents value changes while the radio buttons stay focusable and readable. When bound to a signal\nform field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Marks the group as required. When bound to a signal form field via `[formField]`, this is written by\nthe `FormField` directive.",
+        "kind": "input",
+        "name": "required",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Emits when a radio button is selected and when focus leaves the group.",
+        "kind": "output",
+        "name": "touch",
+        "type": "void"
+      },
+      {
+        "description": "Marks the group as touched. Error styling needs both `invalid` and `touched`. When bound to a signal\nform field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "touched",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Additional CSS classes merged onto the group via `tailwind-merge`.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "alias": "class",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The `radioValue` of the selected radio button.",
+        "kind": "model",
+        "name": "value",
+        "type": "T",
         "defaultValue": "undefined"
       }
     ]
@@ -13081,6 +13560,13 @@
         "name": "ariaValueText",
         "type": "((value: number, maximum: number) => string) | null",
         "defaultValue": "null"
+      },
+      {
+        "description": "Lets a click on the current value clear the rating, so pointer and touch users can undo one. The\nkeyboard can always clear it with Home.",
+        "kind": "input",
+        "name": "clearable",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "CSS color for selected and hovered rating visuals. Empty, `null`, and `undefined` values use the\nprimary theme color.",
@@ -13146,6 +13632,13 @@
         "defaultValue": "false"
       },
       {
+        "description": "Shows the invalid state while the rating is `0` and the control is touched. The `required` rule of\nsignal forms doesn't treat `0` as empty, so it won't fail the form by itself: use `min(path, 1)` to reject an\nunrated value. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "required",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
         "description": "Controls cumulative or single-item filling.",
         "kind": "input",
         "name": "selection",
@@ -13167,7 +13660,7 @@
         "defaultValue": "0"
       },
       {
-        "description": "Emitted when the user interacts with the control, marking the field as touched.",
+        "description": "Emitted when the control loses focus or a pointer commits a rating, marking the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
@@ -13208,7 +13701,23 @@
         "defaultValue": "true"
       },
       {
-        "description": "Represents the state of arrows' visibility or activity.",
+        "description": "Accessible name of the carousel, saying what it shows. Use this or `aria-labelledby`; with neither,\nthe host is a plain group and a warning is logged in development.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The id of the element that names the carousel.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Shows the previous and next arrows. A swipe is a gesture, so give pointer users arrows or a pager too.",
         "kind": "input",
         "name": "arrows",
         "type": "boolean",
@@ -13243,14 +13752,14 @@
         "defaultValue": "false"
       },
       {
-        "description": "Sets whether the pager is visible.",
+        "description": "Shows the pager. A swipe is a gesture, so give pointer users arrows or a pager too.",
         "kind": "input",
         "name": "pageable",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Sets the background blur of the pager in pixels.",
+        "description": "Sets the background blur of the pager in pixels. It doesn't apply with `pagerOverlay` set to `\"none\"`.",
         "kind": "input",
         "name": "pagerBlur",
         "type": "number",
@@ -13336,11 +13845,18 @@
         "defaultValue": "false"
       },
       {
-        "description": "Marks the component as invalid. Error styling requires both `invalid` and `touched` to be `true`.\r\nWhen bound to a signal form field via `[formField]`, this is written by the signal forms `Field` directive.",
+        "description": "Marks the component as invalid. Error styling requires both `invalid` and `touched` to be `true`.\nWhen bound to a signal form field via `[formField]`, this is written by the signal forms `FormField` directive.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
         "defaultValue": "false"
+      },
+      {
+        "description": "The name of the radios, for a native `<form>`. Generated when empty, so two groups don't interfere.\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "name",
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The list of selectable options. Exactly one option is selected at a time.",
@@ -13348,6 +13864,20 @@
         "name": "options",
         "type": "readonly SegmentedOption<T>[]",
         "required": true
+      },
+      {
+        "description": "Prevents value changes while the control stays focusable and readable. When bound to a signal form\nfield via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Marks the group as required, as `aria-required`. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "required",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Border-radius preset applied to the segmented container and its options.",
@@ -13364,13 +13894,13 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Emitted when the selected value changes or focus leaves a radio input.",
+        "description": "Emitted when the selected value changes or focus leaves the group.",
         "kind": "output",
         "name": "touch",
         "type": "void"
       },
       {
-        "description": "Marks the component as touched. When bound to a signal form field via `[formField]`,\r\nthis is written by the signal forms `Field` directive.",
+        "description": "Marks the component as touched. When bound to a signal form field via `[formField]`,\nthis is written by the signal forms `FormField` directive.",
         "kind": "input",
         "name": "touched",
         "type": "boolean",
@@ -13487,11 +14017,19 @@
     "selector": "\"mona-sidebar\"",
     "inputs": [
       {
-        "description": "Accessible name for the sidebar region. Required when `role` is set, and used as the\ndrawer's name on compact viewports.",
+        "description": "Accessible name for the sidebar region. Required when `role` is set, and used as the\ndrawer's name on compact viewports, which otherwise has a localized default.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
         "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The id of the element that names the sidebar region, in place of `aria-label`. A docked sidebar with no\n`role` ignores it.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -13502,7 +14040,7 @@
         "defaultValue": "\"offcanvas\""
       },
       {
-        "description": "Sets whether this sidebar is open. Supports two-way binding. While the viewport is\ncompact this reflects the drawer, so one binding drives both presentations.",
+        "description": "Sets whether this sidebar is open. Supports two-way binding. While the viewport is\ncompact this reflects the drawer, so one binding drives both presentations, and it reads `false` on\na phone from the start. To remember the docked state, use `persistKey` rather than saving this.",
         "kind": "model",
         "name": "expanded",
         "type": "boolean",
@@ -13584,6 +14122,13 @@
         "name": "mobileBreakpoint",
         "type": "number",
         "defaultValue": "768"
+      },
+      {
+        "description": "How far an open drawer's modality reaches. `\"page\"` makes everything outside the drawer inert and\nlocks the page's scroll. Use `\"layout\"` for a sidebar embedded in part of a page: what's around the layout stays\nusable, so the drawer isn't `aria-modal`.",
+        "kind": "input",
+        "name": "modalScope",
+        "type": "SidebarModalScope",
+        "defaultValue": "\"page\""
       },
       {
         "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
@@ -13671,11 +14216,35 @@
         "defaultValue": "null"
       },
       {
-        "description": "Selected range as `[minimum, maximum]`.\r\nValues outside `[minValue, maxValue]` are clamped; the tuple is always sorted, so index 0 ≤ index 1.",
+        "description": "Selected range as `[minimum, maximum]`.\nA value out of range, off the step grid or unsorted is shown at the nearest valid values, and the model keeps its\nown until the user changes it. A development warning reports it.",
         "kind": "model",
         "name": "value",
         "type": "[number, number]",
         "defaultValue": "[0, 10]"
+      },
+      {
+        "description": "Id of an element that describes the control, such as an error message. On a range slider it describes\neach handle.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string | null",
+        "alias": "aria-describedby",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Accessible name of the control. On a range slider it names the group holding both handles.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string | null",
+        "alias": "aria-label",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Id of the element that labels the control. On a range slider each handle reads it before its own\nname.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string | null",
+        "alias": "aria-labelledby",
+        "defaultValue": "null"
       },
       {
         "description": "Human-readable override for the `aria-valuenow` announcement. Pass a function that receives the current value and returns the string to announce.",
@@ -13706,7 +14275,7 @@
         "defaultValue": "{}"
       },
       {
-        "description": "Marks the control as invalid for form validation purposes, reflecting `aria-invalid` on the handle element.",
+        "description": "Marks the control as invalid for form validation purposes, reflecting `aria-invalid` on the handle\nelement once the control is touched.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
@@ -13755,6 +14324,13 @@
         "defaultValue": "\"horizontal\""
       },
       {
+        "description": "Prevents value changes while the control stays focusable and readable. When bound to a signal form\nfield via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
         "description": "Border-radius preset applied to the slider handle.",
         "kind": "input",
         "name": "rounded",
@@ -13797,17 +14373,24 @@
         "defaultValue": "1"
       },
       {
-        "description": "Increment applied when the value changes via keyboard navigation.",
+        "description": "Distance between the values the control can take. `maxValue` can always be reached, even when it\nisn't a whole number of steps from `minValue`.",
         "kind": "input",
         "name": "step",
         "type": "number",
         "defaultValue": "1"
       },
       {
-        "description": "Emitted when the slider loses focus or its value changes via keyboard navigation.",
+        "description": "Emitted when a handle loses focus. A click on the track moves focus to the handle first.",
         "kind": "output",
         "name": "touch",
         "type": "void"
+      },
+      {
+        "description": "Marks the slider as touched. Error styling requires both `invalid` and `touched` to be `true`.\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "touched",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Background color of the unfilled track portion. Accepts a CSS color string or a `CSSStyleDeclaration` partial.",
@@ -13830,7 +14413,36 @@
     "selector": "\"mona-slider\"",
     "inputs": [
       {
-        "description": "Accessible name for the host element. Describe what the component represents.\r\nWhen empty, assistive technology announces the role without a label.",
+        "description": "Upper bound that wins over `maxValue`. When bound to a signal form field via `[formField]`, this is\nwritten from the field's `max` rule.",
+        "kind": "input",
+        "name": "max",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Lower bound that wins over `minValue`. When bound to a signal form field via `[formField]`, this is\nwritten from the field's `min` rule.",
+        "kind": "input",
+        "name": "min",
+        "type": "number | undefined",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Current value. A value out of range or off the step grid is shown at the nearest valid value, and\nthe model keeps its own until the user changes it, so a `maxValue` that loads late can't overwrite saved data. A\ndevelopment warning reports it.",
+        "kind": "model",
+        "name": "value",
+        "type": "number",
+        "defaultValue": "0"
+      },
+      {
+        "description": "Id of an element that describes the control, such as an error message. On a range slider it describes\neach handle.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string | null",
+        "alias": "aria-describedby",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Accessible name of the control. On a range slider it names the group holding both handles.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
@@ -13838,19 +14450,12 @@
         "defaultValue": "null"
       },
       {
-        "description": "ID of an external element that provides the accessible name for the host element.",
+        "description": "Id of the element that labels the control. On a range slider each handle reads it before its own\nname.",
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string | null",
         "alias": "aria-labelledby",
         "defaultValue": "null"
-      },
-      {
-        "description": "Current value. Values outside `[minValue, maxValue]` are clamped before rendering.",
-        "kind": "model",
-        "name": "value",
-        "type": "number",
-        "defaultValue": "0"
       },
       {
         "description": "Human-readable override for the `aria-valuenow` announcement. Pass a function that receives the current value and returns the string to announce.",
@@ -13881,7 +14486,7 @@
         "defaultValue": "{}"
       },
       {
-        "description": "Marks the control as invalid for form validation purposes, reflecting `aria-invalid` on the handle element.",
+        "description": "Marks the control as invalid for form validation purposes, reflecting `aria-invalid` on the handle\nelement once the control is touched.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
@@ -13930,6 +14535,13 @@
         "defaultValue": "\"horizontal\""
       },
       {
+        "description": "Prevents value changes while the control stays focusable and readable. When bound to a signal form\nfield via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
         "description": "Border-radius preset applied to the slider handle.",
         "kind": "input",
         "name": "rounded",
@@ -13972,17 +14584,24 @@
         "defaultValue": "1"
       },
       {
-        "description": "Increment applied when the value changes via keyboard navigation.",
+        "description": "Distance between the values the control can take. `maxValue` can always be reached, even when it\nisn't a whole number of steps from `minValue`.",
         "kind": "input",
         "name": "step",
         "type": "number",
         "defaultValue": "1"
       },
       {
-        "description": "Emitted when the slider loses focus or its value changes via keyboard navigation.",
+        "description": "Emitted when a handle loses focus. A click on the track moves focus to the handle first.",
         "kind": "output",
         "name": "touch",
         "type": "void"
+      },
+      {
+        "description": "Marks the slider as touched. Error styling requires both `invalid` and `touched` to be `true`.\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "touched",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Background color of the unfilled track portion. Accepts a CSS color string or a `CSSStyleDeclaration` partial.",
@@ -14005,6 +14624,30 @@
     "selector": "",
     "inputs": [
       {
+        "description": "Id of an element that describes the control, such as an error message. On a range slider it describes\neach handle.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string | null",
+        "alias": "aria-describedby",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Accessible name of the control. On a range slider it names the group holding both handles.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string | null",
+        "alias": "aria-label",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Id of the element that labels the control. On a range slider each handle reads it before its own\nname.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string | null",
+        "alias": "aria-labelledby",
+        "defaultValue": "null"
+      },
+      {
         "description": "Human-readable override for the `aria-valuenow` announcement. Pass a function that receives the current value and returns the string to announce.",
         "kind": "input",
         "name": "ariaValueText",
@@ -14033,7 +14676,7 @@
         "defaultValue": "{}"
       },
       {
-        "description": "Marks the control as invalid for form validation purposes, reflecting `aria-invalid` on the handle element.",
+        "description": "Marks the control as invalid for form validation purposes, reflecting `aria-invalid` on the handle\nelement once the control is touched.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
@@ -14082,6 +14725,13 @@
         "defaultValue": "\"horizontal\""
       },
       {
+        "description": "Prevents value changes while the control stays focusable and readable. When bound to a signal form\nfield via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
         "description": "Border-radius preset applied to the slider handle.",
         "kind": "input",
         "name": "rounded",
@@ -14124,17 +14774,24 @@
         "defaultValue": "1"
       },
       {
-        "description": "Increment applied when the value changes via keyboard navigation.",
+        "description": "Distance between the values the control can take. `maxValue` can always be reached, even when it\nisn't a whole number of steps from `minValue`.",
         "kind": "input",
         "name": "step",
         "type": "number",
         "defaultValue": "1"
       },
       {
-        "description": "Emitted when the slider loses focus or its value changes via keyboard navigation.",
+        "description": "Emitted when a handle loses focus. A click on the track moves focus to the handle first.",
         "kind": "output",
         "name": "touch",
         "type": "void"
+      },
+      {
+        "description": "Marks the slider as touched. Error styling requires both `invalid` and `touched` to be `true`.\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "touched",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Background color of the unfilled track portion. Accepts a CSS color string or a `CSSStyleDeclaration` partial.",
@@ -14164,7 +14821,7 @@
         "defaultValue": "\"default\""
       },
       {
-        "description": "Accessible text announced by assistive technology when the spinner is not decorative.\nWhen not set, falls back to the localized loading text.",
+        "description": "Accessible name of the spinner when it is not decorative.\nWhen not set, falls back to the localized loading text.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | undefined",
@@ -14172,7 +14829,7 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "When `true`, removes the `status` role and hides the spinner from assistive technology with `aria-hidden=\"true\"`.\nUseful when a parent element already manages loading semantics (such as `aria-busy=\"true\"` on a button).",
+        "description": "When `true`, removes the `img` role and hides the spinner from assistive technology with `aria-hidden=\"true\"`.\nUseful when visible text says the same thing, or a parent element already manages loading semantics (such as\n`aria-busy=\"true\"` on a button).",
         "kind": "input",
         "name": "decorative",
         "type": "boolean",
@@ -14502,11 +15159,24 @@
     "selector": "\"mona-splitter\"",
     "inputs": [
       {
+        "description": "How far an arrow key moves a separator, in pixels.",
+        "kind": "input",
+        "name": "keyboardStep",
+        "type": "number",
+        "defaultValue": "10"
+      },
+      {
         "description": "The layout direction of the splitter panes.",
         "kind": "input",
         "name": "orientation",
         "type": "SplitterVariantProps[\"orientation\"]",
         "defaultValue": "\"horizontal\""
+      },
+      {
+        "description": "Emitted with every pane's `size`, in order, once a drag ends, after each key that resizes, and when the\nseparator collapses or expands a pane. Use it to save a layout: `sizeChange` on a pane fires on every move, and these\nvalues can go straight back into `size`.",
+        "kind": "output",
+        "name": "resizeEnd",
+        "type": "readonly (string | number)[]"
       }
     ]
   },
@@ -14529,21 +15199,28 @@
         "defaultValue": "false"
       },
       {
-        "description": "The maximum size of the pane.",
+        "description": "Names the separator after this pane, for assistive technology. Without it, the separator has a generic\nname, which can't tell one from another when a splitter has several.",
+        "kind": "input",
+        "name": "label",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The maximum size of the pane, in pixels. A number or a string like `\"200px\"`. Percentages aren't\nsupported, and are ignored with a warning in development.",
         "kind": "input",
         "name": "max",
         "type": "string | number | null",
         "defaultValue": "null"
       },
       {
-        "description": "The minimum size of the pane.",
+        "description": "The minimum size of the pane, in pixels. A number or a string like `\"200px\"`. Percentages aren't\nsupported, and are ignored with a warning in development.",
         "kind": "input",
         "name": "min",
         "type": "string | number | null",
         "defaultValue": "null"
       },
       {
-        "description": "Whether the pane is resizable.",
+        "description": "Whether the pane is resizable. A separator only moves, by pointer or key, when the panes on both of its\nsides are.",
         "kind": "input",
         "name": "resizable",
         "type": "boolean",
@@ -14562,14 +15239,6 @@
     "name": "SplitterResizerComponent",
     "selector": "\"mona-splitter-resizer\"",
     "inputs": [
-      {
-        "description": "Accessible label for the separator element.",
-        "kind": "input",
-        "name": "ariaLabel",
-        "type": "string",
-        "alias": "aria-label",
-        "defaultValue": "\"\""
-      },
       {
         "description": "",
         "kind": "input",
@@ -14601,13 +15270,13 @@
         "description": "",
         "kind": "output",
         "name": "collapseNext",
-        "type": "MouseEvent"
+        "type": "void"
       },
       {
         "description": "",
         "kind": "output",
         "name": "collapsePrevious",
-        "type": "MouseEvent"
+        "type": "void"
       },
       {
         "description": "",
@@ -14687,6 +15356,12 @@
         "defaultValue": "0"
       },
       {
+        "description": "Emitted before a click or key changes the step. Call `preventDefault()` to stay on the current step,\nfor example while its form is invalid. It doesn't fire when `step` is written from outside.",
+        "kind": "output",
+        "name": "stepSelect",
+        "type": "StepSelectEvent"
+      },
+      {
         "description": "Sets the steps of the stepper.",
         "kind": "input",
         "name": "steps",
@@ -14730,7 +15405,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Marks the switch as invalid. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
+        "description": "Marks the switch as invalid. When bound to a signal form field via `[formField]`, this is written by\nthe `FormField` directive.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
@@ -14749,6 +15424,13 @@
         "name": "onLabel",
         "type": "string",
         "defaultValue": "\"\""
+      },
+      {
+        "description": "Prevents value changes while the control stays focusable and readable. When bound to a signal form\nfield via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Marks the switch as required for form validation.",
@@ -14772,13 +15454,20 @@
         "defaultValue": "\"medium\""
       },
       {
+        "description": "Tab index of the switch while it's enabled.",
+        "kind": "input",
+        "name": "tabindex",
+        "type": "number",
+        "defaultValue": "0"
+      },
+      {
         "description": "Emitted when the switch loses focus or its value changes.",
         "kind": "output",
         "name": "touch",
         "type": "void"
       },
       {
-        "description": "Marks the switch as touched. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
+        "description": "Marks the switch as touched. When bound to a signal form field via `[formField]`, this is written by\nthe `FormField` directive.",
         "kind": "input",
         "name": "touched",
         "type": "boolean",
@@ -14799,21 +15488,21 @@
     "selector": "\"mona-tab\"",
     "inputs": [
       {
-        "description": "Displays a close button on this tab. Overrides the parent `mona-tabs` component's `closable` input.",
+        "description": "Displays a close button on this tab. Turning it on here shows the button even when the parent\n`mona-tabs` has `closable` off; turning it off here doesn't hide a button the parent asked for.",
         "kind": "input",
         "name": "closable",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Renders this tab with reduced visual emphasis and removes pointer and keyboard interaction.\r\nOverrides the parent `mona-tabs` component's `disabled` input.",
+        "description": "Renders this tab with reduced visual emphasis and removes pointer and keyboard interaction. A tab is\ndisabled when this or the parent `mona-tabs` component's `disabled` input is on.",
         "kind": "input",
         "name": "disabled",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Whether the tab is selected.",
+        "description": "Whether the tab is selected. Setting it to `true` selects the tab unless it's disabled, and it\nfollows the selection, so `[(selected)]` stays current. Setting it to `false` doesn't clear the selection, because\na group of tabs always keeps one selected.",
         "kind": "model",
         "name": "selected",
         "type": "boolean",
@@ -14832,6 +15521,20 @@
     "name": "TabListComponent",
     "selector": "\"mona-tab-list\"",
     "inputs": [
+      {
+        "description": "",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
       {
         "description": "",
         "kind": "input",
@@ -14895,7 +15598,23 @@
     "selector": "\"mona-tabs\"",
     "inputs": [
       {
-        "description": "Displays a close button on each tab, unless overridden per tab.",
+        "description": "Accessible name for the tab list.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The id of an element that names the tab list. Takes precedence over `aria-label`.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Displays a close button on each tab. A tab's own `closable` can add a button, not remove this one.",
         "kind": "input",
         "name": "closable",
         "type": "boolean",
@@ -14923,6 +15642,13 @@
         "defaultValue": "\"top\""
       },
       {
+        "description": "The zero-based index of the selected tab. Writing it selects that tab, unless it's disabled or out of\nrange, in which case the value goes back to the selected tab's index. It also changes when the component moves the\nselection itself, such as when the selected tab is removed.",
+        "kind": "model",
+        "name": "selectedIndex",
+        "type": "number",
+        "defaultValue": "0"
+      },
+      {
         "description": "Size preset controlling the tabs' dimensions.",
         "kind": "input",
         "name": "size",
@@ -14930,13 +15656,13 @@
         "defaultValue": "\"medium\""
       },
       {
-        "description": "Emitted with a {@link TabCloseEvent} when a tab is closed.",
+        "description": "Emitted with a {@link TabCloseEvent} when a close is requested. The component doesn't remove the tab:\nremove it from whatever renders the `mona-tab` elements.",
         "kind": "output",
         "name": "tabClose",
         "type": "TabCloseEvent"
       },
       {
-        "description": "Emitted with a {@link TabSelectEvent} when a tab is selected. This event is preventable.",
+        "description": "Emitted with a {@link TabSelectEvent} before a click or key selects a tab. This event is preventable.\nIt doesn't fire for selections made through `selectedIndex` or `selected`, or when the selected tab is removed.",
         "kind": "output",
         "name": "tabSelect",
         "type": "TabSelectEvent"

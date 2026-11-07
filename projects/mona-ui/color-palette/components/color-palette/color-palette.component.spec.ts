@@ -144,7 +144,7 @@ describe("ColorPaletteComponent value binding", () => {
         expect(component.value()).toBe("#222222");
         expect(getPalette(fixture).getAttribute("aria-readonly")).toBe("true");
         expect(getTile(fixture, 0).getAttribute("data-readonly")).toBe("true");
-        expect(getTile(fixture, 0).getAttribute("tabindex")).toBe("0");
+        expect(getTile(fixture, 1).getAttribute("tabindex")).toBe("0");
     });
 });
 
@@ -336,8 +336,8 @@ describe("ColorPaletteComponent styling", () => {
 
         expect(tile.className).toContain("data-[selected='true']:border-black/90");
         expect(tile.className).toContain("data-[selected='true']:outline-white/90");
-        expect(tile.className).toContain("focus-visible:not-data-[selected='true']:border-black/90");
-        expect(tile.className).toContain("focus-visible:not-data-[selected='true']:outline-white/90");
+        expect(tile.className).toContain("focus-visible:border-black/90");
+        expect(tile.className).toContain("focus-visible:outline-white/90!");
         expect(tile.className).not.toContain("outline-foreground");
     });
 });

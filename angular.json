@@ -71,7 +71,11 @@
                         "polyfills": ["zone.js"],
                         "tsConfig": "projects/mona-ui-tester/tsconfig.app.json",
                         "inlineStyleLanguage": "scss",
-                        "assets": ["projects/mona-ui-tester/src/favicon.ico", "projects/mona-ui-tester/src/assets"],
+                        "assets": [
+                            "projects/mona-ui-tester/src/favicon.ico",
+                            "projects/mona-ui-tester/src/assets",
+                            { "glob": "{forms,theming}.md", "input": "docs", "output": "assets/docs/guides" }
+                        ],
                         "stylePreprocessorOptions": {
                             "includePaths": [""]
                         },

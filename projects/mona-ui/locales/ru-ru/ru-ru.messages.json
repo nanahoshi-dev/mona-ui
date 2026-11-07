@@ -3,7 +3,8 @@
         "clear": "Очистить"
     },
     "breadcrumb": {
-        "breadcrumb": "Навигационная цепочка"
+        "breadcrumb": "Навигационная цепочка",
+        "showFullPath": "Показать полный путь"
     },
     "buttonGroup": {
         "buttonGroup": "Группа кнопок"
@@ -117,27 +118,41 @@
         "removeLabel": "{label, select, undefined {Удалить элемент} other {Удалить {label}}}"
     },
     "colorGradient": {
+        "alpha": "Альфа-канал",
+        "alphaText": "Непрозрачность {opacity}%",
         "apply": "Применить",
+        "blue": "Синий",
         "cancel": "Отмена",
         "clearColor": "Очистить цвет",
+        "colorCopied": "Цвет скопирован",
+        "colorGradient": "Цветовой градиент",
         "copyAsHex": "Копировать как HEX",
         "copyAsRgb": "Копировать как RGB",
         "copyColor": "Копировать цвет",
+        "copyFailed": "Не удалось скопировать цвет",
         "currentColor": "Текущий цвет",
+        "green": "Зелёный",
+        "hexColor": "Шестнадцатеричный цвет",
+        "hue": "Оттенок",
         "previousColor": "Предыдущий цвет",
+        "red": "Красный",
+        "saturation": "Насыщенность",
         "saturationAndValue": "Насыщенность и значение",
         "saturationAndValueText": "Насыщенность {saturation}%, значение {value}%",
-        "switchColorMode": "Переключить цветовой режим"
+        "switchColorMode": "Переключить цветовой режим",
+        "value": "Значение"
     },
     "colorPalette": {
         "color": "Цвет: {color}",
-        "colorPalette": "Цветовая палитра"
+        "colorPalette": "Цветовая палитра",
+        "namedColor": "{name}, {color}"
     },
     "colorPicker": {
         "clearColor": "Очистить цвет",
         "colorGradientPicker": "Выбор градиента цвета",
         "colorPalettePicker": "Выбор цвета из палитры",
-        "colorPicker": "Выбор цвета"
+        "colorPicker": "Выбор цвета",
+        "noColor": "Без цвета"
     },
     "comboBox": {
         "clear": "Очистить"
@@ -327,6 +342,9 @@
         "sortOrder": "Порядок сортировки {position}",
         "toolbar": "Панель инструментов таблицы"
     },
+    "label": {
+        "optional": "Необязательно"
+    },
     "list": {
         "filterList": "Фильтр списка",
         "loading": "Загрузка",
@@ -392,6 +410,9 @@
         "previousPageLabel": "Предыдущая страница",
         "rangeStatus": "{start}–{end} из {total}"
     },
+    "progressBar": {
+        "label": "Ход выполнения"
+    },
     "rating": {
         "notRated": "Без оценки",
         "valueText": "{value} из {max}"
@@ -401,6 +422,7 @@
         "nextPage": "Следующая страница",
         "page": "Страница {current}",
         "pageOf": "Страница {current} из {total}",
+        "pages": "Страницы",
         "previousPage": "Предыдущая страница",
         "scrollPagerNext": "Прокрутить список страниц вперёд",
         "scrollPagerPrevious": "Прокрутить список страниц назад",
@@ -408,6 +430,10 @@
     },
     "sheet": {
         "closeSheet": "Закрыть панель"
+    },
+    "sidebar": {
+        "drawerLabel": "Боковая панель",
+        "rail": "Показать или скрыть боковую панель"
     },
     "slider": {
         "maximumValue": "Максимальное значение",
@@ -431,6 +457,9 @@
         "resizer": "Разделитель панелей"
     },
     "stepper": {
+        "stepCompleted": "Завершён",
+        "stepInvalid": "Содержит ошибки",
+        "stepPosition": "Шаг {current} из {total}",
         "stepProgress": "Ход выполнения шагов",
         "stepper": "Шаги"
     },

@@ -168,10 +168,10 @@ describe("SliderComponent", () => {
             await waitForStable(fixture);
 
             const track = fixture.debugElement.query(By.css(".bg-surface-muted")).nativeElement as HTMLElement;
-            const selection = fixture.debugElement.query(By.css(".bg-primary")).nativeElement as HTMLElement;
+            const selection = fixture.debugElement.query(By.css("[class*='mona-indicator-color']")).nativeElement as HTMLElement;
             const handle = getHandle(fixture);
 
-            expect(track.classList.contains("border-input-border")).toBe(false);
+            expect(track.classList.contains("border-input-border")).toBe(true);
             expect(track.classList.contains("rounded-full")).toBe(true);
             expect(selection).toBeTruthy();
             expect(
@@ -202,7 +202,7 @@ describe("SliderComponent", () => {
             component.step.set(5);
             await waitForStable(fixture);
 
-            expect(fixture.debugElement.queryAll(By.css("[monaSliderTick]")).length).toBe(3);
+            expect(fixture.debugElement.queryAll(By.css("[data-slider-tick]")).length).toBe(3);
             expect(fixture.debugElement.queryAll(By.css("[data-label-position]")).length).toBe(1);
         });
     });
@@ -338,7 +338,7 @@ describe("SliderComponent", () => {
             await waitForStable(fixture);
 
             const handle = getHandle(fixture);
-            const selection = fixture.nativeElement.querySelector("mona-slider [class*='bg-primary']") as HTMLElement;
+            const selection = fixture.nativeElement.querySelector("mona-slider [class*='mona-indicator-color']") as HTMLElement;
 
             // Under semantic Option A, Tailwind rtl: is inactive and matches LTR behavior
             expect(handle.matches(":dir(rtl)")).toBe(false);
@@ -376,15 +376,16 @@ describe("SliderComponent", () => {
             await waitForStable(fixture);
 
             const handle = getHandle(fixture);
-            const selection = fixture.nativeElement.querySelector("mona-slider [class*='bg-primary']") as HTMLElement;
+            const selection = fixture.nativeElement.querySelector("mona-slider [class*='mona-indicator-color']") as HTMLElement;
 
             expect(handle.matches(":dir(rtl)")).toBe(true);
             expect(handle.matches(":dir(ltr)")).toBe(false);
+            expect(handle.getAttribute("data-rtl")).toBe("true");
             expect(handle.style.right).toBe("50%");
             expect(handle.style.left).toBe("");
             expect(selection.style.right).toBe("0%");
             expect(selection.style.left).toBe("50%");
-            expect(handle.classList.contains("rtl:data-[orientation=\"horizontal\"]:translate-x-[50%]")).toBe(true);
+            expect(handle.classList.contains("data-[rtl=\"true\"]:data-[orientation=\"horizontal\"]:translate-x-[50%]")).toBe(true);
 
             // ArrowRight decreases value in RTL
             dispatchKeydown(handle, "ArrowRight");
@@ -426,8 +427,7 @@ describe("SliderComponent", () => {
             await waitForStable(fixture);
 
             const handle = fixture.nativeElement.querySelector("[role='slider']") as HTMLElement;
-            const ticks = fixture.nativeElement.querySelectorAll("span[monaSliderTick]") as NodeListOf<HTMLElement>;
-            const labels = fixture.nativeElement.querySelectorAll(".mona-slider span[data-orientation='horizontal']") as NodeListOf<HTMLElement>;
+            const ticks = fixture.nativeElement.querySelectorAll("span[data-slider-tick]") as NodeListOf<HTMLElement>;
 
             // Min value (0) handle is at right: 0%
             expect(handle.style.right).toBe("0%");

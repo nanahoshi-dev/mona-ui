@@ -16,8 +16,15 @@ export class ButtonService {
     public readonly buttonSelect$: Subject<[ButtonDirective, boolean]> = new Subject<[ButtonDirective, boolean]>();
     public readonly groupDisabled = signal(false);
     public readonly groupLook = signal<ButtonVariantProps["look"] | undefined>(undefined);
+    public readonly groupReadonly = signal(false);
     public readonly groupRounded = signal<ButtonVariantProps["rounded"] | undefined>(undefined);
     public readonly groupSize = signal<ButtonVariantProps["size"] | undefined>(undefined);
+    /**
+     * Every click on a member, toggleable or not, reported after the group has applied its selection.
+     */
+    public readonly memberClick$: Subject<[ButtonDirective, HTMLButtonElement]> = new Subject<
+        [ButtonDirective, HTMLButtonElement]
+    >();
 
     /**
      * The buttons that belong to the group. Only these follow the group's look, size, rounding, disabled state and

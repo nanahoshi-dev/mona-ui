@@ -46,7 +46,7 @@ Add `FieldsetComponent` to your standalone component's `imports` array.
 </mona-fieldset>
 ```
 
-> **Accessibility note:** Always provide either `legend` or `monaFieldsetLegendTemplate`. A `<fieldset>` without a `<legend>` has no accessible group name and offers no benefit over a plain `<div>`.
+> **Accessibility note:** Provide `legend` or `monaFieldsetLegendTemplate`. Without a legend, name the group with `aria-label` or `aria-labelledby`. A `<fieldset>` with no name offers no benefit over a plain `<div>`.
 
 ## Appearance & Styling
 
@@ -64,7 +64,7 @@ The `rounded` value applies to both the fieldset border and the legend notch, ke
 
 ### Legend styling
 
-When a plain `legend` string is supplied, the legend notch is styled with `bg-background-dark`, a border, and padding. When `monaFieldsetLegendTemplate` is used, no default styling is applied to the `<legend>` element — the consumer controls the appearance entirely.
+When a plain `legend` string is supplied, the legend notch has a raised surface background, a border, and padding. When `monaFieldsetLegendTemplate` is used, none of that is applied — the consumer controls the appearance entirely.
 
 ### Custom class
 
@@ -76,11 +76,24 @@ Pass additional classes via the `class` attribute; they are merged onto the rend
 
 ### Disabled state
 
-Set `disabled` to disable the rendered `<fieldset>` and all projected form controls, and to apply a reduced-emphasis visual style:
+Set `disabled` to disable the rendered `<fieldset>`, to apply the disabled colors, and to disable the controls inside it:
 
 ```html
 <mona-fieldset legend="Preferences" [disabled]="true"></mona-fieldset>
 ```
+
+It reaches controls in two ways:
+
+- **Native controls** are disabled by the browser, because the rendered `<fieldset>` has the native `disabled` attribute. This covers `monaTextBox`, `monaTextArea`, `monaCheckbox`, `monaRadioButton` and any other native input, select, textarea or button.
+- **Mona UI controls** read the state of the enclosing `mona-fieldset`, at any depth, including nested fieldsets: auto complete, button group, calendar, check box, color gradient, color palette, color picker, combo box, date picker, date-time picker, dropdown list, editor, multi-select, numeric text box, OTP input, radio button, radio group, rating, segmented, slider, range slider, switch, text box, time picker and time selector.
+
+It has these limits:
+
+- **Other controls:** chip, tree view and the list controls (list box, list view) don't read it. Disable those yourself.
+- **A nested fieldset** shows the disabled colors under a disabled parent, as well as disabling its controls.
+- **The form model:** a signal form field inside stays enabled in the form model, so its validation keeps running. Use the signal forms `disabled` rule when the field itself should be disabled.
+- **The first legend:** the browser leaves native controls in a fieldset's first `<legend>` enabled. Mona UI controls get no such exemption, so one in `monaFieldsetLegendTemplate` is disabled too.
+- **A plain `<fieldset>`:** a native `<fieldset disabled>` you write yourself only reaches native controls. Mona UI controls that draw their own focusable element stay enabled inside it. Use `mona-fieldset` for those.
 
 ## API
 
@@ -88,13 +101,19 @@ Set `disabled` to disable the rendered `<fieldset>` and all projected form contr
 
 **Selector:** `mona-fieldset`
 
-| Name       | Type                                                 | Default     | Description                                                                                                                                        |
-|------------|------------------------------------------------------|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
-| `class`    | `string`                                             | `''`        | Additional CSS classes merged onto the rendered `<fieldset>` element via `tailwind-merge`.                                                         |
-| `disabled` | `boolean`                                            | `false`     | Disables the rendered `<fieldset>` and all projected form controls, and applies a reduced-emphasis visual style.                                   |
-| `legend`   | `string`                                             | `''`        | Text displayed in the legend notch. Ignored when `monaFieldsetLegendTemplate` is provided. When both are empty, no `<legend>` element is rendered. |
-| `name`     | `string \| undefined`                                | `undefined` | The `name` attribute reflected onto the rendered `<fieldset>` element.                                                                             |
-| `rounded`  | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'`  | Border-radius preset applied to both the fieldset border and the legend notch.                                                                     |
+#### Inputs
+
+| Name              | Type                                                 | Default     | Description                                                                                                                                        |
+|-------------------|------------------------------------------------------|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `aria-label`      | `string`                                             | `''`        | Accessible name of the fieldset when it has no legend.                                                                                             |
+| `aria-labelledby` | `string`                                             | `''`        | Id of the element that labels the fieldset when it has no legend.                                                                                  |
+| `class`           | `string`                                             | `''`        | Additional CSS classes merged onto the rendered `<fieldset>` element via `tailwind-merge`.                                                         |
+| `disabled`        | `boolean`                                            | `false`     | Disables the rendered `<fieldset>`, native controls and the Mona UI form controls that read it, and applies the disabled colors. See the limits above. |
+| `legend`          | `string`                                             | `''`        | Text displayed in the legend notch. Ignored when `monaFieldsetLegendTemplate` is provided. When both are empty, no `<legend>` element is rendered. |
+| `name`            | `string \| undefined`                                | `undefined` | The `name` attribute reflected onto the rendered `<fieldset>` element.                                                                             |
+| `rounded`         | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'`  | Border-radius preset applied to both the fieldset border and the legend notch.                                                                     |
+
+#### Outputs
 
 `FieldsetComponent` has no model inputs and no event outputs.
 
@@ -107,16 +126,3 @@ Replaces the string `legend` with projected content inside the `<legend>` elemen
 ```typescript
 import { FieldsetComponent, FieldsetLegendTemplateDirective } from "@nanahoshi/mona-ui/fieldset";
 ```
-
----
-
-<!-- verification-checklist
-- [x] API definitions and defaults verified against source and component-metadata.json
-- [x] standalone: true removed from FieldsetLegendTemplateDirective
-- [x] *ngTemplateOutlet replaced with [ngTemplateOutlet] property binding
-- [x] @description and @default added to userClass; @default added to legend
-- [x] legendVisible computed logic verified — hides <legend> when both legend and template are absent
-- [x] No internal or unexported APIs exposed
-- [x] disabled and name inputs added to fieldset.component.ts and documented
-- [x] class merge target corrected to the rendered <fieldset> element (was previously the host element)
--->

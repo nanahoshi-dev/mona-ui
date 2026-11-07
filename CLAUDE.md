@@ -23,6 +23,9 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 ## Accessibility Requirements
 - It MUST pass all AXE checks.
 - It MUST follow all WCAG AA minimums, including focus management, color contrast, and ARIA attributes.
+- It MUST stay usable in forced colors, where rings (box-shadow) and most backgrounds don't paint:
+    - Pair `outline-none` with `focus-visible:outline-hidden`, which draws an outline there and nothing elsewhere. `npm run test:browser:forced-colors` checks it.
+    - State drawn only by a background needs `forced-colors:bg-[Highlight]`. Where the color is the content, or text sits on it, use `forced-color-adjust-none`: otherwise the browser paints a Canvas backplate behind the text.
 
 ### Components
 - Keep components small and focused on a single responsibility

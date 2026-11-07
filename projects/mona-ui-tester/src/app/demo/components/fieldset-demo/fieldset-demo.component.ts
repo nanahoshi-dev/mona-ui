@@ -1,6 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
+import { booleanAttribute, ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
+import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
 import { FieldsetComponent, FieldsetLegendTemplateDirective } from "@nanahoshi/mona-ui/fieldset";
+import { RatingComponent } from "@nanahoshi/mona-ui/rating";
+import { SliderComponent } from "@nanahoshi/mona-ui/slider";
+import { SwitchComponent } from "@nanahoshi/mona-ui/switch";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
@@ -48,11 +52,31 @@ export class FieldsetDemoComponent extends AbstractDemoComponent<FieldsetCompone
 }
 
 @Component({
-    imports: [FieldsetComponent, FieldsetLegendTemplateDirective],
+    imports: [
+        DropdownListComponent,
+        FieldsetComponent,
+        FieldsetLegendTemplateDirective,
+        RatingComponent,
+        SliderComponent,
+        SwitchComponent
+    ],
     template: `
         @let featureData = features();
-        <mona-fieldset [legend]="legend()" [rounded]="rounded()" [disabled]="disabled()" [class]="userClass()">
-            <p class="p-2">This is a fieldset content.</p>
+        <mona-fieldset
+            [aria-label]="ariaLabel()"
+            [aria-labelledby]="ariaLabelledBy()"
+            [legend]="legend()"
+            [rounded]="rounded()"
+            [disabled]="disabled()"
+            [class]="userClass()">
+            <div class="flex flex-col gap-3 p-2">
+                <p>Turning on disabled disables every control inside.</p>
+                <mona-switch aria-label="Notifications" />
+                <mona-slider aria-label="Volume" class="w-64" />
+                <mona-rating aria-label="Satisfaction" />
+                <mona-dropdown-list aria-label="Season" class="w-64" [data]="seasons" />
+                <input aria-label="Plain native input" class="w-64 border border-border p-1" type="text" />
+            </div>
             @if (featureData["legendTemplate"].active) {
                 <ng-template monaFieldsetLegendTemplate>
                     <div class="text-emerald-600 font-medium">Custom Legend</div>
@@ -67,7 +91,10 @@ export class FieldsetDemoComponent extends AbstractDemoComponent<FieldsetCompone
 })
 class FieldsetWrapperComponent implements ComponentInputsAsSignal<FieldsetComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
-    public readonly disabled = input<ReturnType<FieldsetComponent["disabled"]>>(false);
+    protected readonly seasons = ["Spring", "Summer", "Autumn", "Winter"];
+    public readonly ariaLabel = input("");
+    public readonly ariaLabelledBy = input("");
+    public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly legend = input<ReturnType<FieldsetComponent["legend"]>>("");
     public readonly rounded = input<ReturnType<FieldsetComponent["rounded"]>>("medium");
     public readonly userClass = input<ReturnType<FieldsetComponent["userClass"]>>("");

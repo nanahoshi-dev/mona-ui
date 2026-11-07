@@ -616,6 +616,59 @@ getLocaleFirstDayOfWeek();
     }
 }
 
+/**
+ * Compiles what the install guide tells an application to write, from a folder that only has the package to go on.
+ * Reading `styles.css` isn't enough: an `exports` entry Tailwind can't resolve, or an `@source` that misses the bundles,
+ * would still leave a file there and an application with no component styles.
+ */
+export function verifyPackageStyles(distDir: string, repoRoot: string = process.cwd()): void {
+    if (!existsSync(resolve(distDir, "styles.css"))) {
+        throw new Error(`styles.css not found in the package at: ${distDir}`);
+    }
+    const pkgJson = JSON.parse(readFileSync(resolve(distDir, "package.json"), "utf-8"));
+    if (pkgJson.exports?.["./styles.css"] !== "./styles.css") {
+        throw new Error('Built package.json is missing exports["./styles.css"]');
+    }
+
+    const tempDir = mkdtempSync(join(tmpdir(), "mona-styles-smoke-"));
+    try {
+        const scope = join(tempDir, "node_modules", "@nanahoshi");
+        mkdirSync(scope, { recursive: true });
+        const linkType = process.platform === "win32" ? "junction" : "dir";
+        symlinkSync(distDir, join(scope, "mona-ui"), linkType);
+        symlinkSync(resolve(repoRoot, "node_modules/tailwindcss"), join(tempDir, "node_modules", "tailwindcss"), linkType);
+
+        const scriptPath = join(tempDir, "styles.mjs");
+        writeFileSync(
+            scriptPath,
+            `
+import { createRequire } from "node:module";
+const require = createRequire(${JSON.stringify(resolve(repoRoot, "projects/mona-ui-tester/package.json"))});
+const postcss = require("postcss");
+const tailwind = require("@tailwindcss/postcss");
+const { css } = await postcss([tailwind({ base: ${JSON.stringify(tempDir)} })]).process(
+    '@import "tailwindcss" source(none);\\n@import "@nanahoshi/mona-ui/styles.css";\\n',
+    { from: ${JSON.stringify(join(tempDir, "styles.css"))} }
+);
+for (const expected of [".bg-primary", ".border-input-border", "--color-primary:"]) {
+    if (!css.includes(expected)) {
+        console.error("The compiled stylesheet has no " + expected);
+        process.exit(1);
+    }
+}
+`
+        );
+        try {
+            execFileSync(process.execPath, [scriptPath], { cwd: tempDir, encoding: "utf-8", stdio: ["ignore", "pipe", "pipe"] });
+        } catch (err: unknown) {
+            const execErr = err as { message?: string; stderr?: string; stdout?: string };
+            throw new Error(`Compiling the package's styles failed:\n${execErr.stderr || execErr.stdout || execErr.message}`);
+        }
+    } finally {
+        rmSync(tempDir, { force: true, recursive: true });
+    }
+}
+
 export function verifyBuiltPackage(options: PackageVerificationOptions = {}): void {
     const distDir = resolve(options.distDir ?? resolve(process.cwd(), "dist/mona-ui"));
     const sourceLocalesDir = resolve(
@@ -743,6 +796,9 @@ export function verifyBuiltPackage(options: PackageVerificationOptions = {}): vo
         }
         console.log(`✓ Found ${files.length} JSON catalogs in the package, identical to their sources`);
     }
+
+    verifyPackageStyles(distDir, repoRoot);
+    console.log("✓ styles.css is exported, and compiles with Tailwind to the classes the components use");
 
     runConsumerSmokeTest({
         distDir,

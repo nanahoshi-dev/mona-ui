@@ -4,7 +4,7 @@
     [aria-describedby]="ariaDescribedBy()"
     [aria-label]="ariaLabel()"
     [aria-labelledby]="ariaLabelledBy()"
-    [disabled]="disabled()"
+    [disabled]="effectiveDisabled()"
     [inputId]="inputId()"
     [value]="typedInput.text()"
     [placeholder]="placeholder()"
@@ -32,7 +32,7 @@
             [attr.aria-label]="messages().openCalendar"
             [attr.aria-expanded]="expanded()"
             [attr.aria-controls]="popupId"
-            [disabled]="disabled() || readonly()"
+            [disabled]="effectiveDisabled() || readonly()"
             [tabindex]="-1"
             (click)="onDateInputButtonClick()">
             <svg lucideCalendar [size]="16" aria-hidden="true"></svg>

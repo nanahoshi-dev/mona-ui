@@ -4,7 +4,7 @@ import { themeControlSurfaceClasses, type VariantInputs } from "@nanahoshi/mona-
 export const otpInputHostThemeVariants = cva(
     `
         relative inline-flex items-center gap-2
-        outline-none
+        outline-none focus-visible:outline-hidden
         transition-[color,box-shadow,border] duration-(--mona-motion-standard) ease-in-out
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed
@@ -13,7 +13,7 @@ export const otpInputHostThemeVariants = cva(
 );
 
 export const otpInputFieldThemeVariants = cva(
-    `pointer-events-none absolute inset-0 size-full opacity-0 outline-none select-none -z-10`
+    `absolute inset-0 z-10 size-full cursor-text opacity-0 outline-none focus-visible:outline-hidden read-only:cursor-default`
 );
 
 export const otpInputSlotThemeVariants = cva(
@@ -23,7 +23,7 @@ export const otpInputSlotThemeVariants = cva(
         overflow-hidden
         ${themeControlSurfaceClasses} text-foreground
         border border-input-border shadow-(--shadow-control)
-        outline-none
+        outline-none focus-visible:outline-hidden
         transition-[color,box-shadow,border,background-color] duration-(--mona-motion-standard) ease-in-out
 
         data-[disabled='true']:pointer-events-none

@@ -1,5 +1,5 @@
 import { cva } from "class-variance-authority";
-import { themeControlSurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeControlSurfaceClasses, themeSelectionBorderClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
 
 export const buttonThemeVariants = cva(
@@ -9,6 +9,7 @@ export const buttonThemeVariants = cva(
         text-sm font-medium
         transition-colors duration-100 ease-in-out
         focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-indicator
+        forced-colors:border forced-colors:border-[ButtonBorder]
     `,
 
     {
@@ -32,7 +33,7 @@ export const buttonThemeVariants = cva(
             look: {
                 default: `
                     ${themeControlSurfaceClasses} text-foreground
-                    border border-input-border
+                    border border-border
                     hover:bg-hover active:bg-active
                     focus-visible:border-focus-indicator
                 `,
@@ -62,7 +63,7 @@ export const buttonThemeVariants = cva(
                 `,
                 outline: `
                     ${themeControlSurfaceClasses} text-foreground
-                    border border-input-border
+                    border border-border
                     hover:bg-hover active:bg-active
                     focus-visible:border-focus-indicator
                 `,
@@ -100,7 +101,7 @@ export const buttonThemeVariants = cva(
                 small: "h-8 px-3 text-xs"
             },
             selected: {
-                true: ""
+                true: themeSelectionBorderClasses
             }
         },
         compoundVariants: [

@@ -1,9 +1,9 @@
 import {
-    afterRenderEffect,
     Component,
     contentChild,
     contentChildren,
     DestroyRef,
+    effect,
     inject,
     input,
     TemplateRef,
@@ -33,16 +33,15 @@ export class CardHeaderComponent {
     public readonly userClass = input<ClassInputType>("", { alias: "class" });
 
     public constructor() {
-        afterRenderEffect({
-            read: () => {
-                this.#cardService.actionTemplate.set(this.actionDirective().map(directive => directive.templateRef));
-                this.#cardService.descriptionId.set(this.descriptionDirective()?.id ?? null);
-                this.#cardService.descriptionTemplate.set(this.descriptionDirective()?.templateRef ?? null);
-                this.#cardService.headerTemplate.set(this.headerTemplate());
-                this.#cardService.headerClass.set(this.userClass());
-                this.#cardService.titleId.set(this.titleDirective()?.id ?? null);
-                this.#cardService.titleTemplate.set(this.titleDirective()?.templateRef ?? null);
-            }
+        // A plain effect, because it runs on the server and in the first pass, so the header isn't missing from either.
+        effect(() => {
+            this.#cardService.actionTemplate.set(this.actionDirective().map(directive => directive.templateRef));
+            this.#cardService.descriptionId.set(this.descriptionDirective()?.id ?? null);
+            this.#cardService.descriptionTemplate.set(this.descriptionDirective()?.templateRef ?? null);
+            this.#cardService.headerTemplate.set(this.headerTemplate());
+            this.#cardService.headerClass.set(this.userClass());
+            this.#cardService.titleId.set(this.titleDirective()?.id ?? null);
+            this.#cardService.titleTemplate.set(this.titleDirective()?.templateRef ?? null);
         });
         inject(DestroyRef).onDestroy(() => {
             this.#cardService.actionTemplate.set([]);

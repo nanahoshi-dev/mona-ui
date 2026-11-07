@@ -69,6 +69,7 @@ export class CircularProgressBarDemoComponent extends AbstractDemoComponent<Circ
             [color]="color()"
             [disabled]="disabled()"
             [indeterminate]="indeterminate()"
+            [labelVisible]="labelVisible()"
             [max]="max()"
             [min]="min()"
             [size]="size()"
@@ -91,6 +92,7 @@ class CircularProgressBarWrapperComponent implements ComponentInputsAsSignal<Cir
     public readonly color = input<ReturnType<CircularProgressBarComponent["color"]>>(``);
     public readonly disabled = input(false);
     public readonly indeterminate = input(false);
+    public readonly labelVisible = input(true);
     public readonly max = input(100);
     public readonly min = input(0);
     public readonly size = input(120);

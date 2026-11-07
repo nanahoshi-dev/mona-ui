@@ -149,7 +149,7 @@ describe("Sidebar drawer on a compact viewport", () => {
             expect(sidebar().classList.contains("right-0")).toBe(false);
             expect(sidebar().getAttribute("data-side")).toBe("start");
             expect(sidebar().getAttribute("data-state")).toBe("collapsed");
-            expect(sidebar().style.width).toBe("calc(1px + 18rem)");
+            expect(sidebar().style.width).toBe("18rem");
 
             query(".trigger").click();
             fixture.detectChanges();
@@ -170,7 +170,7 @@ describe("Sidebar drawer on a compact viewport", () => {
             expect(sidebar().classList.contains("left-0")).toBe(false);
             expect(sidebar().getAttribute("data-side")).toBe("end");
             expect(sidebar().getAttribute("data-state")).toBe("collapsed");
-            expect(sidebar().style.width).toBe("calc(1px + 18rem)");
+            expect(sidebar().style.width).toBe("18rem");
 
             query(".trigger").click();
             fixture.detectChanges();
@@ -192,7 +192,7 @@ describe("Sidebar drawer on a compact viewport", () => {
             expect(sidebar().classList.contains("left-0")).toBe(false);
             expect(sidebar().getAttribute("data-side")).toBe("start");
             expect(sidebar().getAttribute("data-state")).toBe("collapsed");
-            expect(sidebar().style.width).toBe("calc(1px + 18rem)");
+            expect(sidebar().style.width).toBe("18rem");
 
             query(".trigger").click();
             fixture.detectChanges();
@@ -215,7 +215,7 @@ describe("Sidebar drawer on a compact viewport", () => {
             expect(sidebar().classList.contains("right-0")).toBe(false);
             expect(sidebar().getAttribute("data-side")).toBe("end");
             expect(sidebar().getAttribute("data-state")).toBe("collapsed");
-            expect(sidebar().style.width).toBe("calc(1px + 18rem)");
+            expect(sidebar().style.width).toBe("18rem");
 
             query(".trigger").click();
             fixture.detectChanges();

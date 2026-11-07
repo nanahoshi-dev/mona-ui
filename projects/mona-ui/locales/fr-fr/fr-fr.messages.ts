@@ -21,7 +21,8 @@ export const FR_FR_MESSAGES = {
         clear: "Effacer"
     },
     breadcrumb: {
-        breadcrumb: "Fil d’Ariane"
+        breadcrumb: "Fil d’Ariane",
+        showFullPath: "Afficher le chemin complet"
     },
     buttonGroup: {
         buttonGroup: "Groupe de boutons"
@@ -159,28 +160,42 @@ export const FR_FR_MESSAGES = {
         removeLabel: (label?: string) => (label ? `Retirer ${label}` : "Retirer l’élément")
     },
     colorGradient: {
+        alpha: "Canal alpha",
+        alphaText: (opacity: number) => `Opacité ${localizeNumber(opacity)}\u00A0%`,
         apply: "Appliquer",
+        blue: "Bleu",
         cancel: "Annuler",
         clearColor: "Effacer la couleur",
+        colorCopied: "Couleur copiée",
+        colorGradient: "Dégradé de couleur",
         copyAsHex: "Copier en HEX",
         copyAsRgb: "Copier en RVB",
         copyColor: "Copier la couleur",
+        copyFailed: "Impossible de copier la couleur",
         currentColor: "Couleur actuelle",
+        green: "Vert",
+        hexColor: "Couleur hexadécimale",
+        hue: "Teinte",
         previousColor: "Couleur précédente",
+        red: "Rouge",
+        saturation: "Saturation",
         saturationAndValue: "Saturation et luminosité",
         saturationAndValueText: (saturation: number, value: number) =>
             `Saturation ${localizeNumber(saturation)}\u00A0%, luminosité ${localizeNumber(value)}\u00A0%`,
-        switchColorMode: "Changer de mode colorimétrique"
+        switchColorMode: "Changer de mode colorimétrique",
+        value: "Luminosité"
     },
     colorPalette: {
         color: (color: string) => `Couleur ${color}`,
-        colorPalette: "Palette de couleurs"
+        colorPalette: "Palette de couleurs",
+        namedColor: (name: string, color: string) => `${name}, ${color}`
     },
     colorPicker: {
         clearColor: "Effacer la couleur",
         colorGradientPicker: "Sélecteur de dégradé de couleurs",
         colorPalettePicker: "Sélecteur de palette de couleurs",
-        colorPicker: "Sélecteur de couleur"
+        colorPicker: "Sélecteur de couleur",
+        noColor: "Aucune couleur"
     },
     comboBox: {
         clear: "Effacer"
@@ -379,6 +394,9 @@ export const FR_FR_MESSAGES = {
         sortOrder: (position: number) => `Ordre de tri ${localizeNumber(position)}`,
         toolbar: "Barre d’outils du tableau"
     },
+    label: {
+        optional: "Facultatif"
+    },
     list: {
         filterList: "Filtrer la liste",
         loading: "Chargement",
@@ -462,6 +480,9 @@ export const FR_FR_MESSAGES = {
                 ? `${localizeNumber(start)}–${localizeNumber(end)} sur ${localizeNumber(total)} élément`
                 : `${localizeNumber(start)}–${localizeNumber(end)} sur ${localizeNumber(total)} éléments`
     },
+    progressBar: {
+        label: "Progression"
+    },
     rating: {
         notRated: "Non évalué",
         valueText: (value: number, max: number) => `${localizeNumber(value)} sur ${localizeNumber(max)}`
@@ -471,6 +492,7 @@ export const FR_FR_MESSAGES = {
         nextPage: "Page suivante",
         page: (current: number) => `Page ${localizeNumber(current)}`,
         pageOf: (current: number, total: number) => `Page ${localizeNumber(current)} sur ${localizeNumber(total)}`,
+        pages: "Pages",
         previousPage: "Page précédente",
         scrollPagerNext: "Faire défiler la pagination vers l’avant",
         scrollPagerPrevious: "Faire défiler la pagination vers l’arrière",
@@ -478,6 +500,10 @@ export const FR_FR_MESSAGES = {
     },
     sheet: {
         closeSheet: "Fermer le panneau"
+    },
+    sidebar: {
+        drawerLabel: "Barre latérale",
+        rail: "Afficher ou masquer la barre latérale"
     },
     slider: {
         maximumValue: "Valeur maximale",
@@ -501,6 +527,10 @@ export const FR_FR_MESSAGES = {
         resizer: "Séparateur"
     },
     stepper: {
+        stepCompleted: "Terminée",
+        stepInvalid: "Contient des erreurs",
+        stepPosition: (current: number, total: number) =>
+            `Étape ${localizeNumber(current)} sur ${localizeNumber(total)}`,
         stepProgress: "Progression de l’étape",
         stepper: "Indicateur d’étapes"
     },

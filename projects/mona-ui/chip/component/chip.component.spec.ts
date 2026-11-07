@@ -131,9 +131,8 @@ describe("ChipComponent", () => {
             expect(component.chipComponent()).toBeTruthy();
         });
 
-        it("should have default tabindex of -1 when not interactive", () => {
-            // By default toggleable=false, removable=false, so tabindex is -1
-            expect(chipElement.getAttribute("tabindex")).toBe("-1");
+        it("should not be focusable by default when not interactive", () => {
+            expect(chipElement.getAttribute("tabindex")).toBeNull();
         });
 
         it("should apply default variant classes", () => {
@@ -174,6 +173,7 @@ describe("ChipComponent", () => {
     // =========================================================================
     describe("disabled input", () => {
         it("should set aria-disabled='true' when disabled", () => {
+            component.toggleable.set(true);
             component.disabled.set(true);
             fixture.detectChanges();
             expect(chipElement.getAttribute("aria-disabled")).toBe("true");
@@ -283,10 +283,10 @@ describe("ChipComponent", () => {
             expect(component.onContentClick).not.toHaveBeenCalled();
         });
 
-        it("should keep host tabindex=-1 when removable", () => {
+        it("should stay out of the tab order when removable", () => {
             component.removable.set(true);
             fixture.detectChanges();
-            expect(chipElement.getAttribute("tabindex")).toBe("-1");
+            expect(chipElement.getAttribute("tabindex")).toBeNull();
         });
 
         it("should NOT emit remove when disabled", async () => {
@@ -478,7 +478,7 @@ describe("ChipComponent", () => {
         it("should apply outline look with a control boundary and no passive hover", () => {
             component.look.set("outline");
             fixture.detectChanges();
-            expect(chipElement.classList.contains("border-input-border")).toBe(true);
+            expect(chipElement.classList.contains("border-border")).toBe(true);
             expect(chipElement.classList.contains("hover:bg-hover")).toBe(false);
         });
 
@@ -557,7 +557,7 @@ describe("ChipComponent", () => {
             fixture.detectChanges();
 
             expect(chipElement.classList.contains("cursor-pointer")).toBe(true);
-            expect(chipElement.classList.contains("focus-visible:ring-2")).toBe(true);
+            expect(chipElement.classList.contains("focus-visible:outline-2")).toBe(true);
         });
     });
 
@@ -626,20 +626,19 @@ describe("ChipComponent", () => {
             expect(chipElement.getAttribute("tabindex")).toBe("0");
         });
 
-        it("should return -1 when removable and no explicit value", () => {
+        it("should have none when removable and no explicit value", () => {
             component.removable.set(true);
             component.tabindex.set(undefined);
             fixture.detectChanges();
-            expect(chipElement.getAttribute("tabindex")).toBe("-1");
+            expect(chipElement.getAttribute("tabindex")).toBeNull();
         });
 
-        it("should return -1 when not interactive and no explicit value", () => {
-            // When toggleable=false, removable=false, and no explicit tabindex, returns -1
+        it("should have none when not interactive and no explicit value", () => {
             component.toggleable.set(false);
             component.removable.set(false);
             component.tabindex.set(undefined);
             fixture.detectChanges();
-            expect(chipElement.getAttribute("tabindex")).toBe("-1");
+            expect(chipElement.getAttribute("tabindex")).toBeNull();
         });
     });
 
@@ -653,11 +652,11 @@ describe("ChipComponent", () => {
             expect(chipElement.getAttribute("aria-label")).toBe("Custom Aria Label");
         });
 
-        it("should fall back to label for aria-label", () => {
+        it("should not copy label to aria-label, since the text reads itself", () => {
             component.ariaLabel.set(undefined);
             component.label.set("Chip Label");
             fixture.detectChanges();
-            expect(chipElement.getAttribute("aria-label")).toBe("Chip Label");
+            expect(chipElement.getAttribute("aria-label")).toBeNull();
         });
 
         it("should have no aria-label when neither provided", () => {
@@ -1071,7 +1070,7 @@ describe("ChipComponent with RouterLink", () => {
 
     it("should apply interactive affordances when functioning as a link", () => {
         expect(chipElement.classList.contains("cursor-pointer")).toBe(true);
-        expect(chipElement.classList.contains("focus-visible:ring-2")).toBe(true);
+        expect(chipElement.classList.contains("focus-visible:outline-2")).toBe(true);
     });
 
     it("should set tabindex=0 for link chip when enabled", () => {

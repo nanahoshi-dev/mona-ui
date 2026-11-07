@@ -78,7 +78,7 @@ export class AvatarDemoComponent extends AbstractDemoComponent<AvatarComponent> 
     template: `
         <mona-avatar
             [alt]="alt()"
-            [ariaLabel]="ariaLabel()"
+            [aria-label]="ariaLabel()"
             [backgroundColor]="backgroundColor()"
             [borderColor]="borderColor()"
             [borderRadius]="borderRadius()"
@@ -128,7 +128,7 @@ export class AvatarWrapperComponent implements ComponentInputsAsSignal<AvatarCom
         "https://photos.smugmug.com/photos/i-fgmzcP4/0/LcnnHTpqhgGgTjHtbmvtjgmLWrVH2JhVGckRnpZqq/Th/i-fgmzcP4-Th.png"
     );
     public readonly label = input("User Name");
-    public readonly labelColor = input("#000000");
+    public readonly labelColor = input("var(--color-primary-foreground)");
     public readonly labelFontSize = input("1.2em");
     public readonly labelFontWeight = input("normal");
     public readonly userClass = input("");

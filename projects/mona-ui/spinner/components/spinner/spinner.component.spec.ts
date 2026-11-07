@@ -79,8 +79,8 @@ describe("SpinnerComponent", () => {
         expect(host.classList.contains("custom-spinner")).toBe(true);
     });
 
-    it("should have status role and default loading aria-label in standalone mode", () => {
-        expect(host.getAttribute("role")).toBe("status");
+    it("should have img role and default loading aria-label in standalone mode", () => {
+        expect(host.getAttribute("role")).toBe("img");
         expect(host.getAttribute("aria-label")).toBe("Loading");
         expect(host.getAttribute("aria-hidden")).toBeNull();
     });

@@ -12,7 +12,8 @@ export const ID_ID_MESSAGES = {
         clear: "Bersihkan"
     },
     breadcrumb: {
-        breadcrumb: "Navigasi remah roti"
+        breadcrumb: "Navigasi remah roti",
+        showFullPath: "Tampilkan jalur lengkap"
     },
     buttonGroup: {
         buttonGroup: "Grup tombol"
@@ -137,28 +138,42 @@ export const ID_ID_MESSAGES = {
         removeLabel: (label?: string) => (label ? `Hapus ${label}` : "Hapus item")
     },
     colorGradient: {
+        alpha: "Saluran alfa",
+        alphaText: (opacity: number) => `Opasitas ${localizeNumber(opacity)}%`,
         apply: "Terapkan",
+        blue: "Biru",
         cancel: "Batal",
         clearColor: "Hapus warna",
+        colorCopied: "Warna disalin",
+        colorGradient: "Gradien warna",
         copyAsHex: "Salin sebagai HEX",
         copyAsRgb: "Salin sebagai RGB",
         copyColor: "Salin warna",
+        copyFailed: "Tidak dapat menyalin warna",
         currentColor: "Warna saat ini",
+        green: "Hijau",
+        hexColor: "Warna heksadesimal",
+        hue: "Rona",
         previousColor: "Warna sebelumnya",
+        red: "Merah",
+        saturation: "Saturasi",
         saturationAndValue: "Saturasi dan nilai warna",
         saturationAndValueText: (saturation: number, value: number) =>
             `Saturasi ${localizeNumber(saturation)}%, nilai ${localizeNumber(value)}%`,
-        switchColorMode: "Ganti mode warna"
+        switchColorMode: "Ganti mode warna",
+        value: "Nilai"
     },
     colorPalette: {
         color: (color: string) => `Warna: ${color}`,
-        colorPalette: "Palet warna"
+        colorPalette: "Palet warna",
+        namedColor: (name: string, color: string) => `${name}, ${color}`
     },
     colorPicker: {
         clearColor: "Hapus warna",
         colorGradientPicker: "Pemilih gradien warna",
         colorPalettePicker: "Pemilih palet warna",
-        colorPicker: "Pemilih warna"
+        colorPicker: "Pemilih warna",
+        noColor: "Tanpa warna"
     },
     comboBox: {
         clear: "Bersihkan"
@@ -353,6 +368,9 @@ export const ID_ID_MESSAGES = {
         sortOrder: (position: number) => `Urutan pengurutan ${localizeNumber(position)}`,
         toolbar: "Bilah alat tabel"
     },
+    label: {
+        optional: "Opsional"
+    },
     list: {
         filterList: "Saring daftar",
         loading: "Memuat",
@@ -421,6 +439,9 @@ export const ID_ID_MESSAGES = {
         rangeStatus: (start: number, end: number, total: number) =>
             `${localizeNumber(start)} - ${localizeNumber(end)} dari ${localizeNumber(total)} item`
     },
+    progressBar: {
+        label: "Kemajuan"
+    },
     rating: {
         notRated: "Belum dinilai",
         valueText: (value: number, max: number) => `${localizeNumber(value)} dari ${localizeNumber(max)}`
@@ -430,6 +451,7 @@ export const ID_ID_MESSAGES = {
         nextPage: "Halaman berikutnya",
         page: (current: number) => `Halaman ${localizeNumber(current)}`,
         pageOf: (current: number, total: number) => `Halaman ${localizeNumber(current)} dari ${localizeNumber(total)}`,
+        pages: "Halaman",
         previousPage: "Halaman sebelumnya",
         scrollPagerNext: "Gulir opsi halaman ke depan",
         scrollPagerPrevious: "Gulir opsi halaman ke belakang",
@@ -437,6 +459,10 @@ export const ID_ID_MESSAGES = {
     },
     sheet: {
         closeSheet: "Tutup panel"
+    },
+    sidebar: {
+        drawerLabel: "Bilah sisi",
+        rail: "Tampilkan atau sembunyikan bilah sisi"
     },
     slider: {
         maximumValue: "Nilai maksimum",
@@ -460,6 +486,10 @@ export const ID_ID_MESSAGES = {
         resizer: "Pemisah panel"
     },
     stepper: {
+        stepCompleted: "Selesai",
+        stepInvalid: "Ada kesalahan",
+        stepPosition: (current: number, total: number) =>
+            `Langkah ${localizeNumber(current)} dari ${localizeNumber(total)}`,
         stepProgress: "Progres langkah",
         stepper: "Langkah"
     },

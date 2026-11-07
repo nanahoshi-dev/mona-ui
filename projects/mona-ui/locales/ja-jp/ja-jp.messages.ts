@@ -12,7 +12,8 @@ export const JA_JP_MESSAGES = {
         clear: "クリア"
     },
     breadcrumb: {
-        breadcrumb: "パンくずリスト"
+        breadcrumb: "パンくずリスト",
+        showFullPath: "パス全体を表示"
     },
     buttonGroup: {
         buttonGroup: "ボタングループ"
@@ -134,28 +135,42 @@ export const JA_JP_MESSAGES = {
         removeLabel: (label?: string) => (label ? `${label}を削除` : "項目を削除")
     },
     colorGradient: {
+        alpha: "アルファ",
+        alphaText: (opacity: number) => `不透明度${localizeNumber(opacity)}%`,
         apply: "適用",
+        blue: "青",
         cancel: "キャンセル",
         clearColor: "色をクリア",
+        colorCopied: "色をコピーしました",
+        colorGradient: "カラーグラデーション",
         copyAsHex: "HEXとしてコピー",
         copyAsRgb: "RGBとしてコピー",
         copyColor: "色をコピー",
+        copyFailed: "色をコピーできませんでした",
         currentColor: "現在の色",
+        green: "緑",
+        hexColor: "16進カラー",
+        hue: "色相",
         previousColor: "前の色",
+        red: "赤",
+        saturation: "彩度",
         saturationAndValue: "彩度と明度",
         saturationAndValueText: (saturation: number, value: number) =>
             `彩度${localizeNumber(saturation)}%、明度${localizeNumber(value)}%`,
-        switchColorMode: "カラーモードを切り替え"
+        switchColorMode: "カラーモードを切り替え",
+        value: "明度"
     },
     colorPalette: {
         color: (color: string) => `色: ${color}`,
-        colorPalette: "カラーパレット"
+        colorPalette: "カラーパレット",
+        namedColor: (name: string, color: string) => `${name}、${color}`
     },
     colorPicker: {
         clearColor: "色をクリア",
         colorGradientPicker: "カラーグラデーションピッカー",
         colorPalettePicker: "カラーパレットピッカー",
-        colorPicker: "カラーピッカー"
+        colorPicker: "カラーピッカー",
+        noColor: "色なし"
     },
     comboBox: {
         clear: "クリア"
@@ -349,6 +364,9 @@ export const JA_JP_MESSAGES = {
         sortOrder: (position: number) => `並べ替え順 ${localizeNumber(position)}`,
         toolbar: "表のツールバー"
     },
+    label: {
+        optional: "任意"
+    },
     list: {
         filterList: "リストをフィルター",
         loading: "読み込み中",
@@ -417,6 +435,9 @@ export const JA_JP_MESSAGES = {
         rangeStatus: (start: number, end: number, total: number) =>
             `全${localizeNumber(total)}件中${localizeNumber(start)}～${localizeNumber(end)}件`
     },
+    progressBar: {
+        label: "進行状況"
+    },
     rating: {
         notRated: "未評価",
         valueText: (value: number, max: number) => `${localizeNumber(max)}段階中${localizeNumber(value)}`
@@ -426,6 +447,7 @@ export const JA_JP_MESSAGES = {
         nextPage: "次のページ",
         page: (current: number) => `${localizeNumber(current)}ページ`,
         pageOf: (current: number, total: number) => `${localizeNumber(total)}ページ中${localizeNumber(current)}ページ`,
+        pages: "ページ",
         previousPage: "前のページ",
         scrollPagerNext: "ページャーを次へスクロール",
         scrollPagerPrevious: "ページャーを前へスクロール",
@@ -433,6 +455,10 @@ export const JA_JP_MESSAGES = {
     },
     sheet: {
         closeSheet: "シートを閉じる"
+    },
+    sidebar: {
+        drawerLabel: "サイドバー",
+        rail: "サイドバーの表示を切り替え"
     },
     slider: {
         maximumValue: "最大値",
@@ -456,6 +482,10 @@ export const JA_JP_MESSAGES = {
         resizer: "サイズ変更ハンドル"
     },
     stepper: {
+        stepCompleted: "完了",
+        stepInvalid: "エラーあり",
+        stepPosition: (current: number, total: number) =>
+            `ステップ ${localizeNumber(current)}/${localizeNumber(total)}`,
         stepProgress: "ステップの進行状況",
         stepper: "ステップ表示"
     },

@@ -1,6 +1,6 @@
 ## Overview
 
-The circular progress bar communicates a quantified progress value within an explicit range. An indeterminate mode plays a continuous rotation animation for tasks where the completion value is unknown.
+The circular progress bar communicates a quantified progress value within an explicit range. An indeterminate mode plays a continuous rotation animation for tasks where the completion value is unknown, or a slow fade under `prefers-reduced-motion`.
 
 **Use `CircularProgressBarComponent` when you need to:**
 
@@ -53,10 +53,10 @@ Add `CircularProgressBarComponent` to your standalone component's `imports` arra
 
 ```html
 <!-- Fixed color -->
-<mona-circular-progress-bar [value]="75" color="#6366f1"></mona-circular-progress-bar>
+<mona-circular-progress-bar [value]="75" color="#6366f1" aria-label="Quota used"></mona-circular-progress-bar>
 
 <!-- Function — green when complete, amber otherwise -->
-<mona-circular-progress-bar [value]="progress" [color]="getColor"></mona-circular-progress-bar>
+<mona-circular-progress-bar [value]="progress" [color]="getColor" aria-label="Upload progress"></mona-circular-progress-bar>
 ```
 
 ```typescript
@@ -80,18 +80,18 @@ The `size` input controls the outer dimension of the SVG in pixels. Both width a
 
 ### Stroke thickness
 
-`thickness` controls the stroke width of both the track and the progress arc in pixels. Increasing it reduces the effective radius. The default of `6` suits most sizes; reduce it for small sizes or increase it for bold indicators.
+`thickness` controls the stroke width of both the track and the progress arc in pixels. The stroke fits inside `size`, so increasing it reduces the effective radius. The default of `6` suits most sizes; reduce it for small sizes or increase it for bold indicators.
 
 ### Color
 
-When `color` is empty the arc color falls back to `var(--color-primary)`. The track (the full circle behind the arc) always uses the `var(--color-input-border)` design token.
+When `color` is empty the arc color falls back to `var(--color-primary)`. The track (the full circle behind the arc) always uses the `var(--color-surface-muted)` design token.
 
 ### Visual states
 
 | State         | Appearance                                                    |
 |---------------|---------------------------------------------------------------|
 | Default       | Arc rendered at `value` percentage of the circumference       |
-| Indeterminate | Arc rendered as a fixed partial stroke, rotating continuously |
+| Indeterminate | Arc rendered as a fixed partial stroke, rotating continuously, or fading under `prefers-reduced-motion` |
 | Disabled      | Reduced opacity, non-interactive                              |
 
 ### Track animation
@@ -103,12 +103,12 @@ When `animate` is `true` (the default), the arc transitions its fill and color o
 Merge additional Tailwind or custom classes onto the host element via the `class` attribute:
 
 ```html
-<mona-circular-progress-bar [value]="75" class="shadow-md"></mona-circular-progress-bar>
+<mona-circular-progress-bar [value]="75" class="shadow-md" aria-label="Upload progress"></mona-circular-progress-bar>
 ```
 
 ### Custom label template
 
-By default the component renders the computed percentage number inside the circle. Replace it with `ng-template[monaCircularProgressBarLabelTemplate]` for full control:
+By default the component renders the percentage inside the circle, formatted for the locale, such as `40%`, `33,33 %` in German or `%40` in Turkish. Hide it with `[labelVisible]="false"`, or replace it with `ng-template[monaCircularProgressBarLabelTemplate]` for full control:
 
 ```html
 <mona-circular-progress-bar [value]="steps" [max]="totalSteps" aria-label="Steps">
@@ -143,15 +143,17 @@ The host element carries `role="progressbar"`. The component manages the followi
 
 | Attribute       | When present       | Value            |
 |-----------------|--------------------|------------------|
+| `aria-label`    | Always             | The `aria-label` input, or the localized "Progress" |
 | `aria-valuemin` | Determinate mode   | Bound to `min`   |
 | `aria-valuemax` | Determinate mode   | Bound to `max`   |
-| `aria-valuenow` | Determinate mode   | Bound to `value` |
-| `aria-busy`     | Indeterminate mode | `true`           |
+| `aria-valuenow` | Determinate mode   | `value`, clamped to the range. A non-finite value counts as `min`, the same place the ring draws it. |
 | `aria-disabled` | `disabled` is true | `true`           |
+
+With a range that holds nothing, where `max` isn't above `min`, the ring reports no values and a warning is logged in development.
 
 Consumer responsibilities:
 
-- Set `aria-label` to name what the indicator measures (e.g., `"Upload progress"`). When omitted, assistive technology announces the role and numeric values without context.
+- Set `aria-label`, or `aria-labelledby`, which takes precedence, to name what the indicator measures (e.g., `"Upload progress"`). "Progress" is only a fallback, and it doesn't tell two apart.
 - Set `aria-valuetext` in indeterminate mode to provide a localized state announcement (e.g., `"Loading"`) so screen readers announce state rather than silence.
 
 ## API
@@ -165,17 +167,18 @@ Consumer responsibilities:
 | Name             | Type                                      | Default | Description                                                                                                                                                                                                   |
 |------------------|-------------------------------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `animate`        | `boolean`                                 | `true`  | Enables CSS transitions on the arc fill and color. Set to `false` when updating `value` at a high frequency.                                                                                                  |
-| `aria-label`     | `string`                                  | `''`    | Accessible name for the host element. Describe what the indicator measures (e.g., `"Upload progress"`). When empty, assistive technology announces the role without context.                                  |
+| `aria-label`     | `string`                                  | `''`    | Accessible name for the host element. Describe what the indicator measures (e.g., `"Upload progress"`). When empty, falls back to the localized "Progress". |
 | `aria-valuetext` | `string`                                  | `''`    | Human-readable override for the `aria-valuenow` announcement. Useful in indeterminate mode — set to a localized string such as `"Loading"`. When empty, assistive technology falls back to the numeric value. |
 | `class`          | `string`                                  | `''`    | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                                                     |
 | `color`          | `string \| ((percent: number) => string)` | `''`    | Accent color of the progress arc. When empty, falls back to the primary theme color. Pass a function to return a color based on the current percentage (0–100).                                               |
 | `disabled`       | `boolean`                                 | `false` | Renders the component with reduced visual emphasis and removes pointer interaction.                                                                                                                           |
-| `indeterminate`  | `boolean`                                 | `false` | Activates indeterminate mode when the completion value is unknown. The label is hidden and `aria-busy` is set on the host element. `aria-valuenow`, `aria-valuemin`, and `aria-valuemax` are removed.         |
+| `indeterminate`  | `boolean`                                 | `false` | Activates indeterminate mode when the completion value is unknown. The label is hidden, and `aria-valuenow`, `aria-valuemin`, and `aria-valuemax` are removed from the host element. |
+| `labelVisible`   | `boolean`                                 | `true`  | Hides the label when `false`. Has no effect in indeterminate mode, where the label is always hidden. |
 | `max`            | `number`                                  | `100`   | Upper bound of the value range. Must be greater than `min`.                                                                                                                                                   |
 | `min`            | `number`                                  | `0`     | Lower bound of the value range.                                                                                                                                                                               |
 | `size`           | `number`                                  | `100`   | Diameter of the indicator in pixels. Controls both width and height of the host element.                                                                                                                      |
 | `thickness`      | `number`                                  | `6`     | Stroke width of the circular track in pixels.                                                                                                                                                                 |
-| `value`          | `number`                                  | `0`     | Current progress value within `[min, max]`. Values outside the range are clamped before rendering; non-finite values are treated as `0`.                                                                      |
+| `value`          | `number`                                  | `0`     | Current progress value within `[min, max]`. Values outside the range are clamped, for the ring and for `aria-valuenow`; non-finite values count as `min`. |
 
 `CircularProgressBarComponent` has no event outputs.
 
@@ -183,7 +186,7 @@ Consumer responsibilities:
 
 **Selector:** `ng-template[monaCircularProgressBarLabelTemplate]`
 
-Structural template directive that replaces the default numeric label inside the circle. The template is hidden when `indeterminate` is `true`. Import alongside the component:
+Structural template directive that replaces the default percentage label inside the circle. The template is hidden when `indeterminate` is `true`. Import alongside the component:
 
 ```typescript
 import { CircularProgressBarComponent, CircularProgressBarLabelTemplateDirective } from "@nanahoshi/mona-ui/circular-progress-bar";
@@ -194,9 +197,9 @@ import { CircularProgressBarComponent, CircularProgressBarLabelTemplateDirective
 <!-- verification-checklist
 - [x] API definitions and defaults verified against source
 - [x] aria-valuenow/min/max removed in indeterminate mode (WAI-ARIA 1.2 compliance)
-- [x] aria-busy="true" added in indeterminate mode
+- [x] aria-busy isn't used; indeterminate is expressed by leaving out aria-valuenow
 - [x] aria-valuetext input documented and host binding present
-- [x] aria-valuenow bound to value(), not progress()
+- [x] aria-valuenow bound to the normalized range, not the raw value()
 - [x] aria-label input present on source and host binding
 - [x] aria-disabled uses disabled() || null
 - [x] animate input documented — suppresses arc transitions

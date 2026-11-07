@@ -1,7 +1,7 @@
 export interface RGB {
-    r: number | null;
-    g: number | null;
     b: number | null;
+    g: number | null;
+    r: number | null;
 }
 
 export interface RGBA extends RGB {
@@ -26,8 +26,8 @@ export type Channel = RGBAChannel | HSVChannel;
 
 export interface HSL {
     h: number | null;
-    s: number | null;
     l: number | null;
+    s: number | null;
 }
 
 export interface HSLA extends HSL {

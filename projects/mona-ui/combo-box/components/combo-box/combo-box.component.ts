@@ -42,7 +42,7 @@ import {
     DropdownPrefixTemplateDirective,
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
-import { createElementControlId } from "@nanahoshi/mona-ui/internal";
+import { createElementControlId, injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
 import { IndicatorIconComponent } from "@nanahoshi/mona-ui/internal/indicator-icon";
 import {
     ListComponent,
@@ -108,7 +108,7 @@ import {
         "[attr.aria-describedby]": "null",
         "[attr.aria-label]": "null",
         "[attr.aria-labelledby]": "null",
-        "[attr.data-disabled]": "disabled() || null",
+        "[attr.data-disabled]": "effectiveDisabled() || null",
         "[attr.data-invalid]": "invalidState() || null",
         "[attr.data-readonly]": "readonly() || null",
         "[attr.tabindex]": "-1",
@@ -142,7 +142,7 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
         return comboBoxAffixContainerThemeVariants();
     });
     protected readonly baseClass = computed(() => {
-        const disabled = this.disabled();
+        const disabled = this.effectiveDisabled();
         const focused = this.#popupRef() != null;
         const invalid = this.invalidState();
         const rounded = this.rounded();
@@ -156,11 +156,12 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
             this.showClearButton() &&
             this.selectedListItem() != null &&
             !this.loading() &&
-            !this.disabled() &&
+            !this.effectiveDisabled() &&
             !this.readonly()
     );
     protected readonly comboBoxValue = signal("");
     protected readonly comboBoxValue$ = new Subject<string | null>();
+    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly expanded = computed(() => this.#popupRef() !== null);
     protected readonly footerTemplate = contentChild(DropdownFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderTemplate = contentChild(DropdownGroupHeaderTemplateDirective, { read: TemplateRef });
@@ -465,7 +466,7 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
         const host = this.#hostElementRef.nativeElement as HTMLElement;
         const target = event.target as HTMLElement | null;
         const control = target?.closest("a, button, input, select, textarea, [tabindex]");
-        if (this.disabled() || (control != null && control !== host)) {
+        if (this.effectiveDisabled() || (control != null && control !== host)) {
             return;
         }
         event.preventDefault();
@@ -500,7 +501,7 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
 
     protected onValueClear(event: Event): void {
         if (
-            this.disabled() ||
+            this.effectiveDisabled() ||
             this.readonly() ||
             (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ")
         ) {

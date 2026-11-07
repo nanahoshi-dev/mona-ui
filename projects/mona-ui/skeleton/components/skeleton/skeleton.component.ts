@@ -10,7 +10,7 @@ import {
 /**
  * @description
  * A placeholder block standing in for content that has not loaded yet. Size it with `width` and
- * `height`, or with utility classes for anything more involved.
+ * `height`, which set inline styles, so utility classes for size have no effect.
  *
  * It is decorative, so it is hidden from assistive technology. Mark the region it fills with
  * `aria-busy` and describe what is loading there instead.

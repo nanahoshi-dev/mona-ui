@@ -5,7 +5,7 @@
 }
 <input
     [id]="inputId()"
-    [disabled]="disabled()"
+    [disabled]="effectiveDisabled()"
     [readonly]="readonly()"
     [required]="required()"
     [placeholder]="placeholder()"
@@ -15,7 +15,7 @@
     [attr.aria-describedby]="ariaDescribedBy() || null"
     [attr.aria-invalid]="invalidInput() ? 'true' : null"
     [attr.aria-label]="ariaLabel() || null"
-    [attr.aria-labelledby]="ariaLabelledBy() || null"
+    [attr.aria-labelledby]="labelledBy()"
     [attr.maxlength]="maxLength() ?? null"
     [attr.minlength]="minLength() ?? null"
     [attr.name]="name() || null"

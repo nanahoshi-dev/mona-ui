@@ -9,7 +9,7 @@ export const numericTextboxThemeVariants = cva(
         overflow-hidden p-0
         ${themeControlSurfaceClasses} text-foreground
         border border-input-border shadow-(--shadow-control)
-        outline-hidden
+        outline-none focus-visible:outline-hidden
         selection:bg-primary selection:text-primary-foreground
         transition-[color,box-shadow,border] duration-300 ease-in-out
 
@@ -53,7 +53,7 @@ export const numericTextboxInputThemeVariants = cva(
         bg-transparent
         border-0 shadow-none
         rounded-none
-        outline-hidden ring-0
+        outline-none focus-visible:outline-hidden ring-0
         focus-visible:border-transparent focus-visible:ring-0
     `,
     {

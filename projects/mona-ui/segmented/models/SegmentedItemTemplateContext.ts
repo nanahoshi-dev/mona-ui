@@ -11,9 +11,9 @@ export interface SegmentedItemTemplateContext<T extends SegmentedValue = Segment
     readonly $implicit: SegmentedOption<T>;
 
     /**
-     * The option rendered by this item.
+     * Whether this option is disabled, either individually or via the group.
      */
-    readonly option: SegmentedOption<T>;
+    readonly disabled: boolean;
 
     /**
      * Zero-based option index.
@@ -21,12 +21,12 @@ export interface SegmentedItemTemplateContext<T extends SegmentedValue = Segment
     readonly index: number;
 
     /**
+     * The option rendered by this item.
+     */
+    readonly option: SegmentedOption<T>;
+
+    /**
      * Whether this option is currently selected.
      */
     readonly selected: boolean;
-
-    /**
-     * Whether this option is disabled, either individually or via the group.
-     */
-    readonly disabled: boolean;
 }

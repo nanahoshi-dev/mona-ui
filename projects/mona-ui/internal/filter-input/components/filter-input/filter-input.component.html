@@ -6,7 +6,7 @@
     (inputBlur)="inputBlur.emit($event)"
     [inputAttributes]="inputAttributes()"
     [size]="size()"
-    class="outline-none shadow-none focus-within:ring-1 focus-within:ring-primary/40"
+    class="outline-none focus-visible:outline-hidden shadow-none focus-within:ring-1 focus-within:ring-primary/40"
     (ngModelChange)="filter$.next($event)">
     <ng-template monaTextBoxPrefixTemplate>
         <div class="h-full flex items-center justify-center ps-2">

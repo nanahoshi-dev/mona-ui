@@ -6,7 +6,7 @@
 <input
     monaTextBox
     [id]="inputId()"
-    [disabled]="disabled()"
+    [disabled]="effectiveDisabled()"
     [required]="required()"
     [type]="'text'"
     [attr.inputmode]="decimals() > 0 ? 'decimal' : 'numeric'"
@@ -39,7 +39,7 @@
     <div [class]="spinButtonClasses()">
         <button
             monaButton
-            [disabled]="disabled()"
+            [disabled]="effectiveDisabled()"
             [tabindex]="-1"
             look="ghost"
             [size]="size()"
@@ -52,7 +52,7 @@
         </button>
         <button
             monaButton
-            [disabled]="disabled()"
+            [disabled]="effectiveDisabled()"
             [tabindex]="-1"
             look="ghost"
             [size]="size()"

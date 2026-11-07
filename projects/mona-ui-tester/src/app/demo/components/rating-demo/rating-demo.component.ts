@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { Component, computed, inject, input, model } from "@angular/core";
+import { booleanAttribute, Component, computed, inject, input, model } from "@angular/core";
 import { LucideFlame, LucideHeart } from "@lucide/angular";
 import {
     RatingComponent,
@@ -130,6 +130,7 @@ export class RatingDemoComponent extends AbstractDemoComponent<RatingComponent> 
                 [aria-describedby]="ariaDescribedBy()"
                 [aria-label]="ariaLabel()"
                 [aria-labelledby]="ariaLabelledBy()"
+                [clearable]="clearable()"
                 [color]="color()"
                 [disabled]="disabled()"
                 [icon]="icon()"
@@ -139,6 +140,7 @@ export class RatingDemoComponent extends AbstractDemoComponent<RatingComponent> 
                 [labelPosition]="labelPosition()"
                 [precision]="precision()"
                 [readonly]="readonly()"
+                [required]="required()"
                 [selection]="selection()"
                 [size]="size()"
                 [tabindex]="tabindex()"
@@ -173,21 +175,23 @@ class RatingWrapperComponent implements ComponentInputsAsSignal<RatingComponent>
     public readonly ariaDescribedBy = input<ReturnType<RatingComponent["ariaDescribedBy"]>>("");
     public readonly ariaLabel = input<ReturnType<RatingComponent["ariaLabel"]>>("Product rating");
     public readonly ariaLabelledBy = input<ReturnType<RatingComponent["ariaLabelledBy"]>>("");
+    public readonly clearable = input(false, { transform: booleanAttribute });
     public readonly color = input<ReturnType<RatingComponent["color"]>>(null);
-    public readonly disabled = input<ReturnType<RatingComponent["disabled"]>>(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly icon = input<ReturnType<RatingComponent["icon"]>>("star");
-    public readonly invalid = input(false);
+    public readonly invalid = input(false, { transform: booleanAttribute });
     public readonly itemsCount = input<ReturnType<RatingComponent["itemsCount"]>>(5);
     public readonly label = input<ReturnType<RatingComponent["label"]>>(null);
     public readonly labelPosition = input<ReturnType<RatingComponent["labelPosition"]>>("after");
     public readonly precision = input<ReturnType<RatingComponent["precision"]>>("item");
-    public readonly readonly = input<ReturnType<RatingComponent["readonly"]>>(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
     public readonly selection = input<ReturnType<RatingComponent["selection"]>>("continuous");
     public readonly size = input<ReturnType<RatingComponent["size"]>>("medium");
     public readonly tabindex = input<number, number | string>(0, {
         transform: value => (typeof value === "string" ? parseInt(value, 10) : value)
     });
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
     public readonly userClass = input<ReturnType<RatingComponent["userClass"]>>("");
     public readonly value = model<ReturnType<RatingComponent["value"]>>(0);
 }

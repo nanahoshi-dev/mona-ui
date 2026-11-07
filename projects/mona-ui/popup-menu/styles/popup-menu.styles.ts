@@ -17,7 +17,7 @@ export const popupMenuContainerThemeVariants = cva(
     `
         flex flex-col p-1
         ${themeOverlaySurfaceClasses} text-foreground
-        border border-border shadow-(--shadow-overlay) outline-none
+        border border-border shadow-(--shadow-overlay) outline-none focus-visible:outline-hidden
     `,
     {
         variants: {
@@ -49,7 +49,7 @@ export const popupMenuIconContainerThemeVariants = cva(`absolute start-2 flex it
 export const popupMenuItemThemeVariants = cva(
     `
         relative flex cursor-pointer select-none items-center gap-2 py-1 pe-2 ps-8
-        text-foreground outline-none
+        text-foreground outline-none focus-visible:outline-hidden
         hover:bg-[var(--mona-menu-item-hover-background,var(--color-hover))] hover:text-foreground
         focus-within:bg-[var(--mona-menu-item-hover-background,var(--color-hover))]
         focus-within:text-foreground focus-within:outline-none

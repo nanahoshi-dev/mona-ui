@@ -51,7 +51,10 @@ export class PageComponent {
     );
     protected readonly activeBreadcrumbs = computed(() => {
         const url = this.#url();
-        const segments = url.split("/").filter(s => s && !s.includes("#") && !s.includes("?"));
+        const segments = url
+            .split(/[?#]/)[0]
+            .split("/")
+            .filter(s => s);
         return segments.map(seg => {
             if (seg === "components") return "Documentation";
             return seg

@@ -1,20 +1,7 @@
 import { NgTemplateOutlet } from "@angular/common";
-import {
-    Component,
-    computed,
-    contentChild,
-    effect,
-    ElementRef,
-    inject,
-    input,
-    model,
-    output,
-    signal,
-    TemplateRef,
-    viewChild
-} from "@angular/core";
+import { afterNextRender, booleanAttribute, Component, computed, contentChild, effect, ElementRef, inject, input, model, numberAttribute, output, signal, TemplateRef, viewChild } from "@angular/core";
 import { type FormValueControl } from "@angular/forms/signals";
-import { AttributeBinderDirective, AttributeConfig } from "@nanahoshi/mona-ui/internal";
+import { AttributeBinderDirective, AttributeConfig, createElementControlId, injectEffectiveDisabled, injectLabelAssociation } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { OtpInputSeparatorTemplateDirective } from "../../directives/otp-input-separator-template.directive";
@@ -27,10 +14,10 @@ import {
     OtpInputVariantProps
 } from "../../styles/otp-input.styles";
 import {
+    acceptCharacter,
     computeSlotClasses,
     filterCharacters,
     findUsableAttribute,
-    isValidCharacter,
     normalizeGroupLengths,
     normalizeLength,
     sanitizeInputAttributes,
@@ -57,9 +44,13 @@ interface OtpGroupViewModel {
     templateUrl: "./otp-input.component.html",
     imports: [NgTemplateOutlet, AttributeBinderDirective],
     host: {
-        dir: "ltr",
+        // The ARIA inputs are applied to the inner input, so the host must not keep the static attributes.
+        "[attr.aria-describedby]": "null",
+        "[attr.aria-label]": "null",
+        "[attr.aria-labelledby]": "null",
+        "[attr.tabindex]": "null",
         "[attr.dir]": "'ltr'",
-        "[attr.data-disabled]": "disabled() || null",
+        "[attr.data-disabled]": "effectiveDisabled() || null",
         "[attr.data-readonly]": "readonly() || null",
         "[attr.data-required]": "required() || null",
         "[attr.data-invalid]": "invalidState() || null",
@@ -69,7 +60,15 @@ interface OtpGroupViewModel {
     }
 })
 export class OtpInputComponent implements OtpInputVariantInput, FormValueControl<string> {
+    readonly #generatedId = createElementControlId();
+    readonly #hasNativeLabel = signal(false);
+    readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #i18n = inject(MonaI18nService);
+    readonly #label = injectLabelAssociation({
+        ariaLabel: () => this.ariaLabel(),
+        ariaLabelledBy: () => this.ariaLabelledBy()
+    });
+    #touchPress = false;
 
     protected readonly activeSlotIndex = computed(() => {
         if (!this.hasFocus()) {
@@ -91,6 +90,10 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         const baseClasses = otpInputHostThemeVariants();
         return twMerge(baseClasses, this.userClass());
     });
+    protected readonly computedAriaDescribedby = computed(() => {
+        const raw = findUsableAttribute(this.inputAttributes(), "aria-describedby");
+        return toNonEmptyString(raw) ?? toNonEmptyString(this.ariaDescribedBy());
+    });
     protected readonly computedAriaLabel = computed(() => {
         const labelledby = this.computedAriaLabelledby();
         if (labelledby != null) {
@@ -102,13 +105,17 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         if (customAttrLabel != null) {
             return customAttrLabel;
         }
-        const fallback = toNonEmptyString(this.ariaLabel());
-        return fallback ?? this.messages().verificationCode;
+        const explicit = toNonEmptyString(this.ariaLabel());
+        if (explicit != null) {
+            return explicit;
+        }
+        // A real <label> names the input, so the generic name would only hide it.
+        return this.#hasNativeLabel() ? null : this.messages().verificationCode;
     });
     protected readonly computedAriaLabelledby = computed(() => {
         const attrs = this.inputAttributes();
         const raw = findUsableAttribute(attrs, "aria-labelledby");
-        return toNonEmptyString(raw);
+        return toNonEmptyString(raw) ?? this.#label.labelledBy();
     });
     protected readonly derivedAutocomplete = computed(() => {
         const attrs = this.inputAttributes();
@@ -123,6 +130,15 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         }
         return this.type() === "number" ? "numeric" : "text";
     });
+    protected readonly derivedName = computed(() => {
+        const name = this.name();
+        if (name) {
+            return name;
+        }
+        const attribute = findUsableAttribute(this.inputAttributes(), "name");
+        return attribute != null ? String(attribute) : null;
+    });
+    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly hasFocus = signal(false);
     protected readonly inputClass = computed(() => otpInputFieldThemeVariants());
     protected readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>("input");
@@ -144,6 +160,15 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     protected readonly messages = this.#i18n.componentMessages("otpInput", OTP_INPUT_DEFAULT_MESSAGES);
     protected readonly nativeInputType = computed(() => (this.type() === "password" ? "password" : "text"));
     protected readonly normalizedLength = computed(() => normalizeLength(this.length()));
+    /** The one thing that writes the id. `inputId` wins, and an id in `inputAttributes` stands in for a generated one. */
+    protected readonly resolvedId = computed(() => {
+        const id = this.inputId();
+        if (id !== this.#generatedId) {
+            return id;
+        }
+        const attribute = findUsableAttribute(this.inputAttributes(), "id");
+        return attribute != null ? String(attribute) : id;
+    });
     protected readonly sanitizedAttributes = computed(() => sanitizeInputAttributes(this.inputAttributes()));
     protected readonly selectionEnd = signal(0);
     protected readonly selectionStart = signal(0);
@@ -222,10 +247,23 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     });
 
     /**
-     * @description Accessible name for the inner `<input>` element.
+     * @description Id of an element that describes the inner `<input>`, such as an error message.
      * @default null
      */
-    public readonly ariaLabel = input<string | null>(null);
+    public readonly ariaDescribedBy = input<string | null>(null, { alias: "aria-describedby" });
+
+    /**
+     * @description Accessible name for the inner `<input>` element. A `<label>` or `mona-label` names it too, and the
+     * generic "Verification code" name only applies when there is neither.
+     * @default null
+     */
+    public readonly ariaLabel = input<string | null>(null, { alias: "aria-label" });
+
+    /**
+     * @description Id of the element that labels the inner `<input>`.
+     * @default null
+     */
+    public readonly ariaLabelledBy = input<string | null>(null, { alias: "aria-labelledby" });
 
     /**
      * @description Regular expression used to determine whether each individual OTP character is allowed.
@@ -234,7 +272,9 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     public readonly characterPattern = input<RegExp | null>(null);
 
     /**
-     * @description Emitted when a user interaction completes the verification code.
+     * @description Emitted when a user interaction completes the verification code. Pasting a different full code over
+     * a complete one emits again, so auto-submit sees the new code. Correcting a complete code one character at a time
+     * doesn't.
      */
     public readonly complete = output<string>();
 
@@ -243,7 +283,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
      * When bound to a signal form field via `[formField]`, this is written by the `FormField` directive.
      * @default false
      */
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
      * @description Configures slot grouping lengths. Accepts a uniform number or an array of group sizes.
@@ -257,6 +297,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
      */
     public readonly inputAttributes = input<AttributeConfig>({});
 
+
     /**
      * @description Emitted when the inner input loses focus.
      */
@@ -268,17 +309,31 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     public readonly inputFocus = output<FocusEvent>();
 
     /**
+     * @description Id of the inner `<input>` element. Point a `<label for>` or `<mona-label for>` at it to label the
+     * control. A unique id is generated when it isn't set.
+     * @default generated
+     */
+    public readonly inputId = input(this.#generatedId);
+
+    /**
      * @description Marks the OTP input as invalid. When bound to a signal form field via `[formField]`,
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly invalid = input(false);
+    public readonly invalid = input(false, { transform: booleanAttribute });
 
     /**
      * @description Sets the total number of characters accepted by the OTP input and the number of visual slots.
      * @default 4
      */
     public readonly length = input(4);
+
+    /**
+     * @description Name of the native input, used in native form submission and by browsers for autofill. When bound to
+     * a signal form field via `[formField]`, this is written by the `FormField` directive.
+     * @default ""
+     */
+    public readonly name = input("");
 
     /**
      * @description Hint character displayed in empty visual slots.
@@ -291,14 +346,14 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
      * When bound to a signal form field via `[formField]`, this is written by the `FormField` directive.
      * @default false
      */
-    public readonly readonly = input(false);
+    public readonly readonly = input(false, { transform: booleanAttribute });
 
     /**
      * @description Marks the OTP input as required. Triggers invalid state when touched and incomplete.
      * When bound to a signal form field via `[formField]`, this is written by the `FormField` directive.
      * @default false
      */
-    public readonly required = input(false);
+    public readonly required = input(false, { transform: booleanAttribute });
 
     /**
      * @description Border-radius preset applied to the OTP slots.
@@ -334,11 +389,19 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
      * @description Determines whether visual slots within a group have spacing between them or are joined together.
      * @default true
      */
-    public readonly spacing = input(true);
+    public readonly spacing = input(true, { transform: booleanAttribute });
 
     /**
-     * @description Emitted when the OTP input is interacted with — on blur or user value change.
-     * The `FormField` directive listens to this to mark the field as touched.
+     * @description Tab index of the inner `<input>`.
+     * @default 0
+     */
+    public readonly tabindex = input<number, number | string>(0, {
+        transform: (value: number | string) => numberAttribute(value, 0)
+    });
+
+    /**
+     * @description Emitted when the inner input loses focus. The `FormField` directive listens to this to mark the field
+     * as touched.
      */
     public readonly touch = output<void>();
 
@@ -347,7 +410,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
      * this is written by the `FormField` directive.
      * @default false
      */
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
 
     /**
      * @description Sets the type of the OTP input ("text", "number", or "password").
@@ -368,6 +431,9 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     public readonly value = model("");
 
     public constructor() {
+        afterNextRender(() => {
+            this.#hasNativeLabel.set((this.inputRef().nativeElement.labels?.length ?? 0) > 0);
+        });
         effect(() => {
             const val = this.value();
             const inputType = this.type();
@@ -388,7 +454,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     public focus(options?: FocusOptions): void;
     public focus(index?: number): void;
     public focus(target?: number | FocusOptions): void {
-        if (this.disabled()) {
+        if (this.effectiveDisabled()) {
             return;
         }
         const el = this.inputRef().nativeElement;
@@ -419,8 +485,15 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         this.syncSelection();
     }
 
+    /**
+     * @internal
+     */
+    public setLabelledBy(id: string | null): void {
+        this.#label.setLabelledBy(id);
+    }
+
     protected onBeforeInput(event: InputEvent): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             event.preventDefault();
             return;
         }
@@ -439,7 +512,8 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
                 return;
             }
             if (event.data.length === 1) {
-                if (!isValidCharacter(event.data, this.type(), this.characterPattern())) {
+                const accepted = acceptCharacter(event.data, this.type(), this.characterPattern());
+                if (accepted === null) {
                     event.preventDefault();
                     return;
                 }
@@ -449,7 +523,14 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
                     return;
                 }
 
-                if (start === end && start < val.length) {
+                const overwrites = start === end && start < val.length;
+                if (accepted !== event.data) {
+                    event.preventDefault();
+                    this.applyUserInsertion(accepted, start, overwrites ? start + 1 : end);
+                    return;
+                }
+
+                if (overwrites) {
                     inputEl.setSelectionRange(start, start + 1);
                 }
             } else {
@@ -486,7 +567,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     }
 
     protected onInput(_event?: Event): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             const inputEl = this.inputRef().nativeElement;
             inputEl.value = this.value();
             return;
@@ -502,7 +583,6 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         inputEl.value = nextVal;
         const wasIncomplete = prevVal.length < this.normalizedLength();
         this.value.set(nextVal);
-        this.touch.emit();
 
         if (wasIncomplete && nextVal.length === this.normalizedLength()) {
             this.complete.emit(nextVal);
@@ -510,8 +590,28 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         this.syncSelection();
     }
 
+    protected onInputClick(event: MouseEvent): void {
+        // A touch leaves the press to the browser, for its paste menu, and places the caret once it's a tap.
+        if (this.#touchPress && !this.effectiveDisabled()) {
+            this.focus(this.#slotIndexAt(event.clientX));
+        }
+    }
+
+    protected onInputMouseDown(event: MouseEvent): void {
+        // The secondary button is left alone as well, so it opens the browser's menu with Paste.
+        if (this.#touchPress || this.effectiveDisabled() || event.button !== 0 || event.ctrlKey) {
+            return;
+        }
+        event.preventDefault();
+        this.focus(this.#slotIndexAt(event.clientX));
+    }
+
+    protected onInputPointerDown(event: PointerEvent): void {
+        this.#touchPress = event.pointerType === "touch" || event.pointerType === "pen";
+    }
+
     protected onKeyDown(event: KeyboardEvent): void {
-        if (this.disabled() || this.readonly() || this.isComposing() || event.isComposing) {
+        if (this.effectiveDisabled() || this.readonly() || this.isComposing() || event.isComposing) {
             return;
         }
         if (event.ctrlKey || event.metaKey || event.altKey) {
@@ -527,7 +627,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         const val = this.value();
         const maxLen = this.normalizedLength();
 
-        if (!isValidCharacter(event.key, this.type(), this.characterPattern())) {
+        if (acceptCharacter(event.key, this.type(), this.characterPattern()) === null) {
             event.preventDefault();
             return;
         }
@@ -547,7 +647,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     }
 
     protected onPaste(event: ClipboardEvent): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             event.preventDefault();
             return;
         }
@@ -567,16 +667,8 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         this.syncSelection();
     }
 
-    protected onSlotPointerDown(event: PointerEvent, index: number): void {
-        if (this.disabled()) {
-            return;
-        }
-        event.preventDefault();
-        this.focus(index);
-    }
-
     private applyUserInsertion(text: string, selectionStart: number, selectionEnd: number): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             return;
         }
         const inputEl = this.inputRef().nativeElement;
@@ -588,8 +680,10 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
             return;
         }
 
-        const start = Math.max(0, Math.min(selectionStart, currentVal.length));
-        const end = Math.max(start, Math.min(selectionEnd, currentVal.length));
+        // A full code replaces what's there, wherever the caret is, because merging would make up a code nobody entered.
+        const replacesAll = filtered.length >= maxLen;
+        const start = replacesAll ? 0 : Math.max(0, Math.min(selectionStart, currentVal.length));
+        const end = replacesAll ? currentVal.length : Math.max(start, Math.min(selectionEnd, currentVal.length));
 
         const before = currentVal.substring(0, start);
         const after = currentVal.substring(end);
@@ -599,18 +693,31 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         }
 
         const newCaretPos = Math.min(start + filtered.length, maxLen);
-        const wasIncomplete = currentVal.length < maxLen;
 
         inputEl.value = combined;
         this.value.set(combined);
         inputEl.setSelectionRange(newCaretPos, newCaretPos);
         this.selectionStart.set(newCaretPos);
         this.selectionEnd.set(newCaretPos);
-        this.touch.emit();
 
-        if (wasIncomplete && combined.length === maxLen) {
+        if (combined !== currentVal && combined.length === maxLen) {
             this.complete.emit(combined);
         }
+    }
+
+    #slotIndexAt(clientX: number): number {
+        const slots = this.#hostElementRef.nativeElement.querySelectorAll<HTMLElement>("[data-slot-index]");
+        let closest = 0;
+        let closestDistance = Number.POSITIVE_INFINITY;
+        slots.forEach((slot, index) => {
+            const { left, right } = slot.getBoundingClientRect();
+            const distance = clientX < left ? left - clientX : Math.max(0, clientX - right);
+            if (distance < closestDistance) {
+                closest = index;
+                closestDistance = distance;
+            }
+        });
+        return closest;
     }
 
     private syncSelection(): void {

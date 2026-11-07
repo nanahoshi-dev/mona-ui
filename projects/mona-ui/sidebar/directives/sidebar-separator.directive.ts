@@ -1,4 +1,4 @@
-import { computed, Directive, inject, input } from "@angular/core";
+import { computed, Directive, ElementRef, inject, input } from "@angular/core";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
 import { twMerge } from "tailwind-merge";
 import { SidebarService } from "../services/sidebar.service";
@@ -11,6 +11,7 @@ import { sidebarSeparatorThemeVariants } from "../styles/sidebar.styles";
 @Directive({
     selector: "[monaSidebarSeparator]",
     host: {
+        "[attr.role]": "role",
         "[class]": "baseClass()"
     }
 })
@@ -22,6 +23,9 @@ export class SidebarSeparatorDirective {
         });
         return twMerge(variantClass, this.userClass());
     });
+    // An `hr` already is one.
+    protected readonly role =
+        inject<ElementRef<HTMLElement>>(ElementRef).nativeElement.tagName === "HR" ? null : "separator";
 
     /**
      * @description Additional CSS classes merged onto the host element via `tailwind-merge`.

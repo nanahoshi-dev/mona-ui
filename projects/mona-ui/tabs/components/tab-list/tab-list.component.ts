@@ -29,18 +29,19 @@ import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i1
 import { asapScheduler, EMPTY, interval, Subject, switchMap, tap, timer } from "rxjs";
 import { TabListItemDirective } from "../../directives/tab-list-item.directive";
 import { TABS_DEFAULT_MESSAGES } from "../../i18n/tabs.default-messages";
-import { getTabOrientation } from "../../models/TabOrientation";
-import { ScrollIntent, TabScrollDirection } from "../../models/ScrollIntent";
+import type { ScrollIntent, TabScrollDirection } from "../../models/ScrollIntent";
 import { TabCloseEvent } from "../../models/TabCloseEvent";
-import { TabItem } from "../../models/TabItem";
+import type { TabItem } from "../../models/TabItem";
+import { getTabOrientation } from "../../models/TabOrientation";
 import { TabSelectEvent } from "../../models/TabSelectEvent";
+import type { TabListVariantInput, TabListVariantProps } from "../../styles/tabs.styles";
 import {
     tabListBaseThemeVariants,
+    tabListCloseButtonThemeVariants,
     tabListListThemeVariants,
     tabListListWrapperThemeVariants,
     tabListScrollButtonThemeVariants,
-    TabListVariantInput,
-    TabListVariantProps
+    tabListTabThemeVariants
 } from "../../styles/tabs.styles";
 
 @Component({
@@ -58,20 +59,30 @@ import {
     templateUrl: "./tab-list.component.html",
     host: {
         "[class]": "baseClass()",
+        "(focusin)": "onFocusIn($event)",
+        "(focusout)": "onFocusOut($event)",
         "(keydown)": "onKeydown($event)"
     }
 })
 export class TabListComponent implements TabListVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #direction = injectComponentDirection();
+    readonly #hostElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
     readonly #i18n = inject(MonaI18nService);
-    readonly #keydown$ = new Subject<KeyboardEvent>();
     readonly #scrollIntent$ = new Subject<ScrollIntent | null>();
+    /** The tab that focus is in, kept when the tab is removed, so focus can go to the selected tab instead of being lost. */
+    #focusedTabId: string | null = null;
     #resizeObserver: ResizeObserver | null = null;
-    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly baseClass = computed(() => {
         return tabListBaseThemeVariants({ position: this.position() });
     });
+    protected readonly closeButtonClass = computed(() => {
+        return tabListCloseButtonThemeVariants();
+    });
+    protected readonly hasClosableTabs = computed(() => {
+        return this.closable() || Array.from(this.tabList()).some(tab => tab.closable);
+    });
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly listClass = computed(() => {
         return tabListListThemeVariants({ position: this.position() });
     });
@@ -86,9 +97,14 @@ export class TabListComponent implements TabListVariantInput {
     protected readonly scrollButtonClass = computed(() => {
         return tabListScrollButtonThemeVariants();
     });
+    protected readonly tabClass = computed(() => {
+        return tabListTabThemeVariants({ position: this.position(), size: this.size() });
+    });
+    protected readonly tabElements = viewChildren<ElementRef<HTMLElement>>("tabElement");
     protected readonly tabListElement = viewChild.required<ElementRef<HTMLUListElement>>("tabListElement");
-    protected readonly tabListItems = viewChildren(TabListItemDirective, { read: ElementRef });
 
+    public readonly ariaLabel = input("");
+    public readonly ariaLabelledBy = input("");
     public readonly closable = input(false);
     public readonly disabled = input(false);
 
@@ -111,57 +127,77 @@ export class TabListComponent implements TabListVariantInput {
     public constructor() {
         afterRenderEffect({
             read: () => {
-                this.tabList();
+                const tabs = Array.from(this.tabList());
                 this.position();
                 untracked(() => {
                     this.updateScrollVisibility();
+                    this.restoreFocus(tabs);
                 });
+            }
+        });
+        afterRenderEffect({
+            read: () => {
+                const selectedId = this.selectedTabId();
+                untracked(() => this.scrollTabIntoStrip(selectedId));
             }
         });
         this.setupScrolling();
         afterNextRender({
-            write: () => {
-                const selectedTab = firstOrDefault(this.tabList(), t => t.id === this.selectedTabId());
-                if (selectedTab) {
-                    this.selectedTabId.set(selectedTab.id);
-                }
-            },
-            read: () => {
-                this.setupKeyboardNavigation();
-                this.setupResizeObserver();
-            }
+            read: () => this.setupResizeObserver()
         });
-        inject(DestroyRef).onDestroy(() => this.#resizeObserver?.disconnect());
+        this.#destroyRef.onDestroy(() => this.#resizeObserver?.disconnect());
     }
 
     public focusSelectedTab(): void {
-        const tabList = this.tabList();
-        const selectedTab = firstOrDefault(tabList, t => t.id === this.selectedTabId());
+        const selectedTab = firstOrDefault(this.tabList(), t => t.id === this.selectedTabId());
         if (selectedTab) {
             this.focusTab(selectedTab);
         }
     }
 
-    protected onKeydown(event: KeyboardEvent): void {
-        this.#keydown$.next(event);
+    protected onFocusIn(event: FocusEvent): void {
+        this.#focusedTabId = (event.target as Element).closest("[data-tab-id]")?.getAttribute("data-tab-id") ?? null;
     }
 
-    protected onTabClick(tab: TabItem, tabListElement: HTMLUListElement, event: MouseEvent): void {
-        if (tab.id === this.selectedTabId()) {
-            return;
-        }
-        const selectEvent = new TabSelectEvent(tab.index, event);
-        this.tabSelect.emit(selectEvent);
-        if (selectEvent.isDefaultPrevented()) {
-            return;
-        }
-        this.selectTab(tab);
-        window.setTimeout(() => {
-            const listElement = tabListElement.querySelector("li[data-selected='true']");
-            if (listElement) {
-                listElement.scrollIntoView({ behavior: "auto", block: "nearest", inline: "nearest" });
+    protected onFocusOut(event: FocusEvent): void {
+        const target = event.target as Element;
+        // Some browsers fire this while removing the focused tab, so only a target that's still there can mean focus left.
+        // It runs after the focusin of a move within the strip, which has already recorded where focus went.
+        queueMicrotask(() => {
+            const root = this.#hostElement.getRootNode() as Document | ShadowRoot;
+            if (target.isConnected && !this.#hostElement.contains(root.activeElement)) {
+                this.#focusedTabId = null;
             }
         });
+    }
+
+    protected onKeydown(event: KeyboardEvent): void {
+        if (event.altKey || event.ctrlKey || event.metaKey) {
+            return;
+        }
+        const tabs = Array.from(this.tabList());
+        const currentTab = this.tabFromEvent(tabs, event);
+        if (!currentTab) {
+            return;
+        }
+        if (event.key === "Tab") {
+            if (!event.shiftKey) {
+                this.handleTabKey(tabs, event);
+            }
+            return;
+        }
+        if (!event.shiftKey) {
+            this.handleTabStripKey(tabs, currentTab, event);
+        }
+    }
+
+    protected onTabClick(tab: TabItem, event: MouseEvent): void {
+        if (tab.disabled || this.disabled() || tab.id === this.selectedTabId()) {
+            return;
+        }
+        if (!this.emitTabSelect(tab, event)) {
+            this.selectTab(tab);
+        }
     }
 
     protected onTabClose(tab: TabItem, event: MouseEvent): void {
@@ -182,19 +218,30 @@ export class TabListComponent implements TabListVariantInput {
         this.#scrollIntent$.next(null);
     }
 
+    /**
+     * Selects the tab and moves focus to it. A vetoed selection still moves focus, so the keyboard can get past a tab it
+     * isn't allowed to select.
+     */
     private activateTab(tab: TabItem, event: Event): void {
-        const prevented = this.emitTabSelect(tab, event);
-        if (!prevented) {
+        if (tab.id !== this.selectedTabId() && !this.emitTabSelect(tab, event)) {
             this.selectTab(tab);
-            this.focusSelectedTab();
         }
+        this.focusTab(tab);
     }
 
-    private emitTabClose(tabItem: TabItem, event: Event): boolean {
-        const selected = tabItem.id === this.selectedTabId();
-        const tabCloseEvent = new TabCloseEvent(tabItem.index, selected, event);
-        this.tabClose.emit(tabCloseEvent);
-        return tabCloseEvent.isDefaultPrevented();
+    private adjacentEnabledTab(tabs: readonly TabItem[], from: TabItem, offset: 1 | -1): TabItem | undefined {
+        const start = tabs.indexOf(from);
+        for (let step = 1; step <= tabs.length; step++) {
+            const candidate = tabs[(start + offset * step + tabs.length * step) % tabs.length];
+            if (this.isTabEnabled(candidate)) {
+                return candidate;
+            }
+        }
+        return undefined;
+    }
+
+    private emitTabClose(tabItem: TabItem, event: Event): void {
+        this.tabClose.emit(new TabCloseEvent(tabItem.index, tabItem.id === this.selectedTabId(), event));
     }
 
     private emitTabSelect(tab: TabItem, event: Event): boolean {
@@ -204,9 +251,7 @@ export class TabListComponent implements TabListVariantInput {
     }
 
     private focusTab(tab: TabItem): void {
-        const tabListItems = this.tabListItems();
-        const tabListItem = tabListItems.find(t => t.nativeElement.getAttribute("data-tab-id") === tab.id);
-        tabListItem?.nativeElement.focus();
+        this.tabElementOf(tab.id)?.focus();
     }
 
     private getNavigationDirection(event: KeyboardEvent): TabScrollDirection | null {
@@ -229,83 +274,111 @@ export class TabListComponent implements TabListVariantInput {
         return null;
     }
 
-    private handleKeyboardEvents(event: KeyboardEvent): void {
-        const tabList = this.tabList();
-        const tabs = Array.from(tabList);
+    private handleTabKey(tabs: readonly TabItem[], event: KeyboardEvent): void {
         const selectedTab = tabs.find(t => t.id === this.selectedTabId());
         if (!selectedTab) {
             return;
         }
-        if (event.key === "Tab") {
-            if (!event.shiftKey) {
-                this.handleTabKey(selectedTab, event);
-            }
-            return;
+        // The root node, because a document lookup finds nothing inside a shadow root.
+        const root = this.#hostElement.getRootNode() as Document | ShadowRoot;
+        const panel = root.getElementById(selectedTab.id + "-panel");
+        if (panel) {
+            event.preventDefault();
+            panel.focus();
         }
+    }
 
-        const listDisabled = this.disabled();
-        const enabledTabs = tabs.filter(t => !t.disabled && !listDisabled);
+    private handleTabStripKey(tabs: readonly TabItem[], currentTab: TabItem, event: KeyboardEvent): void {
+        const enabledTabs = tabs.filter(t => this.isTabEnabled(t));
         if (enabledTabs.length === 0) {
             return;
         }
-        const selectedEnabledIndex = enabledTabs.indexOf(selectedTab);
-        const selectedIndex = selectedEnabledIndex === -1 ? 0 : selectedEnabledIndex;
-
         const navigationDirection = this.getNavigationDirection(event);
-        if (navigationDirection === "previous") {
+        if (navigationDirection) {
             event.preventDefault();
-            this.activateTab(enabledTabs[selectedIndex === 0 ? enabledTabs.length - 1 : selectedIndex - 1], event);
+            const target = this.adjacentEnabledTab(tabs, currentTab, navigationDirection === "next" ? 1 : -1);
+            if (target) {
+                this.activateTab(target, event);
+            }
             return;
         }
-        if (navigationDirection === "next") {
-            event.preventDefault();
-            this.activateTab(enabledTabs[selectedIndex === enabledTabs.length - 1 ? 0 : selectedIndex + 1], event);
-            return;
-        }
-
         switch (event.key) {
             case "Home":
+                event.preventDefault();
                 this.activateTab(enabledTabs[0], event);
                 break;
             case "End":
+                event.preventDefault();
                 this.activateTab(enabledTabs[enabledTabs.length - 1], event);
                 break;
             case "Delete":
             case "Backspace":
-                if (!selectedTab.disabled && !listDisabled && (selectedTab.closable || this.closable())) {
-                    this.emitTabClose(selectedTab, event);
+                if (this.isTabEnabled(currentTab) && (currentTab.closable || this.closable())) {
+                    event.preventDefault();
+                    this.emitTabClose(currentTab, event);
                 }
                 break;
         }
     }
 
-    private handleTabKey(tab: TabItem, event: KeyboardEvent): void {
-        event.preventDefault();
-        const panelId = tab.id + "-panel";
-        const panel = document.getElementById(panelId);
-        if (panel) {
-            panel.focus();
-        }
+    private isTabEnabled(tab: TabItem): boolean {
+        return !tab.disabled && !this.disabled();
     }
 
     private performScroll(element: HTMLElement, direction: TabScrollDirection): void {
         let offset = direction === "previous" ? -100 : 100;
+        const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+        const behavior: ScrollBehavior = reducedMotion ? "auto" : "smooth";
         if (this.orientation() === "vertical") {
-            element.scrollBy({ top: offset, behavior: "smooth" });
+            element.scrollBy({ top: offset, behavior });
             return;
         }
         if (this.isRtl()) {
             offset = -offset;
         }
-        element.scrollBy({ left: offset, behavior: "smooth" });
+        element.scrollBy({ left: offset, behavior });
+    }
+
+    private restoreFocus(tabs: readonly TabItem[]): void {
+        const focusedTabId = this.#focusedTabId;
+        if (focusedTabId === null || tabs.some(tab => tab.id === focusedTabId)) {
+            return;
+        }
+        this.#focusedTabId = null;
+        const root = this.#hostElement.getRootNode() as Document | ShadowRoot;
+        const active = root.activeElement;
+        if (!active || active === this.#hostElement.ownerDocument.body) {
+            this.focusSelectedTab();
+        }
+    }
+
+    /**
+     * Scrolls only the strip. `scrollIntoView` would also scroll the page, which a selection made by code, or the first
+     * render, has no business doing.
+     */
+    private scrollTabIntoStrip(tabId: string | null): void {
+        const tabElement = tabId === null ? undefined : this.tabElementOf(tabId);
+        if (!tabElement) {
+            return;
+        }
+        const list = this.tabListElement().nativeElement;
+        const listRect = list.getBoundingClientRect();
+        const tabRect = tabElement.getBoundingClientRect();
+        if (this.orientation() === "vertical") {
+            const top = Math.min(tabRect.top - listRect.top, 0) || Math.max(tabRect.bottom - listRect.bottom, 0);
+            if (top !== 0) {
+                list.scrollBy({ top });
+            }
+            return;
+        }
+        const left = Math.min(tabRect.left - listRect.left, 0) || Math.max(tabRect.right - listRect.right, 0);
+        if (left !== 0) {
+            list.scrollBy({ left });
+        }
     }
 
     private selectTab(tab: TabItem): void {
         this.selectedTabId.set(tab.id);
-    }
-
-    private setupKeyboardNavigation(): void {
-        this.#keydown$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => this.handleKeyboardEvents(event));
     }
 
     private setupResizeObserver(): void {
@@ -334,6 +407,23 @@ export class TabListComponent implements TabListVariantInput {
                 })
             )
             .subscribe();
+    }
+
+    private tabElementOf(tabId: string): HTMLElement | undefined {
+        return this.tabElements().find(tab => tab.nativeElement.id === tabId + "-tab")?.nativeElement;
+    }
+
+    /**
+     * The tab a key press applies to: the one focus is in, which may not be the selected one after a vetoed selection.
+     * Keys pressed anywhere else in the strip, such as on a close button, belong to no tab.
+     */
+    private tabFromEvent(tabs: readonly TabItem[], event: KeyboardEvent): TabItem | undefined {
+        const target = event.target as Element | undefined;
+        if (!target) {
+            return tabs.find(tab => tab.id === this.selectedTabId());
+        }
+        const tabElement = target.closest("[role='tab']");
+        return tabElement ? tabs.find(tab => tab.id + "-tab" === tabElement.id) : undefined;
     }
 
     private updateScrollVisibility(): void {

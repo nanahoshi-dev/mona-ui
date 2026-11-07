@@ -64,7 +64,7 @@ export class HeatmapChartRenderer {
         // 3. Draw Axis Baseline Lines
         const axisLineColor =
             styleResolver.resolveCssVariable("--mona-chart-axis-line-color") ||
-            styleResolver.resolveCssVariable("--color-border-control") ||
+            styleResolver.resolveCssVariable("--color-border") ||
             "rgba(148, 163, 184, 0.45)";
 
         for (const axisScene of axes) {
@@ -112,7 +112,7 @@ export class HeatmapChartRenderer {
                 } else {
                     const hoverColor =
                         styleResolver.resolveCssVariable("--mona-chart-heatmap-hover-outline-color") ||
-                        styleResolver.resolveCssVariable("--color-border-control") ||
+                        styleResolver.resolveCssVariable("--color-border") ||
                         "rgba(255, 255, 255, 0.85)";
                     context.strokeStyle = hoverColor;
                     context.lineWidth = 1.5;

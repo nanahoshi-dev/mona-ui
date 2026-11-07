@@ -22,7 +22,7 @@
                 [style]="tick | tickStyle: tickStyleArgs()"
                 [attr.data-orientation]="orientation()"
                 [attr.data-value]="tick.value"
-                monaSliderTick>
+                data-slider-tick>
             </span>
         }
     </div>
@@ -38,7 +38,7 @@
                 [attr.data-orientation]="orientation()"
                 [style]="tick | labelStyle: labelStyleArgs()">
                 @if (!tickValueTemplate()) {
-                    <span>{{ tick.value }}</span>
+                    <span>{{ tick.label }}</span>
                 } @else {
                     <span>
                         <ng-container
@@ -56,6 +56,7 @@
     [class]="sliderHandleClasses()"
     [attr.data-orientation]="orientation()"
     [attr.data-dragging]="dragging()"
+    [attr.data-rtl]="isRtl() || null"
     [attr.data-focused]="handleFocused()"
     [style]="handleStyle()"
     [style.left.%]="orientation() === 'horizontal' && !isRtl() ? handlePosition() : undefined"
@@ -63,16 +64,18 @@
     [style.bottom.%]="orientation() === 'vertical' ? handlePosition() : undefined"
     [attr.tabindex]="effectiveDisabled() ? -1 : 0"
     [attr.role]="'slider'"
-    [attr.aria-valuemin]="minValue()"
-    [attr.aria-valuemax]="maxValue()"
+    [attr.aria-valuemin]="effectiveMin()"
+    [attr.aria-valuemax]="effectiveMax()"
     [attr.aria-valuenow]="normalizedValue()"
     [attr.aria-valuetext]="ariaValueText() ? ariaValueText()!(normalizedValue()) : null"
     [attr.aria-orientation]="orientation()"
     [attr.aria-disabled]="effectiveDisabled() || null"
-    [attr.aria-invalid]="invalid() || null"
-    [attr.data-invalid]="invalid() || null"
+    [attr.aria-invalid]="invalidState() || null"
+    [attr.aria-readonly]="readonly() || null"
+    [attr.data-invalid]="invalidState() || null"
+    [attr.aria-describedby]="ariaDescribedBy()"
     [attr.aria-label]="computedAriaLabel()"
-    [attr.aria-labelledby]="ariaLabelledBy()"
+    [attr.aria-labelledby]="labelledBy()"
     #sliderHandle>
     @if (handleTemplate()) {
         <ng-container

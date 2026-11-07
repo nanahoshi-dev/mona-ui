@@ -1,9 +1,10 @@
 <input
     #input
     [class]="inputClass()"
-    tabindex="0"
+    [id]="resolvedId()"
+    [attr.tabindex]="tabindex()"
     [value]="value()"
-    [disabled]="disabled()"
+    [disabled]="effectiveDisabled()"
     [readOnly]="readonly()"
     [required]="required()"
     [type]="nativeInputType()"
@@ -13,17 +14,23 @@
     [attr.spellcheck]="'false'"
     [attr.aria-label]="computedAriaLabel()"
     [attr.aria-labelledby]="computedAriaLabelledby()"
+    [attr.aria-describedby]="computedAriaDescribedby()"
     [attr.aria-invalid]="invalidState() ? 'true' : null"
     [attr.aria-required]="required() ? 'true' : null"
     [attr.maxlength]="normalizedLength()"
+    [attr.name]="derivedName()"
     [monaAttributeBinder]="sanitizedAttributes()"
     (beforeinput)="onBeforeInput($event)"
     (keydown)="onKeyDown($event)"
     (input)="onInput($event)"
     (paste)="onPaste($event)"
+    (click)="onInputClick($event)"
+    (mousedown)="onInputMouseDown($event)"
+    (pointerdown)="onInputPointerDown($event)"
     (focus)="onFocus($event)"
     (blur)="onBlur($event)"
     (select)="onSelect()"
+    (selectionchange)="onSelect()"
     (keyup)="onKeyUp()"
     (compositionstart)="onCompositionStart()"
     (compositionend)="onCompositionEnd($event)" />
@@ -43,13 +50,12 @@
                 [attr.data-selected]="slot.selected || null"
                 [attr.data-filled]="slot.filled || null"
                 [attr.data-placeholder]="slot.placeholder || null"
-                [attr.data-disabled]="disabled() || null"
+                [attr.data-disabled]="effectiveDisabled() || null"
                 [attr.data-readonly]="readonly() || null"
                 [attr.data-invalid]="invalidState() || null"
-                (pointerdown)="onSlotPointerDown($event, slot.index)"
                 aria-hidden="true">
                 {{ slot.displayCharacter }}
-                @if (slot.active && !slot.filled && hasFocus() && !disabled() && !readonly()) {
+                @if (slot.active && !slot.filled && hasFocus() && !effectiveDisabled() && !readonly()) {
                     <span
                         class="pointer-events-none absolute inset-y-2 w-0.5 animate-pulse motion-reduce:animate-none bg-foreground"
                         aria-hidden="true"></span>

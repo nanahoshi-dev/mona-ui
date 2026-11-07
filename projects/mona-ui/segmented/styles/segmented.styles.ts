@@ -6,10 +6,11 @@ export const segmentedContainerThemeVariants = cva(
     `
         relative inline-flex items-center gap-0.5
         ${themeControlSurfaceClasses}
-        border border-input-border
+        border border-border
         p-1
         data-[invalid='true']:border-error
         data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[readonly='true']:[&_*]:cursor-default
         transition-colors duration-(--mona-motion-fast)
     `,
     {
@@ -49,6 +50,11 @@ export const segmentedOptionThemeVariants = cva(
         data-[selected='false']:hover:bg-hover data-[selected='false']:hover:text-foreground
         data-[disabled='true']:data-[selected='false']:text-disabled-foreground
         data-[selected='true']:transition-none
+        data-[selected='true']:not-data-[indicator]:bg-primary
+        has-[input:focus-visible]:z-20
+        has-[input:focus-visible]:outline-2
+        has-[input:focus-visible]:outline-offset-1
+        has-[input:focus-visible]:outline-focus-indicator
     `,
     {
         variants: {
@@ -81,7 +87,8 @@ export const segmentedOptionThemeVariants = cva(
 
 export const segmentedIndicatorThemeVariants = cva(
     `
-        pointer-events-none absolute top-0 start-0
+        pointer-events-none absolute top-0 left-0
+        border-2 border-transparent forced-colors:border-[Highlight]
         bg-primary shadow-sm ring-1 ring-selected-border
         data-[disabled='true']:opacity-50
         motion-reduce:transition-none
@@ -111,7 +118,7 @@ export const segmentedInputThemeVariants = cva(
     `
         peer absolute inset-0 z-10 h-full w-full
         cursor-pointer appearance-none opacity-0
-        outline-none
+        outline-none focus-visible:outline-hidden
         disabled:cursor-not-allowed
     `
 );

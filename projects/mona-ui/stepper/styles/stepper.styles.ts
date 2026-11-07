@@ -1,10 +1,10 @@
+import type { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { VariantProps } from "class-variance-authority";
 
 export const stepperBaseThemeVariants = cva(
     `
-        relative grid outline-none
+        relative grid
     `,
     {
         variants: {
@@ -63,18 +63,30 @@ export const stepperStepListItemThemeVariants = cva(
 export const stepperStepIndicatorThemeVariants = cva(
     `
         flex h-8 w-8 items-center justify-center
-        border border-border outline-none
-        transition-colors duration-400 ease-in-out
+        border border-border cursor-[inherit]
+        transition-colors duration-(--mona-motion-standard) ease-in-out
+        focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus-indicator
     `,
     {
         variants: {
-            active: {
-                true: "bg-primary text-primary-foreground",
-                false: "bg-surface-raised text-foreground"
-            },
-            focused: {
-                true: "border-focus-indicator ring-2 ring-focus-indicator/35",
+            invalid: {
+                true: "border-2 border-error",
                 false: ""
+            },
+            state: {
+                completed: `
+                    bg-[var(--mona-indicator-color,var(--color-primary))]
+                    text-[var(--mona-indicator-foreground,var(--color-primary-foreground))]
+                    forced-colors:border-[Highlight]
+                `,
+                current: `
+                    bg-[var(--mona-indicator-color,var(--color-primary))]
+                    text-[var(--mona-indicator-foreground,var(--color-primary-foreground))]
+                    ring-2 ring-primary ring-offset-2 ring-offset-surface
+                    forced-colors:border-2 forced-colors:border-[Highlight]
+                `,
+                disabled: "border-dashed bg-surface-muted text-disabled-foreground",
+                upcoming: "bg-surface-raised text-foreground"
             },
             rounded: {
                 small: "rounded-sm",
@@ -86,6 +98,25 @@ export const stepperStepIndicatorThemeVariants = cva(
         }
     }
 );
+
+/** The button around a `monaStepperStepTemplate`, whose looks are the template's. */
+export const stepperStepButtonThemeVariants = cva(
+    `
+        cursor-[inherit] rounded-sm
+        focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-indicator
+    `
+);
+
+export const stepperStepLabelThemeVariants = cva("", {
+    variants: {
+        state: {
+            completed: "",
+            current: "font-semibold",
+            disabled: "text-disabled-foreground",
+            upcoming: ""
+        }
+    }
+});
 
 export const stepperTrackThemeVariants = cva(
     `
@@ -108,7 +139,7 @@ export const stepperTrackThemeVariants = cva(
 
 export const stepperTrackLineThemeVariants = cva(
     `
-        absolute start-0 top-0 bg-primary
+        absolute start-0 top-0 bg-[var(--mona-indicator-color,var(--color-primary))]
     `,
     {
         variants: {
@@ -157,6 +188,6 @@ export type StepperVariantProps = StepperBaseVariantProps &
 export type StepperVariantInput = StepperBaseVariantInput &
     StepperStepListVariantInput &
     StepperStepListItemVariantInput &
-    Omit<StepperStepIndicatorVariantInput, "active" | "focused"> &
+    Omit<StepperStepIndicatorVariantInput, "invalid" | "state"> &
     StepperTrackVariantInput &
     StepperTrackLineVariantInput;

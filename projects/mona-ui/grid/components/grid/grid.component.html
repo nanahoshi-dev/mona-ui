@@ -36,11 +36,12 @@
         @if (gridService.groupColumns().length !== 0) {
             @for (groupColumn of gridService.groupColumns(); track $index) {
                 <mona-chip
+                    [aria-label]="groupColumn.title"
                     [removable]="true"
                     size="small"
+                    tabindex="-1"
                     [rounded]="rounded()"
                     (click)="onGroupingColumnSort(groupColumn)"
-                    (keydown)="onGroupChipKeydown($event, groupColumn)"
                     (remove)="onGroupingColumnRemove($event, groupColumn)">
                     @if (groupColumn.groupSortDirection === "asc") {
                         <svg lucideArrowDown [size]="16" aria-hidden="true"></svg>
@@ -241,6 +242,7 @@
                                         @if (groupingInProgress()) {
                                             <mona-chip
                                                 style="z-index: 10; pointer-events: none"
+                                                [aria-label]="column.title"
                                                 [removable]="true"
                                                 [rounded]="rounded()"
                                                 >{{ column.title }}</mona-chip

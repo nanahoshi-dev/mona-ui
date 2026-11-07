@@ -28,11 +28,14 @@ import { FILTER_DEFAULT_MESSAGES } from "../filter/i18n/filter.default-messages"
 import { GRID_DEFAULT_MESSAGES } from "../grid/i18n/grid.default-messages";
 import { LIST_BOX_DEFAULT_MESSAGES } from "../list-box/i18n/list-box.default-messages";
 import { LIST_DEFAULT_MESSAGES } from "../internal/list/i18n/list.default-messages";
+import { LABEL_DEFAULT_MESSAGES } from "../label/i18n/label.default-messages";
 import { MULTI_SELECT_DEFAULT_MESSAGES } from "../multi-select/i18n/multi-select.default-messages";
 import { NOTIFICATION_DEFAULT_MESSAGES } from "../notification/i18n/notification.default-messages";
 import { NUMERIC_TEXT_BOX_DEFAULT_MESSAGES } from "../numeric-text-box/i18n/numeric-text-box.default-messages";
 import { OTP_INPUT_DEFAULT_MESSAGES } from "../otp-input/i18n/otp-input.default-messages";
 import { PAGER_DEFAULT_MESSAGES } from "../pager/i18n/pager.default-messages";
+import { PROGRESS_BAR_DEFAULT_MESSAGES } from "../progress-bar/i18n/progress-bar.default-messages";
+import { SIDEBAR_DEFAULT_MESSAGES } from "../sidebar/i18n/sidebar.default-messages";
 import { RATING_DEFAULT_MESSAGES } from "../rating/i18n/rating.default-messages";
 import { SCROLL_VIEW_DEFAULT_MESSAGES } from "../scroll-view/i18n/scroll-view.default-messages";
 import { SHEET_DEFAULT_MESSAGES } from "../sheet/i18n/sheet.default-messages";
@@ -110,12 +113,15 @@ const ENGLISH_DEFAULTS = {
     filter: FILTER_DEFAULT_MESSAGES,
     grid: GRID_DEFAULT_MESSAGES,
     listBox: LIST_BOX_DEFAULT_MESSAGES,
+    label: LABEL_DEFAULT_MESSAGES,
     list: LIST_DEFAULT_MESSAGES,
     multiSelect: MULTI_SELECT_DEFAULT_MESSAGES,
     notification: NOTIFICATION_DEFAULT_MESSAGES,
     numericTextBox: NUMERIC_TEXT_BOX_DEFAULT_MESSAGES,
     otpInput: OTP_INPUT_DEFAULT_MESSAGES,
     pager: PAGER_DEFAULT_MESSAGES,
+    progressBar: PROGRESS_BAR_DEFAULT_MESSAGES,
+    sidebar: SIDEBAR_DEFAULT_MESSAGES,
     rating: RATING_DEFAULT_MESSAGES,
     scrollView: SCROLL_VIEW_DEFAULT_MESSAGES,
     sheet: SHEET_DEFAULT_MESSAGES,

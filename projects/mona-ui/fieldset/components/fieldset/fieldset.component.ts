@@ -1,5 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { Component, computed, contentChild, inject, input, TemplateRef } from "@angular/core";
+import { booleanAttribute, Component, computed, contentChild, inject, input, TemplateRef } from "@angular/core";
+import { MONA_FIELDSET_DISABLED } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { FieldsetLegendTemplateDirective } from "../../directives/fieldset-legend-template.directive";
 import {
@@ -14,17 +15,22 @@ import {
     selector: "mona-fieldset",
     templateUrl: "./fieldset.component.html",
     imports: [NgTemplateOutlet],
+    providers: [{ provide: MONA_FIELDSET_DISABLED, useFactory: () => inject(FieldsetComponent).effectiveDisabled }],
     host: {
+        // The ARIA inputs below are applied to the native fieldset, so the host must not keep the static attributes.
+        "[attr.aria-label]": "null",
+        "[attr.aria-labelledby]": "null",
         "[class]": "baseClass()"
     }
 })
 export class FieldsetComponent implements FieldsetVariantInput {
+    readonly #parentDisabled = inject(MONA_FIELDSET_DISABLED, { optional: true, skipSelf: true });
     protected readonly baseClass = computed(() => {
         return fieldsetBaseThemeVariants();
     });
     protected readonly fieldsetClass = computed(() => {
         const rounded = this.rounded();
-        const disabled = this.disabled();
+        const disabled = this.effectiveDisabled();
         const userClass = this.userClass();
         return twMerge(fieldsetThemeVariants({ rounded, disabled }), userClass);
     });
@@ -39,11 +45,29 @@ export class FieldsetComponent implements FieldsetVariantInput {
     });
 
     /**
-     * @description Whether the fieldset and its projected form controls are disabled.
-     * Reflected as the native `disabled` attribute on the rendered `<fieldset>`.
+     * @description Accessible name of the fieldset when it has no legend.
+     * @default ""
+     */
+    public readonly ariaLabel = input("", { alias: "aria-label" });
+
+    /**
+     * @description Id of the element that labels the fieldset when it has no legend.
+     * @default ""
+     */
+    public readonly ariaLabelledBy = input("", { alias: "aria-labelledby" });
+
+    /**
+     * @description Whether the fieldset and the Mona UI form controls inside it are disabled, including nested fieldsets.
+     * Reflected as the native `disabled` attribute on the rendered `<fieldset>`, which also covers native controls.
+     * A signal form field inside stays enabled in the form model, so its validation keeps running.
      * @default false
      */
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
+
+    /**
+     * @internal
+     */
+    public readonly effectiveDisabled = computed(() => this.disabled() || (this.#parentDisabled?.() ?? false));
 
     /**
      * @description The legend text of the fieldset. Shown in the top border as a labelled notch.

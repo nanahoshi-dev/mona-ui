@@ -1,5 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { Component, computed, inject, input } from "@angular/core";
+import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
 import { PlaceholderComponent } from "@nanahoshi/mona-ui/placeholder";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
@@ -62,5 +63,5 @@ export class PlaceholderDemoComponent extends AbstractDemoComponent<PlaceholderC
 class PlaceholderWrapperComponent implements ComponentInputsAsSignal<PlaceholderComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
     public readonly text = input<ReturnType<PlaceholderComponent["text"]>>("");
-    public readonly userClass = input<ReturnType<PlaceholderComponent["userClass"]>>("");
+    public readonly userClass = input<string, ClassInputType>("", { transform: value => classInputToClass(value) });
 }

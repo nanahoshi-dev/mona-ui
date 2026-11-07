@@ -7,7 +7,7 @@ export const datePickerBaseThemeVariants = cva(
         flex w-auto items-center
         ${themeControlSurfaceClasses} text-foreground
         border border-input-border shadow-(--shadow-control)
-        outline-none
+        outline-none focus-visible:outline-hidden
 
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed

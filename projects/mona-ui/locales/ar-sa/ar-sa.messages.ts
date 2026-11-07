@@ -21,7 +21,8 @@ export const AR_SA_MESSAGES = {
         clear: "مسح"
     },
     breadcrumb: {
-        breadcrumb: "مسار التنقل"
+        breadcrumb: "مسار التنقل",
+        showFullPath: "إظهار المسار الكامل"
     },
     buttonGroup: {
         buttonGroup: "مجموعة أزرار"
@@ -170,28 +171,42 @@ export const AR_SA_MESSAGES = {
         removeLabel: (label?: string) => (label ? `حذف ${label}` : "حذف العنصر")
     },
     colorGradient: {
+        alpha: "قناة ألفا",
+        alphaText: (opacity: number) => `العتامة ${localizeNumber(opacity)}٪`,
         apply: "تطبيق",
+        blue: "الأزرق",
         cancel: "إلغاء",
         clearColor: "مسح اللون",
+        colorCopied: "تم نسخ اللون",
+        colorGradient: "تدرج الألوان",
         copyAsHex: "نسخ بصيغة HEX",
         copyAsRgb: "نسخ بصيغة RGB",
         copyColor: "نسخ اللون",
+        copyFailed: "تعذر نسخ اللون",
         currentColor: "اللون الحالي",
+        green: "الأخضر",
+        hexColor: "اللون بالنظام الست عشري",
+        hue: "درجة اللون",
         previousColor: "اللون السابق",
+        red: "الأحمر",
+        saturation: "التشبع",
         saturationAndValue: "التشبع والقيمة",
         saturationAndValueText: (saturation: number, value: number) =>
             `التشبع ${localizeNumber(saturation)}٪، القيمة ${localizeNumber(value)}٪`,
-        switchColorMode: "تبديل وضع اللون"
+        switchColorMode: "تبديل وضع اللون",
+        value: "القيمة"
     },
     colorPalette: {
         color: (color: string) => `اللون: ${color}`,
-        colorPalette: "لوحة الألوان"
+        colorPalette: "لوحة الألوان",
+        namedColor: (name: string, color: string) => `${name}، ${color}`
     },
     colorPicker: {
         clearColor: "مسح اللون",
         colorGradientPicker: "منتقي تدرج الألوان",
         colorPalettePicker: "منتقي لوحة الألوان",
-        colorPicker: "منتقي الألوان"
+        colorPicker: "منتقي الألوان",
+        noColor: "بلا لون"
     },
     comboBox: {
         clear: "مسح"
@@ -385,6 +400,9 @@ export const AR_SA_MESSAGES = {
         sortOrder: (position: number) => `ترتيب الفرز ${localizeNumber(position)}`,
         toolbar: "شريط أدوات الجدول"
     },
+    label: {
+        optional: "اختياري"
+    },
     list: {
         filterList: "تصفية القائمة",
         loading: "جارٍ التحميل",
@@ -456,6 +474,9 @@ export const AR_SA_MESSAGES = {
         rangeStatus: (start: number, end: number, total: number) =>
             `${localizeNumber(start)}–${localizeNumber(end)} من ${localizeNumber(total)}`
     },
+    progressBar: {
+        label: "التقدم"
+    },
     rating: {
         notRated: "غير مقيّم",
         valueText: (value: number, max: number) => `${localizeNumber(value)} من ${localizeNumber(max)}`
@@ -465,6 +486,7 @@ export const AR_SA_MESSAGES = {
         nextPage: "الصفحة التالية",
         page: (current: number) => `الصفحة ${localizeNumber(current)}`,
         pageOf: (current: number, total: number) => `الصفحة ${localizeNumber(current)} من ${localizeNumber(total)}`,
+        pages: "الصفحات",
         previousPage: "الصفحة السابقة",
         scrollPagerNext: "تمرير مؤشر الصفحات إلى التالي",
         scrollPagerPrevious: "تمرير مؤشر الصفحات إلى السابق",
@@ -472,6 +494,10 @@ export const AR_SA_MESSAGES = {
     },
     sheet: {
         closeSheet: "إغلاق اللوحة"
+    },
+    sidebar: {
+        drawerLabel: "الشريط الجانبي",
+        rail: "إظهار الشريط الجانبي أو إخفاؤه"
     },
     slider: {
         maximumValue: "الحد الأقصى",
@@ -495,6 +521,10 @@ export const AR_SA_MESSAGES = {
         resizer: "مقبض تغيير الحجم"
     },
     stepper: {
+        stepCompleted: "مكتملة",
+        stepInvalid: "بها أخطاء",
+        stepPosition: (current: number, total: number) =>
+            `الخطوة ${localizeNumber(current)} من ${localizeNumber(total)}`,
         stepProgress: "تقدم الخطوات",
         stepper: "مؤشر الخطوات"
     },

@@ -3,7 +3,8 @@
         "clear": "Effacer"
     },
     "breadcrumb": {
-        "breadcrumb": "Fil d’Ariane"
+        "breadcrumb": "Fil d’Ariane",
+        "showFullPath": "Afficher le chemin complet"
     },
     "buttonGroup": {
         "buttonGroup": "Groupe de boutons"
@@ -117,27 +118,41 @@
         "removeLabel": "{label, select, undefined {Retirer l’élément} other {Retirer {label}}}"
     },
     "colorGradient": {
+        "alpha": "Canal alpha",
+        "alphaText": "Opacité {opacity} %",
         "apply": "Appliquer",
+        "blue": "Bleu",
         "cancel": "Annuler",
         "clearColor": "Effacer la couleur",
+        "colorCopied": "Couleur copiée",
+        "colorGradient": "Dégradé de couleur",
         "copyAsHex": "Copier en HEX",
         "copyAsRgb": "Copier en RVB",
         "copyColor": "Copier la couleur",
+        "copyFailed": "Impossible de copier la couleur",
         "currentColor": "Couleur actuelle",
+        "green": "Vert",
+        "hexColor": "Couleur hexadécimale",
+        "hue": "Teinte",
         "previousColor": "Couleur précédente",
+        "red": "Rouge",
+        "saturation": "Saturation",
         "saturationAndValue": "Saturation et luminosité",
         "saturationAndValueText": "Saturation {saturation} %, luminosité {value} %",
-        "switchColorMode": "Changer de mode colorimétrique"
+        "switchColorMode": "Changer de mode colorimétrique",
+        "value": "Luminosité"
     },
     "colorPalette": {
         "color": "Couleur {color}",
-        "colorPalette": "Palette de couleurs"
+        "colorPalette": "Palette de couleurs",
+        "namedColor": "{name}, {color}"
     },
     "colorPicker": {
         "clearColor": "Effacer la couleur",
         "colorGradientPicker": "Sélecteur de dégradé de couleurs",
         "colorPalettePicker": "Sélecteur de palette de couleurs",
-        "colorPicker": "Sélecteur de couleur"
+        "colorPicker": "Sélecteur de couleur",
+        "noColor": "Aucune couleur"
     },
     "comboBox": {
         "clear": "Effacer"
@@ -327,6 +342,9 @@
         "sortOrder": "Ordre de tri {position}",
         "toolbar": "Barre d’outils du tableau"
     },
+    "label": {
+        "optional": "Facultatif"
+    },
     "list": {
         "filterList": "Filtrer la liste",
         "loading": "Chargement",
@@ -392,6 +410,9 @@
         "previousPageLabel": "Page précédente",
         "rangeStatus": "{total, plural, =1 {{start}–{end} sur # élément} other {{start}–{end} sur # éléments}}"
     },
+    "progressBar": {
+        "label": "Progression"
+    },
     "rating": {
         "notRated": "Non évalué",
         "valueText": "{value} sur {max}"
@@ -401,6 +422,7 @@
         "nextPage": "Page suivante",
         "page": "Page {current}",
         "pageOf": "Page {current} sur {total}",
+        "pages": "Pages",
         "previousPage": "Page précédente",
         "scrollPagerNext": "Faire défiler la pagination vers l’avant",
         "scrollPagerPrevious": "Faire défiler la pagination vers l’arrière",
@@ -408,6 +430,10 @@
     },
     "sheet": {
         "closeSheet": "Fermer le panneau"
+    },
+    "sidebar": {
+        "drawerLabel": "Barre latérale",
+        "rail": "Afficher ou masquer la barre latérale"
     },
     "slider": {
         "maximumValue": "Valeur maximale",
@@ -431,6 +457,9 @@
         "resizer": "Séparateur"
     },
     "stepper": {
+        "stepCompleted": "Terminée",
+        "stepInvalid": "Contient des erreurs",
+        "stepPosition": "Étape {current} sur {total}",
         "stepProgress": "Progression de l’étape",
         "stepper": "Indicateur d’étapes"
     },

@@ -21,7 +21,7 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
 import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
-import { createElementControlId, rxTimeout } from "@nanahoshi/mona-ui/internal";
+import { createElementControlId, injectEffectiveDisabled, rxTimeout } from "@nanahoshi/mona-ui/internal";
 import { FilterChangeEvent } from "@nanahoshi/mona-ui/common";
 import { IndicatorIconComponent } from "@nanahoshi/mona-ui/internal/indicator-icon";
 import {
@@ -107,7 +107,7 @@ import {
         "[attr.aria-describedby]": "null",
         "[attr.aria-label]": "null",
         "[attr.aria-labelledby]": "null",
-        "[attr.data-disabled]": "disabled() || null",
+        "[attr.data-disabled]": "effectiveDisabled() || null",
         "[attr.data-invalid]": "invalidState() || null",
         "[attr.data-readonly]": "readonly() || null",
         "[attr.tabindex]": "-1",
@@ -140,7 +140,7 @@ export class AutoCompleteComponent<TData = unknown>
     protected readonly autoCompleteValue = linkedSignal(() => this.value() ?? "");
     protected readonly autoCompleteValue$ = new Subject<string | null>();
     protected readonly baseClass = computed(() => {
-        const disabled = this.disabled();
+        const disabled = this.effectiveDisabled();
         const expanded = this.expanded();
         const focused = this.#popupRef() !== null;
         const invalid = this.invalidState();
@@ -162,9 +162,10 @@ export class AutoCompleteComponent<TData = unknown>
             this.showClearButton() &&
             !!this.autoCompleteValue() &&
             !this.loading() &&
-            !this.disabled() &&
+            !this.effectiveDisabled() &&
             !this.readonly()
     );
+    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly expanded = computed(() => this.#popupRef() !== null);
     protected readonly footerTemplate = contentChild(DropdownFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderTemplate = contentChild(DropdownGroupHeaderTemplateDirective, {
@@ -451,7 +452,7 @@ export class AutoCompleteComponent<TData = unknown>
 
     protected onValueClear(event: MouseEvent | KeyboardEvent): void {
         if (
-            this.disabled() ||
+            this.effectiveDisabled() ||
             this.readonly() ||
             (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ")
         ) {

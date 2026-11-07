@@ -50,7 +50,7 @@ import {
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
 import { getLocaleDateTimeInputFormat, injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { type AttributeConfig, createElementControlId } from "@nanahoshi/mona-ui/internal";
+import { type AttributeConfig, createElementControlId, injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
 import type { ListSizeInputType } from "@nanahoshi/mona-ui/internal/list";
 import type { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import {
@@ -104,9 +104,9 @@ import {
         "[attr.aria-describedby]": "null",
         "[attr.aria-label]": "null",
         "[attr.aria-labelledby]": "null",
-        "[attr.tabindex]": "disabled() ? null : -1",
+        "[attr.tabindex]": "effectiveDisabled() ? null : -1",
         "[attr.aria-invalid]": "invalidState() ? 'true' : null",
-        "[attr.data-disabled]": "disabled() || null",
+        "[attr.data-disabled]": "effectiveDisabled() || null",
         "[attr.data-expanded]": "expanded()",
         "[attr.data-invalid]": "invalidState() || null",
         "[attr.data-readonly]": "readonly() || null",
@@ -136,6 +136,7 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
     });
     protected readonly dateTabId = createElementControlId();
     protected readonly decadeCellTemplate = contentChild(CalendarDecadeCellTemplateDirective);
+    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly effectiveFormat = computed(() => {
         return (
             this.format() ??
@@ -487,7 +488,7 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
     }
 
     protected onDateInputButtonClick(): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             return;
         }
         if (this.#dropdownService.popupRef()) {
@@ -524,7 +525,7 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
     }
 
     protected onKeydown(event: KeyboardEvent): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             return;
         }
         const popupOpen = this.expanded();

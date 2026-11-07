@@ -10,8 +10,11 @@ When both are provided, `text` takes precedence and projected content is not ren
 **Use `PlaceholderComponent` when you need to:**
 
 - Signal an empty state inside a panel, card, or data region (e.g., "No results")
-- Hold space for a content area that has not yet loaded
 - Wrap a custom empty-state illustration or icon inside a consistently sized, centered slot
+
+**Use `mona-skeleton` instead when:**
+
+- A region is still loading
 
 ## Import & Basic Usage
 
@@ -70,17 +73,19 @@ Pass additional Tailwind or custom classes to the host element via the `class` i
 
 ## Examples
 
-**Reserving space for a loading region:**
+**An empty region:**
 
 ```html
-<mona-placeholder text="Loading..." class="h-40"></mona-placeholder>
+<mona-placeholder text="No items yet" class="h-40"></mona-placeholder>
 ```
+
+For a region that's loading, use `mona-skeleton`. A placeholder's text is static and isn't announced when it appears.
 
 ## Accessibility Notes
 
 `PlaceholderComponent` does not render any ARIA roles or attributes, and the text label is not focusable. It is appropriate for static, non-urgent presentational content.
 
-If the placeholder communicates a state change that screen reader users must be notified of (for example, swapping from a loading placeholder to "No results"), the consumer is responsible for adding an appropriate live region (such as `aria-live`) around the placeholder, since the component does not provide one.
+If the placeholder communicates a state change that screen reader users must be notified of (for example, a search that comes back with "No results"), the consumer is responsible for adding an appropriate live region (such as `aria-live`) around the placeholder, since the component does not provide one.
 
 ## API Matrix
 
@@ -90,10 +95,10 @@ If the placeholder communicates a state change that screen reader users must be 
 
 #### Inputs
 
-| Name    | Type     | Default | Description                                                                                                         |
-|---------|----------|---------|---------------------------------------------------------------------------------------------------------------------|
-| `class` | `string` | `''`    | Additional CSS classes merged onto the host element via `tailwind-merge`.                                           |
-| `text`  | `string` | `''`    | Text displayed as an uppercase muted label inside the placeholder. When non-empty, projected content is suppressed. |
+| Name    | Type             | Default | Description                                                                                                         |
+|---------|------------------|---------|---------------------------------------------------------------------------------------------------------------------|
+| `class` | `ClassInputType` | `''`    | Additional CSS classes merged onto the host element via `tailwind-merge`.                                           |
+| `text`  | `string`         | `''`    | Text displayed as an uppercase muted label inside the placeholder. When non-empty, projected content is suppressed. |
 
 `PlaceholderComponent` has no model inputs and no event outputs.
 

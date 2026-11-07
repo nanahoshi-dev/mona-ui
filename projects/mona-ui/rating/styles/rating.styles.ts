@@ -10,14 +10,13 @@ export const ratingControlThemeVariants = cva(
         inline-flex items-center
         cursor-pointer select-none
         rounded-md
-        outline-none
         transition-colors duration-(--mona-motion-fast)
-        focus-visible:ring-2 focus-visible:ring-focus-indicator/35
+        focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-indicator
         data-[disabled="true"]:pointer-events-none
         data-[disabled="true"]:cursor-not-allowed
         data-[readonly="true"]:cursor-default
-        data-[invalid="true"]:ring-2 data-[invalid="true"]:ring-error/35
-        data-[invalid="true"]:focus-visible:ring-error/35
+        data-[invalid="true"]:outline-2 data-[invalid="true"]:outline-error
+        data-[invalid="true"]:focus-visible:outline-error
     `,
     {
         variants: {
@@ -49,7 +48,7 @@ export const ratingItemThemeVariants = cva(`relative flex items-center justify-c
 export const ratingIconThemeVariants = cva(
     `
         block shrink-0
-        text-muted-foreground opacity-45
+        text-muted-foreground
         transition-colors duration-(--mona-motion-fast)
         group-data-[disabled="true"]:text-disabled-foreground
     `,

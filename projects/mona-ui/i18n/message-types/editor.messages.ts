@@ -8,10 +8,10 @@ export interface MonaEditorMessages {
     readonly alignEnd: string;
     /** @deprecated No longer rendered: the toolbar aligns to the start and end with `alignStart` and `alignEnd`. */
     readonly alignLeft: string;
-    readonly alignmentGroup: string;
     /** @deprecated No longer rendered: the toolbar aligns to the start and end with `alignStart` and `alignEnd`. */
     readonly alignRight: string;
     readonly alignStart: string;
+    readonly alignmentGroup: string;
     readonly altText: string;
     readonly apply: string;
     readonly backgroundColor: string;

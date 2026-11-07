@@ -8,7 +8,7 @@ export const switchThemeVariants = cva(
         cursor-pointer select-none
         ${themeControlSurfaceClasses}
         border border-input-border
-        outline-none
+        outline-none focus-visible:outline-hidden
         transition-[background,border-color]
 
         data-[disabled='true']:pointer-events-none
@@ -17,8 +17,14 @@ export const switchThemeVariants = cva(
         data-[disabled='true']:bg-disabled-background
         data-[disabled='true']:text-disabled-foreground
 
-        data-[active='true']:bg-primary
-        data-[active='true']:text-primary-foreground
+        data-[readonly='true']:cursor-default
+
+        data-[active='true']:bg-[var(--mona-indicator-color,var(--color-primary))]
+        data-[active='true']:text-[var(--mona-indicator-foreground,var(--color-primary-foreground))]
+        data-[active='true']:not-data-[disabled='true']:forced-color-adjust-none
+        data-[active='true']:not-data-[disabled='true']:forced-colors:border-[CanvasText]
+        data-[active='true']:not-data-[disabled='true']:forced-colors:bg-[Highlight]
+        data-[active='true']:not-data-[disabled='true']:forced-colors:text-[HighlightText]
         data-[disabled='true']:data-[active='true']:bg-disabled-background
 
         focus-visible:border-focus-indicator
@@ -41,7 +47,7 @@ export const switchThemeVariants = cva(
             size: {
                 large: "h-7.5 w-14 text-base",
                 medium: "h-6.5 w-12 text-sm",
-                small: "h-5.5 w-10 text-xs"
+                small: "h-5.5 w-10 text-xs before:absolute before:inset-x-0 before:-inset-y-px before:content-['']"
             }
         }
     }
@@ -50,13 +56,15 @@ export const switchThemeVariants = cva(
 export const switchHandleThemeVariants = cva(
     `
         absolute inline-flex items-center justify-center
+        forced-color-adjust-auto
         ${themeRaisedSurfaceClasses} text-foreground
         border border-border-subtle shadow-(--shadow-control)
-        outline-none
+        outline-none focus-visible:outline-hidden
         transition-[inset-inline-start,background] duration-(--mona-motion-standard) ease-in-out
-        data-[active='true']:bg-primary-foreground
-        group-data-[disabled='true']:border-disabled-border
-        group-data-[disabled='true']:bg-disabled-background
+        data-[active='true']:bg-[var(--mona-indicator-foreground,var(--color-primary-foreground))]
+        group-data-[disabled='true']:border-disabled-foreground
+        group-data-[disabled='true']:bg-disabled-foreground
+        group-data-[disabled='true']:data-[active='true']:bg-disabled-foreground
     `,
     {
         variants: {

@@ -22,6 +22,7 @@ export const colorGradientBaseThemeVariants = cva(
 export const colorGradientHsvRectangleThemeVariants = cva(
     `
         relative h-40 w-full
+        cursor-crosshair touch-none forced-color-adjust-none
         bg-[linear-gradient(to_bottom,rgba(0,0,0,0),black),linear-gradient(to_right,white,rgba(255,255,255,0))]
         border border-border-subtle
     `,
@@ -42,12 +43,13 @@ export const colorGradientHsvRectangleHandleThemeVariants = cva(
     `
         absolute
         h-3 w-3
+        -translate-x-1/2 -translate-y-1/2
         cursor-pointer
         bg-transparent
         border-2 border-black/90 outline outline-white/90 shadow-sm
 
-        focus-visible:ring-2 focus-visible:ring-focus-indicator/35
-        focus-visible:ring-offset-2 focus-visible:ring-offset-surface
+        focus-visible:outline-2 focus-visible:outline-white/90!
+        focus-visible:shadow-[0_0_0_4px_rgb(0_0_0/0.9)]
     `,
     {
         variants: {
@@ -66,6 +68,8 @@ export const colorGradientPreviewThemeVariants = cva(
     `
         flex h-10 w-10
         border border-border-subtle
+        forced-color-adjust-none
+        focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-indicator
     `,
     {
         variants: {

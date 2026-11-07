@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { Component, computed, inject, input } from "@angular/core";
+import { booleanAttribute, Component, computed, inject, input, model, signal } from "@angular/core";
 import { range } from "@mirei/ts-collections";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import {
@@ -37,10 +37,26 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
     });
     protected readonly config = computed<ComponentConfig<TabsComponent>>(() => ({
         inputs: deriveInputConfig<TabsComponent>(this.metadata(), {
+            ariaLabel: {
+                alias: "aria-label",
+                type: "string",
+                value: ""
+            },
+            ariaLabelledBy: {
+                alias: "aria-labelledby",
+                type: "string",
+                value: ""
+            },
             position: {
                 type: "dropdown",
                 value: ["top", "bottom", "left", "right"],
                 defaultValue: "top"
+            },
+            selectedIndex: {
+                type: "number",
+                value: 0,
+                min: 0,
+                max: 21
             },
             size: {
                 type: "dropdown",
@@ -64,16 +80,19 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
     imports: [TabsComponent, TabComponent, TabContentTemplateDirective, TextBoxComponent, ButtonDirective],
     template: `
         <mona-tabs
+            [aria-label]="ariaLabel()"
+            [aria-labelledby]="ariaLabelledBy()"
             [closable]="closable()"
             [disabled]="disabled()"
             [keepTabContent]="keepTabContent()"
             [position]="position()"
+            [(selectedIndex)]="selectedIndex"
             [size]="size()"
             (tabClose)="onTabClose($event)"
             (tabSelect)="onTabSelect($event)"
             [class]="'w-96 ' + userClass()"
             [class.h-96]="position() === 'left' || position() === 'right'">
-            <mona-tab title="Register" [selected]="true">
+            <mona-tab title="Register">
                 <ng-template monaTabContentTemplate>
                     <div class="p-4 flex flex-col gap-3">
                         <div class="p-4 flex flex-col gap-1 items-center justify-center">
@@ -110,7 +129,7 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
                     </div>
                 </ng-template>
             </mona-tab>
-            @for (tabNumber of tabNumbers(); track $index) {
+            @for (tabNumber of tabNumbers(); track tabNumber) {
                 <mona-tab [title]="'Tab ' + tabNumber">
                     <ng-template monaTabContentTemplate>
                         <div class="p-4">
@@ -124,20 +143,32 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
     `
 })
 export class TabsWrapperComponent implements ComponentInputsAsSignal<TabsComponent> {
+    readonly #closedTabNumbers = signal<readonly number[]>([]);
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly tabNumbers = computed(() => {
         const tabCount = this.features()["tabCount"]?.numericValue ?? 0;
-        return range(1, tabCount).toImmutableSet();
+        const closed = this.#closedTabNumbers();
+        return range(1, tabCount)
+            .where(tabNumber => !closed.includes(tabNumber))
+            .toArray();
     });
-    public readonly closable = input<ReturnType<TabsComponent["closable"]>>(false);
-    public readonly disabled = input(false);
-    public readonly keepTabContent = input<ReturnType<TabsComponent["keepTabContent"]>>(true);
+    public readonly ariaLabel = input("");
+    public readonly ariaLabelledBy = input("");
+    public readonly closable = input(false, { transform: booleanAttribute });
+    public readonly disabled = input(false, { transform: booleanAttribute });
+    public readonly keepTabContent = input(true, { transform: booleanAttribute });
     public readonly position = input<ReturnType<TabsComponent["position"]>>("top");
+    public readonly selectedIndex = model(0);
     public readonly size = input<ReturnType<TabsComponent["size"]>>("medium");
     public readonly userClass = input<ReturnType<TabsComponent["userClass"]>>("");
 
     protected onTabClose(event: TabCloseEvent): void {
         console.log("Tab closed", event);
+        // The tabs don't remove themselves. Register and Login stay, so there's always something to come back to.
+        const tabNumber = this.tabNumbers()[event.index - 2];
+        if (tabNumber !== undefined) {
+            this.#closedTabNumbers.update(closed => [...closed, tabNumber]);
+        }
     }
 
     protected onTabSelect(event: TabSelectEvent): void {

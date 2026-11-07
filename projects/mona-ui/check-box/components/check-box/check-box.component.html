@@ -1,27 +1,35 @@
-<label [class]="containerLabelClasses()" [attr.data-disabled]="disabled()">
+<label
+    [class]="containerLabelClasses()"
+    [attr.data-disabled]="effectiveDisabled()"
+    [attr.data-readonly]="readonly() || null">
     @if (labelPosition() === "before") {
         <ng-container [ngTemplateOutlet]="labelTemplate"></ng-container>
     }
 
     <input
         type="checkbox"
-        [disabled]="disabled()"
-        [indeterminate]="indeterminate()"
+        [id]="inputId()"
+        [name]="name()"
+        [disabled]="effectiveDisabled()"
+        [indeterminate]="indeterminateState()"
         [required]="required()"
         [checked]="checked()"
-        [tabindex]="disabled() ? -1 : tabIndex()"
+        [tabindex]="effectiveDisabled() ? -1 : tabIndex()"
         [class]="checkBoxClasses()"
-        [attr.aria-checked]="indeterminate() ? 'mixed' : null"
+        [attr.aria-checked]="indeterminateState() ? 'mixed' : null"
         [attr.aria-invalid]="invalidState() ? 'true' : null"
         [attr.aria-label]="ariaLabel() || label() || null"
+        [attr.aria-labelledby]="labelledBy()"
         [attr.aria-describedby]="ariaDescribedBy() || null"
+        [attr.aria-readonly]="readonly() ? 'true' : null"
+        (click)="onInputClick($event)"
         (change)="onInputChange($event)"
         (blur)="onInputBlur($event)"
         (focus)="inputFocus.emit($event)"
         #checkBox />
 
     <span [class]="checkMarkClasses()" [attr.data-invalid]="invalidState() || null" aria-hidden="true">
-        @if (checked()) {
+        @if (checked() && !indeterminateState()) {
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -31,7 +39,7 @@
                 stroke-width="2"
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                class="lucide lucide-check stroke-primary-foreground">
+                class="lucide lucide-check stroke-primary-foreground forced-colors:stroke-[CanvasText]">
                 <path d="M18 6 9 17l-5-5" />
             </svg>
         }

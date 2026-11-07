@@ -158,7 +158,7 @@ describe("Sidebar persistence", () => {
     describe("the drawer", () => {
         it("should never record the drawer over the docked state", () => {
             create("nav");
-            expect(storage.entries.get("nav")).toBe(true);
+            expect(storage.writes).toEqual([]);
 
             layoutServiceOf().setCompact(true);
             fixture.detectChanges();
@@ -168,7 +168,7 @@ describe("Sidebar persistence", () => {
 
             // The desktop is meant to come back expanded. A drawer opened on a phone is not a
             // statement about that, and must not be written down as one.
-            expect(storage.entries.get("nav")).toBe(true);
+            expect(storage.writes).toEqual([]);
         });
 
         it("should never restore a drawer open", () => {

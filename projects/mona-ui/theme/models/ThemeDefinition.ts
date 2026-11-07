@@ -1,4 +1,4 @@
-import type { ThemeName, ThemeSelection, ThemeVariant } from "./Theme";
+import type { ThemeName, ThemePreference, ThemeVariant } from "./Theme";
 
 export type ThemeColorVariable = `--color-${string}`;
 export type ThemeColors = Readonly<Record<ThemeColorVariable, string>>;
@@ -45,8 +45,8 @@ export interface ThemeProfile {
     readonly custom?: ThemeVariables;
     readonly effects: ThemeEffects;
     readonly motion: ThemeMotion;
-    readonly shape: ThemeShape;
     readonly shadows: ThemeShadows;
+    readonly shape: ThemeShape;
 }
 
 export interface ThemeProfileOverrides {
@@ -55,8 +55,8 @@ export interface ThemeProfileOverrides {
     readonly custom?: ThemeVariables;
     readonly effects?: Partial<ThemeEffects>;
     readonly motion?: Partial<ThemeMotion>;
-    readonly shape?: Partial<ThemeShape>;
     readonly shadows?: ThemeShadows;
+    readonly shape?: Partial<ThemeShape>;
 }
 
 export type ThemeFamilyVariants = Readonly<
@@ -72,12 +72,23 @@ export interface ThemeFamilyRegistration {
 export interface ThemeOverrideRegistration {
     readonly common?: ThemeProfileOverrides;
     readonly dark?: ThemeProfileOverrides;
+    /**
+     * Set for a generated palette, which always has both variants, so that one a theme doesn't have is skipped
+     * rather than reported.
+     * @internal
+     */
+    readonly generated?: boolean;
     readonly light?: ThemeProfileOverrides;
     readonly theme: ThemeName;
 }
 
 export interface ThemeOptions {
-    readonly initialTheme: ThemeSelection;
+    readonly initialTheme: ThemePreference;
+    /**
+     * Remembers the theme under this key, in `THEME_STORAGE`, and restores it in place of `initialTheme`. Nothing is
+     * stored without one. A runtime color palette isn't part of what's remembered.
+     */
+    readonly persistKey?: string;
 }
 
 export interface ThemeColorPaletteSeeds {

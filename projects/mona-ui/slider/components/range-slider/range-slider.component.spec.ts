@@ -102,7 +102,7 @@ describe("RangeSliderComponent", () => {
 
         it("should use a rounded muted track with primary range fill", () => {
             const track = fixture.debugElement.query(By.css(".bg-surface-muted")).nativeElement as HTMLElement;
-            const selection = fixture.debugElement.query(By.css(".bg-primary")).nativeElement as HTMLElement;
+            const selection = fixture.debugElement.query(By.css("[class*='mona-indicator-color']")).nativeElement as HTMLElement;
 
             expect(track.classList.contains("rounded-full")).toBe(true);
             expect(selection).toBeTruthy();
@@ -343,7 +343,7 @@ describe("RangeSliderComponent", () => {
             expect(secondaryHandle.matches(":dir(rtl)")).toBe(false);
 
             // Initial positions for value [2, 8] with min 0, max 10
-            const selection = fixture.nativeElement.querySelector("mona-range-slider [class*='bg-primary']") as HTMLElement;
+            const selection = fixture.nativeElement.querySelector("mona-range-slider [class*='mona-indicator-color']") as HTMLElement;
             expect(primaryHandle.style.left).toBe("20%");
             expect(primaryHandle.style.right).toBe("");
             expect(secondaryHandle.style.left).toBe("80%");
@@ -394,12 +394,14 @@ describe("RangeSliderComponent", () => {
 
             const primaryHandle = getPrimaryHandle(fixture);
             const secondaryHandle = getSecondaryHandle(fixture);
-            const selection = fixture.nativeElement.querySelector("mona-range-slider [class*='bg-primary']") as HTMLElement;
+            const selection = fixture.nativeElement.querySelector("mona-range-slider [class*='mona-indicator-color']") as HTMLElement;
 
             expect(primaryHandle.matches(":dir(rtl)")).toBe(true);
             expect(primaryHandle.matches(":dir(ltr)")).toBe(false);
             expect(secondaryHandle.matches(":dir(rtl)")).toBe(true);
             expect(secondaryHandle.matches(":dir(ltr)")).toBe(false);
+            expect(primaryHandle.getAttribute("data-rtl")).toBe("true");
+            expect(secondaryHandle.getAttribute("data-rtl")).toBe("true");
 
             // Initial positions for value [2, 8] with min 0, max 10
             expect(primaryHandle.style.right).toBe("20%");
@@ -463,7 +465,7 @@ describe("RangeSliderComponent", () => {
             await waitForStable(fixture);
 
             const handles = fixture.nativeElement.querySelectorAll("[role='slider']") as NodeListOf<HTMLElement>;
-            const ticks = fixture.nativeElement.querySelectorAll("span[monaSliderTick]") as NodeListOf<HTMLElement>;
+            const ticks = fixture.nativeElement.querySelectorAll("span[data-slider-tick]") as NodeListOf<HTMLElement>;
 
             // Primary handle (0) is at right: 0%, secondary handle (10) is at right: 100%
             expect(handles[0].style.right).toBe("0%");

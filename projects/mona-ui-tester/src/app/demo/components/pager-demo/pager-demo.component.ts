@@ -287,6 +287,7 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
             <span class="text-4xl font-semibold inline-flex items-center justify-center">{{ page() }}</span>
             <mona-pager
                 aria-label="Demo pages"
+                [aria-labelledby]="ariaLabelledBy()"
                 [firstLast]="firstLast()"
                 [navigable]="navigable()"
                 [pageInput]="pageInput()"
@@ -445,6 +446,7 @@ class PagerWrapperComponent implements ComponentInputsAsSignal<PagerComponent> {
         source: () => this.skip(),
         computation: skip => skip
     });
+    public readonly ariaLabelledBy = input("");
     public readonly firstLast = input(true, { transform: booleanAttribute });
     public readonly navigable = input(true, { transform: booleanAttribute });
     public readonly pageInput = input(false, { transform: booleanAttribute });

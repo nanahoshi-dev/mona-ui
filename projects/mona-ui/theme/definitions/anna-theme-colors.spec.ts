@@ -16,11 +16,11 @@ describe("annaThemeColors", () => {
                 "--color-surface": "#1D1E20",
                 "--color-surface-muted": "#161718",
                 "--color-surface-overlay": "#161718",
-                "--color-border-control": "#0F0F10",
-                "--color-border-control-hover": "#17181A",
+                "--color-border-control": "#6F7077",
+                "--color-border-control-hover": "#818289",
                 "--color-primary": "#583573",
                 "--color-selected": "var(--color-primary)",
-                "--color-focus-indicator": "#A174C2"
+                "--color-focus-indicator": "#BC94DB"
             })
         );
         expect(annaThemeColors.dark).not.toBe(monaThemeColors.dark);
@@ -50,12 +50,12 @@ describe("annaThemeColors", () => {
         expectContrast(colors, "--color-primary-foreground", "--color-primary", 4.5);
     });
 
-    it("keeps resting, hovered, and disabled borders darker than their surfaces", () => {
+    it("keeps quiet borders darker than their surfaces, and lifts a field's boundary to where it can be seen", () => {
         const colors = annaThemeColors.dark;
 
-        expectDarker(colors, "--color-border-control", "--color-input-background");
-        expectDarker(colors, "--color-border-control-hover", "--color-input-background");
+        expectDarker(colors, "--color-border", "--color-surface");
         expectDarker(colors, "--color-disabled-border", "--color-disabled-background");
+        expectDarker(colors, "--color-input-background", "--color-border-control");
         expectDarker(colors, "--color-border-control", "--color-border-control-hover");
     });
 

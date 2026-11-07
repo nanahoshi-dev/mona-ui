@@ -1,13 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, contentChild, input, model, TemplateRef } from "@angular/core";
+import { booleanAttribute, Component, computed, contentChild, input, model, TemplateRef } from "@angular/core";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { TabContentTemplateDirective } from "../../directives/tab-content-template.directive";
 import { TabTitleTemplateDirective } from "../../directives/tab-title-template.directive";
-import { TabItem } from "../../models/TabItem";
+import type { TabItem } from "../../models/TabItem";
 
 @Component({
     selector: "mona-tab",
-    template: "",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    template: ""
 })
 export class TabComponent {
     readonly #id = createElementControlId();
@@ -35,20 +34,23 @@ export class TabComponent {
     protected readonly titleTemplate = contentChild(TabTitleTemplateDirective, { read: TemplateRef });
 
     /**
-     * @description Displays a close button on this tab. Overrides the parent `mona-tabs` component's `closable` input.
+     * @description Displays a close button on this tab. Turning it on here shows the button even when the parent
+     * `mona-tabs` has `closable` off; turning it off here doesn't hide a button the parent asked for.
      * @default false
      */
-    public readonly closable = input<boolean>(false);
+    public readonly closable = input(false, { transform: booleanAttribute });
 
     /**
-     * @description Renders this tab with reduced visual emphasis and removes pointer and keyboard interaction.
-     * Overrides the parent `mona-tabs` component's `disabled` input.
+     * @description Renders this tab with reduced visual emphasis and removes pointer and keyboard interaction. A tab is
+     * disabled when this or the parent `mona-tabs` component's `disabled` input is on.
      * @default false
      */
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
-     * @description Whether the tab is selected.
+     * @description Whether the tab is selected. Setting it to `true` selects the tab unless it's disabled, and it
+     * follows the selection, so `[(selected)]` stays current. Setting it to `false` doesn't clear the selection, because
+     * a group of tabs always keeps one selected.
      * @default false
      */
     public readonly selected = model(false);
@@ -59,6 +61,9 @@ export class TabComponent {
      */
     public readonly title = input("");
 
+    /**
+     * @internal
+     */
     public get tabItem(): TabItem {
         return this.#tabItem();
     }

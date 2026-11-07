@@ -9,7 +9,8 @@
     },
     "exports": {
         "./i18n/catalogs/*.json": "./i18n/catalogs/*.json",
-        "./locales/*.json": "./locales/*.json"
+        "./locales/*.json": "./locales/*.json",
+        "./styles.css": "./styles.css"
     },
     "publishConfig": {
         "access": "public"

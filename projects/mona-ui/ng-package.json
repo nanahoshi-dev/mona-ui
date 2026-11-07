@@ -36,6 +36,7 @@
             "glob": "*/*.messages.json",
             "output": "locales"
         },
+        "styles.css",
         "THIRD_PARTY_NOTICES.md"
     ]
 }

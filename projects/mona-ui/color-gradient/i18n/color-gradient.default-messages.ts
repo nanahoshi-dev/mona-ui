@@ -8,16 +8,28 @@ function localizeNumber(value: number, options?: Intl.NumberFormatOptions): stri
 }
 
 export const COLOR_GRADIENT_DEFAULT_MESSAGES: MonaColorGradientMessages = {
+    alpha: "Alpha",
+    alphaText: (opacity: number) => `Opacity ${localizeNumber(opacity)}%`,
     apply: "Apply",
+    blue: "Blue",
     cancel: "Cancel",
     clearColor: "Clear color",
+    colorCopied: "Color copied",
+    colorGradient: "Color gradient",
     copyAsHex: "Copy as HEX",
     copyAsRgb: "Copy as RGB",
     copyColor: "Copy color",
+    copyFailed: "Couldn't copy the color",
     currentColor: "Current color",
+    green: "Green",
+    hexColor: "Hex color",
+    hue: "Hue",
     previousColor: "Previous color",
+    red: "Red",
+    saturation: "Saturation",
     saturationAndValue: "Color saturation and value",
     saturationAndValueText: (saturation: number, value: number) =>
         `Saturation ${localizeNumber(saturation)}%, Value ${localizeNumber(value)}%`,
-    switchColorMode: "Switch color mode"
+    switchColorMode: "Switch color mode",
+    value: "Value"
 };

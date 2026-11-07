@@ -1,15 +1,24 @@
-@if (prefixTemplate()) {
-    <ng-container [ngTemplateOutlet]="prefixTemplate()"></ng-container>
-}
+<span
+    #body
+    [class]="bodyClasses()"
+    [attr.aria-checked]="split() ? ariaChecked() : null"
+    [attr.aria-disabled]="split() && disabled() ? 'true' : null"
+    [attr.aria-label]="split() ? ariaLabel() || null : null"
+    [attr.role]="split() ? controlRole() : null"
+    [attr.tabindex]="split() ? effectiveTabIndex() : null">
+    @if (prefixTemplate()) {
+        <ng-container [ngTemplateOutlet]="prefixTemplate()"></ng-container>
+    }
 
-@if (label()) {
-    <span>{{ label() }}</span>
-} @else {
-    <ng-content></ng-content>
-}
+    @if (label()) {
+        <span>{{ label() }}</span>
+    } @else {
+        <ng-content></ng-content>
+    }
+</span>
 
 @if (removable()) {
-    @let removeAriaLabel = removeLabel() ?? messages().removeLabel(label());
+    @let removeAriaLabel = removeLabel() || messages().removeLabel(label() || ariaLabel());
     <button
         monaButton
         look="link"

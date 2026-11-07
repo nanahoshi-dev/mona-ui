@@ -38,7 +38,7 @@ export const gridCellBaseThemeVariants = cva("flex w-full min-w-0", {
 export const gridCellContainerThemeVariants = cva(
     `
         flex w-full min-w-0 items-center
-        flex-1 outline-none
+        flex-1 outline-none focus-visible:outline-hidden
     `,
     {
         variants: {
@@ -117,12 +117,12 @@ export const gridColumnDragPreviewThemeVariants = cva(
 );
 
 export const gridColumnDropHintThemeVariants = cva(`
-    absolute flex w-1 h-full bg-primary z-10! top-0 bottom-0
+    absolute flex w-1 h-full bg-[var(--mona-indicator-color,var(--color-primary))] z-10! top-0 bottom-0
 `);
 
 export const gridColumnResizerThemeVariants = cva(`
     absolute top-0 bottom-0 w-3 bg-transparent cursor-col-resize z-10 -end-1.5 touch-none
-    outline-none focus-visible:bg-focus-indicator/40
+    outline-none focus-visible:outline-hidden focus-visible:bg-focus-indicator/40
 `);
 
 export const gridRowReorderHandleThemeVariants = cva(`
@@ -131,7 +131,7 @@ export const gridRowReorderHandleThemeVariants = cva(`
     text-muted-foreground
     hover:text-foreground
     active:cursor-grabbing
-    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator/50
+    focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator/50
     disabled:cursor-not-allowed disabled:text-muted-foreground/35 disabled:hover:text-muted-foreground/35
 `);
 
@@ -176,7 +176,7 @@ export const gridFooterTableRowThemeVariants = cva(`relative inline-flex [&>td:l
 
 export const gridFooterTableCellThemeVariants = cva(
     `
-        relative overflow-hidden outline-none
+        relative overflow-hidden outline-none focus-visible:outline-hidden
         text-start align-middle px-2 py-2
         bg-surface-muted
         border-e border-e-border-subtle border-b border-b-border-subtle
@@ -229,7 +229,7 @@ export const gridHeaderTableCellThemeVariants = cva(
     `
         relative select-none
         text-start overflow-visible
-        outline-none border-e border-e-border-subtle
+        outline-none focus-visible:outline-hidden border-e border-e-border-subtle
         after:absolute after:inset-0 after:pointer-events-none
         focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-focus-indicator
     `
@@ -239,7 +239,7 @@ export const gridHeaderTableCellThemeVariants = cva(
 export const gridFilterRowHeaderCellThemeVariants = cva(
     `
         relative overflow-hidden
-        outline-none border-e border-border
+        outline-none focus-visible:outline-hidden border-e border-border
         after:absolute after:inset-0 after:pointer-events-none
         focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-focus-indicator
     `
@@ -263,7 +263,7 @@ export const gridHeaderTableColumnTitleThemeVariants = cva(
 export const gridListBaseThemeVariants = cva(
     `
         w-full h-full
-        outline-none
+        outline-none focus-visible:outline-hidden
         border-t border-t-border-subtle
         [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]
     `,
@@ -296,6 +296,11 @@ export const gridListTableRowThemeVariants = cva(``, {
         selected: {
             true: `
                     bg-(--color-selected) text-(--color-selected-foreground) hover:bg-(--color-selected-active)
+                    [&>td:first-child]:before:absolute [&>td:first-child]:before:inset-y-0
+                    [&>td:first-child]:before:start-0 [&>td:first-child]:before:w-0.5
+                    [&>td:first-child]:before:bg-(--color-selected-border)
+                    [&>td:first-child]:before:forced-color-adjust-none
+                    forced-colors:[&>td:first-child]:before:bg-[Highlight]
                 `,
             false: "bg-surface hover:bg-hover"
         },
@@ -307,7 +312,7 @@ export const gridListTableRowThemeVariants = cva(``, {
 export const gridListTableCellThemeVariants = cva(
     `
         relative
-        outline-none z-1
+        outline-none focus-visible:outline-hidden z-1
         align-middle
         border-b border-b-border-subtle
         after:content-[''] after:block

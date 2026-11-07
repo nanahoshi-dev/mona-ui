@@ -1,5 +1,5 @@
 import { computed, Directive, effect, inject, input, untracked } from "@angular/core";
-import { CollapsibleToken } from "@nanahoshi/mona-ui/collapsible";
+import { COLLAPSIBLE_CONFIG } from "@nanahoshi/mona-ui/collapsible";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
 import { twMerge } from "tailwind-merge";
 import { SidebarService } from "../services/sidebar.service";
@@ -15,7 +15,7 @@ import { sidebarMenuItemThemeVariants } from "../styles/sidebar.styles";
 export class SidebarMenuItemDirective {
     // Applying `monaCollapsible` to the same element turns the item into a disclosure row, so it has to
     // stack its trigger and submenu instead of laying them out side-by-side.
-    readonly #collapsible = inject(CollapsibleToken, { optional: true, self: true });
+    readonly #collapsible = inject(COLLAPSIBLE_CONFIG, { optional: true, self: true });
     readonly #sidebarService = inject(SidebarService, { optional: true });
     #expandedBeforeRail = false;
     protected readonly baseClass = computed(() => {
@@ -54,7 +54,9 @@ export class SidebarMenuItemDirective {
      *
      * Closing the disclosure for real keeps the trigger's own state truthful and lets the collapsible
      * content directive apply the `inert` it already applies when closed. The prior state is restored
-     * on the way back out, so collapsing and expanding the sidebar does not quietly discard it.
+     * on the way back out, so collapsing and expanding the sidebar does not quietly discard it. The row
+     * itself expands the sidebar when it's activated on the rail, so that closing only meets a submenu
+     * opened from code.
      */
     #keepSubmenuClosedOnRail(): void {
         const collapsible = this.#collapsible;

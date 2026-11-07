@@ -2,7 +2,7 @@
     [aria-describedby]="ariaDescribedBy()"
     [aria-label]="ariaLabel()"
     [aria-labelledby]="ariaLabelledBy()"
-    [disabled]="disabled()"
+    [disabled]="effectiveDisabled()"
     [inputId]="inputId()"
     [readonly]="readonly()"
     [required]="required()"
@@ -28,7 +28,7 @@
             [attr.aria-label]="messages().openTimePicker"
             [attr.aria-expanded]="expanded()"
             [attr.aria-controls]="popupId"
-            [disabled]="disabled() || readonly()"
+            [disabled]="effectiveDisabled() || readonly()"
             [tabindex]="-1">
             <svg lucideClock [size]="16" aria-hidden="true"></svg>
         </button>
@@ -49,7 +49,7 @@
             (valueChange)="onTimeSelectorValueChange($event)"
             [max]="max()"
             [min]="min()"
-            [disabled]="disabled()"
+            [disabled]="effectiveDisabled()"
             [readonly]="readonly()"
             [hourFormat]="effectiveHourFormat()"
             [hourStep]="hourStep()"

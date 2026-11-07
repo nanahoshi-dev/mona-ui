@@ -6,4 +6,5 @@ export * from "./directives/card-content.directive";
 export * from "./directives/card-description.directive";
 export * from "./directives/card-title.directive";
 export * from "./i18n/card.default-messages";
+export type { CardTemplateContext } from "./models/CardTemplateContext";
 export type { CardVariantProps } from "./styles/card.styles";

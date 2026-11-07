@@ -10,19 +10,27 @@ import {
 } from "@nanahoshi/mona-ui/label";
 ```
 
-## `LabelComponent`
+## API
+
+### `LabelComponent`
 
 **Selector:** `mona-label`
 
-| Name           | Type          | Default      | Description                                                                                                    |
-|----------------|---------------|--------------|------------------------------------------------------------------------------------------------------------------|
-| `class`        | `string`      | `''`         | Additional CSS classes merged onto the rendered `<label>` element via `tailwind-merge`.                          |
-| `for`          | `LabelTarget` | `undefined`  | Associates the label with a native control ID or a target that exposes a public `focus()` method.               |
-| `optional`     | `boolean`     | `false`      | Whether to display optional-field text next to the caption.                                                      |
-| `optionalText` | `string`      | `'Optional'` | Text displayed when `optional` is enabled.                                                                       |
-| `text`         | `string`      | `''`         | Visible label caption text.                                                                                      |
+#### Inputs
+
+| Name           | Type          | Default     | Description                                                                                                                  |
+|----------------|---------------|-------------|------------------------------------------------------------------------------------------------------------------------------|
+| `class`        | `string`      | `''`        | Additional CSS classes merged onto the rendered `<label>` element via `tailwind-merge`.                                      |
+| `for`          | `LabelTarget` | `undefined` | Associates the label with a native control ID or a control reference. See `LabelTarget`.                                     |
+| `optional`     | `boolean`     | `false`     | Whether to display optional-field text next to the caption.                                                                  |
+| `optionalText` | `string`      | `''`        | Text displayed when `optional` is enabled. When empty, the localized "Optional" (the `label.optional` message) is used.      |
+| `text`         | `string`      | `''`        | Visible label caption text. Required to name a wrapped control.                                                              |
+
+#### Outputs
 
 `LabelComponent` has no model inputs and no event outputs.
+
+#### Usage
 
 **Wrapped control (preferred):**
 
@@ -39,7 +47,7 @@ import {
 <input id="email" monaTextBox />
 ```
 
-**Component-reference focus delegation:**
+**Component reference:**
 
 ```html
 <mona-label text="Email address" [for]="textBox"></mona-label>
@@ -54,16 +62,24 @@ import {
 </mona-label>
 ```
 
-## `LabelDirective`
+### `LabelDirective`
 
 **Selector:** `label[monaLabel]`
 
-| Name    | Type          | Default     | Description                                                                          |
-|---------|---------------|-------------|----------------------------------------------------------------------------------------|
-| `class` | `string`      | `''`        | Additional CSS classes merged onto the native label element via `tailwind-merge`.       |
-| `for`   | `LabelTarget` | `undefined` | Associates the label with a native control ID or a target that exposes a public `focus()` method. |
+#### Inputs
 
-`LabelDirective` has no model inputs and no event outputs. It never inserts or rewrites the label's content — write the caption, and any optional-field text, directly inside the `<label>`:
+| Name    | Type          | Default     | Description                                                                              |
+|---------|---------------|-------------|------------------------------------------------------------------------------------------|
+| `class` | `string`      | `''`        | Additional CSS classes merged onto the native label element via `tailwind-merge`.        |
+| `for`   | `LabelTarget` | `undefined` | Associates the label with a native control ID or a control reference. See `LabelTarget`. |
+
+#### Outputs
+
+`LabelDirective` has no model inputs and no event outputs.
+
+#### Usage
+
+It never inserts or rewrites the label's content — write the caption, and any optional-field text, directly inside the `<label>`:
 
 ```html
 <label monaLabel for="email">
@@ -75,26 +91,31 @@ import {
 
 The directive selector is deliberately scoped to `label[monaLabel]` rather than every `label[for]` — it only affects a `<label>` that explicitly carries the `monaLabel` attribute, so importing it never changes the behavior of other native labels in your application.
 
-## `LabelTarget`
+The directive has no wrapping contract. It connects to a control only through `for`.
+
+### `LabelTarget`
 
 ```typescript
 interface LabelFocusable {
+    activateFromLabel?(): void;
     focus(options?: FocusOptions): void;
+    setLabelledBy?(id: string | null): void;
 }
 
 type LabelTarget = string | LabelFocusable | null | undefined;
 ```
 
-- A `string` is reflected as the native `for` attribute; the browser owns focus and click activation.
-- An object exposing a public `focus()` method — including a native `HTMLElement` or a Mona UI component reference — receives focus when the label is clicked. No `for` attribute is rendered for these targets.
-- `null` and `undefined` are ignored: no `for` attribute is rendered and clicking the label does nothing.
+- A `string` is reflected as the native `for` attribute; the browser owns focus and click activation. It must be the id of a native input: on a component's host element it does nothing, and warns in development.
+- An object is bound with `[for]="ref"`, and no `for` attribute is rendered. If it has `setLabelledBy`, as the controls listed under [which controls take what](#which-controls-take-what) do, the label names it. On a click, the label calls `activateFromLabel` if there is one, and `focus()` otherwise.
+- `null` and `undefined` are ignored: no `for` attribute is rendered and clicking the label does nothing, apart from what the browser does for a native input inside it.
 
 ## Accessibility
 
 - Both APIs render a real native `<label>` — no ARIA `role` is added, and none is needed.
-- Component-reference focus delegation (a `for` value with a `focus()` method) only delegates focus on click. It does **not** automatically give the target control an accessible name, unlike native `for`/`id` association or wrapping, both of which the browser and assistive technology understand natively. Prefer those two modes; when you must use focus delegation, ensure the target control independently has a correct `aria-label` or `aria-labelledby`.
+- A wrapped control is named by the `text` input or its own `aria-label` or `aria-labelledby`. Text projected next to it can't name it, and `mona-label` warns in development if nothing else does.
+- A reference in `for` names the control only if the control supports it. Other targets, such as a native element reference or `mona-dropdown-list`, only receive focus on click, so give them their own `aria-label` or `aria-labelledby`.
 - `LabelComponent` never reads a projected control's `required` state and never renders a required asterisk — pair it with your own validation messaging if needed.
-- Do not wrap `CheckBoxComponent` or `RadioButtonComponent` in `<mona-label>`; both already render their own native `<label>`, and nesting `<label>` elements is invalid HTML. Use their built-in `label` input instead.
+- Do not wrap `CheckBoxComponent` or `RadioButtonComponent` in `<mona-label>`; both already render their own native `<label>`, and nesting `<label>` elements is invalid HTML. Use their built-in `label` input, or `[for]="ref"` from outside.
 
 ## Styling
 
@@ -110,13 +131,4 @@ Both the component and the directive expose a `class` input merged onto the rend
 - Floating labels (`FloatingLabel`).
 - Form-field containers, hint/help/validation/error-message components.
 - Automatically reading a control's `required` state or rendering a required asterisk.
-- Automatically generating IDs for controls or assigning `aria-labelledby` on arbitrary custom components.
-
----
-
-<!-- verification-checklist
-- [x] API definitions and defaults verified against source (label.component.ts, label.directive.ts, LabelTarget.ts)
-- [x] No ElementRef exposed in the public LabelTarget API
-- [x] No FloatingLabel or form-field behavior documented as implemented
-- [x] Checkbox/radio-button nested-label incompatibility documented
--->
+- Automatically generating IDs for controls, or naming custom components that don't support it.

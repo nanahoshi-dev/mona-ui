@@ -361,12 +361,11 @@ describe("SegmentedComponent", () => {
             expect(indicator?.classList.contains("rounded-sm")).toBe(true);
         });
 
-        it("keeps the focus ring on the option label radius", () => {
+        it("keeps the focus outline on the option label radius", () => {
             const label = getLabels(fixture)[0];
             const span = label.querySelector("span") as HTMLSpanElement | null;
 
-            expect(span?.classList.contains("peer-focus-visible:ring-2")).toBe(true);
-            expect(span?.classList.contains("peer-focus-visible:ring-focus-indicator/35")).toBe(true);
+            expect(label.classList.contains("has-[input:focus-visible]:outline-2")).toBe(true);
             expect(span?.classList.contains("[border-radius:inherit]")).toBe(true);
         });
     });
@@ -817,7 +816,7 @@ describe("SegmentedComponent", () => {
             expect(touches).toBe(1);
         });
 
-        it("emits touch when focus leaves a radio input", () => {
+        it("emits touch when focus leaves the group", () => {
             const componentInstance = fixture.debugElement
                 .query(By.directive(SegmentedComponent))
                 .componentInstance as SegmentedComponent;
@@ -827,7 +826,7 @@ describe("SegmentedComponent", () => {
             });
 
             const radio = getRadios(fixture)[0];
-            radio.dispatchEvent(new FocusEvent("blur"));
+            radio.dispatchEvent(new FocusEvent("focusout", { bubbles: true }));
             fixture.detectChanges();
 
             expect(touches).toBe(1);

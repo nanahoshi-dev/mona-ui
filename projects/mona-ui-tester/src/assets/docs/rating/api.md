@@ -29,40 +29,56 @@ import {
 
 External values that are out of range, non-finite, or incompatible with the active precision are normalized for rendering but are **never rewritten on the model** — the model changes only when the user interacts with the control. `Home` restores `0`.
 
-## Inputs
+## Clearing
+
+The keyboard can always clear a rating with `Home`. Set `clearable` so a click on the current value clears it too, which gives pointer and touch users a way to undo one:
+
+```html
+<mona-rating aria-label="Product rating" clearable [(value)]="rating"></mona-rating>
+```
+
+## API
+
+### `RatingComponent`
+
+**Selector:** `mona-rating`
+
+#### Inputs
 
 All inputs are listed alphabetically.
 
-| Input              | Type                                                   | Default        | Description                                                                                |
-| ------------------ | ------------------------------------------------------ | -------------- | ------------------------------------------------------------------------------------------ |
-| `aria-describedby` | `string \| null`                                       | `null`         | Associates help text or an error description with the rating control.                      |
-| `aria-label`       | `string \| null`                                       | `null`         | Explicit accessible name.                                                                  |
-| `aria-labelledby`  | `string \| null`                                       | `null`         | IDs of external elements providing the accessible name.                                    |
-| `ariaValueText`    | `((value: number, maximum: number) => string) \| null` | `null`         | Custom screen-reader value announcement.                                                   |
-| `class`            | `string`                                               | `""`           | Additional host classes merged through `tailwind-merge`.                                   |
-| `color`            | `string \| null \| undefined`                          | `null`         | CSS color for selected and hovered visuals; empty values use the primary theme color.      |
-| `disabled`         | `boolean`                                              | `false`        | Disables interaction and removes the control from the tab sequence.                        |
-| `icon`             | `RatingIconName`                                       | `"star"`       | Built-in icon for the default visuals: `star`, `heart`, `circle`, `diamond`, or `flame`.   |
-| `invalid`          | `boolean`                                              | `false`        | Signal Forms validation state. Error styling requires `touched` too.                       |
-| `itemsCount`       | `number`                                               | `5`            | Number of rating items. Fractional values are floored, values below one are raised to one. |
-| `label`            | `string \| null`                                       | `null`         | Optional visible label.                                                                    |
-| `labelPosition`    | `"before" \| "after"`                                  | `"after"`      | Places the label before or after the item group.                                           |
-| `precision`        | `"item" \| "half"`                                     | `"item"`       | Whole-item or half-item selection.                                                         |
-| `readonly`         | `boolean`                                              | `false`        | Prevents value changes while preserving focusability and visual emphasis.                  |
-| `selection`        | `"continuous" \| "single"`                             | `"continuous"` | Cumulative or single-item filling.                                                         |
-| `size`             | `"small" \| "medium" \| "large"`                       | `"medium"`     | Icon dimensions, item hitboxes, spacing, and label typography.                             |
-| `tabindex`         | `number`                                               | `0`            | Tab index applied when not disabled. Numeric strings are converted.                        |
-| `touched`          | `boolean`                                              | `false`        | Signal Forms touched state.                                                                |
-| `value`            | `number`                                               | `0`            | Current rating value (two-way model).                                                      |
+| Name               | Type                                                   | Default        | Description                                                                                                                                                   |
+| ------------------ | ------------------------------------------------------ | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `aria-describedby` | `string \| null`                                       | `null`         | Associates help text or an error description with the rating control.                                                                                         |
+| `aria-label`       | `string \| null`                                       | `null`         | Explicit accessible name.                                                                                                                                     |
+| `aria-labelledby`  | `string \| null`                                       | `null`         | IDs of external elements providing the accessible name.                                                                                                       |
+| `ariaValueText`    | `((value: number, maximum: number) => string) \| null` | `null`         | Custom screen-reader value announcement.                                                                                                                      |
+| `class`            | `string`                                               | `""`           | Additional host classes merged through `tailwind-merge`.                                                                                                      |
+| `clearable`        | `boolean`                                              | `false`        | Lets a click on the current value clear the rating.                                                                                                           |
+| `color`            | `string \| null \| undefined`                          | `undefined`    | CSS color for selected and hovered visuals; empty values use the primary theme color.                                                                         |
+| `disabled`         | `boolean`                                              | `false`        | Disables interaction and removes the control from the tab sequence. `FormField` writes it.                                                                    |
+| `icon`             | `RatingIconName`                                       | `"star"`       | Built-in icon for the default visuals: `star`, `heart`, `circle`, `diamond`, or `flame`.                                                                      |
+| `invalid`          | `boolean`                                              | `false`        | Marks the component as invalid. Error styling requires `touched` too. `FormField` writes it.                                                                  |
+| `itemsCount`       | `number`                                               | `5`            | Number of rating items. Fractional values are floored, values below one are raised to one.                                                                    |
+| `label`            | `string \| null`                                       | `null`         | Optional visible label. It provides the accessible name when there's no `aria-label` or `aria-labelledby`.                                                    |
+| `labelPosition`    | `"before" \| "after"`                                  | `"after"`      | Places the label before or after the item group.                                                                                                              |
+| `precision`        | `"item" \| "half"`                                     | `"item"`       | Whole-item or half-item selection.                                                                                                                            |
+| `readonly`         | `boolean`                                              | `false`        | Prevents value changes while preserving focusability and visual emphasis. `FormField` writes it.                                                              |
+| `required`         | `boolean`                                              | `false`        | Shows the invalid state while the rating is `0` and the control is touched. It doesn't fail a form: see [Signal Forms](#signal-forms). `FormField` writes it. |
+| `selection`        | `"continuous" \| "single"`                             | `"continuous"` | Cumulative or single-item filling.                                                                                                                            |
+| `size`             | `"small" \| "medium" \| "large"`                       | `"medium"`     | Icon dimensions, item hitboxes, spacing, and label typography.                                                                                                |
+| `tabindex`         | `number`                                               | `0`            | Tab index applied when not disabled. Numeric strings are converted.                                                                                           |
+| `touched`          | `boolean`                                              | `false`        | Marks the component as touched. `FormField` writes it.                                                                                                        |
+| `value`            | `number`                                               | `0`            | Two-way. Current rating value.                                                                                                                                |
 
-## Outputs
+#### Outputs
 
-| Output        | Type     | Description                                                                              |
-| ------------- | -------- | ---------------------------------------------------------------------------------------- |
-| `valueChange` | `number` | Emitted when the user selects a new value. Provided automatically by the `value` model.  |
-| `touch`       | `void`   | Emitted when the user interacts with or blurs the control, marking the field as touched. |
+| Name          | Type     | Description                                                                                                                                       |
+| ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `valueChange` | `number` | Emitted when the user selects a new value. Provided automatically by the `value` model.                                                           |
+| `touch`       | `void`   | Emitted when the control loses focus or a pointer commits a rating, marking the field as touched. A key press doesn't emit it until focus leaves. |
 
-## Methods
+#### Methods
 
 | Method                          | Description                                                    |
 | ------------------------------- | -------------------------------------------------------------- |
@@ -91,7 +107,7 @@ With `selection="single"`, only the item representing the value fills:
 - `precision="item"` — pointer interaction anywhere inside an item selects the whole item; the keyboard step is `1`.
 - `precision="half"` — each item is divided into two pointer regions (first half selects `itemValue - 0.5`, second half selects `itemValue`); the keyboard step is `0.5`.
 
-In RTL, the first _visual_ half (the right side) maps to the lower value.
+In RTL, the first _visual_ half (the right side) maps to the lower value. The pointer follows the computed CSS `direction`, so a `direction` set by style alone counts.
 
 ## Keyboard Navigation
 
@@ -99,10 +115,12 @@ In RTL, the first _visual_ half (the right side) maps to the lower value.
 | ------------------------- | ------------------------------------- |
 | `ArrowRight` / `ArrowUp`  | Increase by the active precision step |
 | `ArrowLeft` / `ArrowDown` | Decrease by the active precision step |
+| `PageUp`                  | Increase by `1`                       |
+| `PageDown`                | Decrease by `1`                       |
 | `Home`                    | Set value to `0`                      |
 | `End`                     | Set value to `itemsCount`             |
 
-Arrow meaning is not inverted in RTL. Handled keys call `preventDefault`; unrecognized keys are ignored.
+In RTL, `ArrowLeft` increases and `ArrowRight` decreases. Handled keys call `preventDefault`; unrecognized keys are ignored.
 
 ## Disabled vs. Read-Only
 
@@ -113,10 +131,11 @@ When both are `true`, disabled behavior takes precedence.
 
 ## Signal Forms
 
-`mona-rating` implements `FormValueControl<number>` and works with the `Field` directive of Angular Signal Forms:
+`mona-rating` implements `FormValueControl<number>` and works with the `FormField` directive of Angular Signal Forms:
 
 ```typescript
-import { form, signal } from "@angular/forms/signals";
+import { signal } from "@angular/core";
+import { form, FormField, min } from "@angular/forms/signals";
 
 interface ReviewModel {
     rating: number;
@@ -124,25 +143,33 @@ interface ReviewModel {
 
 readonly #model = signal<ReviewModel>({ rating: 0 });
 
-readonly reviewForm = form(this.#model);
+readonly reviewForm = form(this.#model, schema => {
+    min(schema.rating, 1);
+});
 ```
 
 ```html
 <mona-rating aria-label="Review rating" [formField]="reviewForm.rating"> </mona-rating>
 ```
 
-The `Field` directive writes `disabled`, `invalid`, and `touched` state automatically. Error styling (`aria-invalid`, `data-invalid`, error ring) appears only when the field is both invalid and touched.
+The `FormField` directive writes `disabled`, `invalid`, `readonly`, `required`, and `touched` state automatically. Don't set those on the same element, because Angular rejects the template. Error styling (`aria-invalid`, `data-invalid`, error ring) appears only when the field is both invalid and touched, or `required` and touched with a rating of `0`.
+
+**Requiring a rating:** `required` and the signal forms `required` rule don't do the same thing. The `required` input shows the invalid state at `0` once touched. The `required` rule doesn't treat the number `0` as empty, so it won't fail the form by itself. To reject an unrated value, use `min(path, 1)`, or `min(path, 0.5)` with `precision="half"`.
+
+The rating has no `name` input, because it has no native input.
+
+`RatingComponent` doesn't implement `ControlValueAccessor`. `[(ngModel)]` binds to its `value` model through Angular's support for custom controls. Prefer `[formField]`.
 
 ## Accessibility Attributes
 
-The rating control is a focusable `role="slider"` element and **requires an accessible name**. Provide at least one of `label` (a visible label rendered next to the items), `aria-label`, or `aria-labelledby` — without one of these, assistive technology cannot announce the control.
+The rating control is a focusable `role="slider"` element and **requires an accessible name**. Provide at least one of `label` (a visible label rendered next to the items), `aria-label`, or `aria-labelledby`, wrap it in a `mona-label` with `text`, or bind a label to it with `[for]="ref"`. Without one of these, assistive technology cannot announce the control, and it warns in development. A click on a wrapping label's caption focuses the control.
 
 The inner control exposes:
 
 | Attribute                                          | Value                                                                     |
 | -------------------------------------------------- | ------------------------------------------------------------------------- |
 | `role`                                             | `"slider"`                                                                |
-| `tabindex`                                         | `0` (or `-1` when disabled)                                               |
+| `tabindex`                                         | `tabindex` (or `-1` when disabled)                                        |
 | `aria-valuemin`                                    | `0`                                                                       |
 | `aria-valuemax`                                    | `itemsCount`                                                              |
 | `aria-valuenow`                                    | The normalized value                                                      |
@@ -239,10 +266,10 @@ this.rating()?.focus();
 
 The component intentionally does not support:
 
-- `ngModel`, `formControl`, `formControlName`, Legacy Reactive Forms, or Template-driven Forms
+- `ControlValueAccessor`
 - Drag-to-rate interaction
 - Arbitrary minimum/maximum values
 - Custom step values other than `1` and `0.5`
 - Vertical orientation
-- A clear/reset button
+- A clear/reset button (use `clearable` or `Home`)
 - Per-item disabled states

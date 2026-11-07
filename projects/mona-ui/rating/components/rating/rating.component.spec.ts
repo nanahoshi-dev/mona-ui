@@ -788,7 +788,7 @@ describe("RatingComponent", () => {
             expect(emissions).toBe(1);
         });
 
-        it("emits touch on keyboard interaction", () => {
+        it("leaves touch for blur on keyboard interaction", () => {
             const componentInstance = getRatingComponent(fixture);
             let touches = 0;
             const subscription = componentInstance.touch.subscribe(() => {
@@ -798,7 +798,7 @@ describe("RatingComponent", () => {
             pressKey(fixture, "ArrowRight");
             subscription.unsubscribe();
 
-            expect(touches).toBe(1);
+            expect(touches).toBe(0);
         });
 
         it("keeps arrow meaning consistent under RTL", () => {
@@ -840,6 +840,12 @@ describe("RatingComponent", () => {
             component.tabindex.set("3");
             fixture.detectChanges();
             expect(getControl(fixture).getAttribute("tabindex")).toBe("3");
+        });
+
+        it("falls back to 0 for a tabindex that isn't a number", () => {
+            component.tabindex.set("abc");
+            fixture.detectChanges();
+            expect(getControl(fixture).getAttribute("tabindex")).toBe("0");
         });
 
         it("forces tabindex -1 while disabled", () => {
@@ -1020,7 +1026,7 @@ describe("RatingComponent", () => {
             expect(touches).toBe(1);
         });
 
-        it("emits touch on keyboard commit", () => {
+        it("leaves touch for blur on keyboard commit", () => {
             const componentInstance = getRatingComponent(fixture);
             let touches = 0;
             const subscription = componentInstance.touch.subscribe(() => {
@@ -1030,7 +1036,7 @@ describe("RatingComponent", () => {
             pressKey(fixture, "ArrowRight");
             subscription.unsubscribe();
 
-            expect(touches).toBe(1);
+            expect(touches).toBe(0);
         });
     });
 
@@ -1245,10 +1251,33 @@ describe("RatingComponent", () => {
             expect(afterSpans[afterSpans.length - 1]?.textContent?.trim()).toBe("Rating");
         });
 
-        it("exposes a focus indicator treatment", () => {
-            const control = getControl(fixture);
-            expect(control.classList.contains("focus-visible:ring-2")).toBe(true);
-            expect(control.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
+        it("has a solid focus outline, because nothing else shows focus", () => {
+            const classes = getControl(fixture).classList;
+            expect(classes.contains("focus-visible:outline-2")).toBe(true);
+            expect(classes.contains("focus-visible:outline-focus-indicator")).toBe(true);
+            // Tailwind's outline-none would keep the outline style at none, and hide it.
+            expect(classes.contains("outline-none")).toBe(false);
+            expect(classes.toString()).not.toContain("focus-indicator/35");
+        });
+
+        it("draws the invalid state with a solid outline as well", () => {
+            const classes = getControl(fixture).classList;
+            expect(classes.contains('data-[invalid="true"]:outline-error')).toBe(true);
+            expect(classes.toString()).not.toContain("ring-error/35");
+        });
+
+        it("doesn't fade the icons of the unfilled items", () => {
+            expect(fixture.nativeElement.querySelector("svg").classList.contains("opacity-45")).toBe(false);
+        });
+
+        it("warns in development when it has no name", async () => {
+            const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+            const unnamed = TestBed.createComponent(RatingComponent);
+            unnamed.detectChanges();
+            await unnamed.whenStable();
+
+            expect(warn.mock.calls.some(call => String(call[0]).includes("[Mona Rating]"))).toBe(true);
+            warn.mockRestore();
         });
 
         it("has no AXE violations in a labeled default state", async () => {

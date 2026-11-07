@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, input, model } from "@angular/core";
+import { booleanAttribute, ChangeDetectionStrategy, Component, computed, input, signal } from "@angular/core";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ButtonGroupComponent } from "@nanahoshi/mona-ui/button-group";
 import { DropdownButtonComponent, DropdownButtonItemComponent } from "@nanahoshi/mona-ui/dropdown-button";
@@ -22,6 +22,11 @@ export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupC
                 alias: "aria-label",
                 type: "string",
                 value: "Button group"
+            },
+            ariaLabelledBy: {
+                alias: "aria-labelledby",
+                type: "string",
+                value: ""
             },
             look: {
                 type: "dropdown",
@@ -48,7 +53,9 @@ export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupC
                 alias: "class",
                 type: "string",
                 value: ""
-            }
+            },
+            // The demo holds its own value, shown under the group.
+            value: undefined
         })
     }));
     protected readonly metadata = this.getMetadata("ButtonGroupComponent");
@@ -69,16 +76,24 @@ export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupC
             <mona-button-group
                 [aria-label]="ariaLabel()"
                 [allowEmpty]="allowEmpty()"
+                [aria-labelledby]="ariaLabelledBy()"
                 [disabled]="disabled()"
+                [invalid]="invalid()"
+                [readonly]="readonly()"
                 [selection]="selection()"
                 [look]="look()"
                 [rounded]="rounded()"
                 [size]="size()"
-                [class]="userClass()">
-                <button monaButton>B1</button>
-                <button monaButton>B2</button>
-                <button monaButton>B3</button>
+                [touched]="touched()"
+                [class]="userClass()"
+                [(value)]="currentValue"
+                (buttonClick)="lastClick.set($event.button.textContent?.trim() ?? '')">
+                <button monaButton value="B1">B1</button>
+                <button monaButton value="B2">B2</button>
+                <button monaButton value="B3">B3</button>
+                <button monaButton [toggleable]="false">Action</button>
             </mona-button-group>
+            <span>Value: {{ currentValue() ?? "none" }}. Last click: {{ lastClick() || "none" }}</span>
             <mona-button-group
                 aria-label="Document"
                 [disabled]="disabled()"
@@ -99,12 +114,18 @@ export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupC
     `
 })
 export class ButtonGroupWrapperComponent implements ComponentInputsAsSignal<ButtonGroupComponent> {
-    public readonly allowEmpty = input<ReturnType<ButtonGroupComponent["allowEmpty"]>>(true);
+    protected readonly currentValue = signal<string | readonly string[] | null | undefined>(undefined);
+    protected readonly lastClick = signal("");
+    public readonly allowEmpty = input(true, { transform: booleanAttribute });
     public readonly ariaLabel = input<ReturnType<ButtonGroupComponent["ariaLabel"]>>("Button group");
-    public readonly disabled = model<ReturnType<ButtonGroupComponent["disabled"]>>(false);
+    public readonly ariaLabelledBy = input("");
+    public readonly disabled = input(false, { transform: booleanAttribute });
+    public readonly invalid = input(false, { transform: booleanAttribute });
     public readonly look = input<ReturnType<ButtonGroupComponent["look"]>>("default");
     public readonly rounded = input<ReturnType<ButtonGroupComponent["rounded"]>>("medium");
-    public readonly selection = model<ReturnType<ButtonGroupComponent["selection"]>>("single");
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly selection = input<ReturnType<ButtonGroupComponent["selection"]>>("single");
     public readonly size = input<ReturnType<ButtonGroupComponent["size"]>>("medium");
+    public readonly touched = input(false, { transform: booleanAttribute });
     public readonly userClass = input<ReturnType<ButtonGroupComponent["userClass"]>>("");
 }

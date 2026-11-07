@@ -45,7 +45,7 @@ describe("TabListItemDirective", () => {
 
     it("applies the active indicator classes for an active tab", () => {
         const classes = tabItem().className.split(/\s+/);
-        expect(classes).toContain("after:bg-primary");
+        expect(classes).toContain("after:bg-[var(--mona-indicator-color,var(--color-primary))]");
         expect(classes).toContain("after:absolute");
         expect(classes).toContain("text-foreground");
         expect(classes).toContain("font-semibold");
@@ -57,7 +57,7 @@ describe("TabListItemDirective", () => {
         const classes = tabItem().className.split(/\s+/);
         expect(classes).toContain("text-muted-foreground");
         expect(classes).toContain("hover:bg-hover");
-        expect(classes).not.toContain("after:bg-primary");
+        expect(classes).not.toContain("after:bg-[var(--mona-indicator-color,var(--color-primary))]");
     });
 
     it("applies bottom-aligned indicator for bottom position", () => {
@@ -92,7 +92,6 @@ describe("TabListItemDirective", () => {
         fixture.detectChanges();
         const classes = tabItem().className.split(/\s+/);
         expect(classes).toContain("h-8");
-        expect(classes).toContain("px-2");
         expect(classes).toContain("text-xs");
     });
 
@@ -101,7 +100,6 @@ describe("TabListItemDirective", () => {
         fixture.detectChanges();
         const classes = tabItem().className.split(/\s+/);
         expect(classes).toContain("h-10");
-        expect(classes).toContain("px-4");
     });
 
     it("hides the indicator and disables interaction for a disabled tab", () => {

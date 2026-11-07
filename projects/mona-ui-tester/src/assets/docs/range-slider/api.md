@@ -11,7 +11,7 @@ Use `RangeSliderComponent` when the user must select both a lower and upper boun
 
 - The user selects a single value within a fixed lower bound
 
-The selected range is always returned as a sorted `[min, max]` tuple — even if the user drags the lower handle past the upper handle during interaction.
+A user change always writes a sorted `[min, max]` tuple. Dragging a handle stops at the other handle, as the keyboard does.
 
 ## Import & Quick Start
 
@@ -28,16 +28,15 @@ import { RangeSliderComponent } from "@nanahoshi/mona-ui/slider";
 **Signal forms integration:**
 
 ```typescript
-import { form } from "@angular/forms/signals";
+import { signal } from "@angular/core";
+import { form, FormField } from "@angular/forms/signals";
 
-protected readonly filterForm = form({ price: [0, 100] as [number, number] });
+protected readonly filterForm = form(signal({ price: [0, 100] as [number, number] }));
 ```
 
 ```html
 <mona-range-slider [formField]="filterForm.price" aria-labelledby="price-label"></mona-range-slider>
 ```
-
-> **`RangeSliderComponent` does NOT implement `ControlValueAccessor`.** It cannot be used with `[(ngModel)]`, `[formControl]`, or `formControlName`. Use the signal forms `[formField]` binding instead.
 
 ## Template Hooks
 
@@ -94,7 +93,7 @@ import { RangeSliderComponent, SliderHandleTemplateDirective } from "@nanahoshi/
 
 ### Overlapping handles
 
-When the two handles share the same value, the secondary (upper) handle is rendered on top by default. Dragging either handle past the other will cause them to swap roles.
+When the two handles share the same value, the upper handle is on top by default, and a handle moved onto the other stays on top. The direction you drag in decides which handle moves, so neither can get stuck.
 
 ### Disabled state
 
@@ -102,9 +101,17 @@ When the two handles share the same value, the secondary (upper) handle is rende
 <mona-range-slider [disabled]="true" [value]="[20, 80]" aria-labelledby="range-label"></mona-range-slider>
 ```
 
+### Read-only state
+
+`readonly` blocks dragging, track clicks and keys. Both handles stay focusable and readable, and get `aria-readonly="true"`. With `[formField]`, the signal forms `readonly` rule writes it.
+
+```html
+<mona-range-slider readonly [value]="[20, 80]" aria-labelledby="range-label"></mona-range-slider>
+```
+
 ### Custom accessible handle labels
 
-The primary (lower) handle defaults to `"Minimum value"` and the secondary (upper) handle defaults to `"Maximum value"`. Override with `aria-label-start` and `aria-label-end`:
+The primary (lower) handle defaults to the localized `"Minimum value"` and the secondary (upper) handle defaults to the localized `"Maximum value"`. Override with `aria-label-start` and `aria-label-end`:
 
 ```html
 <mona-range-slider
@@ -114,61 +121,78 @@ The primary (lower) handle defaults to `"Minimum value"` and the secondary (uppe
 </mona-range-slider>
 ```
 
+## Values Out of Range
+
+The range slider never writes a corrected value on its own. A value that is out of range, off the step grid or unsorted is shown at the nearest valid values, and the model keeps its own until the user changes it. The next user change saves a valid tuple. This way a `maxValue` that loads late can't overwrite saved data.
+
+In development, the range slider warns once per instance when this happens, including for a `maxValue` that loads late. It also warns once when the minimum isn't lower than the maximum.
+
+`maxValue` can always be reached, even when it isn't a whole number of steps from `minValue`.
+
 ## Keyboard Interaction
 
-Each handle is independently focusable. Tab to switch between handles; the same key bindings apply to whichever handle has focus.
+Each handle is independently focusable. Tab to switch between handles; the same key bindings apply to whichever handle has focus. A handle stops at the other one.
 
-| Key                               | Action                                  |
-|-----------------------------------|-----------------------------------------|
-| `ArrowRight` / `ArrowUp`          | Increase focused handle value by `step` |
-| `ArrowLeft` / `ArrowDown`         | Decrease focused handle value by `step` |
-| `Shift` + `ArrowRight`/`ArrowUp`  | Increase by `step × shiftMultiplier`    |
-| `Shift` + `ArrowLeft`/`ArrowDown` | Decrease by `step × shiftMultiplier`    |
-| `Home`                            | Jump focused handle to `minValue`       |
-| `End`                             | Jump focused handle to `maxValue`       |
-| `PageUp`                          | Increase by 10% of the total range      |
-| `PageDown`                        | Decrease by 10% of the total range      |
+| Key                               | Action                                                 |
+|-----------------------------------|--------------------------------------------------------|
+| `ArrowRight` / `ArrowUp`          | Increase focused handle value by `step`                |
+| `ArrowLeft` / `ArrowDown`         | Decrease focused handle value by `step`                |
+| `Shift` + `ArrowRight`/`ArrowUp`  | Increase by `step × shiftMultiplier`                   |
+| `Shift` + `ArrowLeft`/`ArrowDown` | Decrease by `step × shiftMultiplier`                   |
+| `Home`                            | Move focused handle toward `minValue`                  |
+| `End`                             | Move focused handle toward `maxValue`                  |
+| `PageUp`                          | Increase by 10% of the total range, at least `step`    |
+| `PageDown`                        | Decrease by 10% of the total range, at least `step`    |
+
+In RTL, `ArrowLeft` increases and `ArrowRight` decreases.
 
 ## Accessibility Notes
 
-`RangeSliderComponent` renders two focusable `div` elements each with `role="slider"`. Both handles share the same `aria-valuemin` and `aria-valuemax`. Each handle manages its own `aria-valuenow`.
+`RangeSliderComponent` has role `group` and renders two focusable `div` elements each with `role="slider"`. Each handle's range ends at the other handle.
 
-| Attribute          | When present                     | Value                                                         |
-|--------------------|----------------------------------|---------------------------------------------------------------|
-| `role`             | Always (each handle)             | `"slider"`                                                    |
-| `aria-valuemin`    | Always                           | `minValue`                                                    |
-| `aria-valuemax`    | Always                           | `maxValue`                                                    |
-| `aria-valuenow`    | Always                           | Current value of that handle                                  |
-| `aria-valuetext`   | When `ariaValueText` is provided | Return value of the provided function for that handle's value |
-| `aria-orientation` | Always                           | `"horizontal"` or `"vertical"`                                |
-| `aria-disabled`    | When disabled                    | `true`                                                        |
-| `aria-required`    | When `required` is `true`        | `true`                                                        |
-| `aria-invalid`     | When `invalid` is `true`         | `true`                                                        |
-| `tabindex`         | Always                           | `0` (enabled) or `-1` (disabled)                              |
+| Attribute          | When present                      | Value                                                         |
+|--------------------|-----------------------------------|---------------------------------------------------------------|
+| `role`             | Always (each handle)              | `"slider"`                                                    |
+| `aria-valuemin`    | Always                            | Lower handle: `minValue`. Upper handle: the lower handle's value |
+| `aria-valuemax`    | Always                            | Lower handle: the upper handle's value. Upper handle: `maxValue` |
+| `aria-valuenow`    | Always                            | Current value of that handle                                  |
+| `aria-valuetext`   | When `ariaValueText` is provided  | Return value of the provided function for that handle's value |
+| `aria-orientation` | Always                            | `"horizontal"` or `"vertical"`                                |
+| `aria-disabled`    | When disabled                     | `true`                                                        |
+| `aria-readonly`    | When read-only                    | `true`                                                        |
+| `aria-invalid`     | When `invalid` and `touched`      | `true`                                                        |
+| `aria-describedby` | When `aria-describedby` is set    | The given id, on each handle                                  |
+| `tabindex`         | Always                            | `0` (enabled) or `-1` (disabled)                              |
 
-**Consumer responsibilities:**
+The range slider has no required state, because ARIA doesn't allow one on role `slider`. It has no `min` and `max` inputs either, so use `minValue` and `maxValue`.
 
-Each handle must have its own accessible name. Use `aria-label-start` and `aria-label-end` to customize the labels for the lower and upper handles respectively (defaults: `"Minimum value"` / `"Maximum value"`).
+**Accessible name:**
 
-Use `aria-labelledby` to associate a group-level label with both handles simultaneously.
+Each handle has its own name, from `aria-label-start` and `aria-label-end` (defaults: the localized `"Minimum value"` / `"Maximum value"`).
+
+- `aria-labelledby` labels the group, and each handle reads it before its own name, such as "Price Minimum value". A `mona-label` with `text` around it, or bound with `[for]="ref"`, does the same. A click on a wrapping caption focuses the lower handle.
+- `aria-label` names the group only. The handles keep just their own names.
+
+A string `for` can't work, because the range slider has no native input.
 
 ## Forms Integration
 
 `RangeSliderComponent` implements `FormValueControl<[number, number]>` from `@angular/forms/signals`. Connect it using the `[formField]` binding:
 
 ```typescript
-import { form } from "@angular/forms/signals";
+import { signal } from "@angular/core";
+import { form, FormField } from "@angular/forms/signals";
 
-protected readonly filterForm = form({ range: [10, 90] as [number, number] });
+protected readonly filterForm = form(signal({ range: [10, 90] as [number, number] }));
 ```
 
 ```html
 <mona-range-slider [formField]="filterForm.range" aria-labelledby="range-label"></mona-range-slider>
 ```
 
-The `touch` output fires when either handle loses focus or its value changes, signaling the field as touched.
+`FormField` writes `value`, `disabled`, `invalid`, `readonly` and `touched`. Don't set those on the same element, because Angular rejects the template. The `touch` output fires when either handle loses focus, marking the field as touched.
 
-> `ControlValueAccessor` is not implemented. `[(ngModel)]`, `[formControl]`, and `formControlName` are not supported.
+`RangeSliderComponent` doesn't implement `ControlValueAccessor`. `[(ngModel)]` binds to its `value` model through Angular's support for custom controls. Prefer `[formField]`.
 
 ## API
 
@@ -180,40 +204,48 @@ Implements `FormValueControl<[number, number]>` from `@angular/forms/signals`.
 
 #### Inputs
 
-| Name                  | Type                                                 | Default           | Description                                                                                                                                                                                                                                                              |
-|-----------------------|------------------------------------------------------|-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `aria-label`          | `string \| null`                                     | `null`            | Accessible name applied to both handles simultaneously. When provided, takes precedence over `aria-label-start`/`aria-label-end`. Prefer `aria-labelledby` to associate a visible group label.                                                                           |
-| `aria-label-end`      | `string \| null`                                     | `'Maximum value'` | Accessible name for the upper-value (secondary) handle.                                                                                                                                                                                                                  |
-| `aria-label-start`    | `string \| null`                                     | `'Minimum value'` | Accessible name for the lower-value (primary) handle.                                                                                                                                                                                                                    |
-| `aria-labelledby`     | `string \| null`                                     | `null`            | ID of an external element that provides the accessible name for both handles.                                                                                                                                                                                            |
-| `ariaValueText`       | `((value: number) => string) \| null`                | `null`            | Human-readable override for the `aria-valuenow` announcement. The function is called independently for each handle's value.                                                                                                                                              |
-| `disabled`            | `boolean`                                            | `false`           | Renders the component with reduced visual emphasis and removes pointer interaction.                                                                                                                                                                                      |
-| `handleClasses`       | `string \| string[]`                                 | `[]`              | Additional CSS classes to apply to both slider handles.                                                                                                                                                                                                                  |
-| `handleStyles`        | `Partial<CSSStyleDeclaration>`                       | `{}`              | Additional inline styles to apply to both slider handles.                                                                                                                                                                                                                |
-| `invalid`             | `boolean`                                            | `false`           | Marks the control as invalid for form validation purposes, reflecting `aria-invalid` on both handle elements.                                                                                                                                                            |
-| `labelPosition`       | `'before' \| 'after'`                                | `'after'`         | Position of the tick label list relative to the track.                                                                                                                                                                                                                   |
-| `labelStep`           | `number`                                             | `1`               | Controls which tick labels are shown — only every n-th label is rendered.                                                                                                                                                                                                |
-| `largeTickStep`       | `number \| null`                                     | `null`            | Controls which ticks render at large size — only every n-th tick is enlarged. Pass `null` to disable large ticks.                                                                                                                                                        |
-| `maxValue`            | `number`                                             | `10`              | Upper bound of the selectable range. Must be greater than `minValue`.                                                                                                                                                                                                    |
-| `minValue`            | `number`                                             | `0`               | Lower bound of the selectable range.                                                                                                                                                                                                                                     |
-| `orientation`         | `'horizontal' \| 'vertical'`                         | `'horizontal'`    | Layout orientation of the component.                                                                                                                                                                                                                                     |
-| `required`            | `boolean`                                            | `false`           | Marks the slider as required in a form context, reflecting `aria-required` on both handle elements.                                                                                                                                                                      |
-| `rounded`             | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'full'`          | Border-radius preset applied to both slider handles.                                                                                                                                                                                                                     |
-| `selectionBackground` | `string \| Partial<CSSStyleDeclaration> \| null`     | `null`            | Background color of the filled selection area between the two handles. Accepts a CSS color string or a `CSSStyleDeclaration` partial.                                                                                                                                    |
-| `shiftMultiplier`     | `number`                                             | `10`              | Multiplier applied to the step when the user holds Shift while pressing an arrow key.                                                                                                                                                                                    |
-| `showLabels`          | `boolean`                                            | `false`           | Displays value labels alongside tick marks. Only takes effect when `showTicks` is `true`.                                                                                                                                                                                |
-| `showTicks`           | `boolean`                                            | `false`           | Displays tick marks at each step position along the track.                                                                                                                                                                                                               |
-| `smallTickStep`       | `number`                                             | `1`               | Controls how many ticks are visible — only every n-th tick is rendered.                                                                                                                                                                                                  |
-| `step`                | `number`                                             | `1`               | Increment applied when a handle value changes via keyboard navigation.                                                                                                                                                                                                   |
-| `trackBackground`     | `string \| Partial<CSSStyleDeclaration> \| null`     | `null`            | Background color of the unfilled track portions. Accepts a CSS color string or a `CSSStyleDeclaration` partial.                                                                                                                                                          |
-| `trackSize`           | `string \| number`                                   | `undefined`       | Width (vertical orientation) or height (horizontal orientation) of the track. Accepts a pixel number or any CSS length string.                                                                                                                                           |
-| `value`               | `[number, number]`                                   | `[0, 10]`         | Two-way bindable. Selected range as `[minimum, maximum]`. Values outside `[minValue, maxValue]` are clamped; the tuple is always sorted so index 0 ≤ index 1. Implements `FormValueControl<[number, number]>`, enabling use with the signal forms `[formField]` binding. |
+| Name                  | Type                                                 | Default        | Description                                                                                                                                                                                |
+|-----------------------|------------------------------------------------------|----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `aria-describedby`    | `string \| null`                                     | `null`         | Id of an element that describes each handle, such as an error message.                                                                                                                     |
+| `aria-label`          | `string \| null`                                     | `null`         | Accessible name of the group holding both handles. The handles keep their own names.                                                                                                      |
+| `aria-label-end`      | `string \| null`                                     | `null`         | Accessible name for the upper-value (secondary) handle. When `null`, the localized "Maximum value" applies.                                                                                |
+| `aria-label-start`    | `string \| null`                                     | `null`         | Accessible name for the lower-value (primary) handle. When `null`, the localized "Minimum value" applies.                                                                                  |
+| `aria-labelledby`     | `string \| null`                                     | `null`         | ID of the element that labels the group. Each handle reads it before its own name.                                                                                                         |
+| `ariaValueText`       | `((value: number) => string) \| null`                | `null`         | Human-readable override for the `aria-valuenow` announcement. The function is called independently for each handle's value.                                                                |
+| `disabled`            | `boolean`                                            | `false`        | Renders the component with reduced visual emphasis and removes pointer and keyboard interaction.                                                                                           |
+| `handleClasses`       | `string \| string[]`                                 | `[]`           | Additional CSS classes to apply to both slider handles.                                                                                                                                    |
+| `handleStyles`        | `Partial<CSSStyleDeclaration>`                       | `{}`           | Additional inline styles to apply to both slider handles.                                                                                                                                  |
+| `invalid`             | `boolean`                                            | `false`        | Marks the control as invalid, reflecting `aria-invalid` on both handles once the control is touched. `FormField` writes it.                                                                |
+| `labelPosition`       | `'before' \| 'after'`                                | `'after'`      | Position of the tick label list relative to the track.                                                                                                                                     |
+| `labelStep`           | `number`                                             | `1`            | Controls which tick labels are shown — only every n-th label is rendered.                                                                                                                  |
+| `largeTickStep`       | `number \| null`                                     | `null`         | Controls which ticks render at large size — only every n-th tick is enlarged. Pass `null` to disable large ticks.                                                                          |
+| `maxValue`            | `number`                                             | `10`           | Upper bound of the selectable range. Must be greater than `minValue`.                                                                                                                      |
+| `minValue`            | `number`                                             | `0`            | Lower bound of the selectable range.                                                                                                                                                       |
+| `orientation`         | `'horizontal' \| 'vertical'`                         | `'horizontal'` | Layout orientation of the component.                                                                                                                                                       |
+| `readonly`            | `boolean`                                            | `false`        | Prevents value changes while the control stays focusable and readable. `FormField` writes it.                                                                                              |
+| `rounded`             | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'full'`       | Border-radius preset applied to both slider handles.                                                                                                                                       |
+| `selectionBackground` | `string \| Partial<CSSStyleDeclaration> \| null`     | `null`         | Background color of the filled selection area between the two handles. Accepts a CSS color string or a `CSSStyleDeclaration` partial.                                                      |
+| `shiftMultiplier`     | `number`                                             | `10`           | Multiplier applied to the step when the user holds Shift while pressing an arrow key.                                                                                                      |
+| `showLabels`          | `boolean`                                            | `false`        | Displays value labels alongside tick marks. Only takes effect when `showTicks` is `true`.                                                                                                  |
+| `showTicks`           | `boolean`                                            | `false`        | Displays tick marks at each step position along the track.                                                                                                                                 |
+| `smallTickStep`       | `number`                                             | `1`            | Controls how many ticks are visible — only every n-th tick is rendered. Values below `1` are raised to `1`.                                                                                |
+| `step`                | `number`                                             | `1`            | Distance between the values a handle can take. A value of `0` or less falls back to `1`.                                                                                                   |
+| `touched`             | `boolean`                                            | `false`        | Marks the slider as touched. Error styling requires both `invalid` and `touched` to be `true`. `FormField` writes it.                                                                      |
+| `trackBackground`     | `string \| Partial<CSSStyleDeclaration> \| null`     | `null`         | Background color of the unfilled track portions. Accepts a CSS color string or a `CSSStyleDeclaration` partial.                                                                            |
+| `trackSize`           | `string \| number`                                   | `undefined`    | Width (vertical orientation) or height (horizontal orientation) of the track. Accepts a pixel number or any CSS length string.                                                             |
+| `value`               | `[number, number]`                                   | `[0, 10]`      | Two-way. Selected range as `[minimum, maximum]`. A value out of range, off the step grid or unsorted is shown at the nearest valid values, and the model keeps its own until the user changes it. |
 
 #### Outputs
 
-| Name    | Type   | Description                                                                                                                                                       |
-|---------|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `touch` | `void` | Emitted when either handle loses focus or its value changes via keyboard navigation. Consumed by the signal forms `Field` directive to mark the field as touched. |
+| Name    | Type   | Description                                                                                                  |
+|---------|--------|--------------------------------------------------------------------------------------------------------------|
+| `touch` | `void` | Emitted when either handle loses focus. `FormField` uses it to mark the field as touched.                    |
+
+#### Methods
+
+| Method                          | Description                                                   |
+|---------------------------------|---------------------------------------------------------------|
+| `focus(options?: FocusOptions)` | Moves focus to the lower handle. Does nothing while disabled. |
 
 ---
 
@@ -231,23 +263,3 @@ These structural directives are projected inside `<mona-range-slider>` and are s
 ```typescript
 import { RangeSliderComponent, SliderHandleTemplateDirective, SliderTickValueTemplateDirective } from "@nanahoshi/mona-ui/slider";
 ```
-
----
-
-<!-- verification-checklist
-- [x] API table cross-checked against current source (slider-base + range-slider component)
-- [x] value model documented as two-way bindable [number, number]
-- [x] aria-label-start and aria-label-end documented with correct defaults
-- [x] aria-label behavior on both handles noted (applies to both simultaneously)
-- [x] touch output documented
-- [x] ariaValueText documented as per-handle function
-- [x] required and invalid documented with aria reflection on both handles
-- [x] Template directives documented with context — handles receive their own value
-- [x] FormValueControl<[number, number]> documented; ControlValueAccessor absence explicitly stated
-- [x] Overlapping handles behavior documented
-- [x] Full keyboard map verified against source
-- [x] All ARIA attributes verified against range-slider.component.html
-- [x] Inputs table sorted A→Z (value listed last per model convention)
-- [x] No internal computed signals, Tailwind classes, or data attributes exposed
-- [ ] component-metadata.json is stale — needs `npm run build:metadata` after this pass
--->

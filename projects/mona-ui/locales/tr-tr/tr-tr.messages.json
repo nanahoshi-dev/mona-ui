@@ -3,7 +3,8 @@
         "clear": "Temizle"
     },
     "breadcrumb": {
-        "breadcrumb": "İçerik haritası"
+        "breadcrumb": "İçerik haritası",
+        "showFullPath": "Tam yolu göster"
     },
     "buttonGroup": {
         "buttonGroup": "Düğme grubu"
@@ -117,27 +118,41 @@
         "removeLabel": "{label, select, undefined {Öğeyi kaldır} other {{label} öğesini kaldır}}"
     },
     "colorGradient": {
+        "alpha": "Alfa kanalı",
+        "alphaText": "Opaklık %{opacity}",
         "apply": "Uygula",
+        "blue": "Mavi",
         "cancel": "İptal",
         "clearColor": "Rengi temizle",
+        "colorCopied": "Renk kopyalandı",
+        "colorGradient": "Renk gradyanı",
         "copyAsHex": "HEX olarak kopyala",
         "copyAsRgb": "RGB olarak kopyala",
         "copyColor": "Rengi kopyala",
+        "copyFailed": "Renk kopyalanamadı",
         "currentColor": "Geçerli renk",
+        "green": "Yeşil",
+        "hexColor": "Onaltılık renk",
+        "hue": "Ton",
         "previousColor": "Önceki renk",
+        "red": "Kırmızı",
+        "saturation": "Doygunluk",
         "saturationAndValue": "Renk doygunluğu ve değeri",
         "saturationAndValueText": "Doygunluk %{saturation}, değer %{value}",
-        "switchColorMode": "Renk modunu değiştir"
+        "switchColorMode": "Renk modunu değiştir",
+        "value": "Değer"
     },
     "colorPalette": {
         "color": "Renk: {color}",
-        "colorPalette": "Renk paleti"
+        "colorPalette": "Renk paleti",
+        "namedColor": "{name}, {color}"
     },
     "colorPicker": {
         "clearColor": "Rengi temizle",
         "colorGradientPicker": "Renk geçişi seçici",
         "colorPalettePicker": "Renk paleti seçici",
-        "colorPicker": "Renk seçici"
+        "colorPicker": "Renk seçici",
+        "noColor": "Renk yok"
     },
     "comboBox": {
         "clear": "Temizle"
@@ -327,6 +342,9 @@
         "sortOrder": "Sıralama düzeni {position}",
         "toolbar": "Tablo araç çubuğu"
     },
+    "label": {
+        "optional": "İsteğe bağlı"
+    },
     "list": {
         "filterList": "Listeyi filtrele",
         "loading": "Yükleniyor",
@@ -392,6 +410,9 @@
         "previousPageLabel": "Önceki sayfa",
         "rangeStatus": "{start} - {end} / {total} öğe"
     },
+    "progressBar": {
+        "label": "İlerleme"
+    },
     "rating": {
         "notRated": "Değerlendirilmedi",
         "valueText": "{max} üzerinden {value}"
@@ -401,6 +422,7 @@
         "nextPage": "Sonraki sayfa",
         "page": "{current}. sayfa",
         "pageOf": "Sayfa {current} / {total}",
+        "pages": "Sayfalar",
         "previousPage": "Önceki sayfa",
         "scrollPagerNext": "Sayfalama seçeneklerini ileri kaydır",
         "scrollPagerPrevious": "Sayfalama seçeneklerini geri kaydır",
@@ -408,6 +430,10 @@
     },
     "sheet": {
         "closeSheet": "Paneli kapat"
+    },
+    "sidebar": {
+        "drawerLabel": "Kenar çubuğu",
+        "rail": "Kenar çubuğunu göster veya gizle"
     },
     "slider": {
         "maximumValue": "Maksimum değer",
@@ -431,6 +457,9 @@
         "resizer": "Panel ayırıcı"
     },
     "stepper": {
+        "stepCompleted": "Tamamlandı",
+        "stepInvalid": "Hata içeriyor",
+        "stepPosition": "Adım {current}/{total}",
         "stepProgress": "Adım ilerlemesi",
         "stepper": "Adımlar"
     },

@@ -1,9 +1,9 @@
 import {
     afterNextRender,
-    ChangeDetectionStrategy,
     Component,
     computed,
     DestroyRef,
+    DOCUMENT,
     effect,
     ElementRef,
     inject,
@@ -14,6 +14,7 @@ import {
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
 import { injectComponentDirection } from "@nanahoshi/mona-ui/i18n";
 import { resolveSidebarLayoutBaseClass } from "../../internal/sidebar-layout-direction";
+import type { SidebarModalScope } from "../../models/SidebarModalScope";
 import { SidebarLayoutService } from "../../services/sidebar-layout.service";
 import { sidebarBackdropThemeVariants } from "../../styles/sidebar.styles";
 
@@ -63,26 +64,27 @@ function getComposedAncestors(startElement: Element): Element[] {
                 [class]="backdropClass()"
                 [attr.aria-hidden]="'true'"
                 [attr.data-state]="mobileOpen() ? 'open' : 'closed'"
+                data-sidebar-backdrop="true"
                 (click)="onBackdropClick()"></div>
         }
     `,
-    changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         "[attr.data-compact]": "compact() ? 'true' : null",
         "[class]": "baseClass()",
         // Escape closes the drawer from anywhere inside the layout, including from within the
-        // trapped focus inside the drawer itself.
+        // trapped focus inside the drawer itself. The innermost open layout hears it first.
         "(keydown.escape)": "onEscape($event)"
     },
     providers: [SidebarLayoutService]
 })
 export class SidebarLayoutComponent {
+    readonly #browserCssDirection = signal<"ltr" | "rtl" | null>(null);
     readonly #destroyRef = inject(DestroyRef);
     readonly #direction = injectComponentDirection();
+    readonly #document = inject(DOCUMENT);
     readonly #host = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #layoutService = inject(SidebarLayoutService);
     readonly #matches = signal(false);
-    readonly #browserCssDirection = signal<"ltr" | "rtl" | null>(null);
 
     protected readonly backdropClass = computed(() => sidebarBackdropThemeVariants({ open: this.mobileOpen() }));
     protected readonly baseClass = computed(() =>
@@ -105,6 +107,14 @@ export class SidebarLayoutComponent {
     public readonly mobileBreakpoint = input(768);
 
     /**
+     * @description How far an open drawer's modality reaches. `"page"` makes everything outside the drawer inert and
+     * locks the page's scroll. Use `"layout"` for a sidebar embedded in part of a page: what's around the layout stays
+     * usable, so the drawer isn't `aria-modal`.
+     * @default "page"
+     */
+    public readonly modalScope = input<SidebarModalScope>("page");
+
+    /**
      * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
      * @default ""
      */
@@ -114,6 +124,11 @@ export class SidebarLayoutComponent {
     });
 
     public constructor() {
+        effect(() => {
+            const scope = this.modalScope();
+            untracked(() => this.#layoutService.setModalScope(scope));
+        });
+        this.#watchEscapeOutside();
         this.#watchBreakpoint();
         this.#watchCssDirection();
     }
@@ -124,8 +139,9 @@ export class SidebarLayoutComponent {
 
     protected onEscape(event: Event): void {
         // Only a drawer is dismissible. A docked sidebar is part of the page, and closing it on
-        // Escape would take the key from anything inside it that wanted to handle it.
-        if (!this.#layoutService.anyMobileOpen()) {
+        // Escape would take the key from anything inside it that wanted to handle it. A control
+        // that already used the key, such as a search box clearing itself, keeps it.
+        if (event.defaultPrevented || !this.#layoutService.anyMobileOpen()) {
             return;
         }
         event.preventDefault();
@@ -137,8 +153,6 @@ export class SidebarLayoutComponent {
      * crossed and the query is rebuilt only when the breakpoint input itself changes.
      */
     #watchBreakpoint(): void {
-        const destroyRef = inject(DestroyRef);
-
         effect(() => {
             const compact = this.#matches();
             untracked(() => this.#layoutService.setCompact(compact));
@@ -153,7 +167,7 @@ export class SidebarLayoutComponent {
         let current: MediaQueryList | null = null;
         const onChange = (event: MediaQueryListEvent): void => this.#matches.set(event.matches);
         const detach = (): void => current?.removeEventListener("change", onChange);
-        destroyRef.onDestroy(detach);
+        this.#destroyRef.onDestroy(detach);
 
         effect(() => {
             const breakpoint = this.mobileBreakpoint();
@@ -293,5 +307,24 @@ export class SidebarLayoutComponent {
                 window.removeEventListener("resize", onResize);
             });
         }
+    }
+
+    /**
+     * A press on blank space or text can leave focus outside the layout, on the body. Escape still has to work there,
+     * but not from a popup opened from the drawer: closing that is all its Escape should do.
+     */
+    #watchEscapeOutside(): void {
+        const onKeydown = (event: KeyboardEvent): void => {
+            const target = event.target as Element;
+            if (event.key === "Escape" && !target.closest?.(".cdk-overlay-container")) {
+                this.onEscape(event);
+            }
+        };
+        effect(onCleanup => {
+            if (this.mobileOpen()) {
+                this.#document.addEventListener("keydown", onKeydown);
+                onCleanup(() => this.#document.removeEventListener("keydown", onKeydown));
+            }
+        });
     }
 }

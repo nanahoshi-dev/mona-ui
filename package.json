@@ -37,6 +37,8 @@
         "verify:package": "tsx projects/mona-ui-tester/scripts/verify-built-package.ts",
         "audit:i18n-rtl": "tsx projects/mona-ui-tester/scripts/audit-i18n-rtl.ts",
         "audit:i18n-rtl:strict": "tsx projects/mona-ui-tester/scripts/audit-i18n-rtl.ts --strict",
+        "test:browser:forced-colors": "npm run build:tester && tsx scripts/test-forced-colors-browser.ts --no-build",
+        "test:browser:forced-colors:no-build": "tsx scripts/test-forced-colors-browser.ts --no-build",
         "test:browser:geometry": "npm run build:tester && tsx scripts/test-direction-browser.ts --no-build",
         "test:browser:geometry:no-build": "tsx scripts/test-direction-browser.ts --no-build",
         "test:browser:grid": "npm run build:tester && tsx scripts/test-grid-browser.ts",

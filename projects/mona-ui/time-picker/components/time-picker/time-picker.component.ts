@@ -35,7 +35,7 @@ import {
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
 import { getLocaleTimeInputFormat, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { type AttributeConfig, createElementControlId } from "@nanahoshi/mona-ui/internal";
+import { type AttributeConfig, createElementControlId, injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
 import type { ListSizeInputType } from "@nanahoshi/mona-ui/internal/list";
 import type { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import { TextBoxComponent, TextBoxSuffixTemplateDirective } from "@nanahoshi/mona-ui/text-box";
@@ -73,9 +73,9 @@ import {
         "[attr.aria-describedby]": "null",
         "[attr.aria-label]": "null",
         "[attr.aria-labelledby]": "null",
-        "[attr.tabindex]": "disabled() ? null : -1",
+        "[attr.tabindex]": "effectiveDisabled() ? null : -1",
         "[attr.aria-invalid]": "invalidState() ? 'true' : null",
-        "[attr.data-disabled]": "disabled() || null",
+        "[attr.data-disabled]": "effectiveDisabled() || null",
         "[attr.data-expanded]": "expanded()",
         "[attr.data-invalid]": "invalidState() || null",
         "[attr.data-readonly]": "readonly() || null",
@@ -99,6 +99,7 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
+    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly effectiveFormat = computed(() => {
         return (
             this.format() ??
@@ -400,7 +401,7 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
     }
 
     protected onKeydown(event: KeyboardEvent): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             return;
         }
         if (event.altKey && event.key === "ArrowDown") {
@@ -420,7 +421,7 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
     }
 
     protected onTimeInputButtonClick(): void {
-        if (this.disabled() || this.readonly()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             return;
         }
         if (this.#dropdownService.popupRef()) {

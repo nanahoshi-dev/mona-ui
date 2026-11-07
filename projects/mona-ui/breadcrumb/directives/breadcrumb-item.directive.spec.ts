@@ -11,15 +11,14 @@ describe("BreadcrumbItemDirective", () => {
 
     it("uses neutral navigation states and foreground for the current page", () => {
         const itemClasses = breadcrumbListItemThemeVariants({
-            disabled: false,
-            listDisabled: false
+            disabled: false
         }).split(/\s+/);
         const currentClasses = breadcrumbCurrentItemThemeVariants().split(/\s+/);
 
         expect(itemClasses).toContain("text-muted-foreground");
         expect(itemClasses).toContain("hover:bg-hover");
         expect(itemClasses).toContain("active:bg-active");
-        expect(itemClasses).toContain("focus-visible:ring-focus-indicator/35");
+        expect(itemClasses).toContain("focus-visible:outline-focus-indicator");
         expect(itemClasses).not.toContain("text-primary/70");
         expect(currentClasses).toContain("text-foreground");
         expect(currentClasses).not.toContain("text-primary");

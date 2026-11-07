@@ -1,10 +1,13 @@
-import { Component, computed, inject, input, output } from "@angular/core";
+import { Component, computed, ElementRef, inject, input, output } from "@angular/core";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import type { SpinnerAppearance } from "../../models/SpinnerAppearance";
 import type { SpinnerSize } from "../../models/SpinnerSize";
 import { SPINNER_DEFAULT_MESSAGES } from "../../i18n/spinner.default-messages";
 import { spinnerOverlayThemeVariants, type SpinnerOverlayVariantInput } from "../../styles/spinner-overlay.styles";
 import { SpinnerComponent } from "../spinner/spinner.component";
+
+/** Sits above `.cdk-overlay-container`, so a spinner started from a dialog isn't under that dialog. */
+const FULL_PAGE_Z_INDEX = 1001;
 
 /**
  * @description
@@ -17,11 +20,14 @@ import { SpinnerComponent } from "../spinner/spinner.component";
     imports: [SpinnerComponent],
     host: {
         "[class]": "baseClass()",
-        "[style.z-index]": "effectiveZIndex()"
+        "[style.z-index]": "effectiveZIndex()",
+        "(focusin)": "onFocusIn($event)"
     }
 })
 export class SpinnerOverlayComponent implements SpinnerOverlayVariantInput {
+    readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
+    #focusOrigin: HTMLElement | null = null;
     protected readonly baseClass = computed(() => {
         return spinnerOverlayThemeVariants({ fullPage: this.fullPage() });
     });
@@ -33,7 +39,7 @@ export class SpinnerOverlayComponent implements SpinnerOverlayVariantInput {
         if (customZIndex !== undefined) {
             return customZIndex;
         }
-        return this.fullPage() ? 50 : 1;
+        return this.fullPage() ? FULL_PAGE_Z_INDEX : 1;
     });
     protected readonly messages = this.#i18n.componentMessages("spinner", SPINNER_DEFAULT_MESSAGES);
 
@@ -87,7 +93,25 @@ export class SpinnerOverlayComponent implements SpinnerOverlayVariantInput {
      */
     public readonly zIndex = input<number | undefined>(undefined);
 
+    /**
+     * Gives focus back to where it came from, if it's inside the overlay. Call before the overlay's controls go, or
+     * focus falls to the body.
+     */
+    public returnFocus(): void {
+        const host = this.#hostElementRef.nativeElement;
+        if (host.contains(host.ownerDocument.activeElement)) {
+            this.#focusOrigin?.focus({ preventScroll: true });
+        }
+    }
+
     protected onCancel(): void {
         this.cancel.emit();
+    }
+
+    protected onFocusIn(event: FocusEvent): void {
+        const origin = event.relatedTarget as HTMLElement | null;
+        if (origin && !this.#hostElementRef.nativeElement.contains(origin)) {
+            this.#focusOrigin = origin;
+        }
     }
 }

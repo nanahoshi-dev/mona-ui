@@ -43,6 +43,7 @@ import {
 } from "@nanahoshi/mona-ui/dropdowns";
 import {
     createElementControlId,
+    injectEffectiveDisabled,
     isTypeaheadKey,
     setupTypeahead,
     TYPEAHEAD_RESET_DELAY
@@ -115,7 +116,7 @@ const cancellingCloseSources: ReadonlySet<PopupCloseSource | undefined> = new Se
         "[attr.aria-busy]": "loading() ? 'true' : undefined",
         "[attr.aria-controls]": "listId",
         "[attr.aria-describedby]": "ariaDescribedBy() || null",
-        "[attr.aria-disabled]": "disabled() ? true : undefined",
+        "[attr.aria-disabled]": "effectiveDisabled() ? true : undefined",
         "[attr.aria-expanded]": "expanded()",
         "[attr.aria-haspopup]": "'listbox'",
         "[attr.aria-invalid]": "invalidState() ? true : undefined",
@@ -123,11 +124,11 @@ const cancellingCloseSources: ReadonlySet<PopupCloseSource | undefined> = new Se
         "[attr.aria-labelledby]": "ariaLabelledBy() || null",
         "[attr.aria-readonly]": "readonly() ? true : undefined",
         "[attr.aria-required]": "required() ? true : undefined",
-        "[attr.data-disabled]": "disabled() || null",
+        "[attr.data-disabled]": "effectiveDisabled() || null",
         "[attr.data-invalid]": "invalidState() || null",
         "[attr.data-readonly]": "readonly() || null",
         "[attr.role]": "'combobox'",
-        "[attr.tabindex]": "disabled() ? null : 0",
+        "[attr.tabindex]": "effectiveDisabled() ? null : 0",
         "[class]": "baseClass()",
         "(focusout)": "onFocusOut($event)"
     }
@@ -153,7 +154,7 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
         return dropdownListAffixContainerThemeVariants();
     });
     protected readonly baseClass = computed(() => {
-        const disabled = this.disabled();
+        const disabled = this.effectiveDisabled();
         const expanded = this.expanded();
         const hasPrefix = this.prefixTemplate() != null;
         const invalid = this.invalidState();
@@ -175,12 +176,13 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
             this.showClearButton() &&
             this.selectedListItem() != null &&
             !this.loading() &&
-            !this.disabled() &&
+            !this.effectiveDisabled() &&
             !this.readonly()
     );
     protected readonly effectiveAriaLabel = computed(
         () => this.ariaLabel() || (this.ariaLabelledBy() ? "" : this.placeholder())
     );
+    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly expanded = computed(() => this.#dropdownService.popupRef() !== null);
     protected readonly footerTemplate = contentChild(DropdownFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderTemplate = contentChild(DropdownGroupHeaderTemplateDirective, {
@@ -493,7 +495,7 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
 
     protected onValueClear(event: MouseEvent | KeyboardEvent): void {
         if (
-            this.disabled() ||
+            this.effectiveDisabled() ||
             this.readonly() ||
             (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ")
         ) {

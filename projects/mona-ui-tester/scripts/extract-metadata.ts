@@ -201,7 +201,8 @@ function extractInputsFromInheritanceChain(
                         .getTags()
                         .find((tag: JSDocTag) => tag.getTagName() === "description");
                     if (descriptionTag) {
-                        description = descriptionTag.getCommentText()?.toString().trim() || "";
+                        // Normalized, so the output doesn't depend on the line endings of the checkout it was generated from.
+                        description = descriptionTag.getCommentText()?.toString().trim().replace(/\r\n/g, "\n") || "";
                     }
                     const defaultTag = mainDoc.getTags().find((tag: JSDocTag) => tag.getTagName() === "default");
                     if (defaultTag) {

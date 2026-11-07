@@ -12,7 +12,8 @@ export const ZH_CN_MESSAGES = {
         clear: "清除"
     },
     breadcrumb: {
-        breadcrumb: "面包屑导航"
+        breadcrumb: "面包屑导航",
+        showFullPath: "显示完整路径"
     },
     buttonGroup: {
         buttonGroup: "按钮组"
@@ -135,28 +136,42 @@ export const ZH_CN_MESSAGES = {
         removeLabel: (label?: string) => (label ? `删除${label}` : "删除项目")
     },
     colorGradient: {
+        alpha: "透明通道",
+        alphaText: (opacity: number) => `不透明度${localizeNumber(opacity)}%`,
         apply: "应用",
+        blue: "蓝色",
         cancel: "取消",
         clearColor: "清除颜色",
+        colorCopied: "已复制颜色",
+        colorGradient: "颜色渐变",
         copyAsHex: "复制为 HEX",
         copyAsRgb: "复制为 RGB",
         copyColor: "复制颜色",
+        copyFailed: "无法复制颜色",
         currentColor: "当前颜色",
+        green: "绿色",
+        hexColor: "十六进制颜色",
+        hue: "色相",
         previousColor: "先前颜色",
+        red: "红色",
+        saturation: "饱和度",
         saturationAndValue: "饱和度与明度",
         saturationAndValueText: (saturation: number, value: number) =>
             `饱和度${localizeNumber(saturation)}%，明度${localizeNumber(value)}%`,
-        switchColorMode: "切换颜色模式"
+        switchColorMode: "切换颜色模式",
+        value: "明度"
     },
     colorPalette: {
         color: (color: string) => `颜色: ${color}`,
-        colorPalette: "调色板"
+        colorPalette: "调色板",
+        namedColor: (name: string, color: string) => `${name}，${color}`
     },
     colorPicker: {
         clearColor: "清除颜色",
         colorGradientPicker: "渐变颜色选择器",
         colorPalettePicker: "调色板选择器",
-        colorPicker: "颜色选择器"
+        colorPicker: "颜色选择器",
+        noColor: "无颜色"
     },
     comboBox: {
         clear: "清除"
@@ -349,6 +364,9 @@ export const ZH_CN_MESSAGES = {
         sortOrder: (position: number) => `排序顺序 ${localizeNumber(position)}`,
         toolbar: "表格工具栏"
     },
+    label: {
+        optional: "可选"
+    },
     list: {
         filterList: "筛选列表",
         loading: "正在加载",
@@ -417,6 +435,9 @@ export const ZH_CN_MESSAGES = {
         rangeStatus: (start: number, end: number, total: number) =>
             `第 ${localizeNumber(start)} - ${localizeNumber(end)} 项，共 ${localizeNumber(total)} 项`
     },
+    progressBar: {
+        label: "进度"
+    },
     rating: {
         notRated: "未评分",
         valueText: (value: number, max: number) => `第 ${localizeNumber(value)} 级，共 ${localizeNumber(max)} 级`
@@ -426,6 +447,7 @@ export const ZH_CN_MESSAGES = {
         nextPage: "下一页",
         page: (current: number) => `第 ${localizeNumber(current)} 页`,
         pageOf: (current: number, total: number) => `第 ${localizeNumber(current)} 页，共 ${localizeNumber(total)} 页`,
+        pages: "页面",
         previousPage: "上一页",
         scrollPagerNext: "向后滚动分页器",
         scrollPagerPrevious: "向前滚动分页器",
@@ -433,6 +455,10 @@ export const ZH_CN_MESSAGES = {
     },
     sheet: {
         closeSheet: "关闭面板"
+    },
+    sidebar: {
+        drawerLabel: "侧边栏",
+        rail: "显示或隐藏侧边栏"
     },
     slider: {
         maximumValue: "最大值",
@@ -456,6 +482,10 @@ export const ZH_CN_MESSAGES = {
         resizer: "调整大小手柄"
     },
     stepper: {
+        stepCompleted: "已完成",
+        stepInvalid: "有错误",
+        stepPosition: (current: number, total: number) =>
+            `第 ${localizeNumber(current)} 步，共 ${localizeNumber(total)} 步`,
         stepProgress: "步骤进度",
         stepper: "步骤指示器"
     },

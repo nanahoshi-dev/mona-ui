@@ -1,11 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
+import { Component, computed, inject, input } from "@angular/core";
 import { SkeletonComponent } from "@nanahoshi/mona-ui/skeleton";
 import { SidebarService } from "../../services/sidebar.service";
 import { sidebarMenuSkeletonThemeVariants } from "../../styles/sidebar.styles";
 
 /**
  * @description
- * A loading placeholder shaped like a menu item. Drops its label bar on the icon rail, where the
+ * A loading placeholder shaped like a menu item. Its label bar is clipped on the icon rail, where the
  * real labels are not visible either.
  */
 @Component({
@@ -16,7 +16,6 @@ import { sidebarMenuSkeletonThemeVariants } from "../../styles/sidebar.styles";
         }
         <mona-skeleton [width]="labelWidth()" height="1rem" rounded="small"></mona-skeleton>
     `,
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [SkeletonComponent],
     host: {
         "[class]": "baseClass()"

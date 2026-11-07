@@ -73,11 +73,11 @@ export class CardDemoComponent extends AbstractDemoComponent<CardComponent> {
     ],
     template: `
         @let featureData = features();
-        <mona-card [rounded]="rounded()" [class]="'w-96 ' + userClass()">
+        <mona-card [role]="role()" [rounded]="rounded()" [class]="'w-96 ' + userClass()">
             @if (featureData["header"].active) {
                 <mona-card-header>
-                    <h3 class="font-semibold text-sm" *monaCardTitle="let id" [id]="id">Login to your account</h3>
-                    <p class="text-sm text-foreground/70" *monaCardDescription="let id" [id]="id">
+                    <h3 class="font-semibold text-sm" *monaCardTitle>Login to your account</h3>
+                    <p class="text-sm text-foreground/70" *monaCardDescription>
                         Enter your username below to login to your account
                     </p>
                     <button monaButton look="link" size="small" *monaCardAction>Sign up</button>
@@ -109,6 +109,7 @@ export class CardDemoComponent extends AbstractDemoComponent<CardComponent> {
 })
 export class CardWrapperComponent implements ComponentInputsAsSignal<CardComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
+    public readonly role = input<ReturnType<CardComponent["role"]>>("group");
     public readonly rounded = input<ReturnType<CardComponent["rounded"]>>("medium");
     public readonly userClass = input<ReturnType<CardComponent["userClass"]>>("");
 }

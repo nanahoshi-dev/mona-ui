@@ -21,7 +21,8 @@ export const ES_ES_MESSAGES = {
         clear: "Limpiar"
     },
     breadcrumb: {
-        breadcrumb: "Ruta de navegación"
+        breadcrumb: "Ruta de navegación",
+        showFullPath: "Mostrar la ruta completa"
     },
     buttonGroup: {
         buttonGroup: "Grupo de botones"
@@ -158,28 +159,42 @@ export const ES_ES_MESSAGES = {
         removeLabel: (label?: string) => (label ? `Quitar ${label}` : "Quitar elemento")
     },
     colorGradient: {
+        alpha: "Canal alfa",
+        alphaText: (opacity: number) => `Opacidad ${localizeNumber(opacity)}%`,
         apply: "Aplicar",
+        blue: "Azul",
         cancel: "Cancelar",
         clearColor: "Limpiar color",
+        colorCopied: "Color copiado",
+        colorGradient: "Degradado de color",
         copyAsHex: "Copiar como HEX",
         copyAsRgb: "Copiar como RGB",
         copyColor: "Copiar color",
+        copyFailed: "No se pudo copiar el color",
         currentColor: "Color actual",
+        green: "Verde",
+        hexColor: "Color hexadecimal",
+        hue: "Tono",
         previousColor: "Color anterior",
+        red: "Rojo",
+        saturation: "Saturación",
         saturationAndValue: "Saturación y valor del color",
         saturationAndValueText: (saturation: number, value: number) =>
             `Saturación ${localizeNumber(saturation)}%, valor ${localizeNumber(value)}%`,
-        switchColorMode: "Cambiar modo de color"
+        switchColorMode: "Cambiar modo de color",
+        value: "Valor"
     },
     colorPalette: {
         color: (color: string) => `Color ${color}`,
-        colorPalette: "Paleta de colores"
+        colorPalette: "Paleta de colores",
+        namedColor: (name: string, color: string) => `${name}, ${color}`
     },
     colorPicker: {
         clearColor: "Limpiar color",
         colorGradientPicker: "Selector de color por degradado",
         colorPalettePicker: "Selector de color por paleta",
-        colorPicker: "Selector de color"
+        colorPicker: "Selector de color",
+        noColor: "Sin color"
     },
     comboBox: {
         clear: "Limpiar"
@@ -378,6 +393,9 @@ export const ES_ES_MESSAGES = {
         sortOrder: (position: number) => `Orden de clasificación ${localizeNumber(position)}`,
         toolbar: "Barra de herramientas de la tabla"
     },
+    label: {
+        optional: "Opcional"
+    },
     list: {
         filterList: "Filtrar lista",
         loading: "Cargando",
@@ -461,6 +479,9 @@ export const ES_ES_MESSAGES = {
                 ? `${localizeNumber(start)} - ${localizeNumber(end)} de ${localizeNumber(total)} elemento`
                 : `${localizeNumber(start)} - ${localizeNumber(end)} de ${localizeNumber(total)} elementos`
     },
+    progressBar: {
+        label: "Progreso"
+    },
     rating: {
         notRated: "Sin valoración",
         valueText: (value: number, max: number) => `${localizeNumber(value)} de ${localizeNumber(max)}`
@@ -470,6 +491,7 @@ export const ES_ES_MESSAGES = {
         nextPage: "Página siguiente",
         page: (current: number) => `Página ${localizeNumber(current)}`,
         pageOf: (current: number, total: number) => `Página ${localizeNumber(current)} de ${localizeNumber(total)}`,
+        pages: "Páginas",
         previousPage: "Página anterior",
         scrollPagerNext: "Desplazar la paginación hacia delante",
         scrollPagerPrevious: "Desplazar la paginación hacia atrás",
@@ -477,6 +499,10 @@ export const ES_ES_MESSAGES = {
     },
     sheet: {
         closeSheet: "Cerrar panel"
+    },
+    sidebar: {
+        drawerLabel: "Barra lateral",
+        rail: "Mostrar u ocultar la barra lateral"
     },
     slider: {
         maximumValue: "Valor máximo",
@@ -500,6 +526,9 @@ export const ES_ES_MESSAGES = {
         resizer: "Separador de paneles"
     },
     stepper: {
+        stepCompleted: "Completado",
+        stepInvalid: "Tiene errores",
+        stepPosition: (current: number, total: number) => `Paso ${localizeNumber(current)} de ${localizeNumber(total)}`,
         stepProgress: "Progreso del paso",
         stepper: "Progreso"
     },

@@ -12,7 +12,8 @@ export const KO_KR_MESSAGES = {
         clear: "지우기"
     },
     breadcrumb: {
-        breadcrumb: "이동 경로"
+        breadcrumb: "이동 경로",
+        showFullPath: "전체 경로 표시"
     },
     buttonGroup: {
         buttonGroup: "버튼 그룹"
@@ -138,28 +139,42 @@ export const KO_KR_MESSAGES = {
         removeLabel: (label?: string) => (label ? `${label} 삭제` : "항목 삭제")
     },
     colorGradient: {
+        alpha: "알파",
+        alphaText: (opacity: number) => `불투명도 ${localizeNumber(opacity)}%`,
         apply: "적용",
+        blue: "파랑",
         cancel: "취소",
         clearColor: "색상 지우기",
+        colorCopied: "색상을 복사했습니다",
+        colorGradient: "색상 그라데이션",
         copyAsHex: "HEX로 복사",
         copyAsRgb: "RGB로 복사",
         copyColor: "색상 복사",
+        copyFailed: "색상을 복사할 수 없습니다",
         currentColor: "현재 색상",
+        green: "초록",
+        hexColor: "16진수 색상",
+        hue: "색조",
         previousColor: "이전 색상",
+        red: "빨강",
+        saturation: "채도",
         saturationAndValue: "채도 및 명도",
         saturationAndValueText: (saturation: number, value: number) =>
             `채도 ${localizeNumber(saturation)}%, 명도 ${localizeNumber(value)}%`,
-        switchColorMode: "색상 모드 전환"
+        switchColorMode: "색상 모드 전환",
+        value: "명도"
     },
     colorPalette: {
         color: (color: string) => `색상: ${color}`,
-        colorPalette: "색상표"
+        colorPalette: "색상표",
+        namedColor: (name: string, color: string) => `${name}, ${color}`
     },
     colorPicker: {
         clearColor: "색상 지우기",
         colorGradientPicker: "그라데이션 색상 선택기",
         colorPalettePicker: "색상표 선택기",
-        colorPicker: "색상 선택기"
+        colorPicker: "색상 선택기",
+        noColor: "색상 없음"
     },
     comboBox: {
         clear: "지우기"
@@ -353,6 +368,9 @@ export const KO_KR_MESSAGES = {
         sortOrder: (position: number) => `정렬 순서 ${localizeNumber(position)}`,
         toolbar: "표 도구 모음"
     },
+    label: {
+        optional: "선택 사항"
+    },
     list: {
         filterList: "목록 필터",
         loading: "로드 중",
@@ -421,6 +439,9 @@ export const KO_KR_MESSAGES = {
         rangeStatus: (start: number, end: number, total: number) =>
             `전체 ${localizeNumber(total)}개 중 ${localizeNumber(start)}~${localizeNumber(end)}`
     },
+    progressBar: {
+        label: "진행률"
+    },
     rating: {
         notRated: "평가되지 않음",
         valueText: (value: number, max: number) => `${localizeNumber(max)}점 만점에 ${localizeNumber(value)}점`
@@ -431,6 +452,7 @@ export const KO_KR_MESSAGES = {
         page: (current: number) => `${localizeNumber(current)}페이지`,
         pageOf: (current: number, total: number) =>
             `전체 ${localizeNumber(total)}페이지 중 ${localizeNumber(current)}페이지`,
+        pages: "페이지",
         previousPage: "이전 페이지",
         scrollPagerNext: "페이지 표시기 다음으로 스크롤",
         scrollPagerPrevious: "페이지 표시기 이전으로 스크롤",
@@ -438,6 +460,10 @@ export const KO_KR_MESSAGES = {
     },
     sheet: {
         closeSheet: "시트 닫기"
+    },
+    sidebar: {
+        drawerLabel: "사이드바",
+        rail: "사이드바 표시 또는 숨기기"
     },
     slider: {
         maximumValue: "최댓값",
@@ -461,6 +487,10 @@ export const KO_KR_MESSAGES = {
         resizer: "크기 조정 핸들"
     },
     stepper: {
+        stepCompleted: "완료됨",
+        stepInvalid: "오류 있음",
+        stepPosition: (current: number, total: number) =>
+            `${localizeNumber(total)}단계 중 ${localizeNumber(current)}단계`,
         stepProgress: "단계 진행률",
         stepper: "단계 표시기"
     },

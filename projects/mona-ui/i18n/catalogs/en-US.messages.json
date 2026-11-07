@@ -3,7 +3,8 @@
         "clear": "Clear"
     },
     "breadcrumb": {
-        "breadcrumb": "Breadcrumb"
+        "breadcrumb": "Breadcrumb",
+        "showFullPath": "Show full path"
     },
     "buttonGroup": {
         "buttonGroup": "Button group"
@@ -117,27 +118,41 @@
         "removeLabel": "{label, select, undefined {Remove, item} other {Remove, {label}}}"
     },
     "colorGradient": {
+        "alpha": "Alpha",
+        "alphaText": "Opacity {opacity}%",
         "apply": "Apply",
+        "blue": "Blue",
         "cancel": "Cancel",
         "clearColor": "Clear color",
+        "colorCopied": "Color copied",
+        "colorGradient": "Color gradient",
         "copyAsHex": "Copy as HEX",
         "copyAsRgb": "Copy as RGB",
         "copyColor": "Copy color",
+        "copyFailed": "Couldn't copy the color",
         "currentColor": "Current color",
+        "green": "Green",
+        "hexColor": "Hex color",
+        "hue": "Hue",
         "previousColor": "Previous color",
+        "red": "Red",
+        "saturation": "Saturation",
         "saturationAndValue": "Color saturation and value",
         "saturationAndValueText": "Saturation {saturation}%, Value {value}%",
-        "switchColorMode": "Switch color mode"
+        "switchColorMode": "Switch color mode",
+        "value": "Value"
     },
     "colorPalette": {
         "color": "Color {color}",
-        "colorPalette": "Color palette"
+        "colorPalette": "Color palette",
+        "namedColor": "{name}, {color}"
     },
     "colorPicker": {
         "clearColor": "Clear color",
         "colorGradientPicker": "Color gradient picker",
         "colorPalettePicker": "Color palette picker",
-        "colorPicker": "Color picker"
+        "colorPicker": "Color picker",
+        "noColor": "No color"
     },
     "comboBox": {
         "clear": "Clear"
@@ -327,6 +342,9 @@
         "sortOrder": "Sort order {position}",
         "toolbar": "Grid toolbar"
     },
+    "label": {
+        "optional": "Optional"
+    },
     "list": {
         "filterList": "Filter list",
         "loading": "Loading",
@@ -392,6 +410,9 @@
         "previousPageLabel": "Previous page",
         "rangeStatus": "{start} - {end} of {total, plural, one {# item} other {# items}}"
     },
+    "progressBar": {
+        "label": "Progress"
+    },
     "rating": {
         "notRated": "Not rated",
         "valueText": "{value} out of {max}"
@@ -401,6 +422,7 @@
         "nextPage": "Next page",
         "page": "Page {current}",
         "pageOf": "Page {current} of {total}",
+        "pages": "Pages",
         "previousPage": "Previous page",
         "scrollPagerNext": "Scroll pager next",
         "scrollPagerPrevious": "Scroll pager previous",
@@ -408,6 +430,10 @@
     },
     "sheet": {
         "closeSheet": "Close sheet"
+    },
+    "sidebar": {
+        "drawerLabel": "Sidebar",
+        "rail": "Toggle sidebar"
     },
     "slider": {
         "maximumValue": "Maximum value",
@@ -431,6 +457,9 @@
         "resizer": "Resizer"
     },
     "stepper": {
+        "stepCompleted": "Completed",
+        "stepInvalid": "Has errors",
+        "stepPosition": "Step {current} of {total}",
         "stepProgress": "Step progress",
         "stepper": "Progress"
     },

@@ -21,7 +21,8 @@ export const IT_IT_MESSAGES = {
         clear: "Cancella"
     },
     breadcrumb: {
-        breadcrumb: "Percorso di navigazione"
+        breadcrumb: "Percorso di navigazione",
+        showFullPath: "Mostra il percorso completo"
     },
     buttonGroup: {
         buttonGroup: "Gruppo di pulsanti"
@@ -159,28 +160,42 @@ export const IT_IT_MESSAGES = {
         removeLabel: (label?: string) => (label ? `Rimuovi ${label}` : "Rimuovi elemento")
     },
     colorGradient: {
+        alpha: "Canale alfa",
+        alphaText: (opacity: number) => `Opacità ${localizeNumber(opacity)}%`,
         apply: "Applica",
+        blue: "Blu",
         cancel: "Annulla",
         clearColor: "Cancella colore",
+        colorCopied: "Colore copiato",
+        colorGradient: "Sfumatura di colore",
         copyAsHex: "Copia come HEX",
         copyAsRgb: "Copia come RGB",
         copyColor: "Copia colore",
+        copyFailed: "Impossibile copiare il colore",
         currentColor: "Colore corrente",
+        green: "Verde",
+        hexColor: "Colore esadecimale",
+        hue: "Tonalità",
         previousColor: "Colore precedente",
+        red: "Rosso",
+        saturation: "Saturazione",
         saturationAndValue: "Saturazione e valore del colore",
         saturationAndValueText: (saturation: number, value: number) =>
             `Saturazione ${localizeNumber(saturation)}%, valore ${localizeNumber(value)}%`,
-        switchColorMode: "Cambia modalità colore"
+        switchColorMode: "Cambia modalità colore",
+        value: "Valore"
     },
     colorPalette: {
         color: (color: string) => `Colore: ${color}`,
-        colorPalette: "Tavolozza colori"
+        colorPalette: "Tavolozza colori",
+        namedColor: (name: string, color: string) => `${name}, ${color}`
     },
     colorPicker: {
         clearColor: "Cancella colore",
         colorGradientPicker: "Selettore gradiente di colore",
         colorPalettePicker: "Selettore tavolozza colori",
-        colorPicker: "Selettore colore"
+        colorPicker: "Selettore colore",
+        noColor: "Nessun colore"
     },
     comboBox: {
         clear: "Cancella"
@@ -379,6 +394,9 @@ export const IT_IT_MESSAGES = {
         sortOrder: (position: number) => `Ordine di ordinamento ${localizeNumber(position)}`,
         toolbar: "Barra degli strumenti della tabella"
     },
+    label: {
+        optional: "Facoltativo"
+    },
     list: {
         filterList: "Filtra elenco",
         loading: "Caricamento",
@@ -459,6 +477,9 @@ export const IT_IT_MESSAGES = {
                 ? `${localizeNumber(start)} - ${localizeNumber(end)} di ${localizeNumber(total)} elemento`
                 : `${localizeNumber(start)} - ${localizeNumber(end)} di ${localizeNumber(total)} elementi`
     },
+    progressBar: {
+        label: "Avanzamento"
+    },
     rating: {
         notRated: "Nessuna valutazione",
         valueText: (value: number, max: number) => `${localizeNumber(value)} di ${localizeNumber(max)}`
@@ -468,6 +489,7 @@ export const IT_IT_MESSAGES = {
         nextPage: "Pagina successiva",
         page: (current: number) => `Pagina ${localizeNumber(current)}`,
         pageOf: (current: number, total: number) => `Pagina ${localizeNumber(current)} di ${localizeNumber(total)}`,
+        pages: "Pagine",
         previousPage: "Pagina precedente",
         scrollPagerNext: "Scorri in avanti le opzioni del paginatore",
         scrollPagerPrevious: "Scorri indietro le opzioni del paginatore",
@@ -475,6 +497,10 @@ export const IT_IT_MESSAGES = {
     },
     sheet: {
         closeSheet: "Chiudi pannello"
+    },
+    sidebar: {
+        drawerLabel: "Barra laterale",
+        rail: "Mostra o nascondi la barra laterale"
     },
     slider: {
         maximumValue: "Valore massimo",
@@ -498,6 +524,10 @@ export const IT_IT_MESSAGES = {
         resizer: "Divisore pannelli"
     },
     stepper: {
+        stepCompleted: "Completato",
+        stepInvalid: "Contiene errori",
+        stepPosition: (current: number, total: number) =>
+            `Passaggio ${localizeNumber(current)} di ${localizeNumber(total)}`,
         stepProgress: "Avanzamento dei passaggi",
         stepper: "Avanzamento"
     },

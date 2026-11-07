@@ -11,7 +11,7 @@ import { monaThemeColors } from "../../mona-ui/theme/definitions/mona-theme-colo
 import { monaThemeShadows } from "../../mona-ui/theme/definitions/mona-theme-shadows";
 import { monaTheme } from "../../mona-ui/theme/definitions/mona-theme";
 
-const stylesPath = resolve("projects/mona-ui-tester/src/styles.css");
+const stylesPath = resolve("projects/mona-ui/styles.css");
 const styles = readFileSync(stylesPath, "utf8");
 const themeBlock = /@theme\s*{(?<declarations>[\s\S]*?)\n}/.exec(styles)?.groups?.["declarations"];
 
@@ -25,12 +25,9 @@ const tailwindColors = Object.fromEntries(
 const tailwindShadows = Object.fromEntries(
     [...themeBlock.matchAll(/^\s*(--shadow-[\w-]+):\s*([^;]+);/gm)].map(match => [match[1], match[2]])
 );
-const testerOwnedColors = new Set(["--color-page-background", "--color-demo-background"]);
 const runtimeColors = monaThemeColors.light;
 const runtimeKeys = Object.keys(runtimeColors).sort();
-const tailwindKeys = Object.keys(tailwindColors)
-    .filter(key => !testerOwnedColors.has(key))
-    .sort();
+const tailwindKeys = Object.keys(tailwindColors).sort();
 
 if (JSON.stringify(tailwindKeys) !== JSON.stringify(runtimeKeys)) {
     const missing = runtimeKeys.filter(key => !tailwindKeys.includes(key));
@@ -124,7 +121,8 @@ if (forbiddenRecipeStrategies.length > 0) {
 }
 
 const styleOnlyThemeServiceInjections = librarySources.filter(path => {
-    if (path.endsWith("theme.service.ts")) {
+    // The theme entry point has the service, and its providers create it. It's anything else that shouldn't need it.
+    if (path.replaceAll("\\", "/").startsWith("projects/mona-ui/theme/")) {
         return false;
     }
     return /(?:inject\(ThemeService\)|ThemeService)/.test(readFileSync(path, "utf8"));

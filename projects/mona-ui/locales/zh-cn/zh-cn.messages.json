@@ -3,7 +3,8 @@
         "clear": "清除"
     },
     "breadcrumb": {
-        "breadcrumb": "面包屑导航"
+        "breadcrumb": "面包屑导航",
+        "showFullPath": "显示完整路径"
     },
     "buttonGroup": {
         "buttonGroup": "按钮组"
@@ -117,27 +118,41 @@
         "removeLabel": "{label, select, undefined {删除项目} other {删除{label}}}"
     },
     "colorGradient": {
+        "alpha": "透明通道",
+        "alphaText": "不透明度{opacity}%",
         "apply": "应用",
+        "blue": "蓝色",
         "cancel": "取消",
         "clearColor": "清除颜色",
+        "colorCopied": "已复制颜色",
+        "colorGradient": "颜色渐变",
         "copyAsHex": "复制为 HEX",
         "copyAsRgb": "复制为 RGB",
         "copyColor": "复制颜色",
+        "copyFailed": "无法复制颜色",
         "currentColor": "当前颜色",
+        "green": "绿色",
+        "hexColor": "十六进制颜色",
+        "hue": "色相",
         "previousColor": "先前颜色",
+        "red": "红色",
+        "saturation": "饱和度",
         "saturationAndValue": "饱和度与明度",
         "saturationAndValueText": "饱和度{saturation}%，明度{value}%",
-        "switchColorMode": "切换颜色模式"
+        "switchColorMode": "切换颜色模式",
+        "value": "明度"
     },
     "colorPalette": {
         "color": "颜色: {color}",
-        "colorPalette": "调色板"
+        "colorPalette": "调色板",
+        "namedColor": "{name}，{color}"
     },
     "colorPicker": {
         "clearColor": "清除颜色",
         "colorGradientPicker": "渐变颜色选择器",
         "colorPalettePicker": "调色板选择器",
-        "colorPicker": "颜色选择器"
+        "colorPicker": "颜色选择器",
+        "noColor": "无颜色"
     },
     "comboBox": {
         "clear": "清除"
@@ -327,6 +342,9 @@
         "sortOrder": "排序顺序 {position}",
         "toolbar": "表格工具栏"
     },
+    "label": {
+        "optional": "可选"
+    },
     "list": {
         "filterList": "筛选列表",
         "loading": "正在加载",
@@ -392,6 +410,9 @@
         "previousPageLabel": "上一页",
         "rangeStatus": "第 {start} - {end} 项，共 {total} 项"
     },
+    "progressBar": {
+        "label": "进度"
+    },
     "rating": {
         "notRated": "未评分",
         "valueText": "第 {value} 级，共 {max} 级"
@@ -401,6 +422,7 @@
         "nextPage": "下一页",
         "page": "第 {current} 页",
         "pageOf": "第 {current} 页，共 {total} 页",
+        "pages": "页面",
         "previousPage": "上一页",
         "scrollPagerNext": "向后滚动分页器",
         "scrollPagerPrevious": "向前滚动分页器",
@@ -408,6 +430,10 @@
     },
     "sheet": {
         "closeSheet": "关闭面板"
+    },
+    "sidebar": {
+        "drawerLabel": "侧边栏",
+        "rail": "显示或隐藏侧边栏"
     },
     "slider": {
         "maximumValue": "最大值",
@@ -431,6 +457,9 @@
         "resizer": "调整大小手柄"
     },
     "stepper": {
+        "stepCompleted": "已完成",
+        "stepInvalid": "有错误",
+        "stepPosition": "第 {current} 步，共 {total} 步",
         "stepProgress": "步骤进度",
         "stepper": "步骤指示器"
     },

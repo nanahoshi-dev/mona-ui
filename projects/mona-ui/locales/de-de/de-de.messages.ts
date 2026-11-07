@@ -21,7 +21,8 @@ export const DE_DE_MESSAGES = {
         clear: "Leeren"
     },
     breadcrumb: {
-        breadcrumb: "Breadcrumb-Navigation"
+        breadcrumb: "Breadcrumb-Navigation",
+        showFullPath: "Vollständigen Pfad anzeigen"
     },
     buttonGroup: {
         buttonGroup: "Schaltflächengruppe"
@@ -159,28 +160,42 @@ export const DE_DE_MESSAGES = {
         removeLabel: (label?: string) => (label ? `${label} entfernen` : "Element entfernen")
     },
     colorGradient: {
+        alpha: "Alphakanal",
+        alphaText: (opacity: number) => `Deckkraft ${localizeNumber(opacity)} %`,
         apply: "Anwenden",
+        blue: "Blau",
         cancel: "Abbrechen",
         clearColor: "Farbe leeren",
+        colorCopied: "Farbe kopiert",
+        colorGradient: "Farbverlauf",
         copyAsHex: "Als HEX kopieren",
         copyAsRgb: "Als RGB kopieren",
         copyColor: "Farbe kopieren",
+        copyFailed: "Farbe konnte nicht kopiert werden",
         currentColor: "Aktuelle Farbe",
+        green: "Grün",
+        hexColor: "Hex-Farbe",
+        hue: "Farbton",
         previousColor: "Vorherige Farbe",
+        red: "Rot",
+        saturation: "Sättigung",
         saturationAndValue: "Sättigung und Helligkeit",
         saturationAndValueText: (saturation: number, value: number) =>
             `Sättigung ${localizeNumber(saturation)} %, Helligkeit ${localizeNumber(value)} %`,
-        switchColorMode: "Farbmodus wechseln"
+        switchColorMode: "Farbmodus wechseln",
+        value: "Helligkeit"
     },
     colorPalette: {
         color: (color: string) => `Farbe ${color}`,
-        colorPalette: "Farbpalette"
+        colorPalette: "Farbpalette",
+        namedColor: (name: string, color: string) => `${name}, ${color}`
     },
     colorPicker: {
         clearColor: "Farbe leeren",
         colorGradientPicker: "Farbverlaufsauswahl",
         colorPalettePicker: "Farbpalettenauswahl",
-        colorPicker: "Farbauswahl"
+        colorPicker: "Farbauswahl",
+        noColor: "Keine Farbe"
     },
     comboBox: {
         clear: "Leeren"
@@ -378,6 +393,9 @@ export const DE_DE_MESSAGES = {
         sortOrder: (position: number) => `Sortierreihenfolge ${localizeNumber(position)}`,
         toolbar: "Tabellen-Symbolleiste"
     },
+    label: {
+        optional: "Optional"
+    },
     list: {
         filterList: "Liste filtern",
         loading: "Wird geladen",
@@ -461,6 +479,9 @@ export const DE_DE_MESSAGES = {
                 ? `${localizeNumber(start)}–${localizeNumber(end)} von ${localizeNumber(total)} Element`
                 : `${localizeNumber(start)}–${localizeNumber(end)} von ${localizeNumber(total)} Elementen`
     },
+    progressBar: {
+        label: "Fortschritt"
+    },
     rating: {
         notRated: "Nicht bewertet",
         valueText: (value: number, max: number) => `${localizeNumber(value)} von ${localizeNumber(max)}`
@@ -470,6 +491,7 @@ export const DE_DE_MESSAGES = {
         nextPage: "Nächste Seite",
         page: (current: number) => `Seite ${localizeNumber(current)}`,
         pageOf: (current: number, total: number) => `Seite ${localizeNumber(current)} von ${localizeNumber(total)}`,
+        pages: "Seiten",
         previousPage: "Vorherige Seite",
         scrollPagerNext: "Seitennavigation vorwärts scrollen",
         scrollPagerPrevious: "Seitennavigation rückwärts scrollen",
@@ -477,6 +499,10 @@ export const DE_DE_MESSAGES = {
     },
     sheet: {
         closeSheet: "Bereich schließen"
+    },
+    sidebar: {
+        drawerLabel: "Seitenleiste",
+        rail: "Seitenleiste ein- oder ausblenden"
     },
     slider: {
         maximumValue: "Maximalwert",
@@ -500,6 +526,10 @@ export const DE_DE_MESSAGES = {
         resizer: "Trennleiste"
     },
     stepper: {
+        stepCompleted: "Abgeschlossen",
+        stepInvalid: "Enthält Fehler",
+        stepPosition: (current: number, total: number) =>
+            `Schritt ${localizeNumber(current)} von ${localizeNumber(total)}`,
         stepProgress: "Schrittfortschritt",
         stepper: "Schrittanzeige"
     },

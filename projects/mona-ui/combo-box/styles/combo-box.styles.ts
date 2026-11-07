@@ -7,7 +7,7 @@ export const comboBoxBaseThemeVariants = cva(
         flex items-center
         cursor-pointer
         ${themeControlSurfaceClasses} text-foreground
-        border border-input-border shadow-(--shadow-control) outline-none
+        border border-input-border shadow-(--shadow-control) outline-none focus-visible:outline-hidden
         transition-[color,box-shadow,border] duration-(--mona-motion-standard) ease-in-out
         data-[readonly='true']:cursor-default
         focus-within:border-focus-indicator focus-within:ring-2 focus-within:ring-focus-indicator/35
@@ -61,7 +61,7 @@ export const comboBoxBaseThemeVariants = cva(
 export const comboBoxTextInputThemeVariants = cva(
     `
         h-full w-full px-2 text-ellipsis
-        bg-transparent border-none shadow-none outline-none
+        bg-transparent border-none shadow-none outline-none focus-visible:outline-hidden
         focus-within:ring-0 focus-within:shadow-none
         focus-visible:ring-0 focus-visible:shadow-none
     `,

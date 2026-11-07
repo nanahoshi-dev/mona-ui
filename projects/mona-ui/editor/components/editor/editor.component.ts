@@ -18,7 +18,7 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
 import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { RovingToolbar } from "@nanahoshi/mona-ui/internal";
+import { injectEffectiveDisabled, RovingToolbar } from "@nanahoshi/mona-ui/internal";
 import type { JSONContent } from "@tiptap/core";
 import { twMerge } from "tailwind-merge";
 import { EDITOR_DEFAULT_MESSAGES } from "../../i18n/editor.default-messages";
@@ -79,7 +79,7 @@ const EMPTY_DOCUMENT: JSONContent = { type: "doc", content: [] };
         "[attr.aria-describedby]": "null",
         "[attr.aria-label]": "null",
         "[attr.aria-labelledby]": "null",
-        "[attr.data-disabled]": "disabled() || null",
+        "[attr.data-disabled]": "effectiveDisabled() || null",
         "[attr.data-invalid]": "invalidState() || null",
         "[attr.data-readonly]": "readonly() || null",
         "[attr.data-required]": "required() || null"
@@ -105,7 +105,7 @@ export class EditorComponent implements FormValueControl<string> {
         if (this.placeholder()) {
             attributes["aria-placeholder"] = this.placeholder();
         }
-        if (this.disabled()) {
+        if (this.effectiveDisabled()) {
             attributes["aria-disabled"] = "true";
         }
         if (this.readonly()) {
@@ -121,7 +121,7 @@ export class EditorComponent implements FormValueControl<string> {
     });
     readonly #destroyRef = inject(DestroyRef);
     readonly #direction = injectComponentDirection();
-    readonly #editable = computed(() => !this.disabled() && !this.readonly());
+    readonly #editable = computed(() => !this.effectiveDisabled() && !this.readonly());
     readonly #i18n = inject(MonaI18nService);
     readonly #rendered = signal(false);
     readonly #toolbar = new RovingToolbar(() => this.toolbarElement()?.nativeElement);
@@ -140,17 +140,18 @@ export class EditorComponent implements FormValueControl<string> {
         return twMerge(variantClass, userClass);
     });
     protected readonly containerClass = computed(() => {
-        return editorContainerThemeVariants({ disabled: this.disabled() });
+        return editorContainerThemeVariants({ disabled: this.effectiveDisabled() });
     });
     protected readonly editorContainer = viewChild.required<ElementRef<HTMLDivElement>>("editorContainer");
     protected readonly editorService = inject(EditorService);
+    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly invalidState = computed(
         () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
     protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
     protected readonly placeholderClass = computed(() => editorPlaceholderThemeVariants());
     protected readonly toolbarClass = computed(() => {
-        return editorToolbarThemeVariants({ disabled: this.disabled() });
+        return editorToolbarThemeVariants({ disabled: this.effectiveDisabled() });
     });
     protected readonly toolbarElement = viewChild<ElementRef<HTMLDivElement>>("toolbar");
 

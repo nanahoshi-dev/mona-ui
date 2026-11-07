@@ -1,56 +1,75 @@
 import { NgTemplateOutlet } from "@angular/common";
+import type { ElementRef, Signal } from "@angular/core";
 import {
-    afterNextRender,
+    booleanAttribute,
     Component,
     computed,
     contentChild,
-    DestroyRef,
     effect,
-    ElementRef,
     inject,
     input,
     model,
+    output,
     signal,
-    Signal,
-    TemplateRef
+    TemplateRef,
+    viewChildren
 } from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { LucideCheck, LucideCircleAlert } from "@lucide/angular";
 import { select } from "@mirei/ts-collections";
-import { fromEvent } from "rxjs";
 import { formatNumber, injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { StepperIndicatorTemplateDirective } from "../../directives/stepper-indicator-template.directive";
 import { StepperIndicatorDirective } from "../../directives/stepper-indicator.directive";
 import { StepperLabelTemplateDirective } from "../../directives/stepper-label-template.directive";
 import { StepperStepTemplateDirective } from "../../directives/stepper-step-template.directive";
 import { STEPPER_DEFAULT_MESSAGES } from "../../i18n/stepper.default-messages";
-import type { StepItem, StepOptions } from "../../models/Step";
+import type { StepItem, StepOptions, StepState } from "../../models/Step";
 import type { StepperTemplateContext } from "../../models/StepperTemplateContext";
+import { StepSelectEvent } from "../../models/StepSelectEvent";
+import type { StepperVariantInput, StepperVariantProps } from "../../styles/stepper.styles";
 import {
     stepperBaseThemeVariants,
+    stepperStepButtonThemeVariants,
+    stepperStepLabelThemeVariants,
     stepperStepListItemThemeVariants,
     stepperStepListThemeVariants,
     stepperTrackLineThemeVariants,
-    stepperTrackThemeVariants,
-    StepperVariantInput,
-    StepperVariantProps
+    stepperTrackThemeVariants
 } from "../../styles/stepper.styles";
+
+/** What in a label or step template keeps its own clicks. */
+const PROJECTED_CONTROL_SELECTOR = "a[href], button, input, select, summary, textarea, [contenteditable], [tabindex]";
 
 @Component({
     selector: "mona-stepper",
     templateUrl: "./stepper.component.html",
-    imports: [NgTemplateOutlet, StepperIndicatorDirective],
+    imports: [NgTemplateOutlet, StepperIndicatorDirective, LucideCheck, LucideCircleAlert],
     host: {
         role: "group",
         "[attr.aria-label]": "ariaLabel() || messages().stepper",
         "[class]": "baseClass()",
-        "[style]": "hostStyles()"
+        "[style]": "hostStyles()",
+        "(keydown)": "onKeydown($event)"
     }
 })
 export class StepperComponent implements StepperVariantInput {
-    readonly #destroyRef = inject(DestroyRef);
+    /** The nearest steps on either side of the current one that aren't disabled: all that a linear stepper can reach. */
+    readonly #adjacentEnabledSteps = computed(() => {
+        const active = this.activeStep();
+        const enabled = this.viewSteps()
+            .toArray()
+            .filter(step => !step.options.disabled);
+        if (!active) {
+            return { next: undefined, previous: undefined };
+        }
+        return {
+            next: enabled.find(step => step.index > active.index),
+            previous: enabled.filter(step => step.index < active.index).pop()
+        };
+    });
     readonly #direction = injectComponentDirection();
-    readonly #hostElementRef = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
+    readonly #id = createElementControlId();
     readonly #trackItemSize = computed(() => {
         const stepCount = this.viewSteps().length;
         return stepCount !== 0 ? 100 / stepCount : 0;
@@ -65,9 +84,7 @@ export class StepperComponent implements StepperVariantInput {
         if (steps.length === 0) {
             return undefined;
         }
-        const step = this.step();
-        const clampedIndex = Math.min(Math.max(step, 0), steps.length - 1);
-        return steps.elementAt(clampedIndex);
+        return steps.elementAt(this.normalizeIndex(this.step(), steps.length));
     });
     protected readonly baseClass = computed(() => {
         const orientation = this.orientation();
@@ -99,6 +116,14 @@ export class StepperComponent implements StepperVariantInput {
     });
     protected readonly messages = this.#i18n.componentMessages("stepper", STEPPER_DEFAULT_MESSAGES);
     protected readonly progressMax = computed(() => Math.max(this.viewSteps().length - 1, 0));
+    protected readonly progressText = computed(() => {
+        const active = this.activeStep();
+        return active ? this.positionText(active.index + 1) : null;
+    });
+    protected readonly stepButtonClass = computed(() => {
+        return stepperStepButtonThemeVariants();
+    });
+    protected readonly stepButtons = viewChildren<ElementRef<HTMLButtonElement>>("stepButton");
     protected readonly stepTemplate = contentChild(StepperStepTemplateDirective, {
         read: TemplateRef
     }) as Signal<TemplateRef<StepperTemplateContext> | undefined>;
@@ -151,7 +176,7 @@ export class StepperComponent implements StepperVariantInput {
      * If set to true, the user will only be able to navigate to the previous or the next step.
      * @default true
      */
-    public readonly linear = input(true);
+    public readonly linear = input(true, { transform: booleanAttribute });
 
     /**
      * @description Sets the orientation of the stepper.
@@ -175,23 +200,33 @@ export class StepperComponent implements StepperVariantInput {
     public readonly step = model(0);
 
     /**
+     * @description Emitted before a click or key changes the step. Call `preventDefault()` to stay on the current step,
+     * for example while its form is invalid. It doesn't fire when `step` is written from outside.
+     */
+    public readonly stepSelect = output<StepSelectEvent>();
+
+    /**
      * @description Sets the steps of the stepper.
      */
     public readonly steps = input<Iterable<StepOptions>>([]);
 
     public constructor() {
         effect(() => {
-            const activeIndex = this.step();
+            const requested = this.step();
             const stepCount = this.viewSteps().length;
             if (stepCount === 0) {
-                return;
+                return; // Steps may still be on their way, so the value can't be judged yet.
             }
-            const clampedIndex = Math.min(Math.max(activeIndex, 0), stepCount - 1);
-            this.highlightedStep.set(clampedIndex);
+            const index = this.normalizeIndex(requested, stepCount);
+            if (index !== requested) {
+                this.step.set(index);
+            }
+            this.highlightedStep.set(index);
         });
-        afterNextRender({
-            read: () => this.setKeyboardEvents()
-        });
+    }
+
+    protected descriptionId(step: StepItem): string {
+        return `${this.#id}-${step.index}-description`;
     }
 
     protected formatStepNumber(value: number): string {
@@ -217,94 +252,101 @@ export class StepperComponent implements StepperVariantInput {
             return false;
         }
         const active = this.activeStep();
-        if (!active) {
+        if (!active || step.index === active.index) {
             return false;
         }
-        return Math.abs(step.index - active.index) > 1;
+        const { next, previous } = this.#adjacentEnabledSteps();
+        return step.index !== next?.index && step.index !== previous?.index;
+    }
+
+    protected labelClass(state: StepState): string {
+        return stepperStepLabelThemeVariants({ state });
     }
 
     protected onIndicatorFocus(step: StepItem): void {
-        this.setHighlightedStep(step.index);
+        this.highlightedStep.set(step.index);
     }
 
-    protected onStepClick(step: StepItem): void {
-        this.setActiveStep(step);
-    }
-
-    private moveHighlight(offset: number): void {
-        const steps = this.viewSteps();
+    /**
+     * Enter and Space aren't here: they reach the step as the click a native button makes of them. Only the step buttons'
+     * own keys count, so a control in a template keeps its arrows, and a modified key stays the browser's.
+     */
+    protected onKeydown(event: KeyboardEvent): void {
+        if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
+            return;
+        }
+        if (!this.stepButtons().some(button => button.nativeElement === event.target)) {
+            return;
+        }
+        const orientation = this.orientation();
+        const isRtl = this.isRtl();
+        let previousKey = orientation === "vertical" ? "ArrowUp" : "ArrowLeft";
+        let nextKey = orientation === "vertical" ? "ArrowDown" : "ArrowRight";
+        if (orientation === "horizontal" && isRtl) {
+            previousKey = "ArrowRight";
+            nextKey = "ArrowLeft";
+        }
+        const reachable = this.viewSteps()
+            .toArray()
+            .filter(step => !this.isStepLocked(step));
         const current = this.highlightedStep();
-        const linear = this.linear();
-        const activeStep = this.activeStep();
-        const stepCount = steps.length;
-        let target = current + offset;
-        const minIndex = linear && activeStep ? Math.max(activeStep.index - 1, 0) : 0;
-        const maxIndex = linear && activeStep ? Math.min(activeStep.index + 1, stepCount - 1) : stepCount - 1;
-        target = Math.min(Math.max(target, minIndex), maxIndex);
-        // Skip over disabled steps in the direction of travel.
-        while (target >= 0 && target < stepCount && steps.elementAt(target)?.options.disabled) {
-            target += offset;
+        let target: StepItem | undefined;
+        if (event.key === previousKey) {
+            target = reachable.filter(step => step.index < current).pop();
+        } else if (event.key === nextKey) {
+            target = reachable.find(step => step.index > current);
+        } else if (event.key === "Home") {
+            target = reachable[0];
+        } else if (event.key === "End") {
+            target = reachable[reachable.length - 1];
+        } else {
+            return;
         }
-        if (target >= 0 && target < stepCount) {
-            this.setHighlightedStep(target);
+        event.preventDefault();
+        if (target) {
+            this.highlightedStep.set(target.index);
+            this.stepButtons()[target.index]?.nativeElement.focus();
         }
     }
 
-    private setActiveStep(step: StepItem): void {
+    protected onStepClick(step: StepItem, event: MouseEvent): void {
+        const control = (event.target as Element).closest(PROJECTED_CONTROL_SELECTOR);
+        if (control && !this.stepButtons().some(button => button.nativeElement === control)) {
+            return;
+        }
+        this.setActiveStep(step, event);
+    }
+
+    protected positionText(position: number): string {
+        return this.messages().stepPosition(position, this.viewSteps().length);
+    }
+
+    protected stepState(step: StepItem): StepState {
+        const active = this.activeStep();
+        if (step.index === active?.index) {
+            return "current";
+        }
         if (step.options.disabled) {
-            return;
+            return "disabled";
         }
-        const linear = this.linear();
-        const activeStep = this.activeStep();
-        const isPreviousStep = activeStep && activeStep.index - 1 === step.index;
-        const isNextStep = activeStep && activeStep.index + 1 === step.index;
-        if (!linear || (activeStep && (isPreviousStep || isNextStep))) {
-            this.step.set(step.index);
-            this.highlightedStep.set(step.index);
-        }
+        return (step.options.completed ?? (active != null && step.index < active.index)) ? "completed" : "upcoming";
     }
 
-    private setHighlightedStep(index: number): void {
-        const stepCount = this.viewSteps().length;
-        if (stepCount === 0) {
-            return;
-        }
-        const clampedIndex = Math.min(Math.max(index, 0), stepCount - 1);
-        this.highlightedStep.set(clampedIndex);
+    private normalizeIndex(value: number, stepCount: number): number {
+        return Number.isFinite(value) ? Math.min(Math.max(Math.trunc(value), 0), stepCount - 1) : 0;
     }
 
-    private setKeyboardEvents(): void {
-        fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(event => {
-                const orientation = this.orientation();
-                const isRtl = this.isRtl();
-                let previousKey = orientation === "vertical" ? "ArrowUp" : "ArrowLeft";
-                let nextKey = orientation === "vertical" ? "ArrowDown" : "ArrowRight";
-                if (orientation === "horizontal" && isRtl) {
-                    previousKey = "ArrowRight";
-                    nextKey = "ArrowLeft";
-                }
-                if (event.key === previousKey) {
-                    event.preventDefault();
-                    this.moveHighlight(-1);
-                } else if (event.key === nextKey) {
-                    event.preventDefault();
-                    this.moveHighlight(1);
-                } else if (event.key === "Home") {
-                    event.preventDefault();
-                    this.setHighlightedStep(0);
-                } else if (event.key === "End") {
-                    event.preventDefault();
-                    this.setHighlightedStep(this.viewSteps().length - 1);
-                } else if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    const highlightedStep = this.highlightedStep();
-                    const step = this.viewSteps().elementAt(highlightedStep);
-                    if (step) {
-                        this.setActiveStep(step);
-                    }
-                }
-            });
+    private setActiveStep(step: StepItem, event: Event): void {
+        const active = this.activeStep();
+        if (this.isStepLocked(step) || step.index === active?.index) {
+            return;
+        }
+        const selectEvent = new StepSelectEvent(step.index, active?.index ?? 0, step.options, event);
+        this.stepSelect.emit(selectEvent);
+        if (selectEvent.isDefaultPrevented()) {
+            return;
+        }
+        this.step.set(step.index);
+        this.highlightedStep.set(step.index);
     }
 }

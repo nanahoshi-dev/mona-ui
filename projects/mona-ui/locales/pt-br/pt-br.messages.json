@@ -3,7 +3,8 @@
         "clear": "Limpar"
     },
     "breadcrumb": {
-        "breadcrumb": "Trilha de navegação"
+        "breadcrumb": "Trilha de navegação",
+        "showFullPath": "Mostrar caminho completo"
     },
     "buttonGroup": {
         "buttonGroup": "Grupo de botões"
@@ -117,27 +118,41 @@
         "removeLabel": "{label, select, undefined {Remover item} other {Remover {label}}}"
     },
     "colorGradient": {
+        "alpha": "Canal alfa",
+        "alphaText": "Opacidade {opacity}%",
         "apply": "Aplicar",
+        "blue": "Azul",
         "cancel": "Cancelar",
         "clearColor": "Limpar cor",
+        "colorCopied": "Cor copiada",
+        "colorGradient": "Gradiente de cor",
         "copyAsHex": "Copiar como HEX",
         "copyAsRgb": "Copiar como RGB",
         "copyColor": "Copiar cor",
+        "copyFailed": "Não foi possível copiar a cor",
         "currentColor": "Cor atual",
+        "green": "Verde",
+        "hexColor": "Cor hexadecimal",
+        "hue": "Matiz",
         "previousColor": "Cor anterior",
+        "red": "Vermelho",
+        "saturation": "Saturação",
         "saturationAndValue": "Saturação e valor da cor",
         "saturationAndValueText": "Saturação {saturation}%, valor {value}%",
-        "switchColorMode": "Alternar modo de cor"
+        "switchColorMode": "Alternar modo de cor",
+        "value": "Valor"
     },
     "colorPalette": {
         "color": "Cor: {color}",
-        "colorPalette": "Paleta de cores"
+        "colorPalette": "Paleta de cores",
+        "namedColor": "{name}, {color}"
     },
     "colorPicker": {
         "clearColor": "Limpar cor",
         "colorGradientPicker": "Seletor de gradiente de cores",
         "colorPalettePicker": "Seletor de paleta de cores",
-        "colorPicker": "Seletor de cores"
+        "colorPicker": "Seletor de cores",
+        "noColor": "Sem cor"
     },
     "comboBox": {
         "clear": "Limpar"
@@ -327,6 +342,9 @@
         "sortOrder": "Ordem de classificação {position}",
         "toolbar": "Barra de ferramentas da tabela"
     },
+    "label": {
+        "optional": "Opcional"
+    },
     "list": {
         "filterList": "Filtrar lista",
         "loading": "Carregando",
@@ -392,6 +410,9 @@
         "previousPageLabel": "Página anterior",
         "rangeStatus": "{total, plural, =1 {{start} - {end} de # item} other {{start} - {end} de # itens}}"
     },
+    "progressBar": {
+        "label": "Progresso"
+    },
     "rating": {
         "notRated": "Não avaliado",
         "valueText": "{value} de {max}"
@@ -401,6 +422,7 @@
         "nextPage": "Próxima página",
         "page": "Página {current}",
         "pageOf": "Página {current} de {total}",
+        "pages": "Páginas",
         "previousPage": "Página anterior",
         "scrollPagerNext": "Rolar opções do paginador para a frente",
         "scrollPagerPrevious": "Rolar opções do paginador para trás",
@@ -408,6 +430,10 @@
     },
     "sheet": {
         "closeSheet": "Fechar painel"
+    },
+    "sidebar": {
+        "drawerLabel": "Barra lateral",
+        "rail": "Mostrar ou ocultar a barra lateral"
     },
     "slider": {
         "maximumValue": "Valor máximo",
@@ -431,6 +457,9 @@
         "resizer": "Separador de painéis"
     },
     "stepper": {
+        "stepCompleted": "Concluída",
+        "stepInvalid": "Contém erros",
+        "stepPosition": "Etapa {current} de {total}",
         "stepProgress": "Progresso das etapas",
         "stepper": "Progresso"
     },

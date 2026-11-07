@@ -67,7 +67,7 @@ describe("generate-message-parameters", () => {
     it("covers every message namespace", () => {
         const table = readMessageParameterTable();
 
-        expect(table.size).toBe(40);
+        expect(table.size).toBe(43);
         expect(table.get("pager")!.get("pageStatus")).toEqual([
             { name: "page", optional: false, type: "number" },
             { name: "totalPages", optional: false, type: "number" }

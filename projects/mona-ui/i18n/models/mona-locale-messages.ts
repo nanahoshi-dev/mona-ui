@@ -17,6 +17,7 @@ import type { MonaDropdownsMessages } from "../message-types/dropdowns.messages"
 import type { MonaEditorMessages } from "../message-types/editor.messages";
 import type { MonaFilterMessages } from "../message-types/filter.messages";
 import type { MonaGridMessages } from "../message-types/grid.messages";
+import type { MonaLabelMessages } from "../message-types/label.messages";
 import type { MonaListMessages } from "../message-types/list.messages";
 import type { MonaListBoxMessages } from "../message-types/list-box.messages";
 import type { MonaMultiSelectMessages } from "../message-types/multi-select.messages";
@@ -24,6 +25,8 @@ import type { MonaNotificationMessages } from "../message-types/notification.mes
 import type { MonaNumericTextBoxMessages } from "../message-types/numeric-text-box.messages";
 import type { MonaOtpInputMessages } from "../message-types/otp-input.messages";
 import type { MonaPagerMessages } from "../message-types/pager.messages";
+import type { MonaProgressBarMessages } from "../message-types/progress-bar.messages";
+import type { MonaSidebarMessages } from "../message-types/sidebar.messages";
 import type { MonaRatingMessages } from "../message-types/rating.messages";
 import type { MonaScrollViewMessages } from "../message-types/scroll-view.messages";
 import type { MonaSheetMessages } from "../message-types/sheet.messages";
@@ -59,6 +62,7 @@ export interface MonaLocaleMessages {
     editor: MonaEditorMessages;
     filter: MonaFilterMessages;
     grid: MonaGridMessages;
+    label: MonaLabelMessages;
     list: MonaListMessages;
     listBox: MonaListBoxMessages;
     multiSelect: MonaMultiSelectMessages;
@@ -66,6 +70,8 @@ export interface MonaLocaleMessages {
     numericTextBox: MonaNumericTextBoxMessages;
     otpInput: MonaOtpInputMessages;
     pager: MonaPagerMessages;
+    progressBar: MonaProgressBarMessages;
+    sidebar: MonaSidebarMessages;
     rating: MonaRatingMessages;
     scrollView: MonaScrollViewMessages;
     sheet: MonaSheetMessages;

@@ -7,7 +7,7 @@ export const dropdownListInputThemeVariants = cva(
         inline-flex items-center
         cursor-pointer select-none
         ${themeControlSurfaceClasses} text-foreground
-        border border-input-border shadow-(--shadow-control) outline-none
+        border border-input-border shadow-(--shadow-control) outline-none focus-visible:outline-hidden
         transition-[color,box-shadow,border] duration-(--mona-motion-standard) ease-in-out
         data-[readonly='true']:cursor-default
         hover:bg-hover active:bg-active

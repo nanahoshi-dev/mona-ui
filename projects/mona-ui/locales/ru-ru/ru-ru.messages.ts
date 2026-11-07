@@ -21,7 +21,8 @@ export const RU_RU_MESSAGES = {
         clear: "Очистить"
     },
     breadcrumb: {
-        breadcrumb: "Навигационная цепочка"
+        breadcrumb: "Навигационная цепочка",
+        showFullPath: "Показать полный путь"
     },
     buttonGroup: {
         buttonGroup: "Группа кнопок"
@@ -165,28 +166,42 @@ export const RU_RU_MESSAGES = {
         removeLabel: (label?: string) => (label ? `Удалить ${label}` : "Удалить элемент")
     },
     colorGradient: {
+        alpha: "Альфа-канал",
+        alphaText: (opacity: number) => `Непрозрачность ${localizeNumber(opacity)}%`,
         apply: "Применить",
+        blue: "Синий",
         cancel: "Отмена",
         clearColor: "Очистить цвет",
+        colorCopied: "Цвет скопирован",
+        colorGradient: "Цветовой градиент",
         copyAsHex: "Копировать как HEX",
         copyAsRgb: "Копировать как RGB",
         copyColor: "Копировать цвет",
+        copyFailed: "Не удалось скопировать цвет",
         currentColor: "Текущий цвет",
+        green: "Зелёный",
+        hexColor: "Шестнадцатеричный цвет",
+        hue: "Оттенок",
         previousColor: "Предыдущий цвет",
+        red: "Красный",
+        saturation: "Насыщенность",
         saturationAndValue: "Насыщенность и значение",
         saturationAndValueText: (saturation: number, value: number) =>
             `Насыщенность ${localizeNumber(saturation)}%, значение ${localizeNumber(value)}%`,
-        switchColorMode: "Переключить цветовой режим"
+        switchColorMode: "Переключить цветовой режим",
+        value: "Значение"
     },
     colorPalette: {
         color: (color: string) => `Цвет: ${color}`,
-        colorPalette: "Цветовая палитра"
+        colorPalette: "Цветовая палитра",
+        namedColor: (name: string, color: string) => `${name}, ${color}`
     },
     colorPicker: {
         clearColor: "Очистить цвет",
         colorGradientPicker: "Выбор градиента цвета",
         colorPalettePicker: "Выбор цвета из палитры",
-        colorPicker: "Выбор цвета"
+        colorPicker: "Выбор цвета",
+        noColor: "Без цвета"
     },
     comboBox: {
         clear: "Очистить"
@@ -381,6 +396,9 @@ export const RU_RU_MESSAGES = {
         sortOrder: (position: number) => `Порядок сортировки ${localizeNumber(position)}`,
         toolbar: "Панель инструментов таблицы"
     },
+    label: {
+        optional: "Необязательно"
+    },
     list: {
         filterList: "Фильтр списка",
         loading: "Загрузка",
@@ -471,6 +489,9 @@ export const RU_RU_MESSAGES = {
         rangeStatus: (start: number, end: number, total: number) =>
             `${localizeNumber(start)}–${localizeNumber(end)} из ${localizeNumber(total)}`
     },
+    progressBar: {
+        label: "Ход выполнения"
+    },
     rating: {
         notRated: "Без оценки",
         valueText: (value: number, max: number) => `${localizeNumber(value)} из ${localizeNumber(max)}`
@@ -480,6 +501,7 @@ export const RU_RU_MESSAGES = {
         nextPage: "Следующая страница",
         page: (current: number) => `Страница ${localizeNumber(current)}`,
         pageOf: (current: number, total: number) => `Страница ${localizeNumber(current)} из ${localizeNumber(total)}`,
+        pages: "Страницы",
         previousPage: "Предыдущая страница",
         scrollPagerNext: "Прокрутить список страниц вперёд",
         scrollPagerPrevious: "Прокрутить список страниц назад",
@@ -487,6 +509,10 @@ export const RU_RU_MESSAGES = {
     },
     sheet: {
         closeSheet: "Закрыть панель"
+    },
+    sidebar: {
+        drawerLabel: "Боковая панель",
+        rail: "Показать или скрыть боковую панель"
     },
     slider: {
         maximumValue: "Максимальное значение",
@@ -510,6 +536,9 @@ export const RU_RU_MESSAGES = {
         resizer: "Разделитель панелей"
     },
     stepper: {
+        stepCompleted: "Завершён",
+        stepInvalid: "Содержит ошибки",
+        stepPosition: (current: number, total: number) => `Шаг ${localizeNumber(current)} из ${localizeNumber(total)}`,
         stepProgress: "Ход выполнения шагов",
         stepper: "Шаги"
     },

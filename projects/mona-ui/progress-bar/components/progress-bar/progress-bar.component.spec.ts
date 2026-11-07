@@ -27,7 +27,7 @@ describe("ProgressBarComponent", () => {
 
         expect(host.classList.contains("bg-surface-muted")).toBe(true);
         expect(host.classList.contains("border-input-border")).toBe(false);
-        expect(filledTrack.classList.contains("bg-primary")).toBe(true);
+        expect(filledTrack.classList.contains("bg-[var(--mona-indicator-color,var(--color-primary))]")).toBe(true);
         expect(remainingTrack.classList.contains("data-[next='true']:bg-surface-muted")).toBe(true);
     });
 

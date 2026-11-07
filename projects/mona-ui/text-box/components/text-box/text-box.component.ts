@@ -16,7 +16,13 @@ import { type FormValueControl } from "@angular/forms/signals";
 import { LucideX } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { AttributeBinderDirective, type AttributeConfig, createElementControlId } from "@nanahoshi/mona-ui/internal";
+import {
+    AttributeBinderDirective,
+    type AttributeConfig,
+    createElementControlId,
+    injectEffectiveDisabled,
+    injectLabelAssociation
+} from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { TextBoxPrefixTemplateDirective } from "../../directives/text-box-prefix-template.directive";
 import { TextBoxSuffixTemplateDirective } from "../../directives/text-box-suffix-template.directive";
@@ -36,7 +42,7 @@ const selectableInputTypes: ReadonlySet<string> = new Set(["password", "search",
         "[attr.aria-describedby]": "null",
         "[attr.aria-label]": "null",
         "[attr.aria-labelledby]": "null",
-        "[attr.data-disabled]": "disabled() || null",
+        "[attr.data-disabled]": "effectiveDisabled() || null",
         "[attr.data-readonly]": "readonly() || null",
         "[attr.data-required]": "required() || null",
         "[attr.data-invalid]": "invalidInput() || null",
@@ -47,6 +53,10 @@ const selectableInputTypes: ReadonlySet<string> = new Set(["password", "search",
 export class TextBoxComponent implements TextBoxVariantInput, FormValueControl<string> {
     readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #i18n = inject(MonaI18nService);
+    readonly #label = injectLabelAssociation({
+        ariaLabel: () => this.ariaLabel(),
+        ariaLabelledBy: () => this.ariaLabelledBy()
+    });
     protected readonly classes = computed(() => {
         const rounded = this.rounded();
         const size = this.size();
@@ -54,14 +64,16 @@ export class TextBoxComponent implements TextBoxVariantInput, FormValueControl<s
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
+    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>("input");
     protected readonly invalidInput = computed(
         () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
+    protected readonly labelledBy = this.#label.labelledBy;
     protected readonly messages = this.#i18n.componentMessages("textBox", TEXT_BOX_DEFAULT_MESSAGES);
     protected readonly prefixTemplateList = contentChildren(TextBoxPrefixTemplateDirective, { read: TemplateRef });
     protected readonly showClearButton = computed(
-        () => this.clearButton() && !this.disabled() && !this.readonly() && !!this.value()
+        () => this.clearButton() && !this.effectiveDisabled() && !this.readonly() && !!this.value()
     );
     protected readonly suffixTemplateList = contentChildren(TextBoxSuffixTemplateDirective, { read: TemplateRef });
 
@@ -248,6 +260,13 @@ export class TextBoxComponent implements TextBoxVariantInput, FormValueControl<s
 
     public onValueChange(value: string): void {
         this.value.set(value);
+    }
+
+    /**
+     * @internal
+     */
+    public setLabelledBy(id: string | null): void {
+        this.#label.setLabelledBy(id);
     }
 
     protected onFocusOut(event: FocusEvent): void {

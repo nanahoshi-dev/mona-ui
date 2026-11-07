@@ -35,10 +35,11 @@ export const rgba2hsla = (
         }
         h /= 6;
     }
+    // One decimal, because whole percentages can't bring most colors back: #123456 would return as #123354.
     return {
-        h: Math.round(h * 360),
-        s: Math.round(s * 100),
-        l: Math.round(l * 100),
+        h: Math.round(h * 3600) / 10,
+        s: Math.round(s * 1000) / 10,
+        l: Math.round(l * 1000) / 10,
         a: alpha ?? 255
     };
 };

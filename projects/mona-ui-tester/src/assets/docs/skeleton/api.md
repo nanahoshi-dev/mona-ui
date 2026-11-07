@@ -23,7 +23,7 @@ Add `SkeletonComponent` to the `imports` array of a standalone component:
 export class ProfileHeaderComponent {}
 ```
 
-Numbers passed to `width` or `height` are interpreted as pixels. Strings can contain any CSS length accepted by the host element, such as `"12rem"`, `"240px"`, or `"100%"`.
+Numbers passed to `width` or `height` are interpreted as pixels. Strings can contain any CSS length accepted by the host element, such as `"12rem"`, `"240px"`, or `"100%"`. Both are set as inline styles, so a class like `w-8` has no effect. Use these inputs.
 
 ## Examples
 
@@ -73,7 +73,7 @@ When loading completes, remove the busy state and replace the skeleton with the 
 
 | Name      | Type                              | Default    | Description |
 |-----------|-----------------------------------|------------|-------------|
-| `class`   | `string`                          | `''`       | Additional CSS classes merged onto the host element. |
+| `class`   | `ClassInputType`                  | `''`       | Additional CSS classes merged onto the host element. |
 | `height`  | `string \| number`                | `'1rem'`   | Height of the placeholder. Numbers are treated as pixels. |
 | `rounded` | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Border-radius preset applied to the placeholder. |
 | `width`   | `string \| number`                | `'100%'`   | Width of the placeholder. Numbers are treated as pixels. |

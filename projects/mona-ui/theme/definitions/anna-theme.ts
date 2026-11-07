@@ -28,6 +28,12 @@ export const annaTheme = Object.freeze({
         dark: Object.freeze({
             colors: annaThemeColors.dark,
             components,
+            // The violet fill is 1.73:1 on Anna's surface, which is fine under a label and not as the only thing
+            // showing a value. What's drawn by a fill alone takes the lighter violet instead.
+            custom: Object.freeze({
+                "--mona-indicator-color": "var(--color-primary-border)",
+                "--mona-indicator-foreground": "#161718"
+            }),
             effects: createDefaultThemeEffects(),
             motion,
             shape: createDefaultThemeShape(),

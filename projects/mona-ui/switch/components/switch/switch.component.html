@@ -1,4 +1,4 @@
-<span [class]="labelClasses()">
+<span aria-hidden="true" [class]="labelClasses()">
     @if (checked() && !onLabelTemplate()) {
         <span animate.enter="mona-switch-label-enter" animate.leave="mona-switch-label-leave">{{ onLabel() }}</span>
     }
@@ -8,7 +8,7 @@
         </span>
     }
 </span>
-<span [class]="labelClasses()">
+<span aria-hidden="true" [class]="labelClasses()">
     @if (!checked() && !offLabelTemplate()) {
         <span animate.enter="mona-switch-label-enter" animate.leave="mona-switch-label-leave">{{ offLabel() }}</span>
     }

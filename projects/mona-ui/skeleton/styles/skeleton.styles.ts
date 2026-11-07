@@ -4,7 +4,8 @@ import type { VariantInputs } from "@nanahoshi/mona-ui/internal";
 export const skeletonBaseThemeVariants = cva(
     `
         block shrink-0
-        bg-accent
+        bg-muted-foreground/25
+        forced-color-adjust-none forced-colors:bg-[GrayText]
         motion-safe:animate-pulse
     `,
     {

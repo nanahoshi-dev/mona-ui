@@ -1,4 +1,4 @@
-import { computed, effect, inject, linkedSignal, Service, signal, untracked } from "@angular/core";
+import { computed, effect, inject, isDevMode, linkedSignal, Service, signal, untracked } from "@angular/core";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import type { SidebarCollapsibleMode } from "../models/SidebarCollapsibleMode";
 import type { SidebarController } from "../models/SidebarController";
@@ -33,13 +33,6 @@ export class SidebarService {
     readonly #expanded = signal(true);
     readonly #generatedId = createElementControlId();
     readonly #layoutService = inject(SidebarLayoutService, { optional: true });
-    readonly #persistKey = signal("");
-    readonly #providedId = signal<string | null>(null);
-    readonly #side = signal<SidebarSide>("start");
-    readonly #storage = inject(SIDEBAR_STORAGE);
-
-    readonly #variant = signal<SidebarVariant>("sidebar");
-
     /**
      * Reset every time the viewport crosses the breakpoint. A drawer left open on a phone must not
      * still count as open when the window is widened back to a desktop layout, where the same flag
@@ -49,12 +42,24 @@ export class SidebarService {
         source: () => this.#compact(),
         computation: () => false
     });
+    readonly #persistKey = signal("");
+    readonly #providedId = signal<string | null>(null);
+    readonly #side = signal<SidebarSide>("start");
+    readonly #storage = inject(SIDEBAR_STORAGE);
+
+    readonly #variant = signal<SidebarVariant>("sidebar");
+
+    /** What storage holds as far as this service knows, so only a change is written. */
+    #syncedExpanded: boolean | null = null;
 
     /** @description How the sidebar behaves when collapsed. Set by the `mona-sidebar` it belongs to. */
     public readonly collapsible = this.#collapsible.asReadonly();
 
     /** @description Whether the sidebar presents as an overlay drawer rather than as a column. */
     public readonly compact = this.#compact;
+
+    /** @description The subset of this service that is safe to hand to a consumer. */
+    public readonly controller: SidebarController;
 
     /**
      * @description Whether the sidebar is open. While compact this reports the drawer, so one binding
@@ -92,36 +97,36 @@ export class SidebarService {
     /** @description The visual treatment of the sidebar. Set by the `mona-sidebar` it belongs to. */
     public readonly variant = this.#variant.asReadonly();
 
-    /** @description The subset of this service that is safe to hand to a consumer. */
-    public readonly controller: SidebarController = {
-        collapse: () => this.collapse(),
-        collapsible: this.collapsible,
-        compact: this.compact,
-        expand: () => this.expand(),
-        expanded: this.expanded,
-        iconOnly: this.iconOnly,
-        mobileOpen: this.mobileOpen,
-        side: this.side,
-        sidebarId: this.sidebarId,
-        state: this.state,
-        toggle: () => this.toggle(),
-        variant: this.variant
-    };
-
     public constructor() {
+        this.controller = {
+            collapse: () => this.collapse(),
+            collapsible: this.collapsible,
+            compact: this.compact,
+            expand: () => this.expand(),
+            expanded: this.expanded,
+            iconOnly: this.iconOnly,
+            mobileOpen: this.mobileOpen,
+            side: this.side,
+            sidebarId: this.sidebarId,
+            state: this.state,
+            toggle: () => this.toggle(),
+            variant: this.variant
+        };
+
         // Restore before persist, so the first pass cannot write the default back over what was
-        // stored. Both sit idle until `mona-sidebar` publishes a key, which it only does when the
-        // consumer asked for one.
+        // stored, or over something under that key this storage can't read. Both sit idle until
+        // `mona-sidebar` publishes a key, which it only does when the consumer asked for one.
         effect(() => {
             const key = this.#persistKey();
             if (!key) {
                 return;
             }
             untracked(() => {
-                const stored = this.#storage.read(key);
+                const stored = this.#readStored(key);
                 if (stored !== null) {
                     this.#expanded.set(stored);
                 }
+                this.#syncedExpanded = this.#expanded();
             });
         });
 
@@ -136,7 +141,12 @@ export class SidebarService {
             if (!key) {
                 return;
             }
-            untracked(() => this.#storage.write(key, expanded));
+            untracked(() => {
+                if (expanded !== this.#syncedExpanded) {
+                    this.#syncedExpanded = expanded;
+                    this.#writeStored(key, expanded);
+                }
+            });
         });
     }
 
@@ -195,5 +205,29 @@ export class SidebarService {
 
     public toggle(): void {
         this.setExpanded(!this.expanded());
+    }
+
+    /** A custom storage that throws shouldn't take the sidebar down: it opens as its input says. */
+    #readStored(key: string): boolean | null {
+        try {
+            return this.#storage.read(key);
+        } catch (error) {
+            this.#reportStorageError(error);
+            return null;
+        }
+    }
+
+    #reportStorageError(error: unknown): void {
+        if (isDevMode()) {
+            console.error("mona-sidebar: the sidebar storage threw.", error);
+        }
+    }
+
+    #writeStored(key: string, expanded: boolean): void {
+        try {
+            this.#storage.write(key, expanded);
+        } catch (error) {
+            this.#reportStorageError(error);
+        }
     }
 }

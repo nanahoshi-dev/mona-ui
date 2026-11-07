@@ -3,7 +3,8 @@
         "clear": "Leeren"
     },
     "breadcrumb": {
-        "breadcrumb": "Breadcrumb-Navigation"
+        "breadcrumb": "Breadcrumb-Navigation",
+        "showFullPath": "Vollständigen Pfad anzeigen"
     },
     "buttonGroup": {
         "buttonGroup": "Schaltflächengruppe"
@@ -117,27 +118,41 @@
         "removeLabel": "{label, select, undefined {Element entfernen} other {{label} entfernen}}"
     },
     "colorGradient": {
+        "alpha": "Alphakanal",
+        "alphaText": "Deckkraft {opacity} %",
         "apply": "Anwenden",
+        "blue": "Blau",
         "cancel": "Abbrechen",
         "clearColor": "Farbe leeren",
+        "colorCopied": "Farbe kopiert",
+        "colorGradient": "Farbverlauf",
         "copyAsHex": "Als HEX kopieren",
         "copyAsRgb": "Als RGB kopieren",
         "copyColor": "Farbe kopieren",
+        "copyFailed": "Farbe konnte nicht kopiert werden",
         "currentColor": "Aktuelle Farbe",
+        "green": "Grün",
+        "hexColor": "Hex-Farbe",
+        "hue": "Farbton",
         "previousColor": "Vorherige Farbe",
+        "red": "Rot",
+        "saturation": "Sättigung",
         "saturationAndValue": "Sättigung und Helligkeit",
         "saturationAndValueText": "Sättigung {saturation} %, Helligkeit {value} %",
-        "switchColorMode": "Farbmodus wechseln"
+        "switchColorMode": "Farbmodus wechseln",
+        "value": "Helligkeit"
     },
     "colorPalette": {
         "color": "Farbe {color}",
-        "colorPalette": "Farbpalette"
+        "colorPalette": "Farbpalette",
+        "namedColor": "{name}, {color}"
     },
     "colorPicker": {
         "clearColor": "Farbe leeren",
         "colorGradientPicker": "Farbverlaufsauswahl",
         "colorPalettePicker": "Farbpalettenauswahl",
-        "colorPicker": "Farbauswahl"
+        "colorPicker": "Farbauswahl",
+        "noColor": "Keine Farbe"
     },
     "comboBox": {
         "clear": "Leeren"
@@ -327,6 +342,9 @@
         "sortOrder": "Sortierreihenfolge {position}",
         "toolbar": "Tabellen-Symbolleiste"
     },
+    "label": {
+        "optional": "Optional"
+    },
     "list": {
         "filterList": "Liste filtern",
         "loading": "Wird geladen",
@@ -392,6 +410,9 @@
         "previousPageLabel": "Vorherige Seite",
         "rangeStatus": "{total, plural, =1 {{start}–{end} von # Element} other {{start}–{end} von # Elementen}}"
     },
+    "progressBar": {
+        "label": "Fortschritt"
+    },
     "rating": {
         "notRated": "Nicht bewertet",
         "valueText": "{value} von {max}"
@@ -401,6 +422,7 @@
         "nextPage": "Nächste Seite",
         "page": "Seite {current}",
         "pageOf": "Seite {current} von {total}",
+        "pages": "Seiten",
         "previousPage": "Vorherige Seite",
         "scrollPagerNext": "Seitennavigation vorwärts scrollen",
         "scrollPagerPrevious": "Seitennavigation rückwärts scrollen",
@@ -408,6 +430,10 @@
     },
     "sheet": {
         "closeSheet": "Bereich schließen"
+    },
+    "sidebar": {
+        "drawerLabel": "Seitenleiste",
+        "rail": "Seitenleiste ein- oder ausblenden"
     },
     "slider": {
         "maximumValue": "Maximalwert",
@@ -431,6 +457,9 @@
         "resizer": "Trennleiste"
     },
     "stepper": {
+        "stepCompleted": "Abgeschlossen",
+        "stepInvalid": "Enthält Fehler",
+        "stepPosition": "Schritt {current} von {total}",
         "stepProgress": "Schrittfortschritt",
         "stepper": "Schrittanzeige"
     },

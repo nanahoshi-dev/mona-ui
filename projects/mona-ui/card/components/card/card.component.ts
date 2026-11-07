@@ -24,8 +24,10 @@ import {
     templateUrl: "./card.component.html",
     host: {
         "[class]": "baseClass()",
-        "[attr.aria-labelledby]": "titleId()",
-        "[attr.aria-describedby]": "descriptionId()"
+        "[attr.aria-describedby]": "titleId() ? descriptionCellId() : null",
+        "[attr.aria-labelledby]": "titleCellId()",
+        // A name only counts on an element with a role, and a card with no title has no name to give it.
+        "[attr.role]": "titleId() ? role() : null"
     },
     providers: [CardService]
 })
@@ -44,6 +46,11 @@ export class CardComponent implements CardVariantInput {
     });
     protected readonly contentDirective = contentChild(CardContentDirective);
     protected readonly descriptionCellClass = cardHeaderDescriptionThemeVariants();
+    /** Its own id on the library's wrapper: the template's `let id` may already be on the consumer's element. */
+    protected readonly descriptionCellId = computed(() => {
+        const id = this.descriptionId();
+        return id ? `${id}-cell` : null;
+    });
     protected readonly descriptionId = this.#cardService.descriptionId.asReadonly();
     protected readonly descriptionTemplate = this.#cardService.descriptionTemplate.asReadonly();
     protected readonly footerClass = computed(() => {
@@ -62,8 +69,19 @@ export class CardComponent implements CardVariantInput {
     protected readonly headerTemplate = this.#cardService.headerTemplate.asReadonly();
     protected readonly messages = this.#i18n.componentMessages("card", CARD_DEFAULT_MESSAGES);
     protected readonly titleCellClass = cardHeaderTitleThemeVariants();
+    protected readonly titleCellId = computed(() => {
+        const id = this.titleId();
+        return id ? `${id}-cell` : null;
+    });
     protected readonly titleId = this.#cardService.titleId.asReadonly();
     protected readonly titleTemplate = this.#cardService.titleTemplate.asReadonly();
+
+    /**
+     * @description The role the card takes when it has a title, which then names it. Use `article` for self-contained
+     * content or `region` for a landmark.
+     * @default "group"
+     */
+    public readonly role = input<"article" | "group" | "region">("group");
 
     /**
      * @description Controls the border radius applied to the card and its header/footer regions.

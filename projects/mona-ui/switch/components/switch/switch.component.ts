@@ -1,6 +1,7 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
+    booleanAttribute,
     Component,
     computed,
     contentChild,
@@ -9,6 +10,7 @@ import {
     inject,
     input,
     model,
+    numberAttribute,
     output,
     TemplateRef
 } from "@angular/core";
@@ -26,6 +28,7 @@ import {
     SwitchVariantInputs,
     SwitchVariantProps
 } from "../../styles/switch.styles";
+import { injectEffectiveDisabled, injectLabelAssociation } from "@nanahoshi/mona-ui/internal";
 
 @Component({
     selector: "mona-switch",
@@ -72,12 +75,15 @@ import {
     host: {
         "[attr.role]": "'switch'",
         "[attr.aria-checked]": "checked()",
-        "[attr.aria-disabled]": "disabled() || undefined",
+        "[attr.aria-disabled]": "effectiveDisabled() || undefined",
         "[attr.aria-label]": "ariaLabel()",
-        "[attr.aria-labelledby]": "ariaLabelledBy()",
-        "[attr.tabindex]": "disabled() ? -1 : 0",
+        "[attr.aria-labelledby]": "labelledBy()",
+        "[attr.aria-readonly]": "readonly() || null",
+        "[attr.aria-required]": "required() || null",
+        "[attr.data-readonly]": "readonly() || null",
+        "[attr.tabindex]": "effectiveDisabled() ? -1 : tabindex()",
         "[attr.data-active]": "checked()",
-        "[attr.data-disabled]": "disabled()",
+        "[attr.data-disabled]": "effectiveDisabled()",
         "[attr.data-invalid]": "invalidState() || null",
         "[attr.aria-invalid]": "invalidState() ? 'true' : null",
         "[class]": "classes()",
@@ -87,12 +93,18 @@ import {
 export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl {
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    readonly #label = injectLabelAssociation({
+        activate: () => this.activateFromLabel(),
+        ariaLabel: () => this.ariaLabel(),
+        ariaLabelledBy: () => this.ariaLabelledBy()
+    });
     protected readonly classes = computed(() => {
         const rounded = this.rounded();
         const size = this.size();
         const classes = switchThemeVariants({ rounded, size });
         return twMerge(classes, this.userClass());
     });
+    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly handleClasses = computed(() => {
         const rounded = this.rounded();
         const size = this.size();
@@ -109,6 +121,7 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
         const classes = switchLabelThemeVariants();
         return twMerge(classes);
     });
+    protected readonly labelledBy = this.#label.labelledBy;
     protected readonly offLabelTemplate = contentChild(SwitchOffLabelTemplateDirective, { read: TemplateRef });
     protected readonly onLabelTemplate = contentChild(SwitchOnLabelTemplateDirective, { read: TemplateRef });
 
@@ -135,14 +148,14 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
      * @description Renders the component with reduced visual emphasis and removes pointer interaction.
      * @default false
      */
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
 
     /**
-     * @description Marks the switch as invalid. When bound to a signal form field via `[field]`,
-     * this is written by the signal forms `Field` directive.
+     * @description Marks the switch as invalid. When bound to a signal form field via `[formField]`, this is written by
+     * the `FormField` directive.
      * @default false
      */
-    public readonly invalid = input(false);
+    public readonly invalid = input(false, { transform: booleanAttribute });
 
     /**
      * @description Label displayed inside the switch track when it is in the off state.
@@ -157,10 +170,17 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
     public readonly onLabel = input("");
 
     /**
+     * @description Prevents value changes while the control stays focusable and readable. When bound to a signal form
+     * field via `[formField]`, this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly readonly = input(false, { transform: booleanAttribute });
+
+    /**
      * @description Marks the switch as required for form validation.
      * @default false
      */
-    public readonly required = input(false);
+    public readonly required = input(false, { transform: booleanAttribute });
 
     /**
      * @description Border-radius preset applied to the component.
@@ -175,16 +195,24 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
     public readonly size = input<SwitchVariantProps["size"]>("medium");
 
     /**
+     * @description Tab index of the switch while it's enabled.
+     * @default 0
+     */
+    public readonly tabindex = input<number, number | string>(0, {
+        transform: (value: number | string) => numberAttribute(value, 0)
+    });
+
+    /**
      * @description Emitted when the switch loses focus or its value changes.
      */
     public readonly touch = output();
 
     /**
-     * @description Marks the switch as touched. When bound to a signal form field via `[field]`,
-     * this is written by the signal forms `Field` directive.
+     * @description Marks the switch as touched. When bound to a signal form field via `[formField]`, this is written by
+     * the `FormField` directive.
      * @default false
      */
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
 
     /**
      * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
@@ -198,6 +226,30 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
         });
     }
 
+    /**
+     * Toggles the switch when a label for it is clicked, as a native label does for a checkbox.
+     * @internal
+     */
+    public activateFromLabel(): void {
+        this.focus();
+        this.#toggleState();
+    }
+
+    /**
+     * @description Moves focus to the switch.
+     * @param options Options passed to the native `focus()` call, such as `preventScroll`.
+     */
+    public focus(options?: FocusOptions): void {
+        this.#hostElementRef.nativeElement.focus(options);
+    }
+
+    /**
+     * @internal
+     */
+    public setLabelledBy(id: string | null): void {
+        this.#label.setLabelledBy(id);
+    }
+
     protected onBlur(): void {
         this.touch.emit();
     }
@@ -206,8 +258,10 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
         const host = this.#hostElementRef.nativeElement;
         const click$ = fromEvent<MouseEvent>(host, "click");
         const keydown$ = fromEvent<KeyboardEvent>(host, "keydown").pipe(
-            filter(event => event.key === " " || event.key === "Enter"),
-            tap(event => event.preventDefault()) // Prevent page scroll on Space
+            // Keys pressed on a control inside a handle or label template are that control's.
+            filter(event => event.target === host && (event.key === " " || event.key === "Enter")),
+            tap(event => event.preventDefault()), // Prevent page scroll on Space
+            filter(event => !event.repeat)
         );
         merge(click$, keydown$)
             .pipe(takeUntilDestroyed(this.#destroyRef))
@@ -215,7 +269,7 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
     }
 
     #toggleState(): void {
-        if (this.disabled()) {
+        if (this.effectiveDisabled() || this.readonly()) {
             return;
         }
         this.checked.set(!this.checked());

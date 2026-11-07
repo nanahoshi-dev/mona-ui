@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, input, model } from "@angular/core";
+import { booleanAttribute, ChangeDetectionStrategy, Component, computed, input, model } from "@angular/core";
 import { CheckBoxComponent, CheckboxDirective } from "@nanahoshi/mona-ui/check-box";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
@@ -14,6 +14,8 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class CheckboxDemoComponent extends AbstractDemoComponent<CheckBoxComponent> {
     protected readonly config = computed<ComponentConfig<CheckBoxComponent>>(() => ({
         inputs: deriveInputConfig<CheckBoxComponent>(this.metadata(), {
+            // The id is generated per instance; a knob would replace it with an empty string.
+            inputId: undefined,
             label: {
                 type: "string",
                 value: "Checkbox Component"
@@ -43,6 +45,9 @@ export class CheckboxDemoComponent extends AbstractDemoComponent<CheckBoxCompone
     imports: [CheckBoxComponent, CheckboxDirective],
     template: `
         <mona-check-box
+            [aria-describedby]="ariaDescribedBy()"
+            [aria-label]="ariaLabel()"
+            [aria-labelledby]="ariaLabelledBy()"
             [checked]="checked()"
             [disabled]="disabled()"
             [indeterminate]="indeterminate()"
@@ -50,6 +55,8 @@ export class CheckboxDemoComponent extends AbstractDemoComponent<CheckBoxCompone
             [label]="label()"
             [labelPosition]="labelPosition()"
             [labelSize]="labelSize()"
+            [name]="name()"
+            [readonly]="readonly()"
             [required]="required()"
             [rounded]="rounded()"
             [tabIndex]="tabIndex()"
@@ -74,17 +81,22 @@ export class CheckboxDemoComponent extends AbstractDemoComponent<CheckBoxCompone
     `
 })
 export class CheckBoxWrapperComponent implements ComponentInputsAsSignal<CheckBoxComponent> {
+    public readonly ariaDescribedBy = input("");
+    public readonly ariaLabel = input("");
+    public readonly ariaLabelledBy = input("");
     public readonly checked = model(false);
-    public readonly disabled = input(false);
-    public readonly indeterminate = input(false);
-    public readonly invalid = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
+    public readonly indeterminate = input(false, { transform: booleanAttribute });
+    public readonly invalid = input(false, { transform: booleanAttribute });
     public readonly label = input("Checkbox Label");
     public readonly labelPosition = input<ReturnType<CheckBoxComponent["labelPosition"]>>("after");
     public readonly labelSize = input<ReturnType<CheckBoxComponent["labelSize"]>>("medium");
-    public readonly required = input(false);
+    public readonly name = input("");
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<CheckBoxComponent["rounded"]>>("medium");
     public readonly tabIndex = input(0);
-    public readonly touched = input(false);
+    public readonly touched = input(false, { transform: booleanAttribute });
     public readonly userClass = input("");
 
     protected onInputBlur(event: FocusEvent): void {

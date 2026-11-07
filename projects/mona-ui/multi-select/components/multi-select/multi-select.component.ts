@@ -43,7 +43,12 @@ import {
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { createElementControlId, restoreOverlayScroll, rxFromResize } from "@nanahoshi/mona-ui/internal";
+import {
+    createElementControlId,
+    injectEffectiveDisabled,
+    restoreOverlayScroll,
+    rxFromResize
+} from "@nanahoshi/mona-ui/internal";
 import { IndicatorIconComponent } from "@nanahoshi/mona-ui/internal/indicator-icon";
 import {
     ListComponent,
@@ -106,7 +111,7 @@ import {
         "[attr.aria-busy]": "loading() ? 'true' : undefined",
         "[attr.aria-controls]": "listId",
         "[attr.aria-describedby]": "ariaDescribedBy() || null",
-        "[attr.aria-disabled]": "disabled() ? true : undefined",
+        "[attr.aria-disabled]": "effectiveDisabled() ? true : undefined",
         "[attr.aria-expanded]": "expanded()",
         "[attr.aria-haspopup]": "'listbox'",
         "[attr.aria-invalid]": "invalidState() ? true : undefined",
@@ -114,11 +119,11 @@ import {
         "[attr.aria-labelledby]": "ariaLabelledBy() || null",
         "[attr.aria-readonly]": "readonly() ? true : undefined",
         "[attr.aria-required]": "required() ? true : undefined",
-        "[attr.data-disabled]": "disabled() || null",
+        "[attr.data-disabled]": "effectiveDisabled() || null",
         "[attr.data-invalid]": "invalidState() || null",
         "[attr.data-readonly]": "readonly() || null",
         "[attr.role]": "'combobox'",
-        "[attr.tabindex]": "disabled() ? null : 0",
+        "[attr.tabindex]": "effectiveDisabled() ? null : 0",
         "[class]": "baseClass()",
         "(focusout)": "onFocusOut($event)"
     }
@@ -147,7 +152,7 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
         return multiSelectAffixContainerThemeVariants();
     });
     protected readonly baseClass = computed(() => {
-        const disabled = this.disabled();
+        const disabled = this.effectiveDisabled();
         const focused = this.#popupRef() != null;
         const invalid = this.invalidState();
         const rounded = this.rounded();
@@ -162,12 +167,13 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
             this.showClearButton() &&
             this.selectedListItems().any() &&
             !this.loading() &&
-            !this.disabled() &&
+            !this.effectiveDisabled() &&
             !this.readonly()
     );
     protected readonly effectiveAriaLabel = computed(
         () => this.ariaLabel() || (this.ariaLabelledBy() ? "" : this.placeholder())
     );
+    protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly expanded = computed(() => this.#dropdownService.popupRef() !== null);
     protected readonly footerTemplate = contentChild(DropdownFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderTemplate = contentChild(DropdownGroupHeaderTemplateDirective, {
@@ -492,7 +498,7 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
 
     protected onSelectedItemGroupRemove(event: Event): void {
         event.stopImmediatePropagation();
-        if (this.readonly() || this.disabled()) {
+        if (this.readonly() || this.effectiveDisabled()) {
             return;
         }
         const selectedItemCount = this.selectedListItems().size();
@@ -506,7 +512,7 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
 
     protected onSelectedItemRemove(event: Event, listItem: ListItem<TData>): void {
         event.stopImmediatePropagation();
-        if (this.readonly() || this.disabled()) {
+        if (this.readonly() || this.effectiveDisabled()) {
             return;
         }
         this.#listService.deselectItems([listItem]);
@@ -516,7 +522,7 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
 
     protected onValueClear(event: Event): void {
         if (
-            this.disabled() ||
+            this.effectiveDisabled() ||
             this.readonly() ||
             (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ")
         ) {

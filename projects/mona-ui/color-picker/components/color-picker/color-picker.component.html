@@ -1,3 +1,4 @@
+<span class="sr-only">{{ valueText() }}</span>
 @if (valueTemplate()) {
     <ng-container
         [ngTemplateOutlet]="valueTemplate() ?? null"
@@ -5,7 +6,7 @@
 } @else {
     <div [style.background]="value()" [class]="colorClasses()">
         @if (!value()) {
-            <svg lucideXCircle [size]="16"></svg>
+            <svg lucideXCircle [size]="16" aria-hidden="true"></svg>
         }
     </div>
 }
@@ -16,11 +17,10 @@
         <div
             [id]="popupId"
             [class]="palettePopupClasses"
-            tabindex="0"
+            tabindex="-1"
             role="dialog"
             [attr.aria-label]="messages().colorPalettePicker"
-            data-palette-container
-            (keydown)="onPaletteContainerKeyDown($event)">
+            data-palette-container>
             @if (showClearButton()) {
                 <div class="flex items-center justify-end p-1">
                     <button
@@ -34,27 +34,30 @@
                 </div>
             }
             <mona-color-palette
-                [palette]="palette()"
+                [clearable]="false"
+                [palette]="paletteOption()"
                 [columns]="columns()"
                 [readonly]="readonly()"
+                [tileSize]="tileSize()"
                 [value]="value()"
                 (valueChange)="onColorPaletteValueChange($event)"
-                (touch)="onColorPaletteTouch()"></mona-color-palette>
+                (colorSelect)="onPaletteColorSelect()"></mona-color-palette>
         </div>
     } @else if (view() === "gradient") {
         <div
             [id]="popupId"
             [class]="gradientPopupClasses"
-            tabindex="0"
+            tabindex="-1"
             role="dialog"
             [attr.aria-label]="messages().colorGradientPicker">
             <mona-color-gradient
+                [format]="format()"
                 [opacity]="opacity()"
                 [rounded]="rounded()"
-                [disabled]="disabled() || readonly()"
+                [showButtons]="showButtons()"
+                [readonly]="readonly()"
                 [value]="value()"
                 (valueChange)="onColorGradientValueChange($event)"
-                (touch)="onColorGradientTouch()"
                 (apply)="onColorGradientApply()"
                 (cancel)="onColorGradientCancel()"></mona-color-gradient>
         </div>

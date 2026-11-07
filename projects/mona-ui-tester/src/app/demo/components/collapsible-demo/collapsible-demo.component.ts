@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { Component, computed, input, model } from "@angular/core";
+import { booleanAttribute, Component, computed, input, model } from "@angular/core";
 import {
     CollapsibleContentDirective,
     CollapsibleDirective,
@@ -52,7 +52,7 @@ export class CollapsibleDemoComponent extends AbstractDemoComponent<CollapsibleD
     }
 })
 class CollapsibleWrapperComponent implements ComponentInputsAsSignal<CollapsibleDirective> {
-    public readonly animate = input<ReturnType<CollapsibleDirective["animate"]>>(true);
-    public readonly disabled = input<ReturnType<CollapsibleDirective["disabled"]>>(false);
+    public readonly animate = input(true, { transform: booleanAttribute });
+    public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly expanded = model<ReturnType<CollapsibleDirective["expanded"]>>(false);
 }

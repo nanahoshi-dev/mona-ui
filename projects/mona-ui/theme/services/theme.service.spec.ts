@@ -286,7 +286,8 @@ function createTransparencyEnvironment(
     const media = new TestMediaQueryList(reduced);
     const view = {
         CSS: { supports: (property: string): boolean => property === supportedProperty },
-        matchMedia: (): MediaQueryList => media as unknown as MediaQueryList
+        matchMedia: (query: string): MediaQueryList =>
+            (query.includes("transparency") ? media : new TestMediaQueryList(false)) as unknown as MediaQueryList
     };
     return {
         document: { documentElement: root, defaultView: view } as unknown as Document,

@@ -1,8 +1,9 @@
 export interface ColorInput {
+    ariaLabel: string;
+    change: (value: number | null) => void;
     key: string;
     label: string;
-    value: number | null;
-    min: number;
     max: number;
-    change: (value: number | null) => void;
+    min: number;
+    value: number | null;
 }

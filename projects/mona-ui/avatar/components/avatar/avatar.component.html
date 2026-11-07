@@ -1,5 +1,12 @@
-@if (image()) {
-    <img [src]="image()" [style.border-radius]="borderRadius()" [alt]="alt()" />
+@if (imageVisible()) {
+    <img
+        loading="lazy"
+        decoding="async"
+        style="display: block; height: 100%; object-fit: cover; width: 100%"
+        [src]="image()"
+        [style.border-radius]="borderRadius()"
+        [alt]="imageAlt()"
+        (error)="onImageError()" />
 } @else if (label()) {
     <div [style]="avatarLabelStyles()">{{ label() }}</div>
 } @else {

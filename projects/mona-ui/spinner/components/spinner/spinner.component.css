@@ -232,3 +232,9 @@
         transform: scale(0.8);
     }
 }
+
+@media (forced-colors: active) {
+    [data-segment] {
+        background-color: CanvasText;
+    }
+}

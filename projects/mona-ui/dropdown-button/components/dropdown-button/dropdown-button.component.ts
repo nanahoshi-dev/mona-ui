@@ -191,7 +191,7 @@ export class DropdownButtonComponent implements ButtonGroupMember, DropdownButto
     public constructor() {
         effect(() => ensureDropdownButtonComponentTypes(this.menuItemComponents()));
         effect(() => {
-            if (this.disabled() || this.loading()) {
+            if (this.disabled() || this.loading() || this.groupButtons().some(button => button.effectiveDisabled())) {
                 untracked(() => this.popupMenuRef()?.closeMenu());
             }
         });

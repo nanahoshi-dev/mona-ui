@@ -51,7 +51,7 @@ export const menuItemTextThemeVariants = cva(`flex flex-1 items-center justify-s
 export const menuItemThemeVariants = cva(
     `
         relative flex cursor-default select-none items-center gap-4 px-2 py-1.5
-        text-foreground outline-none
+        text-foreground outline-none focus-visible:outline-hidden
         hover:bg-[var(--mona-menu-item-hover-background,var(--color-hover))] hover:text-foreground
         focus-within:bg-[var(--mona-menu-item-hover-background,var(--color-hover))]
         focus-within:text-foreground focus-within:outline-none
@@ -103,7 +103,7 @@ export const menubarBaseThemeVariants = cva(
 export const menubarListItemThemeVariants = cva(
     `
         flex h-full items-center justify-center px-2 py-1.5
-        cursor-pointer text-foreground outline-none
+        cursor-pointer text-foreground outline-none focus-visible:outline-hidden
         hover:bg-[var(--mona-menu-item-hover-background,var(--color-hover))] hover:text-foreground
         focus-within:bg-[var(--mona-menu-item-hover-background,var(--color-hover))]
         focus-within:text-foreground focus-within:outline-none

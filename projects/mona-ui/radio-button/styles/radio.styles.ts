@@ -2,12 +2,23 @@ import { cva } from "class-variance-authority";
 import { themeControlSurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
 
+export const radioGroupThemeVariants = cva("flex", {
+    variants: {
+        orientation: {
+            horizontal: "flex-row flex-wrap gap-4",
+            vertical: "flex-col gap-2"
+        }
+    },
+    defaultVariants: {
+        orientation: "vertical"
+    }
+});
+
+export type RadioGroupVariantProps = VariantProps<typeof radioGroupThemeVariants>;
+
 export const radioButtonThemeVariants = cva(
     `
-        peer absolute inset-0 z-10 h-full w-full
-        cursor-pointer appearance-none opacity-0
-        outline-none
-        disabled:cursor-not-allowed
+        peer sr-only appearance-none outline-none focus-visible:outline-hidden
     `
 );
 
@@ -24,6 +35,7 @@ export const radioButtonCircleThemeVariants = cva(
 
         peer-focus-visible:border-focus-indicator
         peer-focus-visible:ring-2 peer-focus-visible:ring-focus-indicator/35
+        peer-focus-visible:outline-hidden
 
         data-[invalid='true']:border-error
         data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
@@ -46,7 +58,8 @@ export const radioButtonCircleThemeVariants = cva(
 export const radioButtonIndicatorThemeVariants = cva(
     `
         flex h-3 w-3
-        bg-primary
+        bg-[var(--mona-indicator-color,var(--color-primary))]
+        forced-color-adjust-none forced-colors:bg-[Highlight]
         transition-all duration-(--mona-motion-fast)
     `,
     {
@@ -66,9 +79,12 @@ export const radioButtonContainerLabelThemeVariants = cva(
     `
         relative flex h-full w-full items-center justify-center gap-1
         cursor-pointer
+        isolate before:absolute before:-inset-[3px] before:-z-10 before:content-['']
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed
         data-[disabled='true']:text-disabled-foreground
+        data-[readonly='true']:cursor-default
+        [&[data-readonly='true']>*]:cursor-default
     `,
     {
         variants: {
@@ -90,7 +106,7 @@ export const radioButtonDirectiveThemeVariants = cva(
         cursor-pointer appearance-none
         ${themeControlSurfaceClasses}
         border border-input-border
-        outline-none
+        outline-none focus-visible:outline-hidden
 
         disabled:pointer-events-none disabled:cursor-not-allowed
         disabled:border-disabled-border disabled:bg-disabled-background disabled:text-disabled-foreground

@@ -1,6 +1,6 @@
+import type { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { VariantProps } from "class-variance-authority";
 
 export const tabListBaseThemeVariants = cva(
     `
@@ -46,8 +46,7 @@ export const tabListListThemeVariants = cva(
 
 export const tabListListItemThemeVariants = cva(
     `
-        relative flex shrink-0 cursor-pointer outline-none
-        focus-visible:ring-2 focus-visible:ring-focus-indicator/35
+        relative flex shrink-0 cursor-pointer
         transition-colors duration-(--mona-motion-standard) ease-out
     `,
     {
@@ -55,7 +54,8 @@ export const tabListListItemThemeVariants = cva(
             active: {
                 true: `
                     text-foreground font-semibold
-                    after:absolute after:content-[''] after:bg-primary
+                    after:absolute after:content-[''] after:bg-[var(--mona-indicator-color,var(--color-primary))]
+                    after:forced-color-adjust-none forced-colors:after:bg-[Highlight]
                 `,
                 false: "text-muted-foreground hover:bg-hover hover:text-foreground"
             },
@@ -70,9 +70,9 @@ export const tabListListItemThemeVariants = cva(
                 right: "w-full items-center justify-start text-start after:inset-y-0 after:start-0 after:w-[2px]"
             },
             size: {
-                small: "h-8 px-2 text-xs",
-                medium: "h-9 px-3 text-sm",
-                large: "h-10 px-4 text-sm"
+                small: "h-8 text-xs",
+                medium: "h-9 text-sm",
+                large: "h-10 text-sm"
             }
         },
         defaultVariants: {
@@ -80,6 +80,41 @@ export const tabListListItemThemeVariants = cva(
             size: "medium"
         }
     }
+);
+
+/** Inset, because the strip clips anything outside it. */
+export const tabListTabThemeVariants = cva(
+    `
+        flex h-full min-w-0 flex-1 items-center
+        focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus-indicator
+    `,
+    {
+        variants: {
+            position: {
+                top: "justify-center whitespace-nowrap",
+                bottom: "justify-center whitespace-nowrap",
+                left: "justify-start text-start",
+                right: "justify-start text-start"
+            },
+            size: {
+                small: "px-2",
+                medium: "px-3",
+                large: "px-4"
+            }
+        },
+        defaultVariants: {
+            position: "top",
+            size: "medium"
+        }
+    }
+);
+
+/** The icon is 16 pixels. The pseudo-element makes the target 24. */
+export const tabListCloseButtonThemeVariants = cva(
+    `
+        relative -ms-1 me-2 h-fit w-min self-center px-0
+        before:absolute before:-inset-1 before:content-['']
+    `
 );
 
 export const tabListScrollButtonThemeVariants = cva(
@@ -134,6 +169,8 @@ export type TabListListItemVariantProps = VariantProps<typeof tabListListItemThe
 
 export type TabListListItemVariantInput = VariantInputs<TabListListItemVariantProps>;
 
+type TabListTabVariantProps = VariantProps<typeof tabListTabThemeVariants>;
+
 export type TabListScrollButtonVariantProps = VariantProps<typeof tabListScrollButtonThemeVariants>;
 
 export type TabListScrollButtonVariantInput = VariantInputs<TabListScrollButtonVariantProps>;
@@ -150,6 +187,7 @@ export type TabListVariantProps = TabListBaseVariantProps &
     TabListListWrapperVariantProps &
     TabListListVariantProps &
     TabListListItemVariantProps &
+    TabListTabVariantProps &
     TabListScrollButtonVariantProps;
 
 export type TabListVariantInput = TabListBaseVariantInput &

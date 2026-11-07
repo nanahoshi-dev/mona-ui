@@ -8,7 +8,7 @@ export const textAreaThemeVariants = cva(
         text-sm text-foreground
         ${themeControlSurfaceClasses}
         border border-input-border shadow-(--shadow-control)
-        outline-none
+        outline-none focus-visible:outline-hidden
         selection:bg-primary selection:text-primary-foreground
         transition-[color,box-shadow,border] duration-(--mona-motion-standard) ease-in-out
         placeholder:text-muted-foreground

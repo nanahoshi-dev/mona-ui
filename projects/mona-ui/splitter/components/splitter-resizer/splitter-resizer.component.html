@@ -1,6 +1,21 @@
+<div
+    #separator
+    role="separator"
+    [class]="separatorClass()"
+    [style.cursor]="cursor()"
+    [attr.aria-controls]="isInert() ? null : previousPane().uid"
+    [attr.aria-label]="previousPane().label() || messages().resizer"
+    [attr.aria-orientation]="separatorOrientation()"
+    [attr.aria-valuemax]="isInert() ? null : ariaValueMax()"
+    [attr.aria-valuemin]="isInert() ? null : ariaValueMin()"
+    [attr.aria-valuenow]="isInert() ? null : ariaValueNow()"
+    [attr.tabindex]="isInert() ? null : 0"
+    (dblclick)="toggleCollapse()"
+    (keydown)="onKeydown($event)"
+    (pointerdown)="onPointerDown($event)"></div>
 <mona-splitter-resizer-handle
-    (collapseNext)="collapseNext($event)"
-    (collapsePrevious)="collapsePrevious($event)"
+    (collapseNext)="collapseNext()"
+    (collapsePrevious)="collapsePrevious()"
     [nextControlsVisible]="nextCollapseControlsVisible()"
     [orientation]="orientation()"
     [previousControlsVisible]="previousCollapseControlsVisible()"

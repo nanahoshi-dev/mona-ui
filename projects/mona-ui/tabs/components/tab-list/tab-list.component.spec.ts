@@ -116,7 +116,7 @@ describe("TabListComponent", () => {
 
         const emitSpy = vi.spyOn(component.tabSelect, "emit");
         const debugElement = fixture.debugElement;
-        debugElement.triggerEventHandler("keydown", { key: "Home" });
+        debugElement.triggerEventHandler("keydown", { key: "Home", preventDefault: vi.fn() });
         fixture.detectChanges();
         expect(emitSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 0 }));
     });
@@ -126,7 +126,7 @@ describe("TabListComponent", () => {
         fixture.detectChanges();
         const emitSpy = vi.spyOn(component.tabSelect, "emit");
         const debugElement = fixture.debugElement;
-        debugElement.triggerEventHandler("keydown", { key: "End" });
+        debugElement.triggerEventHandler("keydown", { key: "End", preventDefault: vi.fn() });
         fixture.detectChanges();
         expect(emitSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 2 }));
     });
@@ -136,7 +136,7 @@ describe("TabListComponent", () => {
         fixture.detectChanges();
         const emitSpy = vi.spyOn(component.tabClose, "emit");
         const debugElement = fixture.debugElement;
-        debugElement.triggerEventHandler("keydown", { key: "Delete" });
+        debugElement.triggerEventHandler("keydown", { key: "Delete", preventDefault: vi.fn() });
         fixture.detectChanges();
         expect(emitSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 0 }));
     });
@@ -189,7 +189,7 @@ describe("TabListComponent", () => {
         fixture.componentRef.setInput("selectedTabId", "tab1");
         fixture.detectChanges();
 
-        const tabElement: HTMLElement = fixture.debugElement.query(By.css("li[data-tab-id='tab1']")).nativeElement;
+        const tabElement: HTMLElement = fixture.debugElement.query(By.css("li[data-tab-id='tab1'] [role='tab']")).nativeElement;
         expect(tabElement.id).toBe("tab1-tab");
         expect(tabElement.getAttribute("aria-controls")).toBe("tab1-panel");
     });
@@ -233,7 +233,7 @@ describe("TabListComponent", () => {
         fixture.componentRef.setInput("selectedTabId", "tab3");
         fixture.detectChanges();
         const emitSpy = vi.spyOn(component.tabSelect, "emit");
-        fixture.debugElement.triggerEventHandler("keydown", { key: "Home" });
+        fixture.debugElement.triggerEventHandler("keydown", { key: "Home", preventDefault: vi.fn() });
         fixture.detectChanges();
         expect(emitSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 1 }));
     });
@@ -247,7 +247,7 @@ describe("TabListComponent", () => {
         fixture.componentRef.setInput("selectedTabId", "tab1");
         fixture.detectChanges();
         const emitSpy = vi.spyOn(component.tabSelect, "emit");
-        fixture.debugElement.triggerEventHandler("keydown", { key: "End" });
+        fixture.debugElement.triggerEventHandler("keydown", { key: "End", preventDefault: vi.fn() });
         fixture.detectChanges();
         expect(emitSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 1 }));
     });
@@ -260,7 +260,7 @@ describe("TabListComponent", () => {
         fixture.componentRef.setInput("selectedTabId", "tab1");
         fixture.detectChanges();
         const emitSpy = vi.spyOn(component.tabClose, "emit");
-        fixture.debugElement.triggerEventHandler("keydown", { key: "Delete" });
+        fixture.debugElement.triggerEventHandler("keydown", { key: "Delete", preventDefault: vi.fn() });
         fixture.detectChanges();
         expect(emitSpy).not.toHaveBeenCalled();
     });
@@ -274,8 +274,8 @@ describe("TabListComponent", () => {
         fixture.detectChanges();
         const emitSpy = vi.spyOn(component.tabSelect, "emit");
         fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowRight" });
-        fixture.debugElement.triggerEventHandler("keydown", { key: "Home" });
-        fixture.debugElement.triggerEventHandler("keydown", { key: "End" });
+        fixture.debugElement.triggerEventHandler("keydown", { key: "Home", preventDefault: vi.fn() });
+        fixture.debugElement.triggerEventHandler("keydown", { key: "End", preventDefault: vi.fn() });
         fixture.detectChanges();
         expect(emitSpy).not.toHaveBeenCalled();
     });
@@ -290,7 +290,7 @@ describe("TabListComponent", () => {
         fixture.detectChanges();
         expect(emitSpy).not.toHaveBeenCalled();
 
-        const tabElement: HTMLElement = fixture.debugElement.query(By.css("li[data-tab-id='tab1']")).nativeElement;
+        const tabElement: HTMLElement = fixture.debugElement.query(By.css("li[data-tab-id='tab1'] [role='tab']")).nativeElement;
         expect(tabElement.getAttribute("aria-disabled")).toBe("true");
     });
 
@@ -386,7 +386,7 @@ describe("TabListComponent", () => {
             }
         };
 
-        const overflowButtons = () => fixture.debugElement.queryAll(By.css("button[aria-hidden='true']"));
+        const overflowButtons = () => fixture.debugElement.queryAll(By.css("button[aria-hidden='true']:not([data-tab-close])"));
 
         it("should not render overflow controls when content fits", async () => {
             fixture.detectChanges();
@@ -465,21 +465,42 @@ describe("TabListComponent", () => {
         });
     });
 
-    it("should scroll the selected tab into view when clicking a tab", async () => {
-        const scrollIntoView = vi.fn();
-        (Element.prototype as unknown as { scrollIntoView: unknown }).scrollIntoView = scrollIntoView;
+    it("should scroll the strip to the selected tab when clicking a tab", async () => {
         fixture.componentRef.setInput("selectedTabId", "tab1");
         fixture.detectChanges();
-        const tab2 = fixture.debugElement.query(By.css("li[data-tab-id='tab2']"));
+        const list: HTMLElement = fixture.debugElement.query(By.css("ul[role='tablist']")).nativeElement;
+        const tab2 = fixture.debugElement.query(By.css("li[data-tab-id='tab2'] [role='tab']"));
+        const scrollBy = vi.fn();
+        Object.defineProperty(list, "scrollBy", { configurable: true, value: scrollBy });
+        list.getBoundingClientRect = () => ({ left: 100, right: 200, top: 0, bottom: 40 }) as DOMRect;
+        (tab2.nativeElement as HTMLElement).getBoundingClientRect = () =>
+            ({ left: 50, right: 90, top: 0, bottom: 40 }) as DOMRect;
         tab2.triggerEventHandler("click", {});
+        await fixture.whenStable();
         fixture.detectChanges();
-        await flushAsync();
-        expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "auto", block: "nearest", inline: "nearest" });
+        expect(scrollBy).toHaveBeenCalledWith({ left: -50 });
+    });
+
+    it("should scroll a vertical strip the same way", async () => {
+        fixture.componentRef.setInput("position", "left");
+        fixture.componentRef.setInput("selectedTabId", "tab1");
+        fixture.detectChanges();
+        const list: HTMLElement = fixture.debugElement.query(By.css("ul[role='tablist']")).nativeElement;
+        const tab2 = fixture.debugElement.query(By.css("li[data-tab-id='tab2'] [role='tab']"));
+        const scrollBy = vi.fn();
+        Object.defineProperty(list, "scrollBy", { configurable: true, value: scrollBy });
+        list.getBoundingClientRect = () => ({ left: 0, right: 100, top: 0, bottom: 40 }) as DOMRect;
+        (tab2.nativeElement as HTMLElement).getBoundingClientRect = () =>
+            ({ left: 0, right: 100, top: 60, bottom: 90 }) as DOMRect;
+        tab2.triggerEventHandler("click", {});
+        await fixture.whenStable();
+        fixture.detectChanges();
+        expect(scrollBy).toHaveBeenCalledWith({ top: 50 });
     });
 
     describe("i18n", () => {
         it("renders default close tab aria-label", () => {
-            const closeButton = fixture.debugElement.query(By.css("button[monaButton].ms-1"));
+            const closeButton = fixture.debugElement.query(By.css("button[data-tab-close]"));
             expect(closeButton.nativeElement.getAttribute("aria-label")).toBe("Close tab");
         });
 
@@ -497,7 +518,7 @@ describe("TabListComponent", () => {
                 }
             });
             fixture.detectChanges();
-            const closeButton = fixture.debugElement.query(By.css("button[monaButton].ms-1"));
+            const closeButton = fixture.debugElement.query(By.css("button[data-tab-close]"));
             expect(closeButton.nativeElement.getAttribute("aria-label")).toBe("Cerrar pestaña");
         });
     });

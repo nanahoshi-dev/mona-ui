@@ -12,7 +12,8 @@ export const ZH_TW_MESSAGES = {
         clear: "清除"
     },
     breadcrumb: {
-        breadcrumb: "階層連結導航"
+        breadcrumb: "階層連結導航",
+        showFullPath: "顯示完整路徑"
     },
     buttonGroup: {
         buttonGroup: "按鈕群組"
@@ -135,28 +136,42 @@ export const ZH_TW_MESSAGES = {
         removeLabel: (label?: string) => (label ? `移除${label}` : "移除項目")
     },
     colorGradient: {
+        alpha: "透明通道",
+        alphaText: (opacity: number) => `不透明度${localizeNumber(opacity)}%`,
         apply: "套用",
+        blue: "藍色",
         cancel: "取消",
         clearColor: "清除顏色",
+        colorCopied: "已複製顏色",
+        colorGradient: "色彩漸層",
         copyAsHex: "複製為 HEX",
         copyAsRgb: "複製為 RGB",
         copyColor: "複製顏色",
+        copyFailed: "無法複製顏色",
         currentColor: "目前顏色",
+        green: "綠色",
+        hexColor: "十六進位色彩",
+        hue: "色相",
         previousColor: "先前顏色",
+        red: "紅色",
+        saturation: "飽和度",
         saturationAndValue: "飽和度與明度",
         saturationAndValueText: (saturation: number, value: number) =>
             `飽和度${localizeNumber(saturation)}%，明度${localizeNumber(value)}%`,
-        switchColorMode: "切換色彩模式"
+        switchColorMode: "切換色彩模式",
+        value: "明度"
     },
     colorPalette: {
         color: (color: string) => `顏色: ${color}`,
-        colorPalette: "調色盤"
+        colorPalette: "調色盤",
+        namedColor: (name: string, color: string) => `${name}，${color}`
     },
     colorPicker: {
         clearColor: "清除顏色",
         colorGradientPicker: "漸層色彩選取器",
         colorPalettePicker: "調色盤選取器",
-        colorPicker: "色彩選取器"
+        colorPicker: "色彩選取器",
+        noColor: "無色彩"
     },
     comboBox: {
         clear: "清除"
@@ -349,6 +364,9 @@ export const ZH_TW_MESSAGES = {
         sortOrder: (position: number) => `排序順序 ${localizeNumber(position)}`,
         toolbar: "表格工具列"
     },
+    label: {
+        optional: "選填"
+    },
     list: {
         filterList: "篩選清單",
         loading: "載入中",
@@ -417,6 +435,9 @@ export const ZH_TW_MESSAGES = {
         rangeStatus: (start: number, end: number, total: number) =>
             `第 ${localizeNumber(start)} - ${localizeNumber(end)} 項，共 ${localizeNumber(total)} 項`
     },
+    progressBar: {
+        label: "進度"
+    },
     rating: {
         notRated: "未評分",
         valueText: (value: number, max: number) => `第 ${localizeNumber(value)} 級，共 ${localizeNumber(max)} 級`
@@ -426,6 +447,7 @@ export const ZH_TW_MESSAGES = {
         nextPage: "下一頁",
         page: (current: number) => `第 ${localizeNumber(current)} 頁`,
         pageOf: (current: number, total: number) => `第 ${localizeNumber(current)} 頁，共 ${localizeNumber(total)} 頁`,
+        pages: "頁面",
         previousPage: "上一頁",
         scrollPagerNext: "向後捲動分頁器",
         scrollPagerPrevious: "向前捲動分頁器",
@@ -433,6 +455,10 @@ export const ZH_TW_MESSAGES = {
     },
     sheet: {
         closeSheet: "關閉面板"
+    },
+    sidebar: {
+        drawerLabel: "側邊欄",
+        rail: "顯示或隱藏側邊欄"
     },
     slider: {
         maximumValue: "最大值",
@@ -456,6 +482,10 @@ export const ZH_TW_MESSAGES = {
         resizer: "調整大小控點"
     },
     stepper: {
+        stepCompleted: "已完成",
+        stepInvalid: "有錯誤",
+        stepPosition: (current: number, total: number) =>
+            `第 ${localizeNumber(current)} 步，共 ${localizeNumber(total)} 步`,
         stepProgress: "步驟進度",
         stepper: "步驟指示器"
     },

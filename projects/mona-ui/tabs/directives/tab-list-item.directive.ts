@@ -1,9 +1,6 @@
 import { computed, Directive, input } from "@angular/core";
-import {
-    tabListListItemThemeVariants,
-    TabListListItemVariantInput,
-    TabListListItemVariantProps
-} from "../styles/tabs.styles";
+import type { TabListListItemVariantInput, TabListListItemVariantProps } from "../styles/tabs.styles";
+import { tabListListItemThemeVariants } from "../styles/tabs.styles";
 
 @Directive({
     selector: "li[monaTabListItem]",

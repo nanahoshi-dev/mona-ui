@@ -197,8 +197,14 @@ export const ALLOWLIST: AllowlistEntry[] = [
     },
     {
         category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/segmented/styles/segmented.styles.ts",
+        lineSnippet: "top-0 left-0",
+        reason: "Indicator moves by offsetLeft, which is measured from the left in every direction"
+    },
+    {
+        category: "rtl-physical-style",
         filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.html",
-        lineSnippet: "[style.left.px]",
+        lineSnippet: "[style.left.%]",
         reason: "Color gradient 2D coordinate space mapping handle position"
     },
     {
@@ -457,6 +463,12 @@ export const ALLOWLIST: AllowlistEntry[] = [
     // Manual review exemptions for directional gradients, translate transforms, and DOM/coordinate operations
     {
         category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/tabs/components/tab-list/tab-list.component.ts",
+        lineSnippet: "tabRect.left - listRect.left",
+        reason: "Compares on-screen edges to get the on-screen delta scrollBy takes, which holds in either direction"
+    },
+    {
+        category: "rtl-manual-review",
         filePattern: "projects/mona-ui/color-gradient/styles/color-gradient.styles.ts",
         lineSnippet: "linear-gradient(to_right",
         reason: "Color picker gradient coordinate space is physical 2D hue/saturation mapping"
@@ -470,8 +482,14 @@ export const ALLOWLIST: AllowlistEntry[] = [
     {
         category: "rtl-manual-review",
         filePattern: "projects/mona-ui/color-gradient/components/color-gradient/color-gradient.component.ts",
-        lineSnippet: "containerRect.left",
+        lineSnippet: "{ height, left, top, width }",
         reason: "Color gradient 2D coordinate space mapping"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/color-gradient/styles/color-gradient.styles.ts",
+        lineSnippet: "-translate-x-1/2",
+        reason: "Centers the handle on its physical position in the 2D coordinate space"
     },
     {
         category: "rtl-manual-review",
@@ -514,6 +532,12 @@ export const ALLOWLIST: AllowlistEntry[] = [
         filePattern: "projects/mona-ui/window/directives/window-drag-handler.directive.ts",
         lineSnippet: "getBoundingClientRect().left",
         reason: "Desktop window drag handler operates in 2D viewport coordinates"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/otp-input/components/otp-input/otp-input.component.ts",
+        lineSnippet: "const { left, right } = slot.getBoundingClientRect();",
+        reason: "OTP host forces dir=ltr, so physical slot coordinates follow the logical slot order"
     },
     {
         category: "rtl-manual-review",
@@ -664,6 +688,18 @@ export const ALLOWLIST: AllowlistEntry[] = [
         filePattern: "projects/mona-ui/scroll-view/components/scroll-view/scroll-view.component.ts",
         lineSnippet: "const currentScrollLeft = element.scrollLeft",
         reason: "ScrollView pager calculates cumulative scroll target from element scrollLeft"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/scroll-view/components/scroll-view/scroll-view.component.ts",
+        lineSnippet: "const offset = activeRect.left + activeRect.width / 2",
+        reason: "ScrollView pager centers the active dot from a physical distance between two rects, the same in LTR and RTL"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/scroll-view/components/scroll-view/scroll-view.component.ts",
+        lineSnippet: "list.scrollTo({ behavior, left: list.scrollLeft + offset })",
+        reason: "ScrollView pager moves scrollLeft by a physical distance, which holds with RTL's negative scrollLeft"
     },
     {
         category: "rtl-manual-review",

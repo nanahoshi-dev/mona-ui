@@ -1,6 +1,5 @@
-import { cva } from "class-variance-authority";
-import { VariantProps } from "class-variance-authority";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { cva, type VariantProps } from "class-variance-authority";
+import type { VariantInputs } from "@nanahoshi/mona-ui/internal";
 
 export const progressBarBaseThemeVariants = cva(
     `
@@ -8,6 +7,7 @@ export const progressBarBaseThemeVariants = cva(
         h-5.5 w-full
         overflow-hidden select-none
         bg-surface-muted
+        forced-colors:border forced-colors:border-[CanvasText]
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed
         data-[disabled='true']:bg-disabled-background
@@ -45,10 +45,14 @@ export const progressBarTrackThemeVariants = cva(
     `
         relative flex h-full w-full items-center justify-center
         text-xs font-medium
-        bg-primary text-primary-foreground
+        bg-[var(--mona-indicator-color,var(--color-primary))]
+        text-[var(--mona-indicator-foreground,var(--color-primary-foreground))]
         data-[prev='true']:transition-[background-color]
         data-[prev='true']:duration-(--mona-motion-fast)
         data-[prev='true']:ease-in
+        data-[prev='true']:forced-color-adjust-none
+        data-[prev='true']:forced-colors:bg-[Highlight]!
+        data-[prev='true']:forced-colors:text-[HighlightText]
         data-[next='true']:absolute
         data-[next='true']:bg-surface-muted
         data-[next='true']:text-foreground

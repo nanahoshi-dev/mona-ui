@@ -3,7 +3,8 @@
         "clear": "クリア"
     },
     "breadcrumb": {
-        "breadcrumb": "パンくずリスト"
+        "breadcrumb": "パンくずリスト",
+        "showFullPath": "パス全体を表示"
     },
     "buttonGroup": {
         "buttonGroup": "ボタングループ"
@@ -117,27 +118,41 @@
         "removeLabel": "{label, select, undefined {項目を削除} other {{label}を削除}}"
     },
     "colorGradient": {
+        "alpha": "アルファ",
+        "alphaText": "不透明度{opacity}%",
         "apply": "適用",
+        "blue": "青",
         "cancel": "キャンセル",
         "clearColor": "色をクリア",
+        "colorCopied": "色をコピーしました",
+        "colorGradient": "カラーグラデーション",
         "copyAsHex": "HEXとしてコピー",
         "copyAsRgb": "RGBとしてコピー",
         "copyColor": "色をコピー",
+        "copyFailed": "色をコピーできませんでした",
         "currentColor": "現在の色",
+        "green": "緑",
+        "hexColor": "16進カラー",
+        "hue": "色相",
         "previousColor": "前の色",
+        "red": "赤",
+        "saturation": "彩度",
         "saturationAndValue": "彩度と明度",
         "saturationAndValueText": "彩度{saturation}%、明度{value}%",
-        "switchColorMode": "カラーモードを切り替え"
+        "switchColorMode": "カラーモードを切り替え",
+        "value": "明度"
     },
     "colorPalette": {
         "color": "色: {color}",
-        "colorPalette": "カラーパレット"
+        "colorPalette": "カラーパレット",
+        "namedColor": "{name}、{color}"
     },
     "colorPicker": {
         "clearColor": "色をクリア",
         "colorGradientPicker": "カラーグラデーションピッカー",
         "colorPalettePicker": "カラーパレットピッカー",
-        "colorPicker": "カラーピッカー"
+        "colorPicker": "カラーピッカー",
+        "noColor": "色なし"
     },
     "comboBox": {
         "clear": "クリア"
@@ -327,6 +342,9 @@
         "sortOrder": "並べ替え順 {position}",
         "toolbar": "表のツールバー"
     },
+    "label": {
+        "optional": "任意"
+    },
     "list": {
         "filterList": "リストをフィルター",
         "loading": "読み込み中",
@@ -392,6 +410,9 @@
         "previousPageLabel": "前のページ",
         "rangeStatus": "全{total}件中{start}～{end}件"
     },
+    "progressBar": {
+        "label": "進行状況"
+    },
     "rating": {
         "notRated": "未評価",
         "valueText": "{max}段階中{value}"
@@ -401,6 +422,7 @@
         "nextPage": "次のページ",
         "page": "{current}ページ",
         "pageOf": "{total}ページ中{current}ページ",
+        "pages": "ページ",
         "previousPage": "前のページ",
         "scrollPagerNext": "ページャーを次へスクロール",
         "scrollPagerPrevious": "ページャーを前へスクロール",
@@ -408,6 +430,10 @@
     },
     "sheet": {
         "closeSheet": "シートを閉じる"
+    },
+    "sidebar": {
+        "drawerLabel": "サイドバー",
+        "rail": "サイドバーの表示を切り替え"
     },
     "slider": {
         "maximumValue": "最大値",
@@ -431,6 +457,9 @@
         "resizer": "サイズ変更ハンドル"
     },
     "stepper": {
+        "stepCompleted": "完了",
+        "stepInvalid": "エラーあり",
+        "stepPosition": "ステップ {current}/{total}",
         "stepProgress": "ステップの進行状況",
         "stepper": "ステップ表示"
     },

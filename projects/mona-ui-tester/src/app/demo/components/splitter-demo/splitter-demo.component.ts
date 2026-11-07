@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, input, numberAttribute } from "@angular/core";
 import { SplitterComponent, SplitterPaneComponent } from "@nanahoshi/mona-ui/splitter";
 import { compact } from "@mirei/ts-collections";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
@@ -99,6 +99,12 @@ export class SplitterDemoComponent extends AbstractDemoComponent<SplitterCompone
     });
     protected readonly config = computed<ComponentConfig<SplitterComponent>>(() => ({
         inputs: deriveInputConfig<SplitterComponent>(this.metadata(), {
+            keyboardStep: {
+                type: "number",
+                value: 10,
+                min: 1,
+                max: 100
+            },
             orientation: {
                 type: "dropdown",
                 value: ["horizontal", "vertical"],
@@ -115,8 +121,13 @@ export class SplitterDemoComponent extends AbstractDemoComponent<SplitterCompone
 @Component({
     imports: [SplitterComponent, SplitterPaneComponent],
     template: `
-        <mona-splitter [orientation]="orientation()" class="w-full h-full border border-border bg-background">
+        <mona-splitter
+            [keyboardStep]="keyboardStep()"
+            [orientation]="orientation()"
+            class="w-full h-full border border-border bg-background"
+            (resizeEnd)="onResizeEnd($event)">
             <mona-splitter-pane
+                label="Pane 1"
                 [resizable]="resizable()"
                 [collapsed]="collapsed()"
                 [collapsible]="collapsible()"
@@ -127,6 +138,7 @@ export class SplitterDemoComponent extends AbstractDemoComponent<SplitterCompone
                 </div>
             </mona-splitter-pane>
             <mona-splitter-pane
+                label="Pane 2"
                 [resizable]="resizable()"
                 [collapsible]="collapsible()"
                 [size]="sizeList()[1]"
@@ -187,7 +199,12 @@ class SplitterWrapperComponent implements ComponentInputsAsSignal<SplitterCompon
         const pane3 = subFeatures["pane3"]?.numericValue ?? 0;
         return compact([pane1, pane2, pane3]).toArray();
     });
+    public readonly keyboardStep = input(10, { transform: numberAttribute });
     public readonly orientation = input<ReturnType<SplitterComponent["orientation"]>>("horizontal");
+
+    protected onResizeEnd(sizes: readonly (string | number)[]) {
+        console.log("Resize end", sizes);
+    }
 
     protected onSizeChange(paneName: string, size: string | number) {
         console.log(paneName, size);

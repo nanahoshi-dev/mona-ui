@@ -14,7 +14,8 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         clear: null
     },
     breadcrumb: {
-        breadcrumb: null
+        breadcrumb: null,
+        showFullPath: null
     },
     buttonGroup: {
         buttonGroup: null
@@ -193,30 +194,47 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         removeLabel: [{ name: "label", optional: true, type: "string" }]
     },
     colorGradient: {
+        alpha: null,
+        alphaText: [{ name: "opacity", type: "number" }],
         apply: null,
+        blue: null,
         cancel: null,
         clearColor: null,
+        colorCopied: null,
+        colorGradient: null,
         copyAsHex: null,
         copyAsRgb: null,
         copyColor: null,
+        copyFailed: null,
         currentColor: null,
+        green: null,
+        hexColor: null,
+        hue: null,
         previousColor: null,
+        red: null,
+        saturation: null,
         saturationAndValue: null,
         saturationAndValueText: [
             { name: "saturation", type: "number" },
             { name: "value", type: "number" }
         ],
-        switchColorMode: null
+        switchColorMode: null,
+        value: null
     },
     colorPalette: {
         color: [{ name: "color", type: "string" }],
-        colorPalette: null
+        colorPalette: null,
+        namedColor: [
+            { name: "name", type: "string" },
+            { name: "color", type: "string" }
+        ]
     },
     colorPicker: {
         clearColor: null,
         colorGradientPicker: null,
         colorPalettePicker: null,
-        colorPicker: null
+        colorPicker: null,
+        noColor: null
     },
     comboBox: {
         clear: null
@@ -426,6 +444,9 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         sortOrder: [{ name: "position", type: "number" }],
         toolbar: null
     },
+    label: {
+        optional: null
+    },
     list: {
         filterList: null,
         loading: null,
@@ -504,6 +525,9 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
             { name: "total", type: "number" }
         ]
     },
+    progressBar: {
+        label: null
+    },
     rating: {
         notRated: null,
         valueText: [
@@ -519,6 +543,7 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
             { name: "current", type: "number" },
             { name: "total", type: "number" }
         ],
+        pages: null,
         previousPage: null,
         scrollPagerNext: null,
         scrollPagerPrevious: null,
@@ -526,6 +551,10 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
     },
     sheet: {
         closeSheet: null
+    },
+    sidebar: {
+        drawerLabel: null,
+        rail: null
     },
     slider: {
         maximumValue: null,
@@ -549,6 +578,12 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         resizer: null
     },
     stepper: {
+        stepCompleted: null,
+        stepInvalid: null,
+        stepPosition: [
+            { name: "current", type: "number" },
+            { name: "total", type: "number" }
+        ],
         stepProgress: null,
         stepper: null
     },

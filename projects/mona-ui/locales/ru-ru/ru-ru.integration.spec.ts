@@ -630,7 +630,7 @@ describe("MONA_RU_RU_LOCALE Integration with MonaI18nService", () => {
         const scrollView = hostEl.querySelector("mona-scroll-view");
         expect(scrollView?.getAttribute("aria-roledescription")).toBe("карусель");
 
-        const slide = hostEl.querySelector("li[role='group']");
+        const slide = hostEl.querySelector("[data-scroll-view-slide]");
         expect(slide?.getAttribute("aria-roledescription")).toBe("слайд");
 
         const comp = fixture.componentInstance.scrollView() as unknown as {

@@ -1,4 +1,5 @@
-import { Component, computed, inject, input } from "@angular/core";
+import { Component, computed, input } from "@angular/core";
+import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
 import { twMerge } from "tailwind-merge";
 import {
     placeholderBaseThemeVariants,
@@ -35,5 +36,8 @@ export class PlaceholderComponent implements PlaceholderVariantInput {
      * Bind this input with the public `class` alias.
      * @default ""
      */
-    public readonly userClass = input("", { alias: "class" });
+    public readonly userClass = input<string, ClassInputType>("", {
+        alias: "class",
+        transform: value => classInputToClass(value)
+    });
 }

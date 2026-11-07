@@ -68,11 +68,24 @@ The root is exported as `monaCollapsible`, so `expand()`, `collapse()`, and `tog
 <button type="button" (click)="details.collapse()">Hide details</button>
 ```
 
-`disabled` prevents trigger interaction but does not block these programmatic methods. Set `animate` to `false` when the consumer wants to provide its own content transition.
+`disabled` prevents trigger interaction and makes `toggle()` do nothing, but `expand()` and `collapse()` still work. Set `animate` to `false` when the consumer wants to provide its own content transition.
 
 ### Content height
 
-The content directive publishes its measured height as the `--mona-collapsible-content-height` custom property. Pair `[animate]="false"` with a consumer-owned transition when the built-in height transition is not suitable.
+The content directive publishes its measured height as the `--mona-collapsible-content-height` custom property. Pair `[animate]="false"` with a consumer-owned transition when the built-in height transition is not suitable. The built-in one is also skipped when the user asks for reduced motion.
+
+### Padded content
+
+The directive sets the content element's height, block padding and block border inline, so that nothing shows while it's closed. Those inline values are removed when it opens, along with any you set there yourself. Padding from a class survives that, and padding in `style` or a `[style.*]` binding doesn't, so the safe place for padding is an inner element:
+
+```html
+<section monaCollapsible>
+    <button monaCollapsibleTrigger type="button">Details</button>
+    <div monaCollapsibleContent>
+        <div class="p-4">More information</div>
+    </div>
+</section>
+```
 
 ## Accessibility Notes
 
@@ -81,12 +94,14 @@ Use a native `button` or `a` element for the trigger when possible. The trigger 
 | Attribute | Behavior |
 |-----------|----------|
 | `aria-expanded` | Reflects the root's current `expanded` state. |
-| `aria-controls` | References the generated `id` on the content element. |
+| `aria-controls` | References the `id` on the content element, generated unless you gave it one. |
 | `aria-disabled` | Set to `"true"` when the root is disabled. |
 
-Native button triggers receive `type="button"` and use the browser's native role, focusability, and disabled behavior. Other trigger elements receive `role="button"` and `tabindex="0"`; `Enter` and `Space` toggle the root and prevent their default action. A non-native trigger becomes unfocusable (`tabindex="-1"`) while disabled.
+Native button triggers receive `type="button"` and use the browser's native role, focusability, and disabled behavior. A native `input` is disabled the same way, and a disabled `summary` doesn't open its `details`. Other trigger elements receive `role="button"` and `tabindex="0"`; `Enter` and `Space` toggle the root and prevent their default action. A non-native trigger, or an `a`, becomes unfocusable (`tabindex="-1"`) while disabled, and a disabled `a` doesn't follow its `href`.
 
-The content element is marked `inert` while collapsed, preventing focus from entering content that is not currently available. Give every trigger an accessible name through visible text or an appropriate ARIA naming attribute.
+A control inside a trigger, such as a button or an input in a `div` used as one, keeps its own clicks and keys, and doesn't toggle the root.
+
+The content element is marked `inert` while collapsed, preventing focus from entering content that is not currently available. Its collapsed height is set in the first pass, so collapsed content doesn't paint open. Give every trigger an accessible name through visible text or an appropriate ARIA naming attribute.
 
 ## API
 
@@ -96,22 +111,29 @@ The content element is marked `inert` while collapsed, preventing focus from ent
 
 Headless root directive. It adds `data-state="open"` or `data-state="closed"` to its host and exposes itself as `monaCollapsible`.
 
-#### Inputs and model
+#### Inputs
 
 | Name | Type | Default | Description |
 |------|------|---------|-------------|
 | `animate` | `boolean` | `true` | Enables the height transition applied by `CollapsibleContentDirective`. |
-| `disabled` | `boolean` | `false` | Suppresses trigger toggling. `expand()`, `collapse()`, and `toggle()` remain available programmatically; `toggle()` is a no-op while disabled. |
+| `disabled` | `boolean` | `false` | Suppresses trigger toggling, and `toggle()` does nothing while it's on. `expand()` and `collapse()` still work. |
 | `expanded` | `boolean` | `false` | Two-way bindable open state. Use `[(expanded)]` for two-way binding. |
+
+#### Outputs
+
+| Name | Type | Description |
+|------|------|-------------|
+| `expandedChange` | `boolean` | Emitted when the open state changes. |
 
 #### Public properties and methods
 
 | Name | Type | Description |
 |------|------|-------------|
-| `contentId` | `string` | Generated ID assigned to the content element and referenced from the trigger's `aria-controls`. |
+| `contentId` | `string` | ID of the content element, referenced from the trigger's `aria-controls`. Generated, unless the content element has its own. |
 | `expand()` | `void` | Sets `expanded` to `true`. |
 | `collapse()` | `void` | Sets `expanded` to `false`. |
 | `toggle()` | `void` | Toggles `expanded` unless the root is disabled. |
+| `setContentId()` | `void` | Takes the ID the content element was given, so the trigger points at it. `CollapsibleContentDirective` calls it, so there's no need to. |
 
 ### `CollapsibleTriggerDirective`
 
@@ -123,11 +145,19 @@ Toggles the nearest `CollapsibleDirective` on click and supported keyboard activ
 
 **Selector:** `[monaCollapsibleContent]`
 
-Marks the content element with the root's generated ID, `data-state`, and collapsed `inert` state. It has no public inputs or outputs.
+Marks the content element with its ID, `data-state`, and collapsed `inert` state.
 
-### `CollapsibleConfig`
+While closed, its block padding and border are set to `0` inline, along with its height, so that nothing shows. Padding you set inline on it won't survive a toggle, so put that on an inner element. See [Padded content](#padded-content).
 
-Public interface describing the state and control methods exposed by a collapsible root to paired directives. Most consumers can use the directives directly and do not need to implement or inject this interface.
+#### Inputs
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `id` | `string \| null` | `null` | The content's ID, for when it has to be something in particular. Generated if not given. |
+
+### `CollapsibleConfig` and `COLLAPSIBLE_CONFIG`
+
+Public interface describing the state and control methods exposed by a collapsible root to paired directives, and the token that provides it. Most consumers can use the directives directly and do not need to implement or inject either.
 
 ---
 

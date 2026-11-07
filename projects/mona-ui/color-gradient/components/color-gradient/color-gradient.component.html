@@ -1,23 +1,25 @@
 <div [class]="hsvRectangleClasses()" [style.background-color]="hsvRectangleBackground()" #hsvRectangle>
     <div
         [class]="hsvRectangleHandleClasses()"
-        [style.left.px]="hsvHandleLeft()"
-        [style.top.px]="hsvHandleTop()"
-        [attr.tabindex]="disabled() ? -1 : 0"
+        [style.left.%]="hsv().s ?? 0"
+        [style.top.%]="100 - (hsv().v ?? 100)"
+        [attr.tabindex]="effectiveDisabled() ? -1 : 0"
         [attr.role]="'slider'"
         [attr.aria-label]="messages().saturationAndValue"
         [attr.aria-valuemin]="0"
         [attr.aria-valuemax]="100"
-        [attr.aria-valuenow]="hsv().s"
-        [attr.aria-valuetext]="messages().saturationAndValueText(hsv().s ?? 0, hsv().v ?? 0)"
-        [attr.aria-disabled]="disabled() || null"
+        [attr.aria-valuenow]="roundedSaturation()"
+        [attr.aria-valuetext]="messages().saturationAndValueText(roundedSaturation(), roundedValue())"
+        [attr.aria-disabled]="effectiveDisabled() || null"
+        [attr.aria-readonly]="readonly() || null"
         (keydown)="onHsvHandleKeyDown($event)"
-        (blur)="onHsvHandleBlur()"
         #hsvPointer></div>
 </div>
 <div class="flex items-center gap-2">
-    <div class="flex flex-1 flex-col gap-1 me-2">
+    <div class="flex flex-1 flex-col gap-1 me-2 forced-color-adjust-none">
         <mona-slider
+            dir="ltr"
+            [aria-label]="messages().hue"
             [minValue]="0"
             [maxValue]="360"
             [trackBackground]="'linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)'"
@@ -25,11 +27,15 @@
             [handleClasses]="sliderHandleClasses()"
             [trackSize]="sliderHeight"
             [rounded]="rounded()"
-            [value]="hsv().h ?? 0"
-            (valueChange)="hueValue$.next($event)"
-            (touch)="onSliderBlur()"></mona-slider>
+            [value]="roundedHue()"
+            [disabled]="effectiveDisabled()"
+            [readonly]="readonly()"
+            (valueChange)="onHueChange($event)"></mona-slider>
         @if (opacity()) {
             <mona-slider
+                dir="ltr"
+                [aria-label]="messages().alpha"
+                [ariaValueText]="alphaValueText()"
                 [minValue]="0"
                 [maxValue]="255"
                 [trackBackground]="alphaSliderBackground()"
@@ -38,8 +44,9 @@
                 [trackSize]="sliderHeight"
                 [rounded]="rounded()"
                 [value]="alpha()"
-                (valueChange)="onAlphaChange($event)"
-                (touch)="onSliderBlur()"></mona-slider>
+                [disabled]="effectiveDisabled()"
+                [readonly]="readonly()"
+                (valueChange)="onAlphaChange($event)"></mona-slider>
         }
     </div>
     @for (preview of colorPreviews(); track preview.type) {
@@ -50,12 +57,19 @@
             [attr.title]="$index === 1 ? preview.title : null"
             [attr.aria-label]="$index === 1 ? preview.title : null"
             [attr.aria-hidden]="$index === 0 ? 'true' : null"
+            [attr.aria-disabled]="$index === 1 && interactionDisabled() ? 'true' : null"
             [attr.role]="$index === 1 ? 'button' : null"
-            [attr.tabindex]="$index === 1 ? 0 : null"
+            [attr.tabindex]="$index === 1 && !interactionDisabled() ? 0 : null"
             (click)="preview.onClick?.()"
             (keydown)="onPreviousColorKeyDown($event, preview.onClick)"></div>
     }
-    <button monaButton look="ghost" size="small" [attr.aria-label]="messages().clearColor" (click)="onClearClick()">
+    <button
+        monaButton
+        look="ghost"
+        size="small"
+        [disabled]="interactionDisabled()"
+        [attr.aria-label]="messages().clearColor"
+        (click)="onClearClick()">
         <svg lucideDropletOff [size]="16" aria-hidden="true"></svg>
     </button>
 </div>
@@ -65,6 +79,7 @@
             <div class="flex gap-1">
                 @for (input of colorInputs(); track input.key) {
                     <mona-numeric-text-box
+                        [aria-label]="input.ariaLabel"
                         [value]="input.value"
                         [minValue]="input.min"
                         [maxValue]="input.max"
@@ -74,8 +89,9 @@
                         [rounded]="rounded()"
                         [size]="'small'"
                         class="w-18"
-                        (valueChange)="input.change($event)"
-                        (inputBlur)="onNumericInputBlur()">
+                        [disabled]="effectiveDisabled()"
+                        [readonly]="readonly()"
+                        (valueChange)="input.change($event)">
                         <ng-template monaNumericTextBoxPrefixTemplate>
                             <ng-container
                                 [ngTemplateOutlet]="numericInputPrefixTemplate"
@@ -90,6 +106,7 @@
                     look="ghost"
                     [rounded]="rounded()"
                     size="small"
+                    [disabled]="effectiveDisabled()"
                     [attr.aria-label]="messages().switchColorMode"
                     (click)="onSwitchColorModeClick()">
                     <svg lucideChevronsUpDown [size]="16" aria-hidden="true"></svg>
@@ -99,8 +116,11 @@
     }
     @if (showHexInput()) {
         <mona-text-box
+            [aria-label]="messages().hexColor"
             [rounded]="rounded()"
             [value]="hex()"
+            [disabled]="effectiveDisabled()"
+            [readonly]="readonly()"
             (valueChange)="onHexChange($event)"
             (inputBlur)="onHexInputBlur()"
             (inputFocus)="onHexInputFocus()"
@@ -111,9 +131,14 @@
                     [ngTemplateOutletContext]="{ $implicit: 'HEX', classes: 'w-auto px-2' }"></ng-container>
             </ng-template>
             <ng-template monaTextBoxSuffixTemplate>
-                <mona-dropdown-button look="ghost" [iconOnly]="true" [aria-label]="messages().copyColor" class="h-full">
+                <mona-dropdown-button
+                    look="ghost"
+                    [disabled]="effectiveDisabled() || !selectedColor()"
+                    [iconOnly]="true"
+                    [aria-label]="messages().copyColor"
+                    class="h-full">
                     <ng-template monaDropdownButtonTextTemplate>
-                        <svg lucideCopy [size]="12"></svg>
+                        <svg lucideCopy [size]="12" aria-hidden="true"></svg>
                     </ng-template>
                     <mona-dropdown-button-item
                         [label]="messages().copyAsHex"
@@ -127,8 +152,17 @@
     }
     @if (showButtons()) {
         <div class="flex items-center justify-end gap-2">
-            <button monaButton [rounded]="rounded()" look="primary" (click)="onApply()">{{ messages().apply }}</button>
-            <button monaButton [rounded]="rounded()" (click)="onCancel()">{{ messages().cancel }}</button>
+            <button
+                monaButton
+                [rounded]="rounded()"
+                look="primary"
+                [disabled]="interactionDisabled()"
+                (click)="onApply()">
+                {{ messages().apply }}
+            </button>
+            <button monaButton [rounded]="rounded()" [disabled]="effectiveDisabled()" (click)="onCancel()">
+                {{ messages().cancel }}
+            </button>
         </div>
     }
 </div>
@@ -137,6 +171,7 @@
     <span
         [class]="classes"
         class="inline-flex items-center justify-center select-none w-7.5 [background-color:var(--mona-input-addon-background,var(--color-secondary))] h-full text-foreground text-xs font-semibold border-e border-e-input-border"
+        aria-hidden="true"
         >{{ text }}</span
     >
 </ng-template>

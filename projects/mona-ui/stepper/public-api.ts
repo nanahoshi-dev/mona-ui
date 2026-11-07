@@ -2,7 +2,8 @@
  * Public API Surface of @nanahoshi/mona-ui/stepper
  */
 
-export type { StepOptions } from "./models/Step";
+export type { StepOptions, StepState } from "./models/Step";
+export * from "./models/StepSelectEvent";
 export type { StepperTemplateContext } from "./models/StepperTemplateContext";
 export * from "./directives/stepper-indicator-template.directive";
 export * from "./directives/stepper-label-template.directive";

@@ -107,7 +107,7 @@ describe("TabsComponent", () => {
 
     it("should label the panel with the tab's id, not its own id", () => {
         const debugElement = fixture.debugElement.query(By.directive(TabsComponent));
-        const tabElement: HTMLElement = debugElement.query(By.css("li[data-tab-id]")).nativeElement;
+        const tabElement: HTMLElement = debugElement.query(By.css("[role='tab']")).nativeElement;
         const panelElement: HTMLElement = debugElement.query(By.css("div[role='tabpanel']")).nativeElement;
 
         expect(tabElement.id).toBe(panelElement.getAttribute("aria-labelledby"));
@@ -176,7 +176,7 @@ describe("TabsComponent with dynamic tab list", () => {
         expect(getSelectedTabTitle()).toBe("Tab 2");
     });
 
-    it("should fall back to the first remaining tab when the selected tab is removed", async () => {
+    it("should fall back to the previous tab when the selected tab is the last one and is removed", async () => {
         component.showThirdTab.set(true);
         fixture.detectChanges();
         await fixture.whenStable();
@@ -192,7 +192,7 @@ describe("TabsComponent with dynamic tab list", () => {
         fixture.detectChanges();
         await fixture.whenStable();
 
-        expect(getSelectedTabTitle()).toBe("Tab 1");
+        expect(getSelectedTabTitle()).toBe("Tab 2");
     });
 
     it("should propagate the disabled input to TabListComponent", () => {

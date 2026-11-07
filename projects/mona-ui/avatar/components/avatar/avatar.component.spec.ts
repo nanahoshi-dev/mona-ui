@@ -45,9 +45,9 @@ class TestAvatarHostComponent {
     labelColor = signal("var(--color-foreground)");
     labelFontSize = signal("1rem");
     labelFontWeight = signal("700");
-    width = signal<string | number>("64px");
-    userClass = signal("");
     projectedContent = signal("Projected Content");
+    userClass = signal("");
+    width = signal<string | number>("64px");
 }
 
 // =============================================================================
@@ -272,14 +272,15 @@ describe("AvatarComponent", () => {
             expect(host.getAttribute("role")).toBe("img");
         });
 
-        it("should set aria-label but NOT role='img' in image mode", () => {
+        it("should name the image rather than the host in image mode", () => {
             component.image.set("http://example.com/avatar.png");
             component.ariaLabel.set("User Profile Picture");
             fixture.detectChanges();
 
             const host = getHostElement(fixture);
-            expect(host.getAttribute("aria-label")).toBe("User Profile Picture");
+            expect(host.getAttribute("aria-label")).toBeNull();
             expect(host.getAttribute("role")).toBeNull();
+            expect(host.querySelector("img")?.getAttribute("alt")).toBe("User Profile Picture");
         });
 
         it("should have null aria-label and role when ariaLabel is empty", () => {

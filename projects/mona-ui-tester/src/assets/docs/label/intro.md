@@ -2,7 +2,7 @@
 
 **Selectors:** `mona-label`, `label[monaLabel]`
 
-`LabelComponent` and `LabelDirective` provide styled, accessible labels for individual form controls. Both reproduce the native `<label>` element's two built-in association mechanisms — explicit `for`/`id` and implicit wrapping — and add an opt-in convenience for delegating focus to Angular component references.
+`LabelComponent` and `LabelDirective` provide styled, accessible labels for individual form controls. Both support the native `for`/`id` association and a `[for]` binding to a control reference. `LabelComponent` also names a control you wrap in it.
 
 ## `LabelComponent` vs `LabelDirective`
 

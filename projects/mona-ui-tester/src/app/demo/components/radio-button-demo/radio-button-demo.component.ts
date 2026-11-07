@@ -1,8 +1,8 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, input, model, signal } from "@angular/core";
+import { booleanAttribute, ChangeDetectionStrategy, Component, computed, input, model, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { disabled, form, FormField } from "@angular/forms/signals";
-import { RadioButtonComponent, RadioButtonDirective } from "@nanahoshi/mona-ui/radio-button";
+import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
+import { RadioButtonComponent, RadioButtonDirective, RadioGroupComponent } from "@nanahoshi/mona-ui/radio-button";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -43,6 +43,11 @@ export class RadioButtonDemoComponent extends AbstractDemoComponent<RadioButtonC
             // Angular forbids binding them directly, so exclude them rather than expose a dead control.
             invalid: undefined,
             touched: undefined,
+            // The demo shows a group of radios, so one name or id for all of them means nothing.
+            ariaDescribedBy: undefined,
+            ariaLabel: undefined,
+            ariaLabelledBy: undefined,
+            inputId: undefined,
             userClass: {
                 alias: "class",
                 type: "string",
@@ -54,7 +59,7 @@ export class RadioButtonDemoComponent extends AbstractDemoComponent<RadioButtonC
 }
 
 @Component({
-    imports: [RadioButtonComponent, FormsModule, RadioButtonDirective, FormField],
+    imports: [RadioButtonComponent, RadioGroupComponent, FormsModule, RadioButtonDirective, FormField],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <div class="flex flex-col gap-4">
@@ -152,22 +157,38 @@ export class RadioButtonDemoComponent extends AbstractDemoComponent<RadioButtonC
                 </label>
             </form>
         </div>
+
+        <div class="flex flex-col gap-4 mt-4">
+            <span>Radio group, current size: {{ form.size().value() }}</span>
+            <mona-radio-group aria-label="Size" orientation="horizontal" [formField]="form.size">
+                <mona-radio-button label="Small" radioValue="Small" [rounded]="rounded()" />
+                <mona-radio-button label="Medium" radioValue="Medium" [rounded]="rounded()" />
+                <mona-radio-button label="Large" radioValue="Large" [rounded]="rounded()" />
+            </mona-radio-group>
+        </div>
     `
 })
 export class RadioButtonWrapperComponent implements ComponentInputsAsSignal<RadioButtonComponent> {
-    readonly #formModel = signal<FormModel>({ season: "Autumn", direction: "West" });
+    readonly #formModel = signal<FormModel>({ season: "Autumn", direction: "West", size: "Medium" });
     protected readonly form = form(this.#formModel, schema => {
         disabled(schema.season, { when: () => this.disabled() });
         disabled(schema.direction, { when: () => this.disabled() });
+        disabled(schema.size, { when: () => this.disabled() });
+        readonly(schema.size, { when: () => this.readonly() });
+        required(schema.size, { when: () => this.required() });
+        readonly(schema.season, { when: () => this.readonly() });
+        required(schema.season, { when: () => this.required() });
     });
     protected readonly selectedDirection = signal("West");
     protected readonly selectedSeason = signal("Autumn");
-    public readonly disabled = input(false);
+    public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly label = input("Autumn");
     public readonly labelPosition = input<ReturnType<RadioButtonComponent["labelPosition"]>>("after");
     public readonly labelSize = input<ReturnType<RadioButtonComponent["labelSize"]>>("medium");
     public readonly name = input("seasons");
-    public readonly radioValue = model("Autumn");
+    public readonly radioValue = model<unknown>("Autumn");
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<RadioButtonComponent["rounded"]>>("full");
     public readonly userClass = input<ReturnType<RadioButtonComponent["userClass"]>>("");
     public readonly value = model<any>(undefined);
@@ -190,4 +211,5 @@ export class RadioButtonWrapperComponent implements ComponentInputsAsSignal<Radi
 interface FormModel {
     direction: string;
     season: string;
+    size: string;
 }

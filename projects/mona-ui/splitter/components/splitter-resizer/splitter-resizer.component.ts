@@ -1,20 +1,24 @@
+import type { ElementRef } from "@angular/core";
 import {
     afterNextRender,
     afterRenderEffect,
     Component,
     computed,
     DestroyRef,
-    ElementRef,
+    ElementRef as ElementRefToken,
     inject,
     input,
-    signal
+    signal,
+    viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { compact } from "@mirei/ts-collections";
-import { filter, fromEvent, map, merge, skipUntil, takeUntil, tap } from "rxjs";
+import { filter, finalize, fromEvent, merge, take, takeUntil, tap } from "rxjs";
 import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { SPLITTER_DEFAULT_MESSAGES } from "../../i18n/splitter.default-messages";
-import { splitterResizerThemeVariants, SplitterVariantProps } from "../../styles/splitter.styles";
+import type { SplitterVariantProps } from "../../styles/splitter.styles";
+import { splitterResizerThemeVariants, splitterSeparatorThemeVariants } from "../../styles/splitter.styles";
+import { parsePaneSizeLimit } from "../../utils/pane-size";
 import { SplitterPaneComponent } from "../splitter-pane/splitter-pane.component";
 import { SplitterResizerHandleComponent } from "../splitter-resizer-handle/splitter-resizer-handle.component";
 import { SplitterComponent } from "../splitter/splitter.component";
@@ -31,65 +35,65 @@ interface PaneElementData {
     imports: [SplitterResizerHandleComponent],
     host: {
         "[class]": "baseClass()",
-        "[style.cursor]": "resizable() ? (orientation()==='horizontal' ? 'ew-resize' : 'ns-resize') : 'auto'",
-        "(dblclick)": "toggleCollapse()",
-        role: "separator",
-        "[attr.aria-label]": "ariaLabel() || messages().resizer",
-        "[attr.aria-orientation]": "orientation()",
-        "[attr.aria-valuemax]": "ariaValueMax()",
-        "[attr.aria-valuemin]": "ariaValueMin()",
-        "[attr.aria-valuenow]": "ariaValueNow()",
-        "[attr.tabindex]": "isInert() ? -1 : 0"
+        "(focusin)": "focused.set(true)",
+        "(focusout)": "onFocusOut($event)",
+        "(pointerenter)": "hovered.set(true)",
+        "(pointerleave)": "hovered.set(false)"
     }
 })
 export class SplitterResizerComponent {
     readonly #destroyRef = inject(DestroyRef);
     readonly #direction = injectComponentDirection();
-    readonly #hostElementRef = inject(ElementRef);
+    readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRefToken);
     readonly #i18n = inject(MonaI18nService);
     readonly #paneSizeMemory = new WeakMap<SplitterPaneComponent, number>();
     readonly #splitter = inject(SplitterComponent);
-    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly ariaValueMax = signal(0);
     protected readonly ariaValueMin = signal(0);
     protected readonly ariaValueNow = signal(0);
     protected readonly baseClass = computed(() => {
-        const orientation = this.orientation();
-        const resizing = this.resizing();
-        return splitterResizerThemeVariants({ orientation, resizing });
+        return splitterResizerThemeVariants({ orientation: this.orientation() });
     });
+    protected readonly controlsVisible = computed(() => this.hovered() || this.focused());
+    protected readonly cursor = computed(() => {
+        if (!this.resizable()) {
+            return "auto";
+        }
+        return this.orientation() === "horizontal" ? "ew-resize" : "ns-resize";
+    });
+    protected readonly focused = signal(false);
     protected readonly hovered = signal(false);
     protected readonly isInert = computed(() => {
         return !this.resizable() && this.getCollapsibleTargetPane() === null;
     });
+    protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly messages = this.#i18n.componentMessages("splitter", SPLITTER_DEFAULT_MESSAGES);
     protected readonly nextCollapseControlsVisible = computed(() => {
-        return this.hovered() && this.nextPane().collapsible() && !this.nextPane().collapsed();
+        return this.controlsVisible() && this.nextPane().collapsible() && !this.nextPane().collapsed();
     });
     protected readonly previousCollapseControlsVisible = computed(() => {
-        return this.hovered() && this.previousPane().collapsible() && !this.previousPane().collapsed();
+        return this.controlsVisible() && this.previousPane().collapsible() && !this.previousPane().collapsed();
     });
     protected readonly resizable = computed(() => {
         return this.previousPane().resizable() && this.nextPane().resizable();
     });
     protected readonly resizing = signal(false);
+    protected readonly separatorClass = computed(() => {
+        return splitterSeparatorThemeVariants({ orientation: this.orientation(), resizing: this.resizing() });
+    });
+    protected readonly separatorElement = viewChild.required<ElementRef<HTMLElement>>("separator");
+    /** The way the bar runs, which is across the way the panes are laid out. */
+    protected readonly separatorOrientation = computed(() => {
+        return this.orientation() === "horizontal" ? "vertical" : "horizontal";
+    });
 
-    /**
-     * @description Accessible label for the separator element.
-     * @default ""
-     */
-    public readonly ariaLabel = input<string>("", { alias: "aria-label" });
     public readonly nextPane = input.required<SplitterPaneComponent>();
     public readonly orientation = input.required<SplitterVariantProps["orientation"]>();
     public readonly previousPane = input.required<SplitterPaneComponent>();
 
     public constructor() {
         afterNextRender({
-            read: () => {
-                this.setHoverEvents();
-                this.setPointerEvents();
-                this.setKeyboardEvents();
-            }
+            read: () => this.observePaneSizes()
         });
         afterRenderEffect({
             read: () => {
@@ -102,16 +106,77 @@ export class SplitterResizerComponent {
         });
     }
 
-    protected collapseNext(event: MouseEvent): void {
-        event.preventDefault();
-        event.stopPropagation();
+    /** Focus goes to the separator first, because the button that was activated goes away with the pane. */
+    protected collapseNext(): void {
+        this.separatorElement().nativeElement.focus();
         this.collapsePane("next");
     }
 
-    protected collapsePrevious(event: MouseEvent): void {
-        event.preventDefault();
-        event.stopPropagation();
+    protected collapsePrevious(): void {
+        this.separatorElement().nativeElement.focus();
         this.collapsePane("previous");
+    }
+
+    protected onFocusOut(event: FocusEvent): void {
+        this.focused.set(this.#hostElementRef.nativeElement.contains(event.relatedTarget as Node | null));
+    }
+
+    protected onKeydown(event: KeyboardEvent): void {
+        if (this.handleKeydown(event)) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    }
+
+    /** Listens only for the length of the drag, so nothing is left behind on the document in between. */
+    protected onPointerDown(event: PointerEvent): void {
+        if (!this.resizable() || event.button !== 0 || this.resizing()) {
+            return;
+        }
+        // Cancelling this also cancels the mouse events that would have moved focus, so it's moved here.
+        event.preventDefault();
+        const separator = this.separatorElement().nativeElement;
+        separator.focus({ preventScroll: true });
+        const { pointerId } = event;
+        const isDragPointer = (other: PointerEvent): boolean => other.pointerId === pointerId;
+        separator.setPointerCapture(pointerId);
+        this.resizing.set(true);
+
+        let moved = false;
+        const dragEnd$ = merge(
+            fromEvent<PointerEvent>(separator, "pointerup"),
+            fromEvent<PointerEvent>(separator, "pointercancel"),
+            fromEvent<PointerEvent>(separator, "lostpointercapture")
+        ).pipe(
+            filter(isDragPointer),
+            take(1),
+            tap(() => {
+                if (moved) {
+                    this.#splitter.notifyResizeEnd();
+                }
+            })
+        );
+        fromEvent<PointerEvent>(separator.ownerDocument, "pointermove")
+            .pipe(
+                filter(isDragPointer),
+                takeUntil(dragEnd$),
+                takeUntilDestroyed(this.#destroyRef),
+                finalize(() => {
+                    this.resizing.set(false);
+                    if (separator.hasPointerCapture(pointerId)) {
+                        separator.releasePointerCapture(pointerId);
+                    }
+                })
+            )
+            .subscribe(move => {
+                moved = true;
+                this.ensureExpandedBeforeResize();
+                if (this.orientation() === "horizontal") {
+                    this.updateHorizontalPaneSizes(move);
+                } else {
+                    this.updateVerticalPaneSizes(move);
+                }
+            });
     }
 
     protected toggleCollapse(): void {
@@ -123,6 +188,7 @@ export class SplitterResizerComponent {
             targetPane.uid === this.previousPane().uid ? this.getPaneElements()[0] : this.getPaneElements()[1];
         const direction = targetPane.uid === this.previousPane().uid ? "previous" : "next";
         this.togglePane(targetPane, targetElement, direction);
+        this.#splitter.notifyResizeEnd();
     }
 
     private clamp(value: number, min: number, max: number): number {
@@ -170,6 +236,8 @@ export class SplitterResizerComponent {
         trailing: PaneElementData | null
     ): void {
         if (targetSize <= 0) {
+            // Nothing to hand out, as when the splitter sits in a hidden tab, but the pane still collapses.
+            targetPane.collapsed.set(true);
             return;
         }
 
@@ -188,12 +256,14 @@ export class SplitterResizerComponent {
         targetPane.collapsed.set(true);
     }
 
-    private collapsePane(direction: "previous" | "next"): void {
+    private collapsePane(direction: "previous" | "next"): boolean {
         const target = this.pickTargetPane(direction);
         if (target === null || !target.pane.collapsible()) {
-            return;
+            return false;
         }
         this.togglePane(target.pane, target.element, target.direction);
+        this.#splitter.notifyResizeEnd();
+        return true;
     }
 
     private distributeSpaceToNeighbors(space: number, neighbors: PaneElementData[]): void {
@@ -315,23 +385,6 @@ export class SplitterResizerComponent {
         return null;
     }
 
-    private focusAdjacentResizer(forward: boolean): boolean {
-        let cursor: Element | null = this.#hostElementRef.nativeElement;
-        if (!cursor) {
-            return false;
-        }
-        while (true) {
-            cursor = forward ? cursor.nextElementSibling : cursor.previousElementSibling;
-            if (cursor === null) {
-                return false;
-            }
-            if (cursor instanceof HTMLElement && cursor.tagName.toLowerCase() === "mona-splitter-resizer") {
-                cursor.focus();
-                return true;
-            }
-        }
-    }
-
     private getCollapsibleTargetPane(): SplitterPaneComponent | null {
         const previousPane = this.previousPane();
         const nextPane = this.nextPane();
@@ -353,13 +406,13 @@ export class SplitterResizerComponent {
 
     private getMaxSize(pane: SplitterPaneComponent): number {
         const max = pane.max();
-        const parsed = this.parseSizeInput(max);
+        const parsed = parsePaneSizeLimit(max);
         return parsed === null ? Number.POSITIVE_INFINITY : Math.max(0, parsed);
     }
 
     private getMinSize(pane: SplitterPaneComponent): number {
         const min = pane.min();
-        const parsed = this.parseSizeInput(min);
+        const parsed = parsePaneSizeLimit(min);
         return parsed === null ? 0 : Math.max(0, parsed);
     }
 
@@ -404,21 +457,17 @@ export class SplitterResizerComponent {
         if (orientation === "horizontal") {
             const isRtl = this.isRtl();
             if (key === "ArrowLeft") {
-                this.collapsePane(isRtl ? "next" : "previous");
-                return true;
+                return this.collapsePane(isRtl ? "next" : "previous");
             }
             if (key === "ArrowRight") {
-                this.collapsePane(isRtl ? "previous" : "next");
-                return true;
+                return this.collapsePane(isRtl ? "previous" : "next");
             }
         } else {
             if (key === "ArrowUp") {
-                this.collapsePane("previous");
-                return true;
+                return this.collapsePane("previous");
             }
             if (key === "ArrowDown") {
-                this.collapsePane("next");
-                return true;
+                return this.collapsePane("next");
             }
         }
         return false;
@@ -426,51 +475,62 @@ export class SplitterResizerComponent {
 
     private handleKeydown(event: KeyboardEvent): boolean {
         const key = event.key;
-
-        if (key === "Tab") {
-            return this.focusAdjacentResizer(!event.shiftKey);
-        }
-
-        if (key === "Enter") {
-            this.toggleCollapse();
-            return true;
+        if (event.ctrlKey || event.metaKey || event.shiftKey) {
+            return false;
         }
 
         if (event.altKey) {
             return this.handleCollapserKeys(key);
         }
+
+        if (key === "Enter") {
+            if (this.getCollapsibleTargetPane() === null) {
+                return false;
+            }
+            this.toggleCollapse();
+            return true;
+        }
         return this.handleResizerKeys(key);
     }
 
     private handleResizerKeys(key: string): boolean {
-        const orientation = this.orientation();
-        const step = 10;
-        const previousPane = this.previousPane();
-        const nextPane = this.nextPane();
-        if (!previousPane.resizable() && !nextPane.resizable()) {
+        if (!this.resizable()) {
             return false;
         }
-        if (orientation === "horizontal") {
+        const step = this.#splitter.keyboardStep();
+        if (key === "Home") {
+            this.resizeFromKey(Number.NEGATIVE_INFINITY);
+            return true;
+        }
+        if (key === "End") {
+            this.resizeFromKey(Number.POSITIVE_INFINITY);
+            return true;
+        }
+        if (this.orientation() === "horizontal") {
             const isRtl = this.isRtl();
             if (key === "ArrowLeft") {
-                this.nudgeSplitter(isRtl ? step : -step);
+                this.resizeFromKey(isRtl ? step : -step);
                 return true;
             }
             if (key === "ArrowRight") {
-                this.nudgeSplitter(isRtl ? -step : step);
+                this.resizeFromKey(isRtl ? -step : step);
                 return true;
             }
         } else {
             if (key === "ArrowUp") {
-                this.nudgeSplitter(-step);
+                this.resizeFromKey(-step);
                 return true;
             }
             if (key === "ArrowDown") {
-                this.nudgeSplitter(step);
+                this.resizeFromKey(step);
                 return true;
             }
         }
         return false;
+    }
+
+    private isCollapsed(pane: SplitterPaneComponent): boolean {
+        return pane.collapsible() && pane.collapsed();
     }
 
     private measurePaneSize(paneElement: HTMLElement): number {
@@ -492,16 +552,14 @@ export class SplitterResizerComponent {
         this.updatePaneSizes(`${prevSize}px`, `${nextSize}px`);
     }
 
-    private parseSizeInput(value: string | number | null | undefined): number | null {
-        if (value === null || value === undefined || value === "") {
-            return null;
+    /** So the separator's value follows the panes when the container resizes or a hidden tab is shown. */
+    private observePaneSizes(): void {
+        if (typeof ResizeObserver === "undefined") {
+            return;
         }
-        if (typeof value === "number") {
-            return Number.isFinite(value) ? value : null;
-        }
-        const trimmed = value.trim().toLowerCase();
-        const numeric = parseFloat(trimmed.replace("px", ""));
-        return Number.isFinite(numeric) ? numeric : null;
+        const observer = new ResizeObserver(() => this.updateAriaSeparatorValues());
+        this.getPaneElements().forEach(element => observer.observe(element));
+        this.#destroyRef.onDestroy(() => observer.disconnect());
     }
 
     private pickTargetPane(
@@ -524,58 +582,28 @@ export class SplitterResizerComponent {
         }
     }
 
-    private setHoverEvents(): void {
-        const host = this.#hostElementRef.nativeElement;
-        const pointerEnter$ = fromEvent<PointerEvent>(host, "pointerenter").pipe(map(() => true));
-        const pointerLeave$ = fromEvent<PointerEvent>(host, "pointerleave").pipe(map(() => false));
-
-        merge(pointerEnter$, pointerLeave$)
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(isHovered => {
-                this.hovered.set(isHovered);
-            });
-    }
-
-    private setKeyboardEvents(): void {
-        fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(event => {
-                const handled = this.handleKeydown(event);
-                if (handled) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-            });
-    }
-
-    private setPointerEvents(): void {
-        const pointerDown$ = fromEvent<PointerEvent>(this.#hostElementRef.nativeElement, "pointerdown").pipe(
-            filter(() => this.resizable()),
-            tap(event => {
-                event.preventDefault();
-                this.#hostElementRef.nativeElement.setPointerCapture(event.pointerId);
-                this.resizing.set(true);
-            })
-        );
-        const pointerUp$ = fromEvent<PointerEvent>(this.#hostElementRef.nativeElement, "pointerup").pipe(
-            tap(event => {
-                this.#hostElementRef.nativeElement.releasePointerCapture(event.pointerId);
-                this.resizing.set(false);
-                this.setPointerEvents();
-            })
-        );
-
-        fromEvent<PointerEvent>(document, "pointermove")
-            .pipe(skipUntil(pointerDown$), takeUntil(pointerUp$))
-            .subscribe(event => {
-                this.ensureExpandedBeforeResize();
-                const orientation = this.orientation();
-                if (orientation === "horizontal") {
-                    this.updateHorizontalPaneSizes(event);
-                } else {
-                    this.updateVerticalPaneSizes(event);
-                }
-            });
+    /**
+     * A key on a collapsed pane brings it back at the size it had, or does nothing when the key points further into it.
+     * Resizing from there would leave it at a single step and lose that size.
+     */
+    private resizeFromKey(delta: number): void {
+        const previousPane = this.previousPane();
+        const nextPane = this.nextPane();
+        const [previousElement, nextElement] = this.getPaneElements();
+        if (this.isCollapsed(previousPane)) {
+            if (delta <= 0) {
+                return;
+            }
+            this.togglePane(previousPane, previousElement, "previous");
+        } else if (this.isCollapsed(nextPane)) {
+            if (delta >= 0) {
+                return;
+            }
+            this.togglePane(nextPane, nextElement, "next");
+        } else {
+            this.nudgeSplitter(delta);
+        }
+        this.#splitter.notifyResizeEnd();
     }
 
     private togglePane(
@@ -589,7 +617,9 @@ export class SplitterResizerComponent {
             this.expandPane(targetPane, storedSize, neighbors.leading, neighbors.trailing);
         } else {
             const targetSize = this.measurePaneSize(targetElement);
-            this.#paneSizeMemory.set(targetPane, targetSize);
+            if (targetSize > 0) {
+                this.#paneSizeMemory.set(targetPane, targetSize);
+            }
             this.collapseAndRedistribute(targetPane, targetSize, neighbors.leading, neighbors.trailing);
         }
     }

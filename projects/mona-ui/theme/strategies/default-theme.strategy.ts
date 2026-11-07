@@ -1,5 +1,6 @@
+import { isDevMode } from "@angular/core";
 import { builtInThemes } from "../definitions/built-in-themes";
-import type { ThemeSelection, ThemeVariant } from "../models/Theme";
+import type { ThemeAvailability, ThemeSelection, ThemeVariant } from "../models/Theme";
 import {
     flattenThemeProfile,
     type ThemeFamilyRegistration,
@@ -8,6 +9,7 @@ import {
     type ThemeProfileOverrides
 } from "../models/ThemeDefinition";
 import type { ThemeStrategy } from "./theme.strategy";
+import { findThemeProblems } from "./theme-validation";
 
 export class DefaultThemeStrategy implements ThemeStrategy {
     readonly #overrides: readonly ThemeOverrideRegistration[];
@@ -32,7 +34,7 @@ export class DefaultThemeStrategy implements ThemeStrategy {
                 throw new Error(`Cannot override unknown Mona UI theme "${override.theme}".`);
             }
             for (const variant of ["light", "dark"] as const) {
-                if (override[variant] && !family.variants[variant]) {
+                if (override[variant] && !family.variants[variant] && !override.generated) {
                     throw new Error(
                         `Cannot override undeclared "${variant}" variant of Mona UI theme "${override.theme}".`
                     );
@@ -43,6 +45,18 @@ export class DefaultThemeStrategy implements ThemeStrategy {
             validateCustomVariables(override.theme, override.dark?.custom);
         }
         this.#overrides = overrides;
+        if (isDevMode()) {
+            this.#reportProblems(registrations, overrides);
+        }
+    }
+
+    public availableThemes(): readonly ThemeAvailability[] {
+        return [...this.#themes.values()].map(theme =>
+            Object.freeze({
+                name: theme.name,
+                variants: Object.freeze(getDefinedVariants(theme).map(([variant]) => variant))
+            })
+        );
     }
 
     public resolve(selection: ThemeSelection): ThemeProfile {
@@ -70,6 +84,9 @@ export class DefaultThemeStrategy implements ThemeStrategy {
         if (!registration.name.trim()) {
             throw new Error("Mona UI theme names cannot be empty.");
         }
+        if (/\s/.test(registration.name)) {
+            throw new Error(`Mona UI theme name "${registration.name}" cannot contain whitespace.`);
+        }
         if (this.#themes.has(registration.name)) {
             throw new Error(`Mona UI theme "${registration.name}" is already registered.`);
         }
@@ -82,6 +99,21 @@ export class DefaultThemeStrategy implements ThemeStrategy {
             validateProfile(registration.name, variant, profile);
         }
         this.#themes.set(registration.name, registration);
+    }
+
+    /** Custom themes, and built-in ones as overridden. The built-in ones as written have specs of their own. */
+    #reportProblems(
+        registrations: readonly ThemeFamilyRegistration[],
+        overrides: readonly ThemeOverrideRegistration[]
+    ): void {
+        const names = new Set([...registrations.map(({ name }) => name), ...overrides.map(({ theme }) => theme)]);
+        for (const name of names) {
+            for (const [variant] of getDefinedVariants(this.#themes.get(name) as ThemeFamilyRegistration)) {
+                for (const problem of findThemeProblems(name, variant, this.resolve({ name, variant }))) {
+                    console.warn(`Mona UI: ${problem}`);
+                }
+            }
+        }
     }
 }
 

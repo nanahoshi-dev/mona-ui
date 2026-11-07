@@ -25,7 +25,7 @@ describe("CircularProgressBarComponent", () => {
         const progressCircle = host.querySelector("circle:not([data-stroke-trail])") as SVGCircleElement;
 
         expect(host.classList.contains("[&_svg_circle]:data-[stroke-trail='true']:stroke-surface-muted")).toBe(true);
-        expect(progressCircle.getAttribute("stroke")).toBe("var(--color-primary)");
+        expect(progressCircle.getAttribute("stroke")).toBe("var(--mona-indicator-color, var(--color-primary))");
         expect(host.classList.contains("text-foreground")).toBe(true);
     });
 });
