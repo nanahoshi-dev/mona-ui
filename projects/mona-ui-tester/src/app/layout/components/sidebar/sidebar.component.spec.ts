@@ -1,24 +1,60 @@
+import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { provideRouter } from "@angular/router";
-import { beforeEach, describe, expect, it } from "vitest";
+import { Router, provideRouter } from "@angular/router";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { DOCS_MANIFEST } from "../../docs-manifest";
 import { SidebarComponent } from "./sidebar.component";
 
+@Component({ template: "" })
+class EmptyComponent {}
+
 describe("SidebarComponent", () => {
-    let component: SidebarComponent;
     let fixture: ComponentFixture<SidebarComponent>;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [SidebarComponent],
-            providers: [provideRouter([])]
+            providers: [provideRouter([{ path: "components/:page", component: EmptyComponent }])]
         }).compileComponents();
 
         fixture = TestBed.createComponent(SidebarComponent);
-        component = fixture.componentInstance;
+        await fixture.whenStable();
         fixture.detectChanges();
     });
 
-    it("should create", () => {
-        expect(component).toBeTruthy();
+    it("has a section for every category, in a named navigation landmark", () => {
+        const nav = fixture.nativeElement.querySelector("nav") as HTMLElement;
+
+        expect(nav.getAttribute("aria-label")).toBe("Documentation");
+        expect(Array.from(nav.querySelectorAll("h2")).map(heading => heading.textContent?.trim())).toEqual(
+            DOCS_MANIFEST.map(category => category.title)
+        );
+    });
+
+    it("can reach every page in the manifest", () => {
+        const buttons: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll("nav button"));
+        buttons.filter(button => button.getAttribute("aria-expanded") === "false").forEach(button => button.click());
+        fixture.detectChanges();
+
+        const hrefs = Array.from(fixture.nativeElement.querySelectorAll("nav a")).map(link =>
+            (link as HTMLAnchorElement).getAttribute("href")
+        );
+        expect(hrefs).toEqual(
+            DOCS_MANIFEST.flatMap(category => category.pages.map(page => `/components/${page.path}`))
+        );
+    });
+
+    it("brings the current page's link into view", async () => {
+        const scrollIntoView = vi.spyOn(Element.prototype, "scrollIntoView").mockImplementation(() => undefined);
+        fixture.autoDetectChanges();
+        try {
+            await TestBed.inject(Router).navigateByUrl("/components/window");
+            await fixture.whenStable();
+
+            expect(scrollIntoView).toHaveBeenCalledWith({ block: "nearest" });
+            expect((scrollIntoView.mock.contexts.at(-1) as Element).textContent?.trim()).toBe("Window");
+        } finally {
+            scrollIntoView.mockRestore();
+        }
     });
 });

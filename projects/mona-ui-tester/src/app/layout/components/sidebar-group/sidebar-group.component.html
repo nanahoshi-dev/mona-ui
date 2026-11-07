@@ -1,26 +1,51 @@
 <div class="flex flex-col gap-1">
-    <!-- Group Title -->
-    <div class="px-3 py-1.5 text-[11px] font-semibold tracking-widest text-muted-foreground uppercase select-none">
-        {{ group().title }}
-    </div>
+    <h2>
+        <button
+            class="w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-[11px] font-semibold tracking-widest text-start text-muted-foreground uppercase hover:text-foreground hover:bg-hover transition-colors cursor-pointer"
+            type="button"
+            [attr.aria-controls]="expanded() ? listId : null"
+            [attr.aria-expanded]="expanded()"
+            (click)="navigation.toggle(category().id)">
+            <span>{{ category().title }}</span>
+            <svg
+                lucideChevronRight
+                class="flex-shrink-0 transition-transform"
+                aria-hidden="true"
+                [class.rotate-90]="expanded()"
+                [class.rtl:rotate-180]="!expanded()"
+                [size]="14"></svg>
+        </button>
+    </h2>
 
-    <!-- Group Navigation Links -->
-    <ul class="w-full flex flex-col gap-0.5">
-        @for (item of group().items; track item.path) {
-            <li>
-                <a
-                    class="group flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-hover transition-all cursor-pointer"
-                    [routerLink]="[group().path + item.path]"
-                    routerLinkActive="bg-selected text-foreground font-semibold">
-                    @if (item.icon) {
-                        <svg
-                            [lucideIcon]="item.icon"
-                            [size]="16"
-                            class="text-muted-foreground group-hover:text-foreground group-[.bg-selected]:text-primary transition-colors flex-shrink-0"></svg>
-                    }
-                    <span>{{ item.text }}</span>
-                </a>
-            </li>
-        }
-    </ul>
+    @if (expanded()) {
+        <ul class="w-full flex flex-col gap-0.5" [id]="listId">
+            @for (page of category().pages; track page.path) {
+                @let current = page === navigation.currentPage();
+                <li>
+                    <a
+                        class="group flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-sm transition-all cursor-pointer"
+                        [attr.aria-current]="current ? 'page' : null"
+                        [class.bg-selected]="current"
+                        [class.font-medium]="!current"
+                        [class.font-semibold]="current"
+                        [class.forced-colors:bg-[Highlight]]="current"
+                        [class.forced-colors:text-[HighlightText]]="current"
+                        [class.hover:bg-hover]="!current"
+                        [class.hover:text-foreground]="!current"
+                        [class.text-foreground]="current"
+                        [class.text-muted-foreground]="!current"
+                        [routerLink]="['/components', page.path]">
+                        @if (icons[page.path]; as icon) {
+                            <svg
+                                class="text-muted-foreground group-hover:text-foreground group-[.bg-selected]:text-primary transition-colors flex-shrink-0"
+                                aria-hidden="true"
+                                [lucideIcon]="icon"
+                                [size]="16"></svg>
+                        }
+                        <span>{{ page.title }}</span>
+                    </a>
+                </li>
+            }
+        </ul>
+    }
 </div>
