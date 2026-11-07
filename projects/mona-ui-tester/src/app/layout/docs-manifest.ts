@@ -9,6 +9,10 @@
 export type DocsPageKind = "component" | "guide";
 
 export interface DocsPage {
+    /** Other entry points whose exports this page also documents, because using the component takes them. */
+    readonly apiAlsoFrom?: readonly string[];
+    /** The exports this page documents, when pages share an entry point. Without it, the page documents all of them. */
+    readonly apiExports?: readonly string[];
     /** Sub-pages shown nested in the sidebar. Only for topics with their own examples and a reason to be linked to. */
     readonly children?: readonly DocsPage[];
     /** One plain sentence for search results, page metadata and `llms.txt`. No markdown. */
@@ -31,8 +35,14 @@ function guide(path: string, title: string, description: string, entryPoint?: st
     return { description, entryPoint, kind: "guide", path, title };
 }
 
-function component(path: string, title: string, entryPoint: string, description: string): DocsPage {
-    return { description, entryPoint, kind: "component", path, title };
+function component(
+    path: string,
+    title: string,
+    entryPoint: string,
+    description: string,
+    api?: Pick<DocsPage, "apiAlsoFrom" | "apiExports">
+): DocsPage {
+    return { ...api, description, entryPoint, kind: "component", path, title };
 }
 
 export const DOCS_MANIFEST: readonly DocsCategory[] = [
@@ -62,31 +72,31 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
         id: "form-fields",
         title: "Form Fields",
         pages: [
-            component("decimal-textbox", "Decimal Text Box", "numeric-text-box", "A numeric input whose value is a decimal string, for exact values like money."),
+            component("decimal-textbox", "Decimal Text Box", "numeric-text-box", "A numeric input whose value is a decimal string, for exact values like money.", { apiExports: ["DecimalTextBoxComponent", "NumericTextBoxPrefixTemplateDirective"] }),
             component("editor", "Editor", "editor", "A rich text editor with a configurable toolbar and an HTML value."),
             component("fieldset", "Fieldset", "fieldset", "Groups related form controls under a labelled border."),
-            component("input", "Input", "text-box", "Styles a native input element and keeps its browser behavior."),
+            component("input", "Input", "text-box", "Styles a native input element and keeps its browser behavior.", { apiExports: ["InputType", "TextBoxDirective"] }),
             component("label", "Label", "label", "Styled, accessible labels associated with form controls."),
-            component("numeric-textbox", "Numeric Text Box", "numeric-text-box", "A number input with spinner buttons, bounds and decimal formatting."),
+            component("numeric-textbox", "Numeric Text Box", "numeric-text-box", "A number input with spinner buttons, bounds and decimal formatting.", { apiExports: ["NUMERIC_TEXT_BOX_DEFAULT_MESSAGES", "NumericTextBoxComponent", "NumericTextBoxPrefixTemplateDirective"] }),
             component("otp-input", "OTP Input", "otp-input", "A segmented input for one-time passwords and verification codes."),
             component("textarea", "Text Area", "text-area", "Styles a native textarea element and keeps its browser behavior."),
-            component("textbox", "Text Box", "text-box", "A text input with prefix and suffix slots and an optional clear button.")
+            component("textbox", "Text Box", "text-box", "A text input with prefix and suffix slots and an optional clear button.", { apiExports: ["TEXT_BOX_DEFAULT_MESSAGES", "TextBoxComponent", "TextBoxPrefixTemplateDirective", "TextBoxSuffixTemplateDirective"] })
         ]
     },
     {
         id: "selection",
         title: "Selection",
         pages: [
-            component("auto-complete", "Auto Complete", "auto-complete", "A text input that suggests matching options as the user types."),
+            component("auto-complete", "Auto Complete", "auto-complete", "A text input that suggests matching options as the user types.", { apiAlsoFrom: ["dropdowns"] }),
             component("checkbox", "Checkbox", "check-box", "A checkbox with label handling and an indeterminate state."),
-            component("combo-box", "Combo Box", "combo-box", "A text input that resolves typed text to one item from a collection."),
-            component("dropdown-list", "Dropdown List", "dropdown-list", "A closed control that opens a list for choosing exactly one option."),
-            component("multi-select", "Multi Select", "multi-select", "A control that shows selected options as removable tags."),
+            component("combo-box", "Combo Box", "combo-box", "A text input that resolves typed text to one item from a collection.", { apiAlsoFrom: ["dropdowns"] }),
+            component("dropdown-list", "Dropdown List", "dropdown-list", "A closed control that opens a list for choosing exactly one option.", { apiAlsoFrom: ["dropdowns"] }),
+            component("multi-select", "Multi Select", "multi-select", "A control that shows selected options as removable tags.", { apiAlsoFrom: ["dropdowns"] }),
             component("radio-button", "Radio Button", "radio-button", "Radio buttons and groups for choosing one option from several."),
-            component("range-slider", "Range Slider", "slider", "A two-handle slider for selecting a numeric interval."),
+            component("range-slider", "Range Slider", "slider", "A two-handle slider for selecting a numeric interval.", { apiExports: ["RangeSliderComponent", "SliderHandleTemplateDirective", "SliderLabelPosition", "SliderTickValueTemplateDirective"] }),
             component("rating", "Rating", "rating", "Choose a value from a visual scale of icons, in whole or half steps."),
             component("segmented", "Segmented", "segmented", "A compact set of mutually exclusive options."),
-            component("slider", "Slider", "slider", "A single-handle slider for selecting a numeric value."),
+            component("slider", "Slider", "slider", "A single-handle slider for selecting a numeric value.", { apiExports: ["SLIDER_DEFAULT_MESSAGES", "SliderComponent", "SliderHandleTemplateDirective", "SliderLabelPosition", "SliderTickValueTemplateDirective"] }),
             component("switch", "Switch", "switch", "A binary on and off toggle with optional state labels.")
         ]
     },
