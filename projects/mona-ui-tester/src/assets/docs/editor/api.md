@@ -63,39 +63,44 @@ const EDITOR_DEFAULT_MESSAGES: MonaEditorMessages;
 
 #### `ContentChangeEvent`
 
-| Name | Type |
-| --- | --- |
-| `html` | `string` |
-| `json` | `JSONContent` |
-
-#### `EditorSettings`
+The content of the editor after a user change, emitted by `EditorComponent.update`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `alignment` | `boolean` |  |
-| `blockquote` | `boolean` |  |
-| `bold` | `boolean` |  |
-| `code` | `boolean` |  |
-| `fontColor` | `boolean` |  |
-| `fontFamily` | `boolean` |  |
-| `fontHighlight` | `boolean` |  |
-| `fontList` | `Iterable<string>` |  |
-| `fontSize` | `boolean` |  |
+| `html` | `string` | The content as HTML, the same as the editor's `html` property. |
+| `json` | `JSONContent` | The content as a `JSONContent` document, the same as the editor's `json` property. |
+
+#### `EditorSettings`
+
+The features of an editor. Every feature is on unless it is set to `false`. Turning one off removes its toolbar
+control, and the editor no longer keeps that kind of content.
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `alignment` | `boolean` | Whether the toolbar shows the text alignment buttons and the editor keeps paragraph and heading alignment. |
+| `blockquote` | `boolean` | Whether the toolbar shows the block quote button and the editor keeps block quotes. |
+| `bold` | `boolean` | Whether the toolbar shows the bold button and the editor keeps bold text. |
+| `code` | `boolean` | Whether the toolbar shows the code block button and the editor keeps code blocks and inline code. |
+| `fontColor` | `boolean` | Whether the toolbar shows the text color picker and the editor keeps text colors. |
+| `fontFamily` | `boolean` | Whether the toolbar shows the font family dropdown and the editor keeps font families. |
+| `fontHighlight` | `boolean` | Whether the toolbar shows the highlight color picker and the editor keeps highlighted text. |
+| `fontList` | `Iterable<string>` | The fonts the font family dropdown offers, as CSS font family names. Empty keeps the default list. |
+| `fontSize` | `boolean` | Whether the toolbar shows the font size dropdown and the editor keeps font sizes. |
 | `fontSizeList` | `Iterable<string>` | The font sizes the font size dropdown offers, as CSS lengths (`"14px"`, `"1.25rem"`). Empty keeps the default list. |
-| `headings` | `boolean` |  |
-| `history` | `boolean` |  |
-| `horizontalRule` | `boolean` |  |
-| `image` | `boolean` |  |
-| `indent` | `boolean` |  |
-| `italic` | `boolean` |  |
-| `link` | `boolean` |  |
-| `list` | `boolean` |  |
-| `strikethrough` | `boolean` |  |
-| `subscript` | `boolean` |  |
-| `superscript` | `boolean` |  |
-| `table` | `boolean` |  |
-| `taskList` | `boolean` |  |
-| `underline` | `boolean` |  |
+| `headings` | `boolean` | Whether the toolbar shows the format dropdown and the editor keeps headings. |
+| `history` | `boolean` | Whether the toolbar shows the undo and redo buttons and the editor keeps an undo history. |
+| `horizontalRule` | `boolean` | Whether the toolbar shows the horizontal line button and the editor keeps horizontal lines. |
+| `image` | `boolean` | Whether the toolbar shows the insert image button and the editor keeps images. |
+| `indent` | `boolean` | Whether the toolbar shows the indent and outdent buttons and the editor keeps indentation. |
+| `italic` | `boolean` | Whether the toolbar shows the italic button and the editor keeps italic text. |
+| `link` | `boolean` | Whether the toolbar shows the link buttons and the editor keeps links, turning typed URLs into links. |
+| `list` | `boolean` | Whether the toolbar shows the numbered and bulleted list buttons and the editor keeps those lists. |
+| `strikethrough` | `boolean` | Whether the toolbar shows the strikethrough button and the editor keeps struck-through text. |
+| `subscript` | `boolean` | Whether the toolbar shows the subscript button and the editor keeps subscript text. |
+| `superscript` | `boolean` | Whether the toolbar shows the superscript button and the editor keeps superscript text. |
+| `table` | `boolean` | Whether the toolbar shows the table buttons and the editor keeps tables. |
+| `taskList` | `boolean` | Whether the toolbar shows the task list button and the editor keeps task lists. |
+| `underline` | `boolean` | Whether the toolbar shows the underline button and the editor keeps underlined text. |
 
 #### `MonaEditorMessages`
 
@@ -103,68 +108,68 @@ From `@nanahoshi/mona-ui/i18n`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `addColumnAfter` (read-only) | `string` |  |
-| `addColumnBefore` (read-only) | `string` |  |
-| `addHorizontalLine` (read-only) | `string` |  |
-| `addRowAfter` (read-only) | `string` |  |
-| `addRowBefore` (read-only) | `string` |  |
-| `alignCenter` (read-only) | `string` |  |
-| `alignEnd` (read-only) | `string` |  |
+| `addColumnAfter` (read-only) | `string` | The label of the toolbar button that adds a column after the current one. |
+| `addColumnBefore` (read-only) | `string` | The label of the toolbar button that adds a column before the current one. |
+| `addHorizontalLine` (read-only) | `string` | The label of the toolbar button that inserts a horizontal line. |
+| `addRowAfter` (read-only) | `string` | The label of the toolbar button that adds a row after the current one. |
+| `addRowBefore` (read-only) | `string` | The label of the toolbar button that adds a row before the current one. |
+| `alignCenter` (read-only) | `string` | The label of the toolbar button that centers the text. |
+| `alignEnd` (read-only) | `string` | The label of the toolbar button that aligns the text to the end of the line. |
 | `alignLeft` (read-only) | `string` | **Deprecated.** No longer rendered: the toolbar aligns to the start and end with `alignStart` and `alignEnd`. |
-| `alignmentGroup` (read-only) | `string` |  |
+| `alignmentGroup` (read-only) | `string` | The accessible name of the toolbar's text alignment button group. |
 | `alignRight` (read-only) | `string` | **Deprecated.** No longer rendered: the toolbar aligns to the start and end with `alignStart` and `alignEnd`. |
-| `alignStart` (read-only) | `string` |  |
-| `altText` (read-only) | `string` |  |
-| `apply` (read-only) | `string` |  |
-| `backgroundColor` (read-only) | `string` |  |
-| `bold` (read-only) | `string` |  |
-| `cancel` (read-only) | `string` |  |
-| `codeBlock` (read-only) | `string` |  |
-| `color` (read-only) | `string` |  |
-| `contentLabel` (read-only) | `string` |  |
-| `defaultFontFamily` (read-only) | `string` |  |
-| `deleteColumn` (read-only) | `string` |  |
-| `deleteRow` (read-only) | `string` |  |
-| `deleteTable` (read-only) | `string` |  |
-| `editLink` (read-only) | `string` |  |
-| `enterUrl` (read-only) | `string` |  |
-| `fontSize` (read-only) | `string` |  |
-| `format` (read-only) | `string` |  |
-| `heading` (read-only) | `(level: number) => string` |  |
-| `heightPx` (read-only) | `string` |  |
-| `historyGroup` (read-only) | `string` |  |
-| `imageUrl` (read-only) | `string` |  |
-| `indent` (read-only) | `string` |  |
-| `indentGroup` (read-only) | `string` |  |
-| `insert` (read-only) | `string` |  |
-| `insertImage` (read-only) | `string` |  |
-| `insertLink` (read-only) | `string` |  |
-| `insertOrderedList` (read-only) | `string` |  |
-| `insertTable` (read-only) | `string` |  |
-| `insertTaskList` (read-only) | `string` |  |
-| `insertUnorderedList` (read-only) | `string` |  |
-| `invalidUrl` (read-only) | `string` |  |
-| `italic` (read-only) | `string` |  |
-| `justify` (read-only) | `string` |  |
-| `linkGroup` (read-only) | `string` |  |
-| `listGroup` (read-only) | `string` |  |
-| `mergeCells` (read-only) | `string` |  |
-| `outdent` (read-only) | `string` |  |
-| `paragraph` (read-only) | `string` |  |
-| `quotation` (read-only) | `string` |  |
-| `redo` (read-only) | `string` |  |
-| `removeLink` (read-only) | `string` |  |
-| `selectFontFamily` (read-only) | `string` |  |
-| `selectFontSize` (read-only) | `string` |  |
-| `splitCell` (read-only) | `string` |  |
-| `strikethrough` (read-only) | `string` |  |
-| `subscript` (read-only) | `string` |  |
-| `superscript` (read-only) | `string` |  |
-| `tableGroup` (read-only) | `string` |  |
-| `tableSize` (read-only) | `(rows: number, columns: number) => string` |  |
-| `textStyleGroup` (read-only) | `string` |  |
-| `toggleHeaderRow` (read-only) | `string` |  |
-| `toolbar` (read-only) | `string` |  |
-| `underline` (read-only) | `string` |  |
-| `undo` (read-only) | `string` |  |
-| `widthPx` (read-only) | `string` |  |
+| `alignStart` (read-only) | `string` | The label of the toolbar button that aligns the text to the start of the line. |
+| `altText` (read-only) | `string` | The label of the alternative text field in the insert image form. |
+| `apply` (read-only) | `string` | The label of the link dialog's button that sets the link. |
+| `backgroundColor` (read-only) | `string` | The label of the toolbar color picker that sets the text's highlight color. |
+| `bold` (read-only) | `string` | The label of the toolbar button that toggles bold. |
+| `cancel` (read-only) | `string` | The label of the Cancel button in the link dialog and the insert image form. |
+| `codeBlock` (read-only) | `string` | The label of the toolbar button that toggles a code block. |
+| `color` (read-only) | `string` | The label of the toolbar color picker that sets the text color. |
+| `contentLabel` (read-only) | `string` | The accessible name of the editable content when the editor has no `aria-label` or `aria-labelledby`. |
+| `defaultFontFamily` (read-only) | `string` | The placeholder of the font family dropdown when the text uses no specific font. |
+| `deleteColumn` (read-only) | `string` | The label of the toolbar button that deletes the current column. |
+| `deleteRow` (read-only) | `string` | The label of the toolbar button that deletes the current row. |
+| `deleteTable` (read-only) | `string` | The label of the toolbar button that deletes the table. |
+| `editLink` (read-only) | `string` | The title of the link dialog when the selection is already in a link. |
+| `enterUrl` (read-only) | `string` | The label of the URL field in the link dialog. |
+| `fontSize` (read-only) | `string` | The placeholder of the font size dropdown when the text has no specific size. |
+| `format` (read-only) | `string` | The label of the toolbar dropdown that switches between paragraph and heading levels. |
+| `heading` (read-only) | `(level: number) => string` | The text of a heading level in the format dropdown, given the level number. |
+| `heightPx` (read-only) | `string` | The label of the height field in the insert image form. |
+| `historyGroup` (read-only) | `string` | The accessible name of the toolbar's undo and redo button group. |
+| `imageUrl` (read-only) | `string` | The label of the image URL field in the insert image form. |
+| `indent` (read-only) | `string` | The label of the toolbar button that increases the indentation. |
+| `indentGroup` (read-only) | `string` | The accessible name of the toolbar's indent and outdent button group. |
+| `insert` (read-only) | `string` | The label of the insert image form's button that inserts the image. |
+| `insertImage` (read-only) | `string` | The label of the toolbar button that opens the insert image form, and the title of that form's window. |
+| `insertLink` (read-only) | `string` | The label of the toolbar button that opens the link dialog, and the dialog's title for a new link. |
+| `insertOrderedList` (read-only) | `string` | The label of the toolbar button that toggles a numbered list. |
+| `insertTable` (read-only) | `string` | The label of the toolbar button that opens the table size grid, and the accessible name of that grid. |
+| `insertTaskList` (read-only) | `string` | The label of the toolbar button that toggles a task list. |
+| `insertUnorderedList` (read-only) | `string` | The label of the toolbar button that toggles a bulleted list. |
+| `invalidUrl` (read-only) | `string` | The error shown in the link dialog when the URL isn't a valid link. |
+| `italic` (read-only) | `string` | The label of the toolbar button that toggles italic. |
+| `justify` (read-only) | `string` | The label of the toolbar button that justifies the text. |
+| `linkGroup` (read-only) | `string` | The accessible name of the toolbar's link button group. |
+| `listGroup` (read-only) | `string` | The accessible name of the toolbar's list button group. |
+| `mergeCells` (read-only) | `string` | The label of the toolbar button that merges the selected cells. |
+| `outdent` (read-only) | `string` | The label of the toolbar button that decreases the indentation. |
+| `paragraph` (read-only) | `string` | The text of the plain paragraph option in the format dropdown. |
+| `quotation` (read-only) | `string` | The label of the toolbar button that toggles a block quote. |
+| `redo` (read-only) | `string` | The label of the toolbar button that redoes the last undone change. |
+| `removeLink` (read-only) | `string` | The label of the toolbar button and the link dialog button that remove the link. |
+| `selectFontFamily` (read-only) | `string` | The label of the toolbar's font family dropdown. |
+| `selectFontSize` (read-only) | `string` | The label of the toolbar's font size dropdown. |
+| `splitCell` (read-only) | `string` | The label of the toolbar button that splits a merged cell. |
+| `strikethrough` (read-only) | `string` | The label of the toolbar button that toggles strikethrough. |
+| `subscript` (read-only) | `string` | The label of the toolbar button that toggles subscript. |
+| `superscript` (read-only) | `string` | The label of the toolbar button that toggles superscript. |
+| `tableGroup` (read-only) | `string` | The accessible name of the toolbar's table button group. |
+| `tableSize` (read-only) | `(rows: number, columns: number) => string` | Describes a table size in the table size grid, given the number of rows and columns. It names each grid cell and announces the highlighted size. |
+| `textStyleGroup` (read-only) | `string` | The accessible name of the toolbar's bold, italic and other text style button group. |
+| `toggleHeaderRow` (read-only) | `string` | The label of the toolbar button that turns the header row on or off. |
+| `toolbar` (read-only) | `string` | The accessible name of the editor's toolbar. |
+| `underline` (read-only) | `string` | The label of the toolbar button that toggles underline. |
+| `undo` (read-only) | `string` | The label of the toolbar button that undoes the last change. |
+| `widthPx` (read-only) | `string` | The label of the width field in the insert image form. |

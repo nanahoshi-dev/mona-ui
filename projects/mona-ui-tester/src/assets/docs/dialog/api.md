@@ -171,35 +171,35 @@ The settings object accepted by `DialogService.show()`. Fields mirror the `Dialo
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `actions?` | `Iterable<DialogAction>` |  |
-| `actionsLayout?` | `ActionsLayout` |  |
+| `actions?` | `Iterable<DialogAction>` | The buttons in the dialog footer. When omitted, the dialog shows an OK button, plus a Cancel button when `type` is `"confirm"`. Pass an empty list for no buttons. |
+| `actionsLayout?` | `ActionsLayout` | How the action buttons are aligned in the footer. |
 | `ariaLabel?` | `string` | Accessible name for the dialog when it has no `title` or `titleTemplate`. |
-| `closable?` | `boolean` |  |
-| `closeOnEscape?` | `boolean` |  |
+| `closable?` | `boolean` | Whether the header shows a close button. |
+| `closeOnEscape?` | `boolean` | Whether pressing Escape closes the dialog. |
 | `content?` | `TemplateRef<unknown> \| Type<unknown>` | The dialog's body: a template, or a component. A template gets the dialog's `data` as `$implicit` and the `DialogRef` as `dialogRef`; a component can inject `DIALOG_DATA` and `DialogRef`. |
 | `data?` | `D` | Data for the content: `DIALOG_DATA` in a component, `$implicit` in a template. |
-| `description?` | `string` |  |
+| `description?` | `string` | Text shown under the title, and used as the dialog's accessible description. |
 | `descriptionTemplate?` | `TemplateRef<unknown>` | Template rendered in place of `description`. |
-| `focusedElement?` | `HTMLElement \| ElementRef<HTMLElement> \| string \| null` |  |
+| `focusedElement?` | `HTMLElement \| ElementRef<HTMLElement> \| string \| null` | The element that receives focus when the dialog opens: an element, an element reference, or a CSS selector matched inside the dialog. When omitted, focus moves to the first focusable element. |
 | `footerTemplate?` | `TemplateRef<unknown>` | Template rendered in place of the generated action-button row. |
-| `height?` | `number` |  |
+| `height?` | `number` | Height in pixels. When omitted, the dialog fits its content. |
 | `iconTemplate?` | `TemplateRef<unknown>` | Template rendered in place of the built-in `type` icon. |
 | `injector?` | `Injector` | Parent injector for the dialog's content, so a component given as `content` can inject what the opener provides. Defaults to the application injector. |
 | `left?` | `number` | Distance from the viewport's left edge in pixels. When omitted, the dialog is centered horizontally. |
 | `maxHeight?` | `number` | Maximum height in pixels. When omitted, the dialog stays 1rem inside the viewport and its body scrolls. |
 | `maxWidth?` | `number` | Maximum width in pixels. When omitted, the dialog stays 1rem inside the viewport. |
 | `messages?` | `Partial<DialogMessages>` | Overrides for the dialog's messages (close button label, OK, Cancel). |
-| `minHeight?` | `number` |  |
-| `minWidth?` | `number` |  |
+| `minHeight?` | `number` | Minimum height in pixels. |
+| `minWidth?` | `number` | Minimum width in pixels. |
 | `modal?` | `boolean` | Whether the dialog is modal: a backdrop, `aria-modal="true"`, focus kept inside, page scroll locked, and the rest of the page inert. A non-modal dialog does none of these. |
 | `restoreFocus?` | `boolean` | Whether focus goes back to where it was when the dialog opened, once it closes. |
-| `rounded?` | `"large" \| "medium" \| "none" \| "small"` |  |
-| `text?` | `string` |  |
-| `title?` | `string` |  |
+| `rounded?` | `"large" \| "medium" \| "none" \| "small"` | Border-radius preset for the dialog and its action buttons. |
+| `text?` | `string` | Text shown in the dialog's body when no `content` is given. |
+| `title?` | `string` | Text shown in the dialog header, and used as the dialog's accessible name. |
 | `titleTemplate?` | `TemplateRef<unknown>` | Template rendered in place of `title`. |
 | `top?` | `number` | Distance from the viewport's top edge in pixels. When omitted, the dialog is centered vertically. |
-| `type?` | `"confirm" \| "error" \| "info" \| "success" \| "warning"` |  |
-| `width?` | `number` |  |
+| `type?` | `"confirm" \| "error" \| "info" \| "success" \| "warning"` | The dialog's severity, which picks its icon. `"confirm"`, `"error"` and `"warning"` give the dialog the `alertdialog` role. When omitted, `show()` renders no icon; `alert()` uses `"info"` and `confirm()` uses `"confirm"`. |
+| `width?` | `number` | Width in pixels. When omitted, the dialog fits its content. |
 
 #### `ActionsLayout`
 
@@ -246,11 +246,11 @@ type DialogMessages = MonaDialogMessages;
 
 From `@nanahoshi/mona-ui/i18n`.
 
-| Name | Type |
-| --- | --- |
-| `cancel` (read-only) | `string` |
-| `closeDialog` (read-only) | `string` |
-| `ok` (read-only) | `string` |
+| Name | Type | Description |
+| --- | --- | --- |
+| `cancel` (read-only) | `string` | The label of the Cancel button that `confirm()` and a `"confirm"` dialog without `actions` add. |
+| `closeDialog` (read-only) | `string` | The accessible name of the close button in the dialog header. |
+| `ok` (read-only) | `string` | The label of the OK button that `alert()`, `confirm()` and a dialog without `actions` add. |
 
 #### `PreventableEvent`
 

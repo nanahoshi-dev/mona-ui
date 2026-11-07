@@ -220,13 +220,13 @@ type PopupAnchor = FlexibleConnectedPositionStrategyOrigin | string;
 | Member | Value | Description |
 | --- | --- | --- |
 | `Action` | `"action"` | A dialog action button, such as OK or Cancel. |
-| `BackdropClick` | `"backdropClick"` |  |
-| `CloseButton` | `"closeButton"` |  |
-| `Escape` | `"escape"` |  |
-| `MouseLeave` | `"mouseLeave"` |  |
-| `Programmatic` | `"programmatic"` |  |
-| `OutsideClick` | `"outsideClick"` |  |
-| `Scroll` | `"scroll"` |  |
+| `BackdropClick` | `"backdropClick"` | A click on the backdrop, when `closeOnBackdropClick` allows it. |
+| `CloseButton` | `"closeButton"` | The close button of a dialog, window or sheet. |
+| `Escape` | `"escape"` | The Escape key. |
+| `MouseLeave` | `"mouseLeave"` | The pointer leaving the anchor, when `closeOnMouseLeave` is set. |
+| `Programmatic` | `"programmatic"` | A `close()` call from code, with no user interaction behind it. |
+| `OutsideClick` | `"outsideClick"` | A pointer press outside the popup and its anchor. |
+| `Scroll` | `"scroll"` | The anchor scrolling away, when `closeOnScroll` is set. |
 
 #### `Action`
 

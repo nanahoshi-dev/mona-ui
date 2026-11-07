@@ -50,13 +50,13 @@ button-group entry point can provide it; applications don't need to use it direc
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `buttonClick$` (read-only) | `Subject<[ButtonDirective, boolean]>` |  |
-| `buttonSelect$` (read-only) | `Subject<[ButtonDirective, boolean]>` |  |
-| `groupDisabled` (read-only) | `WritableSignal<boolean>` |  |
-| `groupLook` (read-only) | `WritableSignal<"default" \| "primary" \| "success" \| "error" \| "warning" \| "info" \| "outline" \| "secondary" \| "ghost" \| "link" \| "clear" \| null \| undefined>` |  |
-| `groupReadonly` (read-only) | `WritableSignal<boolean>` |  |
-| `groupRounded` (read-only) | `WritableSignal<"none" \| "small" \| "medium" \| "large" \| "full" \| null \| undefined>` |  |
-| `groupSize` (read-only) | `WritableSignal<"small" \| "medium" \| "large" \| null \| undefined>` |  |
+| `buttonClick$` (read-only) | `Subject<[ButtonDirective, boolean]>` | A click on a toggleable member, with the member and whether it was selected before the click. The group answers it by applying its selection rules through `buttonSelect$`. |
+| `buttonSelect$` (read-only) | `Subject<[ButtonDirective, boolean]>` | A selection change the group applies to a member: the member and whether it is now selected. |
+| `groupDisabled` (read-only) | `WritableSignal<boolean>` | Whether the group is disabled. Members are disabled while it is `true`, whatever their own `disabled` input. |
+| `groupLook` (read-only) | `WritableSignal<"default" \| "primary" \| "success" \| "error" \| "warning" \| "info" \| "outline" \| "secondary" \| "ghost" \| "link" \| "clear" \| null \| undefined>` | The group's `look`, which members use in place of their own while it is set. |
+| `groupReadonly` (read-only) | `WritableSignal<boolean>` | Whether the group is read-only. Toggleable members then report `aria-disabled` and keep their selection. |
+| `groupRounded` (read-only) | `WritableSignal<"none" \| "small" \| "medium" \| "large" \| "full" \| null \| undefined>` | The group's `rounded`, which members use in place of their own while it is set. |
+| `groupSize` (read-only) | `WritableSignal<"small" \| "medium" \| "large" \| null \| undefined>` | The group's `size`, which members use in place of their own while it is set. |
 | `memberClick$` (read-only) | `Subject<[ButtonDirective, HTMLButtonElement]>` | Every click on a member, toggleable or not, reported after the group has applied its selection. |
 | `members` (read-only) | `Signal<readonly ButtonDirective[]>` | The buttons that belong to the group. Only these follow the group's look, size, rounding, disabled state and selection; other buttons that can inject this service ignore it. |
 

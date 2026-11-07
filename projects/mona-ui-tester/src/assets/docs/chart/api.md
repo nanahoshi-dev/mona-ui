@@ -1305,43 +1305,43 @@ Adds a tooltip for pointer and keyboard interaction. Use `ng-template[monaChartT
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `$implicit` | `ChartDataLabelContext<T>` |  |
-| `close?` | `number \| undefined` |  |
-| `color` | `string` |  |
-| `dataIndex` | `number` |  |
-| `datum` | `T` |  |
-| `formattedClose?` | `string \| undefined` |  |
-| `formattedFrom?` | `string \| undefined` |  |
-| `formattedHigh?` | `string \| undefined` |  |
-| `formattedLow?` | `string \| undefined` |  |
-| `formattedOpen?` | `string \| undefined` |  |
-| `formattedSize?` | `string \| undefined` |  |
-| `formattedStackPercentage?` | `string \| undefined` |  |
-| `formattedStackTotal?` | `string \| undefined` |  |
-| `formattedTo?` | `string \| undefined` |  |
-| `formattedValue` | `string` |  |
-| `formattedX` | `string` |  |
-| `formattedY` | `string` |  |
-| `fromValue?` | `number \| undefined` |  |
-| `high?` | `number \| undefined` |  |
-| `low?` | `number \| undefined` |  |
-| `markId` | `string` |  |
-| `open?` | `number \| undefined` |  |
-| `rawValue?` | `unknown` |  |
+| `$implicit` | `ChartDataLabelContext<T>` | The same context object, so `let-context` in the template receives every field below. |
+| `close?` | `number \| undefined` | The closing price of a candlestick or OHLC mark. |
+| `color` | `string` | The color of the mark the label belongs to. Falls back to the series color, then to black. |
+| `dataIndex` | `number` | The index of the data item in the series data. |
+| `datum` | `T` | The data item the mark was drawn from. |
+| `formattedClose?` | `string \| undefined` | The closing price of a candlestick or OHLC mark, formatted for display. |
+| `formattedFrom?` | `string \| undefined` | The start value of a range bar or range area mark, formatted for display. |
+| `formattedHigh?` | `string \| undefined` | The high price of a candlestick or OHLC mark, formatted for display. |
+| `formattedLow?` | `string \| undefined` | The low price of a candlestick or OHLC mark, formatted for display. |
+| `formattedOpen?` | `string \| undefined` | The opening price of a candlestick or OHLC mark, formatted for display. |
+| `formattedSize?` | `string \| undefined` | The size value of a bubble mark, formatted for display. |
+| `formattedStackPercentage?` | `string \| undefined` | The mark's share of its stack total, formatted for display. The default label text for percent-stacked bar and area series. |
+| `formattedStackTotal?` | `string \| undefined` | The total of the stack the mark belongs to, formatted for display. |
+| `formattedTo?` | `string \| undefined` | The end value of a range bar or range area mark, formatted for display. |
+| `formattedValue` | `string` | The value text the chart shows for the mark. For range marks it joins the start and end values; for horizontal bars it is the formatted x value. |
+| `formattedX` | `string` | The x value of the mark, formatted for display. Empty when the mark has no x value. |
+| `formattedY` | `string` | The y value of the mark, formatted for display. Empty when the mark has no y value. |
+| `fromValue?` | `number \| undefined` | The start value of a range bar or range area mark. |
+| `high?` | `number \| undefined` | The high price of a candlestick or OHLC mark. |
+| `low?` | `number \| undefined` | The low price of a candlestick or OHLC mark. |
+| `markId` | `string` | A stable identifier of the mark within the chart, the same one selection events report. |
+| `open?` | `number \| undefined` | The opening price of a candlestick or OHLC mark. |
+| `rawValue?` | `unknown` | The value read from the data item before stacking or other processing, when the series provides one. |
 | `selected` | `boolean` | Persistent selection state for this mark. |
-| `seriesId` | `string` |  |
-| `seriesName` | `string` |  |
-| `seriesType` | `ChartSeriesType` |  |
-| `sizeValue?` | `number \| undefined` |  |
-| `stackEnd?` | `number \| undefined` |  |
-| `stackMode?` | `ChartStackMode \| undefined` |  |
-| `stackPercentage?` | `number \| undefined` |  |
-| `stackStart?` | `number \| undefined` |  |
-| `stackTotal?` | `number \| undefined` |  |
-| `toValue?` | `number \| undefined` |  |
-| `value?` | `unknown` |  |
-| `xValue?` | `unknown` |  |
-| `yValue?` | `unknown` |  |
+| `seriesId` | `string` | The identifier of the series the mark belongs to. |
+| `seriesName` | `string` | The display name of the series the mark belongs to. |
+| `seriesType` | `ChartSeriesType` | The type of the series the mark belongs to, such as `"bar"` or `"line"`. |
+| `sizeValue?` | `number \| undefined` | The size value of a bubble mark. |
+| `stackEnd?` | `number \| undefined` | The value where the mark ends on its stack. |
+| `stackMode?` | `ChartStackMode \| undefined` | The stacking mode of the series, when the series is stacked. |
+| `stackPercentage?` | `number \| undefined` | The mark's share of its stack total, as a percentage. |
+| `stackStart?` | `number \| undefined` | The value where the mark starts on its stack. |
+| `stackTotal?` | `number \| undefined` | The total of the stack the mark belongs to. |
+| `toValue?` | `number \| undefined` | The end value of a range bar or range area mark. |
+| `value?` | `unknown` | The value of the mark. A `[from, to]` pair for range marks, the aggregate value for hierarchical marks, and the y value otherwise. |
+| `xValue?` | `unknown` | The x value of the mark. |
+| `yValue?` | `unknown` | The y value of the mark. |
 
 ### `ChartFunnelLabelTemplateDirective`
 
@@ -1793,43 +1793,43 @@ const CHART_DEFAULT_MESSAGES: MonaChartMessages;
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `$implicit` (read-only) | `ChartDataLabelContext<T>` |  |
-| `close?` (read-only) | `number` |  |
-| `color` (read-only) | `string` |  |
-| `dataIndex` (read-only) | `number` |  |
-| `datum` (read-only) | `T` |  |
-| `formattedClose?` (read-only) | `string` |  |
-| `formattedFrom?` (read-only) | `string` |  |
-| `formattedHigh?` (read-only) | `string` |  |
-| `formattedLow?` (read-only) | `string` |  |
-| `formattedOpen?` (read-only) | `string` |  |
-| `formattedSize?` (read-only) | `string` |  |
-| `formattedStackPercentage?` (read-only) | `string` |  |
-| `formattedStackTotal?` (read-only) | `string` |  |
-| `formattedTo?` (read-only) | `string` |  |
-| `formattedValue` (read-only) | `string` |  |
-| `formattedX` (read-only) | `string` |  |
-| `formattedY` (read-only) | `string` |  |
-| `fromValue?` (read-only) | `number` |  |
-| `high?` (read-only) | `number` |  |
-| `low?` (read-only) | `number` |  |
-| `markId` (read-only) | `string` |  |
-| `open?` (read-only) | `number` |  |
-| `rawValue?` (read-only) | `unknown` |  |
+| `$implicit` (read-only) | `ChartDataLabelContext<T>` | The same context object, so `let-context` in the template receives every field below. |
+| `close?` (read-only) | `number` | The closing price of a candlestick or OHLC mark. |
+| `color` (read-only) | `string` | The color of the mark the label belongs to. Falls back to the series color, then to black. |
+| `dataIndex` (read-only) | `number` | The index of the data item in the series data. |
+| `datum` (read-only) | `T` | The data item the mark was drawn from. |
+| `formattedClose?` (read-only) | `string` | The closing price of a candlestick or OHLC mark, formatted for display. |
+| `formattedFrom?` (read-only) | `string` | The start value of a range bar or range area mark, formatted for display. |
+| `formattedHigh?` (read-only) | `string` | The high price of a candlestick or OHLC mark, formatted for display. |
+| `formattedLow?` (read-only) | `string` | The low price of a candlestick or OHLC mark, formatted for display. |
+| `formattedOpen?` (read-only) | `string` | The opening price of a candlestick or OHLC mark, formatted for display. |
+| `formattedSize?` (read-only) | `string` | The size value of a bubble mark, formatted for display. |
+| `formattedStackPercentage?` (read-only) | `string` | The mark's share of its stack total, formatted for display. The default label text for percent-stacked bar and area series. |
+| `formattedStackTotal?` (read-only) | `string` | The total of the stack the mark belongs to, formatted for display. |
+| `formattedTo?` (read-only) | `string` | The end value of a range bar or range area mark, formatted for display. |
+| `formattedValue` (read-only) | `string` | The value text the chart shows for the mark. For range marks it joins the start and end values; for horizontal bars it is the formatted x value. |
+| `formattedX` (read-only) | `string` | The x value of the mark, formatted for display. Empty when the mark has no x value. |
+| `formattedY` (read-only) | `string` | The y value of the mark, formatted for display. Empty when the mark has no y value. |
+| `fromValue?` (read-only) | `number` | The start value of a range bar or range area mark. |
+| `high?` (read-only) | `number` | The high price of a candlestick or OHLC mark. |
+| `low?` (read-only) | `number` | The low price of a candlestick or OHLC mark. |
+| `markId` (read-only) | `string` | A stable identifier of the mark within the chart, the same one selection events report. |
+| `open?` (read-only) | `number` | The opening price of a candlestick or OHLC mark. |
+| `rawValue?` (read-only) | `unknown` | The value read from the data item before stacking or other processing, when the series provides one. |
 | `selected` (read-only) | `boolean` | Persistent selection state for this mark. |
-| `seriesId` (read-only) | `string` |  |
-| `seriesName` (read-only) | `string` |  |
-| `seriesType` (read-only) | `ChartSeriesType` |  |
-| `sizeValue?` (read-only) | `number` |  |
-| `stackEnd?` (read-only) | `number` |  |
-| `stackMode?` (read-only) | `ChartStackMode` |  |
-| `stackPercentage?` (read-only) | `number` |  |
-| `stackStart?` (read-only) | `number` |  |
-| `stackTotal?` (read-only) | `number` |  |
-| `toValue?` (read-only) | `number` |  |
-| `value?` (read-only) | `unknown` |  |
-| `xValue?` (read-only) | `unknown` |  |
-| `yValue?` (read-only) | `unknown` |  |
+| `seriesId` (read-only) | `string` | The identifier of the series the mark belongs to. |
+| `seriesName` (read-only) | `string` | The display name of the series the mark belongs to. |
+| `seriesType` (read-only) | `ChartSeriesType` | The type of the series the mark belongs to, such as `"bar"` or `"line"`. |
+| `sizeValue?` (read-only) | `number` | The size value of a bubble mark. |
+| `stackEnd?` (read-only) | `number` | The value where the mark ends on its stack. |
+| `stackMode?` (read-only) | `ChartStackMode` | The stacking mode of the series, when the series is stacked. |
+| `stackPercentage?` (read-only) | `number` | The mark's share of its stack total, as a percentage. |
+| `stackStart?` (read-only) | `number` | The value where the mark starts on its stack. |
+| `stackTotal?` (read-only) | `number` | The total of the stack the mark belongs to. |
+| `toValue?` (read-only) | `number` | The end value of a range bar or range area mark. |
+| `value?` (read-only) | `unknown` | The value of the mark. A `[from, to]` pair for range marks, the aggregate value for hierarchical marks, and the y value otherwise. |
+| `xValue?` (read-only) | `unknown` | The x value of the mark. |
+| `yValue?` (read-only) | `unknown` | The y value of the mark. |
 
 #### `ChartDataLabelOptions`
 
@@ -2167,7 +2167,7 @@ Options for exporting a chart as a PDF document.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `format` (read-only) | `"pdf"` |  |
+| `format` (read-only) | `"pdf"` | Selects export as a PDF document. |
 | `mode?` (read-only) | `ChartPdfRenderMode` | PDF rendering mode ("auto", "vector", or "raster"). Default: "auto". |
 | `page?` (read-only) | `ChartPdfPageOptions` | PDF page configuration. |
 
@@ -2200,7 +2200,7 @@ Options for exporting a chart as a PNG raster image.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `format` (read-only) | `"png"` |  |
+| `format` (read-only) | `"png"` | Selects export as a PNG image. |
 | `pixelRatio?` (read-only) | `number` | Raster scaling ratio relative to logical CSS pixels. Default: 2. |
 
 #### `ChartPoint`
@@ -2537,7 +2537,7 @@ Options for exporting a chart as a standalone SVG vector document.
 | Name | Type | Description |
 | --- | --- | --- |
 | `accessibility?` (read-only) | `boolean` | Whether to include accessibility metadata (<title>, <desc>, and ARIA attributes). Default: true. |
-| `format` (read-only) | `"svg"` |  |
+| `format` (read-only) | `"svg"` | Selects export as a SVG document. |
 
 #### `ChartSynchronizationAxisMapping`
 
@@ -3418,79 +3418,79 @@ From `@nanahoshi/mona-ui/i18n`.
 | `category` (read-only) | `string` | The data table's first column header when the X axis has no title. |
 | `categoryFallbackName` (read-only) | `(index: number) => string` | The name of a radar category without a value. |
 | `categoryRange` (read-only) | `(from: string, to: string) => string` | The category range of a Cartesian chart, in its description. |
-| `change` (read-only) | `string` |  |
+| `change` (read-only) | `string` | The tooltip label for a waterfall change step or a financial point's price change. |
 | `changeValue` (read-only) | `(change: string) => string` | The price change in a financial announcement. |
-| `chart` (read-only) | `string` |  |
-| `chartLegend` (read-only) | `string` |  |
+| `chart` (read-only) | `string` | The chart's accessible name when it has neither an `ariaLabel` nor a title. |
+| `chartLegend` (read-only) | `string` | The accessible name of the legend. |
 | `chartRoleDescription` (read-only) | `string` | What screen readers call the chart (`aria-roledescription`). |
-| `close` (read-only) | `string` |  |
-| `closeAbbreviation` (read-only) | `string` |  |
-| `colorScale` (read-only) | `string` |  |
-| `conversion` (read-only) | `string` |  |
+| `close` (read-only) | `string` | The tooltip label for a candlestick or OHLC point's closing price. |
+| `closeAbbreviation` (read-only) | `string` | The short closing price label in a tooltip that lists several financial series ("C" in English). |
+| `colorScale` (read-only) | `string` | The name of a heatmap color legend whose scale has no title, in its accessible name. |
+| `conversion` (read-only) | `string` | The tooltip label for a funnel stage's conversion rate. |
 | `conversionOfPrevious` (read-only) | `(rate: string) => string` | A funnel stage's conversion from the previous stage, in an announcement. |
 | `dataTableTruncated` (read-only) | `(shown: number, total: number) => string` | Below the data table when it shows only the first rows. |
 | `decrease` (read-only) | `string` | The waterfall legend's name for falling steps. |
-| `decreaseAnnouncement` (read-only) | `(delta: string, from: string, to: string) => string` |  |
-| `divergingRangeDescription` (read-only) | `( title: string, minimum: string, midpoint: string, maximum: string ) => string` |  |
-| `dropOff` (read-only) | `string` |  |
-| `dropOffValue` (read-only) | `(value: string) => string` |  |
-| `falling` (read-only) | `string` |  |
+| `decreaseAnnouncement` (read-only) | `(delta: string, from: string, to: string) => string` | Announced for a waterfall step that lowers the running total. |
+| `divergingRangeDescription` (read-only) | `( title: string, minimum: string, midpoint: string, maximum: string ) => string` | The accessible name of a diverging heatmap color legend, with its minimum, midpoint and maximum. |
+| `dropOff` (read-only) | `string` | The tooltip label for a funnel stage's drop-off from the previous stage. |
+| `dropOffValue` (read-only) | `(value: string) => string` | A funnel stage's drop-off from the previous stage, in an announcement. |
+| `falling` (read-only) | `string` | Names a falling candlestick or OHLC point, in the tooltip and in announcements. |
 | `gaugeRange` (read-only) | `(minimum: string, maximum: string) => string` | A gauge's scale, in an announcement. |
-| `high` (read-only) | `string` |  |
-| `highAbbreviation` (read-only) | `string` |  |
+| `high` (read-only) | `string` | The tooltip label for a candlestick or OHLC point's high price. |
+| `highAbbreviation` (read-only) | `string` | The short high price label in a tooltip that lists several financial series ("H" in English). |
 | `increase` (read-only) | `string` | The waterfall legend's name for rising steps. |
-| `increaseAnnouncement` (read-only) | `(delta: string, from: string, to: string) => string` |  |
-| `itemDeselected` (read-only) | `(item: string) => string` |  |
+| `increaseAnnouncement` (read-only) | `(delta: string, from: string, to: string) => string` | Announced for a waterfall step that raises the running total. |
+| `itemDeselected` (read-only) | `(item: string) => string` | Announced when the keyboard deselects a point. |
 | `itemFallbackName` (read-only) | `(index: number) => string` | The name of a pie, donut, rose or radial bar item without a category. |
-| `itemSelected` (read-only) | `(item: string) => string` |  |
+| `itemSelected` (read-only) | `(item: string) => string` | Announced when the keyboard selects a point. |
 | `keyboardHelp` (read-only) | `string` | The keyboard instructions at the end of the chart's description. |
-| `labeledValue` (read-only) | `(label: string, value: string) => string` |  |
-| `labelValueSeparator` (read-only) | `string` |  |
-| `low` (read-only) | `string` |  |
-| `lowAbbreviation` (read-only) | `string` |  |
+| `labeledValue` (read-only) | `(label: string, value: string) => string` | Pairs a label with a value in an announcement, such as a series name with the point's values. |
+| `labelValueSeparator` (read-only) | `string` | Separates a label from its value in the tooltip (":" in English). |
+| `low` (read-only) | `string` | The tooltip label for a candlestick or OHLC point's low price. |
+| `lowAbbreviation` (read-only) | `string` | The short low price label in a tooltip that lists several financial series ("L" in English). |
 | `noChange` (read-only) | `string` | The waterfall legend's name for unchanged steps. |
-| `noChangeAnnouncement` (read-only) | `(value: string) => string` |  |
-| `noData` (read-only) | `string` |  |
+| `noChangeAnnouncement` (read-only) | `(value: string) => string` | Announced for a waterfall step that leaves the running total unchanged. |
+| `noData` (read-only) | `string` | Shown and included in the chart's description when it has no data and no `noData` template. |
 | `ohlcValues` (read-only) | `(open: string, high: string, low: string, close: string) => string` | A candlestick or OHLC point's prices, in an announcement. |
-| `open` (read-only) | `string` |  |
-| `openAbbreviation` (read-only) | `string` |  |
-| `overall` (read-only) | `string` |  |
-| `overallConversion` (read-only) | `(rate: string) => string` |  |
-| `pannedDown` (read-only) | `string` |  |
-| `pannedLeft` (read-only) | `string` |  |
-| `pannedRight` (read-only) | `string` |  |
-| `pannedUp` (read-only) | `string` |  |
+| `open` (read-only) | `string` | The tooltip label for a candlestick or OHLC point's opening price. |
+| `openAbbreviation` (read-only) | `string` | The short opening price label in a tooltip that lists several financial series ("O" in English). |
+| `overall` (read-only) | `string` | The tooltip label for a funnel stage's conversion from the first stage. |
+| `overallConversion` (read-only) | `(rate: string) => string` | A funnel stage's conversion from the first stage, in an announcement. |
+| `pannedDown` (read-only) | `string` | Announced when the keyboard pans the viewport down. |
+| `pannedLeft` (read-only) | `string` | Announced when the keyboard pans the viewport left. |
+| `pannedRight` (read-only) | `string` | Announced when the keyboard pans the viewport right. |
+| `pannedUp` (read-only) | `string` | Announced when the keyboard pans the viewport up. |
 | `pathSeparator` (read-only) | `string` | Joins a treemap node's path (" / " in English). |
 | `pointPosition` (read-only) | `(position: number, total: number) => string` | A point's position among the points it is navigated with, in an announcement. |
-| `range` (read-only) | `string` |  |
-| `rangeDescription` (read-only) | `( title: string, minimum: string, maximum: string ) => string` |  |
+| `range` (read-only) | `string` | The tooltip label for a radial point's minimum-to-maximum range. |
+| `rangeDescription` (read-only) | `( title: string, minimum: string, maximum: string ) => string` | Describes a range with its title, minimum and maximum: a range point in an announcement, or a heatmap color legend in its accessible name. |
 | `rangeValue` (read-only) | `(from: string, to: string) => string` | A range value, in an announcement. |
-| `rising` (read-only) | `string` |  |
-| `runningTotal` (read-only) | `string` |  |
+| `rising` (read-only) | `string` | Names a rising candlestick or OHLC point, in the tooltip and in announcements. |
+| `runningTotal` (read-only) | `string` | The tooltip label for a waterfall step's running total. |
 | `seriesFallbackName` (read-only) | `(index: number) => string` | The name of a series without a name. |
 | `seriesHidden` (read-only) | `(series: string) => string` | Announced when a legend item hides a series or item. |
 | `seriesShown` (read-only) | `(series: string) => string` | Announced when a legend item shows a series or item. |
 | `seriesSummary` (read-only) | `(count: number, names: string) => string` | The series of the chart, in its description. |
 | `seriesValueRange` (read-only) | `(series: string, minimum: string, maximum: string) => string` | A series' lowest and highest value, in the chart's description. |
 | `shareOfTotal` (read-only) | `(share: string) => string` | A treemap node's share of the whole, in an announcement. |
-| `size` (read-only) | `string` |  |
+| `size` (read-only) | `string` | The tooltip label for a bubble's size. |
 | `sizeValue` (read-only) | `(size: string) => string` | A bubble's size, in an announcement. |
 | `stackShare` (read-only) | `(share: string) => string` | A point's share of its 100% stack, in an announcement. |
 | `stageFallbackName` (read-only) | `(index: number) => string` | The name of a funnel stage without a category. |
-| `stagePosition` (read-only) | `(position: number, total: number) => string` |  |
+| `stagePosition` (read-only) | `(position: number, total: number) => string` | A funnel stage's position among the stages, in an announcement. |
 | `stepFallbackName` (read-only) | `(index: number) => string` | The name of a waterfall step without a category. |
-| `stepPosition` (read-only) | `(position: number, total: number) => string` |  |
+| `stepPosition` (read-only) | `(position: number, total: number) => string` | A waterfall step's position among the steps, in an announcement. |
 | `subtotal` (read-only) | `string` | The waterfall legend's name for subtotal steps. |
-| `subtotalAnnouncement` (read-only) | `(value: string) => string` |  |
+| `subtotalAnnouncement` (read-only) | `(value: string) => string` | Announced for a waterfall subtotal step. |
 | `total` (read-only) | `string` | The waterfall legend's name for total steps. |
-| `totalAnnouncement` (read-only) | `(value: string) => string` |  |
+| `totalAnnouncement` (read-only) | `(value: string) => string` | Announced for a waterfall total step. |
 | `treemapGroup` (read-only) | `(count: number) => string` | A treemap group, in an announcement. |
 | `treemapLeaf` (read-only) | `string` | A treemap leaf, in an announcement. |
-| `unchanged` (read-only) | `string` |  |
-| `value` (read-only) | `string` |  |
+| `unchanged` (read-only) | `string` | Names a candlestick or OHLC point that closed at its opening price, in the tooltip and in announcements. |
+| `value` (read-only) | `string` | The tooltip label for a point's value. |
 | `valueRange` (read-only) | `(from: string, to: string) => string` | A range value in the tooltip ("10 – 20" in English). |
-| `viewportResetToDefault` (read-only) | `string` |  |
-| `viewportResetToFull` (read-only) | `string` |  |
-| `visualIndicatorClamped` (read-only) | `string` |  |
-| `zoomedIn` (read-only) | `string` |  |
-| `zoomedOut` (read-only) | `string` |  |
+| `viewportResetToDefault` (read-only) | `string` | Announced when the keyboard resets the viewport to its configured default range. |
+| `viewportResetToFull` (read-only) | `string` | Announced when the keyboard resets the viewport to the full data range, when no default range is configured. |
+| `visualIndicatorClamped` (read-only) | `string` | Shown and announced when a gauge value lies outside the gauge's scale and its indicator stops at the edge. |
+| `zoomedIn` (read-only) | `string` | Announced when the keyboard zooms the viewport in. |
+| `zoomedOut` (read-only) | `string` | Announced when the keyboard zooms the viewport out. |

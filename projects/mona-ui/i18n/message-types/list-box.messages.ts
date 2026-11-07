@@ -1,4 +1,5 @@
 export interface MonaListBoxMessages {
+    /** Label of the Clear Selection toolbar button. */
     readonly clearSelection: string;
 
     /** Announced after Move Up or Move Down, with the new position of the first moved item ("Moved to position 2 of 5"). */
@@ -13,8 +14,13 @@ export interface MonaListBoxMessages {
     /** Announced after a transfer to a list box that has no accessible name. */
     itemsTransferredToOtherList(count: number): string;
 
+    /** Label of the Move Down toolbar button. */
     readonly moveDown: string;
+
+    /** Label of the Move Up toolbar button. */
     readonly moveUp: string;
+
+    /** Label of the Remove toolbar button. */
     readonly remove: string;
 
     /** Announced after Clear Selection. */

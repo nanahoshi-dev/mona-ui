@@ -11,11 +11,27 @@ import type { DialogAction } from "./DialogAction";
  * `width`), plus these service-only fields:
  */
 export interface DialogSettings<D = unknown> {
+    /**
+     * The buttons in the dialog footer. When omitted, the dialog shows an OK button, plus a Cancel button when `type`
+     * is `"confirm"`. Pass an empty list for no buttons.
+     */
     actions?: Iterable<DialogAction>;
+    /**
+     * How the action buttons are aligned in the footer.
+     * @default "end"
+     */
     actionsLayout?: ActionsLayout;
     /** Accessible name for the dialog when it has no `title` or `titleTemplate`. */
     ariaLabel?: string;
+    /**
+     * Whether the header shows a close button.
+     * @default true
+     */
     closable?: boolean;
+    /**
+     * Whether pressing Escape closes the dialog.
+     * @default true
+     */
     closeOnEscape?: boolean;
     /**
      * The dialog's body: a template, or a component. A template gets the dialog's `data` as `$implicit` and the
@@ -24,12 +40,18 @@ export interface DialogSettings<D = unknown> {
     content?: TemplateRef<unknown> | Type<unknown>;
     /** Data for the content: `DIALOG_DATA` in a component, `$implicit` in a template. */
     data?: D;
+    /** Text shown under the title, and used as the dialog's accessible description. */
     description?: string;
     /** Template rendered in place of `description`. */
     descriptionTemplate?: TemplateRef<unknown>;
+    /**
+     * The element that receives focus when the dialog opens: an element, an element reference, or a CSS selector
+     * matched inside the dialog. When omitted, focus moves to the first focusable element.
+     */
     focusedElement?: HTMLElement | ElementRef<HTMLElement> | string | null;
     /** Template rendered in place of the generated action-button row. */
     footerTemplate?: TemplateRef<unknown>;
+    /** Height in pixels. When omitted, the dialog fits its content. */
     height?: number;
     /** Template rendered in place of the built-in `type` icon. */
     iconTemplate?: TemplateRef<unknown>;
@@ -46,7 +68,9 @@ export interface DialogSettings<D = unknown> {
     maxWidth?: number;
     /** Overrides for the dialog's messages (close button label, OK, Cancel). */
     messages?: Partial<DialogMessages>;
+    /** Minimum height in pixels. */
     minHeight?: number;
+    /** Minimum width in pixels. */
     minWidth?: number;
     /**
      * Whether the dialog is modal: a backdrop, `aria-modal="true"`, focus kept inside, page scroll locked, and the
@@ -59,13 +83,25 @@ export interface DialogSettings<D = unknown> {
      * @default true
      */
     restoreFocus?: boolean;
+    /**
+     * Border-radius preset for the dialog and its action buttons.
+     * @default "medium"
+     */
     rounded?: DialogVariantProps["rounded"];
+    /** Text shown in the dialog's body when no `content` is given. */
     text?: string;
+    /** Text shown in the dialog header, and used as the dialog's accessible name. */
     title?: string;
     /** Template rendered in place of `title`. */
     titleTemplate?: TemplateRef<unknown>;
     /** Distance from the viewport's top edge in pixels. When omitted, the dialog is centered vertically. */
     top?: number;
+    /**
+     * The dialog's severity, which picks its icon. `"confirm"`, `"error"` and `"warning"` give the dialog the
+     * `alertdialog` role. When omitted, `show()` renders no icon; `alert()` uses `"info"` and `confirm()` uses
+     * `"confirm"`.
+     */
     type?: DialogVariantProps["type"];
+    /** Width in pixels. When omitted, the dialog fits its content. */
     width?: number;
 }

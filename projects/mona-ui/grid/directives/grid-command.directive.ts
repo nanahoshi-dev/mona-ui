@@ -24,6 +24,10 @@ export class GridAddCommandDirective {
 })
 export class GridEditCommandDirective {
     readonly #gridService = inject(GridService);
+    /**
+     * @description The row the button puts into row edit mode when clicked, usually the command template's `row`.
+     * Does nothing while `null` or when the grid isn't in row edit mode.
+     */
     public readonly row = input<Row | null>(null, { alias: "monaGridEditCommand" });
 
     protected onClick(event: Event): void {
@@ -42,6 +46,10 @@ export class GridEditCommandDirective {
 })
 export class GridRemoveCommandDirective {
     readonly #gridService = inject(GridService);
+    /**
+     * @description The row the button removes when clicked, usually the command template's `row`. The click emits the
+     * grid's `remove` event for that row, without the `removeConfirmation` prompt. Does nothing while `null`.
+     */
     public readonly row = input<Row | null>(null, { alias: "monaGridRemoveCommand" });
 
     protected onClick(event: Event): void {

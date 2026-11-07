@@ -194,16 +194,16 @@ A node of a tree, wrapping its data item.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `checked` (read-only) | `WritableSignal<boolean>` |  |
-| `children` (read-only) | `WritableSignal<ImmutableSet<TreeNode<T>>>` |  |
+| `checked` (read-only) | `WritableSignal<boolean>` | Whether the node is checked. The tree keeps it in step with the checked keys. |
+| `children` (read-only) | `WritableSignal<ImmutableSet<TreeNode<T>>>` | The node's child nodes, in display order. |
 | `childrenLoaded` | `boolean` | Whether children from an asynchronous children selector have been loaded. Loaded children are cached, so collapsing and re-expanding the node does not request them again. |
-| `data` (read-only) | `T` |  |
-| `index` | `string` |  |
+| `data` (read-only) | `T` | The data item this node was created from. |
+| `index` | `string` | The node's position in the tree as dot-separated zero-based indices from the root, such as `"0.2.1"` for the second child of the third child of the first root node. |
 | `loadFailed` (read-only) | `WritableSignal<boolean>` | Whether the last load of this node's children from an asynchronous children selector failed. |
-| `loading` (read-only) | `WritableSignal<boolean>` |  |
-| `nodeItem` (read-only) | `NodeItem<T>` |  |
-| `parent` | `TreeNode<T> \| null` |  |
-| `uid` (read-only) | `string` |  |
+| `loading` (read-only) | `WritableSignal<boolean>` | Whether the node's children are being loaded from an asynchronous children selector. |
+| `nodeItem` (read-only) | `NodeItem<T>` | A plain snapshot of the node (its data, uid and whether it has children), as the tree view's events carry it. |
+| `parent` | `TreeNode<T> \| null` | The node's parent node, or `null` for a root node. |
+| `uid` (read-only) | `string` | A unique id generated for the node when it is created. |
 
 #### Methods
 
@@ -477,8 +477,8 @@ From `@nanahoshi/mona-ui/i18n`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `collapse` (read-only) | `string` |  |
-| `expand` (read-only) | `string` |  |
+| `collapse` (read-only) | `string` | Start of an expanded node's expander name, followed by the node's text ("Collapse Documents"). |
+| `expand` (read-only) | `string` | Start of a collapsed node's expander name, followed by the node's text ("Expand Documents"). |
 | `filter` (read-only) | `string` | **Deprecated.** No longer rendered; the filter input's name comes from `filterLabel`. |
 | `filterTree` (read-only) | `string` | Accessible name of the filter input when the tree view has no `aria-label`. |
 | `noData` (read-only) | `string` | Shown, and describes the tree, when the tree view has no data. |

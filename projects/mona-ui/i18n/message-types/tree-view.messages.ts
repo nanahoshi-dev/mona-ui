@@ -1,5 +1,8 @@
 export interface MonaTreeViewMessages {
+    /** Start of an expanded node's expander name, followed by the node's text ("Collapse Documents"). */
     readonly collapse: string;
+
+    /** Start of a collapsed node's expander name, followed by the node's text ("Expand Documents"). */
     readonly expand: string;
 
     /** @deprecated No longer rendered; the filter input's name comes from {@link filterLabel}. */

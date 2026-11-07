@@ -53,7 +53,7 @@ Everything below is imported from `@nanahoshi/mona-ui/pager`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `$implicit` | `PagerContext` |  |
+| `$implicit` | `PagerContext` | The pager state, the same values the context spreads at its top level. |
 | `currentPage` | `number` | The current page, starting at 1. |
 | `disabled` | `boolean` | True when the button has nowhere to go (the first or last page is current, or there are no pages). |
 | `end` | `number` | The position of the last item on the current page, or 0 when there are no items. |
@@ -76,7 +76,7 @@ Everything below is imported from `@nanahoshi/mona-ui/pager`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `$implicit` | `PagerContext` |  |
+| `$implicit` | `PagerContext` | The pager state, the same values the context spreads at its top level. |
 | `currentPage` | `number` | The current page, starting at 1. |
 | `end` | `number` | The position of the last item on the current page, or 0 when there are no items. |
 | `goToPage` | `(page: number) => void` | Goes to a page (clamped to the page range) and emits `pageChange`, as a click on a page button does. |
@@ -96,7 +96,7 @@ Everything below is imported from `@nanahoshi/mona-ui/pager`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `$implicit` | `PagerContext` |  |
+| `$implicit` | `PagerContext` | The pager state, the same values the context spreads at its top level. |
 | `currentPage` | `number` | The current page, starting at 1. |
 | `end` | `number` | The position of the last item on the current page, or 0 when there are no items. |
 | `goToPage` | `(page: number) => void` | Goes to a page (clamped to the page range) and emits `pageChange`, as a click on a page button does. |
@@ -178,7 +178,7 @@ The pager's state and actions, passed to every custom template.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `$implicit` (read-only) | `PagerContext` |  |
+| `$implicit` (read-only) | `PagerContext` | The pager state, the same values the context spreads at its top level. |
 | `disabled` (read-only) | `boolean` | True when the button has nowhere to go (the first or last page is current, or there are no pages). |
 | `targetPage` (read-only) | `number` | The page the button goes to. |
 
@@ -192,9 +192,9 @@ The pager's state and actions, passed to every custom template.
 
 **Extends:** `PagerContext`
 
-| Name | Type |
-| --- | --- |
-| `$implicit` (read-only) | `PagerContext` |
+| Name | Type | Description |
+| --- | --- | --- |
+| `$implicit` (read-only) | `PagerContext` | The pager state, the same values the context spreads at its top level. |
 
 #### `NumericButtonsTemplateContext`
 
@@ -205,7 +205,7 @@ control in an `<li>`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `$implicit` (read-only) | `PagerContext` |  |
+| `$implicit` (read-only) | `PagerContext` | The pager state, the same values the context spreads at its top level. |
 | `pages` (read-only) | `readonly number[]` | The page numbers the default buttons would show, in order (the first and last page included). |
 
 #### `PageChangeEvent`

@@ -295,7 +295,7 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `monaGridEditCommand` | `Row \| null` | `null` |  |
+| `monaGridEditCommand` | `Row \| null` | `null` | The row the button puts into row edit mode when clicked, usually the command template's `row`. Does nothing while `null` or when the grid isn't in row edit mode. |
 
 ### `GridExportDirective`
 
@@ -316,7 +316,7 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `monaGridRemoveCommand` | `Row \| null` | `null` |  |
+| `monaGridRemoveCommand` | `Row \| null` | `null` | The row the button removes when clicked, usually the command template's `row`. The click emits the grid's `remove` event for that row, without the `removeConfirmation` prompt. Does nothing while `null`. |
 
 ### `GridAddCommandDirective`
 
@@ -451,7 +451,7 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 | --- | --- | --- |
 | `index` (read-only) | `number` | The row's position in the grid's `data`, or -1 when it is no longer there. |
 | `key` (read-only) | `unknown` | The row's `rowKey` value, or the data item when the grid has no `rowKey`. |
-| `rowData` (read-only) | `Record<PropertyKey, unknown>` |  |
+| `rowData` (read-only) | `Record<PropertyKey, unknown>` | The data item of the row being removed. |
 
 ### `GridSaveEvent`
 
@@ -547,45 +547,45 @@ grid scrolls horizontally.
 | Name | Type | Description |
 | --- | --- | --- |
 | `calculatedWidth` (read-only) | `number \| null` | The column's currently rendered width. |
-| `columnSortDirection` (read-only) | `SortDirection \| null` |  |
-| `configuredHidden` (read-only) | `boolean` |  |
+| `columnSortDirection` (read-only) | `SortDirection \| null` | The direction the grid is currently sorted by this column, or `null` when it isn't. |
+| `configuredHidden` (read-only) | `boolean` | The column's `hidden` input as set. `hidden` follows it whenever the input changes, and can differ from it after the user or saved state hides or shows the column. |
 | `filtered` (read-only) | `boolean` | Whether a filter is currently applied to this column. |
-| `groupSortDirection` (read-only) | `SortDirection \| null` |  |
+| `groupSortDirection` (read-only) | `SortDirection \| null` | The sort direction of the grid's grouping by this column, or `null` when the grid isn't grouped by it. |
 | `hidden` (read-only) | `boolean` | Whether the column is hidden. |
-| `index` (read-only) | `number` |  |
-| `sortIndex` (read-only) | `number \| null` |  |
+| `index` (read-only) | `number` | The column's zero-based position in the grid's column order, after left-locked columns are moved to the start and right-locked ones to the end. |
+| `sortIndex` (read-only) | `number \| null` | The column's one-based position among the grid's sorted columns, or `null` when it isn't sorted. |
 
 #### `ColumnConfig`
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `aggregate` (read-only) | `AggregateFunction \| null` |  |
-| `cellTemplate` (read-only) | `TemplateRef<unknown> \| null` |  |
-| `commandTemplate` (read-only) | `TemplateRef<unknown> \| null` |  |
+| `aggregate` (read-only) | `AggregateFunction \| null` | The aggregate shown in the grid footer for this column, or `null` for none. |
+| `cellTemplate` (read-only) | `TemplateRef<unknown> \| null` | The column's `monaGridCellTemplate`, which renders its body cells, or `null` for the default text. |
+| `commandTemplate` (read-only) | `TemplateRef<unknown> \| null` | A command column's `monaGridCellTemplate`, which replaces the built-in command buttons, or `null`. |
 | `configuredEditable?` (read-only) | `boolean \| null` | The `editable` input as the consumer set it; `null` leaves it to the default, which is every column but the `rowKey` field. Left out, `editable` is used as given. |
-| `dataType` (read-only) | `DataType` |  |
+| `dataType` (read-only) | `DataType` | The column's data type, which picks the editor and the filter. Command columns use `"string"`. |
 | `editable` (read-only) | `boolean` | Whether the column can be edited. The grid resolves it from `configuredEditable` when that is set. |
-| `editTemplate` (read-only) | `TemplateRef<unknown> \| null` |  |
-| `field` (read-only) | `string` |  |
-| `filterable` (read-only) | `boolean` |  |
-| `footerTemplate` (read-only) | `TemplateRef<unknown> \| null` |  |
-| `format` (read-only) | `ColumnFormat \| null` |  |
-| `groupFooterTemplate` (read-only) | `TemplateRef<unknown> \| null` |  |
-| `headerTemplate` (read-only) | `TemplateRef<unknown> \| null` |  |
-| `hidden` (read-only) | `boolean` |  |
-| `id` (read-only) | `string` |  |
-| `kind` (read-only) | `ColumnKind` |  |
-| `locked` (read-only) | `boolean` |  |
-| `lockedPosition` (read-only) | `GridColumnLockedPosition` |  |
-| `maxWidth` (read-only) | `number \| null` |  |
-| `minWidth` (read-only) | `number \| null` |  |
-| `removeConfirmation` (read-only) | `boolean` |  |
-| `sortable` (read-only) | `boolean` |  |
+| `editTemplate` (read-only) | `TemplateRef<unknown> \| null` | The column's `monaGridEditTemplate`, which renders the cell editor, or `null` for the editor of its data type. |
+| `field` (read-only) | `string` | The data property the column shows. A command column uses its `stateKey`, or `"commands"`. |
+| `filterable` (read-only) | `boolean` | Whether the column can be filtered when the grid's filtering is enabled. |
+| `footerTemplate` (read-only) | `TemplateRef<unknown> \| null` | The column's `monaGridFooterTemplate`, which renders its footer cell, or `null`. |
+| `format` (read-only) | `ColumnFormat \| null` | How cell values are formatted for display, or `null` to show them as they are. |
+| `groupFooterTemplate` (read-only) | `TemplateRef<unknown> \| null` | The column's `monaGridGroupFooterTemplate`, which renders its cell in group footer rows, or `null`. |
+| `headerTemplate` (read-only) | `TemplateRef<unknown> \| null` | The column's `monaGridHeaderTemplate`, which replaces the whole header content and receives the column, or `null`. |
+| `hidden` (read-only) | `boolean` | The column's `hidden` input as set. |
+| `id` (read-only) | `string` | A unique id generated for the column. |
+| `kind` (read-only) | `ColumnKind` | `"data"` for a `mona-grid-column`, `"command"` for a `mona-grid-command-column`. |
+| `locked` (read-only) | `boolean` | Whether the column stays fixed while the grid scrolls horizontally. |
+| `lockedPosition` (read-only) | `GridColumnLockedPosition` | The side of the grid a locked column is fixed to. |
+| `maxWidth` (read-only) | `number \| null` | The column's maximum width in pixels, or `null` for no maximum. |
+| `minWidth` (read-only) | `number \| null` | The column's minimum width in pixels, or `null` for no minimum. |
+| `removeConfirmation` (read-only) | `boolean` | Whether the built-in remove command asks for confirmation before emitting `remove`. Only command columns set it. |
+| `sortable` (read-only) | `boolean` | Whether the column can be sorted from its header when the grid's sorting is enabled. |
 | `sortComparator?` (read-only) | `ColumnSortComparator \| null` | Compares values when the user sorts this column; without it values sort by type, strings by locale. |
-| `stateKey` (read-only) | `string \| null` |  |
-| `title` (read-only) | `string` |  |
-| `titleTemplate` (read-only) | `TemplateRef<unknown> \| null` |  |
-| `width` (read-only) | `number \| null` |  |
+| `stateKey` (read-only) | `string \| null` | The key the column's saved state is stored under, or `null` to use `field`. |
+| `title` (read-only) | `string` | The text shown in the column header. |
+| `titleTemplate` (read-only) | `TemplateRef<unknown> \| null` | The column's `monaGridColumnTitleTemplate`, shown in the header in place of `title` when there is no header template, or `null`. |
+| `width` (read-only) | `number \| null` | The column's configured width in pixels, or `null` to size it automatically. |
 
 #### `ColumnResizeEvent`
 

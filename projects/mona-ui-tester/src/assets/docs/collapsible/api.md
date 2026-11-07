@@ -87,7 +87,7 @@ The contract a collapsible root exposes to its trigger and content parts.
 
 | Signature | Description |
 | --- | --- |
-| `collapse(): void` |  |
-| `expand(): void` |  |
+| `collapse(): void` | Collapses the content. |
+| `expand(): void` | Expands the content. |
 | `setContentId(id: string \| null): void` | Takes the id the content was given, so the trigger points at it. A root without it always uses `contentId`. |
-| `toggle(): void` |  |
+| `toggle(): void` | Switches between expanded and collapsed. The trigger calls it on activation. |

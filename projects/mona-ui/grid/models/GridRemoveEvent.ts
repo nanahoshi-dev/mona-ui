@@ -18,6 +18,7 @@ export class GridRemoveEvent extends PreventableEvent {
         return this.#options.key ?? this.#options.rowData;
     }
 
+    /** The data item of the row being removed. */
     public get rowData(): Record<PropertyKey, unknown> {
         return this.#options.rowData;
     }

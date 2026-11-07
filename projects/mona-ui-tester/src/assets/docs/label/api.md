@@ -38,7 +38,7 @@ Everything below is imported from `@nanahoshi/mona-ui/label`.
 | Signature | Description |
 | --- | --- |
 | `activateFromLabel(): void` | Runs instead of `focus()` on a click, for a control a native label would activate. |
-| `focus(options?: FocusOptions): void` |  |
+| `focus(options?: FocusOptions): void` | Moves focus to the control. The label calls it on a click when the control has no `activateFromLabel`. |
 | `setLabelledBy(id: string \| null): void` | Receives the id of the label's text, so the control can use it for `aria-labelledby`. |
 
 #### `LabelTarget`

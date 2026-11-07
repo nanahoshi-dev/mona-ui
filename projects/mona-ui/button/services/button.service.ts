@@ -12,12 +12,22 @@ import { ButtonVariantProps } from "../styles/button.styles";
 @Injectable()
 export class ButtonService {
     readonly #members = signal<Signal<readonly ButtonDirective[]> | null>(null);
+    /**
+     * A click on a toggleable member, with the member and whether it was selected before the click. The group
+     * answers it by applying its selection rules through {@link buttonSelect$}.
+     */
     public readonly buttonClick$: Subject<[ButtonDirective, boolean]> = new Subject<[ButtonDirective, boolean]>();
+    /** A selection change the group applies to a member: the member and whether it is now selected. */
     public readonly buttonSelect$: Subject<[ButtonDirective, boolean]> = new Subject<[ButtonDirective, boolean]>();
+    /** Whether the group is disabled. Members are disabled while it is `true`, whatever their own `disabled` input. */
     public readonly groupDisabled = signal(false);
+    /** The group's `look`, which members use in place of their own while it is set. */
     public readonly groupLook = signal<ButtonVariantProps["look"] | undefined>(undefined);
+    /** Whether the group is read-only. Toggleable members then report `aria-disabled` and keep their selection. */
     public readonly groupReadonly = signal(false);
+    /** The group's `rounded`, which members use in place of their own while it is set. */
     public readonly groupRounded = signal<ButtonVariantProps["rounded"] | undefined>(undefined);
+    /** The group's `size`, which members use in place of their own while it is set. */
     public readonly groupSize = signal<ButtonVariantProps["size"] | undefined>(undefined);
     /**
      * Every click on a member, toggleable or not, reported after the group has applied its selection.

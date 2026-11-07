@@ -1,7 +1,11 @@
 export interface MonaWindowMessages {
+    /** The close button's tooltip. */
     readonly close: string;
+    /** The close button's accessible name. */
     readonly closeWindow: string;
+    /** The maximize button's tooltip and accessible name while the window isn't maximized. */
     readonly maximize: string;
+    /** The minimize button's tooltip and accessible name while the window isn't minimized. */
     readonly minimize: string;
     /** The title bar's name when the window can be both dragged and resized; it says which keys do each. */
     readonly moveOrResizeWindow: string;
@@ -25,6 +29,7 @@ export interface MonaWindowMessages {
     readonly resizeTopRight: string;
     /** The title bar's name when the window can be resized but not dragged. */
     readonly resizeWindow: string;
+    /** The tooltip and accessible name of the minimize or maximize button while it would restore the window. */
     readonly restore: string;
 }
 

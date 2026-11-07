@@ -204,10 +204,10 @@ From `@nanahoshi/mona-ui/i18n`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `clearSelection` (read-only) | `string` |  |
-| `moveDown` (read-only) | `string` |  |
-| `moveUp` (read-only) | `string` |  |
-| `remove` (read-only) | `string` |  |
+| `clearSelection` (read-only) | `string` | Label of the Clear Selection toolbar button. |
+| `moveDown` (read-only) | `string` | Label of the Move Down toolbar button. |
+| `moveUp` (read-only) | `string` | Label of the Move Up toolbar button. |
+| `remove` (read-only) | `string` | Label of the Remove toolbar button. |
 | `selectionCleared` (read-only) | `string` | Announced after Clear Selection. |
 | `transferAllFrom` (read-only) | `string` | Label of Transfer All From when the connected list box has no accessible name. |
 | `transferAllTo` (read-only) | `string` | Label of Transfer All To when the connected list box has no accessible name. |

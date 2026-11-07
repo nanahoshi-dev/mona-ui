@@ -836,7 +836,7 @@
     "selector": "\"button[monaGridEditCommand]\"",
     "inputs": [
       {
-        "description": "",
+        "description": "The row the button puts into row edit mode when clicked, usually the command template's `row`.\nDoes nothing while `null` or when the grid isn't in row edit mode.",
         "kind": "input",
         "name": "row",
         "type": "Row | null",
@@ -850,7 +850,7 @@
     "selector": "\"button[monaGridRemoveCommand]\"",
     "inputs": [
       {
-        "description": "",
+        "description": "The row the button removes when clicked, usually the command template's `row`. The click emits the\ngrid's `remove` event for that row, without the `removeConfirmation` prompt. Does nothing while `null`.",
         "kind": "input",
         "name": "row",
         "type": "Row | null",
