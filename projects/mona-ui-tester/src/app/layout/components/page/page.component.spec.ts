@@ -1,10 +1,16 @@
+import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { provideRouter } from "@angular/router";
+import { Title } from "@angular/platform-browser";
+import { Router, provideRouter } from "@angular/router";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import axe from "axe-core";
+import { vi } from "vitest";
 import { THEME_OPTIONS } from "../../../theme-options";
 
 import { PageComponent } from "./page.component";
+
+@Component({ template: "" })
+class EmptyComponent {}
 
 describe("PageComponent", () => {
     let component: PageComponent;
@@ -13,7 +19,7 @@ describe("PageComponent", () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [PageComponent],
-            providers: [provideRouter([])]
+            providers: [provideRouter([{ path: "components/:page", component: EmptyComponent }])]
         }).compileComponents();
 
         fixture = TestBed.createComponent(PageComponent);
@@ -23,6 +29,44 @@ describe("PageComponent", () => {
 
     it("should create", () => {
         expect(component).toBeTruthy();
+    });
+
+    it("names the page from the manifest, in the breadcrumb and the document title", async () => {
+        await TestBed.inject(Router).navigateByUrl("/components/contextmenu");
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(component["activeBreadcrumbs"]()).toEqual(["Documentation", "Navigation", "Context Menu"]);
+        expect(TestBed.inject(Title).getTitle()).toBe("Context Menu · Mona UI");
+    });
+
+    it("returns to the top on a new page, but not when following a link to a section", async () => {
+        const router = TestBed.inject(Router);
+        const container = fixture.nativeElement.querySelector("[data-page-scroll-container]") as HTMLElement;
+        const scrollTop = vi.spyOn(container, "scrollTop", "set");
+        await router.navigateByUrl("/components/grid");
+        await fixture.whenStable();
+        fixture.detectChanges();
+        expect(scrollTop).toHaveBeenCalledWith(0);
+
+        scrollTop.mockClear();
+        await router.navigateByUrl("/components/pager#api");
+        await fixture.whenStable();
+        fixture.detectChanges();
+        expect(scrollTop).not.toHaveBeenCalled();
+    });
+
+    it("keeps the drawer open for a section's button, and closes it for a link", () => {
+        const sidebar = component["sidebarService"];
+        sidebar.open();
+        const button = document.createElement("button");
+        const link = document.createElement("a");
+
+        component["onDrawerClick"]({ target: button } as unknown as Event);
+        expect(sidebar.isOpen()).toBe(true);
+
+        component["onDrawerClick"]({ target: link } as unknown as Event);
+        expect(sidebar.isOpen()).toBe(false);
     });
 
     it("offers built-in and custom themes and switches to Anna Dark", () => {

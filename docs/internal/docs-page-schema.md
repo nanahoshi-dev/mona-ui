@@ -1,6 +1,6 @@
 # Documentation page schema
 
-Status: **draft**. The manifest, checker and API reference exist, but the site does not read from the manifest yet, and most pages have not been migrated.
+Status: **draft**. The manifest, checker, API reference and navigation exist, but most pages have not been migrated.
 
 Every documentation page follows the same structure, and one manifest describes every page. A script enforces both, because a written convention alone will drift.
 
@@ -61,7 +61,9 @@ Guides in Get Started (`kind: "guide"`) need a title and lead, and otherwise hav
 
 Each page declares `path`, `title`, `kind`, `description`, and `entryPoint` for components. Descriptions are one plain sentence, with no markdown, since they are reused by search results, page metadata and `llms.txt`.
 
-The file must stay free of Angular imports so scripts can load it under plain Node. For the same reason it does not hold sidebar icons or `loadComponent` functions; see Next steps.
+The sidebar, breadcrumb, document title and previous and next links read from it, through `layout/services/docs-navigation.service.ts`. Routes stay in `routes.ts`, kept honest by the checker, since a generated route file would add a build step for little gain.
+
+The file must stay free of Angular imports so scripts can load it under plain Node. For the same reason it does not hold `loadComponent` functions, and the guides' sidebar icons live in `sidebar-group.component.ts`.
 
 The checker always fails when the manifest and `routes.ts` disagree, when a page is listed twice, or when an entry point has no `public-api.ts`.
 
@@ -71,7 +73,7 @@ Get Started, Actions, Form Fields, Selection, Date Time & Color, Data, Charts, N
 
 ### Nesting
 
-Add `children` only when a topic has its own examples and is worth linking to directly. Everything else stays an in-page section. No page has children yet, because each child needs a route. The planned trees are:
+Add `children` only when a topic has its own examples and is worth linking to directly. Everything else stays an in-page section. No page has children yet, because each child needs a route, and the sidebar will need to render them when the first one arrives. The planned trees are:
 
 - **Chart:** Overview, then series grouped by family (the current library has 20 series types), Axes, Annotations, Interaction.
 - **Grid:** Overview, then a page per major feature. Server binding and row sizing already have their own demos.
@@ -97,6 +99,5 @@ Measured on 2026-11-07, with every route and entry point matching the manifest:
 1. Rename headings across the 34 simple pages.
 2. Restructure the 26 pages, and write the 3 missing ones.
 3. Add `check:docs-schema --strict` to `pr.yml` once all pages pass.
-4. Have the sidebar and routes read the manifest. The sidebar can keep a small icon map keyed by path. Routes can stay in `routes.ts`, kept honest by the checker, since a generated route file would add a build step for little gain.
 
 The planned command menu gets a manifest entry under Navigation when its route exists.

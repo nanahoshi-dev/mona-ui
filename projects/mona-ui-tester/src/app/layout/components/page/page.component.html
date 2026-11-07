@@ -9,6 +9,7 @@
     <!-- Mobile Drawer Sidebar Container -->
     <div
         class="fixed top-0 bottom-0 left-0 w-64 bg-background border-r border-border z-50 md:hidden flex flex-col h-full transform transition-transform duration-300 shadow-xl overflow-hidden"
+        [attr.inert]="sidebarService.isOpen() ? null : ''"
         [class.translate-x-0]="sidebarService.isOpen()"
         [class.-translate-x-full]="!sidebarService.isOpen()">
         <div class="flex items-center justify-between px-4 py-4 border-b border-border">
@@ -21,7 +22,7 @@
                 <svg lucideX [size]="18"></svg>
             </button>
         </div>
-        <div class="flex-1 overflow-y-auto" (click)="sidebarService.close()">
+        <div class="flex-1 overflow-y-auto" (click)="onDrawerClick($event)">
             <app-sidebar></app-sidebar>
         </div>
     </div>
@@ -36,14 +37,8 @@
             class="hidden md:flex items-center justify-between px-8 py-4 border-b border-border sticky top-0 bg-header-background/90 backdrop-blur-md z-20 h-16 flex-shrink-0 select-none">
             <!-- Breadcrumbs -->
             <div class="flex items-center gap-2 text-sm text-muted-foreground font-medium">
-                <!--                @for (crumb of activeBreadcrumbs(); track $index; let last = $last) {-->
-                <!--                    <span [class.text-foreground]="last" [class.font-semibold]="last">{{ crumb }}</span>-->
-                <!--                    @if (!last) {-->
-                <!--                        <span class="text-border">/</span>-->
-                <!--                    }-->
-                <!--                }-->
                 <mona-breadcrumb>
-                    @for (crumb of activeBreadcrumbs(); track $index; let last = $last) {
+                    @for (crumb of activeBreadcrumbs(); track $index) {
                         <mona-breadcrumb-item>{{ crumb }}</mona-breadcrumb-item>
                     }
                 </mona-breadcrumb>
@@ -75,7 +70,7 @@
         </div>
 
         <!-- Scrollable Page Content Grid -->
-        <div class="flex-1 min-h-0 overflow-y-auto px-6 py-6 md:px-8 md:py-8" data-page-scroll-container>
+        <div #scrollContainer class="flex-1 min-h-0 overflow-y-auto px-6 py-6 md:px-8 md:py-8" data-page-scroll-container>
             <div class="max-w-6xl w-full mx-auto xl:grid xl:grid-cols-[minmax(0,1fr)_16rem] xl:gap-10">
                 <!-- Left/Center Document Content Column -->
                 <main class="min-w-0 pb-16">
@@ -92,6 +87,8 @@
                     <div>
                         <router-outlet></router-outlet>
                     </div>
+
+                    <app-docs-pager></app-docs-pager>
                 </main>
 
                 <!-- Right Sidebar TOC Column -->
