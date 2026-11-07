@@ -29,7 +29,7 @@ export const sliderTrackThemeVariants = cva(
         relative z-2 cursor-pointer
         overflow-hidden
         bg-surface-muted text-foreground
-        border border-input-border
+        contrast-more:border contrast-more:border-input-border
 
         data-[orientation="horizontal"]:w-full
         data-[orientation="horizontal"]:h-1.5

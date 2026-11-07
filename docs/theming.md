@@ -114,7 +114,7 @@ Mona's colors describe intent instead of a specific component:
 
 - `canvas` is the application backdrop; `surface` is the normal content plane.
 - `surface-raised` contains controls and elevated regions; `surface-overlay` is reserved for menus, popups, and dialogs.
-- `input-background` and the control-border tokens give form fields a boundary of at least 3:1 on every surface, as WCAG 1.4.11 asks. Buttons and other controls whose text identifies them use the quieter `border`. Hover strengthens a field's border, and focus and invalid states add their own cue.
+- `input-background` and the control-border tokens give form fields, buttons and other outlined controls a quiet boundary, so they match side by side. It's below the 3:1 of WCAG 1.4.11 unless the user asks for more contrast, as [Contrast and Forced Colors](#10-contrast-and-forced-colors) explains. Hover changes a field's border, and focus and invalid states add their own cue.
 - `hover` and `active` are neutral, temporary interaction feedback.
 - `accent` is persistent selection and keyboard highlighting. Mona's built-in accent is a quiet zinc tone rather than a competing hue.
 - `primary` is the stronger action color used by prominent buttons, links, and focus indicators. It is near-black in Mona Light and near-white in Mona Dark.
@@ -247,7 +247,7 @@ A seed gives a hue and a chroma, and Mona chooses the lightness each role needs 
 
 ## 7. Registering a Theme
 
-Custom families provide one or both variants. Every declared variant is a complete, independent `ThemeProfile` with `colors`, `shadows`, `motion`, `effects`, `shape`, and `components` sections:
+Custom families provide one or both variants. Every declared variant is a complete, independent `ThemeProfile` with `colors`, `shadows`, `motion`, `effects`, `shape`, and `components` sections. The only optional tokens are the two contrast border colors in [Contrast and Forced Colors](#10-contrast-and-forced-colors):
 
 ```ts
 import { provideThemeFamily, type ThemeFamilyRegistration } from "@nanahoshi/mona-ui/theme";
@@ -285,7 +285,7 @@ In development, custom themes and overrides are also checked, and each problem l
 
 - A value that isn't a color.
 - A custom variable without `--`.
-- A main pair below what AA needs: 4.5:1 for `--color-foreground` and `--color-muted-foreground` on `--color-surface`, `--color-input-foreground` on `--color-input-background`, and `--color-primary-foreground` on `--color-primary`, and 3:1 for `--color-border-control` on `--color-input-background`, and `--color-focus-indicator` and `--color-selected-border` on `--color-surface`.
+- A main pair below what AA needs: 4.5:1 for `--color-foreground` and `--color-muted-foreground` on `--color-surface`, `--color-input-foreground` on `--color-input-background`, and `--color-primary-foreground` on `--color-primary`, and 3:1 for `--color-focus-indicator` and `--color-selected-border` on `--color-surface`, and for `--color-border-control-contrast` and `--color-border-control-contrast-hover` on `--color-input-background` when a theme sets them.
 
 Values it can't read, such as `color-mix()`, aren't reported, because they may well be right.
 
@@ -325,7 +325,11 @@ When the application's injector is destroyed, the service removes the variables 
 
 ## 10. Contrast and Forced Colors
 
-The built-in themes meet WCAG AA, and a spec checks them: text is 4.5:1, and field borders, focus indicators, selected borders, chart colors and scrollbar thumbs are 3:1. There are no `prefers-contrast` rules, since the tokens don't need them.
+The built-in themes meet WCAG AA with one deliberate exception. A field's border is quiet by default, below the 3:1 that WCAG 1.4.11 asks for, so a field whose background matches its surface is harder to make out.
+
+When the user asks for more contrast (`prefers-contrast: more`), the theme service replaces `--color-border-control` and `--color-border-control-hover` with `--color-border-control-contrast` and `--color-border-control-contrast-hover`, which are at least 3:1 on every surface, and a slider's track gains a border. Everything that shares those tokens follows, including buttons, chips and chart gridlines. A custom theme without the contrast tokens keeps its own border. If it sets them, the development check warns when they're below 3:1. If your application has to meet 1.4.11 for everyone, set `--color-border-control` and `--color-border-control-hover` to at least 3:1 in a custom theme.
+
+A spec checks the rest: text is 4.5:1, and focus indicators, selected borders, chart colors and scrollbar thumbs are 3:1.
 
 In forced colors the browser replaces most of these colors, and rings and many backgrounds don't paint. When you add your own styles to a component or build on the tokens:
 

@@ -37,17 +37,19 @@ describe("built-in theme contrast", () => {
     describe.each(profiles)("%s %s", (_name, _variant, profile) => {
         const colors: Colors = profile.colors;
 
+        // A field's resting border isn't held to 3:1. It's quiet on purpose, as docs/theming.md says, below WCAG
+        // 1.4.11. These are the values it takes when the user asks for more contrast.
         it.each(["input-background", "surface", "canvas", "surface-raised", "surface-overlay", "surface-muted"])(
-            "gives a field's border 3:1 on %s",
+            "gives a field's border 3:1 on %s for more contrast",
             surface => {
-                expect(contrast(colors, "border-control", surface)).toBeGreaterThanOrEqual(3);
-                expect(contrast(colors, "border-control-hover", surface)).toBeGreaterThanOrEqual(3);
+                expect(contrast(colors, "border-control-contrast", surface)).toBeGreaterThanOrEqual(3);
+                expect(contrast(colors, "border-control-contrast-hover", surface)).toBeGreaterThanOrEqual(3);
             }
         );
 
-        it("strengthens a field's border on hover", () => {
-            expect(contrast(colors, "border-control-hover", "input-background")).toBeGreaterThan(
-                contrast(colors, "border-control", "input-background")
+        it("strengthens a field's border on hover for more contrast", () => {
+            expect(contrast(colors, "border-control-contrast-hover", "input-background")).toBeGreaterThan(
+                contrast(colors, "border-control-contrast", "input-background")
             );
         });
 

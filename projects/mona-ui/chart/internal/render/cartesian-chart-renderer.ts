@@ -87,7 +87,7 @@ export class CartesianChartRenderer {
         const { axes, plotRect } = scene;
         const axisLineColor =
             styleResolver.resolveCssVariable("--mona-chart-axis-line-color") ||
-            styleResolver.resolveCssVariable("--color-border") ||
+            styleResolver.resolveCssVariable("--color-border-control") ||
             "rgba(148, 163, 184, 0.45)";
 
         context.save();

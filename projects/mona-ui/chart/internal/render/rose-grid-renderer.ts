@@ -23,7 +23,7 @@ export class RoseGridRenderer {
 
         const gridColor =
             styleResolver.resolveCssVariable("--mona-chart-grid-color") ||
-            styleResolver.resolveCssVariable("--color-border") ||
+            styleResolver.resolveCssVariable("--color-border-control") ||
             "rgba(150, 150, 150, 0.2)";
 
         const zeroLineColor =
@@ -98,7 +98,7 @@ export class RoseGridRenderer {
 
         const axisLineColor =
             styleResolver.resolveCssVariable("--mona-chart-axis-line-color") ||
-            styleResolver.resolveCssVariable("--color-border") ||
+            styleResolver.resolveCssVariable("--color-border-control") ||
             "rgba(150, 150, 150, 0.5)";
 
         const sweepSpan = Math.abs(endAngleRad - startAngleRad);

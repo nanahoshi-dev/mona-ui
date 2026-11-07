@@ -171,7 +171,7 @@ describe("SliderComponent", () => {
             const selection = fixture.debugElement.query(By.css("[class*='mona-indicator-color']")).nativeElement as HTMLElement;
             const handle = getHandle(fixture);
 
-            expect(track.classList.contains("border-input-border")).toBe(true);
+            expect(track.classList.contains("border-input-border")).toBe(false);
             expect(track.classList.contains("rounded-full")).toBe(true);
             expect(selection).toBeTruthy();
             expect(

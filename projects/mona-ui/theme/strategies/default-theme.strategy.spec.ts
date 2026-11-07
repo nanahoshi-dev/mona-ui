@@ -41,15 +41,43 @@ describe("checking a custom theme", () => {
         new DefaultThemeStrategy(
             [
                 family({
-                    "--color-border-control": "var(--color-border-subtle)",
+                    "--color-focus-indicator": "var(--color-border-subtle)",
                     "--color-border-subtle": "#ffffff",
-                    "--color-input-background": "#ffffff"
+                    "--color-surface": "#ffffff"
                 })
             ],
             []
         );
 
-        expect(warn.mock.calls.flat().join()).toContain("--color-border-control on --color-input-background is 1.00:1");
+        expect(warn.mock.calls.flat().join()).toContain("--color-focus-indicator on --color-surface is 1.00:1");
+    });
+
+    it("accepts a theme without the contrast borders, and says nothing about them", () => {
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+        const colors = Object.fromEntries(
+            Object.entries(monaTheme.variants.light.colors).filter(
+                ([token]) => !token.startsWith("--color-border-control-contrast")
+            )
+        );
+
+        expect(
+            () =>
+                new DefaultThemeStrategy(
+                    [{ name: "custom", variants: { light: { ...monaTheme.variants.light, colors } } }],
+                    []
+                )
+        ).not.toThrow();
+        expect(warn.mock.calls.flat().join()).not.toContain("--color-border-control-contrast");
+    });
+
+    it("warns about a contrast border below 3:1", () => {
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+        new DefaultThemeStrategy(
+            [family({ "--color-border-control-contrast": "#d5d6d9", "--color-input-background": "#ffffff" })],
+            []
+        );
+        expect(warn.mock.calls.flat().join()).toContain("--color-border-control-contrast on --color-input-background");
     });
 
     it("warns about a custom variable that can't be applied", () => {

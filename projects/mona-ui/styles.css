@@ -33,8 +33,10 @@
     --color-input-foreground: var(--color-foreground);
     --color-border-subtle: oklch(94% 0.002 286.32);
     --color-border: oklch(92.2% 0.004 286.32);
-    --color-border-control: oklch(64% 0.01 286.067);
-    --color-border-control-hover: oklch(55.2% 0.01 285.938);
+    --color-border-control: oklch(87.1% 0.006 286.286);
+    --color-border-control-hover: oklch(80.5% 0.008 286.067);
+    --color-border-control-contrast: oklch(64% 0.01 286.067);
+    --color-border-control-contrast-hover: oklch(55.2% 0.01 285.938);
     --color-input-border: var(--color-border-control);
     --color-input-hover: var(--color-hover);
     --color-input-active: var(--color-surface-raised);
@@ -153,4 +155,12 @@
     --color-scrollbar-track-active: var(--color-hover);
     --color-scrollbar-track-focus: var(--color-accent);
     --color-scrollbar-corner: var(--color-canvas);
+}
+
+/* A theme provider does this itself, for the theme it applies. This is for the values above, without one. */
+@media (prefers-contrast: more) {
+    :root {
+        --color-border-control: var(--color-border-control-contrast);
+        --color-border-control-hover: var(--color-border-control-contrast-hover);
+    }
 }

@@ -15,6 +15,7 @@ import {
     flattenThemeProfile,
     type GeneratedThemeColorPalette,
     type ThemeColorPaletteSeeds,
+    type ThemeColorVariable,
     type ThemeColors,
     type ThemeEffectLevel,
     type ThemeProfile,
@@ -36,6 +37,7 @@ export class ThemeService {
     readonly #activeSelection: WritableSignal<ThemeSelection>;
     readonly #appliedVariables = new Set<ThemeVariable>();
     readonly #colorSchemeQuery: MediaQueryList | undefined;
+    readonly #contrastQuery: MediaQueryList | undefined;
     readonly #destroyRef = inject(DestroyRef);
     readonly #document = inject(DOCUMENT);
     readonly #injector = inject(Injector);
@@ -62,6 +64,7 @@ export class ThemeService {
     public constructor() {
         const view = this.#document.defaultView;
         this.#colorSchemeQuery = view?.matchMedia?.("(prefers-color-scheme: dark)");
+        this.#contrastQuery = view?.matchMedia?.("(prefers-contrast: more)");
         this.#transparencyQuery = view?.matchMedia?.("(prefers-reduced-transparency: reduce)");
         this.#storage = this.#options.persistKey ? inject(THEME_STORAGE) : null;
         this.#targets = this.#root ? [this.#root] : [];
@@ -81,11 +84,12 @@ export class ThemeService {
         if (this.#root && this.#root !== this.#document.documentElement) {
             this.#themeOverlayContainer();
         }
-        const transparencyQuery = this.#transparencyQuery;
-        if (transparencyQuery) {
-            const onPreferenceChange = (): void => this.#applyTheme(this.#activeSelection(), this.#activeProfile());
-            transparencyQuery.addEventListener("change", onPreferenceChange);
-            this.#destroyRef.onDestroy(() => transparencyQuery.removeEventListener("change", onPreferenceChange));
+        const onPreferenceChange = (): void => this.#applyTheme(this.#activeSelection(), this.#activeProfile());
+        for (const query of [this.#transparencyQuery, this.#contrastQuery]) {
+            if (query) {
+                query.addEventListener("change", onPreferenceChange);
+                this.#destroyRef.onDestroy(() => query.removeEventListener("change", onPreferenceChange));
+            }
         }
         const colorSchemeQuery = this.#colorSchemeQuery;
         if (colorSchemeQuery) {
@@ -164,7 +168,7 @@ export class ThemeService {
 
     #applyTheme(selection: ThemeSelection, profile: ThemeProfile): void {
         const transparency = this.#getTransparencyMode();
-        const variables = getEffectiveVariables(profile, transparency);
+        const variables = getEffectiveVariables(profile, transparency, this.#contrastQuery?.matches === true);
         for (const target of this.#targets) {
             for (const previousName of this.#appliedVariables) {
                 if (!(previousName in variables)) {
@@ -316,6 +320,11 @@ export class ThemeService {
 
 type TransparencyMode = "full" | "reduced";
 
+/** A field's border is quiet by default. Each pair is the variable and what replaces it for more contrast. */
+const contrastBorders: readonly (readonly [ThemeVariable, ThemeColorVariable])[] = [
+    ["--color-border-control", "--color-border-control-contrast"],
+    ["--color-border-control-hover", "--color-border-control-contrast-hover"]
+];
 const effectLevels: readonly ThemeEffectLevel[] = ["control", "raised", "overlay"];
 const preferenceVariants: readonly unknown[] = ["light", "dark", "system"];
 
@@ -326,8 +335,21 @@ function applyColorPalette(profile: ThemeProfile, colors: ThemeColors): ThemePro
     });
 }
 
-function getEffectiveVariables(profile: ThemeProfile, transparency: TransparencyMode): ThemeVariables {
+function getEffectiveVariables(
+    profile: ThemeProfile,
+    transparency: TransparencyMode,
+    moreContrast: boolean
+): ThemeVariables {
     const variables: Record<ThemeVariable, string> = { ...flattenThemeProfile(profile) };
+    if (moreContrast) {
+        for (const [name, replacement] of contrastBorders) {
+            // A custom theme may not have one, and then keeps what it has.
+            const value: string | undefined = profile.colors[replacement];
+            if (value !== undefined) {
+                variables[name] = value;
+            }
+        }
+    }
     if (transparency === "full") {
         return variables;
     }

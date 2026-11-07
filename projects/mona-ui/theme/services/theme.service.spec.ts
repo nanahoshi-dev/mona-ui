@@ -251,6 +251,82 @@ describe("ThemeService", () => {
         expect(environment.media.removeCount).toBe(1);
     });
 
+    describe("when the user asks for more contrast", () => {
+        function configureLuna(more: boolean): { readonly media: TestMediaQueryList; readonly service: ThemeService } {
+            TestBed.resetTestingModule();
+            const environment = createContrastEnvironment(root, more);
+            TestBed.configureTestingModule({
+                providers: [
+                    { provide: DOCUMENT, useValue: environment.document },
+                    { provide: THEME_OPTIONS, useValue: { initialTheme: { name: "luna", variant: "light" } } },
+                    { provide: THEME_STRATEGY, useValue: new DefaultThemeStrategy([], []) }
+                ]
+            });
+            return { media: environment.media, service: TestBed.inject(ThemeService) };
+        }
+
+        it("keeps a field's border quiet without it", () => {
+            configureLuna(false);
+
+            expect(root.style.getPropertyValue("--color-border-control")).toBe("#d5d6d9");
+            expect(root.style.getPropertyValue("--color-border-control-hover")).toBe("#c5c6ca");
+        });
+
+        it("replaces a field's border, and not what the profile says", () => {
+            const { service: configured } = configureLuna(true);
+
+            expect(root.style.getPropertyValue("--color-border-control")).toBe("#8a8b90");
+            expect(root.style.getPropertyValue("--color-border-control-hover")).toBe("#76777c");
+            expect(configured.profile().colors["--color-border-control"]).toBe("#d5d6d9");
+        });
+
+        it("follows a change either way without changing the selection, and cleans up", () => {
+            const { media, service: configured } = configureLuna(false);
+            const selection = configured.selection();
+
+            media.setMatches(true);
+            expect(root.style.getPropertyValue("--color-border-control")).toBe("#8a8b90");
+
+            media.setMatches(false);
+            expect(root.style.getPropertyValue("--color-border-control")).toBe("#d5d6d9");
+            expect(configured.selection()).toEqual(selection);
+
+            TestBed.resetTestingModule();
+            expect(media.removeCount).toBe(1);
+        });
+
+        it("stays in effect across a theme switch", () => {
+            const { service: configured } = configureLuna(true);
+
+            configured.setTheme({ name: "luna", variant: "dark" });
+
+            expect(root.style.getPropertyValue("--color-border-control")).toBe("#74757a");
+        });
+
+        it("leaves a theme without the contrast tokens as it is", () => {
+            TestBed.resetTestingModule();
+            const environment = createContrastEnvironment(root, true);
+            TestBed.configureTestingModule({
+                providers: [
+                    { provide: DOCUMENT, useValue: environment.document },
+                    {
+                        provide: THEME_STRATEGY,
+                        useValue: {
+                            resolve: (): ThemeProfile => ({
+                                ...createProfile("custom"),
+                                colors: { "--color-border-control": "#123456" }
+                            })
+                        }
+                    }
+                ]
+            });
+            TestBed.inject(ThemeService);
+
+            expect(root.style.getPropertyValue("--color-border-control")).toBe("#123456");
+            expect(root.style.getPropertyValue("--color-border-control-hover")).toBe("");
+        });
+    });
+
     it("safely skips DOM writes when no document element exists", () => {
         TestBed.resetTestingModule();
         TestBed.configureTestingModule({
@@ -288,6 +364,25 @@ function createTransparencyEnvironment(
         CSS: { supports: (property: string): boolean => property === supportedProperty },
         matchMedia: (query: string): MediaQueryList =>
             (query.includes("transparency") ? media : new TestMediaQueryList(false)) as unknown as MediaQueryList
+    };
+    return {
+        document: { documentElement: root, defaultView: view } as unknown as Document,
+        media
+    };
+}
+
+function createContrastEnvironment(
+    root: HTMLElement,
+    more: boolean
+): {
+    readonly document: Document;
+    readonly media: TestMediaQueryList;
+} {
+    const media = new TestMediaQueryList(more);
+    const view = {
+        CSS: { supports: (): boolean => false },
+        matchMedia: (query: string): MediaQueryList =>
+            (query.includes("prefers-contrast") ? media : new TestMediaQueryList(false)) as unknown as MediaQueryList
     };
     return {
         document: { documentElement: root, defaultView: view } as unknown as Document,

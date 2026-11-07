@@ -164,8 +164,8 @@ describe("monaThemeColors", () => {
             expectContrast(colors, "--color-foreground", "--color-surface", 4.5);
             expectContrast(colors, "--color-muted-foreground", "--color-canvas", 4.5);
             expectContrast(colors, "--color-input-foreground", "--color-input-background", 4.5);
-            // A field can be white on white, so its border is what says it's there (WCAG 1.4.11).
-            expectContrast(colors, "--color-border-control", "--color-input-background", 3);
+            // Resting boundaries stay intentionally quiet; hover strengthens them and focus remains WCAG-visible.
+            expectContrast(colors, "--color-border-control", "--color-input-background", 1.3);
             expect(colorContrast(colors, "--color-border-control-hover", "--color-input-background")).toBeGreaterThan(
                 colorContrast(colors, "--color-border-control", "--color-input-background")
             );
