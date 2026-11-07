@@ -26,8 +26,9 @@ export class DropdownFilterableDirective {
     /** @description Emitted when the filter value changes. Cancelable. */
     public readonly filterChange = output<FilterChangeEvent>();
     /**
-     * @description No effect on Auto Complete — the popup's own filter row is disabled for this component, since the
-     * main input already serves as the filter box.
+     * @description Placeholder text in the popup's filter row. Auto Complete has no filter row, since its own input is
+     * the filter, so it ignores this.
+     * @default ""
      */
     public readonly filterPlaceholder = input<string>("");
     /**
