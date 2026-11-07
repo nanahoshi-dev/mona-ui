@@ -60,7 +60,7 @@ spinner.close();
 
 ### Full-Page Overlay
 
-Leave `target` out for the whole page, which covers open dialogs too:
+Leave `target` out for the whole page. At z-index `1001` it sits above CDK overlays, so it covers open dialogs too:
 
 ```typescript
 const spinner = this.spinnerService.show({
@@ -71,7 +71,7 @@ const spinner = this.spinnerService.show({
 spinner.close();
 ```
 
-Only leaving the key out means the whole page. A `target` that's present but doesn't resolve to an element, such as a `viewChild` before its first render, shows no overlay and logs an error in development, so a spinner meant for one panel can't take over the page.
+Only leaving the key out means the whole page. A `target` that's present but doesn't resolve to an element, such as `undefined` from a `viewChild` before its first render, shows no overlay and logs an error in development, so a spinner meant for one panel can't take over the page.
 
 ### Delay & Anti-Flicker
 
@@ -132,7 +132,7 @@ this.spinnerService
     });
 ```
 
-With `cancellable`, Cancel unsubscribes from the source, which aborts an HTTP request, and completes the returned observable without its result.
+With `cancellable`, Cancel unsubscribes from the source, which aborts an HTTP request, and completes the returned observable without its result. An `onCancel` you gave still runs.
 
 ### Concurrency Guarantees
 
@@ -153,8 +153,8 @@ When multiple independent operations target the same element:
 ### Service overlays
 
 - **Announcing:** the service announces through the CDK `LiveAnnouncer` when a request becomes visible, with its `text` or the localized "Loading". A later `update({ text })` is read out too, at most once every 5 seconds, ending on the latest text.
-- **`aria-busy`:** set on a targeted element while it's loading, and put back as it was afterwards. It isn't set on the body for a full-page overlay. It would tell assistive technology it can skip the whole page, including the overlay. On a targeted element the Cancel button is inside the busy region, so for a cancellable request, give users another way to reach it if your screen reader support needs it.
-- **Focus:** after Cancel, or when the overlay goes with focus inside it, focus returns to where it came from.
+- **`aria-busy`:** set on a targeted element from the moment of the request, including its `delay`, and put back as it was afterwards. It isn't set on the body for a full-page overlay. It would tell assistive technology it can skip the whole page, including the overlay. On a targeted element the Cancel button is inside the busy region, so for a cancellable request, give users another way to reach it if your screen reader support needs it.
+- **Focus:** when the Cancel button goes with focus on it, because it was pressed, the request closed, or `minimumVisibleDuration` is holding a closed spinner on screen, focus returns to where it came from. The exception is another request on the same target taking over without a Cancel button of its own: the button goes, and focus isn't moved back.
 - **It's not a modal lock:** the overlay blocks the pointer, not the keyboard. Focus stays where it was and the content behind stays reachable, so disable your own actions while they run if resubmitting would be a problem.
 - **Motion and color:** every appearance honors `prefers-reduced-motion`, and stays visible in forced colors.
 
@@ -171,8 +171,8 @@ When multiple independent operations target the same element:
 | Name         | Type                                                                       | Default     | Description |
 |--------------|----------------------------------------------------------------------------|-------------|-------------|
 | `appearance` | `'default' \| 'pulsing' \| 'pulsing-triad' \| 'pulsing-ring' \| 'converging-spinner'` | `'default'` | Visual appearance of the spinner animation. |
-| `aria-label` | `string`                                                                   | `'Loading'` | Accessible name when non-decorative. |
-| `class`      | `string`                                                                   | `''`        | Additional CSS classes merged via `tailwind-merge`. Width and height classes scale the indicator too. |
+| `aria-label` | `string \| undefined`                                                      | `undefined` | Accessible name when non-decorative. When not set, falls back to the localized "Loading". |
+| `class`      | `ClassInputType`                                                           | `''`        | Additional CSS classes merged via `tailwind-merge`. Width and height classes scale the indicator too. |
 | `decorative` | `boolean`                                                                  | `false`     | When `true`, removes the `img` role and sets `aria-hidden="true"`. Can be written as a bare attribute. |
 | `size`       | `'small' \| 'medium' \| 'large'`                                           | `'medium'`  | Sizing preset (`small` ~12px, `medium` ~16px, `large` ~24px). |
 
@@ -190,15 +190,17 @@ When multiple independent operations target the same element:
 
 #### `SpinnerOptions`
 
+Every option is optional.
+
 | Option | Type | Description |
 |--------|------|-------------|
-| `appearance` | `SpinnerAppearance` | Visual style for the spinner. |
+| `appearance` | `SpinnerAppearance` | Visual style for the spinner. Defaults to `'default'`. |
 | `cancellable` | `boolean \| SpinnerCancelOptions` | Enables cancellation action button and callbacks. |
 | `delay` | `number` | Time in ms before the overlay is physically rendered on an idle target. |
-| `id` | `string` | Optional unique identifier for the request. |
+| `id` | `string` | Unique identifier for the request. A new `show()` with an `id` in use closes that request first. |
 | `minimumVisibleDuration` | `number` | Minimum time in ms the overlay stays visible once displayed. |
-| `size` | `SpinnerSize` | Size preset for the spinner indicator. |
-| `target` | `HTMLElement \| ElementRef \| (HTMLElement \| ElementRef)[]` | One or more elements to overlay. Leave it out for the whole page. One that doesn't resolve to an element is skipped, with an error in development. |
+| `size` | `SpinnerSize` | Size preset for the spinner indicator. Defaults to `'medium'`. |
+| `target` | `HTMLElement \| ElementRef<HTMLElement> \| readonly (HTMLElement \| ElementRef<HTMLElement>)[]` | One or more elements to overlay. Leave it out for the whole page. One that doesn't resolve to an element is skipped, with an error in development. |
 | `text` | `string` | Status message displayed below the spinner. |
 | `zIndex` | `number` | Custom z-index override. By default a full-page overlay sits just above CDK overlays, at `1001`, and a targeted one at `1`. |
 
@@ -207,11 +209,13 @@ When multiple independent operations target the same element:
 | Member | Type | Description |
 |--------|------|-------------|
 | `id` | `string` | Unique request identifier. |
-| `cancelled$` | `Observable<void>` | Emits when the user cancels the loading request. |
+| `cancelled$` | `Observable<void>` | Emits when the user cancels the loading request. Completes when the request ends, without emitting if it wasn't cancelled. |
 | `close()` | `() => void` | Idempotently closes the request and releases target leases. |
 | `update()` | `(update: SpinnerUpdate) => void` | Dynamically updates `text`, `appearance`, or `size`. |
 
 #### `SpinnerCancelOptions`
+
+Every option is optional.
 
 | Option | Type | Description |
 |--------|------|-------------|
@@ -219,6 +223,8 @@ When multiple independent operations target the same element:
 | `text` | `string` | Button text. Defaults to the localized "Cancel". |
 
 #### `SpinnerUpdate`
+
+Every option is optional. One you leave out keeps its current value.
 
 | Option | Type | Description |
 |--------|------|-------------|

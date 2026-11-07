@@ -2,12 +2,12 @@
 
 Use `ColorPaletteComponent` when the user should choose only from a known, bounded set of colors rather than compose an arbitrary one. Use `ColorGradientComponent` when the user needs to choose a custom color. Use `ColorPickerComponent` when the palette (or gradient) editor should open from a compact dropdown-style control instead of being shown inline.
 
-> **Signal forms only.** `ColorPaletteComponent` implements `FormValueControl<string | null>` from `@angular/forms/signals`. It does not implement `ControlValueAccessor`, so `[(ngModel)]`, `[formControl]`, and `formControlName` are not supported.
+> **Forms.** `ColorPaletteComponent` implements `FormValueControl<string | null>` from `@angular/forms/signals`, so use `[formField]` with signal forms. It has no `ControlValueAccessor`, but `[(ngModel)]`, `[formControl]` and `formControlName` work too, because Angular binds a control's `value` and `touch` directly when it has no accessor.
 
 ## Import & Quick Start
 
 ```typescript
-import { ColorPaletteComponent } from "mona-ui";
+import { ColorPaletteComponent } from "@nanahoshi/mona-ui/color-palette";
 ```
 
 **Direct value binding**
@@ -23,10 +23,11 @@ protected readonly color = signal<string | null>("#3498db");
 **Signal forms**
 
 ```typescript
-import { form } from "@angular/forms/signals";
-import { ColorPaletteComponent } from "mona-ui";
+import { signal } from "@angular/core";
+import { FormField, form } from "@angular/forms/signals";
+import { ColorPaletteComponent } from "@nanahoshi/mona-ui/color-palette";
 
-protected readonly form = form({ color: "#3498db" });
+protected readonly form = form(signal<{ color: string | null }>({ color: "#3498db" }));
 ```
 
 ```html
@@ -61,12 +62,16 @@ protected readonly brandColors = ["#1a1a2e", "#16213e", "#0f3460", "#e94560"];
 
 An empty custom palette (`[]`) falls back to the built-in `"flat"` scheme. A `columns` value below 1 shows one column.
 
+Hex, `rgb()` and `hsl()` colors are read from their text. Anything else, such as a color name, is read through a canvas, one for each tile, so prefer those three for a large palette.
+
 ### Named colors
 
 Use `{ color, name }` items when the colors mean something. Assistive technology reads "Brand blue, #1A73E8", and the same text shows as a tooltip. Plain strings and items can be mixed, and `value` always holds the color.
 
 ```typescript
-protected readonly brandColors = [
+import type { ColorPaletteItem } from "@nanahoshi/mona-ui/common";
+
+protected readonly brandColors: (string | ColorPaletteItem)[] = [
     { color: "#1A73E8", name: "Brand blue" },
     { color: "#E94560", name: "Alert" },
     "#16213E"
@@ -112,6 +117,8 @@ Keyboard navigation targets the currently focused tile and is disabled entirely 
 | `Ctrl+End` | Move focus to the last tile. |
 | `Enter` / `Space` | Select the focused tile. Ignored when `readonly` is `true` (focus still moves normally). |
 
+Under `dir="rtl"`, `ArrowLeft` and `ArrowRight` swap, so each moves in the direction it points.
+
 ## Accessibility Notes
 
 The host renders `role="grid"`. Each visual row is wrapped in an element with `role="row"`, and each swatch renders `role="gridcell"` with a roving `tabindex`: only the active tile is tab-reachable, and arrow keys move both focus and the active tile. Before any tile has focus, and again after focus leaves, the active tile is the selected one, or the first.
@@ -121,7 +128,7 @@ The host renders `role="grid"`. Each visual row is wrapped in an element with `r
 | `role` | Host | `"grid"` |
 | `aria-label` | Host | The `aria-label` input, or `"Color palette"`. Absent when a label or `aria-labelledby` names the palette. |
 | `aria-disabled` | Host | Reflects `disabled` |
-| `aria-invalid` | Host | `"true"` when invalid, otherwise absent |
+| `aria-invalid` | Host | `"true"` once `touched` and either `invalid`, or `required` with no color. Otherwise absent. |
 | `aria-readonly` | Host | Reflects `readonly` |
 | `aria-required` | Host | Reflects `required` |
 | `role` | Each tile | `"gridcell"` |
@@ -142,9 +149,10 @@ The host renders `role="grid"`. Each visual row is wrapped in an element with `r
 `ColorPaletteComponent` implements `FormValueControl<string | null>` from `@angular/forms/signals`.
 
 ```typescript
-import { disabled, form } from "@angular/forms/signals";
+import { signal } from "@angular/core";
+import { FormField, disabled, form } from "@angular/forms/signals";
 
-protected readonly form = form({ color: "#3498db" }, schema => {
+protected readonly form = form(signal<{ color: string | null }>({ color: "#3498db" }), schema => {
     disabled(schema.color, { when: () => this.locked() });
 });
 ```
@@ -167,7 +175,7 @@ Implements `FormValueControl<string | null>` from `@angular/forms/signals`.
 
 | Name | Type | Default | Description |
 |---|---|---|---|
-| `aria-label` | `string` | `""` | Accessible name of the grid. |
+| `aria-label` | `string` | `""` | Accessible name of the grid. When empty, and nothing else names it, a localized "Color palette". |
 | `aria-labelledby` | `string` | `""` | Id of the element that names the grid. |
 | `clearable` | `boolean` | `true` | Whether activating the selected tile clears the value. A required palette never clears. |
 | `columns` | `number` | `10` | Number of columns in the grid. Only applies to a custom `palette` array — built-in schemes define their own column count. A value below 1 shows one column. |
@@ -192,22 +200,21 @@ Implements `FormValueControl<string | null>` from `@angular/forms/signals`.
 
 | Name | Shape | Description |
 |---|---|---|
-| `ColorPaletteItem` | `{ color: string; name?: string }` | A swatch with a name of its own. |
-| `PaletteType` | `"flat" \| "material" \| "websafe"` | The built-in scheme names accepted by `palette`. |
-| `ColorScheme` | `{ colors: string[]; columns: number; name: string }` | Shape of a color scheme. Not consumed directly by any public input — useful for typing custom scheme data alongside the component. |
-| `ColorPaletteVariantProps` / `ColorPaletteVariantInput` | — | Variant prop types backing the `rounded` input's literal union, exported for advanced typing scenarios. |
+| `ColorPaletteItem` | `{ color: string; name?: string }` | A swatch with a name of its own. Import it from `@nanahoshi/mona-ui/common`. |
+| `PaletteType` | `"flat" \| "material" \| "websafe"` | The built-in scheme names accepted by `palette`. Import it from `@nanahoshi/mona-ui/common`. |
+| `ColorPaletteVariantProps` | — | Variant prop type backing the `rounded` input's literal union, exported for advanced typing scenarios. |
 
 ---
 
 <!-- verification-checklist
-- [x] API definitions and defaults verified against source (color-palette.component.ts) and component-metadata.json
-- [x] Basic examples use public imports from mona-ui
+- [x] API definitions and defaults verified against source (color-palette.component.ts)
+- [x] Basic examples use public imports from @nanahoshi/mona-ui/color-palette
 - [x] Signal forms support verified against FormValueControl implementation and specs
-- [x] ControlValueAccessor absence documented
+- [x] ControlValueAccessor absence documented, and the custom-control path verified in @angular/forms 22 (NgControl.ngControlCreate)
 - [x] Keyboard map verified against onKeyDown() implementation and specs
 - [x] ARIA attributes verified against color-palette.component.html (role=grid/row/gridcell, aria-* bindings)
-- [x] Fixed aria-label limitation verified against host binding (static "'Color palette'" literal, no input)
+- [x] aria-label input verified against host binding
 - [x] Inputs and outputs tables sorted A-Z within each section
 - [x] No private methods, internal signals, Tailwind utility classes, or implementation-only DOM/data-* details exposed
-- [x] Exported PaletteType/ColorScheme/variant types verified present in lib/index.ts and dist d.ts
+- [x] Exported types verified against the color-palette and common public-api.ts
 -->

@@ -9,6 +9,11 @@ import type { ScrollViewSlideContext } from "../models/ScrollViewSlideContext";
     selector: "ng-template[monaScrollViewSlide]"
 })
 export class ScrollViewSlideDirective<T = unknown> {
+    /**
+     * @description The scroll view's data, bound only so that `let-item` takes its type from it. Leave it empty for
+     * `unknown`.
+     * @default ""
+     */
     public readonly monaScrollViewSlide = input<Iterable<T> | "">("");
     public readonly templateRef = inject<TemplateRef<ScrollViewSlideContext<T>>>(TemplateRef);
 

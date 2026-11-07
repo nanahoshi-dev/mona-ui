@@ -71,6 +71,8 @@ A photo that isn't square is cropped to fill the avatar. Images load lazily, whi
 <mona-avatar width="4rem" height="4rem"></mona-avatar>
 ```
 
+Size is set as an inline style on the host, so a class like `w-8` has no effect. Use these inputs.
+
 ### Shape
 
 Control shape with `borderRadius`:
@@ -91,7 +93,7 @@ In image mode, the image is also clipped to match the configured `borderRadius`.
 | `borderColor`     | `var(--color-border)`     |
 | `labelColor`      | `var(--color-primary-foreground)` |
 
-`backgroundColor` is set to `transparent` in image mode regardless of the input value.
+`backgroundColor` is set to `transparent` while an image shows, regardless of the input value. It comes back if the image fails to load.
 
 ### Custom style overrides
 
@@ -110,13 +112,13 @@ The `customStyles` input accepts a `Partial<CSSStyleDeclaration>` object applied
 
 The avatar has no built-in keyboard behavior and no interactive role. Accessibility responsibility depends on the active display mode:
 
-**Image mode:** Provide a meaningful `alt` value when the image conveys identity information, or an `aria-label`, which the image uses when `alt` is empty. Leave both empty only when adjacent visible text already identifies the same entity.
+**Image mode:** Provide a meaningful `alt` value when the image conveys identity information, or an `aria-label`, which the image uses when `alt` is empty. While an image shows, `aria-label` doesn't go on the host, and it's not used at all if `alt` is set. Leave both empty only when adjacent visible text already identifies the same entity.
 
 **Label mode:** The raw visual initials (e.g., `"JD"`) are not a meaningful accessible name on their own. Set `aria-label` to the full name or entity the initials represent (e.g., `aria-label="Jane Smith"`). When `aria-label` is non-empty, the host receives `role="img"` and assistive technology announces the label value instead of the visual text.
 
 **Projected content mode:** Set `aria-label` to describe what is projected. When non-empty, the host receives `role="img"`.
 
-**After an image fails to load:** the host receives `role="img"`, named by `aria-label` or else `alt`, so the name stays the same.
+**After an image fails to load:** the host receives `role="img"`, named by `aria-label` or else `alt`, so with one of them set, the name stays the same. With both set, the name changes from `alt` to `aria-label`, so give them the same meaning. With neither, the host has no role or name of its own.
 
 If the avatar is purely decorative and already described by adjacent visible text, you may omit both `alt` and `aria-label`. Whether this is appropriate depends on context.
 
@@ -130,9 +132,9 @@ If the avatar is purely decorative and already described by adjacent visible tex
 
 | Name              | Type                           | Default                     | Description                                                                                                                                                                                                                                                                                                                                                  |
 |-------------------|--------------------------------|-----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `alt`             | `string`                       | `''`                        | Alternative text for the image in image mode. Provide a meaningful description for non-decorative images. An empty string marks the image as decorative. Has no effect in label or projected-content mode.                                                                                                                                                   |
+| `alt`             | `string`                       | `''`                        | Alternative text for the image in image mode. Provide a meaningful description for non-decorative images. An empty string marks the image as decorative, unless `aria-label` is set. After the image fails to load, it names the host if `aria-label` is empty. Has no effect when `image` is empty. |
 | `aria-label`      | `string`                       | `''`                        | Accessible name of the avatar. In label and projected-content modes, a non-empty value goes on the host with `role="img"`, so assistive technology announces it instead of the raw visual content. While an image shows, it's the image's `alt` unless `alt` is set. |
-| `backgroundColor` | `string`                       | `'var(--color-primary)'`    | Background color of the host element. Ignored in image mode — the background becomes transparent automatically.                                                                                                                                                                                                                                              |
+| `backgroundColor` | `string`                       | `'var(--color-primary)'`    | Background color of the host element. Ignored while an image shows, when the background becomes transparent automatically. |
 | `borderColor`     | `string`                       | `'var(--color-border)'`     | Border color applied to the host element.                                                                                                                                                                                                                                                                                                                    |
 | `borderRadius`    | `string \| number`             | `'0'`                       | Border radius. Accepts a CSS string (`'50%'`, `'8px'`) or a number converted to `px`. In image mode, the image is also clipped to this radius.                                                                                                                                                                                                               |
 | `borderWidth`     | `string \| number`             | `'1px'`                     | Border width. A number is converted to `px`; a string is used as-is.                                                                                                                                                                                                                                                                                         |
@@ -140,7 +142,7 @@ If the avatar is purely decorative and already described by adjacent visible tex
 | `customStyles`    | `Partial<CSSStyleDeclaration>` | `{}`                        | Styles applied after all other values, taking precedence over every other style input including `display`, `height`, and `width`. Overriding layout-critical properties may break expected rendering.                                                                                                                                                        |
 | `height`          | `string \| number`             | `'64px'`                    | Height of the host element. A string is used as-is; a number is converted to `px`.                                                                                                                                                                                                                                                                           |
 | `image`           | `string`                       | `''`                        | Image URL. When non-empty, renders an image and suppresses `label` and projected content, until it fails to load. Then the avatar falls back to them. |
-| `label`           | `string`                       | `''`                        | Text displayed inside the avatar when there's no image, or the image failed to load. |
+| `label`           | `string`                       | `''`                        | Text displayed inside the avatar when there's no image, or the image failed to load. It's shown as given: the avatar doesn't work out initials from a name, and long text isn't truncated. |
 | `labelColor`      | `string`                       | `'var(--color-primary-foreground)'` | Color of the label text. Ignored in image mode.                                                                                                                                                                                                                                                                                                              |
 | `labelFontSize`   | `string`                       | `'1rem'`                    | Font size of the label text. Ignored in image mode.                                                                                                                                                                                                                                                                                                          |
 | `labelFontWeight` | `string`                       | `'700'`                     | Font weight of the label text. Ignored in image mode.                                                                                                                                                                                                                                                                                                        |
@@ -160,5 +162,3 @@ If the avatar is purely decorative and already described by adjacent visible tex
 - [x] class input documented — direct host class binding (no twMerge; avatar uses inline styles)
 - [x] Styling section documents only public inputs — no internal Tailwind classes, data attributes, or DOM structure exposed
 -->
-
-<!-- TODO(owner-review): Confirm whether customStyles is intentional long-term public API or an escape hatch that may be removed -->

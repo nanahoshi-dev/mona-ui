@@ -108,6 +108,7 @@ export class SwitchDemoComponent extends AbstractDemoComponent<SwitchComponent> 
                 [aria-labelledby]="ariaLabelledBy()"
                 [formField]="form.switched"
                 [offLabel]="offLabel()"
+                [tabindex]="tabindex()"
                 [onLabel]="onLabel()"
                 [rounded]="rounded()"
                 [size]="size()"
@@ -153,6 +154,7 @@ export class SwitchWrapperComponent implements ComponentInputsAsSignal<SwitchCom
     public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<SwitchComponent["rounded"]>>("full");
     public readonly size = input<ReturnType<SwitchComponent["size"]>>("medium");
+    public readonly tabindex = input<number, number | string>(0, { transform: Number });
     public readonly userClass = input<ReturnType<SwitchComponent["userClass"]>>("");
 
     public constructor() {

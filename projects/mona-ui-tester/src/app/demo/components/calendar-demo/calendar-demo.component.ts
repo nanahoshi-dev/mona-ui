@@ -115,6 +115,7 @@ export class CalendarDemoComponent extends AbstractDemoComponent<CalendarCompone
             [disabledDates]="disabledDates()"
             [formField]="form.date"
             [firstDay]="firstDay()"
+            [focusOnMount]="focusOnMount()"
             [maxDate]="maxDate()"
             [minDate]="minDate()"
             [rounded]="rounded()"
@@ -163,6 +164,7 @@ export class CalendarWrapperComponent implements ComponentInputsAsSignal<Calenda
     public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly disabledDates = input<ReturnType<CalendarComponent["disabledDates"]>>([]);
     public readonly firstDay = input<ReturnType<CalendarComponent["firstDay"]>>("monday");
+    public readonly focusOnMount = input(false, { transform: booleanAttribute });
     public readonly maxDate = input<ReturnType<CalendarComponent["maxDate"]>>(null);
     public readonly minDate = input<ReturnType<CalendarComponent["minDate"]>>(null);
     public readonly readonly = input(false, { transform: booleanAttribute });

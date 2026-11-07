@@ -31,9 +31,10 @@ The directive does not constrain dimensions. Apply CSS or Tailwind utilities dir
 `TextAreaDirective` works with Angular signal forms. Bind `[formField]` to a signal form field — the `FormField` directive automatically writes `invalid` and `touched` into the directive:
 
 ```typescript
+import { signal } from "@angular/core";
 import { form, FormField } from "@angular/forms/signals";
 
-protected readonly myForm = form({ notes: "" });
+protected readonly myForm = form(signal({ notes: "" }));
 ```
 
 ```html
@@ -43,6 +44,10 @@ protected readonly myForm = form({ notes: "" });
     rows="4">
 </textarea>
 ```
+
+**Read-only:**
+
+Use the native `readonly` attribute, or the signal forms `readonly` rule with `[formField]`. The directive has no input for it. A read-only text area only changes its cursor. It looks otherwise the same, and stays focusable and selectable.
 
 ## Appearance & Styling
 
@@ -57,12 +62,13 @@ protected readonly myForm = form({ notes: "" });
 
 ### Visual states
 
-| State    | Appearance                                                 |
-|----------|------------------------------------------------------------|
-| Default  | Mona UI themed border and background                       |
-| Focused  | Visible focus ring using the primary color (keyboard only) |
-| Disabled | Reduced visual emphasis; pointer interaction removed       |
-| Invalid  | Error-colored border and ring                              |
+| State     | Appearance                                           |
+|-----------|------------------------------------------------------|
+| Default   | Mona UI themed border and background                 |
+| Focused   | Focus border and ring                                |
+| Disabled  | Disabled colors; pointer interaction removed         |
+| Read-only | Default cursor, otherwise unchanged                  |
+| Invalid   | Error-colored border and ring                        |
 
 The invalid state activates when both `invalid` and `touched` are `true`. When using `[formField]`, `FormField` writes these automatically. Without signal forms, set `invalid` and `touched` manually (e.g. from a `FormControl`'s status).
 
@@ -115,22 +121,6 @@ The directive does not manage an accessible name. Associate a label using one of
 | `rounded` | `'large' \| 'medium' \| 'none' \| 'small'` | `'medium'` | Border-radius preset applied to the component.                                                                                                                            |
 | `touched` | `boolean`                                  | `false`    | Marks the textarea as touched. Error styling is only shown when both `invalid` and `touched` are `true`. When using `[formField]`, `FormField` writes this automatically. |
 
+#### Outputs
+
 `TextAreaDirective` has no outputs. All native `<textarea>` events (`input`, `change`, `blur`, `focus`, etc.) are available directly on the host element.
-
----
-
-<!-- verification-checklist
-- [x] API definitions and defaults verified against source and component-metadata.json
-- [x] `class` alias used in API table (not internal name `userClass`)
-- [x] Signal forms ([formField]) documented with demo evidence
-- [x] invalid/touched inputs documented as the sole mechanism for invalid styling (no automatic Reactive Forms class detection)
-- [x] aria-invalid documented — set when invalid && touched
-- [x] No unexported types exposed in API table
-- [x] No internal Tailwind class names in styling section
-- [x] Accessibility consumer responsibilities stated explicitly
-- [x] No Outputs table (directive has no outputs)
-- [x] API table rows sorted A→Z
-- [x] focus-visible behavior noted correctly (keyboard-only focus ring)
-- [x] Disabled state noted (CSS only, via native disabled attribute)
-- [x] No ControlValueAccessor claim
--->

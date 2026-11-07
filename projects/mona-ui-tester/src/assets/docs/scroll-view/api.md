@@ -58,7 +58,7 @@ In finite mode, the left arrow is hidden on the first page and the right arrow i
 
 ### Swipe
 
-A touch or pen swipe of 40 px or more changes the slide, reversed in RTL. Vertical scrolling and pinch zoom stay with the browser, a mouse drag stays text selection, and a drag that starts on a text field or a slider stays with that control. Swipes are always on, but `arrows` and `pageable` are off by default, and WCAG needs a way to change the slide without a gesture, so turn on at least one of them.
+A touch or pen swipe of 40 px or more, mostly sideways, changes the slide, reversed in RTL. Vertical scrolling and pinch zoom stay with the browser, a mouse drag stays text selection, and a drag that starts on a text field or a slider stays with that control. Swipes are always on, but `arrows` and `pageable` are off by default, and WCAG needs a way to change the slide without a gesture (2.5.1 Pointer Gestures), so turn on at least one of them.
 
 ### Dot pager
 
@@ -76,7 +76,7 @@ A touch or pen swipe of 40 px or more changes the slide, reversed in RTL. Vertic
 
 When the number of dots exceeds the pager bar width, scroll arrows appear automatically on the pager bar to let the user scroll the dot list horizontally. The active dot is kept centered in the list, however the page changed. Only the list scrolls, so the pager doesn't move the page to itself.
 
-`pagerOverlay="dark"` uses the theme's canvas color, which isn't dark in a light theme.
+`pagerOverlay="dark"` uses the theme's canvas color, which isn't dark in a light theme, and `"light"` uses its overlay surface color. So the names don't promise a shade. Check the strip against your slides in each theme you ship.
 
 ### Infinite loop
 
@@ -110,7 +110,7 @@ protected currentPage = 0;
 <p>Page {{ currentPage + 1 }} of {{ items.length }}</p>
 ```
 
-`index` is a two-way model. Setting it programmatically navigates to that zero-based page index.
+`index` is a two-way model. Setting it programmatically navigates to that zero-based page index. A value outside the range is brought back to the first or last page, or wrapped in infinite mode, and the corrected value comes back through `indexChange`.
 
 ### Animation control
 
@@ -163,6 +163,8 @@ Give every carousel a name that says what it shows. Two regions on a page need d
 | `aria-roledescription` | `"slide"`  |
 | `aria-label`           | `"Page N of M"` |
 
+While the leave animation runs, 500 ms by default, the leaving slide is still in the DOM beside the new one. Both keep these attributes, and nothing marks the one that's leaving, so a screen reader can find two slides during that time.
+
 **Navigation arrow buttons**
 
 Each arrow button carries a static `aria-label` of `"Previous page"` or `"Next page"`.
@@ -180,7 +182,7 @@ The dots are a list labelled `"Pages"`. Each carries `aria-label="Page N"`, and 
 | `Home`       | Navigate to the first page    |
 | `End`        | Navigate to the last page     |
 
-Keys work when focus is on the host, an arrow or a pager control. It receives focus via `tabindex="0"` and is part of the natural tab order. Keys inside a slide stay with the slide's content, so a text field or a slider there works normally, and a key with a modifier isn't taken. If a slide is replaced from outside while it holds focus, focus moves to the host.
+Keys work when focus is on the host, an arrow or a pager control. The host receives focus via `tabindex="0"` and is part of the natural tab order. Keys inside a slide stay with the slide's content, so a text field or a slider there works normally, and a key with a modifier isn't taken. If a slide is replaced from outside while it holds focus, focus moves to the host.
 
 ### Consumer responsibilities
 
@@ -201,20 +203,24 @@ Keys work when focus is on the host, an arrow or a pager control. It receives fo
 | `animate`      | `boolean \| number`                                  | `true`     | Controls slide transition animation. `true` uses the default 500 ms duration. `false` disables animation. A number sets a custom duration in milliseconds.                    |
 | `aria-label`      | `string`                                             | `""`       | Accessible name of the carousel, saying what it shows. Use this or `aria-labelledby`. |
 | `aria-labelledby` | `string`                                             | `""`       | The id of the element that names the carousel. |
-| `arrows`       | `boolean`                                            | `false`    | Shows previous/next navigation arrows on the left and right edges. In finite mode, the left arrow is hidden on the first page and the right arrow is hidden on the last page. |
+| `arrows`       | `boolean`                                            | `false`    | Shows previous/next navigation arrows on the left and right edges. In finite mode, the left arrow is hidden on the first page and the right arrow is hidden on the last page. Turn on this or `pageable` as the alternative to a swipe. |
 | `class`        | `string`                                             | `""`       | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                     |
 | `data`         | `Iterable<unknown>`                                  | `[]`       | The collection of items to display. Each item is passed as the implicit variable to the slide template.                                                                       |
 | `height`       | `string \| number`                                   | —          | **Required.** Height of the scroll view. Accepts a CSS string (e.g., `"360px"`) or a unitless number.                                                                         |
 | `index`        | `number`                                             | `0`        | Two-way bindable. Zero-based index of the currently active page.                                                                                                              |
 | `infinite`     | `boolean`                                            | `false`    | When `true`, navigating past the last item wraps to the first, and vice versa.                                                                                                |
-| `pageable`     | `boolean`                                            | `false`    | Shows a row of dot buttons representing each page at the bottom of the component.                                                                                             |
-| `pagerBlur`    | `number`                                             | `3`        | Backdrop blur in pixels applied to the pager overlay strip. Has no visual effect when `pagerOverlay` is `"none"`.                                                             |
-| `pagerOverlay` | `'dark' \| 'light' \| 'none'`                        | `"dark"`   | Background style of the pager strip. `"dark"` and `"light"` apply a semi-transparent overlay with backdrop blur. `"none"` renders the pager without a background.             |
+| `pageable`     | `boolean`                                            | `false`    | Shows a row of dot buttons representing each page at the bottom of the component. Turn on this or `arrows` as the alternative to a swipe.                                     |
+| `pagerBlur`    | `number`                                             | `3`        | Backdrop blur in pixels applied to the pager strip. It applies with every `pagerOverlay`, including `"none"`, so set it to `0` for no blur.                                   |
+| `pagerOverlay` | `'dark' \| 'light' \| 'none'`                        | `"dark"`   | Background style of the pager strip. `"dark"` applies the theme's canvas color, which isn't dark in a light theme, and `"light"` its overlay surface color, both semi-transparent. `"none"` renders the pager without a background. |
 | `pagerRounded` | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `"medium"` | Border-radius preset applied to each pager dot.                                                                                                                               |
 | `rounded`      | `'none' \| 'small' \| 'medium' \| 'large'`           | `"medium"` | Border-radius preset applied to the scroll view container.                                                                                                                    |
 | `width`        | `string \| number`                                   | —          | **Required.** Width of the scroll view. Accepts a CSS string (e.g., `"640px"`) or a unitless number.                                                                          |
 
-`ScrollViewComponent` has no outputs.
+#### Outputs
+
+| Name          | Type     | Description                                                              |
+|---------------|----------|--------------------------------------------------------------------------|
+| `indexChange` | `number` | Emitted when the active page changes, including when a value is corrected. |
 
 ---
 
@@ -236,6 +242,12 @@ Project an `ng-template`, marked with `monaScrollViewSlide`, inside `<mona-scrol
 
 Marks the slide template and types its context. Bind `[monaScrollViewSlide]` to the same data as the scroll view for a typed `let-item`, or use the bare attribute and get `unknown`.
 
+#### Inputs
+
+| Name                  | Type                | Default | Description                                                                                           |
+|-----------------------|---------------------|---------|-------------------------------------------------------------------------------------------------------|
+| `monaScrollViewSlide` | `Iterable<T> \| ""` | `""`    | The data the slides come from, used only to type `let-item`. The value itself is never read at runtime. |
+
 ---
 
 ### Exported types
@@ -256,7 +268,7 @@ import type { PagerOverlay, ScrollViewSlideContext } from "@nanahoshi/mona-ui/sc
 - [x] index model documented as two-way bindable
 - [x] class input (userClass alias) documented
 - [x] height and width marked as required
-- [x] No outputs table (component has no outputs)
+- [x] Outputs table holds only indexChange, from the index model (the component declares no output() of its own)
 - [x] Template context ($implicit, width, height) verified from component template
 - [x] Form integration omitted (not a form control)
 - [x] Keyboard handling (ArrowLeft/ArrowRight/Home/End) verified from onKeydown() in source

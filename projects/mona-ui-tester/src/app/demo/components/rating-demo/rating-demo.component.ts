@@ -130,6 +130,7 @@ export class RatingDemoComponent extends AbstractDemoComponent<RatingComponent> 
                 [aria-describedby]="ariaDescribedBy()"
                 [aria-label]="ariaLabel()"
                 [aria-labelledby]="ariaLabelledBy()"
+                [clearable]="clearable()"
                 [color]="color()"
                 [disabled]="disabled()"
                 [icon]="icon()"
@@ -174,6 +175,7 @@ class RatingWrapperComponent implements ComponentInputsAsSignal<RatingComponent>
     public readonly ariaDescribedBy = input<ReturnType<RatingComponent["ariaDescribedBy"]>>("");
     public readonly ariaLabel = input<ReturnType<RatingComponent["ariaLabel"]>>("Product rating");
     public readonly ariaLabelledBy = input<ReturnType<RatingComponent["ariaLabelledBy"]>>("");
+    public readonly clearable = input(false, { transform: booleanAttribute });
     public readonly color = input<ReturnType<RatingComponent["color"]>>(null);
     public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly icon = input<ReturnType<RatingComponent["icon"]>>("star");

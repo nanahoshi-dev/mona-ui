@@ -103,7 +103,7 @@ When `animate` is `true` (the default), the arc transitions its fill and color o
 Merge additional Tailwind or custom classes onto the host element via the `class` attribute:
 
 ```html
-<mona-circular-progress-bar [value]="75" class="shadow-md"></mona-circular-progress-bar>
+<mona-circular-progress-bar [value]="75" class="shadow-md" aria-label="Upload progress"></mona-circular-progress-bar>
 ```
 
 ### Custom label template

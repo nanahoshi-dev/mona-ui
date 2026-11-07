@@ -106,6 +106,7 @@ export class NumericTextboxDemoComponent extends AbstractDemoComponent<NumericTe
                 [maxValue]="maxValue()"
                 [minValue]="minValue()"
                 [nullable]="nullable()"
+                [placeholder]="placeholder()"
                 [rounded]="rounded()"
                 [size]="size()"
                 [spinners]="spinners()"
@@ -142,6 +143,7 @@ export class NumericTextboxWrapperComponent implements ComponentInputsAsSignal<N
     public readonly maxValue = input<number | null>(null);
     public readonly minValue = input<number | null>(null);
     public readonly nullable = input(false, { transform: booleanAttribute });
+    public readonly placeholder = input("");
     public readonly readonly = input(false, { transform: booleanAttribute });
     public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<NumericTextBoxComponent["rounded"]>>(`medium`);

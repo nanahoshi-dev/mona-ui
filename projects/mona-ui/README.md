@@ -17,6 +17,8 @@ A modern, high-performance, accessible UI component library built for Angular an
 
 ## Documentation
 
+- [Theming](docs/theming.md)
+- [Forms](docs/forms.md)
 - [Internationalization (i18n) & RTL Guide](docs/i18n.md)
 - [Buttons](docs/button.md)
 - [Popups](docs/popup.md)
@@ -35,6 +37,13 @@ A modern, high-performance, accessible UI component library built for Angular an
 
 ```bash
 npm install @nanahoshi/mona-ui
+```
+
+Mona UI is styled with Tailwind CSS 4. Import the package's styles after Tailwind in your main stylesheet:
+
+```css
+@import "tailwindcss";
+@import "@nanahoshi/mona-ui/styles.css";
 ```
 
 ### Setup Internationalization

@@ -1586,7 +1586,7 @@
     "selector": "\"ng-template[monaScrollViewSlide]\"",
     "inputs": [
       {
-        "description": "",
+        "description": "The scroll view's data, bound only so that `let-item` takes its type from it. Leave it empty for\n`unknown`.",
         "kind": "input",
         "name": "monaScrollViewSlide",
         "type": "Iterable<T> | \"\"",
@@ -8098,7 +8098,7 @@
         "defaultValue": "true"
       },
       {
-        "description": "Emitted when the color gradient is interacted with on blur or value adjustment.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when focus leaves the color gradient. Moving between its own parts doesn't count.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
@@ -8349,7 +8349,7 @@
         "defaultValue": "24"
       },
       {
-        "description": "Emitted when focus leaves the color picker, its popup closes or a color is selected.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when focus leaves the color picker or its popup closes. A color selected with\n`closeOnSelect` off doesn't emit it until then.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output",
         "name": "touch",
         "type": "void"
@@ -13845,7 +13845,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Marks the component as invalid. Error styling requires both `invalid` and `touched` to be `true`.\r\nWhen bound to a signal form field via `[formField]`, this is written by the signal forms `Field` directive.",
+        "description": "Marks the component as invalid. Error styling requires both `invalid` and `touched` to be `true`.\nWhen bound to a signal form field via `[formField]`, this is written by the signal forms `FormField` directive.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
@@ -13900,7 +13900,7 @@
         "type": "void"
       },
       {
-        "description": "Marks the component as touched. When bound to a signal form field via `[formField]`,\r\nthis is written by the signal forms `Field` directive.",
+        "description": "Marks the component as touched. When bound to a signal form field via `[formField]`,\nthis is written by the signal forms `FormField` directive.",
         "kind": "input",
         "name": "touched",
         "type": "boolean",

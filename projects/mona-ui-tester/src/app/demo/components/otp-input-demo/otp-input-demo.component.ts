@@ -104,6 +104,7 @@ export class OtpInputDemoComponent extends AbstractDemoComponent<OtpInputCompone
                 [groupLength]="groupLength()"
                 [length]="length()"
                 [placeholder]="placeholder()"
+                [tabindex]="tabindex()"
                 [rounded]="rounded()"
                 [separator]="separator()"
                 [size]="size()"
@@ -148,6 +149,7 @@ export class OtpInputWrapperComponent implements ComponentInputsAsSignal<OtpInpu
     public readonly readonly = input(false, { transform: booleanAttribute });
     public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<OtpInputComponent["rounded"]>>("medium");
+    public readonly tabindex = input<number, number | string>(0, { transform: Number });
     public readonly separator = input("-");
     public readonly size = input<ReturnType<OtpInputComponent["size"]>>("medium");
     public readonly spacing = input(true, { transform: booleanAttribute });

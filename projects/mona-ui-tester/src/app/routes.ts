@@ -27,6 +27,14 @@ export const routes: Routes = [
                     import("./docs/installation-doc/installation-doc.component").then(m => m.InstallationDocComponent)
             },
             {
+                path: "theming",
+                loadComponent: () => import("./docs/theming-doc/theming-doc.component").then(m => m.ThemingDocComponent)
+            },
+            {
+                path: "forms",
+                loadComponent: () => import("./docs/forms-doc/forms-doc.component").then(m => m.FormsDocComponent)
+            },
+            {
                 path: "theme-colors",
                 loadComponent: () =>
                     import("./docs/theme-colors-doc/theme-colors-doc.component").then(m => m.ThemeColorsDocComponent)

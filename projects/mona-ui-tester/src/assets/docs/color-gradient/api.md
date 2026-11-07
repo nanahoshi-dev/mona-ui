@@ -4,7 +4,7 @@ Use `ColorGradientComponent` when a user needs to choose a custom color rather t
 
 Use `ColorPaletteComponent` when the user should choose only from known colors. Use `ColorPickerComponent` when the color editor should open from a compact dropdown-style control.
 
-> **Signal forms only.** `ColorGradientComponent` implements `FormValueControl<string | null | undefined>` from `@angular/forms/signals`. It does not implement `ControlValueAccessor`, so `[(ngModel)]`, `[formControl]`, and `formControlName` are not supported.
+> **Forms.** `ColorGradientComponent` implements `FormValueControl<string | null | undefined>` from `@angular/forms/signals`, so use `[formField]` with signal forms. It has no `ControlValueAccessor`, but `[(ngModel)]`, `[formControl]` and `formControlName` work too, because Angular binds a control's `value` and `touch` directly when it has no accessor.
 
 ## Import & Quick Start
 
@@ -25,10 +25,11 @@ protected readonly color = signal<string | null | undefined>("#336699");
 **Signal forms**
 
 ```typescript
+import { signal } from "@angular/core";
 import { FormField, form } from "@angular/forms/signals";
 import { ColorGradientComponent } from "@nanahoshi/mona-ui/color-gradient";
 
-protected readonly form = form({ color: "#336699" });
+protected readonly form = form(signal<{ color: string | null }>({ color: "#336699" }));
 ```
 
 ```html
@@ -88,7 +89,7 @@ Supported rounded values are `none`, `small`, `medium`, `large`, and `full`.
 
 ## Value Parsing & Output
 
-The `value` model accepts `undefined`, `null`, and color strings. When `value` is `undefined`, the component keeps its default internal color state. When `value` is `null`, the component clears its internal color channels.
+The `value` model accepts `undefined`, `null`, and color strings. When `value` is `undefined`, the controls stay as they are, white to begin with. When `value` is `null`, the controls show no color.
 
 It reads what the browser can paint:
 
@@ -99,11 +100,19 @@ It reads what the browser can paint:
 | HSL/HSLA      | `hsl(210, 50%, 40%)`, `hsla(210.5, 50%, 40%, 0.8)`, `hsl(210 50% 40%)`    |
 | Anything else | `red`, `transparent`, `oklch(50% 0.1 200)`, through the browser's canvas  |
 
-A value it still can't read, such as `var(--brand)`, shows as no color and warns in development. Apply only writes after an edit, so that value and any other stay exactly as written until a user changes the color. A color outside sRGB comes back as its closest sRGB color once edited.
+A value it still can't read, such as `var(--brand)`, shows as no color and warns in development. Apply only writes after an edit, so that value and any other stay exactly as written until a user changes the color. The exception is a `value` of `undefined`, where Apply writes the color on screen. A color outside sRGB comes back as its closest sRGB color once edited.
 
-When the component emits a value, the emitted string follows the `format` input. Alpha is included where the selected format supports it. It's written with as few decimals as read back the same, so a saved `0.5` stays `0.5`, and HSL has one decimal.
+When the component emits a value, the emitted string follows the `format` input:
 
-Cancel puts the controls back on `value`. Clear only empties the controls until Apply, and the previous color stays available until then.
+| `format` | Written as                                                 |
+|----------|------------------------------------------------------------|
+| `hex`    | `#336699`, or `#336699cc` when the color isn't fully opaque |
+| `rgb`    | `rgba(51, 102, 153, 0.8)`, with alpha always included      |
+| `hsl`    | `hsla(210, 50%, 40%, 0.8)`, with alpha always included     |
+
+Alpha is written with as few decimals as read back the same, so a saved `0.5` stays `0.5`. HSL channels have one decimal, because whole percentages can't bring most colors back.
+
+Cancel puts the controls back on `value`. With the buttons shown, Clear only empties the controls until Apply, and the previous color stays available until then. With `showButtons` off, Clear writes `null` at once.
 
 ## Right to Left
 
@@ -129,7 +138,7 @@ The previous-color swatch is keyboard-activatable with `Enter` and `Space`.
 
 ## Accessibility Notes
 
-The host is a `role="group"` named by the `aria-label` input, `aria-labelledby` or a `mona-label`, or `"Color gradient"` otherwise. Every slider and input has a name of its own, and the alpha slider reads as a percentage. The saturation/value handle renders a focusable slider and exposes the current saturation and value.
+The host is a `role="group"` named by the `aria-label` input, `aria-labelledby` or a `mona-label`, or `"Color gradient"` otherwise. It has `aria-invalid="true"` once `touched` and either `invalid`, or `required` with no color. Every slider and input has a name of its own, and the alpha slider reads as a percentage. The saturation/value handle renders a focusable slider and exposes the current saturation and value.
 
 | Attribute        | When present                          | Value                                |
 |------------------|---------------------------------------|--------------------------------------|
@@ -140,9 +149,10 @@ The host is a `role="group"` named by the `aria-label` input, `aria-labelledby` 
 | `aria-valuenow`  | Always on the saturation/value handle | Current saturation, `0` with no color |
 | `aria-valuetext` | Always on the saturation/value handle | `"Saturation n%, Value n%"`          |
 | `aria-disabled`  | When disabled                         | `true`                               |
+| `aria-readonly`  | When read-only                        | `true`                               |
 | `tabindex`       | Always on the saturation/value handle | `0` when enabled, `-1` when disabled |
 
-The previous-color swatch renders as a button only for the previous color. The current-color preview is marked `aria-hidden`.
+The previous-color swatch has `role="button"`. The current-color preview is marked `aria-hidden`.
 
 **Consumer responsibilities**
 
@@ -154,9 +164,10 @@ The previous-color swatch renders as a button only for the previous color. The c
 `ColorGradientComponent` implements `FormValueControl<string | null | undefined>` from `@angular/forms/signals`.
 
 ```typescript
+import { signal } from "@angular/core";
 import { FormField, disabled, form } from "@angular/forms/signals";
 
-protected readonly form = form({ color: "#336699" }, schema => {
+protected readonly form = form(signal<{ color: string | null }>({ color: "#336699" }), schema => {
     disabled(schema.color, { when: () => this.locked() });
 });
 ```
@@ -165,7 +176,7 @@ protected readonly form = form({ color: "#336699" }, schema => {
 <mona-color-gradient [formField]="form.color" [showButtons]="false"></mona-color-gradient>
 ```
 
-The `touch` output fires when the user blurs the saturation/value handle, slider controls, numeric inputs, or hex input. The signal forms `FormField` directive listens to this output to mark the field as touched.
+The `touch` output fires when focus leaves the component. Moving between its controls doesn't fire it. The signal forms `FormField` directive listens to this output to mark the field as touched.
 
 ## API
 
@@ -179,16 +190,20 @@ Implements `FormValueControl<string | null | undefined>` from `@angular/forms/si
 
 | Name              | Type                                                 | Default     | Description                                                                                                                                                    |
 |-------------------|------------------------------------------------------|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `aria-label`      | `string`                                             | `""`        | Accessible name of the group of controls.                                                                                                                      |
+| `aria-label`      | `string`                                             | `""`        | Accessible name of the group of controls. When empty, and nothing else names it, a localized "Color gradient".                                                 |
 | `aria-labelledby` | `string`                                             | `""`        | Id of the element that names the group of controls.                                                                                                            |
 | `disabled`        | `boolean`                                            | `false`     | Sets the disabled state of the color gradient.                                                                                                                 |
 | `format`          | `'hex' \| 'rgb' \| 'hsl'`                            | `'hex'`     | Output format used when the component emits a color value.                                                                                                     |
+| `invalid`         | `boolean`                                            | `false`     | Marks the color gradient as invalid once `touched`. When bound via `[formField]`, this is written by the `FormField` directive.                                |
 | `opacity`         | `boolean`                                            | `true`      | Shows or hides the alpha slider.                                                                                                                               |
+| `readonly`        | `boolean`                                            | `false`     | Prevents value changes while the control stays focusable and readable. When bound via `[formField]`, this is written by the `FormField` directive.             |
+| `required`        | `boolean`                                            | `false`     | With no color, makes the color gradient invalid once `touched`. `aria-required` isn't set, because `role="group"` doesn't allow it. When bound via `[formField]`, this is written by the `FormField` directive. |
 | `rounded`         | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'`  | Border-radius preset applied to the color gradient controls.                                                                                                   |
 | `showButtons`     | `boolean`                                            | `true`      | Shows Apply and Cancel buttons. When `false`, value changes emit immediately.                                                                                  |
 | `showColorInputs` | `boolean`                                            | `true`      | Shows or hides the RGB/HSV numeric channel inputs.                                                                                                             |
 | `showHexInput`    | `boolean`                                            | `true`      | Shows or hides the hex text input.                                                                                                                             |
-| `value`           | `string \| null \| undefined`                        | `undefined` | Two-way bindable current color value. `undefined` keeps the default internal color state; `null` clears the current color. Implements `FormValueControl<string | null | undefined>`, enabling signal forms `[formField]` binding. |
+| `touched`         | `boolean`                                            | `false`     | Marks the color gradient as touched. When bound via `[formField]`, this is written by the `FormField` directive.                                               |
+| `value`           | `string \| null \| undefined`                        | `undefined` | Two-way bindable current color value. `undefined` leaves the controls as they are, white to begin with; `null` shows no color. Implements `FormValueControl<string \| null \| undefined>`, enabling signal forms `[formField]` binding. |
 
 #### Outputs
 
@@ -196,20 +211,25 @@ Implements `FormValueControl<string | null | undefined>` from `@angular/forms/si
 |----------|--------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `apply`  | `void` | Emitted when the Apply button is clicked. The button is only displayed when `showButtons` is `true`.                                                             |
 | `cancel` | `void` | Emitted when the Cancel button is clicked, after the controls go back to `value`. The button is only displayed when `showButtons` is `true`.                     |
-| `touch`  | `void` | Emitted when the color gradient is interacted with on blur or value adjustment. Consumed by the signal forms `FormField` directive to mark the field as touched. |
+| `touch`  | `void` | Emitted when focus leaves the color gradient. Consumed by the signal forms `FormField` directive to mark the field as touched.                                   |
+
+### Exported Types
+
+| Name                        | Shape                     | Description                                                                         |
+|-----------------------------|---------------------------|-------------------------------------------------------------------------------------|
+| `ColorOutputFormat`         | `"hex" \| "rgb" \| "hsl"` | The type of `format`. Import it from `@nanahoshi/mona-ui/common`.                   |
+| `ColorGradientVariantProps` | —                         | Variant prop type backing the `rounded` input's literal union, exported for advanced typing scenarios. |
 
 ---
 
-TODO(owner-review): `format` is typed as the internal `ColorOutputFormat` alias and `rounded` is typed through `ColorGradientVariantProps["rounded"]` in source. Consider exporting these public-signature types or keeping the docs' literal-union expansion as the supported consumer contract.
-
 <!-- verification-checklist
-- [x] API definitions and defaults verified against source and component-metadata.json
+- [x] API definitions and defaults verified against source
 - [x] Basic examples use public imports from @nanahoshi/mona-ui
 - [x] Signal forms support verified against FormValueControl implementation and specs
-- [x] ControlValueAccessor absence documented
+- [x] ControlValueAccessor absence documented, and the custom-control path verified in @angular/forms 22 (NgControl.ngControlCreate)
 - [x] Keyboard map verified against source and focused specs
 - [x] ARIA attributes verified against color-gradient.component.html
 - [x] Inputs and outputs tables sorted A-Z within each section
 - [x] No private methods, internal signals, Tailwind utility classes, or implementation-only DOM details exposed
-- [x] Unexported public-signature types marked with TODO(owner-review)
+- [x] ColorOutputFormat and ColorGradientVariantProps verified as exported
 -->

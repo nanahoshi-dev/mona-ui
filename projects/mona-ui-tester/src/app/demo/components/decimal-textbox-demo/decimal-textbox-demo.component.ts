@@ -95,11 +95,15 @@ export class DecimalTextboxDemoComponent extends AbstractDemoComponent<DecimalTe
         <div class="flex flex-col gap-2">
             <span>Value: {{ form.amount().value() }}</span>
             <mona-decimal-text-box
+                [aria-describedby]="ariaDescribedBy()"
+                [aria-labelledby]="ariaLabelledBy()"
                 [decimals]="decimals()"
                 [formatter]="formatterFn()"
                 [maxValue]="maxValue()"
                 [minValue]="minValue()"
+                [inputId]="inputId()"
                 [nullable]="nullable()"
+                [placeholder]="placeholder()"
                 [rounded]="rounded()"
                 [size]="size()"
                 [spinners]="spinners()"
@@ -131,12 +135,16 @@ export class DecimalTextboxWrapperComponent implements ComponentInputsAsSignal<D
             ? (value: string | null) => (value == null ? "" : `$ ${value}`)
             : null;
     });
+    public readonly ariaDescribedBy = input("");
+    public readonly ariaLabelledBy = input("");
     public readonly decimals = input(0);
     public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly formatter = input<ReturnType<DecimalTextBoxComponent["formatter"]>>(this.formatterFn());
     public readonly maxValue = input<string | null, string | number | null>(null, { transform: toOptionalString });
     public readonly minValue = input<string | null, string | number | null>(null, { transform: toOptionalString });
+    public readonly inputId = input("decimal-text-box-demo-input");
     public readonly nullable = input(false, { transform: booleanAttribute });
+    public readonly placeholder = input("");
     public readonly readonly = input(false, { transform: booleanAttribute });
     public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<DecimalTextBoxComponent["rounded"]>>(`medium`);

@@ -8,6 +8,7 @@ import {
     resolveTypeScriptCompilerPath,
     runConsumerSmokeTest,
     verifyBuiltPackage,
+    verifyPackageStyles,
     verifyThirdPartyNotices
 } from "./verify-built-package";
 
@@ -154,6 +155,43 @@ describe("verify-built-package", () => {
                 });
             } finally {
                 rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+    });
+
+    describe("verifyPackageStyles", () => {
+        it("fails when the package has no stylesheet", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                writeFileSync(join(fakeDist, "package.json"), JSON.stringify({ exports: { "./styles.css": "./styles.css" } }));
+                expect(() => verifyPackageStyles(fakeDist)).toThrow("styles.css not found");
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when the stylesheet isn't exported, since Tailwind couldn't resolve the import", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                writeFileSync(join(fakeDist, "package.json"), JSON.stringify({ exports: {} }));
+                writeFileSync(join(fakeDist, "styles.css"), "@theme { --color-primary: red; }");
+                expect(() => verifyPackageStyles(fakeDist)).toThrow('missing exports["./styles.css"]');
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when the stylesheet compiles without the classes the components use", () => {
+            const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
+            try {
+                writeFileSync(
+                    join(fakeDist, "package.json"),
+                    JSON.stringify({ exports: { "./styles.css": "./styles.css" } })
+                );
+                writeFileSync(join(fakeDist, "styles.css"), "@theme { --color-primary: red; }");
+                expect(() => verifyPackageStyles(fakeDist)).toThrow("The compiled stylesheet has no .bg-primary");
+            } finally {
+                rmSync(fakeDist, { recursive: true, force: true });
             }
         });
     });

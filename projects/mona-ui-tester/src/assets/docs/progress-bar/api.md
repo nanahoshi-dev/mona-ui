@@ -2,7 +2,7 @@
 
 `ProgressBarComponent` renders a full-width horizontal bar that fills proportionally to a numeric value within an explicit range. The label remains readable regardless of the current fill level.
 
-An indeterminate mode is available for tasks where the total duration is unknown. In that mode the default label is hidden and a repeating diagonal stripe animation fills the bar.
+An indeterminate mode is available for tasks where the total duration is unknown. In that mode the label is hidden, including a custom one, and a repeating diagonal stripe animation fills the bar.
 
 **Use `ProgressBarComponent` when you need to:**
 
@@ -68,10 +68,10 @@ protected getColor = (percent: number): string =>
 
 ```html
 <!-- Hide the label -->
-<mona-progress-bar [value]="50" [labelVisible]="false"></mona-progress-bar>
+<mona-progress-bar [value]="50" [labelVisible]="false" aria-label="Upload progress"></mona-progress-bar>
 
 <!-- Label at the start -->
-<mona-progress-bar [value]="50" labelPosition="start"></mona-progress-bar>
+<mona-progress-bar [value]="50" labelPosition="start" aria-label="Upload progress"></mona-progress-bar>
 ```
 
 ## Appearance & Styling
@@ -139,7 +139,7 @@ The template is rendered twice, one copy over the fill and one over the track, w
 Use `labelStyles` to apply arbitrary inline styles to the default `<span>` label. This has no effect when a custom `monaProgressBarLabelTemplate` is in use:
 
 ```html
-<mona-progress-bar [value]="60" [labelStyles]="{ fontWeight: '700', fontSize: '10px' }">
+<mona-progress-bar [value]="60" [labelStyles]="{ fontWeight: '700', fontSize: '10px' }" aria-label="Upload progress">
 </mona-progress-bar>
 ```
 
@@ -148,7 +148,7 @@ Use `labelStyles` to apply arbitrary inline styles to the default `<span>` label
 Merge additional Tailwind or custom classes onto the host element via the `class` attribute. They are applied through `tailwind-merge` to avoid conflicts with the computed classes:
 
 ```html
-<mona-progress-bar [value]="80" class="h-3"></mona-progress-bar>
+<mona-progress-bar [value]="80" class="h-3" aria-label="Upload progress"></mona-progress-bar>
 ```
 
 ## Accessibility Notes
@@ -190,8 +190,8 @@ Consumer responsibilities:
 | `labelPosition`  | `'start' \| 'center' \| 'end'`                       | `'center'` | Horizontal alignment of the label within the bar.                                                                                                                                                                                                                                              |
 | `labelStyles`    | `Partial<CSSStyleDeclaration>`                       | `{}`       | Inline styles applied to the default label `<span>`. Has no effect when `monaProgressBarLabelTemplate` is used.                                                                                                                                                                                |
 | `labelVisible`   | `boolean`                                            | `true`     | Hides the label when `false`. Has no effect in indeterminate mode (label is always hidden).                                                                                                                                                                                                    |
-| `max`            | `number`                                             | `100`      | Maximum value of the progress range.                                                                                                                                                                                                                                                           |
-| `min`            | `number`                                             | `0`        | Minimum value of the progress range.                                                                                                                                                                                                                                                           |
+| `max`            | `number`                                             | `100`      | Upper bound of the value range. Must be greater than `min`. |
+| `min`            | `number`                                             | `0`        | Lower bound of the value range. |
 | `rounded`        | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Border-radius preset applied to the host and both track elements.                                                                                                                                                                                                                              |
 | `value`          | `number`                                             | `0`        | Current progress value within `[min, max]`. Values outside the range are clamped, for the bar and for `aria-valuenow`. Non-finite values (e.g. `NaN`) count as `min`. |
 

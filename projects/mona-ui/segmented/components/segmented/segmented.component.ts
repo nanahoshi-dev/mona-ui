@@ -155,7 +155,7 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
 
     /**
      * @description Marks the component as invalid. Error styling requires both `invalid` and `touched` to be `true`.
-     * When bound to a signal form field via `[formField]`, this is written by the signal forms `Field` directive.
+     * When bound to a signal form field via `[formField]`, this is written by the signal forms `FormField` directive.
      * @default false
      */
     public readonly invalid = input(false, { transform: booleanAttribute });
@@ -205,7 +205,7 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
 
     /**
      * @description Marks the component as touched. When bound to a signal form field via `[formField]`,
-     * this is written by the signal forms `Field` directive.
+     * this is written by the signal forms `FormField` directive.
      * @default false
      */
     public readonly touched = input(false, { transform: booleanAttribute });

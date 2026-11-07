@@ -15,6 +15,7 @@
 
 ```typescript
 import { SegmentedComponent, SegmentedItemTemplateDirective } from "@nanahoshi/mona-ui/segmented";
+import type { SegmentedOption } from "@nanahoshi/mona-ui/segmented";
 ```
 
 ```typescript
@@ -25,7 +26,7 @@ protected readonly viewModes: SegmentedOption<ViewMode>[] = [
     { label: "Grid", value: "grid" }
 ];
 
-protected viewMode: ViewMode = "list";
+protected viewMode: ViewMode | null = "list";
 ```
 
 ```html
@@ -72,12 +73,12 @@ protected readonly sortOptions: SegmentedOption<string>[] = [
 
 ### Full-width layout
 
-The control stretches to its container by default. Use the `class` input to apply layout utilities such as a constrained width.
+The control is as wide as its options by default. Use the `class` input to give it a width, and with the default `alignment` the options share that width equally.
 
 ```html
 <mona-segmented
     aria-label="Period"
-    class="w-72"
+    class="w-full"
     [options]="periods"
     [(value)]="period">
 </mona-segmented>
@@ -159,9 +160,11 @@ Tabs convey "one of several content panels is active"; Segmented conveys "one of
 |-------------------|-----------------------------------------------------------------------------|
 | `role`            | `"radiogroup"`                                                              |
 | `aria-label`      | The value of the `aria-label` input, when provided                           |
-| `aria-labelledby` | The value of the `aria-labelledby` input, when provided                     |
+| `aria-labelledby` | The value of the `aria-labelledby` input, or the id of a `mona-label`       |
 | `aria-disabled`   | `"true"` when the group is disabled; omitted otherwise                      |
-| `aria-invalid`    | `"true"` when the control is both `touched` and `invalid`; `null` otherwise |
+| `aria-invalid`    | `"true"` when the control is both `touched` and `invalid`; omitted otherwise |
+| `aria-readonly`   | `"true"` when `readonly`; omitted otherwise                                 |
+| `aria-required`   | `"true"` when `required`; omitted otherwise                                 |
 
 Each option renders a native `<input type="radio">` sharing the same `name`, so assistive technology announces the option label and its checked state automatically. A focused radio shows a solid outline around its option. In forced colors, which drop backgrounds, the selected option keeps a highlighted border.
 
@@ -228,16 +231,19 @@ The component still owns the radio input, selection, and disabled semantics; the
 | Name             | Type                                                       | Default    | Description                                                                                                                                                                                                 |
 |------------------|------------------------------------------------------------|------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `alignment`      | `"start" \| "center" \| "end" \| "stretch"`                | `"stretch"`| Controls how options are positioned within the container. `"stretch"` makes every option fill equal width; `"start"`, `"center"`, `"end"` size options to their content. `"start"`/`"end"` follow the current text direction. |
+| `animate`        | `boolean`                                                  | `true`     | Whether the selection indicator animates between options. When `false`, it moves at once.                                                                                                                  |
 | `aria-label`     | `string \| null`                                           | `null`     | Accessible name for the radio group. Provide either `aria-label` or `aria-labelledby`.                                                                                                                      |
 | `aria-labelledby`| `string \| null`                                           | `null`     | ID of an external element that provides the accessible name for the radio group.                                                                                                                            |
 | `class`          | `string`                                                   | `""`       | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                                                   |
 | `disabled`       | `boolean`                                                  | `false`    | Disables every option in the group and prevents value changes.                                                                                                                                              |
-| `invalid`        | `boolean`                                                  | `false`    | Marks the component as invalid. Error styling requires both `invalid` and `touched` to be `true`. When bound to a signal form field via `[formField]`, this is written by the signal forms `Field` directive. |
+| `invalid`        | `boolean`                                                  | `false`    | Marks the component as invalid. Error styling requires both `invalid` and `touched` to be `true`. When bound to a signal form field via `[formField]`, this is written by the signal forms `FormField` directive. |
 | `name`           | `string`                                                   | `""`       | The name of the radios, for a native `<form>`. Generated when empty, so two groups don't interfere. A signal form field writes it.                                                                           |
 | `options`        | `readonly SegmentedOption<T>[]`                            | —          | **Required.** The list of selectable options. Exactly one option is selected at a time.                                                                                                                     |
+| `readonly`       | `boolean`                                                  | `false`    | Prevents value changes while the control stays focusable and readable. A signal form field writes it.                                                                                                       |
+| `required`       | `boolean`                                                  | `false`    | Marks the group as required, as `aria-required`. A signal form field writes it.                                                                                                                             |
 | `rounded`        | `"none" \| "small" \| "medium" \| "large" \| "full"` | `"medium"` | Border-radius preset applied to the segmented container and its options.                                                                                                                                     |
 | `size`           | `"small" \| "medium" \| "large"`                           | `"medium"` | Size preset controlling the height, horizontal padding, text size, and spacing of each option.                                                                                                              |
-| `touched`        | `boolean`                                                  | `false`    | Marks the component as touched. When bound to a signal form field via `[formField]`, this is written by the signal forms `Field` directive.                                                                  |
+| `touched`        | `boolean`                                                  | `false`    | Marks the component as touched. When bound to a signal form field via `[formField]`, this is written by the signal forms `FormField` directive.                                                              |
 | `value`          | `T \| null`                                                | `null`     | Two-way bindable. The currently selected value. When it matches no current option, no option is checked. A `null` value is allowed initially but cannot be restored through segmented interaction.           |
 
 #### Outputs
@@ -248,12 +254,28 @@ The component still owns the radio input, selection, and disabled semantics; the
 
 ---
 
+### `SegmentedItemTemplateDirective`
+
+**Selector:** `ng-template[monaSegmentedItemTemplate]`
+
+Replaces the visible content of every option. See [Templates](#templates).
+
+#### Inputs
+
+| Name                        | Type                                               | Default     | Description                                                     |
+|-----------------------------|----------------------------------------------------|-------------|-----------------------------------------------------------------|
+| `monaSegmentedItemTemplate` | `readonly SegmentedOption<T>[] \| "" \| undefined` | `undefined` | The options, to type `let-option` from them. It changes nothing else. |
+
+---
+
 ### Exported types
 
 | Type               | Description                                                                  |
 |--------------------|------------------------------------------------------------------------------|
 | `SegmentedValue`   | `string \| number` — the value domain of every `SegmentedOption`.             |
 | `SegmentedOption<T>` | `{ readonly label: string; readonly value: T; readonly disabled?: boolean }` — a single selectable option. `label` is the visible text; `value` is the value written to the `value` model; `disabled` optionally disables this option. |
+| `SegmentedItemTemplateContext<T>` | The context of the item template. See [Template Context](#template-context). |
+| `SegmentedVariantProps` | Variant prop type backing the `alignment`, `rounded` and `size` inputs' literal unions. |
 
 ```typescript
 import type { SegmentedOption, SegmentedValue } from "@nanahoshi/mona-ui/segmented";
@@ -267,21 +289,27 @@ import type { SegmentedOption, SegmentedValue } from "@nanahoshi/mona-ui/segment
 
 ```html
 <mona-segmented
-    [formField]="viewModeField"
+    aria-label="View mode"
+    [formField]="form.viewMode"
     [options]="viewModes">
 </mona-segmented>
 ```
 
 ```typescript
-protected readonly viewModeField = new Field<ViewMode | null>(null);
+import { signal } from "@angular/core";
+import { FormField, form } from "@angular/forms/signals";
+
+protected readonly form = form(signal<{ viewMode: ViewMode | null }>({ viewMode: "list" }));
 ```
 
-When bound to a `Field`, the `Field` directive writes `invalid` and `touched` through the corresponding inputs and reads the selection from the `value` model.
+When bound to a field, the `FormField` directive writes `invalid`, `touched`, `disabled`, `readonly`, `required` and `name` through the corresponding inputs and reads the selection from the `value` model.
+
+It has no `ControlValueAccessor`, but `[(ngModel)]`, `[formControl]` and `formControlName` work too, because Angular binds a control's `value` and `touch` directly when it has no accessor.
 
 ---
 
 <!-- verification-checklist
-- [x] SegmentedComponent inputs/outputs/defaults verified against segmented.component.ts source and cross-checked against component-metadata.json's SegmentedComponent entry (alignment, ariaLabel, ariaLabelledBy, class, disabled, invalid, options, rounded, size, touched, value, touch)
+- [x] SegmentedComponent inputs/outputs/defaults verified against segmented.component.ts source (alignment, animate, ariaLabel, ariaLabelledBy, class, disabled, invalid, name, options, readonly, required, rounded, size, touched, value, touch)
 - [x] alignment preset semantics verified against segmented.styles.ts segmentedContainerThemeVariants (justify-*) and segmentedOptionThemeVariants (flex-1 vs flex-none)
 - [x] SegmentedValue and SegmentedOption exported types verified against models/SegmentedValue.ts and models/SegmentedOption.ts
 - [x] Two-way value model behavior (no option checked when value matches nothing; null allowed initially) verified against segmented.component.ts's onOptionChange and value model declaration
@@ -290,7 +318,7 @@ When bound to a `Field`, the `Field` directive writes `invalid` and `touched` th
 - [x] Options/labels/disabled per-option behavior verified against segmented.component.ts's optionDisabled computed and onOptionChange guard
 - [x] size preset semantics verified against segmented.styles.ts segmentedOptionThemeVariants
 - [x] rounded preset semantics verified against segmented.styles.ts segmentedContainerThemeVariants and segmentedOptionThemeVariants, with the focus ring inheriting the option radius
-- [x] FormValueControl signal-forms integration verified against the `implements FormValueControl<T | null>` declaration and Field-driven invalid/touched writes
+- [x] FormValueControl signal-forms integration verified against the `implements FormValueControl<T | null>` declaration and FormField-driven writes
 - [x] Import paths use @nanahoshi/mona-ui/segmented per repo markdown convention
 - [x] No internal computed signals, private methods, or Tailwind class names documented as public API
 - [x] Inputs table sorted A→Z

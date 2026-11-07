@@ -120,7 +120,7 @@ protected readonly steps: StepOptions[] = [
 
 ### Stopping a step change
 
-`stepSelect` fires before a click or key changes the step. Call `preventDefault()` to stay where you are, for example while the current step's form is invalid. It's a veto rather than a correction, so there's no flicker to undo. It doesn't fire when `step` is written from outside, or for a click on the current or a locked step.
+`stepSelect` fires before a click or key changes the step, and the keys that change it are `Enter` and `Space`, since the arrows only move focus. Call `preventDefault()` to stay where you are, for example while the current step's form is invalid. It's a veto rather than a correction, so there's no flicker to undo. It doesn't fire when `step` is written from outside, so it can't veto your own Next and Back buttons, or for a click on the current or a locked step.
 
 ```html
 <mona-stepper [steps]="steps" [(step)]="currentStep" (stepSelect)="onStepSelect($event)"></mona-stepper>
@@ -153,6 +153,8 @@ protected readonly steps = computed<StepOptions[]>(() => [
 | `upcoming`  | Outlined, with the number                                       |
 | `disabled`  | Muted, with a dashed border and a muted label                   |
 | `invalid`   | An alert icon and an error-colored border, on top of the others |
+
+There's no optional state. To mark a step as optional, say so in its `label`.
 
 ### Step values
 
@@ -203,32 +205,33 @@ protected readonly steps: StepOptions<{ icon: string }>[] = [
 | `End`                                              | Move focus to the last reachable step     |
 | `Enter` / `Space`                                  | Activate the step that has focus          |
 
-A reachable step is one you could activate: never a disabled step, and in linear mode only the nearest enabled steps on either side of the current one. The stepper uses a **roving tabindex** pattern — only one step has `tabindex="0"`. These keys only count on the step buttons, without `Alt`, `Ctrl`, `Meta` or `Shift`, so a control in a label template keeps its own keys and clicks.
+A reachable step is one you could activate: never a disabled step, and in linear mode only the nearest enabled steps on either side of the current one. In a right-to-left layout, `ArrowLeft` and `ArrowRight` swap. The stepper uses a **roving tabindex** pattern — only one step has `tabindex="0"`. These keys only count on the step buttons, without `Alt`, `Ctrl`, `Meta` or `Shift`, so a control in a label template keeps its own keys and clicks.
 
 ### ARIA attributes
 
-| Attribute                         | Element                   | When                             | Value                                                 |
-| --------------------------------- | ------------------------- | -------------------------------- | ----------------------------------------------------- |
-| `role="group"`                    | Host                      | Always                           | —                                                     |
-| `aria-label`                      | Host                      | Always                           | `aria-label` input (default `"Progress"`)             |
-| Native `button`                   | Each step indicator       | Always                           | —                                                     |
-| `aria-label`                      | Each step indicator       | Always                           | Step's `label` string                                 |
-| `aria-describedby`                | Each step indicator       | Always                           | Hidden text: position, completed and errors           |
-| `aria-current="step"`             | Active step indicator     | When this step is active         | `"step"`                                              |
-| `aria-disabled="true"`            | Locked/disabled indicator | When locked (linear) or disabled | `true`                                                |
-| `tabindex="0"`                    | The step's Tab stop       | One step at a time               | `0`                                                   |
-| `tabindex="-1"`                   | All other indicators      | Otherwise                        | `-1`                                                  |
-| `role="list"`                     | The `<ol>`                | Always                           | —                                                     |
-| `role="progressbar"`              | Progress track            | Always                           | —                                                     |
-| `aria-valuenow`                   | Progress track            | Always                           | Current step index                                    |
-| `aria-valuetext`                  | Progress track            | With steps                       | `stepPosition` message, such as "Step 2 of 4"         |
-| `aria-valuemin` / `aria-valuemax` | Progress track            | Always                           | `0` / total steps minus one                           |
-| `aria-label`                      | Progress track            | Always                           | `progressAriaLabel` input (default `"Step progress"`) |
+| Attribute                         | Element                   | When                             | Value                                                    |
+| --------------------------------- | ------------------------- | -------------------------------- | -------------------------------------------------------- |
+| `role="group"`                    | Host                      | Always                           | —                                                        |
+| `aria-label`                      | Host                      | Always                           | `aria-label` input, or the `stepper` message             |
+| Native `button`                   | Each step indicator       | Always                           | —                                                        |
+| `aria-label`                      | Each step indicator       | Always                           | Step's `label` string                                    |
+| `aria-describedby`                | Each step indicator       | Always                           | Hidden text: position, completed and errors              |
+| `aria-current="step"`             | Active step indicator     | When this step is active         | `"step"`                                                 |
+| `aria-disabled="true"`            | Locked/disabled indicator | When locked (linear) or disabled | `true`                                                   |
+| `tabindex="0"`                    | The step's Tab stop       | One step at a time               | `0`                                                      |
+| `tabindex="-1"`                   | All other indicators      | Otherwise                        | `-1`                                                     |
+| `role="list"`                     | The `<ol>`                | Always                           | —                                                        |
+| `role="progressbar"`              | Progress track            | Always                           | —                                                        |
+| `aria-valuenow`                   | Progress track            | Always                           | Current step index                                       |
+| `aria-valuetext`                  | Progress track            | With steps                       | `stepPosition` message, such as "Step 2 of 4"            |
+| `aria-valuemin` / `aria-valuemax` | Progress track            | Always                           | `0` / total steps minus one                              |
+| `aria-label`                      | Progress track            | Always                           | `progressAriaLabel` input, or the `stepProgress` message |
+
+Both names are localized when you leave the inputs empty: the `stepper` message is "Progress" in English, and `stepProgress` is "Step progress".
 
 **Consumer responsibilities:**
 
 - Provide a meaningful `aria-label` when context does not already identify the stepper's purpose.
-- Provide a localized `progressAriaLabel` for non-English applications.
 - All `label` fields in `StepOptions` are required and become the accessible name for each indicator.
 - A custom step or indicator template replaces the check and alert icons, so show `state` and `invalid` in it some way other than color.
 
@@ -240,22 +243,22 @@ A reachable step is one you could activate: never a disabled step, and in linear
 
 #### Inputs
 
-| Name                | Type                                                 | Default           | Description                                                                                                     |
-| ------------------- | ---------------------------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------- |
-| `aria-label`        | `string`                                             | `"Progress"`      | Accessible label for the stepper group (`role="group"`).                                                        |
-| `linear`            | `boolean`                                            | `true`            | When true, only the nearest enabled step on either side can be reached by click or keyboard.                    |
-| `orientation`       | `"horizontal" \| "vertical"`                         | `"horizontal"`    | Layout direction of the step list and track.                                                                    |
-| `progressAriaLabel` | `string`                                             | `"Step progress"` | Accessible label for the progress bar. Localize this for non-English apps.                                      |
-| `rounded`           | `"none" \| "small" \| "medium" \| "large" \| "full"` | `"full"`          | Border-radius preset applied to each step indicator.                                                            |
-| `step`              | `number`                                             | `0`               | Two-way bindable active step index. Use `[(step)]` for two-way binding or `(stepChange)` to listen for changes. |
-| `steps`             | `Iterable<StepOptions>`                              | `[]`              | Ordered list of step definitions.                                                                               |
+| Name                | Type                                                 | Default        | Description                                                                                                     |
+| ------------------- | ---------------------------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------- |
+| `aria-label`        | `string`                                             | `""`           | Accessible label for the stepper group (`role="group"`). Left empty, it's the localized "Progress".             |
+| `linear`            | `boolean`                                            | `true`         | When true, only the nearest enabled step on either side can be reached by click or keyboard.                    |
+| `orientation`       | `"horizontal" \| "vertical"`                         | `"horizontal"` | Layout direction of the step list and track.                                                                    |
+| `progressAriaLabel` | `string`                                             | `""`           | Accessible label for the progress bar. Left empty, it's the localized "Step progress".                          |
+| `rounded`           | `"none" \| "small" \| "medium" \| "large" \| "full"` | `"full"`       | Border-radius preset applied to each step indicator.                                                            |
+| `step`              | `number`                                             | `0`            | Two-way bindable active step index. Use `[(step)]` for two-way binding or `(stepChange)` to listen for changes. |
+| `steps`             | `Iterable<StepOptions>`                              | `[]`           | Ordered list of step definitions.                                                                               |
 
 #### Outputs
 
-| Name         | Type              | Description                                                                  |
-| ------------ | ----------------- | ---------------------------------------------------------------------------- |
-| `stepChange` | `number`          | Emitted when the active step changes. Carries the new zero-based step index. |
-| `stepSelect` | `StepSelectEvent` | Emitted before a click or key changes the step. Cancelable.                  |
+| Name         | Type              | Description                                                                                          |
+| ------------ | ----------------- | ---------------------------------------------------------------------------------------------------- |
+| `stepChange` | `number`          | Emitted when the active step changes. Carries the new zero-based step index.                         |
+| `stepSelect` | `StepSelectEvent` | Emitted before a click or key changes the step, and not for values written from outside. Cancelable. |
 
 ---
 
@@ -305,13 +308,6 @@ Extends `PreventableEvent`.
 
 `"completed" | "current" | "disabled" | "upcoming"`. `current` outranks the others, and `disabled` outranks `completed` and `upcoming`.
 
-#### `StepItem<T = unknown>`
-
-| Field     | Type             | Description                                  |
-| --------- | ---------------- | -------------------------------------------- |
-| `index`   | `number`         | Zero-based position of the step in the list. |
-| `options` | `StepOptions<T>` | The original options object for this step.   |
-
 #### `StepperTemplateContext<T = unknown>`
 
 | Field          | Type             | Description                                                  |
@@ -332,7 +328,7 @@ Extends `PreventableEvent`.
 - [x] Template directives verified against stepper.component.html contentChild queries
 - [x] StepperTemplateContext fields verified against models/StepperTemplateContext.ts
 - [x] StepOptions fields verified against models/Step.ts
-- [x] aria-label alias verified (input("Progress", { alias: "aria-label" }))
+- [x] aria-label alias verified (input("", { alias: "aria-label" })), with the fallback to the stepper message in the host binding
 - [x] No private or unexported APIs exposed
 - [x] rounded variant values verified against stepper.styles.ts CVA config
 - [x] orientation values verified against stepper.styles.ts CVA config

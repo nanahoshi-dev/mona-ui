@@ -38,7 +38,7 @@ Add the imported symbols to your standalone component's `imports` array.
 </mona-breadcrumb>
 ```
 
-The anchor is yours, so `href`, `routerLink`, `target` and `rel` all work, and so do ctrl-click, middle-click and "copy link". The item renders no button around it. A plain `<a>` without `monaBreadcrumbLink` would end up inside a button, which is invalid and fails axe. The last item can be a link too, and the `aria-current` goes on the anchor.
+The anchor is yours, so `href`, `routerLink`, `target` and `rel` all work, and so do ctrl-click, middle-click and "copy link". The item renders no button around it, and `itemClick` still fires for a click on the link. A plain `<a>` without `monaBreadcrumbLink` would end up inside a button, which is invalid and fails axe. The last item can be a link too, and the `aria-current` goes on the anchor.
 
 **Buttons, for an action that isn't navigation:**
 
@@ -53,7 +53,7 @@ The anchor is yours, so `href`, `routerLink`, `target` and `rel` all work, and s
 
 The last `<mona-breadcrumb-item>` never emits `itemClick` — it is non-interactive regardless of whether you bind the output. Only non-last items are clickable. When a trail stops before the page you're on, set `[lastItemCurrent]="false"` and the last item becomes a normal one, with no `aria-current`.
 
-**Long trails:** items shrink and truncate with an ellipsis as the space runs out, and the other items give up their width before the current page does. To shorten the trail instead, set `maxItems`. The first and last items always stay, and the middle collapses behind a button that shows it again and moves focus to the first item it revealed. The trail collapses again when its items change.
+**Long trails:** items shrink and truncate with an ellipsis as the space runs out, and the other items give up their width before the current page does. To shorten the trail instead, set `maxItems`. The first and last items always stay, and the middle collapses behind a button that shows it again and moves focus to the first item it revealed that can take focus. The button's name comes from `showFullPath` in the `breadcrumb` messages. The trail collapses again when its items change.
 
 ```html
 
@@ -126,9 +126,13 @@ Add extra styles to the breadcrumb list via the `class` input on `<mona-breadcru
 <mona-breadcrumb class="text-sm gap-2">...</mona-breadcrumb>
 ```
 
+### Width
+
+The host is a block with `max-width: 100%` and `min-width: 0`, and in a flex parent it needs both. `min-width: 0` lets it shrink along a row, and `max-width: 100%` keeps it inside a column that sizes to fit. Without them it would never get narrower than the trail's text, and nothing inside it would truncate.
+
 ## Accessibility Notes
 
-`BreadcrumbComponent` renders `role="navigation"` on the host, making it a landmark that screen reader users can navigate to directly. The `aria-label` input sets the landmark's accessible name — its default value is `"Breadcrumb"`. A breadcrumb with no items renders no landmark and no list.
+`BreadcrumbComponent` renders `role="navigation"` on the host, making it a landmark that screen reader users can navigate to directly. The `aria-label` input sets the landmark's accessible name. Left empty, the name comes from the `breadcrumb` message, which is "Breadcrumb" in English. A breadcrumb with no items renders no landmark and no list.
 
 The item list is announced as a list by assistive technology. The last item automatically receives `aria-current="page"`. Separators are hidden from assistive technology.
 
@@ -146,13 +150,13 @@ When multiple breadcrumbs appear on the same page, each should have a distinct `
 
 #### Inputs
 
-| Name         | Type      | Default        | Description                                                                                                                   |
-|--------------|-----------|----------------|-------------------------------------------------------------------------------------------------------------------------------|
-| `aria-label` | `string`  | `'Breadcrumb'` | Accessible name for the breadcrumb navigation landmark. Override when multiple breadcrumb components appear on the same page. |
-| `class`      | `string`  | `''`           | Additional CSS classes merged onto the breadcrumb list via `tailwind-merge`.                                                  |
-| `disabled`   | `boolean` | `false`        | Renders the entire breadcrumb with reduced visual emphasis and removes pointer interaction from all items.                    |
-| `lastItemCurrent` | `boolean` | `true`    | Treats the last item as the current page. Turn it off for a trail that ends before the page you're on.                        |
-| `maxItems`   | `number \| null` | `null`  | The most items to show before the middle of the trail collapses. The first and last always stay, so anything below 2 counts as 2. |
+| Name         | Type      | Default | Description                                                                                                                   |
+|--------------|-----------|---------|-------------------------------------------------------------------------------------------------------------------------------|
+| `aria-label` | `string`  | `''`    | Accessible name for the breadcrumb navigation landmark. Left empty, it's the localized "Breadcrumb". Override when multiple breadcrumb components appear on the same page. |
+| `class`      | `string`  | `''`    | Additional CSS classes merged onto the breadcrumb list via `tailwind-merge`.                                                  |
+| `disabled`   | `boolean` | `false` | Renders the entire breadcrumb with reduced visual emphasis and removes pointer interaction from all items.                    |
+| `lastItemCurrent` | `boolean` | `true` | Treats the last item as the current page. Turn it off for a trail that ends before the page you're on.                     |
+| `maxItems`   | `number \| null` | `null` | The most items to show before the middle of the trail collapses. The first and last always stay, so anything below 2 counts as 2. `null` never collapses. |
 
 `BreadcrumbComponent` has no event outputs.
 
@@ -198,7 +202,7 @@ Put this on an anchor projected into a `<mona-breadcrumb-item>`. It styles the a
 
 Apply to an `<ng-template>` directly inside `<mona-breadcrumb>` to replace the default `ChevronRight` separator. One directive per breadcrumb — the first match is used.
 
-The template context is `{ $implicit: number }` where the implicit value is the zero-based index of the preceding item.
+The template context is `{ $implicit: number }` where the implicit value is the zero-based index of the preceding item, or after the collapse button, of the last hidden item.
 
 ```html
 

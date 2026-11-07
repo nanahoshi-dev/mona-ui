@@ -83,7 +83,7 @@ Each `mona-splitter-pane`'s `size` accepts:
 
 If no pane is left with an empty `size`, the last non-collapsed pane absorbs remaining space instead — unless that pane already has an `fr` size, which is honored as its weight rather than being overridden.
 
-`min` and `max` are evaluated in pixels. They accept a number or a pixel-suffixed string (e.g. `"120px"`). Percentage and `fr` values aren't supported, and are ignored with a warning in development. They hold for the layout as well as for a drag, so a first size or a window resize can't take a pane past them. A collapsed pane doesn't keep its `min`, since it has to be able to close.
+`min` and `max` take numbers and pixels only, such as `120` or `"120px"`, because a drag works in pixels. Anything else, such as a percentage, `fr` or `rem`, is ignored, with a warning in development. They hold for the layout as well as for a drag, so a first size or a window resize can't take a pane past them. A collapsed pane doesn't keep its `min`, since it has to be able to close.
 
 ### Saving a layout
 
@@ -96,9 +96,13 @@ If no pane is left with an empty `size`, the last non-collapsed pane absorbs rem
 </mona-splitter>
 ```
 
+A press that moved nothing doesn't fire it. Neither does collapsing or expanding with a double-click, a collapse button, `Enter` or `Alt` + arrow, so bind `collapsed` too if the layout should remember that.
+
 ## Resizing & Collapsing
 
 Dragging the bar between two panes resizes both of them, clamped to their `min`/`max`, with the primary button or by touch. A pane's `resizable` input is `true` by default. Setting it to `false` stops both bars beside that pane from moving, by pointer or key. The bar still renders.
+
+The bar is 2 pixels wide, and its hit area reaches past it, over the edges of the panes: 12 pixels, or 24 on a coarse pointer such as a finger. The collapse buttons are 24 pixels. Pressing the bar gives it focus, without showing the focus outline, so the keys work straight after a drag.
 
 A pane's `collapsible` input is `false` by default. When `true`, the pane can be collapsed and expanded by:
 
@@ -145,12 +149,14 @@ Each collapse button has an `aria-label` describing its action (e.g. "Collapse p
 
 | Key                                                                           | Action                                                                                                                                  |
 |-------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
-| `ArrowLeft` / `ArrowRight` (horizontal) or `ArrowUp` / `ArrowDown` (vertical) | Resize the adjacent panes by `keyboardStep`, if both are resizable. On a collapsed pane, a key pointing out of it brings it back at its previous size, and one pointing into it does nothing. |
+| `ArrowLeft` / `ArrowRight` (horizontal) or `ArrowUp` / `ArrowDown` (vertical) | Resize the adjacent panes by `keyboardStep`, 10 pixels by default, if both are resizable. On a collapsed pane, a key pointing out of it brings it back at its previous size, and one pointing into it does nothing. |
 | `Home` / `End`                                                                | Move the bar as far as the limits allow, with the pane before it at its smallest or largest.                                           |
-| `Alt` + arrow key (same mapping as above)                                     | Collapse the adjacent collapsible pane in that direction. If that pane isn't collapsible, the key stays the browser's.                  |
+| `Alt` + arrow key (same mapping as above)                                     | Collapse the adjacent collapsible pane in that direction. If that pane isn't collapsible, the key stays the browser's. With a collapsed pane beside the bar, either direction expands it. |
 | `Enter`                                                                       | Toggle collapse/expand of the nearest collapsible pane, preferring a pane that is already collapsed.                                    |
 
-`Tab` follows the page's order: from a bar to its collapse buttons, then into the next pane's content, then to the next bar.
+In a right-to-left layout, `ArrowLeft` and `ArrowRight` swap, so they still move the bar the way they point.
+
+`Tab` follows the page's order: from a bar to its collapse buttons, then into the next pane's content, then to the next bar. There's no `F6` shortcut between panes.
 
 ## API
 
@@ -179,15 +185,20 @@ Each collapse button has an `aria-label` describing its action (e.g. "Collapse p
 
 | Name          | Type                       | Default | Description                                                                                                                                                                                                                |
 |---------------|----------------------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `collapsed`   | `boolean`                  | `false` | Two-way bindable collapsed state. When `true`, the pane's content is hidden and its size reduced to zero.                                                                                                                  |
+| `collapsed`   | `boolean`                  | `false` | Two-way bindable collapsed state. When `true` on a `collapsible` pane, the pane's content is hidden and its size reduced to zero.                                                                                          |
 | `collapsible` | `boolean`                  | `false` | Allows the pane to be collapsed and expanded via the adjacent resizer bar's double-click, hover controls, or keyboard.                                                                                                     |
 | `label`       | `string`                   | `''`    | Names the bar after this pane, for assistive technology.                                                                                                                                                                   |
-| `max`         | `string \| number \| null` | `null`  | Maximum size, in pixels, the pane can grow to. Accepts a number or a pixel-suffixed string (e.g. `"400px"`); percentage and `fr` values are not supported.                                                                 |
-| `min`         | `string \| number \| null` | `null`  | Minimum size, in pixels, the pane can shrink to. Accepts a number or a pixel-suffixed string (e.g. `"120px"`); percentage and `fr` values are not supported.                                                               |
+| `max`         | `string \| number \| null` | `null`  | Maximum size, in pixels, the pane can grow to. Accepts a number or a pixel string (e.g. `"400px"`). Anything else is ignored, with a warning in development.                                                               |
+| `min`         | `string \| number \| null` | `null`  | Minimum size, in pixels, the pane can shrink to. Accepts a number or a pixel string (e.g. `"120px"`). Anything else is ignored, with a warning in development.                                                             |
 | `resizable`   | `boolean`                  | `true`  | Allows the pane to be resized by the bars adjacent to it. Setting this to `false` stops both from moving, by pointer or key.                                                                                                |
 | `size`        | `string \| number`         | `''`    | Two-way bindable pane size. Accepts a pixel number, a CSS length string (e.g. `"240px"`, `"20%"`), or a proportional `"<n>fr"` string. Left empty, the pane absorbs the splitter's remaining space; see Pane Sizing above. |
 
-`SplitterPaneComponent` has no outputs of its own. Observe `[(size)]` and `[(collapsed)]` to react to changes, or `resizeEnd` on the splitter to save a layout.
+#### Outputs
+
+| Name              | Type               | Description                                                                 |
+|-------------------|--------------------|-----------------------------------------------------------------------------|
+| `collapsedChange` | `boolean`          | Emitted when the pane collapses or expands.                                 |
+| `sizeChange`      | `string \| number` | Emitted when the size changes, on every move of a drag. To save a layout, use `resizeEnd` on the splitter. |
 
 ---
 

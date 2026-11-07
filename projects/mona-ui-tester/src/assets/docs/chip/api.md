@@ -50,6 +50,8 @@ Add the imported symbols to your standalone component's `imports` array.
 <mona-chip label="Overview" [routerLink]="['/overview']"></mona-chip>
 ```
 
+Add `RouterLink` from `@angular/router` to the same `imports` array.
+
 **Custom padding & class override:**
 
 ```html
@@ -84,7 +86,7 @@ The prefix template renders before the label or projected content. It receives n
 
 ### Removing chips from a list
 
-`remove` fires for the remove button and for Delete and Backspace on the chip. Your parent destroys the chip, and focus goes with it, so a keyboard user lands at the top of the page unless you move it. Move it in the handler, for example to the control that adds chips:
+`remove` fires for the remove button and for Delete and Backspace on the chip. The chip doesn't remove itself: your parent destroys it, and focus goes with it, so a keyboard user lands at the top of the page unless you move it. There's no `mona-chip-list` to do this for you. Move focus in the handler, to the next chip or, for example, to the control that adds chips:
 
 ```html
 @for (tag of tags(); track tag) {
@@ -201,14 +203,14 @@ A control you project into a chip keeps its own clicks and keys, and doesn't tog
 | `label`       | `string`                                                                                                       | `""`        | Text label displayed inside the chip. When non-empty, takes precedence over projected content. Also part of the remove button's accessible label.                                                  |
 | `look`        | `'default' \| 'error' \| 'ghost' \| 'info' \| 'outline' \| 'primary' \| 'secondary' \| 'success' \| 'warning'` | `'default'` | Visual style variant controlling the chip's background color, border, and interaction states.                                                                                                      |
 | `removable`   | `boolean`                                                                                                      | `false`     | Renders a remove button inside the chip. When activated, emits the `remove` output.                                                                                                                |
-| `removeLabel` | `string`                                                                                                       | —           | Accessible label for the remove button, overriding the auto-computed `"Remove, <label>"` fallback. A chip with only projected content needs this or `aria-label`, or it warns in development.     |
-| `rounded`     | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`                                                           | `'full'`    | Border-radius preset applied to the chip.                                                                                                                                                          |
+| `removeLabel` | `string`                                                                                                       | `undefined` | Accessible label for the remove button, overriding the auto-computed `"Remove, <label>"` fallback. A chip with only projected content needs this or `aria-label`, or it warns in development.     |
+| `removeTabIndex` | `number \| string`                                                                                          | `0`         | Tab index for the remove button. Set to `-1` to exclude it from the tab order, since Delete and Backspace on the chip also remove it.                                                              |
+| `rounded`     | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`                                                           | `'medium'`  | Border-radius preset applied to the chip.                                                                                                                                                          |
 | `selected`    | `boolean`                                                                                                      | `false`     | Two-way bindable selected state. When `toggleable` is `true`, each activation flips this value. Use `[(selected)]` for two-way binding.                                                            |
 | `size`        | `'small' \| 'medium' \| 'large'`                                                                               | `'medium'`  | Size preset controlling the chip's padding and remove button dimensions.                                                                                                                           |
-| `removeTabIndex` | `number \| string`                                                                                          | `0`         | Tab index for the remove button. Set to `-1` to exclude it from the tab order, since Delete and Backspace on the chip also remove it.                                                              |
-| `tabindex`    | `number \| string`                                                                                             | —           | Tab index override for the chip's control. When not set, `0` when `toggleable` is `true` or functioning as a link, not focusable otherwise. Overridden to `-1` when `disabled` is `true`.           |
+| `tabindex`    | `number \| string`                                                                                             | `undefined` | Tab index override for the chip's control. When not set, `0` when `toggleable` is `true` or functioning as a link, not focusable otherwise. Overridden to `-1` when `disabled` is `true`.           |
 | `toggleable`  | `boolean`                                                                                                      | `false`     | Enables toggle behavior. When `true`, each activation flips `selected`, and the chip's control receives `role="checkbox"` with `aria-checked`.                                                     |
-| `value`       | `unknown`                                                                                                      | —           | Arbitrary value associated with this chip. The chip doesn't use it or emit it, so pass the item in your `(remove)` handler.                                                                        |
+| `value`       | `unknown`                                                                                                      | `undefined` | Arbitrary value associated with this chip. The chip doesn't use it or emit it, so pass the item in your `(remove)` handler.                                                                        |
 
 #### Outputs
 
@@ -241,13 +243,13 @@ Apply to an `<ng-template>` directly inside `<mona-chip>` to render prefix conte
 <!-- verification-checklist
 - [x] API definitions and defaults verified against source (chip.component.ts) and component-metadata.json
 - [x] removeLabel and removeTabIndex in the API table
-- [x] Inputs sorted A→Z: aria-label, class, disabled, label, look, removable, removeLabel, rounded, selected, size, tabindex, toggleable, value
+- [x] Inputs sorted A→Z: aria-label, class, disabled, label, look, removable, removeLabel, removeTabIndex, rounded, selected, size, tabindex, toggleable, value
 - [x] Outputs sorted A→Z: contentClick, remove
 - [x] selected correctly documented as two-way bindable (model)
 - [x] tabindex default documented as computed (undefined input, automatic logic)
 - [x] contentClick clarified: not emitted from remove button
 - [x] ariaLabel input alias confirmed as aria-label in chip.component.ts
-- [x] removeLabel and value defaults are — (undefined, no default in source)
+- [x] removeLabel, tabindex and value defaults are undefined (no default in source)
 - [x] Accessibility claims verified against source: role/aria-checked/aria-disabled/aria-label/tabindex host bindings confirmed in chip.component.ts; remove button aria-label confirmed in template
 - [x] Keyboard guard fix confirmed: button[data-chip-remove] selector; remove button keyboard activation does not trigger chip body
 - [x] Basic examples compile against the public API surface

@@ -251,7 +251,8 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
     public readonly tileSize = input(24);
 
     /**
-     * @description Emitted when focus leaves the color picker, its popup closes or a color is selected.
+     * @description Emitted when focus leaves the color picker or its popup closes. A color selected with
+     * `closeOnSelect` off doesn't emit it until then.
      * The `FormField` directive listens to this to mark the field as touched.
      */
     public readonly touch = output<void>();

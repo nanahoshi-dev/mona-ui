@@ -311,7 +311,7 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
     public readonly showHexInput = input(true, { transform: booleanAttribute });
 
     /**
-     * @description Emitted when the color gradient is interacted with on blur or value adjustment.
+     * @description Emitted when focus leaves the color gradient. Moving between its own parts doesn't count.
      * The `FormField` directive listens to this to mark the field as touched.
      */
     public readonly touch = output<void>();
