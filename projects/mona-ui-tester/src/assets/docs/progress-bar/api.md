@@ -163,7 +163,7 @@ The host element carries `role="progressbar"`. The component manages the followi
 | `aria-valuenow` | Determinate mode   | `value`, clamped to the range. A non-finite value counts as `min`, the same place the bar draws it. |
 | `aria-disabled` | `disabled` is true | `true`           |
 
-With a range the wrong way round, where `max` is below `min`, the bar reports no values and a warning is logged in development.
+With a range that holds nothing, where `max` isn't above `min`, the bar reports no values and a warning is logged in development.
 
 Consumer responsibilities:
 

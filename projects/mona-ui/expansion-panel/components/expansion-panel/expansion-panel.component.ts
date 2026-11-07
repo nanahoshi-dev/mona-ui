@@ -1,5 +1,4 @@
 import { NgTemplateOutlet } from "@angular/common";
-import type { ElementRef } from "@angular/core";
 import {
     afterNextRender,
     booleanAttribute,
@@ -7,6 +6,8 @@ import {
     computed,
     contentChild,
     contentChildren,
+    DestroyRef,
+    ElementRef,
     forwardRef,
     inject,
     input,
@@ -44,6 +45,9 @@ function toHeadingLevel(value: unknown): number | null {
     return Number.isInteger(level) && level >= 1 && level <= 6 ? level : 3;
 }
 
+/** `Node.DOCUMENT_POSITION_FOLLOWING`, written out because `Node` isn't a global on the server. */
+const DOCUMENT_POSITION_FOLLOWING = 4;
+
 @Component({
     selector: "mona-expansion-panel",
     templateUrl: "./expansion-panel.component.html",
@@ -56,6 +60,7 @@ function toHeadingLevel(value: unknown): number | null {
     providers: [{ provide: COLLAPSIBLE_CONFIG, useExisting: forwardRef(() => ExpansionPanelComponent) }]
 })
 export class ExpansionPanelComponent implements ExpansionPanelVariantInput, CollapsibleConfig {
+    readonly #host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
     protected readonly actionsClass = computed(() => {
         return expansionPanelActionsThemeVariants();
     });
@@ -91,11 +96,6 @@ export class ExpansionPanelComponent implements ExpansionPanelVariantInput, Coll
     });
     protected readonly triggerElement = viewChild.required<ElementRef<HTMLButtonElement>>("trigger");
     protected readonly triggerId = createElementControlId();
-
-    /**
-     * @internal The accordion this panel belongs to, if any.
-     */
-    public readonly accordion = inject(EXPANSION_PANEL_ACCORDION, { optional: true });
 
     /**
      * @description Always enabled. Satisfies the `CollapsibleConfig` contract for `monaCollapsibleTrigger`;
@@ -143,6 +143,10 @@ export class ExpansionPanelComponent implements ExpansionPanelVariantInput, Coll
     public readonly userClass = input("", { alias: "class" });
 
     public constructor() {
+        const accordion = inject(EXPANSION_PANEL_ACCORDION, { optional: true });
+        if (accordion) {
+            inject(DestroyRef).onDestroy(accordion.register(this));
+        }
         if (isDevMode()) {
             afterNextRender({
                 read: () => {
@@ -157,6 +161,13 @@ export class ExpansionPanelComponent implements ExpansionPanelVariantInput, Coll
 
     public collapse(): void {
         this.expanded.set(false);
+    }
+
+    /**
+     * @internal
+     */
+    public compareDocumentOrder(other: ExpansionPanelComponent): number {
+        return this.#host.compareDocumentPosition(other.#host) & DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
     }
 
     public expand(): void {

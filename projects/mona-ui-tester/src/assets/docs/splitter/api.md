@@ -87,7 +87,7 @@ If no pane is left with an empty `size`, the last non-collapsed pane absorbs rem
 
 ### Saving a layout
 
-`sizeChange` fires on every move of a drag. `resizeEnd` on `mona-splitter` fires once when a drag ends and after each key that resizes, with every pane's `size` in order, ready to pass back in:
+`sizeChange` fires on every move of a drag. `resizeEnd` on `mona-splitter` fires once when a drag ends, after each key that resizes, and when the separator collapses or expands a pane, with every pane's `size` in order, ready to pass back in:
 
 ```html
 <mona-splitter class="h-64 w-full" (resizeEnd)="saveLayout($event)">
@@ -175,7 +175,7 @@ In a right-to-left layout, `ArrowLeft` and `ArrowRight` swap, so they still move
 
 | Name        | Type                          | Description                                                                                       |
 |-------------|-------------------------------|---------------------------------------------------------------------------------------------------|
-| `resizeEnd` | `readonly (string \| number)[]` | Every pane's `size`, in order, once a drag ends and after each key that resizes. See [Saving a layout](#saving-a-layout). |
+| `resizeEnd` | `readonly (string \| number)[]` | Every pane's `size`, in order, once a drag ends, after each key that resizes, and when the separator collapses or expands a pane. See [Saving a layout](#saving-a-layout). |
 
 ### `SplitterPaneComponent`
 

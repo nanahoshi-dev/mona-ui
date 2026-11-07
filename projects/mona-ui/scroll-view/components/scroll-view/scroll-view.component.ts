@@ -333,7 +333,7 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     public readonly pageable = input(false);
 
     /**
-     * @description Sets the background blur of the pager in pixels.
+     * @description Sets the background blur of the pager in pixels. It doesn't apply with `pagerOverlay` set to `"none"`.
      * @default 3
      */
     public readonly pagerBlur = input(3);

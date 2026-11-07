@@ -188,6 +188,7 @@ export class SplitterResizerComponent {
             targetPane.uid === this.previousPane().uid ? this.getPaneElements()[0] : this.getPaneElements()[1];
         const direction = targetPane.uid === this.previousPane().uid ? "previous" : "next";
         this.togglePane(targetPane, targetElement, direction);
+        this.#splitter.notifyResizeEnd();
     }
 
     private clamp(value: number, min: number, max: number): number {
@@ -261,6 +262,7 @@ export class SplitterResizerComponent {
             return false;
         }
         this.togglePane(target.pane, target.element, target.direction);
+        this.#splitter.notifyResizeEnd();
         return true;
     }
 

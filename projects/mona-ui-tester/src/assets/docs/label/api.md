@@ -112,7 +112,7 @@ type LabelTarget = string | LabelFocusable | null | undefined;
 ## Accessibility
 
 - Both APIs render a real native `<label>` — no ARIA `role` is added, and none is needed.
-- A wrapped control is named only by the `text` input. Text projected next to it can't name it, and `mona-label` warns in development.
+- A wrapped control is named by the `text` input or its own `aria-label` or `aria-labelledby`. Text projected next to it can't name it, and `mona-label` warns in development if nothing else does.
 - A reference in `for` names the control only if the control supports it. Other targets, such as a native element reference or `mona-dropdown-list`, only receive focus on click, so give them their own `aria-label` or `aria-labelledby`.
 - `LabelComponent` never reads a projected control's `required` state and never renders a required asterisk — pair it with your own validation messaging if needed.
 - Do not wrap `CheckBoxComponent` or `RadioButtonComponent` in `<mona-label>`; both already render their own native `<label>`, and nesting `<label>` elements is invalid HTML. Use their built-in `label` input, or `[for]="ref"` from outside.

@@ -1,15 +1,6 @@
-import {
-    booleanAttribute,
-    Component,
-    computed,
-    contentChildren,
-    effect,
-    forwardRef,
-    input,
-    untracked
-} from "@angular/core";
+import { booleanAttribute, Component, effect, forwardRef, input, signal, untracked } from "@angular/core";
 import { EXPANSION_PANEL_ACCORDION } from "../../models/accordion.token";
-import { ExpansionPanelComponent } from "../expansion-panel/expansion-panel.component";
+import type { ExpansionPanelComponent } from "../expansion-panel/expansion-panel.component";
 
 /**
  * @description
@@ -26,9 +17,8 @@ import { ExpansionPanelComponent } from "../expansion-panel/expansion-panel.comp
     providers: [{ provide: EXPANSION_PANEL_ACCORDION, useExisting: forwardRef(() => AccordionComponent) }]
 })
 export class AccordionComponent {
-    readonly #panels = computed(() => this.allPanels().filter(panel => panel.accordion === this));
+    readonly #registered = signal<readonly ExpansionPanelComponent[]>([]);
     #openPanels: readonly ExpansionPanelComponent[] = [];
-    protected readonly allPanels = contentChildren(ExpansionPanelComponent, { descendants: true });
 
     /**
      * @description Lets several panels stay open. Without it, opening a panel closes the others, however it was opened.
@@ -38,17 +28,25 @@ export class AccordionComponent {
 
     public constructor() {
         effect(() => {
-            const open = this.#panels().filter(panel => panel.expanded());
+            const open = this.#inDocumentOrder().filter(panel => panel.expanded());
             const multiple = this.multiple();
             untracked(() => this.#enforceSingleOpen(open, multiple));
         });
+    }
+
+    /**
+     * @internal
+     */
+    public register(panel: ExpansionPanelComponent): () => void {
+        this.#registered.update(panels => [...panels, panel]);
+        return () => this.#registered.update(panels => panels.filter(other => other !== panel));
     }
 
     protected onKeydown(event: KeyboardEvent): void {
         if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
             return;
         }
-        const panels = this.#panels().filter(panel => !panel.disabled());
+        const panels = this.#inDocumentOrder().filter(panel => !panel.disabled());
         const current = panels.findIndex(panel => panel.ownsTrigger(event.target));
         if (current === -1) {
             return;
@@ -69,6 +67,11 @@ export class AccordionComponent {
         }
         const keep = open.filter(panel => !previous.includes(panel)).at(-1) ?? open[0];
         open.filter(panel => panel !== keep).forEach(panel => panel.collapse());
+    }
+
+    /** Worked out each time, because a panel can be moved without anything registering. */
+    #inDocumentOrder(): readonly ExpansionPanelComponent[] {
+        return [...this.#registered()].sort((first, second) => first.compareDocumentOrder(second));
     }
 
     #targetFor(

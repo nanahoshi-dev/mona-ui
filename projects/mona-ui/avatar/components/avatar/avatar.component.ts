@@ -42,7 +42,8 @@ export class AvatarComponent {
         if (this.imageVisible()) {
             return "";
         }
-        return this.ariaLabel() || (this.image() ? this.alt() : "");
+        // A failed image keeps the name it had, so the fallback doesn't change what's announced.
+        return this.image() ? this.imageAlt() : this.ariaLabel();
     });
     protected readonly imageAlt = computed(() => this.alt() || this.ariaLabel());
     protected readonly imageVisible = computed(() => !!this.image() && !this.#imageFailed());

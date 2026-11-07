@@ -152,8 +152,8 @@ export class CircularProgressBarComponent implements CircularProgressBarVariantI
     public readonly labelVisible = input(true);
 
     /**
-     * @description Upper bound of the value range. Must be greater than `min`; with a range the wrong way round, the bar
-     * reports no values and a warning is logged in development.
+     * @description Upper bound of the value range. Must be greater than `min`; otherwise the bar reports no values and a
+     * warning is logged in development.
      * @default 100
      */
     public readonly max = input(100);

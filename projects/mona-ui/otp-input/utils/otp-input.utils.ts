@@ -22,7 +22,9 @@ const COMPONENT_MANAGED_ATTRIBUTES = new Set([
     "aria-label",
     "aria-labelledby",
     "autocomplete",
-    "inputmode"
+    "id",
+    "inputmode",
+    "name"
 ]);
 
 /** The zero of each decimal digit block a phone or IME commonly types: Arabic-Indic, Devanagari, Thai and so on. */

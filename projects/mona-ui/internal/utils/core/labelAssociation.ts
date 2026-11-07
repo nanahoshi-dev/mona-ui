@@ -7,6 +7,8 @@ import type { Signal } from "@angular/core";
 export interface MonaLabelledControl {
     readonly activate: () => void;
     readonly element: HTMLElement;
+    /** Whether the control has a name of its own, through `aria-label` or `aria-labelledby`. */
+    readonly named: () => boolean;
 }
 
 export interface MonaLabelContext {
@@ -50,7 +52,8 @@ export function injectLabelAssociation(options: LabelAssociationOptions): LabelA
     const { activate } = options;
     if (context && activate) {
         const element: HTMLElement = inject(ElementRef).nativeElement;
-        inject(DestroyRef).onDestroy(context.register({ activate, element }));
+        const named = (): boolean => !!options.ariaLabel() || !!options.ariaLabelledBy();
+        inject(DestroyRef).onDestroy(context.register({ activate, element, named }));
     }
 
     return {

@@ -118,7 +118,7 @@ The avatar has no built-in keyboard behavior and no interactive role. Accessibil
 
 **Projected content mode:** Set `aria-label` to describe what is projected. When non-empty, the host receives `role="img"`.
 
-**After an image fails to load:** the host receives `role="img"`, named by `aria-label` or else `alt`, so with one of them set, the name stays the same. With both set, the name changes from `alt` to `aria-label`, so give them the same meaning. With neither, the host has no role or name of its own.
+**After an image fails to load:** the host receives `role="img"`, named by `alt` or else `aria-label`, the same name the image had. With neither, the host has no role or name of its own.
 
 If the avatar is purely decorative and already described by adjacent visible text, you may omit both `alt` and `aria-label`. Whether this is appropriate depends on context.
 

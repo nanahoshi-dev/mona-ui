@@ -263,6 +263,28 @@ describe("mona-splitter behavior", () => {
             expect(host.ends.length).toBe(1);
         });
 
+        it("fires when Enter collapses a pane, since its neighbor grew", async () => {
+            await setup([{ collapsible: true }, {}]);
+            separators()[0].dispatchEvent(
+                new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })
+            );
+            expect(host.ends.length).toBe(1);
+        });
+
+        it("fires when Alt and an arrow collapse a pane", async () => {
+            await setup([{ collapsible: true }, {}]);
+            separators()[0].dispatchEvent(
+                new KeyboardEvent("keydown", { altKey: true, key: "ArrowLeft", bubbles: true, cancelable: true })
+            );
+            expect(host.ends.length).toBe(1);
+        });
+
+        it("fires when a double click collapses a pane", async () => {
+            await setup([{ collapsible: true }, {}]);
+            separators()[0].dispatchEvent(new MouseEvent("dblclick", { bubbles: true, cancelable: true }));
+            expect(host.ends.length).toBe(1);
+        });
+
         it("doesn't fire for a press that moved nothing", async () => {
             await setup();
             separators()[0].dispatchEvent(pointer("pointerdown"));

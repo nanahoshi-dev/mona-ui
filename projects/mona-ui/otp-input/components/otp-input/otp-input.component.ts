@@ -60,6 +60,7 @@ interface OtpGroupViewModel {
     }
 })
 export class OtpInputComponent implements OtpInputVariantInput, FormValueControl<string> {
+    readonly #generatedId = createElementControlId();
     readonly #hasNativeLabel = signal(false);
     readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #i18n = inject(MonaI18nService);
@@ -159,6 +160,15 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     protected readonly messages = this.#i18n.componentMessages("otpInput", OTP_INPUT_DEFAULT_MESSAGES);
     protected readonly nativeInputType = computed(() => (this.type() === "password" ? "password" : "text"));
     protected readonly normalizedLength = computed(() => normalizeLength(this.length()));
+    /** The one thing that writes the id. `inputId` wins, and an id in `inputAttributes` stands in for a generated one. */
+    protected readonly resolvedId = computed(() => {
+        const id = this.inputId();
+        if (id !== this.#generatedId) {
+            return id;
+        }
+        const attribute = findUsableAttribute(this.inputAttributes(), "id");
+        return attribute != null ? String(attribute) : id;
+    });
     protected readonly sanitizedAttributes = computed(() => sanitizeInputAttributes(this.inputAttributes()));
     protected readonly selectionEnd = signal(0);
     protected readonly selectionStart = signal(0);
@@ -303,7 +313,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
      * control. A unique id is generated when it isn't set.
      * @default generated
      */
-    public readonly inputId = input(createElementControlId());
+    public readonly inputId = input(this.#generatedId);
 
     /**
      * @description Marks the OTP input as invalid. When bound to a signal form field via `[formField]`,

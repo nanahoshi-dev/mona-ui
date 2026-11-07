@@ -344,7 +344,7 @@ Every built-in theme defines them for each of its variants. A custom theme can b
 | `floating` | Detached on its own rounded, shadowed surface |
 | `inset` | Transparent; the raised surface moves onto the inset region instead |
 
-`width`, `iconWidth` and `mobileWidth` are the width the sidebar's *contents* receive. The variant's border is added on top, so a `3rem` icon rail always leaves exactly one `2rem` icon square whatever border the variant draws.
+`width`, `iconWidth` and `mobileWidth` are the width the sidebar's *contents* receive. The variant's border is added on top, so a `3rem` icon rail always leaves exactly one `2rem` icon square whatever border the variant draws. The `sidebar` variant has no border as a drawer, so `mobileWidth` is its whole width.
 
 ## API
 
@@ -377,7 +377,7 @@ None.
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `aria-label` | `string` | `""` | The sidebar's accessible name. Needed with `role`. A docked sidebar with no `role` ignores it. A drawer with neither this nor `aria-labelledby` falls back to a localized "Sidebar". |
-| `aria-labelledby` | `string` | `""` | The id of the element that names the sidebar, in place of `aria-label`. |
+| `aria-labelledby` | `string` | `""` | The id of the element that names the sidebar, in place of `aria-label`. A docked sidebar with no `role` ignores it. |
 | `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
 | `collapsible` | `"offcanvas" \| "icon" \| "none"` | `"offcanvas"` | How the sidebar behaves when collapsed. See [Collapsible modes](#collapsible-modes). |
 | `expanded` | `boolean` | `true` | Two-way. Whether this sidebar is open. On a compact viewport it reflects the drawer, so it reads `false` on a phone from the start. With `collapsible="none"` on a wide viewport it's always `true`. A value stored under `persistKey` wins over it. |
@@ -608,7 +608,7 @@ Call it in an injection context. It throws when there's no sidebar or layout aro
 
 | Option | Type | Description |
 | --- | --- | --- |
-| `for` | `string` | The id of the `mona-sidebar` to read, in the enclosing layout, rather than the nearest one. |
+| `for` | `string` | The id of the `mona-sidebar` to read, in the enclosing layout, rather than the nearest one. Without a layout it throws, or returns `null` with `optional`, even inside a sidebar. |
 | `optional` | `boolean` | Returns `null` instead of throwing. |
 
 ### `SidebarController`

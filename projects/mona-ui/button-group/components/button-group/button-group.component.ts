@@ -107,11 +107,12 @@ export class ButtonGroupComponent<T = unknown>
 
     /**
      * @description Emitted when a button placed directly in the group is clicked, toggleable or not, after the group has
-     * applied its selection. Not emitted for a dropdown or split button's own buttons, or for a disabled button.
+     * applied its selection. Not emitted for a dropdown or split button's own buttons, for a disabled button, or for a
+     * toggle button while the group is read-only, since nothing was selected.
      */
     public readonly buttonClick = outputFromObservable<ButtonGroupClickEvent<T>>(
         this.#buttonService.memberClick$.pipe(
-            filter(([button]) => this.buttons().includes(button)),
+            filter(([button]) => this.buttons().includes(button) && !(this.readonly() && button.effectiveToggleable())),
             map(([button, element]) => ({
                 button: element,
                 selected: button.selected(),

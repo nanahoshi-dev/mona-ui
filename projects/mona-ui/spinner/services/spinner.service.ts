@@ -562,6 +562,10 @@ export class SpinnerService implements OnDestroy {
         } else {
             // Physical overlay already exists: update its inputs dynamically
             const compRef = targetState.componentRef;
+            if (!winner.cancellable) {
+                // The Cancel button goes away with this update, and focus mustn't go with it.
+                compRef.instance.returnFocus();
+            }
             this.#updateOverlayInputs(compRef, winner, targetState);
             compRef.changeDetectorRef.detectChanges();
         }

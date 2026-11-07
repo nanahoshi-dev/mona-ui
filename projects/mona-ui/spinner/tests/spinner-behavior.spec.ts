@@ -522,6 +522,14 @@ describe("SpinnerService behavior", () => {
             expect(document.activeElement).toBe(opener);
         });
 
+        it("returns when another request takes over without a Cancel button", () => {
+            service.show({ cancellable: true, target });
+            moveFocusToCancel();
+            service.show({ target });
+            expect(cancelIn(target)).toBeNull();
+            expect(document.activeElement).toBe(opener);
+        });
+
         it("returns when a hold removes Cancel", () => {
             vi.useFakeTimers();
             const ref = service.show({ cancellable: true, minimumVisibleDuration: 1000, target });

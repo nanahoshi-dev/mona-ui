@@ -4,7 +4,7 @@ import { SidebarLayoutService } from "../services/sidebar-layout.service";
 import { SidebarService } from "../services/sidebar.service";
 
 export interface InjectSidebarOptions {
-    /** Reads the sidebar with this id in the enclosing layout, rather than the nearest one. */
+    /** Reads the sidebar with this id in the enclosing layout, rather than the nearest one. Needs a layout. */
     readonly for?: string;
     /** Returns `null` instead of throwing when there is no enclosing sidebar or layout. */
     readonly optional?: boolean;
@@ -24,7 +24,8 @@ export interface InjectSidebarOptions {
  * one, it reads as closed and its commands do nothing.
  *
  * @param options.optional Returns `null` instead of throwing when there is no enclosing sidebar or layout.
- * @param options.for The id of the `mona-sidebar` to read, in the enclosing layout.
+ * @param options.for The id of the `mona-sidebar` to read, in the enclosing layout. Without a layout this throws, or
+ * returns `null` with `optional`, even inside a sidebar, because only a layout can find one by id.
  */
 export function injectSidebar(options: InjectSidebarOptions & { optional: true }): SidebarController | null;
 export function injectSidebar(options?: InjectSidebarOptions): SidebarController;
@@ -37,6 +38,13 @@ export function injectSidebar(options?: InjectSidebarOptions): SidebarController
     if (layout) {
         return layout.controllerFor(options?.for);
     }
+    if (options?.optional) {
+        return null;
+    }
+    if (options?.for) {
+        // Only a layout can find a sidebar by id, and the enclosing one may not be the one that was named.
+        throw new Error(`injectSidebar: there's no mona-sidebar-layout to find the sidebar "${options.for}" in.`);
+    }
     // Asked again without `optional`, for the framework's own error when there's nothing to read.
-    return options?.optional ? null : inject(SidebarService).controller;
+    return inject(SidebarService).controller;
 }

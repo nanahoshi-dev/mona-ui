@@ -35,8 +35,9 @@ export class SplitterComponent implements SplitterVariantInput {
     public readonly orientation = input<SplitterVariantProps["orientation"]>("horizontal");
 
     /**
-     * @description Emitted with every pane's `size`, in order, once a drag ends and after each key that resizes. Use it to
-     * save a layout: `sizeChange` on a pane fires on every move, and these values can go straight back into `size`.
+     * @description Emitted with every pane's `size`, in order, once a drag ends, after each key that resizes, and when the
+     * separator collapses or expands a pane. Use it to save a layout: `sizeChange` on a pane fires on every move, and these
+     * values can go straight back into `size`.
      */
     public readonly resizeEnd = output<readonly (string | number)[]>();
 

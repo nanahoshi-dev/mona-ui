@@ -11,10 +11,10 @@ export interface ProgressRange {
  * @param min The minimum value.
  * @param max The maximum value.
  * @returns The range and the value within it, or `null` when the range itself is invalid, because `min` or `max` isn't
- * finite or `max` is below `min`.
+ * finite or `max` isn't above `min`.
  */
 export const normalizeProgressRange = (value: number, min: number, max: number): ProgressRange | null => {
-    if (!Number.isFinite(min) || !Number.isFinite(max) || max < min) {
+    if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) {
         return null;
     }
     const now = Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : min;

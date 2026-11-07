@@ -30,7 +30,7 @@ export class FieldsetComponent implements FieldsetVariantInput {
     });
     protected readonly fieldsetClass = computed(() => {
         const rounded = this.rounded();
-        const disabled = this.disabled();
+        const disabled = this.effectiveDisabled();
         const userClass = this.userClass();
         return twMerge(fieldsetThemeVariants({ rounded, disabled }), userClass);
     });

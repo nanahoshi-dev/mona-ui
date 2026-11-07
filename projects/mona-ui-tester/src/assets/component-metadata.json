@@ -7951,7 +7951,7 @@
         "defaultValue": "true"
       },
       {
-        "description": "Upper bound of the value range. Must be greater than `min`; with a range the wrong way round, the bar\nreports no values and a warning is logged in development.",
+        "description": "Upper bound of the value range. Must be greater than `min`; otherwise the bar reports no values and a\nwarning is logged in development.",
         "kind": "input",
         "name": "max",
         "type": "number",
@@ -13236,7 +13236,7 @@
         "defaultValue": "true"
       },
       {
-        "description": "Upper bound of the value range. Must be greater than `min`; with a range the wrong way round, the bar\nreports no values and a warning is logged in development.",
+        "description": "Upper bound of the value range. Must be greater than `min`; otherwise the bar reports no values and a\nwarning is logged in development.",
         "kind": "input",
         "name": "max",
         "type": "number",
@@ -13759,7 +13759,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Sets the background blur of the pager in pixels.",
+        "description": "Sets the background blur of the pager in pixels. It doesn't apply with `pagerOverlay` set to `\"none\"`.",
         "kind": "input",
         "name": "pagerBlur",
         "type": "number",
@@ -14025,7 +14025,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "The id of the element that names the sidebar region, in place of `aria-label`.",
+        "description": "The id of the element that names the sidebar region, in place of `aria-label`. A docked sidebar with no\n`role` ignores it.",
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
@@ -15173,7 +15173,7 @@
         "defaultValue": "\"horizontal\""
       },
       {
-        "description": "Emitted with every pane's `size`, in order, once a drag ends and after each key that resizes. Use it to\nsave a layout: `sizeChange` on a pane fires on every move, and these values can go straight back into `size`.",
+        "description": "Emitted with every pane's `size`, in order, once a drag ends, after each key that resizes, and when the\nseparator collapses or expands a pane. Use it to save a layout: `sizeChange` on a pane fires on every move, and these\nvalues can go straight back into `size`.",
         "kind": "output",
         "name": "resizeEnd",
         "type": "readonly (string | number)[]"

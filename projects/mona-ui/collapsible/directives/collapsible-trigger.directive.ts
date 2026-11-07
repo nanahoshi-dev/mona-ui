@@ -30,10 +30,12 @@ export class CollapsibleTriggerDirective {
     readonly #nativeAnchor = this.#element.tagName === "A";
     readonly #nativeButton =
         this.#element.tagName === "BUTTON" || this.#element.tagName === "INPUT" || this.#element.tagName === "SUMMARY";
+    readonly #nativeDisableable = this.#element.tagName === "BUTTON" || this.#element.tagName === "INPUT";
+    readonly #nativeSummary = this.#element.tagName === "SUMMARY";
     protected readonly ariaDisabled = computed(() => (this.collapsible.disabled() ? "true" : null));
     protected readonly collapsible = inject(COLLAPSIBLE_CONFIG);
     protected readonly nativeDisabled = computed(() =>
-        this.#element.tagName === "BUTTON" && this.collapsible.disabled() ? "" : null
+        this.#nativeDisableable && this.collapsible.disabled() ? "" : null
     );
     protected readonly role = this.#nativeButton || this.#nativeAnchor ? null : "button";
     protected readonly state = computed(() => (this.collapsible.expanded() ? "open" : "closed"));
@@ -52,8 +54,9 @@ export class CollapsibleTriggerDirective {
         if (this.#isFromNestedControl(event)) {
             return;
         }
-        if (this.#nativeAnchor && this.collapsible.disabled()) {
-            event.preventDefault(); // A button's `disabled` stops this by itself. An anchor would follow its `href`.
+        if ((this.#nativeAnchor || this.#nativeSummary) && this.collapsible.disabled()) {
+            // A button's `disabled` stops this by itself. An anchor would follow its `href`, and a summary open its details.
+            event.preventDefault();
             return;
         }
         this.collapsible.toggle();

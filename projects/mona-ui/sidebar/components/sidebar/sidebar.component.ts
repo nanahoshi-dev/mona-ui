@@ -73,7 +73,7 @@ const OUT_OF_REACH_SELECTOR = "[inert], [data-hidden='true']";
     host: {
         "[attr.aria-hidden]": "hidden() ? 'true' : null",
         "[attr.aria-label]": "accessibleName()",
-        "[attr.aria-labelledby]": "ariaLabelledBy() || null",
+        "[attr.aria-labelledby]": "resolvedRole() ? ariaLabelledBy() || null : null",
         "[attr.aria-modal]": "modal() ? 'true' : null",
         "[attr.data-collapsible]": "collapsible()",
         "[attr.data-side]": "logicalSide()",
@@ -178,7 +178,9 @@ export class SidebarComponent {
     protected readonly widthString = computed(() => {
         // A drawer is always at full width; it is moved out of view rather than shrunk.
         if (this.drawer()) {
-            return this.#withBorderAllowance(toCssLength(this.mobileWidth()));
+            const width = toCssLength(this.mobileWidth());
+            // The `sidebar` variant's edge border belongs to its docked form, so its drawer has nothing to allow for.
+            return this.variant() === "sidebar" ? width : this.#withBorderAllowance(width);
         }
         if (this.#sidebarService.expanded()) {
             return this.#withBorderAllowance(toCssLength(this.width()));
@@ -195,7 +197,8 @@ export class SidebarComponent {
     public readonly ariaLabel = input("", { alias: "aria-label" });
 
     /**
-     * @description The id of the element that names the sidebar region, in place of `aria-label`.
+     * @description The id of the element that names the sidebar region, in place of `aria-label`. A docked sidebar with no
+     * `role` ignores it.
      * @default ""
      */
     public readonly ariaLabelledBy = input("", { alias: "aria-labelledby" });

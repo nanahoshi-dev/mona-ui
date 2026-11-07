@@ -176,7 +176,7 @@ The header's button is native, so a click, `Enter` and `Space` all work as a but
 
 **Selector:** `mona-accordion`
 
-Groups the `mona-expansion-panel` elements inside it, however deep in the same template, except those in an accordion of their own. A panel inside another component's template isn't in its content, so it isn't grouped. It renders no element or role of its own. With only one open at a time, the panel opened last stays open, whether it was opened by a click, a binding or `expand()`. That includes panels that start open, and a disabled panel can be closed by it.
+Groups the `mona-expansion-panel` elements inside it, however deep, including those in a child component's template, except those in an accordion of their own. It renders no element or role of its own. With only one open at a time, the panel opened last stays open, whether it was opened by a click, a binding or `expand()`. That includes panels that start open, and a disabled panel can be closed by it.
 
 #### Inputs
 

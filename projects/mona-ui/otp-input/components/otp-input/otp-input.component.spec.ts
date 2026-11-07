@@ -1481,7 +1481,9 @@ describe("OtpInputComponent", () => {
             host.inputAttributes.set({});
             fixture.detectChanges();
 
-            expect(input.id).toBe("");
+            // Back to the generated id, so a `for` pointing at the input isn't left with nothing.
+            expect(input.id).toBeTruthy();
+            expect(input.id).not.toBe("test-otp-input");
             expect(input.hasAttribute("aria-describedby")).toBe(false);
         });
 

@@ -106,7 +106,7 @@ protected onClick({ button, selected, value }: ButtonGroupClickEvent): void {}
 | `selected` | `boolean`           | Whether the button is selected now that the group has applied its selection. |
 | `value`    | `T \| undefined`    | The button's `value`, if it has one.                                |
 
-`buttonClick` fires for every button placed directly in the group, toggleable or not, after the selection has changed. It doesn't fire for a disabled or loading button, or for a dropdown or split button's own buttons. In a read-only group it still fires, with `selected` as it was.
+`buttonClick` fires for every button placed directly in the group, toggleable or not, after the selection has changed. It doesn't fire for a disabled or loading button, for a dropdown or split button's own buttons, or for a toggle button in a read-only group, since nothing was selected. A button that isn't toggleable still fires there.
 
 > **Group inputs override child inputs.** When a child button is inside a `ButtonGroupComponent`, the group's `look`, `size` and `rounded` values replace the child's own inputs for those properties. A child is disabled when either it or the group is.
 

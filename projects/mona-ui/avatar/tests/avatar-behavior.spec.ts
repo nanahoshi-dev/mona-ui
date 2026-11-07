@@ -82,12 +82,12 @@ describe("AvatarComponent behavior", () => {
             expect(host.textContent).not.toContain("JD");
         });
 
-        it("keeps the name it had as the fallback's, from aria-label first", () => {
+        it("keeps the name it had as the fallback's, from alt first", () => {
             fixture.componentInstance.alt.set("Alt name");
             fixture.componentInstance.ariaLabel.set("Jane Smith");
             fail();
             expect(host.getAttribute("role")).toBe("img");
-            expect(host.getAttribute("aria-label")).toBe("Jane Smith");
+            expect(host.getAttribute("aria-label")).toBe("Alt name");
         });
 
         it("keeps the name it had as the fallback's, from alt otherwise", () => {

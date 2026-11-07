@@ -90,6 +90,7 @@ It reaches controls in two ways:
 It has these limits:
 
 - **Other controls:** chip, tree view and the list controls (list box, list view) don't read it. Disable those yourself.
+- **A nested fieldset** shows the disabled colors under a disabled parent, as well as disabling its controls.
 - **The form model:** a signal form field inside stays enabled in the form model, so its validation keeps running. Use the signal forms `disabled` rule when the field itself should be disabled.
 - **The first legend:** the browser leaves native controls in a fieldset's first `<legend>` enabled. Mona UI controls get no such exemption, so one in `monaFieldsetLegendTemplate` is disabled too.
 - **A plain `<fieldset>`:** a native `<fieldset disabled>` you write yourself only reaches native controls. Mona UI controls that draw their own focusable element stay enabled inside it. Use `mona-fieldset` for those.

@@ -97,7 +97,7 @@ Use a native `button` or `a` element for the trigger when possible. The trigger 
 | `aria-controls` | References the `id` on the content element, generated unless you gave it one. |
 | `aria-disabled` | Set to `"true"` when the root is disabled. |
 
-Native button triggers receive `type="button"` and use the browser's native role, focusability, and disabled behavior. Other trigger elements receive `role="button"` and `tabindex="0"`; `Enter` and `Space` toggle the root and prevent their default action. A non-native trigger, or an `a`, becomes unfocusable (`tabindex="-1"`) while disabled, and a disabled `a` doesn't follow its `href`.
+Native button triggers receive `type="button"` and use the browser's native role, focusability, and disabled behavior. A native `input` is disabled the same way, and a disabled `summary` doesn't open its `details`. Other trigger elements receive `role="button"` and `tabindex="0"`; `Enter` and `Space` toggle the root and prevent their default action. A non-native trigger, or an `a`, becomes unfocusable (`tabindex="-1"`) while disabled, and a disabled `a` doesn't follow its `href`.
 
 A control inside a trigger, such as a button or an input in a `div` used as one, keeps its own clicks and keys, and doesn't toggle the root.
 

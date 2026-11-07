@@ -236,7 +236,7 @@ The `inputAttributes` input allows forwarding custom HTML attributes to the unde
 </mona-otp-input>
 ```
 
-Use the `inputId` and `name` inputs for the id and name of the native input, not `inputAttributes`, so only one thing writes each attribute.
+Use the `inputId` and `name` inputs for the id and name of the native input. An `id` or `name` in `inputAttributes` only applies while the matching input isn't set.
 
 ### Attribute Categories
 

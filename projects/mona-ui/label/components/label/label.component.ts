@@ -125,7 +125,7 @@ export class LabelComponent {
 
     #warnIfMisassociated(): void {
         warnIfTargetNotLabelable(this.for(), this.labelRef().nativeElement);
-        if (this.#wrappedControl && !this.for() && !this.context.captionId()) {
+        if (this.#wrappedControl && !this.for() && !this.context.captionId() && !this.#wrappedControl.named()) {
             console.warn(
                 "[Mona Label] A wrapped control takes its name from the text input. Text projected next to it can't " +
                     "name it.",

@@ -154,7 +154,7 @@ When multiple independent operations target the same element:
 
 - **Announcing:** the service announces through the CDK `LiveAnnouncer` when a request becomes visible, with its `text` or the localized "Loading". A later `update({ text })` is read out too, at most once every 5 seconds, ending on the latest text.
 - **`aria-busy`:** set on a targeted element from the moment of the request, including its `delay`, and put back as it was afterwards. It isn't set on the body for a full-page overlay. It would tell assistive technology it can skip the whole page, including the overlay. On a targeted element the Cancel button is inside the busy region, so for a cancellable request, give users another way to reach it if your screen reader support needs it.
-- **Focus:** when the Cancel button goes with focus on it, because it was pressed, the request closed, or `minimumVisibleDuration` is holding a closed spinner on screen, focus returns to where it came from. The exception is another request on the same target taking over without a Cancel button of its own: the button goes, and focus isn't moved back.
+- **Focus:** when the Cancel button goes with focus on it, because it was pressed, the request closed, another request on the same target took over without a Cancel button of its own, or `minimumVisibleDuration` is holding a closed spinner on screen, focus returns to where it came from.
 - **It's not a modal lock:** the overlay blocks the pointer, not the keyboard. Focus stays where it was and the content behind stays reachable, so disable your own actions while they run if resubmitting would be a problem.
 - **Motion and color:** every appearance honors `prefers-reduced-motion`, and stays visible in forced colors.
 
