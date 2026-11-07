@@ -1,5 +1,6 @@
 import { formatDate, NgTemplateOutlet } from "@angular/common";
 import { afterNextRender, Component, computed, ElementRef, inject, Injector, input, LOCALE_ID } from "@angular/core";
+import { formatGregorianDateToLocaleString, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
 import { Column } from "../../models/Column";
 import { Row } from "../../models/Row";
@@ -26,6 +27,7 @@ import { GridEditorComponent, type GridEditorCommitTrigger } from "../grid-edito
 export class GridCellComponent {
     readonly #elementRef = inject(ElementRef<HTMLElement>);
     readonly #gridNavigationService = inject(GridNavigationService);
+    readonly #i18n = inject(MonaI18nService);
     readonly #injector = inject(Injector);
     readonly #locale = inject(LOCALE_ID);
     readonly #logicalCell = inject(GridLogicalCellDirective, { optional: true });
@@ -55,7 +57,14 @@ export class GridCellComponent {
         const value = this.displayValue();
         const format = column.format;
         if (format == null) {
-            return value;
+            // A date shows in the locale's numeric date format, as the date picker and the filter row show it.
+            return column.dataType === "date" && value instanceof Date && !Number.isNaN(value.getTime())
+                ? formatGregorianDateToLocaleString(value, this.#i18n.localeId(), {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric"
+                  })
+                : value;
         }
         if (typeof format === "function") {
             return format(value, this.row().data, column);
