@@ -74,46 +74,49 @@ Each structural directive below is an `ng-template` placed as projected content 
 </mona-combo-box>
 ```
 
-## Feature Examples
+## Examples
+
+### Filtering
+
+`monaDropDownFilterable` narrows the popup's visible options to those matching the typed text.
+
+```example
+combo-box/filtering
+```
 
 ### Primitive value binding
 
 By default `value` holds the complete selected data item. Set `valuePrimitive` to `true` to have `value` hold the value resolved through `valueField` instead — useful for storing just an id rather than the whole object. Setting `value` to a matching field value (for example, restoring it from a signal forms field) also selects the corresponding item and updates the displayed text to that item's `textField`.
 
-```html
-
-<mona-combo-box
-    [data]="countries"
-    textField="name"
-    valueField="id"
-    [valuePrimitive]="true"
-    [(value)]="selectedCountryId">
-</mona-combo-box>
+```example
+combo-box/primitive
 ```
 
-`selectedCountryId` becomes the matching `id` once an item is selected, and `null` again once cleared. `valueField` should resolve to a stable, unique scalar; without it, the item itself is used as the value, which naturally supports primitive data such as `["One", "Two", "Three"]`. Custom values via `allowCustomValue`/`valueAdd` are unaffected — see [Allowing custom values](#allowing-custom-values).
+The value becomes the matching `code` once an item is selected, and `null` again once cleared. `valueField` should resolve to a stable, unique scalar; without it, the item itself is used as the value, which naturally supports primitive data such as `["One", "Two", "Three"]`. Custom values via `allowCustomValue`/`valueAdd` are unaffected — see [Allowing custom values](#allowing-custom-values).
 
 ### Allowing custom values
 
-`allowCustomValue` lets the consumer commit typed text that doesn't match any item in `data`. When enabled, unmatched text on `Enter` emits `valueAdd` with the typed text instead of writing to `value` — the consumer decides how to handle it (for example, adding a new item to `data` and then setting `value`).
+`allowCustomValue` lets the consumer commit typed text that doesn't match any item in `data`. When enabled, unmatched text on `Enter` emits `valueAdd` with the typed text instead of writing to `value` — the consumer decides how to handle it, here by adding a new item to `data` and then setting `value`.
 
-```typescript
-protected onValueAdd(text: string): void {
-    const newItem = { id: crypto.randomUUID(), name: text };
-    this.countries.update(items => [...items, newItem]);
-    this.selectedCountry.set(newItem);
-}
+```example
+combo-box/custom-values
 ```
+
+### Signal Forms integration
+
+Binding `[formField]` synchronizes `value`, `disabled`, `readonly`, `required`, `invalid`, and `touched` with a signal forms field automatically.
+
+```example
+combo-box/forms
+```
+
+### Grouping
+
+`monaDropDownGroupable` groups options under a header row, driven by `groupBy`.
 
 ```html
 
-<mona-combo-box
-    [data]="countries"
-    textField="name"
-    valueField="id"
-    [allowCustomValue]="true"
-    (valueAdd)="onValueAdd($event)">
-</mona-combo-box>
+<mona-combo-box [data]="countries" textField="name" valueField="id" monaDropDownGroupable groupBy="region"></mona-combo-box>
 ```
 
 ### Disabled, readonly, loading, and required states
@@ -132,48 +135,6 @@ protected onValueAdd(text: string): void {
     [required]="true"
     [showClearButton]="true">
 </mona-combo-box>
-```
-
-### Signal Forms integration
-
-Binding `[formField]` synchronizes `value`, `disabled`, `readonly`, `required`, `invalid`, and `touched` with a signal forms field automatically.
-
-```typescript
-import { form, required } from "@angular/forms/signals";
-
-protected readonly countryModel = signal<{ id: number | null }>({ id: null });
-protected readonly countryForm = form(this.countryModel, schema => {
-    required(schema.id);
-});
-```
-
-```html
-
-<mona-combo-box [data]="countries" textField="name" valueField="id" [formField]="countryForm.id"></mona-combo-box>
-```
-
-### Filtering
-
-`monaDropDownFilterable` narrows the popup's visible options to those matching the typed text.
-
-```html
-
-<mona-combo-box
-    [data]="countries"
-    textField="name"
-    valueField="id"
-    monaDropDownFilterable
-    [monaDropDownFilterable]="{ operator: 'contains', caseSensitive: false }">
-</mona-combo-box>
-```
-
-### Grouping
-
-`monaDropDownGroupable` groups options under a header row, driven by `groupBy`.
-
-```html
-
-<mona-combo-box [data]="countries" textField="name" valueField="id" monaDropDownGroupable groupBy="region"></mona-combo-box>
 ```
 
 ### Virtual scrolling

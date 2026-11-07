@@ -26,69 +26,37 @@ import { SwitchComponent } from "@nanahoshi/mona-ui/switch";
 <mona-switch [(checked)]="enabled" aria-label="Enable notifications"></mona-switch>
 ```
 
-**With string labels:**
+## Examples
 
-```html
-<mona-switch [(checked)]="enabled" onLabel="On" offLabel="Off" aria-label="Enable notifications"></mona-switch>
+### Labels in the track
+
+`onLabel` and `offLabel` display text inside the switch track on the respective sides of the handle. They don't name the switch, so it still needs a label.
+
+```example
+switch/labels
 ```
 
-**Signal forms integration:**
-
-```html
-<mona-switch [formField]="notificationsField" aria-label="Enable notifications"></mona-switch>
-```
-
-## Label Customization
-
-`onLabel` and `offLabel` display text inside the switch track on the respective sides of the handle.
-
-```html
-<mona-switch [(checked)]="enabled" onLabel="On" offLabel="Off" aria-label="Theme"></mona-switch>
-```
+### Icons
 
 Replace the text with any markup using the `monaSwitchOnLabelTemplate` and `monaSwitchOffLabelTemplate` structural directives. When both a string input and a template are provided, the template takes precedence.
 
-```html
-<mona-switch [(checked)]="darkMode" aria-label="Dark mode">
-    <ng-template monaSwitchOnLabelTemplate>
-        <svg lucideSun [size]="14"></svg>
-    </ng-template>
-    <ng-template monaSwitchOffLabelTemplate>
-        <svg lucideMoon [size]="14"></svg>
-    </ng-template>
-</mona-switch>
+Use `monaSwitchHandleContentTemplate` to put content in the handle. Its context holds the checked state as the implicit variable.
+
+```example
+switch/icons
 ```
 
-## Handle Customization
+### Signal forms
 
-Use `monaSwitchHandleContentTemplate` to replace the default empty handle circle with custom content. The template context exposes the current checked state as the implicit variable:
-
-```html
-<mona-switch [(checked)]="darkMode" aria-label="Dark mode">
-    <ng-template monaSwitchHandleContentTemplate let-active>
-        @if (active) {
-            <svg lucideSun [size]="14"></svg>
-        } @else {
-            <svg lucideMoon [size]="14"></svg>
-        }
-    </ng-template>
-</mona-switch>
+```example
+switch/forms
 ```
+
+The signal forms `disabled` rule disables the digest switch while email notifications are off.
 
 ## Forms Integration
 
-`SwitchComponent` implements `FormCheckboxControl` from `@angular/forms/signals`. Connect it to a signal form field using the `[formField]` binding provided by the signal forms `FormField` directive:
-
-```typescript
-import { signal } from "@angular/core";
-import { form, FormField } from "@angular/forms/signals";
-
-protected readonly myForm = form(signal({ notifications: false }));
-```
-
-```html
-<mona-switch [formField]="myForm.notifications" aria-label="Enable notifications"></mona-switch>
-```
+`SwitchComponent` implements `FormCheckboxControl` from `@angular/forms/signals`. Connect it to a signal form field using the `[formField]` binding provided by the signal forms `FormField` directive, as in the signal forms example.
 
 `FormField` writes `checked`, `disabled`, `invalid`, `readonly`, `required` and `touched`. Don't set those on the same element, because Angular rejects the template. The `touch` output fires when the switch is toggled or loses focus, marking the field as touched. The signal forms `required` rule treats a switch that's off as empty.
 

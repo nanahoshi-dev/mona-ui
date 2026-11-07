@@ -12,34 +12,28 @@ import {
 
 ## Examples
 
-**Wrapped control (preferred):**
+### Wrapping a control
 
-```html
-<mona-label text="Email address">
-    <mona-text-box [(value)]="email"></mona-text-box>
-</mona-label>
+Wrapping is the preferred way. The `text` input names the wrapped control, and a click on the caption reaches it.
+
+```example
+label/wrapping
 ```
 
-**Native `for`/`id` association:**
+### Pointing at a control
 
-```html
-<mona-label text="Email address" for="email"></mona-label>
-<input id="email" monaTextBox />
+Use `for` when the label and the control can't be nested. A string `for` works for a native input with that `id`. For a component, bind `[for]` to a template reference. `label[monaLabel]` takes `for` the same way.
+
+```example
+label/for
 ```
 
-**Component reference:**
+### Optional fields
 
-```html
-<mona-label text="Email address" [for]="textBox"></mona-label>
-<mona-text-box #textBox></mona-text-box>
-```
+`optional` adds text after the caption. It reads "Optional" unless you set `optionalText`.
 
-**Optional field:**
-
-```html
-<mona-label text="Company" optional optionalText="Optional">
-    <mona-text-box></mona-text-box>
-</mona-label>
+```example
+label/optional
 ```
 
 ## Behavior

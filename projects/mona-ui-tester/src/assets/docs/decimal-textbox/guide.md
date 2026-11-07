@@ -38,45 +38,33 @@ import { DecimalTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
 </mona-decimal-text-box>
 ```
 
-**Signal forms**
-
-```typescript
-import { FormField, form } from "@angular/forms/signals";
-
-protected readonly form = form({ amount: "1250.00" as string | null });
-```
-
-```html
-<mona-decimal-text-box [formField]="form.amount" [decimals]="2" aria-label="Amount"></mona-decimal-text-box>
-```
-
-## Feature Examples
+## Examples
 
 ### Bounds and step
 
 `minValue`, `maxValue` and `step` accept a decimal string or a number. A string keeps every digit; a number is converted to its shortest decimal form.
 
-```html
-<mona-decimal-text-box
-    [(value)]="rate"
-    [decimals]="4"
-    minValue="0"
-    maxValue="99999999999999999999.9999"
-    step="0.0001"
-    aria-label="Rate">
-</mona-decimal-text-box>
+```example
+decimal-textbox/bounds
 ```
 
 The spinner buttons, arrow keys and mouse wheel stop at `minValue` and `maxValue`. On blur, a value outside the range is corrected to the nearest bound.
 
 ### Custom formatter
 
-```typescript
-protected readonly currencyFormatter = (value: string | null) =>
-    value == null ? "" : formatNumber(value, "en-US", { style: "currency", currency: "USD" });
+`formatNumber` from `@nanahoshi/mona-ui/i18n` formats a decimal string exactly. `formatter` affects the unfocused display string. It does not replace the focused edit buffer.
+
+```example
+decimal-textbox/formatter
 ```
 
-`formatNumber` from `@nanahoshi/mona-ui/i18n` formats a decimal string exactly. `formatter` affects the unfocused display string. It does not replace the focused edit buffer.
+### Signal forms
+
+The form field holds the canonical decimal string, whatever the display locale.
+
+```example
+decimal-textbox/forms
+```
 
 ### Parsing and validating text
 

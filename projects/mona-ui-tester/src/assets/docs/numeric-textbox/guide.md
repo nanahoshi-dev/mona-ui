@@ -24,83 +24,39 @@ import { FormField, form } from "@angular/forms/signals";
 </mona-numeric-text-box>
 ```
 
-**Signal forms**
-
-```typescript
-import { FormField, form } from "@angular/forms/signals";
-
-protected readonly form = form({ quantity: 1 });
-```
-
-```html
-<mona-numeric-text-box [formField]="form.quantity" aria-label="Quantity"></mona-numeric-text-box>
-```
-
-## Feature Examples
+## Examples
 
 ### Fixed-point display while editing
 
-```html
-<mona-numeric-text-box
-    [(value)]="amount"
-    [decimals]="2"
-    aria-label="Amount">
-</mona-numeric-text-box>
-```
-
 When the value is `12`, the unfocused control displays `12.00`. While focused, it shows `12`. If the value is `12.5`, the focused edit buffer shows `12.5`.
+
+```example
+numeric-textbox/decimals
+```
 
 ### Custom formatter
 
-```typescript
-protected readonly currencyFormatter = (value: number | null) =>
-    value == null ? "" : `$ ${value.toFixed(2)}`;
-```
-
-```html
-<mona-numeric-text-box
-    [(value)]="price"
-    [decimals]="2"
-    [formatter]="currencyFormatter"
-    aria-label="Price">
-</mona-numeric-text-box>
-```
-
 `formatter` affects the unfocused display string. It does not replace the focused edit buffer.
 
-### Signal forms with bounds
-
-```typescript
-import { form, FormField, required } from "@angular/forms/signals";
-
-protected readonly form = form({ quantity: 1 }, schema => {
-    required(schema.quantity);
-});
+```example
+numeric-textbox/formatter
 ```
-
-```html
-<mona-numeric-text-box
-    [formField]="form.quantity"
-    [minValue]="0"
-    [maxValue]="10"
-    aria-label="Quantity">
-</mona-numeric-text-box>
-```
-
-Use the `FormField` directive when you want the form schema to write `value`, `touched`, `invalid`, `disabled`, `readonly`, and `required` into the component.
 
 ### Spinner buttons and step size
 
-```html
-<mona-numeric-text-box
-    [(value)]="stepValue"
-    [step]="5"
-    [spinners]="true"
-    aria-label="Step value">
-</mona-numeric-text-box>
+The spinner buttons and arrow keys use the configured `step` value, and stop at `minValue` and `maxValue`.
+
+```example
+numeric-textbox/step
 ```
 
-The spinner buttons and arrow keys use the configured `step` value.
+### Signal forms with bounds
+
+Use the `FormField` directive when you want the form schema to write `value`, `touched`, `invalid`, `disabled`, `readonly`, and `required` into the component.
+
+```example
+numeric-textbox/forms
+```
 
 ### Precision
 
@@ -132,10 +88,6 @@ A JavaScript `number` holds integers exactly only up to `9007199254740991` (`Num
 
 ```typescript
 import { disabled, form, FormField, required } from "@angular/forms/signals";
-```
-
-```html
-<mona-numeric-text-box [formField]="form.quantity" aria-label="Quantity"></mona-numeric-text-box>
 ```
 
 The `touch` output fires when the value changes, when the control blurs, and when the spinner buttons update the value.

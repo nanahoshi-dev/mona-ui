@@ -82,19 +82,12 @@ Replaces the default year label in the decade view:
 |-----------------------------|----------|------------------------------------|
 | `$implicit` (as `let-year`) | `number` | The year represented by this cell. |
 
-## Feature Examples
+## Examples
 
 ### Multiple date selection
 
-```html
-<mona-calendar
-    selection="multiple"
-    [(value)]="selectedDates">
-</mona-calendar>
-```
-
-```typescript
-protected readonly selectedDates = signal<Date[]>([]);
+```example
+calendar/multiple
 ```
 
 Click to select the first date. Then:
@@ -106,39 +99,18 @@ All selected dates are emitted as a flat `Date[]`.
 
 ### Range selection
 
-```html
-<mona-calendar
-    selection="range"
-    [(value)]="selectedRange">
-</mona-calendar>
-```
-
-```typescript
-protected readonly selectedRange = signal<Date[] | null>(null);
-```
-
 Click the start date, then click the end date. The emitted `value` is always `[startDate, endDate]` — a `Date[]` with exactly two elements. Clicking a new date while a range is pending resets the selection.
+
+```example
+calendar/range
+```
 
 ### Date constraints
 
-```html
-<mona-calendar
-    [(value)]="date"
-    [minDate]="minDate()"
-    [maxDate]="maxDate()"
-    [disabledDates]="disabledPredicate">
-</mona-calendar>
-```
+`minDate` and `maxDate` bound the dates that can be chosen. `disabledDates` takes a predicate, as here to skip weekends, or an array of specific dates.
 
-```typescript
-protected readonly minDate = signal(new Date(2025, 0, 1));
-protected readonly maxDate = signal(new Date(2025, 11, 31));
-
-// Predicate: disable Sundays
-protected readonly disabledPredicate = (date: Date) => date.getDay() === 0;
-
-// Or an array of specific dates:
-// protected readonly disabledDates = [new Date(2025, 5, 15)];
+```example
+calendar/constraints
 ```
 
 ### Week numbers
@@ -161,18 +133,8 @@ Displays ISO week numbers in a left column of the month grid.
 
 `CalendarComponent` implements `FormValueControl<Date | Date[] | null>` from `@angular/forms/signals`. Use the `[formField]` binding:
 
-```typescript
-import { form, FormField, disabled, readonly, required } from "@angular/forms/signals";
-
-protected readonly form = form({ date: null as Date | null }, schema => {
-    disabled(schema.date, { when: () => this.isDisabled() });
-    readonly(schema.date, { when: () => this.isReadonly() });
-    required(schema.date, { when: () => true });
-});
-```
-
-```html
-<mona-calendar [formField]="form.date"></mona-calendar>
+```example
+calendar/forms
 ```
 
 > **Signal forms only.** `CalendarComponent` does **not** implement `ControlValueAccessor`. It cannot be used with `[(ngModel)]`, `[formControl]`, or `formControlName`.

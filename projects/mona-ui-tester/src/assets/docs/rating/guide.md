@@ -29,12 +29,38 @@ import {
 
 External values that are out of range, non-finite, or incompatible with the active precision are normalized for rendering but are **never rewritten on the model** — the model changes only when the user interacts with the control. `Home` restores `0`.
 
-## Clearing
+## Examples
 
-The keyboard can always clear a rating with `Home`. Set `clearable` so a click on the current value clears it too, which gives pointer and touch users a way to undo one:
+### Clearing
 
-```html
-<mona-rating aria-label="Product rating" clearable [(value)]="rating"></mona-rating>
+The keyboard can always clear a rating with `Home`. Set `clearable` so a click on the current value clears it too, which gives pointer and touch users a way to undo one.
+
+```example
+rating/clearable
+```
+
+### Half values
+
+With `precision="half"`, each item has two halves, and the keyboard moves by `0.5`.
+
+```example
+rating/half
+```
+
+### Icons
+
+`icon` picks a built-in shape and `color` its fill. For any other visual, provide the item templates.
+
+```example
+rating/icons
+```
+
+### Requiring a rating in a form
+
+The `min` rule rejects an unrated value of `0`.
+
+```example
+rating/forms
 ```
 
 ## Selection Behavior
@@ -83,26 +109,7 @@ When both are `true`, disabled behavior takes precedence.
 
 ## Signal Forms
 
-`mona-rating` implements `FormValueControl<number>` and works with the `FormField` directive of Angular Signal Forms:
-
-```typescript
-import { signal } from "@angular/core";
-import { form, FormField, min } from "@angular/forms/signals";
-
-interface ReviewModel {
-    rating: number;
-}
-
-readonly #model = signal<ReviewModel>({ rating: 0 });
-
-readonly reviewForm = form(this.#model, schema => {
-    min(schema.rating, 1);
-});
-```
-
-```html
-<mona-rating aria-label="Review rating" [formField]="reviewForm.rating"> </mona-rating>
-```
+`mona-rating` implements `FormValueControl<number>` and works with the `FormField` directive of Angular Signal Forms, as in [Requiring a rating in a form](#requiring-a-rating-in-a-form).
 
 The `FormField` directive writes `disabled`, `invalid`, `readonly`, `required`, and `touched` state automatically. Don't set those on the same element, because Angular rejects the template. Error styling (`aria-invalid`, `data-invalid`, error ring) appears only when the field is both invalid and touched, or `required` and touched with a rating of `0`.
 
@@ -174,33 +181,11 @@ The component owns overlay width, overflow clipping, continuous vs. single behav
 
 ## Icon Presets and Custom Visuals
 
-Use `icon` to select one built-in shape. The default base icon stays outlined, while committed and pointer-preview values use the same shape filled with the rating color. It defaults to the primary theme color; set `color` to any CSS color value to override it:
-
-```html
-<mona-rating aria-label="Favorite level" icon="heart" color="#e11d48" [(value)]="value"> </mona-rating>
-```
+Use `icon` to select one built-in shape. The default base icon stays outlined, while committed and pointer-preview values use the same shape filled with the rating color. It defaults to the primary theme color; set `color` to any CSS color value to override it.
 
 The available icon values are `star`, `heart`, `circle`, `diamond`, and `flame`. Set `color` to `null`, `undefined`, or an empty string to restore the primary theme color.
 
-For any other icon or visual, use the item templates. Provide all three templates to replace every default layer; omitted templates continue to use the selected preset:
-
-```html
-<mona-rating aria-label="Favorite level" [(value)]="value">
-    <ng-template monaRatingItemTemplate>
-        <svg lucideHeart class="h-full w-full text-muted-foreground" fill="none"></svg>
-    </ng-template>
-
-    <ng-template monaRatingSelectedItemTemplate>
-        <svg lucideHeart class="h-full w-full text-rose-500" fill="currentColor"></svg>
-    </ng-template>
-
-    <ng-template monaRatingHoveredItemTemplate>
-        <svg lucideHeart class="h-full w-full text-rose-400" fill="currentColor"></svg>
-    </ng-template>
-</mona-rating>
-```
-
-Import `LucideHeart` from `@lucide/angular` alongside the Rating template directives in the consuming component.
+For any other icon or visual, use the item templates. Provide all three templates to replace every default layer; omitted templates continue to use the selected preset. [Icons](#icons) shows both.
 
 ## Styling and Class Extension
 

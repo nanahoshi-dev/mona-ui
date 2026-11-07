@@ -36,48 +36,33 @@ protected readonly form = form(signal<{ color: string | null }>({ color: "#33669
 <mona-color-gradient [formField]="form.color" [showButtons]="false"></mona-color-gradient>
 ```
 
-## Feature Examples
+## Examples
+
+### Apply and Cancel
+
+With `showButtons` on, the default, `value` changes only when Apply is pressed. Use `(apply)` and `(cancel)` to react to the buttons.
+
+```example
+color-gradient/buttons
+```
 
 ### Immediate updates
 
-Set `showButtons` to `false` when each adjustment should update the bound value immediately:
+Set `showButtons` to `false` when each adjustment should update the bound value immediately. `format` controls the emitted color string: `hex`, `rgb`, or `hsl`.
 
-```html
-<mona-color-gradient [(value)]="color" [showButtons]="false"></mona-color-gradient>
+```example
+color-gradient/immediate
 ```
-
-When `showButtons` is `true`, use `(apply)` and `(cancel)` to react to the visible buttons:
-
-```html
-<mona-color-gradient
-    [(value)]="draftColor"
-    (apply)="saveColor()"
-    (cancel)="closeEditor()">
-</mona-color-gradient>
-```
-
-### Output format
-
-`format` controls the emitted color string when the component writes a value:
-
-```html
-<mona-color-gradient [(value)]="color" format="rgb" [showButtons]="false"></mona-color-gradient>
-```
-
-Supported output formats are `hex`, `rgb`, and `hsl`.
 
 ### Hide optional controls
 
-```html
-<mona-color-gradient
-    [(value)]="color"
-    [opacity]="false"
-    [showHexInput]="false"
-    [showColorInputs]="false">
-</mona-color-gradient>
+Use this when the surrounding UI already provides text entry or when the editor should stay compact.
+
+```example
+color-gradient/compact
 ```
 
-Use this when the surrounding UI already provides text entry or when the editor should stay compact.
+## Appearance & Styling
 
 ### Rounded variants
 

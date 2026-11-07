@@ -57,75 +57,35 @@ Each structural directive below is an `ng-template` placed as projected content 
 
 Binding the list box's items to `monaListBoxItemTemplateOf` types `let-item` as the item type, so a typo such as `item.nmae` fails the template type check. Without it, the item is `any`, as before.
 
-## Feature Examples
+## Examples
 
-### Single selection with toggle
+### Selection
 
-```html
-<mona-list-box aria-label="Foods" [items]="items" textField="name" selectBy="id" [(selectedKeys)]="selectedIds">
-</mona-list-box>
+With `selectionMode="multiple"`, clicks toggle items, and `[(selectedKeys)]` holds the keys derived through `selectBy`.
+
+```example
+list-box/selection
 ```
 
 With the default `selectionMode` (`"single"`) and `singleSelectionToggleable` (`true`), clicking the selected item again deselects it. Set `[singleSelectionToggleable]="false"` to require selecting a different item instead.
 
-### Multiple selection
-
-```html
-<mona-list-box aria-label="Foods" [items]="items" textField="name" selectBy="id" selectionMode="multiple" [(selectedKeys)]="selectedIds">
-</mona-list-box>
-```
-
 ### A rearrangeable list
 
-```html
-<mona-list-box aria-label="Steps" [items]="steps()" textField="name" selectBy="id" (actionClick)="onStepAction($event)">
-</mona-list-box>
-```
+Without a `connectedList`, the toolbar offers Move Up, Move Down, Clear Selection and Remove. The handler reorders or removes the items, here with `moveIndices` from `@nanahoshi/mona-ui/common`.
 
-Without a `connectedList`, the toolbar offers Move Up, Move Down, Clear Selection and Remove, and the handler reorders or removes items as for a connected pair.
+```example
+list-box/reorder
+```
 
 ### Connected list boxes with a transfer toolbar
 
-```html
-<mona-list-box
-    aria-label="Available foods"
-    [items]="availableItems()"
-    textField="name"
-    selectBy="id"
-    [connectedList]="selected"
-    (actionClick)="onActionClick($event)">
-</mona-list-box>
-<mona-list-box
-    #selected
-    aria-label="Chosen foods"
-    [items]="selectedItems()"
-    textField="name"
-    selectBy="id"
-    [toolbar]="false"
-    (actionClick)="onSelectedActionClick($event)">
-</mona-list-box>
+"To" actions fire on the first list box and carry the items to move to the connected one (its selection, or every item for `transferAllTo`). "From" actions fire on the connected list box and carry the items to move back.
+
+```example
+list-box/transfer
 ```
 
-```typescript
-protected onActionClick(event: ListBoxActionEvent<Food>): void {
-    // "To" actions fire on `available` and carry the items to move to `selected`
-    // (its selection, or every item for "transferAllTo").
-    if (event.action === "transferTo" || event.action === "transferAllTo") {
-        this.selectedItems.update(items => [...items, ...event.selectedItems]);
-        this.availableItems.update(items => items.filter(i => !event.selectedItems.includes(i)));
-    }
-}
-
-protected onSelectedActionClick(event: ListBoxActionEvent<Food>): void {
-    // "From" actions fire on `selected` (the connected list box) and carry the items to move back.
-    if (event.action === "transferFrom" || event.action === "transferAllFrom") {
-        this.availableItems.update(items => [...items, ...event.selectedItems]);
-        this.selectedItems.update(items => items.filter(i => !event.selectedItems.includes(i)));
-    }
-}
-```
-
-Setting `connectedList` on the first list box (pointing at `selected`) is enough — `selected` does not need `connectedList` set back. The toolbar renders on the first list box and controls both lists; set `[toolbar]="false"` on `selected`, or it shows a second toolbar of its own for moving, clearing and removing. Name both list boxes: the toolbar's name and the transfer buttons' labels are built from them ("Available foods actions", "Transfer to Chosen foods"). See [The component does not mutate `items` itself](#the-component-does-not-mutate-items-itself) for what each action requires from the consumer.
+Setting `connectedList` on the first list box is enough — the connected one does not need `connectedList` set back. The toolbar renders on the first list box and controls both lists; set `[toolbar]="false"` on the connected one, or it shows a second toolbar of its own for moving, clearing and removing. Name both list boxes: the toolbar's name and the transfer buttons' labels are built from them ("Available permissions actions", "Transfer to Granted permissions"). See [The component does not mutate `items` itself](#the-component-does-not-mutate-items-itself) for what each action requires from the consumer.
 
 Once the consumer has moved the items, they are selected in the list box they moved to, and focus follows them there when the transfer button is now disabled.
 

@@ -62,33 +62,26 @@ import { RangeSliderComponent, SliderHandleTemplateDirective } from "@nanahoshi/
 
 `monaSliderTickValueTemplate` replaces default numeric labels. Only takes effect when both `showTicks` and `showLabels` are `true`.
 
-## Feature Examples
+## Examples
 
 ### Tick marks and labels
 
-```html
-<mona-range-slider
-    [minValue]="0"
-    [maxValue]="1000"
-    [step]="100"
-    [showTicks]="true"
-    [showLabels]="true"
-    [(value)]="priceRange"
-    aria-labelledby="price-label">
-</mona-range-slider>
+`aria-labelledby` names the group, and each handle reads it before its own name.
+
+```example
+range-slider/ticks
 ```
 
 ### Vertical orientation
 
-```html
-<mona-range-slider
-    orientation="vertical"
-    [minValue]="0"
-    [maxValue]="100"
-    [(value)]="range"
-    aria-labelledby="range-label"
-    style="height: 300px">
-</mona-range-slider>
+```example
+range-slider/vertical
+```
+
+### Signal forms
+
+```example
+range-slider/forms
 ```
 
 ### Overlapping handles
@@ -177,18 +170,7 @@ A string `for` can't work, because the range slider has no native input.
 
 ## Forms Integration
 
-`RangeSliderComponent` implements `FormValueControl<[number, number]>` from `@angular/forms/signals`. Connect it using the `[formField]` binding:
-
-```typescript
-import { signal } from "@angular/core";
-import { form, FormField } from "@angular/forms/signals";
-
-protected readonly filterForm = form(signal({ range: [10, 90] as [number, number] }));
-```
-
-```html
-<mona-range-slider [formField]="filterForm.range" aria-labelledby="range-label"></mona-range-slider>
-```
+`RangeSliderComponent` implements `FormValueControl<[number, number]>` from `@angular/forms/signals`. Connect it using the `[formField]` binding, as in [Signal forms](#signal-forms).
 
 `FormField` writes `value`, `disabled`, `invalid`, `readonly` and `touched`. Don't set those on the same element, because Angular rejects the template. The `touch` output fires when either handle loses focus, marking the field as touched.
 

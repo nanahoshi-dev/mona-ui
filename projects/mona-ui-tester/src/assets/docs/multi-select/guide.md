@@ -74,50 +74,45 @@ Each structural directive below is an `ng-template` placed as projected content 
 </mona-multi-select>
 ```
 
-## Feature Examples
+## Examples
+
+### Checkboxes in the popup
+
+`checkboxes` renders a checkbox next to each option in the popup, in addition to the default selected-state styling. By default the popup stays open after selecting or deselecting an item, so the consumer can pick several options in a row. `monaDropDownFilterable` adds a filter input inside the popup.
+
+```example
+multi-select/checkboxes
+```
+
+### Collapsing tags into a summary
+
+Apply `monaMultiSelectSummaryTag` to collapse tags beyond `tagCount` into a single summary chip (default text: "+N items"). A negative `tagCount` (the default) shows every selected item as its own tag and never renders the summary chip. `monaMultiSelectSummaryTagTemplate` replaces the summary chip's text.
+
+```example
+multi-select/summary
+```
 
 ### Primitive value binding
 
 By default `value` holds the complete selected data items. Set `valuePrimitive` to `true` to have `value` hold an array of the values resolved through `valueField` instead — useful for storing just ids rather than the whole objects. Setting `value` to an array of matching field values (for example, restoring it from a signal forms field) also selects the corresponding items.
 
-```html
-
-<mona-multi-select
-    [data]="countries"
-    textField="name"
-    valueField="id"
-    [valuePrimitive]="true"
-    [(value)]="selectedCountryIds">
-</mona-multi-select>
+```example
+multi-select/primitive
 ```
 
-`selectedCountryIds` becomes the matching `id`s (for example, `[2, 3]`) as items are selected, and an empty array again once cleared. `valueField` should resolve to a stable, unique scalar; without it, the item itself is used as the value, which naturally supports primitive data such as `["One", "Two", "Three"]`.
+`valueField` should resolve to a stable, unique scalar; without it, the item itself is used as the value, which naturally supports primitive data such as `["One", "Two", "Three"]`.
 
-### Collapsing tags into a summary
+### Signal Forms integration
 
-Apply `monaMultiSelectSummaryTag` to collapse tags beyond `tagCount` into a single summary chip (default text: "+N items"). A negative `tagCount` (the default) shows every selected item as its own tag and never renders the summary chip.
+Binding `[formField]` synchronizes `value`, `disabled`, `readonly`, `required`, `invalid`, and `touched` with a signal forms field automatically. Signal Forms' `required` doesn't treat an empty array as missing, so use `minLength(path, 1)` to require a selection.
 
-```html
-
-<mona-multi-select [data]="countries" textField="name" valueField="id" monaMultiSelectSummaryTag [monaMultiSelectSummaryTag]="2">
-    <ng-template monaMultiSelectSummaryTagTemplate let-selectedItems let-tagCount="tagCount">
-        <span>+{{ selectedItems.length - tagCount }} more</span>
-    </ng-template>
-</mona-multi-select>
-```
-
-### Checkboxes in the popup
-
-`checkboxes` renders a checkbox next to each option in the popup, in addition to the default selected-state styling.
-
-```html
-
-<mona-multi-select [data]="countries" textField="name" valueField="id" [checkboxes]="true"></mona-multi-select>
+```example
+multi-select/forms
 ```
 
 ### Closing the popup after each selection
 
-By default the popup stays open after selecting or deselecting an item, so the consumer can pick several options in a row. Set `autoClose` to `true` to close it after each selection instead.
+Set `autoClose` to `true` to close the popup after each selection instead of keeping it open.
 
 ```html
 
@@ -139,39 +134,6 @@ By default the popup stays open after selecting or deselecting an item, so the c
     [loading]="isLoading()"
     [required]="true"
     [showClearButton]="true">
-</mona-multi-select>
-```
-
-### Signal Forms integration
-
-Binding `[formField]` synchronizes `value`, `disabled`, `readonly`, `required`, `invalid`, and `touched` with a signal forms field automatically.
-
-```typescript
-import { form, required } from "@angular/forms/signals";
-
-protected readonly countryModel = signal<{ ids: number[] }>({ ids: [] });
-protected readonly countryForm = form(this.countryModel, schema => {
-    required(schema.ids);
-});
-```
-
-```html
-
-<mona-multi-select [data]="countries" textField="name" valueField="id" [formField]="countryForm.ids"></mona-multi-select>
-```
-
-### Filtering
-
-`monaDropDownFilterable` renders a filter input inside the popup that narrows the visible options by text.
-
-```html
-
-<mona-multi-select
-    [data]="countries"
-    textField="name"
-    valueField="id"
-    monaDropDownFilterable
-    [monaDropDownFilterable]="{ operator: 'contains', caseSensitive: false }">
 </mona-multi-select>
 ```
 

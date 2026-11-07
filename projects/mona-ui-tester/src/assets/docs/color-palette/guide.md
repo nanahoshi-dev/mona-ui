@@ -34,12 +34,12 @@ protected readonly form = form(signal<{ color: string | null }>({ color: "#3498d
 <mona-color-palette [formField]="form.color"></mona-color-palette>
 ```
 
-## Feature Examples
+## Examples
 
 ### Built-in palettes
 
-```html
-<mona-color-palette [(value)]="color" palette="material"></mona-color-palette>
+```example
+color-palette/built-in
 ```
 
 | `palette` value | Scheme |
@@ -52,12 +52,8 @@ protected readonly form = form(signal<{ color: string | null }>({ color: "#3498d
 
 Pass any iterable of CSS color strings. `columns` controls the grid width and only applies to custom palettes — built-in schemes define their own column count.
 
-```html
-<mona-color-palette [(value)]="color" [palette]="brandColors" [columns]="6"></mona-color-palette>
-```
-
-```typescript
-protected readonly brandColors = ["#1a1a2e", "#16213e", "#0f3460", "#e94560"];
+```example
+color-palette/custom
 ```
 
 An empty custom palette (`[]`) falls back to the built-in `"flat"` scheme. A `columns` value below 1 shows one column.
@@ -66,25 +62,11 @@ Hex, `rgb()` and `hsl()` colors are read from their text. Anything else, such as
 
 ### Named colors
 
-Use `{ color, name }` items when the colors mean something. Assistive technology reads "Brand blue, #1A73E8", and the same text shows as a tooltip. Plain strings and items can be mixed, and `value` always holds the color.
+Use `{ color, name }` items when the colors mean something. Assistive technology reads "Done, #15803d", and the same text shows as a tooltip. Plain strings and items can be mixed, and `value` always holds the color. `ColorPaletteItem` is imported from `@nanahoshi/mona-ui/common`.
 
-```typescript
-import type { ColorPaletteItem } from "@nanahoshi/mona-ui/common";
-
-protected readonly brandColors: (string | ColorPaletteItem)[] = [
-    { color: "#1A73E8", name: "Brand blue" },
-    { color: "#E94560", name: "Alert" },
-    "#16213E"
-];
+```example
+color-palette/named
 ```
-
-### Rounded tile variants
-
-```html
-<mona-color-palette [(value)]="color" rounded="full"></mona-color-palette>
-```
-
-Supported `rounded` values are `none`, `small`, `medium`, `large`, and `full`.
 
 ### Read-only and disabled
 
@@ -94,6 +76,16 @@ Supported `rounded` values are `none`, `small`, `medium`, `large`, and `full`.
 ```
 
 `readonly` keeps tiles focusable and keyboard-navigable but blocks selection changes. `disabled` removes tiles from the tab order and blocks all interaction.
+
+## Appearance & Styling
+
+### Rounded tile variants
+
+```html
+<mona-color-palette [(value)]="color" rounded="full"></mona-color-palette>
+```
+
+Supported `rounded` values are `none`, `small`, `medium`, `large`, and `full`.
 
 ## Value Behavior
 

@@ -49,27 +49,31 @@ To reject a choice, write the old value back after the current tick, for example
 <p>Current mode: {{ viewMode }}</p>
 ```
 
-## Feature Examples
+## Examples
 
-### Disabled group
+### Disabled options
 
 `disabled` on `mona-segmented` disables every option at once. An option can also be disabled individually with its own `disabled` flag, even when the group is enabled.
 
-```html
-<mona-segmented
-    aria-label="Sort order"
-    [options]="sortOptions"
-    [disabled]="isReadOnly()">
-</mona-segmented>
+```example
+segmented/disabled
 ```
 
-```typescript
-protected readonly sortOptions: SegmentedOption<string>[] = [
-    { label: "Newest", value: "newest" },
-    { label: "Popular", value: "popular" },
-    { label: "Archived", value: "archived", disabled: true }
-];
+### With icons
+
+A `monaSegmentedItemTemplate` replaces each option's label text. `option.label` stays the radio's accessible name, so the icons are hidden from assistive technology.
+
+```example
+segmented/with-icons
 ```
+
+### In a form
+
+```example
+segmented/forms
+```
+
+## Appearance & Styling
 
 ### Full-width layout
 
@@ -192,18 +196,7 @@ Provide a `monaSegmentedItemTemplate` to replace the default label text with cus
 |------------------------------|---------------------------|-----------------|
 | `monaSegmentedItemTemplate` | The default label text   | Every option    |
 
-```html
-<mona-segmented aria-label="View mode" [options]="viewModes" [(value)]="viewMode">
-    <ng-template monaSegmentedItemTemplate let-option let-selected="selected">
-        <span class="flex items-center gap-1.5">
-            <span class="h-1.5 w-1.5 rounded-full" [class.bg-current]="selected"></span>
-            {{ option.label }}
-        </span>
-    </ng-template>
-</mona-segmented>
-```
-
-When no template is projected, the option renders its plain `label` text, exactly as before.
+[With icons](#with-icons) shows one. When no template is projected, the option renders its plain `label` text, exactly as before.
 
 ### Template Context
 
@@ -220,22 +213,7 @@ The component still owns the radio input, selection, and disabled semantics; the
 
 ## Forms Integration
 
-`SegmentedComponent` implements the signal forms `FormValueControl<T | null>` interface, so it can be bound with `[formField]`:
-
-```html
-<mona-segmented
-    aria-label="View mode"
-    [formField]="form.viewMode"
-    [options]="viewModes">
-</mona-segmented>
-```
-
-```typescript
-import { signal } from "@angular/core";
-import { FormField, form } from "@angular/forms/signals";
-
-protected readonly form = form(signal<{ viewMode: ViewMode | null }>({ viewMode: "list" }));
-```
+`SegmentedComponent` implements the signal forms `FormValueControl<T | null>` interface, so it can be bound with `[formField]`, as in [In a form](#in-a-form).
 
 When bound to a field, the `FormField` directive writes `invalid`, `touched`, `disabled`, `readonly`, `required` and `name` through the corresponding inputs and reads the selection from the `value` model.
 

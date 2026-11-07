@@ -29,48 +29,9 @@ Add the imported symbols to your standalone component's `imports` array.
 
 ### The component
 
-**Label via input:**
-
 ```html
-
 <mona-check-box label="Accept terms"></mona-check-box>
 ```
-
-**Label via projected content:**
-
-```html
-
-<mona-check-box>
-    I agree to the <a href="/terms">Terms of Service</a>
-</mona-check-box>
-```
-
-When `label` is non-empty it takes precedence over projected content.
-
-**Label before the checkbox:**
-
-```html
-
-<mona-check-box label="Notify me" labelPosition="before"></mona-check-box>
-```
-
-**Two-way model binding (direct):**
-
-```html
-
-<mona-check-box label="Accept terms" [(checked)]="accepted"></mona-check-box>
-```
-
-**Signal forms integration:**
-
-`CheckBoxComponent` implements `FormCheckboxControl` from `@angular/forms/signals`. Use the `[formField]` binding from the signal forms `FormField` directive:
-
-```html
-
-<mona-check-box label="Accept terms" [formField]="agreedField"></mona-check-box>
-```
-
-`FormField` writes `checked`, `disabled`, `invalid`, `name`, `readonly`, `required` and `touched`. Don't set those on the same element, because Angular rejects the template. The signal forms `required` rule treats an unchecked box as empty.
 
 **`ngModel`:**
 
@@ -83,27 +44,41 @@ When `label` is non-empty it takes precedence over projected content.
 
 > **Listening to changes:** Use `(inputChange)` for raw DOM `change` events. For signal forms, the `[formField]` binding handles value synchronization automatically.
 
-### The directive
+## Examples
 
-```html
-<label class="flex items-center gap-2">
-    <input type="checkbox" monaCheckbox [(ngModel)]="accepted" />
-    Accept terms
-</label>
+### Labels
+
+The text comes from `label` or from projected content. When `label` is non-empty it takes precedence over projected content. `labelPosition="before"` puts the text before the box.
+
+```example
+checkbox/labels
 ```
 
-The directive leaves all label composition and form wiring to the consumer. The native `<input>` retains its standard keyboard behavior, form submission semantics, and Angular forms support.
-
-## Indeterminate
-
-```html
-
-<mona-check-box label="Select all" [(checked)]="allSelected" [(indeterminate)]="someSelected"></mona-check-box>
-```
+### Select all
 
 `indeterminate` shows a dash and sets `aria-checked="mixed"`. It's independent of `checked`.
 
-A user change clears it and then toggles `checked`, as on a native checkbox, and `indeterminateChange` emits `false`. A one-way `[indeterminate]` binding only writes again when its bound value changes: if it stays `true` after a click, the dash stays gone. Use `[(indeterminate)]`, or recompute the bound value after each change.
+```example
+checkbox/indeterminate
+```
+
+A user change clears it and then toggles `checked`, as on a native checkbox, and `indeterminateChange` emits `false`. A one-way `[indeterminate]` binding only writes again when its bound value changes: if it stays `true` after a click, the dash stays gone. Use `[(indeterminate)]`, or recompute the bound value after each change, as this example does.
+
+### Signal forms
+
+`CheckBoxComponent` implements `FormCheckboxControl` from `@angular/forms/signals`, so it takes `[formField]`. `FormField` writes `checked`, `disabled`, `invalid`, `name`, `readonly`, `required` and `touched`. Don't set those on the same element, because Angular rejects the template. The signal forms `required` rule treats an unchecked box as empty.
+
+```example
+checkbox/forms
+```
+
+### The directive
+
+The directive leaves all label composition and form wiring to the consumer. The native `<input>` retains its standard keyboard behavior, form submission semantics, and Angular forms support.
+
+```example
+checkbox/directive
+```
 
 ## Read-only
 

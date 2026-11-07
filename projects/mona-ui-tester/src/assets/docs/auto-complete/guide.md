@@ -61,19 +61,39 @@ Each structural directive below is an `ng-template` placed as projected content 
 | `DropdownPrefixTemplateDirective`      | `ng-template[monaDropdownPrefixTemplate]`      | None                                            | No default — projected content rendered before the input                        |
 | `DropdownSuffixTemplateDirective`      | `ng-template[monaDropdownSuffixTemplate]`      | None                                            | No default — projected content rendered after the input, before the live region |
 
-```html
+## Examples
 
-<mona-auto-complete [data]="countries" textField="name">
-    <ng-template monaDropDownItemTemplate let-dataItem>
-        <span>{{ dataItem.name }}</span>
-    </ng-template>
-    <ng-template monaDropdownSuffixTemplate>
-        <fa-icon [icon]="['fas', 'magnifying-glass']"></fa-icon>
-    </ng-template>
-</mona-auto-complete>
+### Filtering the suggestion list
+
+`monaDropDownFilterable` narrows the popup's visible options to those matching the typed text. Without it, the popup shows the full `data` collection while still highlighting the best match — see [Matching without `monaDropDownFilterable`](#matching-without-monadropdownfilterable).
+
+```example
+auto-complete/filtering
 ```
 
-## Feature Examples
+### Grouping
+
+`monaDropDownGroupable` groups options under a header row, driven by `groupBy`.
+
+```example
+auto-complete/grouping
+```
+
+### Custom templates
+
+The item template replaces each option's text, the prefix template adds content before the input, and the no-data template replaces the empty popup.
+
+```example
+auto-complete/templates
+```
+
+### Signal Forms integration
+
+Binding `[formField]` synchronizes `value`, `disabled`, `readonly`, `required`, `invalid`, and `touched` with a signal forms field automatically. The field's value type must be `string | null`.
+
+```example
+auto-complete/forms
+```
 
 ### Highlight the first match while typing
 
@@ -98,47 +118,6 @@ Each structural directive below is an `ng-template` placed as projected content 
     [loading]="isLoading()"
     [required]="true">
 </mona-auto-complete>
-```
-
-### Signal Forms integration
-
-Binding `[formField]` synchronizes `value`, `disabled`, `readonly`, `required`, `invalid`, and `touched` with a signal forms field automatically. The field's value type must be `string | null`.
-
-```typescript
-import { form, required } from "@angular/forms/signals";
-
-protected readonly countryModel = signal<{ text: string | null }>({ text: null });
-protected readonly countryForm = form(this.countryModel, schema => {
-    required(schema.text);
-});
-```
-
-```html
-
-<mona-auto-complete [data]="countries" textField="name" [formField]="countryForm.text"></mona-auto-complete>
-```
-
-### Filtering the suggestion list
-
-`monaDropDownFilterable` narrows the popup's visible options to those matching the typed text. Without it, the popup shows the full `data` collection while still highlighting the best match — see [Matching without `monaDropDownFilterable`](#matching-without-monadropdownfilterable).
-
-```html
-
-<mona-auto-complete
-    [data]="countries"
-    textField="name"
-    monaDropDownFilterable
-    [monaDropDownFilterable]="{ operator: 'contains', caseSensitive: false }">
-</mona-auto-complete>
-```
-
-### Grouping
-
-`monaDropDownGroupable` groups options under a header row, driven by `groupBy`.
-
-```html
-
-<mona-auto-complete [data]="countries" textField="name" monaDropDownGroupable groupBy="region"></mona-auto-complete>
 ```
 
 ### Virtual scrolling

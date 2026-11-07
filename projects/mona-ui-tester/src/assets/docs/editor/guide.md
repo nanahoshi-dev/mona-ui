@@ -16,13 +16,35 @@ import type { ContentChangeEvent, EditorSettings } from "@nanahoshi/mona-ui/edit
 <mona-editor aria-labelledby="notes-label" placeholder="Write a note" [(value)]="notes" />
 ```
 
+## Examples
+
+### Two-way value
+
+`[(value)]` holds the content as HTML. An empty editor has the value `""`.
+
+```example
+editor/basic
+```
+
+### A smaller toolbar
+
+Every tool is on by default. Pass only what you want to change in `settings`.
+
+```example
+editor/toolbar
+```
+
+### Forms
+
+Bound with `[formField]`, the editor gets `disabled`, `invalid`, `readonly`, `required` and `touched` from the form. Link the error message with `aria-describedby`.
+
+```example
+editor/forms
+```
+
 ## Toolbar Settings
 
-Every tool is on by default. Pass only what you want to change:
-
-```html
-<mona-editor aria-label="Comment" [settings]="{ image: false, table: false, fontFamily: false }" />
-```
+Every tool is on by default. Pass only what you want to change, as in the toolbar example.
 
 `alignment`, `blockquote`, `bold`, `code`, `fontColor`, `fontFamily`, `fontHighlight`, `fontSize`, `headings`, `history`, `horizontalRule`, `image`, `indent`, `italic`, `link`, `list`, `strikethrough`, `subscript`, `superscript`, `table`, `taskList` and `underline` are booleans. `code: false` also turns off the code block.
 

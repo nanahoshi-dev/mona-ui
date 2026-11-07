@@ -29,36 +29,6 @@ Add the imported symbols to your standalone component's `imports` array.
 <mona-text-box placeholder="Search..."></mona-text-box>
 ```
 
-**Two-way value binding:**
-
-```html
-<mona-text-box [(value)]="searchTerm" placeholder="Search..."></mona-text-box>
-```
-
-**With clear button:**
-
-```html
-<mona-text-box [(value)]="query" [clearButton]="true" placeholder="Enter query"></mona-text-box>
-```
-
-**Signal forms integration:**
-
-`TextBoxComponent` implements `FormValueControl<string>` and connects to an Angular signal form field via `[formField]`:
-
-```typescript
-import { form, required, FormField } from "@angular/forms/signals";
-
-protected readonly myForm = form({ search: "" }, schema => {
-    required(schema.search);
-});
-```
-
-```html
-<mona-text-box [formField]="myForm.search" placeholder="Search..."></mona-text-box>
-```
-
-The `FormField` directive automatically writes `value`, `invalid`, `touched`, `disabled`, `readonly`, and `required` into the component.
-
 **With required validation (standalone):**
 
 ```html
@@ -67,31 +37,29 @@ The `FormField` directive automatically writes `value`, `invalid`, `touched`, `d
 
 The invalid state activates when `required` is `true`, the value is empty, and `touched` is `true`.
 
-## Template Slots
+## Examples
 
-`TextBoxComponent` supports `ng-template` content slots placed inside the component tag.
+### Prefix and suffix
 
-**Prefix slot** — rendered inside the left side of the input boundary:
+Put `ng-template` slots inside the component. A prefix renders at the start of the input boundary, and a suffix at the end, after the optional clear button. Multiple prefix and suffix templates render in source order.
 
-```html
-<mona-text-box placeholder="Search">
-    <ng-template monaTextBoxPrefixTemplate>
-        <svg lucideSearch class="pl-1" [size]="16"></svg>
-    </ng-template>
-</mona-text-box>
+```example
+textbox/slots
 ```
 
-**Suffix slot** — rendered inside the right side of the input boundary (after the optional clear button):
+### Clear button
 
-```html
-<mona-text-box placeholder="Enter value">
-    <ng-template monaTextBoxSuffixTemplate>
-        <button (click)="submit()">Go</button>
-    </ng-template>
-</mona-text-box>
+```example
+textbox/clear-button
 ```
 
-Multiple prefix and suffix templates are supported and render in source order.
+### Signal forms
+
+`TextBoxComponent` implements `FormValueControl<string>` and connects to a signal form field via `[formField]`. The `FormField` directive writes `value`, `invalid`, `touched`, `disabled`, `readonly`, and `required` into the component.
+
+```example
+textbox/forms
+```
 
 ## Appearance & Styling
 

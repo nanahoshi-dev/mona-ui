@@ -25,6 +25,38 @@ Bind to a signal or model property using two-way `[(value)]`:
 </mona-otp-input>
 ```
 
+## Examples
+
+### Grouped slots
+
+`groupLength` splits the slots into groups, and `separator` shows between them. The value never contains the separator.
+
+```example
+otp-input/grouped
+```
+
+### Masked PIN
+
+`type="password"` shows each character as a bullet. Here `characterPattern` limits the PIN to digits.
+
+```example
+otp-input/masked
+```
+
+### Verifying on completion
+
+`complete` emits the code when the last slot is filled, so it can be checked without a submit button.
+
+```example
+otp-input/complete
+```
+
+### Signal forms
+
+```example
+otp-input/forms
+```
+
 ## Value Model
 
 The `value` property is a contiguous string (e.g. `"123456"`).
@@ -68,11 +100,7 @@ Accepts letters (`a-z`, `A-Z`) and digits (`0-9`), preserving input casing.
 
 ### 3. Password / Masked (`type="password"`)
 
-Accepts alphanumeric characters while masking the visual presentation slots with a bullet glyph (`•`). The actual string value remains accessible in the underlying model.
-
-```html
-<mona-otp-input type="password" [length]="4"></mona-otp-input>
-```
+Accepts alphanumeric characters while masking the visual presentation slots with a bullet glyph (`•`). The actual string value remains accessible in the underlying model. See [Masked PIN](#masked-pin).
 
 ### Other digit forms
 
@@ -110,14 +138,7 @@ Visual slots can be grouped into segments with string or template separators:
 
 ### Uniform Grouping
 
-```html
-<!-- 123 - 456 -->
-<mona-otp-input
-    [length]="6"
-    [groupLength]="3"
-    separator="-">
-</mona-otp-input>
-```
+A number in `groupLength` makes groups of that size, as in [Grouped slots](#grouped-slots).
 
 ### Unequal Grouping Arrays
 
@@ -182,34 +203,7 @@ Configure corner radius via `rounded` (`"none"`, `"small"`, `"medium"`, `"large"
 
 ## Signal Forms Integration
 
-`OtpInputComponent` implements `FormValueControl<string>`, enabling full integration with Angular Signal Forms:
-
-```typescript
-import { Component, signal } from "@angular/core";
-import { form, FormField, pattern, required } from "@angular/forms/signals";
-import { OtpInputComponent } from "@nanahoshi/mona-ui/otp-input";
-
-@Component({
-    imports: [OtpInputComponent, FormField],
-    template: `
-        <mona-otp-input
-            type="number"
-            [length]="6"
-            [characterPattern]="digitPattern"
-            [formField]="loginForm.code">
-        </mona-otp-input>
-    `
-})
-export class OtpLoginComponent {
-    readonly #loginModel = signal({ code: "" });
-    protected readonly digitPattern = /^[0-9]$/;
-
-    protected readonly loginForm = form(this.#loginModel, schema => {
-        required(schema.code);
-        pattern(schema.code, /^\d{6}$/);
-    });
-}
-```
+`OtpInputComponent` implements `FormValueControl<string>`, enabling full integration with Angular Signal Forms, as in [Signal forms](#signal-forms).
 
 The `FormField` directive automatically synchronizes value, disabled, name, readonly, required, invalid, and touched state. Don't set those on the same element, because Angular rejects the template. Signal Forms evaluates field-level `pattern(...)` validators over the complete string value and updates form field validity, while character filtering is configured separately via `characterPattern`.
 

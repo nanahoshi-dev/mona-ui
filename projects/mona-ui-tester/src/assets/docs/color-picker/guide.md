@@ -42,15 +42,7 @@ The host renders a preview swatch (the currently selected color, or a "no color"
 
 **Custom preview template**
 
-Project an `ng-template` with the `monaColorPickerValueTemplate` directive to replace the default swatch:
-
-```html
-<mona-color-picker [(value)]="color">
-    <ng-template monaColorPickerValueTemplate let-color>
-        <span class="text-xs">{{ color ?? "None" }}</span>
-    </ng-template>
-</mona-color-picker>
-```
+Project an `ng-template` with the `monaColorPickerValueTemplate` directive to replace the default swatch. See [Custom preview](#custom-preview).
 
 | Directive selector | Template context |
 |---|---|
@@ -58,25 +50,33 @@ Project an `ng-template` with the `monaColorPickerValueTemplate` directive to re
 
 `let-color` is typed `string | null`, and it's `null` when no color is selected.
 
-## Feature Examples
+## Examples
 
 ### Palette view
 
-```html
-<mona-color-picker [(value)]="color" view="palette" palette="material" [columns]="8"></mona-color-picker>
-```
+Accepts the same `palette`, `columns` and `tileSize` inputs as `ColorPaletteComponent`, and `columns` only applies to a custom palette. See the [Color Palette](../color-palette) documentation for palette scheme details. `showClearButton` adds a button to the popup that resets `value` to `null`.
 
-Accepts the same `palette`, `columns` and `tileSize` inputs as `ColorPaletteComponent`. See the [Color Palette](../color-palette) documentation for palette scheme details.
+```example
+color-picker/palette
+```
 
 Tiles are 24 pixels by default, and the built-in schemes have 18 to 20 columns, so their popup is up to about 480 pixels wide. On a smaller screen, the popup stops short of the viewport's width and scrolls.
 
 ### Gradient view
 
-```html
-<mona-color-picker [(value)]="color" view="gradient" [opacity]="false"></mona-color-picker>
+Accepts the `opacity` input, forwarded to the embedded `ColorGradientComponent`.
+
+```example
+color-picker/gradient
 ```
 
-Accepts the `opacity` input, forwarded to the embedded `ColorGradientComponent`.
+### Custom preview
+
+`let-current` is the selected color, or `null` when there is none.
+
+```example
+color-picker/value-template
+```
 
 ### Keep the popup open after selecting
 
@@ -88,11 +88,9 @@ Accepts the `opacity` input, forwarded to the embedded `ColorGradientComponent`.
 
 ### Clear button
 
-```html
-<mona-color-picker [(value)]="color" view="palette" [showClearButton]="true"></mona-color-picker>
-```
+`showClearButton`, shown in [Palette view](#palette-view), only applies to the palette view. It renders a button in the popup that resets `value` to `null`.
 
-Only applies to the palette view. Renders a button in the popup that resets `value` to `null`.
+## Appearance & Styling
 
 ### Size and rounding
 

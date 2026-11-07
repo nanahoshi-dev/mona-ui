@@ -33,20 +33,25 @@ Add `FieldsetComponent` to your standalone component's `imports` array.
 </mona-fieldset>
 ```
 
-**Custom legend template** — replace the string legend with any content:
+> **Accessibility note:** Provide `legend` or `monaFieldsetLegendTemplate`. Without a legend, name the group with `aria-label` or `aria-labelledby`. A `<fieldset>` with no name offers no benefit over a plain `<div>`.
 
-```html
-<mona-fieldset>
-    <ng-template monaFieldsetLegendTemplate>
-        <span class="font-semibold text-primary">Billing address</span>
-    </ng-template>
-    <div class="p-4">
-        <!-- form controls -->
-    </div>
-</mona-fieldset>
+## Examples
+
+### Custom legend
+
+`monaFieldsetLegendTemplate` replaces the string legend with any content. The legend's own surface, border and padding aren't applied to a template, so style it yourself.
+
+```example
+fieldset/legend-template
 ```
 
-> **Accessibility note:** Provide `legend` or `monaFieldsetLegendTemplate`. Without a legend, name the group with `aria-label` or `aria-labelledby`. A `<fieldset>` with no name offers no benefit over a plain `<div>`.
+### Disabling a section
+
+`disabled` disables the controls inside it. The switch stays outside the fieldset, so it stays enabled. "Disabled state" below lists which controls follow it and its limits.
+
+```example
+fieldset/disabled
+```
 
 ## Appearance & Styling
 
@@ -76,11 +81,7 @@ Pass additional classes via the `class` attribute; they are merged onto the rend
 
 ### Disabled state
 
-Set `disabled` to disable the rendered `<fieldset>`, to apply the disabled colors, and to disable the controls inside it:
-
-```html
-<mona-fieldset legend="Preferences" [disabled]="true"></mona-fieldset>
-```
+Set `disabled` to disable the rendered `<fieldset>`, to apply the disabled colors, and to disable the controls inside it.
 
 It reaches controls in two ways:
 

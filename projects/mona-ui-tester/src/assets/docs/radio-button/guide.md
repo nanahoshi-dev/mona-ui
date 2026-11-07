@@ -64,13 +64,6 @@ import { RadioButtonComponent } from "@nanahoshi/mona-ui/radio-button";
 </mona-radio-button>
 ```
 
-**Disabled item in a group:**
-
-```html
-<mona-radio-button name="plan" radioValue="enterprise" label="Enterprise" [disabled]="true">
-</mona-radio-button>
-```
-
 ### Appearance & Styling
 
 | Variant | Input | Options | Default |
@@ -125,23 +118,6 @@ A `radioValue` that isn't a primitive is still compared and written through the 
 import { RadioButtonComponent, RadioGroupComponent } from "@nanahoshi/mona-ui/radio-button";
 ```
 
-```html
-<mona-radio-group aria-label="Size" orientation="horizontal" [(value)]="size">
-    <mona-radio-button radioValue="S" label="Small"></mona-radio-button>
-    <mona-radio-button radioValue="M" label="Medium"></mona-radio-button>
-    <mona-radio-button radioValue="L" label="Large"></mona-radio-button>
-</mona-radio-group>
-```
-
-**With signal forms:**
-
-```html
-<mona-radio-group aria-label="Size" [formField]="orderForm.size">
-    <mona-radio-button radioValue="S" label="Small"></mona-radio-button>
-    <mona-radio-button radioValue="M" label="Medium"></mona-radio-button>
-</mona-radio-group>
-```
-
 Put `[formField]` on the group. A radio button with `[formField]` inside a group isn't supported: the group's value wins.
 
 ### Behavior
@@ -170,21 +146,7 @@ Put `[formField]` on the group. A radio button with `[formField]` inside a group
 import { RadioButtonDirective } from "@nanahoshi/mona-ui/radio-button";
 ```
 
-Pair each input with a `<label>` for accessibility. The `<label>` must either wrap the input or reference it via `for`/`id`:
-
-```html
-<!-- Label wrapping the input -->
-<label class="flex items-center gap-2">
-    <input type="radio" monaRadioButton name="direction" value="North"
-        [ngModel]="selectedDirection()" (ngModelChange)="selectedDirection.set($event)" />
-    <span>North</span>
-</label>
-
-<!-- Label referencing by id -->
-<input id="north" type="radio" monaRadioButton name="direction" value="North"
-    [ngModel]="selectedDirection()" (ngModelChange)="selectedDirection.set($event)" />
-<label for="north">North</label>
-```
+Pair each input with a `<label>` for accessibility. The `<label>` must either wrap the input or reference it via `for`/`id`.
 
 **With border radius:**
 
@@ -215,6 +177,32 @@ The directive applies styles directly to the `<input>` element's `class` attribu
 **Form validation state:** Set `invalid` and `touched` on the directive (e.g. from a `FormControl`'s status) to apply the error styling and `aria-invalid`.
 
 **Read-only:** the directive has no `readonly` input, and the HTML `readonly` attribute has no effect on a native radio button.
+
+## Examples
+
+### A radio group
+
+The group gives its radio buttons one name and one value. A `mona-label` names it through `[for]`. A disabled radio button shows, but can't be chosen.
+
+```example
+radio-button/group
+```
+
+### Signal forms
+
+Put `[formField]` on the group, not on its radio buttons. The signal forms `required` rule fails until one is chosen.
+
+```example
+radio-button/forms
+```
+
+### The directive
+
+The directive styles a native `<input type="radio">`, and the consumer provides the label and the group's `name`.
+
+```example
+radio-button/directive
+```
 
 ## Choosing Between Component and Directive
 

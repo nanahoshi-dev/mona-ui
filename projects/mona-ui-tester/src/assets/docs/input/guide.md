@@ -39,10 +39,22 @@ Always pair `monaTextBox` with an accessible label — either a `<label for>`, o
 <input id="email" type="email" monaTextBox [(ngModel)]="email" />
 ```
 
-**Size and rounding:**
+## Examples
 
-```html
-<input type="text" monaTextBox [size]="'large'" [rounded]="'full'" />
+### Native input types
+
+The directive keeps the native element, so any input type and native attribute such as `autocomplete`, `min` or `disabled` works as usual.
+
+```example
+input/types
+```
+
+### Sizes and rounding
+
+Bind `size` with brackets, as in `[size]="'large'"`. A plain `size="large"` attribute also stays on the native `<input>`, where `size` means its width in characters.
+
+```example
+input/sizes
 ```
 
 ## Appearance & Styling

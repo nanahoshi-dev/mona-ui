@@ -18,36 +18,23 @@ Add the imported symbol to your standalone component's `imports` array.
 <textarea monaTextArea rows="4" placeholder="Enter description..."></textarea>
 ```
 
-**Controlling size:**
+## Examples
 
-The directive does not constrain dimensions. Apply CSS or Tailwind utilities directly on the element:
+### Labels and size
 
-```html
-<textarea monaTextArea class="w-full h-32 resize-none" rows="4"></textarea>
+The directive doesn't constrain dimensions. Apply CSS or Tailwind utilities directly on the element. For a read-only text area, use the native `readonly` attribute, or the signal forms `readonly` rule with `[formField]`. The directive has no input for it. A read-only text area only changes its cursor. It looks otherwise the same, and stays focusable and selectable.
+
+```example
+textarea/basic
 ```
 
-**Signal forms integration:**
+### Signal forms
 
-`TextAreaDirective` works with Angular signal forms. Bind `[formField]` to a signal form field — the `FormField` directive automatically writes `invalid` and `touched` into the directive:
+`TextAreaDirective` works with Angular signal forms. Bind `[formField]` to a signal form field, and the `FormField` directive writes `invalid` and `touched` into the directive.
 
-```typescript
-import { signal } from "@angular/core";
-import { form, FormField } from "@angular/forms/signals";
-
-protected readonly myForm = form(signal({ notes: "" }));
+```example
+textarea/forms
 ```
-
-```html
-<textarea
-    monaTextArea
-    [formField]="myForm.notes"
-    rows="4">
-</textarea>
-```
-
-**Read-only:**
-
-Use the native `readonly` attribute, or the signal forms `readonly` rule with `[formField]`. The directive has no input for it. A read-only text area only changes its cursor. It looks otherwise the same, and stays focusable and selectable.
 
 ## Appearance & Styling
 

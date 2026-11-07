@@ -52,7 +52,7 @@ protected readonly selectedCountry = signal<{ id: number; name: string } | null>
 </mona-dropdown-list>
 ```
 
-`textField` and `valueField` each accept a property name or an accessor function; when either is omitted, the data item itself is used as the display text or the value, respectively. `valueField` also identifies each item for selection matching and, when `valuePrimitive` is enabled, is what gets read from and written into `value` instead of the full item — see [Primitive value binding](#primitive-value-binding). Without any behavior directive applied, the popup renders the full `data` collection with no filter box — see [Feature Examples](#feature-examples) for filtering, grouping, and virtual scrolling.
+`textField` and `valueField` each accept a property name or an accessor function; when either is omitted, the data item itself is used as the display text or the value, respectively. `valueField` also identifies each item for selection matching and, when `valuePrimitive` is enabled, is what gets read from and written into `value` instead of the full item — see [Primitive value binding](#primitive-value-binding). Without any behavior directive applied, the popup renders the full `data` collection with no filter box — see [Examples](#examples) for filtering, grouping, and virtual scrolling.
 
 ## Anatomy & Public Structural Templates
 
@@ -84,49 +84,40 @@ Each structural directive below is an `ng-template` placed as projected content 
 </mona-dropdown-list>
 ```
 
-## Feature Examples
+## Examples
 
 ### Primitive value binding
 
 By default `value` holds the complete selected data item. Set `valuePrimitive` to `true` to have `value` hold the value resolved through `valueField` instead — useful for storing just an id rather than the whole object. Setting `value` to a matching field value (for example, restoring it from a signal forms field) also selects the corresponding item.
 
-```html
-
-<mona-dropdown-list
-    [data]="countries"
-    textField="name"
-    valueField="id"
-    [valuePrimitive]="true"
-    [(value)]="selectedCountryId">
-</mona-dropdown-list>
+```example
+dropdown-list/primitive
 ```
 
-`selectedCountryId` becomes the matching `id` once an item is selected, and `null` again once cleared. `valueField` should resolve to a stable, unique scalar; without it, the item itself is used as the value, which naturally supports primitive data such as `["One", "Two", "Three"]`.
+The value becomes the matching `id` once an item is selected, and `null` again once cleared. `valueField` should resolve to a stable, unique scalar; without it, the item itself is used as the value, which naturally supports primitive data such as `["One", "Two", "Three"]`.
 
-### Custom value display
+### Custom templates
 
-`monaDropDownListValueTemplate` controls how the selected value renders in the host element, independently of how options render inside the popup.
+`monaDropDownListValueTemplate` controls how the selected value renders in the host element, independently of how options render inside the popup through `monaDropDownItemTemplate`. Its item is `null` while nothing is selected. `monaDropdownPrefixTemplate` renders content before the value area, such as an icon.
 
-```html
-
-<mona-dropdown-list [data]="countries" textField="name" valueField="id">
-    <ng-template monaDropDownListValueTemplate let-dataItem>
-        <span>{{ dataItem?.name ?? 'No country selected' }}</span>
-    </ng-template>
-</mona-dropdown-list>
+```example
+dropdown-list/templates
 ```
 
-### Prefix content
+### Filtering and grouping
 
-`monaDropdownPrefixTemplate` renders projected content before the value area, such as an icon.
+`monaDropDownFilterable` renders a filter input inside the popup that narrows the visible options by text. `monaDropDownGroupable` groups options under a header row, driven by `groupBy`. If `groupBy` is omitted while grouping is enabled, every option falls into a single, unlabeled group.
 
-```html
+```example
+dropdown-list/filtering
+```
 
-<mona-dropdown-list [data]="countries" textField="name" valueField="id">
-    <ng-template monaDropdownPrefixTemplate>
-        <fa-icon [icon]="['fas', 'globe']"></fa-icon>
-    </ng-template>
-</mona-dropdown-list>
+### Signal Forms integration
+
+Binding `[formField]` synchronizes `value`, `disabled`, `readonly`, `required`, `invalid`, and `touched` with a signal forms field automatically — see [Form Interaction](#form-interaction).
+
+```example
+dropdown-list/forms
 ```
 
 ### Disabled, readonly, loading, and required states
@@ -144,60 +135,6 @@ By default `value` holds the complete selected data item. Set `valuePrimitive` t
     [loading]="isLoading()"
     [required]="true"
     [showClearButton]="true">
-</mona-dropdown-list>
-```
-
-### Signal Forms integration
-
-Binding `[formField]` synchronizes `value`, `disabled`, `readonly`, `required`, `invalid`, and `touched` with a signal forms field automatically — see [Form Interaction](#form-interaction).
-
-```typescript
-import { form, required } from "@angular/forms/signals";
-
-protected readonly countryModel = signal<{ id: number | null }>({ id: null });
-protected readonly countryForm = form(this.countryModel, schema => {
-    required(schema.id);
-});
-```
-
-```html
-
-<mona-dropdown-list
-    [data]="countries"
-    textField="name"
-    valueField="id"
-    [formField]="countryForm.id">
-</mona-dropdown-list>
-```
-
-### Filtering
-
-`monaDropDownFilterable` renders a filter input inside the popup that narrows the visible options by text.
-
-```html
-
-<mona-dropdown-list
-    [data]="countries"
-    textField="name"
-    valueField="id"
-    monaDropDownFilterable
-    [monaDropDownFilterable]="{ operator: 'startsWith', caseSensitive: false }"
-    filterPlaceholder="Search countries">
-</mona-dropdown-list>
-```
-
-### Grouping
-
-`monaDropDownGroupable` groups options under a header row, driven by `groupBy`. If `groupBy` is omitted while grouping is enabled, every option falls into a single, unlabeled group.
-
-```html
-
-<mona-dropdown-list
-    [data]="countries"
-    textField="name"
-    valueField="id"
-    monaDropDownGroupable
-    groupBy="region">
 </mona-dropdown-list>
 ```
 

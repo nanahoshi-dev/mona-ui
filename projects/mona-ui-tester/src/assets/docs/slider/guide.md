@@ -76,37 +76,22 @@ import { SliderComponent, SliderTickValueTemplateDirective } from "@nanahoshi/mo
 </mona-slider>
 ```
 
-## Feature Examples
+## Examples
 
 ### Tick marks and labels
 
-```html
-
-<mona-slider
-    [minValue]="0"
-    [maxValue]="100"
-    [step]="10"
-    [showTicks]="true"
-    [showLabels]="true"
-    [(value)]="level"
-    aria-label="Level">
-</mona-slider>
-```
-
 Use `labelStep` to render only every n-th label (e.g., `[labelStep]="2"` shows every other label). Use `largeTickStep` to visually enlarge every n-th tick mark.
+
+```example
+slider/ticks
+```
 
 ### Vertical orientation
 
-```html
+A vertical slider is 200 pixels tall unless you give it another height.
 
-<mona-slider
-    orientation="vertical"
-    [minValue]="0"
-    [maxValue]="100"
-    [(value)]="value"
-    aria-label="Height"
-    style="height: 300px">
-</mona-slider>
+```example
+slider/vertical
 ```
 
 ### Disabled state
@@ -129,20 +114,16 @@ Use `labelStep` to render only every n-th label (e.g., `[labelStep]="2"` shows e
 
 Provide `ariaValueText` to give screen readers a richer announcement than the raw number:
 
-```html
-
-<mona-slider
-    [minValue]="0"
-    [maxValue]="2"
-    [step]="1"
-    [ariaValueText]="labelFn"
-    [(value)]="level"
-    aria-label="Priority">
-</mona-slider>
+```example
+slider/value-text
 ```
 
-```typescript
-protected readonly labelFn = (value: number) => ['Low', 'Medium', 'High'][value];
+### Signal forms
+
+The field's `min` and `max` rules set the slider's bounds.
+
+```example
+slider/forms
 ```
 
 ## Values Out of Range
@@ -201,22 +182,7 @@ Without any of these, it falls back to the generic localized name "Slider value"
 
 ## Forms Integration
 
-`SliderComponent` implements `FormValueControl<number>` from `@angular/forms/signals`. Connect it to a signal form field using the `[formField]` binding:
-
-```typescript
-import { signal } from "@angular/core";
-import { form, FormField, max, min } from "@angular/forms/signals";
-
-protected readonly priceForm = form(signal({ price: 50 }), schema => {
-    min(schema.price, 0);
-    max(schema.price, 100);
-});
-```
-
-```html
-
-<mona-slider [formField]="priceForm.price" aria-label="Price"></mona-slider>
-```
+`SliderComponent` implements `FormValueControl<number>` from `@angular/forms/signals`. Connect it to a signal form field using the `[formField]` binding, as in [Signal forms](#signal-forms).
 
 `FormField` writes `value`, `disabled`, `invalid`, `readonly`, `touched`, and, from the field's `min` and `max` rules, the `min` and `max` inputs, which win over `minValue` and `maxValue`. Don't set those on the same element, because Angular rejects the template. `minValue` and `maxValue` are still allowed. The `touch` output fires when the handle loses focus, marking the field as touched. A click on the track moves focus to the handle first.
 
