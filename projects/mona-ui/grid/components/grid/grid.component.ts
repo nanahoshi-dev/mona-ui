@@ -364,6 +364,9 @@ export class GridComponent<T> implements GridVariantInput {
 
     protected readonly noDataTemplate = contentChild(GridNoDataTemplateDirective, { read: TemplateRef });
 
+    /** The column whose group chip has its menu open. */
+    protected readonly openGroupMenuColumnId = signal<string | null>(null);
+
     protected readonly resizing = signal(false);
 
     protected readonly toolbarContext = computed<GridToolbarTemplateContext>(() => {
@@ -676,11 +679,17 @@ export class GridComponent<T> implements GridVariantInput {
         this.gridService.columnSort$.next(new ColumnSortEvent(column));
     }
 
-    /** Delete or Backspace on a group chip, or on its remove button, removes the group. */
     protected onGroupColumnReorder(column: Column, moveAs: "prev" | "next"): void {
         this.gridService.moveGroupColumn(column, moveAs);
+        const position =
+            this.gridService
+                .groupColumns()
+                .toArray()
+                .findIndex(candidate => candidate.id === column.id) + 1;
+        void this.#liveAnnouncer.announce(this.messages().columnMoved(column.title, position));
     }
 
+    /** Delete or Backspace on a group chip, or on its remove button, removes the group. */
     protected onGroupingColumnRemove(event: Event, column: Column): void {
         event.stopPropagation();
         this.gridService.clearColumnGrouping(column);

@@ -271,6 +271,72 @@ describe("grid ARIA and drag (batch 6)", () => {
         });
     });
 
+    describe("group chip menu", () => {
+        function groupButton(title: string): HTMLButtonElement {
+            const button = root.querySelector<HTMLButtonElement>(`button[aria-label='Group options for ${title}']`);
+            if (!button) {
+                throw new Error(`No group options button for ${title}`);
+            }
+            return button;
+        }
+
+        function chipTitles(): (string | null)[] {
+            return Array.from(root.querySelectorAll("mona-chip")).map(chip => chip.getAttribute("aria-label"));
+        }
+
+        beforeEach(async () => {
+            fixture.componentInstance.group.set([{ field: "team" }, { field: "name" }]);
+            await settle();
+        });
+
+        afterEach(() => {
+            document.querySelectorAll(".cdk-overlay-container").forEach(overlay => overlay.remove());
+        });
+
+        it("opens from a named button that the keyboard can reach", async () => {
+            const button = groupButton("Team");
+            expect(button.tabIndex).toBe(0);
+            expect(button.getAttribute("aria-haspopup")).toBe("menu");
+            expect(button.getAttribute("aria-expanded")).toBe("false");
+            expect(button.hasAttribute("aria-controls")).toBe(false);
+
+            button.click();
+            await settle();
+
+            const menu = document.querySelector("[role='menu']") as HTMLElement;
+            expect(menu.getAttribute("aria-labelledby")).toBe(button.id);
+            expect(button.getAttribute("aria-expanded")).toBe("true");
+            expect(button.getAttribute("aria-controls")).toBe(menu.id);
+        });
+
+        it("doesn't sort the group when the button is clicked", async () => {
+            const direction = service.groupColumns().first().groupSortDirection;
+            groupButton("Team").click();
+            await settle();
+            expect(service.groupColumns().first().groupSortDirection).toBe(direction);
+        });
+
+        it("moves the group, announces it, and keeps focus with the moved column", async () => {
+            const button = groupButton("Team");
+            button.focus();
+            button.click();
+            await settle();
+
+            const item = Array.from(document.querySelectorAll<HTMLElement>("[role='menuitem']")).find(
+                element => element.textContent?.trim() === "Move as next"
+            );
+            item?.click();
+            await settle();
+            await new Promise(resolve => setTimeout(resolve, 250));
+            await settle();
+
+            expect(chipTitles()).toEqual(["Name", "Team"]);
+            expect(announce).toHaveBeenCalledWith("Team moved to position 2");
+            expect(document.activeElement).toBe(groupButton("Team"));
+            expect(groupButton("Team").getAttribute("aria-expanded")).toBe("false");
+        });
+    });
+
     describe("dropping columns (GV4)", () => {
         type DragApi = {
             dropAfter: { set(value: boolean): void };

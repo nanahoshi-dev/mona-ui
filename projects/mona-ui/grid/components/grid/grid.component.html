@@ -34,7 +34,9 @@
         (cdkDropListExited)="onColumnDragExitForGrouping()"
         (cdkDropListDropped)="onColumnDropForGrouping($event)">
         @if (gridService.groupColumns().length !== 0) {
-            @for (groupColumn of gridService.groupColumns(); track $index) {
+            @for (groupColumn of gridService.groupColumns(); track groupColumn.id) {
+                @let groupMenuId = groupColumn.id + "-group-menu";
+                @let groupMenuOpen = openGroupMenuColumnId() === groupColumn.id;
                 <mona-chip
                     [aria-label]="groupColumn.title"
                     [removable]="true"
@@ -49,10 +51,28 @@
                         <svg lucideArrowUp [size]="16" aria-hidden="true"></svg>
                     }
                     <span>{{ groupColumn.title }}</span>
-                    <span class="ms-2" (click)="$event.stopPropagation()" #groupReorder>
+                    <button
+                        monaButton
+                        look="link"
+                        type="button"
+                        class="ms-1"
+                        aria-haspopup="menu"
+                        [iconOnly]="true"
+                        [size]="'small'"
+                        [id]="groupColumn.id + '-group-button'"
+                        [attr.aria-controls]="groupMenuOpen ? groupMenuId : null"
+                        [attr.aria-expanded]="groupMenuOpen"
+                        [attr.aria-label]="messages().groupOptions(groupColumn.title)"
+                        (click)="$event.stopPropagation()"
+                        #groupReorder>
                         <svg lucideEllipsisVertical [size]="16" aria-hidden="true"></svg>
-                    </span>
-                    <mona-popup-menu size="small" [target]="groupReorder">
+                    </button>
+                    <mona-popup-menu
+                        size="small"
+                        [id]="groupMenuId"
+                        [target]="groupReorder"
+                        (close)="openGroupMenuColumnId.set(null)"
+                        (open)="openGroupMenuColumnId.set(groupColumn.id)">
                         <mona-popup-menu-item
                             [disabled]="$first"
                             (menuClick)="onGroupColumnReorder(groupColumn, 'prev')">
