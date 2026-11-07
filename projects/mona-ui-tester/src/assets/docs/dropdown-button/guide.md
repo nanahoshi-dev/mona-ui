@@ -77,18 +77,6 @@ Templates placed directly inside `<mona-dropdown-button>` apply globally to all 
 </mona-dropdown-button>
 ```
 
-**Icon-only trigger with custom icon:**
-
-```html
-<mona-dropdown-button [iconOnly]="true" aria-label="More options">
-    <ng-template monaDropdownButtonTextTemplate>
-        <svg lucideEllipsis [size]="16"></svg>
-    </ng-template>
-    <mona-dropdown-button-item label="Edit"></mona-dropdown-button-item>
-    <mona-dropdown-button-item label="Delete"></mona-dropdown-button-item>
-</mona-dropdown-button>
-```
-
 **Custom text per menu item:**
 
 ```html
@@ -101,66 +89,38 @@ Templates placed directly inside `<mona-dropdown-button>` apply globally to all 
 </mona-dropdown-button>
 ```
 
-## Feature Examples
+## Examples
 
-### Groups and separators
+### Groups, separators and disabled items
 
-```html
-<mona-dropdown-button text="File">
-    <mona-dropdown-button-group title="Document">
-        <mona-dropdown-button-item label="New"></mona-dropdown-button-item>
-        <mona-dropdown-button-item label="Open"></mona-dropdown-button-item>
-        <mona-dropdown-button-item label="Save"></mona-dropdown-button-item>
-    </mona-dropdown-button-group>
-    <mona-dropdown-button-separator></mona-dropdown-button-separator>
-    <mona-dropdown-button-item label="Exit"></mona-dropdown-button-item>
-</mona-dropdown-button>
+A disabled item stays in the menu and the arrow keys reach it, but it can't be chosen. `[disabled]` on the dropdown button itself disables the whole control.
+
+```example
+dropdown-button/groups
 ```
 
-### Checkbox items
+### Checkbox and radio items
 
-```html
-<mona-dropdown-button text="Settings">
-    <mona-dropdown-button-checkbox-item label="Dark Mode" [checked]="darkMode()" (checkedChange)="darkMode.set($event)">
-    </mona-dropdown-button-checkbox-item>
-    <mona-dropdown-button-checkbox-item
-        label="Notifications"
-        [checked]="notifications()"
-        (checkedChange)="notifications.set($event)">
-    </mona-dropdown-button-checkbox-item>
-</mona-dropdown-button>
+`checked` on a checkbox item and `value` on a radio group are two-way bindable.
+
+```example
+dropdown-button/checkable
 ```
 
-### Radio groups
+### Icon-only trigger
 
-```html
-<mona-dropdown-button text="Priority">
-    <mona-dropdown-button-radio-group title="Set priority" [(value)]="priority">
-        <mona-dropdown-button-radio-item label="Low" value="low"></mona-dropdown-button-radio-item>
-        <mona-dropdown-button-radio-item label="Medium" value="medium"></mona-dropdown-button-radio-item>
-        <mona-dropdown-button-radio-item label="High" value="high"></mona-dropdown-button-radio-item>
-    </mona-dropdown-button-radio-group>
-</mona-dropdown-button>
+An icon-only button has no text to read out, so it needs an `aria-label`. The arrow is hidden while `iconOnly` is on.
+
+```example
+dropdown-button/icon-only
 ```
 
 ### Loading state
 
 When `loading` is `true`, the button displays a spinner and ignores click interactions. Use this while an async operation triggered by a previous menu selection is in progress.
 
-```html
-<mona-dropdown-button text="Export" [loading]="isExporting()">
-    <mona-dropdown-button-item label="Export as CSV" (menuClick)="onExportCsv($event)"></mona-dropdown-button-item>
-    <mona-dropdown-button-item label="Export as PDF" (menuClick)="onExportPdf($event)"></mona-dropdown-button-item>
-</mona-dropdown-button>
-```
-
-### Disabled items
-
-```html
-<mona-dropdown-button text="Actions" [disabled]="!hasSelection()">
-    <mona-dropdown-button-item label="Edit"></mona-dropdown-button-item>
-    <mona-dropdown-button-item label="Archive" [disabled]="isArchived()"></mona-dropdown-button-item>
-</mona-dropdown-button>
+```example
+dropdown-button/loading
 ```
 
 ## Technical & Behavior Notes

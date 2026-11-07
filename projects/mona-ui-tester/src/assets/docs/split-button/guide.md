@@ -31,24 +31,11 @@ Add the components you need to your standalone component's `imports` array.
 ```
 
 ```typescript
-import { PopupMenuItemClickEvent } from "@nanahoshi/mona-ui/popup-menu";
+import type { PopupMenuItemClickEvent } from "@nanahoshi/mona-ui/popup-menu";
 
-protected
-onSave()
-:
-void { /* ... */}
-protected
-onSaveAs(event
-:
-PopupMenuItemClickEvent
-):
-void { /* ... */}
-protected
-onExport(event
-:
-PopupMenuItemClickEvent
-):
-void { /* ... */}
+protected onSave(): void { /* ... */ }
+protected onSaveAs(event: PopupMenuItemClickEvent): void { /* ... */ }
+protected onExport(event: PopupMenuItemClickEvent): void { /* ... */ }
 ```
 
 ## Anatomy & Structural Templates
@@ -129,87 +116,32 @@ All template directives target `ng-template` elements. Templates placed directly
 </mona-split-button>
 ```
 
-## Feature Examples
+## Examples
 
-### Groups and separators
+### Groups, submenus and disabled items
 
-Use `mona-split-button-group` to add a labeled section header. Use `mona-split-button-separator` between sections.
+Use `mona-split-button-group` to add a labeled section header, and `mona-split-button-separator` between sections. An item with child items opens a submenu. The main button emits `buttonClick`, and every menu item emits `menuItemClick`.
 
-```html
+Both the whole component and individual items can be disabled independently: `[disabled]` on `mona-split-button` disables both buttons, and on an item disables only that item.
 
-<mona-split-button text="Actions">
-    <mona-split-button-group title="Account">
-        <mona-split-button-item label="Profile"></mona-split-button-item>
-        <mona-split-button-item label="Billing"></mona-split-button-item>
-    </mona-split-button-group>
-    <mona-split-button-separator></mona-split-button-separator>
-    <mona-split-button-item label="Sign Out"></mona-split-button-item>
-</mona-split-button>
+```example
+split-button/basic
 ```
 
-### Checkbox items
+### Checkbox and radio items
 
-`mona-split-button-checkbox-item` renders a toggleable item. Bind `[checked]` for the initial state and listen to `(checkedChange)` for updates.
+`mona-split-button-checkbox-item` renders a toggleable item, and `mona-split-button-radio-group` a set of mutually exclusive options. Use `[(checked)]` and `[(value)]` for two-way binding, or the one-way input with `(checkedChange)` or `(valueChange)`.
 
-```html
-
-<mona-split-button text="Settings">
-    <mona-split-button-checkbox-item
-        label="Enable Notifications"
-        [checked]="notificationsEnabled()"
-        (checkedChange)="notificationsEnabled.set($event)">
-    </mona-split-button-checkbox-item>
-    <mona-split-button-checkbox-item
-        label="Dark Mode"
-        [checked]="darkMode()"
-        (checkedChange)="darkMode.set($event)">
-    </mona-split-button-checkbox-item>
-</mona-split-button>
+```example
+split-button/checkable
 ```
 
-### Radio groups
+### Loading state
 
-`mona-split-button-radio-group` renders a set of mutually exclusive options. Use `[(value)]` for two-way binding, or `[value]` + `(valueChange)` for one-way binding.
+`loading` shows a spinner on the main button and keeps the menu from opening until it's `false` again.
 
-```html
-
-<mona-split-button text="View">
-    <mona-split-button-radio-group
-        title="Layout"
-        [(value)]="selectedLayout">
-        <mona-split-button-radio-item label="List" value="list"></mona-split-button-radio-item>
-        <mona-split-button-radio-item label="Grid" value="grid"></mona-split-button-radio-item>
-        <mona-split-button-radio-item label="Compact" value="compact"></mona-split-button-radio-item>
-    </mona-split-button-radio-group>
-</mona-split-button>
-```
-
-### Nested items
-
-`mona-split-button-item` can contain child items, which render as a submenu:
-
-```html
-
-<mona-split-button text="Manage">
-    <mona-split-button-item label="Team">
-        <mona-split-button-item label="Add Member"></mona-split-button-item>
-        <mona-split-button-item label="Remove Member"></mona-split-button-item>
-    </mona-split-button-item>
-</mona-split-button>
-```
-
-### Disabled items
-
-Both the whole component and individual items can be disabled independently:
-
-```html
-<!-- Disable the entire control -->
-<mona-split-button text="Save" [disabled]="isSaving()"></mona-split-button>
-
-<!-- Disable a single menu item -->
-<mona-split-button text="Actions">
-    <mona-split-button-item label="Delete" [disabled]="!canDelete()"></mona-split-button-item>
-</mona-split-button>
+```example
+split-button/loading
 ```
 
 ## Technical & Behavior Notes

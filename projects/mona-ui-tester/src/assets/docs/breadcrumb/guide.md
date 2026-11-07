@@ -40,42 +40,15 @@ Add the imported symbols to your standalone component's `imports` array.
 
 The anchor is yours, so `href`, `routerLink`, `target` and `rel` all work, and so do ctrl-click, middle-click and "copy link". The item renders no button around it, and `itemClick` still fires for a click on the link. A plain `<a>` without `monaBreadcrumbLink` would end up inside a button, which is invalid and fails axe. The last item can be a link too, and the `aria-current` goes on the anchor.
 
-**Buttons, for an action that isn't navigation:**
-
-```html
-
-<mona-breadcrumb>
-    <mona-breadcrumb-item (itemClick)="navigate('home')">Home</mona-breadcrumb-item>
-    <mona-breadcrumb-item (itemClick)="navigate('products')">Products</mona-breadcrumb-item>
-    <mona-breadcrumb-item>Wireless Headphones</mona-breadcrumb-item>
-</mona-breadcrumb>
-```
+**Buttons, for an action that isn't navigation:** an item without a link is a button, and emits `itemClick`. See [Buttons](#buttons).
 
 The last `<mona-breadcrumb-item>` never emits `itemClick` — it is non-interactive regardless of whether you bind the output. Only non-last items are clickable. When a trail stops before the page you're on, set `[lastItemCurrent]="false"` and the last item becomes a normal one, with no `aria-current`.
 
-**Long trails:** items shrink and truncate with an ellipsis as the space runs out, and the other items give up their width before the current page does. To shorten the trail instead, set `maxItems`. The first and last items always stay, and the middle collapses behind a button that shows it again and moves focus to the first item it revealed that can take focus. The button's name comes from `showFullPath` in the `breadcrumb` messages. The trail collapses again when its items change.
-
-```html
-
-<mona-breadcrumb [maxItems]="4">...</mona-breadcrumb>
-```
+**Long trails:** items shrink and truncate with an ellipsis as the space runs out, and the other items give up their width before the current page does. To shorten the trail instead, set `maxItems`, as in [Collapsing a long trail](#collapsing-a-long-trail). The first and last items always stay, and the middle collapses behind a button that shows it again and moves focus to the first item it revealed that can take focus. The button's name comes from `showFullPath` in the `breadcrumb` messages. The trail collapses again when its items change.
 
 Truncation needs text to work on. An item whose content is its own flex container, such as `<div class="flex">`, gets clipped without the ellipsis.
 
-**Custom separator:**
-
-```html
-
-<mona-breadcrumb>
-    <mona-breadcrumb-item (itemClick)="go('home')">Home</mona-breadcrumb-item>
-    <mona-breadcrumb-item>Settings</mona-breadcrumb-item>
-    <ng-template monaBreadcrumbSeparatorTemplate>
-        <svg lucideSlash [size]="14"></svg>
-    </ng-template>
-</mona-breadcrumb>
-```
-
-The separator template receives `{ $implicit: number }` context — the zero-based index of the preceding item. After the collapse button, it's the index of the last hidden item:
+**Custom separator:** project an `ng-template monaBreadcrumbSeparatorTemplate`, as in [Custom separator](#custom-separator). The separator template receives `{ $implicit: number }` context — the zero-based index of the preceding item. After the collapse button, it's the index of the last hidden item:
 
 ```html
 
@@ -102,6 +75,30 @@ The separator template receives `{ $implicit: number }` context — the zero-bas
 ```
 
 > **Multiple breadcrumbs on the same page:** Set a unique `aria-label` on each `<mona-breadcrumb>` so screen reader users can distinguish the navigation landmarks.
+
+## Examples
+
+### Buttons
+
+Clicking a parent folder opens it, which drops the folders below it from the path.
+
+```example
+breadcrumb/buttons
+```
+
+### Collapsing a long trail
+
+With `maxItems` set to 4, the middle of the trail collapses behind a button that shows it again.
+
+```example
+breadcrumb/collapsed
+```
+
+### Custom separator
+
+```example
+breadcrumb/separator
+```
 
 ## Appearance & Styling
 

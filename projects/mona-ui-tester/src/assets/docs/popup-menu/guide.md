@@ -65,62 +65,32 @@ A template placed directly inside `<mona-popup-menu>` applies to every matching 
 
 ### Submenus, groups and separators
 
-```html
-<mona-popup-menu [target]="more">
-    <mona-popup-menu-group title="File">
-        <mona-popup-menu-item label="Rename"></mona-popup-menu-item>
-        <mona-popup-menu-item label="Share">
-            <mona-popup-menu-item label="Copy link"></mona-popup-menu-item>
-            <mona-popup-menu-item label="Email"></mona-popup-menu-item>
-        </mona-popup-menu-item>
-    </mona-popup-menu-group>
-    <mona-popup-menu-separator></mona-popup-menu-separator>
-    <mona-popup-menu-item label="Delete" [disabled]="readOnly()"></mona-popup-menu-item>
-</mona-popup-menu>
+Items projected inside an item make a submenu. Since the target is your own button, the example sets its `aria-haspopup` and `aria-expanded`, and follows the menu's `open` and `close` events.
+
+```example
+popup-menu/submenus
 ```
 
 ### Checkbox and radio items
 
-```html
-<mona-popup-menu [target]="view">
-    <mona-popup-menu-checkbox-item label="Show hidden files" [(checked)]="showHidden"></mona-popup-menu-checkbox-item>
-    <mona-popup-menu-radio-group title="Sort by" [(value)]="sort">
-        <mona-popup-menu-radio-item label="Name" value="name"></mona-popup-menu-radio-item>
-        <mona-popup-menu-radio-item label="Date" value="date"></mona-popup-menu-radio-item>
-    </mona-popup-menu-radio-group>
-</mona-popup-menu>
+```example
+popup-menu/checkable
 ```
 
 ### Items from data
 
-`items` takes plain `MenuItem` objects, and replaces any projected items when it isn't empty.
+`items` takes plain `MenuItem` objects, and replaces any projected items when it isn't empty. Give each item a `value`, and read it from the click event.
 
-```typescript
-import type { MenuItem } from "@nanahoshi/mona-ui/popup-menu";
-
-protected readonly items: MenuItem[] = [
-    { label: "Edit", value: "edit" },
-    { label: "Share", items: [{ label: "Copy link", value: "link" }] },
-    { separator: true, label: "" },
-    { label: "Archived", checkable: true, checked: false, value: "archived" }
-];
-```
-
-```html
-<mona-popup-menu [target]="actions" [items]="items" (menuClick)="onAction($event)"></mona-popup-menu>
+```example
+popup-menu/data
 ```
 
 ### Icons and shortcuts
 
-```html
-<mona-popup-menu-item label="Save">
-    <ng-template monaPopupMenuIconTemplate>
-        <svg lucideSave [size]="14" aria-hidden="true"></svg>
-    </ng-template>
-    <ng-template monaPopupMenuShortcutTemplate>
-        <span class="text-xs">Ctrl + S</span>
-    </ng-template>
-</mona-popup-menu-item>
+Icons are decorative here, so they get `aria-hidden="true"`. The shortcut text only shows the keys; binding them is up to you.
+
+```example
+popup-menu/icons
 ```
 
 ### Opening it from code

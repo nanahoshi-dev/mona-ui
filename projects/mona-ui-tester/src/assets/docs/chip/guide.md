@@ -32,18 +32,6 @@ Add the imported symbols to your standalone component's `imports` array.
 <mona-chip label="Angular"></mona-chip>
 ```
 
-**Toggleable chip:**
-
-```html
-<mona-chip label="TypeScript" [toggleable]="true" [(selected)]="isSelected"></mona-chip>
-```
-
-**Removable chip:**
-
-```html
-<mona-chip label="Remove me" [removable]="true" (remove)="onRemove($event)"></mona-chip>
-```
-
 **RouterLink navigation chip:**
 
 ```html
@@ -58,48 +46,34 @@ Add `RouterLink` from `@angular/router` to the same `imports` array.
 <mona-chip label="Custom Padding" class="px-6 py-2"></mona-chip>
 ```
 
-**Projected content:**
-
-```html
-<mona-chip>
-    <svg lucideTag [size]="12"></svg>
-    Draft
-</mona-chip>
-```
-
 When `label` is non-empty it takes precedence over projected content — both are not visible at the same time.
-
-**Prefix template — avatar chip:**
-
-```html
-<mona-chip label="Jane Smith">
-    <ng-template monaChipPrefixTemplate>
-        <mona-avatar image="photo.jpg" alt="" [width]="16" [height]="16" borderRadius="50%" [borderWidth]="0">
-        </mona-avatar>
-    </ng-template>
-</mona-chip>
-```
-
-The prefix template renders before the label or projected content. It receives no template context.
 
 > **Keyboard access:** Chips receive `tabindex="0"` automatically when `toggleable` is `true` or when functioning as a link (`[routerLink]`). Passive chips and removable-only chips aren't focusable, leaving keyboard access directly on the child remove button.
 
-### Removing chips from a list
+## Examples
 
-`remove` fires for the remove button and for Delete and Backspace on the chip. The chip doesn't remove itself: your parent destroys it, and focus goes with it, so a keyboard user lands at the top of the page unless you move it. There's no `mona-chip-list` to do this for you. Move focus in the handler, to the next chip or, for example, to the control that adds chips:
+### Filter chips
 
-```html
-@for (tag of tags(); track tag) {
-    <mona-chip [label]="tag" [removable]="true" (remove)="removeTag(tag, tagInput)"></mona-chip>
-}
-<input #tagInput aria-label="Add a tag" />
+With `toggleable`, each activation flips `selected`, which supports two-way binding.
+
+```example
+chip/filters
 ```
 
-```typescript
-protected removeTag(tag: string, tagInput: HTMLInputElement): void {
-    this.tags.update(tags => tags.filter(item => item !== tag));
-    tagInput.focus();
-}
+### Removing chips from a list
+
+`remove` fires for the remove button and for Delete and Backspace on the chip. The chip doesn't remove itself: your parent destroys it, and focus goes with it, so a keyboard user lands at the top of the page unless you move it. There's no `mona-chip-list` to do this for you. Move focus in the handler, to the next chip or, as here, to the control that adds chips.
+
+```example
+chip/removable
+```
+
+### Prefix and projected content
+
+The prefix template renders before the label or projected content. It receives no template context. Without a `label`, the chip shows its projected content.
+
+```example
+chip/prefix
 ```
 
 ## Appearance & Styling

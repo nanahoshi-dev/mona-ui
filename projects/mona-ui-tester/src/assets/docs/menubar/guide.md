@@ -121,73 +121,28 @@ Placed directly inside `<mona-menubar>`, a directive applies to every menu (or e
 
 When a `monaMenuItemTextTemplate` is provided without setting `label`, the projected template content is what consumers see and is also what assistive technology reads as the item's accessible name (see Accessibility below).
 
-## Feature Examples
+## Examples
 
-### Submenu (nested items)
-
-```html
-<mona-menu text="File">
-    <mona-menu-item label="New">
-        <mona-menu-item label="Folder"></mona-menu-item>
-        <mona-menu-item label="Text Document"></mona-menu-item>
-    </mona-menu-item>
-</mona-menu>
-```
+### Submenus, groups and separators
 
 Projecting items inside `mona-menu-item` turns it into a submenu trigger; it renders a chevron instead of a shortcut area and no longer emits `menuClick` itself.
 
-### Checkbox items
-
-```html
-<mona-menu text="View">
-    <mona-menu-checkbox-item label="Show Grid" [checked]="showGrid()" (checkedChange)="showGrid.set($event)">
-    </mona-menu-checkbox-item>
-</mona-menu>
+```example
+menubar/basic
 ```
 
-### Radio group
+### Checkbox and radio items
 
-```html
-<mona-menu text="Appearance">
-    <mona-menu-item label="Theme">
-        <mona-menu-radio-group [(value)]="theme">
-            <mona-menu-radio-item label="Light" value="light"></mona-menu-radio-item>
-            <mona-menu-radio-item label="Dark" value="dark"></mona-menu-radio-item>
-            <mona-menu-radio-item label="System" value="system"></mona-menu-radio-item>
-        </mona-menu-radio-group>
-    </mona-menu-item>
-</mona-menu>
-```
+`checked` on a checkbox item and `value` on a radio group are two-way bindable.
 
-```typescript
-protected readonly theme = signal("system");
-```
-
-### Groups and separators
-
-```html
-<mona-menu text="File">
-    <mona-menu-group title="Export Options">
-        <mona-menu-item label="Export as PDF"></mona-menu-item>
-        <mona-menu-item label="Export as Image"></mona-menu-item>
-    </mona-menu-group>
-    <mona-menu-separator></mona-menu-separator>
-    <mona-menu-item label="Close"></mona-menu-item>
-</mona-menu>
+```example
+menubar/checkable
 ```
 
 ### Disabling a menu
 
-```html
-<mona-menubar>
-    <mona-menu text="File">
-        <mona-menu-item label="New"></mona-menu-item>
-    </mona-menu>
-    <mona-menu text="Edit" [disabled]="!hasSelection()">
-        <mona-menu-item label="Cut"></mona-menu-item>
-        <mona-menu-item label="Copy"></mona-menu-item>
-    </mona-menu>
-</mona-menubar>
+```example
+menubar/disabled
 ```
 
 Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or on an individual `mona-menu` to disable only that menu. A disabled menu does not open on click, hover, or keyboard activation, but the arrow keys still reach it, so it can be read and found. A `mona-menu` without items is a plain menubar item: it doesn't advertise or open a popup.

@@ -98,60 +98,28 @@ Each directive can be placed directly inside `<mona-contextmenu>` to apply to ev
 
 When a `monaContextMenuTextTemplate` is provided without setting `label`, the projected template content is what consumers see and is also what assistive technology reads as the item's accessible name (see Accessibility below).
 
-## Feature Examples
+## Examples
 
-### Submenu (nested items)
-
-```html
-<mona-contextmenu [target]="target">
-    <mona-contextmenu-item label="New">
-        <mona-contextmenu-item label="Folder"></mona-contextmenu-item>
-        <mona-contextmenu-item label="Text Document"></mona-contextmenu-item>
-    </mona-contextmenu-item>
-</mona-contextmenu>
-```
+### Submenus, groups and separators
 
 Projecting items inside `mona-contextmenu-item` turns it into a submenu trigger; it renders a chevron instead of a shortcut area and no longer emits `menuClick` itself.
 
-### Checkbox items
-
-```html
-<mona-contextmenu [target]="target">
-    <mona-contextmenu-checkbox-item
-        label="Preview Pane"
-        [checked]="previewPaneVisible()"
-        (checkedChange)="previewPaneVisible.set($event)">
-    </mona-contextmenu-checkbox-item>
-</mona-contextmenu>
+```example
+contextmenu/basic
 ```
 
-### Radio group
+### Checkbox and radio items
 
-```html
-<mona-contextmenu [target]="target">
-    <mona-contextmenu-radio-group title="Sort by" [(value)]="sortField">
-        <mona-contextmenu-radio-item label="Name" value="name"></mona-contextmenu-radio-item>
-        <mona-contextmenu-radio-item label="Date Modified" value="dateModified"></mona-contextmenu-radio-item>
-        <mona-contextmenu-radio-item label="Size" value="size"></mona-contextmenu-radio-item>
-    </mona-contextmenu-radio-group>
-</mona-contextmenu>
+`checked` on a checkbox item and `value` on a radio group are two-way bindable.
+
+```example
+contextmenu/checkable
 ```
 
-```typescript
-protected readonly sortField = signal("name");
-```
+### Icons and shortcuts
 
-### Groups and separators
-
-```html
-<mona-contextmenu [target]="target">
-    <mona-contextmenu-group title="System Actions">
-        <mona-contextmenu-item label="Share"></mona-contextmenu-item>
-        <mona-contextmenu-item label="Properties"></mona-contextmenu-item>
-    </mona-contextmenu-group>
-    <mona-contextmenu-separator></mona-contextmenu-separator>
-    <mona-contextmenu-item label="Exit"></mona-contextmenu-item>
-</mona-contextmenu>
+```example
+contextmenu/icons
 ```
 
 ### Sizing and rounding

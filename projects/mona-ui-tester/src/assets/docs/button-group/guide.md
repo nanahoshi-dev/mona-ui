@@ -38,26 +38,6 @@ Add both to your standalone component's `imports` array. `ButtonDirective` is re
 </mona-button-group>
 ```
 
-**Single-select toggle group:**
-
-```html
-<mona-button-group selection="single" aria-label="Text alignment">
-    <button monaButton>Left</button>
-    <button monaButton>Center</button>
-    <button monaButton>Right</button>
-</mona-button-group>
-```
-
-**Multi-select filter group:**
-
-```html
-<mona-button-group selection="multiple" aria-label="Text formatting">
-    <button monaButton>Bold</button>
-    <button monaButton>Italic</button>
-    <button monaButton>Underline</button>
-</mona-button-group>
-```
-
 **Disabled group:**
 
 ```html
@@ -67,32 +47,31 @@ Add both to your standalone component's `imports` array. `ButtonDirective` is re
 </mona-button-group>
 ```
 
-**Holding the selection in one value:**
+> **Group inputs override child inputs.** When a child button is inside a `ButtonGroupComponent`, the group's `look`, `size` and `rounded` values replace the child's own inputs for those properties. A child is disabled when either it or the group is.
 
-```html
-<mona-button-group selection="single" aria-label="Alignment" [(value)]="alignment">
-    <button monaButton value="left">Left</button>
-    <button monaButton value="center">Center</button>
-    <button monaButton value="right">Right</button>
-</mona-button-group>
+> **Use `value` or `[(selected)]`, not both.** Without a `value`, each button's `[(selected)]` holds its state.
 
-<mona-button-group selection="multiple" aria-label="Filters" [formField]="form.filters">
-    <button monaButton value="open">Open</button>
-    <button monaButton value="closed">Closed</button>
-</mona-button-group>
+> **The selection policy holds for bindings too.** In `"single"` mode a second `selected` button deselects the other, keeping the newest, or the first when several arrive together. A disabled selected button is deselected as well, so the group never holds two.
+
+> **A value with no button yet is kept,** so one that loads first isn't lost. A selected button's value stays in `value` if the button goes away, until the application removes it.
+
+> **`allowEmpty` only applies to `"single"` selection mode.** In `"multiple"` mode, any number of buttons (including zero) can be active simultaneously. It keeps a selected button selected, against clicks and against `selected` bindings, but it doesn't choose a first one, and a `value` of `null` still clears the group so a form can reset it.
+
+> **Other content is dropped.** Only `monaButton` buttons, `mona-dropdown-button` and `mona-split-button` placed directly in the group render. A `<span>`, a link or a button inside a `<div>` doesn't appear, and nothing warns about it.
+
+> **Switching from `"multiple"` to `"single"` reconciles existing state.** When `selection` changes from `"multiple"` to `"single"` at runtime, all but the first currently-selected button are automatically deselected.
+
+## Examples
+
+### Action buttons
+
+`[toggleable]="false"` makes each button a plain action, so the group only shares their style.
+
+```example
+button-group/actions
 ```
 
-`value` is the selected button's value or `null` in `"single"` mode, and an array of them in `"multiple"` mode. Values compare with `===`. Only toggleable buttons with a `value` take part, and action buttons in the same group keep working. While `value` is `undefined`, the group leaves each button's `selected` alone. `value` also works with `[formField]`, and through Angular's own binding of a control with no `ControlValueAccessor`, with `[(ngModel)]`, `[formControl]` and `formControlName`.
-
-**Reacting to a button click in the group:**
-
-```html
-<mona-button-group selection="single" aria-label="Text alignment" (buttonClick)="onClick($event)">
-    <button monaButton value="left">Left</button>
-    <button monaButton value="center">Center</button>
-    <button monaButton value="right">Right</button>
-</mona-button-group>
-```
+`buttonClick` reports which button was clicked:
 
 ```typescript
 import type { ButtonGroupClickEvent } from "@nanahoshi/mona-ui/button-group";
@@ -108,19 +87,29 @@ protected onClick({ button, selected, value }: ButtonGroupClickEvent): void {}
 
 `buttonClick` fires for every button placed directly in the group, toggleable or not, after the selection has changed. It doesn't fire for a disabled or loading button, for a dropdown or split button's own buttons, or for a toggle button in a read-only group, since nothing was selected. A button that isn't toggleable still fires there.
 
-> **Group inputs override child inputs.** When a child button is inside a `ButtonGroupComponent`, the group's `look`, `size` and `rounded` values replace the child's own inputs for those properties. A child is disabled when either it or the group is.
+### Holding the selection in one value
 
-> **Use `value` or `[(selected)]`, not both.** Without a `value`, each button's `[(selected)]` holds its state.
+```example
+button-group/multiple
+```
 
-> **The selection policy holds for bindings too.** In `"single"` mode a second `selected` button deselects the other, keeping the newest, or the first when several arrive together. A disabled selected button is deselected as well, so the group never holds two.
+`value` is the selected button's value or `null` in `"single"` mode, and an array of them in `"multiple"` mode. Values compare with `===`. Only toggleable buttons with a `value` take part, and action buttons in the same group keep working. While `value` is `undefined`, the group leaves each button's `selected` alone.
 
-> **A value with no button yet is kept,** so one that loads first isn't lost. A selected button's value stays in `value` if the button goes away, until the application removes it.
+### Forms
 
-> **`allowEmpty` only applies to `"single"` selection mode.** In `"multiple"` mode, any number of buttons (including zero) can be active simultaneously. It keeps a selected button selected, against clicks and against `selected` bindings, but it doesn't choose a first one, and a `value` of `null` still clears the group so a form can reset it.
+`value` also works with `[formField]`, and through Angular's own binding of a control with no `ControlValueAccessor`, with `[(ngModel)]`, `[formControl]` and `formControlName`. In `"single"` mode, activating one button deactivates the others.
 
-> **Other content is dropped.** Only `monaButton` buttons, `mona-dropdown-button` and `mona-split-button` placed directly in the group render. A `<span>`, a link or a button inside a `<div>` doesn't appear, and nothing warns about it.
+```example
+button-group/forms
+```
 
-> **Switching from `"multiple"` to `"single"` reconciles existing state.** When `selection` changes from `"multiple"` to `"single"` at runtime, all but the first currently-selected button are automatically deselected.
+### With dropdown and split buttons
+
+Dropdown and split buttons take the group's look, size, rounding and disabled state, but take no part in its selection.
+
+```example
+button-group/with-menus
+```
 
 ## Appearance & Styling
 
