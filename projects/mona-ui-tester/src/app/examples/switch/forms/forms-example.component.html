@@ -1,0 +1,11 @@
+<div class="flex flex-col items-start gap-3">
+    <mona-label text="Email notifications">
+        <mona-switch [formField]="settings.emails" />
+    </mona-label>
+    <mona-label text="Weekly digest">
+        <mona-switch [formField]="settings.digest" />
+    </mona-label>
+    <p class="text-sm">
+        Emails: {{ settings.emails().value() ? "on" : "off" }}, digest: {{ settings.digest().value() ? "on" : "off" }}
+    </p>
+</div>

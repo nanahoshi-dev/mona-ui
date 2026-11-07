@@ -1,0 +1,6 @@
+<div class="flex max-w-md flex-col gap-2">
+    <mona-label text="Opening hours">
+        <mona-range-slider [formField]="filter.hours" [maxValue]="24" />
+    </mona-label>
+    <span class="text-sm">Open from {{ filter.hours().value()[0] }}:00 to {{ filter.hours().value()[1] }}:00</span>
+</div>

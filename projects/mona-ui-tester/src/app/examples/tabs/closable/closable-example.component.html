@@ -1,0 +1,12 @@
+<div class="flex flex-col gap-3">
+    <mona-tabs aria-label="Reports" [closable]="true" (tabClose)="close($event)">
+        @for (report of reports(); track report.id) {
+            <mona-tab [title]="report.title">
+                <ng-template monaTabContentTemplate>
+                    <p class="p-4 text-sm">{{ report.title }} figures go here.</p>
+                </ng-template>
+            </mona-tab>
+        }
+    </mona-tabs>
+    <button monaButton class="self-start" type="button" (click)="add()">Add report</button>
+</div>

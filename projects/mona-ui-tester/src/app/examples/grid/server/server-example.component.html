@@ -1,0 +1,18 @@
+<mona-grid
+    ariaLabel="Customers from the server"
+    class="h-96"
+    monaGridServerBinding
+    monaGridSortable
+    [data]="result().data"
+    [loading]="loading()"
+    [monaGridFilterable]="{ enabled: true, type: 'row' }"
+    [pageSize]="state().take"
+    [skip]="state().skip"
+    [total]="result().total"
+    [(filter)]="filter"
+    [(sort)]="sort"
+    (dataStateChange)="load($event)">
+    <mona-grid-column field="id" title="ID" type="number" [width]="90" />
+    <mona-grid-column field="name" title="Customer" />
+    <mona-grid-column field="orders" title="Orders" type="number" />
+</mona-grid>

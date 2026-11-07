@@ -1,0 +1,10 @@
+<div class="grid max-w-md grid-cols-[auto_1fr] items-center gap-x-4 gap-y-3">
+    <mona-label for="label-phone" text="Phone" />
+    <input monaTextBox autocomplete="tel" id="label-phone" type="tel" />
+
+    <mona-label text="City" [for]="cityBox" />
+    <mona-text-box #cityBox [(value)]="city" />
+
+    <label monaLabel [for]="darkModeSwitch">Dark mode</label>
+    <mona-switch #darkModeSwitch [(checked)]="darkMode" />
+</div>

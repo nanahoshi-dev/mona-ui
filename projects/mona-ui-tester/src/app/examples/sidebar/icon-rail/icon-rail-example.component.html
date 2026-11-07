@@ -1,0 +1,34 @@
+<mona-sidebar-layout class="h-80 border border-border" modalScope="layout">
+    <mona-sidebar collapsible="icon">
+        <nav monaSidebarContent aria-label="Mail">
+            <div monaSidebarGroup>
+                <div monaSidebarGroupHeader>
+                    <div monaSidebarGroupLabel>Mail</div>
+                </div>
+                <div monaSidebarGroupContent>
+                    <ul monaSidebarMenu>
+                        @for (folder of folders; track folder.label) {
+                            <li monaSidebarMenuItem [active]="current() === folder.label">
+                                <a monaSidebarMenuButton [href]="folder.href" [tooltip]="folder.label" (click)="open($event, folder.label)">
+                                    <svg aria-hidden="true" [lucideIcon]="folder.icon" [size]="16"></svg>
+                                    <span>{{ folder.label }}</span>
+                                </a>
+                                @if (folder.unread) {
+                                    <span monaSidebarMenuBadge>{{ folder.unread }}</span>
+                                }
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <button monaSidebarRail type="button"></button>
+    </mona-sidebar>
+
+    <div class="gap-2 p-4" monaSidebarInset>
+        <button monaButton monaSidebarTrigger aria-label="Toggle sidebar" look="ghost" type="button" [iconOnly]="true">
+            <svg lucidePanelLeft aria-hidden="true" [size]="16"></svg>
+        </button>
+        <p class="text-sm">Showing {{ current() }}</p>
+    </div>
+</mona-sidebar-layout>

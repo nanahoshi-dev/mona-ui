@@ -1,0 +1,13 @@
+<div class="flex max-w-sm flex-col gap-1">
+    <label id="multi-select-forms-label" monaLabel [for]="skillList">Skills</label>
+    <mona-multi-select
+        #skillList
+        aria-describedby="multi-select-forms-hint"
+        aria-labelledby="multi-select-forms-label"
+        [data]="skills"
+        [formField]="profile.skills" />
+    <p id="multi-select-forms-hint" class="text-sm">Choose at least one.</p>
+    @if (profile.skills().touched() && profile.skills().invalid()) {
+        <p class="text-error text-sm" role="alert">Choose at least one skill.</p>
+    }
+</div>

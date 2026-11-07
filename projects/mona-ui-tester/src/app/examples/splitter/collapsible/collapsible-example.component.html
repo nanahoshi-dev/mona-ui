@@ -1,0 +1,28 @@
+<div class="flex flex-col gap-2">
+    <div class="flex items-center gap-3">
+        <button monaButton type="button" (click)="foldersCollapsed.set(!foldersCollapsed())">
+            {{ foldersCollapsed() ? "Show folders" : "Hide folders" }}
+        </button>
+        <span aria-live="polite" class="text-sm">
+            Folders: {{ foldersCollapsed() ? "collapsed" : foldersSize() + " px" }}
+        </span>
+    </div>
+    <mona-splitter class="h-64 w-full border border-border">
+        <mona-splitter-pane
+            label="Folders"
+            [collapsible]="true"
+            [max]="320"
+            [min]="120"
+            [(collapsed)]="foldersCollapsed"
+            [(size)]="foldersSize">
+            <ul class="space-y-1 p-4 text-sm">
+                <li>Inbox</li>
+                <li>Drafts</li>
+                <li>Archive</li>
+            </ul>
+        </mona-splitter-pane>
+        <mona-splitter-pane label="Message">
+            <p class="p-4 text-sm">Double-click the bar, or focus it and press Enter, to collapse the folders.</p>
+        </mona-splitter-pane>
+    </mona-splitter>
+</div>

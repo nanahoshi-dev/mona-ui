@@ -1,0 +1,14 @@
+<mona-pager [pageSize]="10" [total]="95">
+    <ng-template let-disabled="disabled" let-navigate="navigate" monaPagerNavigationButtonsTemplate type="first">
+        <button aria-label="First page" monaButton type="button" [disabled]="disabled" (click)="navigate()">
+            <svg lucideChevronsLeft aria-hidden="true" [size]="16"></svg>
+            First
+        </button>
+    </ng-template>
+    <ng-template let-disabled="disabled" let-navigate="navigate" monaPagerNavigationButtonsTemplate type="last">
+        <button aria-label="Last page" monaButton type="button" [disabled]="disabled" (click)="navigate()">
+            Last
+            <svg lucideChevronsRight aria-hidden="true" [size]="16"></svg>
+        </button>
+    </ng-template>
+</mona-pager>

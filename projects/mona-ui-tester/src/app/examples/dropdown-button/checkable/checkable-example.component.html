@@ -1,0 +1,12 @@
+<div class="flex flex-wrap items-center gap-3">
+    <mona-dropdown-button text="Task settings">
+        <mona-dropdown-button-checkbox-item label="Notify me" [(checked)]="notifications" />
+        <mona-dropdown-button-separator />
+        <mona-dropdown-button-radio-group title="Priority" [(value)]="priority">
+            <mona-dropdown-button-radio-item label="Low" value="low" />
+            <mona-dropdown-button-radio-item label="Medium" value="medium" />
+            <mona-dropdown-button-radio-item label="High" value="high" />
+        </mona-dropdown-button-radio-group>
+    </mona-dropdown-button>
+    <span class="text-sm">Notifications: {{ notifications() ? "on" : "off" }}. Priority: {{ priority() }}.</span>
+</div>

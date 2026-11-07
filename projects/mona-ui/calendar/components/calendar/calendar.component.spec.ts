@@ -235,6 +235,8 @@ describe("CalendarComponent signal forms", () => {
         const calendar = getCalendar(fixture);
         expect(component.form.date().invalid()).toBe(true);
         expect(calendar.querySelector("[role='grid']")?.getAttribute("aria-invalid")).toBe("true");
+        // A grid may not carry aria-required.
+        expect(calendar.querySelector("[role='grid']")?.hasAttribute("aria-required")).toBe(false);
         expect(calendar.getAttribute("data-invalid")).toBe("true");
         expect(calendar.getAttribute("data-required")).toBe("true");
         expect(calendar.className).toContain("data-[invalid='true']:border-error");

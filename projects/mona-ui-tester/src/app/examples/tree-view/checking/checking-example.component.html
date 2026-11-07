@@ -1,0 +1,16 @@
+<div class="flex max-w-xs flex-col gap-2">
+    <mona-tree-view
+        ariaLabel="Product categories"
+        checkBy="id"
+        expandBy="id"
+        idField="id"
+        mode="flat"
+        monaTreeViewCheckable
+        monaTreeViewExpandable
+        parentIdField="parentId"
+        textField="text"
+        [data]="categories"
+        [expandedKeys]="[1, 4]"
+        [(checkedKeys)]="checkedKeys" />
+    <span aria-live="polite" class="text-sm">Checked ids: {{ checkedKeys().join(", ") || "none" }}</span>
+</div>

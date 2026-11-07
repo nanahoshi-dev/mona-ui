@@ -1,0 +1,7 @@
+<div class="flex flex-col items-start gap-2">
+    <p id="delivery-date-hint" class="text-sm">Choose a delivery date.</p>
+    <mona-calendar aria-describedby="delivery-date-hint" [formField]="delivery.date" />
+    @if (delivery.date().touched() && delivery.date().invalid()) {
+        <p class="text-error text-sm" role="alert">A delivery date is required.</p>
+    }
+</div>

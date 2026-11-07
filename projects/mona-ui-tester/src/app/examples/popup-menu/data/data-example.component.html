@@ -1,0 +1,12 @@
+<div class="flex flex-wrap items-center gap-3">
+    <button #actions monaButton aria-haspopup="menu" type="button" [attr.aria-expanded]="open()">Actions</button>
+    <span aria-live="polite" class="text-sm">Last value: {{ lastValue() }}</span>
+</div>
+
+<mona-popup-menu
+    aria-label="Actions"
+    [items]="items"
+    [target]="actions"
+    (close)="open.set(false)"
+    (menuClick)="onAction($event)"
+    (open)="open.set(true)" />

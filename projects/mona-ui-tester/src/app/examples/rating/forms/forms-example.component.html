@@ -1,0 +1,8 @@
+<div class="flex flex-col items-start gap-2">
+    <mona-rating aria-describedby="review-rating-error" label="Your rating" [formField]="review.rating" />
+    <p id="review-rating-error" aria-live="polite" class="text-error text-sm">
+        @if (review.rating().touched() && review.rating().invalid()) {
+            Choose at least one star.
+        }
+    </p>
+</div>

@@ -1,0 +1,9 @@
+<mona-list-box
+    aria-label="Release steps"
+    height="240px"
+    selectBy="id"
+    textField="name"
+    width="320px"
+    [items]="steps()"
+    [toolbar]="{ actions: ['moveUp', 'moveDown', 'remove'] }"
+    (actionClick)="onAction($event)" />

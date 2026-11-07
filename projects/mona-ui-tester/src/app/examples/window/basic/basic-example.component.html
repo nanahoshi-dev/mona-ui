@@ -1,0 +1,12 @@
+<button monaButton look="primary" type="button" (click)="open.set(true)">Open notes</button>
+
+@if (open()) {
+    <mona-window title="Notes" [height]="240" [resizable]="true" [width]="360" (closed)="open.set(false)">
+        <p class="p-3 text-sm">Drag the title bar to move the window, and an edge or corner to resize it.</p>
+        <ng-template monaWindowFooterTemplate>
+            <div class="flex justify-end border-t border-border p-2">
+                <button monaButton size="small" type="button" (click)="open.set(false)">Close</button>
+            </div>
+        </ng-template>
+    </mona-window>
+}

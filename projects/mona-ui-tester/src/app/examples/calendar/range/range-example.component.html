@@ -1,0 +1,10 @@
+<div class="flex flex-col items-start gap-2">
+    <mona-calendar selection="range" [(value)]="range" />
+    <span aria-live="polite" class="text-sm">
+        @if (ends(); as ends) {
+            Stay: {{ ends[0] | date }} to {{ ends[1] | date }}
+        } @else {
+            Choose the first night, then the last.
+        }
+    </span>
+</div>

@@ -1,0 +1,15 @@
+<div class="flex flex-col items-start gap-2">
+    <mona-check-box
+        label="All toppings"
+        [checked]="allSelected()"
+        [indeterminate]="someSelected()"
+        (checkedChange)="selectAll($event)" />
+    <div class="ms-6 flex flex-col items-start gap-2">
+        @for (topping of toppings(); track topping.name) {
+            <mona-check-box
+                [checked]="topping.selected"
+                [label]="topping.name"
+                (checkedChange)="select(topping.name, $event)" />
+        }
+    </div>
+</div>

@@ -1,0 +1,10 @@
+<mona-tree-view
+    ariaLabel="Playlists"
+    children="items"
+    expandBy="id"
+    monaTreeViewDragAndDrop
+    monaTreeViewExpandable
+    textField="text"
+    [data]="playlists()"
+    [expandedKeys]="['focus', 'workout']"
+    (nodeDrop)="onNodeDrop($event)" />

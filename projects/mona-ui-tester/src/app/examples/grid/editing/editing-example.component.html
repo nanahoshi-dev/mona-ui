@@ -1,0 +1,17 @@
+<mona-grid
+    ariaLabel="Products"
+    rowKey="id"
+    [data]="products()"
+    [monaGridEditable]="{ mode: 'row', schema: productSchema }"
+    [newRowFactory]="createProduct"
+    [pageSize]="5"
+    (remove)="onRemove($event)"
+    (save)="onSave($event)">
+    <ng-template let-addRowVisible="addRowVisible" monaGridToolbarTemplate>
+        <button monaButton monaGridAddCommand type="button" [disabled]="addRowVisible">Add product</button>
+    </ng-template>
+    <mona-grid-column field="name" title="Name" />
+    <mona-grid-column field="price" title="Price" type="number" />
+    <mona-grid-column field="inStock" title="In stock" type="boolean" />
+    <mona-grid-command-column [width]="120" />
+</mona-grid>

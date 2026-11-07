@@ -1,0 +1,16 @@
+<div class="flex max-w-sm flex-col gap-3">
+    <mona-label text="Search products">
+        <mona-text-box placeholder="Name or SKU" type="search" [(value)]="query">
+            <ng-template monaTextBoxPrefixTemplate>
+                <svg lucideSearch aria-hidden="true" class="ps-1" [size]="16"></svg>
+            </ng-template>
+        </mona-text-box>
+    </mona-label>
+    <mona-label text="Email">
+        <mona-text-box [(value)]="username">
+            <ng-template monaTextBoxSuffixTemplate>
+                <span class="pe-2 text-sm">&#64;example.com</span>
+            </ng-template>
+        </mona-text-box>
+    </mona-label>
+</div>

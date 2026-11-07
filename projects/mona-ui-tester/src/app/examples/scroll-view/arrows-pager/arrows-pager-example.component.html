@@ -1,0 +1,16 @@
+<mona-scroll-view
+    aria-label="Product highlights"
+    height="200px"
+    pagerOverlay="dark"
+    pagerRounded="full"
+    width="100%"
+    [arrows]="true"
+    [data]="highlights"
+    [pageable]="true">
+    <ng-template let-highlight [monaScrollViewSlide]="highlights">
+        <div class="flex h-full flex-col items-center justify-center gap-1 bg-secondary px-12 text-center text-secondary-foreground">
+            <p class="text-lg font-semibold">{{ highlight.title }}</p>
+            <p class="text-sm">{{ highlight.text }}</p>
+        </div>
+    </ng-template>
+</mona-scroll-view>

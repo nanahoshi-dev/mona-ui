@@ -1,0 +1,24 @@
+<div class="flex flex-wrap gap-2">
+    <mona-list-box
+        aria-label="Available permissions"
+        height="240px"
+        selectBy="id"
+        selectionMode="multiple"
+        textField="name"
+        width="260px"
+        [connectedList]="granted"
+        [items]="available()"
+        [toolbar]="{ actions: ['transferTo', 'transferAllTo', 'transferFrom', 'transferAllFrom'] }"
+        (actionClick)="onAvailableAction($event)" />
+    <mona-list-box
+        #granted
+        aria-label="Granted permissions"
+        height="240px"
+        selectBy="id"
+        selectionMode="multiple"
+        textField="name"
+        width="200px"
+        [items]="grantedItems()"
+        [toolbar]="false"
+        (actionClick)="onGrantedAction($event)" />
+</div>

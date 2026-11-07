@@ -1,0 +1,9 @@
+<div class="flex max-w-xs flex-col gap-3">
+    <mona-numeric-text-box
+        aria-label="Meeting length in minutes"
+        [maxValue]="240"
+        [minValue]="15"
+        [step]="15"
+        [(value)]="duration" />
+    <p class="text-sm">Meeting length: {{ duration() ?? "not set" }} minutes</p>
+</div>

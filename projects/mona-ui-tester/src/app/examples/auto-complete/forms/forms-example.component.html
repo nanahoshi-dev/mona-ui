@@ -1,0 +1,13 @@
+<div class="flex max-w-xs flex-col gap-1">
+    <label monaLabel for="auto-complete-forms-city">City</label>
+    <mona-auto-complete
+        aria-describedby="auto-complete-forms-city-hint"
+        inputId="auto-complete-forms-city"
+        monaDropDownFilterable
+        [data]="cities"
+        [formField]="address.city" />
+    <p id="auto-complete-forms-city-hint" class="text-sm">Required. Any text is accepted.</p>
+    @if (address.city().touched() && address.city().invalid()) {
+        <p class="text-error text-sm" role="alert">Enter a city.</p>
+    }
+</div>

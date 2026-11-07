@@ -1,0 +1,16 @@
+<div class="flex max-w-md flex-col gap-3">
+    <mona-label text="Ship to my billing address">
+        <mona-switch [(checked)]="sameAsBilling" />
+    </mona-label>
+    <mona-fieldset legend="Shipping address" [disabled]="sameAsBilling()">
+        <div class="flex flex-col gap-3 p-4">
+            <mona-label text="Street">
+                <mona-text-box />
+            </mona-label>
+            <mona-label text="City">
+                <mona-text-box />
+            </mona-label>
+            <mona-check-box label="Leave at the door" />
+        </div>
+    </mona-fieldset>
+</div>

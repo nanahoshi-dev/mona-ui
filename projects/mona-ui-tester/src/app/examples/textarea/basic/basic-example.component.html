@@ -1,0 +1,15 @@
+<div class="flex max-w-md flex-col gap-4">
+    <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium" for="textarea-description">Description</label>
+        <textarea
+            monaTextArea
+            class="h-32 w-full resize-y"
+            id="textarea-description"
+            placeholder="What does this release change?"
+            rows="4"></textarea>
+    </div>
+    <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium" for="textarea-terms">Terms</label>
+        <textarea monaTextArea class="w-full resize-none" id="textarea-terms" readonly rows="2" [value]="terms"></textarea>
+    </div>
+</div>

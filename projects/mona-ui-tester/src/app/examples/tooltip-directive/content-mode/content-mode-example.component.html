@@ -1,0 +1,5 @@
+<div class="flex flex-wrap gap-2" filter="button[title]" mode="content" monaTooltip>
+    @for (action of actions; track action.id) {
+        <button monaButton type="button" [title]="action.description">{{ action.label }}</button>
+    }
+</div>

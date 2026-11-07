@@ -1,0 +1,11 @@
+<div class="flex flex-wrap items-start gap-6">
+    <mona-calendar selection="multiple" [(value)]="value" />
+    <div aria-live="polite" class="text-sm">
+        <p>{{ dates().length }} days off</p>
+        <ul>
+            @for (date of dates(); track date.getTime()) {
+                <li>{{ date | date: "EEE, MMM d" }}</li>
+            }
+        </ul>
+    </div>
+</div>

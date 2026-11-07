@@ -1,0 +1,15 @@
+<div class="flex max-w-md flex-col gap-3">
+    <mona-progress-bar
+        aria-label="Setup steps completed"
+        [aria-valuetext]="completed() + ' of ' + total + ' steps'"
+        [max]="total"
+        [value]="completed()">
+        <ng-template monaProgressBarLabelTemplate let-max="max" let-value>
+            <span class="text-xs font-medium">{{ value }} / {{ max }}</span>
+        </ng-template>
+    </mona-progress-bar>
+    <div class="flex gap-2">
+        <button monaButton type="button" [disabled]="completed() === 0" (click)="back()">Back</button>
+        <button monaButton look="primary" type="button" [disabled]="completed() === total" (click)="next()">Next</button>
+    </div>
+</div>

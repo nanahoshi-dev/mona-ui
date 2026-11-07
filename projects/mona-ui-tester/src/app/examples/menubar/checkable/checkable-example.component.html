@@ -1,0 +1,20 @@
+<div class="flex flex-col items-start gap-3">
+    <mona-menubar ariaLabel="Canvas">
+        <mona-menu text="View">
+            <mona-menu-checkbox-item label="Show grid" [(checked)]="showGrid" />
+            <mona-menu-checkbox-item label="Snap to grid" [(checked)]="snapToGrid" />
+        </mona-menu>
+        <mona-menu text="Appearance">
+            <mona-menu-item label="Theme">
+                <mona-menu-radio-group [(value)]="theme">
+                    <mona-menu-radio-item label="Light" value="light" />
+                    <mona-menu-radio-item label="Dark" value="dark" />
+                    <mona-menu-radio-item label="System" value="system" />
+                </mona-menu-radio-group>
+            </mona-menu-item>
+        </mona-menu>
+    </mona-menubar>
+    <span class="text-sm">
+        Grid: {{ showGrid() ? "shown" : "hidden" }}. Snap: {{ snapToGrid() ? "on" : "off" }}. Theme: {{ theme() }}.
+    </span>
+</div>

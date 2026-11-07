@@ -1,0 +1,13 @@
+<div class="flex flex-col gap-3">
+    <button monaButton class="self-start" type="button" (click)="detailsOpen.set(!detailsOpen())">
+        {{ detailsOpen() ? "Hide" : "Show" }} shipping details
+    </button>
+    <mona-expansion-panel title="Shipping details" [(expanded)]="detailsOpen">
+        <dl class="grid grid-cols-2 gap-1 p-3 text-sm">
+            <dt>Carrier</dt>
+            <dd>Northwind Freight</dd>
+            <dt>Tracking number</dt>
+            <dd>NW-482-117</dd>
+        </dl>
+    </mona-expansion-panel>
+</div>

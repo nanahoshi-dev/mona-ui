@@ -1,0 +1,17 @@
+<div class="flex flex-wrap items-center gap-3">
+    <button #anchor monaButton aria-haspopup="dialog" type="button" (click)="ask(anchor)">Rate this page</button>
+    <span aria-live="polite" class="text-sm">Answer: {{ answer() }}</span>
+</div>
+
+<ng-template #question>
+    <div
+        aria-labelledby="popup-service-example-question"
+        class="flex flex-col gap-2 rounded-md border border-border bg-surface-overlay p-3 text-sm text-foreground shadow-md"
+        role="dialog">
+        <p id="popup-service-example-question">Was this page helpful?</p>
+        <div class="flex gap-2">
+            <button monaButton type="button" (click)="reply('yes')">Yes</button>
+            <button monaButton type="button" (click)="reply('no')">No</button>
+        </div>
+    </div>
+</ng-template>

@@ -1,0 +1,20 @@
+<button monaButton type="button" (click)="open.set(true)">Filters</button>
+
+@if (open()) {
+    <mona-sheet
+        description="Narrow the displayed results."
+        height="min(90dvh, 24rem)"
+        side="bottom"
+        title="Filters"
+        (closed)="open.set(false)">
+        <div class="flex flex-col gap-3 px-4 pb-4">
+            <p class="text-sm font-medium">Category</p>
+            <div class="flex flex-wrap gap-2">
+                @for (category of categories; track category) {
+                    <button monaButton size="small" type="button" [toggleable]="true">{{ category }}</button>
+                }
+            </div>
+            <button monaButton class="self-end" look="primary" type="button" (click)="open.set(false)">Show results</button>
+        </div>
+    </mona-sheet>
+}

@@ -1,0 +1,8 @@
+<div class="flex flex-wrap items-center gap-3">
+    <mona-button-group aria-label="Clipboard" (buttonClick)="onClick($event)">
+        <button monaButton type="button" value="cut" [toggleable]="false">Cut</button>
+        <button monaButton type="button" value="copy" [toggleable]="false">Copy</button>
+        <button monaButton type="button" value="paste" [toggleable]="false">Paste</button>
+    </mona-button-group>
+    <span aria-live="polite" class="text-sm">Last action: {{ lastAction() }}</span>
+</div>

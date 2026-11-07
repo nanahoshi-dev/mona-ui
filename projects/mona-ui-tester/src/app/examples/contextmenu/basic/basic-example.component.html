@@ -1,0 +1,21 @@
+<p class="mb-2 text-sm">Right-click the file, or focus it and press Shift+F10.</p>
+<div class="flex flex-wrap items-center gap-3">
+    <button #file monaButton type="button">report-q3.pdf</button>
+    <span aria-live="polite" class="text-sm">Last action: {{ lastAction() }}</span>
+</div>
+
+<mona-contextmenu ariaLabel="File actions" [target]="file" (menuClick)="lastAction.set($event.label)">
+    <mona-contextmenu-item label="Open" />
+    <mona-contextmenu-item label="Open with">
+        <mona-contextmenu-item label="Viewer" />
+        <mona-contextmenu-item label="Editor" />
+    </mona-contextmenu-item>
+    <mona-contextmenu-separator />
+    <mona-contextmenu-group title="Share">
+        <mona-contextmenu-item label="Copy link" />
+        <mona-contextmenu-item label="Email" />
+    </mona-contextmenu-group>
+    <mona-contextmenu-separator />
+    <mona-contextmenu-item label="Rename" [disabled]="true" />
+    <mona-contextmenu-item label="Delete" />
+</mona-contextmenu>

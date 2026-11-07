@@ -1,0 +1,21 @@
+<div class="flex flex-wrap items-center gap-3">
+    <button #more monaButton aria-haspopup="menu" type="button" [attr.aria-expanded]="open()">File actions</button>
+    <span aria-live="polite" class="text-sm">Last action: {{ lastAction() }}</span>
+</div>
+
+<mona-popup-menu
+    aria-label="File actions"
+    [target]="more"
+    (close)="open.set(false)"
+    (menuClick)="lastAction.set($event.label)"
+    (open)="open.set(true)">
+    <mona-popup-menu-group title="File">
+        <mona-popup-menu-item label="Rename" />
+        <mona-popup-menu-item label="Share">
+            <mona-popup-menu-item label="Copy link" />
+            <mona-popup-menu-item label="Email" />
+        </mona-popup-menu-item>
+    </mona-popup-menu-group>
+    <mona-popup-menu-separator />
+    <mona-popup-menu-item label="Delete" [disabled]="true" />
+</mona-popup-menu>

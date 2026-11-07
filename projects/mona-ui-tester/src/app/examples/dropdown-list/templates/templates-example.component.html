@@ -1,0 +1,21 @@
+<div class="flex max-w-xs flex-col gap-1">
+    <label id="dropdown-list-templates-label" monaLabel [for]="statusList">Status</label>
+    <mona-dropdown-list
+        #statusList
+        aria-labelledby="dropdown-list-templates-label"
+        textField="name"
+        valueField="id"
+        [data]="statuses"
+        [(value)]="status">
+        <ng-template monaDropdownPrefixTemplate>
+            <svg lucideCircleDot aria-hidden="true" class="ms-2" [size]="16"></svg>
+        </ng-template>
+        <ng-template let-item monaDropDownItemTemplate>
+            <span class="flex-1">{{ item.name }}</span>
+            <span class="text-muted-foreground text-xs">{{ item.description }}</span>
+        </ng-template>
+        <ng-template let-item monaDropDownListValueTemplate>
+            {{ item ? item.name : "No status" }}
+        </ng-template>
+    </mona-dropdown-list>
+</div>

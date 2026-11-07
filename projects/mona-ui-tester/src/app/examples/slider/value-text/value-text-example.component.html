@@ -1,0 +1,4 @@
+<div class="flex max-w-xs flex-col gap-2">
+    <mona-slider aria-label="Priority" [ariaValueText]="priorityName" [maxValue]="2" [(value)]="priority" />
+    <span class="text-sm">Priority: {{ priorityName(priority()) }}</span>
+</div>

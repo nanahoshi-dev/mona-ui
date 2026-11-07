@@ -1,0 +1,20 @@
+<div class="flex flex-wrap items-center gap-3">
+    <span class="text-sm">Project: {{ name() }}</span>
+    <button monaButton aria-haspopup="dialog" type="button" (click)="rename()">Rename</button>
+</div>
+
+@if (open()) {
+    <mona-dialog
+        title="Rename project"
+        [actions]="actions"
+        [type]="null"
+        (action)="onAction($event)"
+        (close)="open.set(false)">
+        <ng-template monaDialogContentTemplate>
+            <div class="flex flex-col gap-1">
+                <label for="dialog-content-example-name">Project name</label>
+                <mona-text-box inputId="dialog-content-example-name" [(value)]="draftName" />
+            </div>
+        </ng-template>
+    </mona-dialog>
+}

@@ -1,0 +1,19 @@
+<div class="flex flex-wrap items-center gap-3">
+    <mona-split-button
+        look="primary"
+        text="Publish"
+        (buttonClick)="lastAction.set('Publish')"
+        (menuItemClick)="onMenuItemClick($event)">
+        <mona-split-button-group title="Later">
+            <mona-split-button-item label="Schedule" />
+            <mona-split-button-item label="Save as draft" />
+        </mona-split-button-group>
+        <mona-split-button-separator />
+        <mona-split-button-item label="Share preview">
+            <mona-split-button-item label="Copy link" />
+            <mona-split-button-item label="Email" />
+        </mona-split-button-item>
+        <mona-split-button-item label="Unpublish" [disabled]="true" />
+    </mona-split-button>
+    <span aria-live="polite" class="text-sm">Last action: {{ lastAction() }}</span>
+</div>

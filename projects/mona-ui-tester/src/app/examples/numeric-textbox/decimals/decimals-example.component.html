@@ -1,0 +1,4 @@
+<div class="flex max-w-xs flex-col gap-3">
+    <mona-numeric-text-box aria-label="Weight in kilograms" [decimals]="2" [(value)]="weight" />
+    <p class="text-sm">Value: {{ weight() ?? "empty" }}</p>
+</div>

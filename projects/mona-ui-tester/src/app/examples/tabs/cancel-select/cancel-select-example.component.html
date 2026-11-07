@@ -1,0 +1,15 @@
+<div class="flex flex-col gap-3">
+    <mona-tabs aria-label="Plans" (tabSelect)="select($event)">
+        <mona-tab title="Free">
+            <ng-template monaTabContentTemplate>
+                <p class="p-4 text-sm">Three projects and one member.</p>
+            </ng-template>
+        </mona-tab>
+        <mona-tab title="Pro">
+            <ng-template monaTabContentTemplate>
+                <p class="p-4 text-sm">Unlimited projects and members.</p>
+            </ng-template>
+        </mona-tab>
+    </mona-tabs>
+    <p aria-live="polite" class="text-sm">{{ message() }}</p>
+</div>

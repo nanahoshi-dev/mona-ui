@@ -1,0 +1,27 @@
+<div class="flex flex-col items-start gap-3">
+    <mona-menubar ariaLabel="Document" (menuItemClick)="lastAction.set($event.label)">
+        <mona-menu text="File">
+            <mona-menu-item label="New">
+                <mona-menu-item label="Document" />
+                <mona-menu-item label="Spreadsheet" />
+            </mona-menu-item>
+            <mona-menu-item label="Open" />
+            <mona-menu-separator />
+            <mona-menu-group title="Export">
+                <mona-menu-item label="Export as PDF" />
+                <mona-menu-item label="Export as image" />
+            </mona-menu-group>
+            <mona-menu-separator />
+            <mona-menu-item label="Close" />
+        </mona-menu>
+        <mona-menu text="Edit">
+            <mona-menu-item label="Undo" />
+            <mona-menu-item label="Redo" [disabled]="true" />
+        </mona-menu>
+        <mona-menu text="Help">
+            <mona-menu-item label="Keyboard shortcuts" />
+            <mona-menu-item label="About" />
+        </mona-menu>
+    </mona-menubar>
+    <span aria-live="polite" class="text-sm">Last action: {{ lastAction() }}</span>
+</div>

@@ -1,0 +1,9 @@
+<div class="flex flex-col items-start gap-3">
+    <mona-check-box label="Email me about new releases" [(checked)]="releases" />
+    <mona-check-box label="Keep me signed in" labelPosition="before" [(checked)]="signedIn" />
+    <mona-check-box [(checked)]="terms">
+        I accept the <strong>terms of service</strong>
+    </mona-check-box>
+    <mona-check-box label="Sync contacts" [disabled]="true" />
+    <p class="text-sm">Terms accepted: {{ terms() ? "yes" : "no" }}</p>
+</div>

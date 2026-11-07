@@ -1,0 +1,9 @@
+<mona-list-view
+    aria-label="Activity"
+    class="max-w-sm"
+    height="240px"
+    textField="text"
+    [items]="visibleEvents()"
+    [loading]="loading()"
+    (scrollBottom)="loadMore()" />
+<p aria-live="polite" class="mt-2 text-sm">Showing {{ visibleEvents().length }} of {{ events.length }}</p>

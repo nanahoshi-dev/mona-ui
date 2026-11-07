@@ -1,0 +1,10 @@
+<div class="flex items-center gap-3">
+    <mona-color-picker
+        aria-label="Tag color"
+        view="palette"
+        [columns]="5"
+        [palette]="colors"
+        [showClearButton]="true"
+        [(value)]="color" />
+    <span class="text-sm">Color: {{ color() ?? "none" }}</span>
+</div>

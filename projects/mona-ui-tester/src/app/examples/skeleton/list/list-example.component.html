@@ -1,0 +1,11 @@
+<div aria-busy="true" aria-label="Loading messages" class="flex max-w-md flex-col gap-4" role="region">
+    @for (row of rows; track row) {
+        <div class="flex items-center gap-3">
+            <mona-skeleton rounded="full" [height]="40" [width]="40"></mona-skeleton>
+            <div class="flex flex-1 flex-col gap-2">
+                <mona-skeleton rounded="small" width="40%"></mona-skeleton>
+                <mona-skeleton rounded="small" height="0.75rem"></mona-skeleton>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,11 @@
+<div class="flex max-w-xs flex-col gap-1">
+    <label monaLabel for="combo-box-primitive-size">Shirt size</label>
+    <mona-combo-box
+        inputId="combo-box-primitive-size"
+        textField="label"
+        valueField="code"
+        [data]="sizes"
+        [valuePrimitive]="true"
+        [(value)]="sizeCode" />
+    <span aria-live="polite" class="text-sm">Value: {{ sizeCode() ?? "null" }}</span>
+</div>

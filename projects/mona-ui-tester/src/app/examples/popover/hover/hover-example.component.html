@@ -1,0 +1,8 @@
+<p class="text-sm">
+    Reviewed by
+    <button #reviewer monaButton look="link" type="button">Grace Hopper</button>
+</p>
+
+<mona-popover position="end" title="Grace Hopper" trigger="hover" [displayArrow]="true" [target]="reviewer">
+    <p class="w-56 p-2 text-sm">Platform team lead. Reviews changes to the build and release pipeline.</p>
+</mona-popover>

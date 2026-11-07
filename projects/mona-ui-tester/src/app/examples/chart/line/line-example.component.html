@@ -1,0 +1,7 @@
+<mona-chart aria-label="Monthly visitors by platform" class="h-72 w-full" xField="month" [data]="visitors">
+    <mona-chart-x-axis />
+    <mona-chart-y-axis title="Visitors" />
+    <mona-line-series curve="monotone-x" field="web" name="Web" [showPoints]="true" />
+    <mona-line-series curve="monotone-x" field="mobile" lineStyle="dashed" name="Mobile" [showPoints]="true" />
+    <mona-chart-legend position="bottom" />
+</mona-chart>

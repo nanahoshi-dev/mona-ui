@@ -1,0 +1,14 @@
+<div class="flex gap-10">
+    <div class="flex flex-col items-center gap-2">
+        <mona-slider aria-label="Bass" orientation="vertical" [maxValue]="12" [minValue]="-12" [(value)]="bass" />
+        <span class="text-sm">Bass {{ bass() }} dB</span>
+    </div>
+    <div class="flex flex-col items-center gap-2">
+        <mona-slider aria-label="Middle" orientation="vertical" [maxValue]="12" [minValue]="-12" [(value)]="middle" />
+        <span class="text-sm">Middle {{ middle() }} dB</span>
+    </div>
+    <div class="flex flex-col items-center gap-2">
+        <mona-slider aria-label="Treble" orientation="vertical" [maxValue]="12" [minValue]="-12" [(value)]="treble" />
+        <span class="text-sm">Treble {{ treble() }} dB</span>
+    </div>
+</div>

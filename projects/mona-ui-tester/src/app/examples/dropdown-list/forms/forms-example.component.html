@@ -1,0 +1,17 @@
+<div class="flex max-w-xs flex-col gap-1">
+    <label id="dropdown-list-forms-label" monaLabel [for]="shippingList">Shipping method</label>
+    <mona-dropdown-list
+        #shippingList
+        aria-describedby="dropdown-list-forms-hint"
+        aria-labelledby="dropdown-list-forms-label"
+        placeholder="Select a method"
+        textField="name"
+        valueField="id"
+        [data]="methods"
+        [formField]="order.shippingId"
+        [valuePrimitive]="true" />
+    <p id="dropdown-list-forms-hint" class="text-sm">Required.</p>
+    @if (order.shippingId().touched() && order.shippingId().invalid()) {
+        <p class="text-error text-sm" role="alert">Choose a shipping method.</p>
+    }
+</div>

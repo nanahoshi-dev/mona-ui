@@ -1,0 +1,7 @@
+<div class="flex flex-wrap items-center gap-3">
+    <mona-split-button text="Save" [loading]="saving()" (buttonClick)="save()" (menuItemClick)="save()">
+        <mona-split-button-item label="Save and close" />
+        <mona-split-button-item label="Save a copy" />
+    </mona-split-button>
+    <span aria-live="polite" class="text-sm">{{ status() }}</span>
+</div>

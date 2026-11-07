@@ -1,0 +1,14 @@
+<div class="flex flex-wrap items-center gap-3">
+    <button monaButton aria-haspopup="dialog" type="button" (click)="open.set(true)">Discard draft</button>
+    <span aria-live="polite" class="text-sm">Last choice: {{ lastChoice() }}</span>
+</div>
+
+@if (open()) {
+    <mona-dialog
+        text="The draft and its attachments will be removed."
+        title="Discard this draft?"
+        type="warning"
+        [actions]="actions"
+        (action)="onAction($event)"
+        (close)="open.set(false)" />
+}

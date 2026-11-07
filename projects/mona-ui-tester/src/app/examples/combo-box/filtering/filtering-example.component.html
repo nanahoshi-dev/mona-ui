@@ -1,0 +1,13 @@
+<div class="flex max-w-xs flex-col gap-1">
+    <label monaLabel for="combo-box-filtering-country">Country</label>
+    <mona-combo-box
+        inputId="combo-box-filtering-country"
+        monaDropDownFilterable
+        placeholder="Select a country"
+        textField="name"
+        valueField="id"
+        [data]="countries"
+        [showClearButton]="true"
+        [(value)]="country" />
+    <span aria-live="polite" class="text-sm">Selected: {{ country()?.name ?? "none" }}</span>
+</div>

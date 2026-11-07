@@ -1,0 +1,14 @@
+<div class="flex flex-wrap items-center gap-3">
+    <button #folder monaButton type="button">Documents</button>
+    <span class="text-sm">Preview pane: {{ previewPane() ? "on" : "off" }}. Sorted by {{ sortField() }}.</span>
+</div>
+
+<mona-contextmenu ariaLabel="View options" [target]="folder">
+    <mona-contextmenu-checkbox-item label="Preview pane" [(checked)]="previewPane" />
+    <mona-contextmenu-separator />
+    <mona-contextmenu-radio-group title="Sort by" [(value)]="sortField">
+        <mona-contextmenu-radio-item label="Name" value="name" />
+        <mona-contextmenu-radio-item label="Date modified" value="date modified" />
+        <mona-contextmenu-radio-item label="Size" value="size" />
+    </mona-contextmenu-radio-group>
+</mona-contextmenu>

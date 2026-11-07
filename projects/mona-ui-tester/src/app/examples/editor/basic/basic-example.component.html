@@ -1,0 +1,8 @@
+<div class="flex flex-col gap-2">
+    <label id="editor-basic-label" class="text-sm font-medium">Notes</label>
+    <mona-editor aria-labelledby="editor-basic-label" class="h-72 w-full" placeholder="Write a note" [(value)]="notes" />
+    <details>
+        <summary>HTML value</summary>
+        <pre class="whitespace-pre-wrap text-xs">{{ notes() }}</pre>
+    </details>
+</div>

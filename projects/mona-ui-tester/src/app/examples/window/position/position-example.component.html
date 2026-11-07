@@ -1,0 +1,19 @@
+<div class="flex flex-wrap items-center gap-2">
+    <button monaButton type="button" (click)="open.set(true)">Open</button>
+    <button monaButton type="button" (click)="top.set(16); left.set(16)">Move to the corner</button>
+    <span class="text-sm">Top: {{ top() ?? "centered" }}, left: {{ left() ?? "centered" }}</span>
+</div>
+
+@if (open()) {
+    <mona-window
+        title="Inspector"
+        [draggable]="true"
+        [resizable]="true"
+        [(height)]="height"
+        [(left)]="left"
+        [(top)]="top"
+        [(width)]="width"
+        (closed)="open.set(false)">
+        <p class="p-3 text-sm">Size: {{ width() }} × {{ height() }}</p>
+    </mona-window>
+}

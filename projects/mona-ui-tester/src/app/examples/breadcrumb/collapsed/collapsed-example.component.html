@@ -1,0 +1,8 @@
+<div class="flex flex-col gap-3">
+    <mona-breadcrumb aria-label="Category" [maxItems]="4">
+        @for (category of categories; track category) {
+            <mona-breadcrumb-item (itemClick)="chosen.set(category)">{{ category }}</mona-breadcrumb-item>
+        }
+    </mona-breadcrumb>
+    <p aria-live="polite" class="text-sm">Last clicked: {{ chosen() }}</p>
+</div>

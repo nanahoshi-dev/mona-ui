@@ -1,0 +1,16 @@
+<mona-fieldset class="max-w-md">
+    <ng-template monaFieldsetLegendTemplate>
+        <span class="flex items-center gap-2 px-2 font-semibold">
+            <svg lucideCreditCard aria-hidden="true" [size]="16"></svg>
+            Billing address
+        </span>
+    </ng-template>
+    <div class="flex flex-col gap-3 p-4">
+        <mona-label text="Street">
+            <mona-text-box />
+        </mona-label>
+        <mona-label text="Postal code">
+            <mona-text-box />
+        </mona-label>
+    </div>
+</mona-fieldset>

@@ -1,0 +1,25 @@
+<button #file monaButton aria-haspopup="menu" type="button" [attr.aria-expanded]="open()">File</button>
+
+<mona-popup-menu aria-label="File" [target]="file" (close)="open.set(false)" (open)="open.set(true)">
+    <mona-popup-menu-item label="Open">
+        <ng-template monaPopupMenuIconTemplate>
+            <svg lucideFolderOpen aria-hidden="true" [size]="14"></svg>
+        </ng-template>
+        <ng-template monaPopupMenuShortcutTemplate>
+            <span class="text-xs">Ctrl + O</span>
+        </ng-template>
+    </mona-popup-menu-item>
+    <mona-popup-menu-item label="Save">
+        <ng-template monaPopupMenuIconTemplate>
+            <svg lucideSave aria-hidden="true" [size]="14"></svg>
+        </ng-template>
+        <ng-template monaPopupMenuShortcutTemplate>
+            <span class="text-xs">Ctrl + S</span>
+        </ng-template>
+    </mona-popup-menu-item>
+    <mona-popup-menu-item label="Duplicate">
+        <ng-template monaPopupMenuIconTemplate>
+            <svg lucideCopy aria-hidden="true" [size]="14"></svg>
+        </ng-template>
+    </mona-popup-menu-item>
+</mona-popup-menu>

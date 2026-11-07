@@ -1,0 +1,4 @@
+<div #panel class="flex max-w-sm flex-col gap-3 rounded-md border border-border p-4">
+    <p class="text-sm" aria-live="polite">Report: {{ status() }}</p>
+    <button monaButton type="button" [disabled]="status() === 'Loading…'" (click)="load(panel)">Download report</button>
+</div>

@@ -1,0 +1,24 @@
+<mona-chart aria-label="Daily data transfer" class="h-72 w-full" xField="day" [data]="usage">
+    <mona-chart-x-axis />
+    <mona-chart-y-axis />
+    <mona-area-series field="downloads" name="Downloads" [valueFormatter]="gigabytes" />
+    <mona-area-series field="uploads" name="Uploads" [valueFormatter]="gigabytes" />
+    <mona-chart-tooltip [shared]="true">
+        <ng-template monaChartTooltipTemplate let-points="points">
+            <div class="min-w-36 rounded-md border border-border bg-popover p-2 text-xs text-popover-foreground">
+                <div class="mb-1 font-semibold">{{ points[0]?.formattedX }}</div>
+                @for (point of points; track point.seriesId) {
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="flex items-center gap-1.5">
+                            <span
+                                class="size-2 rounded-full forced-color-adjust-none"
+                                [style.background-color]="point.color"></span>
+                            {{ point.seriesName }}
+                        </span>
+                        <span class="font-semibold">{{ point.formattedY }}</span>
+                    </div>
+                }
+            </div>
+        </ng-template>
+    </mona-chart-tooltip>
+</mona-chart>

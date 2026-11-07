@@ -1,0 +1,15 @@
+<div class="flex max-w-xs flex-col gap-1">
+    <label monaLabel for="combo-box-forms-department">Department</label>
+    <mona-combo-box
+        aria-describedby="combo-box-forms-department-hint"
+        inputId="combo-box-forms-department"
+        textField="name"
+        valueField="id"
+        [data]="departments"
+        [formField]="employee.departmentId"
+        [valuePrimitive]="true" />
+    <p id="combo-box-forms-department-hint" class="text-sm">Required.</p>
+    @if (employee.departmentId().touched() && employee.departmentId().invalid()) {
+        <p class="text-error text-sm" role="alert">Choose a department.</p>
+    }
+</div>

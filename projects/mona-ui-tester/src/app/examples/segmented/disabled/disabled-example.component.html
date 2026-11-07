@@ -1,0 +1,4 @@
+<div class="flex flex-col items-start gap-2">
+    <mona-segmented aria-label="Sort order" [options]="sortOptions" [(value)]="sort" />
+    <span class="text-sm">Sorted by: {{ sort() }}</span>
+</div>

@@ -1,0 +1,12 @@
+<mona-list-view
+    aria-label="Groceries"
+    class="max-w-xs"
+    groupBy="aisle"
+    height="280px"
+    textField="name"
+    [items]="groceries"
+    [monaListViewGroupable]="{ orderBy: 'name' }">
+    <ng-template let-aisle monaListViewGroupHeaderTemplate>
+        <span class="font-semibold">{{ aisle }}</span>
+    </ng-template>
+</mona-list-view>

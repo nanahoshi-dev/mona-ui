@@ -1,0 +1,8 @@
+<div class="flex flex-col gap-3">
+    <ul aria-label="Books" class="flex flex-col gap-1">
+        @for (book of pageItems(); track book) {
+            <li class="rounded-md border border-border px-3 py-1.5 text-sm">{{ book }}</li>
+        }
+    </ul>
+    <mona-pager aria-label="Books pagination" [total]="books.length" [(pageSize)]="pageSize" [(skip)]="skip" />
+</div>

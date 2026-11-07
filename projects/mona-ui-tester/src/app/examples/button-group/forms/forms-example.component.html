@@ -1,0 +1,8 @@
+<div class="flex flex-col items-start gap-3">
+    <mona-button-group aria-label="Text alignment" selection="single" [formField]="paragraph.align">
+        <button monaButton type="button" value="left">Left</button>
+        <button monaButton type="button" value="center">Center</button>
+        <button monaButton type="button" value="right">Right</button>
+    </mona-button-group>
+    <span class="text-sm">Alignment: {{ paragraph.align().value() ?? "none" }}</span>
+</div>

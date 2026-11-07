@@ -1,0 +1,11 @@
+<mona-chart aria-label="Visits by traffic source" class="h-72 w-full" [data]="sources">
+    <mona-donut-series name="Visits" [padAngle]="1">
+        <ng-template monaChartCenterTemplate let-formattedTotal="formattedTotal">
+            <div class="flex flex-col items-center">
+                <span class="text-xs">Total visits</span>
+                <span class="text-lg font-semibold">{{ formattedTotal }}</span>
+            </div>
+        </ng-template>
+    </mona-donut-series>
+    <mona-chart-legend position="end" />
+</mona-chart>

@@ -1,0 +1,20 @@
+<div class="flex max-w-md flex-col gap-1">
+    <label class="text-sm font-medium" for="textarea-feedback">Feedback</label>
+    <textarea
+        monaTextArea
+        aria-describedby="textarea-feedback-count textarea-feedback-error"
+        class="w-full"
+        id="textarea-feedback"
+        rows="4"
+        [formField]="review.feedback"></textarea>
+    <p class="text-sm" id="textarea-feedback-count">
+        {{ review.feedback().value().length }} of {{ maxFeedbackLength }} characters
+    </p>
+    <p aria-live="polite" class="text-sm text-error" id="textarea-feedback-error">
+        @if (review.feedback().touched()) {
+            @for (error of review.feedback().errors(); track error.kind) {
+                {{ error.message }}
+            }
+        }
+    </p>
+</div>

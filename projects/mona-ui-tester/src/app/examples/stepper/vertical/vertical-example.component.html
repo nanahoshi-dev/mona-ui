@@ -1,0 +1,11 @@
+<div class="h-72">
+    <mona-stepper aria-label="Delivery" orientation="vertical" [steps]="steps" [(step)]="currentStep">
+        <ng-template let-index="index" let-state="state" monaStepperIndicatorTemplate>
+            @if (state === "completed") {
+                <svg lucideCheck aria-hidden="true" [size]="16"></svg>
+            } @else {
+                <svg aria-hidden="true" [lucideIcon]="icons[index]" [size]="16"></svg>
+            }
+        </ng-template>
+    </mona-stepper>
+</div>

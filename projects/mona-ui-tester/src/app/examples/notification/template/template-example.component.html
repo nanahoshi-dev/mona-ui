@@ -1,0 +1,17 @@
+<ul class="flex max-w-sm flex-col gap-2">
+    @for (file of files(); track file) {
+        <li class="flex items-center justify-between gap-2">
+            <span>{{ file }}</span>
+            <button monaButton size="small" type="button" (click)="moveToBin(file, undoTemplate)">Move to bin</button>
+        </li>
+    } @empty {
+        <li>The folder is empty.</li>
+    }
+</ul>
+
+<ng-template #undoTemplate let-data="data" let-ref>
+    <div class="flex items-center gap-2 p-2">
+        <span>Moved {{ data.file }} to the bin.</span>
+        <button monaButton look="link" type="button" (click)="undo(data.file); ref.hide()">Undo</button>
+    </div>
+</ng-template>

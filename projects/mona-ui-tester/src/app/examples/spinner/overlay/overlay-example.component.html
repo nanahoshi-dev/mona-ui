@@ -1,0 +1,5 @@
+<div #panel class="flex max-w-sm flex-col gap-3 rounded-md border border-border p-4">
+    <h3 class="font-semibold">Profile</h3>
+    <p class="text-sm">Saving covers only this panel. The rest of the page stays usable.</p>
+    <button monaButton look="primary" type="button" [disabled]="saving()" (click)="save(panel)">Save</button>
+</div>

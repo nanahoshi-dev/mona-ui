@@ -1,0 +1,9 @@
+<mona-list-view
+    aria-label="Invoices"
+    class="max-w-sm"
+    height=""
+    textField="label"
+    [items]="invoices"
+    [monaListViewPageable]="{ pageSize: 5, pageSizeValues: [5, 10, 20] }"
+    [(page)]="page" />
+<p aria-live="polite" class="mt-2 text-sm">Page {{ page() }}</p>

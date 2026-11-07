@@ -1,0 +1,4 @@
+<div class="flex flex-col items-start gap-2">
+    <mona-color-palette aria-label="Card color" rounded="small" [columns]="4" [palette]="colors" [tileSize]="32" [(value)]="color" />
+    <span class="text-sm">Color: {{ color() ?? "none" }}</span>
+</div>

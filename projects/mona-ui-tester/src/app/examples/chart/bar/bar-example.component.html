@@ -1,0 +1,9 @@
+<mona-chart aria-label="Quarterly sales by region" class="h-72 w-full" xField="quarter" [data]="sales">
+    <mona-chart-x-axis />
+    <mona-chart-y-axis title="Sales" />
+    <mona-bar-series field="americas" name="Americas" stack="sales" [valueFormatter]="thousands" />
+    <mona-bar-series field="europe" name="Europe" stack="sales" [valueFormatter]="thousands" />
+    <mona-bar-series field="asia" name="Asia" stack="sales" [borderRadius]="4" [valueFormatter]="thousands" />
+    <mona-chart-legend position="bottom" />
+    <mona-chart-tooltip />
+</mona-chart>

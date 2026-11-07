@@ -1,0 +1,7 @@
+<div class="flex flex-col gap-3">
+    <mona-stepper aria-label="Sign-up" [steps]="steps" [(step)]="currentStep" (stepSelect)="select($event)" />
+    <div class="flex items-center gap-3">
+        <button monaButton type="button" [toggleable]="true" [(selected)]="accountDone">Account details filled in</button>
+        <span aria-live="polite" class="text-sm">{{ message() }}</span>
+    </div>
+</div>

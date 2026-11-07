@@ -1,0 +1,16 @@
+<div class="flex max-w-xs flex-col gap-1">
+    <mona-numeric-text-box
+        aria-describedby="numeric-quantity-error"
+        aria-label="Quantity"
+        [formField]="order.quantity"
+        [maxValue]="10"
+        [minValue]="0" />
+    <p aria-live="polite" class="text-sm text-error" id="numeric-quantity-error">
+        @if (order.quantity().touched()) {
+            @for (error of order.quantity().errors(); track error.kind) {
+                {{ error.message }}
+            }
+        }
+    </p>
+    <p class="text-sm">Quantity: {{ order.quantity().value() ?? "empty" }}</p>
+</div>

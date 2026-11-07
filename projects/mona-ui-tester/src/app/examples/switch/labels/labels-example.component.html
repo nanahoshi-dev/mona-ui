@@ -1,0 +1,9 @@
+<div class="flex flex-col items-start gap-3">
+    <mona-label text="Wi-Fi">
+        <mona-switch offLabel="Off" onLabel="On" [(checked)]="wifi" />
+    </mona-label>
+    <mona-label text="Bluetooth">
+        <mona-switch offLabel="Off" onLabel="On" size="large" [(checked)]="bluetooth" />
+    </mona-label>
+    <p class="text-sm">Wi-Fi is {{ wifi() ? "on" : "off" }}, Bluetooth is {{ bluetooth() ? "on" : "off" }}.</p>
+</div>

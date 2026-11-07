@@ -1,0 +1,17 @@
+<button #anchor monaButton aria-haspopup="dialog" type="button" [attr.aria-expanded]="open()">
+    Shipping details
+</button>
+
+<mona-popup
+    anchorConnectionPoint="topright"
+    popupConnectionPoint="bottomleft"
+    [anchor]="anchor"
+    (close)="open.set(false)"
+    (open)="open.set(true)">
+    <div
+        aria-label="Shipping details"
+        class="w-56 rounded-md border border-border bg-surface-overlay p-3 text-sm text-foreground shadow-md"
+        role="dialog">
+        Ships in 2–3 working days from the Rotterdam warehouse.
+    </div>
+</mona-popup>

@@ -1,0 +1,31 @@
+<div class="flex flex-wrap items-center gap-3">
+    <button #file monaButton type="button">notes.txt</button>
+    <span aria-live="polite" class="text-sm">Last action: {{ lastAction() }}</span>
+</div>
+
+<mona-contextmenu ariaLabel="Edit" [target]="file" (menuClick)="lastAction.set($event.label)">
+    <mona-contextmenu-item label="Cut">
+        <ng-template monaContextMenuIconTemplate>
+            <svg lucideScissors aria-hidden="true" [size]="14"></svg>
+        </ng-template>
+        <ng-template monaContextMenuShortcutTemplate>
+            <span class="text-xs">Ctrl + X</span>
+        </ng-template>
+    </mona-contextmenu-item>
+    <mona-contextmenu-item label="Copy">
+        <ng-template monaContextMenuIconTemplate>
+            <svg lucideCopy aria-hidden="true" [size]="14"></svg>
+        </ng-template>
+        <ng-template monaContextMenuShortcutTemplate>
+            <span class="text-xs">Ctrl + C</span>
+        </ng-template>
+    </mona-contextmenu-item>
+    <mona-contextmenu-item label="Paste">
+        <ng-template monaContextMenuIconTemplate>
+            <svg lucideClipboardPaste aria-hidden="true" [size]="14"></svg>
+        </ng-template>
+        <ng-template monaContextMenuShortcutTemplate>
+            <span class="text-xs">Ctrl + V</span>
+        </ng-template>
+    </mona-contextmenu-item>
+</mona-contextmenu>

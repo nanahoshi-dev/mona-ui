@@ -1,0 +1,14 @@
+<mona-scroll-view
+    aria-label="Customer quotes"
+    height="160px"
+    width="100%"
+    [arrows]="true"
+    [data]="quotes"
+    [infinite]="true">
+    <ng-template let-quote [monaScrollViewSlide]="quotes">
+        <figure class="flex h-full flex-col items-center justify-center gap-2 bg-secondary px-12 text-center text-secondary-foreground">
+            <blockquote class="text-sm">“{{ quote.text }}”</blockquote>
+            <figcaption class="text-xs font-semibold">{{ quote.author }}</figcaption>
+        </figure>
+    </ng-template>
+</mona-scroll-view>

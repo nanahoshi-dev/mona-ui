@@ -1,0 +1,12 @@
+<div class="flex max-w-sm flex-col gap-1">
+    <label id="multi-select-checkboxes-label" monaLabel [for]="toppingList">Toppings</label>
+    <mona-multi-select
+        #toppingList
+        aria-labelledby="multi-select-checkboxes-label"
+        monaDropDownFilterable
+        [checkboxes]="true"
+        [data]="toppings"
+        [showClearButton]="true"
+        [(value)]="chosen" />
+    <span aria-live="polite" class="text-sm">{{ chosen().length }} chosen</span>
+</div>

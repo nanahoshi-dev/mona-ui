@@ -1,0 +1,6 @@
+<div class="flex max-w-md flex-col items-start gap-3">
+    <mona-progress-bar aria-label="Upload progress" class="w-full" [color]="color" [value]="progress()"></mona-progress-bar>
+    <button monaButton look="primary" type="button" [disabled]="uploading()" (click)="upload()">
+        {{ progress() >= 100 ? "Upload again" : "Upload" }}
+    </button>
+</div>

@@ -1,0 +1,23 @@
+<div class="flex flex-col items-start gap-3">
+    <mona-label text="Dark mode">
+        <mona-switch [(checked)]="darkMode">
+            <ng-template monaSwitchOnLabelTemplate>
+                <svg lucideMoon aria-hidden="true" [size]="14"></svg>
+            </ng-template>
+            <ng-template monaSwitchOffLabelTemplate>
+                <svg lucideSun aria-hidden="true" [size]="14"></svg>
+            </ng-template>
+        </mona-switch>
+    </mona-label>
+    <mona-label text="Sound">
+        <mona-switch [(checked)]="sound">
+            <ng-template let-on monaSwitchHandleContentTemplate>
+                @if (on) {
+                    <svg lucideVolume2 aria-hidden="true" [size]="12"></svg>
+                } @else {
+                    <svg lucideVolumeX aria-hidden="true" [size]="12"></svg>
+                }
+            </ng-template>
+        </mona-switch>
+    </mona-label>
+</div>
