@@ -1122,9 +1122,10 @@ describe("StepperComponent", () => {
         });
 
         describe("RTL styles", () => {
-            it("should include rtl:translate-x-3 for vertical step list", () => {
+            it("keeps the step list in the flow, so the stepper's box holds it", () => {
                 const classes = stepperStepListThemeVariants({ orientation: "vertical" });
-                expect(classes).toContain("rtl:translate-x-3");
+                expect(classes).not.toContain("absolute");
+                expect(classes).not.toContain("translate");
             });
 
             it("should include start-0 top-0 on track line", () => {
