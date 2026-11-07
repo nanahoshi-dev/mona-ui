@@ -58,6 +58,15 @@ class ValueBindingRangeSliderHostComponent {
 })
 class HandleTemplateRangeSliderHostComponent {}
 
+@Component({
+    template: `<mona-range-slider
+        aria-label="Comfort range"
+        aria-label-end="Highest temperature"
+        aria-label-start="Lowest temperature"></mona-range-slider>`,
+    imports: [RangeSliderComponent]
+})
+class NamedRangeSliderHostComponent {}
+
 async function waitForStable(fixture: ComponentFixture<unknown>): Promise<void> {
     fixture.detectChanges();
     await fixture.whenStable();
@@ -480,6 +489,19 @@ describe("RangeSliderComponent", () => {
             expect(lastTick.style.right).toBe("100%");
             expect(lastTick.style.left).toBe("");
         });
+    });
+
+    it("names the handles, and keeps the handle names, which aren't ARIA attributes, off the host", async () => {
+        const fixture = TestBed.createComponent(NamedRangeSliderHostComponent);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        const host = fixture.nativeElement.querySelector("mona-range-slider") as HTMLElement;
+        const names = Array.from(host.querySelectorAll("[role='slider']")).map(handle => handle.getAttribute("aria-label"));
+
+        expect(host.hasAttribute("aria-label-start")).toBe(false);
+        expect(host.hasAttribute("aria-label-end")).toBe(false);
+        expect(host.getAttribute("aria-label")).toBe("Comfort range");
+        expect(names).toEqual(["Lowest temperature", "Highest temperature"]);
     });
 });
 
