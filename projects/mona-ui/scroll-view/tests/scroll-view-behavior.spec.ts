@@ -334,6 +334,8 @@ describe("ScrollViewComponent behavior", () => {
             });
         };
 
+        const originalScrollIntoView = Element.prototype.scrollIntoView;
+        const originalScrollTo = Element.prototype.scrollTo;
         let scrollIntoView: ReturnType<typeof vi.fn>;
         let scrollTo: ReturnType<typeof vi.fn>;
 
@@ -345,8 +347,8 @@ describe("ScrollViewComponent behavior", () => {
         });
 
         afterEach(() => {
-            Reflect.deleteProperty(Element.prototype, "scrollIntoView");
-            Reflect.deleteProperty(Element.prototype, "scrollTo");
+            Element.prototype.scrollIntoView = originalScrollIntoView;
+            Element.prototype.scrollTo = originalScrollTo;
         });
 
         it("doesn't move anything when a pager first shows on the first page", async () => {

@@ -1,7 +1,8 @@
-import { vi } from 'vitest';
+import { afterAll, vi } from 'vitest';
 
 /**
- * Mocking ResizeObserver to prevent ReferenceErrors in jsdom
+ * Mocking ResizeObserver to prevent ReferenceErrors in jsdom. Assigned rather than stubbed: to vi.unstubAllGlobals(),
+ * a stub made here would be one to undo, which would leave no ResizeObserver at all.
  */
 class ResizeObserverMock {
     observe = vi.fn();
@@ -9,7 +10,7 @@ class ResizeObserverMock {
     disconnect = vi.fn();
 }
 
-vi.stubGlobal('ResizeObserver', ResizeObserverMock);
+globalThis.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver;
 
 /**
  * jsdom does not implement scrollIntoView/scrollTo, which CDK's virtual scroll
@@ -19,6 +20,23 @@ Element.prototype.scrollIntoView = vi.fn();
 Element.prototype.scrollTo = vi.fn();
 window.scrollTo = vi.fn();
 window.scrollBy = vi.fn();
+
+/**
+ * Spec files share a process, as the builder runs Vitest with isolate: false. On Linux, this file doesn't run again
+ * between them, so what one spec file removes stays removed for the next, which fails specs nowhere near the cause and
+ * only on CI. Failing here points at the file responsible, on every platform.
+ */
+afterAll(() => {
+    const missing = [
+        ['ResizeObserver', globalThis.ResizeObserver],
+        ['Element.prototype.scrollIntoView', Element.prototype.scrollIntoView],
+        ['Element.prototype.scrollTo', Element.prototype.scrollTo]
+    ].filter(([, value]) => typeof value !== 'function');
+    if (missing.length > 0) {
+        const names = missing.map(([name]) => name).join(', ');
+        throw new Error(`This spec file removed ${names}, which other spec files rely on. Restore what you replace.`);
+    }
+});
 
 /**
  * jsdom's Range has no layout, so ProseMirror's scroll-into-view after a focused command (which runs on a timer)
