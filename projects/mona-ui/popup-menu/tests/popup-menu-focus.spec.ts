@@ -14,7 +14,7 @@ import type { PopupMenuItemClickEvent } from "@nanahoshi/mona-ui/internal/popup-
         @if (shown()) {
             <mona-popup-menu
                 [target]="useSecond() ? second : first"
-                [ariaLabel]="ariaLabel()"
+                [aria-label]="ariaLabel()"
                 (menuClick)="clicks.push($event)">
                 <mona-popup-menu-item label="Alpha"></mona-popup-menu-item>
                 <mona-popup-menu-item label="Parent">
@@ -47,10 +47,10 @@ class MenuHostComponent {
             Outer
             <div #inner class="inner" tabindex="0">Inner</div>
         </div>
-        <mona-popup-menu [target]="outer" trigger="contextmenu" [precise]="true">
+        <mona-popup-menu [target]="outer" trigger="contextmenu" [openAtPointer]="true">
             <mona-popup-menu-item label="Outer item"></mona-popup-menu-item>
         </mona-popup-menu>
-        <mona-popup-menu [target]="inner" trigger="contextmenu" [precise]="true">
+        <mona-popup-menu [target]="inner" trigger="contextmenu" [openAtPointer]="true">
             <mona-popup-menu-item label="Inner item"></mona-popup-menu-item>
         </mona-popup-menu>
     `

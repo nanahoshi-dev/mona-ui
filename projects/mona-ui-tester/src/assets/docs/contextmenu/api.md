@@ -13,7 +13,7 @@ Menu content is built from content-projected items — `mona-contextmenu-item`, 
 
 - The menu must always be visible as a horizontal bar of top-level items — use `MenubarComponent`.
 - The menu should open from a dedicated button click rather than a right-click or keyboard shortcut — use `DropdownButtonComponent`.
-- You need a lower-level popup menu with a configurable trigger event, anchor element, or open/close outputs — use `PopupMenuComponent` directly. `ContextMenuComponent` wraps it with the trigger fixed to `"contextmenu"` and pointer-relative positioning, and does not expose `PopupMenuComponent`'s `open`/`close`/`navigate` outputs or its `anchor`/`offset`/`precise` inputs.
+- You need a lower-level popup menu with a configurable trigger event, anchor element, or open/close outputs — use `PopupMenuComponent` directly. `ContextMenuComponent` wraps it with the trigger fixed to `"contextmenu"` and pointer-relative positioning, and does not expose `PopupMenuComponent`'s `open`/`close`/`navigate` outputs or its `anchor`/`offset`/`openAtPointer` inputs.
 
 ## Import & Quick Start
 

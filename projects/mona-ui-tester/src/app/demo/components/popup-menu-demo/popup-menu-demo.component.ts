@@ -226,7 +226,6 @@ export class PopupMenuDemoComponent extends AbstractDemoComponent<PopupMenuCompo
             target: {
                 type: "object"
             },
-            // The library's trigger type is a plain string; the demo curates a limited dropdown.
             trigger: {
                 type: "dropdown",
                 value: ["click", "contextmenu"],
@@ -277,8 +276,8 @@ export class PopupMenuDemoComponent extends AbstractDemoComponent<PopupMenuCompo
             }
         </div>
         <mona-popup-menu
-            [ariaLabel]="ariaLabel()"
-            [ariaLabelledBy]="ariaLabelledBy()"
+            [aria-label]="ariaLabel()"
+            [aria-labelledby]="ariaLabelledby()"
             [anchor]="popupAnchor()"
             [anchorConnectionPoint]="anchorConnectionPoint()"
             (close)="onClose($event)"
@@ -288,7 +287,7 @@ export class PopupMenuDemoComponent extends AbstractDemoComponent<PopupMenuCompo
             (navigate)="onNavigate($event)"
             [offset]="offset()"
             [popupConnectionPoint]="popupConnectionPoint()"
-            [precise]="precise()"
+            [openAtPointer]="openAtPointer()"
             [rounded]="rounded()"
             [size]="size()"
             [target]="popupTarget"
@@ -454,13 +453,13 @@ export class PopupMenuWrapperComponent implements ComponentInputsAsSignal<PopupM
     public readonly anchor = input<ReturnType<PopupMenuComponent["anchor"]>>();
     public readonly anchorConnectionPoint = input<ReturnType<PopupMenuComponent["anchorConnectionPoint"]>>(null);
     public readonly ariaLabel = input<ReturnType<PopupMenuComponent["ariaLabel"]>>("");
-    public readonly ariaLabelledBy = input<ReturnType<PopupMenuComponent["ariaLabelledBy"]>>("");
+    public readonly ariaLabelledby = input<ReturnType<PopupMenuComponent["ariaLabelledby"]>>("");
     public readonly items = input<any>([]);
     public readonly menuId = input("");
     public readonly minWidth = input<ReturnType<PopupMenuComponent["minWidth"]>>();
     public readonly offset = input<ReturnType<PopupMenuComponent["offset"]>>({ horizontal: 0, vertical: 0 });
+    public readonly openAtPointer = input<ReturnType<PopupMenuComponent["openAtPointer"]>>(false);
     public readonly popupConnectionPoint = input<ReturnType<PopupMenuComponent["popupConnectionPoint"]>>(null);
-    public readonly precise = input<ReturnType<PopupMenuComponent["precise"]>>(false);
     public readonly rounded = input<ReturnType<PopupMenuComponent["rounded"]>>("medium");
     public readonly size = input<ReturnType<PopupMenuComponent["size"]>>("medium");
     public readonly target = input<ReturnType<PopupMenuComponent["target"]>>(document.body);
