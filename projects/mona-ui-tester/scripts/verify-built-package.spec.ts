@@ -7,6 +7,7 @@ import {
     resolveExportTargets,
     resolveTypeScriptCompilerPath,
     runConsumerSmokeTest,
+    verifyAgentDocs,
     verifyBuiltPackage,
     verifyPackageStyles,
     verifyThirdPartyNotices
@@ -1217,6 +1218,31 @@ export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayO
                 ).toThrow("Repository notice mismatch");
             } finally {
                 rmSync(fakeRepo, { recursive: true, force: true });
+            }
+        });
+    });
+
+    describe("verifyAgentDocs", () => {
+        it("accepts an index whose pages are all in the package", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "pkg-verify-test-"));
+            try {
+                mkdirSync(join(tempDir, "docs"));
+                writeFileSync(join(tempDir, "docs", "button.md"), "# Button\n");
+                writeFileSync(join(tempDir, "llms.txt"), "# Mona UI\n\n- [Button](docs/button.md): A button.\n");
+                expect(verifyAgentDocs(tempDir)).toBe(1);
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when the index or a page it links to is missing", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "pkg-verify-test-"));
+            try {
+                expect(() => verifyAgentDocs(tempDir)).toThrow("Agent docs index not found");
+                writeFileSync(join(tempDir, "llms.txt"), "- [Grid](docs/grid.md): A grid.\n");
+                expect(() => verifyAgentDocs(tempDir)).toThrow("docs/grid.md");
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
             }
         });
     });

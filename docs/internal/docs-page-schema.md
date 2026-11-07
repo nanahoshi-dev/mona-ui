@@ -98,24 +98,20 @@ The page runs it, shows its source and can send it to StackBlitz as a generated 
 
 A new page needs nothing extra, as long as its component names its markdown with `src="docs/…"`. The script fails if it finds no markdown for a page, except the ones listed in `PAGES_WITHOUT_MARKDOWN`. A heading's link in the results relies on `docs-heading-id.ts`, which the site and the script share.
 
+## AI docs
+
+`npm run generate:ai-docs` writes the docs as plain markdown for coding agents, and `build:tester` and `serve:tester` run it first. It reads the same manifest and markdown as search, and writes to `dist/docs-ai`, which the site serves from its root:
+
+- `/components/<page>.md`: one page, headed by its title, description and entry point. Each example's files replace its `example` block, so the code is there to read. HTML comments and H1s are left out, and links to other pages point at their markdown files.
+- `/llms.txt`: the essentials from `projects/mona-ui-tester/ai/llms-essentials.md`, then a link to every page, grouped as in the sidebar.
+- `/llms-full.txt`: every page in one file.
+
+`npm run build:prod` also runs it with `--package`, which puts the pages in the package's `docs` folder and an `llms.txt` that links to them at its root, so an installed version carries the docs that match it. `verify:package` fails if a page that `llms.txt` links to is missing.
+
+Keep `llms-essentials.md` short. It's what an agent reads first: installing, importing, providers, and the mistakes worth warning about.
+
 ## Where the pages stand
 
-Measured on 2026-11-07, with every route and entry point matching the manifest:
-
-| Group | Pages | Work needed |
-|---|---|---|
-| Matches the schema | 1 | `popup-menu` |
-| Heading edits only | 34 | Renames, plus dividing `Accessibility & Forms Integration` on 16 pages |
-| Restructuring | 26 | Moving sections, or demoting one-off headings to H3 |
-| No content | 3 | Writing the page |
-
-- **No content:** `date-picker`, `datetime-picker` and `time-picker` have a one-line description and no markdown.
-- **Most restructuring:** `otp-input`, `rating`, `label`, `chart` and `radio-button`.
-
-## Next steps
-
-1. Rename headings across the 34 simple pages.
-2. Restructure the 26 pages, and write the 3 missing ones.
-3. Add `check:docs-schema --strict` to `pr.yml` once all pages pass.
+Every component page matches the schema, and `pr.yml` runs `check:docs-schema --strict` so they keep matching.
 
 The command menu's page is under Navigation.
