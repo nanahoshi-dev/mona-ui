@@ -1,0 +1,49 @@
+@let example = entry();
+@if (example) {
+    <div class="bg-surface p-4">
+        @if (component.hasValue()) {
+            <ng-container [ngComponentOutlet]="component.value()" />
+        }
+    </div>
+    <div class="flex flex-wrap items-center gap-2 border-t border-border-subtle px-2 py-1.5">
+        <button
+            monaButton
+            look="ghost"
+            size="small"
+            type="button"
+            [attr.aria-expanded]="showCode()"
+            (click)="toggleCode()">
+            <svg lucideCode aria-hidden="true" [size]="14"></svg>
+            {{ showCode() ? "Hide code" : "Show code" }}
+        </button>
+        <button monaButton look="ghost" size="small" type="button" [disabled]="opening()" (click)="openInStackBlitz()">
+            <svg lucideExternalLink aria-hidden="true" [size]="14"></svg>
+            Open in StackBlitz
+        </button>
+        @if (openFailed()) {
+            <span class="text-xs text-muted-foreground" role="status">Couldn't open the project.</span>
+        }
+    </div>
+    @if (showCode()) {
+        <div class="border-t border-border-subtle">
+            <div class="flex flex-wrap gap-1 px-2 py-1.5" role="group" aria-label="Source files">
+                @for (file of example.files; track file) {
+                    <button
+                        class="cursor-pointer rounded-sm px-2 py-1 font-mono text-xs text-foreground hover:bg-hover aria-pressed:bg-hover aria-pressed:font-semibold focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus-indicator aria-pressed:forced-color-adjust-none forced-colors:aria-pressed:bg-[Highlight] forced-colors:aria-pressed:text-[HighlightText]"
+                        type="button"
+                        [attr.aria-pressed]="file === shownFile()"
+                        (click)="activeFile.set(file)">
+                        {{ file }}
+                    </button>
+                }
+            </div>
+            @if (code(); as source) {
+                <app-code-viewer [code]="source" [language]="language()"></app-code-viewer>
+            } @else if (sources.error()) {
+                <p class="px-3 py-2 text-sm text-muted-foreground" role="status">Couldn't load the source.</p>
+            }
+        </div>
+    }
+} @else {
+    <p class="p-4 text-sm text-muted-foreground" role="status">There's no example called {{ exampleId() }}.</p>
+}

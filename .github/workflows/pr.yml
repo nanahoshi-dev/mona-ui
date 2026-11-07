@@ -60,6 +60,9 @@ jobs:
       - name: Check generated API docs
         run: npm run check:api-docs
 
+      - name: Check generated examples
+        run: npm run check:examples
+
       - name: Build Library
         run: npm run build:prod
 

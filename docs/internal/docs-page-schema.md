@@ -80,6 +80,18 @@ Add `children` only when a topic has its own examples and is worth linking to di
 
 Keep nesting to two levels. Use links with disclosure buttons, not `role="tree"`.
 
+## Examples
+
+An example is a real component in `src/app/examples/<page>/<name>`, so it's compiled with the site, and a guide shows it with a fenced block:
+
+````markdown
+```example
+button/looks
+```
+````
+
+The page runs it, shows its source and can send it to StackBlitz as a generated project (`example-project.ts`). An example can only import from Angular, Mona UI, Lucide, RxJS and its own folder, since that's all the project has, and its markup goes in a template file. After adding one, run `npm run generate:examples`. `check:examples` fails if the registry is stale, an example breaks these rules, or a guide doesn't show it exactly once.
+
 ## Search
 
 `npm run build:search-index` builds the search index from the manifest and the markdown each page's component shows, and `build:tester` and `serve:tester` run it first. The index goes to `dist/docs-search` and is served at `/pagefind`. It's rebuilt only when one of those starts, so a dev server keeps searching the text it started with.

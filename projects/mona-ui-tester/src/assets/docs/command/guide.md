@@ -59,68 +59,24 @@ Place `mona-command-empty` and `mona-command-loading` directly inside `mona-comm
 
 `mona-command-dialog` renders its template while it's open. Set `shortcut` to open and close it from anywhere on the page. No key is bound unless you set one. `mod` is Command on Apple devices and Ctrl elsewhere.
 
-```html
-<mona-command-dialog shortcut="mod+k" [(open)]="open">
-    <ng-template monaCommandDialogContent>
-        <mona-command (itemSelect)="open.set(false)">
-            <mona-command-input />
-            <mona-command-list>
-                <mona-command-empty />
-                <mona-command-item value="New file" (itemSelect)="newFile()">
-                    New file
-                    <mona-command-shortcut keys="mod+n" />
-                </mona-command-item>
-            </mona-command-list>
-        </mona-command>
-    </ng-template>
-</mona-command-dialog>
+```example
+command/dialog
 ```
 
 `mona-command-shortcut` only shows the keys. Binding them to the action is up to you.
 
 ### A picker in a popover
 
-```html
-<button #assign monaButton type="button">Assign to…</button>
-<mona-popover #popover="monaPopover" position="bottom" [target]="assign">
-    <mona-command class="w-64 border-0" (itemSelect)="assignTo($event.value); popover.close()">
-        <mona-command-input placeholder="Find a person…" ariaLabel="Find a person" />
-        <mona-command-list>
-            <mona-command-empty />
-            @for (person of people; track person) {
-                <mona-command-item [value]="person">
-                    <mona-command-highlight [text]="person" />
-                </mona-command-item>
-            }
-        </mona-command-list>
-    </mona-command>
-</mona-popover>
+```example
+command/picker
 ```
 
 ### Results from a server
 
 With `filterMode="manual"` every item you render shows, because your results are already narrowed down. Angular's `resource` keeps only the answer to the latest query, so a slow, older response never replaces a newer one. Set `loading` from it to show `mona-command-loading` and hold back the empty state.
 
-```html
-<mona-command filterMode="manual" [loading]="results.isLoading()" [(query)]="query">
-    <mona-command-input />
-    <mona-command-list>
-        <mona-command-loading />
-        <mona-command-empty />
-        @for (result of results.value(); track result.id) {
-            <mona-command-item [value]="result.title">{{ result.title }}</mona-command-item>
-        }
-    </mona-command-list>
-</mona-command>
-```
-
-```typescript
-protected readonly query = signal("");
-protected readonly results = resource({
-    defaultValue: [],
-    params: () => this.query(),
-    loader: ({ params, abortSignal }) => search(params, abortSignal)
-});
+```example
+command/server
 ```
 
 ### Telling a modified choice apart

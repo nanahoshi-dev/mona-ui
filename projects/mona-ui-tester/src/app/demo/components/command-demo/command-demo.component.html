@@ -1,101 +1,34 @@
-<div class="grid gap-6 py-4 md:grid-cols-2">
-    <section class="flex flex-col gap-2" aria-labelledby="command-demo-inline">
-        <h3 id="command-demo-inline" class="text-sm font-medium">Inline, with groups and shortcut hints</h3>
-        <mona-command (itemSelect)="lastAction.set($event.value)">
-            <mona-command-input ariaLabel="Search actions" placeholder="Search actions…" />
-            <mona-command-list>
-                <mona-command-empty />
-                <mona-command-group heading="File">
-                    <mona-command-item value="New file" [keywords]="['create', 'add']">
-                        <mona-command-highlight text="New file" />
-                        <mona-command-shortcut keys="mod+n" />
-                    </mona-command-item>
-                    <mona-command-item value="Open file" [keywords]="['load']">
-                        <mona-command-highlight text="Open file" />
-                        <mona-command-shortcut keys="mod+o" />
-                    </mona-command-item>
-                    <mona-command-item disabled value="Save file">
-                        <mona-command-highlight text="Save file" />
-                        <mona-command-shortcut keys="mod+s" />
-                    </mona-command-item>
-                </mona-command-group>
-                <mona-command-separator />
-                <mona-command-group heading="View">
-                    <mona-command-item value="Toggle sidebar">
-                        <mona-command-highlight text="Toggle sidebar" />
-                    </mona-command-item>
-                    <mona-command-item value="Switch theme" [keywords]="['dark', 'light']">
-                        <mona-command-highlight text="Switch theme" />
-                    </mona-command-item>
-                </mona-command-group>
-            </mona-command-list>
-            <mona-command-footer>
-                <span aria-live="polite">Last action: {{ lastAction() }}</span>
-            </mona-command-footer>
-        </mona-command>
-    </section>
-
-    <section class="flex flex-col gap-2" aria-labelledby="command-demo-async">
-        <h3 id="command-demo-async" class="text-sm font-medium">Results from a slow server</h3>
-        <mona-command filterMode="manual" [loading]="results.isLoading()" [(query)]="query" (itemSelect)="city.set($event.value)">
-            <mona-command-input ariaLabel="Search cities" placeholder="Search cities…" />
-            <mona-command-list>
-                <mona-command-loading />
-                <mona-command-empty />
-                @for (result of results.value(); track result) {
-                    <mona-command-item [value]="result">
-                        <mona-command-highlight [text]="result" />
-                    </mona-command-item>
-                }
-            </mona-command-list>
-            <mona-command-footer>
-                <span aria-live="polite">Chosen: {{ city() }}</span>
-            </mona-command-footer>
-        </mona-command>
-    </section>
-
-    <section class="flex flex-col items-start gap-2" aria-labelledby="command-demo-dialog">
-        <h3 id="command-demo-dialog" class="text-sm font-medium">In a dialog, with a shortcut</h3>
-        <button monaButton type="button" (click)="open.set(true)">
-            Open command menu
-            <mona-command-shortcut class="ms-2" keys="mod+j" />
-        </button>
-        <mona-command-dialog shortcut="mod+j" [(open)]="open">
-            <ng-template monaCommandDialogContent>
-                <mona-command>
-                    <mona-command-input />
-                    <mona-command-list>
-                        <mona-command-empty />
-                        <mona-command-item value="Go to settings" (itemSelect)="run($event.value)">
-                            <mona-command-highlight text="Go to settings" />
-                        </mona-command-item>
-                        <mona-command-item value="Invite a teammate" (itemSelect)="run($event.value)">
-                            <mona-command-highlight text="Invite a teammate" />
-                        </mona-command-item>
-                        <mona-command-item value="Sign out" (itemSelect)="run($event.value)">
-                            <mona-command-highlight text="Sign out" />
-                        </mona-command-item>
-                    </mona-command-list>
-                </mona-command>
-            </ng-template>
-        </mona-command-dialog>
-    </section>
-
-    <section class="flex flex-col items-start gap-2" aria-labelledby="command-demo-picker">
-        <h3 id="command-demo-picker" class="text-sm font-medium">A picker in a popover</h3>
-        <button #assign monaButton type="button">Assign to: {{ assignee() }}</button>
-        <mona-popover #popover="monaPopover" position="bottom" [target]="assign">
-            <mona-command class="w-64 border-0" (itemSelect)="assignee.set($event.value); popover.close()">
-                <mona-command-input ariaLabel="Find a person" placeholder="Find a person…" />
-                <mona-command-list>
-                    <mona-command-empty />
-                    @for (person of people; track person) {
-                        <mona-command-item [value]="person">
-                            <mona-command-highlight [text]="person" />
-                        </mona-command-item>
-                    }
-                </mona-command-list>
-            </mona-command>
-        </mona-popover>
-    </section>
-</div>
+<section class="flex max-w-md flex-col gap-2 py-4" aria-label="Command menu">
+    <mona-command (itemSelect)="lastAction.set($event.value)">
+        <mona-command-input ariaLabel="Search actions" placeholder="Search actions…" />
+        <mona-command-list>
+            <mona-command-empty />
+            <mona-command-group heading="File">
+                <mona-command-item value="New file" [keywords]="['create', 'add']">
+                    <mona-command-highlight text="New file" />
+                    <mona-command-shortcut keys="mod+n" />
+                </mona-command-item>
+                <mona-command-item value="Open file" [keywords]="['load']">
+                    <mona-command-highlight text="Open file" />
+                    <mona-command-shortcut keys="mod+o" />
+                </mona-command-item>
+                <mona-command-item disabled value="Save file">
+                    <mona-command-highlight text="Save file" />
+                    <mona-command-shortcut keys="mod+s" />
+                </mona-command-item>
+            </mona-command-group>
+            <mona-command-separator />
+            <mona-command-group heading="View">
+                <mona-command-item value="Toggle sidebar">
+                    <mona-command-highlight text="Toggle sidebar" />
+                </mona-command-item>
+                <mona-command-item value="Switch theme" [keywords]="['dark', 'light']">
+                    <mona-command-highlight text="Switch theme" />
+                </mona-command-item>
+            </mona-command-group>
+        </mona-command-list>
+        <mona-command-footer>
+            <span aria-live="polite">Last action: {{ lastAction() }}</span>
+        </mona-command-footer>
+    </mona-command>
+</section>

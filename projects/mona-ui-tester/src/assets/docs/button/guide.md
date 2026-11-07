@@ -50,6 +50,22 @@ Add `ButtonDirective` to your standalone component's `imports` array.
 
 > **Boolean inputs** have no `booleanAttribute` transform. Always use `[iconOnly]="true"` bracket binding syntax, not the bare attribute form.
 
+## Examples
+
+### Looks
+
+```example
+button/looks
+```
+
+### With icons
+
+An icon-only button has no text to read out, so it needs an `aria-label`.
+
+```example
+button/icons
+```
+
 ## Appearance & Styling
 
 ### Look variants

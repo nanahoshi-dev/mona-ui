@@ -1,0 +1,20 @@
+<mona-command
+    class="max-w-md"
+    filterMode="manual"
+    [loading]="results.isLoading()"
+    [(query)]="query"
+    (itemSelect)="chosen.set($event.value)">
+    <mona-command-input ariaLabel="Search cities" placeholder="Search cities…" />
+    <mona-command-list>
+        <mona-command-loading />
+        <mona-command-empty />
+        @for (result of results.value(); track result) {
+            <mona-command-item [value]="result">
+                <mona-command-highlight [text]="result" />
+            </mona-command-item>
+        }
+    </mona-command-list>
+    <mona-command-footer>
+        <span aria-live="polite">Chosen: {{ chosen() }}</span>
+    </mona-command-footer>
+</mona-command>

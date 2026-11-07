@@ -75,7 +75,13 @@
                             "projects/mona-ui-tester/src/favicon.ico",
                             "projects/mona-ui-tester/src/assets",
                             { "glob": "{forms,theming}.md", "input": "docs", "output": "assets/docs/guides" },
-                            { "glob": "**/*", "input": "dist/docs-search", "output": "pagefind" }
+                            { "glob": "**/*", "input": "dist/docs-search", "output": "pagefind" },
+                            {
+                                "glob": "**/*.{ts,html}",
+                                "ignore": ["examples.generated.ts"],
+                                "input": "projects/mona-ui-tester/src/app/examples",
+                                "output": "assets/examples"
+                            }
                         ],
                         "stylePreprocessorOptions": {
                             "includePaths": [""]
