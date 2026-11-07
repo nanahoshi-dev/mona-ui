@@ -61,8 +61,12 @@ describe("ScrollViewComponent", () => {
         expect(pager?.classList.contains("bottom-0")).toBe(true);
         expect(pager?.style.direction).toBe("ltr");
 
-        expect(prevArrow.classList.contains("bg-surface-overlay/65")).toBe(true);
-        expect(prevArrow.classList.contains("hover:bg-hover/90")).toBe(true);
+        expect(prevArrow.classList.contains("bg-transparent")).toBe(true);
+        expect(prevArrow.className).not.toMatch(/(^|\s)(hover:|active:)?bg-(surface|hover|active)/);
+        expect(prevArrow.classList.contains("[&_svg]:opacity-70")).toBe(true);
+        expect(prevArrow.classList.contains("hover:[&_svg]:opacity-100")).toBe(true);
+        expect(prevArrow.classList.contains("focus-visible:[&_svg]:opacity-100")).toBe(true);
+        expect(prevArrow.classList.contains("contrast-more:[&_svg]:opacity-100")).toBe(true);
         expect(prevArrow.classList.contains("focus-visible:outline-focus-indicator")).toBe(true);
         expect(activePage.classList.contains("!bg-foreground")).toBe(true);
         expect(activePage.classList.contains("hover:!bg-foreground")).toBe(true);
