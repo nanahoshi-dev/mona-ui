@@ -465,6 +465,17 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 | `rowData` (read-only) | `Record<PropertyKey, unknown>` |
 | `session` (read-only) | `GridEditSession` |
 
+### `Row`
+
+A row of the grid, wrapping its data item.
+
+#### Properties
+
+| Name | Type |
+| --- | --- |
+| `data` (read-only) | `Record<PropertyKey, unknown>` |
+| `uid` (read-only) | `string` |
+
 ### `RowEditEvent`
 
 **Extends:** `PreventableEvent`
@@ -840,6 +851,14 @@ type GridEditOperation = "create" | "update";
 
 ```typescript
 type GridEditSchemaFactory = ( context: GridEditFormContext ) => SchemaOrSchemaFn<Record<PropertyKey, unknown>> | null | undefined;
+```
+
+#### `GridKeySelector`
+
+The field holding a row's key, or a function returning it.
+
+```typescript
+type GridKeySelector<TData, TKey = unknown> = string | Selector<TData, TKey> | null;
 ```
 
 #### `GridRowClass`

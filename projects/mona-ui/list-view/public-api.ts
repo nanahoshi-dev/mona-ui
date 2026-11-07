@@ -18,6 +18,8 @@ export * from "./directives/list-view-virtual-scroll.directive";
 export type {
     GroupableOptions,
     NavigableOptions,
+    NavigationMode,
+    OrderByOptions,
     PagerSettings,
     SelectableOptions
 } from "@nanahoshi/mona-ui/internal/list";

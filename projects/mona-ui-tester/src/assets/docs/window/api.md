@@ -196,6 +196,16 @@ How a window closed, emitted once by `WindowRef.closed$`.
 | `width?` | `number` |  |
 | `windowClass?` | `string \| string[]` | Class(es) applied to the window's overlay element. |
 
+#### `Action`
+
+From `@nanahoshi/mona-ui/common`.
+
+A function taking a `P` and returning an `R`.
+
+```typescript
+type Action<P = void, R = void> = (arg: P) => R;
+```
+
 #### `MonaWindowMessages`
 
 From `@nanahoshi/mona-ui/i18n`.

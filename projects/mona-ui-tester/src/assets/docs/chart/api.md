@@ -52,7 +52,6 @@ Root visualization container coordinating coordinate layouts, canvas rendering, 
 | `fitViewport(target?: ChartNavigationAxisTarget): void` | Fits target axes (or all axes) to full canonical base domain. |
 | `getViewport(): ChartViewportState \| null` | Returns the current active viewport window state, or null if chart is not Cartesian XY. |
 | `invalidate(): void` | Schedules a new layout and paint, for changes the chart can't see, such as a mutated data array. |
-| `invalidate(reason: ChartInvalidationReason): void` | Schedules a new layout and paint, for changes the chart can't see, such as a mutated data array. |
 | `pan(delta: { x: number; y: number }, target?: ChartNavigationAxisTarget): void` | Pans the viewport by pixel delta vector { x, y }. |
 | `resetViewport(target?: ChartNavigationAxisTarget): void` | Resets the viewport window back to the default viewport (or base domain) for target axes. |
 | `setViewport(viewport: ChartViewportState): void` | Sets the active viewport window state (full replacement). |

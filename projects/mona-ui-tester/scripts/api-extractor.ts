@@ -391,7 +391,9 @@ function readClassMembers(
             ) {
                 continue;
             }
-            const signatures = method.getOverloads().length > 0 ? method.getOverloads() : [method];
+            const overloads = method.getOverloads();
+            const signatures =
+                overloads.length > 0 ? overloads.filter(overload => !readDoc(overload).internal) : [method];
             signatures.forEach((signature, index) =>
                 methods.push({
                     description: doc.description,

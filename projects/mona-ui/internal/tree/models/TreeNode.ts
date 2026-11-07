@@ -3,6 +3,7 @@ import { ImmutableSet } from "@mirei/ts-collections";
 import { v4 } from "uuid";
 import type { NodeItem } from "./NodeItem";
 
+/** A node of a tree, wrapping its data item. */
 export class TreeNode<T> {
     public readonly checked = signal(false);
     public readonly children = signal(ImmutableSet.create<TreeNode<T>>());

@@ -228,6 +228,16 @@ type PopupAnchor = FlexibleConnectedPositionStrategyOrigin | string;
 | `OutsideClick` | `"outsideClick"` |  |
 | `Scroll` | `"scroll"` |  |
 
+#### `Action`
+
+From `@nanahoshi/mona-ui/common`.
+
+A function taking a `P` and returning an `R`.
+
+```typescript
+type Action<P = void, R = void> = (arg: P) => R;
+```
+
 #### `PreventableEvent`
 
 From `@nanahoshi/mona-ui/common`.

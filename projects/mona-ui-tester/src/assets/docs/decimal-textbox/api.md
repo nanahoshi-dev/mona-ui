@@ -63,3 +63,15 @@ exponent, leading zeros or trailing fraction zeros.
 ### `NumericTextBoxPrefixTemplateDirective`
 
 **Selector:** `ng-template[monaNumericTextBoxPrefixTemplate]`
+
+### Types
+
+#### `Action`
+
+From `@nanahoshi/mona-ui/common`.
+
+A function taking a `P` and returning an `R`.
+
+```typescript
+type Action<P = void, R = void> = (arg: P) => R;
+```

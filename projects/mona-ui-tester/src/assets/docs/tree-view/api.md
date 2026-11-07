@@ -184,6 +184,34 @@ the data item is `any` in templates.
 | `$implicit` | `T` | The node's data item (`let-dataItem`). |
 | `element` | `HTMLElement` | The node's element (`let-element="element"`). |
 
+### `TreeNode`
+
+A node of a tree, wrapping its data item.
+
+**Type parameters:** `T`
+
+#### Properties
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `checked` (read-only) | `WritableSignal<boolean>` |  |
+| `children` (read-only) | `WritableSignal<ImmutableSet<TreeNode<T>>>` |  |
+| `childrenLoaded` | `boolean` | Whether children from an asynchronous children selector have been loaded. Loaded children are cached, so collapsing and re-expanding the node does not request them again. |
+| `data` (read-only) | `T` |  |
+| `index` | `string` |  |
+| `loadFailed` (read-only) | `WritableSignal<boolean>` | Whether the last load of this node's children from an asynchronous children selector failed. |
+| `loading` (read-only) | `WritableSignal<boolean>` |  |
+| `nodeItem` (read-only) | `NodeItem<T>` |  |
+| `parent` | `TreeNode<T> \| null` |  |
+| `uid` (read-only) | `string` |  |
+
+#### Methods
+
+| Signature |
+| --- |
+| `clone(): TreeNode<T>` |
+| `isDescendantOf(node: TreeNode<T>): boolean` |
+
 ### `NodeCheckEvent`
 
 **Type parameters:** `T`  
@@ -353,6 +381,12 @@ collapsed again, and expanding it retries the load.
 | --- | --- | --- |
 | `enabled` | `boolean` | Determines if the expanding is enabled. |
 
+#### `MultipleSelectionConfig`
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `mode` | `"multiple"` | Allows multiple items to be selected simultaneously. |
+
 #### `NodeItem`
 
 **Type parameters:** `T`
@@ -370,6 +404,13 @@ collapsed again, and expanding it retries the load.
 | `originalIndex` (read-only) | `number` |
 | `originalParentUid` (read-only) | `string \| null` |
 | `sourceNodeUid` (read-only) | `string` |
+
+#### `SingleSelectionConfig`
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `mode` | `"single"` | Allows only one item to be selected at a time. |
+| `toggleable?` | `boolean` | Determines if clicking an already selected item will deselect it. |
 
 #### `TreeViewNodeTemplateContext`
 

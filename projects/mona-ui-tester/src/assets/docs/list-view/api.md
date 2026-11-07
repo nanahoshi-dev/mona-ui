@@ -209,6 +209,22 @@ The context of a `monaListViewItemTemplate`: the data item, as `let-item`.
 type GroupableOptions<T = unknown, R = unknown> = { enabled?: boolean; headerOrder?: "asc" | "desc"; headerText?: (value: unknown) => string; } & OrderByOptions<T, R>;
 ```
 
+#### `NavigationMode`
+
+Whether arrow keys only highlight an item, or select it as well.
+
+```typescript
+type NavigationMode = "highlight" | "select";
+```
+
+#### `OrderByOptions`
+
+How the items within each group are ordered. Leave both out to keep their order.
+
+```typescript
+type OrderByOptions<T, R> = | { orderBy?: never; orderByDirection?: never } | { orderBy: string | Selector<T, R>; orderByDirection?: "asc" | "desc"; };
+```
+
 #### `SelectableOptions`
 
 ```typescript

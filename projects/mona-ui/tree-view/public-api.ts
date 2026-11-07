@@ -42,3 +42,4 @@ export type {
     NodeMoveSnapshot,
     SelectableOptions
 } from "@nanahoshi/mona-ui/internal/tree";
+export type { MultipleSelectionConfig, SingleSelectionConfig, TreeNode } from "@nanahoshi/mona-ui/internal/tree";

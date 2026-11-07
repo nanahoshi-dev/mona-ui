@@ -82,6 +82,16 @@ From `@nanahoshi/mona-ui/list`.
 type ListSizeInputType = ListSizeType | number;
 ```
 
+#### `ListSizeType`
+
+From `@nanahoshi/mona-ui/list`.
+
+A CSS length, or nothing to leave it to the stylesheet.
+
+```typescript
+type ListSizeType = string | null | undefined;
+```
+
 #### `MonaTimePickerMessages`
 
 From `@nanahoshi/mona-ui/i18n`.

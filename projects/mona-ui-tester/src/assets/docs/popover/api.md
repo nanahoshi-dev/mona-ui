@@ -84,6 +84,14 @@ Marks an `ng-template` as the popover's custom title content.
 
 ### Types
 
+#### `OverlaySide`
+
+A side of the anchor. `start` and `end` follow the direction.
+
+```typescript
+type OverlaySide = "bottom" | "end" | "left" | "right" | "start" | "top";
+```
+
 #### `PopoverPosition`
 
 The side of its target a popover opens on. `left` and `right` are physical in every direction; `start` and `end`

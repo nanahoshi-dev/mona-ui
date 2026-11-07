@@ -304,12 +304,37 @@ From `@nanahoshi/mona-ui/common`.
 | --- | --- |
 | `filter` (read-only) | `string` |
 
+#### `ListItem`
+
+From `@nanahoshi/mona-ui/list`.
+
+An item of a list, wrapping its data item.
+
+**Type parameters:** `TData`
+
+| Name | Type |
+| --- | --- |
+| `data` (read-only) | `TData` |
+| `header` (read-only) | `string` |
+| `isHeader` (read-only) | `boolean` |
+| `uid` (read-only) | `string` |
+
 #### `ListSizeInputType`
 
 From `@nanahoshi/mona-ui/list`.
 
 ```typescript
 type ListSizeInputType = ListSizeType | number;
+```
+
+#### `ListSizeType`
+
+From `@nanahoshi/mona-ui/list`.
+
+A CSS length, or nothing to leave it to the stylesheet.
+
+```typescript
+type ListSizeType = string | null | undefined;
 ```
 
 #### `MonaComboBoxMessages`

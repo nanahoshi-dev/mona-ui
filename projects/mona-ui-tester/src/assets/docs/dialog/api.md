@@ -224,6 +224,16 @@ How a dialog closed. Every close produces one: an action button (`viaClose: fals
 type DialogResult<R = unknown> = | { readonly action: DialogAction; readonly via: PopupCloseSource.Action; readonly viaClose: false; } | { readonly via: Exclude<PopupCloseSource, PopupCloseSource.Action>; readonly value?: R; readonly viaClose: true; };
 ```
 
+#### `Action`
+
+From `@nanahoshi/mona-ui/common`.
+
+A function taking a `P` and returning an `R`.
+
+```typescript
+type Action<P = void, R = void> = (arg: P) => R;
+```
+
 #### `DialogMessages`
 
 From `@nanahoshi/mona-ui/i18n`.

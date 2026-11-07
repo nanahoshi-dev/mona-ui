@@ -11,7 +11,7 @@ export * from "./directives/list-no-data-template.directive";
 export * from "./models/GroupableOptions";
 export { ListItem } from "./models/ListItem";
 export * from "./models/ListSelectors";
-export type { ListSizeInputType } from "./models/ListSizeType";
+export type { ListSizeInputType, ListSizeType } from "./models/ListSizeType";
 export * from "./models/NavigableOptions";
 export * from "./models/NavigationMode";
 export * from "./models/NavigationDirection";

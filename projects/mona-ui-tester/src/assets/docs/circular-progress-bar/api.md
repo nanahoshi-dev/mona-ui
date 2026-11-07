@@ -52,3 +52,13 @@ when `indeterminate` is `true`.
 | `max` | `number` |
 | `min` | `number` |
 | `percent` | `number` |
+
+#### `Action`
+
+From `@nanahoshi/mona-ui/common`.
+
+A function taking a `P` and returning an `R`.
+
+```typescript
+type Action<P = void, R = void> = (arg: P) => R;
+```

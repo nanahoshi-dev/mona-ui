@@ -73,4 +73,14 @@ optional clear button. Multiple suffix templates are supported and render in sou
 const TEXT_BOX_DEFAULT_MESSAGES: { clear: string; };
 ```
 
+#### `AttributeConfig`
+
+From `@nanahoshi/mona-ui/common`.
+
+HTML attributes by name, to apply to an element.
+
+```typescript
+type AttributeConfig = Record<string, unknown>;
+```
+
 **Documented elsewhere:** [`InputType`](/components/input)

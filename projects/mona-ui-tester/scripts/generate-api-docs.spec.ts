@@ -90,6 +90,20 @@ describe("readEntryPoint", () => {
         expect(symbol.properties).toEqual([]);
     });
 
+    it("leaves out an overload marked internal", () => {
+        const [symbol] = readSource(`
+            export class DemoRef {
+                /** Refreshes it. */
+                public refresh(): void;
+                /** @internal */
+                public refresh(reason: number): void;
+                public refresh(reason = 0): void {}
+            }
+        `);
+
+        expect(symbol.methods?.map(method => method.signature)).toEqual(["refresh(): void"]);
+    });
+
     it("treats only documented members of a component as API", () => {
         const [symbol] = readSource(`
             @Directive({ selector: "[monaDemo]" })

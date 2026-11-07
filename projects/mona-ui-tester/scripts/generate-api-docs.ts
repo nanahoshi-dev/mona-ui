@@ -434,7 +434,7 @@ function main(): void {
     for (const page of pages) {
         const rendered = renderApiPage(selectPageEntries(page, symbolsByEntry), index);
         rendered.unexported
-            .filter(name => declaredInLibrary.has(name))
+            .filter(name => declaredInLibrary.has(name) && !/Variant/.test(name))
             .forEach(name => unexported.set(name, (unexported.get(name) ?? new Set()).add(page.path)));
 
         const file = join(docsDirectory, page.path, "api.md");
@@ -457,6 +457,11 @@ function main(): void {
     }
     if (check && stale.length > 0) {
         console.error(`API docs are out of date for: ${stale.join(", ")}. Run npm run generate:api-docs.`);
+    }
+    if (check && unexported.size > 0) {
+        console.error(`The public API uses types no entry point exports: ${[...unexported.keys()].join(", ")}.`);
+    }
+    if (check && (stale.length > 0 || unexported.size > 0)) {
         process.exit(1);
     }
     console.log(

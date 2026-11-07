@@ -87,6 +87,16 @@ const OTP_INPUT_DEFAULT_MESSAGES: MonaOtpInputMessages;
 type OtpInputType = "text" | "number" | "password";
 ```
 
+#### `AttributeConfig`
+
+From `@nanahoshi/mona-ui/common`.
+
+HTML attributes by name, to apply to an element.
+
+```typescript
+type AttributeConfig = Record<string, unknown>;
+```
+
 #### `MonaOtpInputMessages`
 
 From `@nanahoshi/mona-ui/i18n`.

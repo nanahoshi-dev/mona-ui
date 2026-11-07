@@ -67,6 +67,16 @@ Everything below is imported from `@nanahoshi/mona-ui/numeric-text-box`.
 const NUMERIC_TEXT_BOX_DEFAULT_MESSAGES: MonaNumericTextBoxMessages;
 ```
 
+#### `Action`
+
+From `@nanahoshi/mona-ui/common`.
+
+A function taking a `P` and returning an `R`.
+
+```typescript
+type Action<P = void, R = void> = (arg: P) => R;
+```
+
 #### `MonaNumericTextBoxMessages`
 
 From `@nanahoshi/mona-ui/i18n`.

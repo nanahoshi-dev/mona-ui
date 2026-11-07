@@ -133,7 +133,7 @@ box's items to `monaListBoxItemTemplateOf` to type it; without it, the item is `
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `action` (read-only) | `ActionType` | Discriminant matching the `ListBoxActionEvent` union. |
+| `action` (read-only) | `ListBoxTransferAction` | Discriminant matching the `ListBoxActionEvent` union. |
 | `selectedItems` (read-only) | `T[]` | The items to transfer, in list order: the source's selection, or all of the source's items for the "All" variants. See Which list box's `actionClick` fires. |
 
 ### Types
@@ -174,6 +174,14 @@ The context of a `monaListBoxItemTemplate`: the data item, as `let-item`.
 
 ```typescript
 type ListBoxActionEvent<T = any> = ListBoxClearEvent<T> | ListBoxMoveEvent<T> | ListBoxRemoveEvent<T> | ListBoxTransferEvent<T>;
+```
+
+#### `ListBoxTransferAction`
+
+The toolbar actions that move items between list boxes.
+
+```typescript
+type ListBoxTransferAction = Extract<ToolbarAction, "transferAllFrom" | "transferAllTo" | "transferFrom" | "transferTo">;
 ```
 
 #### `ToolbarAction`

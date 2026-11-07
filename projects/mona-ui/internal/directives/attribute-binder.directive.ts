@@ -1,5 +1,5 @@
 import { Directive, effect, ElementRef, inject, input, Renderer2 } from "@angular/core";
-import { AttributeConfig } from "../models/AttributeConfig";
+import type { AttributeConfig } from "@nanahoshi/mona-ui/common";
 
 @Directive({
     selector: "[monaAttributeBinder]"

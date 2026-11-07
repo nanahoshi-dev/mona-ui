@@ -1,6 +1,6 @@
 export * from "./directives/attribute-binder.directive";
 
-export * from "./models/AttributeConfig";
+export type { Action, AttributeConfig } from "@nanahoshi/mona-ui/common";
 export * from "./models/ColorScheme";
 export * from "./models/ColorSpaces";
 
@@ -12,7 +12,6 @@ export * from "./utils/color/rgba2hex";
 export * from "./utils/color/rgba2hsla";
 export * from "./utils/color/parseColor";
 export * from "./utils/color/rgba2hsva";
-export * from "./utils/core/Action";
 export * from "./utils/core/ariaReferences";
 export * from "./utils/core/createElementControlId";
 export * from "./utils/core/fieldsetDisabled";

@@ -3868,7 +3868,6 @@ export class ChartComponent implements AfterContentChecked {
     public invalidate(): void;
     /** @internal */
     public invalidate(reason: ChartInvalidationReason): void;
-    /** Asks for a new layout, for changes the chart can't observe, such as a data array mutated in place. */
     public invalidate(reason: ChartInvalidationReason = ChartInvalidationReason.Layout): void {
         if (this.#isDestroyed || !this.#isBrowser) {
             return;

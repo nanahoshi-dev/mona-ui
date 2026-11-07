@@ -1,5 +1,6 @@
 import { v4 } from "uuid";
 
+/** A row of the grid, wrapping its data item. */
 export class Row {
     public readonly data: Record<PropertyKey, unknown>;
     public readonly uid: string;

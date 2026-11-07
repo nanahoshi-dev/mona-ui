@@ -14,6 +14,7 @@ export * from "./directives/popup-menu-icon-template.directive";
 export * from "./directives/popup-menu-shortcut-template.directive";
 export * from "./directives/popup-menu-text-template.directive";
 export * from "./models/PopupMenuCloseEvent";
+export type { PopupMenuInitialFocus } from "./models/PopupMenuListConfig";
 export type { MenuItem, PopupMenuItem } from "@nanahoshi/mona-ui/internal/popup-menu";
 export * from "./models/PopupMenuTrigger";
 export * from "./models/PopupMenuNavigationEvent";

@@ -51,7 +51,7 @@ A page needs at least one of **Examples** or **Appearance & Styling**, because a
 - **Types from another entry point** link to the page that documents them. When that entry point has no page, as with `common`, the type is shown on the page using it.
 - **Pages sharing an entry point** name their exports with `apiExports` in the manifest. `apiAlsoFrom` adds another entry point's exports, as the dropdowns do with `dropdowns`.
 
-`npm run generate:api-docs -- --report` lists types the public API uses that no entry point exports.
+`npm run check:api-docs` also fails when the public API uses a type no entry point exports, because a consumer couldn't name it and the page couldn't describe it. `npm run generate:api-docs -- --report` lists them.
 
 ## Guide pages
 

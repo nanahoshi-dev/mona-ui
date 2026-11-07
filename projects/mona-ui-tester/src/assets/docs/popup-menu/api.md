@@ -215,6 +215,14 @@ checkbox or radio item's state unchanged.
 | `item` | `PopupMenuItem \| null` |
 | `level` | `number` |
 
+#### `PopupMenuInitialFocus`
+
+The item a menu opened from the keyboard highlights first.
+
+```typescript
+type PopupMenuInitialFocus = "first" | "last";
+```
+
 #### `PopupMenuTrigger`
 
 What opens a popup menu: a click on the target, a right-click on it, or `"none"` to open it only through

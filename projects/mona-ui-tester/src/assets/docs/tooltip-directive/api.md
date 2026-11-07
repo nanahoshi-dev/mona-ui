@@ -77,6 +77,14 @@ function getPositionConnectionPoints(position: Position): { anchor: ConnectionPo
 const tooltipArrowThemeVariants: (props?: ClassProp | undefined) => string;
 ```
 
+#### `OverlaySide`
+
+A side of the anchor. `start` and `end` follow the direction.
+
+```typescript
+type OverlaySide = "bottom" | "end" | "left" | "right" | "start" | "top";
+```
+
 #### `TooltipPosition`
 
 The side of its anchor a tooltip opens on. `left` and `right` are physical in every direction; `start` and `end`

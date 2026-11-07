@@ -1,6 +1,6 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { AttributeConfig } from "../models/AttributeConfig";
+import type { AttributeConfig } from "@nanahoshi/mona-ui/common";
 import { AttributeBinderDirective } from "./attribute-binder.directive";
 
 @Component({

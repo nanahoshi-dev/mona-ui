@@ -66,6 +66,16 @@ const PROGRESS_BAR_DEFAULT_MESSAGES: MonaProgressBarMessages;
 type LabelPosition = "start" | "center" | "end";
 ```
 
+#### `Action`
+
+From `@nanahoshi/mona-ui/common`.
+
+A function taking a `P` and returning an `R`.
+
+```typescript
+type Action<P = void, R = void> = (arg: P) => R;
+```
+
 #### `MonaProgressBarMessages`
 
 From `@nanahoshi/mona-ui/i18n`.
