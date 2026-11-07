@@ -69,7 +69,7 @@ From `@nanahoshi/mona-ui/dropdowns`.
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `filter` | `string` | `""` | Current filter text used to narrow the visible options. |
-| `filterPlaceholder` | `string` | `""` | No effect on Auto Complete — the popup's own filter row is disabled for this component, since the main input already serves as the filter box. |
+| `filterPlaceholder` | `string` | `""` | Placeholder text in the popup's filter row. Auto Complete has no filter row, since its own input is the filter, so it ignores this. |
 | `monaDropDownFilterable` | `Partial<FilterableOptions> \| ""` | `""` | Filter operator, case sensitivity, and debounce delay. An empty string enables filtering with default settings (`operator: "contains"`, `caseSensitive: false`, `debounce: 0`); pass an object to override any field. |
 
 #### Outputs

@@ -81,14 +81,15 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### `GridEditableDirective`
 
-**Selector:** `mona-grid[monaGridEditable]`
+**Selector:** `mona-grid[monaGridEditable]`  
+**Type parameters:** `T extends object = Record<PropertyKey, unknown>`
 
 #### Inputs
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `monaGridEditable` | `EditableOptions \| ""` | `""` | Enables inline editing. An empty string enables cell-mode editing with default settings; pass an object to choose `"cell"` or `"row"` mode and an optional validation `schema`. |
-| `newRowFactory` | `() => Record<PropertyKey, unknown>` | — | Creates the initial data object used by the add-row editor. |
+| `monaGridEditable` | `EditableOptions<T> \| ""` | `""` | Enables inline editing. An empty string enables cell-mode editing with default settings; pass an object to choose `"cell"` or `"row"` mode and an optional validation `schema`. |
+| `newRowFactory` | `() => T` | — | Creates the initial data object used by the add-row editor. |
 
 #### Outputs
 
@@ -100,7 +101,7 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 | `edit` | `GridEditEvent` | Emitted before a row enters edit mode. |
 | `remove` | `GridRemoveEvent` | Emitted when a row remove command is triggered, with the row's `key` and `index`. |
 | `rowEdit` | `RowEditEvent` | Emitted after a changed row is saved (row mode only). |
-| `save` | `GridSaveEvent` | Emitted before an edited or new row is saved; not when an edit changed nothing. `rowData` holds the edited values and `originalRowData` the row as it was. Prevent it to keep the editor open, for example while saving on the server, then call `endEdit()`. |
+| `save` | `GridSaveEvent<T>` | Emitted before an edited or new row is saved; not when an edit changed nothing. `rowData` holds the edited values and `originalRowData` the row as it was. Prevent it to keep the editor open, for example while saving on the server, then call `endEdit()`. |
 
 #### Methods
 
@@ -454,6 +455,9 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### `GridSaveEvent`
 
+`T` is the row type, which a typed `schema` or `newRowFactory` on `monaGridEditable` sets.
+
+**Type parameters:** `T extends object = Record<PropertyKey, unknown>`  
 **Extends:** `PreventableEvent`
 
 #### Properties
@@ -461,8 +465,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 | Name | Type |
 | --- | --- |
 | `operation` (read-only) | `GridSaveOperation` |
-| `originalRowData` (read-only) | `Record<PropertyKey, unknown> \| null` |
-| `rowData` (read-only) | `Record<PropertyKey, unknown>` |
+| `originalRowData` (read-only) | `T \| null` |
+| `rowData` (read-only) | `T` |
 | `session` (read-only) | `GridEditSession` |
 
 ### `Row`
@@ -593,12 +597,16 @@ grid scrolls horizontally.
 
 #### `EditableOptions`
 
+`T` is the row type, which a typed `schema` sets.
+
+**Type parameters:** `T extends object = Record<PropertyKey, unknown>`
+
 | Name | Type | Description |
 | --- | --- | --- |
 | `commandAriaLabel?` | `( command: GridRowCommand, rowData: Record<PropertyKey, unknown>, absoluteIndex: number ) => string` | Returns the accessible name of a row's command button, such as "Edit order 10248". Without it the buttons are named by position ("Edit row 3"). `absoluteIndex` is the row's 0-based position in the filtered and sorted rows; the add row isn't passed here. |
 | `enabled?` | `boolean` | Whether editing is active. On unless set to `false`; options replace earlier ones. |
 | `mode` | `"cell" \| "row"` | Whether editing commits per cell or per row. |
-| `schema?` | `GridEditSchemaFactory` | Builds a Signal Forms validation schema for the row being edited. |
+| `schema?` | `GridEditSchemaFactory<T>` | Builds a Signal Forms validation schema for the row being edited. |
 
 #### `FilterableOptions`
 
@@ -629,6 +637,10 @@ The paging, sorting, and filtering requested by a server-bound Grid.
 
 #### `GridEditFormContext`
 
+What a schema factory is told about the edit. `T` is the row type, untyped unless you give one.
+
+**Type parameters:** `T extends object = Record<PropertyKey, unknown>`
+
 | Name | Type |
 | --- | --- |
 | `column` (read-only) | `Column \| null` |
@@ -636,8 +648,8 @@ The paging, sorting, and filtering requested by a server-bound Grid.
 | `isNew` (read-only) | `boolean` |
 | `mode` (read-only) | `"cell" \| "row"` |
 | `operation` (read-only) | `GridEditOperation` |
-| `originalRowData` (read-only) | `Record<PropertyKey, unknown> \| null` |
-| `rowData` (read-only) | `Record<PropertyKey, unknown>` |
+| `originalRowData` (read-only) | `T \| null` |
+| `rowData` (read-only) | `T` |
 
 #### `GridEditSession`
 
@@ -849,8 +861,10 @@ type GridEditOperation = "create" | "update";
 
 #### `GridEditSchemaFactory`
 
+Builds the Signal Forms schema for the row being edited. `T` is the row type, untyped unless you give one.
+
 ```typescript
-type GridEditSchemaFactory = ( context: GridEditFormContext ) => SchemaOrSchemaFn<Record<PropertyKey, unknown>> | null | undefined;
+type GridEditSchemaFactory<T extends object = Record<PropertyKey, unknown>> = ( context: GridEditFormContext<T> ) => SchemaOrSchemaFn<T> | null | undefined;
 ```
 
 #### `GridKeySelector`

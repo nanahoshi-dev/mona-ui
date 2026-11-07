@@ -714,7 +714,7 @@
         "type": "FilterChangeEvent"
       },
       {
-        "description": "No effect on Auto Complete — the popup's own filter row is disabled for this component, since the\nmain input already serves as the filter box.",
+        "description": "Placeholder text in the popup's filter row. Auto Complete has no filter row, since its own input is\nthe filter, so it ignores this.",
         "kind": "input",
         "name": "filterPlaceholder",
         "type": "string",
@@ -891,13 +891,13 @@
         "description": "Creates the initial data object used by the add-row editor.",
         "kind": "input",
         "name": "newRowFactory",
-        "type": "() => Record<PropertyKey, unknown>"
+        "type": "() => T"
       },
       {
         "description": "Enables inline editing. An empty string enables cell-mode editing with default settings; pass an\nobject to choose `\"cell\"` or `\"row\"` mode and an optional validation `schema`.",
         "kind": "input",
         "name": "options",
-        "type": "EditableOptions | \"\"",
+        "type": "EditableOptions<T> | \"\"",
         "alias": "monaGridEditable",
         "defaultValue": "\"\""
       },
@@ -917,7 +917,7 @@
         "description": "Emitted before an edited or new row is saved; not when an edit changed nothing. `rowData`\nholds the edited values and `originalRowData` the row as it was. Prevent it to keep the editor open,\nfor example while saving on the server, then call `endEdit()`.",
         "kind": "output",
         "name": "save",
-        "type": "GridSaveEvent"
+        "type": "GridSaveEvent<T>"
       }
     ]
   },
@@ -2026,7 +2026,7 @@
         "defaultValue": "null"
       },
       {
-        "description": "Whether the tooltip is disabled. When disabled, the tooltip will not be shown, and an open one\ncloses.",
+        "description": "Whether the tooltip is disabled. When disabled, the tooltip will not be shown, and an open one\ncloses. On a button or another control, `[disabled]` also reaches the control, so use {@link tooltipDisabled}\nthere.",
         "kind": "input",
         "name": "disabled",
         "type": "boolean",
@@ -2093,6 +2093,13 @@
         "kind": "output",
         "name": "shown",
         "type": "void"
+      },
+      {
+        "description": "Disables only the tooltip, like {@link disabled}, on an element whose own `disabled` would take the\nsame binding, such as a `monaButton` or a native control.",
+        "kind": "input",
+        "name": "tooltipDisabled",
+        "type": "boolean",
+        "defaultValue": "false"
       }
     ]
   },
