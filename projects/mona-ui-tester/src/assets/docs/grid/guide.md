@@ -49,8 +49,8 @@ Each directive below is an `ng-template` (or, for `monaGridColumnTitleTemplate`,
 | `GridCellTemplateDirective`        | `ng-template[monaGridCellTemplate]`        | `mona-grid-column` or `mona-grid-command-column` | `{ $implicit: dataItem, column: string }`                                                                                                                                                                                                                                                                                                                               | The column's default formatted cell text                                                   |
 | `GridColumnTitleTemplateDirective` | `[monaGridColumnTitleTemplate]`            | `mona-grid-column`                               | None                                                                                                                                                                                                                                                                                                                                                                    | The column header's default title text (used when `monaGridHeaderTemplate` is not present) |
 | `GridEditTemplateDirective`        | `ng-template[monaGridEditTemplate]`        | `mona-grid-column`                               | `GridEditTemplateContext` — see [API](#gridedittemplatecontext)                                                                                                                                                                                                                                                                                                         | The built-in editor for that column while the cell or row is being edited                  |
-| `GridFooterTemplateDirective`      | `ng-template[monaGridFooterTemplate]`      | `mona-grid-column`                               | `TODO(owner-review): the context interface (aggregate value plus `column`/`columnIndex`/`rows`) is not exported — confirm before treating its shape as a stable contract.`                                                                                                                                                                                              | The column's default aggregate footer value                                                |
-| `GridGroupFooterTemplateDirective` | `ng-template[monaGridGroupFooterTemplate]` | `mona-grid-column`                               | `TODO(owner-review): extends the footer template context with `count`/`depth`/`groupKey`/`groupValue`; neither context type is exported.`                                                                                                                                                                                                                               | The default per-group aggregate footer, shown when a group is collapsed                    |
+| `GridFooterTemplateDirective`      | `ng-template[monaGridFooterTemplate]`      | `mona-grid-column`                               | `{ $implicit, aggregate, aggregates, column, columnIndex, rows }`: `$implicit` is the column's aggregate value, `aggregate` the column's bucket (`{ field, sum?, avg?, count?, min?, max? }`) or `null`, `aggregates` the buckets by field, `rows` the data items of the whole view. The context type isn't exported. | The column's default aggregate footer value                                                |
+| `GridGroupFooterTemplateDirective` | `ng-template[monaGridGroupFooterTemplate]` | `mona-grid-column`                               | The footer context, plus `count`, `depth`, `groupKey` and `groupValue` for the group; `rows` and the aggregates cover that group's rows. The context type isn't exported.                                                                                                                                                                                                  | The default per-group aggregate footer, shown when a group is collapsed                    |
 | `GridHeaderTemplateDirective`      | `ng-template[monaGridHeaderTemplate]`      | `mona-grid-column`                               | `{ $implicit: column, column: Column }`                                                                                                                                                                                                                                                                                                                                 | The column header's default title text                                                     |
 | `GridDetailTemplateDirective`      | `ng-template[monaGridDetailTemplate]`      | `mona-grid`                                      | `{ $implicit: dataItem }`                                                                                                                                                                                                                                                                                                                                               | No default — renders as an expandable row beneath the data row when present                |
 | `GridNoDataTemplateDirective`      | `ng-template[monaGridNoDataTemplate]`      | `mona-grid`                                      | None                                                                                                                                                                                                                                                                                                                                                                    | The grid's default empty-state message                                                     |
@@ -69,7 +69,70 @@ Each directive below is an `ng-template` (or, for `monaGridColumnTitleTemplate`,
 </mona-grid>
 ```
 
+The cell template's `$implicit` is the row's item from `data`, the same object, and `column` is the column's `field`. None of the grid's template directives has an `ngTemplateContextGuard`, so with strict templates `let-dataItem` is typed `any`: the template compiles, but member access on it isn't checked. To have it checked, pass the item to a method of your component that takes your row type.
+
 ## Examples
+
+### Cell Formatting
+
+Without a `format`, a `date` column shows the locale's numeric date (`03/15/2024` in en-US, `15.03.2024` in de-DE), and every other value shows as it is.
+
+`format` takes one of two things:
+
+- A date format string, using Angular's `formatDate` patterns (`"yyyy-MM-dd"`, `"MMM d, y"`). It applies only to `type="date"` columns, where the filter menu and the filter row use it too, and it formats with the application's `LOCALE_ID`. Other columns ignore a string.
+- A function `(value, row, column) => string`, for any column. What it returns replaces the cell text. `value` is the cell's value, `row` the row's data item, and `column` the `Column`.
+
+```html
+<mona-grid-column field="orderDate" title="Ordered" type="date" format="MMM d, y"></mona-grid-column>
+<mona-grid-column field="freight" title="Freight" type="number" [format]="formatCurrency"></mona-grid-column>
+```
+
+```typescript
+readonly #currency = new Intl.NumberFormat("en-US", { currency: "USD", style: "currency" });
+
+protected readonly formatCurrency = (value: number): string => this.#currency.format(value);
+```
+
+A formatter can be typed for the column's value, as above. There is no format string for numbers or currency: use a formatter function, or a `monaGridCellTemplate` with Angular's `currency` or `number` pipe. A cell template replaces the cell text, formatted or not. `format` only changes what the cell shows. Sorting, filtering, aggregates and CSV export use the raw value.
+
+### Client Sorting, Filtering, and Paging
+
+Without `monaGridServerBinding`, the grid sorts, filters, groups and pages `data` itself. Bind the whole data set to `data`; the grid never changes the array.
+
+When `data` is replaced, the grid keeps its sort, filter and group descriptors and applies them to the new rows. It also keeps the current page, unless the new rows no longer reach it: then it moves to the last page and reports it through `pageChange` and `skipChange`. A user's sort or filter keeps the current page in the same way; only server binding goes back to the first page.
+
+To filter from controls outside the grid, either bind a filtered `computed` to `data`:
+
+```typescript
+protected readonly search = signal("");
+protected readonly shownOrders = computed(() => {
+    const text = this.search().toLowerCase();
+    return this.orders().filter(order => order.shipName.toLowerCase().includes(text));
+});
+```
+
+```html
+<mona-text-box aria-label="Search orders" [(value)]="search"></mona-text-box>
+<mona-grid [data]="shownOrders()">...</mona-grid>
+```
+
+or set the `filter` model of `monaGridFilterable`, which also shows the condition in that column's filter UI:
+
+```typescript
+protected readonly filter = signal<CompositeFilterDescriptor[]>([]);
+
+protected onShipChange(shipName: string | null): void {
+    this.filter.set(
+        shipName ? [{ logic: "and", filters: [{ field: "shipName", operator: "eq", value: shipName }] }] : []
+    );
+}
+```
+
+```html
+<mona-grid [data]="orders()" monaGridFilterable [(filter)]="filter">...</mona-grid>
+```
+
+The `filter` model needs `monaGridFilterable` on the grid. With `[monaGridFilterable]="{ enabled: false }"` the filter UI is hidden, but a `filter` set from code still applies. `CompositeFilterDescriptor` comes from `@nanahoshi/mona-ui/query`.
 
 ### Server Paging, Sorting, and Filtering
 
@@ -79,7 +142,7 @@ Import `GridServerBindingDirective` and `GridDataState` from `@nanahoshi/mona-ui
 grid/server
 ```
 
-`dataStateChange` supplies `{ skip, take, sort, filter }` once for a user page, page-size, sort, or filter action. Sort and filter actions start at `skip: 0`; a page-size change keeps the first row of the page in view. Sort order follows multi-column sort priority. Bindings from the parent synchronize silently, and ordinary directive creation does not emit an initial request: load the initial page yourself.
+`dataStateChange` supplies `{ skip, take, sort, filter }` once for a user page, page-size, sort, or filter action. All its properties are readonly, and each emission holds its own copies of the descriptors, including nested filter values. Use the grid's `pageSize` for the request's `take`; in server mode it must be a positive safe integer. The directive is enabled by its presence and adds no page-size input of its own. Sort and filter actions start at `skip: 0`; a page-size change keeps the first row of the page in view. Sort order follows multi-column sort priority. Bindings from the parent synchronize silently, and ordinary directive creation does not emit an initial request: load the initial page yourself.
 
 The application owns HTTP requests, errors, and stale-response handling. The example ignores a response that arrives after a newer request started. `SortDescriptor` and `CompositeFilterDescriptor` come from `@nanahoshi/mona-ui/query`; the Grid has no endpoint or transport dependency.
 
@@ -137,7 +200,28 @@ Virtualization uses a fixed height in pixels for every rendered item and the scr
 
 ### Sorting
 
-`monaGridSortable` enables column-header sorting; `sort` is a two-way bindable model of the current sort descriptors, and a restored grid state updates it. Descriptors are kept even when no column shows their field (a column added later shows the sort), and a repeated field keeps its last descriptor. A column's `sortComparator`, or the descriptor's own `sort` function, is kept when the user clicks the header.
+`monaGridSortable` enables column-header sorting; `sort` is a two-way bindable model of the current sort descriptors, and a restored grid state updates it. A `SortDescriptor` comes from `@nanahoshi/mona-ui/query`:
+
+```typescript
+import type { SortDescriptor } from "@nanahoshi/mona-ui/query";
+
+interface SortDescriptor<TValue = unknown> {
+    dir: "asc" | "desc";
+    field: string;
+    /** Compares two values of `field`; `dir: "desc"` reverses the result. */
+    sort?(left: TValue, right: TValue): number;
+}
+```
+
+```typescript
+protected readonly sort = signal<SortDescriptor[]>([{ dir: "desc", field: "orderDate" }]);
+```
+
+```html
+<mona-grid [data]="orders()" monaGridSortable [(sort)]="sort">...</mona-grid>
+```
+
+Descriptors are kept even when no column shows their field (a column added later shows the sort), and a repeated field keeps its last descriptor. A column's `sortComparator`, or the descriptor's own `sort` function, is kept when the user clicks the header.
 
 ```example
 grid/sorting-filtering
@@ -206,6 +290,8 @@ Selection state always lives in `selectedKeys`. Row clicks and checkbox clicks m
 ```
 
 While virtual scrolling is on, the grid shows no pager and no aggregate footer, and rejects detail rows and server binding.
+
+`height` in the options defaults to **36px** and must be finite and greater than zero. It sets the rendered height and the virtual item size of every row, group header and group footer, and templates taller than it are clipped.
 
 ### Editing
 
@@ -366,13 +452,9 @@ Paging (`pageChange`, `skipChange`, `pageSizeChange`) and detail rows (`expanded
 
 Grid styling is implemented with Tailwind utility classes internally; there are no public CSS custom properties to override. The only public styling hooks are the `class` input (merged with `tailwind-merge`) and the `rounded` input.
 
-### `GridColumnChooserComponent` is not in the public barrel
+### The Columns button
 
-The grid renders a built-in "Columns" toolbar button backed by an internal `GridColumnChooserComponent`, but that component is not exported from `@nanahoshi/mona-ui`. `TODO(owner-review): confirm whether column-visibility toggling through this button is an intended public feature before documenting it further, or whether the component should be added to the public barrel.`
-
-- Use `GridComponent.pageSize` for the request's `take`; it must be a positive safe integer in server mode. The directive is enabled by its presence and does not add a second page-size input.
-- All properties are readonly. Each emission contains independent descriptor snapshots, including nested filter values. The Query descriptor types are exported by `@nanahoshi/mona-ui/query`.
-- `VirtualScrollOptions.height` defaults to **36px** and must be finite and greater than zero. The configured height controls both rendering and virtual item size, including group headers and footers. Virtual templates are clipped to it; expanded detail rows and server page binding are unsupported.
+When the grid has a `monaGridToolbarTemplate`, the toolbar also shows a built-in Columns button (the `columns` message). It opens a popup that lists every column, with a box to filter the list by title. Apply shows the checked columns and hides the others; Cancel drops the changes. A column's `hidden` input sets where it starts, and `monaGridStatePersistence` saves what the user chose. The popup's component is internal, so there is nothing to import, and without a toolbar template there is no button.
 
 ## Forms Integration
 
@@ -453,13 +535,13 @@ Moving a column or grouping by one from the keyboard is announced through a poli
 - [x] GridComponent inputs verified against grid.component.ts source (data, pageSize, pageSizeValues, resizeMethod, responsivePager, rounded, class/userClass); confirmed the component defines no outputs (all "grid events" live on companion directives)
 - [x] GridColumnComponent (12 inputs) and GridCommandColumnComponent (9 inputs) verified against grid-column.component.ts and grid-command-column.component.ts source; both have empty templates and provide GRID_COLUMN_DEFINITION
 - [x] Behavior directives, including ServerBinding (Sortable, Filterable, Groupable, Selectable, Editable, Resizable, Reorderable, VirtualScroll, StatePersistence, Export) verified against their individual .directive.ts source files; missing @description JSDoc added to GridSelectableDirective, GridGroupableDirective, GridFilterableDirective, GridVirtualScrollDirective as part of this pass
-- [x] Nine structural template directive selectors verified against grid/directives/grid-*template*.directive.ts; template contexts verified against grid.component.html, grid-cell.component.html, grid-list.component.html ngTemplateOutletContext bindings; GridFooterTemplateContext/GridGroupFooterTemplateContext confirmed unexported (declared privately in grid-footer-cell.component.ts) and flagged as TODO(owner-review)
+- [x] Nine structural template directive selectors verified against grid/directives/grid-*template*.directive.ts; template contexts verified against grid.component.html, grid-cell.component.html, grid-list.component.html ngTemplateOutletContext bindings; GridFooterTemplateContext/GridGroupFooterTemplateContext confirmed unexported (declared privately in grid-footer-cell.component.ts); their shapes are documented in the Anatomy table
 - [x] Keyboard map verified against grid-logical-cell.directive.ts (onHostKeydown/onEnterKey/onF2Key/#handleCommandInnerKeydown), grid-navigation.service.ts (navigate()), grid.component.ts (onToolbarKeydown), and tests/grid-keyboard-navigation.spec.ts
 - [x] ARIA attributes verified against grid.component.html (grid/rowgroup/columnheader/row/aria-sort/aria-expanded/aria-level), grid-row.directive.ts (aria-selected/aria-rowindex), grid-logical-cell.directive.ts (aria-colindex), grid-cell.directive.ts (gridcell), grid-logical-cell.directive.ts (aria-readonly), grid-column-resize-handler.directive.ts (separator/aria-label/aria-orientation), grid-command-cell.component.html (static aria-labels)
 - [x] Form integration verified: grid-editor.component.ts and GridEditTemplateContext use @angular/forms/signals FieldTree exclusively; no ControlValueAccessor/FormValueControl/FormCheckboxControl implementation found anywhere in projects/mona-ui/src/lib/grid
 - [x] Exported types cross-checked against grid/public-api.ts; GridService, GridNavigationService, GridRowFlattenerService, GridExportService, Row, GridColumnChooserComponent, GridFilterMenuComponent, GridEditorComponent, and the cell/row structural directives (GridRowDirective, GridCellDirective, GridLockedCellDirective, GridLogicalCellDirective, etc.) confirmed NOT exported and omitted from API tables
 - [x] component-metadata.json's GridComponent entry confirmed stale (missing an outputs key, missing several documented inputs) — not used as the source of truth for this page; npm run build:metadata should be re-run and the entry spot-checked against this page after the JSDoc changes in this pass
-- [x] GridColumnChooserComponent (built-in "Columns" toolbar button) confirmed present in grid.component.html template but not in the public barrel — flagged as TODO(owner-review) instead of documented as a public feature
+- [x] GridColumnChooserComponent (built-in "Columns" toolbar button) confirmed present in grid.component.html template but not in the public barrel; documented under Behavior as "The Columns button", shown only with a toolbar template
 - [x] Server binding contract, external synchronization, loading, persistence, and compatibility verified against grid-server-binding.directive.ts, grid.service.ts, grid-server-binding.spec.ts, and the mock server demo.
 - [x] Natural row sizing, fixed virtual geometry, drag placeholders, LTR/RTL locked cells, editing, and WCAG AA AXE checks verified in scripts/test-grid-browser.ts.
 -->

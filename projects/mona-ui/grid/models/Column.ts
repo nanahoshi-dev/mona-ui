@@ -12,7 +12,7 @@ export type ColumnKind = "command" | "data";
 export type ColumnFormatFunction = {
     format(value: unknown, row: Record<PropertyKey, unknown>, column: Column): string;
 }["format"];
-/** A date format string (date, datetime and time columns), or a formatter function. */
+/** A date format string, for `date` columns, or a formatter function, for any column. */
 export type ColumnFormat = string | ColumnFormatFunction;
 /** Compares two cell values for sorting: negative, zero or positive, as for `Array.prototype.sort`. */
 export type ColumnSortComparator = { compare(left: unknown, right: unknown): number }["compare"];
