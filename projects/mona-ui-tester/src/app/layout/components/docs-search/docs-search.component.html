@@ -1,8 +1,8 @@
-<mona-command-dialog ariaLabel="Search documentation" shortcut="mod+k" [(open)]="search.open">
+<mona-command-dialog aria-label="Search documentation" shortcut="mod+k" [(open)]="search.open">
     <ng-template monaCommandDialogContent>
         <mona-command filterMode="manual" [loading]="loading()" [(query)]="query" (itemSelect)="go($event)">
-            <mona-command-input ariaLabel="Search documentation" placeholder="Search documentation…" />
-            <mona-command-list ariaLabel="Search results">
+            <mona-command-input aria-label="Search documentation" placeholder="Search documentation…" />
+            <mona-command-list aria-label="Search results">
                 @if (results().length === 0) {
                     <mona-command-loading />
                 }

@@ -46,7 +46,7 @@ const FOODS: Food[] = [
     template: `
         <div [attr.dir]="dir()">
             <mona-tree-view
-                ariaLabel="Food"
+                aria-label="Food"
                 [data]="data"
                 children="children"
                 textField="text"
@@ -84,7 +84,7 @@ class HostComponent {
     imports: [TreeViewComponent, TreeViewExpandableDirective, TreeViewNodeTemplateDirective],
     template: `
         <mona-tree-view
-            ariaLabel="Food"
+            aria-label="Food"
             [data]="data"
             children="children"
             textField="text"

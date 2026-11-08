@@ -103,7 +103,7 @@ export class PopoverDemoComponent extends AbstractDemoComponent<PopoverComponent
         @let featureData = features();
         <button monaButton #anchor>Popover Anchor</button>
         <mona-popover
-            [ariaLabel]="ariaLabel()"
+            [aria-label]="ariaLabel()"
             [autoFocus]="autoFocus()"
             [closeOnEscape]="closeOnEscape()"
             [closeOnOutsideClick]="closeOnOutsideClick()"

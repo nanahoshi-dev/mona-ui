@@ -13,7 +13,7 @@ Everything below is imported from `@nanahoshi/mona-ui/popover`.
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `ariaLabel` | `string` | — | Accessible name for the popover when it has no `title` or title template. |
+| `aria-label` | `string \| undefined` | `undefined` | Accessible name for the popover when it has no `title` or title template. |
 | `autoFocus` | `boolean \| undefined` | `undefined` | Whether focus moves into the popover when it opens: to its first focusable element, or to the popover itself. Defaults to `true`, except for the `hover` trigger. |
 | `closeOnEscape` | `boolean` | `true` | Whether pressing Escape closes the popover. |
 | `closeOnOutsideClick` | `boolean` | `true` | Whether a click outside the popover and its target closes it. |

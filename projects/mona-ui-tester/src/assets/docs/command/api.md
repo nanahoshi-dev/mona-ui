@@ -47,7 +47,7 @@ results come and go, and the `mona-command` inside is created each time it opens
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `ariaLabel` | `string` | — | The accessible name of the dialog. |
+| `aria-label` | `string \| undefined` | `undefined` | The accessible name of the dialog. |
 | `open` (two-way) | `boolean` | `false` | Whether the dialog is open. |
 | `shortcut` | `string \| null` | `null` | A key combination that opens and closes the dialog from anywhere on the page, such as `mod+k`. `mod` is Command on Apple devices and Ctrl elsewhere. Nothing is bound unless this is set. |
 | `width` | `number \| string` | `"36rem"` | The dialog's width. It never gets wider than the viewport. |
@@ -89,7 +89,7 @@ continues the search.
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `ariaLabel` | `string` | — | The accessible name of the field. |
+| `aria-label` | `string \| undefined` | `undefined` | The accessible name of the field. |
 | `placeholder` | `string` | — | The text shown while the field is empty. |
 
 ### `CommandGroupComponent`
@@ -127,7 +127,7 @@ may only contain options and groups.
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `ariaLabel` | `string` | — | The accessible name of the list. |
+| `aria-label` | `string \| undefined` | `undefined` | The accessible name of the list. |
 
 ### `CommandShortcutComponent`
 

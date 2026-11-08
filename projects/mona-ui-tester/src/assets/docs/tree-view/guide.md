@@ -50,10 +50,10 @@ protected readonly data: FileItem[] = [
 ```
 
 ```html
-<mona-tree-view ariaLabel="Documents" [data]="data" children="items" textField="text"></mona-tree-view>
+<mona-tree-view aria-label="Documents" [data]="data" children="items" textField="text"></mona-tree-view>
 ```
 
-Give every tree a name with `ariaLabel` or `ariaLabelledBy` — see [ARIA](#aria).
+Give every tree a name with `aria-label` or `aria-labelledby` — see [ARIA](#aria).
 
 ## Anatomy
 
@@ -68,7 +68,7 @@ Consumers interact with the following selectors directly:
 | `TreeViewNodeTemplateDirective` | `ng-template[monaTreeViewNodeTemplate]` | `TreeViewNodeTemplateContext<T>`: `{ $implicit: T, element: HTMLElement }` | The default node text from `textField` |
 
 ```html
-<mona-tree-view ariaLabel="Documents" [data]="data" children="items" textField="text">
+<mona-tree-view aria-label="Documents" [data]="data" children="items" textField="text">
     <ng-template monaTreeViewNodeTemplate [monaTreeViewNodeTemplateOf]="data" let-dataItem let-element="element">
         <span>{{ dataItem.text }}</span>
     </ng-template>
@@ -117,7 +117,7 @@ Apply `monaTreeViewDisable` and pass the keys of the nodes to disable. Disabling
 
 ```html
 <mona-tree-view
-    ariaLabel="Documents"
+    aria-label="Documents"
     [data]="data"
     children="items"
     textField="text"
@@ -132,7 +132,7 @@ Apply `monaTreeViewExpandable` to show an expander on every node with children, 
 
 ```html
 <mona-tree-view
-    ariaLabel="Documents"
+    aria-label="Documents"
     [data]="data"
     children="items"
     textField="text"
@@ -148,7 +148,7 @@ Apply `monaTreeViewFilterable` to show a filter input above the tree that narrow
 
 ```html
 <mona-tree-view
-    ariaLabel="Documents"
+    aria-label="Documents"
     [data]="data"
     children="items"
     textField="text"
@@ -246,8 +246,8 @@ The tree element is the `mona-tree` element inside `mona-tree-view`; the `mona-t
 | Element         | Attribute                                     | When present                                                                                                                  | Value                                                                          |
 | --------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
 | Tree            | `role`                                        | Always                                                                                                                        | `tree`                                                                         |
-| Tree            | `aria-label`                                  | When the `ariaLabel` input is set                                                                                             | The `ariaLabel` value                                                          |
-| Tree            | `aria-labelledby`                             | When the `ariaLabelledBy` input is set                                                                                        | The `ariaLabelledBy` value                                                     |
+| Tree            | `aria-label`                                  | When the `aria-label` input is set                                                                                             | The `aria-label` value                                                          |
+| Tree            | `aria-labelledby`                             | When the `aria-labelledby` input is set                                                                                        | The `aria-labelledby` value                                                     |
 | Tree            | `aria-describedby`                            | When no node is shown                                                                                                         | The "No data" or "No matching items" text                                      |
 | Tree            | `aria-multiselectable`                        | When selectable with `mode: "multiple"` and not checkable                                                                     | `true`                                                                         |
 | Tree            | `aria-activedescendant`                       | While a node is active                                                                                                        | The active node's element id                                                   |
@@ -266,4 +266,4 @@ The tree element is the `mona-tree` element inside `mona-tree-view`; the `mona-t
 | Filter          | `role="search"`, `aria-label`                 | When filterable                                                                                                               | A search landmark around the filter input, named like the input                |
 | Filter input    | `aria-label`, `aria-controls`                 | When filterable                                                                                                               | "Filter {name}" from the tree's name (or "Filter tree"), and the tree's id     |
 
-Name every tree with `ariaLabel` or `ariaLabelledBy`; in development, an unnamed tree logs a warning. A plain `aria-label` attribute on `mona-tree-view` doesn't name the tree. The filter input's name is built from `ariaLabel`, or else from the text of the `ariaLabelledBy` elements. After the user types in the filter, the number of matching nodes is announced ("3 results", or "No matching items"); a filter set from code isn't announced. A keyboard move is announced once it's applied ("Apple moved into Fruits"). Each node's checkbox is hidden from assistive technology, because the node itself reports `aria-checked`. Announcements and labels are translated messages (`treeView` namespace); `TREE_VIEW_DEFAULT_MESSAGES` holds the English defaults.
+Name every tree with `aria-label` or `aria-labelledby`; in development, an unnamed tree logs a warning. The filter input's name is built from `aria-label`, or else from the text of the `aria-labelledby` elements. After the user types in the filter, the number of matching nodes is announced ("3 results", or "No matching items"); a filter set from code isn't announced. A keyboard move is announced once it's applied ("Apple moved into Fruits"). Each node's checkbox is hidden from assistive technology, because the node itself reports `aria-checked`. Announcements and labels are translated messages (`treeView` namespace); `TREE_VIEW_DEFAULT_MESSAGES` holds the English defaults.

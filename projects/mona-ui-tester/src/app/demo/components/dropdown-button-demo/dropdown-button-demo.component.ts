@@ -210,7 +210,7 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
         @let featureData = features();
         <mona-dropdown-button
             [aria-label]="ariaLabel()"
-            [aria-labelledby]="ariaLabelledby()"
+            [aria-labelledby]="ariaLabelledBy()"
             [disabled]="disabled()"
             [iconOnly]="iconOnly()"
             [loading]="loading()"
@@ -314,7 +314,7 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
 export class DropdownButtonWrapperComponent implements ComponentInputsAsSignal<DropdownButtonComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
     public readonly ariaLabel = input("");
-    public readonly ariaLabelledby = input("");
+    public readonly ariaLabelledBy = input("");
     public readonly disabled = input<ReturnType<DropdownButtonComponent["disabled"]>>(false);
     public readonly iconOnly = input<ReturnType<DropdownButtonComponent["iconOnly"]>>(false);
     public readonly loading = input<ReturnType<DropdownButtonComponent["loading"]>>(false);

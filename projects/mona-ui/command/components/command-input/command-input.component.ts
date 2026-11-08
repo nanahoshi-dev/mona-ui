@@ -16,6 +16,7 @@ import { CommandComponent } from "../command/command.component";
     imports: [LucideSearch],
     templateUrl: "./command-input.component.html",
     host: {
+        "[attr.aria-label]": "null",
         "[class]": "hostClass()"
     }
 })
@@ -27,7 +28,7 @@ export class CommandInputComponent {
     protected readonly root = inject(CommandComponent);
 
     /** @description The accessible name of the field. */
-    public readonly ariaLabel = input<string>();
+    public readonly ariaLabel = input<string | undefined>(undefined, { alias: "aria-label" });
     /** @description The text shown while the field is empty. */
     public readonly placeholder = input<string>();
 

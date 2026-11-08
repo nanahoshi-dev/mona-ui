@@ -8667,7 +8667,8 @@
         "description": "The accessible name of the dialog.",
         "kind": "input",
         "name": "ariaLabel",
-        "type": "string"
+        "type": "string | undefined",
+        "alias": "aria-label"
       },
       {
         "description": "Whether the dialog is open.",
@@ -8725,7 +8726,8 @@
         "description": "The accessible name of the field.",
         "kind": "input",
         "name": "ariaLabel",
-        "type": "string"
+        "type": "string | undefined",
+        "alias": "aria-label"
       },
       {
         "description": "The text shown while the field is empty.",
@@ -8776,7 +8778,8 @@
         "description": "The accessible name of the list.",
         "kind": "input",
         "name": "ariaLabel",
-        "type": "string"
+        "type": "string | undefined",
+        "alias": "aria-label"
       }
     ]
   },
@@ -8802,6 +8805,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -9475,7 +9479,8 @@
         "description": "Accessible name for the dialog when it has no `title` or title template.",
         "kind": "input",
         "name": "ariaLabel",
-        "type": "string"
+        "type": "string | undefined",
+        "alias": "aria-label"
       },
       {
         "description": "Sets the visibility of the close button in the dialog header.",
@@ -9619,7 +9624,7 @@
       {
         "description": "ID of an external element that provides the accessible name for the dropdown button.\nTakes precedence over `aria-label` when both are set.",
         "kind": "input",
-        "name": "ariaLabelledby",
+        "name": "ariaLabelledBy",
         "type": "string",
         "alias": "aria-labelledby",
         "defaultValue": "\"\""
@@ -10396,10 +10401,11 @@
     "selector": "\"mona-grid\"",
     "inputs": [
       {
-        "description": "The grid's accessible name, such as \"Orders\". Use it, or `ariaLabelledBy`, rather than\nan `aria-label` attribute on the host, which names nothing.",
+        "description": "The grid's accessible name, such as \"Orders\". Use it, or `aria-labelledby`. The grid moves\nthe name to its `role=\"grid\"` element, so the host keeps no `aria-label` attribute.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
+        "alias": "aria-label",
         "defaultValue": "null"
       },
       {
@@ -10407,6 +10413,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string | null",
+        "alias": "aria-labelledby",
         "defaultValue": "null"
       },
       {
@@ -11600,13 +11607,15 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
         "description": "ARIA labelledby for the menubar.",
         "kind": "input",
-        "name": "ariaLabelledby",
+        "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -12787,7 +12796,8 @@
         "description": "Accessible name for the popover when it has no `title` or title template.",
         "kind": "input",
         "name": "ariaLabel",
-        "type": "string"
+        "type": "string | undefined",
+        "alias": "aria-label"
       },
       {
         "description": "Whether focus moves into the popover when it opens: to its first focusable element, or to the\npopover itself. Defaults to `true`, except for the `hover` trigger.",
@@ -13115,7 +13125,7 @@
       {
         "description": "The ids of the elements that name the root menu. When neither this nor `aria-label` is set, the\nmenu is named by the target element if it has an id.",
         "kind": "input",
-        "name": "ariaLabelledby",
+        "name": "ariaLabelledBy",
         "type": "string",
         "alias": "aria-labelledby",
         "defaultValue": "\"\""
@@ -14128,7 +14138,8 @@
         "description": "Accessible name used when no visible title is provided.",
         "kind": "input",
         "name": "ariaLabel",
-        "type": "string"
+        "type": "string | undefined",
+        "alias": "aria-label"
       },
       {
         "description": "Whether the close button is displayed.",
@@ -15125,7 +15136,7 @@
       {
         "description": "ID of an external element that provides the accessible name for the main action button.\nTakes precedence over `aria-label` when both are set.",
         "kind": "input",
-        "name": "ariaLabelledby",
+        "name": "ariaLabelledBy",
         "type": "string",
         "alias": "aria-labelledby",
         "defaultValue": "\"\""
@@ -15723,6 +15734,7 @@
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
@@ -15730,6 +15742,7 @@
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -16494,17 +16507,19 @@
         "defaultValue": "true"
       },
       {
-        "description": "Accessible name of the tree. Describe what the tree represents; it also names the filter input\n(\"Filter {name}\"). Set this or `ariaLabelledBy`: an unnamed tree logs a warning in development. A plain\n`aria-label` attribute on `mona-tree-view` doesn't name the tree.",
+        "description": "Accessible name of the tree. Describe what the tree represents; it also names the filter input\n(\"Filter {name}\"). Set this or `aria-labelledby`: an unnamed tree logs a warning in development. A plain\n`aria-label` attribute on `mona-tree-view` doesn't name the tree.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
+        "alias": "aria-label",
         "defaultValue": "\"\""
       },
       {
-        "description": "Id of the element that names the tree, as an alternative to `ariaLabel`.",
+        "description": "Id of the element that names the tree, as an alternative to `aria-label`.",
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
+        "alias": "aria-labelledby",
         "defaultValue": "\"\""
       },
       {
@@ -16590,7 +16605,8 @@
         "description": "Accessible name for the window when it has no `title` or title template.",
         "kind": "input",
         "name": "ariaLabel",
-        "type": "string"
+        "type": "string | undefined",
+        "alias": "aria-label"
       },
       {
         "description": "Sets the visibility of the close button in the window header.",

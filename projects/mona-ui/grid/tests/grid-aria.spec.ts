@@ -29,7 +29,7 @@ import { GridService } from "../services/grid.service";
     ],
     template: `
         <mona-grid
-            ariaLabel="Orders"
+            aria-label="Orders"
             [data]="rows"
             [rowKey]="'id'"
             [pageSize]="50"
@@ -145,6 +145,7 @@ describe("grid ARIA and drag (batch 6)", () => {
     it("names the grid element, not the host (GR1)", () => {
         const host = root.querySelector("mona-grid") as HTMLElement;
         expect(host.hasAttribute("role")).toBe(false);
+        expect(host.hasAttribute("aria-label")).toBe(false);
         expect(grid().getAttribute("role")).toBe("grid");
         expect(grid().getAttribute("aria-label")).toBe("Orders");
     });

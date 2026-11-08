@@ -113,7 +113,7 @@ protected confirm(event: PageSizeChangeEvent): void {
 
 ```html
 <mona-grid
-    ariaLabel="Orders"
+    aria-label="Orders"
     [data]="orders()"
     [(skip)]="skip"
     [(pageSize)]="pageSize"

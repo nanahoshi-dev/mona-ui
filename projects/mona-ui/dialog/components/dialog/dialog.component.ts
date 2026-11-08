@@ -29,6 +29,7 @@ import { DialogVariantInput, DialogVariantProps } from "../../styles/dialog.styl
     selector: "mona-dialog",
     template: ``,
     host: {
+        "[attr.aria-label]": "null",
         class: "hidden"
     }
 })
@@ -65,7 +66,7 @@ export class DialogComponent implements DialogVariantInput {
     /**
      * @description Accessible name for the dialog when it has no `title` or title template.
      */
-    public readonly ariaLabel = input<string>();
+    public readonly ariaLabel = input<string | undefined>(undefined, { alias: "aria-label" });
 
     /**
      * @description Sets the visibility of the close button in the dialog header.

@@ -501,7 +501,7 @@ Grid cells use a roving `tabindex`: the cell that last had focus has `tabindex="
 | Attribute          | When present                                               | Value                                                              |
 | ------------------ | ---------------------------------------------------------- | ------------------------------------------------------------------ |
 | `role`             | On the tabular content region                              | `"grid"`, or `"treegrid"` while rows are grouped                   |
-| `aria-label`       | On the tabular content region                              | The `ariaLabel` input; `aria-labelledby` from `ariaLabelledBy`     |
+| `aria-label`       | On the tabular content region                              | The `aria-label` input; `aria-labelledby` likewise                  |
 | `aria-rowcount`    | On the tabular content region                              | Every row, or `-1` when paged groups or detail rows make it unknown |
 | `aria-colcount`    | On the tabular content region                              | Every column, including group indent and selection columns         |
 | `aria-multiselectable` | On the tabular content region                              | `"true"` with multiple selection                                   |
@@ -529,7 +529,7 @@ Grid cells use a roving `tabindex`: the cell that last had focus has `tabindex="
 | `aria-expanded`    | On the detail toggle button                                | Reflects whether the detail row is open                            |
 | `aria-label`       | On the built-in command buttons                            | Names the row: `"Edit row 3"`, `"Remove row 3"`, `"Save row 3"`, `"Cancel editing row 3"`, or the `commandAriaLabel` option's text |
 
-Moving a column or grouping by one from the keyboard is announced through a polite live region (`columnMoved` and `columnGrouped` messages). The grid element has no name of its own: set `ariaLabel` or `ariaLabelledBy`.
+Moving a column or grouping by one from the keyboard is announced through a polite live region (`columnMoved` and `columnGrouped` messages). The grid element has no name of its own: set `aria-label` or `aria-labelledby`.
 
 <!-- verification-checklist
 - [x] GridComponent inputs verified against grid.component.ts source (data, pageSize, pageSizeValues, resizeMethod, responsivePager, rounded, class/userClass); confirmed the component defines no outputs (all "grid events" live on companion directives)

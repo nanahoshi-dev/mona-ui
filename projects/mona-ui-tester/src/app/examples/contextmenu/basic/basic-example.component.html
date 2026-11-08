@@ -4,7 +4,7 @@
     <span aria-live="polite" class="text-sm">Last action: {{ lastAction() }}</span>
 </div>
 
-<mona-contextmenu ariaLabel="File actions" [target]="file" (menuClick)="lastAction.set($event.label)">
+<mona-contextmenu aria-label="File actions" [target]="file" (menuClick)="lastAction.set($event.label)">
     <mona-contextmenu-item label="Open" />
     <mona-contextmenu-item label="Open with">
         <mona-contextmenu-item label="Viewer" />

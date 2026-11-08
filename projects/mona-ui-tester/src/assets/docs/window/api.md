@@ -12,7 +12,7 @@ Everything below is imported from `@nanahoshi/mona-ui/window`.
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `ariaLabel` | `string` | — | Accessible name for the window when it has no `title` or title template. |
+| `aria-label` | `string \| undefined` | `undefined` | Accessible name for the window when it has no `title` or title template. |
 | `closable` | `boolean` | `true` | Sets the visibility of the close button in the window header. |
 | `closeOnEscape` | `boolean` | `true` | Sets whether the window should close when the escape key is pressed. |
 | `draggable` | `boolean` | `true` | Sets whether the window can be dragged by the user. |

@@ -195,7 +195,7 @@ interface TreeItem {
         <mona-tree-view
             [data]="data"
             textField="text"
-            [ariaLabel]="ariaLabel()"
+            [aria-label]="ariaLabel()"
             monaTreeViewFilterable
         />
     `,

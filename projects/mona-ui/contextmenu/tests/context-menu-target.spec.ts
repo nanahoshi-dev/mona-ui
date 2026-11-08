@@ -15,7 +15,7 @@ import { ContextMenuItemComponent } from "../components/contextmenu-item/context
         @if (shown()) {
             <mona-contextmenu
                 [target]="target() === 'first' ? first : target() === 'second' ? second : region"
-                [ariaLabel]="ariaLabel()">
+                [aria-label]="ariaLabel()">
                 <mona-contextmenu-item label="Copy"></mona-contextmenu-item>
                 <mona-contextmenu-item label="Paste"></mona-contextmenu-item>
             </mona-contextmenu>

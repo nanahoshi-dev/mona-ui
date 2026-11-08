@@ -14,8 +14,8 @@ Everything below is imported from `@nanahoshi/mona-ui/tree-view`.
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `animate` | `boolean` | `true` | Enables CSS transitions when nodes expand or collapse. Accepts the attribute form (`animate="false"`). |
-| `ariaLabel` | `string` | `""` | Accessible name of the tree. Describe what the tree represents; it also names the filter input ("Filter {name}"). Set this or `ariaLabelledBy`: an unnamed tree logs a warning in development. A plain `aria-label` attribute on `mona-tree-view` doesn't name the tree. |
-| `ariaLabelledBy` | `string` | `""` | Id of the element that names the tree, as an alternative to `ariaLabel`. |
+| `aria-label` | `string` | `""` | Accessible name of the tree. Describe what the tree represents; it also names the filter input ("Filter {name}"). Set this or `aria-labelledby`: an unnamed tree logs a warning in development. A plain `aria-label` attribute on `mona-tree-view` doesn't name the tree. |
+| `aria-labelledby` | `string` | `""` | Id of the element that names the tree, as an alternative to `aria-label`. |
 | `children` | `ChildrenSelector<T>` | `""` | Property name or accessor used to derive a node's children from a data item. Accepts a property name, a function returning the children, or a function returning an observable of the children. |
 | `data` | `Iterable<T>` | `[]` | Collection of items to render. |
 | `hasChildren` | `Predicate<T> \| null` | `null` | Predicate that determines whether a node has children. Required when the children selector returns an observable. |

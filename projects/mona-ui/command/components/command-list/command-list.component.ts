@@ -10,6 +10,7 @@ import { CommandComponent } from "../command/command.component";
     selector: "mona-command-list",
     templateUrl: "./command-list.component.html",
     host: {
+        "[attr.aria-label]": "null",
         class: "flex min-h-0 flex-1 flex-col"
     }
 })
@@ -18,5 +19,5 @@ export class CommandListComponent {
     protected readonly root = inject(CommandComponent);
 
     /** @description The accessible name of the list. */
-    public readonly ariaLabel = input<string>();
+    public readonly ariaLabel = input<string | undefined>(undefined, { alias: "aria-label" });
 }

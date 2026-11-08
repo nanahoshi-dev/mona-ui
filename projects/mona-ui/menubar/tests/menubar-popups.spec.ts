@@ -9,7 +9,7 @@ import { ContextMenuItemComponent } from "../../contextmenu/components/contextme
 @Component({
     imports: [MenubarComponent, MenuComponent, MenuItemComponent],
     template: `
-        <mona-menubar ariaLabel="Application">
+        <mona-menubar aria-label="Application">
             <mona-menu text="File">
                 <mona-menu-item label="New"></mona-menu-item>
                 <mona-menu-item label="Open"></mona-menu-item>

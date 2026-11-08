@@ -237,7 +237,7 @@ dialogRef.close(42);
 
 ### Live vs. one-shot inputs
 
-After the dialog opens, `<mona-dialog>` keeps `actions`, `actionsLayout`, `ariaLabel`, `closable`, `description`, `rounded`, `text`, `title`, and `type` reactive — changing any of them re-renders the open dialog in place.
+After the dialog opens, `<mona-dialog>` keeps `actions`, `actionsLayout`, `aria-label`, `closable`, `description`, `rounded`, `text`, `title`, and `type` reactive — changing any of them re-renders the open dialog in place.
 
 All other inputs (`height`, `width`, `top`, `left`, `minHeight`, `minWidth`, `maxHeight`, `maxWidth`, `focusedElement`, `closeOnEscape`, `modal`, and every `*Template` projected via content) are read once when the dialog opens. Changing them afterward has no effect on the already-open dialog.
 
@@ -287,11 +287,11 @@ A modal dialog keeps focus inside itself for as long as it is open — Tab and S
 |--------------------|-------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
 | `role`             | Always                                                                  | `"alertdialog"` when `type` is `"confirm"`, `"error"`, or `"warning"`; `"dialog"` otherwise |
 | `aria-labelledby`  | When `title` or a `monaDialogTitleTemplate` is present                  | ID of the title element                                                                     |
-| `aria-label`       | When there is no title                                                  | `ariaLabel`                                                                                 |
+| `aria-label`       | When there is no title                                                  | The `aria-label` input, or the `ariaLabel` setting                                           |
 | `aria-describedby` | Only when `description` or a `monaDialogDescriptionTemplate` is present | ID of the description element                                                               |
 | `aria-modal`       | When `modal` is `true`                                                  | `"true"`                                                                                    |
 
-Every dialog needs an accessible name: a `title`, a title template, or `ariaLabel`. In development mode, a dialog without one logs a warning.
+Every dialog needs an accessible name: a `title`, a title template, or `aria-label` (`ariaLabel` in the service settings). In development mode, a dialog without one logs a warning.
 
 <!-- verification-checklist
 - [x] Batch 5 (module 11): close contract (action$/close$/result/closed$), confirm/alert, DIALOG_DATA, injector, component content, ariaLabel, aria-modal, default action, inert, non-modal focus, strategy positioning and viewport caps verified against dialog sources and dialog/tests/dialog-close-contract.spec.ts

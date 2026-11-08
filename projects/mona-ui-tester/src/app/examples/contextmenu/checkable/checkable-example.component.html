@@ -3,7 +3,7 @@
     <span class="text-sm">Preview pane: {{ previewPane() ? "on" : "off" }}. Sorted by {{ sortField() }}.</span>
 </div>
 
-<mona-contextmenu ariaLabel="View options" [target]="folder">
+<mona-contextmenu aria-label="View options" [target]="folder">
     <mona-contextmenu-checkbox-item label="Preview pane" [(checked)]="previewPane" />
     <mona-contextmenu-separator />
     <mona-contextmenu-radio-group title="Sort by" [(value)]="sortField">

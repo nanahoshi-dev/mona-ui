@@ -63,7 +63,7 @@ Large projected content scrolls inside the Sheet while its header and close butt
 
 ### Custom projected content
 
-Any Angular content can be projected. If a visible title is not appropriate, provide `ariaLabel` so the sheet still has an accessible name — Sheet content must have either a `title` or an `ariaLabel`. This sheet has no close button, so it closes on Escape, a backdrop click, or choosing a page.
+Any Angular content can be projected. If a visible title is not appropriate, provide `aria-label` so the sheet still has an accessible name — Sheet content must have either a `title` or an `aria-label`. This sheet has no close button, so it closes on Escape, a backdrop click, or choosing a page.
 
 ```example
 sheet/navigation
@@ -89,7 +89,7 @@ protected onSheetClose(event: PopupCloseEvent): void {
 
 `side` is read once, on the first render, and fixes the viewport edge the sheet is attached to, the direction it slides in and out, and the edge its border is on. `start` and `end` are resolved against the direction at that moment. Changing `side` or the direction on an open sheet has no effect — close the sheet and reopen it.
 
-Every other input is live: `title`, `description`, `ariaLabel`, and `closable` re-render as usual, `width` and `height` resize the open sheet, and `closeOnEscape` and `closeOnBackdropClick` apply from the moment they change.
+Every other input is live: `title`, `description`, `aria-label`, and `closable` re-render as usual, `width` and `height` resize the open sheet, and `closeOnEscape` and `closeOnBackdropClick` apply from the moment they change.
 
 ### `close` fires for every close path
 
@@ -121,9 +121,9 @@ Sheet traps focus inside itself for as long as it is open — Tab and Shift+Tab 
 | `aria-modal`       | Always                         | `"true"`                      |
 | `aria-labelledby`  | Only when `title` is set       | ID of the title element       |
 | `aria-describedby` | Only when `description` is set | ID of the description element |
-| `aria-label`       | Only when `title` is absent    | The `ariaLabel` input         |
+| `aria-label`       | Only when `title` is absent    | The `aria-label` input         |
 
-Sheet content must have either a `title` or an `ariaLabel` so that the modal has an accessible name. In development mode, a sheet without one logs a warning.
+Sheet content must have either a `title` or an `aria-label` so that the modal has an accessible name. In development mode, a sheet without one logs a warning.
 
 <!-- verification-checklist
 - [x] SheetComponent inputs and defaults verified against sheet.component.ts source, including the horizontal-vs-vertical width/height defaults resolved in #open()

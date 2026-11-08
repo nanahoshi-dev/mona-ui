@@ -125,7 +125,7 @@ Classes on `mona-command` and its parts add to their own, so `class="border-0"` 
 
 - The input is a `combobox` that controls a `listbox`, and it points at the active item with `aria-activedescendant`.
 - The number of results is announced through a polite live region after each search. The announcement waits while `loading` is on.
-- The default labels come from the `command` messages, and `ariaLabel` on `mona-command-input`, `mona-command-list` and `mona-command-dialog` replaces them. Name an input for what it searches.
+- The default labels come from the `command` messages, and `aria-label` on `mona-command-input`, `mona-command-list` and `mona-command-dialog` replaces them. Name an input for what it searches.
 - `mona-command-dialog` is modal: the rest of the page is inert, focus moves to the input, and focus returns to where it was when the dialog closes.
 - The active item uses the system highlight color in forced colors.
 - The spoken key names in `mona-command-shortcut` are in English. Give the item an `aria-label` where that matters.

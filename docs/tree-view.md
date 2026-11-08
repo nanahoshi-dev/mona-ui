@@ -30,7 +30,7 @@ interface FileNode {
     imports: [TreeViewComponent, TreeViewExpandableDirective],
     template: `
         <mona-tree-view
-            ariaLabel="Project files"
+            aria-label="Project files"
             textField="name"
             children="items"
             [data]="files"
@@ -55,16 +55,16 @@ export class FilesComponent {
 
 ## 2. Labelling
 
-Name the tree with the `ariaLabel` input, or point `ariaLabelledBy` at a visible heading:
+Name the tree with the `aria-label` input, or point `aria-labelledby` at a visible heading:
 
 ```html
 <h2 id="files-heading">Project files</h2>
-<mona-tree-view ariaLabelledBy="files-heading" textField="name" [data]="files"></mona-tree-view>
+<mona-tree-view aria-labelledby="files-heading" textField="name" [data]="files"></mona-tree-view>
 ```
 
 - These are inputs, not ARIA attributes. A plain `aria-label` attribute on `mona-tree-view` stays on the host element, which has no role, so it **doesn't name the tree**.
 - In development, a tree with neither input logs a console warning ("A tree view needs an accessible name").
-- The filter input is named "Filter {name}" from `ariaLabel`, or from the text of the `ariaLabelledBy` elements.
+- The filter input is named "Filter {name}" from `aria-label`, or from the text of the `aria-labelledby` elements.
 - Each node is named by its own content (its text, or what the node template renders). The expand button and nested nodes aren't part of the name.
 
 ---
@@ -75,7 +75,7 @@ Each feature finds nodes by a key: `expandBy`, `selectBy`, `checkBy` and `disabl
 
 ```html
 <mona-tree-view
-    ariaLabel="Departments"
+    aria-label="Departments"
     textField="name"
     children="teams"
     [data]="departments()"
@@ -104,7 +104,7 @@ Use a stable scalar such as an id. Object keys only match the same object instan
 
 ```html
 <mona-tree-view
-    ariaLabel="Categories"
+    aria-label="Categories"
     textField="name"
     children="items"
     [data]="categories"
@@ -127,7 +127,7 @@ Use a stable scalar such as an id. Object keys only match the same object instan
 
 ```html
 <mona-tree-view
-    ariaLabel="Permissions"
+    aria-label="Permissions"
     textField="name"
     children="items"
     [data]="permissions"
@@ -149,7 +149,7 @@ Use a stable scalar such as an id. Object keys only match the same object instan
 
 ```html
 <mona-tree-view
-    ariaLabel="Settings"
+    aria-label="Settings"
     textField="name"
     children="items"
     [data]="settings"
@@ -166,7 +166,7 @@ Disabled nodes have `aria-disabled="true"`. They can still receive focus, but ca
 
 ```html
 <mona-tree-view
-    ariaLabel="Project files"
+    aria-label="Project files"
     textField="name"
     children="items"
     [data]="files"
@@ -207,7 +207,7 @@ import type { Observable } from "rxjs";
     imports: [TreeViewComponent, TreeViewExpandableDirective],
     template: `
         <mona-tree-view
-            ariaLabel="Folders"
+            aria-label="Folders"
             textField="name"
             [data]="roots()"
             [children]="loadChildren"
@@ -257,7 +257,7 @@ A keyboard move emits the same `(nodeDrop)` as a drop, with the `KeyboardEvent` 
 ## 11. Node Template
 
 ```html
-<mona-tree-view ariaLabel="Project files" textField="name" children="items" [data]="files">
+<mona-tree-view aria-label="Project files" textField="name" children="items" [data]="files">
     <ng-template monaTreeViewNodeTemplate [monaTreeViewNodeTemplateOf]="files" let-file>
         <svg lucideFile [size]="16" aria-hidden="true"></svg>
         <span>{{ file.name }}</span>

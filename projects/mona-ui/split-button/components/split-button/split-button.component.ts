@@ -144,7 +144,7 @@ export class SplitButtonComponent implements ButtonGroupMember, SplitButtonVaria
      * Takes precedence over `aria-label` when both are set.
      * @default ""
      */
-    public readonly ariaLabelledby = input<string>("", { alias: "aria-labelledby" });
+    public readonly ariaLabelledBy = input<string>("", { alias: "aria-labelledby" });
 
     /**
      * @description Emitted when the main action button is clicked.

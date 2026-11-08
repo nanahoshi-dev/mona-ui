@@ -303,8 +303,8 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
         @if (treeVisible()) {
             <mona-tree-view
                 [animate]="animate()"
-                [ariaLabel]="ariaLabel()"
-                [ariaLabelledBy]="ariaLabelledBy()"
+                [aria-label]="ariaLabel()"
+                [aria-labelledby]="ariaLabelledBy()"
                 [children]="children()"
                 [data]="$any(treeData())"
                 [hasChildren]="hasChildren()"

@@ -147,7 +147,7 @@ contextmenu/icons
 
 **No open/close output.** `ContextMenuComponent` only exposes `menuClick`. It does not re-emit `PopupMenuComponent`'s `open`/`close`/`navigate` events. If your use case needs to react to the menu opening or closing, use `PopupMenuComponent` directly.
 
-**`ariaLabel` names the menu.** It becomes the menu's `aria-label`. When it's empty, the menu is labelled by the target, if the target has an `id`.
+**`aria-label` names the menu.** The context menu passes it to the menu it opens. When it's empty, the menu is labelled by the target, if the target has an `id`.
 
 **The target can change.** Binding a different element to `target` moves the right-click, the keyboard shortcuts and the ARIA attributes to it. The old target gets its own attributes back, and so does the target when the context menu is destroyed.
 
@@ -209,7 +209,7 @@ contextmenu/icons
 
 **Consumer responsibilities:**
 
-- Provide an accessible name for the `target` element itself (visible text, or its own `aria-label`) — `ContextMenuComponent` does not add one. Its `ariaLabel` input names the menu, not the target.
+- Provide an accessible name for the `target` element itself (visible text, or its own `aria-label`) — `ContextMenuComponent` does not add one. Its `aria-label` input names the menu, not the target.
 - When an item uses a `monaContextMenuTextTemplate` and the item's `label` is left empty, no `aria-label` fallback is applied; ensure the projected template content alone communicates the item (it is read as the item's accessible name via its text content).
 
 <!-- verification-checklist

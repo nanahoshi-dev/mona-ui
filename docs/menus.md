@@ -100,7 +100,7 @@ When a menu closes (Escape, an item, or a click outside that doesn't move focus 
 
 ## 5. Names and ARIA
 
-- **The menu** is labelled by its trigger: the target's `id` (a context menu), the top-level item (a menubar menu), or the button. A submenu is labelled by its parent item. `ariaLabel` on `mona-contextmenu`, or `aria-label` on `mona-popup-menu`, names it explicitly.
+- **The menu** is labelled by its trigger: the target's `id` (a context menu), the top-level item (a menubar menu), or the button. A submenu is labelled by its parent item. `aria-label` on `mona-contextmenu` or `mona-popup-menu` names it explicitly.
 - **Triggers** say they open a menu: `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` while open. A context menu sets these only on targets whose role allows them (a button, a link, or a `button`, `gridcell`, `link`, `menuitem`, `tab` or `treeitem` role); a plain `div` target gets none, and its menu is still reached through the `ContextMenu` key. `mona-popup-menu` doesn't change your target, so these attributes are yours to set.
 - **Buttons** are named by their content: the `text`, or what a text template renders. Set `aria-label` only when the content isn't a name, as with `iconOnly`. The split button's arrow is named from the main button's text ("More Save options", translated), and the pair is a `role="group"`.
 - **Items** are named by their `label`. With a text template and no `label`, the template's text is the name.

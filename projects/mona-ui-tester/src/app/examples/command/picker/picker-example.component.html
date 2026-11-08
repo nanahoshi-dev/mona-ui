@@ -2,7 +2,7 @@
 
 <mona-popover #popover="monaPopover" position="bottom" [target]="assign">
     <mona-command class="w-64 border-0" (itemSelect)="assignee.set($event.value); popover.close()">
-        <mona-command-input ariaLabel="Find a person" placeholder="Find a person…" />
+        <mona-command-input aria-label="Find a person" placeholder="Find a person…" />
         <mona-command-list>
             <mona-command-empty />
             @for (person of people; track person) {

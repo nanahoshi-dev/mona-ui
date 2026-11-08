@@ -49,7 +49,11 @@ const LOADING_ANNOUNCEMENT_DELAY = 400;
     selector: "mona-tree-view",
     imports: [FilterInputComponent, PlaceholderComponent, TreeComponent, TreeNodeTemplateDirective, NgTemplateOutlet],
     templateUrl: "./tree-view.component.html",
-    providers: [TreeService]
+    providers: [TreeService],
+    host: {
+        "[attr.aria-label]": "null",
+        "[attr.aria-labelledby]": "null"
+    }
 })
 export class TreeViewComponent<T> implements ITreeView<T> {
     readonly #announcer = inject(LiveAnnouncer);
@@ -64,7 +68,7 @@ export class TreeViewComponent<T> implements ITreeView<T> {
     protected readonly emptyText = computed(() =>
         this.treeService.isTreeFiltered() ? this.messages().noMatches : this.messages().noData
     );
-    /** "Filter {name}", from the tree's `ariaLabel` or else the text of its `ariaLabelledBy` elements. */
+    /** "Filter {name}", from the tree's `aria-label` or else the text of its `aria-labelledby` elements. */
     protected readonly filterAriaLabel = computed<string>(() => {
         const name = this.ariaLabel().trim() || this.#labelledByText();
         return name ? this.messages().filterLabel(name) : this.messages().filterTree;
@@ -87,17 +91,17 @@ export class TreeViewComponent<T> implements ITreeView<T> {
 
     /**
      * @description Accessible name of the tree. Describe what the tree represents; it also names the filter input
-     * ("Filter {name}"). Set this or `ariaLabelledBy`: an unnamed tree logs a warning in development. A plain
+     * ("Filter {name}"). Set this or `aria-labelledby`: an unnamed tree logs a warning in development. A plain
      * `aria-label` attribute on `mona-tree-view` doesn't name the tree.
      * @default ""
      */
-    public readonly ariaLabel = input<string>("");
+    public readonly ariaLabel = input<string>("", { alias: "aria-label" });
 
     /**
-     * @description Id of the element that names the tree, as an alternative to `ariaLabel`.
+     * @description Id of the element that names the tree, as an alternative to `aria-label`.
      * @default ""
      */
-    public readonly ariaLabelledBy = input<string>("");
+    public readonly ariaLabelledBy = input<string>("", { alias: "aria-labelledby" });
 
     /**
      * @description Emitted when the tree-view loses focus.
@@ -316,7 +320,7 @@ export class TreeViewComponent<T> implements ITreeView<T> {
             return;
         }
         console.warn(
-            "[Mona TreeView] A tree view needs an accessible name. Set ariaLabel or ariaLabelledBy.",
+            "[Mona TreeView] A tree view needs an accessible name. Set aria-label or aria-labelledby.",
             this.#hostElementRef.nativeElement
         );
     }

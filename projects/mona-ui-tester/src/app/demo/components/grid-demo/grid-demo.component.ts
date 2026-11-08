@@ -475,7 +475,7 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
         }
 
         <mona-grid
-            ariaLabel="Orders"
+            aria-label="Orders"
             [data]="effectiveGridData"
             [(pageSize)]="pageSize"
             [(skip)]="skip"

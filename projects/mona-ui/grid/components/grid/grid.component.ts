@@ -153,6 +153,8 @@ const TOOLBAR_ITEM_SELECTOR =
         SpinnerComponent
     ],
     host: {
+        "[attr.aria-label]": "null",
+        "[attr.aria-labelledby]": "null",
         "[class]": "baseClass()",
         "[attr.data-uid]": "uid"
     }
@@ -391,17 +393,17 @@ export class GridComponent<T> implements GridVariantInput {
     protected readonly uid = v4();
 
     /**
-     * @description The grid's accessible name, such as "Orders". Use it, or `ariaLabelledBy`, rather than
-     * an `aria-label` attribute on the host, which names nothing.
+     * @description The grid's accessible name, such as "Orders". Use it, or `aria-labelledby`. The grid moves
+     * the name to its `role="grid"` element, so the host keeps no `aria-label` attribute.
      * @default null
      */
-    public readonly ariaLabel = input<string | null>(null);
+    public readonly ariaLabel = input<string | null>(null, { alias: "aria-label" });
 
     /**
      * @description The id of the element that names the grid, such as a heading above it.
      * @default null
      */
-    public readonly ariaLabelledBy = input<string | null>(null);
+    public readonly ariaLabelledBy = input<string | null>(null, { alias: "aria-labelledby" });
 
     /**
      * @description The row data to be displayed in the grid.

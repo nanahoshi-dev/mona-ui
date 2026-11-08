@@ -38,8 +38,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `ariaLabel` | `string \| null` | `null` | The grid's accessible name, such as "Orders". Use it, or `ariaLabelledBy`, rather than an `aria-label` attribute on the host, which names nothing. |
-| `ariaLabelledBy` | `string \| null` | `null` | The id of the element that names the grid, such as a heading above it. |
+| `aria-label` | `string \| null` | `null` | The grid's accessible name, such as "Orders". Use it, or `aria-labelledby`. The grid moves the name to its `role="grid"` element, so the host keeps no `aria-label` attribute. |
+| `aria-labelledby` | `string \| null` | `null` | The id of the element that names the grid, such as a heading above it. |
 | `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
 | `data` | `Iterable<T>` | `[]` | The row data to be displayed in the grid. |
 | `expandedKeys` (two-way) | `unknown[]` | `[]` | Keys of the rows whose detail row is open: `rowKey` values, or the data items when the grid has no `rowKey`. Supports two-way binding; `expandedKeysChange` emits when the user opens or closes one. |

@@ -12,7 +12,7 @@ Everything below is imported from `@nanahoshi/mona-ui/sheet`.
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `ariaLabel` | `string` | — | Accessible name used when no visible title is provided. |
+| `aria-label` | `string \| undefined` | `undefined` | Accessible name used when no visible title is provided. |
 | `class` | `ClassInputType` | `undefined` | Additional CSS classes merged onto the sheet panel via `tailwind-merge`. |
 | `closable` | `boolean` | `true` | Whether the close button is displayed. |
 | `closeOnBackdropClick` | `boolean` | `true` | Whether clicking the backdrop requests that the sheet close. |

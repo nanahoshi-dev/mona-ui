@@ -37,7 +37,7 @@ type Order = {
     selector: "app-orders",
     imports: [GridColumnComponent, GridComponent],
     template: `
-        <mona-grid ariaLabel="Orders" rowKey="orderId" [data]="orders()">
+        <mona-grid aria-label="Orders" rowKey="orderId" [data]="orders()">
             <mona-grid-column field="orderId" title="Order ID" type="number" />
             <mona-grid-column field="shipName" title="Ship name" />
             <mona-grid-column field="freight" title="Freight" type="number" aggregate="sum" />
@@ -278,7 +278,7 @@ const orderSchema = (row: SchemaPathTree<Order>): void => {
     ],
     template: `
         <mona-grid
-            ariaLabel="Orders"
+            aria-label="Orders"
             rowKey="orderId"
             [data]="orders()"
             [monaGridEditable]="editOptions"
@@ -376,7 +376,7 @@ Add `monaGridServerBinding` when `data` holds only the page your server returned
 
 ```html
 <mona-grid
-    ariaLabel="Users"
+    aria-label="Users"
     rowKey="id"
     class="h-96"
     [data]="result().data"
@@ -511,11 +511,11 @@ The grid is one Tab stop. <kbd>Tab</kbd> moves into the grid at the cell that la
 
 ## 10. Labelling
 
-**Name the grid.** The grid element has no name of its own. Set `ariaLabel`, or `ariaLabelledBy` with the id of a visible heading. An `aria-label` attribute on `<mona-grid>` names nothing, because the `role="grid"` element is inside it.
+**Name the grid.** The grid element has no name of its own. Set `aria-label`, or `aria-labelledby` with the id of a visible heading. Both are inputs: the grid moves the name to its inner `role="grid"` element and leaves none on `<mona-grid>`.
 
 ```html
 <h2 id="orders-heading">Open orders</h2>
-<mona-grid ariaLabelledBy="orders-heading" [data]="orders()"></mona-grid>
+<mona-grid aria-labelledby="orders-heading" [data]="orders()"></mona-grid>
 ```
 
 **Give every column a `title`**, even when a header template draws the header. The title names:
@@ -582,7 +582,7 @@ The full list is in `GRID_DEFAULT_MESSAGES`, exported from `@nanahoshi/mona-ui/g
 ```html
 <mona-grid
     class="h-128"
-    ariaLabel="Log entries"
+    aria-label="Log entries"
     rowKey="id"
     [data]="entries()"
     [monaGridVirtualScroll]="{ height: 40 }"

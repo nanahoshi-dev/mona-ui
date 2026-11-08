@@ -181,7 +181,7 @@ export class WindowDemoComponent extends AbstractDemoComponent<WindowComponent> 
         <button monaButton (click)="openWindow()">Open via Window Service</button>
         @if (windowVisible()) {
             <mona-window
-                [ariaLabel]="ariaLabel()"
+                [aria-label]="ariaLabel()"
                 [closable]="closable()"
                 [closeOnEscape]="closeOnEscape()"
                 [draggable]="draggable()"

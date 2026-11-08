@@ -13,7 +13,7 @@ Mona UI is an Angular component library styled with Tailwind CSS 4. Its componen
 
 - Importing from `@nanahoshi/mona-ui` instead of an entry point such as `@nanahoshi/mona-ui/grid`.
 - Leaving out `@nanahoshi/mona-ui/styles.css`, or importing it before Tailwind.
-- Treating a `placeholder` as a label. Give each control a name: a `<label for>` pointed at its input id, `aria-label` or `aria-labelledby`.
+- Treating a `placeholder` as a label. Give each control a name: a `<label for>` pointed at its input id, `aria-label` or `aria-labelledby`. Those two are inputs on every component that takes a name, and the component moves them to the element that has the role.
 - Expecting the grid, list box or tabs to change their data. They report the change through an event, and you write it back to the data you bound.
 - Putting `[disabled]` on a `monaTooltip` that sits on a button: it disables the button too. Use `[tooltipDisabled]`.
 - Using the rich text editor without its extra styles: `@import "remixicon/fonts/remixicon.css";` and `@plugin "@tailwindcss/typography";`.

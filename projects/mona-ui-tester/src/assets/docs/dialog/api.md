@@ -14,7 +14,7 @@ Everything below is imported from `@nanahoshi/mona-ui/dialog`.
 | --- | --- | --- | --- |
 | `actions` | `Iterable<DialogAction>` | `[]` | Sets the actions of the dialog. |
 | `actionsLayout` | `ActionsLayout` | `"end"` | Sets the layout of the actions in the dialog footer. |
-| `ariaLabel` | `string` | — | Accessible name for the dialog when it has no `title` or title template. |
+| `aria-label` | `string \| undefined` | `undefined` | Accessible name for the dialog when it has no `title` or title template. |
 | `closable` | `boolean` | `true` | Sets the visibility of the close button in the dialog header. |
 | `closeOnEscape` | `boolean` | `true` | Sets whether the dialog should close when the escape key is pressed. |
 | `description` | `string` | — | Sets the description of the dialog. |

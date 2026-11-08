@@ -57,6 +57,7 @@ import {
     imports: [ButtonDirective, CdkTrapFocus, LucideX],
     templateUrl: "./sheet.component.html",
     host: {
+        "[attr.aria-label]": "null",
         class: "hidden"
     }
 })
@@ -103,7 +104,7 @@ export class SheetComponent implements Omit<SheetVariantInput, "side"> {
     protected readonly titleId = createElementControlId();
 
     /** @description Accessible name used when no visible title is provided. */
-    public readonly ariaLabel = input<string>();
+    public readonly ariaLabel = input<string | undefined>(undefined, { alias: "aria-label" });
 
     /** @description Whether the close button is displayed. @default true */
     public readonly closable = input(true);
@@ -178,7 +179,7 @@ export class SheetComponent implements Omit<SheetVariantInput, "side"> {
         this.#openedSide = side;
         this.#horizontal = side === "left" || side === "right";
         if (isDevMode() && !this.title() && !this.ariaLabel()) {
-            console.warn("[Mona Sheet] A sheet needs an accessible name. Set title or ariaLabel.");
+            console.warn("[Mona Sheet] A sheet needs an accessible name. Set a title or aria-label.");
         }
 
         this.#popupRef = this.#popupService.create({

@@ -12,7 +12,7 @@ Everything below is imported from `@nanahoshi/mona-ui/contextmenu`.
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `ariaLabel` | `string` | `""` | Accessible name for the menu. When empty, the menu is named by the target if it has an `id`. |
+| `aria-label` | `string` | `""` | Accessible name for the menu. When empty, the menu is named by the target if it has an `id`. |
 | `items` | `Iterable<PopupMenuItem>` | `[]` | The menu items to render. When provided, these take precedence over content-projected `mona-contextmenu-item` (and related) components. |
 | `minWidth` | `string \| number` | — | Sets the minimum width of the context menu. This will be applied to the root menu and all submenus. |
 | `rounded` | `"large" \| "medium" \| "none" \| "small"` | `"medium"` | Sets the rounded state of the context menu. |

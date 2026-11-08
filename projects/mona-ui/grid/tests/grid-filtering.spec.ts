@@ -21,7 +21,7 @@ interface FilterRow {
     imports: [GridColumnComponent, GridComponent, GridFilterableDirective],
     template: `
         <mona-grid
-            ariaLabel="Orders"
+            aria-label="Orders"
             [data]="rows"
             [rowKey]="'id'"
             [pageSize]="50"

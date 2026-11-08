@@ -249,7 +249,7 @@ export class DialogContentComponent {
             return;
         }
         console.warn(
-            "[Mona Dialog] A dialog needs an accessible name. Set title, titleTemplate or ariaLabel.",
+            "[Mona Dialog] A dialog needs an accessible name. Set a title, a title template or aria-label (ariaLabel in the service settings).",
             this.#hostElementRef.nativeElement
         );
     }

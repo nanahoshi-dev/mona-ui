@@ -112,7 +112,7 @@ export class DropdownButtonComponent implements ButtonGroupMember, DropdownButto
      * Takes precedence over `aria-label` when both are set.
      * @default ""
      */
-    public readonly ariaLabelledby = input<string>("", { alias: "aria-labelledby" });
+    public readonly ariaLabelledBy = input<string>("", { alias: "aria-labelledby" });
 
     /**
      * @description Renders the button with reduced visual emphasis and removes pointer interaction. Disabling the

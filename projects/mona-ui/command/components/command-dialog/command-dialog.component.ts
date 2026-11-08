@@ -37,6 +37,7 @@ const TOP_OF_VIEWPORT = 0.12;
     imports: [A11yModule, NgTemplateOutlet],
     templateUrl: "./command-dialog.component.html",
     host: {
+        "[attr.aria-label]": "null",
         class: "hidden"
     }
 })
@@ -54,7 +55,7 @@ export class CommandDialogComponent {
     protected readonly panelClass = computed(() => commandDialogPanelThemeVariants());
 
     /** @description The accessible name of the dialog. */
-    public readonly ariaLabel = input<string>();
+    public readonly ariaLabel = input<string | undefined>(undefined, { alias: "aria-label" });
     /** @description Whether the dialog is open. */
     public readonly open = model(false);
     /**

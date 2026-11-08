@@ -191,7 +191,7 @@ After an action, focus stays on the button that ran it while that button is stil
 | Attribute                        | When present                                   | Value                                                          |
 |----------------------------------|------------------------------------------------|----------------------------------------------------------------|
 | `role`                           | Always, on the inner list element (even empty) | `"listbox"`                                                    |
-| `aria-label`                     | When `ariaLabel`/`aria-label` is set           | The provided string (on the listbox, not on the host)          |
+| `aria-label`                     | When `aria-label` is set           | The provided string (on the listbox, not on the host)          |
 | `aria-labelledby`                | When `aria-labelledby` is set                  | The provided ids (on the listbox, not on the host)             |
 | `aria-multiselectable`           | In multiple selection                          | `"true"`                                                       |
 | `aria-describedby`               | On an empty listbox                            | The "No data" text (or the `monaListBoxNoDataTemplate`)         |

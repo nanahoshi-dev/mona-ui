@@ -126,7 +126,7 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
      * @description The ids of the elements that name the root menu. When neither this nor `aria-label` is set, the
      * menu is named by the target element if it has an id.
      */
-    public readonly ariaLabelledby = input("", { alias: "aria-labelledby" });
+    public readonly ariaLabelledBy = input("", { alias: "aria-labelledby" });
 
     /**
      * @description The event that is emitted when the popup menu is closed.
@@ -363,7 +363,7 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
             initialFocus: this.#pendingInitialFocus,
             isRoot: true,
             items: this.menuItems,
-            labelledBy: this.ariaLabelledby() || targetId || null,
+            labelledBy: this.ariaLabelledBy() || targetId || null,
             level: 0,
             menuId: this.menuId(),
             menuItemClick$: this.#menuItemClick$,

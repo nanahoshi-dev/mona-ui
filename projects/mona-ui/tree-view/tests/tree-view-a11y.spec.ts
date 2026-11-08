@@ -55,8 +55,8 @@ const OFF = { enabled: false };
     template: `
         <span id="food-label">Food</span>
         <mona-tree-view
-            [ariaLabel]="ariaLabel()"
-            [ariaLabelledBy]="ariaLabelledBy()"
+            [aria-label]="ariaLabel()"
+            [aria-labelledby]="ariaLabelledBy()"
             [data]="data()"
             children="children"
             textField="text"
@@ -88,7 +88,7 @@ class FeaturesHostComponent {
     imports: [TreeViewComponent, TreeViewExpandableDirective],
     template: `
         <mona-tree-view
-            ariaLabel="Food"
+            aria-label="Food"
             [data]="data"
             [children]="children"
             [hasChildren]="hasChildren"
@@ -117,7 +117,7 @@ class LazyHostComponent {
 @Component({
     imports: [TreeViewComponent, TreeViewNodeTemplateDirective],
     template: `
-        <mona-tree-view ariaLabel="Food" [data]="data" children="children" textField="text">
+        <mona-tree-view aria-label="Food" [data]="data" children="children" textField="text">
             <ng-template monaTreeViewNodeTemplate [monaTreeViewNodeTemplateOf]="data" let-food let-element="element">
                 <span class="typed">{{ food.text.toUpperCase() }} {{ element.tagName.toLowerCase() }}</span>
             </ng-template>
@@ -231,12 +231,13 @@ describe("tree view accessibility", () => {
 
         it("names the tree, and each node by its text alone", () => {
             expect(tree().getAttribute("aria-label")).toBe("Food");
+            expect(root.querySelector("mona-tree-view")?.hasAttribute("aria-label")).toBe(false);
             const fruits = rowOf(root, "Fruits");
             // The expander's "Collapse Fruits" and the nested nodes aren't part of the node's name.
             expect(referenced(fruits, "aria-labelledby")).toBe("Fruits");
         });
 
-        it("takes its name from ariaLabelledBy", async () => {
+        it("takes its name from aria-labelledby", async () => {
             host.ariaLabel.set("");
             host.ariaLabelledBy.set("food-label");
             await settle(fixture);

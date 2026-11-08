@@ -9,8 +9,8 @@
     [toggleable]="false"
     aria-haspopup="menu"
     [id]="buttonId"
-    [attr.aria-label]="ariaLabelledby() ? null : ariaLabel() || null"
-    [attr.aria-labelledby]="ariaLabelledby() || null"
+    [attr.aria-label]="ariaLabelledBy() ? null : ariaLabel() || null"
+    [attr.aria-labelledby]="ariaLabelledBy() || null"
     [attr.aria-expanded]="isMenuOpen()"
     [attr.aria-controls]="isMenuOpen() ? menuId : null"
     #dropdownButton>

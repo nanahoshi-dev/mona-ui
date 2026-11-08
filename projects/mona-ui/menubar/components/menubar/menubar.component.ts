@@ -58,6 +58,8 @@ import { MenuComponent } from "../menu/menu.component";
         PopupMenuGroupTemplateDirective
     ],
     host: {
+        "[attr.aria-label]": "null",
+        "[attr.aria-labelledby]": "null",
         "[class]": "baseClasses()",
         "[attr.data-disabled]": "disabled()"
     }
@@ -115,12 +117,12 @@ export class MenubarComponent implements MenubarVariantInput {
     /**
      * @description ARIA label for the menubar.
      */
-    public readonly ariaLabel = input<string>("");
+    public readonly ariaLabel = input<string>("", { alias: "aria-label" });
 
     /**
      * @description ARIA labelledby for the menubar.
      */
-    public readonly ariaLabelledby = input<string>("");
+    public readonly ariaLabelledBy = input<string>("", { alias: "aria-labelledby" });
 
     /**
      * @description Sets the disabled state of menubar.

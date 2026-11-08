@@ -104,7 +104,7 @@ The hover example above opens after its target in the reading direction (`positi
 popover/no-title
 ```
 
-A popover is a dialog, and needs a name: a `title`, a title template, or `ariaLabel`. In dev mode, a popover that opens without one logs a warning.
+A popover is a dialog, and needs a name: a `title`, a title template, or `aria-label`. In dev mode, a popover that opens without one logs a warning.
 
 ### Preventing a close
 
@@ -178,7 +178,7 @@ All three are removed when the popover is destroyed or its `target` changes.
 | `role`            | Always                                                     | `"dialog"`                                           |
 | `id`              | Always                                                     | Auto-generated, matches the target's `aria-controls` |
 | `aria-labelledby` | When `title` is non-empty or a title template is projected | The header element's auto-generated id               |
-| `aria-label`      | When there's no title, and `ariaLabel` is set              | `ariaLabel`                                          |
+| `aria-label`      | When there's no title, and `aria-label` is set              | `aria-label`                                          |
 | `tabindex`        | Always                                                     | `"-1"`, so the panel itself can take focus           |
 
 ### Focus
@@ -190,7 +190,7 @@ Popover is non-modal and doesn't trap focus: Tab moves on past its content, and 
 **Consumer responsibilities:**
 
 - Provide an accessible name for the `target` element itself (visible text, or its own `aria-label`) — Popover does not add one.
-- Name the popover with `title`, a title template, or `ariaLabel`.
+- Name the popover with `title`, a title template, or `aria-label`.
 - `role="dialog"` is rendered without `aria-modal`. If your use case requires a modal, focus-trapped experience, use `Dialog` or `Window` instead.
 
 <!-- verification-checklist

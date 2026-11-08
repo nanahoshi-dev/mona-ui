@@ -50,7 +50,7 @@ function foods(): Food[] {
     imports: [TreeViewComponent, TreeViewExpandableDirective, TreeViewDragAndDropDirective, TreeViewDisableDirective],
     template: `
         <mona-tree-view
-            ariaLabel="Food"
+            aria-label="Food"
             [data]="data()"
             children="children"
             textField="text"
@@ -92,7 +92,7 @@ class HostComponent {
     imports: [TreeViewComponent, TreeViewExpandableDirective, TreeViewDragAndDropDirective],
     template: `
         <mona-tree-view
-            ariaLabel="Food"
+            aria-label="Food"
             [data]="data()"
             mode="flat"
             idField="id"

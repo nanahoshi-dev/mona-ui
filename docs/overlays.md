@@ -150,10 +150,10 @@ A non-modal dialog or window traps nothing: Tab can leave it, and the page stays
 
 ## 5. Names
 
-Each overlay renders `role="dialog"` and needs a name: a `title` (or title template), or `ariaLabel` when there's no visible title. In development mode, an overlay without one logs a warning.
+Each overlay renders `role="dialog"` and needs a name: a `title` (or title template), or `aria-label` when there's no visible title (`ariaLabel` in `DialogService` and `WindowService` settings). In development mode, an overlay without one logs a warning.
 
 ```html
-<mona-dialog ariaLabel="Keyboard shortcuts">
+<mona-dialog aria-label="Keyboard shortcuts">
     <ng-template monaDialogContentTemplate>…</ng-template>
 </mona-dialog>
 ```

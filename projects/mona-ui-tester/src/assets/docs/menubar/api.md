@@ -12,8 +12,8 @@ Everything below is imported from `@nanahoshi/mona-ui/menubar`.
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `ariaLabel` | `string` | `""` | ARIA label for the menubar. |
-| `ariaLabelledby` | `string` | `""` | ARIA labelledby for the menubar. |
+| `aria-label` | `string` | `""` | ARIA label for the menubar. |
+| `aria-labelledby` | `string` | `""` | ARIA labelledby for the menubar. |
 | `class` | `string` | `""` | Additional CSS classes to apply to the menubar, merged with the computed theme classes. |
 | `disabled` | `boolean` | `false` | Sets the disabled state of menubar. |
 | `rounded` | `"large" \| "medium" \| "none" \| "small"` | `"medium"` | Sets the rounded style of the menubar. |

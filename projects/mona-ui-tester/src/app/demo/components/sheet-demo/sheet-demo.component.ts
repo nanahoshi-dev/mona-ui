@@ -58,7 +58,7 @@ export class SheetDemoComponent extends AbstractDemoComponent<SheetComponent> {
 
         @if (visible()) {
             <mona-sheet
-                [ariaLabel]="ariaLabel()"
+                [aria-label]="ariaLabel()"
                 [side]="side()"
                 [title]="title()"
                 [description]="description()"

@@ -3,7 +3,7 @@
     <span aria-live="polite" class="text-sm">Last action: {{ lastAction() }}</span>
 </div>
 
-<mona-contextmenu ariaLabel="Edit" [target]="file" (menuClick)="lastAction.set($event.label)">
+<mona-contextmenu aria-label="Edit" [target]="file" (menuClick)="lastAction.set($event.label)">
     <mona-contextmenu-item label="Cut">
         <ng-template monaContextMenuIconTemplate>
             <svg lucideScissors aria-hidden="true" [size]="14"></svg>

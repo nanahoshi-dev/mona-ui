@@ -215,8 +215,8 @@ Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or
 |-------------------|------------------------------------|-------------------------------|
 | `role`            | Always                             | `"menubar"`                   |
 | `aria-disabled`   | Always                             | Reflects the `disabled` input |
-| `aria-label`      | When `ariaLabel` is non-empty      | Value of `ariaLabel`          |
-| `aria-labelledby` | When `ariaLabelledby` is non-empty | Value of `ariaLabelledby`     |
+| `aria-label`      | When `aria-label` is non-empty      | Value of `aria-label`          |
+| `aria-labelledby` | When `aria-labelledby` is non-empty | Value of `aria-labelledby`     |
 
 **Top-level menu** (`role="menuitem"`, one per `mona-menu`):
 
@@ -236,7 +236,7 @@ Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or
 
 **Consumer responsibilities:**
 
-- Provide `[ariaLabel]` or `[ariaLabelledby]` on `<mona-menubar>` when the surrounding page does not already identify the menubar's purpose.
+- Provide `aria-label` or `aria-labelledby` on `<mona-menubar>` when the surrounding page does not already identify the menubar's purpose.
 - When an item uses a `monaMenuItemTextTemplate` and the item's `label` is left empty, no `aria-label` fallback is applied; ensure the projected template content alone communicates the item.
 
 <!-- verification-checklist

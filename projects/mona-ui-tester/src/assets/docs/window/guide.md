@@ -172,7 +172,7 @@ window/service
 
 `top`, `left`, `width`, and `height` are `model()` signals kept reactive for the lifetime of the window: setting any of them after the window opens moves or resizes it immediately, and dragging or resizing updates them back.
 
-Every other input (`ariaLabel`, `closable`, `closeOnEscape`, `draggable`, `focusedElement`, `look`, `maxHeight`, `maxWidth`, `maximizable`, `minHeight`, `minWidth`, `minimizable`, `modal`, `resizable`, `rounded`, `title`, the content, and every `*Template` projected via content) is read once when the window opens. Changing them afterward has no effect on the already-open window.
+Every other input (`aria-label`, `closable`, `closeOnEscape`, `draggable`, `focusedElement`, `look`, `maxHeight`, `maxWidth`, `maximizable`, `minHeight`, `minWidth`, `minimizable`, `modal`, `resizable`, `rounded`, `title`, the content, and every `*Template` projected via content) is read once when the window opens. Changing them afterward has no effect on the already-open window.
 
 ### Reopening with `openWindow()`
 
@@ -225,12 +225,12 @@ Window only traps focus while `modal` is `true`. When it opens, focus moves auto
 | ----------------- | ------------------------------------------------- | ------------------------------------------------ |
 | `role`            | Always                                            | `"dialog"`                                       |
 | `aria-labelledby` | When the window has a `title` or a title template | ID of the title element                          |
-| `aria-label`      | When the window has no title                      | The `ariaLabel` input or setting                 |
+| `aria-label`      | When the window has no title                      | The `aria-label` input, or the `ariaLabel` setting |
 | `aria-modal`      | Always                                            | `"true"` for a modal window, otherwise `"false"` |
 
 Each generated header button (`Minimize`/`Restore`, `Maximize`/`Restore`, `Close window`) has its own `aria-label`. When the window can be dragged or resized, the title bar is a `group` named after the keys it takes (`moveWindow`, `resizeWindow` or `moveOrResizeWindow`, e.g. `"Move window. Use arrow keys to move."`). The resize handles are `aria-hidden`.
 
-A window without a `title`, a title template or an `ariaLabel` has no accessible name. In development mode, such a window logs a warning.
+A window without a `title`, a title template or an `aria-label` (`ariaLabel` in the service settings) has no accessible name. In development mode, such a window logs a warning.
 
 <!-- verification-checklist
 - [x] WindowComponent inputs and defaults verified against window.component.ts source, including the two effect()s covering top/left and height/width, and the one-shot #openWindow() body for every other input
