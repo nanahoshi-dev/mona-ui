@@ -1,0 +1,14 @@
+<button monaButton aria-label="Open menu" type="button" [iconOnly]="true" (click)="open.set(true)">
+    <svg lucideMenu aria-hidden="true" [size]="16"></svg>
+</button>
+
+@if (open()) {
+    <mona-sheet aria-label="Main navigation" side="start" width="16rem" [closable]="false" (closed)="open.set(false)">
+        <nav aria-label="Main" class="flex flex-col gap-1 p-4">
+            @for (page of pages; track page) {
+                <a class="rounded-md px-2 py-1.5 text-sm hover:bg-accent" href="/" (click)="go($event, page)">{{ page }}</a>
+            }
+        </nav>
+    </mona-sheet>
+}
+<p class="mt-2 text-sm">Current page: {{ current() }}</p>

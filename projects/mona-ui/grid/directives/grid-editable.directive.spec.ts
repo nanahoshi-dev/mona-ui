@@ -9,7 +9,7 @@ import { GridEditableDirective } from "./grid-editable.directive";
 @Component({
     imports: [GridColumnComponent, GridComponent, GridEditableDirective],
     template: `
-        <mona-grid ariaLabel="Orders" [data]="rows" [monaGridEditable]="options()">
+        <mona-grid aria-label="Orders" [data]="rows" [monaGridEditable]="options()">
             <mona-grid-column field="name" title="Name"></mona-grid-column>
         </mona-grid>
     `

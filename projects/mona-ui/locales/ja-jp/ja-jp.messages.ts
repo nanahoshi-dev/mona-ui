@@ -175,6 +175,15 @@ export const JA_JP_MESSAGES = {
     comboBox: {
         clear: "クリア"
     },
+    command: {
+        dialogLabel: "コマンドメニュー",
+        inputLabel: "コマンドを検索",
+        listLabel: "結果",
+        loading: "読み込み中",
+        noResults: "結果が見つかりません",
+        placeholder: "コマンドを入力または検索…",
+        resultsAvailable: (count: number) => `${localizeNumber(count)}件の結果があります`
+    },
     datePicker: {
         datePicker: "日付選択",
         openCalendar: "カレンダーを開く"
@@ -331,6 +340,7 @@ export const JA_JP_MESSAGES = {
         filterOperator: (column: string, operator: string) => `${column}のフィルター演算子: ${operator}`,
         filterPlaceholder: "フィルター...",
         group: "グループ",
+        groupOptions: (column: string) => `${column} のグループオプション`,
         loading: "読み込み中",
         modified: "変更済み",
         moveAsNext: "次へ移動",

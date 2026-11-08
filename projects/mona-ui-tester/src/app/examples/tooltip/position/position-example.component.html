@@ -1,0 +1,11 @@
+<div class="flex flex-wrap items-center gap-2">
+    <button #top monaButton type="button">Top</button>
+    <button #bottom monaButton type="button">Bottom</button>
+    <button #start monaButton type="button">Start</button>
+    <button #end monaButton type="button">End</button>
+</div>
+
+<mona-tooltip [target]="top">Opens above</mona-tooltip>
+<mona-tooltip position="bottom" [target]="bottom">Opens below</mona-tooltip>
+<mona-tooltip position="start" [target]="start">Opens before, in the reading direction</mona-tooltip>
+<mona-tooltip position="end" [target]="end">Opens after, in the reading direction</mona-tooltip>

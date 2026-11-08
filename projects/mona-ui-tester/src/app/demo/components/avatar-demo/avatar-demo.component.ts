@@ -40,7 +40,7 @@ export class AvatarDemoComponent extends AbstractDemoComponent<AvatarComponent> 
             },
             image: {
                 type: "string",
-                value: "https://photos.smugmug.com/photos/i-fgmzcP4/0/LcnnHTpqhgGgTjHtbmvtjgmLWrVH2JhVGckRnpZqq/Th/i-fgmzcP4-Th.png"
+                value: "assets/images/avatar-portrait.svg"
             },
             label: {
                 type: "string",
@@ -124,9 +124,7 @@ export class AvatarWrapperComponent implements ComponentInputsAsSignal<AvatarCom
             return `${value}px`;
         }
     });
-    public readonly image = input(
-        "https://photos.smugmug.com/photos/i-fgmzcP4/0/LcnnHTpqhgGgTjHtbmvtjgmLWrVH2JhVGckRnpZqq/Th/i-fgmzcP4-Th.png"
-    );
+    public readonly image = input("assets/images/avatar-portrait.svg");
     public readonly label = input("User Name");
     public readonly labelColor = input("var(--color-primary-foreground)");
     public readonly labelFontSize = input("1.2em");

@@ -1,0 +1,29 @@
+<mona-sidebar-layout class="h-72 border border-border" modalScope="layout">
+    <mona-sidebar id="example-nav" side="start" width="12rem" [(expanded)]="navOpen">
+        <nav monaSidebarContent aria-label="Projects">
+            <ul monaSidebarMenu>
+                @for (project of projects; track project) {
+                    <li monaSidebarMenuItem [active]="project === projects[0]">
+                        <a monaSidebarMenuButton href="/projects" (click)="$event.preventDefault()">{{ project }}</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    </mona-sidebar>
+
+    <div class="gap-2 p-4" monaSidebarInset>
+        <div class="flex gap-2">
+            <button monaButton monaSidebarTrigger for="example-nav" type="button">Projects</button>
+            <button monaButton monaSidebarTrigger for="example-details" type="button">Details</button>
+        </div>
+        <p class="text-sm">Projects open: {{ navOpen() }}, details open: {{ detailsOpen() }}</p>
+    </div>
+
+    <mona-sidebar id="example-details" aria-label="Details" side="end" width="12rem" [(expanded)]="detailsOpen">
+        <div class="space-y-1 p-3 text-sm" monaSidebarContent>
+            <p class="font-semibold">Website redesign</p>
+            <p>Owner: Grace Hopper</p>
+            <p>Due: 14 March</p>
+        </div>
+    </mona-sidebar>
+</mona-sidebar-layout>

@@ -1,0 +1,28 @@
+@if (navigation.currentPage()) {
+    <nav
+        class="mt-12 pt-6 border-t border-border flex flex-wrap items-stretch gap-4"
+        aria-label="Previous and next page">
+        @if (navigation.previousPage(); as page) {
+            <a
+                class="flex items-center gap-2 px-4 py-3 rounded-lg border border-border text-sm hover:bg-hover transition-colors"
+                [routerLink]="['/components', page.path]">
+                <svg lucideChevronLeft class="flex-shrink-0 rtl:rotate-180" aria-hidden="true" [size]="16"></svg>
+                <span class="flex flex-col">
+                    <span class="text-xs text-muted-foreground">Previous</span>
+                    <span class="font-semibold text-foreground">{{ page.title }}</span>
+                </span>
+            </a>
+        }
+        @if (navigation.nextPage(); as page) {
+            <a
+                class="ms-auto flex items-center gap-2 px-4 py-3 rounded-lg border border-border text-sm text-end hover:bg-hover transition-colors"
+                [routerLink]="['/components', page.path]">
+                <span class="flex flex-col">
+                    <span class="text-xs text-muted-foreground">Next</span>
+                    <span class="font-semibold text-foreground">{{ page.title }}</span>
+                </span>
+                <svg lucideChevronRight class="flex-shrink-0 rtl:rotate-180" aria-hidden="true" [size]="16"></svg>
+            </a>
+        }
+    </nav>
+}

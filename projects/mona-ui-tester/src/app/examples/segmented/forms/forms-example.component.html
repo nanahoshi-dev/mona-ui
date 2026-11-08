@@ -1,0 +1,6 @@
+<div class="flex flex-col items-start gap-2">
+    <mona-label text="Report period">
+        <mona-segmented [formField]="report.period" [options]="periods" />
+    </mona-label>
+    <span class="text-sm">Showing one {{ report.period().value() }} of sales.</span>
+</div>

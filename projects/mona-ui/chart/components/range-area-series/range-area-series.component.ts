@@ -9,6 +9,10 @@ import type { ChartField, ChartValueFormatter } from "../../models/chart.models"
 
 let nextSeriesId = 0;
 
+/**
+ * Renders continuous Cartesian vertical range bands/areas bounded between lower and upper values (e.g. confidence
+ * intervals, forecast envelopes, or high/low bands).
+ */
 @Component({
     selector: "mona-range-area-series",
     template: "",

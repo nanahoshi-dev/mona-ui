@@ -14,6 +14,7 @@ import type {
     ChartReferenceLineStyle
 } from "../../models/chart-annotation.models";
 
+/** Renders static horizontal or vertical benchmark lines in Cartesian XY charts. */
 @Component({
     selector: "mona-chart-reference-line",
     template: "",

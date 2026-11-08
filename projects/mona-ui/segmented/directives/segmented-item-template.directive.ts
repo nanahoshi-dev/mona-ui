@@ -11,6 +11,7 @@ import type { SegmentedValue } from "../models/SegmentedValue";
     selector: "ng-template[monaSegmentedItemTemplate]"
 })
 export class SegmentedItemTemplateDirective<T extends SegmentedValue = SegmentedValue> {
+    /** @description The options, to type `let-option` from them. It changes nothing else. */
     public readonly options = input<readonly SegmentedOption<T>[] | "" | undefined>(undefined, {
         alias: "monaSegmentedItemTemplate"
     });

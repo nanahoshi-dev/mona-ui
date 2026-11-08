@@ -1,419 +1,367 @@
-## Overview & Component Selection
-
-Multi Select renders every selected item as a removable chip inside the host element, and opens a listbox popup for the consumer to add or remove selections. Unlike Combo Box or Auto Complete, the value area is not a text input — there is no free-text entry and no `placeholder` input; the host either shows selected tags or is empty.
-
-Filtering, grouping, and virtual scrolling are opt-in through companion attribute directives applied to the `<mona-multi-select>` host element, the same pattern used by Dropdown List:
-
-- `monaDropDownFilterable` — renders a filter input inside the popup and narrows visible options by text.
-- `monaDropDownGroupable` — groups options under a header row.
-- `monaDropDownVirtualScroll` — renders only the options currently in view.
-
-**Use Multi Select when:**
-
-- The consumer can select any number of values from a known, bounded set of options.
-
-**Use `DropDownList` instead when:**
-
-- Only one value can be selected at a time.
-
-**Use `ComboBox` or `AutoComplete` instead when:**
-
-- Free-text entry into the value area is needed, or only a single value is selected.
-
-## Import & Quick Start
-
-```typescript
-import { MultiSelectComponent } from "@nanahoshi/mona-ui/multi-select";
-```
-
-```typescript
-protected readonly countries = [
-    { id: 1, name: "United States" },
-    { id: 2, name: "Canada" },
-    { id: 3, name: "Mexico" }
-];
-protected readonly selectedCountries = signal<{ id: number; name: string }[]>([]);
-```
-
-```html
-
-<mona-multi-select
-    [data]="countries"
-    textField="name"
-    valueField="id"
-    [(value)]="selectedCountries">
-</mona-multi-select>
-```
-
-`textField` and `valueField` each accept a property name or an accessor function. `valueField` identifies each item for selection matching and, when `valuePrimitive` is enabled, is also what gets read from and written into `value` instead of the full items — see [Primitive value binding](#primitive-value-binding).
-
-## Anatomy & Public Structural Templates
-
-Each structural directive below is an `ng-template` placed as projected content inside `<mona-multi-select>...</mona-multi-select>`, or (for the summary tag directives) applied alongside `monaMultiSelectSummaryTag` on the host element itself. There is no value-template directive — each selected item renders as a `mona-chip`, not a rendered data item you fully control.
-
-| Directive                                | Selector                                         | Template context                                                                                       | Replaces                                                                                                                             |
-|------------------------------------------|--------------------------------------------------|--------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
-| `DropdownItemTemplateDirective`          | `ng-template[monaDropDownItemTemplate]`          | `{ $implicit: TData }` (the option's data item)                                                        | Each option's default text rendering inside the popup                                                                                |
-| `MultiSelectTagTemplateDirective`        | `ng-template[monaMultiSelectTagTemplate]`        | `{ $implicit: TData }` (the selected item's data item)                                                 | The default tag text rendered inside each selected item's chip                                                                       |
-| `MultiSelectSummaryTagTemplateDirective` | `ng-template[monaMultiSelectSummaryTagTemplate]` | `{ $implicit: Iterable<TData>, tagCount: number }` (all selected items, and the configured `tagCount`) | The default "+N items" text rendered inside the summary chip — see [Collapsing tags into a summary](#collapsing-tags-into-a-summary) |
-| `DropdownGroupHeaderTemplateDirective`   | `ng-template[monaDropDownGroupHeaderTemplate]`   | `{ $implicit: group }`                                                                                 | The default group header row, when grouping is enabled                                                                               |
-| `DropdownHeaderTemplateDirective`        | `ng-template[monaDropDownHeaderTemplate]`        | None                                                                                                   | No default — renders above the option list inside the popup                                                                          |
-| `DropdownFooterTemplateDirective`        | `ng-template[monaDropDownFooterTemplate]`        | None                                                                                                   | No default — renders below the option list inside the popup                                                                          |
-| `DropdownNoDataTemplateDirective`        | `ng-template[monaDropDownNoDataTemplate]`        | None                                                                                                   | The popup's default empty-state content                                                                                              |
-| `DropdownPrefixTemplateDirective`        | `ng-template[monaDropdownPrefixTemplate]`        | None                                                                                                   | No default — projected content rendered before the tags                                                                              |
-
-```html
-
-<mona-multi-select [data]="countries" textField="name" valueField="id">
-    <ng-template monaDropDownItemTemplate let-dataItem>
-        <span>{{ dataItem.name }}</span>
-    </ng-template>
-    <ng-template monaMultiSelectTagTemplate let-dataItem>
-        <span>{{ dataItem.name }}</span>
-    </ng-template>
-</mona-multi-select>
-```
-
-## Feature Examples
-
-### Primitive value binding
-
-By default `value` holds the complete selected data items. Set `valuePrimitive` to `true` to have `value` hold an array of the values resolved through `valueField` instead — useful for storing just ids rather than the whole objects. Setting `value` to an array of matching field values (for example, restoring it from a signal forms field) also selects the corresponding items.
-
-```html
-
-<mona-multi-select
-    [data]="countries"
-    textField="name"
-    valueField="id"
-    [valuePrimitive]="true"
-    [(value)]="selectedCountryIds">
-</mona-multi-select>
-```
-
-`selectedCountryIds` becomes the matching `id`s (for example, `[2, 3]`) as items are selected, and an empty array again once cleared. `valueField` should resolve to a stable, unique scalar; without it, the item itself is used as the value, which naturally supports primitive data such as `["One", "Two", "Three"]`.
-
-### Collapsing tags into a summary
-
-Apply `monaMultiSelectSummaryTag` to collapse tags beyond `tagCount` into a single summary chip (default text: "+N items"). A negative `tagCount` (the default) shows every selected item as its own tag and never renders the summary chip.
-
-```html
-
-<mona-multi-select [data]="countries" textField="name" valueField="id" monaMultiSelectSummaryTag [monaMultiSelectSummaryTag]="2">
-    <ng-template monaMultiSelectSummaryTagTemplate let-selectedItems let-tagCount="tagCount">
-        <span>+{{ selectedItems.length - tagCount }} more</span>
-    </ng-template>
-</mona-multi-select>
-```
-
-### Checkboxes in the popup
-
-`checkboxes` renders a checkbox next to each option in the popup, in addition to the default selected-state styling.
-
-```html
-
-<mona-multi-select [data]="countries" textField="name" valueField="id" [checkboxes]="true"></mona-multi-select>
-```
-
-### Closing the popup after each selection
-
-By default the popup stays open after selecting or deselecting an item, so the consumer can pick several options in a row. Set `autoClose` to `true` to close it after each selection instead.
-
-```html
-
-<mona-multi-select [data]="countries" textField="name" valueField="id" [autoClose]="true"></mona-multi-select>
-```
-
-### Disabled, readonly, loading, and required states
-
-`disabled` renders the component with reduced visual emphasis, prevents the popup from opening, and blocks tag removal. `readonly` prevents value changes while preserving the visual state. `loading` shows a loading indicator in place of the clear button. `required` marks the field for form validation and affects the invalid state once the control is touched.
-
-```html
-
-<mona-multi-select
-    [data]="countries"
-    textField="name"
-    valueField="id"
-    [disabled]="isDisabled()"
-    [readonly]="isReadonly()"
-    [loading]="isLoading()"
-    [required]="true"
-    [showClearButton]="true">
-</mona-multi-select>
-```
-
-### Signal Forms integration
-
-Binding `[formField]` synchronizes `value`, `disabled`, `readonly`, `required`, `invalid`, and `touched` with a signal forms field automatically.
-
-```typescript
-import { form, required } from "@angular/forms/signals";
-
-protected readonly countryModel = signal<{ ids: number[] }>({ ids: [] });
-protected readonly countryForm = form(this.countryModel, schema => {
-    required(schema.ids);
-});
-```
-
-```html
-
-<mona-multi-select [data]="countries" textField="name" valueField="id" [formField]="countryForm.ids"></mona-multi-select>
-```
-
-### Filtering
-
-`monaDropDownFilterable` renders a filter input inside the popup that narrows the visible options by text.
-
-```html
-
-<mona-multi-select
-    [data]="countries"
-    textField="name"
-    valueField="id"
-    monaDropDownFilterable
-    [monaDropDownFilterable]="{ operator: 'contains', caseSensitive: false }">
-</mona-multi-select>
-```
-
-### Grouping
-
-`monaDropDownGroupable` groups options under a header row, driven by `groupBy`.
-
-```html
-
-<mona-multi-select [data]="countries" textField="name" valueField="id" monaDropDownGroupable groupBy="region"></mona-multi-select>
-```
-
-### Virtual scrolling
-
-`monaDropDownVirtualScroll` renders only the options currently in view, for large collections.
-
-```html
-
-<mona-multi-select
-    [data]="countries"
-    textField="name"
-    valueField="id"
-    monaDropDownVirtualScroll
-    [monaDropDownVirtualScroll]="{ height: 32 }">
-</mona-multi-select>
-```
-
-## Technical & Behavior Notes
-
-### No placeholder input
-
-Unlike Dropdown List, Combo Box, and Auto Complete, `MultiSelectComponent` has no `placeholder` input. When nothing is selected, the host element renders no tags and no placeholder text.
-
-### `showClearButton` clears every selection
-
-`showClearButton` renders a single clear button that removes all selected items at once, not one at a time.
-
-### `open` and `close` are cancelable
-
-`open` and `close` emit event objects with `preventDefault()` and `isDefaultPrevented()`. Calling `preventDefault()` in an `open` handler stops the popup from opening; calling it in a `close` handler stops the popup from closing. `close`'s event object also exposes `via`, describing what triggered the close attempt.
-
-### `DropdownFieldSelectorType`, `DropdownFieldPredicateType`, and `ListSizeInputType` are not exported
-
-`textField`, `valueField`, `itemDisabled`, `popupHeight`, and `popupWidth` are typed with these generic aliases internally, but none of the three types are re-exported from `@nanahoshi/mona-ui`. Inline values (as in the examples above) still type-check structurally; only a standalone typed variable would require an import.
-`TODO(owner-review): confirm whether these types should be added to the public barrel export.`
-
-## Accessibility & Forms Integration
-
-### Keyboard
-
-| Key                     | Action                                                                                                                                            |
-|-------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
-| `ArrowDown` / `ArrowUp` | Highlight the next or previous option. Wraps from the last option back to the first (and vice versa). Never selects by itself.                    |
-| `Alt+ArrowDown`         | Open the popup.                                                                                                                                   |
-| `Alt+ArrowUp`           | Close the popup.                                                                                                                                  |
-| `Enter`                 | Open the popup when closed. When open, toggles the highlighted option's selected state; closes the popup afterward only if `autoClose` is `true`. |
-| `Space`                 | Toggle the popup open or closed.                                                                                                                  |
-| `Backspace`             | Remove the most recently selected tag.                                                                                                            |
-| `Escape` / `Tab`        | Close the popup.                                                                                                                                  |
-
-### Focus
-
-The host element is the only Tab stop; DOM focus does not move into the popup's option list, and tags are not individually focusable (`tabindex="-1"` on each chip). Arrow-key navigation moves an internal highlighted-option pointer, reflected through `aria-activedescendant` on the host element, instead.
-
-### ARIA
-
-| Attribute               | When present                                                                                     | Value                                                                                                                  |
-|-------------------------|--------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|
-| `role`                  | Always                                                                                           | `"combobox"`                                                                                                           |
-| `aria-haspopup`         | Always                                                                                           | `"listbox"`                                                                                                            |
-| `aria-expanded`         | Always                                                                                           | Reflects the popup's open state                                                                                        |
-| `aria-activedescendant` | While an option is highlighted                                                                   | The highlighted option's element id                                                                                    |
-| `aria-controls`         | Always                                                                                           | The popup listbox's element id                                                                                         |
-| `aria-label`            | Always                                                                                           | The `ariaLabel` value (empty string by default — no fallback to any other text, since there is no `placeholder` input) |
-| `aria-labelledby`       | Always                                                                                           | The `ariaLabelledBy` value                                                                                             |
-| `aria-disabled`         | `disabled` is `true`                                                                             | `"true"`                                                                                                               |
-| `aria-readonly`         | `readonly` is `true`                                                                             | `"true"`                                                                                                               |
-| `aria-required`         | `required` is `true`                                                                             | `"true"`                                                                                                               |
-| `aria-invalid`          | `invalid` is `true`, or `required` is `true` and the control is `touched` with no items selected | `"true"`                                                                                                               |
-| `aria-busy`             | `loading` is `true`                                                                              | `"true"`                                                                                                               |
-
-Provide `ariaLabel` or `ariaLabelledBy` to identify the control's purpose — unlike the other dropdown components, there is no `placeholder` fallback.
-
-The control also renders a visually hidden live region that announces the highlighted or selected option's text and position to screen reader users as the consumer navigates the popup.
-
-### Form Interaction
-
-`MultiSelectComponent` implements the signal forms `FormValueControl<Iterable<TValue>>` interface (`TValue` defaults to `TData`, or the `valueField` type when `valuePrimitive` is `true`) and synchronizes with a field bound through `[formField]` (see [Signal Forms integration](#signal-forms-integration)). It does not implement `ControlValueAccessor` — there is no `NG_VALUE_ACCESSOR` provider and no `writeValue`/`registerOnChange`/`registerOnTouched` methods — so it cannot be used with `[(ngModel)]`, `[formControl]`, or `formControlName`.
+<!-- Generated by npm run generate:api-docs from the library's JSDoc. Do not edit. -->
 
 ## API
 
+Everything below is imported from `@nanahoshi/mona-ui/multi-select`, `@nanahoshi/mona-ui/dropdowns`, as noted.
+
 ### `MultiSelectComponent`
 
-**Selector:** `mona-multi-select`
+**Selector:** `mona-multi-select`  
+**Type parameters:** `TData = unknown`, `TValue = TData`  
+**Implements:** `FormValueControl<Iterable<TValue>>`
 
 #### Inputs
 
-| Name              | Type                                                 | Default     | Description                                                                                                                                                                                                                                                                                |
-|-------------------|------------------------------------------------------|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `ariaLabel`       | `string`                                             | `""`        | Accessible name for the host element. No fallback — see [No placeholder input](#no-placeholder-input).                                                                                                                                                                                     |
-| `ariaLabelledBy`  | `string`                                             | `""`        | ID of an external element that provides the accessible name for the host element.                                                                                                                                                                                                          |
-| `autoClose`       | `boolean`                                            | `false`     | Closes the popup automatically after an item is selected or deselected.                                                                                                                                                                                                                    |
-| `checkboxes`      | `boolean`                                            | `false`     | Renders a checkbox next to each item in the popup list to indicate its selected state.                                                                                                                                                                                                     |
-| `data`            | `Iterable<TData>`                                    | `[]`        | Collection of items rendered in the popup list.                                                                                                                                                                                                                                            |
-| `disabled`        | `boolean`                                            | `false`     | Two-way bindable. Disables the component, preventing the popup from opening and blocking tag removal.                                                                                                                                                                                      |
-| `invalid`         | `boolean`                                            | `false`     | Marks the multi select as invalid. Set automatically by `[formField]`.                                                                                                                                                                                                                     |
-| `itemDisabled`    | `DropdownFieldPredicateType<TData>`                  | `undefined` | A predicate function or the name of the field that determines whether an item is disabled.                                                                                                                                                                                                 |
-| `loading`         | `boolean`                                            | `false`     | Sets the loading state of the multi select component.                                                                                                                                                                                                                                      |
-| `popupClass`      | `string`                                             | `""`        | Sets the class of the popup element.                                                                                                                                                                                                                                                       |
-| `popupHeight`     | `ListSizeInputType`                                  | `null`      | Sets the height of the popup element.                                                                                                                                                                                                                                                      |
-| `popupWidth`      | `ListSizeInputType`                                  | `null`      | Sets the width of the popup element.                                                                                                                                                                                                                                                       |
-| `readonly`        | `boolean`                                            | `false`     | Sets the readonly state of the multi select component.                                                                                                                                                                                                                                     |
-| `required`        | `boolean`                                            | `false`     | Sets the required state of the multi select component.                                                                                                                                                                                                                                     |
-| `rounded`         | `"none" \| "small" \| "medium" \| "large" \| "full"` | `"medium"`  | Sets the border radius of the multi select component.                                                                                                                                                                                                                                      |
-| `showClearButton` | `boolean`                                            | `false`     | Renders a button that clears all selected items when at least one item is selected — see [`showClearButton` clears every selection](#showclearbutton-clears-every-selection).                                                                                                              |
-| `size`            | `"small" \| "medium" \| "large"`                     | `"medium"`  | The size of the multi select component.                                                                                                                                                                                                                                                    |
-| `textField`       | `DropdownFieldSelectorType<TData>`                   | `null`      | Property name or accessor used to derive the display text from a data item. Uses the item itself when unset.                                                                                                                                                                               |
-| `touched`         | `boolean`                                            | `false`     | Sets the touched state of the multi select. Set automatically by `[formField]`.                                                                                                                                                                                                            |
-| `class`           | `string`                                             | `""`        | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                                                                                                                                  |
-| `value`           | `Iterable<TValue>`                                   | `[]`        | Two-way bindable, and compatible with Signal Forms via `[formField]`. Holds the complete selected data items, or the values resolved through `valueField` when `valuePrimitive` is `true` — see [Primitive value binding](#primitive-value-binding).                                       |
-| `valueField`      | `DropdownFieldSelectorType<TData, unknown>`          | `null`      | Property name or accessor used to derive the value from a data item. Used for item identity, matching externally supplied values, and primitive projection when `valuePrimitive` is `true`. Uses the item itself when unset.                                                              |
-| `valuePrimitive`  | `boolean`                                            | `false`     | When `true`, `value` holds an array of the values resolved through `valueField` instead of the complete data items — see [Primitive value binding](#primitive-value-binding).                                                                                                              |
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `aria-describedby` | `string` | `""` | ID of an element that describes the multi select, such as help text or an error message. |
+| `aria-label` | `string` | `""` | Accessible name for the multi select. Describe what it represents. Falls back to `placeholder` when neither this nor `aria-labelledby` is set. |
+| `aria-labelledby` | `string` | `""` | Sets the aria-labelledby attribute of the multi select component. |
+| `autoClose` | `boolean` | `false` | Closes the popup automatically after an item is selected or deselected. |
+| `checkboxes` | `boolean` | `false` | Renders a checkbox next to each item in the popup list to indicate its selected state. |
+| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
+| `data` | `Iterable<TData>` | `[]` | Collection of items rendered in the popup list. |
+| `disabled` | `boolean` | `false` | Disables the component, preventing the popup from opening and blocking tag removal. |
+| `invalid` | `boolean` | `false` | Marks the multi select as invalid. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
+| `itemDisabled` | `DropdownFieldPredicateType<TData>` | — | A predicate function or the name of the field that determines whether an item is disabled. |
+| `loading` | `boolean` | `false` | Shows a loading indicator, in place of the clear button, and marks the field busy. It doesn't block interaction: the field stays usable while data loads. |
+| `placeholder` | `string` | `""` | Text shown when nothing is selected. It also names the multi select when neither `aria-label` nor `aria-labelledby` is set. |
+| `popupClass` | `string` | `""` | Sets the class of the popup element. |
+| `popupHeight` | `ListSizeInputType` | `null` | Maximum height of the popup, in pixels or as a CSS length. Shorter lists shrink to fit. When unset, the popup is at most 200 pixels tall. |
+| `popupWidth` | `ListSizeInputType` | `null` | Sets the width of the popup element. |
+| `readonly` | `boolean` | `false` | Sets the readonly state of the multi select component. |
+| `required` | `boolean` | `false` | Sets the required state of the multi select component. |
+| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Sets the border radius of the multi select component. |
+| `showClearButton` | `boolean` | `false` | Renders a button that clears all selected items when at least one item is selected. |
+| `size` | `"large" \| "medium" \| "small"` | `"medium"` | The size of the multi select component. |
+| `textField` | `DropdownFieldSelectorType<TData, string>` | `null` | Sets the text field of the multi select component. It can be null, string, or a function that takes an item and returns a string. If null, the item itself will be used as the text representation. |
+| `touched` | `boolean` | `false` | Sets the touched state of the multi select. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
+| `value` (two-way) | `Iterable<TValue>` | `[]` | Two-way bindable current selected values. Implements `FormValueControl<Iterable<TValue>>`, enabling signal forms `[formField]` binding. Object mode contains selected data items; primitive mode (see `valuePrimitive`) contains values resolved through `valueField`. An empty selection is represented by an empty iterable/array. |
+| `valueField` | `DropdownFieldSelectorType<TData, unknown>` | `null` | Sets the value field of the multi select component. It is used for stable item identity, matching externally supplied values, and primitive value projection when `valuePrimitive` is enabled. It can be null, string, or a function that takes an item and returns a value. If null, the item itself will be used as the value representation. Should resolve to a stable, unique scalar. |
+| `valuePrimitive` | `boolean` | `false` | Determines whether the bound value contains complete data items or values extracted through `valueField`. When `false`, selecting an item writes the complete data item. When `true`, selecting an item writes the value resolved through `valueField`. |
 
 #### Outputs
 
-| Name     | Type               | Description                                                                                                                                |
-|----------|--------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| `close`  | `PopupCloseEvent`  | Emitted when the popup is about to close. Cancelable.                                                                                      |
-| `closed` | `void`             | Emitted after the popup is closed.                                                                                                         |
-| `open`   | `PreventableEvent` | Emitted when the popup is about to open. Cancelable.                                                                                       |
-| `opened` | `void`             | Emitted after the popup is opened.                                                                                                         |
-| `touch`  | `void`             | Emitted when the multi select is interacted with on blur, selection, remove, or clear. Used by `[formField]` to mark the field as touched. |
+| Name | Type | Description |
+| --- | --- | --- |
+| `close` | `PopupCloseEvent<unknown>` | Emits when the popup is about to close. This event is preventable. |
+| `closed` | `void` | Emits after the popup is closed. |
+| `open` | `PreventableEvent<Event>` | Emits when the popup is about to open. This event is preventable. |
+| `opened` | `void` | Emits after the popup is opened. |
+| `touch` | `void` | Emitted when focus leaves the multi select. Moving between it, its chips, its clear button and its popup doesn't count. The `FormField` directive listens to this to mark the field as touched. |
+| `valueChange` | `Iterable<TValue>` | Emitted when `value` changes. |
 
----
+#### Methods
 
-### `MultiSelectSummaryTagDirective<TData>`
+| Signature | Description |
+| --- | --- |
+| `focus(options?: FocusOptions): void` | Moves focus to the multi select. |
+
+### `DropdownFilterableDirective`
+
+From `@nanahoshi/mona-ui/dropdowns`.
+
+**Selector:** `mona-auto-complete[monaDropDownFilterable], mona-dropdown-list[monaDropDownFilterable], mona-combo-box[monaDropDownFilterable], mona-multi-select[monaDropDownFilterable]`
+
+#### Inputs
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `filter` | `string` | `""` | Current filter text used to narrow the visible options. |
+| `filterPlaceholder` | `string` | `""` | Placeholder text in the popup's filter row. Auto Complete has no filter row, since its own input is the filter, so it ignores this. |
+| `monaDropDownFilterable` | `Partial<FilterableOptions> \| ""` | `""` | Filter operator, case sensitivity, and debounce delay. An empty string enables filtering with default settings (`operator: "contains"`, `caseSensitive: false`, `debounce: 0`); pass an object to override any field. |
+
+#### Outputs
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `filterChange` | `FilterChangeEvent` | Emitted when the filter value changes. Cancelable. |
+
+### `DropdownGroupableDirective`
+
+From `@nanahoshi/mona-ui/dropdowns`.
+
+**Selector:** `mona-auto-complete[monaDropDownGroupable], mona-combo-box[monaDropDownGroupable], mona-dropdown-list[monaDropDownGroupable], mona-multi-select[monaDropDownGroupable]`  
+**Type parameters:** `TData`
+
+#### Inputs
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `groupBy` | `string \| Selector<TData, unknown> \| null \| undefined` | `""` | Property name, or accessor, used to derive an option's group. |
+| `monaDropDownGroupable` | `GroupableOptions<TData, unknown> \| ""` | `""` | Group header order, and optional per-group item ordering. An empty string enables grouping with default settings (`headerOrder: "asc"`); pass an object to override any field. |
+
+### `DropdownVirtualScrollDirective`
+
+From `@nanahoshi/mona-ui/dropdowns`.
+
+**Selector:** `mona-auto-complete[monaDropDownVirtualScroll], mona-dropdown-list[monaDropDownVirtualScroll], mona-combo-box[monaDropDownVirtualScroll], mona-multi-select[monaDropDownVirtualScroll]`
+
+#### Inputs
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `monaDropDownVirtualScroll` | `Partial<VirtualScrollOptions> \| ""` | `""` | Whether virtual scrolling is enabled and the pixel height of a single option row. An empty string enables virtual scrolling with default settings (`height: 28`); pass an object to override either field. |
+
+### `MultiSelectSummaryTagDirective`
 
 **Selector:** `mona-multi-select[monaMultiSelectSummaryTag]`
 
 #### Inputs
 
-| Name                                     | Type     | Default | Description                                                                                                                                                                                                                                                 |
-|------------------------------------------|----------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `monaMultiSelectSummaryTag` (`tagCount`) | `number` | `-1`    | Number of selected item tags to display before collapsing the rest into a summary tag. A negative value shows every selected item as its own tag and never renders the summary tag — see [Collapsing tags into a summary](#collapsing-tags-into-a-summary). |
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `monaMultiSelectSummaryTag` | `number` | `-1` | Number of selected item tags to display before collapsing the rest into a summary tag. A negative value shows every selected item as its own tag and never renders the summary tag. |
 
-No outputs.
+### `DropdownDataHandlerDirective`
 
----
+From `@nanahoshi/mona-ui/dropdowns`.
 
-### `DropdownFilterableDirective<TData>`
+**Selector:** `[monaDropdownDataHandler]`
 
-**Selector:** `mona-multi-select[monaDropDownFilterable]`
+### `DropdownFooterTemplateDirective`
 
-#### Inputs
+From `@nanahoshi/mona-ui/dropdowns`.
 
-| Name                     | Type                               | Default | Description                                                                                                                                                                                                           |
-|--------------------------|------------------------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `filter`                 | `string`                           | `""`    | Current filter text used to narrow the visible options.                                                                                                                                                               |
-| `filterPlaceholder`      | `string`                           | `""`    | Placeholder text shown in the popup's filter input.                                                                                                                                                                   |
-| `monaDropDownFilterable` | `Partial<FilterableOptions> \| ""` | `""`    | Filter operator, case sensitivity, and debounce delay. An empty string enables filtering with default settings (`operator: "contains"`, `caseSensitive: false`, `debounce: 0`); pass an object to override any field. |
+**Selector:** `ng-template[monaDropDownFooterTemplate], ng-template[monaAutoCompleteFooterTemplate], ng-template[monaDropDownListFooterTemplate], ng-template[monaDropDownTreeFooterTemplate], ng-template[monaComboBoxFooterTemplate], ng-template[monaMultiSelectFooterTemplate]`
 
-#### Outputs
+### `DropdownGroupHeaderTemplateDirective`
 
-| Name           | Type                | Description                                        |
-|----------------|---------------------|----------------------------------------------------|
-| `filterChange` | `FilterChangeEvent` | Emitted when the filter value changes. Cancelable. |
+From `@nanahoshi/mona-ui/dropdowns`.
 
----
+**Selector:** `ng-template[monaDropDownGroupHeaderTemplate], ng-template[monaAutoCompleteGroupHeaderTemplate], ng-template[monaDropDownListGroupHeaderTemplate], ng-template[monaComboBoxGroupHeaderTemplate], ng-template[monaMultiSelectGroupHeaderTemplate]`
 
-### `DropdownGroupableDirective<TData>`
+### `DropdownHeaderTemplateDirective`
 
-**Selector:** `mona-multi-select[monaDropDownGroupable]`
+From `@nanahoshi/mona-ui/dropdowns`.
 
-#### Inputs
+**Selector:** `ng-template[monaDropDownHeaderTemplate], ng-template[monaAutoCompleteHeaderTemplate], ng-template[monaDropDownListHeaderTemplate], ng-template[monaDropDownTreeHeaderTemplate], ng-template[monaComboBoxHeaderTemplate], ng-template[monaMultiSelectHeaderTemplate]`
 
-| Name                    | Type                                                  | Default | Description                                                                                                                                                                    |
-|-------------------------|-------------------------------------------------------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `groupBy`               | `string \| ((item: TData) => R) \| null \| undefined` | `""`    | Property name, or accessor, used to derive an option's group.                                                                                                                  |
-| `monaDropDownGroupable` | `GroupableOptions<TData, R> \| ""`                    | `""`    | Group header order, and optional per-group item ordering. An empty string enables grouping with default settings (`headerOrder: "asc"`); pass an object to override any field. |
+### `DropdownItemTemplateDirective`
 
-No outputs.
+From `@nanahoshi/mona-ui/dropdowns`.
 
----
+**Selector:** `ng-template[monaDropDownItemTemplate], ng-template[monaAutoCompleteItemTemplate], ng-template[monaDropDownListItemTemplate], ng-template[monaComboBoxItemTemplate], ng-template[monaMultiSelectItemTemplate]`
 
-### `DropdownVirtualScrollDirective<TData>`
+### `DropdownListPopupHandlerDirective`
 
-**Selector:** `mona-multi-select[monaDropDownVirtualScroll]`
+From `@nanahoshi/mona-ui/dropdowns`.
 
-#### Inputs
+**Selector:** `[monaDropdownListPopupHandler]`
 
-| Name                        | Type                                  | Default | Description                                                                                                                                                                                                |
-|-----------------------------|---------------------------------------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `monaDropDownVirtualScroll` | `Partial<VirtualScrollOptions> \| ""` | `""`    | Whether virtual scrolling is enabled and the pixel height of a single option row. An empty string enables virtual scrolling with default settings (`height: 28`); pass an object to override either field. |
+### `DropdownLiveRegionDirective`
 
-No outputs.
+From `@nanahoshi/mona-ui/dropdowns`.
 
----
+Announces how many results a dropdown shows after its list is filtered, or after its items change, while the
+popup is open ("3 results available", "No results found").
 
-### Exported Types
+The announcement goes through the CDK `LiveAnnouncer`, whose live region lives at the end of the document, so it
+never becomes part of the combobox's content. The highlighted option isn't announced here:
+`aria-activedescendant` already does that.
 
-#### `FilterableOptions`
+**Selector:** `[monaDropdownLiveRegion]`
 
-| Field           | Type                                                                                       | Description                                                               |
-|-----------------|--------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
-| `caseSensitive` | `boolean`                                                                                  | Whether text matching is case-sensitive.                                  |
-| `debounce`      | `number`                                                                                   | Milliseconds to wait after the last keystroke before applying the filter. |
-| `enabled`       | `boolean`                                                                                  | Whether filtering is active.                                              |
-| `operator`      | `"contains" \| "endsWith" \| "startsWith" \| ((value: string, filter: string) => boolean)` | Match strategy used to test an option's text against the filter text.     |
+### `DropdownNoDataTemplateDirective`
 
-#### `GroupableOptions<T = unknown, R = unknown>`
+From `@nanahoshi/mona-ui/dropdowns`.
 
-| Field              | Type                                      | Description                                                             |
-|--------------------|-------------------------------------------|-------------------------------------------------------------------------|
-| `enabled`          | `boolean \| undefined`                    | Whether grouping is active.                                             |
-| `headerOrder`      | `"asc" \| "desc" \| undefined`            | Sort direction applied to group headers by their key.                   |
-| `orderBy`          | `string \| ((item: T) => R) \| undefined` | Property name or accessor used to sort items within each group.         |
-| `orderByDirection` | `"asc" \| "desc" \| undefined`            | Sort direction applied by `orderBy`. Ignored when `orderBy` is not set. |
+**Selector:** `ng-template[monaDropDownNoDataTemplate], ng-template[monaAutoCompleteNoDataTemplate], ng-template[monaDropDownListNoDataTemplate], ng-template[monaDropDownTreeNoDataTemplate], ng-template[monaComboBoxNoDataTemplate], ng-template[monaMultiSelectNoDataTemplate]`
 
-#### `VirtualScrollOptions`
+### `DropdownPopupHandlerDirective`
 
-| Field     | Type                  | Description                                                               |
-|-----------|-----------------------|---------------------------------------------------------------------------|
-| `enabled` | `boolean`             | Whether virtual scrolling is active.                                      |
-| `height`  | `number \| undefined` | Fixed row height, in pixels, used to measure the virtual scroll viewport. |
+From `@nanahoshi/mona-ui/dropdowns`.
 
-`PopupCloseEvent`, `PreventableEvent`, and `FilterChangeEvent` are also exported from `@nanahoshi/mona-ui`.
+**Selector:** `[monaDropdownPopupHandler]`
 
-`TODO(owner-review): DropdownFieldSelectorType<TData>, DropdownFieldPredicateType<TData>, and ListSizeInputType are used in public input signatures but are not exported — see` [DropdownFieldSelectorType, DropdownFieldPredicateType, and ListSizeInputType are not exported](#dropdownfieldselectortype-dropdownfieldpredicatetype-and-listsizeinputtype-are-not-exported).
+### `DropdownPrefixTemplateDirective`
 
----
+From `@nanahoshi/mona-ui/dropdowns`.
 
-<!-- verification-checklist
-- [x] MultiSelectComponent inputs/outputs/defaults verified against multi-select.component.ts source and cross-checked against component-metadata.json's MultiSelectComponent entry (all 28 members matched, including the valuePrimitive input added alongside value/valueField)
-- [x] Confirmed no placeholder input exists (absent from both the source's public input list and component-metadata.json), and that aria-label has no fallback (bound directly to ariaLabel(), unlike DropdownList/ComboBox/AutoComplete's effectiveAriaLabel computed)
-- [x] MultiSelectSummaryTagDirective and its tagCount input/monaMultiSelectSummaryTagTemplate contentChild verified against multi-select-summary-tag.directive.ts; template context { $implicit, tagCount } verified against multi-select.component.html's ngTemplateOutletContext binding
-- [x] MultiSelectTagTemplateDirective verified against multi-select-tag-template.directive.ts and its usage/context in multi-select.component.html
-- [x] valuePrimitive and TValue-generic value binding verified against multi-select.component.ts's getSelectedControlValues() (maps each selected item through getDataItemValue when valuePrimitive() else uses item.data) and synchronizeSelection() (setSelectedKeys(value) when valuePrimitive() else setSelectedDataItems(value)); confirmed value-restoration by primitive field array only takes effect when valuePrimitive is true; multi-select.component.spec.ts's dedicated PrimitiveMultiSelectFormModel host ([valuePrimitive]="true", form model { value: [2] }) tests this separately from the default object-mode host ({ value: [FOOD_ITEMS[1]] })
-- [x] showClearButton clearing all selections verified against onValueClear() calling updateValue([]) and listService.clearSelections()
-- [x] Keyboard map verified: ArrowUp/ArrowDown/Alt+Arrow/Escape/Tab/Space fall through to dropdown-list-popup-handler.directive.ts's shared defaults (not intercepted by MultiSelectComponent, unlike ComboBox/AutoComplete); Enter and Backspace verified against multi-select.component.ts's setEnterKeySubscription/setBackspaceKeySubscription/handleEnterKey; wrap: true verified against initialize()'s setNavigableOptions call
-- [x] Focus behavior verified: host has [attr.tabindex]="disabled() ? null : 0" (host itself is the focusable element, unlike ComboBox/AutoComplete's inner <input> pattern); chips have [tabindex]="-1" and [removeTabIndex]="-1" in multi-select.component.html
-- [x] ARIA attributes (single-element table, not host/input split) verified against multi-select.component.ts's host object
-- [x] Form integration verified: MultiSelectComponent implements FormValueControl<Iterable<TValue>>; no NG_VALUE_ACCESSOR provider or writeValue/registerOnChange/registerOnTouched methods found
-- [x] FilterableOptions, GroupableOptions, VirtualScrollOptions, PopupCloseEvent, PreventableEvent, FilterChangeEvent confirmed exported via lib/index.ts; DropdownFieldSelectorType, DropdownFieldPredicateType, ListSizeInputType confirmed NOT exported; MultiSelectComponent, MultiSelectTagTemplateDirective, MultiSelectSummaryTagDirective, MultiSelectSummaryTagTemplateDirective all confirmed exported
-- [x] No internal-only symbols (ListService, DropdownService, MultiSelectService, ChipComponent's own internal styling, monaDropdownLiveRegion, indicator-icon presets, Tailwind class names, data-invalid attribute) documented as public API beyond the mona-chip content-projection mention needed to explain tag rendering
--->
+**Selector:** `ng-template[monaDropdownPrefixTemplate]`
+
+### `DropdownSuffixTemplateDirective`
+
+From `@nanahoshi/mona-ui/dropdowns`.
+
+**Selector:** `ng-template[monaDropdownSuffixTemplate]`
+
+### `MultiSelectSummaryTagTemplateDirective`
+
+**Selector:** `ng-template[monaMultiSelectSummaryTagTemplate]`
+
+### `MultiSelectTagTemplateDirective`
+
+**Selector:** `ng-template[monaMultiSelectTagTemplate]`
+
+### `DropdownListService`
+
+From `@nanahoshi/mona-ui/dropdowns`.
+
+**Type parameters:** `TData = unknown`
+
+#### Properties
+
+| Name | Type |
+| --- | --- |
+| `navigate$` (read-only) | `Subject<{ item: ListItem<TData>; }>` |
+
+### Types
+
+#### `DROPDOWN_DATA_INPUT_TOKEN`
+
+```typescript
+const DROPDOWN_DATA_INPUT_TOKEN: InjectionToken<DropdownDataInput<unknown>>;
+```
+
+#### `DROPDOWN_POPUP_INPUT_TOKEN`
+
+```typescript
+const DROPDOWN_POPUP_INPUT_TOKEN: InjectionToken<DropdownPopupInput>;
+```
+
+#### `DropdownDataInputToken`
+
+**Deprecated.** Use `DROPDOWN_DATA_INPUT_TOKEN`.
+
+```typescript
+const DropdownDataInputToken: InjectionToken<DropdownDataInput<unknown>>;
+```
+
+#### `dropdownPopupThemeVariants`
+
+```typescript
+const dropdownPopupThemeVariants: (props?: ({ rounded?: "none" | "small" | "medium" | "large" | "full" | null | undefined; size?: "small" | "medium" | "large" | null | undefined; } & ClassProp) | undefined) => string;
+```
+
+#### `DROPDOWNS_DEFAULT_MESSAGES`
+
+```typescript
+const DROPDOWNS_DEFAULT_MESSAGES: MonaDropdownsMessages;
+```
+
+#### `MULTI_SELECT_DEFAULT_MESSAGES`
+
+```typescript
+const MULTI_SELECT_DEFAULT_MESSAGES: MonaMultiSelectMessages;
+```
+
+#### `DropdownDataInput`
+
+**Type parameters:** `TData`
+
+| Name | Type |
+| --- | --- |
+| `data` (read-only) | `InputSignal<Iterable<TData>>` |
+| `itemDisabled` (read-only) | `InputSignal<DropdownFieldPredicateType<TData>>` |
+| `textField` (read-only) | `InputSignal<DropdownFieldSelectorType<TData, string>>` |
+| `valueField` (read-only) | `InputSignal<DropdownFieldSelectorType<TData, unknown>>` |
+
+#### `DropdownPopupInput`
+
+| Name | Type |
+| --- | --- |
+| `close` (read-only) | `OutputEmitterRef<PopupCloseEvent>` |
+| `closed` (read-only) | `OutputEmitterRef<void>` |
+| `disabled` (read-only) | `Signal<boolean>` |
+| `open` (read-only) | `OutputEmitterRef<PreventableEvent>` |
+| `opened` (read-only) | `OutputEmitterRef<void>` |
+| `popupHeight` (read-only) | `InputSignal<ListSizeInputType>` |
+| `popupWidth` (read-only) | `InputSignal<ListSizeInputType>` |
+| `readonly` (read-only) | `Signal<boolean>` |
+| `touch` (read-only) | `OutputEmitterRef<void>` |
+
+#### `DropdownFieldPredicateType`
+
+```typescript
+type DropdownFieldPredicateType<TData> = string | Predicate<TData> | null | undefined;
+```
+
+#### `DropdownFieldSelectorType`
+
+```typescript
+type DropdownFieldSelectorType<TData, TResult = unknown> = string | Selector<TData, TResult> | null | undefined;
+```
+
+#### `FilterChangeEvent`
+
+From `@nanahoshi/mona-ui/common`.
+
+**Extends:** `PreventableEvent`
+
+| Name | Type |
+| --- | --- |
+| `filter` (read-only) | `string` |
+
+#### `ListItem`
+
+From `@nanahoshi/mona-ui/list`.
+
+An item of a list, wrapping its data item.
+
+**Type parameters:** `TData`
+
+| Name | Type |
+| --- | --- |
+| `data` (read-only) | `TData` |
+| `header` (read-only) | `string` |
+| `isHeader` (read-only) | `boolean` |
+| `uid` (read-only) | `string` |
+
+#### `ListSizeInputType`
+
+From `@nanahoshi/mona-ui/list`.
+
+```typescript
+type ListSizeInputType = ListSizeType | number;
+```
+
+#### `ListSizeType`
+
+From `@nanahoshi/mona-ui/list`.
+
+A CSS length, or nothing to leave it to the stylesheet.
+
+```typescript
+type ListSizeType = string | null | undefined;
+```
+
+#### `MonaDropdownsMessages`
+
+From `@nanahoshi/mona-ui/i18n`.
+
+| Name | Type |
+| --- | --- |
+| `itemPosition` (read-only) | `(text: string, position: number, total: number) => string` |
+| `noResultsFound` (read-only) | `string` |
+| `resultsAvailable` (read-only) | `(count: number) => string` |
+
+#### `MonaMultiSelectMessages`
+
+From `@nanahoshi/mona-ui/i18n`.
+
+| Name | Type |
+| --- | --- |
+| `clear` (read-only) | `string` |
+| `itemsCount` (read-only) | `(count: number) => string` |
+| `removeMoreItems` (read-only) | `(count: number) => string` |
+
+#### `PreventableEvent`
+
+From `@nanahoshi/mona-ui/common`.
+
+**Type parameters:** `E extends Event = Event`
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
+| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
+
+**Methods**
+
+| Signature | Description |
+| --- | --- |
+| `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
+| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
+
+**Documented elsewhere:** [`FilterableOptions`](/components/grid), [`GroupableOptions`](/components/grid), [`PopupCloseEvent`](/components/popup), [`VirtualScrollOptions`](/components/list-view)

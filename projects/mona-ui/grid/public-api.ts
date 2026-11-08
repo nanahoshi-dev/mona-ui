@@ -3,6 +3,8 @@
  */
 
 export { CellEditEvent } from "./models/CellEditEvent";
+export type { GridKeySelector } from "./models/GridKeySelector";
+export type { Row } from "./models/Row";
 export { RowEditEvent } from "./models/RowEditEvent";
 export { GridAddEvent } from "./models/GridAddEvent";
 export { GridCancelEvent, type GridCancelReason } from "./models/GridCancelEvent";

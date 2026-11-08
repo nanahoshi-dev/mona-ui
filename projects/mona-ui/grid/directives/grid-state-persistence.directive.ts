@@ -74,10 +74,16 @@ export class GridStatePersistenceDirective {
         });
     }
 
+    /** Captures the grid's current state (columns, sort, filter, group) without waiting for the next change cycle. */
     public captureState(): GridState {
         return this.#gridService.captureState(this.#resolveOptions());
     }
 
+    /**
+     * Applies a previously captured state to the grid. A state that isn't well formed (a missing array, a duplicate
+     * column id, an unknown filter operator, a page size or width that isn't a positive number) returns
+     * `rejected-invalid` and changes nothing.
+     */
     public loadState(
         state: GridState | null,
         options: GridStatePersistenceOptions = this.#resolveOptions()

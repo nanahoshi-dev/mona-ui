@@ -101,7 +101,7 @@ export class ButtonWrapperComponent implements ComponentInputsAsSignal<ButtonDir
     public readonly ariaDescribedby = input("aria-describedby");
     public readonly ariaHasPopup = input<ReturnType<ButtonDirective["ariaHasPopup"]>>("false");
     public readonly ariaLabel = input("Button");
-    public readonly ariaLabelledby = input("aria-labelledby");
+    public readonly ariaLabelledBy = input("aria-labelledby");
     public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly iconOnly = input(false, { transform: booleanAttribute });
     public readonly loading = input(false, { transform: booleanAttribute });

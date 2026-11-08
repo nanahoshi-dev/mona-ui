@@ -1,0 +1,243 @@
+## Overview
+
+Dropdown List renders a single-value combobox: the host element shows the current selection (or a placeholder) and opens a listbox popup on click, `Enter`, `Space`, or `Alt+ArrowDown`. The value area is not an editable text input — typing only happens inside the popup's filter box, and only once filtering is explicitly enabled.
+
+Filtering, grouping, and virtual scrolling are opt-in through companion attribute directives applied to the same `<mona-dropdown-list>` host element, the same pattern used by List View:
+
+- `monaDropDownFilterable` — renders a filter input inside the popup and narrows visible options by text.
+- `monaDropDownGroupable` — groups options under a header row.
+- `monaDropDownVirtualScroll` — renders only the options currently in view.
+
+**Use Dropdown List when:**
+
+- The consumer picks exactly one value from a known, bounded set of options.
+- Free-text entry into the value area itself is not needed.
+
+**Use `ComboBox` instead when:**
+
+- The consumer should be able to type directly into the value area, not just into a popup filter box.
+
+**Use `MultiSelect` instead when:**
+
+- More than one value can be selected at once.
+
+**Use `AutoComplete` instead when:**
+
+- The consumer enters free text with suggestions, and the value does not need to match a list item.
+
+## Import & Quick Start
+
+```typescript
+import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
+```
+
+```typescript
+protected readonly countries = [
+    { id: 1, name: "United States" },
+    { id: 2, name: "Canada" },
+    { id: 3, name: "Mexico" }
+];
+
+protected readonly selectedCountry = signal<{ id: number; name: string } | null>(null);
+```
+
+```html
+
+<mona-dropdown-list
+    [data]="countries"
+    textField="name"
+    valueField="id"
+    placeholder="Select a country"
+    [(value)]="selectedCountry">
+</mona-dropdown-list>
+```
+
+`textField` and `valueField` each accept a property name or an accessor function; when either is omitted, the data item itself is used as the display text or the value, respectively. `valueField` also identifies each item for selection matching and, when `valuePrimitive` is enabled, is what gets read from and written into `value` instead of the full item — see [Primitive value binding](#primitive-value-binding). Without any behavior directive applied, the popup renders the full `data` collection with no filter box — see [Examples](#examples) for filtering, grouping, and virtual scrolling.
+
+## Anatomy
+
+Each structural directive below is an `ng-template` placed as projected content inside `<mona-dropdown-list>...</mona-dropdown-list>`.
+
+| Directive                              | Selector                                       | Template context                                                   | Replaces                                                                          |
+|----------------------------------------|------------------------------------------------|--------------------------------------------------------------------|-----------------------------------------------------------------------------------|
+| `DropdownItemTemplateDirective`        | `ng-template[monaDropDownItemTemplate]`        | `{ $implicit: TData }` (the option's data item)                    | Each option's default text rendering inside the popup                             |
+| `DropDownListValueTemplateDirective`   | `ng-template[monaDropDownListValueTemplate]`   | `{ $implicit: TData \| null }` (the selected data item, or `null`) | The default selected-value text rendered in the host element                      |
+| `DropdownGroupHeaderTemplateDirective` | `ng-template[monaDropDownGroupHeaderTemplate]` | `{ $implicit: group }`                                             | The default group header row, when grouping is enabled                            |
+| `DropdownHeaderTemplateDirective`      | `ng-template[monaDropDownHeaderTemplate]`      | None                                                               | No default — renders above the option list inside the popup                       |
+| `DropdownFooterTemplateDirective`      | `ng-template[monaDropDownFooterTemplate]`      | None                                                               | No default — renders below the option list inside the popup                       |
+| `DropdownNoDataTemplateDirective`      | `ng-template[monaDropDownNoDataTemplate]`      | None                                                               | The popup's default empty-state content                                           |
+| `DropdownPrefixTemplateDirective`      | `ng-template[monaDropdownPrefixTemplate]`      | None                                                               | No default — projected content rendered before the value area on the host element |
+
+```html
+
+<mona-dropdown-list [data]="countries" textField="name" valueField="id">
+    <ng-template monaDropDownItemTemplate let-dataItem>
+        <span>{{ dataItem.name }}</span>
+    </ng-template>
+    <ng-template monaDropDownListValueTemplate let-dataItem>
+        @if (dataItem) {
+        <span>{{ dataItem.name }}</span>
+        } @else {
+        <span>No country selected</span>
+        }
+    </ng-template>
+</mona-dropdown-list>
+```
+
+## Examples
+
+### Primitive value binding
+
+By default `value` holds the complete selected data item. Set `valuePrimitive` to `true` to have `value` hold the value resolved through `valueField` instead — useful for storing just an id rather than the whole object. Setting `value` to a matching field value (for example, restoring it from a signal forms field) also selects the corresponding item.
+
+```example
+dropdown-list/primitive
+```
+
+The value becomes the matching `id` once an item is selected, and `null` again once cleared. `valueField` should resolve to a stable, unique scalar; without it, the item itself is used as the value, which naturally supports primitive data such as `["One", "Two", "Three"]`.
+
+### Custom templates
+
+`monaDropDownListValueTemplate` controls how the selected value renders in the host element, independently of how options render inside the popup through `monaDropDownItemTemplate`. Its item is `null` while nothing is selected. `monaDropdownPrefixTemplate` renders content before the value area, such as an icon.
+
+```example
+dropdown-list/templates
+```
+
+### Filtering and grouping
+
+`monaDropDownFilterable` renders a filter input inside the popup that narrows the visible options by text. `monaDropDownGroupable` groups options under a header row, driven by `groupBy`. If `groupBy` is omitted while grouping is enabled, every option falls into a single, unlabeled group.
+
+```example
+dropdown-list/filtering
+```
+
+### Signal Forms integration
+
+Binding `[formField]` synchronizes `value`, `disabled`, `readonly`, `required`, `invalid`, and `touched` with a signal forms field automatically — see [Forms Integration](#forms-integration).
+
+```example
+dropdown-list/forms
+```
+
+### Disabled, readonly, loading, and required states
+
+`disabled` renders the control with reduced visual emphasis and removes pointer interaction. `readonly` prevents value changes while preserving the visual state. `loading` shows a loading indicator in place of the clear button and marks the field busy. It doesn't block interaction: the field stays usable while data loads. `required` marks the field for form validation and affects the invalid state once the control is touched.
+
+```html
+
+<mona-dropdown-list
+    [data]="countries"
+    textField="name"
+    valueField="id"
+    [disabled]="isDisabled()"
+    [readonly]="isReadonly()"
+    [loading]="isLoading()"
+    [required]="true"
+    [showClearButton]="true">
+</mona-dropdown-list>
+```
+
+### Virtual scrolling
+
+`monaDropDownVirtualScroll` renders only the options currently in view, for large collections. `height` on the options object is the fixed row height, in pixels, used to measure the viewport; every option must render at that height for scrolling to stay accurate.
+
+```html
+
+<mona-dropdown-list
+    [data]="countries"
+    textField="name"
+    valueField="id"
+    monaDropDownVirtualScroll
+    [monaDropDownVirtualScroll]="{ height: 32 }">
+</mona-dropdown-list>
+```
+
+## Behavior
+
+### Staged navigation while the popup is open
+
+While the popup is open, arrow-key and typeahead navigation only stage a highlighted option; the staged option is not written to `value` until the consumer commits it with `Enter` or by closing the popup. When the popup is closed, arrow-key and typeahead navigation commit the value immediately.
+
+### `open` and `close` are cancelable
+
+`open` and `close` emit event objects with `preventDefault()` and `isDefaultPrevented()`. Calling `preventDefault()` in an `open` handler stops the popup from opening; calling it in a `close` handler stops the popup from closing. `close`'s event object also exposes `via`, describing what triggered the close attempt (for example `"escape"` or `"outsideClick"`).
+
+### Click-to-toggle
+
+Clicking anywhere on the host element, outside the clear button, toggles the popup — in addition to the keyboard interactions documented under [Keyboard](#keyboard).
+
+### Filtering, grouping, and virtual scrolling compose
+
+These three directives are independent — applying more than one to the same `mona-dropdown-list` combines their behavior.
+
+### `DropdownFieldSelectorType`, `DropdownFieldPredicateType`, and `ListSizeInputType` are not exported
+
+`textField`, `valueField`, `itemDisabled`, `popupHeight`, and `popupWidth` are typed with these generic aliases internally, but none of the three types are re-exported from `@nanahoshi/mona-ui`. Inline values (as in the examples above) still type-check structurally; only a standalone typed variable would require an import.
+`TODO(owner-review): confirm whether these types should be added to the public barrel export.`
+
+## Forms Integration
+
+`DropdownListComponent` implements the signal forms `FormValueControl<TValue | null>` interface (`TValue` defaults to `TData`, or the `valueField` type when `valuePrimitive` is `true`) and synchronizes with a field bound through `[formField]` (see [Signal Forms integration](#signal-forms-integration)). It has no `ControlValueAccessor`, but `[(ngModel)]`, `[formControl]` and `formControlName` work too, because Angular binds a control's `value` and `touch` directly when it has no accessor. Prefer `[formField]`, which also hands it `disabled`, `readonly`, `required` and validation state.
+
+## Accessibility
+
+### Keyboard
+
+| Key                     | Action                                                                                                                                                                                                                                            |
+|-------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `ArrowDown` / `ArrowUp` | Navigate to the next or previous option. Commits the value immediately when the popup is closed; only highlights the option when the popup is open — see [Staged navigation while the popup is open](#staged-navigation-while-the-popup-is-open). |
+| `Alt+ArrowDown`         | Open the popup.                                                                                                                                                                                                                                   |
+| `Alt+ArrowUp`           | Close the popup.                                                                                                                                                                                                                                  |
+| `Home`                  | Move to the first option.                                                                                                                                                                                                                         |
+| `End`                   | Move to the last option.                                                                                                                                                                                                                          |
+| `Enter`                 | Open the popup when closed. When open, commits the highlighted option and closes the popup.                                                                                                                                                       |
+| `Space`                 | Toggle the popup open or closed.                                                                                                                                                                                                                  |
+| `Escape` / `Tab`        | Close the popup without committing a highlighted-but-uncommitted option.                                                                                                                                                                          |
+| Character keys          | Typeahead: cycles through options whose text matches the typed characters.                                                                                                                                                                        |
+
+### Focus
+
+The host element is the only Tab stop; DOM focus does not move into the popup's option list. Arrow-key, `Home`/`End`, and typeahead navigation move an internal highlighted-option pointer that is reflected through `aria-activedescendant` on the host element instead.
+
+### ARIA
+
+| Attribute               | When present                                                                                     | Value                                             |
+|-------------------------|--------------------------------------------------------------------------------------------------|---------------------------------------------------|
+| `role`                  | Always                                                                                           | `"combobox"`                                      |
+| `aria-haspopup`         | Always                                                                                           | `"listbox"`                                       |
+| `aria-expanded`         | Always                                                                                           | Reflects the popup's open state                   |
+| `aria-activedescendant` | While an option is highlighted                                                                   | The highlighted option's element id               |
+| `aria-controls`         | Always                                                                                           | The popup listbox's element id                    |
+| `aria-label`            | The `aria-label` input is set, or as a fallback to `placeholder` when `aria-labelledby` is unset | The `aria-label` value, or the `placeholder` value |
+| `aria-labelledby`       | The `aria-labelledby` input is set                                                               | The `aria-labelledby` value                        |
+| `aria-describedby`      | The `aria-describedby` input is set                                                              | The `aria-describedby` value                       |
+| `aria-disabled`         | `disabled` is `true`                                                                             | `"true"`                                          |
+| `aria-readonly`         | `readonly` is `true`                                                                             | `"true"`                                          |
+| `aria-required`         | `required` is `true`                                                                             | `"true"`                                          |
+| `aria-invalid`          | `invalid` is `true`, or `required` is `true` and the control is `touched` with no value selected | `"true"`                                          |
+| `aria-busy`             | `loading` is `true`                                                                              | `"true"`                                          |
+
+Name the dropdown list with `aria-labelledby` pointing at a visible label's `id`, or with `aria-label`. The `placeholder` only supplies a fallback name, and it disappears from view once a value is selected. A label can't name it in any other way: the host is a `role="combobox"` element, not a native input, so wrapping it in `<mona-label>` doesn't name it, and a string `for` has nothing to point at. `[for]` bound to its template reference makes a click on the label focus it, but doesn't name it. That's why the examples use both:
+
+```html
+<label id="shipping-label" monaLabel [for]="shippingList">Shipping method</label>
+<mona-dropdown-list #shippingList aria-labelledby="shipping-label" [data]="methods"></mona-dropdown-list>
+```
+
+The control also renders a visually hidden live region that announces the highlighted or selected option's text and position to screen reader users as the consumer navigates the popup.
+
+<!-- verification-checklist
+- [x] DropdownListComponent inputs/outputs/defaults verified against dropdown-list.component.ts source and cross-checked against component-metadata.json's DropdownListComponent entry (all 27 members matched: ariaLabel, ariaLabelledBy, data, disabled(model), invalid, itemDisabled, loading, placeholder, popupClass, popupHeight, popupWidth, readonly, required, rounded, showClearButton, size, textField, touched, userClass(class), value(model), valueField, valuePrimitive, close, closed, open, opened, touch)
+- [x] valuePrimitive and TValue-generic value binding verified against dropdown-list.component.ts's getControlValue() (returns getDataItemValue(dataItem) when valuePrimitive() else dataItem) and synchronizeSelection() (setSelectedKeys([value]) when valuePrimitive() else setSelectedDataItems([value])); confirmed value-restoration by primitive field only takes effect when valuePrimitive is true, unlike the pre-valuePrimitive behavior this doc previously described
+- [x] Three behavior directives (Filterable, Groupable, VirtualScroll) inputs/outputs and default option objects verified against dropdown-filterable.directive.ts, dropdown-groupable.directive.ts, dropdown-virtual-scroll.directive.ts
+- [x] Seven structural template directives and their selectors verified against dropdowns/directives/*-template.directive.ts and dropdowns/dropdown-list/directives/dropdown-list-value-template.directive.ts; template contexts verified against dropdown-list.component.html's ngTemplateOutletContext bindings
+- [x] Keyboard map (ArrowDown/ArrowUp/Alt+ArrowDown/Alt+ArrowUp/Home/End/Enter/Space/Escape/Tab/typeahead) verified against dropdown-list-popup-handler.directive.ts (handleKeyDown/handleArrowKeys) and dropdown-list.component.ts (setKeydownSubscription/handleEnterKey/handleHomeEndKeys)
+- [x] Staged-vs-committed value behavior verified against dropdown-list.component.ts's #navigatedValue linkedSignal, setArrowKeyNavigationSubscription, and setPopupCloseSubscriptions
+- [x] Single Tab-stop focus behavior verified against dropdown-list-popup-handler.directive.ts's keydown listener bound to the host element (not to popup items) plus list-item.directive.ts's rovingTabIndex (roving -1 on all items since the combobox never delegates DOM focus into the popup)
+- [x] ARIA attributes verified against dropdown-list.component.ts's host object bindings
+- [x] Form integration verified: DropdownListComponent implements FormValueControl<TValue | null> (dropdown-list.component.ts class declaration); no NG_VALUE_ACCESSOR provider or writeValue/registerOnChange/registerOnTouched methods found; ngModel and formControl still work without one, checked by tests/forms-interop.spec.ts
+- [x] FilterableOptions, GroupableOptions, VirtualScrollOptions, PopupCloseEvent, PreventableEvent, FilterChangeEvent confirmed exported via lib/index.ts; DropdownFieldSelectorType, DropdownFieldPredicateType, ListSizeInputType confirmed NOT exported
+- [x] hostDirectives (DropdownDataHandlerDirective, DropdownListPopupHandlerDirective) confirmed to expose no public inputs/outputs of their own — omitted from API tables
+- [x] No internal-only symbols (ListService, DropdownService, DropdownListService, monaDropdownLiveRegion, indicator-icon presets, Tailwind class names) documented as public API
+-->

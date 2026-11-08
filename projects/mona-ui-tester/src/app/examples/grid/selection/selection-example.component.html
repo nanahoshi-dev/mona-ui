@@ -1,0 +1,14 @@
+<div class="flex flex-col gap-2">
+    <mona-grid
+        aria-label="Team members"
+        rowKey="id"
+        [data]="members"
+        [monaGridSelectable]="{ mode: 'multiple', showCheckboxes: true, rowAriaLabel: rowLabel }"
+        [pageSize]="5"
+        [(selectedKeys)]="selectedIds">
+        <mona-grid-column field="name" title="Name" />
+        <mona-grid-column field="role" title="Role" />
+        <mona-grid-column field="location" title="Location" />
+    </mona-grid>
+    <span aria-live="polite" class="text-sm">{{ selectedIds().length }} selected</span>
+</div>

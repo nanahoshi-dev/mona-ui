@@ -159,6 +159,7 @@ export class ExpansionPanelComponent implements ExpansionPanelVariantInput, Coll
         }
     }
 
+    /** Collapses the panel, even when `disabled`. */
     public collapse(): void {
         this.expanded.set(false);
     }
@@ -170,6 +171,7 @@ export class ExpansionPanelComponent implements ExpansionPanelVariantInput, Coll
         return this.#host.compareDocumentPosition(other.#host) & DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
     }
 
+    /** Expands the panel, even when `disabled`. */
     public expand(): void {
         this.expanded.set(true);
     }
@@ -188,6 +190,7 @@ export class ExpansionPanelComponent implements ExpansionPanelVariantInput, Coll
         return this.triggerElement().nativeElement === element;
     }
 
+    /** Toggles the panel, unless it's `disabled`. */
     public toggle(): void {
         if (this.disabled()) {
             return;

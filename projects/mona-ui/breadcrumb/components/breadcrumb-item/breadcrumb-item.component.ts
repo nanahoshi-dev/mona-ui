@@ -13,6 +13,10 @@ import {
 import { BreadcrumbLinkDirective } from "../../directives/breadcrumb-link.directive";
 import { BREADCRUMB_CONTEXT, BREADCRUMB_ITEM_CONTEXT } from "../../models/breadcrumb.tokens";
 
+/**
+ * Use as a direct child of `<mona-breadcrumb>`. Project any Angular content — text, icons, or elements — into the
+ * default slot.
+ */
 @Component({
     selector: "mona-breadcrumb-item",
     templateUrl: "./breadcrumb-item.component.html",

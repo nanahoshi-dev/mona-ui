@@ -1,0 +1,39 @@
+<mona-sidebar-layout class="h-80 border border-border" modalScope="layout">
+    <mona-sidebar collapsible="icon">
+        <nav monaSidebarContent aria-label="Documentation">
+            <ul monaSidebarMenu>
+                <li monaSidebarMenuItem>
+                    <a monaSidebarMenuButton href="/docs" tooltip="Introduction" (click)="$event.preventDefault()">
+                        <svg lucideBookOpen aria-hidden="true" [size]="16"></svg>
+                        <span>Introduction</span>
+                    </a>
+                </li>
+                <li #components="monaCollapsible" monaCollapsible monaSidebarMenuItem [expanded]="true">
+                    <button monaCollapsibleTrigger monaSidebarMenuButton tooltip="Components" type="button">
+                        <svg lucideFolder aria-hidden="true" [size]="16"></svg>
+                        <span>Components</span>
+                        <svg
+                            class="ms-auto transition-transform"
+                            lucideChevronRight
+                            aria-hidden="true"
+                            [size]="16"
+                            [style.rotate]="components.expanded() ? '90deg' : '0deg'"></svg>
+                    </button>
+                    <ul monaCollapsibleContent monaSidebarMenuSub>
+                        @for (page of pages; track page) {
+                            <li monaSidebarMenuItem>
+                                <a monaSidebarMenuButton href="/docs" (click)="$event.preventDefault()">{{ page }}</a>
+                            </li>
+                        }
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </mona-sidebar>
+
+    <div class="p-4" monaSidebarInset>
+        <button monaButton monaSidebarTrigger aria-label="Toggle sidebar" look="ghost" type="button" [iconOnly]="true">
+            <svg lucidePanelLeft aria-hidden="true" [size]="16"></svg>
+        </button>
+    </div>
+</mona-sidebar-layout>

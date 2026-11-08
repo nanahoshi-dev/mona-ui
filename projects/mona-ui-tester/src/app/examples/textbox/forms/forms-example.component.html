@@ -1,0 +1,22 @@
+<div class="flex max-w-sm flex-col gap-3">
+    <mona-label text="Name">
+        <mona-text-box aria-describedby="textbox-name-error" [formField]="contact.name" />
+    </mona-label>
+    <p aria-live="polite" class="text-sm text-error" id="textbox-name-error">
+        @if (contact.name().touched()) {
+            @for (error of contact.name().errors(); track error.kind) {
+                {{ error.message }}
+            }
+        }
+    </p>
+    <mona-label text="Email">
+        <mona-text-box aria-describedby="textbox-email-error" type="email" [formField]="contact.email" />
+    </mona-label>
+    <p aria-live="polite" class="text-sm text-error" id="textbox-email-error">
+        @if (contact.email().touched()) {
+            @for (error of contact.email().errors(); track error.kind) {
+                {{ error.message }}
+            }
+        }
+    </p>
+</div>

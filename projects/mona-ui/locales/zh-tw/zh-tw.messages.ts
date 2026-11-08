@@ -176,6 +176,15 @@ export const ZH_TW_MESSAGES = {
     comboBox: {
         clear: "清除"
     },
+    command: {
+        dialogLabel: "命令選單",
+        inputLabel: "搜尋命令",
+        listLabel: "結果",
+        loading: "載入中",
+        noResults: "找不到結果",
+        placeholder: "輸入命令或搜尋…",
+        resultsAvailable: (count: number) => `有 ${localizeNumber(count)} 個可用結果`
+    },
     datePicker: {
         datePicker: "日期選取器",
         openCalendar: "開啟行事曆"
@@ -331,6 +340,7 @@ export const ZH_TW_MESSAGES = {
         filterOperator: (column: string, operator: string) => `${column} 的篩選運算子：${operator}`,
         filterPlaceholder: "篩選…",
         group: "群組",
+        groupOptions: (column: string) => `${column} 群組選項`,
         loading: "載入中",
         modified: "已修改",
         moveAsNext: "移至下一項",

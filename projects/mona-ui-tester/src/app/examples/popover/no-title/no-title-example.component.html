@@ -1,0 +1,8 @@
+<button #filters monaButton type="button">Filters ({{ activeCount() }})</button>
+
+<mona-popover aria-label="Filters" position="bottom" [target]="filters">
+    <div class="flex flex-col gap-2 p-3">
+        <mona-check-box label="Open issues only" [(checked)]="open" />
+        <mona-check-box label="Assigned to me" [(checked)]="assignedToMe" />
+    </div>
+</mona-popover>

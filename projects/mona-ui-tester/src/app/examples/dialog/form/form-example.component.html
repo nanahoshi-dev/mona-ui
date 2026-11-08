@@ -1,0 +1,47 @@
+<div class="flex flex-wrap items-center gap-3">
+    <button monaButton aria-haspopup="dialog" type="button" (click)="openDialog()">Add contact</button>
+    @if (saved(); as contact) {
+        <span class="text-sm">Saved: {{ contact.name }} ({{ contact.email }})</span>
+    }
+</div>
+
+@if (open()) {
+    <mona-dialog
+        title="Add contact"
+        [actions]="actions"
+        [type]="null"
+        (action)="onAction($event)"
+        (close)="open.set(false)">
+        <ng-template monaDialogContentTemplate>
+            <div class="flex flex-col gap-3">
+                <div class="flex flex-col gap-1">
+                    <mona-label text="Name">
+                        <mona-text-box aria-describedby="dialog-form-example-name-error" [formField]="contact.name" />
+                    </mona-label>
+                    <p aria-live="polite" class="text-sm text-error" id="dialog-form-example-name-error">
+                        @if (contact.name().touched()) {
+                            @for (error of contact.name().errors(); track error.kind) {
+                                {{ error.message }}
+                            }
+                        }
+                    </p>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <mona-label text="Email">
+                        <mona-text-box
+                            aria-describedby="dialog-form-example-email-error"
+                            type="email"
+                            [formField]="contact.email" />
+                    </mona-label>
+                    <p aria-live="polite" class="text-sm text-error" id="dialog-form-example-email-error">
+                        @if (contact.email().touched()) {
+                            @for (error of contact.email().errors(); track error.kind) {
+                                {{ error.message }}
+                            }
+                        }
+                    </p>
+                </div>
+            </div>
+        </ng-template>
+    </mona-dialog>
+}

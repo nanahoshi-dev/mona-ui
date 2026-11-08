@@ -16,6 +16,7 @@ import { FormsModule } from "@angular/forms";
 import { LucideFunnel, LucideFunnelX } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { deepEquals } from "@nanahoshi/mona-ui/common";
+import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { DatePickerComponent } from "@nanahoshi/mona-ui/date-picker";
 import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
 import { type FilterMenuDataItem, type FilterMenuValue, FilterService } from "@nanahoshi/mona-ui/filter";
@@ -125,6 +126,8 @@ export class GridFilterRowCellComponent {
     });
     protected readonly messages = this.#gridService.messages;
     protected readonly numberValue = signal<number | null>(null);
+    /** The operator menu is named by the button it opens from, through this id. */
+    protected readonly operatorButtonId = createElementControlId();
     /** The operators of the column's type, with labels that follow the locale. */
     protected readonly operatorItems = computed<FilterMenuDataItem[]>(() => {
         switch (this.#dataType()) {

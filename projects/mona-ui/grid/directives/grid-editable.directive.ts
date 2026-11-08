@@ -13,7 +13,8 @@ import { GridService } from "../services/grid.service";
 @Directive({
     selector: "mona-grid[monaGridEditable]"
 })
-export class GridEditableDirective {
+/** Generic over the row type, which a typed `schema` or `newRowFactory` sets. */
+export class GridEditableDirective<T extends object = Record<PropertyKey, unknown>> {
     readonly #destroyRef = inject(DestroyRef);
     readonly #gridService: GridService = inject(GridService);
 
@@ -44,9 +45,13 @@ export class GridEditableDirective {
     /**
      * @description Creates the initial data object used by the add-row editor.
      */
-    public readonly newRowFactory = input<() => Record<PropertyKey, unknown>>(() => ({}));
+    public readonly newRowFactory = input<() => T>(() => ({}) as T);
 
-    public readonly options = input<EditableOptions | "">("", {
+    /**
+     * @description Enables inline editing. An empty string enables cell-mode editing with default settings; pass an
+     * object to choose `"cell"` or `"row"` mode and an optional validation `schema`.
+     */
+    public readonly options = input<EditableOptions<T> | "">("", {
         alias: "monaGridEditable"
     });
 
@@ -64,14 +69,15 @@ export class GridEditableDirective {
      * holds the edited values and `originalRowData` the row as it was. Prevent it to keep the editor open,
      * for example while saving on the server, then call `endEdit()`.
      */
-    public readonly save = output<GridSaveEvent>();
+    public readonly save = output<GridSaveEvent<T>>();
 
     public constructor() {
         effect(() => {
             const options = this.options();
             untracked(() => {
                 if (options) {
-                    this.#gridService.setEditableOptions(options);
+                    // The grid keeps rows untyped. The row type only checks the consumer's own schema.
+                    this.#gridService.setEditableOptions(options as unknown as EditableOptions);
                 } else if (options === "") {
                     this.#gridService.setEditableOptions({ enabled: true, mode: "cell" });
                 }
@@ -79,7 +85,7 @@ export class GridEditableDirective {
         });
         effect(() => {
             const factory = this.newRowFactory();
-            untracked(() => this.#gridService.setNewRowFactory(factory));
+            untracked(() => this.#gridService.setNewRowFactory(factory as () => Record<PropertyKey, unknown>));
         });
         afterNextRender({
             read: () => this.#setSubscriptions()
@@ -109,6 +115,6 @@ export class GridEditableDirective {
         this.#gridService.rowEdit$
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe((event: RowEditEvent) => this.rowEdit.emit(event));
-        this.#gridService.save$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => this.save.emit(event));
+        this.#gridService.save$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => this.save.emit(event as unknown as GridSaveEvent<T>));
     }
 }

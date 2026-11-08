@@ -157,6 +157,15 @@
     "comboBox": {
         "clear": "Leeren"
     },
+    "command": {
+        "dialogLabel": "Befehlsmenü",
+        "inputLabel": "Befehle suchen",
+        "listLabel": "Ergebnisse",
+        "loading": "Wird geladen",
+        "noResults": "Keine Ergebnisse gefunden",
+        "placeholder": "Befehl eingeben oder suchen…",
+        "resultsAvailable": "{count, plural, =1 {1 Ergebnis verfügbar} other {# Ergebnisse verfügbar}}"
+    },
     "datePicker": {
         "datePicker": "Datumsauswahl",
         "openCalendar": "Kalender öffnen"
@@ -311,6 +320,7 @@
         "filterOperator": "Filteroperator für {column}: {operator}",
         "filterPlaceholder": "Filtern...",
         "group": "Gruppe",
+        "groupOptions": "Gruppenoptionen für {column}",
         "loading": "Wird geladen",
         "modified": "Geändert",
         "moveAsNext": "Als Nächstes verschieben",

@@ -1,0 +1,11 @@
+<div class="flex items-center gap-4">
+    <mona-range-slider
+        aria-label="Comfort range"
+        aria-label-end="Highest temperature"
+        aria-label-start="Lowest temperature"
+        orientation="vertical"
+        [maxValue]="30"
+        [minValue]="10"
+        [(value)]="temperature" />
+    <span class="text-sm">Comfort range: {{ temperature()[0] }} °C to {{ temperature()[1] }} °C</span>
+</div>

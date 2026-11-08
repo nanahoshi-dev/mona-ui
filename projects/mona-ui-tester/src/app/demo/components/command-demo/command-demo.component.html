@@ -1,0 +1,34 @@
+<section class="flex max-w-md flex-col gap-2 py-4" aria-label="Command menu">
+    <mona-command (itemSelect)="lastAction.set($event.value)">
+        <mona-command-input aria-label="Search actions" placeholder="Search actions…" />
+        <mona-command-list>
+            <mona-command-empty />
+            <mona-command-group heading="File">
+                <mona-command-item value="New file" [keywords]="['create', 'add']">
+                    <mona-command-highlight text="New file" />
+                    <mona-command-shortcut keys="mod+n" />
+                </mona-command-item>
+                <mona-command-item value="Open file" [keywords]="['load']">
+                    <mona-command-highlight text="Open file" />
+                    <mona-command-shortcut keys="mod+o" />
+                </mona-command-item>
+                <mona-command-item disabled value="Save file">
+                    <mona-command-highlight text="Save file" />
+                    <mona-command-shortcut keys="mod+s" />
+                </mona-command-item>
+            </mona-command-group>
+            <mona-command-separator />
+            <mona-command-group heading="View">
+                <mona-command-item value="Toggle sidebar">
+                    <mona-command-highlight text="Toggle sidebar" />
+                </mona-command-item>
+                <mona-command-item value="Switch theme" [keywords]="['dark', 'light']">
+                    <mona-command-highlight text="Switch theme" />
+                </mona-command-item>
+            </mona-command-group>
+        </mona-command-list>
+        <mona-command-footer>
+            <span aria-live="polite">Last action: {{ lastAction() }}</span>
+        </mona-command-footer>
+    </mona-command>
+</section>

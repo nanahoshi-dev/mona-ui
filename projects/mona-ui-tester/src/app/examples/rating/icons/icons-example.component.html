@@ -1,0 +1,15 @@
+<div class="flex flex-col items-start gap-4">
+    <mona-rating color="#e11d48" icon="heart" label="Favorite level" [(value)]="favorite" />
+
+    <mona-rating label="Helpful" [(value)]="helpful">
+        <ng-template monaRatingItemTemplate>
+            <svg lucideThumbsUp class="text-muted-foreground h-full w-full" fill="none"></svg>
+        </ng-template>
+        <ng-template monaRatingSelectedItemTemplate>
+            <svg lucideThumbsUp class="h-full w-full text-sky-600" fill="currentColor"></svg>
+        </ng-template>
+        <ng-template monaRatingHoveredItemTemplate>
+            <svg lucideThumbsUp class="h-full w-full text-sky-400" fill="currentColor"></svg>
+        </ng-template>
+    </mona-rating>
+</div>

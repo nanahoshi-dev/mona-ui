@@ -53,7 +53,9 @@ describe("SheetComponent", () => {
         }> = {}
     ): Promise<SheetComponent> {
         fixture = TestBed.createComponent(SheetComponent);
-        Object.entries(inputs).forEach(([name, value]) => fixture?.componentRef.setInput(name, value));
+        Object.entries(inputs).forEach(([name, value]) =>
+            fixture?.componentRef.setInput(name === "ariaLabel" ? "aria-label" : name, value)
+        );
         fixture.detectChanges();
         await fixture.whenStable();
         TestBed.inject(ApplicationRef).tick();

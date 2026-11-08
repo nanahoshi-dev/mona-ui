@@ -1,0 +1,21 @@
+<div class="flex flex-col gap-3">
+    <mona-expansion-panel title="Notifications">
+        <ng-template monaExpansionPanelActionsTemplate>
+            <button
+                monaButton
+                aria-label="Notification settings"
+                look="ghost"
+                size="small"
+                type="button"
+                [iconOnly]="true"
+                (click)="settingsClicks.set(settingsClicks() + 1)">
+                <svg lucideSettings aria-hidden="true" [size]="14"></svg>
+            </button>
+        </ng-template>
+        <ng-template let-expanded monaExpansionPanelIconTemplate>
+            <svg class="mx-2 transition-transform" lucideChevronDown aria-hidden="true" [class.rotate-180]="expanded" [size]="16"></svg>
+        </ng-template>
+        <p class="p-3 text-sm">Email me when someone mentions me or replies to my comment.</p>
+    </mona-expansion-panel>
+    <p aria-live="polite" class="text-sm">Settings opened {{ settingsClicks() }} times</p>
+</div>

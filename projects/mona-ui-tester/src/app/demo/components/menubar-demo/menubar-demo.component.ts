@@ -252,8 +252,8 @@ export class MenubarDemoComponent extends AbstractDemoComponent<MenubarComponent
     template: `
         @let featureData = features();
         <mona-menubar
-            [ariaLabel]="ariaLabel()"
-            [ariaLabelledby]="ariaLabelledby()"
+            [aria-label]="ariaLabel()"
+            [aria-labelledby]="ariaLabelledBy()"
             [disabled]="disabled()"
             [rounded]="rounded()"
             [size]="size()"
@@ -448,7 +448,7 @@ class MenubarWrapperComponent implements ComponentInputsAsSignal<MenubarComponen
     protected readonly selectedFontSize = signal("md");
     protected readonly selectedTheme = signal("system");
     public readonly ariaLabel = input("");
-    public readonly ariaLabelledby = input("");
+    public readonly ariaLabelledBy = input("");
     public readonly disabled = input(false);
     public readonly size = input<ReturnType<MenubarComponent["size"]>>("medium");
     public readonly rounded = input<ReturnType<MenubarComponent["rounded"]>>("medium");

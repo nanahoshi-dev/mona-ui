@@ -447,12 +447,17 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         });
     }
 
+    /** Removes focus from the input. */
     public blur(): void {
         this.inputRef().nativeElement.blur();
     }
 
     public focus(options?: FocusOptions): void;
     public focus(index?: number): void;
+    /**
+     * Focuses the input: at the given slot, with the given options, or at the next unfilled slot. Does nothing while
+     * disabled.
+     */
     public focus(target?: number | FocusOptions): void {
         if (this.effectiveDisabled()) {
             return;

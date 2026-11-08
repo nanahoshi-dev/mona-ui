@@ -1,0 +1,14 @@
+<mona-grid
+    aria-label="Orders"
+    [data]="orders"
+    [monaGridFilterable]="{ enabled: true, type: 'menu, row' }"
+    [monaGridSortable]="{ mode: 'multiple', allowUnsort: true }"
+    [pageSize]="5"
+    [(filter)]="filter"
+    [(sort)]="sort">
+    <mona-grid-column field="id" title="Order" type="number" [sortable]="false" [width]="100" />
+    <mona-grid-column field="customer" title="Customer" />
+    <mona-grid-column field="shippedOn" title="Shipped" type="date" />
+    <mona-grid-column field="freight" title="Freight" type="number" />
+    <mona-grid-column field="paid" title="Paid" type="boolean" />
+</mona-grid>

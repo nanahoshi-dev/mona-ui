@@ -241,14 +241,17 @@ describe("GridComponent keyboard navigation", () => {
         expect(document.activeElement).toBe(secondary);
     });
 
-    it("makes the first header cell the table Tab stop when there is no remembered cell", async () => {
+    it("makes the first body cell the table Tab stop when there is no remembered cell", async () => {
         fixture.componentInstance.showToolbar.set(false);
         await settleFixture(fixture);
 
         const root = fixture.nativeElement as ParentNode;
         const firstHeader = getRequiredTableCell(root, "thead tr:first-child th[role='columnheader']");
+        const firstBodyCell = getRequiredTableCell(root, "tbody tr:first-child td[aria-colindex]");
 
-        expect(firstHeader.getAttribute("tabindex")).toBe("0");
+        // The body is what scrolls, so Tab lands where its scrolling can be reached from the keyboard.
+        expect(firstBodyCell.getAttribute("tabindex")).toBe("0");
+        expect(firstHeader.getAttribute("tabindex")).toBe("-1");
     });
 
     it("leaves Tab on a header cell to the browser, with one Tab stop in the tables (GK1, GK2)", async () => {

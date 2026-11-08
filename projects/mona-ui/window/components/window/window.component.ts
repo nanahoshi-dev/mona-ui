@@ -29,6 +29,7 @@ import type { WindowVariantInput, WindowVariantProps } from "../../styles/window
     // Content placed directly inside <mona-window> is the window's content, unless a monaWindowContentTemplate is given.
     template: `<ng-template #projectedContent><ng-content /></ng-template>`,
     host: {
+        "[attr.aria-label]": "null",
         class: "hidden"
     }
 })
@@ -46,7 +47,7 @@ export class WindowComponent implements WindowVariantInput {
     /**
      * @description Accessible name for the window when it has no `title` or title template.
      */
-    public readonly ariaLabel = input<string>();
+    public readonly ariaLabel = input<string | undefined>(undefined, { alias: "aria-label" });
 
     /**
      * @description Sets the visibility of the close button in the window header.
@@ -201,6 +202,7 @@ export class WindowComponent implements WindowVariantInput {
         });
     }
 
+    /** Closes the window. */
     public closeWindow(): void {
         this.#windowRef?.close();
     }

@@ -1,9 +1,6 @@
 import { Directive, forwardRef } from "@angular/core";
-import {
-    PopupMenuShortcutTemplateDirective,
-    PopupMenuShortcutTemplateToken,
-    PopupMenuTemplateOrigin
-} from "@nanahoshi/mona-ui/popup-menu";
+import { PopupMenuShortcutTemplateDirective } from "@nanahoshi/mona-ui/popup-menu";
+import { PopupMenuShortcutTemplateToken, PopupMenuTemplateOrigin } from "@nanahoshi/mona-ui/internal/popup-menu";
 
 @Directive({
     selector: "ng-template[monaSplitButtonMenuItemShortcutTemplate]",

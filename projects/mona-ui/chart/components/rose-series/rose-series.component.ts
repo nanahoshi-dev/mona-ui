@@ -17,6 +17,9 @@ import { createChartHiddenItems } from "../../internal/utils/chart-hidden-items"
 
 let nextRoseSeriesId = 0;
 
+/**
+ * Renders Nightingale rose (coxcomb) charts with angular category petals whose radial extent scales by area or radius.
+ */
 @Component({
     selector: "mona-rose-series",
     template: "",
@@ -288,6 +291,7 @@ export class RoseSeriesComponent implements OnInit {
         this.#destroyRef.onDestroy(unregister);
     }
 
+    /** Shows or hides the petal with this id, and returns whether it's now visible. */
     public toggleDatum(itemId: string): boolean {
         const isNowVisible = this.#hidden.toggle(itemId);
 

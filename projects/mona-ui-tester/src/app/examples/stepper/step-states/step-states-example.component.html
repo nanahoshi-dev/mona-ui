@@ -1,0 +1,4 @@
+<div class="flex flex-col gap-3">
+    <mona-stepper aria-label="Project setup" [linear]="false" [steps]="steps" [(step)]="currentStep" />
+    <p class="text-sm">Current step: {{ steps[currentStep()].label }}</p>
+</div>

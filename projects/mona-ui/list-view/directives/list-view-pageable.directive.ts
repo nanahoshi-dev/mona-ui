@@ -20,6 +20,12 @@ export class ListViewPageableDirective {
     };
     readonly #listService = inject(ListService);
 
+    /**
+     * @description Enables pagination. An empty string enables pagination with default settings (`type: "numeric"`,
+     * `previousNext: true`, `pageSize: 10`, `pageSizeValues: [5, 10, 20, 25, 50, 100]`, `visiblePages: 5`); pass an
+     * object to override any field. Has no visible effect while `monaListViewVirtualScroll` is enabled — see Pagination
+     * and virtualization don't combine.
+     */
     public readonly options = input<Partial<PagerSettings> | "">("", {
         alias: "monaListViewPageable"
     });

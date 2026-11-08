@@ -12,6 +12,10 @@ import type {
     ChartCrosshairSnapMode
 } from "../../models/chart-crosshair.models";
 
+/**
+ * Renders dynamic crosshair guide lines and axis label badges for pointer and keyboard navigation in Cartesian XY
+ * charts.
+ */
 @Component({
     selector: "mona-chart-crosshair",
     template: "",

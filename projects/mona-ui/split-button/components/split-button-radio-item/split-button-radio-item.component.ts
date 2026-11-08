@@ -1,10 +1,6 @@
 import { Component, effect, forwardRef } from "@angular/core";
-import {
-    PopupMenuOrigin,
-    PopupMenuRadioItemComponent,
-    PopupMenuRadioItemToken,
-    PopupMenuToken
-} from "@nanahoshi/mona-ui/popup-menu";
+import { PopupMenuRadioItemComponent } from "@nanahoshi/mona-ui/popup-menu";
+import { PopupMenuOrigin, PopupMenuRadioItemToken, PopupMenuToken } from "@nanahoshi/mona-ui/internal/popup-menu";
 import { ensureSplitButtonTemplateTypes } from "../../utils/split-button.utils";
 
 @Component({

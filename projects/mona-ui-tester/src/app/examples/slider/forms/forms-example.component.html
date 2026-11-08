@@ -1,0 +1,6 @@
+<div class="flex max-w-sm flex-col gap-2">
+    <mona-label text="Guests">
+        <mona-slider [formField]="booking.guests" />
+    </mona-label>
+    <span class="text-sm">Table for {{ booking.guests().value() }}</span>
+</div>

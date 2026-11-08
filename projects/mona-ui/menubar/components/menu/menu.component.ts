@@ -1,11 +1,16 @@
 import { Component, computed, contentChild, contentChildren, effect, input, TemplateRef } from "@angular/core";
 import { any } from "@mirei/ts-collections";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
-import { MenuItem, PopupMenuComponent, PopupMenuToken, preparePopupMenuItems } from "@nanahoshi/mona-ui/popup-menu";
+import { MenuItem, PopupMenuComponent } from "@nanahoshi/mona-ui/popup-menu";
+import { PopupMenuToken, preparePopupMenuItems } from "@nanahoshi/mona-ui/internal/popup-menu";
 import { MenuIconTemplateDirective } from "../../directives/menu-icon-template.directive";
 import { MenuTextTemplateDirective } from "../../directives/menu-text-template.directive";
 import { ensureMenubarComponentTypes } from "../../utils/menubar.utils";
 
+/**
+ * A top-level menu. Its `text` is displayed on the menubar; its projected items (or `items` input) become the popup
+ * content.
+ */
 @Component({
     selector: "mona-menu",
     template: ""

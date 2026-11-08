@@ -82,7 +82,6 @@
         [attr.aria-disabled]="effectiveDisabled() || null"
         [attr.aria-invalid]="invalidState() ? 'true' : null"
         [attr.aria-readonly]="readonly() || null"
-        [attr.aria-required]="required() || null"
         (pointerleave)="onMonthGridPointerLeave()">
         <div role="row" [class]="monthGridHeaderClass()" [style.grid-template-columns]="`repeat(${columnCount}, 32px)`">
             @if (weekNumber()) {

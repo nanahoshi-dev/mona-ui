@@ -1,0 +1,12 @@
+<div class="flex max-w-sm flex-col gap-1">
+    <label id="multi-select-primitive-label" monaLabel [for]="dayList">Working days</label>
+    <mona-multi-select
+        #dayList
+        aria-labelledby="multi-select-primitive-label"
+        textField="name"
+        valueField="id"
+        [data]="days"
+        [valuePrimitive]="true"
+        [(value)]="dayIds" />
+    <span aria-live="polite" class="text-sm">Value: [{{ dayIds().join(", ") }}]</span>
+</div>

@@ -1,0 +1,11 @@
+<div class="flex flex-col gap-2">
+    <mona-splitter class="h-48 w-full border border-border" (resizeEnd)="layout.set($event)">
+        <mona-splitter-pane label="Navigation" [size]="layout()[0]">
+            <p class="p-4 text-sm">Navigation</p>
+        </mona-splitter-pane>
+        <mona-splitter-pane label="Content" [size]="layout()[1]">
+            <p class="p-4 text-sm">Content</p>
+        </mona-splitter-pane>
+    </mona-splitter>
+    <p aria-live="polite" class="text-sm">Saved layout: {{ layout().join(" / ") }}</p>
+</div>

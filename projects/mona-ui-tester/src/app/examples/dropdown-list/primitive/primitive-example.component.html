@@ -1,0 +1,12 @@
+<div class="flex max-w-xs flex-col gap-1">
+    <label id="dropdown-list-primitive-label" monaLabel [for]="priorityList">Priority</label>
+    <mona-dropdown-list
+        #priorityList
+        aria-labelledby="dropdown-list-primitive-label"
+        textField="label"
+        valueField="id"
+        [data]="priorities"
+        [valuePrimitive]="true"
+        [(value)]="priorityId" />
+    <span aria-live="polite" class="text-sm">Value: {{ priorityId() ?? "null" }}</span>
+</div>

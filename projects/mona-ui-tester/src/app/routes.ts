@@ -142,6 +142,11 @@ export const routes: Routes = [
                     import("./docs/components/combo-box-doc/combo-box-doc.component").then(m => m.ComboBoxDocComponent)
             },
             {
+                path: "command",
+                loadComponent: () =>
+                    import("./docs/components/command-doc/command-doc.component").then(m => m.CommandDocComponent)
+            },
+            {
                 path: "contextmenu",
                 loadComponent: () =>
                     import("./docs/components/contextmenu-doc/contextmenu-doc.component").then(

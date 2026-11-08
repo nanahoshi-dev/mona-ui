@@ -26,9 +26,9 @@ import {
     PopupMenuGroupTemplateDirective,
     PopupMenuIconTemplateDirective,
     PopupMenuShortcutTemplateDirective,
-    PopupMenuTextTemplateDirective,
-    PopupMenuToken
+    PopupMenuTextTemplateDirective
 } from "@nanahoshi/mona-ui/popup-menu";
+import { PopupMenuToken } from "@nanahoshi/mona-ui/internal/popup-menu";
 import type { PopupMenuItemClickEvent } from "@nanahoshi/mona-ui/popup-menu";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
@@ -105,6 +105,8 @@ export class SplitButtonComponent implements ButtonGroupMember, SplitButtonVaria
     });
     protected readonly mainButtonId = createElementControlId();
     protected readonly mainButtonTextTemplate = contentChild(SplitButtonTextTemplateDirective, { read: TemplateRef });
+    /** The menu is named by the element it opens from, through this id. */
+    protected readonly menuButtonId = createElementControlId();
     protected readonly menuButtonRef = viewChild<ElementRef<HTMLButtonElement>>("menuButton");
     protected readonly menuButtonTemplate = contentChild(SplitButtonMenuButtonTemplateDirective, { read: TemplateRef });
     protected readonly menuId = createElementControlId();
@@ -139,10 +141,10 @@ export class SplitButtonComponent implements ButtonGroupMember, SplitButtonVaria
 
     /**
      * @description ID of an external element that provides the accessible name for the main action button.
-     * Takes precedence over `ariaLabel` when both are set.
+     * Takes precedence over `aria-label` when both are set.
      * @default ""
      */
-    public readonly ariaLabelledby = input<string>("", { alias: "aria-labelledby" });
+    public readonly ariaLabelledBy = input<string>("", { alias: "aria-labelledby" });
 
     /**
      * @description Emitted when the main action button is clicked.

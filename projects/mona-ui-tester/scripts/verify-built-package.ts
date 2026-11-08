@@ -37,6 +37,23 @@ export function verifyThirdPartyNotices(
     }
 }
 
+/** The package carries its docs for coding agents: an `llms.txt` whose every link is a file in the package. */
+export function verifyAgentDocs(distDir: string): number {
+    const indexPath = resolve(distDir, "llms.txt");
+    if (!existsSync(indexPath)) {
+        throw new Error(`Agent docs index not found at: ${indexPath}`);
+    }
+    const links = Array.from(readFileSync(indexPath, "utf-8").matchAll(/\]\((docs\/[^)]+\.md)\)/g), match => match[1]);
+    if (links.length === 0) {
+        throw new Error(`Agent docs index at ${indexPath} links to no pages`);
+    }
+    const missing = links.filter(link => !existsSync(resolve(distDir, link)));
+    if (missing.length > 0) {
+        throw new Error(`Agent docs index links to pages that aren't in the package: ${missing.join(", ")}`);
+    }
+    return links.length;
+}
+
 export interface ExpectedLocaleExport {
     readonly direction?: "ltr" | "rtl";
     /** Locale folder when the locale is also its own entry point, `@nanahoshi/mona-ui/locales/<folder>`. */
@@ -799,6 +816,9 @@ export function verifyBuiltPackage(options: PackageVerificationOptions = {}): vo
 
     verifyPackageStyles(distDir, repoRoot);
     console.log("✓ styles.css is exported, and compiles with Tailwind to the classes the components use");
+
+    const agentPages = verifyAgentDocs(distDir);
+    console.log(`✓ Agent docs verified: llms.txt and the ${agentPages} pages it links to`);
 
     runConsumerSmokeTest({
         distDir,

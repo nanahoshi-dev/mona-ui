@@ -1,0 +1,10 @@
+<button monaButton aria-label="Save" type="button" [iconOnly]="true" [monaTooltip]="shortcut">
+    <svg lucideSave aria-hidden="true" [size]="16"></svg>
+</button>
+
+<ng-template #shortcut>
+    Save
+    <kbd>Ctrl</kbd>
+    +
+    <kbd>S</kbd>
+</ng-template>

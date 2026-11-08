@@ -46,7 +46,8 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Do NOT use `ngStyle`, use `style` bindings instead
 - When using external templates/styles, use paths relative to the component TS file.
 - When adding/removing public APIs, update `projects/mona-ui/src/lib/index.ts` exports (the package surface is re-exported via `projects/mona-ui/src/public-api.ts`).
-- Add/maintain `@description` JSDoc on `input()`/`model()`/`output()` properties because `projects/mona-ui-tester/scripts/extract-metadata.ts` uses it to generate `projects/mona-ui-tester/src/assets/component-metadata.json`.
+- Add/maintain `@description` JSDoc on `input()`/`model()`/`output()` properties because `projects/mona-ui-tester/scripts/extract-metadata.ts` uses it to generate `projects/mona-ui-tester/src/assets/component-metadata.json`, and the API reference is generated from it.
+- Run `npm run generate:api-docs` after changing a public API or its JSDoc. It rewrites each page's `assets/docs/<page>/api.md`, which is never edited by hand; `npm run check:api-docs` fails in CI when it's out of date. Guidance goes in `guide.md`. A public method or property on a component or directive only appears in the reference if it has JSDoc.
 
 ## State Management
 

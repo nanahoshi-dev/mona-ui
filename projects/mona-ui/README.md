@@ -17,6 +17,8 @@ A modern, high-performance, accessible UI component library built for Angular an
 
 ## Documentation
 
+Coding agents can read the documentation as markdown. The package includes it: start from `llms.txt` at the package root, which links to a page for each component in `docs/`.
+
 - [Theming](docs/theming.md)
 - [Forms](docs/forms.md)
 - [Internationalization (i18n) & RTL Guide](docs/i18n.md)

@@ -23,9 +23,9 @@ import {
     PopupMenuItem,
     PopupMenuItemClickEvent,
     PopupMenuShortcutTemplateDirective,
-    PopupMenuTextTemplateDirective,
-    PopupMenuToken
+    PopupMenuTextTemplateDirective
 } from "@nanahoshi/mona-ui/popup-menu";
+import { PopupMenuToken } from "@nanahoshi/mona-ui/internal/popup-menu";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { any } from "@mirei/ts-collections";
 import { ContextMenuGroupTemplateDirective } from "../../directives/context-menu-group-template.directive";
@@ -70,7 +70,10 @@ const roleOf = (element: HTMLElement): string | null => {
         PopupMenuIconTemplateDirective,
         PopupMenuShortcutTemplateDirective,
         PopupMenuGroupTemplateDirective
-    ]
+    ],
+    host: {
+        "[attr.aria-label]": "null"
+    }
 })
 export class ContextMenuComponent implements ContextMenuVariantInput {
     /** The target, while it has a role that allows the popup attributes. */
@@ -109,7 +112,7 @@ export class ContextMenuComponent implements ContextMenuVariantInput {
     /**
      * @description Accessible name for the menu. When empty, the menu is named by the target if it has an `id`.
      */
-    public readonly ariaLabel = input<string>("");
+    public readonly ariaLabel = input<string>("", { alias: "aria-label" });
 
     /**
      * @description The menu items to render. When provided, these take precedence over

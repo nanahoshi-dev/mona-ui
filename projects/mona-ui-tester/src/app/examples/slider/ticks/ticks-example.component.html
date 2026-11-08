@@ -1,0 +1,12 @@
+<div class="flex max-w-sm flex-col gap-2">
+    <mona-slider
+        aria-label="Volume"
+        [labelStep]="2"
+        [largeTickStep]="2"
+        [maxValue]="100"
+        [showLabels]="true"
+        [showTicks]="true"
+        [step]="10"
+        [(value)]="volume" />
+    <span class="text-sm">Volume: {{ volume() }}</span>
+</div>

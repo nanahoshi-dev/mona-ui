@@ -1,0 +1,17 @@
+<div class="flex items-center gap-3">
+    <button monaButton type="button" (click)="openRename()">Rename</button>
+    <span aria-live="polite" class="text-sm">File: {{ fileName() }}</span>
+</div>
+
+<ng-template #rename let-windowRef="windowRef">
+    <div class="flex flex-col gap-2 p-3">
+        <mona-label for="window-rename-input">New name</mona-label>
+        <mona-text-box inputId="window-rename-input" [(value)]="draft" />
+        <div class="flex justify-end gap-2">
+            <button monaButton size="small" type="button" (click)="windowRef.close()">Cancel</button>
+            <button monaButton look="primary" size="small" type="button" (click)="windowRef.close(draft())">
+                Rename
+            </button>
+        </div>
+    </div>
+</ng-template>

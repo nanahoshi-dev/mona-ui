@@ -6,6 +6,10 @@ import {
     CheckboxDirectiveVariantProps
 } from "../styles/checkbox.styles";
 
+/**
+ * Applies Mona UI styling to a native `<input type="checkbox">`. All native checkbox behaviors — keyboard interaction,
+ * form submission, `indeterminate` state, and Angular forms directives — are preserved.
+ */
 @Directive({
     selector: "input[type='checkbox'][monaCheckbox]",
     host: {

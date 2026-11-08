@@ -1,0 +1,5 @@
+<div class="flex max-w-sm flex-col gap-2">
+    <mona-label text="City" [for]="cityBox" />
+    <mona-text-box #cityBox placeholder="Where to?" [clearButton]="true" [(value)]="city" />
+    <p class="text-sm">Value: "{{ city() }}"</p>
+</div>

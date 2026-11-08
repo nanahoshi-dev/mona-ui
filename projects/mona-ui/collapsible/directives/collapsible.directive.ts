@@ -46,18 +46,25 @@ export class CollapsibleDirective implements CollapsibleConfig {
         return this.#contentIdFromContent() ?? this.#generatedContentId;
     }
 
+    /** Sets `expanded` to `false`. */
     public collapse(): void {
         this.expanded.set(false);
     }
 
+    /** Sets `expanded` to `true`. */
     public expand(): void {
         this.expanded.set(true);
     }
 
+    /**
+     * Takes the ID the content element was given, so the trigger points at it. `CollapsibleContentDirective` calls it,
+     * so there's no need to.
+     */
     public setContentId(id: string | null): void {
         this.#contentIdFromContent.set(id);
     }
 
+    /** Toggles `expanded` unless the root is disabled. */
     public toggle(): void {
         if (this.disabled()) {
             return;

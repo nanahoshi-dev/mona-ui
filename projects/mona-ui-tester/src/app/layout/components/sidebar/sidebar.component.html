@@ -6,20 +6,25 @@
     <span class="font-bold text-foreground text-lg tracking-tight">Mona UI</span>
 </div>
 
-<!-- Search Placeholder Button -->
+<!-- Search -->
 <div class="px-3 py-2 border-b border-border flex-shrink-0">
     <button
         class="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-background text-muted-foreground text-sm hover:bg-hover transition-colors cursor-pointer"
+        aria-keyshortcuts="Control+K Meta+K"
         aria-label="Search documentation"
-        type="button">
+        type="button"
+        (click)="search.open.set(true)">
         <svg lucideSearch [size]="14"></svg>
         <span>Search...</span>
+        <mona-command-shortcut keys="mod+k" />
     </button>
 </div>
 
 <!-- Navigation Groups (scrollable without scrollbar) -->
-<div class="flex-1 min-h-0 overflow-y-auto no-scrollbar px-3 py-4 pb-8 flex flex-col gap-3 select-none">
-    @for (group of groups(); track $index) {
-        <app-sidebar-group [group]="group"></app-sidebar-group>
+<nav
+    class="flex-1 min-h-0 overflow-y-auto no-scrollbar px-3 py-4 pb-8 flex flex-col gap-3 select-none"
+    aria-label="Documentation">
+    @for (category of navigation.categories; track category.id) {
+        <app-sidebar-group [category]="category"></app-sidebar-group>
     }
-</div>
+</nav>

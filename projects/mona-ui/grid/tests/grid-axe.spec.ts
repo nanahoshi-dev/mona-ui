@@ -45,7 +45,7 @@ const ROWS: AxeRow[] = [
     ],
     template: `
         <mona-grid
-            ariaLabel="Orders"
+            aria-label="Orders"
             [data]="rows()"
             [rowKey]="'id'"
             [pageSize]="10"
@@ -77,7 +77,7 @@ class GridHostComponent {
 @Component({
     imports: [GridColumnComponent, GridComponent, GridDetailTemplateDirective],
     template: `
-        <mona-grid ariaLabel="Orders" [data]="rows" [rowKey]="'id'" [pageSizeValues]="[]" [responsivePager]="false">
+        <mona-grid aria-label="Orders" [data]="rows" [rowKey]="'id'" [pageSizeValues]="[]" [responsivePager]="false">
             <mona-grid-column field="id" title="Id" type="number" [width]="80"></mona-grid-column>
             <mona-grid-column field="name" title="Name" [width]="140"></mona-grid-column>
             <ng-template monaGridDetailTemplate let-row>

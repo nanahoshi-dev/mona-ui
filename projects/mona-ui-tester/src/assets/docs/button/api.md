@@ -1,118 +1,8 @@
-## Overview
-
-`ButtonDirective` is a styling directive applied to a native `<button>` element via the `monaButton` attribute selector. It manages look, size, and border-radius variants, and handles interactive states including loading, disabled, and toggle selection.
-
-The directive is restricted to `<button>` host elements. This preserves native keyboard activation (Enter, Space), form submission semantics, and assistive technology support without requiring additional ARIA roles.
-
-When used inside a `ButtonGroup`, the group's look, size, and rounded values take precedence over the individual button's inputs.
-
-**Use `monaButton` when you need to:**
-
-- Trigger actions inside forms, toolbars, dialogs, or inline content
-- Build a toggle control (on/off, active/inactive) that does not navigate to a URL
-- Show a spinner while an async operation is in progress
-- Place an icon-only button in a compact area such as a toolbar or list row action
-
-**Do not use `monaButton` when:**
-
-- The target navigates to a URL — use `<a>` instead; the directive does not support `<a>` hosts
-- Multiple related buttons need shared look, size, or coordinated selection — use `ButtonGroup`
-- A button opens a dropdown menu — use `DropdownButton` or `SplitButton`
-
-## Import & Basic Usage
-
-```typescript
-import { ButtonDirective } from "@nanahoshi/mona-ui/button";
-```
-
-Add `ButtonDirective` to your standalone component's `imports` array.
-
-```html
-<!-- Default -->
-<button monaButton>Default</button>
-
-<!-- With look variant -->
-<button monaButton look="primary">Primary</button>
-
-<!-- Async operation with loading state -->
-<button monaButton look="primary" [(loading)]="isSaving" (click)="save()">
-    Save changes
-</button>
-
-<!-- Toggle -->
-<button monaButton [toggleable]="true" [(selected)]="isBold">Bold</button>
-
-<!-- Icon-only -->
-<button monaButton [iconOnly]="true" look="ghost" aria-label="Search">
-    <svg lucideSearch [size]="16"></svg>
-</button>
-```
-
-> **Boolean inputs** have no `booleanAttribute` transform. Always use `[iconOnly]="true"` bracket binding syntax, not the bare attribute form.
-
-## Appearance & Styling
-
-### Look variants
-
-| `look`                                   | Appearance                                                |
-|------------------------------------------|-----------------------------------------------------------|
-| `default`                                | Background with border; adapts to the active theme        |
-| `primary`                                | Filled primary color                                      |
-| `secondary`                              | Filled secondary color                                    |
-| `success` / `error` / `warning` / `info` | Semantic fill colors                                      |
-| `outline`                                | Transparent background with border                        |
-| `ghost`                                  | No border or shadow; hover reveals a subtle background    |
-| `link`                                   | No border; hover adds underline                           |
-| `clear`                                  | Fully transparent; no border, shadow, or hover background |
-
-### Sizes
-
-| `size`   | Description                           |
-|----------|---------------------------------------|
-| `small`  | Compact height and padding            |
-| `medium` | Standard height and padding (default) |
-| `large`  | Taller height and wider padding       |
-
-When `iconOnly` is `true`, horizontal padding is removed and the button width is fixed to match its height.
-
-### Rounded presets
-
-| `rounded` | Shape                       |
-|-----------|-----------------------------|
-| `none`    | No border radius            |
-| `small`   | Slight rounding             |
-| `medium`  | Moderate rounding (default) |
-| `large`   | Strong rounding             |
-| `full`    | Pill / fully rounded        |
-
-### Theme tokens
-
-Button colors are derived from Mona UI theme design tokens. Override them at `:root` or a scoped ancestor to customize button colors globally.
-
-<!-- TODO(owner-review): Confirm exact CSS custom property names (--color-primary vs --primary etc.) for the theme tokens table -->
-
-## Accessibility Notes
-
-The directive sets `type="button"` on the host, preventing accidental form submission when placed inside a `<form>`.
-
-The following attributes are managed automatically:
-
-| Attribute       | When present                                               | Value                          |
-|-----------------|------------------------------------------------------------|--------------------------------|
-| `aria-busy`     | `loading` is `true`                                        | `"true"`                       |
-| `aria-disabled` | `disabled` or `loading` is `true`                          | `"true"`                       |
-| `aria-haspopup` | `aria-haspopup` input is set to any value except `'false'` | The input value                |
-| `aria-pressed`  | Button is toggleable (via `toggleable` or `ButtonGroup`)   | `"true"` or `"false"`          |
-| `disabled`      | `disabled` or `loading` is `true`                          | (empty string — presence-only) |
-| `tabindex`      | `disabled` or `loading` is `true`                          | `"-1"`                         |
-| `type`          | Always                                                     | `"button"`                     |
-
-**Consumer responsibilities:**
-
-- For icon-only buttons, provide `aria-label` on the `<button>` element so assistive technology announces a meaningful name.
-- When a button opens a popup (menu, dialog, listbox, etc.), set the `aria-haspopup` input to the appropriate token (`"menu"`, `"dialog"`, etc.).
+<!-- Generated by npm run generate:api-docs from the library's JSDoc. Do not edit. -->
 
 ## API
+
+Everything below is imported from `@nanahoshi/mona-ui/button`.
 
 ### `ButtonDirective`
 
@@ -120,30 +10,67 @@ The following attributes are managed automatically:
 
 #### Inputs
 
-| Name            | Type                                                                                                                                | Default     | Description                                                                                                                                                                                                                                                                   |
-|-----------------|-------------------------------------------------------------------------------------------------------------------------------------|-------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `aria-haspopup` | `string`                                                                                                                            | `'false'`   | Value forwarded to the `aria-haspopup` attribute. The attribute is omitted from the host when this value is `'false'`, so plain action buttons carry no `aria-haspopup`. Set to `'menu'`, `'listbox'`, `'tree'`, `'grid'`, or `'dialog'` when this button opens such a popup. |
-| `class`         | `string`                                                                                                                            | `''`        | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                                                                                                                     |
-| `disabled`      | `boolean`                                                                                                                           | `false`     | Two-way bindable. Disables the button. Sets the native `disabled` attribute and `aria-disabled="true"`. When inside a `ButtonGroup`, the group's disabled state takes precedence.                                                                                             |
-| `iconOnly`      | `boolean`                                                                                                                           | `false`     | Removes horizontal padding and fixes a square aspect ratio sized to match `size`. Provide `aria-label` on the host when using icon-only buttons.                                                                                                                              |
-| `loading`       | `boolean`                                                                                                                           | `false`     | Two-way bindable. Inserts a spinner before the button's first child and blocks interaction. Sets `aria-busy="true"`. Spinner size scales with `size`.                                                                                                                         |
-| `look`          | `'default' \| 'primary' \| 'secondary' \| 'success' \| 'error' \| 'warning' \| 'info' \| 'outline' \| 'ghost' \| 'link' \| 'clear'` | `'default'` | Two-way bindable. Visual variant. When inside a `ButtonGroup`, the group's look takes precedence.                                                                                                                                                                             |
-| `rounded`       | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`                                                                                | `'medium'`  | Border-radius preset. When inside a `ButtonGroup`, the group's value takes precedence.                                                                                                                                                                                        |
-| `selected`      | `boolean`                                                                                                                           | `false`     | Two-way bindable. Active/selected state. Drives `aria-pressed` when the button is toggleable. Managed by `toggleable` click handling or by `ButtonGroup` selection policy.                                                                                                    |
-| `size`          | `'small' \| 'medium' \| 'large'`                                                                                                    | `'medium'`  | Controls button height and horizontal padding. When inside a `ButtonGroup`, the group's value takes precedence.                                                                                                                                                               |
-| `tabindex`      | `number`                                                                                                                            | `0`         | Tab index. Automatically overridden to `-1` when the button is disabled or loading. Accepts a string value and converts it to a number.                                                                                                                                       |
-| `toggleable`    | `boolean`                                                                                                                           | `false`     | When `true`, each click flips the `selected` model and `aria-pressed` is managed. Requires `[toggleable]="true"` binding syntax.                                                                                                                                              |
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `aria-haspopup` | `ButtonAriaHasPopup` | `"false"` | Value forwarded to the `aria-haspopup` attribute. Set when this button triggers a popup, menu, listbox, tree, grid, or dialog. Omit or leave as `"false"` for plain action buttons. |
+| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
+| `disabled` | `boolean` | `false` | Renders the component with reduced visual emphasis and removes pointer interaction. Accepts the bare attribute form (`<button monaButton disabled>`). When inside a `ButtonGroup`, the button is disabled when either it or the group is disabled. |
+| `iconOnly` | `boolean` | `false` | Removes horizontal padding and fixes a square aspect ratio sized to match `size`. Provide `aria-label` on the host when using icon-only buttons; in dev mode, an icon-only button without an accessible name logs a warning. |
+| `loading` | `boolean` | `false` | Displays a loading indicator and prevents interaction while an operation is in progress. Sets `aria-busy="true"` and `aria-disabled="true"` on the host. The button stays focusable, so keyboard focus isn't lost when loading starts, and clicks (including form submission) are blocked until it ends. |
+| `look` (two-way) | `"clear" \| "default" \| "error" \| "ghost" \| "info" \| "link" \| "outline" \| "primary" \| "secondary" \| "success" \| "warning"` | `"default"` | Visual style variant of the button. When inside a `ButtonGroup`, the group's look takes precedence. `"outline"` looks the same as `"default"`. `"clear"` shows no selected state, so use another look for toggle buttons. |
+| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Border-radius preset applied to the component. When inside a `ButtonGroup`, the group's value takes precedence. |
+| `selected` (two-way) | `boolean` | `false` | Whether the button is in the selected/pressed state. Drives `aria-pressed` when the button is toggleable. Managed by `toggleable` click handling or by `ButtonGroup` selection policy. |
+| `size` | `"large" \| "medium" \| "small"` | `"medium"` | Size preset controlling the button's height and horizontal padding. When inside a `ButtonGroup`, the group's value takes precedence. |
+| `tabindex` | `string \| number` | `0` | Tab index of the host element. Automatically overridden to `-1` when the button is disabled. Accepts a numeric string and converts it to a number; a value that is not a number falls back to `0`. |
+| `toggleable` | `boolean \| undefined` | `undefined` | Enables toggle behavior — each click flips the `selected` state and `aria-pressed` is managed. Accepts the bare attribute form. Buttons in a `ButtonGroup` are toggleable unless this is set to `false`. |
+| `type` | `"button" \| "reset" \| "submit"` | `"button"` | Native `type` attribute of the button. Defaults to `"button"` to prevent accidental form submission; set to `"submit"` or `"reset"` explicitly when that behavior is intended. |
+| `value` | `unknown` | `undefined` | What a `ButtonGroup`'s `value` holds while this button is selected. A button without one takes no part in the group's `value`. |
 
-`ButtonDirective` has no event outputs. Read `[(selected)]`, `[(loading)]`, or `[(disabled)]` model bindings to observe state changes.
+#### Outputs
 
----
+| Name | Type | Description |
+| --- | --- | --- |
+| `lookChange` | `"clear" \| "default" \| "error" \| "ghost" \| "info" \| "link" \| "outline" \| "primary" \| "secondary" \| "success" \| "warning"` | Emitted when `look` changes. |
+| `selectedChange` | `boolean` | Emitted when `selected` changes. |
 
-<!-- verification-checklist
-- [x] API definitions and defaults verified against source and component-metadata.json
-- [x] Basic example compiles successfully against the public API surface
-- [x] No internal or unexported APIs exposed
-- [x] Accessibility claims verified against source: aria-busy/aria-disabled/aria-haspopup/aria-pressed/disabled/tabindex/type host bindings confirmed in button.directive.ts
-- [x] aria-haspopup null-guard documented: attribute is omitted (null) when value is "false" — host binding: ariaHasPopup() !== 'false' ? ariaHasPopup() : null
-- [x] ButtonService.buttonClick$ is Subject (not ReplaySubject) — no stale-replay risk for conditionally added group members
-- [x] Styling section documents only public inputs — Tailwind class names removed, replaced with consumer-facing descriptions
--->
+#### Properties
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `effectiveDisabled` (read-only) | `Signal<boolean>` | Whether the button is disabled, by its own input or its group's. A dropdown or split button reads this to close its menu. |
+| `effectiveToggleable` (read-only) | `Signal<boolean>` | Whether a click toggles the button: buttons in a group do unless `toggleable` is `false`. The group reads this to know which buttons take part in its selection. |
+
+### Types
+
+#### `BUTTON_GROUP_MEMBER`
+
+Provided by a component that implements `ButtonGroupMember`, so a `mona-button-group` can find it among its
+content children.
+
+```typescript
+const BUTTON_GROUP_MEMBER: InjectionToken<ButtonGroupMember>;
+```
+
+#### `ButtonGroupMember`
+
+A component whose own buttons join the `mona-button-group` it is placed in, such as a dropdown or split button.
+Those buttons follow the group's look, size, rounding and disabled state, but they aren't toggleable and take no
+part in the group's selection.
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `groupButtons` (read-only) | `Signal<readonly ButtonDirective[]>` | The component's buttons that join the group. |
+
+#### `ButtonAriaHasPopup`
+
+Values accepted by the `aria-haspopup` input of `ButtonDirective`. `"false"` (the default) omits the attribute.
+
+```typescript
+type ButtonAriaHasPopup = "dialog" | "false" | "grid" | "listbox" | "menu" | "tree" | "true";
+```
+
+#### `ButtonVariantsInput`
+
+```typescript
+type ButtonVariantsInput = VariantInputs<ButtonVariantProps>;
+```

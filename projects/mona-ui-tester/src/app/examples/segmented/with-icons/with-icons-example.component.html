@@ -1,0 +1,12 @@
+<mona-segmented aria-label="View mode" [options]="viewModes" [(value)]="viewMode">
+    <ng-template let-option [monaSegmentedItemTemplate]="viewModes">
+        <span class="flex items-center gap-1.5">
+            @if (option.value === "list") {
+                <svg lucideList aria-hidden="true" [size]="16"></svg>
+            } @else {
+                <svg lucideLayoutGrid aria-hidden="true" [size]="16"></svg>
+            }
+            {{ option.label }}
+        </span>
+    </ng-template>
+</mona-segmented>

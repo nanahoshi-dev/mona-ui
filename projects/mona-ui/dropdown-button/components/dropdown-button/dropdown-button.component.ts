@@ -27,9 +27,9 @@ import {
     PopupMenuGroupTemplateDirective,
     PopupMenuIconTemplateDirective,
     PopupMenuShortcutTemplateDirective,
-    PopupMenuTextTemplateDirective,
-    PopupMenuToken
+    PopupMenuTextTemplateDirective
 } from "@nanahoshi/mona-ui/popup-menu";
+import { PopupMenuToken } from "@nanahoshi/mona-ui/internal/popup-menu";
 import type { PopupMenuItemClickEvent } from "@nanahoshi/mona-ui/popup-menu";
 import { fromEvent } from "rxjs";
 import { DropdownButtonMenuGroupTemplateDirective } from "../../directives/dropdown-button-menu-group-template.directive";
@@ -64,6 +64,8 @@ export class DropdownButtonComponent implements ButtonGroupMember, DropdownButto
     readonly #destroyRef = inject(DestroyRef);
     readonly #triggerWidth = signal(0);
     private readonly menuItemComponents = contentChildren(PopupMenuToken, { descendants: false });
+    /** The menu is named by the element it opens from, through this id. */
+    protected readonly buttonId = createElementControlId();
     protected readonly buttonRef = viewChild<ElementRef<HTMLButtonElement>>("dropdownButton");
     protected readonly groupTemplate = contentChild(DropdownButtonMenuGroupTemplateDirective, {
         read: TemplateRef,
@@ -110,7 +112,7 @@ export class DropdownButtonComponent implements ButtonGroupMember, DropdownButto
      * Takes precedence over `aria-label` when both are set.
      * @default ""
      */
-    public readonly ariaLabelledby = input<string>("", { alias: "aria-labelledby" });
+    public readonly ariaLabelledBy = input<string>("", { alias: "aria-labelledby" });
 
     /**
      * @description Renders the button with reduced visual emphasis and removes pointer interaction. Disabling the

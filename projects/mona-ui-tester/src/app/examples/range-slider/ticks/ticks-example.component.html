@@ -1,0 +1,12 @@
+<div class="flex max-w-md flex-col gap-2">
+    <span id="price-label" class="text-sm font-medium">Price</span>
+    <mona-range-slider
+        aria-labelledby="price-label"
+        [labelStep]="2"
+        [maxValue]="1000"
+        [showLabels]="true"
+        [showTicks]="true"
+        [step]="100"
+        [(value)]="price" />
+    <span class="text-sm">From {{ price()[0] }} to {{ price()[1] }}</span>
+</div>

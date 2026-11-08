@@ -139,7 +139,7 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
                 type: "string",
                 value: ""
             },
-            ariaLabelledby: {
+            ariaLabelledBy: {
                 alias: "aria-labelledby",
                 type: "string",
                 value: ""
@@ -202,7 +202,7 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
         @let featureData = features();
         <mona-split-button
             [aria-label]="ariaLabel()"
-            [aria-labelledby]="ariaLabelledby()"
+            [aria-labelledby]="ariaLabelledBy()"
             (buttonClick)="onButtonClick()"
             [disabled]="disabled()"
             [iconOnly]="iconOnly()"
@@ -332,7 +332,7 @@ export class SplitButtonWrapperComponent implements ComponentInputsAsSignal<Spli
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly selectedOption = signal<string>("o1");
     public readonly ariaLabel = input("");
-    public readonly ariaLabelledby = input("");
+    public readonly ariaLabelledBy = input("");
     public readonly disabled = input(false);
     public readonly iconOnly = input(false);
     public readonly loading = input(false);

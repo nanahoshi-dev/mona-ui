@@ -1,7 +1,7 @@
-import { Component, computed, inject } from "@angular/core";
-import { toSignal } from "@angular/core/rxjs-interop";
+import { Component, ElementRef, computed, effect, inject, untracked, viewChild } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { NavigationEnd, Router, RouterOutlet } from "@angular/router";
+import { Meta, Title } from "@angular/platform-browser";
+import { RouterOutlet } from "@angular/router";
 import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import {
@@ -15,10 +15,12 @@ import {
 } from "@lucide/angular";
 
 import { BreadcrumbComponent, BreadcrumbItemComponent } from "@nanahoshi/mona-ui/breadcrumb";
-import { filter, map, startWith } from "rxjs";
 import { THEME_OPTIONS, type ThemeOption } from "../../../theme-options";
+import { DocsNavigationService } from "../../services/docs-navigation.service";
 import { PageService } from "../../services/page.service";
 import { SidebarService } from "../../services/sidebar.service";
+import { DocsPagerComponent } from "../docs-pager/docs-pager.component";
+import { DocsSearchComponent } from "../docs-search/docs-search.component";
 import { PageNavigationComponent } from "../page-navigation/page-navigation.component";
 import { SidebarComponent } from "../sidebar/sidebar.component";
 
@@ -30,6 +32,8 @@ import { SidebarComponent } from "../sidebar/sidebar.component";
         PageNavigationComponent,
         BreadcrumbComponent,
         BreadcrumbItemComponent,
+        DocsPagerComponent,
+        DocsSearchComponent,
         LucideDynamicIcon,
         LucideX,
         DropdownListComponent,
@@ -39,46 +43,57 @@ import { SidebarComponent } from "../sidebar/sidebar.component";
     providers: [PageService]
 })
 export class PageComponent {
-    readonly #router = inject(Router);
+    readonly #navigation = inject(DocsNavigationService);
     readonly #themeService = inject(ThemeService);
-    readonly #url = toSignal(
-        this.#router.events.pipe(
-            filter(e => e instanceof NavigationEnd),
-            map(() => this.#router.url),
-            startWith(this.#router.url)
-        ),
-        { requireSync: true }
-    );
     protected readonly activeBreadcrumbs = computed(() => {
-        const url = this.#url();
-        const segments = url
-            .split(/[?#]/)[0]
-            .split("/")
-            .filter(s => s);
-        return segments.map(seg => {
-            if (seg === "components") return "Documentation";
-            return seg
-                .split("-")
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(" ");
-        });
+        const page = this.#navigation.currentPage();
+        const category = this.#navigation.currentCategory();
+        return page && category ? ["Documentation", category.title, page.title] : ["Documentation"];
     });
     protected readonly pageIcon = computed(() => {
-        const url = this.#url();
+        const url = this.#navigation.url();
         if (url.includes("introduction")) return LucideSparkles;
         if (url.includes("installation")) return LucideBookOpen;
         if (url.includes("avatar")) return LucideUser;
         if (url.includes("button")) return LucidePlay;
         return LucideTerminal;
     });
+    protected readonly scrollContainer = viewChild<ElementRef<HTMLElement>>("scrollContainer");
     protected readonly selectedTheme = computed(() =>
         this.themeOptions.find(
             theme =>
                 theme.name === this.#themeService.themeName() && theme.variant === this.#themeService.themeVariant()
         )
     );
-    protected readonly themeOptions = THEME_OPTIONS;
     protected readonly sidebarService = inject(SidebarService);
+    protected readonly themeOptions = THEME_OPTIONS;
+
+    public constructor() {
+        const title = inject(Title);
+        const meta = inject(Meta);
+        effect(() => {
+            const page = this.#navigation.currentPage();
+            title.setTitle(page ? `${page.title} · Mona UI` : "Mona UI");
+            if (page) {
+                meta.updateTag({ content: page.description, name: "description" });
+            }
+        });
+        // The page scrolls inside this element, which the router doesn't reset. A link to a section scrolls on its own.
+        effect(() => {
+            this.#navigation.currentPage();
+            const container = this.scrollContainer()?.nativeElement;
+            if (container && !untracked(this.#navigation.url).includes("#")) {
+                container.scrollTop = 0;
+            }
+        });
+    }
+
+    /** Only following a link closes the drawer, so a section can be opened without it closing. */
+    protected onDrawerClick(event: Event): void {
+        if ((event.target as Element).closest("a")) {
+            this.sidebarService.close();
+        }
+    }
 
     protected onThemeChange(theme: ThemeOption): void {
         this.#themeService.setTheme(theme);

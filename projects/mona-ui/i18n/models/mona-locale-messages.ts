@@ -28,6 +28,7 @@ import type { MonaPagerMessages } from "../message-types/pager.messages";
 import type { MonaProgressBarMessages } from "../message-types/progress-bar.messages";
 import type { MonaSidebarMessages } from "../message-types/sidebar.messages";
 import type { MonaRatingMessages } from "../message-types/rating.messages";
+import type { MonaCommandMessages } from "../message-types/command.messages";
 import type { MonaScrollViewMessages } from "../message-types/scroll-view.messages";
 import type { MonaSheetMessages } from "../message-types/sheet.messages";
 import type { MonaSliderMessages } from "../message-types/slider.messages";
@@ -73,6 +74,7 @@ export interface MonaLocaleMessages {
     progressBar: MonaProgressBarMessages;
     sidebar: MonaSidebarMessages;
     rating: MonaRatingMessages;
+    command: MonaCommandMessages;
     scrollView: MonaScrollViewMessages;
     sheet: MonaSheetMessages;
     slider: MonaSliderMessages;

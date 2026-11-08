@@ -1,0 +1,4 @@
+<div class="flex max-w-sm flex-col gap-3">
+    <mona-decimal-text-box aria-label="Amount" [decimals]="2" [formatter]="currencyFormatter" [(value)]="amount" />
+    <p class="text-sm">Value: {{ amount() ?? "empty" }}</p>
+</div>

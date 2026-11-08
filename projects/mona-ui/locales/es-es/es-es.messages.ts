@@ -199,6 +199,16 @@ export const ES_ES_MESSAGES = {
     comboBox: {
         clear: "Limpiar"
     },
+    command: {
+        dialogLabel: "Menú de comandos",
+        inputLabel: "Buscar comandos",
+        listLabel: "Resultados",
+        loading: "Cargando",
+        noResults: "No se han encontrado resultados",
+        placeholder: "Escribe un comando o busca…",
+        resultsAvailable: (count: number) =>
+            count === 1 ? "1 resultado disponible" : `${localizeNumber(count)} resultados disponibles`
+    },
     datePicker: {
         datePicker: "Selector de fecha",
         openCalendar: "Abrir calendario"
@@ -359,6 +369,7 @@ export const ES_ES_MESSAGES = {
         filterOperator: (column: string, operator: string) => `Operador de filtro de ${column}: ${operator}`,
         filterPlaceholder: "Filtrar...",
         group: "Grupo",
+        groupOptions: (column: string) => `Opciones de grupo de ${column}`,
         loading: "Cargando",
         modified: "Modificado",
         moveAsNext: "Mover como siguiente",

@@ -1,6 +1,21 @@
-import { Component, DestroyRef, ElementRef, computed, inject, input, signal } from "@angular/core";
+import {
+    ApplicationRef,
+    Component,
+    type ComponentRef,
+    DestroyRef,
+    ElementRef,
+    EnvironmentInjector,
+    Injector,
+    computed,
+    createComponent,
+    inject,
+    input,
+    signal
+} from "@angular/core";
 import { MarkdownComponent } from "ngx-markdown";
+import { createUniqueHeadingId } from "../../docs-heading-id";
 import type { SectionItem } from "../../models/SectionItem";
+import { ExampleComponent } from "../example/example.component";
 import { PageService } from "../../services/page.service";
 
 @Component({
@@ -9,10 +24,14 @@ import { PageService } from "../../services/page.service";
     template: `<markdown [src]="assetUrl()" (ready)="onReady()" class="block"></markdown>`
 })
 export class MarkdownDocComponent {
+    readonly #application = inject(ApplicationRef);
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject(ElementRef<HTMLElement>);
+    readonly #environmentInjector = inject(EnvironmentInjector);
+    readonly #injector = inject(Injector);
     readonly #pageService = inject(PageService);
     readonly #registeredItems = signal<SectionItem[]>([]);
+    #examples: ComponentRef<ExampleComponent>[] = [];
 
     protected readonly assetUrl = computed(() => `/assets/${this.src()}`);
     /**
@@ -26,6 +45,7 @@ export class MarkdownDocComponent {
 
     public constructor() {
         this.#destroyRef.onDestroy(() => {
+            this.#destroyExamples();
             this.#registeredItems().forEach(item => this.#pageService.removeSection(item));
         });
     }
@@ -49,7 +69,7 @@ export class MarkdownDocComponent {
         const items: SectionItem[] = headings.map((el, i) => {
             const level = parseInt(el.tagName[1], 10);
             const text = el.textContent?.trim() ?? `heading-${i}`;
-            const id = this.#createUniqueId(text, existingIds);
+            const id = createUniqueHeadingId(text, existingIds);
             el.id = id;
 
             const isH1 = level === 1;
@@ -68,23 +88,38 @@ export class MarkdownDocComponent {
         });
 
         this.#rewriteFragmentLinks();
+        this.#mountExamples();
 
         this.#registeredItems.set(items);
         this.#pageService.setSections(items);
     }
 
-    #createUniqueId(text: string, existingIds: Set<string>): string {
-        const baseId = this.#slugify(text);
-        let candidateId = baseId;
-        let suffix = 2;
+    #destroyExamples(): void {
+        this.#examples.forEach(example => example.destroy());
+        this.#examples = [];
+    }
 
-        while (existingIds.has(candidateId)) {
-            candidateId = `${baseId}-${suffix}`;
-            suffix++;
+    /**
+     * A guide shows an example with a fenced block whose language is `example`, which keeps the markdown readable on
+     * its own. Each block is replaced with the running example.
+     */
+    #mountExamples(): void {
+        this.#destroyExamples();
+        const blocks = Array.from(
+            this.#elementRef.nativeElement.querySelectorAll("pre > code.language-example")
+        ) as HTMLElement[];
+        for (const block of blocks) {
+            const host = (this.#elementRef.nativeElement.ownerDocument as Document).createElement("app-example");
+            (block.parentElement as HTMLElement).replaceWith(host);
+            const example = createComponent(ExampleComponent, {
+                elementInjector: this.#injector,
+                environmentInjector: this.#environmentInjector,
+                hostElement: host
+            });
+            example.setInput("exampleId", (block.textContent ?? "").trim());
+            this.#application.attachView(example.hostView);
+            this.#examples.push(example);
         }
-
-        existingIds.add(candidateId);
-        return candidateId;
     }
 
     /**
@@ -101,16 +136,5 @@ export class MarkdownDocComponent {
             const hash = link.getAttribute("href") ?? "";
             link.setAttribute("href", `${pathname}${hash}`);
         });
-    }
-
-    #slugify(text: string): string {
-        const slug = text
-            .toLowerCase()
-            .trim()
-            .replace(/[^\w\s-]/g, "")
-            .replace(/[\s_-]+/g, "-")
-            .replace(/^-+|-+$/g, "");
-
-        return slug.length > 0 ? slug : "section";
     }
 }

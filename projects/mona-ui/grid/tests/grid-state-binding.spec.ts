@@ -195,6 +195,29 @@ describe("grid state bindings", () => {
                     .toArray()
             ).toEqual([1, 1, 1, 1, 1, 1, 1]);
         });
+
+        it("goes back to the first page when the user sorts, and reports it", async () => {
+            host.skip.set(10);
+            await settle();
+            const header = Array.from(fixture.nativeElement.querySelectorAll("th") as NodeListOf<HTMLElement>).find(
+                th => th.textContent?.includes("Id")
+            );
+            header?.querySelector<HTMLElement>("[title='Id']")?.click();
+            await settle();
+            expect(host.skip()).toBe(0);
+            expect(host.pages).toEqual([{ page: 1, skip: 0, take: 10 }]);
+            expect(ids()[0]).toBe(1);
+        });
+
+        it("keeps the page when sort is set from code", async () => {
+            host.skip.set(10);
+            await settle();
+            host.sort.set([{ dir: "desc", field: "id" }]);
+            await settle();
+            expect(host.skip()).toBe(10);
+            expect(ids()[0]).toBe(15);
+            expect(host.pages).toEqual([]);
+        });
     });
 
     it("gives the toolbar the grid state, not the service (GS8)", async () => {

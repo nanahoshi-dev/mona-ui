@@ -1,0 +1,10 @@
+<div class="flex flex-col items-start gap-2">
+    <mona-label text="Sign-in code">
+        <mona-otp-input aria-describedby="sign-in-code-error" type="number" [formField]="login.code" [length]="6" />
+    </mona-label>
+    <p id="sign-in-code-error" aria-live="polite" class="text-error text-sm">
+        @if (login.code().touched() && login.code().invalid()) {
+            Enter the six-digit code.
+        }
+    </p>
+</div>

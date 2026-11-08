@@ -14,8 +14,11 @@ import { SliderBaseComponent } from "../slider-base/slider-base.component";
     templateUrl: "./range-slider.component.html",
     imports: [NgTemplateOutlet, LabelStylePipe, TickStylePipe],
     host: {
-        // The description is applied to the handles, so the host must not keep the static attribute.
+        // The description and the handles' names are applied to the handles, so the host must not keep the static
+        // attributes. aria-label-start and aria-label-end aren't ARIA attributes at all.
         "[attr.aria-describedby]": "null",
+        "[attr.aria-label-end]": "null",
+        "[attr.aria-label-start]": "null",
         "[class]": "baseClasses()",
         "[class.mona-slider]": "true",
         "[attr.data-disabled]": "effectiveDisabled() || null",
@@ -105,6 +108,7 @@ export class RangeSliderComponent extends SliderBaseComponent implements FormVal
      */
     public readonly value = model<[number, number]>([0, 10]);
 
+    /** Moves focus to the lower handle. Does nothing while disabled. */
     public focus(options?: FocusOptions): void {
         if (!this.effectiveDisabled()) {
             this.sliderHandle().nativeElement.focus(options);

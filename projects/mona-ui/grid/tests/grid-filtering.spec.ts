@@ -21,7 +21,7 @@ interface FilterRow {
     imports: [GridColumnComponent, GridComponent, GridFilterableDirective],
     template: `
         <mona-grid
-            ariaLabel="Orders"
+            aria-label="Orders"
             [data]="rows"
             [rowKey]="'id'"
             [pageSize]="50"
@@ -225,6 +225,8 @@ describe("grid filtering (batch 8)", () => {
             operator.click();
             await settle();
             expect(operator.getAttribute("aria-expanded")).toBe("true");
+            expect(operator.id).not.toBe("");
+            expect(document.querySelector("[role='menu']")?.getAttribute("aria-labelledby")).toBe(operator.id);
 
             document.body.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Escape" }));
             document.activeElement?.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Escape" }));

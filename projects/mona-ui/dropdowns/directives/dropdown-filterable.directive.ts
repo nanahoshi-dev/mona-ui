@@ -21,9 +21,21 @@ export class DropdownFilterableDirective {
     };
     readonly #destroyRef = inject(DestroyRef);
     readonly #listService = inject(ListService);
+    /** @description Current filter text used to narrow the visible options. */
     public readonly filter = input<string>("");
+    /** @description Emitted when the filter value changes. Cancelable. */
     public readonly filterChange = output<FilterChangeEvent>();
+    /**
+     * @description Placeholder text in the popup's filter row. Auto Complete has no filter row, since its own input is
+     * the filter, so it ignores this.
+     * @default ""
+     */
     public readonly filterPlaceholder = input<string>("");
+    /**
+     * @description Filter operator, case sensitivity, and debounce delay. An empty string enables filtering with
+     * default settings (`operator: "contains"`, `caseSensitive: false`, `debounce: 0`); pass an object to override any
+     * field.
+     */
     public readonly options = input<Partial<FilterableOptions> | "">("", {
         alias: "monaDropDownFilterable"
     });

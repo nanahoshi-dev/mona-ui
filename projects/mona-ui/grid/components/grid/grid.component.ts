@@ -153,6 +153,8 @@ const TOOLBAR_ITEM_SELECTOR =
         SpinnerComponent
     ],
     host: {
+        "[attr.aria-label]": "null",
+        "[attr.aria-labelledby]": "null",
         "[class]": "baseClass()",
         "[attr.data-uid]": "uid"
     }
@@ -364,6 +366,9 @@ export class GridComponent<T> implements GridVariantInput {
 
     protected readonly noDataTemplate = contentChild(GridNoDataTemplateDirective, { read: TemplateRef });
 
+    /** The column whose group chip has its menu open. */
+    protected readonly openGroupMenuColumnId = signal<string | null>(null);
+
     protected readonly resizing = signal(false);
 
     protected readonly toolbarContext = computed<GridToolbarTemplateContext>(() => {
@@ -388,17 +393,17 @@ export class GridComponent<T> implements GridVariantInput {
     protected readonly uid = v4();
 
     /**
-     * @description The grid's accessible name, such as "Orders". Use it, or `ariaLabelledBy`, rather than
-     * an `aria-label` attribute on the host, which names nothing.
+     * @description The grid's accessible name, such as "Orders". Use it, or `aria-labelledby`. The grid moves
+     * the name to its `role="grid"` element, so the host keeps no `aria-label` attribute.
      * @default null
      */
-    public readonly ariaLabel = input<string | null>(null);
+    public readonly ariaLabel = input<string | null>(null, { alias: "aria-label" });
 
     /**
      * @description The id of the element that names the grid, such as a heading above it.
      * @default null
      */
-    public readonly ariaLabelledBy = input<string | null>(null);
+    public readonly ariaLabelledBy = input<string | null>(null, { alias: "aria-labelledby" });
 
     /**
      * @description The row data to be displayed in the grid.
@@ -413,8 +418,9 @@ export class GridComponent<T> implements GridVariantInput {
     public readonly expandedKeys = model<unknown[]>([]);
 
     /**
-     * @description Emitted when the user changes the page or the page size, and when the grid moves back to the
-     * last page because the data shrank. Not emitted for `skip` or `pageSize` values set from code.
+     * @description Emitted when the user changes the page or the page size, when the user's sort or filter moves a
+     * client-side grid back to the first page, and when the grid moves back to the last page because the data shrank.
+     * Not emitted for `skip` or `pageSize` values set from code.
      */
     public readonly pageChange = output<PageChangeEvent>();
 
@@ -484,6 +490,7 @@ export class GridComponent<T> implements GridVariantInput {
      */
     public readonly skip = model(0);
 
+    /** @description Additional CSS classes merged onto the host element via `tailwind-merge`. */
     public readonly userClass = input<string>("", { alias: "class" });
 
     public constructor() {
@@ -676,11 +683,17 @@ export class GridComponent<T> implements GridVariantInput {
         this.gridService.columnSort$.next(new ColumnSortEvent(column));
     }
 
-    /** Delete or Backspace on a group chip, or on its remove button, removes the group. */
     protected onGroupColumnReorder(column: Column, moveAs: "prev" | "next"): void {
         this.gridService.moveGroupColumn(column, moveAs);
+        const position =
+            this.gridService
+                .groupColumns()
+                .toArray()
+                .findIndex(candidate => candidate.id === column.id) + 1;
+        void this.#liveAnnouncer.announce(this.messages().columnMoved(column.title, position));
     }
 
+    /** Delete or Backspace on a group chip, or on its remove button, removes the group. */
     protected onGroupingColumnRemove(event: Event, column: Column): void {
         event.stopPropagation();
         this.gridService.clearColumnGrouping(column);
@@ -1159,6 +1172,7 @@ export class GridComponent<T> implements GridVariantInput {
         this.gridService.expandedKeysChange$
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(keys => this.expandedKeys.set(keys));
+        this.gridService.pageReset$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => this.reportPage());
         // Client paging: when the rows shrink below the current page (new data, a removed row, a filter), move
         // back to the last page instead of showing an empty page without a pager.
         effect(() => {

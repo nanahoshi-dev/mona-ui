@@ -1,0 +1,12 @@
+<div class="flex max-w-xs flex-col gap-2">
+    <mona-list-box
+        aria-label="Fruits"
+        height="240px"
+        selectBy="id"
+        selectionMode="multiple"
+        textField="name"
+        [items]="fruits"
+        [toolbar]="false"
+        [(selectedKeys)]="selectedIds" />
+    <span aria-live="polite" class="text-sm">Selected ids: {{ selectedIds().join(", ") || "none" }}</span>
+</div>

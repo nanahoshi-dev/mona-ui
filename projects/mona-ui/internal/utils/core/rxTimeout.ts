@@ -1,7 +1,7 @@
 import { DestroyRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { take, timer } from "rxjs";
-import { Action } from "./Action";
+import type { Action } from "@nanahoshi/mona-ui/common";
 
 export const rxTimeout = (destroyRef: DestroyRef, fn: Action, delay: number = 0): void => {
     timer(delay)

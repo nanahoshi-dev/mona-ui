@@ -1,0 +1,17 @@
+<button #anchor monaButton aria-haspopup="dialog" type="button" [attr.aria-expanded]="open()">
+    What's new
+</button>
+
+<mona-popup
+    [anchor]="anchor"
+    [closeOnBackdropClick]="true"
+    [hasBackdrop]="true"
+    (close)="open.set(false)"
+    (open)="open.set(true)">
+    <div
+        aria-label="What's new"
+        class="w-64 rounded-md border border-border bg-surface-overlay p-3 text-sm text-foreground shadow-md"
+        role="dialog">
+        Reports can now be exported as spreadsheets. Click anywhere outside, or press Escape, to close this.
+    </div>
+</mona-popup>

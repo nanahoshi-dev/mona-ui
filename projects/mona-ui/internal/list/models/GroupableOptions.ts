@@ -1,6 +1,7 @@
 import type { Selector } from "@mirei/ts-collections";
 
-type OrderByOptions<T, R> =
+/** How the items within each group are ordered. Leave both out to keep their order. */
+export type OrderByOptions<T, R> =
     | { orderBy?: never; orderByDirection?: never }
     | {
           /**

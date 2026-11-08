@@ -32,18 +32,21 @@ import {
     PopupMenuIconTemplateToken,
     PopupMenuShortcutTemplateToken,
     PopupMenuTextTemplateToken,
-    PopupMenuToken
-} from "../../models/PopupMenuConfig";
-import { MenuItem, PopupMenuItem } from "../../models/PopupMenuItem";
-import { PopupMenuItemClickEvent } from "../../models/PopupMenuItemClickEvent";
+    PopupMenuToken,
+    MenuItem,
+    PopupMenuItem,
+    PopupMenuItemClickEvent,
+    preparePopupMenuItems
+} from "@nanahoshi/mona-ui/internal/popup-menu";
 import type {
     PopupMenuCloseRequest,
     PopupMenuInitialFocus,
     PopupMenuListConfig
 } from "../../models/PopupMenuListConfig";
 import { PopupMenuNavigationEvent } from "../../models/PopupMenuNavigationEvent";
+import type { PopupMenuTrigger } from "../../models/PopupMenuTrigger";
 import { PopupMenuVariantInput, PopupMenuVariantProps } from "../../styles/popup-menu.styles";
-import { groupPopupMenuItems, isMenuOwnedCheckState, preparePopupMenuItems } from "../../utils/popup-menu.utils";
+import { groupPopupMenuItems, isMenuOwnedCheckState } from "../../utils/popup-menu.utils";
 import { PopupMenuListComponent } from "../popup-menu-list/popup-menu-list.component";
 
 /** What the component keeps about the menu it has open. */
@@ -59,7 +62,12 @@ const handledContextMenuEvents = new WeakSet<Event>();
 
 @Component({
     selector: "mona-popup-menu",
-    template: ""
+    template: "",
+    host: {
+        // The name goes to the menu when it opens. The host has no role, which may not carry one.
+        "[attr.aria-label]": "null",
+        "[attr.aria-labelledby]": "null"
+    }
 })
 export class PopupMenuComponent implements PopupMenuVariantInput {
     readonly #destroyRef = inject(DestroyRef);
@@ -98,27 +106,27 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
     });
 
     /**
-     * @description The anchor element that the context menu will be anchored to.
-     * Only applicable when `precise` is set to `false`.
+     * @description The element to position the menu against, when it isn't the `target`.
+     * Ignored when `openAtPointer` is set.
      */
     public readonly anchor = input<ElementRef<HTMLElement> | Element>();
 
     /**
-     * @description The anchor connection point of the popup menu.
-     * Only applicable when `precise` is set to `false`.
+     * @description The point on the anchor that the menu attaches to.
+     * Ignored when `openAtPointer` is set.
      */
     public readonly anchorConnectionPoint = input<ConnectionPoint | null>();
 
     /**
-     * @description The accessible name of the root menu. Takes precedence over `ariaLabelledBy`.
+     * @description The accessible name of the root menu. Takes precedence over `aria-labelledby`.
      */
-    public readonly ariaLabel = input("");
+    public readonly ariaLabel = input("", { alias: "aria-label" });
 
     /**
-     * @description The ids of the elements that name the root menu. When neither this nor `ariaLabel` is set, the
+     * @description The ids of the elements that name the root menu. When neither this nor `aria-label` is set, the
      * menu is named by the target element if it has an id.
      */
-    public readonly ariaLabelledBy = input("");
+    public readonly ariaLabelledBy = input("", { alias: "aria-labelledby" });
 
     /**
      * @description The event that is emitted when the popup menu is closed.
@@ -149,13 +157,12 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
     public readonly minWidth = input<string | number>();
 
     /**
-     * @description The event that is emitted when the popup menu is navigated.
-     * This is used to handle keyboard navigation within the popup menu.
+     * @description Emitted when an arrow key moves through the menu, or tries to leave it.
      */
     public readonly navigate = output<PopupMenuNavigationEvent>();
 
     /**
-     * @description The offset of the popup menu from the anchor element.
+     * @description The distance between the menu and its anchor.
      */
     public readonly offset = input<PopupOffset>();
 
@@ -165,17 +172,16 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
     public readonly open = output<void>();
 
     /**
-     * @description The connection point of the popup element to which the anchor will be connected.
-     * Only applicable when `precise` is set to `false`.
+     * @description Opens the menu where the pointer is, instead of against the `anchor` or `target`. Opened from the
+     * keyboard, it opens at the center of the target.
      */
-    public readonly popupConnectionPoint = input<ConnectionPoint | null>();
+    public readonly openAtPointer = input(false);
 
     /**
-     * @description Whether the context menu should be opened with precise positioning.
-     * If true, the context menu will be positioned at the mouse cursor position.
-     * If false, it will be positioned at the target element. If an anchor is provided, it will be anchored to that element.
+     * @description The point on the menu that attaches to the anchor.
+     * Ignored when `openAtPointer` is set.
      */
-    public readonly precise = input(false);
+    public readonly popupConnectionPoint = input<ConnectionPoint | null>();
 
     /**
      * @description Sets the border radius of the popup menu.
@@ -190,15 +196,19 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
     public readonly size = input<PopupMenuVariantProps["size"]>("medium");
 
     /**
-     * @description The target element that will be used to trigger the popup menu.
+     * @description The element that opens the menu. The menu is positioned against it unless `anchor` is set.
      */
     public readonly target = input.required<ElementRef<HTMLElement> | Element>();
 
     /**
-     * @description The event that triggers the popup menu.
+     * @description What opens the menu: a click on the target, a right-click on it, or `"none"` to open it only
+     * through `openMenu()`.
      */
-    public readonly trigger = input("click");
+    public readonly trigger = input<PopupMenuTrigger>("click");
 
+    /**
+     * @description Extra classes for the menu's popup.
+     */
     public readonly userClass = input<string, ClassInputType>(undefined, {
         alias: "class",
         transform: value => classInputToClass(value)
@@ -251,14 +261,18 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
         this.#open?.ref?.close();
     }
 
-    public openMenu(viaContextMenuKey: boolean): void {
+    /**
+     * @description Opens the menu, as if the target had been clicked.
+     * @param viaContextMenuKey Whether the menu opens from the ContextMenu key or Shift+F10.
+     */
+    public openMenu(viaContextMenuKey: boolean = false): void {
         const targetElement = this.#element(this.target());
         if (!targetElement) {
             return;
         }
         const center = targetElement.getBoundingClientRect();
         // Create a fake event to pass the center of the target element as the mouse position.
-        // This is useful when precise is true, but we want to open the menu via keyboard
+        // This is useful when openAtPointer is true, but we want to open the menu via keyboard
         // or some other non-mouse event.
         if (viaContextMenuKey) {
             const contextMenuEvent = new MouseEvent("contextmenu", {
@@ -341,7 +355,7 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
 
     private createMenu(event: MouseEvent, state: OpenMenuState): PopupRef {
         const anchor = this.getPopupAnchor(event);
-        const anchorConnectionPoint = this.precise() ? undefined : this.anchorConnectionPoint();
+        const anchorConnectionPoint = this.openAtPointer() ? undefined : this.anchorConnectionPoint();
         const targetId = this.#element(this.target())?.id ?? "";
         const data: PopupMenuListConfig = {
             ariaLabel: this.ariaLabel(),
@@ -373,7 +387,7 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
             minWidth: toCssValue(this.minWidth()),
             offset: this.offset(),
             popupClass: this.userClass(),
-            popupConnectionPoint: this.precise() ? undefined : this.popupConnectionPoint(),
+            popupConnectionPoint: this.openAtPointer() ? undefined : this.popupConnectionPoint(),
             restoreFocus: false,
             width: toCssValue(this.width())
         });
@@ -383,10 +397,10 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
         const anchorElement = this.anchor();
         const targetElement = this.target();
         const targetInput = anchorElement ?? targetElement;
-        const precise = this.precise();
+        const atPointer = this.openAtPointer();
         const actualTargetElement = targetInput instanceof ElementRef ? targetInput.nativeElement : targetInput;
         let anchor: Point | Element;
-        if (precise) {
+        if (atPointer) {
             if (event.button < 0) {
                 const rect = actualTargetElement.getBoundingClientRect();
                 anchor = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
@@ -490,7 +504,7 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
             .subscribe();
     }
 
-    private setTriggerSubscription(targetElement: HTMLElement, trigger: string): Subscription {
+    private setTriggerSubscription(targetElement: HTMLElement, trigger: PopupMenuTrigger): Subscription {
         return fromEvent<MouseEvent>(targetElement, trigger)
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
@@ -507,7 +521,7 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
                 }
                 const open = this.#open;
                 if (open) {
-                    if (trigger !== "contextmenu" && !this.precise()) {
+                    if (trigger !== "contextmenu" && !this.openAtPointer()) {
                         // The trigger toggles the menu.
                         open.ref?.close();
                         return;

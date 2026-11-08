@@ -1,6 +1,8 @@
 export type { SelectionMode } from "./models/SelectionMode";
 export type { ScrollDirection } from "./models/ScrollDirection";
 
+export type { Action } from "./models/Action";
+export type { AttributeConfig } from "./models/AttributeConfig";
 export * from "./models/ClassInputType";
 export * from "./models/ColorMode";
 export * from "./models/DataType";

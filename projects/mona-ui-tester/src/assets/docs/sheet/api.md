@@ -1,138 +1,8 @@
-## Overview & Component Selection
-
-Sheet displays a modal panel attached to an edge of the viewport, with an optional title, description, and close button, plus projected content. It is built on `PopupService` internally, like every other Mona UI overlay.
-
-`SheetComponent` (`<mona-sheet>`) is declarative only — there is no `SheetService`. Place it behind an `@if` in your template; the sheet opens after the first render and closes when the host element is destroyed or when the consumer closes it.
-
-**Use `Sheet` when:**
-
-- The overlay should slide in from a viewport edge (`top`, `right`, `bottom`, or `left`) instead of appearing centered
-- The content is mobile navigation, filters, a form, or a configuration panel
-
-**Use `Dialog` instead when:**
-
-- You need a modal confirmation, message, or short form centered in the viewport, with a title/description/actions layout and built-in action-button wiring
-
-**Use `Window` instead when:**
-
-- The user needs to drag, resize, minimize, or maximize the overlay
-
-**Use `Popup` directly when:**
-
-- You need a custom anchored overlay with no title/header structure at all
-
-## Import & Quick Start
-
-```typescript
-import { SheetComponent } from "@nanahoshi/mona-ui/sheet";
-```
-
-```html
-<button monaButton (click)="sheetOpen.set(true)">Edit profile</button>
-
-@if (sheetOpen()) {
-    <mona-sheet title="Edit profile" description="Make changes to your profile." (closed)="sheetOpen.set(false)">
-        <form>…</form>
-    </mona-sheet>
-}
-```
-
-`SheetComponent` opens automatically once its host renders; there is no explicit `open()` call.
-
-## Feature Examples
-
-### Side
-
-```html
-<mona-sheet side="bottom" title="Filters"> </mona-sheet>
-```
-
-`side` accepts `"top" | "right" | "bottom" | "left" | "start" | "end"` and defaults to `"right"`. `left` and `right` are physical edges in every direction; `start` and `end` follow the text direction, so `start` opens from the left in left-to-right pages and from the right in right-to-left ones. The border always faces the page. Left and right sheets default to `min(100dvw, 24rem)` wide and `100dvh` high; top and bottom sheets default to `100dvw` wide with automatic height capped at `90dvh`.
-
-### Mobile bottom sheet
-
-```html
-@if (filtersOpen()) {
-    <mona-sheet
-        side="bottom"
-        title="Filters"
-        description="Narrow the displayed results."
-        height="min(90dvh, 36rem)"
-        (closed)="filtersOpen.set(false)">
-        <app-product-filters />
-    </mona-sheet>
-}
-```
-
-Large projected content scrolls inside the Sheet while its header and close button remain in place. The page behind it cannot scroll while the sheet is open. Width and height values based on `dvw`/`dvh` adapt when mobile browser chrome or device orientation changes.
-
-### Custom projected content
-
-```html
-@if (navigationOpen()) {
-    <mona-sheet side="left" ariaLabel="Main navigation" [closable]="false" (closed)="navigationOpen.set(false)">
-        <app-mobile-navigation />
-    </mona-sheet>
-}
-```
-
-Any Angular content can be projected. If a visible title is not appropriate, provide `ariaLabel` so the sheet still has an accessible name — Sheet content must have either a `title` or an `ariaLabel`.
-
-### Preventing a close
-
-```typescript
-protected onSheetClose(event: PopupCloseEvent): void {
-    if (this.hasUnsavedChanges()) {
-        event.preventDefault();
-    }
-}
-```
-
-```html
-<mona-sheet (close)="onSheetClose($event)"> </mona-sheet>
-```
-
-## Technical & Behavior Notes
-
-### `side` is fixed once the sheet opens
-
-`side` is read once, on the first render, and fixes the viewport edge the sheet is attached to, the direction it slides in and out, and the edge its border is on. `start` and `end` are resolved against the direction at that moment. Changing `side` or the direction on an open sheet has no effect — close the sheet and reopen it.
-
-Every other input is live: `title`, `description`, `ariaLabel`, and `closable` re-render as usual, `width` and `height` resize the open sheet, and `closeOnEscape` and `closeOnBackdropClick` apply from the moment they change.
-
-### `close` fires for every close path
-
-`close` emits for the close (X) button, the Escape key, and a backdrop click. Call `event.preventDefault()` synchronously inside a `close` handler to cancel any of these, the same way `PopupRef.beforeClose` works (see the Popup documentation's [Preventing a close](/components/popup#preventing-a-close) section, since Sheet is built on the same mechanism).
-
-### Scroll blocking
-
-Sheet blocks scrolling of the page behind it for as long as it is open, regardless of `side`. The rest of the page is also `inert` until the sheet starts closing, so a pointer, Tab, or a screen reader can't reach it; popups opened from inside the sheet stay usable.
-
-## Accessibility & Forms Integration
-
-### Keyboard
-
-The Escape key requests a close when `closeOnEscape` is `true` (the default).
-
-### Focus
-
-Sheet traps focus inside itself for as long as it is open — Tab and Shift+Tab cannot move focus to the rest of the page. Focus is restored to the previously focused element when the sheet closes.
-
-### ARIA
-
-| Attribute          | When present                   | Value                         |
-|--------------------|--------------------------------|-------------------------------|
-| `role`             | Always                         | `"dialog"`                    |
-| `aria-modal`       | Always                         | `"true"`                      |
-| `aria-labelledby`  | Only when `title` is set       | ID of the title element       |
-| `aria-describedby` | Only when `description` is set | ID of the description element |
-| `aria-label`       | Only when `title` is absent    | The `ariaLabel` input         |
-
-Sheet content must have either a `title` or an `ariaLabel` so that the modal has an accessible name. In development mode, a sheet without one logs a warning.
-
-Form integration is not applicable — Sheet is a container, not a form control.
+<!-- Generated by npm run generate:api-docs from the library's JSDoc. Do not edit. -->
 
 ## API
+
+Everything below is imported from `@nanahoshi/mona-ui/sheet`.
 
 ### `SheetComponent`
 
@@ -140,38 +10,74 @@ Form integration is not applicable — Sheet is a container, not a form control.
 
 #### Inputs
 
-| Name                   | Type                                            | Default        | Description                                                                                                           |
-|------------------------|-------------------------------------------------|----------------|-----------------------------------------------------------------------------------------------------------------------|
-| `ariaLabel`            | `string`                                        | —              | Accessible name used when `title` is absent.                                                                          |
-| `class`                | `string \| string[] \| Record<string, unknown>` | —              | Additional classes merged onto the sheet panel with `tailwind-merge`, so they can override its own.                   |
-| `closable`             | `boolean`                                       | `true`         | Sets the visibility of the close button.                                                                              |
-| `closeOnBackdropClick` | `boolean`                                       | `true`         | Sets whether a backdrop click requests that the sheet close.                                                          |
-| `closeOnEscape`        | `boolean`                                       | `true`         | Sets whether the sheet should close when the escape key is pressed.                                                   |
-| `description`          | `string`                                        | —              | Supporting text displayed below the title and referenced by `aria-describedby`.                                       |
-| `height`               | `number \| string`                              | side-dependent | Explicit height. Numbers are interpreted as pixels.                                                                   |
-| `side`                 | `SheetSide`                                     | `"right"`      | Viewport edge to which the sheet is attached: `top`, `right`, `bottom`, `left`, or the direction-aware `start`/`end`. |
-| `title`                | `string`                                        | —              | Visible title and accessible name.                                                                                    |
-| `width`                | `number \| string`                              | side-dependent | Explicit width. Numbers are interpreted as pixels.                                                                    |
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `aria-label` | `string \| undefined` | `undefined` | Accessible name used when no visible title is provided. |
+| `class` | `ClassInputType` | `undefined` | Additional CSS classes merged onto the sheet panel via `tailwind-merge`. |
+| `closable` | `boolean` | `true` | Whether the close button is displayed. |
+| `closeOnBackdropClick` | `boolean` | `true` | Whether clicking the backdrop requests that the sheet close. |
+| `closeOnEscape` | `boolean` | `true` | Whether pressing Escape requests that the sheet close. |
+| `description` | `string` | — | Supporting text displayed below the title. |
+| `height` | `number \| string` | — | Explicit sheet height. Numbers are interpreted as pixels. |
+| `messages` | `Partial<SheetMessages>` | — | Internationalization message overrides for accessible labels. |
+| `side` | `SheetSide` | `"right"` | Edge of the viewport from which the sheet opens. `left` and `right` are physical; `start` and `end` follow the direction (`start` is the left edge in LTR and the right edge in RTL). The edge is fixed once the sheet opens. |
+| `title` | `string` | — | Title displayed in the sheet header and used as its accessible name. |
+| `width` | `number \| string` | — | Explicit sheet width. Numbers are interpreted as pixels. |
 
 #### Outputs
 
-| Name     | Type              | Description                                                                                                        |
-|----------|-------------------|--------------------------------------------------------------------------------------------------------------------|
-| `close`  | `PopupCloseEvent` | Emitted before closing. Preventable — see [`close` fires for every close path](#close-fires-for-every-close-path). |
-| `closed` | `void`            | Emitted after the leave animation completes and the popup is disposed.                                             |
+| Name | Type | Description |
+| --- | --- | --- |
+| `close` | `PopupCloseEvent<unknown>` | Emitted before the sheet closes. Call preventDefault() to keep it open. |
+| `closed` | `void` | Emitted after the leave animation completes and the popup is disposed. |
 
----
+### Types
 
-<!-- verification-checklist
-- [x] SheetComponent inputs and defaults verified against sheet.component.ts source, including the horizontal-vs-vertical width/height defaults resolved in #open()
-- [x] SheetComponent outputs verified (close: PopupCloseEvent, closed: void) against sheet.component.ts source
-- [x] Batch 5 (module 11): start/end resolved against injectComponentDirection() at open time, physical left/right in RTL, inert page, and the dev-mode naming warning verified against sheet.component.ts and sheet.component.spec.ts
-- [x] side-is-fixed behavior verified: side is read only inside #open(), which runs once via afterNextRender, and drives both #positionOverlay() and #resolveAnimation()
-- [x] Live width/height verified against the #trackSize() effect calling overlayRef.updateSize()
-- [x] Live closeOnEscape/closeOnBackdropClick verified against #isSuppressedCloseSource(), which vetoes those sources in the beforeClose subscription
-- [x] close firing for close button, Escape, and backdrop click verified against sheet.component.ts's #popupRef.beforeClose subscription
-- [x] blockScroll: true verified against the PopupSettings passed in #open()
-- [x] role="dialog"/aria-modal/aria-labelledby/aria-describedby/aria-label verified against sheet.component.html template bindings
-- [x] Focus trap (cdkTrapFocus, cdkTrapFocusAutoCapture) and restoreFocus: true verified against sheet.component.html and the PopupSettings passed in #open()
-- [x] No SheetService or SheetRef exists — SheetComponent is the sole export alongside the SheetSide and SheetPhysicalSide types, verified against public-api.ts
--->
+#### `SHEET_DEFAULT_MESSAGES`
+
+```typescript
+const SHEET_DEFAULT_MESSAGES: MonaSheetMessages;
+```
+
+#### `SheetPhysicalSide`
+
+A side resolved to a physical edge.
+
+```typescript
+type SheetPhysicalSide = "bottom" | "left" | "right" | "top";
+```
+
+#### `SheetSide`
+
+Edge the sheet opens from. `left` and `right` are physical, whatever the direction; `start` and `end` follow it
+(`start` is the left edge in LTR and the right edge in RTL).
+
+```typescript
+type SheetSide = "bottom" | "end" | "left" | "right" | "start" | "top";
+```
+
+#### `ClassInputType`
+
+From `@nanahoshi/mona-ui/common`.
+
+```typescript
+type ClassInputType = string | string[] | Record<string, unknown> | null | undefined;
+```
+
+#### `MonaSheetMessages`
+
+From `@nanahoshi/mona-ui/i18n`.
+
+| Name | Type |
+| --- | --- |
+| `closeSheet` (read-only) | `string` |
+
+#### `SheetMessages`
+
+From `@nanahoshi/mona-ui/i18n`.
+
+```typescript
+type SheetMessages = MonaSheetMessages;
+```
+
+**Documented elsewhere:** [`PopupCloseEvent`](/components/popup)

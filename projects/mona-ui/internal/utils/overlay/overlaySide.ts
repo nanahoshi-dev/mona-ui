@@ -4,6 +4,7 @@ import { ConnectionPositionPair } from "@angular/cdk/overlay";
  * The side of its anchor a tooltip or popover opens on. `left` and `right` are physical in every direction; `start`
  * and `end` follow the text direction.
  */
+/** A side of the anchor. `start` and `end` follow the direction. */
 export type OverlaySide = "bottom" | "end" | "left" | "right" | "start" | "top";
 
 /** A side resolved against the text direction. */

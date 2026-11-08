@@ -19,10 +19,10 @@ import {
     PopupMenuOrigin,
     PopupMenuShortcutTemplateToken,
     PopupMenuTextTemplateToken,
-    PopupMenuToken
-} from "../../models/PopupMenuConfig";
-import { PopupMenuItem } from "../../models/PopupMenuItem";
-import { PopupMenuItemClickEvent } from "../../models/PopupMenuItemClickEvent";
+    PopupMenuToken,
+    PopupMenuItem,
+    PopupMenuItemClickEvent
+} from "@nanahoshi/mona-ui/internal/popup-menu";
 
 @Component({
     selector: "mona-popup-menu-checkbox-item",

@@ -1,0 +1,7 @@
+<mona-accordion>
+    @for (question of questions; track question.title) {
+        <mona-expansion-panel [title]="question.title">
+            <p class="p-3 text-sm">{{ question.answer }}</p>
+        </mona-expansion-panel>
+    }
+</mona-accordion>

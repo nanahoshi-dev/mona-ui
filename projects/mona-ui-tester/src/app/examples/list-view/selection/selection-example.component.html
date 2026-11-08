@@ -1,0 +1,11 @@
+<div class="flex max-w-xs flex-col gap-2">
+    <mona-list-view
+        aria-label="Notification channels"
+        height=""
+        selectBy="id"
+        textField="name"
+        [items]="channels"
+        [monaListViewSelectable]="{ mode: 'multiple', checkboxes: true }"
+        [(selectedKeys)]="selectedIds" />
+    <span aria-live="polite" class="text-sm">Selected ids: {{ selectedIds().join(", ") || "none" }}</span>
+</div>

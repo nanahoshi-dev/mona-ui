@@ -1,0 +1,18 @@
+<div class="flex max-w-xs flex-col gap-2">
+    <label class="text-sm" for="placeholder-country-search">Search countries</label>
+    <input #search id="placeholder-country-search" monaTextBox type="search" (input)="query.set(search.value)" />
+    <div class="h-48 rounded-md border border-border">
+        @if (results().length > 0) {
+            <ul class="flex flex-col gap-1 p-3">
+                @for (country of results(); track country) {
+                    <li>{{ country }}</li>
+                }
+            </ul>
+        }
+        <div aria-live="polite" [class.h-full]="results().length === 0">
+            @if (results().length === 0) {
+                <mona-placeholder text="No results"></mona-placeholder>
+            }
+        </div>
+    </div>
+</div>

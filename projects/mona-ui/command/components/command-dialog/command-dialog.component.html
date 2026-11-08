@@ -1,0 +1,10 @@
+<ng-template #panel>
+    <div
+        cdkTrapFocus
+        role="dialog"
+        aria-modal="true"
+        [attr.aria-label]="ariaLabel() || messages().dialogLabel"
+        [class]="panelClass()">
+        <ng-container [ngTemplateOutlet]="content() ?? null" />
+    </div>
+</ng-template>

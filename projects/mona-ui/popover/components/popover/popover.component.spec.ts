@@ -24,7 +24,7 @@ import { PopoverComponent } from "./popover.component";
                 [target]="useCheckbox() ? check : first"
                 [trigger]="trigger()"
                 [title]="title()"
-                [ariaLabel]="ariaLabel()"
+                [aria-label]="ariaLabel()"
                 [position]="position()"
                 [closeOnEscape]="closeOnEscape()"
                 (show)="onShow($event)"

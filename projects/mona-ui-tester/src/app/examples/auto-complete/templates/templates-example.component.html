@@ -1,0 +1,20 @@
+<div class="flex max-w-xs flex-col gap-1">
+    <label monaLabel for="auto-complete-templates-language">Language</label>
+    <mona-auto-complete
+        inputId="auto-complete-templates-language"
+        placeholder="Type a language"
+        textField="name"
+        [data]="languages"
+        [(value)]="language">
+        <ng-template monaDropdownPrefixTemplate>
+            <svg lucideSearch aria-hidden="true" class="ms-2" [size]="16"></svg>
+        </ng-template>
+        <ng-template let-item monaDropDownItemTemplate>
+            <span class="flex-1">{{ item.name }}</span>
+            <span class="text-muted-foreground text-xs">{{ item.code }}</span>
+        </ng-template>
+        <ng-template monaDropDownNoDataTemplate>
+            <span class="p-2 text-sm">No language matches.</span>
+        </ng-template>
+    </mona-auto-complete>
+</div>

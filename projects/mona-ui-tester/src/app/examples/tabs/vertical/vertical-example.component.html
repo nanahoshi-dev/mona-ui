@@ -1,0 +1,13 @@
+<mona-tabs class="h-64" aria-label="Settings" position="left">
+    @for (section of sections; track section.title) {
+        <mona-tab>
+            <ng-template monaTabTitleTemplate>
+                <svg aria-hidden="true" [lucideIcon]="section.icon" [size]="16"></svg>
+                <span>{{ section.title }}</span>
+            </ng-template>
+            <ng-template monaTabContentTemplate>
+                <p class="p-4 text-sm">{{ section.description }}</p>
+            </ng-template>
+        </mona-tab>
+    }
+</mona-tabs>

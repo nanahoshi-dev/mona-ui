@@ -4,7 +4,7 @@ import {
     PopupMenuTemplateType,
     PopupMenuTextTemplateToken,
     PopupTemplateConfig
-} from "../models/PopupMenuConfig";
+} from "@nanahoshi/mona-ui/internal/popup-menu";
 
 @Directive({
     selector: "ng-template[monaPopupMenuTextTemplate]",

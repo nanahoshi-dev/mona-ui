@@ -37,7 +37,7 @@ type Order = {
     selector: "app-orders",
     imports: [GridColumnComponent, GridComponent],
     template: `
-        <mona-grid ariaLabel="Orders" rowKey="orderId" [data]="orders()">
+        <mona-grid aria-label="Orders" rowKey="orderId" [data]="orders()">
             <mona-grid-column field="orderId" title="Order ID" type="number" />
             <mona-grid-column field="shipName" title="Ship name" />
             <mona-grid-column field="freight" title="Freight" type="number" aggregate="sum" />
@@ -200,6 +200,7 @@ protected readonly pageSize = signal(25);
 - `skip` (rows before the page) and `pageSize` are two-way models. `pageChange` fires when the user changes the page or page size, never for values you set.
 - The pager has no page-size dropdown until you set `pageSizeValues`.
 - A new page size keeps the first row of the current page in view.
+- A user's sort or filter goes back to the first page and reports it through `pageChange`. A `sort` or `filter` set from code keeps the page.
 - When the rows shrink below the current page (new data, a removed row, a filter), the grid moves to the last page and reports it through `pageChange`.
 - Changing the page scrolls the body back to its first row.
 - The pager is hidden while the grid has no rows (except with server binding) and with virtual scrolling.
@@ -278,7 +279,7 @@ const orderSchema = (row: SchemaPathTree<Order>): void => {
     ],
     template: `
         <mona-grid
-            ariaLabel="Orders"
+            aria-label="Orders"
             rowKey="orderId"
             [data]="orders()"
             [monaGridEditable]="editOptions"
@@ -354,7 +355,7 @@ export class OrderEditorComponent {
 - Neither `cellEdit` nor `save` fires when nothing changed: the editor just closes.
 - **Persist from `save`.** In cell mode `cellEdit` comes first; use it to reject a single value.
 - **To save on a server**, prevent `save`, send `rowData`, update `data`, then call `endEdit()` on the `GridEditableDirective` (from `viewChild`). `endEdit()` closes the editor without reporting anything. If the request fails, don't call it: the editor keeps the user's values.
-- **`remove` doesn't delete anything.** Remove the row from `data` yourself. Set `removeConfirmation` on the command column to ask first.
+- **`remove` doesn't delete anything.** Remove the row from `data` yourself. Set `removeConfirmation` on the command column to ask first: the built-in Remove button and a `monaGridRemoveCommand` button in its template both ask.
 - When `data` is replaced during an edit, the edit moves to the new item with the same `rowKey` and keeps what was typed. When the row is gone, the edit ends with a `cancel` of reason `"removed"`.
 
 **Validation.** `schema` is a function that receives a `GridEditFormContext` (`mode`, `operation`, `isNew`, `column`, ...) and returns a signal-forms schema for the row. Return a different schema for new rows, or `null` for none. The cast is needed because the schema is typed for your row while the grid's rows are `Record<PropertyKey, unknown>`.
@@ -376,7 +377,7 @@ Add `monaGridServerBinding` when `data` holds only the page your server returned
 
 ```html
 <mona-grid
-    ariaLabel="Users"
+    aria-label="Users"
     rowKey="id"
     class="h-96"
     [data]="result().data"
@@ -511,11 +512,11 @@ The grid is one Tab stop. <kbd>Tab</kbd> moves into the grid at the cell that la
 
 ## 10. Labelling
 
-**Name the grid.** The grid element has no name of its own. Set `ariaLabel`, or `ariaLabelledBy` with the id of a visible heading. An `aria-label` attribute on `<mona-grid>` names nothing, because the `role="grid"` element is inside it.
+**Name the grid.** The grid element has no name of its own. Set `aria-label`, or `aria-labelledby` with the id of a visible heading. Both are inputs: the grid moves the name to its inner `role="grid"` element and leaves none on `<mona-grid>`.
 
 ```html
 <h2 id="orders-heading">Open orders</h2>
-<mona-grid ariaLabelledBy="orders-heading" [data]="orders()"></mona-grid>
+<mona-grid aria-labelledby="orders-heading" [data]="orders()"></mona-grid>
 ```
 
 **Give every column a `title`**, even when a header template draws the header. The title names:
@@ -562,6 +563,7 @@ provideMonaI18n({
 | `commandColumnTitle`                                 | the command column's header when it has no `title`             |
 | `filterByColumn`, `filterByColumnFiltered`           | filter menu buttons, the filter dialog and filter-row boxes    |
 | `filterOperator`, `clearFilter`, `filterPlaceholder` | the filter row's operator button, Clear button and placeholder |
+| `groupOptions`, `moveAsNext`, `moveAsPrevious` | a group chip's options button and its menu |
 | `editRow`, `saveRow`, `cancelRowEdit`, `removeRow`   | row command buttons                                            |
 | `saveNewRow`, `cancelNewRow`                         | the add row's buttons                                          |
 | `deleteRowTitle`, `deleteRowConfirmation`            | the remove confirmation (`removeConfirmation`)                 |
@@ -581,7 +583,7 @@ The full list is in `GRID_DEFAULT_MESSAGES`, exported from `@nanahoshi/mona-ui/g
 ```html
 <mona-grid
     class="h-128"
-    ariaLabel="Log entries"
+    aria-label="Log entries"
     rowKey="id"
     [data]="entries()"
     [monaGridVirtualScroll]="{ height: 40 }"

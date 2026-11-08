@@ -3,7 +3,7 @@
     role="menubar"
     [attr.aria-disabled]="disabled()"
     [attr.aria-label]="ariaLabel() || null"
-    [attr.aria-labelledby]="ariaLabelledby() || null">
+    [attr.aria-labelledby]="ariaLabelledBy() || null">
     @for (item of menuList(); track item; let i = $index) {
         @let menuIconTemplate = item.iconTemplate() ?? iconTemplate() ?? null;
         @let menuTextTemplate = item.textTemplate() ?? textTemplate() ?? null;

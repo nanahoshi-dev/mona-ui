@@ -221,7 +221,7 @@ export class PagerComponent implements PagerVariantInputs {
     public readonly ariaLabel = input<string | null>(null, { alias: "aria-label" });
 
     /**
-     * @description Id of the element that names the pager. Takes precedence over {@link ariaLabel}.
+     * @description Id of the element that names the pager. Takes precedence over `aria-label`.
      */
     public readonly ariaLabelledBy = input("", { alias: "aria-labelledby" });
 

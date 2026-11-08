@@ -76,6 +76,13 @@ describe("GridCellComponent", () => {
         expect(getCellText()).toBe("2026-06-24");
     });
 
+    it("shows a date in the locale's date format when the column has none", () => {
+        setCellInputs({ ...createColumn(), dataType: "date" }, new Row({ test: new Date(2026, 5, 24) }));
+        fixture.detectChanges();
+
+        expect(getCellText()).toBe("06/24/2026");
+    });
+
     it("ignores string formats for non-date columns", () => {
         setCellInputs(
             {

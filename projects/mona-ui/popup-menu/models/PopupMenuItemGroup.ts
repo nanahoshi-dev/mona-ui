@@ -1,4 +1,4 @@
-import type { PopupMenuItem } from "./PopupMenuItem";
+import type { PopupMenuItem } from "@nanahoshi/mona-ui/internal/popup-menu";
 
 /** A run of consecutive menu items that share a group key. */
 export interface PopupMenuItemGroup {

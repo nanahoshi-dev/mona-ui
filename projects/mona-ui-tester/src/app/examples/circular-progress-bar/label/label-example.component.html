@@ -1,0 +1,12 @@
+<div class="flex items-center gap-4">
+    <mona-circular-progress-bar
+        aria-label="Tasks done"
+        [aria-valuetext]="done() + ' of ' + total + ' tasks'"
+        [max]="total"
+        [value]="done()">
+        <ng-template monaCircularProgressBarLabelTemplate let-max="max" let-value>
+            <span class="text-xs font-semibold">{{ value }} / {{ max }}</span>
+        </ng-template>
+    </mona-circular-progress-bar>
+    <button monaButton type="button" [disabled]="done() === total" (click)="completeTask()">Complete a task</button>
+</div>

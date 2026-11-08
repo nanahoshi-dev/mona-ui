@@ -733,12 +733,6 @@ export const ALLOWLIST: AllowlistEntry[] = [
     },
     {
         category: "rtl-manual-review",
-        filePattern: "projects/mona-ui/stepper/styles/stepper.styles.ts",
-        lineSnippet: "-translate-x-3 rtl:translate-x-3",
-        reason: "Stepper connector offset with explicit RTL counterpart"
-    },
-    {
-        category: "rtl-manual-review",
         filePattern: "projects/mona-ui/slider/styles/slider.styles.ts",
         lineSnippet: "translate-x-[-50%]",
         reason: "Slider handle centering with explicit RTL counterpart"

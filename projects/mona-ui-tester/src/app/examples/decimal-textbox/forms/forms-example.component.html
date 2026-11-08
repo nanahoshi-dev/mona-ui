@@ -1,0 +1,16 @@
+<div class="flex max-w-sm flex-col gap-1">
+    <mona-decimal-text-box
+        aria-describedby="decimal-amount-error"
+        aria-label="Amount"
+        minValue="0"
+        [decimals]="2"
+        [formField]="payment.amount" />
+    <p aria-live="polite" class="text-sm text-error" id="decimal-amount-error">
+        @if (payment.amount().touched()) {
+            @for (error of payment.amount().errors(); track error.kind) {
+                {{ error.message }}
+            }
+        }
+    </p>
+    <p class="text-sm">Sent to the server: {{ payment.amount().value() ?? "null" }}</p>
+</div>

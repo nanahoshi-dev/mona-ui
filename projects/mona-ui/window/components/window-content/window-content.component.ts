@@ -278,7 +278,7 @@ export class WindowContentComponent implements WindowContentVariantInput {
             return;
         }
         console.warn(
-            "[Mona Window] A window needs an accessible name. Set title, a title template or ariaLabel.",
+            "[Mona Window] A window needs an accessible name. Set a title, a title template or aria-label (ariaLabel in the service settings).",
             this.#hostElementRef.nativeElement
         );
     }

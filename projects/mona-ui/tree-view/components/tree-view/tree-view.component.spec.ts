@@ -114,7 +114,7 @@ describe("TreeViewComponent", () => {
             const internals = component as unknown as TreeViewComponentInternals;
             expect(internals.filterAriaLabel()).toBe("Filter tree");
 
-            fixture.componentRef.setInput("ariaLabel", "Files");
+            fixture.componentRef.setInput("aria-label", "Files");
             fixture.detectChanges();
             expect(internals.filterAriaLabel()).toBe("Filter Files");
         });
@@ -140,7 +140,7 @@ describe("TreeViewComponent", () => {
 
             expect(internals.filterAriaLabel()).toBe("تصفية الشجرة");
 
-            fixture.componentRef.setInput("ariaLabel", "الملفات");
+            fixture.componentRef.setInput("aria-label", "الملفات");
             fixture.detectChanges();
             expect(internals.filterAriaLabel()).toBe("تصفية الملفات");
         });

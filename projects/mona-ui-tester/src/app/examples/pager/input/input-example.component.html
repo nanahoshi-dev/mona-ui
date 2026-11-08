@@ -1,0 +1,4 @@
+<div class="flex flex-col gap-2">
+    <mona-pager type="input" [pageSize]="10" [total]="240" (pageChange)="onPageChange($event)" />
+    <span aria-live="polite" class="text-sm">Requested items {{ range() }}</span>
+</div>

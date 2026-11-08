@@ -13,6 +13,10 @@ import { createChartHiddenItems } from "../../internal/utils/chart-hidden-items"
 
 let nextRadialBarSeriesId = 0;
 
+/**
+ * Renders concentric circular progress rings with customizable bar gap, thickness, rounded corners, and background
+ * tracks.
+ */
 @Component({
     selector: "mona-radial-bar-series",
     template: "",
@@ -329,6 +333,7 @@ export class RadialBarSeriesComponent implements OnInit {
         this.#destroyRef.onDestroy(unregister);
     }
 
+    /** Shows or hides the bar with this id, and returns whether it's now visible. */
     public toggleDatum(itemId: string): boolean {
         const isNowVisible = this.#hidden.toggle(itemId);
 

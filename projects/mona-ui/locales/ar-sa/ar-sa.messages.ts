@@ -211,6 +211,15 @@ export const AR_SA_MESSAGES = {
     comboBox: {
         clear: "مسح"
     },
+    command: {
+        dialogLabel: "قائمة الأوامر",
+        inputLabel: "البحث في الأوامر",
+        listLabel: "النتائج",
+        loading: "جارٍ التحميل",
+        noResults: "لم يتم العثور على نتائج",
+        placeholder: "اكتب أمرًا أو ابحث…",
+        resultsAvailable: (count: number) => `عدد النتائج المتاحة: ${localizeNumber(count)}`
+    },
     datePicker: {
         datePicker: "منتقي التاريخ",
         openCalendar: "فتح التقويم"
@@ -367,6 +376,7 @@ export const AR_SA_MESSAGES = {
         filterOperator: (column: string, operator: string) => `عامل تصفية ${column}: ${operator}`,
         filterPlaceholder: "تصفية…",
         group: "مجموعة",
+        groupOptions: (column: string) => `خيارات مجموعة ${column}`,
         loading: "جارٍ التحميل",
         modified: "تم التعديل",
         moveAsNext: "نقل كعنصر تالٍ",

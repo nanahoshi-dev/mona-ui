@@ -17,7 +17,12 @@ export class DropdownGroupableDirective<TData> {
     };
     readonly #listService: ListService<TData> = inject(ListService);
 
+    /** @description Property name, or accessor, used to derive an option's group. */
     public readonly groupBy = input<string | Selector<TData, unknown> | null | undefined>("");
+    /**
+     * @description Group header order, and optional per-group item ordering. An empty string enables grouping with
+     * default settings (`headerOrder: "asc"`); pass an object to override any field.
+     */
     public readonly options = input<GroupableOptions<TData, unknown> | "">("", {
         alias: "monaDropDownGroupable"
     });

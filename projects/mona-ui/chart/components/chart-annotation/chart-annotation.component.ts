@@ -13,6 +13,7 @@ import type {
     ChartAnnotationMarker
 } from "../../models/chart-annotation.models";
 
+/** Renders callouts, milestone badges, and outlier markers anchored to specific (X, Y) coordinates. */
 @Component({
     selector: "mona-chart-annotation",
     template: "",

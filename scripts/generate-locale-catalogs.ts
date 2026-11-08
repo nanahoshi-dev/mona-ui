@@ -142,6 +142,13 @@ export const DEFAULT_CATALOG_TARGETS: readonly DefaultCatalogTarget[] = [
         typeName: "MonaDateTimePickerMessages"
     },
     {
+        constName: "COMMAND_DEFAULT_MESSAGES",
+        file: "command/i18n/command.default-messages.ts",
+        namespace: "command",
+        style: "type",
+        typeName: "MonaCommandMessages"
+    },
+    {
         constName: "DIALOG_DEFAULT_MESSAGES",
         file: "dialog/i18n/dialog.default-messages.ts",
         namespace: "dialog",

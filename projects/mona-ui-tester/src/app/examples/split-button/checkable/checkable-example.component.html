@@ -1,0 +1,12 @@
+<div class="flex flex-wrap items-center gap-3">
+    <mona-split-button text="Export" (buttonClick)="export()">
+        <mona-split-button-radio-group title="Format" [(value)]="format">
+            <mona-split-button-radio-item label="PDF" value="pdf" />
+            <mona-split-button-radio-item label="Word" value="docx" />
+            <mona-split-button-radio-item label="Plain text" value="txt" />
+        </mona-split-button-radio-group>
+        <mona-split-button-separator />
+        <mona-split-button-checkbox-item label="Include comments" [(checked)]="includeComments" />
+    </mona-split-button>
+    <span aria-live="polite" class="text-sm">Last export: {{ lastExport() }}</span>
+</div>

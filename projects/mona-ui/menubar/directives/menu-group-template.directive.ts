@@ -1,10 +1,8 @@
 import { Directive, forwardRef } from "@angular/core";
-import {
-    PopupMenuGroupTemplateDirective,
-    PopupMenuGroupTemplateToken,
-    PopupMenuTemplateOrigin
-} from "@nanahoshi/mona-ui/popup-menu";
+import { PopupMenuGroupTemplateDirective } from "@nanahoshi/mona-ui/popup-menu";
+import { PopupMenuGroupTemplateToken, PopupMenuTemplateOrigin } from "@nanahoshi/mona-ui/internal/popup-menu";
 
+/** Customizes a group header's content. */
 @Directive({
     selector: "ng-template[monaMenuGroupTemplate]",
     providers: [

@@ -1,0 +1,16 @@
+<div class="flex flex-col items-start gap-2">
+    <mona-label text="Plan" [for]="planGroup" />
+    <mona-radio-group #planGroup aria-describedby="radio-plan-error" [formField]="order.plan">
+        <mona-radio-button label="Free" radioValue="free" />
+        <mona-radio-button label="Team" radioValue="team" />
+        <mona-radio-button label="Enterprise" radioValue="enterprise" />
+    </mona-radio-group>
+    <p aria-live="polite" class="text-sm text-error" id="radio-plan-error">
+        @if (order.plan().touched()) {
+            @for (error of order.plan().errors(); track error.kind) {
+                {{ error.message }}
+            }
+        }
+    </p>
+    <p class="text-sm">Plan: {{ order.plan().value() || "none" }}</p>
+</div>

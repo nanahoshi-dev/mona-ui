@@ -1,0 +1,15 @@
+<div class="flex flex-col items-start gap-3">
+    <mona-check-box label="Send me the monthly newsletter" [formField]="signup.newsletter" />
+    <mona-check-box
+        aria-describedby="checkbox-terms-error"
+        label="I accept the terms of service"
+        [formField]="signup.terms" />
+    <p aria-live="polite" class="text-sm text-error" id="checkbox-terms-error">
+        @if (signup.terms().touched()) {
+            @for (error of signup.terms().errors(); track error.kind) {
+                {{ error.message }}
+            }
+        }
+    </p>
+    <p class="text-sm">Form valid: {{ signup().valid() ? "yes" : "no" }}</p>
+</div>

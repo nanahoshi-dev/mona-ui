@@ -200,6 +200,16 @@ export const IT_IT_MESSAGES = {
     comboBox: {
         clear: "Cancella"
     },
+    command: {
+        dialogLabel: "Menu dei comandi",
+        inputLabel: "Cerca comandi",
+        listLabel: "Risultati",
+        loading: "Caricamento",
+        noResults: "Nessun risultato trovato",
+        placeholder: "Digita un comando o cerca…",
+        resultsAvailable: (count: number) =>
+            count === 1 ? "1 risultato disponibile" : `${localizeNumber(count)} risultati disponibili`
+    },
     datePicker: {
         datePicker: "Selettore data",
         openCalendar: "Apri calendario"
@@ -360,6 +370,7 @@ export const IT_IT_MESSAGES = {
         filterOperator: (column: string, operator: string) => `Operatore di filtro di ${column}: ${operator}`,
         filterPlaceholder: "Filtra...",
         group: "Gruppo",
+        groupOptions: (column: string) => `Opzioni del gruppo ${column}`,
         loading: "Caricamento",
         modified: "Modificato",
         moveAsNext: "Sposta dopo",

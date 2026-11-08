@@ -1,0 +1,6 @@
+<div class="flex flex-col items-start gap-2">
+    <mona-label text="Verification code">
+        <mona-otp-input separator="-" type="number" [groupLength]="3" [length]="6" [(value)]="code" />
+    </mona-label>
+    <span class="text-sm">Value: "{{ code() }}"</span>
+</div>

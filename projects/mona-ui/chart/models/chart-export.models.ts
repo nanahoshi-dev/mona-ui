@@ -71,6 +71,7 @@ export interface ChartExportBaseOptions {
  * Options for exporting a chart as a PNG raster image.
  */
 export interface ChartPngExportOptions extends ChartExportBaseOptions {
+    /** Selects export as a PNG image. */
     readonly format: "png";
 
     /**
@@ -90,6 +91,7 @@ export interface ChartSvgExportOptions extends ChartExportBaseOptions {
      */
     readonly accessibility?: boolean;
 
+    /** Selects export as a SVG document. */
     readonly format: "svg";
 }
 
@@ -154,6 +156,7 @@ export interface ChartPdfPageOptions {
  * Options for exporting a chart as a PDF document.
  */
 export interface ChartPdfExportOptions extends ChartExportBaseOptions {
+    /** Selects export as a PDF document. */
     readonly format: "pdf";
 
     /**

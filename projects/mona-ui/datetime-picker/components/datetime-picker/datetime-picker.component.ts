@@ -229,7 +229,7 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
 
     /**
      * @description Accessible name of the input. Prefer a visible label, linked through {@link inputId} or
-     * {@link ariaLabelledBy}; the placeholder is not a label.
+     * `aria-labelledby`; the placeholder is not a label.
      * @default ""
      */
     public readonly ariaLabel = input("", { alias: "aria-label" });
@@ -418,6 +418,7 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
      */
     public readonly touched = input(false, { transform: booleanAttribute });
 
+    /** @description Extra classes for the input's container. */
     public readonly userClass = input("", { alias: "class" });
 
     /**

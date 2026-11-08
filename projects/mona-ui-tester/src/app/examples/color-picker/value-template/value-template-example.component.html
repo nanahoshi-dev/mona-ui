@@ -1,0 +1,5 @@
+<mona-color-picker aria-label="Text color" view="palette" [(value)]="color">
+    <ng-template monaColorPickerValueTemplate let-current>
+        <span class="font-mono text-xs">{{ current ?? "None" }}</span>
+    </ng-template>
+</mona-color-picker>

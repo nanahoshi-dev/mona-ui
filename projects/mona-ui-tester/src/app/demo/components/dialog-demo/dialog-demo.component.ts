@@ -240,7 +240,7 @@ export class DialogDemoComponent extends AbstractDemoComponent<DialogComponent> 
         <button monaButton look="primary" (click)="openDialog()">Open via Dialog Service</button>
         @if (dialogVisible()) {
             <mona-dialog
-                [ariaLabel]="ariaLabel()"
+                [aria-label]="ariaLabel()"
                 (action)="onAction($event)"
                 [actions]="actions()"
                 [actionsLayout]="actionsLayout()"

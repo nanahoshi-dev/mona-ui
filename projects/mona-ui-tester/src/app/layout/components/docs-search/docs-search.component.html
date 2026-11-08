@@ -1,0 +1,56 @@
+<mona-command-dialog aria-label="Search documentation" shortcut="mod+k" [(open)]="search.open">
+    <ng-template monaCommandDialogContent>
+        <mona-command filterMode="manual" [loading]="loading()" [(query)]="query" (itemSelect)="go($event)">
+            <mona-command-input aria-label="Search documentation" placeholder="Search documentation…" />
+            <mona-command-list aria-label="Search results">
+                @if (results().length === 0) {
+                    <mona-command-loading />
+                }
+                @if (!failed()) {
+                    <mona-command-empty />
+                }
+                @for (result of results(); track result.url) {
+                    <mona-command-item [value]="result.url">
+                        <div class="flex min-w-0 flex-1 flex-col">
+                            <span class="flex items-baseline justify-between gap-2">
+                                <span class="font-medium">{{ result.title }}</span>
+                                <span class="shrink-0 text-xs text-muted-foreground in-data-[active='true']:forced-colors:text-[HighlightText]">
+                                    {{ result.category }}
+                                </span>
+                            </span>
+                            <span
+                                class="line-clamp-2 text-xs text-muted-foreground in-data-[active='true']:forced-colors:text-[HighlightText] [&_mark]:bg-transparent [&_mark]:font-semibold [&_mark]:text-current [&_mark]:underline"
+                                [innerHTML]="result.excerpt"></span>
+                        </div>
+                    </mona-command-item>
+                    @for (section of result.sections; track section.url) {
+                        <mona-command-item class="ms-4" [value]="section.url">
+                            <div class="flex min-w-0 flex-1 flex-col">
+                                <span>{{ section.title }}</span>
+                                <span
+                                    class="line-clamp-2 text-xs text-muted-foreground in-data-[active='true']:forced-colors:text-[HighlightText] [&_mark]:bg-transparent [&_mark]:font-semibold [&_mark]:text-current [&_mark]:underline"
+                                    [innerHTML]="section.excerpt"></span>
+                            </div>
+                        </mona-command-item>
+                    }
+                }
+            </mona-command-list>
+            @if (failed()) {
+                <p class="px-3 py-6 text-center text-sm text-muted-foreground" role="status">
+                    Search isn't available right now.
+                </p>
+            } @else if (query().trim() === "") {
+                <p class="px-3 py-6 text-center text-sm text-muted-foreground">
+                    Search the guides, components and API reference.
+                </p>
+            }
+            <mona-command-footer>
+                <span>Enter to open</span>
+                <span class="flex items-center gap-1">
+                    <mona-command-shortcut keys="mod+enter" />
+                    for a new tab
+                </span>
+            </mona-command-footer>
+        </mona-command>
+    </ng-template>
+</mona-command-dialog>

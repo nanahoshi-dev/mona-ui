@@ -178,6 +178,15 @@ export const ID_ID_MESSAGES = {
     comboBox: {
         clear: "Bersihkan"
     },
+    command: {
+        dialogLabel: "Menu perintah",
+        inputLabel: "Cari perintah",
+        listLabel: "Hasil",
+        loading: "Memuat",
+        noResults: "Tidak ada hasil",
+        placeholder: "Ketik perintah atau cari…",
+        resultsAvailable: (count: number) => `${localizeNumber(count)} hasil tersedia`
+    },
     datePicker: {
         datePicker: "Pemilih tanggal",
         openCalendar: "Buka kalender"
@@ -335,6 +344,7 @@ export const ID_ID_MESSAGES = {
         filterOperator: (column: string, operator: string) => `Operator saringan kolom ${column}: ${operator}`,
         filterPlaceholder: "Saring...",
         group: "Grup",
+        groupOptions: (column: string) => `Opsi grup ${column}`,
         loading: "Memuat",
         modified: "Diubah",
         moveAsNext: "Pindahkan setelahnya",

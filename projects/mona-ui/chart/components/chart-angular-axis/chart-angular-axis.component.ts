@@ -4,6 +4,7 @@ import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { ChartAxisFormatter } from "../../models/chart-axis.models";
 
+/** Configures the angular dimension (spokes and continuous degrees) in Polar Axis charts. */
 @Component({
     selector: "mona-chart-angular-axis",
     template: "",

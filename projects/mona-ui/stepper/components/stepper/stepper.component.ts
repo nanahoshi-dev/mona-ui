@@ -150,12 +150,12 @@ export class StepperComponent implements StepperVariantInput {
         return stepperTrackLineThemeVariants({ orientation });
     });
     protected readonly trackStyles = computed(() => {
-        const orientation = this.orientation();
-        const step = this.activeStep();
-        const stepCount = this.viewSteps().length;
-        const gridColumn = orientation === "horizontal" && step != null ? `2/${stepCount * 2}` : undefined;
-        const gridRow = orientation === "vertical" && step != null ? `2/${stepCount * 2}` : undefined;
-        return { gridColumn, gridRow };
+        // Each step takes an equal share, with its indicator centred in it along the track. Across it, the 2rem
+        // indicator's centre is 1rem in, and the 0.5rem track is centred on that.
+        const edge = `${this.#trackItemSize() / 2}%`;
+        return this.orientation() === "horizontal"
+            ? { insetInlineEnd: edge, insetInlineStart: edge, top: "0.75rem" }
+            : { bottom: edge, insetInlineStart: "0.75rem", top: edge };
     });
     protected readonly viewSteps = computed(() => {
         const steps = this.steps();

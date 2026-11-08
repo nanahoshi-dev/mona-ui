@@ -89,7 +89,8 @@ export class GridCommandColumnComponent implements GridColumnDefinition {
     public readonly minWidth = input<number | null>(null);
 
     /**
-     * @description Whether the built-in remove command asks for confirmation before emitting remove.
+     * @description Whether removing a row asks for confirmation before emitting `remove`: from the built-in Remove button, or from a
+     * `monaGridRemoveCommand` button in this column's template.
      */
     public readonly removeConfirmation = input(false, { transform: booleanAttribute });
 

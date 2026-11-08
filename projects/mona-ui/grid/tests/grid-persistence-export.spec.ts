@@ -28,7 +28,7 @@ interface ExportRow {
     ],
     template: `
         <mona-grid
-            ariaLabel="Orders"
+            aria-label="Orders"
             [data]="rows()"
             [rowKey]="'id'"
             [pageSize]="2"

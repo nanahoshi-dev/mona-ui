@@ -5,7 +5,7 @@
         <section [id]="'natural-' + direction" [dir]="direction">
             <h4 class="font-medium mb-2">{{ direction === "ltr" ? "Left to right" : "Right to left" }}</h4>
             <mona-grid
-                [ariaLabel]="direction === 'ltr' ? 'Users, left to right' : 'Users, right to left'"
+                [aria-label]="direction === 'ltr' ? 'Users, left to right' : 'Users, right to left'"
                 class="h-80 w-full"
                 [data]="rows()"
                 rowKey="id"
@@ -70,7 +70,7 @@
     <section id="virtual-explicit">
         <h4 class="font-medium mb-2">Virtual rows: 48px</h4>
         <mona-grid
-            ariaLabel="Virtual rows, 48 pixels"
+            aria-label="Virtual rows, 48 pixels"
             class="h-64 w-full"
             [data]="virtualRows"
             [monaGridVirtualScroll]="{ height: 48 }"
@@ -88,7 +88,7 @@
     <section id="virtual-default">
         <h4 class="font-medium mb-2">Virtual rows: default 36px</h4>
         <mona-grid
-            ariaLabel="Virtual rows, default height"
+            aria-label="Virtual rows, default height"
             class="h-64 w-full"
             [data]="virtualRows"
             monaGridVirtualScroll
@@ -99,7 +99,7 @@
     <section id="virtual-grouped">
         <h4 class="font-medium mb-2">Grouped virtual rows: 48px</h4>
         <mona-grid
-            ariaLabel="Grouped virtual rows"
+            aria-label="Grouped virtual rows"
             class="h-64 w-full"
             [data]="virtualRows"
             [monaGridVirtualScroll]="{ height: 48 }"

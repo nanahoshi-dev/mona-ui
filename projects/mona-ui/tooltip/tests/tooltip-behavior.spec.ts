@@ -1,6 +1,7 @@
 import { OverlayContainer } from "@angular/cdk/overlay";
 import { ApplicationRef, Component, signal } from "@angular/core";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { HOVER_GRACE } from "@nanahoshi/mona-ui/internal";
 import { PopupService, type PopupSettings } from "@nanahoshi/mona-ui/popup";
 import { TooltipComponent } from "../components/tooltip/tooltip.component";
@@ -72,6 +73,13 @@ class ComponentHostComponent {
     public readonly cells = signal(["c1"]);
     public readonly disabled = signal(false);
     public readonly position = signal<TooltipPosition>("top");
+}
+@Component({
+    imports: [ButtonDirective, TooltipDirective],
+    template: `<button id="button" type="button" monaButton monaTooltip="Save" [tooltipDisabled]="off()">Save</button>`
+})
+class ButtonHostComponent {
+    public readonly off = signal(true);
 }
 
 const readDataTip = (element: HTMLElement): string => element.getAttribute("data-tip") ?? "";
@@ -459,6 +467,22 @@ describe("Tooltip behavior", () => {
             expect(tooltips()).toHaveLength(0);
             fixture.destroy();
         });
+    });
+
+    it("disables only the tooltip through tooltipDisabled, leaving the button enabled", () => {
+        const fixture = create(ButtonHostComponent);
+        const button = el("button") as HTMLButtonElement;
+
+        over(button);
+        expect(tooltips()).toHaveLength(0);
+        expect(button.disabled).toBe(false);
+
+        fixture.componentInstance.off.set(false);
+        fixture.detectChanges();
+        settle();
+        over(button);
+        expect(tooltips()).toHaveLength(1);
+        fixture.destroy();
     });
 
     describe("component", () => {

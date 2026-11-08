@@ -15,6 +15,7 @@ export interface ListItemOptions<T> {
     uid?: string;
 }
 
+/** An item of a list, wrapping its data item. */
 export class ListItem<TData> {
     public readonly data: TData;
     public readonly header: string = "";

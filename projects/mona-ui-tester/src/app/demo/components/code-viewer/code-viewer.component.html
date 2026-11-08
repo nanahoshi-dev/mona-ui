@@ -7,9 +7,11 @@
     </div>
     <pre
         class="flex-grow overflow-x-auto px-2 py-2 bg-zinc-900"><code class="block" [innerHTML]="highlightedCode()"></code></pre>
-    <svg
-        lucideCopy
-        [size]="16"
-        (click)="copyToClipboard()"
-        class="absolute top-1.25 right-1.25 opacity-40 hover:opacity-80 transition-opacity ease-in-out duration-100 cursor-pointer"></svg>
+    <button
+        type="button"
+        aria-label="Copy code"
+        class="absolute top-1.25 right-1.25 opacity-40 hover:opacity-80 transition-opacity ease-in-out duration-100 cursor-pointer focus-visible:opacity-100"
+        (click)="copyToClipboard()">
+        <svg lucideCopy aria-hidden="true" [size]="16"></svg>
+    </button>
 </div>

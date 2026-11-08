@@ -65,7 +65,10 @@ const TABBABLE = [
     selector: "mona-popover",
     templateUrl: "./popover.component.html",
     exportAs: "monaPopover",
-    imports: [NgTemplateOutlet]
+    imports: [NgTemplateOutlet],
+    host: {
+        "[attr.aria-label]": "null"
+    }
 })
 export class PopoverComponent implements PopoverVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
@@ -110,7 +113,7 @@ export class PopoverComponent implements PopoverVariantInputs {
     /**
      * @description Accessible name for the popover when it has no `title` or title template.
      */
-    public readonly ariaLabel = input<string>();
+    public readonly ariaLabel = input<string | undefined>(undefined, { alias: "aria-label" });
 
     /**
      * @description Whether focus moves into the popover when it opens: to its first focusable element, or to the
@@ -222,10 +225,15 @@ export class PopoverComponent implements PopoverVariantInputs {
         });
     }
 
+    /**
+     * Closes the popover if one is currently open. Emits `hide` and respects `preventDefault()` — if canceled, the
+     * popup stays open and the component's internal state remains consistent with that.
+     */
     public close(): void {
         this.#popupRef?.close();
     }
 
+    /** Opens the popover directly. No-op if it is already open. Does not emit `show`; emits `shown` once open. */
     public open(): void {
         if (this.#popupRef) {
             return;
@@ -301,7 +309,7 @@ export class PopoverComponent implements PopoverVariantInputs {
                     }
                     if (isDevMode() && !this.hasTitle() && !this.ariaLabel()) {
                         console.warn(
-                            "[Mona Popover] A popover needs an accessible name. Set title, a title template or ariaLabel.",
+                            "[Mona Popover] A popover needs an accessible name. Set a title, a title template or aria-label.",
                             panel
                         );
                     }

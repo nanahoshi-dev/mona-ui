@@ -1,9 +1,6 @@
 import { Directive, forwardRef } from "@angular/core";
-import {
-    PopupMenuTemplateOrigin,
-    PopupMenuTextTemplateDirective,
-    PopupMenuTextTemplateToken
-} from "@nanahoshi/mona-ui/popup-menu";
+import { PopupMenuTextTemplateDirective } from "@nanahoshi/mona-ui/popup-menu";
+import { PopupMenuTemplateOrigin, PopupMenuTextTemplateToken } from "@nanahoshi/mona-ui/internal/popup-menu";
 
 @Directive({
     selector: "ng-template[monaContextMenuTextTemplate]",

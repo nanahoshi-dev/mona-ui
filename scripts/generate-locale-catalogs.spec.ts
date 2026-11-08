@@ -131,6 +131,6 @@ describe("generate-locale-catalogs emitter", () => {
         const namespaces = DEFAULT_CATALOG_TARGETS.map(target => target.namespace);
 
         expect(new Set(namespaces).size).toBe(namespaces.length);
-        expect(namespaces).toHaveLength(43);
+        expect(namespaces).toHaveLength(44);
     });
 });

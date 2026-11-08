@@ -1,0 +1,25 @@
+<div class="flex max-w-xs flex-col gap-2">
+    <mona-tree-view
+        aria-label="Project files"
+        children="items"
+        expandBy="id"
+        monaTreeViewExpandable
+        selectBy="id"
+        textField="text"
+        [data]="files"
+        [expandedKeys]="['src']"
+        [monaTreeViewSelectable]="{ mode: 'single', toggleable: true }"
+        [(selectedKeys)]="selectedKeys">
+        <ng-template let-file monaTreeViewNodeTemplate [monaTreeViewNodeTemplateOf]="files">
+            <span class="flex items-center gap-1.5">
+                @if (file.items.length > 0) {
+                    <svg lucideFolder aria-hidden="true" [size]="14"></svg>
+                } @else {
+                    <svg lucideFile aria-hidden="true" [size]="14"></svg>
+                }
+                {{ file.text }}
+            </span>
+        </ng-template>
+    </mona-tree-view>
+    <span aria-live="polite" class="text-sm">Selected: {{ selectedKeys().join(", ") || "none" }}</span>
+</div>

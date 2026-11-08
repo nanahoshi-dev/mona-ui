@@ -43,6 +43,10 @@ bootstrapApplication(AppComponent, {
 });
 ```
 
+## Using an AI Coding Assistant
+
+The documentation is also available as markdown, for coding agents. Point an agent at `/llms.txt`, which lists every page with a link to its markdown, or at `node_modules/@nanahoshi/mona-ui/llms.txt`, which matches the installed version.
+
 ## Build Forms
 
 The form controls work with Angular's signal forms through `[formField]`. See [Forms](/components/forms) for how to name them, and what each one supports.

@@ -1,0 +1,15 @@
+<div class="flex max-w-sm flex-col gap-1">
+    <label id="multi-select-summary-label" monaLabel [for]="memberList">Reviewers</label>
+    <mona-multi-select
+        #memberList
+        aria-labelledby="multi-select-summary-label"
+        textField="name"
+        valueField="id"
+        [data]="people"
+        [monaMultiSelectSummaryTag]="2"
+        [(value)]="reviewers">
+        <ng-template let-items let-tagCount="tagCount" monaMultiSelectSummaryTagTemplate>
+            +{{ items.length - tagCount }} more
+        </ng-template>
+    </mona-multi-select>
+</div>

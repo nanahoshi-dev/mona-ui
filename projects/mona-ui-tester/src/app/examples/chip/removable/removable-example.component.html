@@ -1,0 +1,15 @@
+<div class="flex max-w-sm flex-col gap-3">
+    <div class="flex flex-wrap gap-2">
+        @for (tag of tags(); track tag) {
+            <mona-chip [label]="tag" [removable]="true" (remove)="removeTag(tag, tagInput)"></mona-chip>
+        }
+    </div>
+    <label class="text-sm" for="chip-removable-tag">Add a tag</label>
+    <input
+        #tagInput
+        id="chip-removable-tag"
+        monaTextBox
+        placeholder="Type and press Enter"
+        type="text"
+        (keydown.enter)="addTag(tagInput)" />
+</div>

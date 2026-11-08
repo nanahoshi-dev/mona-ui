@@ -1,0 +1,8 @@
+<div class="flex flex-col gap-3">
+    <div class="flex flex-wrap gap-2" role="group" aria-label="Filter issues">
+        <mona-chip label="Open" [toggleable]="true" [(selected)]="open"></mona-chip>
+        <mona-chip label="Assigned to me" [toggleable]="true" [(selected)]="assignedToMe"></mona-chip>
+        <mona-chip label="Urgent" look="error" [toggleable]="true" [(selected)]="urgent"></mona-chip>
+    </div>
+    <p class="text-sm">Filters: {{ summary() }}</p>
+</div>

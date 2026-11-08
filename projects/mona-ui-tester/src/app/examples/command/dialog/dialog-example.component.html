@@ -1,0 +1,23 @@
+<div class="flex flex-wrap items-center gap-3">
+    <button monaButton type="button" (click)="open.set(true)">
+        Open command menu
+        <mona-command-shortcut class="ms-2" keys="mod+j" />
+    </button>
+    <span aria-live="polite" class="text-sm">Last action: {{ lastAction() }}</span>
+</div>
+
+<mona-command-dialog shortcut="mod+j" [(open)]="open">
+    <ng-template monaCommandDialogContent>
+        <mona-command (itemSelect)="run($event.value)">
+            <mona-command-input />
+            <mona-command-list>
+                <mona-command-empty />
+                @for (action of actions; track action) {
+                    <mona-command-item [value]="action">
+                        <mona-command-highlight [text]="action" />
+                    </mona-command-item>
+                }
+            </mona-command-list>
+        </mona-command>
+    </ng-template>
+</mona-command-dialog>

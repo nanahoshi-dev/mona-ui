@@ -1,0 +1,14 @@
+<div class="flex flex-col gap-2">
+    <label id="editor-forms-label" class="text-sm font-medium">Issue description</label>
+    <mona-editor
+        aria-describedby="editor-forms-error"
+        aria-labelledby="editor-forms-label"
+        class="h-56 w-full"
+        [formField]="issue.description"
+        [settings]="{ image: false, table: false }" />
+    <p id="editor-forms-error" class="text-error text-sm" role="alert">
+        @if (issue.description().touched() && issue.description().invalid()) {
+            Describe the issue.
+        }
+    </p>
+</div>

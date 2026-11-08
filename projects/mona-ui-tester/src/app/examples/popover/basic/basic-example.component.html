@@ -1,0 +1,17 @@
+<button #details monaButton type="button">Order details</button>
+
+<mona-popover #popover="monaPopover" position="bottom" title="Order #1042" [target]="details">
+    <dl class="grid w-64 grid-cols-2 gap-1 p-2 text-sm">
+        <dt>Placed</dt>
+        <dd>12 March</dd>
+        <dt>Items</dt>
+        <dd>3</dd>
+        <dt>Total</dt>
+        <dd>€84.50</dd>
+    </dl>
+    <ng-template monaPopoverFooterTemplate>
+        <div class="flex justify-end border-t border-t-border p-2">
+            <button monaButton type="button" (click)="popover.close()">Close</button>
+        </div>
+    </ng-template>
+</mona-popover>

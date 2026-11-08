@@ -1,0 +1,13 @@
+<section class="max-w-md rounded-md border border-border" monaCollapsible [(expanded)]="expanded">
+    <button class="flex w-full items-center justify-between px-4 py-3 text-left font-medium" monaCollapsibleTrigger type="button">
+        Advanced options
+        <svg class="transition-transform" lucideChevronDown aria-hidden="true" [class.rotate-180]="expanded()" [size]="16"></svg>
+    </button>
+    <div monaCollapsibleContent>
+        <ul class="list-disc border-t border-border px-8 py-3 text-sm">
+            <li>Keep a copy of every version</li>
+            <li>Send a summary every Monday</li>
+        </ul>
+    </div>
+</section>
+<p class="mt-2 text-sm">Expanded: {{ expanded() }}</p>

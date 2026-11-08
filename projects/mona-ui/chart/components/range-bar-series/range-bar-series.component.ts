@@ -8,6 +8,10 @@ import type { ChartBarOrientation } from "../../models/chart-bar.models";
 
 let nextSeriesId = 0;
 
+/**
+ * Renders floating Cartesian range bars spanning between a lower value and an upper value (e.g. min/max temperatures,
+ * price spans, or SLA tolerances).
+ */
 @Component({
     selector: "mona-range-bar-series",
     template: "",

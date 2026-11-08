@@ -206,6 +206,15 @@ export const RU_RU_MESSAGES = {
     comboBox: {
         clear: "Очистить"
     },
+    command: {
+        dialogLabel: "Меню команд",
+        inputLabel: "Поиск команд",
+        listLabel: "Результаты",
+        loading: "Загрузка",
+        noResults: "Результаты не найдены",
+        placeholder: "Введите команду или выполните поиск…",
+        resultsAvailable: (count: number) => `Доступно результатов: ${localizeNumber(count)}`
+    },
     datePicker: {
         datePicker: "Выбор даты",
         openCalendar: "Открыть календарь"
@@ -363,6 +372,7 @@ export const RU_RU_MESSAGES = {
         filterOperator: (column: string, operator: string) => `Оператор фильтра столбца ${column}: ${operator}`,
         filterPlaceholder: "Фильтр…",
         group: "Группа",
+        groupOptions: (column: string) => `Параметры группы ${column}`,
         loading: "Загрузка",
         modified: "Изменено",
         moveAsNext: "Переместить после",

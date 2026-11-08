@@ -1,0 +1,18 @@
+<svg lucideSearch aria-hidden="true" [class]="iconClass()" [size]="16"></svg>
+<input
+    #field
+    type="text"
+    role="combobox"
+    autocapitalize="off"
+    autocomplete="off"
+    aria-autocomplete="list"
+    spellcheck="false"
+    [attr.aria-activedescendant]="root.activeItem()?.id ?? null"
+    [attr.aria-controls]="root.listId"
+    [attr.aria-expanded]="root.resultCount() > 0"
+    [attr.aria-label]="ariaLabel() || root.messages().inputLabel"
+    [attr.placeholder]="placeholder() ?? root.messages().placeholder"
+    [class]="fieldClass()"
+    [value]="root.query()"
+    (input)="onInput($event)"
+    (keydown)="onKeydown($event)" />

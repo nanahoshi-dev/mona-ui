@@ -1,0 +1,14 @@
+<div class="flex flex-wrap items-center gap-3">
+    <button #view monaButton aria-haspopup="menu" type="button" [attr.aria-expanded]="open()">View options</button>
+    <span class="text-sm">Hidden files: {{ showHidden() ? "shown" : "not shown" }}. Sorted by {{ sort() }}.</span>
+</div>
+
+<mona-popup-menu aria-label="View options" [target]="view" (close)="open.set(false)" (open)="open.set(true)">
+    <mona-popup-menu-checkbox-item label="Show hidden files" [(checked)]="showHidden" />
+    <mona-popup-menu-separator />
+    <mona-popup-menu-radio-group title="Sort by" [(value)]="sort">
+        <mona-popup-menu-radio-item label="Name" value="name" />
+        <mona-popup-menu-radio-item label="Date" value="date" />
+        <mona-popup-menu-radio-item label="Size" value="size" />
+    </mona-popup-menu-radio-group>
+</mona-popup-menu>

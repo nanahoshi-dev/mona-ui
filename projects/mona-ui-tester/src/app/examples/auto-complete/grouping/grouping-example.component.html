@@ -1,0 +1,12 @@
+<div class="flex max-w-xs flex-col gap-1">
+    <label monaLabel for="auto-complete-grouping-city">City</label>
+    <mona-auto-complete
+        groupBy="country"
+        inputId="auto-complete-grouping-city"
+        monaDropDownFilterable
+        monaDropDownGroupable
+        placeholder="Type a city"
+        textField="name"
+        [data]="cities"
+        [(value)]="city" />
+</div>

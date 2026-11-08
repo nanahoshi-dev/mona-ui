@@ -1,0 +1,8 @@
+<div class="flex flex-col items-start gap-3">
+    <mona-button-group aria-label="Text formatting" selection="multiple" [(value)]="formatting">
+        <button monaButton type="button" value="bold">Bold</button>
+        <button monaButton type="button" value="italic">Italic</button>
+        <button monaButton type="button" value="underline">Underline</button>
+    </mona-button-group>
+    <span class="text-sm">Value: {{ summary() }}</span>
+</div>

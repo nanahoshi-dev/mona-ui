@@ -8,6 +8,7 @@ import type { ChartField, ChartValueFormatter } from "../../models/chart.models"
 
 let nextSeriesId = 0;
 
+/** Renders 3-dimensional data points with position (X, Y) and proportionally-scaled circle areas (Size). */
 @Component({
     selector: "mona-bubble-series",
     template: "",

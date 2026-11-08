@@ -20,8 +20,7 @@ import { PopupDataInjectionToken, PopupRef, PopupService } from "@nanahoshi/mona
 import { selectMany } from "@mirei/ts-collections";
 import { fromEvent, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { PopupMenuItem } from "../../models/PopupMenuItem";
-import { PopupMenuItemClickEvent } from "../../models/PopupMenuItemClickEvent";
+import { PopupMenuItem, PopupMenuItemClickEvent } from "@nanahoshi/mona-ui/internal/popup-menu";
 import { PopupMenuListConfig } from "../../models/PopupMenuListConfig";
 import { groupPopupMenuItems } from "../../utils/popup-menu.utils";
 import {

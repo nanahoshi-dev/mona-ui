@@ -7,12 +7,15 @@ export const COLLAPSIBLE_CONFIG = new InjectionToken<CollapsibleConfig>("COLLAPS
  */
 export interface CollapsibleConfig {
     readonly animate: Signal<boolean>;
+    /** Collapses the content. */
     collapse(): void;
     readonly contentId: string;
     readonly disabled: Signal<boolean>;
+    /** Expands the content. */
     expand(): void;
     readonly expanded: Signal<boolean>;
     /** Takes the id the content was given, so the trigger points at it. A root without it always uses `contentId`. */
     setContentId?(id: string | null): void;
+    /** Switches between expanded and collapsed. The trigger calls it on activation. */
     toggle(): void;
 }

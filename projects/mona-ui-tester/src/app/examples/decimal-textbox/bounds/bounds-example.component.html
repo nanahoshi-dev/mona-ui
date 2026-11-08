@@ -1,0 +1,10 @@
+<div class="flex max-w-sm flex-col gap-3">
+    <mona-decimal-text-box
+        aria-label="Rate"
+        maxValue="99999999999999999999.9999"
+        minValue="0"
+        step="0.0001"
+        [decimals]="4"
+        [(value)]="rate" />
+    <p class="text-sm break-all">Value: {{ rate() ?? "empty" }}</p>
+</div>

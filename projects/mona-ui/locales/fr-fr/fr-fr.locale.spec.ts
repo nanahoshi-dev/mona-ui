@@ -30,6 +30,7 @@ describe("MONA_FR_FR_LOCALE", () => {
             "colorPalette",
             "colorPicker",
             "comboBox",
+            "command",
             "datePicker",
             "dateTimePicker",
             "dialog",
@@ -61,7 +62,7 @@ describe("MONA_FR_FR_LOCALE", () => {
             "window"
         ] as const;
 
-        it("defines all 43 canonical message namespaces", () => {
+        it("defines all 44 canonical message namespaces", () => {
             for (const ns of expectedNamespaces) {
                 expect(MONA_FR_FR_LOCALE.messages[ns], `Namespace ${ns} must be defined`).toBeDefined();
             }

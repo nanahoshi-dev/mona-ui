@@ -6,6 +6,7 @@ import type { ChartField } from "../../models/chart.models";
 
 let nextPolarSeriesId = 0;
 
+/** Renders continuous polar series mapping magnitude over continuous degree angles (0° to 360°). */
 @Component({
     selector: "mona-polar-series",
     template: "",

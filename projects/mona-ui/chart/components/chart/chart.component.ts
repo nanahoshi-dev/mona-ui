@@ -327,6 +327,7 @@ function easingToCss(easing: string): string {
 
 type ChartTransientInteractionOwner = "tooltip" | "crosshair" | "keyboard" | null;
 
+/** Root visualization container coordinating coordinate layouts, canvas rendering, theme styles, and interactions. */
 @Component({
     selector: "mona-chart",
     templateUrl: "./chart.component.html",
@@ -4900,6 +4901,7 @@ export class ChartComponent implements AfterContentChecked {
         }
     }
 
+    /** Toggles the visibility of a series. */
     public toggleSeriesVisibility(seriesId: string): void {
         const s = this.#registeredSeries().find(item => item.id === seriesId);
         if (s) {

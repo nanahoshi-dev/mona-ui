@@ -1,5 +1,6 @@
 import { Component, effect, forwardRef } from "@angular/core";
-import { PopupMenuCheckboxItemComponent, PopupMenuOrigin, PopupMenuToken } from "@nanahoshi/mona-ui/popup-menu";
+import { PopupMenuCheckboxItemComponent } from "@nanahoshi/mona-ui/popup-menu";
+import { PopupMenuOrigin, PopupMenuToken } from "@nanahoshi/mona-ui/internal/popup-menu";
 import { ensureContextMenuTemplateTypes } from "../../utils/ctx-menu.utils";
 
 @Component({

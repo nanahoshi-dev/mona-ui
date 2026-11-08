@@ -1,0 +1,14 @@
+<div class="flex max-w-xs flex-col gap-1">
+    <label id="dropdown-list-filtering-label" monaLabel [for]="timeZoneList">Time zone</label>
+    <mona-dropdown-list
+        #timeZoneList
+        aria-labelledby="dropdown-list-filtering-label"
+        filterPlaceholder="Search time zones"
+        groupBy="region"
+        monaDropDownGroupable
+        placeholder="Select a time zone"
+        textField="name"
+        [data]="timeZones"
+        [monaDropDownFilterable]="{ operator: 'startsWith' }"
+        [(value)]="timeZone" />
+</div>

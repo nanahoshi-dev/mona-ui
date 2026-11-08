@@ -11,8 +11,8 @@
     [toggleable]="false"
     class="rounded-e-none"
     [id]="mainButtonId"
-    [attr.aria-label]="ariaLabelledby() ? null : ariaLabel() || null"
-    [attr.aria-labelledby]="ariaLabelledby() || null"
+    [attr.aria-label]="ariaLabelledBy() ? null : ariaLabel() || null"
+    [attr.aria-labelledby]="ariaLabelledBy() || null"
     #mainButton>
     @if (mainButtonTextTemplate()) {
         <ng-container [ngTemplateOutlet]="mainButtonTextTemplate()"></ng-container>
@@ -30,6 +30,7 @@
     [toggleable]="false"
     class="rounded-s-none border-s-0"
     aria-haspopup="menu"
+    [id]="menuButtonId"
     [attr.aria-expanded]="menuOpen()"
     [attr.aria-controls]="menuOpen() ? menuId : null"
     [attr.aria-label]="effectiveMenuButtonAriaLabel()"

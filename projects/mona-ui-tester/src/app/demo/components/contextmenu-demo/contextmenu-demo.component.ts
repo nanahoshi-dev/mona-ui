@@ -192,7 +192,7 @@ export class ContextMenuDemoComponent extends AbstractDemoComponent<ContextMenuC
         @let featureData = features();
         <button monaButton class="mr-4" #menuTarget>Context Menu Target</button>
         <mona-contextmenu
-            [ariaLabel]="ariaLabel()"
+            [aria-label]="ariaLabel()"
             (menuClick)="onMenuClick($event, 'mona-contextmenu')"
             [minWidth]="minWidth()"
             [rounded]="rounded()"

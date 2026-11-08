@@ -4,13 +4,14 @@ import { cva } from "class-variance-authority";
 
 export const stepperBaseThemeVariants = cva(
     `
-        relative grid
+        relative
     `,
     {
         variants: {
             orientation: {
-                horizontal: "h-auto w-full",
-                vertical: "h-full w-auto"
+                horizontal: "grid h-auto w-full",
+                // A flex row stretches the step list to the stepper's height.
+                vertical: "flex h-full w-auto"
             }
         },
         defaultVariants: {
@@ -19,22 +20,17 @@ export const stepperBaseThemeVariants = cva(
     }
 );
 
+/** The list is in the flow, so the stepper's box holds the indicators and labels. The track is drawn behind it. */
 export const stepperStepListThemeVariants = cva(
     `
-        absolute z-1 col-span-full flex list-none
+        relative z-1 col-span-full flex list-none
         font-medium
     `,
     {
         variants: {
             orientation: {
-                horizontal: `
-                    w-full flex-row
-                    -translate-y-3
-                `,
-                vertical: `
-                    h-full w-max flex-col
-                    -translate-x-3 rtl:translate-x-3
-                `
+                horizontal: "w-full flex-row",
+                vertical: "w-max flex-col"
             }
         },
         defaultVariants: {
@@ -118,17 +114,18 @@ export const stepperStepLabelThemeVariants = cva("", {
     }
 });
 
+/** Placed by the component, from the first indicator's centre to the last one's. */
 export const stepperTrackThemeVariants = cva(
     `
-        relative grid
+        absolute
         bg-surface-muted text-foreground
         border border-border-subtle
     `,
     {
         variants: {
             orientation: {
-                horizontal: "h-2 w-full",
-                vertical: "h-full w-2"
+                horizontal: "h-2",
+                vertical: "w-2"
             }
         },
         defaultVariants: {

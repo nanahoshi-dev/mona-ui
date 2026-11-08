@@ -1,5 +1,6 @@
 import { Component, effect, forwardRef } from "@angular/core";
-import { PopupMenuItemComponent, PopupMenuOrigin, PopupMenuToken } from "@nanahoshi/mona-ui/popup-menu";
+import { PopupMenuItemComponent } from "@nanahoshi/mona-ui/popup-menu";
+import { PopupMenuOrigin, PopupMenuToken } from "@nanahoshi/mona-ui/internal/popup-menu";
 import {
     ensureDropdownButtonComponentTypes,
     ensureDropdownButtonTemplateTypes

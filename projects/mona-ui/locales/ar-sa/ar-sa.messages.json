@@ -157,6 +157,15 @@
     "comboBox": {
         "clear": "مسح"
     },
+    "command": {
+        "dialogLabel": "قائمة الأوامر",
+        "inputLabel": "البحث في الأوامر",
+        "listLabel": "النتائج",
+        "loading": "جارٍ التحميل",
+        "noResults": "لم يتم العثور على نتائج",
+        "placeholder": "اكتب أمرًا أو ابحث…",
+        "resultsAvailable": "عدد النتائج المتاحة: {count}"
+    },
     "datePicker": {
         "datePicker": "منتقي التاريخ",
         "openCalendar": "فتح التقويم"
@@ -311,6 +320,7 @@
         "filterOperator": "عامل تصفية {column}: {operator}",
         "filterPlaceholder": "تصفية…",
         "group": "مجموعة",
+        "groupOptions": "خيارات مجموعة {column}",
         "loading": "جارٍ التحميل",
         "modified": "تم التعديل",
         "moveAsNext": "نقل كعنصر تالٍ",

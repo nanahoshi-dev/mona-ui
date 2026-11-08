@@ -17,6 +17,8 @@ export class GridNavigationService {
     readonly #lastNonGroupCellKey = signal<string | null>(null);
     /** Whether a cell (not a control inside it) had focus last; only then is lost focus brought back. */
     #cellHasFocus = false;
+    /** Whether the Tab stop is the grid's own pick, which moves to a better cell as cells register. */
+    #defaultTabStop = false;
     /** The cell whose row was scrolled out while it had focus, with the element that had it. */
     #lostFocus: { element: HTMLElement; snapshot: NavigationCellSnapshot } | null = null;
     /** A body row the virtual list is scrolling to; its cell takes focus once it is drawn. */
@@ -267,12 +269,16 @@ export class GridNavigationService {
     }
 
     #ensureFocusedCell(): void {
-        if (this.#getFocusedCell()) {
+        const current = this.#getFocusedCell();
+        if (current && !this.#defaultTabStop) {
             return;
         }
-        const fallback = this.#findFallbackCell(this.#lastFocusedCellSnapshot());
-        if (fallback) {
+        // Until the user picks a cell, the Tab stop follows the best default: header cells register before the body.
+        const snapshot = current ? null : this.#lastFocusedCellSnapshot();
+        const fallback = this.#findFallbackCell(snapshot);
+        if (fallback && fallback.key !== current?.key) {
             this.#setFocusedCell(fallback.key, fallback.value);
+            this.#defaultTabStop = snapshot == null;
         }
     }
 
@@ -314,7 +320,17 @@ export class GridNavigationService {
             }
         }
 
-        return this.#findFirstHeaderCell() ?? this.#findFirstCell();
+        // Tab lands on the data. The body is what scrolls, so its scrolling stays reachable from the keyboard, and
+        // Arrow Up still reaches the headers.
+        return this.#findFirstBodyCell() ?? this.#findFirstHeaderCell() ?? this.#findFirstCell();
+    }
+
+    #findFirstBodyCell(): { key: string; value: NavigationData } | null {
+        return this.#cells()
+            .where(d => d.value.section === "body")
+            .orderBy(d => d.value.rowIndex)
+            .thenBy(d => d.value.colIndex)
+            .firstOrDefault();
     }
 
     #findFirstCell(): { key: string; value: NavigationData } | null {
@@ -701,6 +717,7 @@ export class GridNavigationService {
     }
 
     #setFocusedCell(key: string, data: NavigationData): void {
+        this.#defaultTabStop = false;
         this.#lastFocusedCellKey.set(key);
         this.#lastFocusedCellSnapshot.set(this.#createSnapshot(data));
     }

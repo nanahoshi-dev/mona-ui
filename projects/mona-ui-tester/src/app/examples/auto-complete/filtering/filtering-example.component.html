@@ -1,0 +1,10 @@
+<div class="flex max-w-xs flex-col gap-1">
+    <label monaLabel for="auto-complete-filtering-country">Country</label>
+    <mona-auto-complete
+        inputId="auto-complete-filtering-country"
+        monaDropDownFilterable
+        placeholder="Type a country"
+        [data]="countries"
+        [(value)]="country" />
+    <span aria-live="polite" class="text-sm">Value: {{ country() ?? "none" }}</span>
+</div>

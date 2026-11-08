@@ -1,0 +1,11 @@
+<button #statusButton monaButton type="button">Build status</button>
+
+<mona-tooltip [target]="statusButton">
+    <div class="flex flex-col gap-1">
+        <span class="flex items-center gap-1">
+            <svg lucideCircleCheck aria-hidden="true" [size]="14"></svg>
+            <strong>Passing</strong>
+        </span>
+        <span>Last run 4 minutes ago, 212 tests</span>
+    </div>
+</mona-tooltip>

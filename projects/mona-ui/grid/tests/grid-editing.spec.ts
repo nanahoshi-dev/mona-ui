@@ -25,7 +25,7 @@ interface EditRow {
     imports: [GridColumnComponent, GridCommandColumnComponent, GridComponent, GridEditableDirective],
     template: `
         <mona-grid
-            ariaLabel="Orders"
+            aria-label="Orders"
             [data]="rows()"
             [rowKey]="'id'"
             [pageSize]="50"

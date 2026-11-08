@@ -5,6 +5,7 @@ import { ChartInvalidationReason } from "../../internal/context/chart-registrati
 import type { ChartAxisFormatter } from "../../models/chart-axis.models";
 import type { ChartRadialGridShape } from "../../models/chart-polar.models";
 
+/** Configures the radial numeric dimension (distance from pole) in Polar Axis charts. */
 @Component({
     selector: "mona-chart-radial-axis",
     template: "",

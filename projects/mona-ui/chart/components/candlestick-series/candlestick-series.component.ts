@@ -23,6 +23,10 @@ import type { ChartField } from "../../models/chart.models";
 
 let nextSeriesId = 0;
 
+/**
+ * Renders financial Japanese candlestick series with central high/low wicks, rectangular open/close bodies,
+ * rising/falling/neutral color coding, and solid or hollow rising bodies.
+ */
 @Component({
     selector: "mona-candlestick-series",
     template: "",

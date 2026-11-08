@@ -1,23 +1,29 @@
 import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import type { ToolbarAction } from "./ToolbarOptions";
 
-type ActionType = Extract<ToolbarAction, "transferAllFrom" | "transferAllTo" | "transferFrom" | "transferTo">;
+/** The toolbar actions that move items between list boxes. */
+export type ListBoxTransferAction = Extract<ToolbarAction, "transferAllFrom" | "transferAllTo" | "transferFrom" | "transferTo">;
 
 // `any` by default, so an event annotated without a type argument keeps untyped items.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class ListBoxTransferEvent<T = any> extends PreventableEvent {
-    readonly #action: ActionType;
+    readonly #action: ListBoxTransferAction;
     readonly #selectedItems: T[];
-    public constructor(action: ActionType, selectedItems: Iterable<T>, originalEvent?: Event) {
+    public constructor(action: ListBoxTransferAction, selectedItems: Iterable<T>, originalEvent?: Event) {
         super("listBoxTransfer", originalEvent);
         this.#action = action;
         this.#selectedItems = Array.from(selectedItems);
     }
 
-    public get action(): ActionType {
+    /** Discriminant matching the `ListBoxActionEvent` union. */
+    public get action(): ListBoxTransferAction {
         return this.#action;
     }
 
+    /**
+     * The items to transfer, in list order: the source's selection, or all of the source's items for the "All"
+     * variants. See Which list box's `actionClick` fires.
+     */
     public get selectedItems(): T[] {
         return this.#selectedItems;
     }

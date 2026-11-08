@@ -4,15 +4,12 @@ import { LucideCheck, LucideOctagonAlert, LucidePencil, LucideTrash2, LucideX } 
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { DialogService } from "@nanahoshi/mona-ui/dialog";
 import { TooltipComponent } from "@nanahoshi/mona-ui/tooltip";
-import { take } from "rxjs";
 import { v4 } from "uuid";
 import { Column } from "../../models/Column";
 import { Row } from "../../models/Row";
 import { GridNavigationService } from "../../services/grid-navigation.service";
+import { removeGridRow } from "../../services/grid-row-removal";
 import { GridService } from "../../services/grid.service";
-
-/** The delete dialog's confirming action, told apart by this id rather than by its (translated) text. */
-const DELETE_ACTION = "delete";
 
 @Component({
     selector: "mona-grid-command-cell",
@@ -116,27 +113,14 @@ export class GridCommandCellComponent {
         if (row == null) {
             return;
         }
-        if (!this.column().removeConfirmation) {
-            this.#removeRow(row, event);
-            return;
-        }
-        const dialogRef = this.#dialogService.show({
-            actions: [
-                { data: DELETE_ACTION, look: "error", text: this.messages().delete },
-                { look: "default", text: this.messages().cancel }
-            ],
-            closeOnEscape: true,
-            text: this.messages().deleteRowConfirmation(this.gridService.getRowNumber(row)),
-            title: this.messages().deleteRowTitle,
-            type: "warning",
-            modal: true,
-            width: 360
-        });
-        dialogRef.result.pipe(take(1)).subscribe(result => {
-            if (!result.viaClose && result.action.data === DELETE_ACTION) {
-                this.#removeRow(row, event);
-            }
-        });
+        removeGridRow(
+            {
+                dialogService: this.#dialogService,
+                gridNavigationService: this.#gridNavigationService,
+                gridService: this.gridService
+            },
+            { confirm: this.column().removeConfirmation, element: this.#elementRef.nativeElement, event, row }
+        );
     }
 
     protected save(event?: Event): void {
@@ -160,13 +144,5 @@ export class GridCommandCellComponent {
 
     #focusCell(): void {
         (this.#elementRef.nativeElement.closest("td") as HTMLElement | null)?.focus();
-    }
-
-    /** The row may leave the grid: focus its cell first, so focus moves on to the nearest row's. */
-    #removeRow(row: Row, event?: Event): void {
-        this.#focusCell();
-        if (this.gridService.removeRow(row, event)) {
-            this.#gridNavigationService.refocusAfterRender();
-        }
     }
 }

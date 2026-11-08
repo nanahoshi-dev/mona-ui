@@ -1,0 +1,7 @@
+<div class="flex flex-wrap items-center gap-3">
+    <mona-dropdown-button text="Export" [loading]="exporting()" (menuItemClick)="export($event)">
+        <mona-dropdown-button-item label="CSV" />
+        <mona-dropdown-button-item label="PDF" />
+    </mona-dropdown-button>
+    <span aria-live="polite" class="text-sm">{{ status() }}</span>
+</div>

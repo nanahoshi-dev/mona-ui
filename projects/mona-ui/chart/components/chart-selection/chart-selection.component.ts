@@ -3,6 +3,7 @@ import { CHART_CONTEXT } from "../../internal/context/chart-context.token";
 import { ChartInvalidationReason } from "../../internal/context/chart-registration-context";
 import type { ChartSelectionChangeEvent, ChartSelectionMode } from "../../models/chart-selection.models";
 
+/** Lets users select marks with the pointer and keyboard, and holds the selected mark IDs. */
 @Component({
     selector: "mona-chart-selection",
     template: "",

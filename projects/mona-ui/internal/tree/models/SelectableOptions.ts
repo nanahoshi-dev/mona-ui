@@ -10,7 +10,7 @@ export type SelectableOptions = {
     childrenOnly: boolean;
 } & (SingleSelectionConfig | MultipleSelectionConfig);
 
-interface SingleSelectionConfig {
+export interface SingleSelectionConfig {
     /**
      * @description Allows only one item to be selected at a time.
      */
@@ -22,7 +22,7 @@ interface SingleSelectionConfig {
     toggleable?: boolean;
 }
 
-interface MultipleSelectionConfig {
+export interface MultipleSelectionConfig {
     /**
      * @description Allows multiple items to be selected simultaneously.
      */

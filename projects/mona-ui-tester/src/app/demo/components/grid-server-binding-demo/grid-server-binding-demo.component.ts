@@ -48,7 +48,7 @@ async function requestPage(state: GridDataState) {
         <h3 class="text-lg font-medium">Server paging, sorting, and filtering</h3>
         <p>The mock server owns all 137 users; the grid receives only the requested page.</p>
         <mona-grid
-            ariaLabel="Users from the server"
+            aria-label="Users from the server"
             class="h-96 w-full"
             [data]="result().data"
             [pageSize]="state().take"

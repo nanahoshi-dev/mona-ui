@@ -185,7 +185,9 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
         return multiSelectIndicatorContainerThemeVariants({ size });
     });
     protected readonly invalidState = computed(
-        () => this.touched() && (this.invalid() || (this.required() && none(this.value())))
+        () =>
+            this.touched() &&
+            (this.invalid() || (this.required() && none((this.value() as Iterable<TValue> | null) ?? [])))
     );
     protected readonly itemContainerClass = computed(() => {
         const rounded = this.rounded();
@@ -243,7 +245,7 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
 
     /**
      * @description Accessible name for the multi select. Describe what it represents.
-     * Falls back to {@link placeholder} when neither this nor {@link ariaLabelledBy} is set.
+     * Falls back to {@link placeholder} when neither this nor `aria-labelledby` is set.
      * @default ""
      */
     public readonly ariaLabel = input("", { alias: "aria-label" });
@@ -319,8 +321,8 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
     public readonly opened = output();
 
     /**
-     * @description Text shown when nothing is selected. It also names the multi select when neither {@link ariaLabel}
-     * nor {@link ariaLabelledBy} is set.
+     * @description Text shown when nothing is selected. It also names the multi select when neither `aria-label`
+     * nor `aria-labelledby` is set.
      * @default ""
      */
     public readonly placeholder = input("");
@@ -450,7 +452,9 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
             this.valuePrimitive();
             untracked(() => {
                 this.#listService.setValueField(valueField ?? "");
-                this.synchronizeSelection(value);
+                // NgModel writes null before its first value, and so does a reset form control. Both mean nothing
+                // is selected.
+                this.synchronizeSelection((value as Iterable<TValue> | null) ?? []);
             });
         });
         effect(() => {

@@ -36,6 +36,11 @@ interface StageIdentityInfo {
     formattedCategory: string;
 }
 
+/**
+ * Renders conversion pipeline and sales funnel visualizations using connected trapezoidal stages. Supports vertical and
+ * horizontal layouts, custom stage colors, inscribed DOM labels, widening stages (>100% conversion), and dynamic stage
+ * visibility toggling.
+ */
 @Component({
     selector: "mona-funnel-series",
     template: "",
@@ -297,6 +302,7 @@ export class FunnelSeriesComponent implements OnInit {
         });
     }
 
+    /** Whether the stage with this id is visible. */
     public isDatumVisible(stageId: string): boolean {
         return !this.#hidden.has(stageId);
     }
@@ -347,11 +353,13 @@ export class FunnelSeriesComponent implements OnInit {
         });
     }
 
+    /** Shows every stage again. */
     public resetVisibility(): void {
         this.#hidden.reset();
         this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
     }
 
+    /** Shows or hides the stage with this id. */
     public setDatumVisibility(stageId: string, visible: boolean): void {
         const currentlyVisible = this.isDatumVisible(stageId);
         if (currentlyVisible === visible) {
@@ -376,6 +384,7 @@ export class FunnelSeriesComponent implements OnInit {
         this.#chartContext?.invalidate(ChartInvalidationReason.Visibility);
     }
 
+    /** Shows or hides the stage with this id, and returns whether it's now visible. */
     public toggleDatumVisibility(stageId: string): boolean {
         const next = !this.isDatumVisible(stageId);
         this.setDatumVisibility(stageId, next);

@@ -58,6 +58,8 @@ import {
     ],
     templateUrl: "./tab-list.component.html",
     host: {
+        "[attr.aria-label]": "null",
+        "[attr.aria-labelledby]": "null",
         "[class]": "baseClass()",
         "(focusin)": "onFocusIn($event)",
         "(focusout)": "onFocusOut($event)",
@@ -103,8 +105,8 @@ export class TabListComponent implements TabListVariantInput {
     protected readonly tabElements = viewChildren<ElementRef<HTMLElement>>("tabElement");
     protected readonly tabListElement = viewChild.required<ElementRef<HTMLUListElement>>("tabListElement");
 
-    public readonly ariaLabel = input("");
-    public readonly ariaLabelledBy = input("");
+    public readonly ariaLabel = input("", { alias: "aria-label" });
+    public readonly ariaLabelledBy = input("", { alias: "aria-labelledby" });
     public readonly closable = input(false);
     public readonly disabled = input(false);
 

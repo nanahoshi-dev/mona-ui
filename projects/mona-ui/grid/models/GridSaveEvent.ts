@@ -4,10 +4,11 @@ import type { GridEditSession } from "./GridEditSession";
 
 export type GridSaveOperation = GridEditOperation;
 
-export class GridSaveEvent extends PreventableEvent {
-    readonly #options: GridSaveEventOptions;
+/** `T` is the row type, which a typed `schema` or `newRowFactory` on `monaGridEditable` sets. */
+export class GridSaveEvent<T extends object = Record<PropertyKey, unknown>> extends PreventableEvent {
+    readonly #options: GridSaveEventOptions<T>;
 
-    public constructor(options: GridSaveEventOptions) {
+    public constructor(options: GridSaveEventOptions<T>) {
         super("gridSave", options.originalEvent);
         this.#options = options;
     }
@@ -16,11 +17,11 @@ export class GridSaveEvent extends PreventableEvent {
         return this.#options.operation;
     }
 
-    public get originalRowData(): Record<PropertyKey, unknown> | null {
+    public get originalRowData(): T | null {
         return this.#options.originalRowData ?? null;
     }
 
-    public get rowData(): Record<PropertyKey, unknown> {
+    public get rowData(): T {
         return this.#options.rowData;
     }
 
@@ -29,10 +30,10 @@ export class GridSaveEvent extends PreventableEvent {
     }
 }
 
-export interface GridSaveEventOptions {
+export interface GridSaveEventOptions<T extends object = Record<PropertyKey, unknown>> {
     operation: GridSaveOperation;
     originalEvent?: Event;
-    originalRowData?: Record<PropertyKey, unknown> | null;
-    rowData: Record<PropertyKey, unknown>;
+    originalRowData?: T | null;
+    rowData: T;
     session: GridEditSession;
 }

@@ -31,6 +31,8 @@ export interface MonaGridMessages {
     readonly filterPlaceholder: string;
     /** The name of a group indent column's header. */
     readonly group: string;
+    /** The name of the button on a group chip that opens its menu. */
+    groupOptions(column: string): string;
     /** Shown while the grid body loads. */
     readonly loading: string;
     readonly modified: string;
