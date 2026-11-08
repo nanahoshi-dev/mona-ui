@@ -178,7 +178,7 @@ These three directives are independent — applying more than one to the same `m
 
 ## Forms Integration
 
-`DropdownListComponent` implements the signal forms `FormValueControl<TValue | null>` interface (`TValue` defaults to `TData`, or the `valueField` type when `valuePrimitive` is `true`) and synchronizes with a field bound through `[formField]` (see [Signal Forms integration](#signal-forms-integration)). It does not implement `ControlValueAccessor` — there is no `NG_VALUE_ACCESSOR` provider and no `writeValue`/`registerOnChange`/`registerOnTouched` methods — so it cannot be used with `[(ngModel)]`, `[formControl]`, or `formControlName`.
+`DropdownListComponent` implements the signal forms `FormValueControl<TValue | null>` interface (`TValue` defaults to `TData`, or the `valueField` type when `valuePrimitive` is `true`) and synchronizes with a field bound through `[formField]` (see [Signal Forms integration](#signal-forms-integration)). It has no `ControlValueAccessor`, but `[(ngModel)]`, `[formControl]` and `formControlName` work too, because Angular binds a control's `value` and `touch` directly when it has no accessor. Prefer `[formField]`, which also hands it `disabled`, `readonly`, `required` and validation state.
 
 ## Accessibility
 
@@ -209,15 +209,21 @@ The host element is the only Tab stop; DOM focus does not move into the popup's 
 | `aria-expanded`         | Always                                                                                           | Reflects the popup's open state                   |
 | `aria-activedescendant` | While an option is highlighted                                                                   | The highlighted option's element id               |
 | `aria-controls`         | Always                                                                                           | The popup listbox's element id                    |
-| `aria-label`            | The `ariaLabel` input is set, or as a fallback to `placeholder` when `ariaLabelledBy` is unset   | The `ariaLabel` value, or the `placeholder` value |
-| `aria-labelledby`       | The `ariaLabelledBy` input is set                                                                | The `ariaLabelledBy` value                        |
+| `aria-label`            | The `aria-label` input is set, or as a fallback to `placeholder` when `aria-labelledby` is unset | The `aria-label` value, or the `placeholder` value |
+| `aria-labelledby`       | The `aria-labelledby` input is set                                                               | The `aria-labelledby` value                        |
+| `aria-describedby`      | The `aria-describedby` input is set                                                              | The `aria-describedby` value                       |
 | `aria-disabled`         | `disabled` is `true`                                                                             | `"true"`                                          |
 | `aria-readonly`         | `readonly` is `true`                                                                             | `"true"`                                          |
 | `aria-required`         | `required` is `true`                                                                             | `"true"`                                          |
 | `aria-invalid`          | `invalid` is `true`, or `required` is `true` and the control is `touched` with no value selected | `"true"`                                          |
 | `aria-busy`             | `loading` is `true`                                                                              | `"true"`                                          |
 
-Provide `ariaLabel` or `ariaLabelledBy` when `placeholder` does not already identify the control's purpose — `placeholder` only supplies a fallback accessible name, and disappears once a value is selected.
+Name the dropdown list with `aria-labelledby` pointing at a visible label's `id`, or with `aria-label`. The `placeholder` only supplies a fallback name, and it disappears from view once a value is selected. A label can't name it in any other way: the host is a `role="combobox"` element, not a native input, so wrapping it in `<mona-label>` doesn't name it, and a string `for` has nothing to point at. `[for]` bound to its template reference makes a click on the label focus it, but doesn't name it. That's why the examples use both:
+
+```html
+<label id="shipping-label" monaLabel [for]="shippingList">Shipping method</label>
+<mona-dropdown-list #shippingList aria-labelledby="shipping-label" [data]="methods"></mona-dropdown-list>
+```
 
 The control also renders a visually hidden live region that announces the highlighted or selected option's text and position to screen reader users as the consumer navigates the popup.
 
@@ -230,7 +236,7 @@ The control also renders a visually hidden live region that announces the highli
 - [x] Staged-vs-committed value behavior verified against dropdown-list.component.ts's #navigatedValue linkedSignal, setArrowKeyNavigationSubscription, and setPopupCloseSubscriptions
 - [x] Single Tab-stop focus behavior verified against dropdown-list-popup-handler.directive.ts's keydown listener bound to the host element (not to popup items) plus list-item.directive.ts's rovingTabIndex (roving -1 on all items since the combobox never delegates DOM focus into the popup)
 - [x] ARIA attributes verified against dropdown-list.component.ts's host object bindings
-- [x] Form integration verified: DropdownListComponent implements FormValueControl<TValue | null> (dropdown-list.component.ts class declaration); no NG_VALUE_ACCESSOR provider or writeValue/registerOnChange/registerOnTouched methods found
+- [x] Form integration verified: DropdownListComponent implements FormValueControl<TValue | null> (dropdown-list.component.ts class declaration); no NG_VALUE_ACCESSOR provider or writeValue/registerOnChange/registerOnTouched methods found; ngModel and formControl still work without one, checked by tests/forms-interop.spec.ts
 - [x] FilterableOptions, GroupableOptions, VirtualScrollOptions, PopupCloseEvent, PreventableEvent, FilterChangeEvent confirmed exported via lib/index.ts; DropdownFieldSelectorType, DropdownFieldPredicateType, ListSizeInputType confirmed NOT exported
 - [x] hostDirectives (DropdownDataHandlerDirective, DropdownListPopupHandlerDirective) confirmed to expose no public inputs/outputs of their own — omitted from API tables
 - [x] No internal-only symbols (ListService, DropdownService, DropdownListService, monaDropdownLiveRegion, indicator-icon presets, Tailwind class names) documented as public API

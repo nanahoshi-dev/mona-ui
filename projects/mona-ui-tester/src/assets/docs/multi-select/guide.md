@@ -182,7 +182,7 @@ Set `autoClose` to `true` to close the popup after each selection instead of kee
 
 ## Forms Integration
 
-`MultiSelectComponent` implements the signal forms `FormValueControl<Iterable<TValue>>` interface (`TValue` defaults to `TData`, or the `valueField` type when `valuePrimitive` is `true`) and synchronizes with a field bound through `[formField]` (see [Signal Forms integration](#signal-forms-integration)). It has no `ControlValueAccessor`, but `[(ngModel)]`, `[formControl]` and `formControlName` work too, because Angular binds a control's `value` and `touch` directly when it has no accessor. A `null` value, which NgModel writes first and a cleared form control holds, means nothing is selected.
+`MultiSelectComponent` implements the signal forms `FormValueControl<Iterable<TValue>>` interface (`TValue` defaults to `TData`, or the `valueField` type when `valuePrimitive` is `true`) and synchronizes with a field bound through `[formField]` (see [Signal Forms integration](#signal-forms-integration)). It has no `ControlValueAccessor`, but `[(ngModel)]`, `[formControl]` and `formControlName` work too, because Angular binds a control's `value` and `touch` directly when it has no accessor. Prefer `[formField]`, which also hands it `disabled`, `readonly`, `required` and validation state. A `null` value, which NgModel writes first and a cleared form control holds, means nothing is selected.
 
 ## Accessibility
 

@@ -2,9 +2,12 @@ import { Component, signal } from "@angular/core";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { By } from "@angular/platform-browser";
+import { AutoCompleteComponent } from "@nanahoshi/mona-ui/auto-complete";
 import { CalendarComponent } from "@nanahoshi/mona-ui/calendar";
 import { CheckBoxComponent } from "@nanahoshi/mona-ui/check-box";
 import { ColorPaletteComponent } from "@nanahoshi/mona-ui/color-palette";
+import { ComboBoxComponent } from "@nanahoshi/mona-ui/combo-box";
+import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
 import { MultiSelectComponent } from "@nanahoshi/mona-ui/multi-select";
 import { DecimalTextBoxComponent, NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
 import { OtpInputComponent } from "@nanahoshi/mona-ui/otp-input";
@@ -22,10 +25,13 @@ import { describe, expect, it } from "vitest";
  */
 @Component({
     imports: [
+        AutoCompleteComponent,
         CalendarComponent,
         CheckBoxComponent,
         ColorPaletteComponent,
+        ComboBoxComponent,
         DecimalTextBoxComponent,
+        DropdownListComponent,
         FormsModule,
         MultiSelectComponent,
         NumericTextBoxComponent,
@@ -65,6 +71,12 @@ import { describe, expect, it } from "vitest";
         <mona-calendar [ngModel]="date.value"></mona-calendar>
         <mona-multi-select aria-label="Control" [data]="items" [formControl]="list"></mona-multi-select>
         <mona-multi-select aria-label="Model" [data]="items" [ngModel]="list.value"></mona-multi-select>
+        <mona-dropdown-list aria-label="Control" [data]="items" [formControl]="item"></mona-dropdown-list>
+        <mona-dropdown-list aria-label="Model" [data]="items" [ngModel]="item.value"></mona-dropdown-list>
+        <mona-combo-box aria-label="Control" [data]="items" [formControl]="item"></mona-combo-box>
+        <mona-combo-box aria-label="Model" [data]="items" [ngModel]="item.value"></mona-combo-box>
+        <mona-auto-complete aria-label="Control" [data]="items" [formControl]="item"></mona-auto-complete>
+        <mona-auto-complete aria-label="Model" [data]="items" [ngModel]="item.value"></mona-auto-complete>
     `
 })
 class InteropHostComponent {
@@ -73,6 +85,7 @@ class InteropHostComponent {
     public readonly date = new FormControl(new Date(2026, 0, 15));
     public readonly flag = new FormControl(true);
     public readonly flagModel = signal(true);
+    public readonly item = new FormControl("b");
     public readonly items = ["a", "b"];
     public readonly list = new FormControl(["a"]);
     public readonly options = [{ label: "One", value: "12" }];
@@ -106,7 +119,10 @@ describe("Form directives on controls without an accessor", () => {
         ["mona-numeric-text-box", NumericTextBoxComponent, "value", 3],
         ["mona-decimal-text-box", DecimalTextBoxComponent, "value", "12"],
         ["mona-calendar", CalendarComponent, "value", new Date(2026, 0, 15)],
-        ["mona-multi-select", MultiSelectComponent, "value", ["a"]]
+        ["mona-multi-select", MultiSelectComponent, "value", ["a"]],
+        ["mona-dropdown-list", DropdownListComponent, "value", "b"],
+        ["mona-combo-box", ComboBoxComponent, "value", "b"],
+        ["mona-auto-complete", AutoCompleteComponent, "value", "b"]
     ] as const)("hands %s its value through both", async (_selector, type, member, expected) => {
         const fixture = await createHost();
         const instances = fixture.debugElement.queryAll(By.directive(type)).map(element => element.componentInstance);
@@ -150,6 +166,17 @@ describe("Form directives on controls without an accessor", () => {
         await settle(fixture);
 
         expect(fixture.componentInstance.flag.value).toBe(true);
+    });
+
+    it("shows a dropdown list's selection from the form control and reports a new one back", async () => {
+        const fixture = await createHost();
+        const [dropdown] = fixture.debugElement.queryAll(By.directive(DropdownListComponent));
+        expect((dropdown.nativeElement as HTMLElement).textContent).toContain("b");
+
+        dropdown.componentInstance.setValue("a");
+        await settle(fixture);
+
+        expect(fixture.componentInstance.item.value).toBe("a");
     });
 
     it("marks the form control touched when the control reports it", async () => {

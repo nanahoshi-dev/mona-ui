@@ -163,7 +163,7 @@ Blurring the input while the popup is closed commits the typed text as `value`, 
 
 ## Forms Integration
 
-`AutoCompleteComponent` implements the signal forms `FormValueControl<string | null>` interface and synchronizes with a field bound through `[formField]` (see [Signal Forms integration](#signal-forms-integration)). It does not implement `ControlValueAccessor` — there is no `NG_VALUE_ACCESSOR` provider and no `writeValue`/`registerOnChange`/`registerOnTouched` methods — so it cannot be used with `[(ngModel)]`, `[formControl]`, or `formControlName`.
+`AutoCompleteComponent` implements the signal forms `FormValueControl<string | null>` interface and synchronizes with a field bound through `[formField]` (see [Signal Forms integration](#signal-forms-integration)). It has no `ControlValueAccessor`, but `[(ngModel)]`, `[formControl]` and `formControlName` work too, because Angular binds a control's `value` and `touch` directly when it has no accessor. Prefer `[formField]`, which also hands it `disabled`, `readonly`, `required` and validation state.
 
 ## Accessibility
 
@@ -200,11 +200,11 @@ The host element itself is not a Tab stop (`tabindex="-1"`); the inner `<input>`
 | Input        | `aria-busy`             | Always                                                                                         | Reflects the `loading` input                      |
 | Input        | `aria-activedescendant` | While an option is highlighted                                                                 | The highlighted option's element id               |
 | Input        | `aria-invalid`          | `invalid` is `true`, or `required` is `true` and the control is `touched` with no value        | `"true"`                                          |
-| Input        | `aria-label`            | The `ariaLabel` input is set, or as a fallback to `placeholder` when `ariaLabelledBy` is unset | The `ariaLabel` value, or the `placeholder` value |
-| Input        | `aria-labelledby`       | The `ariaLabelledBy` input is set                                                              | The `ariaLabelledBy` value                        |
-| Input        | `aria-describedby`      | The `ariaDescribedBy` input is set                                                             | The `ariaDescribedBy` value                       |
+| Input        | `aria-label`            | The `aria-label` input is set, or as a fallback to `placeholder` when `aria-labelledby` is unset | The `aria-label` value, or the `placeholder` value |
+| Input        | `aria-labelledby`       | The `aria-labelledby` input is set                                                             | The `aria-labelledby` value                        |
+| Input        | `aria-describedby`      | The `aria-describedby` input is set                                                            | The `aria-describedby` value                       |
 
-Provide `ariaLabel` or `ariaLabelledBy` when `placeholder` does not already identify the input's purpose. Provide `ariaDescribedBy` to associate error messages or help text with the input.
+Provide `aria-label` or `aria-labelledby` when `placeholder` does not already identify the input's purpose, or point a `<label for>` or `<mona-label for>` at `inputId`. Provide `aria-describedby` to associate error messages or help text with the input.
 
 The control also renders a visually hidden live region that announces the highlighted option's text and position to screen reader users as the consumer types.
 
@@ -219,7 +219,7 @@ The control also renders a visually hidden live region that announces the highli
 - [x] "Matching without monaDropDownFilterable" verified against list.service.ts's viewItems (filters only when filterText is non-empty) vs. getMatchingFilteredItem (always runs, using filterableOptions.enabled ? configured operator/caseSensitivity : "startsWith"/case-insensitive) and auto-complete.component.ts's setAutoCompleteValueChangeSubscription (setFilter only called when isFilteringEnabled())
 - [x] Focus behavior verified: host has [attr.tabindex]="-1"; focus() method explicitly queries and focuses the inner <input>
 - [x] ARIA attributes split by element (host div vs. inner input) verified against auto-complete.component.ts's host object and auto-complete.component.html's [attr.*] bindings on the <input>
-- [x] Form integration verified: AutoCompleteComponent implements FormValueControl<string | null>; no NG_VALUE_ACCESSOR provider or writeValue/registerOnChange/registerOnTouched methods found
+- [x] Form integration verified: AutoCompleteComponent implements FormValueControl<string | null>; no NG_VALUE_ACCESSOR provider or writeValue/registerOnChange/registerOnTouched methods found; ngModel and formControl still work without one, checked by tests/forms-interop.spec.ts
 - [x] FilterableOptions, GroupableOptions, VirtualScrollOptions, PopupCloseEvent, PreventableEvent, FilterChangeEvent confirmed exported via lib/index.ts; DropdownFieldSelectorType, DropdownFieldPredicateType, ListSizeInputType confirmed NOT exported; only AutoCompleteComponent itself (not a value-template directive, since none exists) is exported for this component family
 - [x] No internal-only symbols (ListService, DropdownService, monaDropdownLiveRegion, indicator-icon presets, Tailwind class names, data-disabled/data-invalid attributes) documented as public API
 -->
