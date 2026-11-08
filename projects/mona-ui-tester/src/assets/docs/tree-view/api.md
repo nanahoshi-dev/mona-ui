@@ -184,34 +184,6 @@ the data item is `any` in templates.
 | `$implicit` | `T` | The node's data item (`let-dataItem`). |
 | `element` | `HTMLElement` | The node's element (`let-element="element"`). |
 
-### `TreeNode`
-
-A node of a tree, wrapping its data item.
-
-**Type parameters:** `T`
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `checked` (read-only) | `WritableSignal<boolean>` | Whether the node is checked. The tree keeps it in step with the checked keys. |
-| `children` (read-only) | `WritableSignal<ImmutableSet<TreeNode<T>>>` | The node's child nodes, in display order. |
-| `childrenLoaded` | `boolean` | Whether children from an asynchronous children selector have been loaded. Loaded children are cached, so collapsing and re-expanding the node does not request them again. |
-| `data` (read-only) | `T` | The data item this node was created from. |
-| `index` | `string` | The node's position in the tree as dot-separated zero-based indices from the root, such as `"0.2.1"` for the second child of the third child of the first root node. |
-| `loadFailed` (read-only) | `WritableSignal<boolean>` | Whether the last load of this node's children from an asynchronous children selector failed. |
-| `loading` (read-only) | `WritableSignal<boolean>` | Whether the node's children are being loaded from an asynchronous children selector. |
-| `nodeItem` (read-only) | `NodeItem<T>` | A plain snapshot of the node (its data, uid and whether it has children), as the tree view's events carry it. |
-| `parent` | `TreeNode<T> \| null` | The node's parent node, or `null` for a root node. |
-| `uid` (read-only) | `string` | A unique id generated for the node when it is created. |
-
-#### Methods
-
-| Signature |
-| --- |
-| `clone(): TreeNode<T>` |
-| `isDescendantOf(node: TreeNode<T>): boolean` |
-
 ### `NodeCheckEvent`
 
 **Type parameters:** `T`  
@@ -294,6 +266,21 @@ A request to move a node: a drop, or a keyboard move (Ctrl+Shift+Arrow), whose o
 | Name | Type |
 | --- | --- |
 | `nodeItem` (read-only) | `NodeItem<T>` |
+
+### `TreeNode`
+
+A node of a tree, wrapping its data item. Read `data`, `uid` and `nodeItem`; the tree keeps the rest, and writing to it
+would put the node out of step with the tree.
+
+**Type parameters:** `T`
+
+#### Properties
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `data` (read-only) | `T` | The data item this node was created from. |
+| `nodeItem` (read-only) | `NodeItem<T>` | A plain snapshot of the node (its data, uid and whether it has children), as the tree view's events carry it. |
+| `uid` (read-only) | `string` | A unique id generated for the node when it is created. |
 
 ### `moveFlatTreeNode`
 

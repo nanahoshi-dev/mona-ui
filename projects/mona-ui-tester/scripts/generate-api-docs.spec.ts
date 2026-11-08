@@ -104,6 +104,19 @@ describe("readEntryPoint", () => {
         expect(symbol.methods?.map(method => method.signature)).toEqual(["refresh(): void"]);
     });
 
+    it("leaves out what is marked hidden, as it does what is internal", () => {
+        const [symbol] = readSource(`
+            export class DemoRef {
+                /** Shown. */
+                public readonly id = "a";
+                /** @hidden Shared with other entry points. */
+                public readonly plumbing = "b";
+            }
+        `);
+
+        expect(symbol.properties?.map(property => property.name)).toEqual(["id"]);
+    });
+
     it("treats only documented members of a component as API", () => {
         const [symbol] = readSource(`
             @Directive({ selector: "[monaDemo]" })

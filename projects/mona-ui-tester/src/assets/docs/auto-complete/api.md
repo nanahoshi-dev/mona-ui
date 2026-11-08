@@ -175,34 +175,6 @@ From `@nanahoshi/mona-ui/dropdowns`.
 
 **Selector:** `ng-template[monaDropdownSuffixTemplate]`
 
-### `DropdownService`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `beforeKeydown$` (read-only) | `Subject<PreventableEvent<KeyboardEvent>>` | Every key the dropdown's host receives (outside IME composition), before the dropdown handles it. Call `preventDefault()` on the event to skip the built-in handling. |
-| `beforeNavigate$` (read-only) | `Subject<PreventableEvent<KeyboardEvent>>` | ArrowDown or ArrowUp on the host, before the dropdown opens, closes or moves through the list. Call `preventDefault()` on the event to skip the built-in handling. |
-| `focusCanReturn` (read-only) | `WritableSignal<boolean>` | Set when the popup finishes closing: whether focus may return to the dropdown. It is `false` when the user moved focus outside the dropdown and its popup first, for example by clicking another field or pressing Tab. Read it from `popupCloseComplete$` before calling `focus()`. |
-| `keydown$` (read-only) | `Subject<KeyboardEvent>` | Keys the dropdown has no built-in handling for, and Enter before it toggles the popup. Calling `preventDefault()` on an Enter key stops the toggle. |
-| `popupCloseComplete$` (read-only) | `Subject<PopupCloseEvent<unknown>>` | Emits when the popup has closed and its leave animation has finished, with the close event. By then `popupRef` is `null` and `focusCanReturn` is set. |
-| `popupCloseStart$` (read-only) | `Subject<PopupCloseEvent<unknown>>` | Emits when the popup's close sequence starts, before its leave animation, with the close event. |
-| `popupOpenComplete$` (read-only) | `Subject<void>` | Emits on the next task after the popup is created, together with the host's `opened` event. |
-| `popupRef` (read-only) | `WritableSignal<PopupRef \| null>` | The open popup, or `null` while it is closed. |
-| `popupTemplate` (read-only) | `WritableSignal<TemplateRef<unknown> \| null>` | The template rendered as the popup's content. Each dropdown component sets it to its own popup template. |
-| `restoreFocus` (read-only) | `WritableSignal<boolean \| "auto">` | Whether focus returns to the dropdown when the popup closes, passed to the popup as its `restoreFocus` setting. The auto-complete sets it to `false`. |
-| `touch$` (read-only) | `Subject<void>` | Not emitted or read anywhere in the library. |
-| `triggerPopupOpen$` (read-only) | `Subject<Partial<PopupSettings<unknown, void>>>` | Opens the popup with the given settings when it is closed. Does nothing while the host is disabled or read-only, or when the `open` event is prevented. |
-| `triggerPopupToggle$` (read-only) | `Subject<Partial<PopupSettings<unknown, void>>>` | Closes the popup when it is open, and otherwise opens it as `triggerPopupOpen$` does. |
-
-#### Methods
-
-| Signature |
-| --- |
-| `getDefaultPositions(): ConnectionPositionPair[]` |
-
 ### `DropdownListService`
 
 From `@nanahoshi/mona-ui/dropdowns`.
@@ -371,4 +343,4 @@ From `@nanahoshi/mona-ui/common`.
 | `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
 | `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
 
-**Documented elsewhere:** [`FilterableOptions`](/components/grid), [`GroupableOptions`](/components/grid), [`PopupCloseEvent`](/components/popup), [`PopupRef`](/components/popup), [`PopupSettings`](/components/popup), [`VirtualScrollOptions`](/components/list-view)
+**Documented elsewhere:** [`FilterableOptions`](/components/grid), [`GroupableOptions`](/components/grid), [`PopupCloseEvent`](/components/popup), [`VirtualScrollOptions`](/components/list-view)

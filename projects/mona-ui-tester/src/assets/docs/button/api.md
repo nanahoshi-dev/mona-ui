@@ -40,32 +40,6 @@ Everything below is imported from `@nanahoshi/mona-ui/button`.
 | `effectiveDisabled` (read-only) | `Signal<boolean>` | Whether the button is disabled, by its own input or its group's. A dropdown or split button reads this to close its menu. |
 | `effectiveToggleable` (read-only) | `Signal<boolean>` | Whether a click toggles the button: buttons in a group do unless `toggleable` is `false`. The group reads this to know which buttons take part in its selection. |
 
-### `ButtonService`
-
-Coordinates a `mona-button-group` with its buttons: the group publishes its look, size, rounding, disabled state
-and members here, and buttons report clicks and receive selection changes through it. It is public so the
-button-group entry point can provide it; applications don't need to use it directly.
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `buttonClick$` (read-only) | `Subject<[ButtonDirective, boolean]>` | A click on a toggleable member, with the member and whether it was selected before the click. The group answers it by applying its selection rules through `buttonSelect$`. |
-| `buttonSelect$` (read-only) | `Subject<[ButtonDirective, boolean]>` | A selection change the group applies to a member: the member and whether it is now selected. |
-| `groupDisabled` (read-only) | `WritableSignal<boolean>` | Whether the group is disabled. Members are disabled while it is `true`, whatever their own `disabled` input. |
-| `groupLook` (read-only) | `WritableSignal<"default" \| "primary" \| "success" \| "error" \| "warning" \| "info" \| "outline" \| "secondary" \| "ghost" \| "link" \| "clear" \| null \| undefined>` | The group's `look`, which members use in place of their own while it is set. |
-| `groupReadonly` (read-only) | `WritableSignal<boolean>` | Whether the group is read-only. Toggleable members then report `aria-disabled` and keep their selection. |
-| `groupRounded` (read-only) | `WritableSignal<"none" \| "small" \| "medium" \| "large" \| "full" \| null \| undefined>` | The group's `rounded`, which members use in place of their own while it is set. |
-| `groupSize` (read-only) | `WritableSignal<"small" \| "medium" \| "large" \| null \| undefined>` | The group's `size`, which members use in place of their own while it is set. |
-| `memberClick$` (read-only) | `Subject<[ButtonDirective, HTMLButtonElement]>` | Every click on a member, toggleable or not, reported after the group has applied its selection. |
-| `members` (read-only) | `Signal<readonly ButtonDirective[]>` | The buttons that belong to the group. Only these follow the group's look, size, rounding, disabled state and selection; other buttons that can inject this service ignore it. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `setMembers(members: Signal<readonly ButtonDirective[]>): void` | Sets the source of the group's members, such as the group's `contentChildren(ButtonDirective)` query. |
-
 ### Types
 
 #### `BUTTON_GROUP_MEMBER`

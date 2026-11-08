@@ -548,11 +548,9 @@ grid scrolls horizontally.
 | --- | --- | --- |
 | `calculatedWidth` (read-only) | `number \| null` | The column's currently rendered width. |
 | `columnSortDirection` (read-only) | `SortDirection \| null` | The direction the grid is currently sorted by this column, or `null` when it isn't. |
-| `configuredHidden` (read-only) | `boolean` | The column's `hidden` input as set. `hidden` follows it whenever the input changes, and can differ from it after the user or saved state hides or shows the column. |
 | `filtered` (read-only) | `boolean` | Whether a filter is currently applied to this column. |
 | `groupSortDirection` (read-only) | `SortDirection \| null` | The sort direction of the grid's grouping by this column, or `null` when the grid isn't grouped by it. |
 | `hidden` (read-only) | `boolean` | Whether the column is hidden. |
-| `index` (read-only) | `number` | The column's zero-based position in the grid's column order, after left-locked columns are moved to the start and right-locked ones to the end. |
 | `sortIndex` (read-only) | `number \| null` | The column's one-based position among the grid's sorted columns, or `null` when it isn't sorted. |
 
 #### `ColumnConfig`

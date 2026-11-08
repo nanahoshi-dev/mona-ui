@@ -6,6 +6,11 @@ import type { PopupRef } from "@nanahoshi/mona-ui/popup";
 import type { PopupSettings } from "@nanahoshi/mona-ui/popup";
 import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
 
+/**
+ * @hidden
+ * The state one dropdown shares with its popup handlers and live region. Each dropdown provides its own; the date and
+ * time pickers use it too, which is why it is exported. Applications don't need it.
+ */
 @Injectable()
 export class DropdownService {
     /**
@@ -48,8 +53,6 @@ export class DropdownService {
      * The auto-complete sets it to `false`.
      */
     public readonly restoreFocus = signal<boolean | "auto">("auto");
-    /** Not emitted or read anywhere in the library. */
-    public readonly touch$ = new Subject<void>();
     /**
      * Opens the popup with the given settings when it is closed. Does nothing while the host is disabled or read-only,
      * or when the `open` event is prevented.

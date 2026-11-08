@@ -144,6 +144,10 @@ function splitTopLevelUnion(text: string): string[] {
 /**
  * Reads a JSDoc block. The library has two habits, an `@description` tag and a plain comment, and either is the
  * description. A leading `@deprecated` note is kept, because consumers need to see it where they read the member.
+ *
+ * `@internal` and `@hidden` both keep a declaration out of the docs. `@internal` also strips it from the published
+ * typings, so it only suits what no other entry point imports. `@hidden`, as in TypeDoc, leaves the typings alone, for
+ * plumbing that the library's own entry points share but consumers have no use for.
  */
 function readDoc(node: JSDocableNode): DocComment {
     const doc = node.getJsDocs().at(-1);
@@ -164,7 +168,7 @@ function readDoc(node: JSDocableNode): DocComment {
     return {
         defaultValue: tagText("default"),
         description: [deprecated, description].filter(Boolean).join(" "),
-        internal: tags.some(tag => tag.getTagName() === "internal")
+        internal: tags.some(tag => tag.getTagName() === "internal" || tag.getTagName() === "hidden")
     };
 }
 

@@ -99,6 +99,7 @@ export interface Column extends ColumnConfig {
     /**
      * The column's `hidden` input as set. `hidden` follows it whenever the input changes, and can differ from it after
      * the user or saved state hides or shows the column.
+     * @internal
      */
     readonly configuredHidden: boolean;
     /** Whether a filter is currently applied to this column. */
@@ -110,6 +111,7 @@ export interface Column extends ColumnConfig {
     /**
      * The column's zero-based position in the grid's column order, after left-locked columns are moved to the start and
      * right-locked ones to the end.
+     * @internal
      */
     readonly index: number;
     /** The column's one-based position among the grid's sorted columns, or `null` when it isn't sorted. */

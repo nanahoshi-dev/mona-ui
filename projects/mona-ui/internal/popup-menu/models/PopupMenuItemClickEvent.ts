@@ -29,6 +29,7 @@ export class PopupMenuItemClickEvent extends PreventableEvent {
 
     /**
      * The activated item, as the menu holds it. The event's `label` and `value` read from it.
+     * @hidden
      */
     public get item(): PopupMenuItem {
         return this.#item;

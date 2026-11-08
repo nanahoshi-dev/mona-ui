@@ -167,7 +167,6 @@ checkbox or radio item's state unchanged.
 | Name | Type | Description |
 | --- | --- | --- |
 | `checked` (read-only) | `boolean \| undefined` | For a checkbox or radio item, the state the item has once the click is applied (if it isn't prevented). `undefined` for other items. |
-| `item` (read-only) | `PopupMenuItem` | The activated item, as the menu holds it. The event's `label` and `value` read from it. |
 | `label` (read-only) | `string` | The item's label. |
 | `value` (read-only) | `unknown` | The item's `value`: the `value` input of the item component, or the `value` of a `MenuItem`. |
 
@@ -192,19 +191,13 @@ checkbox or radio item's state unchanged.
 | --- | --- | --- |
 | `checkable?` | `boolean` | Whether the item is a checkbox item. |
 | `checked?` | `Signal<boolean>` | The checked state of a checkbox item. |
-| `click$?` | `Subject<PopupMenuItemClickEvent>` | The stream the menu pushes the item's click events to. The item component or radio group behind the item listens to it. |
 | `disabled` | `boolean` | Whether the item can't be activated. |
 | `group` | `string \| symbol` | The group the item belongs to. Consecutive items with the same key form a group. A string key, or a symbol with a description, is the group's title. |
-| `groupTemplate` | `Signal<TemplateRef<unknown> \| null> \| null` | The template that renders the title of the item's group, or `null` to use the menu's group template. |
-| `iconTemplate` | `Signal<TemplateRef<unknown> \| null> \| null` | The template that renders the item's icon, or `null` to use the menu's icon template. |
 | `items` | `PopupMenuItem[]` | The items of the item's submenu. Empty when it has none. |
 | `label` | `string` | The item's text. |
 | `radio?` | `boolean` | Whether the item is a radio item in a radio group. |
 | `selected?` | `Signal<boolean>` | Whether a radio item is the selected item of its radio group. |
 | `separator?` | `boolean` | Whether the item is a divider. |
-| `shortcutTemplate` | `Signal<TemplateRef<unknown> \| null> \| null` | The template that renders the item's shortcut text, or `null` to use the menu's shortcut template. |
-| `textTemplate` | `Signal<TemplateRef<unknown> \| null> \| null` | The template that renders the item's text in place of its label, or `null` to use the menu's text template. |
-| `uid` | `string` | A unique id for the item. The menu uses it as the item element's `id`. |
 | `value?` | `Signal<unknown>` | The item's value: the `value` input of the item component, or the `value` of a `MenuItem`. |
 
 #### `PopupMenuNavigationEvent`

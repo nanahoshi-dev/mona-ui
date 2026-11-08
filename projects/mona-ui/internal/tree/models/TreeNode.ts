@@ -3,37 +3,43 @@ import { ImmutableSet } from "@mirei/ts-collections";
 import { v4 } from "uuid";
 import type { NodeItem } from "./NodeItem";
 
-/** A node of a tree, wrapping its data item. */
+/**
+ * A node of a tree, wrapping its data item. Read `data`, `uid` and `nodeItem`; the tree keeps the rest, and writing to it
+ * would put the node out of step with the tree.
+ */
 export class TreeNode<T> {
-    /** Whether the node is checked. The tree keeps it in step with the checked keys. */
+    /** @hidden Whether the node is checked. The tree keeps it in step with the checked keys. */
     public readonly checked = signal(false);
-    /** The node's child nodes, in display order. */
+    /** @hidden The node's child nodes, in display order. */
     public readonly children = signal(ImmutableSet.create<TreeNode<T>>());
     /** The data item this node was created from. */
     public readonly data: T;
-    /** Whether the last load of this node's children from an asynchronous children selector failed. */
+    /** @hidden Whether the last load of this node's children from an asynchronous children selector failed. */
     public readonly loadFailed = signal(false);
-    /** Whether the node's children are being loaded from an asynchronous children selector. */
+    /** @hidden Whether the node's children are being loaded from an asynchronous children selector. */
     public readonly loading = signal(false);
     /** A unique id generated for the node when it is created. */
     public readonly uid = v4();
     /**
      * Whether children from an asynchronous children selector have been loaded. Loaded children are cached,
      * so collapsing and re-expanding the node does not request them again.
+     * @hidden
      */
     public childrenLoaded = false;
     /**
      * The node's position in the tree as dot-separated zero-based indices from the root, such as `"0.2.1"` for
      * the second child of the third child of the first root node.
+     * @hidden
      */
     public index: string = "";
-    /** The node's parent node, or `null` for a root node. */
+    /** @hidden The node's parent node, or `null` for a root node. */
     public parent: TreeNode<T> | null = null;
 
     public constructor(data: T) {
         this.data = data;
     }
 
+    /** @hidden Copies the node and its children. */
     public clone(): TreeNode<T> {
         const node = new TreeNode<T>(this.data);
         node.index = this.index;
@@ -42,6 +48,7 @@ export class TreeNode<T> {
         return node;
     }
 
+    /** @hidden Whether the node sits anywhere below `node`. */
     public isDescendantOf(node: TreeNode<T>): boolean {
         let parent = this.parent;
         while (parent != null) {
