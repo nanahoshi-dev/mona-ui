@@ -320,6 +320,11 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./dialog/content/content-example.component").then(module => module.DialogContentExampleComponent),
         mainFile: "content-example.component.ts"
     },
+    "dialog/form": {
+        files: ["form-example.component.ts", "form-example.component.html"],
+        load: () => import("./dialog/form/form-example.component").then(module => module.DialogFormExampleComponent),
+        mainFile: "form-example.component.ts"
+    },
     "dialog/service": {
         files: ["service-example.component.ts", "service-example.component.html"],
         load: () => import("./dialog/service/service-example.component").then(module => module.DialogServiceExampleComponent),

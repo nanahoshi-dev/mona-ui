@@ -131,6 +131,8 @@ Pressing Enter inside the dialog triggers the action marked `default: true`, as 
 
 `type` accepts `"info" | "success" | "warning" | "error" | "confirm"`, each with a built-in icon, or `null` to render no icon at all. `"confirm"`, `"error"`, and `"warning"` also switch the rendered ARIA role — see [Accessibility](#accessibility).
 
+On `<mona-dialog>`, `type` defaults to `"info"`, so a dialog without `type` shows the info icon. For a dialog with no icon, such as one holding a form, set `[type]="null"`. `DialogService.show()` has no default type: leave `type` out of the settings, or set it to `null`, and the dialog has no icon. `alert()` defaults to `"info"` and `confirm()` to `"confirm"`.
+
 ### Custom content instead of plain text
 
 A content template replaces `text`. Here Enter in the text box triggers the default Save action.
@@ -138,6 +140,16 @@ A content template replaces `text`. Here Enter in the text box triggers the defa
 ```example
 dialog/content
 ```
+
+### A form in a dialog
+
+Bind a signal form inside a content template. Save is the default action, so Enter in a text field triggers it. While the form is invalid, the `action` handler calls `event.preventDefault()`, which keeps the dialog open, and marks the form touched to show the errors. Once the form is valid, Save closes the dialog.
+
+```example
+dialog/form
+```
+
+Enter triggers the default action only outside a `<form>` element: inside one, Enter is left to the form's own submit. The example doesn't use a `<form>` element; signal forms don't need one.
 
 ### A confirmation from code
 
