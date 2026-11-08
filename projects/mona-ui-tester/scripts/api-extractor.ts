@@ -15,6 +15,7 @@ import type {
     CallExpression,
     Decorator,
     JSDocableNode,
+    JSDocTag,
     MethodDeclaration,
     MethodSignature,
     PropertySignature,
@@ -142,6 +143,21 @@ function splitTopLevelUnion(text: string): string[] {
 }
 
 /**
+ * A tag's text as it's written, without the tag name and the leading `*`s. The compiler's own reading drops the line
+ * break after an inline `{@link}`, so on an LF checkout the next line's first word ran into the link.
+ */
+function tagTextOf(tag: JSDocTag): string {
+    return tag
+        .getText()
+        .replace(/^@\S+/, "")
+        .split(/\r?\n/)
+        .map(line => line.replace(/^\s*\*(?!\/)\s?/, ""))
+        .join("\n")
+        .replace(/\s*\*\/\s*$/, "")
+        .trim();
+}
+
+/**
  * Reads a JSDoc block. The library has two habits, an `@description` tag and a plain comment, and either is the
  * description. A leading `@deprecated` note is kept, because consumers need to see it where they read the member.
  *
@@ -155,12 +171,10 @@ function readDoc(node: JSDocableNode): DocComment {
         return { description: "", internal: false };
     }
     const tags = doc.getTags();
-    const tagText = (name: string): string | undefined =>
-        tags
-            .find(tag => tag.getTagName() === name)
-            ?.getCommentText()
-            ?.trim()
-            .replace(/\r\n/g, "\n");
+    const tagText = (name: string): string | undefined => {
+        const tag = tags.find(candidate => candidate.getTagName() === name);
+        return tag == null ? undefined : tagTextOf(tag);
+    };
     const description = tagText("description") ?? doc.getDescription().trim().replace(/\r\n/g, "\n");
     const deprecated = tags.some(tag => tag.getTagName() === "deprecated")
         ? `**Deprecated.** ${tagText("deprecated") ?? ""}`.trim()

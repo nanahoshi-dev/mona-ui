@@ -117,6 +117,22 @@ describe("readEntryPoint", () => {
         expect(symbol.properties?.map(property => property.name)).toEqual(["id"]);
     });
 
+    it("keeps the line break after a link that ends a line, with LF and CRLF alike", () => {
+        const source = [
+            "export class DemoRef {",
+            "    /**",
+            "     * @description Use {@link other}",
+            "     * there.",
+            "     */",
+            "    public readonly id = \"a\";",
+            "}"
+        ];
+        for (const newline of ["\n", "\r\n"]) {
+            const [symbol] = readSource(source.join(newline));
+            expect(symbol.properties?.[0].description.replace(/\s+/g, " ")).toBe("Use {@link other} there.");
+        }
+    });
+
     it("treats only documented members of a component as API", () => {
         const [symbol] = readSource(`
             @Directive({ selector: "[monaDemo]" })
