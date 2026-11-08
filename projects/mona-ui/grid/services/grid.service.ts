@@ -462,6 +462,8 @@ export class GridService {
     public readonly masterDetailTemplate = signal<TemplateRef<unknown> | null>(null);
     public readonly messages = this.#i18n.componentMessages("grid", GRID_DEFAULT_MESSAGES);
     public readonly newRowFactory = signal<() => Record<PropertyKey, unknown>>(() => ({}));
+    /** Emits when a user's sort or filter moves a client-side grid back to the first page. */
+    public readonly pageReset$ = new Subject<void>();
     public readonly pagerTotal = computed(() =>
         this.serverBindingEnabled() ? this.serverTotal() : this.viewRowCount()
     );
@@ -1275,12 +1277,20 @@ export class GridService {
         return true;
     }
 
+    /**
+     * Reports the data state to a server-bound grid. With `resetPage`, which a user's sort or filter sets, it first goes
+     * back to the first page, on a client-side grid too: the rows the user was looking at may have moved anywhere.
+     */
     public requestDataStateChange(options: { readonly resetPage?: boolean } = {}): void {
+        if (options.resetPage) {
+            const previousSkip = this.paginationState().skip;
+            this.setPageState({ skip: 0 });
+            if (!this.serverBindingEnabled() && previousSkip !== 0) {
+                this.pageReset$.next();
+            }
+        }
         if (!this.serverBindingEnabled()) {
             return;
-        }
-        if (options.resetPage) {
-            this.setPageState({ skip: 0 });
         }
         if (this.#dataStateEmissionPending) {
             return;

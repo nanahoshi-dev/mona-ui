@@ -10431,7 +10431,7 @@
         "defaultValue": "[]"
       },
       {
-        "description": "Emitted when the user changes the page or the page size, and when the grid moves back to the\nlast page because the data shrank. Not emitted for `skip` or `pageSize` values set from code.",
+        "description": "Emitted when the user changes the page or the page size, when the user's sort or filter moves a\nclient-side grid back to the first page, and when the grid moves back to the last page because the data shrank.\nNot emitted for `skip` or `pageSize` values set from code.",
         "kind": "output",
         "name": "pageChange",
         "type": "PageChangeEvent"

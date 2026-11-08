@@ -418,8 +418,9 @@ export class GridComponent<T> implements GridVariantInput {
     public readonly expandedKeys = model<unknown[]>([]);
 
     /**
-     * @description Emitted when the user changes the page or the page size, and when the grid moves back to the
-     * last page because the data shrank. Not emitted for `skip` or `pageSize` values set from code.
+     * @description Emitted when the user changes the page or the page size, when the user's sort or filter moves a
+     * client-side grid back to the first page, and when the grid moves back to the last page because the data shrank.
+     * Not emitted for `skip` or `pageSize` values set from code.
      */
     public readonly pageChange = output<PageChangeEvent>();
 
@@ -1171,6 +1172,7 @@ export class GridComponent<T> implements GridVariantInput {
         this.gridService.expandedKeysChange$
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(keys => this.expandedKeys.set(keys));
+        this.gridService.pageReset$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => this.reportPage());
         // Client paging: when the rows shrink below the current page (new data, a removed row, a filter), move
         // back to the last page instead of showing an empty page without a pager.
         effect(() => {

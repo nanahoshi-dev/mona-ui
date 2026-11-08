@@ -99,7 +99,7 @@ A formatter can be typed for the column's value, as above. There is no format st
 
 Without `monaGridServerBinding`, the grid sorts, filters, groups and pages `data` itself. Bind the whole data set to `data`; the grid never changes the array.
 
-When `data` is replaced, the grid keeps its sort, filter and group descriptors and applies them to the new rows. It also keeps the current page, unless the new rows no longer reach it: then it moves to the last page and reports it through `pageChange` and `skipChange`. A user's sort or filter keeps the current page in the same way; only server binding goes back to the first page.
+When `data` is replaced, the grid keeps its sort, filter and group descriptors and applies them to the new rows. It also keeps the current page, unless the new rows no longer reach it: then it moves to the last page and reports it through `pageChange` and `skipChange`. A user's sort or filter goes back to the first page, with or without server binding, and reports it through `pageChange` and `skipChange`. A `sort` or `filter` set from code keeps the current page.
 
 To filter from controls outside the grid, either bind a filtered `computed` to `data`:
 
@@ -192,7 +192,7 @@ Virtualization uses a fixed height in pixels for every rendered item and the scr
 
 ### Paging
 
-`pageSize` and `pageSizeValues` control the built-in pager; `[(pageSize)]` and `[(skip)]` are two-way, and `pageChange` reports the user's page and page-size changes (not values set from code). A new page size keeps the first row of the current page in view. When the rows shrink below the current page (new data, a removed row, a filter), the grid moves to the last page and reports it. `responsivePager` collapses the pager into a dropdown when the grid narrows.
+`pageSize` and `pageSizeValues` control the built-in pager; `[(pageSize)]` and `[(skip)]` are two-way, and `pageChange` reports the user's page and page-size changes (not values set from code). A new page size keeps the first row of the current page in view. A user's sort or filter goes back to the first page and reports it. When the rows shrink below the current page (new data, a removed row, a filter), the grid moves to the last page and reports it. `responsivePager` collapses the pager into a dropdown when the grid narrows.
 
 ```html
 <mona-grid [data]="orders()" [pageSize]="10" [pageSizeValues]="[10, 20, 30]" [responsivePager]="true"></mona-grid>

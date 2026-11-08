@@ -130,7 +130,7 @@ protected confirm(event: PageSizeChangeEvent): void {
 | `responsivePager` | The pager's `responsive` mode; on by default.                                                   |
 
 - The grid's pager always has a page input, and its `total` is the number of rows after filtering (or the server's `total` with `monaGridServerBinding`).
-- The grid's `pageChange` fires for the same user changes as the pager's, and also when the rows shrink below the current page and the grid moves back to the last page.
+- The grid's `pageChange` fires for the same user changes as the pager's, and also when a user's sort or filter moves it back to the first page, or the rows shrink below the current page and the grid moves back to the last page.
 - The pager is hidden while the grid has no rows (except with server binding) and with virtual scrolling.
 - For server paging, see the server binding section of the [grid guide](grid.md).
 

@@ -200,6 +200,7 @@ protected readonly pageSize = signal(25);
 - `skip` (rows before the page) and `pageSize` are two-way models. `pageChange` fires when the user changes the page or page size, never for values you set.
 - The pager has no page-size dropdown until you set `pageSizeValues`.
 - A new page size keeps the first row of the current page in view.
+- A user's sort or filter goes back to the first page and reports it through `pageChange`. A `sort` or `filter` set from code keeps the page.
 - When the rows shrink below the current page (new data, a removed row, a filter), the grid moves to the last page and reports it through `pageChange`.
 - Changing the page scrolls the body back to its first row.
 - The pager is hidden while the grid has no rows (except with server binding) and with virtual scrolling.

@@ -57,7 +57,7 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 | Name | Type | Description |
 | --- | --- | --- |
 | `expandedKeysChange` | `unknown[]` | Emitted when `expandedKeys` changes. |
-| `pageChange` | `PageChangeEvent` | Emitted when the user changes the page or the page size, and when the grid moves back to the last page because the data shrank. Not emitted for `skip` or `pageSize` values set from code. |
+| `pageChange` | `PageChangeEvent` | Emitted when the user changes the page or the page size, when the user's sort or filter moves a client-side grid back to the first page, and when the grid moves back to the last page because the data shrank. Not emitted for `skip` or `pageSize` values set from code. |
 | `pageSizeChange` | `number` | Emitted when `pageSize` changes. |
 | `skipChange` | `number` | Emitted when `skip` changes. |
 
