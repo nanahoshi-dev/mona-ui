@@ -15,7 +15,7 @@ Everything below is imported from `@nanahoshi/mona-ui/auto-complete`, `@nanahosh
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `aria-describedby` | `string` | `""` | ID of an element that provides an extended description for the input. Use this to associate error messages or help text with the input. |
-| `aria-label` | `string` | `""` | Accessible name for the input. Describe what the autocomplete represents. Prefer a visible label, linked through `inputId` or `ariaLabelledBy`; without any of them, browsers fall back to the `placeholder`. |
+| `aria-label` | `string` | `""` | Accessible name for the input. Describe what the autocomplete represents. Prefer a visible label, linked through `inputId` or `aria-labelledby`; without any of them, browsers fall back to the `placeholder`. |
 | `aria-labelledby` | `string` | `""` | ID of an external element that provides the accessible name for the input. |
 | `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
 | `data` | `Iterable<TData>` | `[]` | Collection of items to render. |
@@ -361,14 +361,14 @@ From `@nanahoshi/mona-ui/common`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | Inherited from `PreventableEvent`. |
-| `type` (read-only) | `string \| undefined` | Inherited from `PreventableEvent`. |
+| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
+| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
 
 **Methods**
 
 | Signature | Description |
 | --- | --- |
 | `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Marks the event as prevented, keeping the dialog open. |
+| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
 
 **Documented elsewhere:** [`FilterableOptions`](/components/grid), [`GroupableOptions`](/components/grid), [`PopupCloseEvent`](/components/popup), [`PopupRef`](/components/popup), [`PopupSettings`](/components/popup), [`VirtualScrollOptions`](/components/list-view)

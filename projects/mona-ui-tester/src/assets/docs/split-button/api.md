@@ -13,7 +13,7 @@ Everything below is imported from `@nanahoshi/mona-ui/split-button`.
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `aria-label` | `string` | `""` | Accessible name for the main action button. Leave it empty when the button shows its name as text; set it (or `aria-labelledby`) when it shows only an icon. The pair of buttons is a group named by the main button. |
-| `aria-labelledby` | `string` | `""` | ID of an external element that provides the accessible name for the main action button. Takes precedence over `ariaLabel` when both are set. |
+| `aria-labelledby` | `string` | `""` | ID of an external element that provides the accessible name for the main action button. Takes precedence over `aria-label` when both are set. |
 | `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
 | `disabled` | `boolean` | `false` | Renders the component with reduced visual emphasis and removes pointer interaction from both the main button and the menu toggle button. Disabling it closes the open menu. |
 | `iconOnly` | `boolean` | `false` | Renders the main button as a square for icon-only content, removing horizontal text padding. Set `aria-label` so the main button has a name. |

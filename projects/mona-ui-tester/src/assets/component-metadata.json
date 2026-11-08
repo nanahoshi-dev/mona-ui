@@ -12,7 +12,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Accessible name for the input. Describe what the autocomplete represents. Prefer a visible label,\nlinked through {@link inputId} or {@link ariaLabelledBy}; without any of them, browsers fall back to the\n{@link placeholder}.",
+        "description": "Accessible name for the input. Describe what the autocomplete represents. Prefer a visible label,\nlinked through {@link inputId} or `aria-labelledby`; without any of them, browsers fall back to the\n{@link placeholder}.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
@@ -8404,7 +8404,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Accessible name for the input. Describe what the combo box represents. Prefer a visible label,\nlinked through {@link inputId} or {@link ariaLabelledBy}; without any of them, browsers fall back to the\n{@link placeholder}.",
+        "description": "Accessible name for the input. Describe what the combo box represents. Prefer a visible label,\nlinked through {@link inputId} or `aria-labelledby`; without any of them, browsers fall back to the\n{@link placeholder}.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
@@ -9001,7 +9001,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Accessible name of the input. Prefer a visible label, linked through {@link inputId} or\n{@link ariaLabelledBy}; the placeholder is not a label.",
+        "description": "Accessible name of the input. Prefer a visible label, linked through {@link inputId} or\n`aria-labelledby`; the placeholder is not a label.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
@@ -9213,7 +9213,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Accessible name of the input. Prefer a visible label, linked through {@link inputId} or\n{@link ariaLabelledBy}; the placeholder is not a label.",
+        "description": "Accessible name of the input. Prefer a visible label, linked through {@link inputId} or\n`aria-labelledby`; the placeholder is not a label.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
@@ -11659,7 +11659,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Accessible name for the multi select. Describe what it represents.\nFalls back to {@link placeholder} when neither this nor {@link ariaLabelledBy} is set.",
+        "description": "Accessible name for the multi select. Describe what it represents.\nFalls back to {@link placeholder} when neither this nor `aria-labelledby` is set.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
@@ -11747,7 +11747,7 @@
         "type": "void"
       },
       {
-        "description": "Text shown when nothing is selected. It also names the multi select when neither {@link ariaLabel}\nnor {@link ariaLabelledBy} is set.",
+        "description": "Text shown when nothing is selected. It also names the multi select when neither `aria-label`\nnor `aria-labelledby` is set.",
         "kind": "input",
         "name": "placeholder",
         "type": "string",
@@ -11928,7 +11928,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Accessible name for the input. Prefer a visible label, linked through {@link inputId} or\n{@link ariaLabelledBy}.",
+        "description": "Accessible name for the input. Prefer a visible label, linked through {@link inputId} or\n`aria-labelledby`.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
@@ -12116,7 +12116,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Accessible name for the input. Prefer a visible label, linked through {@link inputId} or\n{@link ariaLabelledBy}.",
+        "description": "Accessible name for the input. Prefer a visible label, linked through {@link inputId} or\n`aria-labelledby`.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
@@ -12269,7 +12269,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Accessible name for the input. Prefer a visible label, linked through {@link inputId} or\n{@link ariaLabelledBy}.",
+        "description": "Accessible name for the input. Prefer a visible label, linked through {@link inputId} or\n`aria-labelledby`.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string | null",
@@ -12631,7 +12631,7 @@
         "defaultValue": "null"
       },
       {
-        "description": "Id of the element that names the pager. Takes precedence over {@link ariaLabel}.",
+        "description": "Id of the element that names the pager. Takes precedence over `aria-label`.",
         "kind": "input",
         "name": "ariaLabelledBy",
         "type": "string",
@@ -15123,7 +15123,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "ID of an external element that provides the accessible name for the main action button.\nTakes precedence over `ariaLabel` when both are set.",
+        "description": "ID of an external element that provides the accessible name for the main action button.\nTakes precedence over `aria-label` when both are set.",
         "kind": "input",
         "name": "ariaLabelledby",
         "type": "string",
@@ -15887,7 +15887,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Accessible name of the inner input. Prefer a visible label, linked through {@link inputId} or\n{@link ariaLabelledBy}; the placeholder is not a label.",
+        "description": "Accessible name of the inner input. Prefer a visible label, linked through {@link inputId} or\n`aria-labelledby`; the placeholder is not a label.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",
@@ -16069,7 +16069,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Accessible name of the input. Prefer a visible label, linked through {@link inputId} or\n{@link ariaLabelledBy}; the placeholder is not a label.",
+        "description": "Accessible name of the input. Prefer a visible label, linked through {@link inputId} or\n`aria-labelledby`; the placeholder is not a label.",
         "kind": "input",
         "name": "ariaLabel",
         "type": "string",

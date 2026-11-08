@@ -141,7 +141,7 @@ export class SplitButtonComponent implements ButtonGroupMember, SplitButtonVaria
 
     /**
      * @description ID of an external element that provides the accessible name for the main action button.
-     * Takes precedence over `ariaLabel` when both are set.
+     * Takes precedence over `aria-label` when both are set.
      * @default ""
      */
     public readonly ariaLabelledby = input<string>("", { alias: "aria-labelledby" });

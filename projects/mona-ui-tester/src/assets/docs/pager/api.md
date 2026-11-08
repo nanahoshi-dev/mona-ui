@@ -13,7 +13,7 @@ Everything below is imported from `@nanahoshi/mona-ui/pager`.
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `aria-label` | `string \| null` | `null` | Accessible name of the pager's navigation landmark. Defaults to the localized "Pagination"; name each pager when a page has several. |
-| `aria-labelledby` | `string` | `""` | Id of the element that names the pager. Takes precedence over `ariaLabel`. |
+| `aria-labelledby` | `string` | `""` | Id of the element that names the pager. Takes precedence over `aria-label`. |
 | `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
 | `firstLast` | `boolean` | `true` | Shows the first and last page navigation buttons. |
 | `navigable` | `boolean` | `true` | Enables page shortcuts while a pager button has focus: Page Up and Page Down go to the previous and next page, Home and End to the first and last, and the left and right arrows to the previous and next page (mirrored right to left). The buttons themselves are always ordinary tab stops. |
@@ -238,12 +238,12 @@ From `@nanahoshi/mona-ui/common`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | Inherited from `PreventableEvent`. |
-| `type` (read-only) | `string \| undefined` | Inherited from `PreventableEvent`. |
+| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
+| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
 
 **Methods**
 
 | Signature | Description |
 | --- | --- |
 | `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Marks the event as prevented, keeping the dialog open. |
+| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |

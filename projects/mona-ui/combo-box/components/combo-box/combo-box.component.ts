@@ -218,7 +218,7 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
 
     /**
      * @description Accessible name for the input. Describe what the combo box represents. Prefer a visible label,
-     * linked through {@link inputId} or {@link ariaLabelledBy}; without any of them, browsers fall back to the
+     * linked through {@link inputId} or `aria-labelledby`; without any of them, browsers fall back to the
      * {@link placeholder}.
      * @default ""
      */

@@ -131,7 +131,7 @@ export abstract class NumericTextBoxBaseComponent<
 
     /**
      * @description Accessible name for the input. Prefer a visible label, linked through {@link inputId} or
-     * {@link ariaLabelledBy}.
+     * `aria-labelledby`.
      */
     public readonly ariaLabel = input<string | null>(null, { alias: "aria-label" });
 

@@ -14,7 +14,7 @@ Everything below is imported from `@nanahoshi/mona-ui/time-picker`.
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `aria-describedby` | `string` | `""` | Id of an element that describes the input, such as a hint or an error message. |
-| `aria-label` | `string` | `""` | Accessible name of the input. Prefer a visible label, linked through `inputId` or `ariaLabelledBy`; the placeholder is not a label. |
+| `aria-label` | `string` | `""` | Accessible name of the input. Prefer a visible label, linked through `inputId` or `aria-labelledby`; the placeholder is not a label. |
 | `aria-labelledby` | `string` | `""` | Id of the element that labels the input. |
 | `class` | `string` | `""` | Extra classes for the input's container. |
 | `disabled` | `boolean` | `false` | Sets the disabled state of the time picker. |
@@ -109,14 +109,14 @@ From `@nanahoshi/mona-ui/common`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | Inherited from `PreventableEvent`. |
-| `type` (read-only) | `string \| undefined` | Inherited from `PreventableEvent`. |
+| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
+| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
 
 **Methods**
 
 | Signature | Description |
 | --- | --- |
 | `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Marks the event as prevented, keeping the dialog open. |
+| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
 
 **Documented elsewhere:** [`PopupCloseEvent`](/components/popup)

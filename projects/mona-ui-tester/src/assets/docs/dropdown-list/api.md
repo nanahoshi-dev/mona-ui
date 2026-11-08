@@ -364,14 +364,14 @@ From `@nanahoshi/mona-ui/common`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | Inherited from `PreventableEvent`. |
-| `type` (read-only) | `string \| undefined` | Inherited from `PreventableEvent`. |
+| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
+| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
 
 **Methods**
 
 | Signature | Description |
 | --- | --- |
 | `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Marks the event as prevented, keeping the dialog open. |
+| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
 
 **Documented elsewhere:** [`FilterableOptions`](/components/grid), [`GroupableOptions`](/components/grid), [`PopupCloseEvent`](/components/popup), [`PopupRef`](/components/popup), [`PopupSettings`](/components/popup), [`VirtualScrollOptions`](/components/list-view)

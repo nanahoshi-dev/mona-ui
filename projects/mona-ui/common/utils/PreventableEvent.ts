@@ -13,17 +13,17 @@ export class PreventableEvent<E extends Event = Event> {
         return this.#defaultPrevented;
     }
 
-    /** Marks the event as prevented, keeping the dialog open. */
+    /** Cancels what the event announces, such as opening or closing a popup, or closing a dialog. */
     public preventDefault(): void {
         this.#defaultPrevented = true;
     }
 
-    /** Inherited from `PreventableEvent`. */
+    /** The DOM event that caused this one, when there is one. */
     public get originalEvent(): E | undefined {
         return this.#event;
     }
 
-    /** Inherited from `PreventableEvent`. */
+    /** A name for the kind of event, when the component that emits it sets one. */
     public get type(): string | undefined {
         return this.#type;
     }

@@ -14,7 +14,7 @@ Everything below is imported from `@nanahoshi/mona-ui/numeric-text-box`.
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `aria-describedby` | `string` | `""` | ID of an element that provides an extended description for the input, such as a hint or an error message. |
-| `aria-label` | `string \| null` | `null` | Accessible name for the input. Prefer a visible label, linked through `inputId` or `ariaLabelledBy`. |
+| `aria-label` | `string \| null` | `null` | Accessible name for the input. Prefer a visible label, linked through `inputId` or `aria-labelledby`. |
 | `aria-labelledby` | `string` | `""` | ID of an external element that provides the accessible name for the input. |
 | `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
 | `decimals` | `number` | `0` | Number of fractional decimal places to display and accept. Values are truncated to an integer and clamped to the range 0–20. Non-finite and negative values normalize to 0. |

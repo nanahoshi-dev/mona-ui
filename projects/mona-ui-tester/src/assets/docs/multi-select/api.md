@@ -15,7 +15,7 @@ Everything below is imported from `@nanahoshi/mona-ui/multi-select`, `@nanahoshi
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `aria-describedby` | `string` | `""` | ID of an element that describes the multi select, such as help text or an error message. |
-| `aria-label` | `string` | `""` | Accessible name for the multi select. Describe what it represents. Falls back to `placeholder` when neither this nor `ariaLabelledBy` is set. |
+| `aria-label` | `string` | `""` | Accessible name for the multi select. Describe what it represents. Falls back to `placeholder` when neither this nor `aria-labelledby` is set. |
 | `aria-labelledby` | `string` | `""` | Sets the aria-labelledby attribute of the multi select component. |
 | `autoClose` | `boolean` | `false` | Closes the popup automatically after an item is selected or deselected. |
 | `checkboxes` | `boolean` | `false` | Renders a checkbox next to each item in the popup list to indicate its selected state. |
@@ -25,7 +25,7 @@ Everything below is imported from `@nanahoshi/mona-ui/multi-select`, `@nanahoshi
 | `invalid` | `boolean` | `false` | Marks the multi select as invalid. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
 | `itemDisabled` | `DropdownFieldPredicateType<TData>` | — | A predicate function or the name of the field that determines whether an item is disabled. |
 | `loading` | `boolean` | `false` | Shows a loading indicator, in place of the clear button, and marks the field busy. It doesn't block interaction: the field stays usable while data loads. |
-| `placeholder` | `string` | `""` | Text shown when nothing is selected. It also names the multi select when neither `ariaLabel` nor `ariaLabelledBy` is set. |
+| `placeholder` | `string` | `""` | Text shown when nothing is selected. It also names the multi select when neither `aria-label` nor `aria-labelledby` is set. |
 | `popupClass` | `string` | `""` | Sets the class of the popup element. |
 | `popupHeight` | `ListSizeInputType` | `null` | Maximum height of the popup, in pixels or as a CSS length. Shorter lists shrink to fit. When unset, the popup is at most 200 pixels tall. |
 | `popupWidth` | `ListSizeInputType` | `null` | Sets the width of the popup element. |
@@ -382,14 +382,14 @@ From `@nanahoshi/mona-ui/common`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | Inherited from `PreventableEvent`. |
-| `type` (read-only) | `string \| undefined` | Inherited from `PreventableEvent`. |
+| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
+| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
 
 **Methods**
 
 | Signature | Description |
 | --- | --- |
 | `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Marks the event as prevented, keeping the dialog open. |
+| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
 
 **Documented elsewhere:** [`FilterableOptions`](/components/grid), [`GroupableOptions`](/components/grid), [`PopupCloseEvent`](/components/popup), [`PopupRef`](/components/popup), [`PopupSettings`](/components/popup), [`VirtualScrollOptions`](/components/list-view)

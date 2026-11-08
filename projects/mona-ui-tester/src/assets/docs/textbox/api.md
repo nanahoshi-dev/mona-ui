@@ -14,7 +14,7 @@ Everything below is imported from `@nanahoshi/mona-ui/text-box`.
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `aria-describedby` | `string` | `""` | Id of an element that describes the inner input, such as a hint or an error message. |
-| `aria-label` | `string` | `""` | Accessible name of the inner input. Prefer a visible label, linked through `inputId` or `ariaLabelledBy`; the placeholder is not a label. |
+| `aria-label` | `string` | `""` | Accessible name of the inner input. Prefer a visible label, linked through `inputId` or `aria-labelledby`; the placeholder is not a label. |
 | `aria-labelledby` | `string` | `""` | Id of the element that labels the inner input. |
 | `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
 | `clearButton` | `boolean` | `false` | Displays a clear button that resets the value to empty. The button is hidden while the value is empty or the text box is disabled or read-only. |
