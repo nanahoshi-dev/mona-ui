@@ -74,7 +74,7 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 | `lockedPosition` | `GridColumnLockedPosition` | `"left"` | The side of the grid where this locked command column is fixed. |
 | `maxWidth` | `number \| null` | `null` | The maximum width of this command column in pixels. |
 | `minWidth` | `number \| null` | `null` | The minimum width of this command column in pixels. |
-| `removeConfirmation` | `boolean` | `false` | Whether the built-in remove command asks for confirmation before emitting remove. |
+| `removeConfirmation` | `boolean` | `false` | Whether removing a row asks for confirmation before emitting `remove`: from the built-in Remove button, or from a `monaGridRemoveCommand` button in this column's template. |
 | `stateKey` | `string \| null` | `"commands"` | A stable key used to persist state for this command column. |
 | `title` | `string \| null` | `null` | The title displayed in the command column header. Without one, the localized `commandColumnTitle` message ("Commands"). |
 | `width` | `number \| null` | `160` | The fixed width of this command column in pixels. |
@@ -316,7 +316,7 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `monaGridRemoveCommand` | `Row \| null` | `null` | The row the button removes when clicked, usually the command template's `row`. The click emits the grid's `remove` event for that row, without the `removeConfirmation` prompt. Does nothing while `null`. |
+| `monaGridRemoveCommand` | `Row \| null` | `null` | The row the button removes when clicked, usually the command template's `row`. The click emits the grid's `remove` event for that row. Inside a command column with `removeConfirmation`, it asks first, as the built-in remove command does. Does nothing while `null`. |
 
 ### `GridAddCommandDirective`
 

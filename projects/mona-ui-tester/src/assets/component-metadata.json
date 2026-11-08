@@ -850,7 +850,7 @@
     "selector": "\"button[monaGridRemoveCommand]\"",
     "inputs": [
       {
-        "description": "The row the button removes when clicked, usually the command template's `row`. The click emits the\ngrid's `remove` event for that row, without the `removeConfirmation` prompt. Does nothing while `null`.",
+        "description": "The row the button removes when clicked, usually the command template's `row`. The click emits the\ngrid's `remove` event for that row. Inside a command column with `removeConfirmation`, it asks first, as the\nbuilt-in remove command does. Does nothing while `null`.",
         "kind": "input",
         "name": "row",
         "type": "Row | null",
@@ -10722,7 +10722,7 @@
         "defaultValue": "null"
       },
       {
-        "description": "Whether the built-in remove command asks for confirmation before emitting remove.",
+        "description": "Whether removing a row asks for confirmation before emitting `remove`: from the built-in Remove button, or from a\n`monaGridRemoveCommand` button in this column's template.",
         "kind": "input",
         "name": "removeConfirmation",
         "type": "boolean",

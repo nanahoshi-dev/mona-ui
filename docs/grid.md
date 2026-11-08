@@ -354,7 +354,7 @@ export class OrderEditorComponent {
 - Neither `cellEdit` nor `save` fires when nothing changed: the editor just closes.
 - **Persist from `save`.** In cell mode `cellEdit` comes first; use it to reject a single value.
 - **To save on a server**, prevent `save`, send `rowData`, update `data`, then call `endEdit()` on the `GridEditableDirective` (from `viewChild`). `endEdit()` closes the editor without reporting anything. If the request fails, don't call it: the editor keeps the user's values.
-- **`remove` doesn't delete anything.** Remove the row from `data` yourself. Set `removeConfirmation` on the command column to ask first.
+- **`remove` doesn't delete anything.** Remove the row from `data` yourself. Set `removeConfirmation` on the command column to ask first: the built-in Remove button and a `monaGridRemoveCommand` button in its template both ask.
 - When `data` is replaced during an edit, the edit moves to the new item with the same `rowKey` and keeps what was typed. When the row is gone, the edit ends with a `cancel` of reason `"removed"`.
 
 **Validation.** `schema` is a function that receives a `GridEditFormContext` (`mode`, `operation`, `isNew`, `column`, ...) and returns a signal-forms schema for the row. Return a different schema for new rows, or `null` for none. The cast is needed because the schema is typed for your row while the grid's rows are `Record<PropertyKey, unknown>`.
