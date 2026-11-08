@@ -70,29 +70,31 @@ A JavaScript `number` holds integers exactly only up to `9007199254740991` (`Num
 import { disabled, form, FormField, required } from "@angular/forms/signals";
 ```
 
-The `touch` output fires when the value changes, when the control blurs, and when the spinner buttons update the value.
+The `touch` output fires when focus leaves the component, after the value has been clamped to the bounds. Typing and spinning don't fire it, and neither does moving focus between the input and content inside the component, such as a prefix template.
 
 The `invalid` and `touched` inputs are written by `FormField` when the control is used with signal forms. `required` contributes to the invalid state when the value is empty and the control has been touched.
 
 ## Accessibility
 
-`NumericTextBoxComponent` renders `role="spinbutton"` on the inner input element and keeps the following ARIA attributes in sync with state:
+`NumericTextBoxComponent` renders `role="spinbutton"` on the inner input element. The host element has no role, and the ARIA inputs below go to the inner input, not the host.
 
-| Attribute        | When present                    | Value                   |
-|------------------|---------------------------------|-------------------------|
-| `role`           | Always                          | `"spinbutton"`          |
-| `aria-disabled`  | Always                          | `disabled()`            |
-| `aria-invalid`   | When the control is invalid     | `"true"`                |
-| `aria-readonly`  | Always                          | `readonly()`            |
-| `aria-required`  | Always                          | `required()`            |
-| `aria-valuemax`  | When `maxValue` is set          | `maxValue`              |
-| `aria-valuemin`  | When `minValue` is set          | `minValue`              |
-| `aria-valuenow`  | When a numeric value is present | Current numeric value   |
-| `aria-valuetext` | Always                          | Formatted display value |
+| Attribute          | When present                                                                   | Value                   |
+|--------------------|--------------------------------------------------------------------------------|-------------------------|
+| `role`             | Always                                                                         | `"spinbutton"`          |
+| `aria-label`       | The `aria-label` input is set                                                  | Its value               |
+| `aria-labelledby`  | The `aria-labelledby` input is set                                             | Its value               |
+| `aria-describedby` | The `aria-describedby` input is set                                            | Its value               |
+| `aria-invalid`     | Once `touched`, when `invalid` is `true` or `required` is `true` with no value | `"true"`                |
+| `aria-valuemax`    | When `maxValue` is set                                                         | `maxValue`              |
+| `aria-valuemin`    | When `minValue` is set                                                         | `minValue`              |
+| `aria-valuenow`    | When a numeric value is present                                                | Current numeric value   |
+| `aria-valuetext`   | When the input shows text                                                      | Formatted display value |
+
+`disabled`, `readonly` and `required` are set as the native attributes of the inner input, which assistive technology reads as those states.
 
 **Consumer responsibilities**
 
-- Provide an accessible name through `aria-label`. The component does not generate one automatically.
+- Name the control. Point a `<label for>` or `<mona-label for>` at `inputId`, wrap it in `<mona-label text="...">` (the browser names the inner input from the label), or set `aria-labelledby` or `aria-label`. The placeholder is not a label. `[for]` bound to a template reference only moves focus to the input on click, and doesn't name it.
 
 <!-- verification-checklist
 - [ ] API definitions and defaults verified against source and component metadata

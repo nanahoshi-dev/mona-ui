@@ -108,7 +108,7 @@ The calendar button has `tabindex="-1"`, so the picker is one Tab stop. Keyboard
 
 **Consumer responsibilities**
 
-- Label the picker. Point a `<label for>` or `<mona-label for>` at `inputId`, or set `aria-labelledby` or `aria-label`. The placeholder is not a label.
+- Label the picker. Point a `<label for>` or `<mona-label for>` at `inputId`, wrap it in `<mona-label text="...">`, or set `aria-labelledby` or `aria-label`. The placeholder is not a label. `[for]` bound to the picker's template reference only moves focus to the input on click, and doesn't name it.
 - Link hint or error text with `aria-describedby`.
 
 ### Keyboard Interaction

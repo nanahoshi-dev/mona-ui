@@ -74,27 +74,30 @@ If more than one applies, an explicit `aria-labelledby` wins, and then `aria-lab
 
 ### Which control takes what
 
-| Control               | Wrap in `mona-label` | `[for]="ref"` | `aria-label`, `aria-labelledby` | `inputId` | Its own `label` |
-| --------------------- | -------------------- | ------------- | ------------------------------- | --------- | --------------- |
-| `mona-check-box`      | No                   | Yes           | Yes                             | Yes       | Yes             |
-| `mona-radio-button`   | No                   | Yes           | Yes                             | Yes       | Yes             |
-| `mona-radio-group`    | Yes                  | Yes           | Yes                             | No        | No              |
-| `mona-switch`         | Yes                  | Yes           | Yes                             | No        | No              |
-| `mona-text-box`       | Yes                  | Yes           | Yes                             | Yes       | No              |
-| `mona-otp-input`      | Yes                  | Yes           | Yes                             | Yes       | No              |
-| `mona-rating`         | Yes                  | Yes           | Yes                             | No        | Yes             |
-| `mona-slider`         | Yes                  | Yes           | Yes                             | No        | No              |
-| `mona-range-slider`   | Yes                  | Yes           | Yes                             | No        | No              |
-| `mona-segmented`      | Yes                  | Yes           | Yes                             | No        | No              |
-| `mona-color-palette`  | Yes                  | Yes           | Yes                             | No        | No              |
-| `mona-color-picker`   | Yes                  | Yes           | Yes                             | No        | No              |
-| `mona-color-gradient` | Yes                  | Yes           | Yes                             | No        | No              |
+| Control                                          | Wrap in `mona-label`      | `[for]="ref"` | `aria-label`, `aria-labelledby` | `inputId` | Its own `label` |
+| ------------------------------------------------ | ------------------------- | ------------- | ------------------------------- | --------- | --------------- |
+| `mona-check-box`                                 | No                        | Yes           | Yes                             | Yes       | Yes             |
+| `mona-radio-button`                              | No                        | Yes           | Yes                             | Yes       | Yes             |
+| `mona-radio-group`                               | Yes                       | Yes           | Yes                             | No        | No              |
+| `mona-switch`                                    | Yes                       | Yes           | Yes                             | No        | No              |
+| `mona-text-box`                                  | Yes                       | Yes           | Yes                             | Yes       | No              |
+| `mona-otp-input`                                 | Yes                       | Yes           | Yes                             | Yes       | No              |
+| `mona-rating`                                    | Yes                       | Yes           | Yes                             | No        | Yes             |
+| `mona-slider`                                    | Yes                       | Yes           | Yes                             | No        | No              |
+| `mona-range-slider`                              | Yes                       | Yes           | Yes                             | No        | No              |
+| `mona-segmented`                                 | Yes                       | Yes           | Yes                             | No        | No              |
+| `mona-color-palette`                             | Yes                       | Yes           | Yes                             | No        | No              |
+| `mona-color-picker`                              | Yes                       | Yes           | Yes                             | No        | No              |
+| `mona-color-gradient`                            | Yes                       | Yes           | Yes                             | No        | No              |
+| `mona-numeric-text-box`, `mona-decimal-text-box` | Yes, named by the browser | Focus only    | Yes                             | Yes       | No              |
+| `mona-date-picker`                               | Yes                       | Focus only    | Yes                             | Yes       | No              |
+| `mona-dropdown-list`                             | No                        | Focus only    | Yes                             | No        | No              |
 
 A check box and a radio button render their own `<label>`, and its text has to stay their name, so a wrapping `mona-label` doesn't name them. Use their `label` input, or `[for]` from outside.
 
 A text area is a directive on a native `<textarea>`, so a label's `for` and an `id` work as they do for any native element.
 
-Dropdowns, date pickers and the numeric text box have their own pages, and their `[for]` moves focus to them. See each one for how to name it.
+"Focus only" means `[for]` makes a click on the label focus the control, but doesn't name it. Name those controls with `inputId` and a string `for`, by wrapping them where the table says yes, or with `aria-labelledby` pointing at the label's `id`. A dropdown list has no native input, so `aria-labelledby` or `aria-label` is the only way to name it. The other dropdowns and pickers have their own pages; see each one for how to name it.
 
 ---
 

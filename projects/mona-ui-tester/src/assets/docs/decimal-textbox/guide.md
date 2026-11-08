@@ -83,4 +83,4 @@ decimal-textbox/forms
 
 **Consumer responsibilities**
 
-- Provide an accessible name through `aria-label`. The component does not generate one automatically.
+- Name the control the same way as `NumericTextBoxComponent`: point a `<label for>` or `<mona-label for>` at `inputId`, wrap it in `<mona-label text="...">`, or set `aria-labelledby` or `aria-label`. `[for]` bound to a template reference only moves focus to the input, and doesn't name it.
