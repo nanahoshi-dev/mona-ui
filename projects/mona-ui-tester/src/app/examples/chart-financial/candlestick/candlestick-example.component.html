@@ -1,0 +1,12 @@
+<mona-chart aria-label="ACME share price, March 2 to 13" class="h-72 w-full" xField="date" [data]="prices">
+    <mona-chart-x-axis type="time" />
+    <mona-chart-y-axis title="Price" [formatter]="dollars" />
+    <mona-candlestick-series
+        closeField="close"
+        highField="high"
+        lowField="low"
+        name="ACME"
+        openField="open"
+        [valueFormatter]="dollars" />
+    <mona-chart-tooltip />
+</mona-chart>

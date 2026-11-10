@@ -32,13 +32,7 @@ import { filter, map } from "rxjs";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
 import { DemoService } from "../../services/demo.service";
 import { ComponentConfigFeatureItem, ComponentConfigInputType } from "../../utils/componentConfig";
-import {
-    DemoEventLog,
-    DemoPart,
-    DemoPartValues,
-    readPartValues,
-    reconcilePartValues
-} from "../../utils/demoParts";
+import { DemoEventLog, DemoPart, DemoPartValues, readPartValues, reconcilePartValues } from "../../utils/demoParts";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { PartsDemoContainerComponent } from "../parts-demo-container/parts-demo-container.component";
@@ -108,22 +102,20 @@ const LABEL_ROTATIONS: readonly { readonly text: string; readonly value: ChartAx
     templateUrl: "./chart-line-area-demo.component.html"
 })
 export class ChartLineAreaDemoComponent {
-    readonly #injector = inject(Injector);
-    readonly #metadata = toSignal(
-        inject(DemoService).metadata$.pipe(
-            filter(metadata => !!metadata),
-            map(metadata => metadata ?? {})
-        ),
-        { initialValue: {} as Record<string, ComponentMetadata> }
-    );
     readonly #chartFeatures = this.#features({
         animation: {
             name: "Animation options",
-            description: "Binds an options object to animation instead of true. Off here means [animation]=\"false\".",
+            description: 'Binds an options object to animation instead of true. Off here means [animation]="false".',
             active: true,
             directiveBinding: { hostAttribute: "animation", buildValue: features => readAnimation(features) },
             subFeatures: {
-                duration: { name: "Duration", description: "Milliseconds.", type: "number", numericValue: 300, numericMin: 0 },
+                duration: {
+                    name: "Duration",
+                    description: "Milliseconds.",
+                    type: "number",
+                    numericValue: 300,
+                    numericMin: 0
+                },
                 easing: {
                     name: "Easing",
                     description: "The timing function.",
@@ -159,7 +151,11 @@ export class ChartLineAreaDemoComponent {
                 wheelZoom: { name: "Wheel zoom", description: "Zoom with the wheel.", active: true },
                 dragPan: { name: "Drag pan", description: "Pan by dragging.", active: true },
                 pinchZoom: { name: "Pinch zoom", description: "Zoom with two fingers.", active: true },
-                keyboard: { name: "Keyboard", description: "Shift + arrows pan, + and - zoom, 0 resets.", active: true },
+                keyboard: {
+                    name: "Keyboard",
+                    description: "Shift + arrows pan, + and - zoom, 0 resets.",
+                    active: true
+                },
                 clampToData: { name: "Clamp to data", description: "Keep the viewport inside the data.", active: true },
                 minVisibleCategories: {
                     name: "Minimum visible categories",
@@ -172,9 +168,12 @@ export class ChartLineAreaDemoComponent {
         },
         downsampling: {
             name: "Downsampling options",
-            description: "The chart-wide policy for dense series. Off here means [downsampling]=\"false\".",
+            description: 'The chart-wide policy for dense series. Off here means [downsampling]="false".',
             active: true,
-            directiveBinding: { hostAttribute: "downsampling", buildValue: features => readDownsampling(features, "downsampling") },
+            directiveBinding: {
+                hostAttribute: "downsampling",
+                buildValue: features => readDownsampling(features, "downsampling")
+            },
             subFeatures: downsamplingSubFeatures()
         },
         titleTemplate: {
@@ -205,6 +204,24 @@ export class ChartLineAreaDemoComponent {
                 </ng-template>`
         }
     });
+    readonly #legendFeatures = this.#features({
+        legendItemTemplate: {
+            name: "Legend item template",
+            description: "Replaces each legend entry with your own markup.",
+            active: false,
+            code: `
+                <ng-template monaChartLegendItemTemplate let-item>
+                    <span [style.color]="item.color">{{ item.name }}</span>
+                </ng-template>`
+        }
+    });
+    readonly #metadata = toSignal(
+        inject(DemoService).metadata$.pipe(
+            filter(metadata => !!metadata),
+            map(metadata => metadata ?? {})
+        ),
+        { initialValue: {} as Record<string, ComponentMetadata> }
+    );
     readonly #seriesFeatures = this.#features({
         dataLabels: {
             name: "Data labels",
@@ -219,7 +236,13 @@ export class ChartLineAreaDemoComponent {
                     dropdownDataSource: ["auto", "top", "bottom", "left", "right", "center"],
                     dropdownValue: "auto"
                 },
-                offset: { name: "Offset", description: "Pixels from the point.", type: "number", numericValue: 6, numericMin: 0 },
+                offset: {
+                    name: "Offset",
+                    description: "Pixels from the point.",
+                    type: "number",
+                    numericValue: 6,
+                    numericMin: 0
+                },
                 overflow: {
                     name: "Overflow",
                     description: "What happens at the plot edge.",
@@ -235,8 +258,19 @@ export class ChartLineAreaDemoComponent {
                     numericValue: 2,
                     numericMin: 0
                 },
-                maxLabels: { name: "Maximum labels", description: "The most labels shown.", type: "number", numericValue: 200, numericMin: 0 },
-                color: { name: "Color", description: "Any CSS color. Empty uses the theme.", type: "string", stringValue: "" },
+                maxLabels: {
+                    name: "Maximum labels",
+                    description: "The most labels shown.",
+                    type: "number",
+                    numericValue: 200,
+                    numericMin: 0
+                },
+                color: {
+                    name: "Color",
+                    description: "Any CSS color. Empty uses the theme.",
+                    type: "string",
+                    stringValue: ""
+                },
                 compact: { name: "Compact formatter", description: "Formats labels as 3.2K.", active: false }
             }
         },
@@ -253,30 +287,11 @@ export class ChartLineAreaDemoComponent {
             name: "Downsampling",
             description: "The series' own policy, which wins over the chart's. Off leaves it to the chart.",
             active: false,
-            directiveBinding: { hostAttribute: "downsampling", buildValue: features => readDownsampling(features, "downsampling") },
+            directiveBinding: {
+                hostAttribute: "downsampling",
+                buildValue: features => readDownsampling(features, "downsampling")
+            },
             subFeatures: downsamplingSubFeatures()
-        }
-    });
-    readonly #xAxisFeatures = this.#features({
-        axisLabelTemplate: {
-            name: "Axis label template",
-            description: "Replaces each tick label with your own markup.",
-            active: false,
-            code: `
-                <ng-template monaChartAxisLabelTemplate let-value let-index="index">
-                    <span [class.font-semibold]="index === 0">{{ value }}</span>
-                </ng-template>`
-        }
-    });
-    readonly #legendFeatures = this.#features({
-        legendItemTemplate: {
-            name: "Legend item template",
-            description: "Replaces each legend entry with your own markup.",
-            active: false,
-            code: `
-                <ng-template monaChartLegendItemTemplate let-item>
-                    <span [style.color]="item.color">{{ item.name }}</span>
-                </ng-template>`
         }
     });
     readonly #tooltipFeatures = this.#features({
@@ -293,6 +308,17 @@ export class ChartLineAreaDemoComponent {
         }
     });
 
+    readonly #xAxisFeatures = this.#features({
+        axisLabelTemplate: {
+            name: "Axis label template",
+            description: "Replaces each tick label with your own markup.",
+            active: false,
+            code: `
+                <ng-template monaChartAxisLabelTemplate let-value let-index="index">
+                    <span [class.font-semibold]="index === 0">{{ value }}</span>
+                </ng-template>`
+        }
+    });
     protected readonly animation = computed<ChartAnimationInput>(() => readAnimation(this.#chartFeatures.data()));
     protected readonly chart = computed(() => readPartValues<ChartComponent>(this.#part("chart"), this.values()));
     protected readonly chartFeatures = this.#chartFeatures.data;
@@ -309,7 +335,9 @@ export class ChartLineAreaDemoComponent {
         readDownsampling(this.#chartFeatures.data(), "downsampling")
     );
     protected readonly eventLog = new DemoEventLog();
-    protected readonly legend = computed(() => readPartValues<ChartLegendComponent>(this.#part("legend"), this.values()));
+    protected readonly legend = computed(() =>
+        readPartValues<ChartLegendComponent>(this.#part("legend"), this.values())
+    );
     protected readonly legendFeatures = this.#legendFeatures.data;
     protected readonly navigation = computed<ChartNavigationInput>(() => readNavigation(this.#chartFeatures.data()));
     protected readonly parts = computed<readonly DemoPart[]>(() => {
@@ -328,7 +356,9 @@ export class ChartLineAreaDemoComponent {
                 metadata: chartMetadata,
                 codeAttributes: ['[data]="data"', 'xField="date"'],
                 config: {
-                    inputs: deriveInputConfig<ChartComponent>(chartMetadata, chartOverrides(), { resolveAliases: true }),
+                    inputs: deriveInputConfig<ChartComponent>(chartMetadata, chartOverrides(), {
+                        resolveAliases: true
+                    }),
                     featureHandler: this.#chartFeatures
                 }
             },
@@ -338,7 +368,9 @@ export class ChartLineAreaDemoComponent {
                 metadata: seriesMetadata,
                 codeAttributes: type === "rangeArea" ? ['fromField="low"', 'toField="high"'] : ['field="visitors"'],
                 config: {
-                    inputs: deriveInputConfig<LineSeriesComponent>(seriesMetadata, seriesOverrides(type), { resolveAliases: true }),
+                    inputs: deriveInputConfig<LineSeriesComponent>(seriesMetadata, seriesOverrides(type), {
+                        resolveAliases: true
+                    }),
                     featureHandler: this.#seriesFeatures
                 }
             },
@@ -347,7 +379,11 @@ export class ChartLineAreaDemoComponent {
                 title: "X axis",
                 metadata: xAxisMetadata,
                 config: {
-                    inputs: deriveInputConfig<ChartXAxisComponent>(xAxisMetadata, axisOverrides<ChartXAxisComponent>(), { resolveAliases: true }),
+                    inputs: deriveInputConfig<ChartXAxisComponent>(
+                        xAxisMetadata,
+                        axisOverrides<ChartXAxisComponent>(),
+                        { resolveAliases: true }
+                    ),
                     featureHandler: this.#xAxisFeatures
                 }
             },
@@ -368,7 +404,11 @@ export class ChartLineAreaDemoComponent {
                 title: "Legend",
                 metadata: legendMetadata,
                 config: {
-                    inputs: deriveInputConfig<ChartLegendComponent>(legendMetadata, { userClass: undefined }, { resolveAliases: true }),
+                    inputs: deriveInputConfig<ChartLegendComponent>(
+                        legendMetadata,
+                        { userClass: undefined },
+                        { resolveAliases: true }
+                    ),
                     featureHandler: this.#legendFeatures
                 }
             },
@@ -387,19 +427,28 @@ export class ChartLineAreaDemoComponent {
             }
         ];
     });
-    protected readonly series = computed(() => readPartValues<LineSeriesComponent>(this.#part(this.seriesType()), this.values()));
-    protected readonly seriesFeatures = this.#seriesFeatures.data;
+    /** The panels come from metadata that loads after the page; until then the chart would get no settings. */
+    protected readonly ready = computed(() => this.parts().every(part => (part.metadata.inputs ?? []).length > 0));
+    protected readonly series = computed(() =>
+        readPartValues<LineSeriesComponent>(this.#part(this.seriesType()), this.values())
+    );
     protected readonly seriesDownsampling = computed<ChartDownsamplingInput | undefined>(() => {
         const features = this.#seriesFeatures.data();
         return features["downsampling"]?.active ? readDownsampling(features, "downsampling") : undefined;
     });
+    /** The area and range area inputs the line series doesn't have, read loosely since one panel serves all three. */
+    protected readonly seriesExtras = computed(() => this.series() as unknown as SeriesExtras);
+
+    protected readonly seriesFeatures = this.#seriesFeatures.data;
     protected readonly seriesType = signal<SeriesType>("line");
     protected readonly seriesTypeOptions: readonly SegmentedOption<SeriesType>[] = [
         { label: "Line", value: "line" },
         { label: "Area", value: "area" },
         { label: "Range area", value: "rangeArea" }
     ];
-    protected readonly tooltip = computed(() => readPartValues<ChartTooltipComponent>(this.#part("tooltip"), this.values()));
+    protected readonly tooltip = computed(() =>
+        readPartValues<ChartTooltipComponent>(this.#part("tooltip"), this.values())
+    );
     protected readonly tooltipFeatures = this.#tooltipFeatures.data;
     protected readonly values = linkedSignal<readonly DemoPart[], DemoPartValues>({
         source: this.parts,
@@ -408,13 +457,10 @@ export class ChartLineAreaDemoComponent {
     protected readonly xAxis = computed(() => readPartValues<ChartXAxisComponent>(this.#part("xAxis"), this.values()));
     protected readonly xAxisFeatures = this.#xAxisFeatures.data;
     protected readonly yAxis = computed(() => readPartValues<ChartYAxisComponent>(this.#part("yAxis"), this.values()));
-    /** The area and range area inputs the line series doesn't have, read loosely since one panel serves all three. */
-    protected readonly seriesExtras = computed(() => this.series() as unknown as SeriesExtras);
-
-    protected onSeriesVisibleChange(visible: boolean): void {
-        const type = this.seriesType();
-        this.values.update(values => ({ ...values, [type]: { ...values[type], visible } }));
-        this.eventLog.record("visibleChange", visible);
+    protected onDataSetChange(set: TrafficDataSet | null): void {
+        if (set) {
+            this.dataSet.set(set);
+        }
     }
 
     protected onSeriesTypeChange(type: SeriesType | null): void {
@@ -423,14 +469,14 @@ export class ChartLineAreaDemoComponent {
         }
     }
 
-    protected onDataSetChange(set: TrafficDataSet | null): void {
-        if (set) {
-            this.dataSet.set(set);
-        }
+    protected onSeriesVisibleChange(visible: boolean): void {
+        const type = this.seriesType();
+        this.values.update(values => ({ ...values, [type]: { ...values[type], visible } }));
+        this.eventLog.record("visibleChange", visible);
     }
 
     #features(data: ComponentConfigFeatureItem): FeatureConfigHandler {
-        return createFeatureInjector(data, this.#injector).get(FeatureConfigHandler);
+        return createFeatureInjector(data, inject(Injector)).get(FeatureConfigHandler);
     }
 
     #part(id: string): DemoPart | undefined {
@@ -465,7 +511,13 @@ function seriesOverrides(type: SeriesType): Partial<ComponentConfigInputType<Lin
         name: { type: "string", value: type === "rangeArea" ? "Expected range" : "Visitors" },
         seriesKey: undefined,
         userClass: undefined,
-        valueFormatter: { type: "customDropdown", value: VALUE_FORMATTERS, textField: "text", valueField: "value", defaultValue: undefined },
+        valueFormatter: {
+            type: "customDropdown",
+            value: VALUE_FORMATTERS,
+            textField: "text",
+            valueField: "value",
+            defaultValue: undefined
+        },
         xAxisId: undefined,
         yAxisId: undefined
     };
@@ -474,8 +526,20 @@ function seriesOverrides(type: SeriesType): Partial<ComponentConfigInputType<Lin
 function axisOverrides<T extends ChartXAxisComponent | ChartYAxisComponent>(): Partial<ComponentConfigInputType<T>> {
     const overrides: Partial<ComponentConfigInputType<ChartXAxisComponent>> = {
         axisId: undefined,
-        formatter: { type: "customDropdown", value: AXIS_FORMATTERS, textField: "text", valueField: "value", defaultValue: undefined },
-        labelRotation: { type: "customDropdown", value: LABEL_ROTATIONS, textField: "text", valueField: "value", defaultValue: 0 }
+        formatter: {
+            type: "customDropdown",
+            value: AXIS_FORMATTERS,
+            textField: "text",
+            valueField: "value",
+            defaultValue: undefined
+        },
+        labelRotation: {
+            type: "customDropdown",
+            value: LABEL_ROTATIONS,
+            textField: "text",
+            valueField: "value",
+            defaultValue: 0
+        }
     };
     return overrides as Partial<ComponentConfigInputType<T>>;
 }

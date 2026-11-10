@@ -154,11 +154,13 @@ describe("normalizeOptionalValues", () => {
             prop({ name: "maxValue", type: "number | null" }),
             prop({ name: "title", type: "string" })
         ]);
-        expect(normalizeOptionalValues(metadata, { pointRadius: null, axisId: "", maxValue: null, title: "" })).toEqual({
-            pointRadius: undefined,
-            axisId: undefined,
-            maxValue: null,
-            title: ""
-        });
+        expect(normalizeOptionalValues(metadata, { pointRadius: null, axisId: "", maxValue: null, title: "" })).toEqual(
+            {
+                pointRadius: undefined,
+                axisId: undefined,
+                maxValue: null,
+                title: ""
+            }
+        );
     });
 });

@@ -1,0 +1,13 @@
+<mona-chart aria-label="Average wind by direction" class="h-80 w-full" [data]="wind">
+    <mona-chart-angular-axis [formatter]="compass" [tickCount]="8" />
+    <mona-chart-radial-axis [labelAngle]="45" />
+    <mona-polar-series
+        categoryField="bearing"
+        curve="smooth"
+        field="speed"
+        fillMode="gradient"
+        name="Average wind"
+        [showPoints]="true"
+        [valueFormatter]="kmh" />
+    <mona-chart-tooltip />
+</mona-chart>

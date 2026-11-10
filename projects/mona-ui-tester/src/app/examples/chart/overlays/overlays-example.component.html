@@ -1,0 +1,9 @@
+<mona-chart aria-label="Response time by hour" class="h-72 w-full" xField="hour" [data]="latency">
+    <mona-chart-x-axis />
+    <mona-chart-y-axis title="ms" />
+    <mona-line-series field="ms" name="Response time" [showPoints]="true" />
+    <mona-chart-reference-band axis="x" from="08:00" label="Peak hours" to="16:00" />
+    <mona-chart-reference-line axis="y" label="Budget" [value]="200" />
+    <mona-chart-annotation label="Deploy" x="12:00" [y]="260" />
+    <mona-chart-crosshair mode="x" />
+</mona-chart>

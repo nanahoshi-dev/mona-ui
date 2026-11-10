@@ -1,0 +1,171 @@
+@let c = chart();
+@let s = series();
+@let l = legend();
+@let t = tooltip();
+@let chartFeatureData = chartFeatures();
+@let seriesFeatureData = seriesFeatures();
+
+<app-parts-demo-container [eventLog]="eventLog" [parts]="parts()" [(values)]="values">
+    <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-medium" id="chart-pie-series-type">Series</span>
+            <mona-segmented
+                aria-labelledby="chart-pie-series-type"
+                size="small"
+                [options]="seriesTypeOptions"
+                [value]="seriesType()"
+                (valueChange)="onSeriesTypeChange($event)"></mona-segmented>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-medium" id="chart-pie-data-set">Data</span>
+            <mona-segmented
+                aria-labelledby="chart-pie-data-set"
+                size="small"
+                [options]="dataSetOptions"
+                [value]="dataSet()"
+                (valueChange)="onDataSetChange($event)"></mona-segmented>
+        </div>
+    </div>
+
+    @if (ready()) {
+        <mona-chart
+            class="h-96 w-full"
+            [animation]="animation()"
+            [aria-description]="c.ariaDescription"
+            [aria-label]="c.ariaLabel"
+            [data]="data()"
+            [dataTable]="c.dataTable"
+            [landmark]="c.landmark"
+            [renderer]="c.renderer"
+            [subtitle]="c.subtitle"
+            [title]="c.title"
+            [titleAlign]="c.titleAlign"
+            (pointClick)="eventLog.record('pointClick', $event)"
+            (pointFocusChange)="eventLog.record('pointFocusChange', $event)"
+            (seriesVisibilityChange)="eventLog.record('seriesVisibilityChange', $event)"
+            (viewportChange)="eventLog.record('viewportChange', $event)"
+            (viewportChangeDetails)="eventLog.record('viewportChangeDetails', $event)">
+            @switch (seriesType()) {
+                @case ("pie") {
+                    <mona-pie-series
+                        categoryField="channel"
+                        field="sessions"
+                        keyField="channel"
+                        [categoryFormatter]="s.categoryFormatter"
+                        [colorField]="colorField()"
+                        [colors]="s.colors"
+                        [cornerRadius]="s.cornerRadius"
+                        [endAngle]="s.endAngle"
+                        [fillMode]="s.fillMode"
+                        [fillOpacity]="s.fillOpacity"
+                        [hiddenIndices]="s.hiddenIndices"
+                        [labelContent]="s.labelContent"
+                        [labelPosition]="s.labelPosition"
+                        [minLabelAngle]="s.minLabelAngle"
+                        [name]="s.name"
+                        [outerRadiusRatio]="s.outerRadiusRatio"
+                        [padAngle]="s.padAngle"
+                        [showLabels]="s.showLabels"
+                        [startAngle]="s.startAngle"
+                        [strokeColor]="s.strokeColor"
+                        [strokeWidth]="s.strokeWidth"
+                        [valueFormatter]="s.valueFormatter"
+                        [visible]="s.visible"
+                        (hiddenIndicesChange)="onHiddenIndicesChange($event)"
+                        (sliceVisibilityChange)="eventLog.record('sliceVisibilityChange', $event)"
+                        (visibleChange)="onSeriesVisibleChange($event)">
+                        @if (seriesFeatureData["sliceLabelTemplate"]?.active) {
+                            <ng-template monaChartSliceLabelTemplate let-slice>
+                                <span class="flex flex-col items-center leading-tight">
+                                    <span class="font-semibold">{{ slice.formattedCategory }}</span>
+                                    <span>{{ slice.formattedValue }}</span>
+                                </span>
+                            </ng-template>
+                        }
+                    </mona-pie-series>
+                }
+                @case ("donut") {
+                    <mona-donut-series
+                        categoryField="channel"
+                        field="sessions"
+                        keyField="channel"
+                        [categoryFormatter]="s.categoryFormatter"
+                        [colorField]="colorField()"
+                        [colors]="s.colors"
+                        [cornerRadius]="s.cornerRadius"
+                        [endAngle]="s.endAngle"
+                        [fillMode]="s.fillMode"
+                        [fillOpacity]="s.fillOpacity"
+                        [hiddenIndices]="s.hiddenIndices"
+                        [innerRadiusRatio]="s.innerRadiusRatio"
+                        [labelContent]="s.labelContent"
+                        [labelPosition]="s.labelPosition"
+                        [minLabelAngle]="s.minLabelAngle"
+                        [name]="s.name"
+                        [outerRadiusRatio]="s.outerRadiusRatio"
+                        [padAngle]="s.padAngle"
+                        [showLabels]="s.showLabels"
+                        [startAngle]="s.startAngle"
+                        [strokeColor]="s.strokeColor"
+                        [strokeWidth]="s.strokeWidth"
+                        [valueFormatter]="s.valueFormatter"
+                        [visible]="s.visible"
+                        (hiddenIndicesChange)="onHiddenIndicesChange($event)"
+                        (sliceVisibilityChange)="eventLog.record('sliceVisibilityChange', $event)"
+                        (visibleChange)="onSeriesVisibleChange($event)">
+                        @if (seriesFeatureData["sliceLabelTemplate"]?.active) {
+                            <ng-template monaChartSliceLabelTemplate let-slice>
+                                <span class="flex flex-col items-center leading-tight">
+                                    <span class="font-semibold">{{ slice.formattedCategory }}</span>
+                                    <span>{{ slice.formattedValue }}</span>
+                                </span>
+                            </ng-template>
+                        }
+                        @if (seriesFeatureData["centerTemplate"]?.active) {
+                            <ng-template
+                                monaChartCenterTemplate
+                                let-formattedTotal="formattedTotal"
+                                let-count="visibleSliceCount">
+                                <span class="text-xs text-muted-foreground">{{ count }} channels</span>
+                                <span class="text-lg font-semibold text-foreground">{{ formattedTotal }}</span>
+                            </ng-template>
+                        }
+                    </mona-donut-series>
+                }
+            }
+
+            <mona-chart-legend [interactive]="l.interactive" [mode]="l.mode" [position]="l.position">
+                @if (legendFeatures()["legendItemTemplate"]?.active) {
+                    <ng-template monaChartLegendItemTemplate let-item>
+                        <span class="text-sm">{{ item.name }} · {{ item.percentage | percent: "1.0-1" }}</span>
+                    </ng-template>
+                }
+            </mona-chart-legend>
+            <mona-chart-tooltip [enabled]="t.enabled" [shared]="t.shared">
+                @if (tooltipFeatures()["tooltipTemplate"]?.active) {
+                    <ng-template monaChartTooltipTemplate let-point="point">
+                        <div class="rounded-md border border-border bg-popover p-2 text-xs text-popover-foreground">
+                            {{ point.formattedCategory }}: {{ point.formattedY }} ({{ point.formattedPercentage }})
+                        </div>
+                    </ng-template>
+                }
+            </mona-chart-tooltip>
+
+            @if (chartFeatureData["titleTemplate"]?.active) {
+                <ng-template monaChartTitleTemplate let-title>
+                    <span class="font-semibold">🥧 {{ title }}</span>
+                </ng-template>
+            }
+            @if (chartFeatureData["subtitleTemplate"]?.active) {
+                <ng-template monaChartSubtitleTemplate let-subtitle>
+                    <em>{{ subtitle }}</em>
+                </ng-template>
+            }
+            @if (chartFeatureData["noDataTemplate"]?.active) {
+                <ng-template monaChartNoDataTemplate>
+                    <span class="text-sm text-muted-foreground">No sessions yet</span>
+                </ng-template>
+            }
+        </mona-chart>
+    }
+</app-parts-demo-container>

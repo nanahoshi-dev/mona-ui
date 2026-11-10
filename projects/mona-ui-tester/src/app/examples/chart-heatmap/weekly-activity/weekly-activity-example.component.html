@@ -1,0 +1,7 @@
+<mona-chart aria-label="Orders by day and time" class="h-80 w-full" xField="slot" [data]="orders">
+    <mona-chart-x-axis title="Time of day" />
+    <mona-chart-y-axis />
+    <mona-heatmap-series field="orders" name="Orders" yField="day" [showValues]="true" />
+    <mona-chart-legend />
+    <mona-chart-tooltip />
+</mona-chart>

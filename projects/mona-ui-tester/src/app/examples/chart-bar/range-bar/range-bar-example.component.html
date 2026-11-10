@@ -1,0 +1,14 @@
+<mona-chart aria-label="Monthly temperature range" class="h-72 w-full" xField="month" [data]="temperatures">
+    <mona-chart-x-axis />
+    <mona-chart-y-axis title="°C" />
+    <mona-range-bar-series
+        fromField="low"
+        name="Daily low to high"
+        toField="high"
+        [borderRadius]="6"
+        [maxBarWidth]="24"
+        [valueFormatter]="celsius" />
+    <mona-line-series field="mean" name="Average" [showPoints]="true" [valueFormatter]="celsius" />
+    <mona-chart-legend />
+    <mona-chart-tooltip [shared]="true" />
+</mona-chart>

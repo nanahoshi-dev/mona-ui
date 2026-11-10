@@ -1,0 +1,22 @@
+<div class="flex w-full flex-col gap-3">
+    <div class="flex flex-wrap gap-2">
+        <button monaButton type="button" (click)="hidden.set(['k:s:trial'])">Skip the trial stage</button>
+        <button monaButton type="button" [disabled]="hidden().length === 0" (click)="hidden.set([])">
+            Show every stage
+        </button>
+    </div>
+    <mona-chart aria-label="Users at each stage of the customer journey" class="h-80 w-full" [data]="journey">
+        <mona-funnel-series
+            categoryField="stage"
+            field="users"
+            keyField="id"
+            labelContent="category-value-conversion"
+            name="Users"
+            [(hiddenStageIds)]="hidden"
+            (stageVisibilityChange)="onStageVisibilityChange($event)" />
+        <mona-chart-legend />
+        <mona-chart-tooltip />
+    </mona-chart>
+    <p class="text-sm text-muted-foreground">Hidden stage IDs: {{ hidden().length ? hidden().join(", ") : "none" }}</p>
+    <p aria-live="polite" class="text-sm text-muted-foreground">{{ lastChange() }}</p>
+</div>

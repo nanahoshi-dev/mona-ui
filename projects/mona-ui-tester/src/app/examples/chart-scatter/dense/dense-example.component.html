@@ -1,0 +1,20 @@
+<div class="flex w-full flex-col gap-3">
+    <mona-segmented
+        aria-label="Markers drawn"
+        size="small"
+        [options]="modes"
+        [value]="mode()"
+        (valueChange)="onModeChange($event)"></mona-segmented>
+    <mona-chart
+        aria-label="Response time by request size"
+        class="h-80 w-full"
+        xField="size"
+        [data]="requests"
+        [downsampling]="reduce()"
+        [navigation]="true">
+        <mona-chart-x-axis title="Request size (KB)" />
+        <mona-chart-y-axis title="Response time (ms)" />
+        <mona-scatter-series field="duration" name="Requests" [pointRadius]="2" [strokeWidth]="0" />
+        <mona-chart-tooltip />
+    </mona-chart>
+</div>

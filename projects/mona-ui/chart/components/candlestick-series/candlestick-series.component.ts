@@ -86,7 +86,7 @@ export class CandlestickSeriesComponent implements OnInit {
 
     /**
      * @description Visual fill mode for candle bodies: 'filled' (solid fill) or 'hollow' (rising hollow, falling filled).
-     * @default "filled"
+     * @default "hollow"
      */
     public readonly fillMode = input<ChartFinancialFillMode>("hollow");
 

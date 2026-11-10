@@ -111,7 +111,10 @@ export function normalizeOptionalValues(
     return result;
 }
 
-function classifyResolvedType(typeString: string, literalOptions: readonly string[] | undefined): ClassifiedType | undefined {
+function classifyResolvedType(
+    typeString: string,
+    literalOptions: readonly string[] | undefined
+): ClassifiedType | undefined {
     const parts = typeString.split("|").map(part => part.trim());
     const optional = parts.includes("undefined") || parts.includes("null");
     if (literalOptions && literalOptions.length > 1) {

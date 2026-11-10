@@ -245,6 +245,19 @@ describe("Chart documentation", () => {
     let publicApiSource = "";
     let sourceText = "";
 
+    function readAllApiSections(): Map<string, string> {
+        const sections = new Map<string, string>();
+        for (const [name, markdown] of docs) {
+            if (name.endsWith("/api.md")) {
+                for (const [selector, section] of readApiSections(markdown)) {
+                    expect(sections.has(selector), `<${selector}> has a section in more than one api.md`).toBe(false);
+                    sections.set(selector, section);
+                }
+            }
+        }
+        return sections;
+    }
+
     function readDoc(name: string): string {
         const doc = docs.get(name);
         if (doc === undefined) {
@@ -289,10 +302,14 @@ describe("Chart documentation", () => {
         const root = nodeProcess.cwd();
         const chartRoot = path.resolve(root, "projects/mona-ui/chart");
 
+        const docsRoot = "projects/mona-ui-tester/src/assets/docs";
+        const chartPages = fs
+            .readdirSync(path.resolve(root, docsRoot), { withFileTypes: true })
+            .filter(entry => entry.isDirectory() && /^chart(?:-|$)/.test(entry.name))
+            .map(entry => entry.name);
+        expect(chartPages.length).toBe(11);
         for (const name of [
-            "projects/mona-ui-tester/src/assets/docs/chart/api.md",
-            "projects/mona-ui-tester/src/assets/docs/chart/guide.md",
-            "projects/mona-ui-tester/src/assets/docs/chart/intro.md",
+            ...chartPages.flatMap(page => ["api", "guide", "intro"].map(file => `${docsRoot}/${page}/${file}.md`)),
             "projects/mona-ui/chart/README.md",
             "docs/charts.md"
         ]) {
@@ -452,7 +469,7 @@ describe("Chart documentation", () => {
         });
 
         it("has an api.md section for every exported component and names each in the README", () => {
-            const sections = readApiSections(readDoc("chart/api.md"));
+            const sections = readAllApiSections();
             const readme = readDoc("chart/README.md");
             const exported = components.filter(
                 component => component.selector.startsWith("mona-") && component.className in PublicApi
@@ -486,7 +503,7 @@ describe("Chart documentation", () => {
 
     describe("tables", () => {
         it("lists exactly the inputs and outputs of each component in api.md", () => {
-            const sections = readApiSections(readDoc("chart/api.md"));
+            const sections = readAllApiSections();
             for (const [selector, section] of sections) {
                 const { members } = componentFor(selector);
                 const rows = [...section.matchAll(/^\| `([\w-]+)`( \([^)]*\))? \| (.*) \|$/gm)];

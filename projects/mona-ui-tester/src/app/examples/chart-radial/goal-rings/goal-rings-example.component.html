@@ -1,0 +1,18 @@
+<div class="flex w-full flex-col gap-3">
+    <mona-chart aria-label="Progress towards quarterly goals" class="h-80 w-full" [data]="goals">
+        <mona-radial-bar-series
+            categoryField="team"
+            field="progress"
+            name="Goal progress"
+            [endAngle]="270"
+            [max]="100"
+            [valueFormatter]="percent"
+            [(hiddenItemIds)]="hiddenTeams"
+            (datumVisibilityChange)="onDatumVisibilityChange($event)" />
+        <mona-chart-legend position="end" />
+        <mona-chart-tooltip />
+    </mona-chart>
+    <p class="text-sm">
+        {{ lastToggle() }} Hidden item ids: <code>{{ hiddenSummary() }}</code>
+    </p>
+</div>

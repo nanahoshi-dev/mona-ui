@@ -1,0 +1,113 @@
+@let c = chart();
+@let s = series();
+@let l = legend();
+@let t = tooltip();
+@let chartFeatureData = chartFeatures();
+
+<app-parts-demo-container [eventLog]="eventLog" [parts]="parts()" [(values)]="values">
+    <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-medium" id="chart-funnel-data-set">Data</span>
+            <mona-segmented
+                aria-labelledby="chart-funnel-data-set"
+                size="small"
+                [options]="dataSetOptions"
+                [value]="dataSet()"
+                (valueChange)="onDataSetChange($event)"></mona-segmented>
+        </div>
+    </div>
+
+    @if (ready()) {
+        <mona-chart
+            class="h-96 w-full"
+            [animation]="animation()"
+            [aria-description]="c.ariaDescription"
+            [aria-label]="c.ariaLabel"
+            [data]="data()"
+            [dataTable]="c.dataTable"
+            [landmark]="c.landmark"
+            [renderer]="c.renderer"
+            [subtitle]="c.subtitle"
+            [title]="c.title"
+            [titleAlign]="c.titleAlign"
+            (pointClick)="eventLog.record('pointClick', $event)"
+            (pointFocusChange)="eventLog.record('pointFocusChange', $event)"
+            (seriesVisibilityChange)="eventLog.record('seriesVisibilityChange', $event)"
+            (viewportChange)="eventLog.record('viewportChange', $event)"
+            (viewportChangeDetails)="eventLog.record('viewportChangeDetails', $event)">
+            <mona-funnel-series
+                categoryField="stage"
+                field="users"
+                keyField="id"
+                [categoryFormatter]="s.categoryFormatter"
+                [color]="s.color"
+                [colorField]="s.colorField"
+                [colors]="s.colors"
+                [fillOpacity]="s.fillOpacity"
+                [gap]="s.gap"
+                [hiddenStageIds]="s.hiddenStageIds"
+                [labelContent]="s.labelContent"
+                [maxLabels]="s.maxLabels"
+                [minLabelHeight]="s.minLabelHeight"
+                [minLabelWidth]="s.minLabelWidth"
+                [name]="s.name"
+                [orientation]="s.orientation"
+                [showLabels]="s.showLabels"
+                [strokeColor]="s.strokeColor"
+                [strokeWidth]="s.strokeWidth"
+                [valueFormatter]="s.valueFormatter"
+                [visible]="s.visible"
+                [widthRatio]="s.widthRatio"
+                (hiddenStageIdsChange)="onHiddenStageIdsChange($event)"
+                (stageVisibilityChange)="eventLog.record('stageVisibilityChange', $event)"
+                (visibleChange)="onSeriesVisibleChange($event)">
+                @if (seriesFeatures()["labelTemplate"]?.active) {
+                    <ng-template monaChartFunnelLabelTemplate let-stage>
+                        <span class="text-xs font-semibold">{{ stage.formattedCategory }}</span>
+                        @if (stage.formattedConversionRate) {
+                            <span class="text-xs">{{ stage.formattedConversionRate }} of previous</span>
+                        }
+                    </ng-template>
+                }
+            </mona-funnel-series>
+
+            <mona-chart-legend [interactive]="l.interactive" [mode]="l.mode" [position]="l.position">
+                @if (legendFeatures()["legendItemTemplate"]?.active) {
+                    <ng-template monaChartLegendItemTemplate let-item>
+                        <span class="text-sm" [class.line-through]="!item.visible">{{ item.name }}</span>
+                    </ng-template>
+                }
+            </mona-chart-legend>
+            <mona-chart-tooltip [enabled]="t.enabled" [shared]="t.shared">
+                @if (tooltipFeatures()["tooltipTemplate"]?.active) {
+                    <ng-template monaChartTooltipTemplate let-point="point">
+                        <div class="rounded-md border border-border bg-popover p-2 text-xs text-popover-foreground">
+                            <div class="font-semibold">
+                                {{ point.formattedCategory }}: {{ point.funnel?.formattedValue }}
+                            </div>
+                            @if (point.funnel?.formattedOverallConversionRate) {
+                                <div>{{ point.funnel?.formattedOverallConversionRate }} of the first stage</div>
+                            }
+                        </div>
+                    </ng-template>
+                }
+            </mona-chart-tooltip>
+
+            @if (chartFeatureData["titleTemplate"]?.active) {
+                <ng-template monaChartTitleTemplate let-title>
+                    <span class="font-semibold">🔻 {{ title }}</span>
+                </ng-template>
+            }
+            @if (chartFeatureData["subtitleTemplate"]?.active) {
+                <ng-template monaChartSubtitleTemplate let-subtitle>
+                    <em>{{ subtitle }}</em>
+                </ng-template>
+            }
+            @if (chartFeatureData["noDataTemplate"]?.active) {
+                <ng-template monaChartNoDataTemplate>
+                    <span class="text-sm text-muted-foreground">No one has entered the funnel yet</span>
+                </ng-template>
+            }
+        </mona-chart>
+    }
+</app-parts-demo-container>

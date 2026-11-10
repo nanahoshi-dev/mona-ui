@@ -31,7 +31,9 @@ export type DemoPartValues = Readonly<Record<string, Readonly<Record<string, unk
  * Every input a part's panel controls, as the component takes it. The keys are required because a playground binds
  * all of them, and a value the panel holds as `null` or `""` is already `undefined` where the input expects that.
  */
-export type DemoInputValues<TComponent> = { [K in keyof ComponentInputs<TComponent>]-?: ComponentInputs<TComponent>[K] };
+export type DemoInputValues<TComponent> = {
+    [K in keyof ComponentInputs<TComponent>]-?: ComponentInputs<TComponent>[K];
+};
 
 /**
  * The values of each part, keeping what the user changed for parts that are still there and starting new parts from
@@ -47,7 +49,10 @@ export function reconcilePartValues(parts: readonly DemoPart[], previous?: DemoP
 }
 
 /** A part's values, ready to bind: cleared controls become `undefined` where the input takes it. */
-export function readPartValues<TComponent>(part: DemoPart | undefined, values: DemoPartValues): DemoInputValues<TComponent> {
+export function readPartValues<TComponent>(
+    part: DemoPart | undefined,
+    values: DemoPartValues
+): DemoInputValues<TComponent> {
     if (!part) {
         return {} as DemoInputValues<TComponent>;
     }

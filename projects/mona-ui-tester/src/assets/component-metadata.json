@@ -3782,7 +3782,7 @@
           "filled",
           "hollow"
         ],
-        "defaultValue": "\"filled\""
+        "defaultValue": "\"hollow\""
       },
       {
         "description": "Fill and stroke opacity ratio (0 to 1).",
@@ -5573,7 +5573,7 @@
         "defaultValue": "0"
       },
       {
-        "description": "Whether to display inside slice data labels.",
+        "description": "Whether to display slice labels, inside or outside as `labelPosition` sets.",
         "kind": "input",
         "name": "showLabels",
         "type": "boolean",
@@ -6698,7 +6698,7 @@
         "defaultValue": "0"
       },
       {
-        "description": "Whether to display inside slice data labels.",
+        "description": "Whether to display slice labels, inside or outside as `labelPosition` sets.",
         "kind": "input",
         "name": "showLabels",
         "type": "boolean",

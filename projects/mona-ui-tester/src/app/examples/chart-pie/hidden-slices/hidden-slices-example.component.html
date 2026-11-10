@@ -1,0 +1,31 @@
+<div class="flex flex-col gap-4">
+    <div aria-label="Regions in the chart" class="flex flex-wrap gap-2" role="group">
+        @for (row of regions; track row.region; let index = $index) {
+            <button
+                monaButton
+                size="small"
+                [selected]="isShown(index)"
+                [toggleable]="true"
+                (selectedChange)="setShown(index, $event)">
+                {{ row.region }}
+            </button>
+        }
+    </div>
+    <mona-chart aria-label="Revenue by region" class="h-72 w-full" [data]="regions">
+        <mona-donut-series
+            categoryField="region"
+            field="revenue"
+            name="Revenue"
+            [valueFormatter]="currency"
+            [(hiddenIndices)]="hidden">
+            <ng-template monaChartCenterTemplate let-count="visibleSliceCount" let-formattedTotal="formattedTotal">
+                <div class="flex flex-col items-center">
+                    <span class="text-xs">{{ count }} of {{ regions.length }} regions</span>
+                    <span class="text-lg font-semibold">{{ formattedTotal }}</span>
+                </div>
+            </ng-template>
+        </mona-donut-series>
+        <mona-chart-legend position="end" />
+        <mona-chart-tooltip />
+    </mona-chart>
+</div>

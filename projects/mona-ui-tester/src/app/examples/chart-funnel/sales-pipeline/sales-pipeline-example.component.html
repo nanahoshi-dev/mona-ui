@@ -1,0 +1,10 @@
+<mona-chart aria-label="Sales pipeline by stage" class="h-80 w-full" [data]="pipeline">
+    <mona-funnel-series
+        categoryField="stage"
+        field="deals"
+        labelContent="category-value-conversion"
+        name="Deals"
+        [valueFormatter]="deals" />
+    <mona-chart-legend position="end" />
+    <mona-chart-tooltip />
+</mona-chart>

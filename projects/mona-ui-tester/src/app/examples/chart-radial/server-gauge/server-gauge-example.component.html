@@ -1,0 +1,24 @@
+<div class="flex w-full flex-col gap-3">
+    <mona-segmented
+        aria-label="Simulated load"
+        size="small"
+        [options]="loads"
+        [value]="load()"
+        (valueChange)="onLoadChange($event)"></mona-segmented>
+    <mona-chart aria-label="Server load" class="h-64 w-full">
+        <mona-gauge-series
+            name="Server load"
+            [endAngle]="90"
+            [startAngle]="-90"
+            [value]="load()"
+            [valueFormatter]="percent">
+            <ng-template monaChartGaugeCenterTemplate let-formattedValue="formattedValue" let-isClamped="isClamped">
+                <span class="text-2xl font-semibold text-foreground">{{ formattedValue }}</span>
+                @if (isClamped) {
+                    <span class="text-xs text-muted-foreground">Above the scale</span>
+                }
+            </ng-template>
+        </mona-gauge-series>
+        <mona-chart-tooltip />
+    </mona-chart>
+</div>

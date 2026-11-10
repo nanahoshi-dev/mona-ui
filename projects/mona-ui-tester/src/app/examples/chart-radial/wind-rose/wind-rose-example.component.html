@@ -1,0 +1,19 @@
+<div class="flex w-full flex-col gap-3">
+    <mona-segmented
+        aria-label="Petal scale"
+        size="small"
+        [options]="scaleModes"
+        [value]="scaleMode()"
+        (valueChange)="onScaleModeChange($event)"></mona-segmented>
+    <mona-chart aria-label="Hours of wind by direction in March" class="h-80 w-full" [data]="wind">
+        <mona-rose-series
+            categoryField="direction"
+            field="hours"
+            name="Wind"
+            [scaleMode]="scaleMode()"
+            [valueFormatter]="hours" />
+        <mona-chart-angular-axis [rotation]="-22.5" />
+        <mona-chart-radial-axis [formatter]="hourTicks" [labelAngle]="22.5" />
+        <mona-chart-tooltip />
+    </mona-chart>
+</div>

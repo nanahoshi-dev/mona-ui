@@ -1,0 +1,223 @@
+@let c = chart();
+@let x = xAxis();
+@let y = yAxis();
+@let l = legend();
+@let t = tooltip();
+@let ch = crosshair();
+@let rl = line();
+@let rb = band();
+@let an = annotation();
+@let se = selection();
+@let br = brush();
+@let chartFeatureData = chartFeatures();
+
+<app-parts-demo-container [eventLog]="eventLog" [parts]="parts()" [(values)]="values">
+    <fieldset class="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <legend class="sr-only">Chart parts</legend>
+        @for (part of optionalParts; track part.id) {
+            <mona-check-box
+                [checked]="isEnabled(part.id)"
+                [label]="part.title"
+                (checkedChange)="togglePart(part.id, $event)"></mona-check-box>
+        }
+        <mona-check-box label="Empty data" [checked]="empty()" (checkedChange)="empty.set($event)"></mona-check-box>
+    </fieldset>
+
+    @if (ready()) {
+        <mona-chart
+            class="h-96 w-full"
+            xField="month"
+            [animation]="animation()"
+            [aria-description]="c.ariaDescription"
+            [aria-label]="c.ariaLabel"
+            [data]="data()"
+            [dataTable]="c.dataTable"
+            [landmark]="c.landmark"
+            [navigation]="navigation()"
+            [renderer]="c.renderer"
+            [subtitle]="c.subtitle"
+            [title]="c.title"
+            [titleAlign]="c.titleAlign"
+            (pointClick)="eventLog.record('pointClick', $event)"
+            (pointFocusChange)="eventLog.record('pointFocusChange', $event)"
+            (seriesVisibilityChange)="eventLog.record('seriesVisibilityChange', $event)"
+            (viewportChange)="eventLog.record('viewportChange', $event)"
+            (viewportChangeDetails)="eventLog.record('viewportChangeDetails', $event)">
+            <mona-chart-x-axis
+                [axisLine]="x.axisLine"
+                [exponent]="x.exponent"
+                [formatter]="x.formatter"
+                [gridLines]="x.gridLines"
+                [labelMaxWidth]="x.labelMaxWidth"
+                [labelPadding]="x.labelPadding"
+                [labels]="x.labels"
+                [logBase]="x.logBase"
+                [nice]="x.nice"
+                [position]="x.position"
+                [symlogConstant]="x.symlogConstant"
+                [tickCount]="x.tickCount"
+                [tickMarks]="x.tickMarks"
+                [tickSize]="x.tickSize"
+                [title]="x.title"
+                [titlePadding]="x.titlePadding"
+                [type]="x.type"
+                [visible]="x.visible" />
+            <mona-chart-y-axis
+                [axisLine]="y.axisLine"
+                [exponent]="y.exponent"
+                [formatter]="y.formatter"
+                [gridLines]="y.gridLines"
+                [labelMaxWidth]="y.labelMaxWidth"
+                [labelPadding]="y.labelPadding"
+                [labels]="y.labels"
+                [logBase]="y.logBase"
+                [max]="y.max"
+                [min]="y.min"
+                [nice]="y.nice"
+                [position]="y.position"
+                [symlogConstant]="y.symlogConstant"
+                [tickCount]="y.tickCount"
+                [tickMarks]="y.tickMarks"
+                [tickSize]="y.tickSize"
+                [title]="y.title"
+                [titlePadding]="y.titlePadding"
+                [type]="y.type"
+                [visible]="y.visible" />
+
+            <mona-line-series curve="monotone-x" field="revenue" name="Revenue" [showPoints]="true" />
+            <mona-line-series curve="monotone-x" field="cost" lineStyle="dashed" name="Cost" [showPoints]="true" />
+
+            @if (isEnabled("referenceBand")) {
+                <mona-chart-reference-band
+                    [axis]="rb.axis"
+                    [borderColor]="rb.borderColor"
+                    [borderWidth]="rb.borderWidth"
+                    [fillColor]="rb.fillColor"
+                    [fillOpacity]="rb.fillOpacity"
+                    [from]="parseAxisValue(rb.from)"
+                    [label]="rb.label"
+                    [labelClass]="rb.labelClass"
+                    [labelOffset]="rb.labelOffset"
+                    [labelPosition]="rb.labelPosition"
+                    [layer]="rb.layer"
+                    [to]="parseAxisValue(rb.to)"
+                    [visible]="rb.visible" />
+            }
+            @if (isEnabled("referenceLine")) {
+                <mona-chart-reference-line
+                    [axis]="rl.axis"
+                    [color]="rl.color"
+                    [label]="rl.label"
+                    [labelClass]="rl.labelClass"
+                    [labelOffset]="rl.labelOffset"
+                    [labelPosition]="rl.labelPosition"
+                    [layer]="rl.layer"
+                    [lineStyle]="rl.lineStyle"
+                    [opacity]="rl.opacity"
+                    [value]="parseAxisValue(rl.value)"
+                    [visible]="rl.visible"
+                    [width]="rl.width">
+                    @if (referenceLineFeatures()["referenceLabelTemplate"]?.active) {
+                        <ng-template monaChartReferenceLabel let-formatted="formattedValue">
+                            <strong class="text-xs">Target {{ formatted }}</strong>
+                        </ng-template>
+                    }
+                </mona-chart-reference-line>
+            }
+            @if (isEnabled("annotation")) {
+                <mona-chart-annotation
+                    [color]="an.color"
+                    [connector]="an.connector"
+                    [connectorWidth]="an.connectorWidth"
+                    [data]="annotationData"
+                    [label]="an.label"
+                    [labelClass]="an.labelClass"
+                    [labelPlacement]="an.labelPlacement"
+                    [marker]="an.marker"
+                    [markerRadius]="an.markerRadius"
+                    [markerStrokeWidth]="an.markerStrokeWidth"
+                    [offsetX]="an.offsetX"
+                    [offsetY]="an.offsetY"
+                    [visible]="an.visible"
+                    [x]="parseAxisValue(an.x)"
+                    [y]="parseAxisValue(an.y)">
+                    @if (annotationFeatures()["annotationLabelTemplate"]?.active) {
+                        <ng-template monaChartAnnotationLabel let-data="data" let-formattedY="formattedY">
+                            <span class="text-xs">{{ $any(data).note }}: {{ formattedY }}</span>
+                        </ng-template>
+                    }
+                </mona-chart-annotation>
+            }
+            @if (isEnabled("crosshair")) {
+                <mona-chart-crosshair
+                    [color]="ch.color"
+                    [enabled]="ch.enabled"
+                    [labelOffset]="ch.labelOffset"
+                    [lineStyle]="ch.lineStyle"
+                    [lineWidth]="ch.lineWidth"
+                    [maxSnapDistance]="ch.maxSnapDistance"
+                    [mode]="ch.mode"
+                    [opacity]="ch.opacity"
+                    [showAxisLabels]="ch.showAxisLabels"
+                    [showXLabel]="ch.showXLabel"
+                    [showYLabel]="ch.showYLabel"
+                    [snap]="ch.snap">
+                    @if (crosshairFeatures()["crosshairLabelTemplate"]?.active) {
+                        <ng-template monaChartCrosshairLabel let-formatted="formattedValue">
+                            <span class="rounded bg-foreground px-1 text-xs text-background">{{ formatted }}</span>
+                        </ng-template>
+                    }
+                </mona-chart-crosshair>
+            }
+            @if (isEnabled("selection")) {
+                <mona-chart-selection
+                    [clearOnBackgroundClick]="se.clearOnBackgroundClick"
+                    [clickSelection]="se.clickSelection"
+                    [color]="se.color"
+                    [enabled]="se.enabled"
+                    [fillOpacity]="se.fillOpacity"
+                    [keyboardSelection]="se.keyboardSelection"
+                    [mode]="se.mode"
+                    [retainOnDataChange]="se.retainOnDataChange"
+                    [selectedMarkIds]="selectedMarkIds()"
+                    [strokeWidth]="se.strokeWidth"
+                    (selectedMarkIdsChange)="onSelectedMarkIdsChange($event)"
+                    (selectionChange)="eventLog.record('selectionChange', $event)" />
+            }
+            @if (isEnabled("brush")) {
+                <mona-chart-brush
+                    [activation]="br.activation"
+                    [borderColor]="br.borderColor"
+                    [borderWidth]="br.borderWidth"
+                    [enabled]="br.enabled"
+                    [fillColor]="br.fillColor"
+                    [fillOpacity]="br.fillOpacity"
+                    [hitPolicy]="br.hitPolicy"
+                    [lineStyle]="br.lineStyle"
+                    [minDragDistance]="br.minDragDistance"
+                    [mode]="br.mode"
+                    [selectionBehavior]="br.selectionBehavior"
+                    (brushChange)="eventLog.record('brushChange', $event)" />
+            }
+
+            <mona-chart-legend [interactive]="l.interactive" [mode]="l.mode" [position]="l.position" />
+            <mona-chart-tooltip [enabled]="t.enabled" [shared]="t.shared" />
+
+            @if (chartFeatureData["titleTemplate"]?.active) {
+                <ng-template monaChartTitleTemplate let-title>
+                    <span class="font-semibold">{{ title }}</span>
+                </ng-template>
+            }
+            @if (chartFeatureData["subtitleTemplate"]?.active) {
+                <ng-template monaChartSubtitleTemplate let-subtitle>
+                    <em>{{ subtitle }}</em>
+                </ng-template>
+            }
+            @if (chartFeatureData["noDataTemplate"]?.active) {
+                <ng-template monaChartNoDataTemplate>
+                    <span class="text-sm text-muted-foreground">Nothing to show yet</span>
+                </ng-template>
+            }
+        </mona-chart>
+    }
+</app-parts-demo-container>

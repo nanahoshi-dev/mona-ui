@@ -1,0 +1,17 @@
+<mona-chart aria-label="Checkout sessions by step" class="h-64 w-full" [data]="checkout">
+    <mona-funnel-series
+        categoryField="step"
+        field="sessions"
+        name="Sessions"
+        orientation="horizontal"
+        [minLabelWidth]="72">
+        <ng-template monaChartFunnelLabelTemplate let-stage>
+            <span class="font-semibold">{{ stage.formattedCategory }}</span>
+            <span>{{ stage.formattedValue }}</span>
+            @if (stage.dropOff) {
+                <span>{{ stage.formattedConversionRate }}, lost {{ stage.dropOff | number }}</span>
+            }
+        </ng-template>
+    </mona-funnel-series>
+    <mona-chart-tooltip />
+</mona-chart>

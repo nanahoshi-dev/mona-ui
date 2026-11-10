@@ -1,0 +1,201 @@
+@let c = chart();
+@let candle = candlestick();
+@let bar = ohlc();
+@let x = xAxis();
+@let y = yAxis();
+@let l = legend();
+@let t = tooltip();
+@let chartFeatureData = chartFeatures();
+@let seriesFeatureData = seriesFeatures();
+
+<app-parts-demo-container [eventLog]="eventLog" [parts]="parts()" [(values)]="values">
+    <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-medium" id="chart-financial-series-type">Series</span>
+            <mona-segmented
+                aria-labelledby="chart-financial-series-type"
+                size="small"
+                [options]="seriesTypeOptions"
+                [value]="seriesType()"
+                (valueChange)="onSeriesTypeChange($event)"></mona-segmented>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-medium" id="chart-financial-data-set">Data</span>
+            <mona-segmented
+                aria-labelledby="chart-financial-data-set"
+                size="small"
+                [options]="dataSetOptions"
+                [value]="dataSet()"
+                (valueChange)="onDataSetChange($event)"></mona-segmented>
+        </div>
+    </div>
+
+    @if (ready()) {
+        <mona-chart
+            class="h-96 w-full"
+            xField="date"
+            [animation]="animation()"
+            [aria-description]="c.ariaDescription"
+            [aria-label]="c.ariaLabel"
+            [data]="data()"
+            [dataTable]="c.dataTable"
+            [downsampling]="downsampling()"
+            [landmark]="c.landmark"
+            [navigation]="navigation()"
+            [renderer]="c.renderer"
+            [subtitle]="c.subtitle"
+            [title]="c.title"
+            [titleAlign]="c.titleAlign"
+            (pointClick)="eventLog.record('pointClick', $event)"
+            (pointFocusChange)="eventLog.record('pointFocusChange', $event)"
+            (seriesVisibilityChange)="eventLog.record('seriesVisibilityChange', $event)"
+            (viewportChange)="eventLog.record('viewportChange', $event)"
+            (viewportChangeDetails)="eventLog.record('viewportChangeDetails', $event)">
+            <mona-chart-x-axis
+                [axisLine]="x.axisLine"
+                [exponent]="x.exponent"
+                [formatter]="x.formatter"
+                [gridLines]="x.gridLines"
+                [labelMaxWidth]="x.labelMaxWidth"
+                [labelPadding]="x.labelPadding"
+                [labelRotation]="x.labelRotation"
+                [labels]="x.labels"
+                [logBase]="x.logBase"
+                [nice]="x.nice"
+                [position]="x.position"
+                [symlogConstant]="x.symlogConstant"
+                [tickCount]="x.tickCount"
+                [tickMarks]="x.tickMarks"
+                [tickSize]="x.tickSize"
+                [title]="x.title"
+                [titlePadding]="x.titlePadding"
+                [type]="x.type"
+                [visible]="x.visible">
+                @if (xAxisFeatures()["axisLabelTemplate"]?.active) {
+                    <ng-template monaChartAxisLabelTemplate let-value let-index="index">
+                        <span [class.font-semibold]="index === 0">{{ value }}</span>
+                    </ng-template>
+                }
+            </mona-chart-x-axis>
+            <mona-chart-y-axis
+                [axisLine]="y.axisLine"
+                [exponent]="y.exponent"
+                [formatter]="y.formatter"
+                [gridLines]="y.gridLines"
+                [labelMaxWidth]="y.labelMaxWidth"
+                [labelPadding]="y.labelPadding"
+                [labelRotation]="y.labelRotation"
+                [labels]="y.labels"
+                [logBase]="y.logBase"
+                [max]="y.max"
+                [min]="y.min"
+                [nice]="y.nice"
+                [position]="y.position"
+                [symlogConstant]="y.symlogConstant"
+                [tickCount]="y.tickCount"
+                [tickMarks]="y.tickMarks"
+                [tickSize]="y.tickSize"
+                [title]="y.title"
+                [titlePadding]="y.titlePadding"
+                [type]="y.type"
+                [visible]="y.visible" />
+
+            @switch (seriesType()) {
+                @case ("candlestick") {
+                    <mona-candlestick-series
+                        closeField="close"
+                        highField="high"
+                        lowField="low"
+                        openField="open"
+                        [bodyWidth]="candle.bodyWidth"
+                        [bodyWidthRatio]="candle.bodyWidthRatio"
+                        [color]="candle.color"
+                        [dataLabels]="dataLabels()"
+                        [fallingColor]="candle.fallingColor"
+                        [fillMode]="candle.fillMode"
+                        [fillOpacity]="candle.fillOpacity"
+                        [maxBodyWidth]="candle.maxBodyWidth"
+                        [name]="candle.name"
+                        [neutralColor]="candle.neutralColor"
+                        [risingColor]="candle.risingColor"
+                        [valueFormatter]="candle.valueFormatter"
+                        [visible]="candle.visible"
+                        [wickColor]="candle.wickColor"
+                        [wickWidth]="candle.wickWidth"
+                        (visibleChange)="onSeriesVisibleChange($event)">
+                        @if (seriesFeatureData["dataLabelTemplate"]?.active) {
+                            <ng-template monaChartDataLabel let-label>
+                                <span class="font-semibold">{{ label.formattedClose }}</span>
+                            </ng-template>
+                        }
+                    </mona-candlestick-series>
+                }
+                @case ("ohlc") {
+                    <mona-ohlc-series
+                        closeField="close"
+                        highField="high"
+                        lowField="low"
+                        openField="open"
+                        [bodyWidth]="bar.bodyWidth"
+                        [bodyWidthRatio]="bar.bodyWidthRatio"
+                        [color]="bar.color"
+                        [dataLabels]="dataLabels()"
+                        [fallingColor]="bar.fallingColor"
+                        [fillOpacity]="bar.fillOpacity"
+                        [maxBodyWidth]="bar.maxBodyWidth"
+                        [name]="bar.name"
+                        [neutralColor]="bar.neutralColor"
+                        [risingColor]="bar.risingColor"
+                        [tickLength]="bar.tickLength"
+                        [valueFormatter]="bar.valueFormatter"
+                        [visible]="bar.visible"
+                        [wickColor]="bar.wickColor"
+                        [wickWidth]="bar.wickWidth"
+                        (visibleChange)="onSeriesVisibleChange($event)">
+                        @if (seriesFeatureData["dataLabelTemplate"]?.active) {
+                            <ng-template monaChartDataLabel let-label>
+                                <span class="font-semibold">{{ label.formattedClose }}</span>
+                            </ng-template>
+                        }
+                    </mona-ohlc-series>
+                }
+            }
+
+            <mona-chart-legend [interactive]="l.interactive" [mode]="l.mode" [position]="l.position">
+                @if (legendFeatures()["legendItemTemplate"]?.active) {
+                    <ng-template monaChartLegendItemTemplate let-item>
+                        <span class="text-sm" [style.color]="item.color">{{ item.name }}</span>
+                    </ng-template>
+                }
+            </mona-chart-legend>
+            <mona-chart-tooltip [enabled]="t.enabled" [shared]="t.shared">
+                @if (tooltipFeatures()["tooltipTemplate"]?.active) {
+                    <ng-template monaChartTooltipTemplate let-point="point">
+                        <div class="rounded-md border border-border bg-popover p-2 text-xs text-popover-foreground">
+                            <div class="font-medium">{{ point.formattedX }}</div>
+                            <div>O {{ point.formattedOpen }} H {{ point.formattedHigh }}</div>
+                            <div>L {{ point.formattedLow }} C {{ point.formattedClose }}</div>
+                            <div>{{ point.formattedChange }} ({{ point.formattedChangePercentage }})</div>
+                        </div>
+                    </ng-template>
+                }
+            </mona-chart-tooltip>
+
+            @if (chartFeatureData["titleTemplate"]?.active) {
+                <ng-template monaChartTitleTemplate let-title>
+                    <span class="font-semibold">💹 {{ title }}</span>
+                </ng-template>
+            }
+            @if (chartFeatureData["subtitleTemplate"]?.active) {
+                <ng-template monaChartSubtitleTemplate let-subtitle>
+                    <em>{{ subtitle }}</em>
+                </ng-template>
+            }
+            @if (chartFeatureData["noDataTemplate"]?.active) {
+                <ng-template monaChartNoDataTemplate>
+                    <span class="text-sm text-muted-foreground">No trades yet</span>
+                </ng-template>
+            }
+        </mona-chart>
+    }
+</app-parts-demo-container>

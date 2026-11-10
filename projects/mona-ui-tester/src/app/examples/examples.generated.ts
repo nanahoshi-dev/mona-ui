@@ -120,6 +120,66 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./chart-bar/bar/bar-example.component").then(module => module.ChartBarExampleComponent),
         mainFile: "bar-example.component.ts"
     },
+    "chart-bar/horizontal": {
+        files: ["horizontal-example.component.ts", "horizontal-example.component.html"],
+        load: () => import("./chart-bar/horizontal/horizontal-example.component").then(module => module.ChartHorizontalBarExampleComponent),
+        mainFile: "horizontal-example.component.ts"
+    },
+    "chart-bar/range-bar": {
+        files: ["range-bar-example.component.ts", "range-bar-example.component.html"],
+        load: () => import("./chart-bar/range-bar/range-bar-example.component").then(module => module.ChartRangeBarExampleComponent),
+        mainFile: "range-bar-example.component.ts"
+    },
+    "chart-bar/waterfall": {
+        files: ["waterfall-example.component.ts", "waterfall-example.component.html"],
+        load: () => import("./chart-bar/waterfall/waterfall-example.component").then(module => module.ChartWaterfallExampleComponent),
+        mainFile: "waterfall-example.component.ts"
+    },
+    "chart-financial/candlestick": {
+        files: ["candlestick-example.component.ts", "candlestick-example.component.html"],
+        load: () => import("./chart-financial/candlestick/candlestick-example.component").then(module => module.ChartCandlestickExampleComponent),
+        mainFile: "candlestick-example.component.ts"
+    },
+    "chart-financial/direction-colors": {
+        files: ["direction-colors-example.component.ts", "direction-colors-example.component.html"],
+        load: () => import("./chart-financial/direction-colors/direction-colors-example.component").then(module => module.ChartDirectionColorsExampleComponent),
+        mainFile: "direction-colors-example.component.ts"
+    },
+    "chart-financial/moving-average": {
+        files: ["moving-average-example.component.ts", "moving-average-example.component.html"],
+        load: () => import("./chart-financial/moving-average/moving-average-example.component").then(module => module.ChartMovingAverageExampleComponent),
+        mainFile: "moving-average-example.component.ts"
+    },
+    "chart-funnel/conversion-labels": {
+        files: ["conversion-labels-example.component.ts", "conversion-labels-example.component.html"],
+        load: () => import("./chart-funnel/conversion-labels/conversion-labels-example.component").then(module => module.ChartFunnelConversionLabelsExampleComponent),
+        mainFile: "conversion-labels-example.component.ts"
+    },
+    "chart-funnel/sales-pipeline": {
+        files: ["sales-pipeline-example.component.ts", "sales-pipeline-example.component.html"],
+        load: () => import("./chart-funnel/sales-pipeline/sales-pipeline-example.component").then(module => module.ChartFunnelSalesPipelineExampleComponent),
+        mainFile: "sales-pipeline-example.component.ts"
+    },
+    "chart-funnel/stage-visibility": {
+        files: ["stage-visibility-example.component.ts", "stage-visibility-example.component.html"],
+        load: () => import("./chart-funnel/stage-visibility/stage-visibility-example.component").then(module => module.ChartFunnelStageVisibilityExampleComponent),
+        mainFile: "stage-visibility-example.component.ts"
+    },
+    "chart-heatmap/cell-details": {
+        files: ["cell-details-example.component.ts", "cell-details-example.component.html"],
+        load: () => import("./chart-heatmap/cell-details/cell-details-example.component").then(module => module.ChartHeatmapCellDetailsExampleComponent),
+        mainFile: "cell-details-example.component.ts"
+    },
+    "chart-heatmap/diverging": {
+        files: ["diverging-example.component.ts", "diverging-example.component.html"],
+        load: () => import("./chart-heatmap/diverging/diverging-example.component").then(module => module.ChartHeatmapDivergingExampleComponent),
+        mainFile: "diverging-example.component.ts"
+    },
+    "chart-heatmap/weekly-activity": {
+        files: ["weekly-activity-example.component.ts", "weekly-activity-example.component.html"],
+        load: () => import("./chart-heatmap/weekly-activity/weekly-activity-example.component").then(module => module.ChartHeatmapWeeklyActivityExampleComponent),
+        mainFile: "weekly-activity-example.component.ts"
+    },
     "chart-line-area/line": {
         files: ["line-example.component.ts", "line-example.component.html"],
         load: () => import("./chart-line-area/line/line-example.component").then(module => module.ChartLineExampleComponent),
@@ -139,6 +199,91 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         files: ["donut-example.component.ts", "donut-example.component.html"],
         load: () => import("./chart-pie/donut/donut-example.component").then(module => module.ChartDonutExampleComponent),
         mainFile: "donut-example.component.ts"
+    },
+    "chart-pie/hidden-slices": {
+        files: ["hidden-slices-example.component.ts", "hidden-slices-example.component.html"],
+        load: () => import("./chart-pie/hidden-slices/hidden-slices-example.component").then(module => module.ChartPieHiddenSlicesExampleComponent),
+        mainFile: "hidden-slices-example.component.ts"
+    },
+    "chart-pie/outside-labels": {
+        files: ["outside-labels-example.component.ts", "outside-labels-example.component.html"],
+        load: () => import("./chart-pie/outside-labels/outside-labels-example.component").then(module => module.ChartPieOutsideLabelsExampleComponent),
+        mainFile: "outside-labels-example.component.ts"
+    },
+    "chart-pie/slice-template": {
+        files: ["slice-template-example.component.ts", "slice-template-example.component.html"],
+        load: () => import("./chart-pie/slice-template/slice-template-example.component").then(module => module.ChartPieSliceTemplateExampleComponent),
+        mainFile: "slice-template-example.component.ts"
+    },
+    "chart-radar/axis-labels": {
+        files: ["axis-labels-example.component.ts", "axis-labels-example.component.html"],
+        load: () => import("./chart-radar/axis-labels/axis-labels-example.component").then(module => module.ChartRadarAxisLabelsExampleComponent),
+        mainFile: "axis-labels-example.component.ts"
+    },
+    "chart-radar/compare": {
+        files: ["compare-example.component.ts", "compare-example.component.html"],
+        load: () => import("./chart-radar/compare/compare-example.component").then(module => module.ChartRadarCompareExampleComponent),
+        mainFile: "compare-example.component.ts"
+    },
+    "chart-radar/wind-rose": {
+        files: ["wind-rose-example.component.ts", "wind-rose-example.component.html"],
+        load: () => import("./chart-radar/wind-rose/wind-rose-example.component").then(module => module.ChartRadarWindRoseExampleComponent),
+        mainFile: "wind-rose-example.component.ts"
+    },
+    "chart-radial/goal-rings": {
+        files: ["goal-rings-example.component.ts", "goal-rings-example.component.html"],
+        load: () => import("./chart-radial/goal-rings/goal-rings-example.component").then(module => module.ChartRadialGoalRingsExampleComponent),
+        mainFile: "goal-rings-example.component.ts"
+    },
+    "chart-radial/server-gauge": {
+        files: ["server-gauge-example.component.ts", "server-gauge-example.component.html"],
+        load: () => import("./chart-radial/server-gauge/server-gauge-example.component").then(module => module.ChartRadialServerGaugeExampleComponent),
+        mainFile: "server-gauge-example.component.ts"
+    },
+    "chart-radial/wind-rose": {
+        files: ["wind-rose-example.component.ts", "wind-rose-example.component.html"],
+        load: () => import("./chart-radial/wind-rose/wind-rose-example.component").then(module => module.ChartRadialWindRoseExampleComponent),
+        mainFile: "wind-rose-example.component.ts"
+    },
+    "chart-scatter/bubble": {
+        files: ["bubble-example.component.ts", "bubble-example.component.html"],
+        load: () => import("./chart-scatter/bubble/bubble-example.component").then(module => module.ChartScatterBubbleExampleComponent),
+        mainFile: "bubble-example.component.ts"
+    },
+    "chart-scatter/correlation": {
+        files: ["correlation-example.component.ts", "correlation-example.component.html"],
+        load: () => import("./chart-scatter/correlation/correlation-example.component").then(module => module.ChartScatterCorrelationExampleComponent),
+        mainFile: "correlation-example.component.ts"
+    },
+    "chart-scatter/dense": {
+        files: ["dense-example.component.ts", "dense-example.component.html"],
+        load: () => import("./chart-scatter/dense/dense-example.component").then(module => module.ChartScatterDenseExampleComponent),
+        mainFile: "dense-example.component.ts"
+    },
+    "chart-treemap/budget": {
+        files: ["budget-example.component.ts", "budget-example.component.html"],
+        load: () => import("./chart-treemap/budget/budget-example.component").then(module => module.ChartTreemapBudgetExampleComponent),
+        mainFile: "budget-example.component.ts"
+    },
+    "chart-treemap/custom-labels": {
+        files: ["custom-labels-example.component.ts", "custom-labels-example.component.html"],
+        load: () => import("./chart-treemap/custom-labels/custom-labels-example.component").then(module => module.ChartTreemapCustomLabelsExampleComponent),
+        mainFile: "custom-labels-example.component.ts"
+    },
+    "chart-treemap/drill-down": {
+        files: ["drill-down-example.component.ts", "drill-down-example.component.html"],
+        load: () => import("./chart-treemap/drill-down/drill-down-example.component").then(module => module.ChartTreemapDrillDownExampleComponent),
+        mainFile: "drill-down-example.component.ts"
+    },
+    "chart/overlays": {
+        files: ["overlays-example.component.ts", "overlays-example.component.html"],
+        load: () => import("./chart/overlays/overlays-example.component").then(module => module.ChartOverlaysExampleComponent),
+        mainFile: "overlays-example.component.ts"
+    },
+    "chart/selection": {
+        files: ["selection-example.component.ts", "selection-example.component.html"],
+        load: () => import("./chart/selection/selection-example.component").then(module => module.ChartSelectionExampleComponent),
+        mainFile: "selection-example.component.ts"
     },
     "chart/tooltip": {
         files: ["tooltip-example.component.ts", "tooltip-example.component.html"],

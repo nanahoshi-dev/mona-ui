@@ -1,0 +1,14 @@
+<mona-chart aria-label="Monthly temperature anomaly by year" class="h-80 w-full" xField="month" [data]="anomalies">
+    <mona-chart-x-axis />
+    <mona-chart-y-axis />
+    <mona-heatmap-series
+        colorMode="diverging"
+        field="anomaly"
+        name="Difference from average"
+        yField="year"
+        [colors]="colors"
+        [midpoint]="0"
+        [valueFormatter]="signedCelsius" />
+    <mona-chart-legend position="end" />
+    <mona-chart-tooltip />
+</mona-chart>

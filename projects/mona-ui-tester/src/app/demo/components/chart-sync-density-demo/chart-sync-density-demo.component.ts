@@ -27,25 +27,22 @@ function generateDenseLine(count: number, phase: number, xExtent = 200_000): Den
         // Keep differently sized dashboard series on the same semantic x domain
         // so a synchronized vertical crosshair remains visible in both plots.
         x: (i * xExtent) / intervalCount,
-        y:
-            Math.sin((i + phase) / 150) * 20 +
-            Math.sin(i / 17) * 2 +
-            (i % 50_000 === 0 ? 80 : 0)
+        y: Math.sin((i + phase) / 150) * 20 + Math.sin(i / 17) * 2 + (i % 50_000 === 0 ? 80 : 0)
     }));
 }
 
 function generateDenseScatter(count: number): DensePoint[] {
     return Array.from({ length: count }, (_, i) => ({
-        x: ((i * 7919) % 9973) / 9973 * 1000,
-        y: ((i * 104_729) % 9967) / 9967 * 400
+        x: (((i * 7919) % 9973) / 9973) * 1000,
+        y: (((i * 104_729) % 9967) / 9967) * 400
     }));
 }
 
 function generateDenseBubble(count: number): Array<DensePoint & { readonly size: number }> {
     return Array.from({ length: count }, (_, i) => ({
         size: i % 25_000 === 0 ? 800 : ((i * 31) % 40) + 2,
-        x: ((i * 6271) % 9973) / 9973 * 1000,
-        y: ((i * 15_483) % 9967) / 9967 * 400
+        x: (((i * 6271) % 9973) / 9973) * 1000,
+        y: (((i * 15_483) % 9967) / 9967) * 400
     }));
 }
 

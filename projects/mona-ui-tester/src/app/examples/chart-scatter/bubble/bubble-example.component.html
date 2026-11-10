@@ -1,0 +1,13 @@
+<mona-chart aria-label="Life expectancy by income per person" class="h-80 w-full" xField="income" [data]="countries">
+    <mona-chart-x-axis title="Income per person (USD)" type="log" [formatter]="dollars" />
+    <mona-chart-y-axis title="Life expectancy (years)" />
+    <mona-bubble-series
+        field="lifeExpectancy"
+        name="Countries"
+        sizeField="population"
+        [maxRadius]="36"
+        [minRadius]="6"
+        [sizeFormatter]="people"
+        [valueFormatter]="years" />
+    <mona-chart-tooltip />
+</mona-chart>

@@ -1,0 +1,16 @@
+<div class="flex flex-col gap-2">
+    <div class="flex h-8 items-center">
+        @if (region()) {
+            <button monaButton size="small" type="button" (click)="region.set(null)">All regions</button>
+        }
+    </div>
+    <mona-chart
+        class="h-72 w-full"
+        subtitle="Revenue in millions. Click or press Enter on a region to open it."
+        [data]="data()"
+        [title]="region()?.name ?? 'Revenue by region'"
+        (pointClick)="onPointClick($event)">
+        <mona-treemap-series name="Revenue" [maxDepth]="1" [showValues]="true" />
+        <mona-chart-tooltip />
+    </mona-chart>
+</div>

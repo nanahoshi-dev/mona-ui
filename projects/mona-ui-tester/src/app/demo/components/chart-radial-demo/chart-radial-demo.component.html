@@ -1,0 +1,224 @@
+@let c = chart();
+@let rb = radialBar();
+@let ro = rose();
+@let g = gauge();
+@let aa = angularAxis();
+@let ra = radialAxis();
+@let l = legend();
+@let t = tooltip();
+@let hiddenIds = hiddenItemIds();
+@let chartFeatureData = chartFeatures();
+
+<app-parts-demo-container [eventLog]="eventLog" [parts]="parts()" [(values)]="values">
+    <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-medium" id="chart-radial-series-type">Series</span>
+            <mona-segmented
+                aria-labelledby="chart-radial-series-type"
+                size="small"
+                [options]="seriesTypeOptions"
+                [value]="seriesType()"
+                (valueChange)="onSeriesTypeChange($event)"></mona-segmented>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-medium" id="chart-radial-data-set">Data</span>
+            <mona-segmented
+                aria-labelledby="chart-radial-data-set"
+                size="small"
+                [options]="dataSetOptions()"
+                [value]="dataSet()"
+                (valueChange)="onDataSetChange($event)"></mona-segmented>
+        </div>
+        @if (seriesType() !== "gauge") {
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-medium">Hidden items</span>
+                <code class="text-sm">{{ hiddenItemsText() }}</code>
+                <button monaButton size="small" [disabled]="hiddenIds.length === 0" (click)="onShowAllItems()">
+                    Show all items
+                </button>
+            </div>
+        }
+    </div>
+
+    @if (ready()) {
+        <mona-chart
+            class="h-96 w-full"
+            [animation]="animation()"
+            [aria-description]="c.ariaDescription"
+            [aria-label]="c.ariaLabel"
+            [data]="data()"
+            [dataTable]="c.dataTable"
+            [landmark]="c.landmark"
+            [renderer]="c.renderer"
+            [subtitle]="c.subtitle"
+            [title]="c.title"
+            [titleAlign]="c.titleAlign"
+            (pointClick)="eventLog.record('pointClick', $event)"
+            (pointFocusChange)="eventLog.record('pointFocusChange', $event)"
+            (seriesVisibilityChange)="eventLog.record('seriesVisibilityChange', $event)">
+            @switch (seriesType()) {
+                @case ("radialBar") {
+                    <mona-radial-bar-series
+                        categoryField="team"
+                        field="progress"
+                        [barGap]="rb.barGap"
+                        [barThickness]="rb.barThickness"
+                        [categoryFormatter]="rb.categoryFormatter"
+                        [colors]="rb.colors"
+                        [cornerRadius]="rb.cornerRadius"
+                        [endAngle]="rb.endAngle"
+                        [fillMode]="rb.fillMode"
+                        [fillOpacity]="rb.fillOpacity"
+                        [hiddenItemIds]="hiddenIds"
+                        [innerRadiusRatio]="rb.innerRadiusRatio"
+                        [max]="rb.max"
+                        [min]="rb.min"
+                        [name]="rb.name"
+                        [outerRadiusRatio]="rb.outerRadiusRatio"
+                        [showTrack]="rb.showTrack"
+                        [startAngle]="rb.startAngle"
+                        [strokeColor]="rb.strokeColor"
+                        [strokeWidth]="rb.strokeWidth"
+                        [trackColor]="rb.trackColor"
+                        [trackOpacity]="rb.trackOpacity"
+                        [valueFormatter]="rb.valueFormatter"
+                        [visible]="rb.visible"
+                        (datumVisibilityChange)="eventLog.record('datumVisibilityChange', $event)"
+                        (hiddenItemIdsChange)="onHiddenItemIdsChange($event)"
+                        (visibleChange)="onSeriesVisibleChange($event)" />
+                }
+                @case ("rose") {
+                    <mona-rose-series
+                        categoryField="direction"
+                        field="hours"
+                        [categoryFormatter]="ro.categoryFormatter"
+                        [colors]="ro.colors"
+                        [cornerRadius]="ro.cornerRadius"
+                        [endAngle]="ro.endAngle"
+                        [fillMode]="ro.fillMode"
+                        [fillOpacity]="ro.fillOpacity"
+                        [hiddenItemIds]="hiddenIds"
+                        [innerRadiusRatio]="ro.innerRadiusRatio"
+                        [name]="ro.name"
+                        [outerRadiusRatio]="ro.outerRadiusRatio"
+                        [padAngle]="ro.padAngle"
+                        [scaleMode]="ro.scaleMode"
+                        [startAngle]="ro.startAngle"
+                        [strokeColor]="ro.strokeColor"
+                        [strokeWidth]="ro.strokeWidth"
+                        [valueFormatter]="ro.valueFormatter"
+                        [visible]="ro.visible"
+                        (datumVisibilityChange)="eventLog.record('datumVisibilityChange', $event)"
+                        (hiddenItemIdsChange)="onHiddenItemIdsChange($event)"
+                        (visibleChange)="onSeriesVisibleChange($event)" />
+                    <mona-chart-angular-axis
+                        [axisLine]="aa.axisLine"
+                        [formatter]="aa.formatter"
+                        [gridLines]="aa.gridLines"
+                        [labelOffset]="aa.labelOffset"
+                        [labels]="aa.labels"
+                        [rotation]="aa.rotation"
+                        [visible]="aa.visible">
+                        @if (angularAxisFeatures()["axisLabelTemplate"]?.active) {
+                            <ng-template monaChartAxisLabelTemplate let-value let-index="index">
+                                <span [class.font-semibold]="index === 0">{{ value }}</span>
+                            </ng-template>
+                        }
+                    </mona-chart-angular-axis>
+                    <mona-chart-radial-axis
+                        [axisLine]="ra.axisLine"
+                        [formatter]="ra.formatter"
+                        [gridLines]="ra.gridLines"
+                        [labelAngle]="ra.labelAngle"
+                        [labelOffset]="ra.labelOffset"
+                        [labels]="ra.labels"
+                        [max]="ra.max"
+                        [min]="ra.min"
+                        [nice]="ra.nice"
+                        [tickCount]="ra.tickCount"
+                        [visible]="ra.visible">
+                        @if (radialAxisFeatures()["axisLabelTemplate"]?.active) {
+                            <ng-template monaChartAxisLabelTemplate let-value>
+                                <span class="italic">{{ value }}</span>
+                            </ng-template>
+                        }
+                    </mona-chart-radial-axis>
+                }
+                @case ("gauge") {
+                    <mona-gauge-series
+                        field="load"
+                        [color]="g.color"
+                        [cornerRadius]="g.cornerRadius"
+                        [endAngle]="g.endAngle"
+                        [fillMode]="g.fillMode"
+                        [fillOpacity]="g.fillOpacity"
+                        [hubRadius]="g.hubRadius"
+                        [indicator]="g.indicator"
+                        [innerRadiusRatio]="g.innerRadiusRatio"
+                        [max]="g.max"
+                        [min]="g.min"
+                        [name]="g.name"
+                        [needleColor]="g.needleColor"
+                        [needleLengthRatio]="g.needleLengthRatio"
+                        [needleWidth]="g.needleWidth"
+                        [outerRadiusRatio]="g.outerRadiusRatio"
+                        [showValue]="g.showValue"
+                        [startAngle]="g.startAngle"
+                        [trackColor]="g.trackColor"
+                        [trackOpacity]="g.trackOpacity"
+                        [value]="g.value"
+                        [valueFormatter]="g.valueFormatter"
+                        [visible]="g.visible"
+                        (visibleChange)="onSeriesVisibleChange($event)">
+                        @if (gaugeFeatures()["centerTemplate"]?.active) {
+                            <ng-template
+                                monaChartGaugeCenterTemplate
+                                let-formattedMax="formattedMax"
+                                let-formattedValue="formattedValue"
+                                let-isClamped="isClamped">
+                                <span class="text-2xl font-semibold text-foreground">{{ formattedValue }}</span>
+                                <span class="text-xs text-muted-foreground">of {{ formattedMax }}</span>
+                                @if (isClamped) {
+                                    <span class="text-xs font-medium text-foreground">Off the scale</span>
+                                }
+                            </ng-template>
+                        }
+                    </mona-gauge-series>
+                }
+            }
+
+            <mona-chart-legend [interactive]="l.interactive" [position]="l.position">
+                @if (legendFeatures()["legendItemTemplate"]?.active) {
+                    <ng-template monaChartLegendItemTemplate let-item>
+                        <span class="text-sm" [style.color]="item.color">{{ item.name }}</span>
+                    </ng-template>
+                }
+            </mona-chart-legend>
+            <mona-chart-tooltip [enabled]="t.enabled">
+                @if (tooltipFeatures()["tooltipTemplate"]?.active) {
+                    <ng-template monaChartTooltipTemplate let-point>
+                        <div class="rounded-md border border-border bg-popover p-2 text-xs text-popover-foreground">
+                            {{ point.formattedCategory ?? point.seriesName }}: {{ point.formattedY }}
+                        </div>
+                    </ng-template>
+                }
+            </mona-chart-tooltip>
+
+            @if (chartFeatureData["titleTemplate"]?.active) {
+                <ng-template monaChartTitleTemplate let-title>
+                    <span class="font-semibold">◔ {{ title }}</span>
+                </ng-template>
+            }
+            @if (chartFeatureData["subtitleTemplate"]?.active) {
+                <ng-template monaChartSubtitleTemplate let-subtitle>
+                    <em>{{ subtitle }}</em>
+                </ng-template>
+            }
+            @if (chartFeatureData["noDataTemplate"]?.active) {
+                <ng-template monaChartNoDataTemplate>
+                    <span class="text-sm text-muted-foreground">Nothing to show yet</span>
+                </ng-template>
+            }
+        </mona-chart>
+    }
+</app-parts-demo-container>

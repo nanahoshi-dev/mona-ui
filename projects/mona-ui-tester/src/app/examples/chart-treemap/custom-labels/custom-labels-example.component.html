@@ -1,0 +1,21 @@
+<mona-chart aria-label="Disk usage" class="h-80 w-full" [data]="disk">
+    <mona-treemap-series
+        colorField="color"
+        field="size"
+        name="Disk usage"
+        [borderRadius]="4"
+        [colors]="colors"
+        [minLabelHeight]="32"
+        [parentHeaderHeight]="24"
+        [valueFormatter]="gigabytes">
+        <ng-template monaChartTreemapLabelTemplate let-node>
+            <span class="truncate font-semibold">{{ node.formattedLabel }}</span>
+            @if (node.isLeaf) {
+                <span class="truncate text-xs opacity-80">
+                    {{ node.formattedValue }} · {{ (node.percentageOfParent ?? 0) | percent }}
+                </span>
+            }
+        </ng-template>
+    </mona-treemap-series>
+    <mona-chart-tooltip />
+</mona-chart>

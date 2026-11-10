@@ -34,7 +34,7 @@ Renders a full or partial donut. Use `ng-template[monaChartCenterTemplate]` for 
 | `name` | `string` | `"Donut"` | Series name used in tooltips and accessibility announcements. |
 | `outerRadiusRatio` | `number` | `0.9` | Outer radius ratio relative to available plot bounds (0.1 to 1). |
 | `padAngle` | `number` | `0` | Angular padding in degrees between adjacent slices. |
-| `showLabels` | `boolean` | `false` | Whether to display inside slice data labels. |
+| `showLabels` | `boolean` | `false` | Whether to display slice labels, inside or outside as `labelPosition` sets. |
 | `startAngle` | `number` | `0` | Starting angle in degrees (0 is 12 o'clock, clockwise). |
 | `strokeColor` | `string` | `""` | Color of slice separator strokes. |
 | `strokeWidth` | `number \| undefined` | `undefined` | Stroke width in pixels for slice separators. |
@@ -84,7 +84,7 @@ Renders a full or partial pie.
 | `name` | `string` | `"Pie"` | Series name used in tooltips and accessibility announcements. |
 | `outerRadiusRatio` | `number` | `0.9` | Outer radius ratio relative to available plot bounds (0.1 to 1). |
 | `padAngle` | `number` | `0` | Angular padding in degrees between adjacent slices. |
-| `showLabels` | `boolean` | `false` | Whether to display inside slice data labels. |
+| `showLabels` | `boolean` | `false` | Whether to display slice labels, inside or outside as `labelPosition` sets. |
 | `startAngle` | `number` | `0` | Starting angle in degrees (0 is 12 o'clock, clockwise). |
 | `strokeColor` | `string` | `""` | Color of slice separator strokes. |
 | `strokeWidth` | `number \| undefined` | `undefined` | Stroke width in pixels for slice separators. |

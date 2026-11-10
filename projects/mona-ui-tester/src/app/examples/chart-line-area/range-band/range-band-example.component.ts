@@ -24,7 +24,6 @@ import type { ChartValueFormatter } from "@nanahoshi/mona-ui/chart";
     templateUrl: "./range-band-example.component.html"
 })
 export class ChartRangeBandExampleComponent {
-    protected readonly celsius: ChartValueFormatter = value => `${value} °C`;
     protected readonly temperatures = [
         { average: 3, high: 7, low: -1, month: "Jan" },
         { average: 4, high: 9, low: 0, month: "Feb" },
@@ -35,4 +34,5 @@ export class ChartRangeBandExampleComponent {
         { average: 22, high: 28, low: 15, month: "Jul" },
         { average: 21, high: 27, low: 15, month: "Aug" }
     ];
+    protected readonly celsius: ChartValueFormatter = value => `${value} °C`;
 }
