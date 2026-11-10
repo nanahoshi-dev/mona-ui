@@ -24,7 +24,7 @@ Renders hierarchical treemap visualizations using nested squarified, binary, dic
 | `data` | `readonly unknown[] \| unknown \| undefined` | `undefined` | Hierarchical root object or array of root nodes overriding chart-level data. |
 | `field` | `ChartField` | `"value"` | Property key or accessor function extracting the numeric value for a leaf node. |
 | `fillOpacity` | `number \| undefined` | `undefined` | Opacity of leaf node fills (0 to 1). |
-| `hiddenNodeIds` (two-way) | `readonly string[]` | `[]` | The hidden top-level node IDs. Bind `[(hiddenNodeIds)]` for two-way binding; legend toggles write to it. |
+| `hiddenNodeIds` (two-way) | `readonly string[]` | `[]` | The hidden top-level node IDs. Bind `[(hiddenNodeIds)]` for two-way binding; legend toggles write to it. With `keyField`, build an ID with `chartItemKeyId(key)`; otherwise read IDs from `nodeVisibilityChange`. |
 | `keyField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting a stable datum identity across data updates. |
 | `labelField` | `ChartField` | `"name"` | Property key or accessor extracting the display label for a node. |
 | `labelFormatter` | `ChartValueFormatter \| undefined` | `undefined` | **Deprecated.** Use `categoryFormatter`, as on the other series. Formatter callback for node display labels. |

@@ -111,6 +111,7 @@ export class FunnelSeriesComponent implements OnInit {
 
     /**
      * @description The hidden stage IDs. Bind `[(hiddenStageIds)]` for two-way binding; legend toggles write to it.
+     * Build an ID with `chartItemKeyId(key)` when `keyField` is set, or with `chartItemIndexId(index)`.
      * @default []
      */
     public readonly hiddenStageIds = model<readonly string[]>([]);

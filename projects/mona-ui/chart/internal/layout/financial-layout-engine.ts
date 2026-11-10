@@ -142,7 +142,7 @@ export class FinancialLayoutEngine {
             isFiniteNumber(explicitMaxBodyWidth) && (explicitMaxBodyWidth as number) > 0
                 ? Math.max(2, explicitMaxBodyWidth as number)
                 : 32;
-        const wickWidth = Math.max(0.5, normalizeNonNegativeNumber(series.wickWidth?.(), 1));
+        const wickWidth = Math.max(0.5, normalizeNonNegativeNumber(resolvedStyle.wickWidth, 1));
         const seriesFormatter = series.valueFormatter?.() ?? valueFormatter;
         const seriesName = series.name();
 
@@ -288,7 +288,7 @@ export class FinancialLayoutEngine {
             isFiniteNumber(explicitMaxBodyWidth) && (explicitMaxBodyWidth as number) > 0
                 ? Math.max(2, explicitMaxBodyWidth as number)
                 : 32;
-        const wickWidth = Math.max(0.5, normalizeNonNegativeNumber(series.wickWidth?.(), 1));
+        const wickWidth = Math.max(0.5, normalizeNonNegativeNumber(resolvedStyle.wickWidth, 1));
         const seriesFormatter = series.valueFormatter?.() ?? valueFormatter;
         const seriesName = series.name();
 

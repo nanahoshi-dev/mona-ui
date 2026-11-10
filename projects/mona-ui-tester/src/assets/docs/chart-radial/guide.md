@@ -189,7 +189,7 @@ When two rows have the same category, the first one with a value is kept, and a 
 
 The legend of a radial bar or rose has an entry for each item, named by its formatted category. Toggling one hides that item, writes `[(hiddenItemIds)]` and emits `datumVisibilityChange` with the item's `itemId`, category, row and new visibility. It doesn't emit the chart's `seriesVisibilityChange`. The scale stays the same, so the other items keep their lengths: a hidden ring gives its space to the others, and a hidden petal leaves its slice empty. `toggleDatum(itemId)` does the same from code.
 
-An item's id comes from `keyField`, or else its category, or else its row index. It's written as `k:` or `c:` with the value's kind (`s` for a string, `n` a number, `b` a boolean, `d` a date) and the value, or as `i:` and the index. The category `"Sales"` is `"c:s:Sales"`. Set `keyField` when categories can change but items should stay hidden. Ids the data no longer has are dropped, as described under Two-Way Binding on [Chart Overview](/components/chart).
+An item's id comes from `keyField`, or else its category, or else its row index, and `chartItemKeyId(key)`, `chartItemCategoryId(category)` and `chartItemIndexId(index)` build each kind. So `chartItemCategoryId("Sales")` hides the item whose category is `"Sales"`. These functions are described in the [Chart Overview API](/components/chart). Treat the ids as opaque: compare them, but don't parse them. Set `keyField` when categories can change but items should stay hidden. Ids the data no longer has are dropped, as described under Two-Way Binding on [Chart Overview](/components/chart).
 
 A gauge's legend entry stands for the whole series. Toggling it sets `[(visible)]` and emits `seriesVisibilityChange`.
 

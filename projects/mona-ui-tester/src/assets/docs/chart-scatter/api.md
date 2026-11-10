@@ -22,8 +22,8 @@ Renders 3-dimensional data points with position (X, Y) and proportionally-scaled
 | `field` | `ChartField` | `"value"` | Property key or accessor extracting the Y value for each data item. |
 | `fillOpacity` | `number \| undefined` | `undefined` | Fill opacity for bubbles between 0 and 1. |
 | `keyField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting a stable datum identity across updates. |
-| `maxRadius` | `number` | `24` | Maximum rendered pixel radius for the largest data size value. |
-| `minRadius` | `number` | `4` | Minimum rendered pixel radius for the smallest data size value. |
+| `maxRadius` | `number \| undefined` | `undefined` | Maximum rendered pixel radius for the largest data size value. When unset, the series reads `--mona-chart-bubble-max-radius`, or uses `24`. |
+| `minRadius` | `number \| undefined` | `undefined` | Minimum rendered pixel radius for the smallest data size value. When unset, the series reads `--mona-chart-bubble-min-radius`, or uses `4`. |
 | `name` | `string` | `"Bubble"` | Name of the series displayed in legends and tooltips. |
 | `seriesKey` | `string \| undefined` | `undefined` | Optional stable key identifying this series for mark identity and selection across updates. |
 | `sizeField` | `ChartField` | `"size"` | Property key or accessor extracting the size magnitude for each bubble. |

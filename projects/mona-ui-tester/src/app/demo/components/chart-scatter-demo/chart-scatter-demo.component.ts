@@ -550,8 +550,8 @@ function bubbleOverrides(): Partial<ComponentConfigInputType<BubbleSeriesCompone
     return {
         color: { type: "color", value: "" },
         fillOpacity: { type: "number", nullable: true, min: 0, max: 1, value: undefined },
-        maxRadius: { type: "number", min: 1, max: 100, value: 24 },
-        minRadius: { type: "number", min: 1, max: 100, value: 4 },
+        maxRadius: { type: "number", nullable: true, min: 1, max: 100, value: undefined },
+        minRadius: { type: "number", nullable: true, min: 1, max: 100, value: undefined },
         name: { type: "string", value: "Petrol" },
         seriesKey: undefined,
         sizeFormatter: {

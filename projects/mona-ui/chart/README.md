@@ -586,8 +586,8 @@ Renders a Cartesian bubble series encoding a 3rd quantitative dimension into mar
 | `field`         | `ChartField`                  | `"value"`   | Property key or accessor extracting numeric Y-axis coordinate.                                                   |
 | `sizeField`     | `ChartField`                  | `"size"`    | Property key or accessor extracting quantitative magnitude for bubble area.                                      |
 | `sizeFormatter` | `ChartValueFormatter<number>` | `undefined` | Formatter callback generating formatted size strings for tooltips and accessibility announcements.               |
-| `minRadius`     | `number`                      | `4` | Minimum bubble radius in pixels for the minimum size value. Defaults to `--mona-chart-bubble-min-radius` (4px).  |
-| `maxRadius`     | `number`                      | `24` | Maximum bubble radius in pixels for the maximum size value. Defaults to `--mona-chart-bubble-max-radius` (24px). |
+| `minRadius`     | `number \| undefined`          | `undefined` | Minimum bubble radius in pixels for the minimum size value. When unset, reads `--mona-chart-bubble-min-radius`, or uses 4px. |
+| `maxRadius`     | `number \| undefined`          | `undefined` | Maximum bubble radius in pixels for the maximum size value. When unset, reads `--mona-chart-bubble-max-radius`, or uses 24px. |
 | `xField`        | `ChartField`                  | `undefined` | Property key or accessor extracting X-axis coordinate (overrides chart-level `xField`).                          |
 | `keyField`      | `ChartField`                  | `undefined` | Unique identifier field for stable mark tracking across animation transitions.                                   |
 | `name`          | `string`                      | `"Bubble"`  | Series name for tooltips, legend, and accessibility.                                                             |

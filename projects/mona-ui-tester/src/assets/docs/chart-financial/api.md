@@ -39,7 +39,7 @@ open ticks, right-facing close ticks, and directional color coding.
 | `valueFormatter` | `ChartAxisFormatter \| undefined` | `undefined` | Formatter callback transforming financial numeric values into custom display strings. |
 | `visible` (two-way) | `boolean` | `true` | Whether the series is currently visible on the chart and in calculations. |
 | `wickColor` | `string` | `""` | Explicit stroke color for the central vertical stem. |
-| `wickWidth` | `number` | `1` | Pixel stroke width for OHLC stems and tick arms. |
+| `wickWidth` | `number \| undefined` | `undefined` | Pixel stroke width for OHLC stems and tick arms. When unset, the series reads `--mona-chart-financial-wick-width`, or uses `1`. |
 | `xAxisId` | `string \| undefined` | `undefined` | Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used. |
 | `xField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting the X coordinate, overriding the root chart X field. |
 | `yAxisId` | `string \| undefined` | `undefined` | Optional ID of the Cartesian Y axis this series binds to. When omitted, the primary Y axis is used. |
@@ -84,7 +84,7 @@ rising/falling/neutral color coding, and solid or hollow rising bodies.
 | `valueFormatter` | `ChartAxisFormatter \| undefined` | `undefined` | Formatter callback transforming financial numeric values into custom display strings. |
 | `visible` (two-way) | `boolean` | `true` | Whether the series is currently visible on the chart and in calculations. |
 | `wickColor` | `string` | `""` | Explicit stroke color for the upper and lower wicks. |
-| `wickWidth` | `number` | `1` | Pixel stroke width for candle wicks. |
+| `wickWidth` | `number \| undefined` | `undefined` | Pixel stroke width for candle wicks. When unset, the series reads `--mona-chart-financial-wick-width`, or uses `1`. |
 | `xAxisId` | `string \| undefined` | `undefined` | Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used. |
 | `xField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting the X coordinate, overriding the root chart X field. |
 | `yAxisId` | `string \| undefined` | `undefined` | Optional ID of the Cartesian Y axis this series binds to. When omitted, the primary Y axis is used. |

@@ -514,6 +514,37 @@ Error thrown when a chart export operation fails.
 | --- | --- |
 | `code` (read-only) | `ChartExportErrorCode` |
 
+### `chartItemCategoryId`
+
+The ID of the item whose category is `category`, as a radial bar or rose series gives an item without a `keyField`
+value. Use it in `hiddenItemIds`. Returns `undefined` for a number that isn't finite or a date that isn't valid,
+which can't identify an item.
+
+```typescript
+function chartItemCategoryId(category: boolean | string): string;
+function chartItemCategoryId(category: ChartItemKey): string | undefined;
+```
+
+### `chartItemIndexId`
+
+The ID of the item in row `index`, as a funnel stage, waterfall step, or radial bar or rose item gets it when it has
+no `keyField` value (and, for a radial series, no category). It follows the position, not the row.
+
+```typescript
+function chartItemIndexId(index: number): string;
+```
+
+### `chartItemKeyId`
+
+The ID of the item whose `keyField` value is `key`, as funnel stages, treemap nodes, waterfall steps and radial bar
+and rose items use it. Use it in `hiddenStageIds`, `hiddenNodeIds` or `hiddenItemIds`, or to compare with an ID an
+event gives. Returns `undefined` for a number that isn't finite or a date that isn't valid, which can't be a key.
+
+```typescript
+function chartItemKeyId(key: boolean | string): string;
+function chartItemKeyId(key: ChartItemKey): string | undefined;
+```
+
 ### `getChartSeriesFamily`
 
 ```typescript
@@ -1553,6 +1584,14 @@ How the title and subtitle align: `start` and `end` follow the direction, `left`
 
 ```typescript
 type ChartHeaderAlignment = "center" | "end" | "left" | "right" | "start";
+```
+
+#### `ChartItemKey`
+
+A value that can identify a chart item: a `keyField` value or a category.
+
+```typescript
+type ChartItemKey = boolean | Date | number | string;
 ```
 
 #### `ChartLegendItemKind`

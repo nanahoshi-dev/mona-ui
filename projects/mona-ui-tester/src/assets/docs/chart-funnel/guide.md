@@ -152,8 +152,16 @@ A funnel has its chart to itself. A chart with two funnels, or with a funnel and
 
 Each stage has an ID, which `hiddenStageIds`, `stageVisibilityChange` and the label context use.
 
-- Without `keyField`, the ID is `i:` followed by the row's index, such as `i:2`. It follows the position, not the row, when rows are reordered.
-- With `keyField`, the ID is `k:s:` followed by a string key, such as `k:s:trial`, or `k:n:` followed by a number key. It stays with the row when rows are reordered. A key used twice logs a development warning, and the later row falls back to its index.
+- With `keyField`, the ID comes from the row's key, and `chartItemKeyId(key)` builds it. It stays with the row when rows are reordered. A key used twice logs a development warning, and the later row falls back to its index.
+- Without `keyField`, the ID comes from the row's index, and `chartItemIndexId(index)` builds it. It follows the position, not the row, when rows are reordered.
+
+```typescript
+import { chartItemKeyId } from "@nanahoshi/mona-ui/chart";
+
+protected readonly hiddenStageIds = signal([chartItemKeyId("trial")]);
+```
+
+Both functions are described in the [Chart Overview API](/components/chart). Treat the IDs as opaque: compare them, but don't parse them.
 
 The ID also matches stages from one data set to the next, so stages with the same ID animate from where they were.
 

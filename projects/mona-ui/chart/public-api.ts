@@ -283,3 +283,6 @@ export type {
 } from "./models/chart-export.models";
 
 export { CHART_DEFAULT_MESSAGES } from "./i18n/chart.default-messages";
+
+export { chartItemCategoryId, chartItemIndexId, chartItemKeyId } from "./utils/chart-item-id";
+export type { ChartItemKey } from "./utils/chart-item-id";

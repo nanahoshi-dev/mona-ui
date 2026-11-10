@@ -583,7 +583,7 @@ function seriesOverrides<T extends CandlestickSeriesComponent | OhlcSeriesCompon
             defaultValue: undefined
         },
         wickColor: { type: "color", value: "" },
-        wickWidth: { type: "number", value: 1, min: 0 },
+        wickWidth: { type: "number", nullable: true, min: 0, value: undefined },
         xAxisId: undefined,
         yAxisId: undefined
     };

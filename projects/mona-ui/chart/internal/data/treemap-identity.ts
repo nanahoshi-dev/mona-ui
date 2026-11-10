@@ -1,5 +1,5 @@
 import type { ChartField, ChartValueFormatter } from "../../models/chart.models";
-import { serializeKeyPart } from "../animation/animation-identity";
+import { formatItemId, serializeKeyPart } from "../animation/animation-identity";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import { resolveValue } from "./chart-value-resolver";
 
@@ -151,9 +151,8 @@ export class TreemapIdentity {
 
         if (keyField) {
             const rawKey = resolveValue(datum, keyField, dataIndex);
-            const keyPart = serializeKeyPart(rawKey);
-            if (keyPart !== null) {
-                const keyStr = `k:${keyPart.type}:${String(keyPart.value)}`;
+            const keyStr = formatItemId("k", rawKey);
+            if (keyStr !== null) {
                 if (seenExplicitKeys && seenExplicitKeys.has(keyStr)) {
                     if (warnedDiagnosticSignatures && seriesId) {
                         ChartDiagnostics.warnOnce(

@@ -99,8 +99,8 @@ chart-financial/moving-average
 | `fillMode` | `"hollow"`, `"filled"` | Candlestick only. `hollow`, the default, draws rising bodies as an outline and fills falling and neutral ones. `filled` fills every body. |
 | `risingColor`, `fallingColor`, `neutralColor` | Any CSS color, or a `var(--token)` | The color of rising, falling and neutral marks. Empty uses the theme tokens, then green, red and gray. |
 | `color` | Any CSS color | One color for every mark, whatever its direction. It wins over the three direction colors. |
-| `wickColor` | Any CSS color | The color of a candle's wicks or an OHLC bar's stem. Empty uses the mark's direction color. With `renderer="svg"`, an OHLC bar draws its stem in the direction color. |
-| `wickWidth` | Pixels | The width of wicks, stems and OHLC ticks, and of a hollow body's outline. It's never thinner than half a pixel. |
+| `wickColor` | Any CSS color | The color of a candle's wicks or an OHLC bar's stem. Empty uses the mark's direction color. |
+| `wickWidth` | Pixels | The width of wicks, stems and OHLC ticks, and of a hollow body's outline. It's never thinner than half a pixel. When unset, it comes from `--mona-chart-financial-wick-width`, or is `1`. |
 | `bodyWidthRatio` | `0.05` to `1` | How much of the room each mark takes. |
 | `bodyWidth` | Pixels | A fixed width for every body, or every pair of OHLC ticks, instead of the ratio. |
 | `maxBodyWidth` | Pixels | The widest a mark gets, `32` by default, so a few marks on a wide chart don't turn into blocks. |
@@ -113,7 +113,7 @@ On a category X axis each mark takes `bodyWidthRatio` of its category's band. On
 
 ## Theming
 
-These tokens set the colors of every financial series inside the element they're set on, so they can go on `:root`, on a container or on one chart. An input on the series wins over its token.
+These tokens set the colors and wick width of every financial series inside the element they're set on, so they can go on `:root`, on a container or on one chart. An input on the series wins over its token.
 
 | Token | Default | Sets |
 | :--- | :--- | :--- |
@@ -121,6 +121,7 @@ These tokens set the colors of every financial series inside the element they're
 | `--mona-chart-financial-falling-color` | `#ef4444` | Falling marks, like `fallingColor`. |
 | `--mona-chart-financial-neutral-color` | `#6b7280` | Neutral marks, like `neutralColor`. |
 | `--mona-chart-financial-wick-color` | The direction color | Wicks and stems, like `wickColor`. |
+| `--mona-chart-financial-wick-width` | `1` | The width of wicks, stems and ticks, like `wickWidth`. |
 | `--mona-chart-financial-hollow-fill` | The surface color | The inside of hollow candles. Without it, the theme's surface, card or background color is used, so a hollow body matches the chart behind it. |
 
 ```css

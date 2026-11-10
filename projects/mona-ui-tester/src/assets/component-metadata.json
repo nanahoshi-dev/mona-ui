@@ -3620,18 +3620,18 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "Maximum rendered pixel radius for the largest data size value.",
+        "description": "Maximum rendered pixel radius for the largest data size value. When unset, the series reads\n`--mona-chart-bubble-max-radius`, or uses `24`.",
         "kind": "input",
         "name": "maxRadius",
-        "type": "number",
-        "defaultValue": "24"
+        "type": "number | undefined",
+        "defaultValue": "undefined"
       },
       {
-        "description": "Minimum rendered pixel radius for the smallest data size value.",
+        "description": "Minimum rendered pixel radius for the smallest data size value. When unset, the series reads\n`--mona-chart-bubble-min-radius`, or uses `4`.",
         "kind": "input",
         "name": "minRadius",
-        "type": "number",
-        "defaultValue": "4"
+        "type": "number | undefined",
+        "defaultValue": "undefined"
       },
       {
         "description": "Name of the series displayed in legends and tooltips.",
@@ -3891,11 +3891,11 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Pixel stroke width for candle wicks.",
+        "description": "Pixel stroke width for candle wicks. When unset, the series reads\n`--mona-chart-financial-wick-width`, or uses `1`.",
         "kind": "input",
         "name": "wickWidth",
-        "type": "number",
-        "defaultValue": "1"
+        "type": "number | undefined",
+        "defaultValue": "undefined"
       },
       {
         "description": "Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used.",
@@ -5698,7 +5698,7 @@
         "defaultValue": "2"
       },
       {
-        "description": "The hidden stage IDs. Bind `[(hiddenStageIds)]` for two-way binding; legend toggles write to it.",
+        "description": "The hidden stage IDs. Bind `[(hiddenStageIds)]` for two-way binding; legend toggles write to it.\nBuild an ID with `chartItemKeyId(key)` when `keyField` is set, or with `chartItemIndexId(index)`.",
         "kind": "model",
         "name": "hiddenStageIds",
         "type": "readonly string[]",
@@ -6524,11 +6524,11 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Pixel stroke width for OHLC stems and tick arms.",
+        "description": "Pixel stroke width for OHLC stems and tick arms. When unset, the series reads\n`--mona-chart-financial-wick-width`, or uses `1`.",
         "kind": "input",
         "name": "wickWidth",
-        "type": "number",
-        "defaultValue": "1"
+        "type": "number | undefined",
+        "defaultValue": "undefined"
       },
       {
         "description": "Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used.",
@@ -7117,7 +7117,7 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "The hidden item IDs. Bind `[(hiddenItemIds)]` for two-way binding; legend toggles write to it.",
+        "description": "The hidden item IDs. Bind `[(hiddenItemIds)]` for two-way binding; legend toggles write to it.\nBuild an ID with `chartItemKeyId(key)` when `keyField` is set, or else with `chartItemCategoryId(category)`.",
         "kind": "model",
         "name": "hiddenItemIds",
         "type": "readonly string[]",
@@ -7614,7 +7614,7 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "The hidden item IDs. Bind `[(hiddenItemIds)]` for two-way binding; legend toggles write to it.",
+        "description": "The hidden item IDs. Bind `[(hiddenItemIds)]` for two-way binding; legend toggles write to it.\nBuild an ID with `chartItemKeyId(key)` when `keyField` is set, or else with `chartItemCategoryId(category)`.",
         "kind": "model",
         "name": "hiddenItemIds",
         "type": "readonly string[]",
@@ -7912,7 +7912,7 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "The hidden top-level node IDs. Bind `[(hiddenNodeIds)]` for two-way binding; legend toggles write to it.",
+        "description": "The hidden top-level node IDs. Bind `[(hiddenNodeIds)]` for two-way binding; legend toggles write to it.\nWith `keyField`, build an ID with `chartItemKeyId(key)`; otherwise read IDs from `nodeVisibilityChange`.",
         "kind": "model",
         "name": "hiddenNodeIds",
         "type": "readonly string[]",

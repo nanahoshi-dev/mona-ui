@@ -89,7 +89,7 @@ chart-scatter/dense
 | Input | Values | Effect |
 | :--- | :--- | :--- |
 | `pointRadius` | Pixels, from `1` to `100` | The radius of every scatter marker. Defaults to `4`. |
-| `minRadius`, `maxRadius` | Pixels, from `1` to `100` | The radius of the smallest and the largest bubble. Default `4` and `24`. When `minRadius` is the larger, the two are swapped. |
+| `minRadius`, `maxRadius` | Pixels, from `1` to `100` | The radius of the smallest and the largest bubble. When unset, they come from the theme, or are `4` and `24`. When `minRadius` is the larger, the two are swapped. |
 | `fillOpacity` | A number from `0` to `1` | How opaque the markers are. Defaults to `0.9` for scatter and `0.55` for bubbles, so overlapping bubbles stay visible. |
 | `strokeColor` | Any CSS color | The outline. A scatter marker is outlined in the surface color by default, which separates touching markers; a bubble is outlined in its own color. |
 | `strokeWidth` | Pixels | The width of the outline. Defaults to `1.5`; `0` removes it, which helps dense data. |
@@ -105,6 +105,8 @@ These custom properties set the defaults of every scatter or bubble series insid
 | `--mona-chart-marker-fill-opacity` | `0.9` scatter, `0.55` bubble | `fillOpacity`, falling back to `--mona-chart-fill-opacity` |
 | `--mona-chart-marker-stroke-color` | Surface color for scatter, series color for bubbles | `strokeColor` |
 | `--mona-chart-marker-stroke-width` | `1.5` | `strokeWidth` |
+| `--mona-chart-bubble-min-radius` | `4` | `minRadius` of a bubble series |
+| `--mona-chart-bubble-max-radius` | `24` | `maxRadius` of a bubble series |
 
 ```css
 .dense-charts {

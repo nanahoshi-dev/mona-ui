@@ -1,4 +1,6 @@
-/** One stage of the Funnel playground. `id` feeds `keyField`, so the stage IDs read as `k:s:<id>`. */
+import { chartItemKeyId } from "@nanahoshi/mona-ui/chart";
+
+/** One stage of the Funnel playground. `id` feeds `keyField`, so `chartItemKeyId(id)` is the stage's ID. */
 export interface FunnelStage {
     readonly color: string;
     readonly id: string;
@@ -71,7 +73,7 @@ function presetsFor(stages: readonly FunnelStage[]): readonly HiddenStagePreset[
     const [, second, third] = stages;
     return [
         { text: "None", value: NO_HIDDEN_STAGES },
-        { text: `Hide ${second.stage}`, value: [`k:s:${second.id}`] },
-        { text: `Hide ${second.stage} and ${third.stage}`, value: [`k:s:${second.id}`, `k:s:${third.id}`] }
+        { text: `Hide ${second.stage}`, value: [chartItemKeyId(second.id)] },
+        { text: `Hide ${second.stage} and ${third.stage}`, value: [chartItemKeyId(second.id), chartItemKeyId(third.id)] }
     ];
 }

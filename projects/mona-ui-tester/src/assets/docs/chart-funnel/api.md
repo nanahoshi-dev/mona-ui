@@ -26,7 +26,7 @@ visibility toggling.
 | `field` | `ChartField` | `"value"` | Property key or accessor function extracting numeric values. |
 | `fillOpacity` | `number \| undefined` | `undefined` | Fill opacity applied to stage trapezoids (0 to 1). |
 | `gap` | `number` | `2` | Spacing in pixels between consecutive funnel stages. |
-| `hiddenStageIds` (two-way) | `readonly string[]` | `[]` | The hidden stage IDs. Bind `[(hiddenStageIds)]` for two-way binding; legend toggles write to it. |
+| `hiddenStageIds` (two-way) | `readonly string[]` | `[]` | The hidden stage IDs. Bind `[(hiddenStageIds)]` for two-way binding; legend toggles write to it. Build an ID with `chartItemKeyId(key)` when `keyField` is set, or with `chartItemIndexId(index)`. |
 | `keyField` | `ChartField \| undefined` | `undefined` | Unique identifier key field for datums. |
 | `labelContent` | `ChartFunnelLabelContent` | `"category-value"` | Content format for automatic stage labels. |
 | `maxLabels` | `number` | `100` | Maximum number of visible stage labels rendered simultaneously. |

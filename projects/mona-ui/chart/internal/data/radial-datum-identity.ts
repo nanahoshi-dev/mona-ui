@@ -1,4 +1,4 @@
-import { serializeKeyPart } from "../animation/animation-identity";
+import { formatItemId } from "../animation/animation-identity";
 import { resolveNumericValue, resolveValue } from "./chart-value-resolver";
 import type { ChartField } from "../../models/chart.models";
 import { chartMessages } from "../utils/chart-locale";
@@ -11,41 +11,15 @@ export function deriveRadialDatumId(
     explicitKeyValue: unknown,
     dataIndex: number
 ): string {
-    if (explicitKeyValue !== undefined && explicitKeyValue !== null) {
-        const keyPart = serializeKeyPart(explicitKeyValue);
-        if (keyPart !== null) {
-            return `k:${keyPart.type}:${String(keyPart.value)}`;
-        }
-    }
-
-    if (categoryValue !== undefined && categoryValue !== null) {
-        const catPart = serializeKeyPart(categoryValue);
-        if (catPart !== null) {
-            return `c:${catPart.type}:${String(catPart.value)}`;
-        }
-    }
-
-    return `i:${dataIndex}`;
+    return formatItemId("k", explicitKeyValue) ?? formatItemId("c", categoryValue) ?? `i:${dataIndex}`;
 }
 
 export function serializeRadialCategoryKey(categoryValue: unknown, fallbackIndex: number): string {
-    if (categoryValue !== undefined && categoryValue !== null) {
-        const part = serializeKeyPart(categoryValue);
-        if (part !== null) {
-            return `c:${part.type}:${String(part.value)}`;
-        }
-    }
-    return `c:i:${fallbackIndex}`;
+    return formatItemId("c", categoryValue) ?? `c:i:${fallbackIndex}`;
 }
 
 export function serializeRadialExplicitKey(explicitKeyValue: unknown): string | null {
-    if (explicitKeyValue !== undefined && explicitKeyValue !== null) {
-        const part = serializeKeyPart(explicitKeyValue);
-        if (part !== null) {
-            return `k:${part.type}:${String(part.value)}`;
-        }
-    }
-    return null;
+    return formatItemId("k", explicitKeyValue);
 }
 
 export interface RadialRetainedIdentity {

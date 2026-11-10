@@ -28,7 +28,7 @@ tracks.
 | `field` | `ChartField` | `"value"` | Property key or accessor extracting the numeric value for each radial ring. |
 | `fillMode` | `ChartRadialArcFillMode` | `"solid"` | Fill style applied to radial rings ("solid" or radial "gradient"). |
 | `fillOpacity` | `number \| undefined` | `undefined` | Opacity of bar fills (between 0 and 1). |
-| `hiddenItemIds` (two-way) | `readonly string[]` | `[]` | The hidden item IDs. Bind `[(hiddenItemIds)]` for two-way binding; legend toggles write to it. |
+| `hiddenItemIds` (two-way) | `readonly string[]` | `[]` | The hidden item IDs. Bind `[(hiddenItemIds)]` for two-way binding; legend toggles write to it. Build an ID with `chartItemKeyId(key)` when `keyField` is set, or else with `chartItemCategoryId(category)`. |
 | `innerRadiusRatio` | `number` | `0.2` | Inner radius ratio relative to available plot bounds (0 to 1). |
 | `keyField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting a stable datum identity across updates. |
 | `max` | `number \| undefined` | `undefined` | Explicit maximum value for the radial bar progress scale. |
@@ -123,7 +123,7 @@ Renders Nightingale rose (coxcomb) charts with angular category petals whose rad
 | `field` | `ChartField` | `"value"` | Property key or accessor extracting the numeric petal value. |
 | `fillMode` | `ChartRadialArcFillMode` | `"solid"` | Fill style applied to rose petals ("solid" or radial "gradient"). |
 | `fillOpacity` | `number \| undefined` | `undefined` | Opacity of petal fills (between 0 and 1). |
-| `hiddenItemIds` (two-way) | `readonly string[]` | `[]` | The hidden item IDs. Bind `[(hiddenItemIds)]` for two-way binding; legend toggles write to it. |
+| `hiddenItemIds` (two-way) | `readonly string[]` | `[]` | The hidden item IDs. Bind `[(hiddenItemIds)]` for two-way binding; legend toggles write to it. Build an ID with `chartItemKeyId(key)` when `keyField` is set, or else with `chartItemCategoryId(category)`. |
 | `innerRadiusRatio` | `number` | `0` | Inner radius ratio relative to available plot bounds (0 to 1). |
 | `keyField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting a stable datum identity across updates. |
 | `name` | `string` | `"Rose"` | Series name used in tooltips and accessibility announcements. |

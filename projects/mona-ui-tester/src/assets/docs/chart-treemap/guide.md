@@ -172,7 +172,7 @@ A treemap takes the whole chart on its own. A chart with two treemap series, or 
 The legend has an entry for each top-level node. Toggling one hides that node and everything in it, and the others grow to fill the space. The series then emits `nodeVisibilityChange`, with the node's id, label and new state, and updates `[(hiddenNodeIds)]`. The chart's `seriesVisibilityChange` isn't emitted, since the series stays visible.
 
 - Only top-level ids have an effect. Hiding a deeper node isn't supported.
-- Ids are generated: with `keyField` from the key, otherwise from the path of labels. Read them from `nodeVisibilityChange`, or from `hierarchy.nodeId` in the chart's point events, rather than building them by hand.
+- Ids are generated: with `keyField` from the key, and `chartItemKeyId(key)` builds that id (see the [Chart Overview API](/components/chart)). Without `keyField` they come from the path of labels; read those from `nodeVisibilityChange`, or from `hierarchy.nodeId` in the chart's point events, rather than building them by hand.
 - Hidden ids the data no longer has are dropped when the data changes, and an empty data set keeps them, as described on [Chart Overview](/components/chart).
 - Give nodes a `keyField` when the data reloads or two siblings can share a label. Without one, siblings with the same label are told apart by their order. A key used twice falls back to the path, with a warning.
 

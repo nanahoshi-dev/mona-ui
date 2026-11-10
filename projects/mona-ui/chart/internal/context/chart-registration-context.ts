@@ -281,8 +281,8 @@ export interface ChartScatterSeriesRegistration extends ChartCartesianMarkerSeri
 }
 
 export interface ChartBubbleSeriesRegistration extends ChartCartesianMarkerSeriesRegistrationBase {
-    maxRadius: Signal<number>;
-    minRadius: Signal<number>;
+    maxRadius: Signal<number | undefined>;
+    minRadius: Signal<number | undefined>;
     sizeField: Signal<ChartField>;
     sizeFormatter?: Signal<ChartValueFormatter | undefined>;
     type: "bubble";
@@ -401,7 +401,7 @@ export interface ChartFinancialSeriesRegistrationBase {
     readonly valueFormatter: Signal<ChartAxisFormatter | undefined>;
     readonly visible: Signal<boolean>;
     readonly wickColor: Signal<string | undefined>;
-    readonly wickWidth: Signal<number>;
+    readonly wickWidth: Signal<number | undefined>;
     readonly xAxisId: Signal<string | undefined>;
     readonly xField: Signal<ChartField | undefined>;
     readonly yAxisId: Signal<string | undefined>;

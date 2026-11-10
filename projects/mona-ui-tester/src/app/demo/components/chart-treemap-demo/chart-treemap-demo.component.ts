@@ -10,6 +10,7 @@ import {
     ChartTitleTemplateDirective,
     ChartTooltipComponent,
     ChartTooltipTemplateDirective,
+    chartItemKeyId,
     ChartTreemapLabelTemplateDirective,
     TreemapSeriesComponent
 } from "@nanahoshi/mona-ui/chart";
@@ -51,14 +52,6 @@ const PALETTES: readonly { readonly text: string; readonly value: readonly strin
     { text: "Warm", value: ["#b45309", "#be123c", "#c2410c", "#a16207", "#9d174d"] },
     { text: "Cool", value: ["#1d4ed8", "#0f766e", "#6d28d9", "#0369a1", "#15803d"] }
 ];
-
-/**
- * The id the series gives a department. With `keyField`, a node's id comes from its key; the playground builds it here
- * only so the Features tab can hide a department before the legend has reported any id.
- */
-function departmentNodeId(id: string): string {
-    return `k:s:${id}`;
-}
 
 /**
  * The playground of the Treemap page. It covers every input of the treemap series, the legend, the tooltip and the
@@ -379,7 +372,7 @@ function readHiddenNodeIds(features: ComponentConfigFeatureItem): readonly strin
         return [];
     }
     return BUDGET_DEPARTMENTS.filter(department => item.subFeatures?.[department.id]?.active).map(department =>
-        departmentNodeId(department.id)
+        chartItemKeyId(department.id)
     );
 }
 
@@ -395,7 +388,7 @@ function withHiddenDepartments(
     const subFeatures: ComponentConfigFeatureItem = Object.fromEntries(
         Object.entries(item.subFeatures ?? {}).map(([key, sub]) => [
             key,
-            { ...sub, active: ids.includes(departmentNodeId(key)) }
+            { ...sub, active: ids.includes(chartItemKeyId(key)) }
         ])
     );
     return {

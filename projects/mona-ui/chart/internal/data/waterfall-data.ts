@@ -4,7 +4,7 @@ import type { ChartWaterfallDatumKind, ChartWaterfallVisualKind } from "../../mo
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import type { ChartWaterfallSeriesStyle } from "../scene/waterfall-scene";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
-import { serializeKeyPart } from "../animation/animation-identity";
+import { formatItemId } from "../animation/animation-identity";
 import { resolveNumericValue, resolveValue } from "./chart-value-resolver";
 import { chartMessages, formatChartNumber } from "../utils/chart-locale";
 
@@ -173,9 +173,8 @@ export class WaterfallDataProcessor {
             let explicitKey: string | undefined;
             if (keyField) {
                 const rawKey = resolveValue(datum, keyField, i);
-                const keyPart = serializeKeyPart(rawKey);
-                if (keyPart !== null) {
-                    const keyStr = `k:${keyPart.type}:${String(keyPart.value)}`;
+                const keyStr = formatItemId("k", rawKey);
+                if (keyStr !== null) {
                     if (seenExplicitKeys.has(keyStr)) {
                         if (warnedDiagnosticSignatures) {
                             ChartDiagnostics.warnOnce(
