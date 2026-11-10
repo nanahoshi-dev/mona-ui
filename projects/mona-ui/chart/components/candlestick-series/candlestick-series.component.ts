@@ -86,7 +86,7 @@ export class CandlestickSeriesComponent implements OnInit {
 
     /**
      * @description Visual fill mode for candle bodies: 'filled' (solid fill) or 'hollow' (rising hollow, falling filled).
-     * @default "filled"
+     * @default "hollow"
      */
     public readonly fillMode = input<ChartFinancialFillMode>("hollow");
 
@@ -179,10 +179,11 @@ export class CandlestickSeriesComponent implements OnInit {
     public readonly wickColor = input("");
 
     /**
-     * @description Pixel stroke width for candle wicks.
-     * @default 1
+     * @description Pixel stroke width for candle wicks. When unset, the series reads
+     * `--mona-chart-financial-wick-width`, or uses `1`.
+     * @default undefined
      */
-    public readonly wickWidth = input(1);
+    public readonly wickWidth = input<number | undefined>(undefined);
 
     /**
      * @description Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used.

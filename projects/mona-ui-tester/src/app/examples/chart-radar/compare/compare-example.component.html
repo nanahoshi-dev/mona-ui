@@ -1,0 +1,12 @@
+<mona-chart aria-label="Phone review scores" class="h-80 w-full" [data]="scores">
+    <mona-chart-radial-axis [max]="100" [min]="0" />
+    <mona-radar-series
+        categoryField="skill"
+        field="alpha"
+        fillMode="solid"
+        name="Phone A"
+        [valueFormatter]="outOf100" />
+    <mona-radar-series categoryField="skill" field="beta" fillMode="solid" name="Phone B" [valueFormatter]="outOf100" />
+    <mona-chart-legend />
+    <mona-chart-tooltip [shared]="true" />
+</mona-chart>

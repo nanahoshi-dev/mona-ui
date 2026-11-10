@@ -1,0 +1,23 @@
+<div class="flex w-full flex-col gap-3">
+    <mona-chart
+        aria-label="Code reviews by team and week"
+        class="h-64 w-full"
+        xField="week"
+        [data]="reviews"
+        (pointClick)="onPointClick($event)">
+        <mona-chart-x-axis />
+        <mona-chart-y-axis />
+        <mona-heatmap-series
+            color="#7c3aed"
+            field="reviews"
+            name="Reviews"
+            yField="team"
+            [borderRadius]="6"
+            [cellGap]="4"
+            [showValues]="true"
+            [xCategories]="weeks"
+            [yCategories]="teams" />
+        <mona-chart-tooltip />
+    </mona-chart>
+    <p aria-live="polite" class="text-sm text-muted-foreground">{{ selected() }}</p>
+</div>

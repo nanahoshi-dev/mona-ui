@@ -11,7 +11,10 @@ export type DocsPageKind = "component" | "guide";
 export interface DocsPage {
     /** Other entry points whose exports this page also documents, because using the component takes them. */
     readonly apiAlsoFrom?: readonly string[];
-    /** The exports this page documents, when pages share an entry point. Without it, the page documents all of them. */
+    /**
+     * The exports this page documents, when pages share an entry point. Without it, the page documents the exports no
+     * other page of that entry point names, which is all of them when no other page does.
+     */
     readonly apiExports?: readonly string[];
     /** Sub-pages shown nested in the sidebar. Only for topics with their own examples and a reason to be linked to. */
     readonly children?: readonly DocsPage[];
@@ -129,8 +132,19 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
     {
         id: "charts",
         title: "Charts",
+        // The overview documents every chart export that no family page claims.
         pages: [
-            component("chart", "Chart", "chart", "High-performance Canvas charts composed from series, axes and interaction parts.")
+            component("chart", "Chart Overview", "chart", "High-performance Canvas charts composed from series, axes and interaction parts."),
+            component("chart-line-area", "Line & Area", "chart", "Line, area and range area series for values that change across a continuous or category axis.", { apiExports: ["AreaSeriesComponent", "ChartAreaFillMode", "ChartCurve", "ChartLineStyle", "LineSeriesComponent", "RangeAreaSeriesComponent"] }),
+            component("chart-bar", "Bar & Waterfall", "chart", "Bar, range bar and waterfall series for comparing values, intervals and running totals.", { apiExports: ["BarSeriesComponent", "ChartBarOrientation", "ChartWaterfallDatumKind", "ChartWaterfallLabelTemplateContext", "ChartWaterfallLabelTemplateDirective", "ChartWaterfallPointContext", "ChartWaterfallPointValue", "ChartWaterfallVisualKind", "RangeBarSeriesComponent", "WaterfallSeriesComponent"] }),
+            component("chart-scatter", "Scatter & Bubble", "chart", "Scatter and bubble series for the relationship between two or three numeric values.", { apiExports: ["BubbleSeriesComponent", "ScatterSeriesComponent"] }),
+            component("chart-financial", "Financial", "chart", "Candlestick and OHLC series for open, high, low and close prices.", { apiExports: ["CandlestickSeriesComponent", "ChartFinancialDirection", "ChartFinancialFillMode", "ChartOhlcPointValue", "OhlcSeriesComponent"] }),
+            component("chart-heatmap", "Heatmap", "chart", "A heatmap series that colors a grid of cells by value, with a color legend.", { apiExports: ["ChartColorLegendScale", "ChartColorLegendStop", "ChartColorLegendTick", "ChartHeatmapCategory", "ChartHeatmapCellData", "ChartHeatmapColorMode", "HeatmapCellClickEvent", "HeatmapColorStop", "HeatmapSeriesComponent"] }),
+            component("chart-pie", "Pie & Donut", "chart", "Pie and donut series for the parts of a whole, with slice labels and a donut center.", { apiExports: ["ChartCenterTemplateContext", "ChartCenterTemplateDirective", "ChartPolarFillMode", "ChartPolarLabelContent", "ChartPolarLabelPosition", "ChartPolarLabelSide", "ChartSliceContext", "ChartSliceLabelTemplateContext", "ChartSliceLabelTemplateDirective", "ChartSliceVisibilityEvent", "DonutSeriesComponent", "PieSeriesComponent"] }),
+            component("chart-funnel", "Funnel", "chart", "A funnel series for stages that narrow, with conversion and drop-off between them.", { apiExports: ["ChartFunnelLabelContent", "ChartFunnelLabelTemplateContext", "ChartFunnelLabelTemplateDirective", "ChartFunnelOrientation", "ChartFunnelPointMetadata", "ChartFunnelStageContext", "ChartFunnelStageVisibilityEvent", "FunnelSeriesComponent"] }),
+            component("chart-treemap", "Treemap", "chart", "A treemap series that tiles hierarchical data by value.", { apiExports: ["ChartHierarchicalKind", "ChartHierarchyNodeContext", "ChartHierarchyPointMetadata", "ChartTreemapLabelTemplateContext", "ChartTreemapLabelTemplateDirective", "ChartTreemapNodeVisibilityEvent", "ChartTreemapSort", "ChartTreemapTile", "TreemapSeriesComponent"] }),
+            component("chart-radar", "Radar & Polar", "chart", "Radar and polar series on angular and radial axes, for comparing metrics or directions.", { apiExports: ["ChartAngularAxisComponent", "ChartRadialAxisComponent", "ChartRadialCurve", "ChartRadialFillMode", "ChartRadialGridShape", "PolarSeriesComponent", "RadarSeriesComponent"] }),
+            component("chart-radial", "Radial", "chart", "Radial bar, rose and gauge series that draw values as arcs around a center.", { apiExports: ["ChartGaugeCenterTemplateContext", "ChartGaugeCenterTemplateDirective", "ChartGaugeIndicator", "ChartRadialArcFillMode", "ChartRadialDatumVisibilityEvent", "ChartRoseScaleMode", "GaugeSeriesComponent", "RadialBarSeriesComponent", "RoseSeriesComponent"] })
         ]
     },
     {

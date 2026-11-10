@@ -1,0 +1,19 @@
+<div class="flex w-full flex-col gap-3">
+    <mona-segmented
+        aria-label="Bar orientation"
+        size="small"
+        [options]="orientations"
+        [value]="orientation()"
+        (valueChange)="onOrientationChange($event)"></mona-segmented>
+    <mona-chart aria-label="Units sold by product" class="h-80 w-full" xField="product" [data]="products">
+        <mona-chart-x-axis />
+        <mona-chart-y-axis />
+        <mona-bar-series
+            field="units"
+            name="Units sold"
+            [dataLabels]="true"
+            [maxBarWidth]="28"
+            [orientation]="orientation()" />
+        <mona-chart-tooltip />
+    </mona-chart>
+</div>

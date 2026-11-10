@@ -2,6 +2,7 @@ import type { ChartInteractionState } from "../../../interaction/chart-interacti
 import type { CartesianHeatmapChartScene } from "../../../scene/chart-scene";
 import type { ChartStyleResolver } from "../../../style/chart-style-resolver";
 import type { SceneHeatmapCell } from "../../../../models/chart-heatmap.models";
+import { buildHeatmapTickSegments } from "../../geometry/heatmap-tick-segments";
 import { buildRoundedRectPath } from "../../geometry/rounded-rect-path-builder";
 import { setSvgAttribute } from "../svg-attribute-utils";
 import { createSvgElement } from "../svg-element-utils";
@@ -212,6 +213,11 @@ export class SvgHeatmapRenderer {
                     axisScene.position === "top" ? Math.round(plotRect.y) : Math.round(plotRect.y + plotRect.height);
                 axisSegments.push(`M ${plotRect.x} ${y} H ${plotRect.x + plotRect.width}`);
             }
+        }
+        for (const tick of buildHeatmapTickSegments(axes, plotRect)) {
+            axisSegments.push(
+                `M ${Math.round(tick.x1)} ${Math.round(tick.y1)} L ${Math.round(tick.x2)} ${Math.round(tick.y2)}`
+            );
         }
         if (axisSegments.length > 0) {
             if (!this.#axisPath) {

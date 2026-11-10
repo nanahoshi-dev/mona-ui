@@ -1,0 +1,10 @@
+<div class="flex w-full flex-col gap-2">
+    <mona-chart aria-label="Tickets opened by day" class="h-72 w-full" xField="day" [data]="tickets">
+        <mona-chart-x-axis />
+        <mona-chart-y-axis />
+        <mona-bar-series field="opened" name="Opened" />
+        <mona-chart-selection mode="multiple" [(selectedMarkIds)]="selected" />
+        <mona-chart-brush mode="x" selectionBehavior="replace" />
+    </mona-chart>
+    <p class="text-sm text-muted-foreground" aria-live="polite">{{ selected().length }} selected</p>
+</div>

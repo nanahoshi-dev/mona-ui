@@ -1,0 +1,11 @@
+<mona-chart aria-label="Quarterly profit bridge" class="h-80 w-full" xField="step" [data]="profit">
+    <mona-chart-x-axis />
+    <mona-chart-y-axis />
+    <mona-waterfall-series field="amount" name="Profit" [showLabels]="true" [valueFormatter]="thousands">
+        <ng-template monaChartWaterfallLabelTemplate let-step>
+            <span [class.font-semibold]="step.kind !== 'change'">{{ step.formattedValue }}</span>
+        </ng-template>
+    </mona-waterfall-series>
+    <mona-chart-legend />
+    <mona-chart-tooltip />
+</mona-chart>

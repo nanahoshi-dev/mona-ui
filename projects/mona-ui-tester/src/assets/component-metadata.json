@@ -147,6 +147,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "AutoCompleteVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -161,6 +168,11 @@
         "kind": "input",
         "name": "size",
         "type": "AutoCompleteVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -252,6 +264,15 @@
         "name": "ariaHasPopup",
         "type": "ButtonAriaHasPopup",
         "alias": "aria-haspopup",
+        "options": [
+          "true",
+          "false",
+          "dialog",
+          "grid",
+          "listbox",
+          "menu",
+          "tree"
+        ],
         "defaultValue": "\"false\""
       },
       {
@@ -280,6 +301,19 @@
         "kind": "model",
         "name": "look",
         "type": "ButtonVariantProps[\"look\"]",
+        "options": [
+          "default",
+          "primary",
+          "success",
+          "error",
+          "warning",
+          "info",
+          "outline",
+          "secondary",
+          "ghost",
+          "link",
+          "clear"
+        ],
         "defaultValue": "\"default\""
       },
       {
@@ -287,6 +321,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "ButtonVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -301,6 +342,11 @@
         "kind": "input",
         "name": "size",
         "type": "ButtonVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -322,6 +368,11 @@
         "kind": "input",
         "name": "type",
         "type": "\"button\" | \"reset\" | \"submit\"",
+        "options": [
+          "button",
+          "reset",
+          "submit"
+        ],
         "defaultValue": "\"button\""
       },
       {
@@ -364,6 +415,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "CalendarVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "required": true
       },
       {
@@ -445,6 +503,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "CalendarVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "required": true
       },
       {
@@ -493,6 +558,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "CalendarVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "required": true
       },
       {
@@ -519,6 +591,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "CheckboxDirectiveVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -575,6 +654,17 @@
         "kind": "input",
         "name": "look",
         "type": "ChipVariantProps[\"look\"]",
+        "options": [
+          "default",
+          "primary",
+          "success",
+          "error",
+          "warning",
+          "info",
+          "outline",
+          "secondary",
+          "ghost"
+        ],
         "defaultValue": "\"default\""
       },
       {
@@ -609,6 +699,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "ChipVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -623,6 +720,11 @@
         "kind": "input",
         "name": "size",
         "type": "ChipVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -1026,6 +1128,15 @@
         "kind": "input",
         "name": "cellKind",
         "type": "GridCellKind | null",
+        "options": [
+          "command",
+          "data",
+          "detail",
+          "filter",
+          "footer",
+          "group",
+          "header"
+        ],
         "defaultValue": "null"
       },
       {
@@ -1119,6 +1230,13 @@
         "kind": "input",
         "name": "section",
         "type": "GridNavigationSection | null",
+        "options": [
+          "filter",
+          "footer",
+          "header",
+          "add",
+          "body"
+        ],
         "defaultValue": "null"
       },
       {
@@ -1530,6 +1648,12 @@
         "kind": "input",
         "name": "type",
         "type": "\"first\" | \"last\" | \"next\" | \"previous\"",
+        "options": [
+          "first",
+          "last",
+          "next",
+          "previous"
+        ],
         "required": true
       }
     ]
@@ -1550,6 +1674,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "RadioButtonDirectiveProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"full\""
       },
       {
@@ -1577,6 +1708,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "ScrollViewVariantProps[\"pagerRounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "required": true
       }
     ]
@@ -1686,6 +1824,10 @@
         "kind": "input",
         "name": "size",
         "type": "SidebarMenuButtonSize",
+        "options": [
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -1804,6 +1946,10 @@
         "kind": "input",
         "name": "orientation",
         "type": "SplitterVariantProps[\"orientation\"]",
+        "options": [
+          "horizontal",
+          "vertical"
+        ],
         "defaultValue": "\"horizontal\""
       },
       {
@@ -1838,6 +1984,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "StepperVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "required": true
       },
       {
@@ -1845,6 +1998,12 @@
         "kind": "input",
         "name": "state",
         "type": "StepState",
+        "options": [
+          "disabled",
+          "completed",
+          "current",
+          "upcoming"
+        ],
         "required": true
       }
     ]
@@ -1872,6 +2031,12 @@
         "kind": "input",
         "name": "position",
         "type": "TabListListItemVariantProps[\"position\"]",
+        "options": [
+          "left",
+          "right",
+          "top",
+          "bottom"
+        ],
         "required": true
       },
       {
@@ -1879,6 +2044,11 @@
         "kind": "input",
         "name": "size",
         "type": "TabListListItemVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "required": true
       }
     ]
@@ -1899,6 +2069,12 @@
         "kind": "input",
         "name": "rounded",
         "type": "TextAreaVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -1934,6 +2110,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "InputVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -1941,6 +2124,11 @@
         "kind": "input",
         "name": "size",
         "type": "InputVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -1976,6 +2164,11 @@
         "kind": "input",
         "name": "size",
         "type": "TimeSelectorListItemVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "required": true
       },
       {
@@ -2010,6 +2203,11 @@
         "kind": "input",
         "name": "size",
         "type": "TimeSelectorListVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "required": true
       }
     ]
@@ -2057,6 +2255,10 @@
         "kind": "input",
         "name": "mode",
         "type": "\"host\" | \"content\"",
+        "options": [
+          "host",
+          "content"
+        ],
         "defaultValue": "\"host\""
       },
       {
@@ -2071,6 +2273,14 @@
         "kind": "input",
         "name": "position",
         "type": "TooltipPosition",
+        "options": [
+          "left",
+          "right",
+          "top",
+          "bottom",
+          "end",
+          "start"
+        ],
         "defaultValue": "\"top\""
       },
       {
@@ -2079,6 +2289,13 @@
         "name": "rounded",
         "type": "TooltipVariantProps[\"rounded\"]",
         "alias": "tooltipRounded",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -2119,6 +2336,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "TooltipVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -2442,6 +2666,16 @@
         "kind": "input",
         "name": "direction",
         "type": "WindowResizeHandlerDirection",
+        "options": [
+          "north",
+          "south",
+          "east",
+          "west",
+          "northeast",
+          "northwest",
+          "southeast",
+          "southwest"
+        ],
         "required": true
       },
       {
@@ -2697,6 +2931,17 @@
         "kind": "input",
         "name": "look",
         "type": "ButtonGroupVariantProps[\"look\"]",
+        "options": [
+          "default",
+          "primary",
+          "success",
+          "error",
+          "warning",
+          "info",
+          "outline",
+          "secondary",
+          "ghost"
+        ],
         "defaultValue": "\"outline\""
       },
       {
@@ -2711,6 +2956,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "ButtonGroupVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -2718,6 +2970,10 @@
         "kind": "input",
         "name": "selection",
         "type": "SelectionMode",
+        "options": [
+          "single",
+          "multiple"
+        ],
         "defaultValue": "\"multiple\""
       },
       {
@@ -2725,6 +2981,11 @@
         "kind": "input",
         "name": "size",
         "type": "ButtonGroupVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -2779,6 +3040,15 @@
         "kind": "input",
         "name": "firstDay",
         "type": "FirstDayOfWeek | null",
+        "options": [
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday",
+          "saturday",
+          "sunday"
+        ],
         "defaultValue": "null"
       },
       {
@@ -2826,6 +3096,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "CalendarVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -2833,6 +3110,11 @@
         "kind": "input",
         "name": "selection",
         "type": "CalendarSelection",
+        "options": [
+          "single",
+          "multiple",
+          "range"
+        ],
         "defaultValue": "\"single\""
       },
       {
@@ -2881,6 +3163,11 @@
         "kind": "input",
         "name": "role",
         "type": "\"article\" | \"group\" | \"region\"",
+        "options": [
+          "group",
+          "article",
+          "region"
+        ],
         "defaultValue": "\"group\""
       },
       {
@@ -2888,6 +3175,14 @@
         "kind": "input",
         "name": "rounded",
         "type": "CardVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "xlarge",
+          "xxlarge"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -2951,6 +3246,13 @@
         "kind": "input",
         "name": "curve",
         "type": "ChartCurve",
+        "options": [
+          "linear",
+          "monotone-x",
+          "natural",
+          "step",
+          "step-after"
+        ],
         "defaultValue": "\"linear\""
       },
       {
@@ -2986,6 +3288,10 @@
         "kind": "input",
         "name": "fillMode",
         "type": "ChartAreaFillMode",
+        "options": [
+          "gradient",
+          "solid"
+        ],
         "defaultValue": "\"gradient\""
       },
       {
@@ -3007,6 +3313,11 @@
         "kind": "input",
         "name": "lineStyle",
         "type": "ChartLineStyle",
+        "options": [
+          "solid",
+          "dashed",
+          "dotted"
+        ],
         "defaultValue": "\"solid\""
       },
       {
@@ -3049,6 +3360,10 @@
         "kind": "input",
         "name": "stackMode",
         "type": "ChartStackMode",
+        "options": [
+          "normal",
+          "percent"
+        ],
         "defaultValue": "\"normal\""
       },
       {
@@ -3175,6 +3490,10 @@
         "kind": "input",
         "name": "orientation",
         "type": "ChartBarOrientation",
+        "options": [
+          "horizontal",
+          "vertical"
+        ],
         "defaultValue": "\"vertical\""
       },
       {
@@ -3196,6 +3515,10 @@
         "kind": "input",
         "name": "stackMode",
         "type": "ChartStackMode",
+        "options": [
+          "normal",
+          "percent"
+        ],
         "defaultValue": "\"normal\""
       },
       {
@@ -3297,18 +3620,18 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "Maximum rendered pixel radius for the largest data size value.",
+        "description": "Maximum rendered pixel radius for the largest data size value. When unset, the series reads\n`--mona-chart-bubble-max-radius`, or uses `24`.",
         "kind": "input",
         "name": "maxRadius",
-        "type": "number",
-        "defaultValue": "24"
+        "type": "number | undefined",
+        "defaultValue": "undefined"
       },
       {
-        "description": "Minimum rendered pixel radius for the smallest data size value.",
+        "description": "Minimum rendered pixel radius for the smallest data size value. When unset, the series reads\n`--mona-chart-bubble-min-radius`, or uses `4`.",
         "kind": "input",
         "name": "minRadius",
-        "type": "number",
-        "defaultValue": "4"
+        "type": "number | undefined",
+        "defaultValue": "undefined"
       },
       {
         "description": "Name of the series displayed in legends and tooltips.",
@@ -3455,7 +3778,11 @@
         "kind": "input",
         "name": "fillMode",
         "type": "ChartFinancialFillMode",
-        "defaultValue": "\"filled\""
+        "options": [
+          "filled",
+          "hollow"
+        ],
+        "defaultValue": "\"hollow\""
       },
       {
         "description": "Fill and stroke opacity ratio (0 to 1).",
@@ -3564,11 +3891,11 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Pixel stroke width for candle wicks.",
+        "description": "Pixel stroke width for candle wicks. When unset, the series reads\n`--mona-chart-financial-wick-width`, or uses `1`.",
         "kind": "input",
         "name": "wickWidth",
-        "type": "number",
-        "defaultValue": "1"
+        "type": "number | undefined",
+        "defaultValue": "undefined"
       },
       {
         "description": "Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used.",
@@ -3679,6 +4006,10 @@
         "kind": "input",
         "name": "renderer",
         "type": "ChartRendererMode",
+        "options": [
+          "canvas",
+          "svg"
+        ],
         "defaultValue": "\"canvas\""
       },
       {
@@ -3713,6 +4044,13 @@
         "kind": "input",
         "name": "titleAlign",
         "type": "ChartHeaderAlignment",
+        "options": [
+          "left",
+          "right",
+          "end",
+          "start",
+          "center"
+        ],
         "defaultValue": "\"start\""
       },
       {
@@ -3870,6 +4208,12 @@
         "kind": "input",
         "name": "labelPlacement",
         "type": "ChartAnnotationLabelPlacement",
+        "options": [
+          "left",
+          "right",
+          "top",
+          "bottom"
+        ],
         "defaultValue": "\"top\""
       },
       {
@@ -3877,6 +4221,11 @@
         "kind": "input",
         "name": "marker",
         "type": "ChartAnnotationMarker",
+        "options": [
+          "none",
+          "circle",
+          "diamond"
+        ],
         "defaultValue": "\"circle\""
       },
       {
@@ -3959,6 +4308,10 @@
         "kind": "input",
         "name": "activation",
         "type": "ChartBrushActivation",
+        "options": [
+          "drag",
+          "shift-drag"
+        ],
         "defaultValue": "\"shift-drag\""
       },
       {
@@ -4007,6 +4360,10 @@
         "kind": "input",
         "name": "hitPolicy",
         "type": "ChartBrushHitPolicy",
+        "options": [
+          "center",
+          "intersect"
+        ],
         "defaultValue": "\"intersect\""
       },
       {
@@ -4014,6 +4371,11 @@
         "kind": "input",
         "name": "lineStyle",
         "type": "ChartBrushLineStyle | undefined",
+        "options": [
+          "solid",
+          "dashed",
+          "dotted"
+        ],
         "defaultValue": "undefined"
       },
       {
@@ -4028,6 +4390,11 @@
         "kind": "input",
         "name": "mode",
         "type": "ChartBrushMode",
+        "options": [
+          "x",
+          "y",
+          "xy"
+        ],
         "defaultValue": "\"xy\""
       },
       {
@@ -4035,6 +4402,13 @@
         "kind": "input",
         "name": "selectionBehavior",
         "type": "ChartBrushSelectionBehavior",
+        "options": [
+          "none",
+          "add",
+          "replace",
+          "remove",
+          "toggle"
+        ],
         "defaultValue": "\"none\""
       },
       {
@@ -4082,6 +4456,11 @@
         "kind": "input",
         "name": "lineStyle",
         "type": "ChartCrosshairLineStyle",
+        "options": [
+          "solid",
+          "dashed",
+          "dotted"
+        ],
         "defaultValue": "\"dashed\""
       },
       {
@@ -4102,6 +4481,12 @@
         "kind": "input",
         "name": "mode",
         "type": "ChartCrosshairMode",
+        "options": [
+          "x",
+          "y",
+          "xy",
+          "auto"
+        ],
         "defaultValue": "\"auto\""
       },
       {
@@ -4134,6 +4519,10 @@
         "kind": "input",
         "name": "snap",
         "type": "ChartCrosshairSnapMode",
+        "options": [
+          "nearest",
+          "pointer"
+        ],
         "defaultValue": "\"nearest\""
       },
       {
@@ -4174,6 +4563,11 @@
         "kind": "input",
         "name": "mode",
         "type": "ChartLegendMode",
+        "options": [
+          "auto",
+          "color",
+          "series"
+        ],
         "defaultValue": "\"auto\""
       },
       {
@@ -4181,6 +4575,14 @@
         "kind": "input",
         "name": "position",
         "type": "ChartLegendPosition",
+        "options": [
+          "left",
+          "right",
+          "top",
+          "bottom",
+          "end",
+          "start"
+        ],
         "defaultValue": "\"bottom\""
       },
       {
@@ -4223,6 +4625,11 @@
         "kind": "input",
         "name": "gridShape",
         "type": "ChartRadialGridShape",
+        "options": [
+          "circle",
+          "auto",
+          "polygon"
+        ],
         "defaultValue": "\"auto\""
       },
       {
@@ -4300,6 +4707,10 @@
         "kind": "input",
         "name": "axis",
         "type": "\"x\" | \"y\"",
+        "options": [
+          "x",
+          "y"
+        ],
         "required": true
       },
       {
@@ -4365,6 +4776,11 @@
         "kind": "input",
         "name": "labelPosition",
         "type": "ChartReferenceLabelPosition",
+        "options": [
+          "end",
+          "start",
+          "center"
+        ],
         "defaultValue": "\"center\""
       },
       {
@@ -4372,6 +4788,10 @@
         "kind": "input",
         "name": "layer",
         "type": "ChartOverlayLayer",
+        "options": [
+          "overlay",
+          "underlay"
+        ],
         "defaultValue": "\"underlay\""
       },
       {
@@ -4407,6 +4827,10 @@
         "kind": "input",
         "name": "axis",
         "type": "\"x\" | \"y\"",
+        "options": [
+          "x",
+          "y"
+        ],
         "required": true
       },
       {
@@ -4447,6 +4871,11 @@
         "kind": "input",
         "name": "labelPosition",
         "type": "ChartReferenceLabelPosition",
+        "options": [
+          "end",
+          "start",
+          "center"
+        ],
         "defaultValue": "\"end\""
       },
       {
@@ -4454,6 +4883,10 @@
         "kind": "input",
         "name": "layer",
         "type": "ChartOverlayLayer",
+        "options": [
+          "overlay",
+          "underlay"
+        ],
         "defaultValue": "\"overlay\""
       },
       {
@@ -4461,6 +4894,11 @@
         "kind": "input",
         "name": "lineStyle",
         "type": "ChartReferenceLineStyle",
+        "options": [
+          "solid",
+          "dashed",
+          "dotted"
+        ],
         "defaultValue": "\"dashed\""
       },
       {
@@ -4557,6 +4995,10 @@
         "kind": "input",
         "name": "mode",
         "type": "ChartSelectionMode",
+        "options": [
+          "single",
+          "multiple"
+        ],
         "defaultValue": "\"single\""
       },
       {
@@ -4729,6 +5171,10 @@
         "kind": "input",
         "name": "position",
         "type": "ChartXAxisPosition",
+        "options": [
+          "top",
+          "bottom"
+        ],
         "defaultValue": "\"bottom\""
       },
       {
@@ -4778,6 +5224,17 @@
         "kind": "input",
         "name": "type",
         "type": "ChartXAxisType",
+        "options": [
+          "linear",
+          "auto",
+          "category",
+          "log",
+          "symlog",
+          "pow",
+          "sqrt",
+          "time",
+          "utc"
+        ],
         "defaultValue": "\"auto\""
       },
       {
@@ -4889,6 +5346,12 @@
         "kind": "input",
         "name": "position",
         "type": "ChartYAxisPosition",
+        "options": [
+          "left",
+          "right",
+          "end",
+          "start"
+        ],
         "defaultValue": "\"start\""
       },
       {
@@ -4938,6 +5401,15 @@
         "kind": "input",
         "name": "type",
         "type": "ChartYAxisType",
+        "options": [
+          "linear",
+          "auto",
+          "category",
+          "log",
+          "symlog",
+          "pow",
+          "sqrt"
+        ],
         "defaultValue": "\"auto\""
       },
       {
@@ -5014,6 +5486,10 @@
         "kind": "input",
         "name": "fillMode",
         "type": "ChartPolarFillMode",
+        "options": [
+          "gradient",
+          "solid"
+        ],
         "defaultValue": "\"solid\""
       },
       {
@@ -5049,6 +5525,12 @@
         "kind": "input",
         "name": "labelContent",
         "type": "ChartPolarLabelContent",
+        "options": [
+          "category",
+          "category-percentage",
+          "percentage",
+          "value"
+        ],
         "defaultValue": "\"percentage\""
       },
       {
@@ -5056,6 +5538,10 @@
         "kind": "input",
         "name": "labelPosition",
         "type": "ChartPolarLabelPosition",
+        "options": [
+          "outside",
+          "inside"
+        ],
         "defaultValue": "\"outside\""
       },
       {
@@ -5087,7 +5573,7 @@
         "defaultValue": "0"
       },
       {
-        "description": "Whether to display inside slice data labels.",
+        "description": "Whether to display slice labels, inside or outside as `labelPosition` sets.",
         "kind": "input",
         "name": "showLabels",
         "type": "boolean",
@@ -5212,7 +5698,7 @@
         "defaultValue": "2"
       },
       {
-        "description": "The hidden stage IDs. Bind `[(hiddenStageIds)]` for two-way binding; legend toggles write to it.",
+        "description": "The hidden stage IDs. Bind `[(hiddenStageIds)]` for two-way binding; legend toggles write to it.\nBuild an ID with `chartItemKeyId(key)` when `keyField` is set, or with `chartItemIndexId(index)`.",
         "kind": "model",
         "name": "hiddenStageIds",
         "type": "readonly string[]",
@@ -5230,6 +5716,12 @@
         "kind": "input",
         "name": "labelContent",
         "type": "ChartFunnelLabelContent",
+        "options": [
+          "category",
+          "value",
+          "category-value",
+          "category-value-conversion"
+        ],
         "defaultValue": "\"category-value\""
       },
       {
@@ -5265,6 +5757,10 @@
         "kind": "input",
         "name": "orientation",
         "type": "ChartFunnelOrientation",
+        "options": [
+          "horizontal",
+          "vertical"
+        ],
         "defaultValue": "\"vertical\""
       },
       {
@@ -5369,6 +5865,10 @@
         "kind": "input",
         "name": "fillMode",
         "type": "ChartRadialArcFillMode",
+        "options": [
+          "gradient",
+          "solid"
+        ],
         "defaultValue": "\"solid\""
       },
       {
@@ -5390,6 +5890,11 @@
         "kind": "input",
         "name": "indicator",
         "type": "ChartGaugeIndicator",
+        "options": [
+          "arc",
+          "both",
+          "needle"
+        ],
         "defaultValue": "\"arc\""
       },
       {
@@ -5544,6 +6049,10 @@
         "kind": "input",
         "name": "colorMode",
         "type": "ChartHeatmapColorMode",
+        "options": [
+          "diverging",
+          "sequential"
+        ],
         "defaultValue": "\"sequential\""
       },
       {
@@ -5705,6 +6214,13 @@
         "kind": "input",
         "name": "curve",
         "type": "ChartCurve",
+        "options": [
+          "linear",
+          "monotone-x",
+          "natural",
+          "step",
+          "step-after"
+        ],
         "defaultValue": "\"linear\""
       },
       {
@@ -5747,6 +6263,11 @@
         "kind": "input",
         "name": "lineStyle",
         "type": "ChartLineStyle",
+        "options": [
+          "solid",
+          "dashed",
+          "dotted"
+        ],
         "defaultValue": "\"solid\""
       },
       {
@@ -6003,11 +6524,11 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Pixel stroke width for OHLC stems and tick arms.",
+        "description": "Pixel stroke width for OHLC stems and tick arms. When unset, the series reads\n`--mona-chart-financial-wick-width`, or uses `1`.",
         "kind": "input",
         "name": "wickWidth",
-        "type": "number",
-        "defaultValue": "1"
+        "type": "number | undefined",
+        "defaultValue": "undefined"
       },
       {
         "description": "Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used.",
@@ -6097,6 +6618,10 @@
         "kind": "input",
         "name": "fillMode",
         "type": "ChartPolarFillMode",
+        "options": [
+          "gradient",
+          "solid"
+        ],
         "defaultValue": "\"solid\""
       },
       {
@@ -6125,6 +6650,12 @@
         "kind": "input",
         "name": "labelContent",
         "type": "ChartPolarLabelContent",
+        "options": [
+          "category",
+          "category-percentage",
+          "percentage",
+          "value"
+        ],
         "defaultValue": "\"percentage\""
       },
       {
@@ -6132,6 +6663,10 @@
         "kind": "input",
         "name": "labelPosition",
         "type": "ChartPolarLabelPosition",
+        "options": [
+          "outside",
+          "inside"
+        ],
         "defaultValue": "\"outside\""
       },
       {
@@ -6163,7 +6698,7 @@
         "defaultValue": "0"
       },
       {
-        "description": "Whether to display inside slice data labels.",
+        "description": "Whether to display slice labels, inside or outside as `labelPosition` sets.",
         "kind": "input",
         "name": "showLabels",
         "type": "boolean",
@@ -6257,6 +6792,10 @@
         "kind": "input",
         "name": "curve",
         "type": "ChartRadialCurve",
+        "options": [
+          "linear",
+          "smooth"
+        ],
         "defaultValue": "\"linear\""
       },
       {
@@ -6278,6 +6817,11 @@
         "kind": "input",
         "name": "fillMode",
         "type": "ChartRadialFillMode",
+        "options": [
+          "none",
+          "gradient",
+          "solid"
+        ],
         "defaultValue": "\"none\""
       },
       {
@@ -6376,6 +6920,10 @@
         "kind": "input",
         "name": "curve",
         "type": "ChartRadialCurve",
+        "options": [
+          "linear",
+          "smooth"
+        ],
         "defaultValue": "\"linear\""
       },
       {
@@ -6397,6 +6945,11 @@
         "kind": "input",
         "name": "fillMode",
         "type": "ChartRadialFillMode",
+        "options": [
+          "none",
+          "gradient",
+          "solid"
+        ],
         "defaultValue": "\"none\""
       },
       {
@@ -6550,6 +7103,10 @@
         "kind": "input",
         "name": "fillMode",
         "type": "ChartRadialArcFillMode",
+        "options": [
+          "gradient",
+          "solid"
+        ],
         "defaultValue": "\"solid\""
       },
       {
@@ -6560,7 +7117,7 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "The hidden item IDs. Bind `[(hiddenItemIds)]` for two-way binding; legend toggles write to it.",
+        "description": "The hidden item IDs. Bind `[(hiddenItemIds)]` for two-way binding; legend toggles write to it.\nBuild an ID with `chartItemKeyId(key)` when `keyField` is set, or else with `chartItemCategoryId(category)`.",
         "kind": "model",
         "name": "hiddenItemIds",
         "type": "readonly string[]",
@@ -6697,6 +7254,13 @@
         "kind": "input",
         "name": "curve",
         "type": "ChartCurve",
+        "options": [
+          "linear",
+          "monotone-x",
+          "natural",
+          "step",
+          "step-after"
+        ],
         "defaultValue": "\"linear\""
       },
       {
@@ -6900,6 +7464,10 @@
         "kind": "input",
         "name": "orientation",
         "type": "ChartBarOrientation",
+        "options": [
+          "horizontal",
+          "vertical"
+        ],
         "defaultValue": "\"vertical\""
       },
       {
@@ -7032,6 +7600,10 @@
         "kind": "input",
         "name": "fillMode",
         "type": "ChartRadialArcFillMode",
+        "options": [
+          "gradient",
+          "solid"
+        ],
         "defaultValue": "\"solid\""
       },
       {
@@ -7042,7 +7614,7 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "The hidden item IDs. Bind `[(hiddenItemIds)]` for two-way binding; legend toggles write to it.",
+        "description": "The hidden item IDs. Bind `[(hiddenItemIds)]` for two-way binding; legend toggles write to it.\nBuild an ID with `chartItemKeyId(key)` when `keyField` is set, or else with `chartItemCategoryId(category)`.",
         "kind": "model",
         "name": "hiddenItemIds",
         "type": "readonly string[]",
@@ -7088,6 +7660,10 @@
         "kind": "input",
         "name": "scaleMode",
         "type": "ChartRoseScaleMode",
+        "options": [
+          "area",
+          "radius"
+        ],
         "defaultValue": "\"area\""
       },
       {
@@ -7336,7 +7912,7 @@
         "defaultValue": "undefined"
       },
       {
-        "description": "The hidden top-level node IDs. Bind `[(hiddenNodeIds)]` for two-way binding; legend toggles write to it.",
+        "description": "The hidden top-level node IDs. Bind `[(hiddenNodeIds)]` for two-way binding; legend toggles write to it.\nWith `keyField`, build an ID with `chartItemKeyId(key)`; otherwise read IDs from `nodeVisibilityChange`.",
         "kind": "model",
         "name": "hiddenNodeIds",
         "type": "readonly string[]",
@@ -7458,6 +8034,11 @@
         "kind": "input",
         "name": "sort",
         "type": "ChartTreemapSort",
+        "options": [
+          "none",
+          "ascending",
+          "descending"
+        ],
         "defaultValue": "\"descending\""
       },
       {
@@ -7479,6 +8060,13 @@
         "kind": "input",
         "name": "tile",
         "type": "ChartTreemapTile",
+        "options": [
+          "binary",
+          "dice",
+          "slice",
+          "slice-dice",
+          "squarify"
+        ],
         "defaultValue": "\"squarify\""
       },
       {
@@ -7835,6 +8423,10 @@
         "kind": "input",
         "name": "labelPosition",
         "type": "\"before\" | \"after\"",
+        "options": [
+          "before",
+          "after"
+        ],
         "defaultValue": "\"after\""
       },
       {
@@ -7842,6 +8434,11 @@
         "kind": "input",
         "name": "labelSize",
         "type": "CheckboxVariantProps[\"labelSize\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -7870,6 +8467,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "CheckmarkVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -8046,6 +8650,11 @@
         "kind": "input",
         "name": "format",
         "type": "ColorOutputFormat",
+        "options": [
+          "hex",
+          "rgb",
+          "hsl"
+        ],
         "defaultValue": "\"hex\""
       },
       {
@@ -8081,6 +8690,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "ColorGradientVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -8206,6 +8822,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "ColorPaletteVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"none\""
       },
       {
@@ -8283,6 +8906,11 @@
         "kind": "input",
         "name": "format",
         "type": "ColorOutputFormat",
+        "options": [
+          "hex",
+          "rgb",
+          "hsl"
+        ],
         "defaultValue": "\"hex\""
       },
       {
@@ -8325,6 +8953,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "ColorPickerVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -8346,6 +8981,11 @@
         "kind": "input",
         "name": "size",
         "type": "ColorPickerVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -8380,6 +9020,10 @@
         "kind": "input",
         "name": "view",
         "type": "ColorPickerView",
+        "options": [
+          "gradient",
+          "palette"
+        ],
         "defaultValue": "\"gradient\""
       }
     ]
@@ -8532,6 +9176,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "ComboBoxVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -8546,6 +9197,11 @@
         "kind": "input",
         "name": "size",
         "type": "ComboBoxVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -8621,6 +9277,10 @@
         "kind": "input",
         "name": "filterMode",
         "type": "CommandFilterMode",
+        "options": [
+          "auto",
+          "manual"
+        ],
         "defaultValue": "\"auto\""
       },
       {
@@ -8655,6 +9315,12 @@
         "kind": "input",
         "name": "rounded",
         "type": "CommandVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       }
     ]
@@ -8832,6 +9498,12 @@
         "kind": "input",
         "name": "rounded",
         "type": "ContextMenuVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -8839,6 +9511,11 @@
         "kind": "input",
         "name": "size",
         "type": "ContextMenuVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -9050,6 +9727,15 @@
         "kind": "input",
         "name": "firstDay",
         "type": "FirstDayOfWeek | null",
+        "options": [
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday",
+          "saturday",
+          "sunday"
+        ],
         "defaultValue": "null"
       },
       {
@@ -9151,6 +9837,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "DatePickerVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -9165,6 +9858,11 @@
         "kind": "input",
         "name": "size",
         "type": "DatePickerVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -9262,6 +9960,15 @@
         "kind": "input",
         "name": "firstDay",
         "type": "FirstDayOfWeek | null",
+        "options": [
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday",
+          "saturday",
+          "sunday"
+        ],
         "defaultValue": "null"
       },
       {
@@ -9276,6 +9983,10 @@
         "kind": "input",
         "name": "hourFormat",
         "type": "HourFormat | null",
+        "options": [
+          "12",
+          "24"
+        ],
         "defaultValue": "null"
       },
       {
@@ -9384,6 +10095,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "DateTimePickerVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -9412,6 +10130,11 @@
         "kind": "input",
         "name": "size",
         "type": "DateTimePickerVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -9473,6 +10196,12 @@
         "kind": "input",
         "name": "actionsLayout",
         "type": "ActionsLayout",
+        "options": [
+          "end",
+          "start",
+          "center",
+          "stretched"
+        ],
         "defaultValue": "\"end\""
       },
       {
@@ -9574,6 +10303,12 @@
         "kind": "input",
         "name": "rounded",
         "type": "DialogVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -9599,6 +10334,13 @@
         "kind": "input",
         "name": "type",
         "type": "DialogVariantProps[\"type\"] | null",
+        "options": [
+          "success",
+          "error",
+          "warning",
+          "info",
+          "confirm"
+        ],
         "defaultValue": "\"info\""
       },
       {
@@ -9655,6 +10397,19 @@
         "kind": "input",
         "name": "look",
         "type": "ButtonVariantProps[\"look\"]",
+        "options": [
+          "default",
+          "primary",
+          "success",
+          "error",
+          "warning",
+          "info",
+          "outline",
+          "secondary",
+          "ghost",
+          "link",
+          "clear"
+        ],
         "defaultValue": "\"default\""
       },
       {
@@ -9675,6 +10430,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "ButtonVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -9689,6 +10451,11 @@
         "kind": "input",
         "name": "size",
         "type": "ButtonVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -9978,6 +10745,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "DropDownListVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -9992,6 +10766,11 @@
         "kind": "input",
         "name": "size",
         "type": "DropDownListVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -10259,6 +11038,12 @@
         "kind": "input",
         "name": "rounded",
         "type": "ExpansionPanelVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -10324,6 +11109,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "FieldsetVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -10372,6 +11164,12 @@
         "kind": "input",
         "name": "rounded",
         "type": "FilterMenuVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -10379,6 +11177,11 @@
         "kind": "input",
         "name": "size",
         "type": "FilterMenuVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -10386,6 +11189,12 @@
         "kind": "input",
         "name": "type",
         "type": "DataType",
+        "options": [
+          "string",
+          "number",
+          "boolean",
+          "date"
+        ],
         "defaultValue": "\"string\""
       },
       {
@@ -10468,6 +11277,12 @@
         "kind": "input",
         "name": "rounded",
         "type": "GridVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -10530,6 +11345,14 @@
         "kind": "input",
         "name": "aggregate",
         "type": "AggregateFunction | null",
+        "options": [
+          "sum",
+          "avg",
+          "count",
+          "min",
+          "max",
+          "custom"
+        ],
         "defaultValue": "null"
       },
       {
@@ -10578,6 +11401,10 @@
         "kind": "input",
         "name": "lockedPosition",
         "type": "GridColumnLockedPosition",
+        "options": [
+          "left",
+          "right"
+        ],
         "defaultValue": "\"left\""
       },
       {
@@ -10627,6 +11454,12 @@
         "kind": "input",
         "name": "type",
         "type": "DataType",
+        "options": [
+          "string",
+          "number",
+          "boolean",
+          "date"
+        ],
         "defaultValue": "\"string\""
       },
       {
@@ -10705,6 +11538,10 @@
         "kind": "input",
         "name": "lockedPosition",
         "type": "GridColumnLockedPosition",
+        "options": [
+          "left",
+          "right"
+        ],
         "defaultValue": "\"left\""
       },
       {
@@ -10852,6 +11689,12 @@
         "kind": "input",
         "name": "type",
         "type": "DataType",
+        "options": [
+          "string",
+          "number",
+          "boolean",
+          "date"
+        ],
         "defaultValue": "\"string\""
       }
     ]
@@ -10939,6 +11782,13 @@
         "kind": "input",
         "name": "section",
         "type": "GridNavigationSection",
+        "options": [
+          "filter",
+          "footer",
+          "header",
+          "add",
+          "body"
+        ],
         "defaultValue": "\"footer\""
       }
     ]
@@ -11072,6 +11922,10 @@
         "kind": "input",
         "name": "type",
         "type": "\"detail\" | \"group\"",
+        "options": [
+          "detail",
+          "group"
+        ],
         "required": true
       },
       {
@@ -11209,6 +12063,12 @@
         "kind": "input",
         "name": "rounded",
         "type": "ListBoxVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "medium"
       },
       {
@@ -11242,6 +12102,10 @@
         "kind": "input",
         "name": "selectionMode",
         "type": "SelectionMode",
+        "options": [
+          "single",
+          "multiple"
+        ],
         "defaultValue": "single"
       },
       {
@@ -11256,6 +12120,11 @@
         "kind": "input",
         "name": "size",
         "type": "ListBoxVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "medium"
       },
       {
@@ -11396,6 +12265,12 @@
         "kind": "input",
         "name": "rounded",
         "type": "ListViewVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "medium"
       },
       {
@@ -11409,6 +12284,11 @@
         "kind": "input",
         "name": "size",
         "type": "ListViewVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "medium"
       },
       {
@@ -11636,6 +12516,12 @@
         "kind": "input",
         "name": "rounded",
         "type": "MenubarVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -11643,6 +12529,11 @@
         "kind": "input",
         "name": "size",
         "type": "MenubarVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -11802,6 +12693,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "MultiSelectVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -11816,6 +12714,11 @@
         "kind": "input",
         "name": "size",
         "type": "MultiSelectVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -11885,6 +12788,10 @@
         "kind": "input",
         "name": "side",
         "type": "\"top\" | \"bottom\"",
+        "options": [
+          "top",
+          "bottom"
+        ],
         "defaultValue": "\"top\""
       }
     ]
@@ -12031,6 +12938,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "NumericTextboxVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "`medium`"
       },
       {
@@ -12038,6 +12952,11 @@
         "kind": "input",
         "name": "size",
         "type": "NumericTextboxVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "`medium`"
       },
       {
@@ -12219,6 +13138,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "NumericTextboxVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "`medium`"
       },
       {
@@ -12226,6 +13152,11 @@
         "kind": "input",
         "name": "size",
         "type": "NumericTextboxVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "`medium`"
       },
       {
@@ -12372,6 +13303,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "NumericTextboxVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "`medium`"
       },
       {
@@ -12379,6 +13317,11 @@
         "kind": "input",
         "name": "size",
         "type": "NumericTextboxVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "`medium`"
       },
       {
@@ -12546,6 +13489,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "OtpInputVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -12567,6 +13517,11 @@
         "kind": "input",
         "name": "size",
         "type": "OtpInputVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -12608,6 +13563,11 @@
         "kind": "input",
         "name": "type",
         "type": "OtpInputType",
+        "options": [
+          "number",
+          "text",
+          "password"
+        ],
         "defaultValue": "\"text\""
       },
       {
@@ -12713,6 +13673,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "PagerVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -12727,6 +13694,11 @@
         "kind": "input",
         "name": "size",
         "type": "PagerVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -12748,6 +13720,10 @@
         "kind": "input",
         "name": "type",
         "type": "PagerType",
+        "options": [
+          "input",
+          "numeric"
+        ],
         "defaultValue": "\"numeric\""
       },
       {
@@ -12843,6 +13819,14 @@
         "kind": "input",
         "name": "position",
         "type": "PopoverPosition",
+        "options": [
+          "left",
+          "right",
+          "top",
+          "bottom",
+          "end",
+          "start"
+        ],
         "defaultValue": "\"top\""
       },
       {
@@ -12850,6 +13834,12 @@
         "kind": "input",
         "name": "rounded",
         "type": "PopoverVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -12903,6 +13893,17 @@
         "kind": "input",
         "name": "anchorConnectionPoint",
         "type": "ConnectionPoint",
+        "options": [
+          "center",
+          "topleft",
+          "topcenter",
+          "topright",
+          "centerleft",
+          "centerright",
+          "bottomleft",
+          "bottomcenter",
+          "bottomright"
+        ],
         "defaultValue": "\"bottomcenter\""
       },
       {
@@ -13027,6 +14028,17 @@
         "kind": "input",
         "name": "popupConnectionPoint",
         "type": "ConnectionPoint",
+        "options": [
+          "center",
+          "topleft",
+          "topcenter",
+          "topright",
+          "centerleft",
+          "centerright",
+          "bottomleft",
+          "bottomcenter",
+          "bottomright"
+        ],
         "defaultValue": "\"topcenter\""
       },
       {
@@ -13041,6 +14053,10 @@
         "kind": "input",
         "name": "positionStrategy",
         "type": "\"global\" | \"connected\"",
+        "options": [
+          "global",
+          "connected"
+        ],
         "defaultValue": "\"connected\""
       },
       {
@@ -13112,7 +14128,18 @@
         "description": "The point on the anchor that the menu attaches to.\nIgnored when `openAtPointer` is set.",
         "kind": "input",
         "name": "anchorConnectionPoint",
-        "type": "ConnectionPoint | null"
+        "type": "ConnectionPoint | null",
+        "options": [
+          "center",
+          "topleft",
+          "topcenter",
+          "topright",
+          "centerleft",
+          "centerright",
+          "bottomleft",
+          "bottomcenter",
+          "bottomright"
+        ]
       },
       {
         "description": "The accessible name of the root menu. Takes precedence over `aria-labelledby`.",
@@ -13192,13 +14219,30 @@
         "description": "The point on the menu that attaches to the anchor.\nIgnored when `openAtPointer` is set.",
         "kind": "input",
         "name": "popupConnectionPoint",
-        "type": "ConnectionPoint | null"
+        "type": "ConnectionPoint | null",
+        "options": [
+          "center",
+          "topleft",
+          "topcenter",
+          "topright",
+          "centerleft",
+          "centerright",
+          "bottomleft",
+          "bottomcenter",
+          "bottomright"
+        ]
       },
       {
         "description": "Sets the border radius of the popup menu.\nThis will be applied to the root menu and all submenus.",
         "kind": "input",
         "name": "rounded",
         "type": "PopupMenuVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -13206,6 +14250,11 @@
         "kind": "input",
         "name": "size",
         "type": "PopupMenuVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -13220,6 +14269,11 @@
         "kind": "input",
         "name": "trigger",
         "type": "PopupMenuTrigger",
+        "options": [
+          "none",
+          "click",
+          "contextmenu"
+        ],
         "defaultValue": "\"click\""
       },
       {
@@ -13426,6 +14480,11 @@
         "kind": "input",
         "name": "labelPosition",
         "type": "LabelPosition",
+        "options": [
+          "end",
+          "start",
+          "center"
+        ],
         "defaultValue": "center"
       },
       {
@@ -13461,6 +14520,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "ProgressBarVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "medium"
       },
       {
@@ -13559,6 +14625,10 @@
         "kind": "input",
         "name": "labelPosition",
         "type": "\"before\" | \"after\"",
+        "options": [
+          "before",
+          "after"
+        ],
         "defaultValue": "\"after\""
       },
       {
@@ -13566,6 +14636,11 @@
         "kind": "input",
         "name": "labelSize",
         "type": "RadioButtonVariantProps[\"labelSize\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -13601,6 +14676,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "RadioButtonVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"full\""
       },
       {
@@ -13687,6 +14769,10 @@
         "kind": "input",
         "name": "orientation",
         "type": "RadioGroupVariantProps[\"orientation\"]",
+        "options": [
+          "horizontal",
+          "vertical"
+        ],
         "defaultValue": "\"vertical\""
       },
       {
@@ -13794,6 +14880,13 @@
         "kind": "input",
         "name": "icon",
         "type": "RatingIconName",
+        "options": [
+          "circle",
+          "diamond",
+          "flame",
+          "heart",
+          "star"
+        ],
         "defaultValue": "\"star\""
       },
       {
@@ -13822,6 +14915,10 @@
         "kind": "input",
         "name": "labelPosition",
         "type": "RatingLabelPosition",
+        "options": [
+          "before",
+          "after"
+        ],
         "defaultValue": "\"after\""
       },
       {
@@ -13829,6 +14926,10 @@
         "kind": "input",
         "name": "precision",
         "type": "RatingPrecision",
+        "options": [
+          "item",
+          "half"
+        ],
         "defaultValue": "\"item\""
       },
       {
@@ -13850,6 +14951,10 @@
         "kind": "input",
         "name": "selection",
         "type": "RatingSelectionMode",
+        "options": [
+          "single",
+          "continuous"
+        ],
         "defaultValue": "\"continuous\""
       },
       {
@@ -13857,6 +14962,11 @@
         "kind": "input",
         "name": "size",
         "type": "RatingVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -13977,6 +15087,11 @@
         "kind": "input",
         "name": "pagerOverlay",
         "type": "PagerOverlay",
+        "options": [
+          "none",
+          "dark",
+          "light"
+        ],
         "defaultValue": "\"dark\""
       },
       {
@@ -13984,6 +15099,13 @@
         "kind": "input",
         "name": "pagerRounded",
         "type": "ScrollViewVariantProps[\"pagerRounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -13991,6 +15113,12 @@
         "kind": "input",
         "name": "rounded",
         "type": "ScrollViewVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -14019,6 +15147,12 @@
         "kind": "input",
         "name": "alignment",
         "type": "SegmentedVariantProps[\"alignment\"]",
+        "options": [
+          "end",
+          "start",
+          "center",
+          "stretch"
+        ],
         "defaultValue": "\"stretch\""
       },
       {
@@ -14091,6 +15225,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "SegmentedVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -14098,6 +15239,11 @@
         "kind": "input",
         "name": "size",
         "type": "SegmentedVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -14197,6 +15343,14 @@
         "kind": "input",
         "name": "side",
         "type": "SheetSide",
+        "options": [
+          "left",
+          "right",
+          "top",
+          "bottom",
+          "end",
+          "start"
+        ],
         "defaultValue": "\"right\""
       },
       {
@@ -14245,6 +15399,11 @@
         "kind": "input",
         "name": "collapsible",
         "type": "SidebarCollapsibleMode",
+        "options": [
+          "none",
+          "offcanvas",
+          "icon"
+        ],
         "defaultValue": "\"offcanvas\""
       },
       {
@@ -14294,6 +15453,12 @@
         "kind": "input",
         "name": "side",
         "type": "SidebarSide",
+        "options": [
+          "left",
+          "right",
+          "end",
+          "start"
+        ],
         "defaultValue": "\"start\""
       },
       {
@@ -14309,6 +15474,11 @@
         "kind": "input",
         "name": "variant",
         "type": "SidebarVariant",
+        "options": [
+          "sidebar",
+          "floating",
+          "inset"
+        ],
         "defaultValue": "\"sidebar\""
       },
       {
@@ -14336,6 +15506,10 @@
         "kind": "input",
         "name": "modalScope",
         "type": "SidebarModalScope",
+        "options": [
+          "page",
+          "layout"
+        ],
         "defaultValue": "\"page\""
       },
       {
@@ -14384,6 +15558,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "SkeletonVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -14494,6 +15675,10 @@
         "kind": "input",
         "name": "labelPosition",
         "type": "SliderLabelPosition",
+        "options": [
+          "before",
+          "after"
+        ],
         "defaultValue": "\"after\""
       },
       {
@@ -14529,6 +15714,10 @@
         "kind": "input",
         "name": "orientation",
         "type": "Orientation",
+        "options": [
+          "horizontal",
+          "vertical"
+        ],
         "defaultValue": "\"horizontal\""
       },
       {
@@ -14543,6 +15732,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "SliderVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"full\""
       },
       {
@@ -14705,6 +15901,10 @@
         "kind": "input",
         "name": "labelPosition",
         "type": "SliderLabelPosition",
+        "options": [
+          "before",
+          "after"
+        ],
         "defaultValue": "\"after\""
       },
       {
@@ -14740,6 +15940,10 @@
         "kind": "input",
         "name": "orientation",
         "type": "Orientation",
+        "options": [
+          "horizontal",
+          "vertical"
+        ],
         "defaultValue": "\"horizontal\""
       },
       {
@@ -14754,6 +15958,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "SliderVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"full\""
       },
       {
@@ -14895,6 +16106,10 @@
         "kind": "input",
         "name": "labelPosition",
         "type": "SliderLabelPosition",
+        "options": [
+          "before",
+          "after"
+        ],
         "defaultValue": "\"after\""
       },
       {
@@ -14930,6 +16145,10 @@
         "kind": "input",
         "name": "orientation",
         "type": "Orientation",
+        "options": [
+          "horizontal",
+          "vertical"
+        ],
         "defaultValue": "\"horizontal\""
       },
       {
@@ -14944,6 +16163,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "SliderVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"full\""
       },
       {
@@ -15026,6 +16252,13 @@
         "kind": "input",
         "name": "appearance",
         "type": "SpinnerAppearance",
+        "options": [
+          "default",
+          "pulsing",
+          "pulsing-triad",
+          "pulsing-ring",
+          "converging-spinner"
+        ],
         "defaultValue": "\"default\""
       },
       {
@@ -15048,6 +16281,11 @@
         "kind": "input",
         "name": "size",
         "type": "SpinnerSize",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -15069,6 +16307,13 @@
         "kind": "input",
         "name": "appearance",
         "type": "SpinnerAppearance",
+        "options": [
+          "default",
+          "pulsing",
+          "pulsing-triad",
+          "pulsing-ring",
+          "converging-spinner"
+        ],
         "defaultValue": "\"default\""
       },
       {
@@ -15103,6 +16348,11 @@
         "kind": "input",
         "name": "size",
         "type": "SpinnerSize",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -15173,6 +16423,17 @@
         "kind": "input",
         "name": "look",
         "type": "SplitButtonVariantProps[\"look\"]",
+        "options": [
+          "default",
+          "primary",
+          "success",
+          "error",
+          "warning",
+          "info",
+          "outline",
+          "secondary",
+          "ghost"
+        ],
         "defaultValue": "\"default\""
       },
       {
@@ -15200,6 +16461,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "SplitButtonVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -15207,6 +16475,11 @@
         "kind": "input",
         "name": "size",
         "type": "SplitButtonVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -15378,6 +16651,10 @@
         "kind": "input",
         "name": "orientation",
         "type": "SplitterVariantProps[\"orientation\"]",
+        "options": [
+          "horizontal",
+          "vertical"
+        ],
         "defaultValue": "\"horizontal\""
       },
       {
@@ -15459,6 +16736,10 @@
         "kind": "input",
         "name": "orientation",
         "type": "SplitterVariantProps[\"orientation\"]",
+        "options": [
+          "horizontal",
+          "vertical"
+        ],
         "required": true
       },
       {
@@ -15498,6 +16779,10 @@
         "kind": "input",
         "name": "orientation",
         "type": "SplitterVariantProps[\"orientation\"]",
+        "options": [
+          "horizontal",
+          "vertical"
+        ],
         "required": true
       },
       {
@@ -15540,6 +16825,10 @@
         "kind": "input",
         "name": "orientation",
         "type": "StepperVariantProps[\"orientation\"]",
+        "options": [
+          "horizontal",
+          "vertical"
+        ],
         "defaultValue": "\"horizontal\""
       },
       {
@@ -15554,6 +16843,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "StepperVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"full\""
       },
       {
@@ -15652,6 +16948,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "SwitchVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"full\""
       },
       {
@@ -15659,6 +16962,11 @@
         "kind": "input",
         "name": "size",
         "type": "SwitchVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -15764,6 +17072,12 @@
         "kind": "input",
         "name": "position",
         "type": "TabListVariantProps[\"position\"]",
+        "options": [
+          "left",
+          "right",
+          "top",
+          "bottom"
+        ],
         "required": true,
         "defaultValue": "\"top\""
       },
@@ -15779,6 +17093,11 @@
         "kind": "input",
         "name": "size",
         "type": "TabListVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "required": true,
         "defaultValue": "\"medium\""
       },
@@ -15849,6 +17168,12 @@
         "kind": "input",
         "name": "position",
         "type": "TabsVariantProps[\"position\"]",
+        "options": [
+          "left",
+          "right",
+          "top",
+          "bottom"
+        ],
         "defaultValue": "\"top\""
       },
       {
@@ -15863,6 +17188,11 @@
         "kind": "input",
         "name": "size",
         "type": "TabsVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -16023,6 +17353,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "TextBoxVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -16030,6 +17367,11 @@
         "kind": "input",
         "name": "size",
         "type": "TextBoxVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -16050,6 +17392,14 @@
         "kind": "input",
         "name": "type",
         "type": "InputType",
+        "options": [
+          "text",
+          "password",
+          "email",
+          "search",
+          "tel",
+          "url"
+        ],
         "defaultValue": "\"text\""
       },
       {
@@ -16128,6 +17478,10 @@
         "kind": "input",
         "name": "hourFormat",
         "type": "HourFormat | null",
+        "options": [
+          "12",
+          "24"
+        ],
         "defaultValue": "null"
       },
       {
@@ -16238,6 +17592,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "TimePickerVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -16266,6 +17627,11 @@
         "kind": "input",
         "name": "size",
         "type": "TimePickerVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -16336,6 +17702,10 @@
         "kind": "input",
         "name": "hourFormat",
         "type": "HourFormat | null",
+        "options": [
+          "12",
+          "24"
+        ],
         "defaultValue": "null"
       },
       {
@@ -16390,6 +17760,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "ButtonVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -16411,6 +17788,11 @@
         "kind": "input",
         "name": "size",
         "type": "TimeSelectorVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -16464,6 +17846,14 @@
         "kind": "input",
         "name": "position",
         "type": "TooltipPosition",
+        "options": [
+          "left",
+          "right",
+          "top",
+          "bottom",
+          "end",
+          "start"
+        ],
         "defaultValue": "\"top\""
       },
       {
@@ -16471,6 +17861,13 @@
         "kind": "input",
         "name": "rounded",
         "type": "TooltipVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -16573,6 +17970,10 @@
         "kind": "input",
         "name": "mode",
         "type": "DataStructure",
+        "options": [
+          "flat",
+          "hierarchical"
+        ],
         "defaultValue": "\"hierarchical\""
       },
       {
@@ -16676,6 +18077,10 @@
         "kind": "input",
         "name": "look",
         "type": "WindowVariantProps[\"look\"]",
+        "options": [
+          "default",
+          "primary"
+        ],
         "defaultValue": "\"default\""
       },
       {
@@ -16741,6 +18146,12 @@
         "kind": "input",
         "name": "rounded",
         "type": "WindowVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {
@@ -16846,6 +18257,11 @@
         "kind": "input",
         "name": "size",
         "type": "ReturnType<TextBoxComponent[\"size\"]>",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       }
     ]
@@ -16886,6 +18302,11 @@
         "kind": "input",
         "name": "preset",
         "type": "IndicatorIconPreset | null",
+        "options": [
+          "loading",
+          "clear",
+          "dropdown"
+        ],
         "defaultValue": "null"
       },
       {
@@ -16994,6 +18415,10 @@
         "kind": "input",
         "name": "listRole",
         "type": "\"list\" | \"listbox\"",
+        "options": [
+          "listbox",
+          "list"
+        ],
         "defaultValue": "\"listbox\""
       },
       {
@@ -17019,6 +18444,11 @@
         "kind": "input",
         "name": "size",
         "type": "ReturnType<TextBoxComponent[\"size\"]>",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
         "defaultValue": "\"medium\""
       },
       {

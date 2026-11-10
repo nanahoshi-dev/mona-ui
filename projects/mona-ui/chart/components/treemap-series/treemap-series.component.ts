@@ -107,6 +107,7 @@ export class TreemapSeriesComponent implements OnInit {
 
     /**
      * @description The hidden top-level node IDs. Bind `[(hiddenNodeIds)]` for two-way binding; legend toggles write to it.
+     * With `keyField`, build an ID with `chartItemKeyId(key)`; otherwise read IDs from `nodeVisibilityChange`.
      * @default []
      */
     public readonly hiddenNodeIds = model<readonly string[]>([]);

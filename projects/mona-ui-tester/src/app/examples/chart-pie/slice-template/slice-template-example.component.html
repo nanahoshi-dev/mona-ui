@@ -1,0 +1,21 @@
+<mona-chart aria-label="Budget by item, in thousands of euros" class="h-80 w-full" [data]="budget">
+    <mona-pie-series
+        categoryField="item"
+        colorField="color"
+        field="amount"
+        labelPosition="inside"
+        name="Budget"
+        [cornerRadius]="4"
+        [minLabelAngle]="20"
+        [padAngle]="1.5"
+        [showLabels]="true">
+        <ng-template monaChartSliceLabelTemplate let-slice>
+            <span class="flex flex-col items-center leading-tight">
+                <span>{{ slice.formattedCategory }}</span>
+                <span class="text-sm">{{ slice.formattedPercentage }}</span>
+            </span>
+        </ng-template>
+    </mona-pie-series>
+    <mona-chart-legend position="end" />
+    <mona-chart-tooltip />
+</mona-chart>

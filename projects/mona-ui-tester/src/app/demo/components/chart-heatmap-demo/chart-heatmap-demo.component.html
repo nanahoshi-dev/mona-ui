@@ -1,0 +1,131 @@
+@let c = chart();
+@let s = series();
+@let x = xAxis();
+@let y = yAxis();
+@let l = legend();
+@let t = tooltip();
+@let chartFeatureData = chartFeatures();
+
+<app-parts-demo-container [eventLog]="eventLog" [parts]="parts()" [(values)]="values">
+    <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-medium" id="chart-heatmap-ramp">Colors</span>
+            <mona-segmented
+                aria-labelledby="chart-heatmap-ramp"
+                size="small"
+                [options]="rampOptions"
+                [value]="ramp()"
+                (valueChange)="onRampChange($event)"></mona-segmented>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-medium" id="chart-heatmap-data-set">Data</span>
+            <mona-segmented
+                aria-labelledby="chart-heatmap-data-set"
+                size="small"
+                [options]="dataSetOptions"
+                [value]="dataSet()"
+                (valueChange)="onDataSetChange($event)"></mona-segmented>
+        </div>
+    </div>
+
+    @if (ready()) {
+        <mona-chart
+            class="h-96 w-full"
+            xField="hour"
+            [animation]="animation()"
+            [aria-description]="c.ariaDescription"
+            [aria-label]="c.ariaLabel"
+            [data]="data()"
+            [dataTable]="c.dataTable"
+            [landmark]="c.landmark"
+            [renderer]="c.renderer"
+            [subtitle]="c.subtitle"
+            [title]="c.title"
+            [titleAlign]="c.titleAlign"
+            (pointClick)="eventLog.record('pointClick', $event)"
+            (pointFocusChange)="eventLog.record('pointFocusChange', $event)"
+            (seriesVisibilityChange)="eventLog.record('seriesVisibilityChange', $event)"
+            (viewportChange)="eventLog.record('viewportChange', $event)"
+            (viewportChangeDetails)="eventLog.record('viewportChangeDetails', $event)">
+            <mona-chart-x-axis
+                [axisLine]="x.axisLine"
+                [formatter]="x.formatter"
+                [gridLines]="x.gridLines"
+                [labelPadding]="x.labelPadding"
+                [labels]="x.labels"
+                [position]="x.position"
+                [tickMarks]="x.tickMarks"
+                [tickSize]="x.tickSize"
+                [title]="x.title"
+                [titlePadding]="x.titlePadding"
+                [visible]="x.visible" />
+            <mona-chart-y-axis
+                [axisLine]="y.axisLine"
+                [formatter]="y.formatter"
+                [gridLines]="y.gridLines"
+                [labelPadding]="y.labelPadding"
+                [labels]="y.labels"
+                [position]="y.position"
+                [tickMarks]="y.tickMarks"
+                [tickSize]="y.tickSize"
+                [title]="y.title"
+                [titlePadding]="y.titlePadding"
+                [visible]="y.visible" />
+
+            <mona-heatmap-series
+                field="value"
+                yField="day"
+                [borderRadius]="s.borderRadius"
+                [cellGap]="s.cellGap"
+                [color]="s.color"
+                [colorMode]="s.colorMode"
+                [colors]="s.colors"
+                [fillOpacity]="s.fillOpacity"
+                [max]="s.max"
+                [midpoint]="s.midpoint"
+                [min]="s.min"
+                [name]="s.name"
+                [showValues]="s.showValues"
+                [strokeColor]="s.strokeColor"
+                [strokeWidth]="s.strokeWidth"
+                [valueFormatter]="s.valueFormatter"
+                [visible]="s.visible"
+                [xCategories]="s.xCategories"
+                [yCategories]="s.yCategories"
+                (visibleChange)="onSeriesVisibleChange($event)" />
+
+            <mona-chart-legend [interactive]="l.interactive" [mode]="l.mode" [position]="l.position">
+                @if (legendFeatures()["legendItemTemplate"]?.active) {
+                    <ng-template monaChartLegendItemTemplate let-item>
+                        <span class="text-sm" [style.color]="item.color">{{ item.name }}</span>
+                    </ng-template>
+                }
+            </mona-chart-legend>
+            <mona-chart-tooltip [enabled]="t.enabled">
+                @if (tooltipFeatures()["tooltipTemplate"]?.active) {
+                    <ng-template monaChartTooltipTemplate let-point>
+                        <div class="rounded-md border border-border bg-popover p-2 text-xs text-popover-foreground">
+                            {{ point.formattedYCategory }} {{ point.formattedXValue }}: {{ point.formattedY }}
+                        </div>
+                    </ng-template>
+                }
+            </mona-chart-tooltip>
+
+            @if (chartFeatureData["titleTemplate"]?.active) {
+                <ng-template monaChartTitleTemplate let-title>
+                    <span class="font-semibold">🔥 {{ title }}</span>
+                </ng-template>
+            }
+            @if (chartFeatureData["subtitleTemplate"]?.active) {
+                <ng-template monaChartSubtitleTemplate let-subtitle>
+                    <em>{{ subtitle }}</em>
+                </ng-template>
+            }
+            @if (chartFeatureData["noDataTemplate"]?.active) {
+                <ng-template monaChartNoDataTemplate>
+                    <span class="text-sm text-muted-foreground">Nothing to show yet</span>
+                </ng-template>
+            }
+        </mona-chart>
+    }
+</app-parts-demo-container>

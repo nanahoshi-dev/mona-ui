@@ -1,40 +1,67 @@
 ## Overview
 
-The chart component renders high-performance Canvas 2D visualizations composed of declarative child series and axis components. It supports Cartesian, Sector, Polar Axis, Polar Arc, and Hierarchical chart families, with specialized Cartesian layouts for Heatmap, Funnel, Waterfall, and Financial series.
+A chart is a `mona-chart` with parts inside it: one or more series, the axes they're drawn on, and optional parts for the legend, the tooltip and interaction. Every part is a component, so a chart is written as markup and changes when its inputs do. Charts draw on a Canvas, so they stay fast with large data, and keep an accessible description, live announcements and keyboard navigation alongside.
 
-**Series Types:**
-- **Cartesian**: `<mona-line-series>`, `<mona-area-series>`, `<mona-bar-series>`, `<mona-range-bar-series>`, `<mona-range-area-series>`, `<mona-scatter-series>`, `<mona-bubble-series>`, `<mona-candlestick-series>`, `<mona-ohlc-series>`, `<mona-heatmap-series>`, `<mona-funnel-series>`, `<mona-waterfall-series>`
-- **Sector**: `<mona-pie-series>`, `<mona-donut-series>`
-- **Polar Axis**: `<mona-radar-series>`, `<mona-polar-series>`
-- **Polar Arc**: `<mona-radial-bar-series>`, `<mona-rose-series>`, `<mona-gauge-series>`
-- **Hierarchical**: `<mona-treemap-series>`
+This page covers what every chart shares. Each family of series has its own page, with a playground that covers all of its inputs:
+
+| Page | Series | Draw |
+| :--- | :--- | :--- |
+| [Line & Area](/components/chart-line-area) | `mona-line-series`, `mona-area-series`, `mona-range-area-series` | Trends, volumes and bands along an X axis |
+| [Bar & Waterfall](/components/chart-bar) | `mona-bar-series`, `mona-range-bar-series`, `mona-waterfall-series` | Comparisons, intervals and running totals |
+| [Scatter & Bubble](/components/chart-scatter) | `mona-scatter-series`, `mona-bubble-series` | Relationships between two or three numbers |
+| [Financial](/components/chart-financial) | `mona-candlestick-series`, `mona-ohlc-series` | Open, high, low and close prices |
+| [Heatmap](/components/chart-heatmap) | `mona-heatmap-series` | A grid of cells colored by value |
+| [Pie & Donut](/components/chart-pie) | `mona-pie-series`, `mona-donut-series` | Parts of a whole |
+| [Funnel](/components/chart-funnel) | `mona-funnel-series` | Stages that narrow, with conversion between them |
+| [Treemap](/components/chart-treemap) | `mona-treemap-series` | Hierarchies sized by value |
+| [Radar & Polar](/components/chart-radar) | `mona-radar-series`, `mona-polar-series` | Metrics or directions around a circle |
+| [Radial](/components/chart-radial) | `mona-radial-bar-series`, `mona-rose-series`, `mona-gauge-series` | Values as arcs around a center |
+
+The X-Y series (line, area, range area, bar, range bar, scatter, bubble, candlestick and OHLC) can share one chart. Several radar series can share a chart, and so can several polar series, but not radar with polar. A chart takes one pie or donut, or one radial bar, rose or gauge, and a waterfall, funnel, heatmap or treemap series has its chart to itself. Cartesian and polar series never mix. A chart that breaks one of these rules logs a development warning.
 
 ## Import & Quick Start
+
+Everything is imported from `@nanahoshi/mona-ui/chart`.
 
 ```typescript
 import {
     ChartComponent,
-    ChartAngularAxisComponent,
-    ChartRadialAxisComponent,
-    RadarSeriesComponent,
-    PolarSeriesComponent,
     ChartLegendComponent,
-    ChartTooltipComponent
+    ChartTooltipComponent,
+    ChartXAxisComponent,
+    ChartYAxisComponent,
+    LineSeriesComponent
 } from "@nanahoshi/mona-ui/chart";
-import type { ChartField, ChartValueFormatter, ChartViewportState } from "@nanahoshi/mona-ui/chart";
 ```
 
 ```html
-<mona-chart [data]="data" class="h-80 w-full">
-    <mona-chart-angular-axis />
-    <mona-chart-radial-axis gridShape="polygon" />
-    <mona-radar-series field="score" categoryField="metric" name="Attributes" fillMode="gradient" />
-    <mona-chart-legend position="bottom" />
+<mona-chart aria-label="Monthly visitors" class="h-72 w-full" xField="month" [data]="visitors">
+    <mona-chart-x-axis />
+    <mona-chart-y-axis title="Visitors" />
+    <mona-line-series field="web" name="Web" />
+    <mona-line-series field="mobile" name="Mobile" />
+    <mona-chart-legend />
     <mona-chart-tooltip [shared]="true" />
 </mona-chart>
 ```
 
+The chart fills its host, so give the host a size. Series read their rows from the chart's `data` and their X value from its `xField`, unless they set their own.
+
 ## Anatomy
+
+| Part | Selector | Role |
+| :--- | :--- | :--- |
+| Chart | `mona-chart` | Holds the data, title, animation, navigation and synchronization, and is the element that takes focus. |
+| Cartesian axes | `mona-chart-x-axis`, `mona-chart-y-axis` | Scales, ticks, grid lines and titles. Add more than one with `axisId`, and bind series to them with `xAxisId` and `yAxisId`. |
+| Polar axes | `mona-chart-angular-axis`, `mona-chart-radial-axis` | The axes of radar and polar series, described on [Radar & Polar](/components/chart-radar). |
+| Series | `mona-*-series` | The data marks, described on each family's page. |
+| Legend | `mona-chart-legend` | Lists the series, or the slices of a pie, and toggles them. |
+| Tooltip | `mona-chart-tooltip` | Shows the values under the pointer or the keyboard focus. |
+| Crosshair | `mona-chart-crosshair` | Guide lines and axis badges that follow the pointer on Cartesian charts. |
+| Reference line and band | `mona-chart-reference-line`, `mona-chart-reference-band` | A fixed value or range on an axis, such as a target or a threshold. |
+| Annotation | `mona-chart-annotation` | A marker and callout attached to a data point. |
+| Selection | `mona-chart-selection` | Lets users select points by click or keyboard. |
+| Brush | `mona-chart-brush` | Lets users select the points inside a dragged range. |
 
 ### Template Directives
 
@@ -44,44 +71,22 @@ import type { ChartField, ChartValueFormatter, ChartViewportState } from "@nanah
 - `ng-template[monaChartAxisLabelTemplate]`: Customizes tick label markup with `{ $implicit, axis, axisId, index, position, scaleType, value }`.
 - `ng-template[monaChartLegendItemTemplate]`: Customizes legend items with `{ $implicit, color, dataIndex, datum, interactive, itemId, kind, name, percentage, secondaryColor, series, seriesId, seriesType, value, visible }`.
 - `ng-template[monaChartNoDataTemplate]`: Customizes the empty state when no renderable data is present.
-- `ng-template[monaChartSliceLabelTemplate]`: Customizes pie and donut slice labels with `{ $implicit, category, color, dataIndex, datum, formattedCategory, formattedPercentage, formattedValue, percentage, seriesId, seriesName, seriesType, slice, value }`.
-- `ng-template[monaChartCenterTemplate]`: Customizes the center of a donut with `{ $implicit, formattedTotal, seriesId, seriesName, total, visibleSliceCount }`.
-- `ng-template[monaChartGaugeCenterTemplate]`: Customizes central gauge readout template with `{ $implicit, formattedMax, formattedMin, formattedValue, isClamped, max, min, ratio, seriesId, seriesName, value }`.
-- `ng-template[monaChartTreemapLabelTemplate]`: Customizes DOM treemap node labels with `{ $implicit, bounds, color, datum, depth, formattedLabel, formattedPath, formattedValue, isCollapsed, isLeaf, label, node, nodeId, path, percentageOfParent, percentageOfRoot, textColor, value }`.
-- `ng-template[monaChartFunnelLabelTemplate]`: Customizes DOM funnel stage labels with `{ $implicit, bounds, category, color, conversionRate, dataIndex, datum, dropOff, formattedCategory, formattedConversionRate, formattedOverallConversionRate, formattedValue, overallConversionRate, previousValue, stage, stageId, stageIndex, textColor, value }`.
-- `ng-template[monaChartWaterfallLabelTemplate]`: Customizes DOM waterfall step labels with `{ $implicit, barEnd, barStart, bounds, category, color, cumulativeAfter, cumulativeBefore, dataIndex, datum, deltaValue, formattedCategory, formattedCumulativeAfter, formattedCumulativeBefore, formattedDelta, formattedValue, kind, step, textColor, value, visualKind }`.
 - `ng-template[monaChartCrosshairLabelTemplate]` (or `[monaChartCrosshairLabel]`): Customizes DOM crosshair coordinate badges with `{ $implicit, axis, axisId, coordinate, formattedValue, snapped, source, value }`.
 - `ng-template[monaChartReferenceLabelTemplate]` (or `[monaChartReferenceLabel]`): Customizes DOM reference line or band labels with `{ $implicit, axis, axisId, bounds, coordinate, formattedFrom, formattedTo, formattedValue, from, kind, to, value }`.
 - `ng-template[monaChartAnnotationLabelTemplate]` (or `[monaChartAnnotationLabel]`): Customizes DOM point annotation callout badges with `{ $implicit, data, formattedX, formattedY, point, x, xAxisId, y, yAxisId }`.
 - `ng-template[monaChartDataLabelTemplate]` (or `[monaChartDataLabel]`): Customizes data labels with `{ $implicit, close, color, dataIndex, datum, formattedClose, formattedFrom, formattedHigh, formattedLow, formattedOpen, formattedSize, formattedStackPercentage, formattedStackTotal, formattedTo, formattedValue, formattedX, formattedY, fromValue, high, low, markId, open, rawValue, selected, seriesId, seriesName, seriesType, sizeValue, stackEnd, stackMode, stackPercentage, stackStart, stackTotal, toValue, value, xValue, yValue }`.
+- `ng-template[monaChartWaterfallLabelTemplate]`: Customizes [waterfall](/components/chart-bar) step labels with `{ $implicit, barEnd, barStart, bounds, category, color, cumulativeAfter, cumulativeBefore, dataIndex, datum, deltaValue, formattedCategory, formattedCumulativeAfter, formattedCumulativeBefore, formattedDelta, formattedValue, kind, step, textColor, value, visualKind }`.
+- `ng-template[monaChartSliceLabelTemplate]`: Customizes [pie and donut](/components/chart-pie) slice labels with `{ $implicit, category, color, dataIndex, datum, formattedCategory, formattedPercentage, formattedValue, percentage, seriesId, seriesName, seriesType, slice, value }`.
+- `ng-template[monaChartCenterTemplate]`: Customizes the center of a [donut](/components/chart-pie) with `{ $implicit, formattedTotal, seriesId, seriesName, total, visibleSliceCount }`.
+- `ng-template[monaChartFunnelLabelTemplate]`: Customizes [funnel](/components/chart-funnel) stage labels with `{ $implicit, bounds, category, color, conversionRate, dataIndex, datum, dropOff, formattedCategory, formattedConversionRate, formattedOverallConversionRate, formattedValue, overallConversionRate, previousValue, stage, stageId, stageIndex, textColor, value }`.
+- `ng-template[monaChartTreemapLabelTemplate]`: Customizes [treemap](/components/chart-treemap) node labels with `{ $implicit, bounds, color, datum, depth, formattedLabel, formattedPath, formattedValue, isCollapsed, isLeaf, label, node, nodeId, path, percentageOfParent, percentageOfRoot, textColor, value }`.
+- `ng-template[monaChartGaugeCenterTemplate]`: Customizes the readout in the middle of a [gauge](/components/chart-radial) with `{ $implicit, formattedMax, formattedMin, formattedValue, isClamped, max, min, ratio, seriesId, seriesName, value }`.
+
+The series templates, for slice, donut center, gauge center, treemap, funnel and waterfall labels, are described on their family's page.
 
 Every directive types its `let-` variables under `strictTemplates`. `let-value` is the context's `$implicit`, which is the tick, line or annotation value, not the whole context: read other members by name, as in `let-axis="axis"`. Annotation data is `unknown`, so use `$any(data).note` or a typed method to read it.
 
 ## Examples
-
-### Line
-
-Series read their values from the chart's `data`, using `field` for the value and the chart's `xField` for the category.
-
-```example
-chart/line
-```
-
-### Stacked bars
-
-Bar series with the same `stack` name stack together. `valueFormatter` formats the values in tooltips and announcements, without changing the axis ticks.
-
-```example
-chart/bar
-```
-
-### Donut
-
-A donut reads `category` and `value` by default. `ng-template[monaChartCenterTemplate]` fills its center, and legend items show or hide slices.
-
-```example
-chart/donut
-```
 
 ### Custom tooltip
 
@@ -89,6 +94,22 @@ A shared tooltip shows every visible series at the active category. `ng-template
 
 ```example
 chart/tooltip
+```
+
+### Reference lines, bands and annotations
+
+A reference line marks one value on an axis and a reference band marks a range, such as a budget or busy hours. Values are on the axis's own scale: a category name on a category axis, a number or `Date` on a continuous one. Bands draw under the series by default (`layer="underlay"`) and lines over them. An annotation pins a marker and a label to one point, and the crosshair follows the pointer.
+
+```example
+chart/overlays
+```
+
+### Selection and brushing
+
+`mona-chart-selection` lets users select points by click, `Enter` or `Space`, and `[(selectedMarkIds)]` holds the ids of the selected marks. `mona-chart-brush` selects every point in a dragged range (by default with `Shift` held), and `selectionBehavior` decides whether that replaces, adds to, removes from or toggles the selection.
+
+```example
+chart/selection
 ```
 
 ## Behavior
@@ -256,7 +277,21 @@ For eligible finite-X monotonic sources that retain a density runtime, viewport 
 | `zoom` | `boolean` | `true` | Allows zooming at all. |
 | `zoomAxes` | `ChartNavigationAxisTarget` | `"auto"` | Axes that zoom. |
 
-The viewport is a `ChartViewportState`: `{ axes: ChartViewportWindow[] }`. A window is `{ kind: "continuous", axis, axisId, min, max }` or `{ kind: "category", axis, axisId, startIndex, endIndexExclusive }`.
+The viewport is a `ChartViewportState`: `{ axes: ChartViewportWindow[] }`. A window is `{ kind: "continuous", axis, axisId, min, max }` or `{ kind: "category", axis, axisId, startIndex, endIndexExclusive }`. To keep the viewport in your own state, for example to restore it later, bind it both ways:
+
+```typescript
+import type { ChartViewportState } from "@nanahoshi/mona-ui/chart";
+
+protected readonly viewport = signal<ChartViewportState | undefined>(undefined);
+```
+
+```html
+<mona-chart [data]="data" [navigation]="true" [viewport]="viewport()" (viewportChange)="viewport.set($event)">
+    <mona-chart-x-axis />
+    <mona-chart-y-axis />
+    <mona-line-series field="value" />
+</mona-chart>
+```
 
 `viewportChangeDetails` gives the `source` of a change (`"drag"`, `"wheel"`, `"pinch"`, `"keyboard"`, `"fit"`, `"reset"`, `"sync"`, `"programmatic"` or `"data-reconcile"`) and its `phase` (`"start"`, `"update"` or `"end"`).
 

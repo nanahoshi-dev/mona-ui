@@ -3,11 +3,12 @@ import type { SceneOhlcMark } from "../../../../scene/scene-geometry";
 import { setSvgAttribute } from "../../svg-attribute-utils";
 import { SvgKeyedGroup } from "../../svg-keyed-group";
 
+/** Draws each OHLC mark as a group of two paths: the high-low stem in `wickColor`, and the open and close ticks. */
 export class SvgOhlcSeriesRenderer {
-    readonly #keyedGroup: SvgKeyedGroup<SceneOhlcMark, SVGPathElement>;
+    readonly #keyedGroup: SvgKeyedGroup<SceneOhlcMark, SVGGElement>;
 
     public constructor(container: SVGGElement) {
-        this.#keyedGroup = new SvgKeyedGroup<SceneOhlcMark, SVGPathElement>(container);
+        this.#keyedGroup = new SvgKeyedGroup<SceneOhlcMark, SVGGElement>(container);
     }
 
     public clear(): void {
@@ -16,6 +17,18 @@ export class SvgOhlcSeriesRenderer {
 
     public destroy(): void {
         this.#keyedGroup.destroy();
+    }
+
+    static #ensurePaths(group: SVGGElement): readonly [SVGPathElement, SVGPathElement] {
+        const paths = group.querySelectorAll<SVGPathElement>(":scope > path");
+        if (paths.length === 2) {
+            return [paths[0], paths[1]];
+        }
+        group.replaceChildren();
+        const stem = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        const ticks = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        group.append(stem, ticks);
+        return [stem, ticks];
     }
 
     public render(scene: ChartOhlcSeriesScene): void {
@@ -30,11 +43,12 @@ export class SvgOhlcSeriesRenderer {
 
         this.#keyedGroup.reconcile(marks, {
             key: (mark, index) => mark.animationKey ?? String(index),
-            tag: "path",
-            update: (element, mark) => {
+            tag: "g",
+            update: (group, mark) => {
+                const [stem, ticks] = SvgOhlcSeriesRenderer.#ensurePaths(group);
                 const markAlpha = baseAlpha * (mark.renderOpacity ?? 1);
                 if (markAlpha <= 0) {
-                    setSvgAttribute(element, "opacity", 0);
+                    setSvgAttribute(group, "opacity", 0);
                     return;
                 }
 
@@ -47,20 +61,22 @@ export class SvgOhlcSeriesRenderer {
                           : style.neutralColor);
 
                 const cx = Math.round(mark.centerX);
-                const highY = Math.round(mark.highY);
-                const lowY = Math.round(mark.lowY);
                 const openY = Math.round(mark.openY);
                 const closeY = Math.round(mark.closeY);
                 const tickWidth = mark.tickWidth;
 
-                const d = `M ${cx} ${highY} V ${lowY} M ${cx - tickWidth} ${openY} H ${cx} M ${cx} ${closeY} H ${cx + tickWidth}`;
-
-                setSvgAttribute(element, "d", d);
-                setSvgAttribute(element, "fill", "none");
-                setSvgAttribute(element, "stroke", markColor);
-                setSvgAttribute(element, "stroke-width", mark.wickWidth);
-                setSvgAttribute(element, "opacity", markAlpha);
-                setSvgAttribute(element, "shape-rendering", "crispEdges");
+                setSvgAttribute(group, "opacity", markAlpha);
+                setSvgAttribute(group, "fill", "none");
+                setSvgAttribute(group, "stroke-width", mark.wickWidth);
+                setSvgAttribute(group, "shape-rendering", "crispEdges");
+                setSvgAttribute(stem, "d", `M ${cx} ${Math.round(mark.highY)} V ${Math.round(mark.lowY)}`);
+                setSvgAttribute(stem, "stroke", style.wickColor || markColor);
+                setSvgAttribute(
+                    ticks,
+                    "d",
+                    `M ${cx - tickWidth} ${openY} H ${cx} M ${cx} ${closeY} H ${cx + tickWidth}`
+                );
+                setSvgAttribute(ticks, "stroke", markColor);
             }
         });
     }

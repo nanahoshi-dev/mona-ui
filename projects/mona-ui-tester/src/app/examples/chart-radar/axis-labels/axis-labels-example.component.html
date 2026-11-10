@@ -1,0 +1,10 @@
+<mona-chart aria-label="Test coverage by area" class="h-80 w-full" [data]="coverage">
+    <mona-chart-angular-axis [labelOffset]="14" [rotation]="36">
+        <ng-template monaChartAxisLabelTemplate let-value let-index="index">
+            <span class="font-medium">{{ index + 1 }}. {{ value }}</span>
+        </ng-template>
+    </mona-chart-angular-axis>
+    <mona-chart-radial-axis gridShape="circle" [formatter]="percent" [max]="100" [min]="0" [tickCount]="4" />
+    <mona-radar-series categoryField="area" curve="smooth" fillMode="gradient" name="Coverage" />
+    <mona-chart-tooltip />
+</mona-chart>

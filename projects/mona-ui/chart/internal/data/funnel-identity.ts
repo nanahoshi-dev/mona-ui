@@ -1,5 +1,5 @@
 import type { ChartField } from "../../models/chart.models";
-import { serializeKeyPart } from "../animation/animation-identity";
+import { formatItemId } from "../animation/animation-identity";
 import { ChartDiagnostics } from "../utils/chart-diagnostics";
 import { resolveNumericValue, resolveValue } from "./chart-value-resolver";
 
@@ -65,9 +65,8 @@ export class FunnelIdentity {
 
         if (keyField) {
             const rawKey = resolveValue(datum, keyField, sourceIndex);
-            const keyPart = serializeKeyPart(rawKey);
-            if (keyPart !== null) {
-                const keyStr = `k:${keyPart.type}:${String(keyPart.value)}`;
+            const keyStr = formatItemId("k", rawKey);
+            if (keyStr !== null) {
                 if (seenExplicitKeys?.has(keyStr)) {
                     if (warnedDiagnosticSignatures) {
                         ChartDiagnostics.warnOnce(

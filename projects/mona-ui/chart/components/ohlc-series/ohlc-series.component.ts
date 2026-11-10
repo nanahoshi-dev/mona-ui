@@ -184,10 +184,11 @@ export class OhlcSeriesComponent implements OnInit {
     public readonly wickColor = input("");
 
     /**
-     * @description Pixel stroke width for OHLC stems and tick arms.
-     * @default 1
+     * @description Pixel stroke width for OHLC stems and tick arms. When unset, the series reads
+     * `--mona-chart-financial-wick-width`, or uses `1`.
+     * @default undefined
      */
-    public readonly wickWidth = input(1);
+    public readonly wickWidth = input<number | undefined>(undefined);
 
     /**
      * @description Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used.

@@ -2,6 +2,7 @@ import type { ChartInteractionState } from "../interaction/chart-interaction-sta
 import type { CartesianHeatmapChartScene } from "../scene/chart-scene";
 import type { ChartStyleResolver } from "../style/chart-style-resolver";
 import { crispPixel, drawCellRectOutline } from "../utils/canvas-utils";
+import { buildHeatmapTickSegments } from "./geometry/heatmap-tick-segments";
 import { HeatmapSeriesRenderer } from "./series/heatmap-series-renderer";
 
 export class HeatmapChartRenderer {
@@ -89,6 +90,18 @@ export class HeatmapChartRenderer {
                         : crispPixel(plotRect.y + plotRect.height, 1);
                 context.moveTo(plotRect.x, y);
                 context.lineTo(plotRect.x + plotRect.width, y);
+            }
+            context.stroke();
+        }
+
+        const ticks = buildHeatmapTickSegments(axes, plotRect);
+        if (ticks.length > 0) {
+            context.strokeStyle = axisLineColor;
+            context.lineWidth = 1;
+            context.beginPath();
+            for (const tick of ticks) {
+                context.moveTo(crispPixel(tick.x1, 1), crispPixel(tick.y1, 1));
+                context.lineTo(crispPixel(tick.x2, 1), crispPixel(tick.y2, 1));
             }
             context.stroke();
         }

@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { CallExpression, JSDocTag, Node, Project, SyntaxKind } from "ts-morph";
+import { CallExpression, JSDocTag, Node, Project, SyntaxKind, Type } from "ts-morph";
 
 interface ComponentInputMetadata {
     /** The name consumers bind, when the input or output is aliased (`input("", { alias: "aria-label" })`). */
@@ -9,6 +9,8 @@ interface ComponentInputMetadata {
     description: string;
     kind: "input" | "model" | "output";
     name: string;
+    /** The values of an input whose type is a union of string literals once its aliases are resolved. */
+    options?: string[];
     required?: boolean;
     type: string;
 }
@@ -76,6 +78,28 @@ function simplifyType(fullType: string): string {
     }
 
     return simplified.trim();
+}
+
+/**
+ * Lists the values of a type that is a union of string literals, such as an alias like `ChartCurve`, leaving out
+ * `undefined` and `null`. Anything else gives `undefined`, so a demo can't offer a value the input doesn't take.
+ */
+function extractLiteralOptions(type: Type | undefined): string[] | undefined {
+    if (!type) {
+        return undefined;
+    }
+    const members = type.isUnion() ? type.getUnionTypes() : [type];
+    const values: string[] = [];
+    for (const member of members) {
+        if (member.isUndefined() || member.isNull()) {
+            continue;
+        }
+        if (!member.isStringLiteral()) {
+            return undefined;
+        }
+        values.push(String(member.getLiteralValue()));
+    }
+    return values.length > 1 ? values : undefined;
 }
 
 /**
@@ -185,6 +209,10 @@ function extractInputsFromInheritanceChain(
 
                 // Try to get type from the explicit generic argument first
                 const typeArguments = callExpression.getTypeArguments();
+                const resolvedType =
+                    kind === "output"
+                        ? undefined
+                        : (typeArguments[0]?.getType() ?? property.getType().getTypeArguments()[0]);
                 if (typeArguments.length > 0) {
                     inputType = typeArguments[0].getText();
                 } else {
@@ -224,6 +252,10 @@ function extractInputsFromInheritanceChain(
                 const alias = extractAlias(callExpression, isRequired);
                 if (alias) {
                     item.alias = alias;
+                }
+                const options = extractLiteralOptions(resolvedType);
+                if (options) {
+                    item.options = options;
                 }
                 if (isRequired) {
                     item.required = true;

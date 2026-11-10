@@ -92,6 +92,56 @@ export const routes: Routes = [
                     import("./docs/components/chart-doc/chart-doc.component").then(m => m.ChartDocComponent)
             },
             {
+                path: "chart-line-area",
+                loadComponent: () =>
+                    import("./docs/components/chart-line-area-doc/chart-line-area-doc.component").then(m => m.ChartLineAreaDocComponent)
+            },
+            {
+                path: "chart-bar",
+                loadComponent: () =>
+                    import("./docs/components/chart-bar-doc/chart-bar-doc.component").then(m => m.ChartBarDocComponent)
+            },
+            {
+                path: "chart-scatter",
+                loadComponent: () =>
+                    import("./docs/components/chart-scatter-doc/chart-scatter-doc.component").then(m => m.ChartScatterDocComponent)
+            },
+            {
+                path: "chart-financial",
+                loadComponent: () =>
+                    import("./docs/components/chart-financial-doc/chart-financial-doc.component").then(m => m.ChartFinancialDocComponent)
+            },
+            {
+                path: "chart-heatmap",
+                loadComponent: () =>
+                    import("./docs/components/chart-heatmap-doc/chart-heatmap-doc.component").then(m => m.ChartHeatmapDocComponent)
+            },
+            {
+                path: "chart-pie",
+                loadComponent: () =>
+                    import("./docs/components/chart-pie-doc/chart-pie-doc.component").then(m => m.ChartPieDocComponent)
+            },
+            {
+                path: "chart-funnel",
+                loadComponent: () =>
+                    import("./docs/components/chart-funnel-doc/chart-funnel-doc.component").then(m => m.ChartFunnelDocComponent)
+            },
+            {
+                path: "chart-treemap",
+                loadComponent: () =>
+                    import("./docs/components/chart-treemap-doc/chart-treemap-doc.component").then(m => m.ChartTreemapDocComponent)
+            },
+            {
+                path: "chart-radar",
+                loadComponent: () =>
+                    import("./docs/components/chart-radar-doc/chart-radar-doc.component").then(m => m.ChartRadarDocComponent)
+            },
+            {
+                path: "chart-radial",
+                loadComponent: () =>
+                    import("./docs/components/chart-radial-doc/chart-radial-doc.component").then(m => m.ChartRadialDocComponent)
+            },
+            {
                 path: "checkbox",
                 loadComponent: () =>
                     import("./docs/components/checkbox-doc/checkbox-doc.component").then(m => m.CheckboxDocComponent)

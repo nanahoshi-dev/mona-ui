@@ -1,0 +1,12 @@
+<mona-chart aria-label="Page views by browser" class="h-80 w-full" [data]="browsers">
+    <mona-pie-series
+        categoryField="browser"
+        field="views"
+        labelContent="category-percentage"
+        name="Page views"
+        strokeColor="var(--color-surface)"
+        [showLabels]="true"
+        [strokeWidth]="2"
+        [valueFormatter]="views" />
+    <mona-chart-tooltip />
+</mona-chart>

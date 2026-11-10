@@ -1,0 +1,13 @@
+<mona-chart aria-label="Exam score by hours studied" class="h-72 w-full" xField="hours">
+    <mona-chart-x-axis title="Hours studied" />
+    <mona-chart-y-axis title="Score" />
+    <mona-scatter-series field="score" name="Morning class" [data]="morning" [valueFormatter]="points" />
+    <mona-scatter-series
+        field="score"
+        name="Evening class"
+        [data]="evening"
+        [pointRadius]="6"
+        [valueFormatter]="points" />
+    <mona-chart-legend />
+    <mona-chart-tooltip />
+</mona-chart>

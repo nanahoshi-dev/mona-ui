@@ -347,16 +347,27 @@ export function renderApiPage(entries: readonly ApiEntry[], index: ApiIndex): Re
     return { markdown: `${blocks.join("\n\n")}\n`, unexported: related.unexported };
 }
 
-/** The entry points and exported names a page documents, from its manifest entry. */
+/**
+ * The entry points and exported names a page documents, from its manifest entry. A page without `apiExports` takes
+ * what the other pages of its entry point don't name, so an export is never left off every page.
+ */
 export function selectPageEntries(
     page: DocsPage,
-    symbolsByEntry: ReadonlyMap<string, readonly ApiSymbol[]>
+    symbolsByEntry: ReadonlyMap<string, readonly ApiSymbol[]>,
+    allPages: readonly DocsPage[] = []
 ): ApiEntry[] {
     if (!page.entryPoint) {
         return [];
     }
+    const namedElsewhere = new Set(
+        allPages
+            .filter(other => other !== page && other.entryPoint === page.entryPoint)
+            .flatMap(other => other.apiExports ?? [])
+    );
     const own = (symbolsByEntry.get(page.entryPoint) ?? [])
-        .filter(symbol => !page.apiExports || page.apiExports.includes(symbol.name))
+        .filter(symbol =>
+            page.apiExports ? page.apiExports.includes(symbol.name) : !namedElsewhere.has(symbol.name)
+        )
         .map((symbol): ApiEntry => ({ entryPoint: page.entryPoint ?? "", symbol }));
     const taken = new Set(own.map(entry => entry.symbol.name));
     const also = (page.apiAlsoFrom ?? []).flatMap(entryPoint =>
@@ -400,7 +411,7 @@ function main(): void {
     const pages = flattenDocsPages().filter(page => page.kind === "component");
     const pageOfSymbol = new Map<string, string>();
     for (const page of pages) {
-        for (const { symbol } of selectPageEntries(page, symbolsByEntry)) {
+        for (const { symbol } of selectPageEntries(page, symbolsByEntry, pages)) {
             if (!pageOfSymbol.has(symbol.name)) {
                 pageOfSymbol.set(symbol.name, page.path);
             }
@@ -432,7 +443,7 @@ function main(): void {
     const stale: string[] = [];
     const unexported = new Map<string, Set<string>>();
     for (const page of pages) {
-        const rendered = renderApiPage(selectPageEntries(page, symbolsByEntry), index);
+        const rendered = renderApiPage(selectPageEntries(page, symbolsByEntry, pages), index);
         rendered.unexported
             .filter(name => declaredInLibrary.has(name) && !/Variant/.test(name))
             .forEach(name => unexported.set(name, (unexported.get(name) ?? new Set()).add(page.path)));

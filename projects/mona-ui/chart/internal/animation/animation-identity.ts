@@ -30,6 +30,15 @@ export function serializeKeyPart(value: unknown): TypedKeyPart | null {
     return null;
 }
 
+/**
+ * Writes an item ID: the prefix (`k` for a key, `c` for a category), the kind of the value and the value, such as
+ * `k:s:trial`. Returns `null` for a value that can't identify an item.
+ */
+export function formatItemId(prefix: string, value: unknown): string | null {
+    const part = serializeKeyPart(value);
+    return part === null ? null : `${prefix}:${part.type}:${String(part.value)}`;
+}
+
 export function normalizeSeriesKey(value: string | undefined | null): string | undefined {
     if (value === undefined || value === null) {
         return undefined;

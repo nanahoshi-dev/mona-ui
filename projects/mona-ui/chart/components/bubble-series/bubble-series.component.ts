@@ -68,16 +68,18 @@ export class BubbleSeriesComponent implements OnInit {
     public readonly keyField = input<ChartField | undefined>(undefined);
 
     /**
-     * @description Maximum rendered pixel radius for the largest data size value.
-     * @default 24
+     * @description Maximum rendered pixel radius for the largest data size value. When unset, the series reads
+     * `--mona-chart-bubble-max-radius`, or uses `24`.
+     * @default undefined
      */
-    public readonly maxRadius = input(24);
+    public readonly maxRadius = input<number | undefined>(undefined);
 
     /**
-     * @description Minimum rendered pixel radius for the smallest data size value.
-     * @default 4
+     * @description Minimum rendered pixel radius for the smallest data size value. When unset, the series reads
+     * `--mona-chart-bubble-min-radius`, or uses `4`.
+     * @default undefined
      */
-    public readonly minRadius = input(4);
+    public readonly minRadius = input<number | undefined>(undefined);
 
     /**
      * @description Name of the series displayed in legends and tooltips.

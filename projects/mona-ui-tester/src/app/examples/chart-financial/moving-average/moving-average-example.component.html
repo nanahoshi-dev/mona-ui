@@ -1,0 +1,13 @@
+<mona-chart
+    aria-label="Daily share price with its 20-day moving average"
+    class="h-80 w-full"
+    xField="date"
+    [data]="prices"
+    [navigation]="true">
+    <mona-chart-x-axis type="time" />
+    <mona-chart-y-axis title="Price (USD)" />
+    <mona-candlestick-series closeField="close" highField="high" lowField="low" name="Price" openField="open" />
+    <mona-line-series curve="monotone-x" field="average" lineStyle="dashed" name="20-day average" />
+    <mona-chart-legend />
+    <mona-chart-tooltip [shared]="true" />
+</mona-chart>

@@ -115,6 +115,7 @@ export class RadialBarSeriesComponent implements OnInit {
 
     /**
      * @description The hidden item IDs. Bind `[(hiddenItemIds)]` for two-way binding; legend toggles write to it.
+     * Build an ID with `chartItemKeyId(key)` when `keyField` is set, or else with `chartItemCategoryId(category)`.
      * @default []
      */
     public readonly hiddenItemIds = model<readonly string[]>([]);

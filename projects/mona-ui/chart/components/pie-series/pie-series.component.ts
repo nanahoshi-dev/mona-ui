@@ -163,7 +163,7 @@ export class PieSeriesComponent implements OnInit {
     public readonly padAngle = input<number>(0);
 
     /**
-     * @description Whether to display inside slice data labels.
+     * @description Whether to display slice labels, inside or outside as `labelPosition` sets.
      * @default false
      */
     public readonly showLabels = input<boolean>(false);

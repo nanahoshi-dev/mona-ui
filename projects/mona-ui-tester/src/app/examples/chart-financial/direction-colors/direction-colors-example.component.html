@@ -1,0 +1,38 @@
+<div class="flex w-full flex-col gap-3">
+    <mona-segmented
+        aria-label="Series type"
+        size="small"
+        [options]="types"
+        [value]="type()"
+        (valueChange)="onTypeChange($event)"></mona-segmented>
+    <mona-chart aria-label="Weekly price of a fund" class="h-72 w-full" xField="week" [data]="prices">
+        <mona-chart-x-axis />
+        <mona-chart-y-axis title="Price" />
+        @if (type() === "candlestick") {
+            <mona-candlestick-series
+                closeField="close"
+                fallingColor="#ea580c"
+                fillMode="filled"
+                highField="high"
+                lowField="low"
+                name="Fund"
+                neutralColor="#64748b"
+                openField="open"
+                risingColor="#2563eb" />
+        } @else {
+            <mona-ohlc-series
+                closeField="close"
+                fallingColor="#ea580c"
+                highField="high"
+                lowField="low"
+                name="Fund"
+                neutralColor="#64748b"
+                openField="open"
+                risingColor="#2563eb"
+                [tickLength]="8"
+                [wickWidth]="2" />
+        }
+        <mona-chart-legend />
+        <mona-chart-tooltip />
+    </mona-chart>
+</div>

@@ -412,6 +412,15 @@ describe("selectPageEntries", () => {
         expect(selectPageEntries(page({ apiExports: ["B"] }), symbols).map(entry => entry.symbol.name)).toEqual(["B"]);
     });
 
+    it("gives a page without exports what the entry point's other pages don't name", () => {
+        const overview = page({});
+        const family = page({ apiExports: ["B"], path: "family" });
+
+        expect(selectPageEntries(overview, symbols, [overview, family]).map(entry => entry.symbol.name)).toEqual([
+            "A"
+        ]);
+    });
+
     it("adds another entry point without repeating a name", () => {
         const entries = selectPageEntries(page({ apiAlsoFrom: ["extra"] }), symbols);
 
