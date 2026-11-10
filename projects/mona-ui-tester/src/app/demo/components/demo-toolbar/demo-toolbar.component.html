@@ -1,0 +1,30 @@
+<button monaButton look="ghost" type="button" aria-label="Show code" (click)="codeToggle.emit()">
+    <svg lucideCode aria-hidden="true" [size]="20"></svg>
+</button>
+<mona-color-picker
+    aria-label="Background color"
+    size="small"
+    [value]="customColor()"
+    (valueChange)="customColor.set($event)"></mona-color-picker>
+<mona-dropdown-list
+    aria-label="Locale"
+    textField="label"
+    size="small"
+    [data]="localeOptions"
+    [style.min-width]="'10rem'"
+    [style.width]="'auto'"
+    [value]="selectedLocale()"
+    (valueChange)="onLocaleChange($event)">
+</mona-dropdown-list>
+<mona-dropdown-list
+    aria-label="Theme"
+    monaDropDownGroupable
+    textField="text"
+    valueField="value"
+    size="small"
+    [data]="themeDropdownData"
+    [groupBy]="'group'"
+    [style.width.px]="100"
+    [value]="selectedTheme()"
+    (valueChange)="onThemeChange($event)">
+</mona-dropdown-list>

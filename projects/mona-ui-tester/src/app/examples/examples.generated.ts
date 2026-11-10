@@ -115,20 +115,30 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./card/form/form-example.component").then(module => module.CardFormExampleComponent),
         mainFile: "form-example.component.ts"
     },
-    "chart/bar": {
+    "chart-bar/bar": {
         files: ["bar-example.component.ts", "bar-example.component.html"],
-        load: () => import("./chart/bar/bar-example.component").then(module => module.ChartBarExampleComponent),
+        load: () => import("./chart-bar/bar/bar-example.component").then(module => module.ChartBarExampleComponent),
         mainFile: "bar-example.component.ts"
     },
-    "chart/donut": {
-        files: ["donut-example.component.ts", "donut-example.component.html"],
-        load: () => import("./chart/donut/donut-example.component").then(module => module.ChartDonutExampleComponent),
-        mainFile: "donut-example.component.ts"
-    },
-    "chart/line": {
+    "chart-line-area/line": {
         files: ["line-example.component.ts", "line-example.component.html"],
-        load: () => import("./chart/line/line-example.component").then(module => module.ChartLineExampleComponent),
+        load: () => import("./chart-line-area/line/line-example.component").then(module => module.ChartLineExampleComponent),
         mainFile: "line-example.component.ts"
+    },
+    "chart-line-area/range-band": {
+        files: ["range-band-example.component.ts", "range-band-example.component.html"],
+        load: () => import("./chart-line-area/range-band/range-band-example.component").then(module => module.ChartRangeBandExampleComponent),
+        mainFile: "range-band-example.component.ts"
+    },
+    "chart-line-area/stacked-area": {
+        files: ["stacked-area-example.component.ts", "stacked-area-example.component.html"],
+        load: () => import("./chart-line-area/stacked-area/stacked-area-example.component").then(module => module.ChartStackedAreaExampleComponent),
+        mainFile: "stacked-area-example.component.ts"
+    },
+    "chart-pie/donut": {
+        files: ["donut-example.component.ts", "donut-example.component.html"],
+        load: () => import("./chart-pie/donut/donut-example.component").then(module => module.ChartDonutExampleComponent),
+        mainFile: "donut-example.component.ts"
     },
     "chart/tooltip": {
         files: ["tooltip-example.component.ts", "tooltip-example.component.html"],

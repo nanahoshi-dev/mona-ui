@@ -1,0 +1,17 @@
+<div class="flex w-full flex-col gap-3">
+    <mona-segmented
+        aria-label="Stack mode"
+        size="small"
+        [options]="modes"
+        [value]="mode()"
+        (valueChange)="onModeChange($event)"></mona-segmented>
+    <mona-chart aria-label="Visits by channel" class="h-72 w-full" xField="month" [data]="traffic">
+        <mona-chart-x-axis />
+        <mona-chart-y-axis />
+        <mona-area-series field="search" name="Search" stack="visits" [stackMode]="mode()" />
+        <mona-area-series field="direct" name="Direct" stack="visits" [stackMode]="mode()" />
+        <mona-area-series field="referral" name="Referral" stack="visits" [stackMode]="mode()" />
+        <mona-chart-legend />
+        <mona-chart-tooltip [shared]="true" />
+    </mona-chart>
+</div>

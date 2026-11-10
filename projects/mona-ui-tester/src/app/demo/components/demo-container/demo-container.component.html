@@ -1,46 +1,6 @@
 <div class="flex flex-col border border-border">
     <div class="flex flex-col border-b border-border" [style.background]="background()">
-        <div class="flex items-center justify-end p-2 gap-1">
-            <button monaButton look="ghost" (click)="onCodeToggle()">
-                <svg lucideCode [size]="20"></svg>
-            </button>
-            <!--            <mona-dropdown-list-->
-            <!--                [data]="['ltr', 'rtl']"-->
-            <!--                size="small"-->
-            <!--                [ngModel]="direction()"-->
-            <!--                (ngModelChange)="onDirectionChange($event)">-->
-            <!--                <ng-template monaDropDownListItemTemplate let-dataItem>-->
-            <!--                    <span [style.text-transform]="'uppercase'">{{ dataItem }}</span>-->
-            <!--                </ng-template>-->
-            <!--                <ng-template monaDropDownListValueTemplate let-dataItem>-->
-            <!--                    <span [style.text-transform]="'uppercase'">{{ dataItem }}</span>-->
-            <!--                </ng-template>-->
-            <!--            </mona-dropdown-list>-->
-            <mona-color-picker
-                [value]="customColor()"
-                (valueChange)="customColor.set($event)"
-                size="small"></mona-color-picker>
-            <mona-dropdown-list
-                [data]="localeOptions"
-                textField="label"
-                size="small"
-                [value]="selectedLocale()"
-                [style.min-width]="'10rem'"
-                [style.width]="'auto'"
-                (valueChange)="onLocaleChange($event)">
-            </mona-dropdown-list>
-            <mona-dropdown-list
-                [data]="themeDropdownData"
-                textField="text"
-                valueField="value"
-                monaDropDownGroupable
-                [groupBy]="'group'"
-                [value]="selectedTheme()"
-                size="small"
-                [style.width.px]="100"
-                (valueChange)="onThemeChange($event)">
-            </mona-dropdown-list>
-        </div>
+        <app-demo-toolbar [(customColor)]="customColor" (codeToggle)="onCodeToggle()"></app-demo-toolbar>
         <div
             class="flex flex-1 items-center justify-center p-8 pb-20 [&_ng-component]:w-full [&_ng-component]:flex [&_ng-component]:flex-col [&_ng-component]:items-center [&_ng-component]:justify-center [&_ng-component]:gap-4">
             <ng-content></ng-content>

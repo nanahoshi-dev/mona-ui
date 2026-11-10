@@ -9,7 +9,7 @@ import {
 } from "@nanahoshi/mona-ui/chart";
 
 @Component({
-    selector: "app-chart-bar-example",
+    selector: "app-chart-bar-bar-example",
     imports: [
         BarSeriesComponent,
         ChartComponent,

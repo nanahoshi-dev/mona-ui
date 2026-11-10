@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ComponentMetadata, ComponentPropertyMetadata } from "../models/ComponentMetadata";
-import { deriveInputConfig } from "./deriveInputConfig";
+import { deriveInputConfig, normalizeOptionalValues, OPTIONAL_BOOLEAN_CHOICES } from "./deriveInputConfig";
 
 function metadataWith(inputs: ComponentPropertyMetadata[]): ComponentMetadata {
     return { name: "Test", selector: '"mona-test"', inputs };
@@ -89,6 +89,76 @@ describe("deriveInputConfig", () => {
         expect(result).toEqual({
             disabled: { type: "boolean", value: false },
             formatter: { type: "function", value: expect.any(Function) }
+        });
+    });
+
+    describe("with resolveAliases", () => {
+        it("leaves aliases and optional primitives out unless asked", () => {
+            const metadata = metadataWith([
+                prop({ name: "curve", type: "ChartCurve", options: ["linear", "step"], defaultValue: '"linear"' }),
+                prop({ name: "pointRadius", type: "number | undefined" })
+            ]);
+            expect(deriveInputConfig(metadata, {})).toEqual({});
+        });
+
+        it("makes a dropdown from an alias's resolved options", () => {
+            const metadata = metadataWith([
+                prop({ name: "curve", type: "ChartCurve", options: ["linear", "step"], defaultValue: '"linear"' })
+            ]);
+            expect(deriveInputConfig(metadata, {}, { resolveAliases: true })).toEqual({
+                curve: { type: "dropdown", value: ["linear", "step"], defaultValue: "linear" }
+            });
+        });
+
+        it("lets an optional alias be cleared", () => {
+            const metadata = metadataWith([
+                prop({ name: "side", type: "ChartYAxisSide | undefined", options: ["start", "end"] })
+            ]);
+            expect(deriveInputConfig(metadata, {}, { resolveAliases: true })).toEqual({
+                side: {
+                    type: "dropdown",
+                    clearable: true,
+                    value: ["start", "end"],
+                    defaultValue: null,
+                    placeholder: "Automatic"
+                }
+            });
+        });
+
+        it("classifies optional numbers, strings and booleans", () => {
+            const metadata = metadataWith([
+                prop({ name: "pointRadius", type: "number | undefined" }),
+                prop({ name: "axisId", type: "string | undefined" }),
+                prop({ name: "gridLines", type: "boolean | undefined" })
+            ]);
+            expect(deriveInputConfig(metadata, {}, { resolveAliases: true })).toEqual({
+                pointRadius: { type: "number", nullable: true, value: null },
+                axisId: { type: "string", value: "" },
+                gridLines: {
+                    type: "customDropdown",
+                    value: OPTIONAL_BOOLEAN_CHOICES,
+                    textField: "text",
+                    valueField: "value",
+                    defaultValue: undefined
+                }
+            });
+        });
+    });
+});
+
+describe("normalizeOptionalValues", () => {
+    it("turns cleared values back into undefined only where the input takes undefined", () => {
+        const metadata = metadataWith([
+            prop({ name: "pointRadius", type: "number | undefined" }),
+            prop({ name: "axisId", type: "string | undefined" }),
+            prop({ name: "maxValue", type: "number | null" }),
+            prop({ name: "title", type: "string" })
+        ]);
+        expect(normalizeOptionalValues(metadata, { pointRadius: null, axisId: "", maxValue: null, title: "" })).toEqual({
+            pointRadius: undefined,
+            axisId: undefined,
+            maxValue: null,
+            title: ""
         });
     });
 });

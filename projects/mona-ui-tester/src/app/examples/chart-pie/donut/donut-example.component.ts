@@ -7,7 +7,7 @@ import {
 } from "@nanahoshi/mona-ui/chart";
 
 @Component({
-    selector: "app-chart-donut-example",
+    selector: "app-chart-pie-donut-example",
     imports: [ChartCenterTemplateDirective, ChartComponent, ChartLegendComponent, DonutSeriesComponent],
     templateUrl: "./donut-example.component.html"
 })

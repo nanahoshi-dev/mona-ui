@@ -1,0 +1,53 @@
+<div class="flex flex-col border border-border">
+    <div class="flex flex-col border-b border-border" [style.background]="customColor() ?? ''">
+        <app-demo-toolbar [(customColor)]="customColor" (codeToggle)="onCodeToggle()"></app-demo-toolbar>
+        <div class="flex flex-col gap-4 px-4 pb-8 sm:px-8">
+            <ng-content></ng-content>
+        </div>
+    </div>
+    @if (codeVisible()) {
+        <div
+            class="grid overflow-hidden border-b border-b-border"
+            animate.enter="demo-code-panel-enter"
+            animate.leave="demo-code-panel-leave">
+            <div class="min-h-0 overflow-hidden p-2">
+                <app-code-viewer language="html" [code]="generatedCode()"></app-code-viewer>
+            </div>
+        </div>
+    }
+    <mona-tabs
+        class="[&>div]:border-none [&>div]:shadow-none [&>mona-tab-list]:rounded-none [&>mona-tab-list]:w-full [&>mona-tab-list]:border-b [&>mona-tab-list]:border-b-border gap-0">
+        @for (panel of panels(); track panel.part.id) {
+            <mona-tab [title]="panel.part.title">
+                <ng-template monaTabContentTemplate>
+                    <app-config
+                        [config]="panel.config"
+                        [metadata]="panel.part.metadata"
+                        (valueChange)="onValueChange(panel.part.id, $event)"></app-config>
+                </ng-template>
+            </mona-tab>
+        }
+        @if (eventLog(); as log) {
+            <mona-tab title="Events">
+                <ng-template monaTabContentTemplate>
+                    <div class="flex items-center justify-between gap-2 border-b border-border px-2 py-1">
+                        <span class="text-sm font-medium">{{ log.entries().length }} recent events</span>
+                        <button monaButton look="ghost" size="small" type="button" (click)="log.clear()">Clear</button>
+                    </div>
+                    <ol class="flex max-h-80 flex-col divide-y divide-border overflow-auto" aria-label="Event log">
+                        @for (entry of log.entries(); track entry.id) {
+                            <li class="flex flex-col gap-1 px-2 py-1 text-sm sm:flex-row sm:gap-4">
+                                <span class="font-medium sm:w-48 sm:shrink-0">{{ entry.name }}</span>
+                                <code class="whitespace-pre-wrap break-all text-xs">{{ entry.value }}</code>
+                            </li>
+                        } @empty {
+                            <li class="px-2 py-4 text-sm text-muted-foreground">
+                                Interact with the chart to see the events it emits.
+                            </li>
+                        }
+                    </ol>
+                </ng-template>
+            </mona-tab>
+        }
+    </mona-tabs>
+</div>

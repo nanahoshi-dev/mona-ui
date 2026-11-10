@@ -8,7 +8,7 @@ import {
 } from "@nanahoshi/mona-ui/chart";
 
 @Component({
-    selector: "app-chart-line-example",
+    selector: "app-chart-line-area-line-example",
     imports: [ChartComponent, ChartLegendComponent, ChartXAxisComponent, ChartYAxisComponent, LineSeriesComponent],
     templateUrl: "./line-example.component.html"
 })
