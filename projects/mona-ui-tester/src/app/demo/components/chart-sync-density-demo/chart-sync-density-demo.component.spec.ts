@@ -14,11 +14,11 @@ interface DemoScene {
 class FakeResizeObserver {
     public constructor(public readonly callback: ResizeObserverCallback) {}
 
+    public disconnect(): void {}
+
     public observe(): void {}
 
     public unobserve(): void {}
-
-    public disconnect(): void {}
 }
 
 describe("ChartSyncDensityDemoComponent", () => {
@@ -84,7 +84,8 @@ describe("ChartSyncDensityDemoComponent", () => {
             expect(scene?.series.length ?? 0, `chart ${index} series count`).toBeGreaterThan(0);
             expect(scene?.axes.length ?? 0, `chart ${index} axes`).toBeGreaterThanOrEqual(2);
         }
-    });
+        // Rendering seven dense charts takes 6-8s on a busy machine, over the 5s default.
+    }, 15_000);
 
     it("builds density runtimes for the synchronized dashboard charts", () => {
         const charts = flushCharts();

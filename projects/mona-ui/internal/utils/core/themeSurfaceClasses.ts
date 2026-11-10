@@ -7,11 +7,16 @@ export const themeSelectionBarClasses = `
     before:forced-color-adjust-none forced-colors:before:bg-[Highlight]
 `;
 
-/** A border in the text's color, for a selected control whose fill doesn't say it alone. */
+/**
+ * A border in the text's color for a selected control, drawn only when the user asks for more contrast or forced colors
+ * are on. Elsewhere the fill says it alone. A control with a border of its own adds `after:-inset-px`, so this one
+ * replaces it.
+ */
 export const themeSelectionBorderClasses = `
     relative
     after:pointer-events-none after:absolute after:inset-0
-    after:rounded-[inherit] after:border-2 after:border-current
+    after:rounded-[inherit] after:border-current
+    contrast-more:after:border-2 forced-colors:after:border-2
 `;
 
 export const themeControlBackdropClasses = `

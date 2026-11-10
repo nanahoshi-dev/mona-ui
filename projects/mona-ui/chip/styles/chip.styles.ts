@@ -1,5 +1,5 @@
 import { cva } from "class-variance-authority";
-import { themeRaisedSurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeRaisedSurfaceClasses, themeSelectionBorderClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
 
 /**
@@ -74,11 +74,8 @@ export const chipThemeVariants = cva(
                 `
             },
             selected: {
-                // A border in the text's color, so selected doesn't rest on the background alone, and forced colors keep it.
-                true: `
-                    after:pointer-events-none after:absolute after:inset-0
-                    after:rounded-[inherit] after:border-2 after:border-current
-                `,
+                // A border in the text's color under prefers-contrast: more and forced colors, where the fill alone isn't enough.
+                true: themeSelectionBorderClasses,
                 false: ""
             }
         },
@@ -86,7 +83,7 @@ export const chipThemeVariants = cva(
             {
                 look: "default",
                 selected: true,
-                class: "bg-(--color-selected) text-(--color-selected-foreground)"
+                class: "after:-inset-px bg-(--color-selected) text-(--color-selected-foreground)"
             },
             {
                 look: "primary",
@@ -121,7 +118,7 @@ export const chipThemeVariants = cva(
             {
                 look: "outline",
                 selected: true,
-                class: "bg-(--color-selected) text-(--color-selected-foreground)"
+                class: "after:-inset-px bg-(--color-selected) text-(--color-selected-foreground)"
             },
             {
                 look: "ghost",

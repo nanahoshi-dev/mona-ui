@@ -1,3 +1,4 @@
+import { twMerge } from "tailwind-merge";
 import { buttonGroupThemeVariants } from "../../button-group/styles/button-group.styles";
 import { buttonThemeVariants } from "../../button/styles/button.styles";
 import { calendarMonthViewDayThemeVariants } from "../../calendar/styles/calendar.styles";
@@ -65,12 +66,18 @@ describe("what says a row is selected", () => {
         expect(gridListTableRowThemeVariants({ selected: false })).not.toContain("before:");
     });
 
-    it("gives a selected button a border in its text's color, whatever its look", () => {
+    it("gives a selected button a border in its text's color under high contrast and forced colors only", () => {
+        const merged = (look: "default" | "ghost" | "outline" | "primary"): string[] =>
+            twMerge(buttonThemeVariants({ look, selected: true })).split(/\s+/);
         for (const look of ["default", "outline", "ghost", "primary"] as const) {
-            const classes = buttonThemeVariants({ look, selected: true });
-            expect(classes).toContain("after:border-current");
-            expect(classes).toContain("relative");
+            expect(merged(look)).toContain("after:border-current");
+            expect(merged(look)).toContain("contrast-more:after:border-2");
+            expect(merged(look)).toContain("forced-colors:after:border-2");
+            expect(merged(look)).toContain("relative");
+            expect(merged(look).some(c => /^after:border(-\d)?$/.test(c))).toBe(false);
         }
+        expect(merged("default")).toContain("after:-inset-px");
+        expect(merged("primary")).toContain("after:inset-0");
         expect(buttonThemeVariants({ look: "default" })).not.toContain("after:border-current");
     });
 });

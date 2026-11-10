@@ -379,9 +379,10 @@ describe("chip behavior", () => {
             expect(classes({})).not.toContain("outline-none");
         });
 
-        it("shows selected with more than a background", () => {
-            expect(classes({ selected: true })).toContain("after:border-2");
-            expect(classes({ selected: false })).not.toContain("after:border-2");
+        it("adds a border when selected under high contrast and forced colors", () => {
+            expect(classes({ selected: true })).toContain("contrast-more:after:border-2");
+            expect(classes({ selected: true })).toContain("forced-colors:after:border-2");
+            expect(classes({ selected: false })).not.toContain("contrast-more:after:border-2");
         });
 
         it.each([

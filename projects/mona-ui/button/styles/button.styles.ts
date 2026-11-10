@@ -109,6 +109,7 @@ export const buttonThemeVariants = cva(
                 look: "default",
                 selected: true,
                 class: `
+                    after:-inset-px
                     bg-(--color-selected) text-(--color-selected-foreground)
                     hover:bg-(--color-selected-hover) hover:text-(--color-selected-hover-foreground)
                     active:bg-(--color-selected-active) active:text-(--color-selected-active-foreground)
@@ -172,6 +173,7 @@ export const buttonThemeVariants = cva(
                 look: "outline",
                 selected: true,
                 class: `
+                    after:-inset-px
                     bg-(--color-selected) text-(--color-selected-foreground)
                     hover:bg-(--color-selected-hover) hover:text-(--color-selected-hover-foreground)
                     active:bg-(--color-selected-active) active:text-(--color-selected-active-foreground)
