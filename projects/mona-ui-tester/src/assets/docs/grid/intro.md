@@ -1,7 +1,7 @@
-# Grid
+# Grid Overview
 
-**Selector:** `mona-grid`
+**Selectors:** `mona-grid`, `mona-grid-column`
 
-`GridComponent` renders tabular data with paging built in, and adds sorting, filtering, grouping, selection, inline editing, column resizing/reordering/locking, virtualization, state persistence, and CSV export through companion directives applied to the same host element.
+`GridComponent` shows rows of data in typed columns, with a pager below them. Sorting, filtering, grouping, selection, editing, column and row features, server binding, virtualization, state and export are directives you add to the same `<mona-grid>` element, each described on its own page.
 
-Use `monaGridServerBinding` to supply a server page with its total record count and offset. Ordinary rows fit cell templates and editors automatically; virtual rows use one configured height.
+This page covers the grid itself: its columns, cell formatting, templates, paging, the toolbar and keyboard navigation.

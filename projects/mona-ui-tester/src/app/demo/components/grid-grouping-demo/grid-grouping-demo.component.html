@@ -1,0 +1,68 @@
+@let g = grid();
+@let c = columns();
+@let columnFeatureData = columnFeatures();
+
+<app-parts-demo-container
+    eventsHint="Drag a column header to the group panel, or remove or re-sort a group, to see the grouping events."
+    [eventLog]="eventLog"
+    [parts]="parts()"
+    [(values)]="values">
+    <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-medium" id="grid-grouping-group-by">Group by</span>
+            <mona-segmented
+                aria-labelledby="grid-grouping-group-by"
+                size="small"
+                [options]="groupPresetOptions"
+                [value]="groupPreset()"
+                (valueChange)="onGroupPresetChange($event)"></mona-segmented>
+        </div>
+    </div>
+
+    @if (ready()) {
+        <mona-grid
+            class="h-112 w-full"
+            monaGridSortable
+            [aria-label]="g.ariaLabel"
+            [data]="data"
+            [group]="group()"
+            [monaGridGroupable]="groupableOptions()"
+            [pageSize]="g.pageSize"
+            (groupChange)="onGroupChange($event)">
+            <mona-grid-column
+                field="customer"
+                [aggregate]="c.customer.aggregate"
+                [title]="c.customer.title"></mona-grid-column>
+            <mona-grid-column field="country" [title]="c.country.title"></mona-grid-column>
+            <mona-grid-column field="shipped" type="boolean" [title]="c.shipped.title"></mona-grid-column>
+            <mona-grid-column
+                field="quantity"
+                type="number"
+                [aggregate]="c.quantity.aggregate"
+                [title]="c.quantity.title">
+                @if (columnFeatureData.quantity["footerTemplate"]?.active) {
+                    <ng-template monaGridFooterTemplate let-value let-column="column" let-rows="rows">
+                        <span class="font-semibold">{{ column.aggregate }}: {{ value ?? rows.length + " rows" }}</span>
+                    </ng-template>
+                }
+                @if (columnFeatureData.quantity["groupFooterTemplate"]?.active) {
+                    <ng-template monaGridGroupFooterTemplate let-value let-count="count" let-groupValue="groupValue">
+                        <span>{{ groupValue }}: {{ value }} in {{ count }} orders</span>
+                    </ng-template>
+                }
+            </mona-grid-column>
+            <mona-grid-column field="freight" type="number" [aggregate]="c.freight.aggregate" [title]="c.freight.title">
+                @if (columnFeatureData.freight["footerTemplate"]?.active) {
+                    <ng-template monaGridFooterTemplate let-value let-column="column" let-rows="rows">
+                        <span class="font-semibold">{{ column.aggregate }}: {{ value ?? rows.length + " rows" }}</span>
+                    </ng-template>
+                }
+                @if (columnFeatureData.freight["groupFooterTemplate"]?.active) {
+                    <ng-template monaGridGroupFooterTemplate let-value let-count="count" let-groupValue="groupValue">
+                        <span>{{ groupValue }}: {{ value }} in {{ count }} orders</span>
+                    </ng-template>
+                }
+            </mona-grid-column>
+        </mona-grid>
+    }
+</app-parts-demo-container>

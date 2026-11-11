@@ -122,11 +122,26 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
         pages: [
             component("avatar", "Avatar", "avatar", "Shows a person or entity as an image, text label or projected content."),
             component("chip", "Chip", "chip", "A compact label that can be selected, removed or given a prefix."),
-            component("grid", "Grid", "grid", "Tabular data with paging, sorting, filtering, grouping, selection and editing."),
             component("list-box", "List Box", "list-box", "A selectable list with a toolbar for moving items and transferring them between lists."),
             component("list-view", "List View", "list-view", "Renders a collection as a list, with optional selection, grouping and paging."),
             component("pager", "Pager", "pager", "Pagination controls with page buttons, a page-size selector and a page-jump input."),
             component("tree-view", "Tree View", "tree-view", "Hierarchical data as an expandable, keyboard-navigable tree.")
+        ]
+    },
+    {
+        id: "grid",
+        title: "Grid",
+        // The overview documents every grid export that no feature page claims.
+        pages: [
+            component("grid", "Grid Overview", "grid", "Tabular data in typed columns with paging, templates and a toolbar, extended by feature directives."),
+            component("grid-sorting-filtering", "Sorting & Filtering", "grid", "Sort rows by column headers and filter them from a header menu or a filter row.", { apiExports: ["ColumnSortComparator", "ColumnSortEvent", "FilterableOptions", "GridFilterableDirective", "GridSortableDirective", "SortableOptions"] }),
+            component("grid-grouping", "Grouping & Aggregates", "grid", "Group rows by column values and show sums, averages and other aggregates in footers.", { apiExports: ["AggregateFunction", "GridFooterTemplateDirective", "GridGroupableDirective", "GridGroupFooterTemplateDirective", "GroupableOptions", "GroupDescriptor"] }),
+            component("grid-selection", "Selection", "grid", "Select single or multiple rows by key, with checkboxes, row clicks and the keyboard.", { apiExports: ["GridKeySelector", "GridSelectableDirective", "SelectableOptions"] }),
+            component("grid-editing", "Editing", "grid", "Edit cells or rows inline with Signal Forms, and add, save, cancel and remove rows.", { apiExports: ["CellEditEvent", "EditableOptions", "GridAddCommandDirective", "GridAddEvent", "GridCancelCommandDirective", "GridCancelEvent", "GridCancelReason", "GridCommandColumnComponent", "GridEditableDirective", "GridEditCommandDirective", "GridEditEvent", "GridEditFormContext", "GridEditOperation", "GridEditSchemaFactory", "GridEditSession", "GridEditTemplateContext", "GridEditTemplateDirective", "GridRemoveCommandDirective", "GridRemoveEvent", "GridRowCommand", "GridSaveCommandDirective", "GridSaveEvent", "GridSaveOperation", "RowEditEvent"] }),
+            component("grid-columns", "Columns", "grid", "Resize, reorder, lock and hide columns, by pointer, keyboard or the column chooser.", { apiExports: ["ColumnReorderEvent", "ColumnResizeEvent", "GridColumnLockedPosition", "GridReorderableDirective", "GridResizableDirective", "ReorderableOptions", "ResizableOptions", "ResizeMethod"] }),
+            component("grid-rows", "Rows", "grid", "Expandable detail rows, row reordering by drag or keyboard, row classes and row sizing.", { apiExports: ["GridDetailTemplateDirective", "GridRowClass", "GridRowClassValue", "GridRowReorderableDirective", "RowReorderableOptions", "RowReorderEvent"] }),
+            component("grid-server", "Server Binding & Virtualization", "grid", "Load pages from a server, or render only the visible rows of a large data set.", { apiExports: ["GridDataState", "GridServerBindingDirective", "GridVirtualScrollDirective"] }),
+            component("grid-state-export", "State & Export", "grid", "Save and restore the grid's columns, sort, filter, groups and page size, and export rows as CSV.", { apiExports: ["GridColumnState", "GridExportDirective", "GridState", "GridStateCompositeFilterDescriptor", "GridStateFilterDescriptor", "GridStateFilterValue", "GridStateLoadResult", "GridStateLoadStatus", "GridStatePersistenceDirective", "GridStatePersistenceOptions", "GridStateSortDescriptor", "GridStateVersion"] })
         ]
     },
     {

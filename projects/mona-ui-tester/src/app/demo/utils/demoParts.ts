@@ -1,6 +1,12 @@
 import { signal } from "@angular/core";
 import { ComponentMetadata } from "../models/ComponentMetadata";
-import { buildActiveFeatureAttributes, buildActiveFeatureContent, generateComponentCodeSample } from "./codeSample";
+import {
+    buildActiveFeatureAttributes,
+    buildActiveFeatureContent,
+    buildInputAttributes,
+    generateComponentCodeSample,
+    selectorHostAttribute
+} from "./codeSample";
 import {
     ComponentConfig,
     ComponentConfigInputType,
@@ -8,7 +14,7 @@ import {
     createComponentInputConfigArray,
     extractConfigValues
 } from "./componentConfig";
-import { normalizeOptionalValues } from "./deriveInputConfig";
+import { coerceDefaultValue, normalizeOptionalValues } from "./deriveInputConfig";
 
 /**
  * One component of a playground made of several, such as a chart and its series and axes. The first part is the root
@@ -21,6 +27,12 @@ export interface DemoPart {
     readonly config: ComponentConfig<any>;
     readonly id: string;
     readonly metadata: ComponentMetadata;
+    /**
+     * `"host"` for a directive applied to the root's element, such as `monaGridSortable` on `mona-grid`: its bindings
+     * join the root's attributes instead of nesting as an element of their own. A directive whose options feature is
+     * on is written as that binding, otherwise as its bare attribute.
+     */
+    readonly placement?: "child" | "host";
     readonly title: string;
 }
 
@@ -93,22 +105,64 @@ export function generatePartsCodeSample(
     values: DemoPartValues,
     content: readonly string[] = []
 ): string {
-    const render = (part: DemoPart, children: string[] = []): string => {
+    const featureAttributes = (part: DemoPart): string[] => {
         const features = part.config.featureHandler?.data();
         const inputNames = new Set((part.metadata.inputs ?? []).map(input => input.name));
-        return generateComponentCodeSample(
-            part.metadata.selector ?? "",
-            createComponentInputConfigArray(part.config.inputs),
-            values[part.id] ?? {},
-            [...(part.codeAttributes ?? []), ...(features ? buildActiveFeatureAttributes(features, inputNames) : [])],
-            [...children, ...(features ? buildActiveFeatureContent(features, inputNames) : [])]
-        );
+        return features ? buildActiveFeatureAttributes(features, inputNames) : [];
     };
-    const [root, ...children] = parts;
+    const featureContent = (part: DemoPart): string[] => {
+        const features = part.config.featureHandler?.data();
+        const inputNames = new Set((part.metadata.inputs ?? []).map(input => input.name));
+        return features ? buildActiveFeatureContent(features, inputNames) : [];
+    };
+    const inputAttributes = (part: DemoPart): string[] => {
+        const partValues = values[part.id] ?? {};
+        const items = createComponentInputConfigArray(part.config.inputs).filter(
+            item => !isComponentDefault(part.metadata, item.name, partValues[item.name] ?? item.value)
+        );
+        return buildInputAttributes(items, partValues);
+    };
+    const render = (part: DemoPart, children: string[] = [], hostAttributes: string[] = []): string =>
+        generateComponentCodeSample(
+            part.metadata.selector ?? "",
+            [],
+            {},
+            [...(part.codeAttributes ?? []), ...inputAttributes(part), ...featureAttributes(part), ...hostAttributes],
+            [...children, ...featureContent(part)]
+        );
+    const hostBindings = (part: DemoPart): string[] => {
+        const attribute = selectorHostAttribute(part.metadata.selector ?? "");
+        const bindings = [...(part.codeAttributes ?? []), ...inputAttributes(part), ...featureAttributes(part)];
+        const bound = attribute && bindings.some(binding => binding.startsWith(`[${attribute}]=`));
+        return attribute && !bound ? [attribute, ...bindings] : bindings;
+    };
+    const [root, ...others] = parts;
     if (!root) {
         return "";
     }
-    return render(root, [...children.map(child => render(child)), ...content]);
+    const hosted = others.filter(part => part.placement === "host");
+    const children = others.filter(part => part.placement !== "host");
+    return render(
+        root,
+        [...children.map(child => render(child)), ...hosted.flatMap(featureContent), ...content],
+        hosted.flatMap(hostBindings)
+    );
+}
+
+/**
+ * Whether a value is what the input already defaults to, by the metadata read from the component's source, so the code
+ * sample can leave it out. Only a literal default can be compared: a number, a boolean or a quoted string.
+ */
+function isComponentDefault(metadata: ComponentMetadata, name: string, value: unknown): boolean {
+    const input = metadata.inputs?.find(property => property.name === name);
+    if (!input || input.defaultValue === undefined) {
+        return false;
+    }
+    const defaultValue = coerceDefaultValue(input.defaultValue);
+    return (
+        (typeof defaultValue === "number" || typeof defaultValue === "boolean" || typeof defaultValue === "string") &&
+        value === defaultValue
+    );
 }
 
 export interface DemoEventEntry {

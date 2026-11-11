@@ -1,0 +1,65 @@
+@let g = grid();
+@let c = columns();
+
+<app-parts-demo-container
+    eventsHint="Click a column header or apply a filter to see the sort and filter events."
+    [eventLog]="eventLog"
+    [parts]="parts()"
+    [(values)]="values">
+    <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-medium" id="grid-sorting-filtering-preset">Preset</span>
+            <mona-segmented
+                aria-labelledby="grid-sorting-filtering-preset"
+                size="small"
+                [options]="presetOptions"
+                [value]="preset()"
+                (valueChange)="onPresetChange($event)"></mona-segmented>
+        </div>
+    </div>
+
+    @if (ready()) {
+        <mona-grid
+            class="h-112 w-full"
+            [aria-label]="g.ariaLabel"
+            [data]="data"
+            [filter]="filter()"
+            [monaGridFilterable]="filterableOptions()"
+            [monaGridSortable]="sortableOptions()"
+            [pageSize]="g.pageSize"
+            [sort]="sort()"
+            (columnSort)="onColumnSort($event)"
+            (filterChange)="onFilterChange($event)"
+            (sortChange)="onSortChange($event)">
+            <mona-grid-column
+                field="orderId"
+                type="number"
+                [filterable]="c.orderId.filterable"
+                [sortable]="c.orderId.sortable"
+                [title]="c.orderId.title"></mona-grid-column>
+            <mona-grid-column
+                field="customer"
+                [filterable]="c.customer.filterable"
+                [sortComparator]="c.customer.sortComparator"
+                [sortable]="c.customer.sortable"
+                [title]="c.customer.title"></mona-grid-column>
+            <mona-grid-column
+                field="country"
+                [filterable]="c.country.filterable"
+                [sortable]="c.country.sortable"
+                [title]="c.country.title"></mona-grid-column>
+            <mona-grid-column
+                field="freight"
+                type="number"
+                [filterable]="c.freight.filterable"
+                [sortable]="c.freight.sortable"
+                [title]="c.freight.title"></mona-grid-column>
+            <mona-grid-column
+                field="orderDate"
+                type="date"
+                [filterable]="c.orderDate.filterable"
+                [sortable]="c.orderDate.sortable"
+                [title]="c.orderDate.title"></mona-grid-column>
+        </mona-grid>
+    }
+</app-parts-demo-container>

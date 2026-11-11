@@ -1,0 +1,43 @@
+@let g = grid();
+@let s = selection();
+@let c = columns();
+
+<app-parts-demo-container
+    eventsHint="Tick a row's checkbox or the select-all checkbox to see selectedKeysChange. Keys set from code, as with the buttons, don't emit it."
+    [eventLog]="eventLog"
+    [parts]="parts()"
+    [(values)]="values">
+    <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-medium" id="grid-selection-data-set">Data</span>
+            <mona-segmented
+                aria-labelledby="grid-selection-data-set"
+                size="small"
+                [options]="dataSetOptions"
+                [value]="dataSet()"
+                (valueChange)="onDataSetChange($event)"></mona-segmented>
+        </div>
+        <div class="flex items-center gap-2">
+            <button monaButton size="small" type="button" (click)="onSelectFirstFive()">Select first five</button>
+            <button monaButton size="small" type="button" (click)="onClearSelection()">Clear selection</button>
+        </div>
+        <p class="text-sm" aria-live="polite">Selected: {{ selectedText() }}</p>
+    </div>
+
+    @if (ready()) {
+        <mona-grid
+            class="h-112 w-full"
+            rowKey="orderId"
+            [aria-label]="g.ariaLabel"
+            [data]="data()"
+            [monaGridSelectable]="selectableOptions()"
+            [pageSize]="g.pageSize"
+            [selectBy]="s.selectBy"
+            [selectedKeys]="selectedKeys()"
+            (selectedKeysChange)="onSelectedKeysChange($event)">
+            <mona-grid-column field="orderId" type="number" [title]="c.orderId.title"></mona-grid-column>
+            <mona-grid-column field="customer" [title]="c.customer.title"></mona-grid-column>
+            <mona-grid-column field="freight" type="number" [title]="c.freight.title"></mona-grid-column>
+        </mona-grid>
+    }
+</app-parts-demo-container>

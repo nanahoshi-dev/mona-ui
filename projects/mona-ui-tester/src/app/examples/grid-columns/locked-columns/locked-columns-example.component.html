@@ -1,0 +1,24 @@
+<div class="flex flex-col gap-2">
+    <mona-grid
+        aria-label="Shipments"
+        class="w-full"
+        rowKey="id"
+        [data]="shipments"
+        [pageSize]="5"
+        monaGridReorderable
+        monaGridResizable
+        (columnReorder)="onColumnReorder($event)"
+        (columnResize)="onColumnResize($event)">
+        <ng-template monaGridToolbarTemplate>
+            <span class="text-sm font-medium">Shipments</span>
+        </ng-template>
+        <mona-grid-column field="id" title="Shipment" type="number" [locked]="true" [width]="110" />
+        <mona-grid-column field="carrier" title="Carrier" [minWidth]="140" [width]="180" />
+        <mona-grid-column field="origin" title="Origin" [width]="160" />
+        <mona-grid-column field="destination" title="Destination" [width]="160" />
+        <mona-grid-column field="weight" title="Weight (kg)" type="number" [width]="140" />
+        <mona-grid-column field="containers" title="Containers" type="number" [hidden]="true" [width]="130" />
+        <mona-grid-column field="status" lockedPosition="right" title="Status" [locked]="true" [width]="120" />
+    </mona-grid>
+    <span aria-live="polite" class="text-sm">{{ lastChange() }}</span>
+</div>

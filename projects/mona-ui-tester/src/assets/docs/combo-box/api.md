@@ -345,4 +345,4 @@ From `@nanahoshi/mona-ui/common`.
 | `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
 | `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
 
-**Documented elsewhere:** [`FilterableOptions`](/components/grid), [`GroupableOptions`](/components/grid), [`PopupCloseEvent`](/components/popup), [`VirtualScrollOptions`](/components/list-view)
+**Documented elsewhere:** [`FilterableOptions`](/components/grid-sorting-filtering), [`GroupableOptions`](/components/list-view), [`PopupCloseEvent`](/components/popup), [`VirtualScrollOptions`](/components/list-view)

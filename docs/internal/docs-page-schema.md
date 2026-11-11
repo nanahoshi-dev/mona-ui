@@ -49,7 +49,7 @@ A page needs at least one of **Examples** or **Appearance & Styling**, because a
 - **Styling types** (`*VariantProps`, `*VariantInput`) don't appear, because inputs spell out their values.
 - **Template context** comes from a directive's `ngTemplateContextGuard`.
 - **Types from another entry point** link to the page that documents them. When that entry point has no page, as with `common`, the type is shown on the page using it.
-- **Pages sharing an entry point** name their exports with `apiExports` in the manifest. A page of that entry point without `apiExports` documents the exports no other page names, so a new export always lands somewhere: the chart family pages name theirs, and Chart Overview takes the rest. `apiAlsoFrom` adds another entry point's exports, as the dropdowns do with `dropdowns`.
+- **Pages sharing an entry point** name their exports with `apiExports` in the manifest. A page of that entry point without `apiExports` documents the exports no other page names, so a new export always lands somewhere: the chart family and grid feature pages name theirs, and Chart Overview and Grid Overview take the rest. `apiAlsoFrom` adds another entry point's exports, as the dropdowns do with `dropdowns`.
 
 `npm run check:api-docs` also fails when the public API uses a type no entry point exports, because a consumer couldn't name it and the page couldn't describe it. `npm run generate:api-docs -- --report` lists them.
 
@@ -76,7 +76,7 @@ Get Started, Actions, Form Fields, Selection, Date Time & Color, Data, Charts, N
 Add `children` only when a topic has its own examples and is worth linking to directly. Everything else stays an in-page section. No page has children yet, because each child needs a route, and the sidebar will need to render them when the first one arrives.
 
 - **Charts** don't nest. The Charts category holds Chart Overview and one page per series family (Line & Area, Bar & Waterfall, Scatter & Bubble, Financial, Heatmap, Pie & Donut, Funnel, Treemap, Radar & Polar, Radial), each with its own playground. The playgrounds share `PartsDemoContainerComponent` and nothing else, so one family's demo never depends on another's.
-- **Grid:** the planned tree is Overview, then a page per major feature. Server binding and row sizing already have their own demos.
+- **Grid** doesn't nest either. The Grid category holds Grid Overview and one page per feature (Sorting & Filtering, Grouping & Aggregates, Selection, Editing, Columns, Rows, Server Binding & Virtualization, State & Export), each with its own playground. A feature directive's panel is a part with `placement: "host"`, so the code sample writes its bindings on `<mona-grid>` rather than nesting it.
 
 Keep nesting to two levels. Use links with disclosure buttons, not `role="tree"`.
 

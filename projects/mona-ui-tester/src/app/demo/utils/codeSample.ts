@@ -34,6 +34,18 @@ export function generateComponentCodeSample(
         attributes.push(hostAttribute);
     }
 
+    attributes.push(...buildInputAttributes(items, currentValues), ...additionalAttributes);
+
+    return formatElement(tag, attributes, additionalContent);
+}
+
+/**
+ * The bindings of the inputs whose value differs from their baseline, as `[name]="value"`, without the element. A
+ * directive applied to another component's element, such as `monaGridSortable` on `mona-grid`, adds these to that
+ * element's attributes.
+ */
+export function buildInputAttributes(items: ProcessedConfigItem[], currentValues: Record<string, unknown>): string[] {
+    const attributes: string[] = [];
     for (const item of items) {
         if (item.disabled || NON_BINDABLE_CONFIG_TYPES.has(item.configType)) {
             continue;
@@ -44,10 +56,12 @@ export function generateComponentCodeSample(
         }
         attributes.push(`[${item.alias ?? item.name}]="${formatBindingValue(resolvedValue)}"`);
     }
+    return attributes;
+}
 
-    attributes.push(...additionalAttributes);
-
-    return formatElement(tag, attributes, additionalContent);
+/** The attribute an attribute selector matches, such as `monaGridSortable` for `mona-grid[monaGridSortable]`. */
+export function selectorHostAttribute(selector: string): string | undefined {
+    return parseSelector(selector).hostAttribute;
 }
 
 /**
@@ -242,7 +256,32 @@ function formatBindingValue(value: unknown): string {
     if (typeof value === "string") {
         return `'${value.replace(/\\/g, "\\\\").replace(/'/g, "\\'")}'`;
     }
-    return JSON.stringify(value);
+    return formatLiteral(value);
+}
+
+/**
+ * Writes a value as a template expression, `{ mode: 'multiple', showIndices: true }`, rather than JSON: JSON's double
+ * quotes would end the attribute they're bound in.
+ */
+function formatLiteral(value: unknown): string {
+    if (typeof value === "string") {
+        return `'${value.replace(/\\/g, "\\\\").replace(/'/g, "\\'")}'`;
+    }
+    if (Array.isArray(value)) {
+        return `[${value.map(formatLiteral).join(", ")}]`;
+    }
+    if (value instanceof Date) {
+        return `'${value.toISOString()}'`;
+    }
+    if (value && typeof value === "object") {
+        const entries = Object.entries(value).filter(([, entry]) => entry !== undefined && typeof entry !== "function");
+        if (entries.length === 0) {
+            return "{}";
+        }
+        const key = (name: string) => (/^[A-Za-z_$][\w$]*$/.test(name) ? name : formatLiteral(name));
+        return `{ ${entries.map(([name, entry]) => `${key(name)}: ${formatLiteral(entry)}`).join(", ")} }`;
+    }
+    return JSON.stringify(value) ?? "undefined";
 }
 
 interface ParsedSelector {

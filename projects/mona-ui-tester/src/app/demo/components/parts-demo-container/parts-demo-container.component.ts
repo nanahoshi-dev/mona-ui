@@ -44,6 +44,8 @@ export class PartsDemoContainerComponent {
     /** Markup the code sample adds inside the root after the parts, such as an active template. */
     public readonly codeContent = input<readonly string[]>([]);
     public readonly eventLog = input<DemoEventLog | null>(null);
+    /** What the Events tab says before anything was emitted. */
+    public readonly eventsHint = input("Interact with the chart to see the events it emits.");
     public readonly parts = input.required<readonly DemoPart[]>();
     public readonly values = model.required<DemoPartValues>();
 

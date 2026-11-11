@@ -1,0 +1,13 @@
+<mona-grid aria-label="Orders" rowKey="orderId" [data]="orders" [pageSize]="5">
+    <mona-grid-column field="orderId" title="Order" type="number" [width]="90" />
+    <mona-grid-column field="customer" title="Customer" />
+    <mona-grid-column field="orderDate" format="MMM d, y" title="Ordered" type="date" />
+    <mona-grid-column field="freight" title="Freight" type="number" [format]="formatFreight" />
+    <mona-grid-column field="shipped" title="Status" type="boolean">
+        <ng-template monaGridCellTemplate let-order>
+            <mona-chip size="small" [look]="order.shipped ? 'success' : 'warning'">
+                {{ order.shipped ? "Shipped" : "Waiting" }}
+            </mona-chip>
+        </ng-template>
+    </mona-grid-column>
+</mona-grid>

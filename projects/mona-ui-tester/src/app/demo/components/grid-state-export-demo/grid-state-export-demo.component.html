@@ -1,0 +1,61 @@
+@let g = grid();
+@let c = columns();
+@let button = exportButton();
+
+<app-parts-demo-container
+    eventsHint="Sort, filter, group, reorder or resize the columns to see the state the grid emits."
+    [eventLog]="eventLog"
+    [parts]="parts()"
+    [(values)]="values">
+    <div class="flex flex-wrap items-center gap-2">
+        <button monaButton size="small" type="button" (click)="onSave()">Save to this browser</button>
+        <button monaButton size="small" type="button" (click)="onRestore()">Restore saved state</button>
+        <button monaButton look="ghost" size="small" type="button" (click)="onReset()">Reset</button>
+        @if (button.visible) {
+            <button monaButton size="small" type="button" (click)="onExport()">Export as CSV</button>
+        }
+    </div>
+    <p aria-live="polite" class="min-h-5 text-sm" data-state-status>{{ status() }}</p>
+
+    @if (ready()) {
+        @for (key of [generation()]; track key) {
+            <mona-grid
+                class="h-112 w-full"
+                monaGridExport
+                monaGridGroupable
+                monaGridReorderable
+                monaGridResizable
+                monaGridSortable
+                rowKey="orderId"
+                [aria-label]="g.ariaLabel"
+                [data]="orders"
+                [monaGridFilterable]="{ enabled: true, type: 'menu' }"
+                [monaGridStatePersistence]="persistenceOptions()"
+                [pageSize]="g.pageSize"
+                [pageSizeValues]="pageSizeValues"
+                [state]="state()"
+                (columnReorder)="eventLog.record('columnReorder', $event)"
+                (columnResize)="eventLog.record('columnResize', $event)"
+                (columnSort)="eventLog.record('columnSort', $event)"
+                (filterChange)="eventLog.record('filterChange', $event)"
+                (groupChange)="eventLog.record('groupChange', $event)"
+                (pageChange)="eventLog.record('pageChange', $event)"
+                (pageSizeChange)="onPageSizeChange($event)"
+                (stateChange)="onStateChange($event)">
+                <mona-grid-column field="orderId" type="number" [title]="c.orderId.title"></mona-grid-column>
+                <mona-grid-column field="customer" [title]="c.customer.title"></mona-grid-column>
+                <mona-grid-column field="product" [title]="c.product.title"></mona-grid-column>
+                <mona-grid-column field="city" [title]="c.city.title"></mona-grid-column>
+                <mona-grid-column field="quantity" type="number" [title]="c.quantity.title"></mona-grid-column>
+            </mona-grid>
+        }
+        <p class="text-sm text-muted-foreground">
+            Order 10248 has text that starts with = and +. The CSV writes it with a leading ' so a spreadsheet shows it
+            as text instead of running it as a formula.
+        </p>
+        <details class="text-sm">
+            <summary class="cursor-pointer font-medium">Current state</summary>
+            <pre class="max-h-64 overflow-auto text-xs" data-state-json tabindex="0">{{ state() | json }}</pre>
+        </details>
+    }
+</app-parts-demo-container>

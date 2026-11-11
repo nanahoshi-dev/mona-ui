@@ -266,6 +266,46 @@ export const routes: Routes = [
                     import("./docs/components/grid-doc/grid-doc.component").then(m => m.GridDocComponent)
             },
             {
+                path: "grid-sorting-filtering",
+                loadComponent: () =>
+                    import("./docs/components/grid-sorting-filtering-doc/grid-sorting-filtering-doc.component").then(m => m.GridSortingFilteringDocComponent)
+            },
+            {
+                path: "grid-grouping",
+                loadComponent: () =>
+                    import("./docs/components/grid-grouping-doc/grid-grouping-doc.component").then(m => m.GridGroupingDocComponent)
+            },
+            {
+                path: "grid-selection",
+                loadComponent: () =>
+                    import("./docs/components/grid-selection-doc/grid-selection-doc.component").then(m => m.GridSelectionDocComponent)
+            },
+            {
+                path: "grid-editing",
+                loadComponent: () =>
+                    import("./docs/components/grid-editing-doc/grid-editing-doc.component").then(m => m.GridEditingDocComponent)
+            },
+            {
+                path: "grid-columns",
+                loadComponent: () =>
+                    import("./docs/components/grid-columns-doc/grid-columns-doc.component").then(m => m.GridColumnsDocComponent)
+            },
+            {
+                path: "grid-rows",
+                loadComponent: () =>
+                    import("./docs/components/grid-rows-doc/grid-rows-doc.component").then(m => m.GridRowsDocComponent)
+            },
+            {
+                path: "grid-server",
+                loadComponent: () =>
+                    import("./docs/components/grid-server-doc/grid-server-doc.component").then(m => m.GridServerDocComponent)
+            },
+            {
+                path: "grid-state-export",
+                loadComponent: () =>
+                    import("./docs/components/grid-state-export-doc/grid-state-export-doc.component").then(m => m.GridStateExportDocComponent)
+            },
+            {
                 path: "input",
                 loadComponent: () =>
                     import("./docs/components/input-doc/input-doc.component").then(m => m.InputDocComponent)

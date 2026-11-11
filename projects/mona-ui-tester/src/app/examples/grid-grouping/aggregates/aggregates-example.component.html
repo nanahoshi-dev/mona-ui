@@ -1,0 +1,18 @@
+<mona-grid
+    aria-label="Sales by region"
+    rowKey="id"
+    [data]="sales"
+    [monaGridGroupable]="{ enabled: true, showFooter: true }"
+    [pageSize]="10"
+    [(group)]="group">
+    <mona-grid-column field="region" title="Region" />
+    <mona-grid-column aggregate="count" field="rep" title="Rep">
+        <ng-template monaGridFooterTemplate let-count>{{ count }} reps</ng-template>
+        <ng-template monaGridGroupFooterTemplate let-count>{{ count }} reps</ng-template>
+    </mona-grid-column>
+    <mona-grid-column aggregate="avg" field="units" title="Units" type="number">
+        <ng-template monaGridFooterTemplate let-average>Average {{ average | number: "1.0-1" }}</ng-template>
+        <ng-template monaGridGroupFooterTemplate let-average>Average {{ average | number: "1.0-1" }}</ng-template>
+    </mona-grid-column>
+    <mona-grid-column aggregate="sum" field="revenue" title="Revenue" type="number" />
+</mona-grid>

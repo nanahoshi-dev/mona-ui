@@ -1,0 +1,18 @@
+<mona-grid
+    #gridExport="monaGridExport"
+    aria-label="Orders"
+    rowKey="orderId"
+    [data]="orders"
+    [monaGridStatePersistence]="{ persistPageSize: true }"
+    [pageSize]="5"
+    [pageSizeValues]="[5, 10, 20]"
+    monaGridExport
+    monaGridSortable
+    [(state)]="state">
+    <ng-template monaGridToolbarTemplate>
+        <button monaButton type="button" (click)="gridExport.exportCsv('orders.csv')">Export as CSV</button>
+    </ng-template>
+    <mona-grid-column field="orderId" title="Order" type="number" />
+    <mona-grid-column field="customer" title="Customer" />
+    <mona-grid-column field="freight" title="Freight" type="number" />
+</mona-grid>

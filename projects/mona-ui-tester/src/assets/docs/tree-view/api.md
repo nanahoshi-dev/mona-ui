@@ -502,4 +502,4 @@ From `@nanahoshi/mona-ui/common`.
 | `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
 | `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
 
-**Documented elsewhere:** [`FilterableOptions`](/components/grid)
+**Documented elsewhere:** [`FilterableOptions`](/components/grid-sorting-filtering)
