@@ -1,0 +1,15 @@
+<div class="flex flex-col gap-2">
+    <mona-grid
+        aria-label="Sensor readings"
+        class="h-96"
+        rowKey="id"
+        [data]="rows()"
+        [monaGridVirtualScroll]="{ height: 36 }"
+        [scrollEndThreshold]="20"
+        (scrollEnd)="onScrollEnd()">
+        <mona-grid-column field="id" title="Reading" type="number" [width]="110" />
+        <mona-grid-column field="sensor" title="Sensor" />
+        <mona-grid-column field="temperature" title="Temperature (°C)" type="number" />
+    </mona-grid>
+    <span aria-live="polite" class="text-sm">{{ rows().length }} readings loaded</span>
+</div>

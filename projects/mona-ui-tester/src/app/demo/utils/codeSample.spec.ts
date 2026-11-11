@@ -42,9 +42,7 @@ describe("generateComponentCodeSample", () => {
 
     it("formats numbers unquoted and skips values equal to the item default", () => {
         const items = [makeItem({ name: "length", configType: "number", value: 6, defaultValue: 6 })];
-        expect(generateComponentCodeSample("mona-otp-input", items, {})).toBe(
-            "<mona-otp-input></mona-otp-input>"
-        );
+        expect(generateComponentCodeSample("mona-otp-input", items, {})).toBe("<mona-otp-input></mona-otp-input>");
         expect(generateComponentCodeSample("mona-otp-input", items, { length: 10 })).toBe(
             `<mona-otp-input [length]="10"></mona-otp-input>`
         );
@@ -112,13 +110,13 @@ describe("generateComponentCodeSample", () => {
     it("appends additionalAttributes after the derived input bindings", () => {
         const items = [makeItem({ name: "disabled", configType: "boolean", value: false })];
         const code = generateComponentCodeSample("mona-dropdown-list", items, { disabled: true }, [
-            `[monaDropDownFilterable]="{"enabled":true}"`
+            `[monaDropDownFilterable]="{ enabled: true }"`
         ]);
         expect(code).toBe(
             [
                 "<mona-dropdown-list",
                 `    [disabled]="true"`,
-                `    [monaDropDownFilterable]="{"enabled":true}">`,
+                `    [monaDropDownFilterable]="{ enabled: true }">`,
                 "</mona-dropdown-list>"
             ].join("\n")
         );
@@ -157,9 +155,7 @@ describe("generateFeatureCodeSample", () => {
             dropdownValue: "large",
             dropdownDefaultValue: "medium"
         };
-        expect(generateFeatureCodeSample("mona-chip", "size", item)).toBe(
-            `<mona-chip [size]="'large'"></mona-chip>`
-        );
+        expect(generateFeatureCodeSample("mona-chip", "size", item)).toBe(`<mona-chip [size]="'large'"></mona-chip>`);
     });
 });
 
@@ -174,7 +170,7 @@ describe("generateDirectiveBindingCodeSample", () => {
         expect(code).toBe(
             [
                 "<mona-auto-complete",
-                `    [monaDropDownFilterable]="{"enabled":true,"operator":"startsWith"}">`,
+                `    [monaDropDownFilterable]="{ enabled: true, operator: 'startsWith' }">`,
                 "</mona-auto-complete>"
             ].join("\n")
         );
@@ -188,7 +184,7 @@ describe("generateDirectiveBindingCodeSample", () => {
             allFeatures
         );
         expect(code).toBe(
-            ["<mona-dropdown-list", `    [monaDropDownGroupable]="{"enabled":false}">`, "</mona-dropdown-list>"].join(
+            ["<mona-dropdown-list", `    [monaDropDownGroupable]="{ enabled: false }">`, "</mona-dropdown-list>"].join(
                 "\n"
             )
         );
@@ -201,7 +197,9 @@ describe("generateDirectiveBindingCodeSample", () => {
             { hostAttribute: "monaDropDownVirtualScroll", buildValue: () => ({ enabled: true }) },
             allFeatures
         );
-        expect(code).toBe(`<mona-combo-box [monaDropDownVirtualScroll]="{"enabled":true}"></mona-combo-box>`);
+        expect(code).toBe(
+            ["<mona-combo-box", `    [monaDropDownVirtualScroll]="{ enabled: true }">`, "</mona-combo-box>"].join("\n")
+        );
     });
 });
 
@@ -231,7 +229,7 @@ describe("buildActiveFeatureAttributes", () => {
             }
         } as unknown as ComponentConfigFeatureItem;
         expect(buildActiveFeatureAttributes(features, new Set())).toEqual([
-            `[monaDropDownFilterable]="{"enabled":true,"operator":"startsWith"}"`
+            `[monaDropDownFilterable]="{ enabled: true, operator: 'startsWith' }"`
         ]);
     });
 
@@ -290,7 +288,12 @@ describe("buildActiveFeatureContent", () => {
 
     it("skips inactive features and features with empty code", () => {
         const features = {
-            prefixTemplate: { active: false, description: "", name: "Prefix Template", code: "<ng-template></ng-template>" },
+            prefixTemplate: {
+                active: false,
+                description: "",
+                name: "Prefix Template",
+                code: "<ng-template></ng-template>"
+            },
             headerTemplate: { active: true, description: "", name: "Header Template", code: "" }
         } as unknown as ComponentConfigFeatureItem;
         expect(buildActiveFeatureContent(features, new Set())).toEqual([]);
@@ -367,9 +370,13 @@ describe("buildActiveFeatureContent", () => {
 describe("generateComponentCodeSample with nested content", () => {
     it("renders active template feature content as nested markup", () => {
         const items = [makeItem({ name: "disabled", configType: "boolean", value: false })];
-        const code = generateComponentCodeSample("mona-chip", items, { disabled: true }, [], [
-            "<ng-template monaChipPrefixTemplate>\n    <svg lucideSearch></svg>\n</ng-template>"
-        ]);
+        const code = generateComponentCodeSample(
+            "mona-chip",
+            items,
+            { disabled: true },
+            [],
+            ["<ng-template monaChipPrefixTemplate>\n    <svg lucideSearch></svg>\n</ng-template>"]
+        );
         expect(code).toBe(
             [
                 `<mona-chip [disabled]="true">`,

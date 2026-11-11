@@ -33,6 +33,14 @@ export class FeatureConfigHandler {
                         numericValue: value
                     }
                 };
+            } else if (type === "string") {
+                updatedData = {
+                    ...currentData,
+                    [property]: {
+                        ...currentData[property],
+                        stringValue: value
+                    }
+                };
             } else {
                 updatedData = {
                     ...currentData,

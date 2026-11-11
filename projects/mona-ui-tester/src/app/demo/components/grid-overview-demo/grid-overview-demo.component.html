@@ -1,0 +1,112 @@
+@let g = grid();
+@let c = columns();
+@let gridFeatureData = gridFeatures();
+@let columnFeatureData = columnFeatures();
+
+<app-parts-demo-container
+    eventsHint="Change the page or the page size to see the events the grid emits."
+    [eventLog]="eventLog"
+    [parts]="parts()"
+    [(values)]="values">
+    <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-medium" id="grid-overview-data-set">Data</span>
+            <mona-segmented
+                aria-labelledby="grid-overview-data-set"
+                size="small"
+                [options]="dataSetOptions"
+                [value]="dataSet()"
+                (valueChange)="onDataSetChange($event)"></mona-segmented>
+        </div>
+    </div>
+
+    @if (ready()) {
+        <mona-grid
+            class="h-112 w-full"
+            rowKey="orderId"
+            [aria-label]="g.ariaLabel"
+            [data]="data()"
+            [pageSize]="g.pageSize"
+            [pageSizeValues]="g.pageSizeValues"
+            [resizeMethod]="g.resizeMethod"
+            [responsivePager]="g.responsivePager"
+            [rounded]="g.rounded"
+            [rowClass]="$any(g.rowClass)"
+            (pageChange)="eventLog.record('pageChange', $event)"
+            (pageSizeChange)="onPageSizeChange($event)"
+            (skipChange)="eventLog.record('skipChange', $event)">
+            @if (gridFeatureData["toolbarTemplate"]?.active) {
+                <ng-template monaGridToolbarTemplate>
+                    <span class="text-sm font-medium">Orders</span>
+                </ng-template>
+            }
+            @if (gridFeatureData["noDataTemplate"]?.active) {
+                <ng-template monaGridNoDataTemplate>
+                    <span>No orders yet</span>
+                </ng-template>
+            }
+            <mona-grid-column
+                field="orderId"
+                type="number"
+                [format]="c.orderId.format"
+                [hidden]="c.orderId.hidden"
+                [maxWidth]="c.orderId.maxWidth"
+                [minWidth]="c.orderId.minWidth"
+                [title]="c.orderId.title"
+                [width]="c.orderId.width">
+                @if (columnFeatureData.orderId["titleTemplate"]?.active) {
+                    <span monaGridColumnTitleTemplate>Order <abbr title="number">#</abbr></span>
+                }
+            </mona-grid-column>
+            <mona-grid-column
+                field="customer"
+                [format]="c.customer.format"
+                [hidden]="c.customer.hidden"
+                [maxWidth]="c.customer.maxWidth"
+                [minWidth]="c.customer.minWidth"
+                [title]="c.customer.title"
+                [width]="c.customer.width">
+                @if (columnFeatureData.customer["headerTemplate"]?.active) {
+                    <ng-template monaGridHeaderTemplate let-column>
+                        <span class="uppercase tracking-wide">{{ column.title }}</span>
+                    </ng-template>
+                }
+            </mona-grid-column>
+            <mona-grid-column
+                field="freight"
+                type="number"
+                [format]="c.freight.format"
+                [hidden]="c.freight.hidden"
+                [maxWidth]="c.freight.maxWidth"
+                [minWidth]="c.freight.minWidth"
+                [title]="c.freight.title"
+                [width]="c.freight.width">
+                @if (columnFeatureData.freight["cellTemplate"]?.active) {
+                    <ng-template monaGridCellTemplate let-order>
+                        <mona-chip size="small" [look]="order.freight > 250 ? 'error' : 'info'">
+                            {{ order.freight }} kg
+                        </mona-chip>
+                    </ng-template>
+                }
+            </mona-grid-column>
+            <mona-grid-column
+                field="orderDate"
+                type="date"
+                [format]="c.orderDate.format"
+                [hidden]="c.orderDate.hidden"
+                [maxWidth]="c.orderDate.maxWidth"
+                [minWidth]="c.orderDate.minWidth"
+                [title]="c.orderDate.title"
+                [width]="c.orderDate.width"></mona-grid-column>
+            <mona-grid-column
+                field="shipped"
+                type="boolean"
+                [format]="c.shipped.format"
+                [hidden]="c.shipped.hidden"
+                [maxWidth]="c.shipped.maxWidth"
+                [minWidth]="c.shipped.minWidth"
+                [title]="c.shipped.title"
+                [width]="c.shipped.width"></mona-grid-column>
+        </mona-grid>
+    }
+</app-parts-demo-container>

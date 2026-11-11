@@ -1,0 +1,80 @@
+@let g = grid();
+@let c = columns();
+@let gridFeatureData = gridFeatures();
+@let customerFeatureData = customerFeatures();
+@let detailActive = !!gridFeatureData["detailTemplate"]?.active;
+
+<app-parts-demo-container
+    eventsHint="Open a detail row or drag a row by its handle to see the events the grid and its directive emit."
+    [eventLog]="eventLog"
+    [parts]="parts()"
+    [(values)]="values">
+    <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-medium" id="grid-rows-data-set">Data</span>
+            <mona-segmented
+                aria-labelledby="grid-rows-data-set"
+                size="small"
+                [options]="dataSetOptions"
+                [value]="dataSet()"
+                (valueChange)="onDataSetChange($event)"></mona-segmented>
+        </div>
+        <div class="flex items-center gap-2">
+            <button monaButton size="small" type="button" [disabled]="!detailActive" (click)="onExpandAllOnPage()">
+                Expand all on page
+            </button>
+            <button monaButton size="small" type="button" [disabled]="!detailActive" (click)="onCollapseAll()">
+                Collapse all
+            </button>
+        </div>
+    </div>
+
+    @if (ready()) {
+        <mona-grid
+            class="h-112 w-full"
+            rowKey="orderId"
+            [aria-label]="g.ariaLabel"
+            [data]="orders()"
+            [expandedKeys]="expandedKeys()"
+            [monaGridRowReorderable]="rowReorderable()"
+            [pageSize]="g.pageSize"
+            [rowClass]="$any(g.rowClass)"
+            (expandedKeysChange)="onExpandedKeysChange($event)"
+            (pageChange)="eventLog.record('pageChange', $event)"
+            (pageSizeChange)="onPageSizeChange($event)"
+            (rowReorder)="onRowReorder($event)"
+            (skipChange)="onSkipChange($event)">
+            @if (detailActive) {
+                <ng-template monaGridDetailTemplate let-order>
+                    <ul class="list-disc ps-5 text-sm">
+                        @for (line of order.lines; track $index) {
+                            <li>{{ line.quantity }} × {{ line.product }}</li>
+                        }
+                    </ul>
+                </ng-template>
+            }
+            <mona-grid-column field="orderId" type="number" [title]="c.orderId.title"></mona-grid-column>
+            <mona-grid-column field="customer" [title]="c.customer.title">
+                @if (customerFeatureData["tallCells"]?.active) {
+                    <ng-template monaGridCellTemplate let-order>
+                        <div class="flex items-center gap-3">
+                            <mona-avatar
+                                backgroundColor="#44607e"
+                                borderRadius="50%"
+                                labelColor="white"
+                                [height]="40"
+                                [label]="order.initials"
+                                [width]="40" />
+                            <div>
+                                <div>{{ order.customer }}</div>
+                                <div class="text-xs">{{ order.contact }}</div>
+                            </div>
+                        </div>
+                    </ng-template>
+                }
+            </mona-grid-column>
+            <mona-grid-column field="freight" type="number" [title]="c.freight.title"></mona-grid-column>
+            <mona-grid-column field="shipped" type="boolean" [title]="c.shipped.title"></mona-grid-column>
+        </mona-grid>
+    }
+</app-parts-demo-container>

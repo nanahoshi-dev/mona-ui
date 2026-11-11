@@ -565,25 +565,55 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./fieldset/legend-template/legend-template-example.component").then(module => module.FieldsetLegendTemplateExampleComponent),
         mainFile: "legend-template-example.component.ts"
     },
-    "grid/editing": {
+    "grid-columns/locked-columns": {
+        files: ["locked-columns-example.component.ts", "locked-columns-example.component.html"],
+        load: () => import("./grid-columns/locked-columns/locked-columns-example.component").then(module => module.GridLockedColumnsExampleComponent),
+        mainFile: "locked-columns-example.component.ts"
+    },
+    "grid-editing/editing": {
         files: ["editing-example.component.ts", "editing-example.component.html"],
-        load: () => import("./grid/editing/editing-example.component").then(module => module.GridEditingExampleComponent),
+        load: () => import("./grid-editing/editing/editing-example.component").then(module => module.GridEditingExampleComponent),
         mainFile: "editing-example.component.ts"
     },
-    "grid/selection": {
+    "grid-grouping/aggregates": {
+        files: ["aggregates-example.component.ts", "aggregates-example.component.html"],
+        load: () => import("./grid-grouping/aggregates/aggregates-example.component").then(module => module.GridAggregatesExampleComponent),
+        mainFile: "aggregates-example.component.ts"
+    },
+    "grid-rows/master-detail": {
+        files: ["master-detail-example.component.ts", "master-detail-example.component.html"],
+        load: () => import("./grid-rows/master-detail/master-detail-example.component").then(module => module.GridMasterDetailExampleComponent),
+        mainFile: "master-detail-example.component.ts"
+    },
+    "grid-selection/selection": {
         files: ["selection-example.component.ts", "selection-example.component.html"],
-        load: () => import("./grid/selection/selection-example.component").then(module => module.GridSelectionExampleComponent),
+        load: () => import("./grid-selection/selection/selection-example.component").then(module => module.GridSelectionExampleComponent),
         mainFile: "selection-example.component.ts"
     },
-    "grid/server": {
+    "grid-server/server": {
         files: ["server-example.component.ts", "server-example.component.html"],
-        load: () => import("./grid/server/server-example.component").then(module => module.GridServerExampleComponent),
+        load: () => import("./grid-server/server/server-example.component").then(module => module.GridServerExampleComponent),
         mainFile: "server-example.component.ts"
     },
-    "grid/sorting-filtering": {
+    "grid-server/virtual": {
+        files: ["virtual-example.component.ts", "virtual-example.component.html"],
+        load: () => import("./grid-server/virtual/virtual-example.component").then(module => module.GridVirtualExampleComponent),
+        mainFile: "virtual-example.component.ts"
+    },
+    "grid-sorting-filtering/sorting-filtering": {
         files: ["sorting-filtering-example.component.ts", "sorting-filtering-example.component.html"],
-        load: () => import("./grid/sorting-filtering/sorting-filtering-example.component").then(module => module.GridSortingFilteringExampleComponent),
+        load: () => import("./grid-sorting-filtering/sorting-filtering/sorting-filtering-example.component").then(module => module.GridSortingFilteringExampleComponent),
         mainFile: "sorting-filtering-example.component.ts"
+    },
+    "grid-state-export/saved-state": {
+        files: ["saved-state-example.component.ts", "saved-state-example.component.html"],
+        load: () => import("./grid-state-export/saved-state/saved-state-example.component").then(module => module.GridSavedStateExampleComponent),
+        mainFile: "saved-state-example.component.ts"
+    },
+    "grid/cell-formatting": {
+        files: ["cell-formatting-example.component.ts", "cell-formatting-example.component.html"],
+        load: () => import("./grid/cell-formatting/cell-formatting-example.component").then(module => module.GridCellFormattingExampleComponent),
+        mainFile: "cell-formatting-example.component.ts"
     },
     "input/sizes": {
         files: ["sizes-example.component.ts", "sizes-example.component.html"],

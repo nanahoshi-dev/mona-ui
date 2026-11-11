@@ -81,7 +81,7 @@ describe("DocsNavigationService", () => {
     it("opens the first section and the current page's by default", async () => {
         const { router, service } = setUp();
 
-        await go(router, "/components/grid");
+        await go(router, "/components/list-view");
 
         expect(service.isExpanded("get-started")).toBe(true);
         expect(service.isExpanded("data")).toBe(true);
@@ -90,7 +90,7 @@ describe("DocsNavigationService", () => {
 
     it("keeps what the reader chose across sessions", async () => {
         const { router, service } = setUp();
-        await go(router, "/components/grid");
+        await go(router, "/components/list-view");
 
         service.toggle("feedback");
         service.toggle("get-started");
@@ -110,7 +110,7 @@ describe("DocsNavigationService", () => {
 
     it("lets the reader close the current section, and reopens it on going to a page in it", async () => {
         const { router, service } = setUp();
-        await go(router, "/components/grid");
+        await go(router, "/components/list-view");
 
         service.toggle("data");
         TestBed.tick();
@@ -124,7 +124,7 @@ describe("DocsNavigationService", () => {
         stored.set("mona-docs-navigation", JSON.stringify({ data: false }));
         const { router, service } = setUp();
 
-        await go(router, "/components/grid");
+        await go(router, "/components/list-view");
 
         expect(service.isExpanded("data")).toBe(true);
     });

@@ -1,0 +1,119 @@
+@let g = grid();
+@let c = columns();
+@let cc = commandColumn();
+@let gridFeatureData = gridFeatures();
+@let columnFeatureData = columnFeatures();
+@let commandFeatureData = commandFeatures();
+
+<app-parts-demo-container
+    eventsHint="Edit a row, save or cancel it, add an order or remove one to see the events the grid emits."
+    [eventLog]="eventLog"
+    [parts]="parts()"
+    [(values)]="values">
+    <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-medium" id="grid-editing-data-set">Data</span>
+            <mona-segmented
+                aria-labelledby="grid-editing-data-set"
+                size="small"
+                [options]="dataSetOptions"
+                [value]="dataSet()"
+                (valueChange)="onDataSetChange($event)"></mona-segmented>
+        </div>
+    </div>
+
+    @if (ready()) {
+        <mona-grid
+            class="h-112 w-full"
+            rowKey="orderId"
+            [aria-label]="g.ariaLabel"
+            [data]="orders()"
+            [monaGridEditable]="editableOptions()"
+            [newRowFactory]="newOrder"
+            [pageSize]="g.pageSize"
+            (add)="onAdd($event)"
+            (cancel)="onCancel($event)"
+            (cellEdit)="onCellEdit($event)"
+            (edit)="onEdit($event)"
+            (remove)="onRemove($event)"
+            (rowEdit)="onRowEdit($event)"
+            (save)="onSave($event)">
+            @if (gridFeatureData["toolbar"]?.active) {
+                <ng-template monaGridToolbarTemplate>
+                    <button monaButton monaGridAddCommand type="button">Add order</button>
+                </ng-template>
+            }
+            <mona-grid-column
+                field="orderId"
+                type="number"
+                [editable]="c.orderId.editable ?? null"
+                [title]="c.orderId.title"></mona-grid-column>
+            <mona-grid-column field="customer" [editable]="c.customer.editable ?? null" [title]="c.customer.title">
+                @if (columnFeatureData.customer["editTemplate"]?.active) {
+                    <ng-template monaGridEditTemplate let-context>
+                        <mona-text-box
+                            size="small"
+                            [aria-label]="c.customer.title"
+                            [formField]="$any(context.field)"
+                            (keydown.escape)="context.cancel()"></mona-text-box>
+                    </ng-template>
+                }
+            </mona-grid-column>
+            <mona-grid-column
+                field="freight"
+                type="number"
+                [editable]="c.freight.editable ?? null"
+                [title]="c.freight.title"></mona-grid-column>
+            <mona-grid-column
+                field="shipped"
+                type="boolean"
+                [editable]="c.shipped.editable ?? null"
+                [title]="c.shipped.title"></mona-grid-column>
+            <mona-grid-command-column
+                [hidden]="cc.hidden"
+                [locked]="cc.locked"
+                [lockedPosition]="cc.lockedPosition"
+                [maxWidth]="cc.maxWidth"
+                [minWidth]="cc.minWidth"
+                [removeConfirmation]="cc.removeConfirmation"
+                [title]="cc.title || null"
+                [width]="cc.width">
+                @if (commandFeatureData["customCommands"]?.active) {
+                    <ng-template monaGridCellTemplate let-order let-row="row" let-isEditing="isEditing">
+                        <div class="flex items-center gap-1 px-1">
+                            @if (isEditing) {
+                                <button monaButton look="ghost" monaGridSaveCommand size="small" type="button">
+                                    Save
+                                </button>
+                                <button monaButton look="ghost" monaGridCancelCommand size="small" type="button">
+                                    Cancel
+                                </button>
+                            } @else {
+                                @if (editMode() === "row") {
+                                    <button
+                                        monaButton
+                                        look="ghost"
+                                        size="small"
+                                        type="button"
+                                        [attr.aria-label]="'Edit order ' + order.orderId"
+                                        [monaGridEditCommand]="row">
+                                        Edit
+                                    </button>
+                                }
+                                <button
+                                    monaButton
+                                    look="ghost"
+                                    size="small"
+                                    type="button"
+                                    [attr.aria-label]="'Remove order ' + order.orderId"
+                                    [monaGridRemoveCommand]="row">
+                                    Remove
+                                </button>
+                            }
+                        </div>
+                    </ng-template>
+                }
+            </mona-grid-command-column>
+        </mona-grid>
+    }
+</app-parts-demo-container>

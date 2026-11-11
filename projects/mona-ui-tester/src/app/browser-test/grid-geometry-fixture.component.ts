@@ -6,8 +6,8 @@ import {
     GridGroupableDirective,
     GridSelectableDirective
 } from "@nanahoshi/mona-ui/grid";
-import { GridRowSizingDemoComponent } from "../demo/components/grid-row-sizing-demo/grid-row-sizing-demo.component";
-import { GridServerBindingDemoComponent } from "../demo/components/grid-server-binding-demo/grid-server-binding-demo.component";
+import { GridRowSizingDemoComponent } from "./grid-row-sizing-fixture/grid-row-sizing-demo.component";
+import { GridServerBindingDemoComponent } from "./grid-server-binding-fixture/grid-server-binding-demo.component";
 
 @Component({
     imports: [

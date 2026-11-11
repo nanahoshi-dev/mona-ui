@@ -1,6 +1,6 @@
 # Mona UI Grid
 
-`<mona-grid>` (from `@nanahoshi/mona-ui/grid`) shows rows of data in typed columns, with a pager below them. Every other feature is a directive you add to the same `<mona-grid>` element. This guide explains how the features work and how to combine them. The [grid reference](../projects/mona-ui-tester/src/assets/docs/grid/api.md) lists every input, output and type.
+`<mona-grid>` (from `@nanahoshi/mona-ui/grid`) shows rows of data in typed columns, with a pager below them. Every other feature is a directive you add to the same `<mona-grid>` element. This guide explains how the features work and how to combine them. The reference is split like the docs site: [Grid Overview](../projects/mona-ui-tester/src/assets/docs/grid/api.md) lists the grid and its columns, and each feature page's `api.md` beside it (`grid-sorting-filtering`, `grid-editing` and so on) lists that feature's inputs, outputs and types.
 
 | Feature                 | Directive on `<mona-grid>`                 | State you bind             | Events                                                           |
 | ----------------------- | ------------------------------------------ | -------------------------- | ---------------------------------------------------------------- |

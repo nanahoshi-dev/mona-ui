@@ -1,0 +1,14 @@
+<mona-grid
+    aria-label="Release tasks"
+    rowKey="id"
+    [data]="tasks()"
+    [pageSize]="10"
+    monaGridRowReorderable
+    (rowReorder)="onRowReorder($event)"
+    [(expandedKeys)]="expandedKeys">
+    <mona-grid-column field="title" title="Task" />
+    <mona-grid-column field="owner" title="Owner" />
+    <ng-template monaGridDetailTemplate let-task>
+        <p class="p-3 text-sm">{{ task.notes }}</p>
+    </ng-template>
+</mona-grid>

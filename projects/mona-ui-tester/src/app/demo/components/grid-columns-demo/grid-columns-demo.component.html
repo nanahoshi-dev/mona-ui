@@ -1,0 +1,100 @@
+@let g = grid();
+@let c = columns();
+@let gridFeatureData = gridFeatures();
+
+<app-parts-demo-container
+    eventsHint="Resize or drag a column header to see the events the directives emit."
+    [eventLog]="eventLog"
+    [parts]="parts()"
+    [(values)]="values">
+    <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-medium" id="grid-columns-data-set">Data</span>
+            <mona-segmented
+                aria-labelledby="grid-columns-data-set"
+                size="small"
+                [options]="dataSetOptions"
+                [value]="dataSet()"
+                (valueChange)="onDataSetChange($event)"></mona-segmented>
+        </div>
+    </div>
+
+    @if (ready()) {
+        <mona-grid
+            class="h-112 w-full"
+            [aria-label]="g.ariaLabel"
+            [data]="data()"
+            [monaGridReorderable]="reorderable()"
+            [monaGridResizable]="resizable()"
+            [pageSize]="g.pageSize"
+            [resizeMethod]="g.resizeMethod"
+            (columnReorder)="onColumnReorder($event)"
+            (columnResize)="onColumnResize($event)"
+            (pageChange)="eventLog.record('pageChange', $event)"
+            (pageSizeChange)="onPageSizeChange($event)"
+            (skipChange)="eventLog.record('skipChange', $event)">
+            @if (gridFeatureData["toolbarTemplate"]?.active) {
+                <ng-template monaGridToolbarTemplate>
+                    <span class="text-sm font-medium">Orders</span>
+                </ng-template>
+            }
+            <mona-grid-column
+                field="orderId"
+                type="number"
+                [hidden]="c.orderId.hidden"
+                [locked]="c.orderId.locked"
+                [lockedPosition]="c.orderId.lockedPosition"
+                [maxWidth]="c.orderId.maxWidth"
+                [minWidth]="c.orderId.minWidth"
+                [title]="c.orderId.title"
+                [width]="c.orderId.width"></mona-grid-column>
+            <mona-grid-column
+                field="customer"
+                [hidden]="c.customer.hidden"
+                [locked]="c.customer.locked"
+                [lockedPosition]="c.customer.lockedPosition"
+                [maxWidth]="c.customer.maxWidth"
+                [minWidth]="c.customer.minWidth"
+                [title]="c.customer.title"
+                [width]="c.customer.width"></mona-grid-column>
+            <mona-grid-column
+                field="shipCity"
+                [hidden]="c.shipCity.hidden"
+                [locked]="c.shipCity.locked"
+                [lockedPosition]="c.shipCity.lockedPosition"
+                [maxWidth]="c.shipCity.maxWidth"
+                [minWidth]="c.shipCity.minWidth"
+                [title]="c.shipCity.title"
+                [width]="c.shipCity.width"></mona-grid-column>
+            <mona-grid-column
+                field="shipCountry"
+                [hidden]="c.shipCountry.hidden"
+                [locked]="c.shipCountry.locked"
+                [lockedPosition]="c.shipCountry.lockedPosition"
+                [maxWidth]="c.shipCountry.maxWidth"
+                [minWidth]="c.shipCountry.minWidth"
+                [title]="c.shipCountry.title"
+                [width]="c.shipCountry.width"></mona-grid-column>
+            <mona-grid-column
+                field="orderDate"
+                type="date"
+                [hidden]="c.orderDate.hidden"
+                [locked]="c.orderDate.locked"
+                [lockedPosition]="c.orderDate.lockedPosition"
+                [maxWidth]="c.orderDate.maxWidth"
+                [minWidth]="c.orderDate.minWidth"
+                [title]="c.orderDate.title"
+                [width]="c.orderDate.width"></mona-grid-column>
+            <mona-grid-column
+                field="freight"
+                type="number"
+                [hidden]="c.freight.hidden"
+                [locked]="c.freight.locked"
+                [lockedPosition]="c.freight.lockedPosition"
+                [maxWidth]="c.freight.maxWidth"
+                [minWidth]="c.freight.minWidth"
+                [title]="c.freight.title"
+                [width]="c.freight.width"></mona-grid-column>
+        </mona-grid>
+    }
+</app-parts-demo-container>

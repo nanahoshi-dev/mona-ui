@@ -36,13 +36,13 @@ describe("SidebarGroupComponent", () => {
     });
 
     it("lists its pages, marking the current one, while its section holds the current page", async () => {
-        await go("/components/grid");
+        await go("/components/list-view");
 
         expect(links().map(link => link.getAttribute("href"))).toEqual(
             data.pages.map(page => `/components/${page.path}`)
         );
         const current = links().filter(link => link.getAttribute("aria-current") === "page");
-        expect(current.map(link => link.textContent?.trim())).toEqual(["Grid"]);
+        expect(current.map(link => link.textContent?.trim())).toEqual(["List View"]);
     });
 
     it("hides its pages behind a button that says so", async () => {
@@ -63,7 +63,7 @@ describe("SidebarGroupComponent", () => {
     });
 
     it("gives each instance its own list id, because the sidebar is on the page twice", async () => {
-        await go("/components/grid");
+        await go("/components/list-view");
         const other = TestBed.createComponent(SidebarGroupComponent);
         other.componentRef.setInput("category", data);
         await other.whenStable();
@@ -74,7 +74,7 @@ describe("SidebarGroupComponent", () => {
     });
 
     it("passes axe", async () => {
-        await go("/components/grid");
+        await go("/components/list-view");
 
         const results = await axe.run(fixture.nativeElement, { rules: { "color-contrast": { enabled: false } } });
 

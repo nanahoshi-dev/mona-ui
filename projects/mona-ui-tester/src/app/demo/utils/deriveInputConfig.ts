@@ -200,7 +200,7 @@ function buildEntry(classified: ClassifiedType, rawDefaultValue: string | undefi
  * Parses a metadata `defaultValue` string (the JSDoc `@default` tag's text, or a re-serialized
  * literal argument - see `extract-metadata.ts`) into its runtime JS value. Hand-rolled, no `eval`.
  */
-function coerceDefaultValue(raw: string | undefined): unknown {
+export function coerceDefaultValue(raw: string | undefined): unknown {
     if (raw === undefined) {
         return undefined;
     }
