@@ -39,6 +39,14 @@ Add `CircularProgressBarComponent` to your standalone component's `imports` arra
 circular-progress-bar/sizes
 ```
 
+### Round and flat ends
+
+The arc's ends are round by default. `lineCap="flat"` cuts them straight instead. Both cover the same part of the ring, so 72% reads the same either way.
+
+```example
+circular-progress-bar/line-cap
+```
+
 ### Indeterminate
 
 Use it when the completion percentage is unknown. Set `aria-valuetext` so screen readers announce a state.
@@ -70,6 +78,10 @@ The `size` input controls the outer dimension of the SVG in pixels. Both width a
 ### Stroke thickness
 
 `thickness` controls the stroke width of both the track and the progress arc in pixels. The stroke fits inside `size`, so increasing it reduces the effective radius. The default of `6` suits most sizes; reduce it for small sizes or increase it for bold indicators.
+
+### Line cap
+
+`lineCap` sets the shape of the arc's ends: `"round"` (the default) rounds them, `"flat"` cuts them straight. A round end reaches half the `thickness` past where the arc ends, so the component shortens the arc by that much at each end to keep it within the value. An empty ring draws nothing either way, and a sliver of progress draws a dot as wide as the stroke.
 
 ### Color
 

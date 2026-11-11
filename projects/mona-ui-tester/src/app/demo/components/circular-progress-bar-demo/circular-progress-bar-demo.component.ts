@@ -34,6 +34,11 @@ export class CircularProgressBarDemoComponent extends AbstractDemoComponent<Circ
                 type: "color",
                 value: ""
             },
+            lineCap: {
+                type: "dropdown",
+                value: ["flat", "round"],
+                defaultValue: "round"
+            },
             // The demo curates a size of 120 instead of the library's default of 100.
             size: {
                 type: "number",
@@ -70,6 +75,7 @@ export class CircularProgressBarDemoComponent extends AbstractDemoComponent<Circ
             [disabled]="disabled()"
             [indeterminate]="indeterminate()"
             [labelVisible]="labelVisible()"
+            [lineCap]="lineCap()"
             [max]="max()"
             [min]="min()"
             [size]="size()"
@@ -93,6 +99,7 @@ class CircularProgressBarWrapperComponent implements ComponentInputsAsSignal<Cir
     public readonly disabled = input(false);
     public readonly indeterminate = input(false);
     public readonly labelVisible = input(true);
+    public readonly lineCap = input<ReturnType<CircularProgressBarComponent["lineCap"]>>("round");
     public readonly max = input(100);
     public readonly min = input(0);
     public readonly size = input(120);

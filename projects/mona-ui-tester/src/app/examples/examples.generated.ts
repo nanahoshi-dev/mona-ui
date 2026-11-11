@@ -335,6 +335,11 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./circular-progress-bar/label/label-example.component").then(module => module.CircularProgressBarLabelExampleComponent),
         mainFile: "label-example.component.ts"
     },
+    "circular-progress-bar/line-cap": {
+        files: ["line-cap-example.component.ts", "line-cap-example.component.html"],
+        load: () => import("./circular-progress-bar/line-cap/line-cap-example.component").then(module => module.CircularProgressBarLineCapExampleComponent),
+        mainFile: "line-cap-example.component.ts"
+    },
     "circular-progress-bar/sizes": {
         files: ["sizes-example.component.ts", "sizes-example.component.html"],
         load: () => import("./circular-progress-bar/sizes/sizes-example.component").then(module => module.CircularProgressBarSizesExampleComponent),

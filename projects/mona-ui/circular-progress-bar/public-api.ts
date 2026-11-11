@@ -5,4 +5,5 @@
 export * from "./components/circular-progress-bar/circular-progress-bar.component";
 export * from "./directives/circular-progress-bar-label-template.directive";
 
+export * from "./models/CircularProgressBarLineCap";
 export * from "./models/LabelTemplateContext";

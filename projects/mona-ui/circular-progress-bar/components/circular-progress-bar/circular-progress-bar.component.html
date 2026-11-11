@@ -12,8 +12,9 @@
         [attr.cy]="center().y"
         [attr.r]="radius()"
         [attr.stroke]="strokeColor()"
-        [attr.stroke-dasharray]="circumference()"
-        [attr.stroke-dashoffset]="strokeDashOffset()"
+        [attr.stroke-dasharray]="stroke().dashArray"
+        [attr.stroke-dashoffset]="stroke().dashOffset"
+        [attr.stroke-linecap]="stroke().lineCap"
         [attr.stroke-width]="thickness()"
         fill="transparent"
         [class.indeterminate]="indeterminate()" />
