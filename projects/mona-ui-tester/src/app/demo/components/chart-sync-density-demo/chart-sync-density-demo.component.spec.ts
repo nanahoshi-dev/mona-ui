@@ -62,6 +62,9 @@ describe("ChartSyncDensityDemoComponent", () => {
         vi.restoreAllMocks();
     });
 
+    // Rendering the seven dense charts takes 6-8s on a busy machine, over Vitest's 5s default.
+    const renderTimeout = 15_000;
+
     const flushCharts = (): Array<{ index: number; scene: DemoScene | undefined }> => {
         fixture.detectChanges();
         const chartDebugElements = fixture.debugElement.queryAll(By.directive(ChartComponent));
@@ -84,8 +87,7 @@ describe("ChartSyncDensityDemoComponent", () => {
             expect(scene?.series.length ?? 0, `chart ${index} series count`).toBeGreaterThan(0);
             expect(scene?.axes.length ?? 0, `chart ${index} axes`).toBeGreaterThanOrEqual(2);
         }
-        // Rendering seven dense charts takes 6-8s on a busy machine, over the 5s default.
-    }, 15_000);
+    }, renderTimeout);
 
     it("builds density runtimes for the synchronized dashboard charts", () => {
         const charts = flushCharts();
@@ -93,7 +95,7 @@ describe("ChartSyncDensityDemoComponent", () => {
         for (const { index, scene } of charts.slice(0, 3)) {
             expect(scene?.densityRuntime?.seriesById.size ?? 0, `chart ${index} density entries`).toBeGreaterThan(0);
         }
-    });
+    }, renderTimeout);
 
     it("does not override the chart host flex layout", () => {
         fixture.detectChanges();
