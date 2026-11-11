@@ -25,9 +25,13 @@ export class DocsNavigationService {
         const page = this.currentPage();
         return page ? (this.categories.find(category => flattenDocsPages([category]).includes(page)) ?? null) : null;
     });
+    /** The page the URL names under `/components`, where a nested page's path has a segment for each level. */
     public readonly currentPage = computed<DocsPage | null>(() => {
-        const segment = this.url().split(/[?#]/)[0].split("/").at(-1);
-        return this.#pages.find(page => page.path === segment) ?? null;
+        const path = this.url()
+            .split(/[?#]/)[0]
+            .replace(/^\/components\//, "")
+            .replace(/\/$/, "");
+        return this.#pages.find(page => page.path === path) ?? null;
     });
     public readonly nextPage = computed(() => this.#neighbor(1));
     public readonly previousPage = computed(() => this.#neighbor(-1));

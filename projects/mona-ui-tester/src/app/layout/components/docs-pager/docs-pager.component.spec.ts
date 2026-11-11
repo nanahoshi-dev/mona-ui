@@ -27,7 +27,12 @@ describe("DocsPagerComponent", () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [DocsPagerComponent],
-            providers: [provideRouter([{ path: "components/:page", component: EmptyComponent }])]
+            providers: [
+                provideRouter([
+                    { path: "components/:page", component: EmptyComponent },
+                    { path: "components/:page/:child", component: EmptyComponent }
+                ])
+            ]
         }).compileComponents();
         fixture = TestBed.createComponent(DocsPagerComponent);
     });
@@ -44,6 +49,14 @@ describe("DocsPagerComponent", () => {
 
         await go(`/components/${pages.at(-1)?.path}`);
         expect(hrefs()).toEqual([`/components/${pages.at(-2)?.path}`]);
+    });
+
+    it("goes into a page's sub-pages after it, and links to them by their nested URLs", async () => {
+        await go("/components/sidebar");
+        expect(hrefs()).toEqual(["/components/popup-menu", "/components/sidebar/menus"]);
+
+        await go("/components/sidebar/state");
+        expect(hrefs()).toEqual(["/components/sidebar/menus", "/components/stepper"]);
     });
 
     it("renders nothing off the manifest", async () => {

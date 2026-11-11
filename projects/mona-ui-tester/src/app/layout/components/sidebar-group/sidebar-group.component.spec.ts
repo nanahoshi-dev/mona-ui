@@ -26,7 +26,12 @@ describe("SidebarGroupComponent", () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [SidebarGroupComponent],
-            providers: [provideRouter([{ path: "components/:page", component: EmptyComponent }])]
+            providers: [
+                provideRouter([
+                    { path: "components/:page", component: EmptyComponent },
+                    { path: "components/:page/:child", component: EmptyComponent }
+                ])
+            ]
         }).compileComponents();
 
         fixture = TestBed.createComponent(SidebarGroupComponent);
@@ -43,6 +48,21 @@ describe("SidebarGroupComponent", () => {
         );
         const current = links().filter(link => link.getAttribute("aria-current") === "page");
         expect(current.map(link => link.textContent?.trim())).toEqual(["List View"]);
+    });
+
+    it("lists a page's sub-pages under it by their short names, at their nested URLs", async () => {
+        const navigation = DOCS_MANIFEST.find(category => category.id === "navigation") as DocsCategory;
+        fixture.componentRef.setInput("category", navigation);
+        await go("/components/sidebar/state");
+
+        const sidebar = links().find(link => link.getAttribute("href") === "/components/sidebar") as HTMLAnchorElement;
+        const nested = Array.from(sidebar.closest("li")?.querySelectorAll(":scope > ul a") ?? []);
+        expect(nested.map(link => [link.getAttribute("href"), link.textContent?.trim()])).toEqual([
+            ["/components/sidebar/menus", "Menus"],
+            ["/components/sidebar/state", "State & Behavior"]
+        ]);
+        expect(links().filter(link => link.getAttribute("aria-current") === "page")).toEqual([nested[1]]);
+        expect(sidebar.hasAttribute("aria-current")).toBe(false);
     });
 
     it("hides its pages behind a button that says so", async () => {
@@ -73,8 +93,12 @@ describe("SidebarGroupComponent", () => {
         expect(ids[0]).not.toBe(ids[1]);
     });
 
-    it("passes axe", async () => {
-        await go("/components/list-view");
+    it("passes axe, sub-pages included", async () => {
+        fixture.componentRef.setInput(
+            "category",
+            DOCS_MANIFEST.find(category => category.id === "navigation")
+        );
+        await go("/components/sidebar/menus");
 
         const results = await axe.run(fixture.nativeElement, { rules: { "color-contrast": { enabled: false } } });
 

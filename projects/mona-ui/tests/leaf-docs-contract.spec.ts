@@ -79,7 +79,7 @@ const coveredEntryPoints: readonly (readonly [entry: string, docs: readonly stri
     ["rating", ["rating"]],
     ["scroll-view", ["scroll-view"]],
     ["segmented", ["segmented"]],
-    ["sidebar", ["sidebar"]],
+    ["sidebar", ["sidebar", "sidebar-menus", "sidebar-state"]],
     ["skeleton", ["skeleton"]],
     ["slider", ["slider", "range-slider"]],
     ["spinner", ["spinner"]],

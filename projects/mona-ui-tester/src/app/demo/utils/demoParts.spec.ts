@@ -1,6 +1,8 @@
+import { signal } from "@angular/core";
 import { describe, expect, it } from "vitest";
 import type { DemoPart } from "./demoParts";
 import { generatePartsCodeSample } from "./demoParts";
+import type { FeatureConfigHandler } from "./featureInjection";
 
 function part(id: string, selector: string, extra: Partial<DemoPart> = {}): DemoPart {
     return {
@@ -75,5 +77,101 @@ describe("generatePartsCodeSample", () => {
         );
 
         expect(code).toBe(`<mona-grid [monaGridSortable]="{ mode: 'multiple' }"></mona-grid>`);
+    });
+
+    it("writes a feature's code at the start of its part when it asks to be", () => {
+        const features = signal({
+            footer: { active: true, code: "<footer monaSidebarFooter></footer>", description: "", name: "Footer" },
+            header: {
+                active: true,
+                code: "<header monaSidebarHeader></header>",
+                codePosition: "start" as const,
+                description: "",
+                name: "Header"
+            }
+        });
+        const code = generatePartsCodeSample(
+            [
+                part("sidebar", "mona-sidebar", {
+                    codeContent: ["<nav monaSidebarContent></nav>"],
+                    config: { inputs: {}, featureHandler: { data: features } as unknown as FeatureConfigHandler }
+                })
+            ],
+            {}
+        );
+
+        expect(code).toBe(
+            [
+                "<mona-sidebar>",
+                "    <header monaSidebarHeader></header>",
+                "    <nav monaSidebarContent></nav>",
+                "    <footer monaSidebarFooter></footer>",
+                "</mona-sidebar>"
+            ].join("\n")
+        );
+    });
+
+    it("nests a part inside its parent, in its wrappers and on its own element", () => {
+        const code = generatePartsCodeSample(
+            [
+                part("layout", "mona-sidebar-layout"),
+                part("sidebar", "mona-sidebar", { codeAttributes: ['collapsible="icon"'] }),
+                part("item", "li[monaSidebarMenuItem]", {
+                    parent: "sidebar",
+                    wrappers: ['nav monaSidebarContent aria-label="Main"', "ul monaSidebarMenu"]
+                }),
+                part("button", "a[monaSidebarMenuButton], button[monaSidebarMenuButton]", {
+                    codeAttributes: ['href="/inbox"'],
+                    codeContent: ["<span>Inbox</span>"],
+                    parent: "item"
+                }),
+                part("sent", "li[monaSidebarMenuItem]", {
+                    codeContent: ['<a monaSidebarMenuButton href="/sent">Sent</a>'],
+                    parent: "sidebar",
+                    wrappers: ['nav monaSidebarContent aria-label="Main"', "ul monaSidebarMenu"]
+                }),
+                part("loading", "li[monaSidebarMenuItem]", {
+                    codeContent: ["<mona-sidebar-menu-skeleton></mona-sidebar-menu-skeleton>"],
+                    parent: "sidebar",
+                    wrappers: ['nav monaSidebarContent aria-label="Main"', 'ul monaSidebarMenu aria-busy="true"']
+                }),
+                part("inset", "[monaSidebarInset]", { element: "main" }),
+                part("trigger", "[monaSidebarTrigger]", {
+                    codeAttributes: ['aria-label="Toggle sidebar"'],
+                    element: "button",
+                    parent: "inset"
+                })
+            ],
+            {}
+        );
+
+        expect(code).toBe(
+            [
+                "<mona-sidebar-layout>",
+                '    <mona-sidebar collapsible="icon">',
+                '        <nav monaSidebarContent aria-label="Main">',
+                "            <ul monaSidebarMenu>",
+                "                <li monaSidebarMenuItem>",
+                '                    <a monaSidebarMenuButton href="/inbox">',
+                "                        <span>Inbox</span>",
+                "                    </a>",
+                "                </li>",
+                "                <li monaSidebarMenuItem>",
+                '                    <a monaSidebarMenuButton href="/sent">Sent</a>',
+                "                </li>",
+                "            </ul>",
+                '            <ul monaSidebarMenu aria-busy="true">',
+                "                <li monaSidebarMenuItem>",
+                "                    <mona-sidebar-menu-skeleton></mona-sidebar-menu-skeleton>",
+                "                </li>",
+                "            </ul>",
+                "        </nav>",
+                "    </mona-sidebar>",
+                "    <main monaSidebarInset>",
+                '        <button monaSidebarTrigger aria-label="Toggle sidebar"></button>',
+                "    </main>",
+                "</mona-sidebar-layout>"
+            ].join("\n")
+        );
     });
 });

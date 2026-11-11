@@ -965,20 +965,30 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./sheet/navigation/navigation-example.component").then(module => module.SheetNavigationExampleComponent),
         mainFile: "navigation-example.component.ts"
     },
+    "sidebar-menus/rows": {
+        files: ["rows-example.component.ts", "rows-example.component.html"],
+        load: () => import("./sidebar-menus/rows/rows-example.component").then(module => module.SidebarMenusRowsExampleComponent),
+        mainFile: "rows-example.component.ts"
+    },
+    "sidebar-menus/submenus": {
+        files: ["submenus-example.component.ts", "submenus-example.component.html"],
+        load: () => import("./sidebar-menus/submenus/submenus-example.component").then(module => module.SidebarMenusSubmenusExampleComponent),
+        mainFile: "submenus-example.component.ts"
+    },
+    "sidebar-state/remembered": {
+        files: ["remembered-example.component.ts", "remembered-example.component.html", "sidebar-status.component.html", "sidebar-status.component.ts"],
+        load: () => import("./sidebar-state/remembered/remembered-example.component").then(module => module.SidebarStateRememberedExampleComponent),
+        mainFile: "remembered-example.component.ts"
+    },
+    "sidebar-state/two-sidebars": {
+        files: ["two-sidebars-example.component.ts", "two-sidebars-example.component.html"],
+        load: () => import("./sidebar-state/two-sidebars/two-sidebars-example.component").then(module => module.SidebarStateTwoSidebarsExampleComponent),
+        mainFile: "two-sidebars-example.component.ts"
+    },
     "sidebar/icon-rail": {
         files: ["icon-rail-example.component.ts", "icon-rail-example.component.html"],
         load: () => import("./sidebar/icon-rail/icon-rail-example.component").then(module => module.SidebarIconRailExampleComponent),
         mainFile: "icon-rail-example.component.ts"
-    },
-    "sidebar/submenus": {
-        files: ["submenus-example.component.ts", "submenus-example.component.html"],
-        load: () => import("./sidebar/submenus/submenus-example.component").then(module => module.SidebarSubmenusExampleComponent),
-        mainFile: "submenus-example.component.ts"
-    },
-    "sidebar/two-sidebars": {
-        files: ["two-sidebars-example.component.ts", "two-sidebars-example.component.html"],
-        load: () => import("./sidebar/two-sidebars/two-sidebars-example.component").then(module => module.SidebarTwoSidebarsExampleComponent),
-        mainFile: "two-sidebars-example.component.ts"
     },
     "skeleton/card": {
         files: ["card-example.component.ts", "card-example.component.html"],

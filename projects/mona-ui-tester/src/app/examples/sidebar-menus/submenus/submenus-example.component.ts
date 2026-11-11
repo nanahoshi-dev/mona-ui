@@ -19,7 +19,7 @@ import {
 } from "@nanahoshi/mona-ui/sidebar";
 
 @Component({
-    selector: "app-sidebar-submenus-example",
+    selector: "app-sidebar-menus-submenus-example",
     imports: [
         ButtonDirective,
         CollapsibleContentDirective,
@@ -41,6 +41,6 @@ import {
     ],
     templateUrl: "./submenus-example.component.html"
 })
-export class SidebarSubmenusExampleComponent {
+export class SidebarMenusSubmenusExampleComponent {
     protected readonly pages = ["Button", "Card", "Tabs"];
 }
