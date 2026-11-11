@@ -260,6 +260,8 @@ describe("mona-circular-progress-bar specifics", () => {
     let host: HTMLElement;
 
     const circle = (): SVGCircleElement => host.querySelector("circle:not([data-stroke-trail])") as SVGCircleElement;
+    // Round ends write "dash gap", where the gap is the circumference; flat ends write the circumference alone.
+    const dashArray = (): number[] => (circle().getAttribute("stroke-dasharray") ?? "").split(" ").map(Number);
 
     beforeEach(() => {
         fixture = TestBed.createComponent(CircularProgressBarComponent);
@@ -274,7 +276,7 @@ describe("mona-circular-progress-bar specifics", () => {
         fixture.componentRef.setInput("thickness", 6);
         fixture.detectChanges();
         expect(circle().getAttribute("r")).toBe("47");
-        expect(Number(circle().getAttribute("stroke-dasharray"))).toBeCloseTo(2 * Math.PI * 47);
+        expect(dashArray().at(-1)).toBeCloseTo(2 * Math.PI * 47);
     });
 
     it("never has a negative radius or dash", () => {
@@ -282,7 +284,15 @@ describe("mona-circular-progress-bar specifics", () => {
         fixture.componentRef.setInput("thickness", 20);
         fixture.detectChanges();
         expect(circle().getAttribute("r")).toBe("0");
-        expect(circle().getAttribute("stroke-dasharray")).toBe("0");
+        expect(dashArray().every(length => length === 0)).toBe(true);
+    });
+
+    it("never has a negative dash with round ends and a stroke wider than the arc", () => {
+        fixture.componentRef.setInput("size", 100);
+        fixture.componentRef.setInput("thickness", 30);
+        fixture.componentRef.setInput("value", 2);
+        fixture.detectChanges();
+        expect(dashArray().every(length => length >= 0)).toBe(true);
     });
 
     it("can hide its label", () => {

@@ -20,6 +20,7 @@ Everything below is imported from `@nanahoshi/mona-ui/circular-progress-bar`.
 | `disabled` | `boolean` | `false` | Renders the component with reduced visual emphasis and removes pointer interaction. |
 | `indeterminate` | `boolean` | `false` | Activates indeterminate mode when the completion value is unknown. ARIA value attributes are removed. |
 | `labelVisible` | `boolean` | `true` | Controls label visibility in determinate mode. Has no effect in indeterminate mode, where the label is always hidden. |
+| `lineCap` | `CircularProgressBarLineCap` | `"round"` | Shape of the arc's two ends. `"round"` draws rounded ends that stay within the value's span, so the arc covers the same part of the ring as `"flat"`, which cuts them straight. An empty ring draws nothing either way. |
 | `max` | `number` | `100` | Upper bound of the value range. Must be greater than `min`; otherwise the bar reports no values and a warning is logged in development. |
 | `min` | `number` | `0` | Lower bound of the value range. |
 | `size` | `number` | `100` | Diameter of the indicator in pixels. Controls both width and height of the host element. |
@@ -52,6 +53,12 @@ when `indeterminate` is `true`.
 | `max` | `number` |
 | `min` | `number` |
 | `percent` | `number` |
+
+#### `CircularProgressBarLineCap`
+
+```typescript
+type CircularProgressBarLineCap = "flat" | "round";
+```
 
 #### `Action`
 

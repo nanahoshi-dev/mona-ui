@@ -6,10 +6,21 @@ import type { Action } from "@nanahoshi/mona-ui/internal";
 import { PROGRESS_BAR_DEFAULT_MESSAGES } from "@nanahoshi/mona-ui/progress-bar";
 import { twMerge } from "tailwind-merge";
 import { CircularProgressBarLabelTemplateDirective } from "../../directives/circular-progress-bar-label-template.directive";
+import type { CircularProgressBarLineCap } from "../../models/CircularProgressBarLineCap";
 import {
     circularProgressBarBaseThemeVariants,
     type CircularProgressBarVariantInput
 } from "../../styles/circular-progress-bar.styles";
+
+interface CircularProgressBarStroke {
+    readonly dashArray: string;
+    readonly dashOffset: number;
+    /** The SVG `stroke-linecap` value. */
+    readonly lineCap: "butt" | "round";
+}
+
+/** The share of the ring the spinning arc covers in indeterminate mode. */
+const INDETERMINATE_ARC_FRACTION = 1 - 1 / 1.42;
 
 @Component({
     selector: "mona-circular-progress-bar",
@@ -88,6 +99,31 @@ export class CircularProgressBarComponent implements CircularProgressBarVariantI
     protected readonly pixelSize = computed(() => `${this.size()}px`);
     protected readonly progress = computed(() => getPercentage(this.value(), this.min(), this.max()));
     protected readonly radius = computed(() => Math.max(0, this.size() / 2 - this.thickness() / 2));
+    protected readonly stroke = computed<CircularProgressBarStroke>(() => {
+        const circumference = this.circumference();
+        const fraction = this.indeterminate()
+            ? INDETERMINATE_ARC_FRACTION
+            : Math.min(Math.max(this.progress(), 0), 100) / 100;
+        if (this.lineCap() === "flat") {
+            return { dashArray: `${circumference}`, dashOffset: circumference * (1 - fraction), lineCap: "butt" };
+        }
+        if (fraction <= 0) {
+            // A zero-length dash still paints its round caps as a dot, so an empty ring drops them.
+            return { dashArray: `0 ${circumference}`, dashOffset: 0, lineCap: "butt" };
+        }
+        if (fraction >= 1) {
+            return { dashArray: `${circumference} ${circumference}`, dashOffset: 0, lineCap: "round" };
+        }
+        // Each round cap reaches half the thickness past its end of the dash. Shortening the dash by the thickness and
+        // starting it half a thickness in keeps the painted arc between the start of the ring and the value.
+        const thickness = Math.min(this.thickness(), circumference * fraction);
+        return {
+            dashArray: `${circumference * fraction - thickness} ${circumference}`,
+            dashOffset: -thickness / 2,
+            lineCap: "round"
+        };
+    });
+
     protected readonly strokeColor = computed(() => {
         if (typeof this.color() === "string") {
             return this.color() || "var(--mona-indicator-color, var(--color-primary))";
@@ -95,12 +131,6 @@ export class CircularProgressBarComponent implements CircularProgressBarVariantI
         const colorize = this.color() as Action<number, string>;
         return colorize(this.progress());
     });
-    protected readonly strokeDashOffset = computed(() => {
-        const progress = Math.min(Math.max(this.progress(), 0), 100);
-        const dashOffset = this.circumference() * (1 - progress / 100);
-        return this.indeterminate() ? this.circumference() / 1.42 : dashOffset;
-    });
-
     /**
      * @description Enables CSS transitions on stroke and color changes.
      * Set to `false` when updating `value` at a high frequency.
@@ -150,6 +180,13 @@ export class CircularProgressBarComponent implements CircularProgressBarVariantI
      * @default true
      */
     public readonly labelVisible = input(true);
+
+    /**
+     * @description Shape of the arc's two ends. `"round"` draws rounded ends that stay within the value's span, so the
+     * arc covers the same part of the ring as `"flat"`, which cuts them straight. An empty ring draws nothing either way.
+     * @default "round"
+     */
+    public readonly lineCap = input<CircularProgressBarLineCap>("round");
 
     /**
      * @description Upper bound of the value range. Must be greater than `min`; otherwise the bar reports no values and a

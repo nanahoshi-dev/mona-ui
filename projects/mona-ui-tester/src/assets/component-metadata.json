@@ -8562,6 +8562,17 @@
         "defaultValue": "true"
       },
       {
+        "description": "Shape of the arc's two ends. `\"round\"` draws rounded ends that stay within the value's span, so the\narc covers the same part of the ring as `\"flat\"`, which cuts them straight. An empty ring draws nothing either way.",
+        "kind": "input",
+        "name": "lineCap",
+        "type": "CircularProgressBarLineCap",
+        "options": [
+          "flat",
+          "round"
+        ],
+        "defaultValue": "\"round\""
+      },
+      {
         "description": "Upper bound of the value range. Must be greater than `min`; otherwise the bar reports no values and a\nwarning is logged in development.",
         "kind": "input",
         "name": "max",

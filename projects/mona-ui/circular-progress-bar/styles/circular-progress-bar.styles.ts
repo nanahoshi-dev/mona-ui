@@ -10,7 +10,7 @@ export const circularProgressBarBaseThemeVariants = cva(
         [&_svg]:h-full [&_svg]:w-full
         [&_svg_circle]:origin-center
         [&_svg_circle]:-rotate-90
-        [&_svg_circle]:transition-[stroke-dashoffset,stroke]
+        [&_svg_circle]:transition-[stroke-dashoffset,stroke-dasharray,stroke]
         [&_svg_circle]:duration-(--mona-motion-fast)
         [&_svg_circle]:ease-in
         [&_svg_circle]:data-[stroke-trail='true']:stroke-surface-muted
